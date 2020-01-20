@@ -930,6 +930,7 @@ NTIPAliasStat["plusskillbattlecry"] = [97,146];
 NTIPAliasStat["plusskillwerewolf"] = [97,223];
 NTIPAliasStat["plusskillshapeshifting"] = [97,224];	NTIPAliasStat["plusskilllycanthropy"] = [97,224];
 NTIPAliasStat["plusskillsummonspiritwolf"] = [97,227];
+NTIPAliasStat["plusskillferalrage"] = [97,232];
 
 NTIPAliasStat["state"] = 98;
 NTIPAliasStat["itemfastergethitrate"] = 99;	NTIPAliasStat["fhr"] = 99;
@@ -1108,10 +1109,10 @@ NTIPAliasStat["skillsummonspiritwolf"] = [107,227];
 NTIPAliasStat["skillwerebear"] = [107,228];
 NTIPAliasStat["skillmoltenboulder"] = [107,229];
 NTIPAliasStat["skillarcticblast"] = [107,230];
-NTIPAliasStat["skillfissure"] = [107,231];
+NTIPAliasStat["skillcarrionvine"] = [107,231];
 NTIPAliasStat["skillferalrage"] = [107,232];
 NTIPAliasStat["skillmaul"] = [107,233];
-NTIPAliasStat["skillcarrionvine"] = [107,234];
+NTIPAliasStat["skillfissure"] = [107,234];
 NTIPAliasStat["skillcyclonearmor"] = [107,235];
 NTIPAliasStat["skillheartofwolverine"] = [107,236];
 NTIPAliasStat["skillsummondirewolf"] = [107,237];
@@ -1285,20 +1286,27 @@ NTIPAliasStat["unused191"] = 191;
 NTIPAliasStat["unused192"] = 192;
 NTIPAliasStat["unused193"] = 193;
 NTIPAliasStat["itemnumsockets"] = 194;	NTIPAliasStat["sockets"] = 194;
-NTIPAliasStat["itemskillonattack"] = 195;
-NTIPAliasStat["itemskillonkill"] = 196;
-NTIPAliasStat["itemskillondeath"] = 197;
+NTIPAliasStat["itemskillonattack"] = [195, 1];
+NTIPAliasStat["itemskillonattacklevel"] = [195, 2];
+NTIPAliasStat["itemskillonkill"] = [196, 1];
+NTIPAliasStat["itemskillonkilllevel"] = [196, 2];
+NTIPAliasStat["itemskillondeath"] = [197, 1];
+NTIPAliasStat["itemskillondeathlevel"] = [197, 2];
 
-NTIPAliasStat["itemskillonhit"] = 198;
+NTIPAliasStat["itemskillonhit"] = [198, 1];
+NTIPAliasStat["itemskillonhitlevel"] = [198, 2];
 NTIPAliasStat["amplifydamageonhit"] = [198,4225];
 
-NTIPAliasStat["itemskillonlevelup"] = 199;
+NTIPAliasStat["itemskillonlevelup"] = [199, 1];
+NTIPAliasStat["itemskillonleveluplevel"] = [199, 2];
 NTIPAliasStat["unused200"] = 200;
-NTIPAliasStat["itemskillongethit"] = 201;
+NTIPAliasStat["itemskillongethit"] = [201, 1];
+NTIPAliasStat["itemskillongethitlevel"] = [201, 2];
 NTIPAliasStat["unused202"] = 202;
 NTIPAliasStat["unused203"] = 203;
 
-NTIPAliasStat["itemchargedskill"] = 204;
+NTIPAliasStat["itemchargedskill"] = [204, 1];
+NTIPAliasStat["itemchargedskilllevel"] = [204, 2];
 NTIPAliasStat["teleportcharges"] = [204,3461];
 
 NTIPAliasStat["unused204"] = 205;

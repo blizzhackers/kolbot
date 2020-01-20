@@ -723,9 +723,13 @@ Unit.prototype.getStatEx = function (id, subid) {
 
 		break;
 	case 195: // itemskillonattack
+	case 196: // itemskillonkill
+	case 197: // itemskillondeath
 	case 198: // itemskillonhit
+	case 199: // itemskillonlevelup
+	case 201: // itemskillongethit
 	case 204: // itemchargedskill
-		if (subid === undefined) {
+		if (subid === 1) {
 			temp = this.getStat(-2);
 
 			if (temp.hasOwnProperty(id)) {
@@ -742,6 +746,28 @@ Unit.prototype.getStatEx = function (id, subid) {
 
 			return 0;
 		}
+
+		if (subid === 2) {
+			temp = this.getStat(-2);
+
+			if (temp.hasOwnProperty(id)) {
+				if (temp[id] instanceof Array) {
+					for (i = 0; i < temp[id].length; i += 1) {
+						if (temp[id][i] !== undefined) {
+							return temp[id][i].level;
+						}
+					}
+				} else {
+					return temp[id].level;
+				}
+			}
+
+			return 0;
+		}
+
+		break;
+	case 216: // itemhpperlevel (for example Fortitude with hp per lvl can be defined now with 1.5)
+		return this.getStat(216) / 2048;
 
 		break;
 	}
