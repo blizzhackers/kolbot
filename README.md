@@ -4,7 +4,7 @@
 
 [**Join the Discord Channel!**](https://discord.gg/FuBG8N2)
 
-[**Documentation Repo**](https://github.com/blizzhackers/documentation)
+[**Documentation Repo**](https://github.com/blizzhackers-d2/documentation)
 
 ## Install Dependencies - DO THIS FIRST!
 - [Microsoft Visual C++ 2010 Redistributable Package (x86)](https://www.microsoft.com/en-us/download/details.aspx?id=5555)
@@ -24,21 +24,20 @@ If you want to contribute to d2bs/d2bot#, come to irc.synirc.net/d2bs and ask ar
 - [ESLint options for kolbot code](https://gist.githubusercontent.com/Nishimura-Katsuo/2d6866666c7acf10047c486a15a7fe60/raw/99ef9c2995929c492ef856772ff346e0f19709cd/.eslintrc.js)
 
 ## Getting Started
-- [D2Bot # Manager Setup](https://github.com/kolton/d2bot-with-kolbot/wiki/D2Bot-%23-Manager-Setup)
-- [Installing D2Bot # with Kolbot](https://github.com/kolton/d2bot-with-kolbot/wiki/Installing-d2bot%23-with-kolbot)
-- [.dbj .dbl syntax highlighting](https://github.com/kolton/d2bot-with-kolbot/wiki/.dbj-.dbl-syntax-highlighting)
-- [FAQ](https://github.com/kolton/d2bot-with-kolbot/wiki/FAQ)
+- [download d2bot-with-kolbot](https://github.com/blizzhackers-d2/documentation/blob/master/d2bot/Download.md#download)
+- [d2bot manager setup](https://github.com/blizzhackers-d2/documentation/blob/master/d2bot/ManagerSetup.md/#manager-setup)
+- [notepad++ syntax highlighting](https://github.com/blizzhackers-d2/documentation/blob/master/kolbot/Notepad++.md/#syntax-highlighting-in-np)
+- [FAQ](https://github.com/blizzhackers-d2/documentation/blob/master/kolbot/FAQ.md/#faq)
 
 ## Guides
-**Starter Config**
-- [Kolbot Leader config](https://github.com/kolton/d2bot-with-kolbot/wiki/Kolbot-Leader-config)
-- [Kolbot Leecher config](https://github.com/kolton/d2bot-with-kolbot/wiki/Kolbot-Leecher-Starter)
-- [Kolbot Character config](https://github.com/kolton/d2bot-with-kolbot/wiki/Kolbot-Character-config)
+- [manual playing](https://github.com/blizzhackers-d2/documentation/blob/master/kolbot/ManualPlay.md/#manual-playing)
+- [multi botting](https://github.com/blizzhackers-d2/documentation/blob/master/kolbot/MultiBotting.md/#multi-botting)
+- [character config](https://github.com/blizzhackers-d2/documentation/blob/master/kolbot/CharacterConfig.md/#character-configuration)
 
-# LimeDrop Web Based Item Manager and Dropper
-## Setup
-**Limedrop is available by default on the master and unicode branches.**
-- [Limedrop Install and Usage](https://github.com/blizzhackers/documentation/blob/master/limedrop/README.md)
+## LimeDrop web based Item Manager and Dropper
+
+- Limedrop is available by default on the master(trunk) branch.
+- [limedrop install and usage](https://github.com/blizzhackers-d2/documentation/blob/master/limedrop/readme.md)
 
 
-![](https://i.imgur.com/bsmEv3j.png)
+![limedrop-general](https://github.com/blizzhackers-d2/documentation/blob/master/limedrop/assets/limedrop-general.png)
