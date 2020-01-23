@@ -177,7 +177,11 @@ function main() {
 	if (!Scripts.UserAddon && !Scripts.Test) {
 		Town.getCorpse();
 		Town.clearBelt();
-		Town.clearInventory();
+		
+		if(Config.ClearInvOnStart) {
+			Town.clearInventory();
+		}
+		
 		//Pickit.pickItems();
 	}
 
