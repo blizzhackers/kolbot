@@ -176,6 +176,7 @@ var Config = {
 	RejuvBuffer: 0,
 	PickRange: 40,
 	MakeRoom: true,
+	ClearInvOnStart: true,
 	FastPick: false,
 	OpenChests: false,
 	PickitFiles: [],
