@@ -2,7 +2,6 @@
 *	@filename	Diablo.js
 *	@author		kolton
 *	@desc		clear Chaos Sanctuary and kill Diablo
-*	@return		{boolean}
 */
 
 function Diablo() {

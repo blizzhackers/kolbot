@@ -2,7 +2,6 @@
 *	@filename	DiabloHelper.js
 *	@author		kolton
 *	@desc		help leading player in clearing Chaos Sanctuary and killing Diablo
-*	@return		{boolean}
 */
 
 function DiabloHelper() {
