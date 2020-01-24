@@ -264,6 +264,7 @@ var Config = {
 	LowManaSkill: [],
 	CustomAttack: {},
 	TeleStomp: false,
+	NoTele: false,
 	ClearType: false,
 	ClearPath: false,
 	BossPriority: false,
