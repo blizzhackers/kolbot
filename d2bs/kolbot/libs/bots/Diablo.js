@@ -260,8 +260,8 @@ function Diablo() {
 		return true;
 	};
 
-	const openSeals = (sealOrder) => {
-		print("seal order: " + sealOrder);
+	const openSeals = () => {
+		print("seal order: " + Config.Diablo.SealOrder);
 		let seals = {
 			1: () => this.vizierSeal(),
 			2: () => this.seisSeal(),
@@ -270,7 +270,7 @@ function Diablo() {
 			"seis": () => this.seisSeal(),
 			"infector": () => this.infectorSeal(),
 		};
-		sealOrder.forEach(seal => {seals[seal]()});
+		Config.Diablo.SealOrder.forEach(seal => {seals[seal]()});
 	};
 
 	this.diabloPrep = function () {
@@ -490,7 +490,7 @@ function Diablo() {
 	}
 
 	Attack.clear(30, 0, false, this.sort);
-	openSeals(Config.Diablo.SealOrder);
+	openSeals();
 
 	if (Config.PublicMode) {
 		say(Config.Diablo.DiabloMsg);
