@@ -166,6 +166,7 @@ var Config = {
 		Toggle: false,
 		Mode: 0
 	},
+	Silence: false,
 	PublicMode: false,
 	PartyAfterScript: false,
 	Greetings: [],
