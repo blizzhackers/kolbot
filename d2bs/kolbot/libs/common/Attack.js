@@ -236,7 +236,7 @@ var Attack = {
 			say("kill " + classId);
 		}
 
-		while (attackCount < 300 && this.checkMonster(target) && this.skipCheck(target)) {
+		while (attackCount < Config.MaxAttackCount && this.checkMonster(target) && this.skipCheck(target)) {
 			Misc.townCheck();
 
 			if (!target || !copyUnit(target).x) { // Check if unit got invalidated, happens if necro raises a skeleton from the boss's corpse.
@@ -280,7 +280,7 @@ var Attack = {
 			attackCount += 1;
 		}
 
-		if (attackCount === 300) {
+		if (attackCount === Config.MaxAttackCount) {
 			errorInfo = " (attackCount exceeded)";
 		}
 
@@ -316,7 +316,7 @@ var Attack = {
 			delay(200);
 		}
 
-		while (attackCount < 300 && Attack.checkMonster(target) && Attack.skipCheck(target)) {
+		while (attackCount < Config.MaxAttackCount && Attack.checkMonster(target) && Attack.skipCheck(target)) {
 			result = ClassAttack.doAttack(target, attackCount % 15 === 0);
 
 			if (result === 0) {
