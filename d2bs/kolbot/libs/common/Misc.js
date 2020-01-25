@@ -481,6 +481,24 @@ var Item = {
 		return true;
 	},
 
+	canMercEquip: function (item) {
+		if (item.type !== 4) { // Not an item
+			return false;
+		}
+
+		if (!item.getFlag(0x10)) { // Unid item
+			return false;
+		}
+
+		var merc = me.getMerc();
+
+		if (item.getStat(92) > merc.getStat(12) || item.dexreq > merc.getStat(2) || item.strreq > merc.getStat(0)) { // Higher requirements
+			return false;
+		}
+
+		return true;
+	},
+
 	// Equips an item and throws away the old equipped item
 	equip: function (item, bodyLoc) {
 		if (!this.canEquip(item)) {
@@ -546,7 +564,7 @@ var Item = {
 
 		for (i = 0; i < 3; i += 1) {
 			if (item.toCursor()) {
-				clickItem(0, bodyLoc);
+				clickItem(4, bodyLoc);
 				delay(me.ping * 2 + 500);
 
 				if (item.bodylocation === bodyLoc) {
@@ -864,7 +882,7 @@ var Item = {
 			items.sort(sortEq);
 
 			tier = NTIP.GetMercTier(items[0]);
-			bodyLoc = this.getMercBodyLoc(items[0]);
+			bodyLoc = this.getBodyLoc(items[0]);
 
 			if (tier > 0 && bodyLoc) {
 				for (j = 0; j < bodyLoc.length; j += 1) {
