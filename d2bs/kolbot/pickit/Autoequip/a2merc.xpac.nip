@@ -1,0 +1,45 @@
+// weapon
+[type] == polearm && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [enhanceddamage] >= 20 # [merctier] == 1
+[type] == polearm && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [enhanceddamage] >= 40 # [merctier] == 2
+[type] == polearm && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [enhanceddamage] >= 60 # [merctier] == 3
+[type] == polearm && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [enhanceddamage] >= 80 # [merctier] == 4
+[type] == polearm && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [enhanceddamage] >= 100 # [merctier] == 5
+[type] == polearm && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [enhanceddamage] >= 120 # [merctier] == 6
+[type] == polearm && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [enhanceddamage] >= 140 # [merctier] == 7
+[type] == polearm && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [enhanceddamage] >= 160 # [merctier] == 8
+[type] == polearm && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [enhanceddamage] >= 180 # [merctier] == 9
+[type] == polearm && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [enhanceddamage] >= 200 # [merctier] == 10
+[type] == polearm && [flag] == runeword # [skillmeditation] > 0 # [merctier] == 101
+
+// armor
+[type] == armor && [quality] <= rare # [maxhp] > 0 # [merctier] == 1
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 0 # [merctier] == 1
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 5 # [merctier] == 2
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 10 # [merctier] == 3
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 15 # [merctier] == 4
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 20 # [merctier] == 5
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 25 # [merctier] == 6
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 30 # [merctier] == 7
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 35 # [merctier] == 8
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 40 # [merctier] == 9
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 45 # [merctier] == 10
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 50 # [merctier] == 11
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 55 # [merctier] == 12
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 60 # [merctier] == 13
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 65 # [merctier] == 14
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 70 # [merctier] == 15
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 75 # [merctier] == 16
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 80 # [merctier] == 17
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 85 # [merctier] == 18
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 90 # [merctier] == 19
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 95 # [merctier] == 20
+[type] == armor && ([quality] == rare || [quality] == set || [quality] == unique || [flag] == runeword) # [fireresist]+[lightresist]+[coldresist]+[poisonresist] > 100 # [merctier] == 21
+[name] == lacqueredplate && [quality] == set # # [merctier] == 101
+
+// helm
+[type] == helm && [quality] == rare # [lifeleech]+[manaleech] > 0 # [merctier] == 1
+[name] == deathmask && [quality] == set # # [merctier] == 2
+[name] == grimhelm && [quality] == unique && [flag] != ethereal # [lifeleech] == 8 && [manaleech] == 8 && [magicdamagereduction] == 15 && [damageresist] >= 20 # [merctier] == 3
+[name] == grimhelm && [quality] == unique && [flag] == ethereal # [lifeleech] == 8 && [manaleech] == 8 && [magicdamagereduction] == 15 && [damageresist] >= 20 # [merctier] == 4
+[name] == demonhead && [quality] == unique && [flag] != ethereal # # [merctier] == 5
+[name] == demonhead && [quality] == unique && [flag] == ethereal # # [merctier] == 6

@@ -119,7 +119,7 @@ var Pickit = {
 				// Check if the item should be picked
 				status = this.checkItem(pickList[0]);
 
-				if (status.result && this.canPick(pickList[0]) && Item.autoEquipCheck(pickList[0])) {
+				if (status.result && this.canPick(pickList[0]) && (Item.autoEquipCheck(pickList[0]) || Item.autoMercEquipCheck(pickList[0]))) {
 					// Override canFit for scrolls, potions and gold
 					canFit = Storage.Inventory.CanFit(pickList[0]) || [4, 22, 76, 77, 78].indexOf(pickList[0].itemType) > -1;
 

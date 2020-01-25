@@ -195,6 +195,44 @@ NTIP.GetTier = function (item) {
 	return tier;
 };
 
+NTIP.GetMercTier = function (item) {
+	var i,
+		tier = 0;
+
+	// Go through ALL lines that describe the item
+	for (i = 0; i < NTIP_CheckList.length; i += 1) {
+		if (NTIP_CheckList[i].length === 3 && NTIP_CheckList[i][2].hasOwnProperty("MercTier") && !isNaN(NTIP_CheckList[i][2].MercTier)) {
+			try {
+				if (NTIP_CheckList[i][0].length > 0) {
+					if (eval(NTIP_CheckList[i][0])) {
+						if (NTIP_CheckList[i][1].length > 0) {
+							if (eval(NTIP_CheckList[i][1])) {
+								if (NTIP_CheckList[i][2].MercTier > tier) {
+									tier = NTIP_CheckList[i][2].MercTier;
+								}
+							}
+						} else {
+							if (NTIP_CheckList[i][2].MercTier > tier) {
+								tier = NTIP_CheckList[i][2].MercTier;
+							}
+						}
+					}
+				} else if (NTIP_CheckList[i][1].length > 0) {
+					if (eval(NTIP_CheckList[i][1])) {
+						if (NTIP_CheckList[i][2].MercTier > tier) {
+							tier = NTIP_CheckList[i][2].MercTier;
+						}
+					}
+				}
+			} catch (e) {
+
+			}
+		}
+	}
+
+	return tier;
+};
+
 NTIP.CheckItem = function (item, entryList, verbose) {
 	var i, list, identified, num,
 		rval = {},
@@ -571,6 +609,14 @@ NTIP.ParseLineInt = function (input, info) {
 
 				if (!isNaN(value)) {
 					p_result[2].Tier = value;
+				}
+
+				break;
+			case "merctier":
+				value = Number(p_section[i].split("==")[1].match(/\d+/g));
+
+				if (!isNaN(value)) {
+					p_result[2].MercTier = value;
 				}
 
 				break;

@@ -4,3 +4,7 @@ To use it, ADD these lines to your character config.
 
 Config.AutoEquip = true;
 Config.PickitFiles.push("autoequip/sorceress.xpac.nip");
+
+To use merc equip add the following:
+Config.AutoMercEquip = true;
+Config.PickitFiles.push("autoequip/a2merc.xpac.nip");

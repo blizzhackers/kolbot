@@ -252,6 +252,7 @@ var Config = {
 	// Experimental
 	FastParty: false,
 	AutoEquip: false,
+	AutoMercEquip: false,
 
 	// GameData
 	ChampionBias: 60,
