@@ -2,6 +2,7 @@ function main () {
 	include("json2.js");
 	include("OOG.js");
 	include("common/misc.js");
+	include("common/util.js");
 
 	var handle,
 		isUp = "no";

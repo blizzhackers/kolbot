@@ -10,7 +10,8 @@ function main() {
 	include("common/Config.js");
 	include("common/Cubing.js");
 	include("common/Runewords.js");
-	include("common/Misc.js");
+	include("common/misc.js");
+	include("common/util.js");
 	include("common/Prototypes.js");
 	include("common/Town.js");
 

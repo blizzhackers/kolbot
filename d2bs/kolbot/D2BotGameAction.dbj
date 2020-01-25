@@ -18,6 +18,7 @@ include("OOG.js");
 include("GameAction.js");
 include("gambling.js");
 include("common/misc.js");
+include("common/util.js");
 
 if (!FileTools.exists("data/" + me.profile + ".json")) {
 	DataFile.create();
