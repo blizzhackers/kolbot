@@ -492,7 +492,7 @@ var Item = {
 
 		var merc = me.getMerc();
 
-		if (item.getStat(92) > merc.getStat(12) || item.dexreq > merc.getStat(2) || item.strreq > merc.getStat(0)) { // Higher requirements
+		if (!merc || item.getStat(92) > merc.getStat(12) || item.dexreq > merc.getStat(2) || item.strreq > merc.getStat(0)) { // Higher requirements
 			return false;
 		}
 
