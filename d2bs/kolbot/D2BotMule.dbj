@@ -399,6 +399,7 @@ include("common/pickit.js");
 include("common/town.js");
 include("common/pather.js");
 include("common/misc.js");
+include("common/util.js");
 include("common/config.js");
 include("common/prototypes.js");
 include("common/collmap.js");

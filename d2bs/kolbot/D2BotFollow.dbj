@@ -58,6 +58,7 @@ include("gambling.js");
 include("craftingsystem.js");
 include("torchsystem.js");
 include("common/misc.js");
+include("common/util.js");
 
 var i, j, gameInfo, joinInfo, gameStart, ingame, handle,
 	firstLogin, chatActionsDone, lastGameTick, connectFail,

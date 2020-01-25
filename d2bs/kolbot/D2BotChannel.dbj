@@ -60,6 +60,7 @@ include("automule.js");
 include("gambling.js");
 include("torchsystem.js");
 include("common/misc.js");
+include("common/util.js");
 
 var gameStart, handle, ingame, firstLogin, useChat,
 	connectFail, chatActionsDone, gameInfo,

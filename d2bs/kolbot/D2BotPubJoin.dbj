@@ -111,6 +111,7 @@ include("gambling.js");
 include("craftingsystem.js");
 include("torchsystem.js");
 include("common/misc.js");
+include("common/util.js");
 
 if (!FileTools.exists("data/" + me.profile + ".json")) {
 	DataFile.create();

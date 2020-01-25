@@ -20,6 +20,7 @@ include("json2.js");
 include("OOG.js");
 include("MuleLogger.js");
 include("common/misc.js");
+include("common/util.js");
 
 if (!FileTools.exists("data/" + me.profile + ".json")) {
 	DataFile.create();

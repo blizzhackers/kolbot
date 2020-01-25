@@ -119,6 +119,7 @@ var MuleLogger = {
 	logItem: function (unit, logIlvl) {
 		if (!isIncluded("common/misc.js")) {
 			include("common/misc.js");
+			include("common/util.js");
 		}
 
 		if (logIlvl === undefined) {
