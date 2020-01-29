@@ -599,11 +599,12 @@ NTIP.ParseLineInt = function (input, info) {
 
 				break;
 			case "merctier":
-					value = Number(p_section[i].split("==")[1].match(/\d+/g));
+				value = Number(p_section[i].split("==")[1].match(/\d+/g));
 
-					if (!isNaN(value)) {
-						p_result[2].MercTier = value;
-					}
+				if (!isNaN(value)) {
+					p_result[2].MercTier = value;
+				}
+
 				break;
 			default:
 				Misc.errorReport("Unknown 3rd part keyword: " + p_keyword.toLowerCase());
