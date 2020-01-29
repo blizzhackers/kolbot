@@ -498,8 +498,8 @@ var Item = {
 
 		for (i = 0; i < 3; i += 1) {
 			if (item.toCursor()) {
-				clickItem(0, bodyLoc);
-				delay(me.ping * 2 + 500);
+				clickItemAndWait(0, bodyLoc);
+
 
 				if (item.bodylocation === bodyLoc) {
 					if (getCursorType() === 3) {

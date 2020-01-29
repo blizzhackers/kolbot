@@ -17,24 +17,23 @@ function getUnits(...args) {
 const clickItemAndWait = (...args) => {
 	let before,
 		itemEvent = false,
-		timeout = getTickCount(),
-		gamePacket = bytes => bytes && bytes.length > 0 && bytes[0] === 0x9D /* item event*/ && (itemEvent = true) && false; // false to not block
+		timeout = getTickCount(),timedOut;
 
-	addEventListener('gamepacket', gamePacket);
-
+	before = !me.itemoncursor;
 	clickItem.apply(undefined, args);
 	delay(Math.max(me.ping * 2, 250));
 
-	before = !me.itemoncursor;
-	while (!itemEvent) { // Wait until item is picked up.
+
+	while (true) { // Wait until item is picked up.
 		delay(3);
 
-		if (before !== !!me.itemoncursor || getTickCount() - timeout > Math.min(1000, 100 + (me.ping * 4))) {
+		if (before !== !!me.itemoncursor || (timedOut = getTickCount() - timeout > Math.min(1000, 100 + (me.ping * 4)))) {
 			break; // quit the loop of item on cursor has changed
 		}
 	}
 
-	removeEventListener('gamepacket', gamePacket);
 	delay(Math.max(me.ping, 50));
-	itemEvent = false;
+
+	// return item if we didnt timeout
+	return !timedOut;
 };
