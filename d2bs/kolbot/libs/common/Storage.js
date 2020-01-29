@@ -195,7 +195,7 @@ Loop:
 						sendPacket(1, 0x2a, 4, cItem.gid, 4, cube.gid);
 					}
 				} else {
-					clickItem(0, nPos.y, nPos.x, this.location);
+					clickItemAndWait(0, nPos.y, nPos.x, this.location);
 				}
 
 				nDelay = getTickCount();
