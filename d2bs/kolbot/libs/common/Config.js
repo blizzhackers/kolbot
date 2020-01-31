@@ -318,6 +318,9 @@ var Config = {
 	AggressiveCloak: false,
 	SummonShadow: false,
 
+	// Custom Attack
+	CustomClassAttack: '', // If set it loads common/Attack/[CustomClassAttack].js
+
 	// Script specific
 	MFLeader: false,
 	Mausoleum: {
