@@ -96,6 +96,12 @@ var Config = {
 			}
 		}
 
+		if (Config.Silence && !Config.LocalChat.Enabled) {
+			// Override the say function with print, so it just gets printed to console
+			global._say = global.say;
+			global.say = (what) => print('Tryed to say: '+what);
+		}
+
 		try {
 			if (Config.AutoBuild.Enabled === true && !isIncluded("common/AutoBuild.js") && include("common/AutoBuild.js")) {
 				AutoBuild.initialize();
@@ -160,6 +166,7 @@ var Config = {
 		Toggle: false,
 		Mode: 0
 	},
+	Silence: false,
 	PublicMode: false,
 	PartyAfterScript: false,
 	Greetings: [],
