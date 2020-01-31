@@ -1107,5 +1107,101 @@ IngredientLoop:
 		}
 
 		return true;
-	}
+	},
+
+	makeRevPots: function () {
+		let locations = {
+				Belt: 2,
+				Inventory: 3,
+				Cube: 6,
+				Stash: 7,
+			},
+			origin = [], cube = me.getItem(549/* the cube it self*/), cubeInStash;
+
+		// Get a list of all items
+		let revpots = me.getItems()
+			.filter(item => item.classid === 515); // Filter out all those rev pots
+
+		// Stop if less as 3 pots
+		if (revpots.length < 3) {
+			return;
+		}
+
+		// Go to town and open stash
+		Town.goToTown() && Town.moveToSpot('stash');
+		Town.openStash();
+
+		// For reasons unclear, cubing goes wrong in stash in my test, so for ease, i put cube in inventory
+		(cubeInStash = cube.location !== locations.Inventory) && Storage.Inventory.MoveTo(cube);
+		me.cancel();
+		me.cancel();
+
+		// clear the cube, otherwise we cant transmute
+		Cubing.emptyCube();
+
+		// Remove excessive pots from the list. (only groups of 3)
+		revpots.length -= revpots.length % 3;
+
+		// Call this function for each pot
+		revpots.forEach(function (pot, index) {
+
+			// Add this to the original location array
+			origin.push({location: pot.location, x: pot.x, y: pot.y});
+
+			Town.openStash();
+
+			// Move to inventory first (to avoid bugs)
+			Storage.Inventory.MoveTo(pot);
+			me.cancel(); // remove inventory/cube window
+			me.cancel(); // remove inventory window (if it was cube)
+
+			// Move the current pot to the cube
+			Storage.Cube.MoveTo(pot);
+			// For every third pot, excluding the first
+			if (!index || (1 + index) % 3 !== 0) {
+				me.cancel(); // remove cube window
+				me.cancel(); // remove stash window
+			} else {
+				// press the transmute button
+				Cubing.openCube() && transmute();
+
+				// high delay here to avoid issues with ping spikes
+				delay(me.ping * 5 + 1000); // <-- probably can be less
+
+				// Find all items in the cube. (the full rev pot)
+				let fullrev = me.findItem(-1, -1, 6);
+
+				// Sort the original locations of the pots. Put a low location first (belt = 2, rest is higher).
+				origin.sort((a, b) => a.location - b.location).some(function (orgin) { // Loop over all the original spots.
+
+					// Loop trough all possible locations
+					for (let i in locations) {
+						// If location is matched with its orgin, we know the name of the spot
+						locations[i] === orgin.location && (orgin.location = i); // Store the name of the location
+					}
+
+					Storage.Inventory.MoveTo(fullrev); // First put to inventory;
+					me.cancel(); // cube
+					me.cancel(); // inventory
+
+					// If the storage location is known, put the pot to this location
+					Storage[orgin.location] && Storage[orgin.location].moveTo(fullrev);
+
+					// If returned true, the prototype some stops looping.
+					return fullrev.location !== locations.Cube;
+				});
+
+				// empty the array
+				origin.length = 0;
+
+				// Cube should be empty, but lets be sure
+				Cubing.emptyCube();
+			}
+		});
+		// Put cube back in stash, if it was when we started
+		cubeInStash && Storage.Stash.MoveTo(cube);
+
+		me.cancel();
+		me.cancel();
+	},
 };
