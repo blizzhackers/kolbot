@@ -4,33 +4,8 @@
 *	@desc		various 'Unit' and 'me' prototypes
 */
 
-// Shuffle Array
-// http://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array-in-javascript
-Array.prototype.shuffle = function () {
-	var temp, index,
-		counter = this.length;
-
-	// While there are elements in the array
-	while (counter > 0) {
-		// Pick a random index
-		index = Math.floor(Math.random() * counter);
-
-		// Decrease counter by 1
-		counter -= 1;
-
-		// And swap the last element with it
-		temp = this[counter];
-		this[counter] = this[index];
-		this[index] = temp;
-	}
-
-	return this;
-};
-
-// Trim String
-String.prototype.trim = function () {
-	return this.replace(/^\s+|\s+$/g, "");
-};
+// Ensure these are in polyfill.js
+!isIncluded('Polyfill.js') && include('Polyfill.js');
 
 // Check if unit is idle
 Unit.prototype.__defineGetter__("idle",
@@ -1081,81 +1056,6 @@ Unit.prototype.getColor = function () {
 	return -1;
 };
 
-// Object.assign polyfill from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
-if (typeof Object.assign !== 'function') {
-	Object.defineProperty(Object, "assign", {
-		value: function assign (target) {
-			if (target === null) {
-				throw new TypeError('Cannot convert undefined or null to object');
-			}
-
-			var to = Object(target);
-
-			for (var index = 1; index < arguments.length; index++) {
-				var nextSource = arguments[index];
-
-				if (nextSource !== null) {
-					for (var nextKey in nextSource) {
-						if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-							to[nextKey] = nextSource[nextKey];
-						}
-					}
-				}
-			}
-
-			return to;
-		},
-		writable: true,
-		configurable: true
-	});
-}
-
-// Array.find polyfill from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
-if (!Array.prototype.find) {
-	Object.defineProperty(Array.prototype, 'find', {
-		value: function (predicate) {
-			if (this === null) {
-				throw new TypeError('"this" is null or not defined');
-			}
-
-			var o = Object(this);
-
-			var len = o.length >>> 0;
-
-			if (typeof predicate !== 'function') {
-				throw new TypeError('predicate must be a function');
-			}
-
-			var thisArg = arguments[1];
-
-			var k = 0;
-
-			while (k < len) {
-				var kValue = o[k];
-
-				if (predicate.call(thisArg, kValue, k, o)) {
-					return kValue;
-				}
-
-				k++;
-			}
-
-			return undefined;
-		},
-		configurable: true,
-		writable: true
-	});
-}
-
-/**
- * @description Return the first element or undefined
- * @return undefined|*
- */
-if (!Array.prototype.first) {
-	Array.prototype.first = function () {
-		return this.length > 0 ? this[0] : undefined;
-	};
-}
 
 /**
  * @description Return the items of a player, or an empty array
