@@ -325,6 +325,9 @@ var Config = {
 	AggressiveCloak: false,
 	SummonShadow: false,
 
+	// Custom Attack
+	CustomClassAttack: '', // If set it loads common/Attack/[CustomClassAttack].js
+
 	// Script specific
 	MFLeader: false,
 	Mausoleum: {
@@ -476,7 +479,8 @@ var Config = {
 		WaitTimeout: false,
 		UseSalvation: false,
 		GetFade: false,
-		MakeTorch: true
+		MakeTorch: true,
+		AntidotesToChug: 0,
 	},
 	Synch: {
 		WaitFor: []
