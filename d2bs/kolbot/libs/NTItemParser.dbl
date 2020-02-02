@@ -129,16 +129,16 @@ NTIP.CheckQuantityOwned = function (item_type, item_stats) {
 		if (items[i].mode === 0 && items[i].location === 7) {
 			item = items[i];
 
-			if ((item_type !== null && item_type.length > 0 && eval(item_type)) || item_type === null) {
-				if ((item_stats !== null && item_stats.length > 0 && eval(item_stats)) || item_stats === null) {
+			if ((item_type !== null && typeof item_type === 'function' && item_type(item)) || item_type === null) {
+				if ((item_stats !== null && typeof item_stats === 'function' && item_stats(item)) || item_stats === null) {
 					num += 1;
 				}
 			}
 		} else if (items[i].mode === 0 && items[i].location === 3) { // inv check
 			item = items[i];
 
-			if ((item_type !== null && item_type.length > 0 && eval(item_type)) || item_type === null) {
-				if ((item_stats !== null && item_stats.length > 0 && eval(item_stats)) || item_stats === null) {
+			if ((item_type !== null && typeof item_type === 'function' && item_type(item)) || item_type === null) {
+				if ((item_stats !== null && typeof item_stats === 'function' && item_stats(item)) || item_stats === null) {
 					//if (Config.Inventory[items[i].y][items[i].x] > 0) { // we check only space that is supposed to be free
 					num += 1;
 					//}
