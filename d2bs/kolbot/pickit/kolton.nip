@@ -191,7 +191,7 @@
 
 //          ==rare==
 [type] == gloves && [quality] == rare && [flag] != ethereal # [ias] == 20 && [strength]+[dexterity] >= 30
-[type] == gloves && [quality] == rare && [flag] != ethereal # [ias] == 20 && [javelinandspearskilltab]+[passiveandmagicskilltab] >= 2 && ([strength] == 15  || [dexterity] == 15)
+[type] == gloves && [quality] == rare && [flag] != ethereal # [ias] == 20 && [javelinandspearskilltab]+[passiveandmagicskilltab] >= 2 && ([strength] == 15 || [dexterity] == 15)
 [type] == gloves && [quality] == rare && [flag] == ethereal # [ias] == 20 && [enhanceddefense] >= 175 && ([itemreplenishdurability] > 0 || [itemreplenishquantity] > 0)
 
 //          ==magic==
@@ -236,7 +236,7 @@
 //[name] == vampirefangbelt && [quality] == unique && [flag] != ethereal # [lifeleech] == 7 && [defense] == 63 // nosferatu's coil
 [name] == mithrilcoil && [quality] == unique && [flag] != ethereal # [damageresist] == 15 && [vitality] == 40 // verdungo's hearty cord
 [name] == demonhidesash && [quality] == unique && [flag] != ethereal # [damageresist] == 15 && [lifeleech] == 8 && [enhanceddefense] == 180 && [magicdamagereduction] == 15 // string of ears
-//[name] == battlebelt  && [quality] == unique && [flag] != ethereal # [enhanceddefense] == 170 // snowclash
+//[name] == battlebelt && [quality] == unique && [flag] != ethereal # [enhanceddefense] == 170 // snowclash
 //[name] == warbelt && [quality] == unique && [flag] != ethereal # [enhanceddefense] == 200 // thundergod's vigor
 [name] == heavybelt && [quality] == unique && [flag] != ethereal # [enhanceddefense] == 60 && [itemgoldbonus] == 80 // goldwrap
 [name] == battlebelt && [quality] == unique && [flag] != ethereal # [enhanceddefense] == 60 // && [defense] == 92 // goldwrap x1
@@ -732,7 +732,7 @@
 // griswold's
 
 [name] == caduceus && [quality] == set # [enhanceddamage] == 240 && [sockets] == 4
-[name] == corona  && [quality] == set # [enhanceddefense] == 75 && [itemmagicbonus] == 30
+[name] == corona && [quality] == set # [enhanceddefense] == 75 && [itemmagicbonus] == 30
 [name] == vortexshield && [quality] == set # [defense] == 333
 
 // unsorted shit

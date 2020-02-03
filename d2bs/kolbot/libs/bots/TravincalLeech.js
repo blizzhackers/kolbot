@@ -1,7 +1,7 @@
 /**
-*   @filename   TravincalLeech.js
-*   @author	 ToS/XxXGoD/YGM/azero
-*   @desc	   Travinical Leech
+*	@filename	TravincalLeech.js
+*	@author		ToS/XxXGoD/YGM/azero
+*	@desc		Travincal Leech
 */
 
 function TravincalLeech() {
