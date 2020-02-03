@@ -171,7 +171,7 @@ NTIP.generateTierFunc = function (type) {
 				continue;
 			}
 
-			let [type,stat,wanted] = NTIP_CheckList[i];
+			let [typeFunc,statFunc,wanted] = NTIP_CheckList[i];
 			if (wanted.hasOwnProperty(type) && wanted[type]) {
 
 				try {
