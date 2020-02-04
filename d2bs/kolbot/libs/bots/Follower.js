@@ -22,7 +22,7 @@
 *	tele - toggle teleport for all
 *	<charname> tele - toggle teleport for <charname>
 *	tele on - teleport on for all
-*	<charname> tele on -  teleport on for <charname>
+*	<charname> tele on - teleport on for <charname>
 *	tele off - teleport off for all
 *	<charname> tele off - teleport off for <charname>
 * Skills: *** refer to skills.txt ***

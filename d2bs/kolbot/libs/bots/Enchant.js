@@ -577,7 +577,7 @@ MainLoop:
 
 	while (true) {
 		while (greet.length > 0) {
-			nick  = greet.shift();
+			nick = greet.shift();
 
 			if (shitList.indexOf(nick) === -1) {
 				say("Welcome, " + nick + "! For a list of commands say 'help'");

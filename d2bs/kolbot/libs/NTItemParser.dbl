@@ -212,7 +212,7 @@ NTIP.GetTier = NTIP.generateTierFunc('Tier');
 
 /**@function
  * @param item */
-NTIP.GetMercTier  = NTIP.generateTierFunc('MercTier');
+NTIP.GetMercTier = NTIP.generateTierFunc('MercTier');
 
 NTIP.CheckItem = function (item, entryList, verbose) {
 	var i, list, identified, num,

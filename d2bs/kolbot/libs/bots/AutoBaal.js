@@ -231,7 +231,7 @@ function AutoBaal() {
 
 				portal = getUnit(2, 563);
 
-				delay(2000); // wait for others to enter first - helps  with curses and tentacles from spawning around you
+				delay(2000); // wait for others to enter first - helps with curses and tentacles from spawning around you
 				print("ÿc4AutoBaal: ÿc0Entering chamber.");
 
 				if (Pather.usePortal(null, null, portal)) { // enter chamber

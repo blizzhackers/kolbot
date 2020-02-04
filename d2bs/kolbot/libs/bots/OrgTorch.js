@@ -123,7 +123,7 @@ function OrgTorch() {
 		var portal,
 			item1 = mode === 0 ? me.findItem("pk1", 0) : me.findItem("dhn", 0),
 			item2 = mode === 0 ? me.findItem("pk2", 0) : me.findItem("bey", 0),
-			item3 = mode === 0 ?  me.findItem("pk3", 0) : me.findItem("mbr", 0);
+			item3 = mode === 0 ? me.findItem("pk3", 0) : me.findItem("mbr", 0);
 
 		Town.goToTown(5);
 		Town.doChores();
@@ -357,7 +357,7 @@ function OrgTorch() {
 			hkeys = me.findItems("pk2", 0).length || 0;
 			dkeys = me.findItems("pk3", 0).length || 0;
 
-			// Stop the loop if we  have enough keys or if wait time expired
+			// Stop the loop if we have enough keys or if wait time expired
 			if (((tkeys >= 3 && hkeys >= 3 && dkeys >= 3) || (Config.OrgTorch.WaitTimeout && (getTickCount() - timer > Config.OrgTorch.WaitTimeout * 1000 * 60))) && this.aloneInGame()) {
 				removeEventListener('copydata', this.torchSystemEvent);
 

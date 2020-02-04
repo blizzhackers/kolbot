@@ -1888,7 +1888,7 @@ MainLoop:
 	},
 
 	// Use a NPC menu. Experimental function, subject to change
-	// id = string number (with exception of Ressurect merc). http://www.blizzhackers.cc/viewtopic.php?f=209&t=378493
+	// id = string number (with exception of Ressurect merc).
 	useMenu: function (id) {
 		//print("useMenu " + getLocaleString(id));
 

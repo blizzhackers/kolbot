@@ -315,7 +315,7 @@ var D2Bot = {
 			args: []
 		};
 
-        sendCopyData(null, this.handle, 0, JSON.stringify(obj));
+		sendCopyData(null, this.handle, 0, JSON.stringify(obj));
 	},
 
 	setProfile: function (account, password, character, difficulty, realm, infoTag, gamePath) {
@@ -335,7 +335,7 @@ var D2Bot = {
 			args: [JSON.stringify(tag)]
 		};
 
-        sendCopyData(null, this.handle, 0, JSON.stringify(obj));
+		sendCopyData(null, this.handle, 0, JSON.stringify(obj));
 	},
 
 	// Store info in d2bot# cache
@@ -514,7 +514,7 @@ var ControlAction = {
 			if (currTime !== Math.floor((endTime - getTickCount()) / 1000)) {
 				currTime = Math.floor((endTime - getTickCount()) / 1000);
 
-				D2Bot.updateStatus(text + " (" + Math.max(currTime, 0)  + "s)");
+				D2Bot.updateStatus(text + " (" + Math.max(currTime, 0) + "s)");
 			}
 
 			delay(10);

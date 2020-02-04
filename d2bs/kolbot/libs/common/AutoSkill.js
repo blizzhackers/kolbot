@@ -18,7 +18,7 @@ var AutoSkill = new function () {
 		 satisfy - boolean value to stop(true) or continue(false) further allocation until count is met. Defaults to true if not specified.
 
 		skillBuildOrder = [
-			[37, 1, true], [42, 1, true], [54, 1, true],  //warmth, static, teleport
+			[37, 1, true], [42, 1, true], [54, 1, true], //warmth, static, teleport
 			[59, 1, false], [55, 7, true], [45, 13, true], //blizzard, glacial spike, ice blast
 			[59, 7, false], [65, 1, true], //blizzard, cold mastery
 			[59, 20, false], [65, 20, true], //max blizzard, max cold mastery
@@ -28,7 +28,7 @@ var AutoSkill = new function () {
 
 	this.needPreReq = function (skillid) {	//a function to return false if have all prereqs or a skill if not
 		for (var t = 183; t >=181; t--) {		//a loop to go through each reqskill
-			var preReq = (getBaseStat('skills', skillid, t));      // Check ReqSkills
+			var preReq = (getBaseStat('skills', skillid, t)); // Check ReqSkills
 
 			if (preReq > 0 && preReq < 356 && !me.getSkill(preReq, 0)) {
 				return preReq;

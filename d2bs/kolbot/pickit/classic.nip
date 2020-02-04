@@ -160,7 +160,7 @@
 
 //------ Arcanna's Tricks ------
 
-//[name] == skullcap  && [quality] == set # [hpregen] == 4
+//[name] == skullcap && [quality] == set # [hpregen] == 4
 //[name] == lightplate && [quality] == set # [normaldamagereduction] == 3
 //[name] == warstaff && [quality] == set # [sorceressskills] == 1
 //[name] == amulet && [quality] == set # [maxmana] == 15

@@ -1,7 +1,7 @@
 /**
-*   @filename   TristramLeech.js
-*   @author	 ToS/XxXGoD/YGM
-*   @desc	   Tristram Leech (Helper)
+*	@filename	TristramLeech.js
+*	@author		ToS/XxXGoD/YGM
+*	@desc		Tristram Leech (Helper)
 */
 
 function TristramLeech() {
@@ -36,13 +36,13 @@ function TristramLeech() {
 
 		if (whereisleader) {
 			if (whereisleader.area === 83) {
-			   return false;
+				return false;
 			}
 			if (whereisleader.area === 108) {
-			   return false;
+				return false;
 			}
 			if (whereisleader.area === 131) {
-			   return false;
+				return false;
 			}
 		}
 
