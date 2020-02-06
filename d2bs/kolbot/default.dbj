@@ -162,7 +162,11 @@ function main() {
 	}
 
 	if (Config.PublicMode) {
-		load("tools/Party.js");
+		if (Config.PublicMode === true) {
+			require('libs/modules/SimpleParty');
+		} else {
+			load("tools/Party.js");
+		}
 	}
 
 	if (Config.AntiHostile) {
