@@ -17,7 +17,7 @@ function MFHelper() {
 			if (msg) {
 				for (i = 0; i < match.length; i += 1) {
 					if (msg.match(match[i])) {
-						player = this.findPlayer(name);
+						player = Misc.findPlayer(name);
 
 						break;
 					}
@@ -29,44 +29,6 @@ function MFHelper() {
 			command = msg;
 		}
 	}
-
-	this.findPlayer = function (name) {
-		var party = getParty();
-
-		if (party) {
-			do {
-				if (party.name !== me.name && party.name === name) {
-					return party;
-				}
-			} while (party.getNext());
-		}
-
-		return false;
-	};
-
-	this.getPlayerAct = function (player) {
-		if (player.area > 0 && player.area <= 39) {
-			return 1;
-		}
-
-		if (player.area >= 40 && player.area <= 74) {
-			return 2;
-		}
-
-		if (player.area >= 75 && player.area <= 102) {
-			return 3;
-		}
-
-		if (player.area >= 103 && player.area <= 108) {
-			return 4;
-		}
-
-		if (player.area >= 109) {
-			return 5;
-		}
-
-		return false;
-	};
 
 	this.buildCowRooms = function () {
 		var i, j, room, kingPreset, badRooms, badRooms2,
@@ -153,7 +115,7 @@ function MFHelper() {
 			throw new Error("MFHelper: Leader not partied");
 		}
 
-		player = this.findPlayer(Config.Leader);
+		player = Misc.findPlayer(Config.Leader);
 	}
 
 	// START
@@ -164,7 +126,7 @@ MainLoop:
 				delay(100);
 			}
 
-			playerAct = this.getPlayerAct(player);
+			playerAct = Misc.getPlayerAct(player);
 
 			if (playerAct && playerAct !== me.act) {
 				Town.goToTown(playerAct);

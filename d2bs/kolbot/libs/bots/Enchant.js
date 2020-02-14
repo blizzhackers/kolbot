@@ -375,7 +375,7 @@ function Enchant() {
 			break;
 		}
 
-		act = this.getPlayerAct(nick);
+		act = Misc.getPlayerAct(nick);
 
 		switch (act) {
 		case 1:
@@ -439,36 +439,6 @@ MainLoop:
 		this.wpNicks[nick].timer = getTickCount();
 
 		return true;
-	};
-
-	this.getPlayerAct = function (name) {
-		var unit = getParty();
-
-		if (unit) {
-			do {
-				if (unit.name === name) {
-					if (unit.area <= 39) {
-						return 1;
-					}
-
-					if (unit.area >= 40 && unit.area <= 74) {
-						return 2;
-					}
-
-					if (unit.area >= 75 && unit.area <= 102) {
-						return 3;
-					}
-
-					if (unit.area >= 103 && unit.area <= 108) {
-						return 4;
-					}
-
-					return 5;
-				}
-			} while (unit.getNext());
-		}
-
-		return false;
 	};
 
 	this.checkHostiles = function () {
