@@ -831,7 +831,7 @@ var Misc = {
 	},
 
 	// Get player unit
-	getPlayerUnit = function (name) {
+	getPlayerUnit: function (name) {
 		var player = getUnit(0, name);
 
 		if (player) {
@@ -843,10 +843,10 @@ var Misc = {
 		}
 
 		return false;
-	}
+	},
 
 	// Check the player act
-	getPlayerAct = function (name) {
+	getPlayerAct: function (name) {
 		var unit = getParty();
 
 		if (unit) {
