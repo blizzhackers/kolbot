@@ -948,7 +948,7 @@ CursorLoop:
 			return true;
 		}
 
-		// Fuck Alkor
+		// avoid Alkor
 		if (me.act === 3) {
 			this.goToTown(2);
 		}
@@ -1092,7 +1092,7 @@ CursorLoop:
 			return true;
 		}
 
-		// Fuck Hratli
+		// avoid Hratli
 		if (me.act === 3) {
 			this.goToTown(Pather.accessToAct(4) ? 4 : 2);
 		}
@@ -1453,7 +1453,7 @@ CursorLoop:
 			return true;
 		}
 
-		// Fuck Aheara
+		// avoid Aheara
 		if (me.act === 3) {
 			this.goToTown(2);
 		}
