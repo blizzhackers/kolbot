@@ -861,7 +861,11 @@ var Attack = {
 	clearLevel: function (spectype) {
 		if (Config.MFLeader) {
 			Pather.makePortal();
-			say("clearlevel " + getArea().name);
+			if (me.area > 65 && me.area < 73) { // tombs exception
+				say("clearlevel " + me.area);
+			} else {
+				say("clearlevel " + getArea().name);
+			}
 		}
 
 		var room, result, rooms, myRoom, currentArea, previousArea;
@@ -892,6 +896,15 @@ var Attack = {
 			// get the first room + initialize myRoom var
 			if (!myRoom) {
 				room = getRoom(me.x, me.y);
+			}
+
+			if (Config.MFHelper && Config.MFHelper.BreakClearLevel && Config.Leader !== "") {
+				var leader = Misc.findPlayer(Config.Leader);
+
+				if (leader.area !== me.area && !leader.inTown) {
+					me.overhead("break the clearing in " + getArea().name);
+					return true;
+				}
 			}
 
 			if (room) {

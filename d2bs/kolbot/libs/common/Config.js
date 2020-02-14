@@ -419,7 +419,7 @@ var Config = {
 		StarTP: "Star TP up",
 		DiabloMsg: "Diablo",
 		WalkClear: false,
-		SealOrder: ["vizier", "seis", "infector"],
+		SealOrder: ["vizier", "seis", "infector"]
 	},
 	DiabloHelper: {
 		Wait: 120,
@@ -429,7 +429,10 @@ var Config = {
 		OpenSeals: false,
 		SafePrecast: true,
 		SealOrder: ["vizier", "seis", "infector"],
-		RecheckSeals: false,
+		RecheckSeals: false
+	},
+	MFHelper: {
+		BreakClearLevel: true
 	},
 	BattleOrders: {
 		Mode: 0,
@@ -437,7 +440,7 @@ var Config = {
 		Idle: false,
 		QuitOnFailure: false,
 		SkipIfTardy: true,
-		Wait: 10,
+		Wait: 10
 	},
 	Enchant: {
 		Triggers: ["chant", "cows", "wps"],
@@ -480,7 +483,7 @@ var Config = {
 		UseSalvation: false,
 		GetFade: false,
 		MakeTorch: true,
-		AntidotesToChug: 0,
+		AntidotesToChug: 0
 	},
 	Synch: {
 		WaitFor: []
