@@ -845,35 +845,25 @@ var Misc = {
 		return false;
 	},
 
-	// Check the player act
-	getPlayerAct: function (name) {
-		var unit = getParty();
-
-		if (unit) {
-			do {
-				if (unit.name === name) {
-					if (unit.area <= 39) {
-						return 1;
-					}
-
-					if (unit.area >= 40 && unit.area <= 74) {
-						return 2;
-					}
-
-					if (unit.area >= 75 && unit.area <= 102) {
-						return 3;
-					}
-
-					if (unit.area >= 103 && unit.area <= 108) {
-						return 4;
-					}
-
-					return 5;
-				}
-			} while (unit.getNext());
+	// Get the player act
+	getPlayerAct: function (unit) {
+		if (unit.area <= 39) {
+			return 1;
 		}
 
-		return false;
+		if (unit.area >= 40 && unit.area <= 74) {
+			return 2;
+		}
+
+		if (unit.area >= 75 && unit.area <= 102) {
+			return 3;
+		}
+
+		if (unit.area >= 103 && unit.area <= 108) {
+			return 4;
+		}
+
+		return 5;
 	},
 
 	// Get number of players within getUnit distance
