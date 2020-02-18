@@ -846,7 +846,9 @@ var Misc = {
 	},
 
 	// Get the player act
-	getPlayerAct: function (unit) {
+	getPlayerAct: function (player) {
+		var unit = this.findPlayer(player);
+
 		if (unit.area <= 39) {
 			return 1;
 		}
