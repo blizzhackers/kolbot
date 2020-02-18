@@ -625,7 +625,7 @@ function Follower() {
 			}
 
 			if (attack) {
-				Attack.clear(20, false, false, false, false);
+				Attack.clear(20, false, false, false, true);
 				this.pickPotions(20);
 			}
 
@@ -749,13 +749,13 @@ WPLoop:
 
 			break;
 		case "1":
-			if (me.inTown && leader.inTown && Misc.getPlayerAct(leader) !== me.act) {
+			if (me.inTown && leader.inTown && Misc.getPlayerAct(Config.Leader) !== me.act) {
 				say("Going to leader's town.");
-				Town.goToTown(Misc.getPlayerAct(leader));
+				Town.goToTown(Misc.getPlayerAct(Config.Leader));
 				Town.move("portalspot");
 			} else if (me.inTown) {
 				say("Going outside.");
-				Town.goToTown(Misc.getPlayerAct(leader));
+				Town.goToTown(Misc.getPlayerAct(Config.Leader));
 				Town.move("portalspot");
 
 				if (!Pather.usePortal(null, leader.name)) {
