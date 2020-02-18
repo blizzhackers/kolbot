@@ -901,7 +901,7 @@ var Attack = {
 			if (Config.MFHelper && Config.MFHelper.BreakClearLevel && Config.Leader !== "") {
 				var leader = Misc.findPlayer(Config.Leader);
 
-				if (leader.area !== me.area && !leader.inTown) {
+				if (leader.area !== me.area && (!leader.inTown || Misc.getPlayerAct(Config.Leader) !== me.act)) {
 					me.overhead("break the clearing in " + getArea().name);
 					return true;
 				}
