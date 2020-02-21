@@ -195,6 +195,12 @@ var Config = {
 	SkipException: [],
 	ScanShrines: [],
 	Debug: false,
+	DeepStats: {
+		Enabled: false,
+		Token: "", // GheedsFortune.com/accounts/profile for your token
+		Url: "http://d2bs.gheedsfortune.com/api/v1/items/",
+		FileLogOnly: false,
+	},
 
 	AutoMule: {
 		Trigger: [],
