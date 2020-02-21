@@ -1361,7 +1361,7 @@ var Misc = {
 			return false;
 		}
 
-		var i;
+		let i;
 
 		if (!Config.LogKeys && ["pk1", "pk2", "pk3"].indexOf(unit.code) > -1) {
 			return false;
@@ -1397,15 +1397,18 @@ var Misc = {
 			}
 		}
 
-		var lastArea, code, desc, sock, itemObj,
+		let lastArea, code, desc, raw_desc, sock, itemObj, deepstatsData,
+			lastAreaID = 0,
 			color = -1,
 			name = unit.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<:;.*]|\/|\\/g, "").trim();
 
+		raw_desc = this.getItemDesc(unit);
 		desc = this.getItemDesc(unit);
 		color = unit.getColor();
 
 		if (action.match("kept", "i")) {
 			lastArea = DataFile.getStats().lastArea;
+			lastAreaID = DataFile.getStats().lastAreaID;
 
 			if (lastArea) {
 				desc += ("\n\\xffc0Area: " + lastArea);
@@ -1582,6 +1585,53 @@ var Misc = {
 			header: "",
 			sockets: this.getItemSockets(unit)
 		};
+
+		if (Config.DeepStats.Enabled) {
+			deepstatsData = {
+				item_id: Date.now().toString(36) + "$" + unit.gid + ":" + unit.classid + ":" + unit.location + ":" + unit.x + ":" + unit.y + (unit.getFlag(0x400000) ? ":eth" : ""),
+				name: name,
+				fname: unit.fname,
+				description: desc,
+				action: action,
+				ilvl: unit.ilvl,
+				lvlreq: unit.lvlreq,
+				quality: unit.quality,
+				code: code,
+				class_id: unit.classid,
+				ethereal: !!unit.getFlag(0x400000),
+				last_area: lastAreaID,
+				difficulty: me.diff,
+				player_count: this.playerCount(),
+				char_name: me.charname,
+				char_level: me.charlvl,
+				char_class: me.classid,
+				char_mf: me.getStat(80),
+				ladder: me.ladder > 0,
+				realm: me.realm,
+				hardcore: me.playertype,
+				expansion: me.gametype === 1,
+				can_teleport: me.getSkill(54, 1) > 0
+			};
+
+			if (Config.DeepStats.FileLogOnly) {
+				DeepStats.updateStats(JSON.stringify(deepstatsData));
+			} else if (!Config.DeepStats.API.Token) {
+				throw new Error("An auth token is required. Set Config.DeepStats.Token");
+			} else {
+				const HTTP = require("../modules/HTTP");
+				DeepStats.updateStats(JSON.stringify(deepstatsData));
+				HTTP({
+					url: Config.DeepStats.API.ReportItem,
+					method: "POST",
+					headers: {
+						"Authorization": "Token " + Config.DeepStats.API.Token,
+						"Content-Type": "application/json",
+						"Connection": "close"
+					},
+					data: JSON.stringify(deepstatsData)
+				});
+			}
+		}
 
 		D2Bot.printToItemLog(itemObj);
 
@@ -1941,7 +1991,7 @@ MainLoop:
 	},
 
 	// Use a NPC menu. Experimental function, subject to change
-	// id = string number (with exception of Ressurect merc).
+	// id = string number (with exception of Ressurect merc). http://www.blizzhackers.cc/viewtopic.php?f=209&t=378493
 	useMenu: function (id) {
 		//print("useMenu " + getLocaleString(id));
 
