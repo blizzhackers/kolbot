@@ -541,7 +541,7 @@ Unit.prototype.getStatEx = function (id, subid) {
 			// Get it in local variables, its more easy to read
 			let [fire, cold, light, psn] = allres;
 
-			return fire === cold === light === psn ? min : 0;
+			return fire === cold && cold === light && light === psn ? min : 0;
 		}
 	case 20: // toblock
 		switch (this.classid) {
