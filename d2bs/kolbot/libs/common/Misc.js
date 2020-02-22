@@ -1615,16 +1615,16 @@ var Misc = {
 
 			if (Config.DeepStats.FileLogOnly) {
 				DeepStats.updateStats(JSON.stringify(deepstatsData));
-			} else if (!Config.DeepStats.Token) {
+			} else if (!Config.DeepStats.API.Token) {
 				throw new Error("An auth token is required. Set Config.DeepStats.Token");
 			} else {
 				const HTTP = require("../modules/HTTP");
 				DeepStats.updateStats(JSON.stringify(deepstatsData));
 				HTTP({
-					url: Config.DeepStats.Url,
+					url: Config.DeepStats.API.ReportItem,
 					method: "POST",
 					headers: {
-						"Authorization": "Token " + Config.DeepStats.Token,
+						"Authorization": "Token " + Config.DeepStats.API.Token,
 						"Content-Type": "application/json",
 						"Connection": "close"
 					},
