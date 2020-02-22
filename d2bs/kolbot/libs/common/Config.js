@@ -196,10 +196,16 @@ var Config = {
 	ScanShrines: [],
 	Debug: false,
 	DeepStats: {
-		Enabled: false,
-		Token: "", // GheedsFortune.com/accounts/profile for your token
-		Url: "http://d2bs.gheedsfortune.com/api/v1/items/",
+		StatsEnabled: false,
+		SOJReportsEnabled: false,
+		DCloneReportsEnabled: false,
 		FileLogOnly: false,
+		API: {
+			Token: "", // GheedsFortune.com/accounts/profile for your token
+			ReportItem: "http://d2bs.gheedsfortune.com/api/v1/items/",
+			ReportDClone: "http://d2bs.gheedsfortune.com/api/v1/dclones/",
+			ReportSOJsSold: "http://d2bs.gheedsfortune.com/api/v1/sojs/",
+		}
 	},
 
 	AutoMule: {
