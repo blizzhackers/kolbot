@@ -16,6 +16,13 @@ function LoadConfig() {
 	// User addon script. Read the description in libs/bots/UserAddon.js
 	Scripts.UserAddon = true; // !!!YOU MUST SET THIS TO FALSE IF YOU WANT TO RUN BOSS/AREA SCRIPTS!!!
 
+	// DeepStats item logging and reporting
+	DeepStats.StatsEnabled = false;
+		DeepStats.API.Token = ""; // Go to GheedsFortune.com/accounts/profile for your token
+		DeepStats.SOJReportsEnabled = false;
+		DeepStats.DCloneReportsEnabled = false;
+		DeepStats.FileLogOnly = false;
+
 	// Battle orders script - Use this for 2+ characters (for example BO barb + sorc)
 	Scripts.BattleOrders = false;
 		Config.BattleOrders.Mode = 0; // 0 = give BO, 1 = get BO
