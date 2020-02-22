@@ -144,7 +144,7 @@ function main() {
 
 	this.togglePause = function () {
 		var i,	script,
-			scripts = ["default.dbj", "tools/townchicken.js", "tools/antihostile.js", "tools/party.js", "tools/rushthread.js"];
+			scripts = ["default.dbj", "tools/townchicken.js", "tools/antihostile.js", "tools/party.js", "tools/rushthread.js", "tools/bogetting.js"];
 
 		for (i = 0; i < scripts.length; i += 1) {
 			script = getScript(scripts[i]);
@@ -354,7 +354,14 @@ function main() {
 			this.togglePause();
 
 			break;
-		case 123: // F12 key
+		case 35: // End key
+			MuleLogger.logChar();
+			delay(rand(Config.QuitListDelay[0] * 1e3, Config.QuitListDelay[1] * 1e3));
+			D2Bot.printToConsole(me.profile + " - end run " + me.gamename);
+			D2Bot.stop(me.profile, true);
+
+			break;
+		case 45: // Ins key
 			me.overhead("Revealing " + Pather.getAreaName(me.area));
 			revealLevel(true);
 

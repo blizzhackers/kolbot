@@ -41,6 +41,8 @@ function main() {
 	if (getScript("d2botmap.dbj")) {
 		load("tools/mapthread.js");
 		load("tools/ToolsThread.js");
+		Config.init(true);
+		LocalChat.init();
 
 		while (true) {
 			delay(1000);
@@ -159,6 +161,10 @@ function main() {
 
 	if (Config.TownCheck || Config.TownHP || Config.TownMP) {
 		load("tools/TownChicken.js");
+	}
+
+	if (Config.BoBarbHelper.Mode === 1) {
+		load("tools/BoGetting.js");
 	}
 
 	if (Config.PublicMode) {
