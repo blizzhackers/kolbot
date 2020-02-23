@@ -16,8 +16,8 @@ include("common/Cubing.js");
 include("common/Config.js");
 include("common/CollMap.js");
 include("common/Loader.js");
-include("common/misc.js");
-include("common/util.js");
+include("common/Misc.js");
+include("common/Util.js");
 include("common/Pickit.js");
 include("common/Pather.js");
 include("common/Precast.js");
@@ -55,7 +55,7 @@ function main() {
 
 			myTown = me.area;
 			Pather.useWaypoint(Config.BoBarbHelper.Wp, true);
-			Pather.moveTo(me.x + 5, me.y + 5);
+			Pather.moveTo(me.x + 5, me.y + 5, 5, true);
 			delay(3000);
 
 			if (me.getState(32)) {
