@@ -18,7 +18,7 @@
  	Scripts.BoBarbHelper = false; // specific HC script with BoBarb on the Bo area during whole game
 		Config.BoBarbHelper.Mode = -1; // 0 = give BO, 1 = get BO, -1  = disabled
 		Config.BoBarbHelper.Wp = 35; // 35 = Catacombs level 2
-		Config.BoBarbHelper.BoDuration = 180; // the duration of BO skill of barbarian char in seconds
+		Config.BoBarbHelper.BoDuration = 180; // the barbarian char duration of BO skill in seconds (it can be the lower value between BC-BO-Shout)
 
 	// Team MF system
 	Config.MFLeader = false; // Set to true if you have one or more MFHelpers. Opens TP and gives commands when doing normal MF runs.
