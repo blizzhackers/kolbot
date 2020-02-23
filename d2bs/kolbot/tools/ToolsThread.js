@@ -472,11 +472,11 @@ function main() {
 					if (!Config.DeepStats.API.Token) {
 						throw new Error("An auth token is required. Set Config.DeepStats.API.Token");
 					}
-					let soj_data = {
+					let sojData = {
 						ip_address: me.gameserverip.split(".")[3],
 						realm: me.realm,
 						ladder: me.ladder > 0,
-						current_count: param1,
+						count: param1,
 					};
 					HTTP({
 						url: Config.DeepStats.API.ReportSOJsSold,
@@ -485,7 +485,7 @@ function main() {
 							"Authorization": "Token " + Config.DeepStats.API.Token,
 							"Content-Type": "application/json",
 						},
-						data: JSON.stringify(soj_data)
+						data: JSON.stringify(sojData)
 					});
 				}
 
@@ -518,7 +518,7 @@ function main() {
 					if (!Config.DeepStats.API.Token) {
 						throw new Error("An auth token is required. Set Config.DeepStats.API.Token");
 					}
-					let dclone_data = {
+					let dcloneData = {
 						ip_address: me.gameserverip.split(".")[3],
 						realm: me.realm,
 						ladder: me.ladder > 0,
@@ -530,7 +530,7 @@ function main() {
 							"Authorization": "Token " + Config.DeepStats.API.Token,
 							"Content-Type": "application/json",
 						},
-						data: JSON.stringify(dclone_data)
+						data: JSON.stringify(dcloneData)
 					});
 				}
 
