@@ -7,7 +7,6 @@
 (function (module, require) {
 	const Events = module.exports = function () {
 		const Worker = require('Worker'), self = this;
-		let hook;
 
 		this.hooks = [];
 
@@ -33,7 +32,7 @@
 
 		this.once = function (name, callback) {
 			if (callback === undefined && typeof name === 'function') [callback,name] = [name,callback];
-			hook = new Hook(name, function (...args) {
+			const hook = new Hook(name, function (...args) {
 				callback.apply(undefined, args);
 				delete self.hooks[this.id];
 			});
