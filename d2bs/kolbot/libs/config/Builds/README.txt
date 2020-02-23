@@ -152,7 +152,7 @@ README.txt - AutoBuild Script Installation and Configuration
 
 	The best way to think of this AutoBuild system is an automation system for your char config settings.
 	You still need to make and setup a basic char config file for your character or profile
-	just as you normally would to run without the AutoBuild system enabled. (See https://github.com/kolton/d2bot-with-kolbot/wiki)
+	just as you normally would to run without the AutoBuild system enabled. (See https://github.com/blizzhackers/documentation)
 	This script just adjusts and overwrites anything you want it to within your Config object once it's loaded by kolbot.
 	(NOTE: Overwrites the char config in memory, not on disk!)
 

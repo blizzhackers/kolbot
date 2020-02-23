@@ -67,17 +67,17 @@ var GameAction = {
 		}
 
 		// drop specific object
-		if  (this.task.data["items"] && this.task.data.items.length > 0) {
+		if (this.task.data["items"] && this.task.data.items.length > 0) {
 			li.realm = this.task.data.items[0].realm
 			li.account = this.task.data.items[0].account;
 		}
 
 		// mule log specific objects
-		if  (this.task.data["realm"]) {
+		if (this.task.data["realm"]) {
 			li.realm = this.task.data.realm;
 		}
 
-		if  (this.task.data["account"]) {
+		if (this.task.data["account"]) {
 			li.account = this.task.data.account;
 		}
 
@@ -95,7 +95,7 @@ var GameAction = {
 		var chars = [];
 
 		// drop specific object
-		if  (this.task.data["items"]) {
+		if (this.task.data["items"]) {
 			for (i = 0; i < this.task.data.items.length; i += 1) {
 				if (chars.indexOf(this.task.data.items[i].character) === -1) {
 					chars.push(this.task.data.items[i].character);
@@ -104,7 +104,7 @@ var GameAction = {
 		}
 
 		// mule log specific object
-		if  (this.task.data["chars"]) {
+		if (this.task.data["chars"]) {
 			chars = this.task.data.chars;
 		}
 
@@ -233,7 +233,7 @@ var GameAction = {
 			print("classid: " + classid + " location: " + loc + " X: " + unitX + " Y: " + unitY);
 
 			for (var j = 0; j < items.length; j += 1) {
-				if (items[j].classid.toString() === classid &&  items[j].location.toString() === loc &&  items[j].x.toString() === unitX && items[j].y.toString() === unitY) {
+				if (items[j].classid.toString() === classid && items[j].location.toString() === loc && items[j].x.toString() === unitX && items[j].y.toString() === unitY) {
 					items[j].drop();
 				}
 			}

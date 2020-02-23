@@ -73,8 +73,8 @@ var Config = {
 
 			// Try to find default config
 			if (!FileTools.exists("libs/config/" + classes[me.classid] + ".js")) {
-				D2Bot.printToConsole("Not going well? Read the wiki: https://github.com/kolton/d2bot-with-kolbot/wiki");
-				throw new Error("ÿc1Default config not found. \nÿc9     Try reading the kolbot wiki.");
+				D2Bot.printToConsole("Not going well? Read the guides: https://github.com/blizzhackers/documentation");
+				throw new Error("ÿc1Default config not found. \nÿc9     Try reading the kolbot guides.");
 			}
 
 			try {
@@ -419,7 +419,7 @@ var Config = {
 		StarTP: "Star TP up",
 		DiabloMsg: "Diablo",
 		WalkClear: false,
-		SealOrder: ["vizier", "seis", "infector"],
+		SealOrder: ["vizier", "seis", "infector"]
 	},
 	DiabloHelper: {
 		Wait: 120,
@@ -429,15 +429,18 @@ var Config = {
 		OpenSeals: false,
 		SafePrecast: true,
 		SealOrder: ["vizier", "seis", "infector"],
-		RecheckSeals: false,
+		RecheckSeals: false
+	},
+	MFHelper: {
+		BreakClearLevel: true
 	},
 	BattleOrders: {
 		Mode: 0,
 		Getters: [],
-		Idle: false,  // Idle until player receiving BO leaves
-		QuitOnFailure: false,  // Quit the game if BO fails
-		SkipIfTardy: true,  // Proceed with scripts if other players already moved on from BO spot
-		Wait: 10,  // Duration to wait for players to join game
+		Idle: false,
+		QuitOnFailure: false,
+		SkipIfTardy: true,
+		Wait: 10
 	},
 	Enchant: {
 		Triggers: ["chant", "cows", "wps"],
@@ -480,7 +483,7 @@ var Config = {
 		UseSalvation: false,
 		GetFade: false,
 		MakeTorch: true,
-		AntidotesToChug: 0,
+		AntidotesToChug: 0
 	},
 	Synch: {
 		WaitFor: []

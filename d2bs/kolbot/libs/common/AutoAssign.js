@@ -40,8 +40,8 @@ var answer = false,
 	},
 
 	gameEvent: function (mode, param1, param2, name1, name2) {
-        switch (mode) {
-        case 0x00: //Left game due to time-out
+		switch (mode) {
+		case 0x00: //Left game due to time-out
 			AutoAssign.updateNames(name1);
 
 			break;
@@ -49,13 +49,13 @@ var answer = false,
 			AutoAssign.updateNames();
 
 			break;
-        case 0x03://left game
+		case 0x03://left game
 			AutoAssign.updateNames(name1);
 			break;
 
 		}
 		delay (250);
-    },
+	},
 
 	getJobs: function () {
 

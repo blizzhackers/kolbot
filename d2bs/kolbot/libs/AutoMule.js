@@ -1,10 +1,10 @@
 var AutoMule = {
 	Mules: {
-		"Mule1":  {
-			muleProfile: "",  // The name of mule profile in d2bot#. It will be started and stopped when needed.
-			accountPrefix: "",  // Account prefix. Numbers added automatically when making accounts.
-			accountPassword: "",  // Account password.
-			charPrefix: "",  // Character prefix. Suffix added automatically when making characters.
+		"Mule1": {
+			muleProfile: "", // The name of mule profile in d2bot#. It will be started and stopped when needed.
+			accountPrefix: "", // Account prefix. Numbers added automatically when making accounts.
+			accountPassword: "", // Account password.
+			charPrefix: "", // Character prefix. Suffix added automatically when making characters.
 			realm: "", // Available options: "useast", "uswest", "europe", "asia"
 			expansion: true,
 			ladder: true,
@@ -39,11 +39,11 @@ var AutoMule = {
 		* Each mule will hold either a Torch or an Anni, but not both. As soon as the current mule has either one, a new one will be created.
 	*/
 	TorchAnniMules: {
-		"Mule1":  {
-			muleProfile: "",  // The name of mule profile in d2bot#. It will be started and stopped when needed.
-			accountPrefix: "",  // Account prefix. Numbers added automatically when making accounts.
-			accountPassword: "",  // Account password.
-			charPrefix: "",  // Character prefix. Suffix added automatically when making characters.
+		"Mule1": {
+			muleProfile: "", // The name of mule profile in d2bot#. It will be started and stopped when needed.
+			accountPrefix: "", // Account prefix. Numbers added automatically when making accounts.
+			accountPassword: "", // Account password.
+			charPrefix: "", // Character prefix. Suffix added automatically when making characters.
 			realm: "", // Available options: "useast", "uswest", "europe", "asia"
 			expansion: true,
 			ladder: true,
@@ -168,7 +168,7 @@ var AutoMule = {
 		}
 
 		addEventListener("copydata", MuleCheckEvent);
-		D2Bot.printToConsole("Starting " + (this.torchAnniCheck === 2 ? "anni" : this.torchAnniCheck === 1 ? "torch" : "")  + " mule profile: " + muleObj.muleProfile, 7);
+		D2Bot.printToConsole("Starting " + (this.torchAnniCheck === 2 ? "anni" : this.torchAnniCheck === 1 ? "torch" : "") + " mule profile: " + muleObj.muleProfile, 7);
 
 MainLoop:
 		while (true) {
@@ -241,7 +241,7 @@ MainLoop:
 				break;
 			}
 
-			if (failCount >= 60) {
+			if (failCount >= 260) {
 				D2Bot.printToConsole("No response from mule profile.", 9);
 
 				break;
@@ -259,7 +259,7 @@ MainLoop:
 		this.torchAnniCheck = false;
 
 		// No response - stop mule profile
-		if (failCount >= 60) {
+		if (failCount >= 260) {
 			D2Bot.stop(muleObj.muleProfile, true);
 			delay(1000);
 		}

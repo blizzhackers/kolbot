@@ -815,6 +815,59 @@ var Misc = {
 		return false;
 	},
 
+	// Find a player
+	findPlayer: function (name) {
+		var player = getParty();
+
+		if (player) {
+			do {
+				if (player.name !== me.name && player.name === name) {
+					return player;
+				}
+			} while (player.getNext());
+		}
+
+		return false;
+	},
+
+	// Get player unit
+	getPlayerUnit: function (name) {
+		var player = getUnit(0, name);
+
+		if (player) {
+			do {
+				if (!player.dead) {
+					return player;
+				}
+			} while (player.getNext());
+		}
+
+		return false;
+	},
+
+	// Get the player act
+	getPlayerAct: function (player) {
+		var unit = this.findPlayer(player);
+
+		if (unit.area <= 39) {
+			return 1;
+		}
+
+		if (unit.area >= 40 && unit.area <= 74) {
+			return 2;
+		}
+
+		if (unit.area >= 75 && unit.area <= 102) {
+			return 3;
+		}
+
+		if (unit.area >= 103 && unit.area <= 108) {
+			return 4;
+		}
+
+		return 5;
+	},
+
 	// Get number of players within getUnit distance
 	getNearbyPlayerCount: function () {
 		var count = 0,
@@ -1888,7 +1941,7 @@ MainLoop:
 	},
 
 	// Use a NPC menu. Experimental function, subject to change
-	// id = string number (with exception of Ressurect merc). http://www.blizzhackers.cc/viewtopic.php?f=209&t=378493
+	// id = string number (with exception of Ressurect merc).
 	useMenu: function (id) {
 		//print("useMenu " + getLocaleString(id));
 
