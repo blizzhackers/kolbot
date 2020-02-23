@@ -438,6 +438,25 @@ NTIP.ParseLineInt = function (input, info) {
 				p_end += 2;
 
 				break;
+			case 'europe':
+			case 'uswest':
+			case 'useast':
+			case 'asia':
+				p_result[0] += '("'+me.realm.toLowerCase() + '"==="' + property.toLowerCase() + '")';
+
+				break;
+			case 'ladder':
+				p_result[0] += "me.ladder";
+
+				break;
+			case 'hardcore':
+				p_result[0] += "(!!me.playertype)";
+
+				break;
+			case 'classic':
+				p_result[0] += "(!me.gametype)";
+
+				break;
 			default:
 				Misc.errorReport("Unknown property: " + property + " File: " + info.file + " Line: " + info.line);
 
