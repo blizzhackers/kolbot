@@ -439,7 +439,7 @@ NTIP.ParseLineInt = function (input, info) {
 			case 'uswest':
 			case 'useast':
 			case 'asia':
-				p_result[0]+= '("'+me.realm.toLowerCase()+'"==="'+property.toLowerCase()+'")';
+				p_result[0] += '("'+me.realm.toLowerCase() + '"==="' + property.toLowerCase() + '")';
 
 				break;
 			case 'ladder':
@@ -456,6 +456,7 @@ NTIP.ParseLineInt = function (input, info) {
 				break;
 			default:
 				Misc.errorReport("Unknown property: " + property + " File: " + info.file + " Line: " + info.line);
+
 				return false;
 			}
 
@@ -469,6 +470,7 @@ NTIP.ParseLineInt = function (input, info) {
 
 			if (p_section[i].substring(p_start, p_end) === "=") {
 				Misc.errorReport("Unexpected = at line " + info.line + " in " + info.file);
+
 				return false;
 			}
 
