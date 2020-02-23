@@ -17,11 +17,11 @@ function LoadConfig() {
 	Scripts.UserAddon = true; // !!!YOU MUST SET THIS TO FALSE IF YOU WANT TO RUN BOSS/AREA SCRIPTS!!!
 
 	// DeepStats item logging and reporting
-	DeepStats.StatsEnabled = false;
-		DeepStats.API.Token = ""; // Go to GheedsFortune.com/accounts/profile for your token
-		DeepStats.SOJReportsEnabled = false;
-		DeepStats.DCloneReportsEnabled = false;
-		DeepStats.FileLogOnly = false;
+	Config.DeepStats.StatsEnabled = false;
+		Config.DeepStats.API.Token = ""; // Go to GheedsFortune.com/accounts/profile for your token
+		Config.DeepStats.SOJReportsEnabled = false;
+		Config.DeepStats.DCloneReportsEnabled = false;
+		Config.DeepStats.FileLogOnly = false;
 
 	// Battle orders script - Use this for 2+ characters (for example BO barb + sorc)
 	Scripts.BattleOrders = false;
