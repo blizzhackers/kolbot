@@ -1397,12 +1397,11 @@ var Misc = {
 			}
 		}
 
-		let lastArea, code, desc, raw_desc, sock, itemObj, deepstatsData,
+		let lastArea, code, desc, sock, itemObj, deepstatsData,
 			lastAreaID = 0,
 			color = -1,
 			name = unit.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<:;.*]|\/|\\/g, "").trim();
 
-		raw_desc = this.getItemDesc(unit);
 		desc = this.getItemDesc(unit);
 		color = unit.getColor();
 
@@ -1586,7 +1585,7 @@ var Misc = {
 			sockets: this.getItemSockets(unit)
 		};
 
-		if (Config.DeepStats.Enabled) {
+		if (Config.DeepStats.StatsEnabled) {
 			deepstatsData = {
 				item_id: Date.now().toString(36) + "$" + unit.gid + ":" + unit.classid + ":" + unit.location + ":" + unit.x + ":" + unit.y + (unit.getFlag(0x400000) ? ":eth" : ""),
 				name: name,
@@ -1597,11 +1596,12 @@ var Misc = {
 				lvlreq: unit.lvlreq,
 				quality: unit.quality,
 				code: code,
+				type: unit.itemType,
 				class_id: unit.classid,
 				ethereal: !!unit.getFlag(0x400000),
 				last_area: lastAreaID,
 				difficulty: me.diff,
-				player_count: this.playerCount(),
+				player_count: this.getPlayerCount(),
 				char_name: me.charname,
 				char_level: me.charlvl,
 				char_class: me.classid,
