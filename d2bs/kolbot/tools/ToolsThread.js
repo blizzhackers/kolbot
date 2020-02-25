@@ -399,6 +399,27 @@ function main() {
 		case 102: // Numpad 6
 			MuleLogger.logChar();
 			me.overhead("Logged char: " + me.name);
+			if (Config.DeepStats.SOJReportsEnabled) {
+				if (!Config.DeepStats.API.Token) {
+					throw new Error("An auth token is required. Set Config.DeepStats.API.Token");
+				}
+				let sojData = {
+					ip_address: me.gameserverip.split(".")[3],
+					realm: me.realm,
+					ladder: me.ladder > 0,
+					count: 0,
+				};
+				HTTP({
+					url: Config.DeepStats.API.ReportSOJsSold,
+					method: "POST",
+					headers: {
+						"Authorization": "Token " + Config.DeepStats.API.Token,
+						"Content-Type": "application/json",
+					},
+					data: JSON.stringify(sojData)
+				});
+				me.overhead("SOJ report ping sent");
+			}
 
 			break;
 		case 109: // Numpad -
