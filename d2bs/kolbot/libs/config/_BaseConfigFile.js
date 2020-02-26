@@ -16,7 +16,7 @@
 		Config.BattleOrders.Wait = 10; // Duration to wait for players to join game in seconds (default: 10)
 
  	Scripts.BoBarbHelper = false; // specific HC script with BoBarb on the Bo area during whole game | set it only in barbarian config
-		Config.BoBarbHelper.Mode = -1; // 0 = give BO, 1 = get BO, -1  = disabled
+		Config.BoBarbHelper.Mode = -1; // 0 = give BO, -1 = disabled
 		Config.BoBarbHelper.Wp = 35; // 35 = Catacombs level 2
 
 	// Team MF system
