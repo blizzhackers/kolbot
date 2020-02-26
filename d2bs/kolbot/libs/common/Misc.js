@@ -1626,7 +1626,7 @@ var Misc = {
 			if (Config.DeepStats.FileLogOnly) {
 				DeepStats.updateStats(JSON.stringify(deepstatsData));
 			} else if (!Config.DeepStats.API.Token) {
-				throw new Error("An auth token is required. Set Config.DeepStats.Token");
+				throw new Error("An auth token is required. Set Config.DeepStats.API.Token");
 			} else {
 				const HTTP = require("../modules/HTTP");
 				DeepStats.updateStats(JSON.stringify(deepstatsData));
