@@ -1201,6 +1201,15 @@ var Misc = {
 		return false;
 	},
 
+	getEstimatedBuild: function () {
+		let counter, build = 0, builds = [49, 53, 56, 59, 64, 97, 106, 112, 147, 149, 151, 152];
+		for (counter = 0; counter < builds.length; counter++) {
+			if (me.getSkill(builds[counter], 1) > build) {
+				build = builds[counter];
+			}
+		}
+	},
+
 	getItemDesc: function (unit) {
 		var i, desc, index,
 			stringColor = "";
@@ -1586,7 +1595,7 @@ var Misc = {
 			sockets: this.getItemSockets(unit)
 		};
 
-		if (Config.DeepStats.Enabled) {
+		if (Config.DeepStats.StatsEnabled) {
 			deepstatsData = {
 				item_id: Date.now().toString(36) + "$" + unit.gid + ":" + unit.classid + ":" + unit.location + ":" + unit.x + ":" + unit.y + (unit.getFlag(0x400000) ? ":eth" : ""),
 				name: name,
@@ -1598,10 +1607,11 @@ var Misc = {
 				quality: unit.quality,
 				code: code,
 				class_id: unit.classid,
+				type: unit.itemType,
 				ethereal: !!unit.getFlag(0x400000),
 				last_area: lastAreaID,
 				difficulty: me.diff,
-				player_count: this.playerCount(),
+				player_count: this.getPlayerCount(),
 				char_name: me.charname,
 				char_level: me.charlvl,
 				char_class: me.classid,
@@ -1610,7 +1620,8 @@ var Misc = {
 				realm: me.realm,
 				hardcore: me.playertype,
 				expansion: me.gametype === 1,
-				can_teleport: me.getSkill(54, 1) > 0
+				can_teleport: me.getSkill(54, 1) > 0,
+				build: this.getEstimatedBuild(),
 			};
 
 			if (Config.DeepStats.FileLogOnly) {
