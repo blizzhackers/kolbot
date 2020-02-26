@@ -1406,12 +1406,11 @@ var Misc = {
 			}
 		}
 
-		let lastArea, code, desc, raw_desc, sock, itemObj, deepstatsData,
+		let lastArea, code, desc, sock, itemObj, deepstatsData,
 			lastAreaID = 0,
 			color = -1,
 			name = unit.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<:;.*]|\/|\\/g, "").trim();
 
-		raw_desc = this.getItemDesc(unit);
 		desc = this.getItemDesc(unit);
 		color = unit.getColor();
 
