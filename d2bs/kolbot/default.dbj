@@ -163,10 +163,6 @@ function main() {
 		load("tools/TownChicken.js");
 	}
 
-	if (Config.BoBarbHelper.Mode === 1) {
-		load("tools/BoGetting.js");
-	}
-
 	if (Config.PublicMode) {
 		if (Config.PublicMode === true) {
 			require('libs/modules/SimpleParty');
