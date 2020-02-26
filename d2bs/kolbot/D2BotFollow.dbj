@@ -6,7 +6,7 @@ var StarterConfig = {
 	JoinRetryDelay: 5, // Time in seconds to wait before next join attempt
 	SwitchKeyDelay: 5, // Seconds to wait before switching a used/banned key or after realm down
 
-	CrashDelay: 5, // Seconds to wait after a d2 window crash
+	CrashDelay: rand(120, 150), // Seconds to wait after a d2 window crash
 	RealmDownDelay: 3, // Minutes to wait after getting Realm Down message
 	UnableToConnectDelay: 5, // Minutes to wait after Unable To Connect message
 	CDKeyInUseDelay: 5, // Minutes to wait before connecting again if CD-Key is in use. SwitchKeys overrides this!
@@ -63,6 +63,7 @@ include("common/util.js");
 var i, j, gameInfo, joinInfo, gameStart, ingame, handle,
 	firstLogin, chatActionsDone, lastGameTick, connectFail,
 	gameCount = DataFile.getStats().runs + 1,
+	ftj = 0,
 	loginRetry = 0,
 	lastGameStatus = "ready",
 	leader = "",
@@ -175,25 +176,7 @@ function ReceiveCopyData (mode, msg) {
 }
 
 function timer (tick) {
-	if (!tick) {
-		return "";
-	}
-
-	var min, sec;
-
-	min = Math.floor((getTickCount() - tick) / 60000).toString();
-
-	if (min <= 9) {
-		min = "0" + min;
-	}
-
-	sec = (Math.floor((getTickCount() - tick) / 1000) % 60).toString();
-
-	if (sec <= 9) {
-		sec = "0" + sec;
-	}
-
-	return " (" + min + ":" + sec + ")";
+	return " (" + new Date(getTickCount() - tick).toISOString().slice(11, -5) + ")";
 }
 
 function main () {
@@ -789,6 +772,12 @@ JoinLoop2:
 		break;
 	case 28: // Lobby - Game Does Not Exist
 		D2Bot.printToConsole("Game doesn't exist");
+		ftj++;
+
+		if (ftj > 4) {
+			D2BotFollow.update("done", "D2BotFollow failed to join game!");
+			D2Bot.stop(me.profile,true);
+		}
 
 		if (gameInfo.rdBlocker) {
 			D2Bot.printToConsole(gameInfo.mpq + " is probably flagged.", 6);

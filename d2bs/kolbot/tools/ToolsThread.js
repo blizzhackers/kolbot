@@ -355,7 +355,14 @@ function main() {
 			this.togglePause();
 
 			break;
-		case 123: // F12 key
+		case 35: // End key
+			MuleLogger.logChar();
+			delay(rand(Config.QuitListDelay[0] * 1e3, Config.QuitListDelay[1] * 1e3));
+			D2Bot.printToConsole(me.profile + " - end run " + me.gamename);
+			D2Bot.stop(me.profile, true);
+
+			break;
+		case 45: // Ins key
 			me.overhead("Revealing " + Pather.getAreaName(me.area));
 			revealLevel(true);
 

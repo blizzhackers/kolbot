@@ -454,6 +454,10 @@ var Config = {
 		SkipIfTardy: true,
 		Wait: 10
 	},
+	BoBarbHelper: {
+		Mode: -1,
+		Wp: 35
+	},
 	Enchant: {
 		Triggers: ["chant", "cows", "wps"],
 		GetLeg: false,

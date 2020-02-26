@@ -159,10 +159,17 @@ NTIP.Clear = function () {
 
 
 /** @return {function({Unit} item)} */
-NTIP.generateTierFunc = function (type) {
+NTIP.generateTierFunc = function (tierType) {
 	return function (item) {
-		var i,
-			tier = -1;
+		let i, tier = -1;
+
+		const updateTier = (wanted) => {
+			const tmpTier = wanted[tierType](item);
+
+			if (tier < tmpTier) {
+				tier = tmpTier;
+			}
+		};
 
 		// Go through ALL lines that describe the item
 		for (i = 0; i < NTIP_CheckList.length; i += 1) {
@@ -171,33 +178,29 @@ NTIP.generateTierFunc = function (type) {
 				continue;
 			}
 
-			let [typeFunc,statFunc,wanted] = NTIP_CheckList[i];
-			if (wanted.hasOwnProperty(type) && wanted[type]) {
+			let [type,stat,wanted] = NTIP_CheckList[i];
 
+			// If the line doesnt have a tier of this type, we dont need to call it
+			if (typeof wanted === 'object' && wanted && typeof wanted[tierType] === 'function') {
 				try {
-					if (typeof wanted === 'function') {
-						if (wanted(item)) {
+					if (typeof type === 'function') {
+						if (type(item)) {
 							if (typeof stat === 'function') {
 								if (stat(item)) {
-									if (wanted[type] > tier) {
-										tier = wanted[type];
-									}
+									updateTier(wanted);
 								}
 							} else {
-								if (wanted[type] > tier) {
-									tier = wanted[type];
-								}
+								updateTier(wanted);
 							}
 						}
 					} else if (typeof stat === 'function') {
 						if (stat(item)) {
-							if (wanted[type] > tier) {
-								tier = wanted[type];
-							}
+							updateTier(wanted);
 						}
 					}
 				} catch (e) {
-
+					const info = stringArray[i];
+					Misc.errorReport("ÿc1Pickit Tier ("+tierType+") error! Line # ÿc2" + info.line + " ÿc1Entry: ÿc0" + info.string + " (" + info.file + ") Error message: " + e.message);
 				}
 			}
 		}
@@ -212,7 +215,7 @@ NTIP.GetTier = NTIP.generateTierFunc('Tier');
 
 /**@function
  * @param item */
-NTIP.GetMercTier = NTIP.generateTierFunc('MercTier');
+NTIP.GetMercTier = NTIP.generateTierFunc('Merctier');
 
 NTIP.CheckItem = function (item, entryList, verbose) {
 	var i, list, identified, num,
@@ -435,6 +438,25 @@ NTIP.ParseLineInt = function (input, info) {
 				p_end += 2;
 
 				break;
+			case 'europe':
+			case 'uswest':
+			case 'useast':
+			case 'asia':
+				p_result[0] += '("'+me.realm.toLowerCase() + '"==="' + property.toLowerCase() + '")';
+
+				break;
+			case 'ladder':
+				p_result[0] += "me.ladder";
+
+				break;
+			case 'hardcore':
+				p_result[0] += "(!!me.playertype)";
+
+				break;
+			case 'classic':
+				p_result[0] += "(!me.gametype)";
+
+				break;
 			default:
 				Misc.errorReport("Unknown property: " + property + " File: " + info.file + " Line: " + info.line);
 
@@ -579,7 +601,8 @@ NTIP.ParseLineInt = function (input, info) {
 			p_end = p_section[i].indexOf("]");
 			p_keyword = p_section[i].substring(0, p_end);
 
-			switch (p_keyword.toLowerCase()) {
+			let keyword = p_keyword.toLowerCase();
+			switch (keyword) {
 			case "maxquantity":
 				value = Number(p_section[i].split("==")[1].match(/\d+/g));
 
@@ -588,24 +611,18 @@ NTIP.ParseLineInt = function (input, info) {
 				}
 
 				break;
-			case "tier":
-				value = Number(p_section[i].split("==")[1].match(/\d+/g));
-
-				if (!isNaN(value)) {
-					p_result[2].Tier = value;
-				}
-
-				break;
 			case "merctier":
-				value = Number(p_section[i].split("==")[1].match(/\d+/g));
-
-				if (!isNaN(value)) {
-					p_result[2].MercTier = value;
+			case "tier":
+				try {
+					// p_result[2].Tier = function(item) { return value };
+					p_result[2][keyword.charAt(0).toUpperCase() + keyword.slice(1)] = (new Function('return function(item) { return ' + p_section[i].split("==")[1] + ';}')).call(null); // generate function out of
+				} catch(e) {
+					Misc.errorReport("ÿc1Pickit Tier ("+keyword+") error! Line # ÿc2" + info.line + " ÿc1Entry: ÿc0" + info.string + " (" + info.file + ") Error message: " + e.message);
 				}
-
 				break;
+
 			default:
-				Misc.errorReport("Unknown 3rd part keyword: " + p_keyword.toLowerCase());
+				Misc.errorReport("Unknown 3rd part keyword: " + p_keyword.toLowerCase() + " File: " + info.file + " Line: " + info.line);
 				return false;
 			}
 		}
