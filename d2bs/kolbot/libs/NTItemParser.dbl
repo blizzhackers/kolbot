@@ -215,7 +215,7 @@ NTIP.GetTier = NTIP.generateTierFunc('Tier');
 
 /**@function
  * @param item */
-NTIP.GetMercTier  = NTIP.generateTierFunc('Merctier');
+NTIP.GetMercTier = NTIP.generateTierFunc('Merctier');
 
 NTIP.CheckItem = function (item, entryList, verbose) {
 	var i, list, identified, num,
@@ -622,7 +622,7 @@ NTIP.ParseLineInt = function (input, info) {
 				break;
 
 			default:
-				Misc.errorReport("Unknown 3rd part keyword: " + p_keyword.toLowerCase());
+				Misc.errorReport("Unknown 3rd part keyword: " + p_keyword.toLowerCase() + " File: " + info.file + " Line: " + info.line);
 				return false;
 			}
 		}

@@ -31,7 +31,7 @@ function main() {
 
 	this.togglePause = function () {
 		var i,	script,
-			scripts = ["default.dbj", "tools/antihostile.js", "tools/rushthread.js", "tools/CloneKilla.js", "tools/bogetting.js"];
+			scripts = ["default.dbj", "tools/antihostile.js", "tools/rushthread.js", "tools/CloneKilla.js"];
 
 		for (i = 0; i < scripts.length; i += 1) {
 			script = getScript(scripts[i]);

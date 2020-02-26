@@ -444,8 +444,7 @@ var Config = {
 	},
 	BoBarbHelper: {
 		Mode: -1,
-		Wp: 35,
-		BoDuration: 180
+		Wp: 35
 	},
 	Enchant: {
 		Triggers: ["chant", "cows", "wps"],
