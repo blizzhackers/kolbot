@@ -434,6 +434,9 @@ var Config = {
 	MFHelper: {
 		BreakClearLevel: true
 	},
+	Wakka: {
+		Wait: 1 // minutes
+	},
 	BattleOrders: {
 		Mode: 0,
 		Getters: [],
