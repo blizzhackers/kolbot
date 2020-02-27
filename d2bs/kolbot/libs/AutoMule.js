@@ -361,6 +361,10 @@ MainLoop:
 		} else {
 			print("ÿc4AutoMuleÿc0: In mule game.");
 			D2Bot.updateStatus("AutoMule: In game.");
+			if (Config.LowGold > 0) {
+				Town.doChores();
+				Town.goToTown(1);
+			}
 			this.dropStuff();
 		}
 
