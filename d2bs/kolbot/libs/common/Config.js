@@ -346,7 +346,8 @@ var Config = {
 		ViperQuit: false
 	},
 	Nihlathak: {
-		ViperQuit: false
+		ViperQuit: false,
+		UseRedemption: false,
 	},
 	Pit: {
 		ClearPath: false,

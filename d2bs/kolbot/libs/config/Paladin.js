@@ -101,6 +101,7 @@ function LoadConfig() {
 		Config.Pindleskin.ViperQuit = false; // End script if Tomb Vipers are found.
 	Scripts.Nihlathak = false;
 		Config.Nihlathak.ViperQuit = false; // End script if Tomb Vipers are found.
+		Config.Nihlathak.UseRedemption = false; // Use redemption to counter corpse explosion
 	Scripts.Eldritch = false;
 		Config.Eldritch.OpenChest = true;
 		Config.Eldritch.KillShenk = true;

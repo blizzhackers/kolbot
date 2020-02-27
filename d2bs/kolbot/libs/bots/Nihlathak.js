@@ -9,6 +9,16 @@ function Nihlathak() {
 	Pather.useWaypoint(123);
 	Precast.doPrecast(false);
 
+	let skillBackup1, skillBackup2;
+	if (Config.Nihlathak.UseRedemption && me.classid === 3 && me.getSkill(124, 0)) {
+		skillBackup1 = Config.AttackSkill[2];
+		skillBackup2 = Config.AttackSkill[4];
+		Config.AttackSkill[2] = 124;
+		Config.AttackSkill[4] = 124;
+
+		Attack.init();
+	}
+
 	if (!Pather.moveToExit(124, true)) {
 		throw new Error("Failed to go to Nihlathak");
 	}
@@ -22,6 +32,14 @@ function Nihlathak() {
 	}
 
 	Attack.kill(526); // Nihlathak
+
+	if (skillBackup1) {
+		Config.AttackSkill[2] = skillBackup1;
+		Config.AttackSkill[4] = skillBackup2;
+
+		Attack.init();
+	}
+
 	Pickit.pickItems();
 
 	return true;
