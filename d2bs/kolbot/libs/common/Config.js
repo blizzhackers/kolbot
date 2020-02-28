@@ -414,7 +414,7 @@ var Config = {
 	},
 	Hephasto: {
 		ClearRiver: false,
-		ClearType: false,
+		ClearType: false
 	},
 	Diablo: {
 		Entrance: false,
