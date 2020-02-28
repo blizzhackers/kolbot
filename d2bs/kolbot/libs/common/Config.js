@@ -435,7 +435,7 @@ var Config = {
 		BreakClearLevel: true
 	},
 	Wakka: {
-		Wait: 1 // minutes
+		Wait: 1
 	},
 	BattleOrders: {
 		Mode: 0,
