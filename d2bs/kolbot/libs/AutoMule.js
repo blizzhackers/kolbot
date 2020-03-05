@@ -108,6 +108,10 @@ var AutoMule = {
 		if (info && info.hasOwnProperty("muleInfo")) {
 			items = this.getMuleItems();
 
+			if (info.muleInfo.hasOwnProperty("usedInventoryTrigger") && Storage.Inventory.UsedSpacePercent() >= info.muleInfo.usedInventoryTrigger && Config.LowGold > 0) {
+				Town.doChores();
+			}
+
 			if (info.muleInfo.hasOwnProperty("usedStashTrigger") && info.muleInfo.hasOwnProperty("usedInventoryTrigger") &&
 					Storage.Inventory.UsedSpacePercent() >= info.muleInfo.usedInventoryTrigger && Storage.Stash.UsedSpacePercent() >= info.muleInfo.usedStashTrigger &&
 						items.length > 0) {
