@@ -32,11 +32,11 @@
 
 		this.once = function (name, callback) {
 			if (callback === undefined && typeof name === 'function') [callback,name] = [name,callback];
-			const Hook = new Hook(name, function (...args) {
+			const hook = new Hook(name, function (...args) {
 				callback.apply(undefined, args);
 				delete self.hooks[this.id];
 			});
-			Hook.__callback = callback;
+			hook.__callback = callback;
 		};
 
 		this.off = function (name, callback) {

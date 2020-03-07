@@ -7,8 +7,8 @@
 var stopLvl = 99;
 
 function Wakka() {
-	var i, safeTP, portal, vizClear, seisClear, infClear, tick, diablo,
-		timeout = 1, // minutes
+	let i, safeTP, portal, vizClear, seisClear, infClear, tick, diablo,
+		timeout = Config.Wakka.Wait,
 		minDist = 50,
 		maxDist = 80,
 		leaderUnit = null,
@@ -16,7 +16,7 @@ function Wakka() {
 		leader = "";
 
 	function autoLeaderDetect(destination) { // autoleader by Ethic
-		var solofail, suspect;
+		let solofail, suspect;
 
 		do {
 			solofail = 0;
