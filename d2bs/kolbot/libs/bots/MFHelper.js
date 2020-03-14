@@ -101,6 +101,7 @@ function MFHelper() {
 	addEventListener("chatmsg", ChatEvent);
 	Town.doChores();
 	Town.move("portalspot");
+	Config.MFHelper.BreakClearLevel = true; // overwrite Config.js value
 
 	if (Config.Leader) {
 		for (i = 0; i < 30; i += 1) {
@@ -236,5 +237,6 @@ MainLoop:
 		delay(100);
 	}
 
+	Config.MFHelper.BreakClearLevel = false; // revert to default value
 	return true;
 }
