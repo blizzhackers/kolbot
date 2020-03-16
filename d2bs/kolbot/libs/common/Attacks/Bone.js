@@ -1,7 +1,7 @@
 /**
- *	@filename	Necromancer.js
- *	@author		kolton
- *	@desc		Necromancer attack sequence
+ *	@filename	Bone.js
+ *	@author		jaenster
+ *	@desc		A optimized bone spear attack sequence
  */
 
 var ClassAttack = (function () {
@@ -78,21 +78,21 @@ var ClassAttack = (function () {
 		}
 
 		// 2) Bone spear
-		if (!me.getSkill(sdk.skills.BoneSpear,1)) {
+		if (!me.getSkill(sdk.skills.BoneSpear, 1)) {
 			return Result.NO_VALID_SKILLS;
 		}
 
-		// First calculate the damge of bone spear on this subject
+		// First calculate the damage of bone spear on this subject
 		const dmgFields = [['MinDam', 'MinLevDam1', 'MinLevDam2', 'MinLevDam3', 'MinLevDam4', 'MinLevDam5', 'MaxDam', 'MaxLevDam1', 'MaxLevDam2', 'MaxLevDam3', 'MaxLevDam4', 'MaxLevDam5'], ['EMin', 'EMinLev1', 'EMinLev2', 'EMinLev3', 'EMinLev4', 'EMinLev5', 'EMax', 'EMaxLev1', 'EMaxLev2', 'EMaxLev3', 'EMaxLev4', 'EMaxLev5']],
-		 	l = me.getSkill(84,1);
+			l = me.getSkill(84, 1);
 
 		const damage = {
 			min: stagedDmg(l, getBaseStat('skills', 84, dmgFields[1][0]), getBaseStat('skills', 84, dmgFields[1][1]), getBaseStat('skills', 84, dmgFields[1][2]), getBaseStat('skills', 84, dmgFields[1][3]), getBaseStat('skills', 84, dmgFields[1][4]), getBaseStat('skills', 84, dmgFields[1][5]), getBaseStat('skills', 84, 'HitShift'), 1),
 			max: stagedDmg(l, getBaseStat('skills', 84, dmgFields[1][6]), getBaseStat('skills', 84, dmgFields[1][7]), getBaseStat('skills', 84, dmgFields[1][8]), getBaseStat('skills', 84, dmgFields[1][9]), getBaseStat('skills', 84, dmgFields[1][10]), getBaseStat('skills', 84, dmgFields[1][11]), getBaseStat('skills', 84, 'HitShift'), 1)
 		};
 
-		const baseSkills = [sdk.skills.BoneSpirit,sdk.skills.Teeth,sdk.skills.BoneArmor,sdk.skills.BonePrison].reduce((acc,cur) => acc+(me.getSkill(cur,0/*hard skills*/)),0);
-		const bonus = 0.07*baseSkills;
+		const baseSkills = [sdk.skills.BoneSpirit, sdk.skills.Teeth, sdk.skills.BoneArmor, sdk.skills.BonePrison].reduce((acc, cur) => acc + (me.getSkill(cur, 0/*hard skills*/)), 0);
+		const bonus = 0.07 * baseSkills;
 
 		// calculate the synergies
 		damage.min *= 1 + bonus;
@@ -100,11 +100,11 @@ var ClassAttack = (function () {
 
 
 		// capped at -100 / 100
-		let resist = Math.min(Math.max(/** @type number*/unit.getStat(sdk.stats.Magicresist),-100),100);
+		let resist = Math.min(Math.max(/** @type number*/unit.getStat(sdk.stats.Magicresist), -100), 100);
 
 		if (resist < 0) {
 			// Instead of reducing, its amplifying damage
-			damage.min *= 1+(resist/100);
+			damage.min *= 1 + (resist / 100);
 		} else {
 			// its holding back
 			damage.min *= (100 - resist) / 100;
@@ -116,10 +116,10 @@ var ClassAttack = (function () {
 
 		// So now that we know all that damage, findout the life of a monster
 		const percentLeft = (unit.hp * 100 / unit.hpmax),
-			maxReal = GameData.monsterMaxHP(unit.classid, unit.area, unit.charlvl - GameData.monsterLevel(monsterId, areaId)),
+			maxReal = GameData.monsterMaxHP(unit.classid, unit.area, unit.charlvl - GameData.monsterLevel(unit.classid, unit.area)),
 			hpReal = maxReal / 100 * percentLeft;
 
-		Skill.cast(sdk.skills.BoneSpear,1/* right skill */);
+		Skill.cast(sdk.skills.BoneSpear, 1/* right skill */);
 
 		if (damage.min > hpReal) {
 			// We know for sure he gonna die of this attack
@@ -177,7 +177,7 @@ var ClassAttack = (function () {
 	/** @author Nishimura-Katsuo,
 	 *  altered it a bit <3 */
 	const stagedDmg = function (l, a, b, c, d, e, f, hitshift = 0, mult = 1) {
-		[28,22,16,8].some(g => {
+		[28, 22, 16, 8].some(g => {
 			if (l > g) {
 				a += f * (l - g);
 				l = g;
