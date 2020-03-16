@@ -276,6 +276,10 @@ var Attack = {
 				errorInfo = " (No valid attack skills)";
 
 				break;
+
+			} else if (result === 3) {
+				// We already know this is the last needed attack, so move to next target
+				break;
 			} else {
 				retry = 0;
 			}
