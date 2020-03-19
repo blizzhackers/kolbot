@@ -50,6 +50,11 @@ declare class Unit {
     move(x: number, y: number) ;
     getQuest(quest:number, subid: number) ;
     getMinionCount() : number ;
+
+    castChargedSkill(skillId:number,x:number,y:number):boolean;
+    castChargedSkill(monster:Unit):boolean;
+    castChargedSkill(skillId:number, monster:Unit):boolean;
+    castChargedSkill(x:number,y:number):boolean;
 }
 
 declare class me {
