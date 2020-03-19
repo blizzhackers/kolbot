@@ -5,7 +5,8 @@
  */
 
 var ClassAttack = (function () {
-
+	// Load GameData
+	include('GameData.js');
 	const Result = {
 		FAIL: 0,
 		OK: 1,
@@ -40,7 +41,38 @@ var ClassAttack = (function () {
 		}
 		// 3) Need to dim someone's vision?
 		//ToDo actually write this properly
+
+		// 4) who is our merc attacking?
+		let merc = me.getMerc();
+		if (merc) {
+			const unit = getUnits(sdk.unittype.Monsters)
+				.filter(unit => {
+					if (!Attack.checkMonster(unit)) {
+						return false;
+					}
+					if (getDistance(unit, merc) > 5) {
+						return false;
+					}
+					if (!unit.isCursable) {
+						return false;
+					}
+
+					if (unit.getState(sdk.states.AmplifyDamage)) {
+						return false;
+					}
+					return Attack.canAttack(unit) && getDistance(unit, merc) <= 5 && unit.isCursable && !unit.getState(sdk.states.AmplifyDamage);
+				})
+				.sort((a, b) => getDistance(a, merc) - getDistance(b, merc))
+				.first();
+
+			// Most close by unit to merc, that aint amped yet
+			if (unit) {
+				Skill.cast(sdk.skills.AmplifyDamage, 0, unit);
+			}
+		}
 	};
+
+	const colWall = parseInt('10011', 2);
 
 	/**
 	 * @param {Unit} unit
@@ -49,6 +81,13 @@ var ClassAttack = (function () {
 	Bone.doAttack = function (unit, preattack) {
 		commonChecks();
 
+		//  Make sure we are in a spot where we can attack anyway
+		if (getDistance(unit, me) > 25 || getDistance(unit, me) < 15 || checkCollision(me, unit, 0x4)) {
+			if (checkCollision(me, unit, 0x4)) {
+			}
+			Attack.getIntoPosition(unit, 20, 0x4, false);
+		}
+
 		// 1) Explode corpses nearby for the monster we are attacking
 		// get all corpses
 		let corpse = getUnit(1, -1, 12);
@@ -56,25 +95,26 @@ var ClassAttack = (function () {
 		if (corpse) {
 			let exploded = false;
 			// calculate the range of your skill and loop trough them
-			for (let range = ~~((me.getSkill(74, 1) + 7) / 3); corpse.getNext();) {
-
+			for (let range = ((me.getSkill(sdk.skills.CorpseExplosion, 1) + 7) / 3); corpse.getNext();) {
 				// Check if monster in range
 				if (getDistance(unit, corpse) <= range && corpse.checkCorpse) {
-
 					// Check if it can be amp'd. ToDo; fix line of sight
 					// Amp does -100% DR, and corpse explosion is 50% psy dmg. https://www.theamazonbasin.com/wiki/index.php?title=Amplify_Damage
-					if (me.getSkill(sdk.skills.AmplifyDamage, 1) && !unit.getStat(sdk.states.AmplifyDamage) && unit.isCursable) {
-						Skill.cast(sdk.skills.AmplifyDamage);
+					if (me.getSkill(sdk.skills.AmplifyDamage, 1) && !unit.getState(sdk.states.AmplifyDamage) && unit.isCursable) {
+						Skill.cast(sdk.skills.AmplifyDamage, 0, unit);
 					}
 
 					// Explode that corpse
 					Skill.cast(sdk.skills.CorpseExplosion, 0, corpse);
 					exploded = true;
+					break; // once is enough, we see next loop if its needed again
 				}
 			}
 
 			// Give some time back to kolbot system, telling we succeed
-			return Result.OK;
+			if (exploded) {
+				return Result.OK;
+			}
 		}
 
 		// 2) Bone spear
@@ -82,6 +122,16 @@ var ClassAttack = (function () {
 			return Result.NO_VALID_SKILLS;
 		}
 
+		// Check magic immunity
+		Skill.cast(sdk.skills.BoneSpear, 1/* right skill */, unit/*on unit*/);
+
+		return Result.OK;
+
+
+	};
+
+	// unused atm
+	Bone.calcDmg = function (unit) {
 		// First calculate the damage of bone spear on this subject
 		const dmgFields = [['MinDam', 'MinLevDam1', 'MinLevDam2', 'MinLevDam3', 'MinLevDam4', 'MinLevDam5', 'MaxDam', 'MaxLevDam1', 'MaxLevDam2', 'MaxLevDam3', 'MaxLevDam4', 'MaxLevDam5'], ['EMin', 'EMinLev1', 'EMinLev2', 'EMinLev3', 'EMinLev4', 'EMinLev5', 'EMax', 'EMaxLev1', 'EMaxLev2', 'EMaxLev3', 'EMaxLev4', 'EMaxLev5']],
 			l = me.getSkill(84, 1);
@@ -119,17 +169,7 @@ var ClassAttack = (function () {
 			maxReal = GameData.monsterMaxHP(unit.classid, unit.area, unit.charlvl - GameData.monsterLevel(unit.classid, unit.area)),
 			hpReal = maxReal / 100 * percentLeft;
 
-		Skill.cast(sdk.skills.BoneSpear, 1/* right skill */);
-
-		if (damage.min > hpReal) {
-			// We know for sure he gonna die of this attack
-			return Result.NEXT_TARGET; // So tell kolbot we can move to the next target
-		}
-
-		return Result.OK;
-
-
-	};
+	}
 
 	Bone.afterAttack = function () {
 		commonChecks();
@@ -138,16 +178,16 @@ var ClassAttack = (function () {
 	// Some prototypes
 
 	// A prototype i like to use for the isCursable field
-	Unit.prototype.hasOwnProperty('isCursable') && Object.defineProperty(Unit.prototype, 'isCursable', {
+	!Unit.prototype.hasOwnProperty('isCursable') && Object.defineProperty(Unit.prototype, 'isCursable', {
 		get: function () {
 			return !((copyUnit(this).name === undefined || this.name.indexOf(getLocaleString(11086/*Possessed*/)) > -1))
-				&& !this.getState(57) /*attract*/
+				&& !this.getState(sdk.states.Attract)
 				&& !(this.classid === 206 || this.classid === 258 || this.classid === 261 || this.classid === 266 || this.classid === 528);
 		}
 	});
 
 	// A prototype to see if a corpse a valid one
-	Unit.prototype.hasOwnProperty('checkCorpse') && Object.defineProperty(Unit.prototype, 'checkCorpse', {
+	!Unit.prototype.hasOwnProperty('checkCorpse') && Object.defineProperty(Unit.prototype, 'checkCorpse', {
 		get: function () {
 			if (this.mode !== 12) return false;
 
@@ -159,7 +199,7 @@ var ClassAttack = (function () {
 					(this.spectype & 0x7)
 					|| badList.indexOf(baseId) > -1
 					|| (Config.ReviveUnstackable && getBaseStat("monstats2", baseId, "sizex") === 3)
-				) || !getBaseStat("monstats2", baseId, revive ? "revive" : "corpseSel")
+				) || !getBaseStat("monstats2", baseId, "corpseSel")
 			) {
 				return false;
 			}
