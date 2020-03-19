@@ -1,5 +1,6 @@
 /**
  * @description Diffie–Hellman key exchange
+ * @author Jaenster
  */
 
 "use strict";
