@@ -1126,7 +1126,7 @@ Unit.prototype.castChargedSkill = function (...args) {
 	// Charged skills can only be casted on x, y coordinates
 	unit && ([x, y] = [unit.x, unit.y]);
 
-	if (this !== me && this.type === 4) {
+	if (this !== me && this.type !== 4) {
 		throw Error("invalid arguments, expected 'me' object or 'item' unit");
 	}
 
@@ -1142,7 +1142,7 @@ Unit.prototype.castChargedSkill = function (...args) {
 			.forEach(function (item) {
 				let stats = item.getStat(-2);
 
-				if (!stats.hasOwnProperty(204)) {
+				if (stats.hasOwnProperty(204)) {
 					stats = stats[204].filter(validCharge);
 					stats.length && chargedItems.push({
 						charge: stats.first(),
