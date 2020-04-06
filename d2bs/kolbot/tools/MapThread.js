@@ -250,7 +250,15 @@ var Hooks = {
 
 				if (exits) {
 					for (i = 0; i < exits.length; i += 1) {
-						this.add(exits[i].x, exits[i].y, me.area === 46 && exits[i].target === getRoom().correcttomb ? 0x69 : 0x99);
+						if (me.area === 46) {
+							this.add(exits[i].x, exits[i].y, exits[i].target === getRoom().correcttomb ? 0x69 : 0x99);
+						} else if (exits[i].target === Hooks.tele.prevAreas[me.area]) {
+							this.add(exits[i].x, exits[i].y, 0x0A);
+						} else if (exits[i].target === Hooks.tele.prevAreas.indexOf(me.area)) {
+							this.add(exits[i].x, exits[i].y, 0x1F);
+						} else {
+							this.add(exits[i].x, exits[i].y, 0x99);
+						}
 					}
 				}
 
