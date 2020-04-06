@@ -611,7 +611,7 @@ MainLoop:
 			gid = this.gidList.shift();
 			item = getUnit(4, -1, -1, gid);
 
-			if (item && (item.mode === 3 || item.mode === 5) && Town.ignoredItemTypes.indexOf(item.itemType) === -1 && getDistance(me, item) <= Config.PickRange) {
+			if (item && (item.mode === 3 || item.mode === 5) && (Town.ignoredItemTypes.indexOf(item.itemType) === -1 || (item.itemType >= 76 && item.itemType <= 78)) && item.itemType !== 4 && getDistance(me, item) <= Config.PickRange) {
 				itemList.push(copyUnit(item));
 			}
 		}
