@@ -370,7 +370,7 @@ MainSwitch:
 			lastGameStatus = "ready";
 			ingame = false;
 
-			if (StarterConfig.ResetCount && gameCount >= StarterConfig.ResetCount) {
+			if (StarterConfig.ResetCount && gameCount > StarterConfig.ResetCount) {
 				gameCount = 1;
 
 				DataFile.updateStats("runs", gameCount);
@@ -429,7 +429,7 @@ MainSwitch:
 			lastGameStatus = "ready";
 			ingame = false;
 
-			if (StarterConfig.ResetCount && gameCount >= StarterConfig.ResetCount) {
+			if (StarterConfig.ResetCount && gameCount > StarterConfig.ResetCount) {
 				gameCount = 1;
 
 				DataFile.updateStats("runs", gameCount);
