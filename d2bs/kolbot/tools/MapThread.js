@@ -531,6 +531,14 @@ var Hooks = {
 				});
 
 				break;
+			case 3: // Cold Plains
+				this.hooks.push({
+					name: "Side Area",
+					destination: 17,
+					hook: new Text("Num 4: " + Pather.getAreaName(17), 150, 525 - (this.hooks.length * 10))
+				});
+
+				break;
 			case 6: // Black Marsh
 				this.hooks.push({
 					name: "Side Area",
@@ -539,11 +547,35 @@ var Hooks = {
 				});
 
 				break;
+			case 7: // Tamoe Highlands
+				this.hooks.push({
+					name: "Side Area",
+					destination: 12,
+					hook: new Text("Num 4: " + Pather.getAreaName(12), 150, 525 - (this.hooks.length * 10))
+				});
+
+				break;
+			case 17: // Burial Grounds
+				this.hooks.push({
+					name: "Side Area",
+					destination: 19,
+					hook: new Text("Num 4: " + Pather.getAreaName(19), 150, 525 - (this.hooks.length * 10))
+				});
+
+				break;
 			case 43: // Far Oasis
 				this.hooks.push({
 					name: "Side Area",
 					destination: 62,
 					hook: new Text("Num 4: " + Pather.getAreaName(62), 150, 525 - (this.hooks.length * 10))
+				});
+
+				break;
+			case 44: // Lost City
+				this.hooks.push({
+					name: "Side Area",
+					destination: 65,
+					hook: new Text("Num 4: " + Pather.getAreaName(65), 150, 525 - (this.hooks.length * 10))
 				});
 
 				break;
