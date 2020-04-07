@@ -48,7 +48,7 @@ function main() {
 			load("tools/party.js");
 		}
 
-		if (Config.FastPick) {
+		if (Config.ManualPlayPick) {
 			load("tools/pickthread.js");
 		}
 
