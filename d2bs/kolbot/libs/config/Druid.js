@@ -296,7 +296,8 @@ function LoadConfig() {
 	Config.PickitFiles.push("kolton.nip");
 	Config.PickitFiles.push("LLD.nip");
 	Config.PickRange = 40; // Pick radius
-	Config.FastPick = false; // Check and pick items between attacks. If true and D2BotMap entry script is used, will enable picking in manual play.
+	Config.FastPick = false; // Check and pick items between attacks
+	Config.ManualPlayPick = false; // If set to true and D2BotMap entry script is used, will enable picking in manual play.
 
 	/* Advanced automule settings
 	 * Trigger - Having an item that is on the list will initiate muling. Useful if you want to mule something immediately upon finding.
