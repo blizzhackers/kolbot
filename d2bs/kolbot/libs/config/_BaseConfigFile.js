@@ -519,7 +519,7 @@
 	Config.Runewords.push([Runeword.CallToArms, "Phase Blade"]); // Make CTA Phase Blade
 	//Config.Runewords.push([Runeword.CallToArms, "Flail"]); // Make CTA Flail
 	//Config.KeepRunewords.push("[name] == crystalsword || [name] == phaseblade || [name] == flail # [plusskillbattlecommand] >= 3 && [plusskillbattleorders] >=3");
-	Config.KeepRunewords.push("[name] == crystalsword || [name] == phaseblade || [name] == flail # [plusskillbattlecommand] >= 6 && [plusskillbattleorders] >=6 && ["plusskillbattlecry"] >= 4"); // perfect CTA and *optional [enhanceddamage] = 290%
+	Config.KeepRunewords.push("[name] == crystalsword || [name] == phaseblade || [name] == flail # [plusskillbattlecommand] >= 6 && [plusskillbattleorders] >=6 && [plusskillbattlecry] >= 4"); // perfect CTA and *optional [enhanceddamage] = 290%
 
 	Config.Runewords.push([Runeword.Spirit, "Crystal Sword"]); // Make Spirit Crystal Sword
 	Config.Runewords.push([Runeword.Spirit, "Broad Sword"]); // Make Spirit Broad Sword
