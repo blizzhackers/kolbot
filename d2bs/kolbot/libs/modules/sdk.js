@@ -157,7 +157,7 @@
                 switch (true) {
                     case area < sdk.areas.LutGholein:
                         return 1;
-                    case area < sdk.areas.LowerKurast:
+                    case area < sdk.areas.KurastDocktown:
                         return 2;
                     case area < sdk.areas.PandemoniumFortress:
                         return 3;
