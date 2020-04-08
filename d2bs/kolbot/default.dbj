@@ -40,9 +40,21 @@ function main() {
 
 	if (getScript("d2botmap.dbj")) {
 		load("tools/mapthread.js");
-		load("tools/ToolsThread.js");
+		load("tools/toolsthread.js");
 		Config.init(true);
 		LocalChat.init();
+
+		if (Config.PublicMode) {
+			load("tools/party.js");
+		}
+
+		if (Config.ManualPlayPick) {
+			load("tools/pickthread.js");
+		}
+
+		if (Config.AutoMap) {
+			me.automap = true;
+		}
 
 		while (true) {
 			delay(1000);
