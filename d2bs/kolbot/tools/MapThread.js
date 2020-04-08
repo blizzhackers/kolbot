@@ -250,7 +250,15 @@ var Hooks = {
 
 				if (exits) {
 					for (i = 0; i < exits.length; i += 1) {
-						this.add(exits[i].x, exits[i].y, me.area === 46 && exits[i].target === getRoom().correcttomb ? 0x69 : 0x99);
+						if (me.area === 46) {
+							this.add(exits[i].x, exits[i].y, exits[i].target === getRoom().correcttomb ? 0x69 : 0x99);
+						} else if (exits[i].target === Hooks.tele.prevAreas[me.area]) {
+							this.add(exits[i].x, exits[i].y, 0x0A);
+						} else if (exits[i].target === Hooks.tele.prevAreas.indexOf(me.area)) {
+							this.add(exits[i].x, exits[i].y, 0x1F);
+						} else {
+							this.add(exits[i].x, exits[i].y, 0x99);
+						}
 					}
 				}
 
@@ -523,6 +531,14 @@ var Hooks = {
 				});
 
 				break;
+			case 3: // Cold Plains
+				this.hooks.push({
+					name: "Side Area",
+					destination: 17,
+					hook: new Text("Num 4: " + Pather.getAreaName(17), 150, 525 - (this.hooks.length * 10))
+				});
+
+				break;
 			case 6: // Black Marsh
 				this.hooks.push({
 					name: "Side Area",
@@ -531,11 +547,35 @@ var Hooks = {
 				});
 
 				break;
+			case 7: // Tamoe Highlands
+				this.hooks.push({
+					name: "Side Area",
+					destination: 12,
+					hook: new Text("Num 4: " + Pather.getAreaName(12), 150, 525 - (this.hooks.length * 10))
+				});
+
+				break;
+			case 17: // Burial Grounds
+				this.hooks.push({
+					name: "Side Area",
+					destination: 19,
+					hook: new Text("Num 4: " + Pather.getAreaName(19), 150, 525 - (this.hooks.length * 10))
+				});
+
+				break;
 			case 43: // Far Oasis
 				this.hooks.push({
 					name: "Side Area",
 					destination: 62,
 					hook: new Text("Num 4: " + Pather.getAreaName(62), 150, 525 - (this.hooks.length * 10))
+				});
+
+				break;
+			case 44: // Lost City
+				this.hooks.push({
+					name: "Side Area",
+					destination: 65,
+					hook: new Text("Num 4: " + Pather.getAreaName(65), 150, 525 - (this.hooks.length * 10))
 				});
 
 				break;
@@ -737,7 +777,7 @@ function main() {
 	};
 
 	var i,
-		hideFlags = [0x09, 0x0C, 0x0D, 0x01, 0x02, 0x0F, 0x18, 0x19, 0x21];
+		hideFlags = [0x09, 0x0C, 0x0D, 0x01, 0x02, 0x0F, 0x18, 0x19, 0x1A, 0x21];
 
 	addEventListener("keyup", this.keyEvent);
 
