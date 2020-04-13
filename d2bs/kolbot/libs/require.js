@@ -11,7 +11,6 @@ typeof global === 'undefined' && (this['global'] = this);
 global['module'] = {exports: undefined};
 global['exports'] = {};
 function removeRelativePath(test) {
-	print('here -> '+ test.replace(/\\/g, '/'));
 	return test.replace(/\\/g, '/').split('/').reduce(function (acc, cur) {
 		if (!cur || cur === '.') return acc;
 		if (cur === '..') {
