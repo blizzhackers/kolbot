@@ -78,7 +78,16 @@ global.require = (function (include, isIncluded, print, notify) {
 			try {
 				depth++;
 				if (!include(fullpath + '.js')) {
-					throw Error('module ' + fullpath + ' not found');
+					const err = new Error('module ' + fullpath + ' not found');
+
+					// Rewrite the location of the error, to be more clear for the developer/user _where_ it crashes
+					const myStack = err.stack.match(/[^\r\n]+/g);
+					err.fileName = directory + myStack[1].match(/.*?@.*?d2bs\\kolbot\\?(.*)(\.js|\.dbj):/)[1];
+					err.lineNumber = myStack[1].substr(stack[1].lastIndexOf(':') + 1);
+					myStack.unshift();
+					err.stack = myStack.join('\r\n'); // rewrite stack
+
+					throw err;
 				}
 			} finally {
 				depth--
