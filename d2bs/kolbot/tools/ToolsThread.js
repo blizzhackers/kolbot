@@ -347,6 +347,57 @@ function main() {
 		return id || "";
 	};
 
+	this.getStatsString = function (unit) {
+		var realFCR = unit.getStat(sdk.stats.Fastercastrate);
+		var realIAS = unit.getStat(sdk.stats.Fasterattackrate);
+		var realFBR = unit.getStat(sdk.stats.Fasterblockrate);
+		var realFHR = unit.getStat(sdk.stats.Fastergethitrate);
+		// me.getStat(105) will return real FCR from gear + Config.FCR from char cfg
+		if (unit == me)
+		{
+		        realFCR -= Config.FCR;
+		        realIAS -= Config.IAS;
+		        realFBR -= Config.FBR;
+		        realFHR -= Config.FHR;
+		}
+		var maxHellFireRes = 75 + unit.getStat(sdk.stats.Maxfireresist);
+		var hellFireRes = unit.getStat(sdk.stats.Fireresist) - 100;
+		if (hellFireRes > maxHellFireRes)
+		        hellFireRes = maxHellFireRes;
+		var maxHellColdRes = 75 + unit.getStat(sdk.stats.Maxcoldresist);
+		var hellColdRes = unit.getStat(sdk.stats.Coldresist) - 100;
+		if (hellColdRes > maxHellColdRes)
+		        hellColdRes = maxHellColdRes;
+		var maxHellLightRes = 75 + unit.getStat(sdk.stats.Maxlightresist);
+		var hellLightRes = unit.getStat(sdk.stats.Lightresist) - 100;
+		if (hellLightRes > maxHellLightRes)
+		        hellLightRes = maxHellLightRes;
+		var maxHellPoisonRes = 75 + unit.getStat(sdk.stats.Maxpoisonresist);
+		var hellPoisonRes = unit.getStat(sdk.stats.Poisonresist) - 100;
+		if (hellPoisonRes > maxHellPoisonRes)
+		        hellPoisonRes = maxHellPoisonRes;
+		var str = "ÿc4MF: ÿc0" + unit.getStat(sdk.stats.Magicbonus) + "ÿc4 GF: ÿc0" + unit.getStat(sdk.stats.Goldbonus) +
+		"ÿc1 FR: ÿc0" + unit.getStat(sdk.stats.Fireresist) + "ÿc1 Max FR: ÿc0" + unit.getStat(sdk.stats.Maxfireresist) +
+		"ÿc3 CR: ÿc0" + unit.getStat(sdk.stats.Coldresist) + "ÿc3 Max CR: ÿc0" + unit.getStat(sdk.stats.Maxcoldresist) +
+		"ÿc9 LR: ÿc0" + unit.getStat(sdk.stats.Lightresist) + "ÿc9 Max LR: ÿc0" + unit.getStat(sdk.stats.Maxlightresist) +
+		"ÿc2 PR: ÿc0" + unit.getStat(sdk.stats.Poisonresist) + "ÿc2 Max PR: ÿc0" + unit.getStat(sdk.stats.Maxpoisonresist) +
+		"\n" +
+		"Hell res: ÿc1" + hellFireRes + "ÿc0/ÿc3" + hellColdRes + "ÿc0/ÿc9" + hellLightRes + "ÿc0/ÿc2" + hellPoisonRes +
+		"ÿc0\n" +
+		"FCR: " + realFCR + " IAS: " + realIAS + " FBR: " + realFBR +
+		" FHR: " + realFHR + " FRW: " + unit.getStat(sdk.stats.Fastermovevelocity) +
+		"\n" +
+		"CB: " + unit.getStat(sdk.stats.Crushingblow) + " DS: " + unit.getStat(sdk.stats.Deadlystrike) +
+		" OW: " + unit.getStat(sdk.stats.Openwounds) +
+		" ÿc1LL: ÿc0" + unit.getStat(sdk.stats.Lifedrainmindam) + " ÿc3ML: ÿc0" + unit.getStat(sdk.stats.Manadrainmindam) +
+		" DR: " + unit.getStat(sdk.stats.Damageresist) + "% + " + unit.getStat(sdk.stats.NormalDamageReduction) +
+		" MDR: " + unit.getStat(sdk.stats.Magicresist) + "% + " + unit.getStat(sdk.stats.MagicDamageReduction) +
+		"\n" +
+		(unit.getStat(sdk.stats.Cannotbefrozen) > 0 ? "ÿc3Cannot be Frozenÿc1\n" : "\n");
+
+		return str;
+	};
+
 	// Event functions
 	this.keyEvent = function (key) {
 		switch (key) {
@@ -369,23 +420,10 @@ function main() {
 		case 107: // Numpad +
 			showConsole();
 
-			// me.getStat(105) will return real FCR from gear + Config.FCR from char cfg
-			var realFCR = me.getStat(105) - Config.FCR;
-			var realIAS = me.getStat(93) - Config.IAS;
-			var realFBR = me.getStat(102) - Config.FBR;
-			var realFHR = me.getStat(99) - Config.FHR;
-
-			print("ÿc4MF: ÿc0" + me.getStat(80) + " ÿc4GF: ÿc0" + me.getStat(79) + " ÿc1FR: ÿc0" + me.getStat(39) +
-				" ÿc3CR: ÿc0" + me.getStat(43) + " ÿc9LR: ÿc0" + me.getStat(41) + " ÿc2PR: ÿc0" + me.getStat(45) +
-				"\n" +
-				"FCR: " + realFCR + " IAS: " + realIAS + " FBR: " + realFBR +
-				" FHR: " + realFHR + " FRW: " + me.getStat(96) +
-				"\n" +
-				"CB: " + me.getStat(136) + " DS: " + me.getStat(141) + " OW: " + me.getStat(135) +
-				" ÿc1LL: ÿc0" + me.getStat(60) + " ÿc3ML: ÿc0" + me.getStat(62) +
-				" DR: " + me.getStat(36) + "% + " + me.getStat(34) + " MDR: " + me.getStat(37) + "% + " + me.getStat(35) +
-				"\n" +
-				(me.getStat(153) > 0 ? "ÿc3Cannot be Frozenÿc1" : "" ));
+			var merc = me.getMerc();
+			print(this.getStatsString(me));
+			if (merc)
+				print("Merc stats:\n" + this.getStatsString(merc));
 
 			break;
 		case 101: // numpad 5
