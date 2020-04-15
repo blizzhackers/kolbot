@@ -52,7 +52,11 @@ global.require = (function (include, isIncluded, print, notify) {
 
 		path = path || directory;
 
-		const fullpath = removeRelativePath((path + field).replace(/\\/, '/')).toLowerCase();
+		let fullpath = removeRelativePath((path + field).replace(/\\/, '/')).toLowerCase();
+		// remove lib again, if required in e.g. kolbot\tools but wants modules\whatever
+		if (fullpath.startsWith('lib')) {
+			fullpath = fullpath.substr(4); 
+		}
 		const packageName = fullpath;
 
 		const asNew = this.__proto__.constructor === require && ((...args) => new (Function.prototype.bind.apply(modules[packageName].exports, args)));
