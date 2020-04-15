@@ -29,6 +29,8 @@ include("common/Runewords.js");
 include("common/Storage.js");
 include("common/Town.js");
 
+const sdk = require('../libs/modules/sdk')
+
 function main() {
 	var i, mercHP, ironGolem, tick, merc,
 		debugInfo = {area: 0, currScript: "no entry"},
