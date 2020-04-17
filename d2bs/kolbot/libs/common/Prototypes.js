@@ -1229,7 +1229,7 @@ Unit.prototype.equip = function (destLocation = undefined) {
 	}
 
 	// If destLocation isnt an array, make it one
-	if (Array.isArray(destLocation)) {
+	if (!Array.isArray(destLocation)) {
 		destLocation = [destLocation]
 	}
 
@@ -1278,7 +1278,7 @@ Unit.prototype.equip = function (destLocation = undefined) {
 
 			print('Unequip item first ' + item.name);
 			// Incase multiple items are equipped
-			spot = findspot(item); // Find a spot for the current item
+			let spot = findspot(item); // Find a spot for the current item
 
 			if (!spot) {
 				throw Error('cant find spot for unequipped item');
