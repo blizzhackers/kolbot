@@ -908,6 +908,14 @@ MainSwitch:
 	case 38: // Game is full
 		// doesn't happen when making
 		break;
+	case 39: // Other Multiplayer
+		sendKey(0x1B);
+
+		break;
+	case 40: // TCP/IP Game
+		sendKey(0x1B);
+
+		break;
 	default:
 		if (location !== undefined) {
 			D2Bot.printToConsole("Unhandled location " + location);
