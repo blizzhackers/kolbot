@@ -23,7 +23,7 @@ function Mephisto() {
 		while (attackCount < 300 && Attack.checkMonster(meph)) {
 			//if (getUnit(3, 276)) {
 			if (meph.mode === 5) {
-			//if (attackCount % 2 === 0) {
+				//if (attackCount % 2 === 0) {
 				angle = Math.round(Math.atan2(me.y - meph.y, me.x - meph.x) * 180 / Math.PI);
 				angles = me.y > meph.y ? [-30, -60, -90] : [30, 60, 90];
 
@@ -142,7 +142,12 @@ function Mephisto() {
 		this.killCouncil();
 	}
 
-	Pather.moveTo(17566, 8069);
+	if (Config.Mephisto.TakeRedPortal) {
+		Pather.moveTo(17590, 8068);
+		delay(400); // Activate the bridge tile
+	} else {
+		Pather.moveTo(17566, 8069);
+	}
 
 	if (me.classid === 1) {
 		if (Config.Mephisto.MoatTrick) {
@@ -174,9 +179,18 @@ function Mephisto() {
 
 	if (Config.Mephisto.TakeRedPortal) {
 		Pather.moveTo(17590, 8068);
-		delay(1500);
-		Pather.moveTo(17601, 8070);
-		Pather.usePortal(null);
+		let tick = getTickCount(),  time = 0;
+
+		// Wait until bridge is there
+		while (getCollision(me.area, 17601, 8070, 17590, 8068) !== 0 && (time = getTickCount() - tick) < 2000) {
+			Pather.moveTo(17590, 8068);  // Activate it
+			delay(3);
+		}
+
+		// If bridge is there, and we can move to the location
+		if (time < 2000 && Pather.moveTo(17601, 8070)) {
+			Pather.usePortal(null);
+		}
 	}
 
 	return true;
