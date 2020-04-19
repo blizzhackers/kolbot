@@ -554,7 +554,7 @@ MainSwitch:
 			D2Bot.updateRuns();
 
 			if (ftj > 4) {
-				D2BotLead.update("done", "D2BotLead failed to join game!");
+				D2Bot.update("done", "D2BotLead failed to join game!");
 				D2Bot.stop(me.profile,true);
 			}
 		}
