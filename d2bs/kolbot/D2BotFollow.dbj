@@ -775,7 +775,7 @@ JoinLoop2:
 		ftj++;
 
 		if (ftj > 4) {
-			D2BotFollow.update("done", "D2BotFollow failed to join game!");
+			D2Bot.update("done", "D2BotFollow failed to join game!");
 			D2Bot.stop(me.profile,true);
 		}
 
