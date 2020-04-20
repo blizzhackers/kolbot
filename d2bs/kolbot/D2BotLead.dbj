@@ -392,10 +392,18 @@ MainSwitch:
 
 		break;
 	case 2: // Waiting In Line
-		D2Bot.updateStatus("Waiting...");
-		locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location);
-		ControlAction.click(6, 433, 433, 96, 32);
+		let positionInLine = ControlAction.getQueueTime();
+		if (positionInLine) {
+			D2Bot.updateStatus("Position in line " + positionInLine);
 
+			let nowLine;
+			while ((nowLine = ControlAction.getQueueTime())) {
+				if (positionInLine !== nowLine) {
+					positionInLine = nowLine;
+					D2Bot.updateStatus("Position in line " + positionInLine);
+				}
+			}
+		}
 		break;
 	case 3: // Lobby Chat
 		D2Bot.updateStatus("Lobby Chat");

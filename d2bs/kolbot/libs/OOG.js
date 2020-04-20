@@ -1016,6 +1016,21 @@ MainLoop:
 		return position;
 	},
 
+	getQueueTime: function() {
+		const control = getControl(4, 427, 234, 300, 100);
+
+		if (control && control.getText()) {
+			const text = control.getText(); //You are in line to create a game.,Try joining a game to avoid waiting.,,Your position in line is: ÿc02912
+			const result = /Your position in line is: ÿc0(\d*)/gm.exec(text);
+			if (result && typeof result[1] === 'string') {
+
+				return parseInt(result[1]) || 0;
+			}
+		}
+
+		return 0; // Your in line 0, aka no queue
+	},
+
 	loginCharacter: function (info, startFromTop = true) {
 		me.blockMouse = true;
 
