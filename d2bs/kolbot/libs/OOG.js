@@ -1021,10 +1021,12 @@ MainLoop:
 
 		if (control && control.getText()) {
 			const text = control.getText(); //You are in line to create a game.,Try joining a game to avoid waiting.,,Your position in line is: ÿc02912
-			const result = /Your position in line is: ÿc0(\d*)/gm.exec(text);
-			if (result && typeof result[1] === 'string') {
+			if (text.indexOf(getLocaleString(11026)) !== -1) {
+				const result = /ÿc0(\d*)/gm.exec(text);
+				if (result && typeof result[1] === 'string') {
 
-				return parseInt(result[1]) || 0;
+					return parseInt(result[1]) || 0;
+				}
 			}
 		}
 
