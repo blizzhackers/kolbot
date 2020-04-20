@@ -402,6 +402,7 @@ MainSwitch:
 					positionInLine = nowLine;
 					D2Bot.updateStatus("Position in line " + positionInLine);
 				}
+				delay(333);
 			}
 		}
 		break;
