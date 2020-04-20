@@ -63,7 +63,6 @@ include("common/util.js");
 var i, j, gameInfo, joinInfo, gameStart, ingame, handle,
 	firstLogin, chatActionsDone, lastGameTick, connectFail,
 	gameCount = DataFile.getStats().runs + 1,
-	ftj = 0,
 	loginRetry = 0,
 	lastGameStatus = "ready",
 	leader = "",
@@ -772,12 +771,6 @@ JoinLoop2:
 		break;
 	case 28: // Lobby - Game Does Not Exist
 		D2Bot.printToConsole("Game doesn't exist");
-		ftj++;
-
-		if (ftj > 4) {
-			D2Bot.update("done", "D2BotFollow failed to join game!");
-			D2Bot.stop(me.profile,true);
-		}
 
 		if (gameInfo.rdBlocker) {
 			D2Bot.printToConsole(gameInfo.mpq + " is probably flagged.", 6);
