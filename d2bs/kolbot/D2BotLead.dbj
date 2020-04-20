@@ -909,11 +909,11 @@ MainSwitch:
 		// doesn't happen when making
 		break;
 	case 39: // Other Multiplayer
-		sendKey(0x1B);
+		sendKey(0x1B); // Esc key
 
 		break;
 	case 40: // TCP/IP Game
-		sendKey(0x1B);
+		sendKey(0x1B); // Esc key
 
 		break;
 	default:
