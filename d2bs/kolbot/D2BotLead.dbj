@@ -80,7 +80,6 @@ var gameInfo, gameStart, ingame, chatActionsDone, pingQuit,
 	handle, useChat, firstLogin, connectFail,
 	gameCount = DataFile.getStats().runs + 1,
 	loginRetry = 0,
-	ftj = 0,
 	lastGameStatus = "ready",
 	isUp = "no",
 	chanInfo = {
@@ -546,17 +545,11 @@ MainSwitch:
 
 		// FTJ handler
 		if (lastGameStatus === "pending") {
-			ftj++;
 			isUp = "no";
 
 			D2Bot.printToConsole("Failed to create game");
 			ControlAction.timeoutDelay("FTJ delay", StarterConfig.FTJDelay * 1e3);
 			D2Bot.updateRuns();
-
-			if (ftj > 4) {
-				D2Bot.update("done", "D2BotLead failed to join game!");
-				D2Bot.stop(me.profile,true);
-			}
 		}
 
 		ControlAction.createGame((gameInfo.gameName === "?" ? randomString(null,true) : gameInfo.gameName + gameCount), (gameInfo.gamePass === "?" ? randomString(null,true) : gameInfo.gamePass), gameInfo.difficulty, StarterConfig.CreateGameDelay * 1000);
