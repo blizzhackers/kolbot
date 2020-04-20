@@ -1019,9 +1019,9 @@ MainLoop:
 	getQueueTime: function() {
 		const control = getControl(4, 427, 234, 300, 100);
 
-		if (control && control.getText()) {
+		if (control) {
 			const text = control.getText(); //You are in line to create a game.,Try joining a game to avoid waiting.,,Your position in line is: ÿc02912
-			if (text.indexOf(getLocaleString(11026)) !== -1) {
+			if (text && text.indexOf(getLocaleString(11026)) !== -1) {
 				const result = /ÿc0(\d*)/gm.exec(text);
 				if (result && typeof result[1] === 'string') {
 
