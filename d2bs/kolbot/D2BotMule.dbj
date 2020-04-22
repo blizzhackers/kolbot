@@ -1036,15 +1036,19 @@ MainSwitch:
 	case 38: // Game is full
 		break; // not sure how/if to handle
 	case 39: // Other Multiplayer
-		sendKey(0x1B); // Esc key
+		ControlAction.click(6, 264, 568, 272, 35);
 
 		break;
 	case 40: // TCP/IP Game
-		sendKey(0x1B); // Esc key
+		ControlAction.click(6, 39, 571, 128, 35);
 
 		break;
 	case 41: // TCP/IP Game - Enter Host IP
-		login(me.profile);
+		try {
+			login(me.profile);
+		} catch (e) {
+
+		}
 
 		break;
 	case 44: // Unable To Connect TCP/IP
