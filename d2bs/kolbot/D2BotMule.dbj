@@ -576,6 +576,7 @@ function locationAction(location) {
 
 MainSwitch:
 	switch (location) {
+	case 0:
 	case 1:
 	case 3:
 		D2Bot.updateStatus("Lobby");
