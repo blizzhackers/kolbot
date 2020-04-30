@@ -169,16 +169,22 @@ MainLoop:
 						this.clearCowLevel();
 						delay(1000);
 
-						if (!Pather.usePortal(null, player.name)) {
+						if (!Pather.getPortal(null, player.name)) {
 							Town.goToTown();
+						} else {
+							if (!Pather.usePortal(null, player.name)) {
+								Town.goToTown();
+							}
 						}
 					} else {
 						print("Failed to use portal.");
 					}
 				} else {
 					for (i = 0; i < 5; i += 1) {
-						if (Pather.usePortal(player.area, player.name)) {
-							break;
+						if (Pather.getPortal(player.area, player.name)) {
+							if (Pather.usePortal(player.area, player.name)) {
+								break;
+							}
 						}
 
 						delay(500 + me.ping);
@@ -225,8 +231,12 @@ MainLoop:
 
 						delay(100);
 
-						if (!Pather.usePortal(null, player.name)) {
+						if (!Pather.getPortal(null, player.name)) {
 							Town.goToTown();
+						} else {
+							if (!Pather.usePortal(null, player.name)) {
+								Town.goToTown();
+							}
 						}
 					}
 				}
