@@ -157,7 +157,8 @@ MainLoop:
 					print("ÿc4MFHelperÿc0: Clear Cows");
 
 					for (i = 0; i < 5; i += 1) {
-						if (Town.goToTown(1) && Pather.usePortal(39)) {
+						if (Town.goToTown(1) && Pather.getPortal(39)) {
+							Pather.usePortal(39);
 							break;
 						}
 
