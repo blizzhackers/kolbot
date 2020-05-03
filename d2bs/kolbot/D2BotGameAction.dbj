@@ -190,6 +190,13 @@ MainSwitch:
 		}
 
 		if (GameAction.gameInfo() !== null) { // a game name was specified
+		
+			if (++ftj > 5) {
+				GameAction.update("done", "GameAction failed to join game!");
+				D2Bot.stop(me.profile,true);
+				break;
+			}
+			
 			if (!ControlAction.click(6, 533, 469, 120, 20)) { // Create screen to check if character is dead or not
 				break;
 			}
@@ -213,6 +220,13 @@ MainSwitch:
 				}
 			}
 		} else {
+			
+			if (++ftj > 5) {
+				GameAction.update("done", "GameAction failed to create game!");
+				D2Bot.stop(me.profile,true);
+				break;
+			}
+			
 			if (!ControlAction.click(6, 533, 469, 120, 20)) { // Create
 				break;
 			}
@@ -415,6 +429,9 @@ MainSwitch:
 
 		break;
 	case 12: // Character Select
+		// Reset ftj counter
+		ftj = 0;
+		
 		// Single Player screen fix
 		if (getLocation() === 12 && !getControl(4, 626, 100, 151, 44)) {
 			ControlAction.click(6, 33, 572, 128, 35);
@@ -564,6 +581,14 @@ MainSwitch:
 
 		break;
 	case 26: // Lobby - Game Name Exists
+		ControlAction.timeoutDelay("Game Already Exists", 5e3);
+		
+		if (++ftj > 5) {
+			GameAction.update("done", "GameAction failed to create game!");
+			D2Bot.stop(me.profile,true);
+			break;
+		}
+		
 		ControlAction.click(6, 533, 469, 120, 20);
 
 		break;
@@ -572,14 +597,14 @@ MainSwitch:
 
 		break;
 	case 28: // Lobby - Game Does Not Exist
-		ftj++;
-
-		if (ftj > 4) {
+		ControlAction.timeoutDelay("Game Doesn't Exist", 5e3);
+		
+		if (++ftj > 5) {
 			GameAction.update("done", "GameAction failed to join game!");
 			D2Bot.stop(me.profile,true);
+			break;
 		}
-
-		ControlAction.timeoutDelay("Game Doesn't Exist", 1e4);
+		
 		ControlAction.click(6, 652, 469, 120, 20);
 
 		break;
