@@ -27,7 +27,8 @@ if (!FileTools.exists("data/" + me.profile + ".json")) {
 var handle, tag, gameInfo, gameStart, ingame, connectFail, charList,
 	ftj = 0,
 	lastGameStatus = "ready",
-	gameCount = DataFile.getStats().runs + 1;
+	gameCount = DataFile.getStats().runs + 1,
+	creatingActions = ["doMule"];
 
 function ReceiveCopyData(mode, msg) {
 	switch (msg) {
@@ -255,6 +256,12 @@ MainSwitch:
 
 		break;
 	case 4: // Create Game
+		if (creatingActions.indexOf(JSON.parse(tag).action) < 0) {
+			GameAction.update("done", "GameAction failed to create game!");
+			D2Bot.stop(me.profile,true);
+			break;
+		}
+	
 		D2Bot.updateStatus("Creating Game");
 
 		control = getControl(1, 657, 342, 27, 20);
