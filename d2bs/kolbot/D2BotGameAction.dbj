@@ -581,14 +581,12 @@ MainSwitch:
 
 		break;
 	case 26: // Lobby - Game Name Exists
-		ControlAction.timeoutDelay("Game Already Exists", 5e3);
-		
 		if (++ftj > 5) {
 			GameAction.update("done", "GameAction failed to create game!");
 			D2Bot.stop(me.profile,true);
 			break;
 		}
-		
+		ControlAction.timeoutDelay("Game Already Exists", 5e3);
 		ControlAction.click(6, 533, 469, 120, 20);
 
 		break;
@@ -596,15 +594,13 @@ MainSwitch:
 		ControlAction.click(6, 436, 538, 96, 32);
 
 		break;
-	case 28: // Lobby - Game Does Not Exist
-		ControlAction.timeoutDelay("Game Doesn't Exist", 5e3);
-		
+	case 28: // Lobby - Game Does Not Exist		
 		if (++ftj > 5) {
 			GameAction.update("done", "GameAction failed to join game!");
 			D2Bot.stop(me.profile,true);
 			break;
 		}
-		
+		ControlAction.timeoutDelay("Game Doesn't Exist", 5e3);
 		ControlAction.click(6, 652, 469, 120, 20);
 
 		break;
