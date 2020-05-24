@@ -564,15 +564,5 @@ var Config = {
 		Template: "",
 		Verbose: false,
 		DebugMode: false
-	},
-	pallyTeam: {
-		TeamSize: 1,
-		teslaPally: [],
-		BoBarb: "",
-		healerPally: "",
-		manaPally: "",
-		frostPally: "",
-		convicPally: "",
-		OtherChars: []
 	}
 };
