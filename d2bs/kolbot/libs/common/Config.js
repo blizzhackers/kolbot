@@ -185,7 +185,6 @@ var Config = {
 	MakeRoom: true,
 	ClearInvOnStart: true,
 	FastPick: false,
-	ManualPlayPick: false,
 	OpenChests: false,
 	PickitFiles: [],
 	BeltColumn: [],
@@ -460,6 +459,9 @@ var Config = {
 		AutoChant: false,
 		GameLength: 20
 	},
+	BoBot: {
+		Trigger: ["bo"]
+	},
 	IPHunter: {
 		IPList: [],
 		GameLength: 3
@@ -562,5 +564,15 @@ var Config = {
 		Template: "",
 		Verbose: false,
 		DebugMode: false
+	},
+	pallyTeam: {
+		TeamSize: 1,
+		teslaPally: [],
+		BoBarb: "",
+		healerPally: "",
+		manaPally: "",
+		frostPally: "",
+		convicPally: "",
+		OtherChars: []
 	}
 };
