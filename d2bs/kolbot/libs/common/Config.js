@@ -185,6 +185,7 @@ var Config = {
 	MakeRoom: true,
 	ClearInvOnStart: true,
 	FastPick: false,
+	ManualPlayPick: false,
 	OpenChests: false,
 	PickitFiles: [],
 	BeltColumn: [],
