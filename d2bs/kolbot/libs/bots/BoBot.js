@@ -20,12 +20,6 @@ function BoBot(){
 		var partyUnit,
 			unit = getUnit(0, nick);
 
-		if (getDistance(me, unit) > 10) {
-			say("Get closer.");
-
-			return false;
-		}
-
 		if (!unit) {
 			partyUnit = getParty(nick);
 
@@ -33,12 +27,19 @@ function BoBot(){
 
 			if ([1,40, 75, 103, 109].indexOf(partyUnit.area) > -1) {
 				say("Cannot Bo in town.");
-				print("cannot bo in town");
+				
 				return false
 			} else{
 				print(partyUnit.area); //for debug
-				Pather.useWaypoint(partyUnit.area);
-				unit = getUnit(0, nick);
+				if([3, 4, 5, 6, 27, 29, 32, 35, 48, 42, 57, 43, 
+				  	44, 52, 74, 46, 76, 77, 78, 79, 80, 81, 83, 
+				  	101, 106, 107, 111, 112, 113, 115, 117, 118, 129].indexOf(partyUnit.area) > -1){
+					Pather.useWaypoint(partyUnit.area);
+					unit = getUnit(0, nick);
+				}else{
+					say("Go to nearest Waypoint, then try again.");
+					return false;
+				}
 			}
 		}
 
@@ -56,16 +57,7 @@ function BoBot(){
 		} else {
 			say("Couldn't find you, champ.");
 		}
-
-		unit = getUnit(1);
-
-		if (unit) {
-			do {
-				if (unit.getParent() && unit.getParent().name === nick) { // merc or any other owned unit
-					Precast.doPrecast(true);
-				}
-			} while (unit.getNext());
-		}
+			
 		Pather.useWaypoint(1);
 		return true;
 	};
@@ -198,7 +190,7 @@ function BoBot(){
 
 				say("Commands:");
 				say("I am a BoBarb. Use command " + Config.BoBot.Trigger[0] + " to get a Bo at one of the waypoints.");
-				say("I do not have any other commands.");
+				say("You must stand on waypoint square.");
 
 				break;
 			case Config.BoBot.Trigger[0].toLowerCase(): // Bo
@@ -218,11 +210,7 @@ function BoBot(){
 
 		command = "";
 
-		if (me.act > 1) {
-			//Town.goToTown(1);
-			Pather.useWaypoint(1);
-		}
-
+		Pather.useWaypoint(1);
 		delay(200);
 	}
 
