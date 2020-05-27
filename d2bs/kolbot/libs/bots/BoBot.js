@@ -46,7 +46,7 @@ function BoBot(){
 		if (unit) {
 			do {
 				if (!unit.dead) { // player is alive
-					if (getDistance(me, unit) >= 10) {
+					if (getDistance(me, unit) >= 15) {
 						say("You went too far away.");
 
 						return false;
@@ -188,9 +188,9 @@ function BoBot(){
 					break;
 				}
 
-				say("Commands:");
-				say("I am a BoBarb. Use command " + Config.BoBot.Trigger[0] + " to get a Bo at one of the waypoints.");
-				say("You must stand on waypoint square.");
+				say("Commands" +
+						(Config.BoBot.Trigger[0] ? " | Bo: " + Config.BoBot.Trigger[0] : "") + 
+						"You must go to a Waypoint and stand on the square.");
 
 				break;
 			case Config.BoBot.Trigger[0].toLowerCase(): // Bo
