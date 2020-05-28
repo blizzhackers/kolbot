@@ -17,10 +17,9 @@ function BoBot(){
 			return false;
 		}
 
-		var partyUnit,
-			unit = getUnit(0, nick);
+		var partyUnit,unit;
 
-		if (!unit) {
+		
 			partyUnit = getParty(nick);
 
 			// wait until party area is readable?
@@ -29,38 +28,34 @@ function BoBot(){
 				say("Cannot Bo in town.");
 				
 				return false
-			} else{
-				print(partyUnit.area); //for debug
-				if([3, 4, 5, 6, 27, 29, 32, 35, 48, 42, 57, 43, 
+			}else if([3, 4, 5, 6, 27, 29, 32, 35, 48, 42, 57, 43, 
 				  	44, 52, 74, 46, 76, 77, 78, 79, 80, 81, 83, 
 				  	101, 106, 107, 111, 112, 113, 115, 117, 118, 129].indexOf(partyUnit.area) > -1){
+				
+					print(partyUnit.area); //for debug
 					Pather.useWaypoint(partyUnit.area);
 					unit = getUnit(0, nick);
-				}else{
-					say("Go to nearest Waypoint, then try again.");
-					return false;
-				}
-			}
-		}
-
-		if (unit) {
-			do {
-				if (!unit.dead) { // player is alive
-					if (getDistance(me, unit) >= 15) {
-						say("You went too far away.");
-
-						return false;
+					if (unit) {
+						do {
+							if (!unit.dead) { // player is alive
+								if (getDistance(me, unit) >= 15) {
+									say("You went too far away.");
+								return false;
+								}
+							Precast.doPrecast(true);
+							}
+						}while (unit.getNext());
+					}else {
+						say("Couldn't find you, champ. Are you on a Waypoint?");
 					}
-					Precast.doPrecast(true);
+			}else{
+				say("Go to nearest Waypoint, then try again.");
+
+				return false;
 				}
-			} while (unit.getNext());
-		} else {
-			say("Couldn't find you, champ.");
-		}
-			
-		Pather.useWaypoint(1);
-		return true;
-	};
+			Pather.useWaypoint(1);
+			return true;
+		};
 
 	this.checkHostiles = function () {
 		var rval = false,
@@ -190,7 +185,7 @@ function BoBot(){
 
 				say("Commands" +
 						(Config.BoBot.Trigger[0] ? " | Bo: " + Config.BoBot.Trigger[0] : "") + 
-						"You must go to a Waypoint and stand on the square.");
+						"| You must go to a Waypoint, stand on the square then say 'bo'.");
 
 				break;
 			case Config.BoBot.Trigger[0].toLowerCase(): // Bo
