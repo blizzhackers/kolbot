@@ -4,58 +4,57 @@
 *	@desc		Meant to run alongside Enchant to Bo players
 */
 
-function BoBot(){
+function BoBot() {
 	var command, hostile, nick, spot, tick, s, m,
 		startTime = getTickCount(),
 		shitList = [],
 		greet = [];
 
-		this.Bo = function (nick) {
+	this.Bo = function (nick) {
 		if (!Misc.inMyParty(nick)) {
 			say("Accept party invite, noob.");
 
 			return false;
 		}
 
-		var partyUnit,unit;
+	var partyUnit,unit;
 
-		
-			partyUnit = getParty(nick);
+		partyUnit = getParty(nick);
 
-			// wait until party area is readable?
+		// wait until party area is readable?
 
-			if ([1,40, 75, 103, 109].indexOf(partyUnit.area) > -1) {
-				say("Cannot Bo in town.");
+		if ([1,40, 75, 103, 109].indexOf(partyUnit.area) > -1) {
+			say("Cannot Bo in town.");
 				
-				return false
-			}else if([3, 4, 5, 6, 27, 29, 32, 35, 48, 42, 57, 43, 
+			return false
+		}else if([3, 4, 5, 6, 27, 29, 32, 35, 48, 42, 57, 43, 	//excludes halls of pain
 				  	44, 52, 74, 46, 76, 77, 78, 79, 80, 81, 83, 
 				  	101, 106, 107, 111, 112, 113, 115, 117, 118, 129].indexOf(partyUnit.area) > -1){
 				
 					print(partyUnit.area); //for debug
 					Pather.useWaypoint(partyUnit.area);
 					unit = getUnit(0, nick);
-					if (unit) {
-						do {
-							if (!unit.dead) { // player is alive
-								if (getDistance(me, unit) >= 15) {
-									say("You went too far away.");
-								return false;
-								}
-							Precast.doPrecast(true);
-							}
-						}while (unit.getNext());
-					}else {
-						say("Couldn't find you, champ. Are you on a Waypoint?");
-					}
-			}else{
-				say("Go to nearest Waypoint, then try again.");
+						if (unit) {
+							do {
+								if (!unit.dead) { // player is alive
+									if (getDistance(me, unit) >= 15) {
+										say("You went too far away.");
+										return false;
+										}
+									Precast.doPrecast(true);
+									}
+							}while (unit.getNext());
+						}else {
+							say("Couldn't find you, champ. Are you on a Waypoint?");
+						}
+		}else{
+			say("Go to nearest Waypoint, then try again.");
 
-				return false;
-				}
-			Pather.useWaypoint(1);
-			return true;
-		};
+			return false;
+			}
+		Pather.useWaypoint(1);
+		return true;
+	};
 
 	this.checkHostiles = function () {
 		var rval = false,
