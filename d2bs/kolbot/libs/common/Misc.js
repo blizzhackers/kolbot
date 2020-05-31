@@ -590,29 +590,29 @@ var Item = {
 			bodyLoc = 1;
 
 			break;
-        case 24: // Scepter
-        case 25: // Wand
-        case 26: // Staff
-        case 27: // Bow
-        case 28: // Axe
-        case 29: // Club
-        case 30: // Sword
-        case 31: // Hammer
-        case 32: // Knife
-        case 33: // Spear
-        case 34: // Polearm
-        case 35: // Crossbow
-        case 36: // Mace
-        case 38: // Missile Potion
-        case 42: // Throwing Knife
-        case 43: // Throwing Axe
-        case 44: // Javelin
-        case 67: // Handtohand (Assasin Claw)
-        case 68: // Orb
-        case 85: // Amazon Bow
-        case 86: // Amazon Spear
-        case 87: // Amazon Javelin
-        case 88: // Assassin Claw
+		case 24: // Scepter
+		case 25: // Wand
+		case 26: // Staff
+		case 27: // Bow
+		case 28: // Axe
+		case 29: // Club
+		case 30: // Sword
+		case 31: // Hammer
+		case 32: // Knife
+		case 33: // Spear
+		case 34: // Polearm
+		case 35: // Crossbow
+		case 36: // Mace
+		case 38: // Missile Potion
+		case 42: // Throwing Knife
+		case 43: // Throwing Axe
+		case 44: // Javelin
+		case 67: // Handtohand (Assasin Claw)
+		case 68: // Orb
+		case 85: // Amazon Bow
+		case 86: // Amazon Spear
+		case 87: // Amazon Javelin
+		case 88: // Assassin Claw
 			bodyLoc = 4;
 
 			break;
