@@ -100,6 +100,10 @@ var Skill = {
 		case 91: // Lower Resist
 			return 50;
 		// Variable range
+		case 41: // Inferno
+		    var inferno = [3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12];
+
+		    return inferno[Math.min(me.getSkill(41, 1) - 1, 19)];
 		case 42: // Static Field
 			return Math.floor((me.getSkill(42, 1) + 4) * 2 / 3);
 		case 132: // Leap
@@ -548,17 +552,15 @@ var Item = {
 
 		switch (item.itemType) {
 		case 2: // Shield
+		case 5: // Arrows
+		case 6: // Bolts
+		case 69: // Voodoo Heads
 		case 70: // Auric Shields
 			bodyLoc = 5;
 
 			break;
 		case 3: // Armor
 			bodyLoc = 3;
-
-			break;
-		case 5: // Arrows
-		case 6: // Bolts
-			bodyLoc = 5;
 
 			break;
 		case 10: // Ring
@@ -583,34 +585,34 @@ var Item = {
 			break;
 		case 37: // Helm
 		case 71: // Barb Helm
+        	case 72: // Druid Pelt
 		case 75: // Circlet
 			bodyLoc = 1;
 
 			break;
-		case 24: //
-		case 25: //
-		case 26: //
-		case 27: //
-		case 28: //
-		case 29: //
-		case 30: //
-		case 31: //
-		case 32: //
-		case 33: //
-		case 34: //
-		case 35: //
-		case 36: //
-		case 42: //
-		case 43: //
-		case 44: //
+		case 24: // Scepter
+		case 25: // Wand
+		case 26: // Staff
+		case 27: // Bow
+		case 28: // Axe
+		case 29: // Club
+		case 30: // Sword
+		case 31: // Hammer
+		case 32: // Knife
+		case 33: // Spear
+		case 34: // Polearm
+		case 35: // Crossbow
+		case 36: // Mace
+		case 38: // Missile Potion
+		case 42: // Throwing Knife
+		case 43: // Throwing Axe
+		case 44: // Javelin
+		case 68: // Orb
+		case 85: // Amazon Bow
+		case 86: // Amazon Spear
+		case 87: // Amazon Javelin
 		case 67: // Handtohand (Assasin Claw)
-		case 68: //
-		case 69: //
-		case 72: //
-		case 85: //
-		case 86: //
-		case 87: //
-		case 88: //
+		case 88: // Assassin Claw
 			bodyLoc = 4;
 
 			break;
