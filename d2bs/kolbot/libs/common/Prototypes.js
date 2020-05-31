@@ -1298,11 +1298,11 @@ Unit.prototype.equip = function (destLocation = undefined) {
 
 Unit.prototype.getBodyLoc = function () {
 	let types = {
-		1: [37, 71, 75], // helm
+		1: [37, 71, 72, 75], // helm
 		2: [12], // amulet
 		3: [3], // armor
-		4: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 42, 43, 44, 67, 68, 69, 72, 85, 86, 87, 88], // weapons
-		5: [2, 5, 6, 70], // shields / Arrows / bolts
+		4: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 38, 42, 43, 44, 67, 68, 85, 86, 87, 88], // weapons
+		5: [2, 5, 6, 69, 70], // shields / Arrows / bolts
 		6: [10], // ring slot 1
 		7: [10], // ring slot 2
 		8: [19], // belt
