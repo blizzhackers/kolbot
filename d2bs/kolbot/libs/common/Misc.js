@@ -697,7 +697,7 @@ var Item = {
 
 			if (tier > 0 && bodyLoc) {
 				for (j = 0; j < bodyLoc.length; j += 1) {
-					if ([3, 7].indexOf(items[0].location) > -1 && tier > this.getEquippedItem(bodyLoc[j]).tier && this.getEquippedItem(bodyLoc[j]).classid !== 174) { // khalim's will adjustment
+					if ([3, 7].indexOf(items[0].location) > -1 && tier > this.getEquippedItem(bodyLoc[j]).tier && this.getEquippedItem(bodyLoc[j]).classid !== 90 && this.getEquippedItem(bodyLoc[j]).classid !== 174) { // Hellforge Hammer & Khalim's Will adjustment
 						if (!items[0].getFlag(0x10)) { // unid
 							tome = me.findItem(519, 0, 3);
 
@@ -2230,9 +2230,9 @@ var Packet = {
 			}
 
 			sendPacket(1, 0x2f, 4, 1, 4, unit.gid);
-			delay(me.ping * 2);
+			delay(10 + me.ping * 2);
 			sendPacket(1, 0x30, 4, 1, 4, unit.gid);
-			delay(me.ping * 2);
+			delay(10 + me.ping * 2);
 			this.flash(me.gid);
 		}
 

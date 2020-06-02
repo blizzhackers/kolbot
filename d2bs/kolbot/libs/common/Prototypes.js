@@ -7,6 +7,15 @@
 // Ensure these are in polyfill.js
 !isIncluded('Polyfill.js') && include('Polyfill.js');
 
+Unit.prototype.__defineGetter__("attacking",
+	function () {
+		if (this.type > 0) {
+			throw new Error("Unit.attacking: Must be used with player units.");
+		}
+
+		return [7, 8, 10, 11, 12, 13, 14, 15, 16, 18].indexOf(this.mode) > -1;
+	});
+
 // Check if unit is idle
 Unit.prototype.__defineGetter__("idle",
 	function () {
@@ -17,22 +26,32 @@ Unit.prototype.__defineGetter__("idle",
 		return (this.mode === 1 || this.mode === 5 || this.mode === 17); // Dead is pretty idle too
 	});
 
+// Death check
+Unit.prototype.__defineGetter__("dead",
+	function () {
+		switch (this.type) {
+			case 0: // Player
+				return this.mode === 0 || this.mode === 17;
+			case 1: // Monster
+				return this.mode === 0 || this.mode === 12;
+			default:
+				return false;
+		}
+	});
+
 Unit.prototype.__defineGetter__("gold",
 	function () {
 		return this.getStat(14) + this.getStat(15);
 	});
 
-// Death check
-Unit.prototype.__defineGetter__("dead",
+// Check if classic or expansion character
+Unit.prototype.__defineGetter__("classic",
 	function () {
-		switch (this.type) {
-		case 0: // Player
-			return this.mode === 0 || this.mode === 17;
-		case 1: // Monster
-			return this.mode === 0 || this.mode === 12;
-		default:
-			return false;
+		if (this.type > 0) {
+			throw new Error("Unit.classic must be used with player units.");
 		}
+
+		return this.gametype === 0;
 	});
 
 // Check if unit is in town
@@ -51,13 +70,116 @@ Party.prototype.__defineGetter__("inTown",
 		return [1, 40, 75, 103, 109].indexOf(this.area) > -1;
 	});
 
-Unit.prototype.__defineGetter__("attacking",
+// Check party member's current act
+Party.prototype.__defineGetter__("act",
 	function () {
-		if (this.type > 0) {
-			throw new Error("Unit.attacking: Must be used with player units.");
+		if (this.area > 0) {
+			if (this.area < 40) {
+				return 1;
+			} else if (this.area < 75) {
+				return 2;
+			} else if (this.area < 103) {
+				return 3;
+			} else if (this.area < 109) {
+				return 4;
+			} else {
+				return 5;
+			}
 		}
 
-		return [7, 8, 10, 11, 12, 13, 14, 15, 16, 18].indexOf(this.mode) > -1;
+		return false;
+	});
+
+// check Difficulty
+Unit.prototype.__defineGetter__("normal",
+	function () {
+		if (this.type > 0) {
+			throw new Error("Unit.normal must be used with player units.");
+		}
+
+		return this.diff === 0;
+	});
+
+Unit.prototype.__defineGetter__("nightmare",
+	function () {
+		if (this.type > 0) {
+			throw new Error("Unit.nightmare must be used with player units.");
+		}
+
+		return this.diff === 1;
+	});
+
+Unit.prototype.__defineGetter__("hell",
+	function () {
+		if (this.type > 0) {
+			throw new Error("Unit.hell must be used with player units.");
+		}
+
+		return this.diff === 2;
+	});
+
+// Check character class
+Unit.prototype.__defineGetter__("amazon",
+	function () {
+		if (this.type > 0) {
+			throw new Error("Unit.amazon must be used with player units.");
+		}
+
+		return this.classid === 0;
+	});
+
+Unit.prototype.__defineGetter__("sorceress",
+	function () {
+		if (this.type > 0) {
+			throw new Error("Unit.sorceress must be used with player units.");
+		}
+
+		return this.classid === 1;
+	});
+
+Unit.prototype.__defineGetter__("necromancer",
+	function () {
+		if (this.type > 0) {
+			throw new Error("Unit.necromancer must be used with player units.");
+		}
+
+		return this.classid === 2;
+	});
+
+Unit.prototype.__defineGetter__("paladin",
+	function () {
+		if (this.type > 0) {
+			throw new Error("Unit.paladin must be used with player units.");
+		}
+
+		return this.classid === 3;
+	});
+
+Unit.prototype.__defineGetter__("barbarian",
+	function () {
+		if (this.type > 0) {
+			throw new Error("Unit.barbarian must be used with player units.");
+		}
+
+		return this.classid === 4;
+	});
+
+Unit.prototype.__defineGetter__("druid",
+	function () {
+		if (this.type > 0) {
+			throw new Error("Unit.druid must be used with player units.");
+		}
+
+		return this.classid === 5;
+	});
+
+Unit.prototype.__defineGetter__("assassin",
+	function () {
+		if (this.type > 0) {
+			throw new Error("Unit.assassin must be used with player units.");
+		}
+
+		return this.classid === 6;
 	});
 
 // Open NPC menu
@@ -412,30 +534,30 @@ Unit.prototype.getPrefix = function (id) {
 	var i;
 
 	switch (typeof id) {
-	case "number":
-		if (typeof this.prefixnums !== "object") {
-			return this.prefixnum === id;
-		}
-
-		for (i = 0; i < this.prefixnums.length; i += 1) {
-			if (id === this.prefixnums[i]) {
-				return true;
+		case "number":
+			if (typeof this.prefixnums !== "object") {
+				return this.prefixnum === id;
 			}
-		}
 
-		break;
-	case "string":
-		if (typeof this.prefixes !== "object") {
-			return this.prefix.replace(/\s+/g, "").toLowerCase() === id.replace(/\s+/g, "").toLowerCase();
-		}
-
-		for (i = 0; i < this.prefixes.length; i += 1) {
-			if (id.replace(/\s+/g, "").toLowerCase() === this.prefixes[i].replace(/\s+/g, "").toLowerCase()) {
-				return true;
+			for (i = 0; i < this.prefixnums.length; i += 1) {
+				if (id === this.prefixnums[i]) {
+					return true;
+				}
 			}
-		}
 
-		break;
+			break;
+		case "string":
+			if (typeof this.prefixes !== "object") {
+				return this.prefix.replace(/\s+/g, "").toLowerCase() === id.replace(/\s+/g, "").toLowerCase();
+			}
+
+			for (i = 0; i < this.prefixes.length; i += 1) {
+				if (id.replace(/\s+/g, "").toLowerCase() === this.prefixes[i].replace(/\s+/g, "").toLowerCase()) {
+					return true;
+				}
+			}
+
+			break;
 	}
 
 	return false;
@@ -445,30 +567,30 @@ Unit.prototype.getSuffix = function (id) {
 	var i;
 
 	switch (typeof id) {
-	case "number":
-		if (typeof this.suffixnums !== "object") {
-			return this.suffixnum === id;
-		}
-
-		for (i = 0; i < this.suffixnums.length; i += 1) {
-			if (id === this.suffixnums[i]) {
-				return true;
+		case "number":
+			if (typeof this.suffixnums !== "object") {
+				return this.suffixnum === id;
 			}
-		}
 
-		break;
-	case "string":
-		if (typeof this.suffixes !== "object") {
-			return this.suffix.replace(/\s+/g, "").toLowerCase() === id.replace(/\s+/g, "").toLowerCase();
-		}
-
-		for (i = 0; i < this.suffixes.length; i += 1) {
-			if (id.replace(/\s+/g, "").toLowerCase() === this.suffixes[i].replace(/\s+/g, "").toLowerCase()) {
-				return true;
+			for (i = 0; i < this.suffixnums.length; i += 1) {
+				if (id === this.suffixnums[i]) {
+					return true;
+				}
 			}
-		}
 
-		break;
+			break;
+		case "string":
+			if (typeof this.suffixes !== "object") {
+				return this.suffix.replace(/\s+/g, "").toLowerCase() === id.replace(/\s+/g, "").toLowerCase();
+			}
+
+			for (i = 0; i < this.suffixes.length; i += 1) {
+				if (id.replace(/\s+/g, "").toLowerCase() === this.suffixes[i].replace(/\s+/g, "").toLowerCase()) {
+					return true;
+				}
+			}
+
+			break;
 	}
 
 	return false;
@@ -527,280 +649,280 @@ Unit.prototype.getStatEx = function (id, subid) {
 	var i, temp, rval, regex;
 
 	switch (id) {
-	case 555: //calculates all res, doesnt exists trough
-		{ // Block scope due to the variable declaration
-			// Get all res
-			let allres = [this.getStatEx(39), this.getStatEx(41), this.getStatEx(43), this.getStatEx(45)];
+		case 555: //calculates all res, doesnt exists trough
+			{ // Block scope due to the variable declaration
+				// Get all res
+				let allres = [this.getStatEx(39), this.getStatEx(41), this.getStatEx(43), this.getStatEx(45)];
 
-			// What is the minimum of the 4?
-			let min = Math.min.apply(null, allres);
+				// What is the minimum of the 4?
+				let min = Math.min.apply(null, allres);
 
-			// Cap all res to the minimum amount of res
-			allres = allres.map(res => res > min ? min : res);
+				// Cap all res to the minimum amount of res
+				allres = allres.map(res => res > min ? min : res);
 
-			// Get it in local variables, its more easy to read
-			let [fire, cold, light, psn] = allres;
+				// Get it in local variables, its more easy to read
+				let [fire, cold, light, psn] = allres;
 
-			return fire === cold && cold === light && light === psn ? min : 0;
-		}
-	case 20: // toblock
-		switch (this.classid) {
-		case 328: // buckler
-			return this.getStat(20);
-		case 413: // preserved
-		case 483: // mummified
-		case 503: // minion
-			return this.getStat(20) - 3;
-		case 329: // small
-		case 414: // zombie
-		case 484: // fetish
-		case 504: // hellspawn
-			return this.getStat(20) - 5;
-		case 331: // kite
-		case 415: // unraveller
-		case 485: // sexton
-		case 505: // overseer
-			return this.getStat(20) - 8;
-		case 351: // spiked
-		case 374: // deefender
-		case 416: // gargoyle
-		case 486: // cantor
-		case 506: // succubus
-		case 408: // targe
-		case 478: // akaran t
-			return this.getStat(20) - 10;
-		case 330: // large
-		case 375: // round
-		case 417: // demon
-		case 487: // hierophant
-		case 507: // bloodlord
-			return this.getStat(20) - 12;
-		case 376: // scutum
-			return this.getStat(20) - 14;
-		case 409: // rondache
-		case 479: // akaran r
-			return this.getStat(20) - 15;
-		case 333: // goth
-		case 379: // ancient
-			return this.getStat(20) - 16;
-		case 397: // barbed
-			return this.getStat(20) - 17;
-		case 377: // dragon
-			return this.getStat(20) - 18;
-		case 502: // vortex
-			return this.getStat(20) - 19;
-		case 350: // bone
-		case 396: // grim
-		case 445: // luna
-		case 467: // blade barr
-		case 466: // troll
-		case 410: // heraldic
-		case 480: // protector
-			return this.getStat(20) - 20;
-		case 444: // heater
-		case 447: // monarch
-		case 411: // aerin
-		case 481: // gilded
-		case 501: // zakarum
-			return this.getStat(20) - 22;
-		case 332: // tower
-		case 378: // pavise
-		case 446: // hyperion
-		case 448: // aegis
-		case 449: // ward
-			return this.getStat(20) - 24;
-		case 412: // crown
-		case 482: // royal
-		case 500: // kurast
-			return this.getStat(20) - 25;
-		case 499: // sacred r
-			return this.getStat(20) - 28;
-		case 498: // sacred t
-			return this.getStat(20) - 30;
-		}
+				return fire === cold && cold === light && light === psn ? min : 0;
+			}
+		case 20: // toblock
+			switch (this.classid) {
+				case 328: // buckler
+					return this.getStat(20);
+				case 413: // preserved
+				case 483: // mummified
+				case 503: // minion
+					return this.getStat(20) - 3;
+				case 329: // small
+				case 414: // zombie
+				case 484: // fetish
+				case 504: // hellspawn
+					return this.getStat(20) - 5;
+				case 331: // kite
+				case 415: // unraveller
+				case 485: // sexton
+				case 505: // overseer
+					return this.getStat(20) - 8;
+				case 351: // spiked
+				case 374: // deefender
+				case 416: // gargoyle
+				case 486: // cantor
+				case 506: // succubus
+				case 408: // targe
+				case 478: // akaran t
+					return this.getStat(20) - 10;
+				case 330: // large
+				case 375: // round
+				case 417: // demon
+				case 487: // hierophant
+				case 507: // bloodlord
+					return this.getStat(20) - 12;
+				case 376: // scutum
+					return this.getStat(20) - 14;
+				case 409: // rondache
+				case 479: // akaran r
+					return this.getStat(20) - 15;
+				case 333: // goth
+				case 379: // ancient
+					return this.getStat(20) - 16;
+				case 397: // barbed
+					return this.getStat(20) - 17;
+				case 377: // dragon
+					return this.getStat(20) - 18;
+				case 502: // vortex
+					return this.getStat(20) - 19;
+				case 350: // bone
+				case 396: // grim
+				case 445: // luna
+				case 467: // blade barr
+				case 466: // troll
+				case 410: // heraldic
+				case 480: // protector
+					return this.getStat(20) - 20;
+				case 444: // heater
+				case 447: // monarch
+				case 411: // aerin
+				case 481: // gilded
+				case 501: // zakarum
+					return this.getStat(20) - 22;
+				case 332: // tower
+				case 378: // pavise
+				case 446: // hyperion
+				case 448: // aegis
+				case 449: // ward
+					return this.getStat(20) - 24;
+				case 412: // crown
+				case 482: // royal
+				case 500: // kurast
+					return this.getStat(20) - 25;
+				case 499: // sacred r
+					return this.getStat(20) - 28;
+				case 498: // sacred t
+					return this.getStat(20) - 30;
+			}
 
-		break;
-	case 21: // plusmindamage
-	case 22: // plusmaxdamage
-		if (subid === 1) {
-			temp = this.getStat(-1);
-			rval = 0;
+			break;
+		case 21: // plusmindamage
+		case 22: // plusmaxdamage
+			if (subid === 1) {
+				temp = this.getStat(-1);
+				rval = 0;
 
-			for (i = 0; i < temp.length; i += 1) {
-				switch (temp[i][0]) {
-				case id: // plus one handed dmg
-				case id + 2: // plus two handed dmg
-					// There are 2 occurrences of min/max if the item has +damage. Total damage is the sum of both.
-					// First occurrence is +damage, second is base item damage.
+				for (i = 0; i < temp.length; i += 1) {
+					switch (temp[i][0]) {
+						case id: // plus one handed dmg
+						case id + 2: // plus two handed dmg
+							// There are 2 occurrences of min/max if the item has +damage. Total damage is the sum of both.
+							// First occurrence is +damage, second is base item damage.
 
-					if (rval) { // First occurence stored, return if the second one exists
-						return rval;
+							if (rval) { // First occurence stored, return if the second one exists
+								return rval;
+							}
+
+							if (this.getStat(temp[i][0]) > 0 && this.getStat(temp[i][0]) > temp[i][2]) {
+								rval = temp[i][2]; // Store the potential +dmg value
+							}
+
+							break;
 					}
+				}
 
-					if (this.getStat(temp[i][0]) > 0 && this.getStat(temp[i][0]) > temp[i][2]) {
-						rval = temp[i][2]; // Store the potential +dmg value
-					}
+				return 0;
+			}
 
+			break;
+		case 31: // plusdefense
+			if (subid === 0) {
+				if ([0, 1].indexOf(this.mode) < 0) {
 					break;
 				}
-			}
 
-			return 0;
-		}
-
-		break;
-	case 31: // plusdefense
-		if (subid === 0) {
-			if ([0, 1].indexOf(this.mode) < 0) {
-				break;
-			}
-
-			switch (this.itemType) {
-			case 58: // jewel
-			case 82: // charms
-			case 83:
-			case 84:
-				// defense is the same as plusdefense for these items
-				return this.getStat(31);
-			}
-
-			if (!this.desc) {
-				this.desc = this.description;
-			}
-
-			temp = this.desc.split("\n");
-			regex = new RegExp("\\+\\d+ " + getLocaleString(3481).replace(/^\s+|\s+$/g, ""));
-
-			for (i = 0; i < temp.length; i += 1) {
-				if (temp[i].match(regex, "i")) {
-					return parseInt(temp[i].replace(/ÿc[0-9!"+<;.*]/, ""), 10);
+				switch (this.itemType) {
+					case 58: // jewel
+					case 82: // charms
+					case 83:
+					case 84:
+						// defense is the same as plusdefense for these items
+						return this.getStat(31);
 				}
-			}
 
-			return 0;
-		}
-
-		break;
-	case 57:
-		if (subid === 1) {
-			return Math.round(this.getStat(57) * this.getStat(59) / 256);
-		}
-
-		break;
-	case 83: // itemaddclassskills
-		if (subid === undefined) {
-			for (i = 0; i < 7; i += 1) {
-				if (this.getStat(83, i)) {
-					return this.getStat(83, i);
+				if (!this.desc) {
+					this.desc = this.description;
 				}
-			}
 
-			return 0;
-		}
+				temp = this.desc.split("\n");
+				regex = new RegExp("\\+\\d+ " + getLocaleString(3481).replace(/^\s+|\s+$/g, ""));
 
-		break;
-	case 188: // itemaddskilltab
-		if (subid === undefined) {
-			temp = [0, 1, 2, 8, 9, 10, 16, 17, 18, 24, 25, 26, 32, 33, 34, 40, 41, 42, 48, 49, 50];
-
-			for (i = 0; i < temp.length; i += 1) {
-				if (this.getStat(188, temp[i])) {
-					return this.getStat(188, temp[i]);
-				}
-			}
-
-			return 0;
-		}
-
-		break;
-	case 195: // itemskillonattack
-	case 196: // itemskillonkill
-	case 197: // itemskillondeath
-	case 198: // itemskillonhit
-	case 199: // itemskillonlevelup
-	case 201: // itemskillongethit
-	case 204: // itemchargedskill
-		if (subid === 1) {
-			temp = this.getStat(-2);
-
-			if (temp.hasOwnProperty(id)) {
-				if (temp[id] instanceof Array) {
-					for (i = 0; i < temp[id].length; i += 1) {
-						if (temp[id][i] !== undefined) {
-							return temp[id][i].skill;
-						}
+				for (i = 0; i < temp.length; i += 1) {
+					if (temp[i].match(regex, "i")) {
+						return parseInt(temp[i].replace(/ÿc[0-9!"+<;.*]/, ""), 10);
 					}
-				} else {
-					return temp[id].skill;
 				}
+
+				return 0;
 			}
 
-			return 0;
-		}
+			break;
+		case 57:
+			if (subid === 1) {
+				return Math.round(this.getStat(57) * this.getStat(59) / 256);
+			}
 
-		if (subid === 2) {
-			temp = this.getStat(-2);
-
-			if (temp.hasOwnProperty(id)) {
-				if (temp[id] instanceof Array) {
-					for (i = 0; i < temp[id].length; i += 1) {
-						if (temp[id][i] !== undefined) {
-							return temp[id][i].level;
-						}
+			break;
+		case 83: // itemaddclassskills
+			if (subid === undefined) {
+				for (i = 0; i < 7; i += 1) {
+					if (this.getStat(83, i)) {
+						return this.getStat(83, i);
 					}
-				} else {
-					return temp[id].level;
 				}
+
+				return 0;
 			}
 
-			return 0;
-		}
+			break;
+		case 188: // itemaddskilltab
+			if (subid === undefined) {
+				temp = [0, 1, 2, 8, 9, 10, 16, 17, 18, 24, 25, 26, 32, 33, 34, 40, 41, 42, 48, 49, 50];
 
-		break;
-	case 216: // itemhpperlevel (for example Fortitude with hp per lvl can be defined now with 1.5)
-		return this.getStat(216) / 2048;
+				for (i = 0; i < temp.length; i += 1) {
+					if (this.getStat(188, temp[i])) {
+						return this.getStat(188, temp[i]);
+					}
+				}
 
-		break;
+				return 0;
+			}
+
+			break;
+		case 195: // itemskillonattack
+		case 196: // itemskillonkill
+		case 197: // itemskillondeath
+		case 198: // itemskillonhit
+		case 199: // itemskillonlevelup
+		case 201: // itemskillongethit
+		case 204: // itemchargedskill
+			if (subid === 1) {
+				temp = this.getStat(-2);
+
+				if (temp.hasOwnProperty(id)) {
+					if (temp[id] instanceof Array) {
+						for (i = 0; i < temp[id].length; i += 1) {
+							if (temp[id][i] !== undefined) {
+								return temp[id][i].skill;
+							}
+						}
+					} else {
+						return temp[id].skill;
+					}
+				}
+
+				return 0;
+			}
+
+			if (subid === 2) {
+				temp = this.getStat(-2);
+
+				if (temp.hasOwnProperty(id)) {
+					if (temp[id] instanceof Array) {
+						for (i = 0; i < temp[id].length; i += 1) {
+							if (temp[id][i] !== undefined) {
+								return temp[id][i].level;
+							}
+						}
+					} else {
+						return temp[id].level;
+					}
+				}
+
+				return 0;
+			}
+
+			break;
+		case 216: // itemhpperlevel (for example Fortitude with hp per lvl can be defined now with 1.5)
+			return this.getStat(216) / 2048;
+
+			break;
 	}
 
 	if (this.getFlag(0x04000000)) { // Runeword
 		switch (id) {
-		case 16: // enhanceddefense
-			if ([0, 1].indexOf(this.mode) < 0) {
-				break;
-			}
-
-			if (!this.desc) {
-				this.desc = this.description;
-			}
-
-			temp = this.desc.split("\n");
-
-			for (i = 0; i < temp.length; i += 1) {
-				if (temp[i].match(getLocaleString(3520).replace(/^\s+|\s+$/g, ""), "i")) {
-					return parseInt(temp[i].replace(/ÿc[0-9!"+<;.*]/, ""), 10);
+			case 16: // enhanceddefense
+				if ([0, 1].indexOf(this.mode) < 0) {
+					break;
 				}
-			}
 
-			return 0;
-		case 18: // enhanceddamage
-			if ([0, 1].indexOf(this.mode) < 0) {
-				break;
-			}
-
-			if (!this.desc) {
-				this.desc = this.description;
-			}
-
-			temp = this.desc.split("\n");
-
-			for (i = 0; i < temp.length; i += 1) {
-				if (temp[i].match(getLocaleString(10038).replace(/^\s+|\s+$/g, ""), "i")) {
-					return parseInt(temp[i].replace(/ÿc[0-9!"+<;.*]/, ""), 10);
+				if (!this.desc) {
+					this.desc = this.description;
 				}
-			}
 
-			return 0;
+				temp = this.desc.split("\n");
+
+				for (i = 0; i < temp.length; i += 1) {
+					if (temp[i].match(getLocaleString(3520).replace(/^\s+|\s+$/g, ""), "i")) {
+						return parseInt(temp[i].replace(/ÿc[0-9!"+<;.*]/, ""), 10);
+					}
+				}
+
+				return 0;
+			case 18: // enhanceddamage
+				if ([0, 1].indexOf(this.mode) < 0) {
+					break;
+				}
+
+				if (!this.desc) {
+					this.desc = this.description;
+				}
+
+				temp = this.desc.split("\n");
+
+				for (i = 0; i < temp.length; i += 1) {
+					if (temp[i].match(getLocaleString(10038).replace(/^\s+|\s+$/g, ""), "i")) {
+						return parseInt(temp[i].replace(/ÿc[0-9!"+<;.*]/, ""), 10);
+					}
+				}
+
+				return 0;
 		}
 	}
 
@@ -1011,17 +1133,17 @@ Unit.prototype.getColor = function () {
 		};
 
 		switch (this.itemType) {
-		case 15: // boots
-			colors["of Precision"] = Color.darkgold;
+			case 15: // boots
+				colors["of Precision"] = Color.darkgold;
 
-			break;
-		case 16: // gloves
-			colors["of Alacrity"] = Color.darkyellow;
-			colors["of the Leech"] = Color.crystalred;
-			colors["of the Bat"] = Color.crystalred;
-			colors["of the Giant"] = Color.darkgold;
+				break;
+			case 16: // gloves
+				colors["of Alacrity"] = Color.darkyellow;
+				colors["of the Leech"] = Color.crystalred;
+				colors["of the Bat"] = Color.crystalred;
+				colors["of the Giant"] = Color.darkgold;
 
-			break;
+				break;
 		}
 	} else if (this.quality === 5) { // Set
 		if (this.getFlag(0x10)) {
@@ -1090,37 +1212,37 @@ Unit.prototype.castChargedSkill = function (...args) {
 		};
 
 	switch (args.length) {
-	case 0: // item.castChargedSkill()
-		break;
-	case 1:
-		if (args[0] instanceof Unit) { // hellfire.castChargedSkill(monster);
-			unit = args[0];
-		} else {
-			skillId = args[0];
-		}
-
-		break;
-	case 2:
-		if (typeof args[0] === 'number') {
-			if (args[1] instanceof Unit) { // me.castChargedSkill(skillId,unit)
-				[skillId, unit] = [...args];
-			} else if (typeof args[1] === 'number') { // item.castChargedSkill(x,y)
-				[x, y] = [...args];
+		case 0: // item.castChargedSkill()
+			break;
+		case 1:
+			if (args[0] instanceof Unit) { // hellfire.castChargedSkill(monster);
+				unit = args[0];
+			} else {
+				skillId = args[0];
 			}
-		} else {
-			throw new Error(' invalid arguments, expected (skillId, unit) or (x, y)');
-		}
 
-		break;
-	case 3:
-		// If all arguments are numbers
-		if (typeof args[0] === 'number' && typeof args[1] === 'number' && typeof args[2] === 'number') {
-			[skillId, x, y] = [...args];
-		}
+			break;
+		case 2:
+			if (typeof args[0] === 'number') {
+				if (args[1] instanceof Unit) { // me.castChargedSkill(skillId,unit)
+					[skillId, unit] = [...args];
+				} else if (typeof args[1] === 'number') { // item.castChargedSkill(x,y)
+					[x, y] = [...args];
+				}
+			} else {
+				throw new Error(' invalid arguments, expected (skillId, unit) or (x, y)');
+			}
 
-		break;
-	default:
-		throw new Error("invalid arguments, expected 'me' object or 'item' unit");
+			break;
+		case 3:
+			// If all arguments are numbers
+			if (typeof args[0] === 'number' && typeof args[1] === 'number' && typeof args[2] === 'number') {
+				[skillId, x, y] = [...args];
+			}
+
+			break;
+		default:
+			throw new Error("invalid arguments, expected 'me' object or 'item' unit");
 	}
 
 	// Charged skills can only be casted on x, y coordinates
@@ -1202,20 +1324,20 @@ Unit.prototype.equip = function (destLocation = undefined) {
 	}
 
 	const findspot = function (item) {
-			let tempspot = Storage.Stash.FindSpot(item);
+		let tempspot = Storage.Stash.FindSpot(item);
 
-			if (getUIFlag(0x19) && tempspot) {
-				return {location: Storage.Stash.location, coord: tempspot};
-			}
+		if (getUIFlag(0x19) && tempspot) {
+			return { location: Storage.Stash.location, coord: tempspot };
+		}
 
-			tempspot = Storage.Inventory.FindSpot(item);
+		tempspot = Storage.Inventory.FindSpot(item);
 
-			if (tempspot) {
-				return {location: Storage.Inventory.location, coord: tempspot};
-			}
+		if (tempspot) {
+			return { location: Storage.Inventory.location, coord: tempspot };
+		}
 
-			return false; // no spot found
-		},
+		return false; // no spot found
+	},
 		doubleHanded = [26, 27, 34, 35, 67, 85, 86];
 
 	// Not an item, or unidentified, or not enough stats
@@ -1259,11 +1381,11 @@ Unit.prototype.equip = function (destLocation = undefined) {
 			// Last item, so swap instead of putting off first
 			if (index === (currentEquiped.length - 1)) {
 				print('swap ' + this.name + ' for ' + item.name);
-				let oldLoc = {x: this.x, y: this.y, location: this.location};
+				let oldLoc = { x: this.x, y: this.y, location: this.location };
 				clickItemAndWait(0, this); // Pick up current item
 				clickItemAndWait(0, destLocation.first()); // the swap of items
 				// Find a spot for the current item
-				let	spot = findspot(item);
+				let spot = findspot(item);
 
 				if (!spot) { // If no spot is found for the item, rollback
 					clickItemAndWait(0, destLocation.first()); // swap again
