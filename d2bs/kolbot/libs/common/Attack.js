@@ -462,7 +462,7 @@ var Attack = {
 			} while (target.getNext());
 		}
 
-		while (start && monsterList.length > 0 && attackCount < 300) {
+		while (start && monsterList.length > 0 && attackCount < Config.MaxAttackCount) {
 			if (boss) {
 				orgx = boss.x;
 				orgy = boss.y;
@@ -532,7 +532,7 @@ var Attack = {
 					}
 
 					// Skip non-unique monsters after 15 attacks, except in Throne of Destruction
-					if (me.area !== 131 && !(target.spectype & 0x7) && gidAttack[i].attacks > 15) {
+					if (me.area !== 131 && !(target.spectype & 0x7) && gidAttack[i].attacks > Config.MaxAttackCount / 20) {
 						print("ÿc1Skipping " + target.name + " " + target.gid + " " + gidAttack[i].attacks);
 						monsterList.shift();
 					}
@@ -637,7 +637,7 @@ var Attack = {
 			sortFunc = this.sortMonsters;
 		}
 
-		while (monsterList.length > 0 && attackCount < 300) {
+		while (monsterList.length > 0 && attackCount < Config.MaxAttackCount) {
 			if (refresh && attackCount > 0 && attackCount % refresh === 0) {
 				monsterList = mainArg.call();
 			}
@@ -701,7 +701,7 @@ var Attack = {
 					}
 
 					// Skip non-unique monsters after 15 attacks, except in Throne of Destruction
-					if (me.area !== 131 && !(target.spectype & 0x7) && gidAttack[i].attacks > 15) {
+					if (me.area !== 131 && !(target.spectype & 0x7) && gidAttack[i].attacks > Config.MaxAttackCount / 20) {
 						print("ÿc1Skipping " + target.name + " " + target.gid + " " + gidAttack[i].attacks);
 						monsterList.shift();
 					}
