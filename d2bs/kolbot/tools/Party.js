@@ -126,7 +126,9 @@ function main() {
 							delay(100);
 						}
 
-						break;
+						if (Config.PublicMode === 3) {
+							break;
+						}
 					case 2: // Accept invites
 						if (Config.Leader && player.name !== Config.Leader) {
 							break;
