@@ -388,6 +388,12 @@ var Config = {
 	Countess: {
 		KillGhosts: false
 	},
+	Cows: {
+		PublicGame: false,
+		PortalRetry: 3,
+		CowLeader: false,
+		WaitForParty: 3000,
+	},
 	Baal: {
 		DollQuit: false,
 		SoulQuit: false,

@@ -222,13 +222,29 @@ function Cows() {
 	Town.goToTown(1);
 	Town.doChores();
 
-	leg = this.getLeg();
-	tome = this.getTome();
 
-	this.openPortal(leg, tome);
+	if (!Config.Cows.PublicGame || Config.Cows.PublicGame && Config.Cows.CowLeader || Misc.getPlayerCount() <= 1) {
+		print("Getting leg");
+		try {
+			leg = this.getLeg();
+			tome = this.getTome();
+			this.openPortal(leg, tome);
+		}
+		catch(err) {
+			print(err);
+			Town.goToTown(1);
+		}
+	} else {
+		Town.goToTown(1);
+		Town.move("portalspot");
+		print("Waiting for portal...");
+		delay(Config.Cows.WaitForParty || 10000);
+	}
+
 	Pather.usePortal(39);
 	Precast.doPrecast(false);
 	this.clearCowLevel();
 
 	return true;
 }
+
