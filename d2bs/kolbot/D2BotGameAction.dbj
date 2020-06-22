@@ -274,7 +274,7 @@ MainSwitch:
 			gameCount += 1;
 		}
 
-		timeoutDelay("Make Game Delay", StarterConfig.CreateGameDelay * 1e3);
+		ControlAction.timeoutDelay("Make Game Delay", StarterConfig.CreateGameDelay * 1e3);
 		ControlAction.createGame(gameInfo.gameName + gameCount, gameInfo.gamePass, 0);
 		locationTimeout(5000, location);
 
