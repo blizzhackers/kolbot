@@ -5,6 +5,7 @@ var StarterConfig = {
 	CrashDelay: 60, // Seconds to wait after a d2 window crash
 	RealmDownDelay: 2, // Minutes to wait after getting Realm Down message
 	UnableToConnectDelay: 5, // Minutes to wait after Unable To Connect message
+	TCPIPNoHostDelay: 5, // Seconds to wait after Cannot Connect To Server message
 	CDKeyInUseDelay: 5, // Minutes to wait before connecting again if CD-Key is in use. SwitchKeys overrides this!
 	ConnectingTimeout: 20, // Seconds to wait before cancelling the 'Connecting...' screen
 	PleaseWaitTimeout: 10, // Seconds to wait before cancelling the 'Please Wait...' screen
@@ -57,15 +58,6 @@ function ReceiveCopyData(mode, msg) {
 		tag = JSON.parse(msg).Tag;
 
 		break;
-	}
-}
-
-function timeoutDelay(text, time) {
-	var endTime = getTickCount() + time;
-
-	while (getTickCount() < endTime) {
-		D2Bot.updateStatus(text + " (" + Math.floor((endTime - getTickCount()) / 1000) + "s)");
-		delay(500);
 	}
 }
 
@@ -174,7 +166,7 @@ MainSwitch:
 
 		if (ingame) {
 			if (getTickCount() - gameStart < StarterConfig.MinGameTime * 1e3) {
-				timeoutDelay("Min game time wait", StarterConfig.MinGameTime * 1e3 + gameStart - getTickCount());
+				ControlAction.timeoutDelay("Min game time wait", StarterConfig.MinGameTime * 1e3 + gameStart - getTickCount());
 			}
 
 			print("updating runs");
@@ -423,16 +415,14 @@ MainSwitch:
 		D2Bot.updateStatus("Unable To Connect");
 
 		if (connectFail) {
-			timeoutDelay("Unable to Connect", StarterConfig.UnableToConnectDelay * 6e4);
+			ControlAction.timeoutDelay("Unable to Connect", StarterConfig.UnableToConnectDelay * 6e4);
 
 			connectFail = false;
+		} else {
+			connectFail = true;
 		}
 
-		if (!ControlAction.click(6, 335, 450, 128, 35)) {
-			break;
-		}
-
-		connectFail = true;
+		ControlAction.click(6, 335, 450, 128, 35);
 
 		break;
 	case 12: // Character Select
@@ -482,11 +472,11 @@ MainSwitch:
 		}
 
 		updateCount();
-		timeoutDelay("Realm Down", StarterConfig.RealmDownDelay * 6e4);
+		ControlAction.timeoutDelay("Realm Down", StarterConfig.RealmDownDelay * 6e4);
 
 		if (gameInfo.switchKeys) {
 			D2Bot.printToConsole("Realm Down - Changing CD-Key");
-			timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
+			ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
 			D2Bot.restart(true);
 		} else {
 			D2Bot.restart();
@@ -653,6 +643,36 @@ MainSwitch:
 			GameAction.update("done", "Account has no chars! location 42");
 			D2Bot.stop(me.profile,true);
 		}
+
+		break;
+	case 39: // Other Multiplayer
+		ControlAction.click(6, 264, 568, 272, 35);
+
+		break;
+	case 40: // TCP/IP Game
+		ControlAction.click(6, 39, 571, 128, 35);
+
+		break;
+	case 41: // TCP/IP Game - Enter Host IP
+		try {
+			login(me.profile);
+		} catch (e) {
+
+		}
+
+		break;
+	case 44: // Unable To Connect TCP/IP
+		D2Bot.updateStatus("Unable To Connect TCP/IP");
+
+		if (connectFail) {
+			ControlAction.timeoutDelay("Unable to Connect", StarterConfig.TCPIPNoHostDelay * 1e3);
+
+			connectFail = false;
+		} else {
+			connectFail = true;
+		}
+
+		ControlAction.click(6, 351, 337, 96, 32);
 
 		break;
 	default:

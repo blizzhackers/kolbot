@@ -16,6 +16,7 @@ var StarterConfig = {
 	CrashDelay: 60, // Seconds to wait after a d2 window crash
 	RealmDownDelay: 10, // Minutes to wait after getting Realm Down message
 	UnableToConnectDelay: 5, // Minutes to wait after Unable To Connect message
+	TCPIPNoHostDelay: 5, // Seconds to wait after Cannot Connect To Server message
 	CDKeyInUseDelay: 5, // Minutes to wait before connecting again if CD-Key is in use. SwitchKeys overrides this!
 	ConnectingTimeout: 20, // Seconds to wait before cancelling the 'Connecting...' screen
 	PleaseWaitTimeout: 10, // Seconds to wait before cancelling the 'Please Wait...' screen
@@ -127,15 +128,6 @@ function ReceiveCopyData(mode, msg) {
 		}
 
 		break;
-	}
-}
-
-function timeoutDelay(text, time) {
-	var endTime = getTickCount() + time;
-
-	while (getTickCount() < endTime) {
-		D2Bot.updateStatus(text + " (" + Math.floor((endTime - getTickCount()) / 1000) + "s)");
-		delay(500);
 	}
 }
 
@@ -335,7 +327,7 @@ MainSwitch:
 
 			if (StarterConfig.SkipMutedKey) {
 				if (gameInfo.switchKeys) {
-					timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
+					ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
 					D2Bot.restart(true);
 				} else {
 					D2Bot.stop();
@@ -363,7 +355,7 @@ MainSwitch:
 			}
 
 			if (StarterConfig.FirstJoinMessage !== "" && !chatActionsDone) { // Added !chatActionsDone condition to prevent spam
-				timeoutDelay("Chat delay", StarterConfig.ChatActionsDelay * 1e3);
+				ControlAction.timeoutDelay("Chat delay", StarterConfig.ChatActionsDelay * 1e3);
 				sayMsg(StarterConfig.FirstJoinMessage);
 				delay(500);
 			}
@@ -480,9 +472,9 @@ MainLoop:
 
 			if (retry === 0 || lastGameStatus === "pending") { // Only delay on first join - the rest is handled by GameDoesNotExistTimeout. Any other case is instant fail (ie. full game).
 				if (typeof AdvancedConfig[me.profile] === "object" && typeof AdvancedConfig[me.profile].JoinDelay === "number") {
-					timeoutDelay("Custom Join Delay", AdvancedConfig[me.profile].JoinDelay * 1e3);
+					ControlAction.timeoutDelay("Custom Join Delay", AdvancedConfig[me.profile].JoinDelay * 1e3);
 				} else if (StarterConfig.JoinDelay) {
-					timeoutDelay("Join Game Delay", StarterConfig.JoinDelay * 1e3);
+					ControlAction.timeoutDelay("Join Game Delay", StarterConfig.JoinDelay * 1e3);
 				}
 			}
 
@@ -646,16 +638,14 @@ MainLoop:
 		D2Bot.updateStatus("Unable To Connect");
 
 		if (connectFail) {
-			timeoutDelay("Unable to Connect", StarterConfig.UnableToConnectDelay * 6e4);
+			ControlAction.timeoutDelay("Unable to Connect", StarterConfig.UnableToConnectDelay * 6e4);
 
 			connectFail = false;
+		} else {
+			connectFail = true;
 		}
 
-		if (!ControlAction.click(6, 335, 450, 128, 35)) {
-			break;
-		}
-
-		connectFail = true;
+		ControlAction.click(6, 335, 450, 128, 35);
 
 		break;
 	case 13: // Realm Down - Character Select screen
@@ -667,12 +657,12 @@ MainLoop:
 		}
 
 		updateCount();
-		timeoutDelay("Realm Down", StarterConfig.RealmDownDelay * 6e4);
+		ControlAction.timeoutDelay("Realm Down", StarterConfig.RealmDownDelay * 6e4);
 		D2Bot.CDKeyRD();
 
 		if (gameInfo.switchKeys) {
 			D2Bot.printToConsole("Realm Down - Changing CD-Key");
-			timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
+			ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
 			D2Bot.restart(true);
 		}
 
@@ -810,7 +800,7 @@ MainLoop:
 		//D2Bot.printToConsole("Game doesn't exist");
 		ControlAction.click(6, 652, 469, 120, 20);
 		ControlAction.click(6, 433, 433, 96, 32);
-		timeoutDelay("Game doesn't exist", StarterConfig.GameDoesNotExistTimeout * 1e3);
+		ControlAction.timeoutDelay("Game doesn't exist", StarterConfig.GameDoesNotExistTimeout * 1e3);
 
 		lastGameStatus = "DNE";
 
@@ -821,6 +811,36 @@ MainLoop:
 		ControlAction.click(6, 433, 433, 96, 32);
 
 		lastGameStatus = "FULL";
+
+		break;
+	case 39: // Other Multiplayer
+		ControlAction.click(6, 264, 568, 272, 35);
+
+		break;
+	case 40: // TCP/IP Game
+		ControlAction.click(6, 39, 571, 128, 35);
+
+		break;
+	case 41: // TCP/IP Game - Enter Host IP
+		try {
+			login(me.profile);
+		} catch (e) {
+
+		}
+
+		break;
+	case 44: // Unable To Connect TCP/IP
+		D2Bot.updateStatus("Unable To Connect TCP/IP");
+
+		if (connectFail) {
+			ControlAction.timeoutDelay("Unable to Connect", StarterConfig.TCPIPNoHostDelay * 1e3);
+
+			connectFail = false;
+		} else {
+			connectFail = true;
+		}
+
+		ControlAction.click(6, 351, 337, 96, 32);
 
 		break;
 	default:
