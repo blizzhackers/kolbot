@@ -86,39 +86,39 @@ function BoBot () {
 			return false;
 		}
 
-		if (!this.cmdplayers) {
-			this.cmdplayers = {};
+		if (!this.cmdPlayers) {
+			this.cmdPlayers = {};
 		}
 
-		if (!this.cmdplayers.hasOwnProperty(player)) {
-			this.cmdplayers[player] = {
+		if (!this.cmdPlayers.hasOwnProperty(player)) {
+			this.cmdPlayers[player] = {
 				firstCmd: getTickCount(),
 				commands: 0,
 				ignored: false
 			};
 		}
 
-		if (this.cmdplayers[player].ignored) {
-			if (getTickCount() - this.cmdplayers[player].ignored < 60000) {
+		if (this.cmdPlayers[player].ignored) {
+			if (getTickCount() - this.cmdPlayers[player].ignored < 60000) {
 				return true; // ignore flooder
 			}
 
 			// unignore flooder
-			this.cmdplayers[player].ignored = false;
-			this.cmdplayers[player].commands = 0;
+			this.cmdPlayers[player].ignored = false;
+			this.cmdPlayers[player].commands = 0;
 		}
 
-		this.cmdplayers[player].commands += 1;
+		this.cmdPlayers[player].commands += 1;
 
-		if (getTickCount() - this.cmdplayers[player].firstCmd < 10000) {
-			if (this.cmdplayers[player].commands > 5) {
-				this.cmdplayers[player].ignored = getTickCount();
+		if (getTickCount() - this.cmdPlayers[player].firstCmd < 10000) {
+			if (this.cmdPlayers[player].commands > 5) {
+				this.cmdPlayers[player].ignored = getTickCount();
 
 				say(player + ", you are being ignored for 60 seconds because of flooding.");
 			}
 		} else {
-			this.cmdplayers[player].firstCmd = getTickCount();
-			this.cmdplayers[player].commands = 0;
+			this.cmdPlayers[player].firstCmd = getTickCount();
+			this.cmdPlayers[player].commands = 0;
 		}
 
 		return false;
