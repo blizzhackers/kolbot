@@ -22,6 +22,7 @@
 	// Team MF system
 	Config.MFLeader = false; // Set to true if you have one or more MFHelpers. Opens TP and gives commands when doing normal MF runs.
 	Scripts.MFHelper = false; // Run the same MF run as the MFLeader. Leader must have Config.MFLeader = true
+		Config.BreakClearLevel = false; // Stop clearing the current area if the leader goes to another area
 
 	// Leeching section
 	// leader's character name isn't needed on order to run. Don't use more scripts of the same type! (Run AutoBaal OR BaalHelper, not both)

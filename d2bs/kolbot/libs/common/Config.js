@@ -437,7 +437,7 @@ var Config = {
 		RecheckSeals: false
 	},
 	MFHelper: {
-		BreakClearLevel: true
+		BreakClearLevel: false
 	},
 	Wakka: {
 		Wait: 1
