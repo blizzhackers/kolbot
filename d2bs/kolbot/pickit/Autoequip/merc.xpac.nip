@@ -1,0 +1,29 @@
+// helm
+[type] == helm # [fireresist]+[lightresist]+[coldresist] >= 10 # [MercTier] == 1
+
+[name] == grandcrown && [quality] == unique # # [MercTier] == 20 // Crown of Thiefs
+[name] == grimhelm && [quality] == unique # # [MercTier] == 21 // Vampire Gaze
+[name] == demonhead && [quality] == unique # # [MercTier] == 22 // Andariel's Visage
+
+[name] == demonhead && [flag] == ethereal && [quality] == unique # # [MercTier] == 100 // Andariel's Visage
+
+// armor
+[type] == armor # [fireresist]+[lightresist]+[coldresist] >= 10 # [MercTier] == 1
+[type] == armor # [fireresist]+[lightresist]+[coldresist] >= 30 # [MercTier] == 2
+
+[name] == cuirass && [quality] == unique # # [mercTier] == 20 // Duriel's shell
+
+[type] == armor && [flag] == runeword # [assassinskills] == 2 # [MercTier] == 50 // Treachery
+
+[type] == armor && [flag] == ethereal && [flag] == runeword && [class] == elite # [assassinskills] == 2 # [MercTier] == 100 // Treachery
+
+// weapon (Act 2 merc)
+([type] == spear || [type] == polearm || [type] == javelin) # [lifeleech] >= 1 # [MercTier] == 1
+
+[name] == poleaxe && [quality] == unique # # [MercTier] == 20 // The Battlebranch
+[name] == brandistock && [quality] == unique # # [MercTier] == 21 // Bloodthief
+[name] == bill && [quality] == unique # # [MercTier] == 22 // Blackleach Blade
+
+[type] == polearm && [flag] == runeword # [meditationaura] >= 12 # [mercTier] == 50 // Insight
+
+[type] == polearm && [flag] == ethereal && [flag] == runeword && [class] == elite # [meditationaura] >= 12 # [mercTier] == 100 // Insight

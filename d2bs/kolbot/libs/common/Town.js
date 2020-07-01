@@ -88,6 +88,7 @@ var Town = {
 		this.buyPotions();
 		this.clearInventory();
 		Item.autoEquip();
+		Item.autoEquipMerc();
 		this.buyKeys();
 		this.repair(repair);
 		this.gamble();
@@ -1565,11 +1566,7 @@ MainLoop:
 
 					// Don't stash low tier autoequip items.
 					if (Config.AutoEquip && Pickit.checkItem(items[i]).result === 1) {
-						tier = NTIP.GetTier(items[i]);
-
-						if (tier > 0 && tier < 100) {
-							result = false;
-						}
+						result = Item.autoEquipCheck(items[i]);
 					}
 
 					if (result) {
@@ -1826,7 +1823,7 @@ MainLoop:
 		return true;
 	},
 
-	clearInventory: function () {
+	 clearInventory: function () {
 		var i, col, result, item, beltSize,
 			items = [];
 
@@ -1933,8 +1930,13 @@ MainLoop:
 					!Cubing.keepItem(items[i]) && // Don't throw cubing ingredients
 					!Runewords.keepItem(items[i]) && // Don't throw runeword ingredients
 					!CraftingSystem.keepItem(items[i]) // Don't throw crafting system ingredients
-					) {
+			) {
 				result = Pickit.checkItem(items[i]).result;
+
+				// Revive merc if using merc autoequip and merc item is found.
+				if (Item.hasMercTier(items[i])) {
+					this.reviveMerc();
+				}
 
 				if (!Item.autoEquipCheck(items[i])) {
 					result = 0;
