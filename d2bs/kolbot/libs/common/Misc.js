@@ -849,6 +849,10 @@ var Misc = {
 	getPlayerAct: function (player) {
 		var unit = this.findPlayer(player);
 
+		if (!unit) {
+			return false;
+		}
+
 		if (unit.area <= 39) {
 			return 1;
 		}

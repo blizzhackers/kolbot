@@ -898,11 +898,12 @@ var Attack = {
 				room = getRoom(me.x, me.y);
 			}
 
-			if (Config.MFHelper && Config.MFHelper.BreakClearLevel && Config.Leader !== "") {
+			if (Loader.scriptName() === "MFHelper" && Config.MFHelper.BreakClearLevel && Config.Leader !== "") {
 				var leader = Misc.findPlayer(Config.Leader);
 
-				if (leader.area !== me.area && (!leader.inTown || Misc.getPlayerAct(Config.Leader) !== me.act)) {
+				if (leader && leader.area !== me.area && !leader.inTown) {
 					me.overhead("break the clearing in " + getArea().name);
+
 					return true;
 				}
 			}
