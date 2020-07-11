@@ -899,9 +899,14 @@ function Rushee() {
 					if (!this.changeAct(2)) {
 						break;
 					}
+					
+					Town.move(NPC.Atma);
+					target = getUnit(1, 176); // Atma
+					if (target && target.openMenu()) {
+						me.cancel();
+					}
 
 					target = getUnit(1, NPC.Jerhyn);
-
 					if (target) {
 						target.openMenu();
 					}
@@ -915,7 +920,7 @@ function Rushee() {
 					if (!this.changeAct(3)) {
 						break;
 					}
-
+					
 					Town.move("portalspot");
 					actions.shift();
 
