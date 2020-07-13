@@ -136,6 +136,10 @@ MainLoop:
 				delay(100 + me.ping);
 			}
 
+			if (me.inTown && (Config.HealHP > 0 && me.hp < Math.floor(me.hpmax * Config.HealHP / 100))) {
+				Town.initNPC("Heal", "heal");	//Condition: When you are in a town + get NPC Health when you are less than Config.TownHP
+			}
+
 			playerAct = Misc.getPlayerAct(Config.Leader);
 
 			if (playerAct && playerAct !== me.act) {
