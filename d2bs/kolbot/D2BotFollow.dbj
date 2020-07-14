@@ -60,6 +60,7 @@ include("craftingsystem.js");
 include("torchsystem.js");
 include("common/misc.js");
 include("common/util.js");
+include("common/pather.js");
 
 var i, j, gameInfo, joinInfo, gameStart, ingame, handle,
 	firstLogin, chatActionsDone, lastGameTick, connectFail,
@@ -232,7 +233,7 @@ function main () {
 					DataFile.updateStats("runs", gameCount);
 				}
 
-				D2Bot.updateStatus("Game: " + me.gamename + timer(gameStart));
+				if (me.area) {D2Bot.updateStatus("| "+me.gamename+timer(gameStart)+ " | Ping " + me.ping + " | Lev " + me.getStat(12) + " | (" + me.area + ") "  + Pather.getAreaName(me.area) + " |");}
 			}
 
 			delay(1000);

@@ -72,6 +72,7 @@ include("craftingsystem.js");
 include("torchsystem.js");
 include("common/misc.js");
 include("common/util.js");
+include("common/pather.js");
 
 if (!FileTools.exists("data/" + me.profile + ".json")) {
 	DataFile.create();
@@ -298,7 +299,7 @@ function main() {
 					DataFile.updateStats("ingameTick");
 				}
 
-				D2Bot.updateStatus("Game: " + me.gamename + timer(gameStart));
+				if (me.area) {D2Bot.updateStatus("| "+me.gamename+timer(gameStart)+ " | Ping " + me.ping + " | Lev " + me.getStat(12) + " | (" + me.area + ") "  + Pather.getAreaName(me.area) + " |");}
 			}
 
 			delay(1000);
