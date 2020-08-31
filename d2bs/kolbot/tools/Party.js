@@ -121,7 +121,7 @@ function main() {
 							break;
 						}
 
-						if (player.partyflag !== 4 && (Config.PublicMode === 1 || player.partyflag !== 2) && player.partyid === 65535) {
+						if (player.partyflag !== 4 && player.partyflag !== 2 && player.partyflag !== 1 && player.partyid === 65535) {
 							clickParty(player, 2);
 							delay(100);
 						}
@@ -130,17 +130,19 @@ function main() {
 							break;
 						}
 					case 2: // Accept invites
-						if (Config.Leader && player.name !== Config.Leader) {
-							break;
-						}
+						if (myPartyId === 65535) {
+							if (Config.Leader && player.name !== Config.Leader) {
+								break;
+							}
 
-						if (player.partyid !== 65535 && player.partyid !== myPartyId) {
-							otherParty = player.partyid;
-						}
+							if (player.partyid !== 65535 && player.partyid !== myPartyId) {
+								otherParty = player.partyid;
+							}
 
-						if (player.partyflag === 2 && (!otherParty || player.partyid === otherParty) && (getTickCount() - partyTick >= 2000 || Config.FastParty)) {
-							clickParty(player, 2);
-							delay(100);
+							if (player.partyflag === 2 && (!otherParty || player.partyid === otherParty) && (getTickCount() - partyTick >= 2000 || Config.FastParty)) {
+								clickParty(player, 2);
+								delay(100);
+							}
 						}
 
 						break;
