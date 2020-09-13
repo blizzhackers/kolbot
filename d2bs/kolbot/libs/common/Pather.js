@@ -1125,14 +1125,15 @@ MainLoop:
 						this.moveToUnit(portal);
 					}
 
-					while (getTickCount() - this.lastPortalTick < 2500 && me.area === preArea) {
-						delay(10);
-					}
-
-					if (i < 2) {
-						sendPacket(1, 0x13, 4, 0x2, 4, portal.gid);
+					if (getTickCount() - this.lastPortalTick > 2500) {
+						if (i < 2) {
+							sendPacket(1, 0x13, 4, 0x2, 4, portal.gid);
+						} else {
+							Misc.click(0, 0, portal);
+						}
 					} else {
-						Misc.click(0, 0, portal);
+						delay(300);
+						continue;
 					}
 				}
 
@@ -1152,7 +1153,7 @@ MainLoop:
 
 				tick = getTickCount();
 
-				while (getTickCount() - 200 + me.ping) {
+				while (getTickCount() - tick < 500 + me.ping) {
 					if (me.area !== preArea) {
 						this.lastPortalTick = getTickCount();
 						delay(100);
