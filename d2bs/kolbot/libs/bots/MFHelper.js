@@ -143,6 +143,11 @@ MainLoop:
 				Town.move("portalspot");
 			}
 
+			if (Config.LifeChicken > 0 && me.hp <= Math.floor(me.hpmax * Config.LifeChicken / 100)) {
+				Town.heal();
+				Town.move("portalspot");
+			}
+
 			// Finish MFHelper script if leader is in Chaos or Throne
 			if ([108, 131].indexOf(player.area) > -1) {
 				break MainLoop;
@@ -161,7 +166,7 @@ MainLoop:
 							break;
 						}
 
-						delay(1000);
+						delay(500 + me.ping);
 					}
 
 					if (me.area === 39) {
@@ -169,7 +174,7 @@ MainLoop:
 						this.clearCowLevel();
 						delay(1000);
 
-						if (!Pather.usePortal(null, player.name)) {
+						if (!Pather.getPortal(null, player.name) || !Pather.usePortal(null, player.name)) {
 							Town.goToTown();
 						}
 					} else {
@@ -183,6 +188,8 @@ MainLoop:
 
 						delay(500 + me.ping);
 					}
+
+					delay(1000); // delay to make sure leader's area is accurate
 
 					if (!me.inTown && me.area === player.area) {
 						Precast.doPrecast(true);
@@ -225,7 +232,7 @@ MainLoop:
 
 						delay(100);
 
-						if (!Pather.usePortal(null, player.name)) {
+						if (!Pather.getPortal(null, player.name) || !Pather.usePortal(null, player.name)) {
 							Town.goToTown();
 						}
 					}
