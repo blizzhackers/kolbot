@@ -1125,7 +1125,7 @@ MainLoop:
 						this.moveToUnit(portal);
 					}
 
-					while (getTickCount() - this.lastPortalTick < 2500) {
+					while (getTickCount() - this.lastPortalTick < 2500 && me.area === preArea) {
 						delay(10);
 					}
 
@@ -1152,7 +1152,7 @@ MainLoop:
 
 				tick = getTickCount();
 
-				while (getTickCount() - me.ping * 2) {
+				while (getTickCount() - 200 + me.ping) {
 					if (me.area !== preArea) {
 						this.lastPortalTick = getTickCount();
 						delay(100);
