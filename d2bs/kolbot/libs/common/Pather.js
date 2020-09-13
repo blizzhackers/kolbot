@@ -116,6 +116,7 @@ var Pather = {
 	cancelFlags: [0x01, 0x02, 0x04, 0x08, 0x14, 0x16, 0x0c, 0x0f, 0x17, 0x19, 0x1A],
 	wpAreas: [1, 3, 4, 5, 6, 27, 29, 32, 35, 40, 48, 42, 57, 43, 44, 52, 74, 46, 75, 76, 77, 78, 79, 80, 81, 83, 101, 103, 106, 107, 109, 111, 112, 113, 115, 123, 117, 118, 129],
 	recursion: true,
+	lastPortalTick = getTickCount(),
 
 	useTeleport: function () {
 		return this.teleport && !Config.NoTele && !me.getState(139) && !me.getState(140) && !me.inTown && ((me.classid === 1 && me.getSkill(54, 1)) || me.getStat(97, 54));
@@ -1124,6 +1125,10 @@ MainLoop:
 						this.moveToUnit(portal);
 					}
 
+					while (getTickCount() - lastPortalTick < 2500) {
+						delay(10);
+					}
+
 					if (i < 2) {
 						sendPacket(1, 0x13, 4, 0x2, 4, portal.gid);
 					} else {
@@ -1147,8 +1152,9 @@ MainLoop:
 
 				tick = getTickCount();
 
-				while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
+				while (getTickCount() - me.ping * 2) {
 					if (me.area !== preArea) {
+						lastPortalTick = getTickCount();
 						delay(100);
 
 						return true;
