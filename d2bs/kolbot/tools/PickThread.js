@@ -49,11 +49,14 @@ function main() {
 				break;
 			}
 		}
-		if (!me.inTown && !noPick) {
-			Pickit.fastPick();
+
+		if (!me.inTown && !noPick && !me.itemoncursor && Pickit.gidList.length > 0) {
+			Pickit.fastPick(1);
 		}
+
 		noPick = false;
-		delay(50);
+		delay(100);
 	}
+
 	return true;
 }
