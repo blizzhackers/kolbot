@@ -208,11 +208,7 @@ var Pickit = {
 		return false;
 	},
 
-	pickItem: function (unit, status, keptLine, tries) {
-		if (tries === undefined) {
-			tries = 3;
-		}
-
+	pickItem: function (unit, status, keptLine, retry = 3) {
 		function ItemStats(unit) {
 			this.ilvl = unit.ilvl;
 			this.type = unit.itemType;
@@ -250,7 +246,7 @@ var Pickit = {
 		stats = new ItemStats(item);
 
 MainLoop:
-		for (i = 0; i < tries; i += 1) {
+		for (i = 0; i < retry; i += 1) {
 			if (!getUnit(4, -1, -1, gid)) {
 				break MainLoop;
 			}
@@ -607,7 +603,7 @@ MainLoop:
 		return getDistance(me, unitA) - getDistance(me, unitB);
 	},
 
-	fastPick: function (tries) {
+	fastPick: function (retry = 3) {
 		var item, gid, status,
 			itemList = [];
 
@@ -630,7 +626,7 @@ MainLoop:
 				status = this.checkItem(item);
 
 				if (status.result && this.canPick(item) && (Storage.Inventory.CanFit(item) || [4, 22, 76, 77, 78].indexOf(item.itemType) > -1)) {
-					this.pickItem(item, status.result, status.line, tries ? tries : 3);
+					this.pickItem(item, status.result, status.line, retry);
 				}
 			}
 		}
