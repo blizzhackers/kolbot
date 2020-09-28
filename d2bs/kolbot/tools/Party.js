@@ -17,7 +17,7 @@ function main() {
 
 	Config.init();
 
-	var i, myPartyId, player, otherParty, shitList, currScript, scriptList,
+	var i, myPartyId, player, shitList, currScript, scriptList,
 		classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"],
 		playerLevels = {},
 		partyTick = getTickCount();
@@ -121,7 +121,7 @@ function main() {
 							break;
 						}
 
-						if (player.partyflag !== 4 && player.partyflag !== 2 && player.partyflag !== 1 && player.partyid === 65535) {
+						if (player.partyflag !== 4 && player.partyflag !== 2 && player.partyid === 65535) {
 							clickParty(player, 2);
 							delay(100);
 						}
@@ -135,11 +135,7 @@ function main() {
 								break;
 							}
 
-							if (player.partyid !== 65535 && player.partyid !== myPartyId) {
-								otherParty = player.partyid;
-							}
-
-							if (player.partyflag === 2 && (!otherParty || player.partyid === otherParty) && (getTickCount() - partyTick >= 2000 || Config.FastParty)) {
+							if (player.partyflag === 2 && (getTickCount() - partyTick >= 2000 || Config.FastParty)) {
 								clickParty(player, 2);
 								delay(100);
 							}
