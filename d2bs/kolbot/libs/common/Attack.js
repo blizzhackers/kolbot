@@ -414,7 +414,7 @@ var Attack = {
 			throw new Error("Attack.clear: range must be a number.");
 		}
 
-		var i, boss, orgx, orgy, target, result, monsterList, start, coord,
+		var i, boss, orgx, orgy, target, result, monsterList, start, coord, skillCheck, secAttack,
 			retry = 0,
 			gidAttack = [],
 			attackCount = 0;
@@ -509,8 +509,21 @@ var Attack = {
 					gidAttack[i].attacks += 1;
 					attackCount += 1;
 
+					if (me.classid === 4) {
+						secAttack = (target.spectype & 0x7) ? 2 : 4;
+					} else {
+						secAttack = 5;
+					}
+
+					if (Config.AttackSkill[secAttack] > -1 && (!Attack.checkResist(target, Config.AttackSkill[(target.spectype & 0x7) ? 1 : 3]) ||
+							(me.classid === 3 && Config.AttackSkill[(target.spectype & 0x7) ? 1 : 3] === 112 && !ClassAttack.getHammerPosition(target)))) {
+						skillCheck = Config.AttackSkill[secAttack];
+					} else {
+						skillCheck = Config.AttackSkill[(target.spectype & 0x7) ? 1 : 3];
+					}
+
 					// Desync/bad position handler
-					switch (Config.AttackSkill[(target.spectype & 0x7) ? 1 : 3]) {
+					switch (skillCheck) {
 					case 112:
 						//print(gidAttack[i].name + " " + gidAttack[i].attacks);
 
@@ -524,7 +537,7 @@ var Attack = {
 						break;
 					default:
 						// Flash with melee skills
-						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % ((target.spectype & 0x7) ? 15 : 5) === 0 && Skill.getRange(Config.AttackSkill[(target.spectype & 0x7) ? 1 : 3]) < 4) {
+						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % ((target.spectype & 0x7) ? 15 : 5) === 0 && Skill.getRange(skillCheck) < 4) {
 							Packet.flash(me.gid);
 						}
 
