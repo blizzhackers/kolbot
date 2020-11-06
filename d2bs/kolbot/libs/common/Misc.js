@@ -583,6 +583,7 @@ var Item = {
 			break;
 		case 37: // Helm
 		case 71: // Barb Helm
+		case 72: // Pelt		
 		case 75: // Circlet
 			bodyLoc = 1;
 
@@ -606,7 +607,6 @@ var Item = {
 		case 67: // Handtohand (Assasin Claw)
 		case 68: //
 		case 69: //
-		case 72: //
 		case 85: //
 		case 86: //
 		case 87: //
