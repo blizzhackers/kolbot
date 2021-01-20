@@ -235,6 +235,18 @@ function Rushee() {
 					break;
 				}
 
+				if (!Config.Rushee.Quester) { // Non Quester needs to talk to Townsfolk to enable Harem TP
+					Town.move(NPC.Atma); // Talk to Atma
+
+					target = getUnit(1, 176); // Atma
+
+					if (target && target.openMenu()) {
+						me.cancel();
+					} else {
+						break;
+					}
+				}
+				
 				Pather.usePortal(50, Config.Leader);
 				Pather.moveToExit(40, true);
 
@@ -900,13 +912,6 @@ function Rushee() {
 						break;
 					}
 
-					target = getUnit(1, NPC.Jerhyn);
-
-					if (target) {
-						target.openMenu();
-					}
-
-					me.cancel();
 					Town.move("portalspot");
 					actions.shift();
 
