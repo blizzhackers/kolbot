@@ -161,6 +161,22 @@ var Config = {
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 	],
+	SortInventory: true,
+	SortStash: true,
+	ItemsSortedFromLeft: [], // default: everything not in Config.ItemsSortedFromRight
+	ItemsSortedFromRight: [
+		// (NOTE: default pickit is fastest if the left side is open)
+		603, 604, 605, // sort charms from the right
+		519, 518, 543, // sort tomes and keys to the right
+		515, 516, 587, 588, 589, 590, 591, 592, 593, 594, 595, 596 // sort all inventory potions from the right
+	],
+	PrioritySorting: false,
+	ItemsSortedFromLeftPriority: [], // (NOTE: the earlier in the index, the further to the Left)
+	ItemsSortedFromRightPriority: [
+		// (NOTE: the earlier in the index, the further to the Right)
+		605, 604, 603, // sort charms from the right, GC > LC > SC
+		519, 518, 543
+	],
 	LocalChat: {
 		Enabled: false,
 		Toggle: false,

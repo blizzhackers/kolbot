@@ -119,45 +119,54 @@ var Pickit = {
 				// Check if the item should be picked
 				status = this.checkItem(pickList[0]);
 
-				if (status.result && this.canPick(pickList[0]) && Item.autoEquipCheck(pickList[0])) {
-					// Override canFit for scrolls, potions and gold
-					canFit = Storage.Inventory.CanFit(pickList[0]) || [4, 22, 76, 77, 78].indexOf(pickList[0].itemType) > -1;
+				if (status.result && this.canPick(pickList[0]) /*&& Item.autoEquipCheck(pickList[0])*/) {
+					if (pickList[0].gid !== undefined) { // make sure it's not gone already {
+						// Override canFit for scrolls, potions and gold
+						canFit = pickList[0].gid !== undefined && (Storage.Inventory.CanFit(pickList[0]) || [4, 22, 76, 77, 78].indexOf(pickList[0].itemType) > -1);
 
-					// Try to make room with FieldID
-					if (!canFit && Config.FieldID && Town.fieldID()) {
-						canFit = Storage.Inventory.CanFit(pickList[0]) || [4, 22, 76, 77, 78].indexOf(pickList[0].itemType) > -1;
-					}
-
-					// Try to make room by selling items in town
-					if (!canFit) {
-						// Check if any of the current inventory items can be stashed or need to be identified and eventually sold to make room
-						if (this.canMakeRoom()) {
-							print("ÿc7Trying to make room for " + this.itemColor(pickList[0]) + pickList[0].name);
-
-							// Go to town and do town chores
-							if (Town.visitTown()) {
-								// Recursive check after going to town. We need to remake item list because gids can change.
-								// Called only if room can be made so it shouldn't error out or block anything.
-
-								return this.pickItems();
-							}
-
-							// Town visit failed - abort
-							print("ÿc7Not enough room for " + this.itemColor(pickList[0]) + pickList[0].name);
-
-							return false;
+						// Try to make room with FieldID
+						if (!canFit && Config.FieldID && Town.fieldID()
+							&& pickList[0].gid !== undefined) { // make sure it didn't disappear (happens with potions with 2+ bots)
+							// delay(me.ping > 0 ? me.ping * 2 : 50); // TODO: determine if this resolves undefined errors coming back from FindSpot and avoids extra muling
+							canFit = pickList[0].gid !== undefined && (Storage.Inventory.CanFit(pickList[0]) || [4, 22, 76, 77, 78].indexOf(pickList[0].itemType) > -1);
 						}
 
-						// Can't make room - trigger automule
-						Misc.itemLogger("No room for", pickList[0]);
-						print("ÿc7Not enough room for " + this.itemColor(pickList[0]) + pickList[0].name);
+						// Try to make room by selling items in town
+						if (!canFit && pickList[0].name !== undefined) {
+							// Check if any of the current inventory items can be stashed or need to be identified and eventually sold to make room
+							if (this.canMakeRoom()) {
+								print("ÿc7Trying to make room for " + this.itemColor(pickList[0]) + pickList[0].name);
 
-						needMule = true;
-					}
+								// Go to town and do town chores
+								if (Town.visitTown()) {
+									// Recursive check after going to town. We need to remake item list because gids can change.
+									// Called only if room can be made so it shouldn't error out or block anything.
 
-					// Item can fit - pick it up
-					if (canFit) {
-						this.pickItem(pickList[0], status.result, status.line);
+									return this.pickItems();
+								}
+
+								// Town visit failed - abort
+								print("ÿc7Not enough room for " + this.itemColor(pickList[0]) + pickList[0].name);
+
+								return false;
+							}
+
+							// Can't make room - trigger automule
+							Misc.itemLogger("No room for", pickList[0]);
+							print("ÿc7Not enough room for " + this.itemColor(pickList[0]) + pickList[0].name);
+
+							needMule = true;
+						}
+
+						// Item can fit - pick it up
+						if (canFit && pickList[0].gid !== undefined) {
+							this.pickItem(pickList[0], status.result, status.line);
+						} else if (!canFit && pickList[0].gid !== undefined) {
+							// no noise for repeat checks when inventory is full
+						} else { // the item is undefined (only happens if someone picked the item faster)
+							print("ÿc7Item was gone when we went to pick. ClassID: " + this.itemColor(pickList[0]) + pickList[0].classid);
+							D2Bot.printToConsole("Pickit.js>pickItems WARNING: Detected undefined CanFit item classid: " + pickList[0].classid, 6);
+						}
 					}
 				}
 			}

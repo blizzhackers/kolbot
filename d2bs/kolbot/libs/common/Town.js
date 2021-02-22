@@ -94,8 +94,17 @@ var Town = {
 		this.reviveMerc();
 		Cubing.doCubing();
 		Runewords.makeRunewords();
+
+		if (Config.SortStash) {
+			this.sortStash();
+		}
+
 		this.stash(true);
 		this.clearScrolls();
+
+		if (Config.SortInventory) {
+			this.sortInventory();
+		}
 
 		for (i = 0; i < cancelFlags.length; i += 1) {
 			if (getUIFlag(cancelFlags[i])) {
@@ -1122,7 +1131,7 @@ CursorLoop:
 	},
 
 	checkKeys: function () {
-		if (!Config.OpenChests || me.classid === 6 || me.gold < 540 || (!me.getItem("key") && !Storage.Inventory.CanFit({sizex: 1, sizey: 1}))) {
+		if (!Config.OpenChests || me.classid === 6 || me.gold < 540 || (!me.getItem("key") && !Storage.Inventory.CanFit({sizex: 1, sizey: 1, gid: 13378008}))) {
 			return 12;
 		}
 
@@ -1971,6 +1980,18 @@ MainLoop:
 				}
 			}
 		}
+
+		return true;
+	},
+
+	sortInventory: function() {
+		Storage.Inventory.SortItems(Config.ItemsSortedFromLeft, Config.ItemsSortedFromRight);
+
+		return true;
+	},
+
+	sortStash: function () {
+		Storage.Stash.SortItems();
 
 		return true;
 	},
