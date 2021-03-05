@@ -564,5 +564,9 @@ CSLoop:
 	Attack.kill(243); // Diablo
 	Pickit.pickItems();
 
+	if (!Pather.getPortal(null, Config.Leader) || !Pather.usePortal(null, Config.Leader)) {
+		Town.goToTown();
+	}
+
 	return true;
 }
