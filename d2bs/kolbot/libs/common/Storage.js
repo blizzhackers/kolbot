@@ -171,9 +171,9 @@ var Container = function (name, width, height, location) {
 				if (this.location === 7) { // always sort stash left-to-right
 					nPos = this.FindSpot(item);
 				} else if (this.location === 3 && (!itemIdsLeft && !itemIdsRight) || !itemIdsLeft || itemIdsRight.indexOf(item.classid) > -1 || itemIdsLeft.indexOf(item.classid) === -1) { // sort from right by default or if specified
-					nPos = this.FindSpot(item, true, false, Config.ItemsSortedFromLeftPriority);
+					nPos = this.FindSpot(item, true, false, Config.ItemsSortedFromRightPriority);
 				} else if (this.location === 3 && itemIdsRight.indexOf(item.classid) === -1 && itemIdsLeft.indexOf(item.classid) > -1) { // sort from left only if specified
-					nPos = this.FindSpot(item, false, false, Config.ItemsSortedFromRightPriority);
+					nPos = this.FindSpot(item, false, false, Config.ItemsSortedFromLeftPriority);
 				}
 
 				if ( !nPos || (nPos.x === ix && nPos.y === iy)) {
