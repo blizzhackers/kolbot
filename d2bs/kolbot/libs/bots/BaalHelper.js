@@ -342,8 +342,8 @@ MainLoop:
 		Pather.moveTo(15134, 5923);
 		Attack.kill(544); // Baal
 		Pickit.pickItems();
-		if (!Pather.getPortal(null, Config.Leader) || !Pather.usePortal(null, Config.Leader)) {
-			Town.goToTown();
+		if (Pather.getPortal(null, Config.Leader)) {
+			Pather.usePortal(null, Config.Leader);
 		}
 	} else {
 		while (true) {
