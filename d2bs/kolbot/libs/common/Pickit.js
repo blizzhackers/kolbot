@@ -158,14 +158,13 @@ var Pickit = {
 							needMule = true;
 						}
 
-						// Item can fit - pick it up
-						if (canFit && pickList[0].gid !== undefined) {
-							this.pickItem(pickList[0], status.result, status.line);
-						} else if (!canFit && pickList[0].gid !== undefined) {
-							// no noise for repeat checks when inventory is full
-						} else { // the item is undefined (only happens if someone picked the item faster)
-							print("ÿc7Item was gone when we went to pick. ClassID: " + this.itemColor(pickList[0]) + pickList[0].classid);
-							D2Bot.printToConsole("Pickit.js>pickItems WARNING: Detected undefined CanFit item classid: " + pickList[0].classid, 6);
+						if (canFit) { // Item can fit - pick it up
+							if (pickList[0].gid !== undefined) {
+								this.pickItem(pickList[0], status.result, status.line);
+							} else { // the item is undefined (only happens if someone picked the item faster)
+								print("ÿc7Item was gone when we went to pick. ClassID: " + this.itemColor(pickList[0]) + pickList[0].classid);
+								D2Bot.printToConsole("Pickit.js>pickItems WARNING: Detected undefined CanFit item classid: " + pickList[0].classid, 6);
+							}
 						}
 					}
 				}
