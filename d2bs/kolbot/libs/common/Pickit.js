@@ -265,7 +265,7 @@ MainLoop:
 
 			if (stats.useTk) {
 				Skill.setSkill(43, 0);
-				Packet.castSkill(0, item.x, item.y);
+				Packet.unitCast(0, item);
 			} else {
 				if (getDistance(me, item) > (Config.FastPick === 2 && i < 1 ? 6 : 4) || checkCollision(me, item, 0x1)) {
 					if (Pather.useTeleport()) {
