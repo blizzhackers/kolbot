@@ -861,6 +861,51 @@ ModeLoop:
 
 		return targetArea ? me.area === targetArea : me.area !== preArea;
 	},
+	
+	
+	/*
+	Pather.getAct(targetArea);
+	targetArea - id of the area to enter
+	*/
+	getAct: function getAct(targetArea) {
+		var actNumber,
+			lo,
+			hi,
+			areas = [39, 74, 102, 108, 132];
+		
+
+		hi = areas.length;
+		lo = 0;
+		
+		while (hi >= lo) {
+			actNumber = ((hi - lo) / 2|0) + lo;
+			
+			if (targetArea <= areas[actNumber]) {
+				hi = actNumber - 1;
+			} else {
+				lo = actNumber + 1;
+			}
+			
+		}
+		
+
+		return lo + 1;
+	},
+	
+	
+	/*
+	Pather.broadcastIntent(targetArea);
+	targetArea - id of the area to enter
+	*/
+	broadcastIntent: function broadcastIntent(targetArea) {
+		var myAct = me.act,
+			targetAct = this.getAct(targetArea);
+		
+		if (Config.MFLeader && myAct !== targetAct) {
+			say("goto A" + targetAct);
+		}
+	
+	},
 
 	/*
 		Pather.moveTo(targetArea, check);
@@ -887,7 +932,8 @@ ModeLoop:
 
 			break;
 		}
-
+		this.broadcastIntent(targetArea);
+		
 		var i, tick, wp, coord, retry, npc;
 
 		for (i = 0; i < 12; i += 1) {
