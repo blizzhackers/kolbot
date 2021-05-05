@@ -244,31 +244,34 @@ var Container = function (name, width, height, location) {
 					// TODO: add makespot logic here. priorityClassIds should only be used when sorting -- in town, where it's safe!
 					// TODO: collapse this down to just a MakeSpot(item, location) call, and have MakeSpot do the priority checks right at the top
 					var bufferItemClass = this.itemList[this.buffer[x][y] - 1].classid;
-
-
-					// if ( this.location === 3 && this.IsLocked(item, Config.Inventory)) {
-					// 	continue; // locked spot / item
-					// }
+					var bufferItemGfx = this.itemList[this.buffer[x][y] - 1].gfx;
+					var bufferItemQuality = this.itemList[this.buffer[x][y] - 1].quality;
 
 					if (Config.PrioritySorting && priorityClassIds && priorityClassIds.indexOf(item.classid) > -1
 						&& !this.IsLocked(this.itemList[this.buffer[x][y] - 1], Config.Inventory) // don't try to make a spot by moving locked items! TODO: move this to the start of loop
 						&& (priorityClassIds.indexOf(bufferItemClass) === -1
-						|| priorityClassIds.indexOf(item.classid) < priorityClassIds.indexOf(bufferItemClass))) { // item in this spot needs to move!
-						D2Bot.printToConsole("Storage.js>FindSpot Trying to make spot for: " + item.name + " at " + y + "," + x, 6);
-						var makeSpot = this.MakeSpot(item, {x: x, y: y}); // NOTE: passing these in buffer order [h/x][w/y]
+						|| priorityClassIds.indexOf(item.classid) <= priorityClassIds.indexOf(bufferItemClass))) { // item in this spot needs to move!
+						// D2Bot.printToConsole("Storage.js>FindSpot Trying to make spot for: " + item.name + " at " + y + "," + x, 6);
 
-						if (makeSpot) {
-							if (makeSpot === -1) {
-								return false; // this item cannot be moved
+						if (item.classid !== bufferItemClass // higher priority item
+							|| (item.classid === bufferItemClass && item.quality > bufferItemQuality) // same class, higher quality item
+							|| (item.classid === bufferItemClass && item.quality === bufferItemQuality && item.gfx > bufferItemGfx) // same quality, higher graphic item
+							|| (Config.AutoEquip && item.classid === bufferItemClass && item.quality === bufferItemQuality && item.gfx === bufferItemGfx // same graphic, higher tier item
+								&& NTIP.GetTier(item) > NTIP.GetTier(this.itemList[this.buffer[x][y] - 1]))) {
+							var makeSpot = this.MakeSpot(item, {x: x, y: y}); // NOTE: passing these in buffer order [h/x][w/y]
+
+							if (makeSpot) {
+								if (makeSpot === -1) {
+									return false; // this item cannot be moved
+								}
+
+								return makeSpot;
 							}
-
-							return makeSpot;
 						}
 					}
 
 					if (item.gid === undefined) {
-						return false;
-						break Loop; // this item disappeared? perhaps picked by another bot
+						return false; // this item disappeared? perhaps picked by another bot
 					}
 
 					if (item.gid !== this.itemList[this.buffer[x][y] - 1].gid ) { // ignore same gid
