@@ -244,7 +244,7 @@ function LoadConfig() {
 	Config.UseMerc = true; // Use merc. This is ignored and always false in d2classic.
 	Config.MercWatch = false; // Instant merc revive during battle.
 	Config.SortStash = true; // Sort stash during Town chores
-	Config.SortInventory = true; // Sort stash during Town chores
+	Config.SortInventory = true; // Sort inventory during Town chores
 
 	// Potion settings
 	Config.UseHP = 75; // Drink a healing potion if life is under designated percent.

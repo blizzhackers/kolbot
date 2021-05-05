@@ -262,7 +262,7 @@ function LoadConfig() {
 	Config.TownHP = 0; // Go to town if life is under designated percent.
 	Config.TownMP = 0; // Go to town if mana is under designated percent.
 	Config.SortStash = true; // Sort stash during Town chores
-	Config.SortInventory = true; // Sort stash during Town chores
+	Config.SortInventory = true; // Sort inventory during Town chores
 
 	/* Inventory lock configuration. !!!READ CAREFULLY!!!
 	 * 0 = item is locked and won't be moved. If item occupies more than one slot, ALL of those slots must be set to 0 to lock it in place.

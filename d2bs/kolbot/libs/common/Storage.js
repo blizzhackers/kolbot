@@ -116,8 +116,8 @@ var Container = function (name, width, height, location) {
 	this.SortItems = function (itemIdsLeft, itemIdsRight) {
 		print("Sorting " + this.name + " ... ");
 
-		var tick = getTickCount(),
-			cube = me.findItem(549);
+		// var tick = getTickCount(),
+		// 	cube = me.findItem(549);
 
 		//Town.openStash();
 
@@ -143,16 +143,16 @@ var Container = function (name, width, height, location) {
 					continue; // dont touch the cube
 				}
 
+				var ix = item.y, iy = item.x; // x and y are backwards!
+
 				if ( this.location !== item.location ) {
-					D2Bot.printToConsole("Storage.js>SortItems WARNING: Detected a non-storage item in the list: " + item.name + " at "+ ix + "," + iy, 6);
+					D2Bot.printToConsole("Storage.js>SortItems WARNING: Detected a non-storage item in the list: " + item.name + " at " + ix + "," + iy, 6);
 					continue; // dont try to touch non-storage items | TODO: prevent non-storage items from getting this far
 				}
 
 				if ( this.location === 3 && this.IsLocked(item, Config.Inventory)) {
 					continue; // locked spot / item
 				}
-
-				var ix = item.y, iy = item.x; // x and y are backwards!
 
 				if ( ix < x || iy < y ) {
 					continue; // not top left part of item
@@ -170,7 +170,7 @@ var Container = function (name, width, height, location) {
 
 				if (this.location === 7) { // always sort stash left-to-right
 					nPos = this.FindSpot(item);
-				} else if (this.location === 3 && (!itemIdsLeft && !itemIdsRight) || !itemIdsLeft || itemIdsRight.indexOf(item.classid) > -1 || itemIdsLeft.indexOf(item.classid) === -1) { // sort from right by default or if specified
+				} else if (this.location === 3 && ((!itemIdsLeft && !itemIdsRight) || !itemIdsLeft || itemIdsRight.indexOf(item.classid) > -1 || itemIdsLeft.indexOf(item.classid) === -1)) { // sort from right by default or if specified
 					nPos = this.FindSpot(item, true, false, Config.ItemsSortedFromRightPriority);
 				} else if (this.location === 3 && itemIdsRight.indexOf(item.classid) === -1 && itemIdsLeft.indexOf(item.classid) > -1) { // sort from left only if specified
 					nPos = this.FindSpot(item, false, false, Config.ItemsSortedFromLeftPriority);
@@ -204,7 +204,7 @@ var Container = function (name, width, height, location) {
 	 *	Finds a spot available in the buffer to place the item.
 	 *  reverseX - find a spot from right-to-left instead of left-to-right
 	 *  reverseY - find a spot from bottom-to-top instead of top-to-bottom
-	 *  priorityClassIds - uses MakeSpot to give items priority spots
+	 *  priorityClassIds - uses MakeSpot to shift items around to meet sort expectations
 	 */
 	this.FindSpot = function (item, reverseX, reverseY, priorityClassIds) {
 		var x, y, nx, ny,
@@ -300,8 +300,9 @@ var Container = function (name, width, height, location) {
 	 * 		  as being iterated in FindSpot, and sizex and sizey are reversed
 	 */
 	this.MakeSpot = function (item, location, force) {
-		var itemsToMove = [], itemsMoved = [], x, y, endx, endy, tmpLocation,
-			success = true; // successful until proven otherwise
+		var x, y, endx, endy, tmpLocation,
+			itemsToMove = [],
+			itemsMoved = [];
 		// TODO: test the scenario where all possible items have been moved, but this item still can't be placed
 		//		 e.g. if there are many LCs in an inventory and the spot for a GC can't be freed up without
 		//			  moving other items that ARE NOT part of the position desired
@@ -352,29 +353,31 @@ var Container = function (name, width, height, location) {
 		// Move any item(s) out of the way
 		if (itemsToMove) {
 			var i;
-			for (i = 0; i < itemsToMove.length; i++){
-				delay(1); // give reload a moment of time to avoid moving the same item twice | TODO: make sure this works
-				var reverseX = !(Config.ItemsSortedFromRight.indexOf(item.classid) > -1) // reverse sort direction when making spot
+
+			for (i = 0; i < itemsToMove.length; i++) {
+				var reverseX = !(Config.ItemsSortedFromRight.indexOf(item.classid) > -1);
 				tmpLocation = this.FindSpot(itemsToMove[i], reverseX, false);
-				D2Bot.printToConsole(itemsToMove[i].name + " moving from " + itemsToMove[i].x + "," + itemsToMove[i].y + " to "  + tmpLocation.y + "," + tmpLocation.x, 6);
-				if (this.MoveToSpot(itemsToMove[i], tmpLocation.y, tmpLocation.x)){
+				// D2Bot.printToConsole(itemsToMove[i].name + " moving from " + itemsToMove[i].x + "," + itemsToMove[i].y + " to "  + tmpLocation.y + "," + tmpLocation.x, 6);
+
+				if (this.MoveToSpot(itemsToMove[i], tmpLocation.y, tmpLocation.x)) {
 					// D2Bot.printToConsole(itemsToMove[i].name + " moved to " + tmpLocation.y + "," + tmpLocation.x, 6);
-					itemsMoved.push(copyUnit(itemsToMove[i]))
+					itemsMoved.push(copyUnit(itemsToMove[i]));
 					Storage.Reload(); // success on this item, reload!
+					delay(1); // give reload a moment of time to avoid moving the same item twice
 				} else {
 					D2Bot.printToConsole(itemsToMove[i].name + " failed to move to " + tmpLocation.y + "," + tmpLocation.x, 6);
+
 					return false;
 				}
 			}
 		}
 
-		D2Bot.printToConsole("MakeSpot success! " + item.name + " can now be placed at " + location.y + "," + location.x, 6);
 		return ({x: location.x, y: location.y});
 	};
 
 	this.MoveToSpot = function(item, x, y) {
 		var n, nDelay, cItem, cube;
-		
+
 		//Cube -> Stash, must place item in inventory first
 		if (item.location === 6 && this.location === 7 && !Storage.Inventory.MoveTo(item)) {
 			return false;
@@ -443,10 +446,11 @@ var Container = function (name, width, height, location) {
 			if (!nPos) {
 				return false;
 			}
-			
+
 			return this.MoveToSpot(item, nPos.y, nPos.x);
 		} catch (e) {
 			print("Storage.Container.MoveTo catched error : "  + e + " - " +e.toSource());
+
 			return false;
 		}
 	};
