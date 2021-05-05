@@ -243,6 +243,8 @@ function LoadConfig() {
 	Config.HealStatus = false; // Go to a healer if poisoned or cursed
 	Config.UseMerc = true; // Use merc. This is ignored and always false in d2classic.
 	Config.MercWatch = false; // Instant merc revive during battle.
+	Config.SortStash = true; // Sort stash during Town chores
+	Config.SortInventory = true; // Sort inventory during Town chores
 
 	// Potion settings
 	Config.UseHP = 75; // Drink a healing potion if life is under designated percent.
@@ -261,8 +263,6 @@ function LoadConfig() {
 	Config.MercChicken = 0; // Exit game if merc's life is less or equal to designated percent.
 	Config.TownHP = 0; // Go to town if life is under designated percent.
 	Config.TownMP = 0; // Go to town if mana is under designated percent.
-	Config.SortStash = true; // Sort stash during Town chores
-	Config.SortInventory = true; // Sort inventory during Town chores
 
 	/* Inventory lock configuration. !!!READ CAREFULLY!!!
 	 * 0 = item is locked and won't be moved. If item occupies more than one slot, ALL of those slots must be set to 0 to lock it in place.
