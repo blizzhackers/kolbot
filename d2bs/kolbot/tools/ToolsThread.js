@@ -543,9 +543,9 @@ function main() {
 				}
 				else { // not killing so do anti-idle
 					while (true) {
-						sendPacket(1, 0x3F, 2, rand(0x19, 0x20));
-						for (let i = 30; i > 0; i -= 1) {
-							me.overhead("Diablo Walks the Earth! - Next say in: " + i + " sec.");
+						sendPacket(1, 40);
+						for (let i = (10 * 60); i > 0; i -= 1) {
+							me.overhead("Diablo Walks the Earth! - Next packet in: " + i + " sec.");
 							delay(1000);
 						}
 					}
