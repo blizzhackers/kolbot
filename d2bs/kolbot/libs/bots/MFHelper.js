@@ -129,6 +129,7 @@ function MFHelper() {
 		if (playerAct && playerAct !== me.act) {
 			Town.goToTown(playerAct);
 			Town.move("portalspot");
+		}
 	}
 
 	// START
