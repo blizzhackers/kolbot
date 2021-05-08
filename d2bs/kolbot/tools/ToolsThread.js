@@ -541,6 +541,15 @@ function main() {
 				if (Config.KillDclone) {
 					load("tools/clonekilla.js");
 				}
+				else { // not killing so do anti-idle
+					while (true) {
+						sendPacket(1, 40);
+						for (let i = (10 * 60); i > 0; i -= 1) {
+							me.overhead("Diablo Walks the Earth! - Next packet in: " + i + " sec.");
+							delay(1000);
+						}
+					}
+				}
 			}
 
 			break;
