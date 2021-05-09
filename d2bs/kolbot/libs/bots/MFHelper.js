@@ -164,7 +164,7 @@ MainLoop:
 					break MainLoop;
 				} else if (command.indexOf("goto") > -1) {
 					print("ÿc4MFHelperÿc0: Goto");
-					split = command.split("goto A")[1];
+					split = command.substr(6);
 
 					try {
 						if (!!parseInt(split, 10)) {
