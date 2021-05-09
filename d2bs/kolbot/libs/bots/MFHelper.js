@@ -120,8 +120,8 @@ function MFHelper() {
 	
 	
 	if (player) {
-		while (!player.area) {
-			delay(100 + me.ping);
+		if (!Misc.poll(() => player.area, 120*60, 100 + me.ping)) {
+			throw new Error('Failed to wait for player area');
 		}
 
 		playerAct = Misc.getPlayerAct(Config.Leader);
