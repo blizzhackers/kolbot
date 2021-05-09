@@ -898,13 +898,14 @@ ModeLoop:
 	targetArea - id of the area to enter
 	*/
 	broadcastIntent: function broadcastIntent(targetArea) {
-		var myAct = me.act,
-			targetAct = this.getAct(targetArea);
-		
-		if (Config.MFLeader && myAct !== targetAct) {
-			say("goto A" + targetAct);
+		if (Config.MFLeader) {
+			var targetAct = this.getAct(targetArea);
+
+			if (me.act !== targetAct) {
+				say("goto A" + targetAct);
+			}
 		}
-	
+		
 	},
 
 	/*
