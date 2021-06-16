@@ -50,6 +50,10 @@ function main () {
 			if (isUp === "no") {
 				isUp = "yes";
 			}
+
+			if (me.ingame) {
+				D2Bot.updateStatus("Game: " + me.gamename + " | Level: " + me.charlvl);
+			}
 		} else {
 			isUp = "no";
 		}

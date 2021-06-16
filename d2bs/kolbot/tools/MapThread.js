@@ -1,4 +1,13 @@
 var Hooks = {
+	dashboardX: 400,
+	dashboardY: 480,
+	resfixX: me.screensize ? 0 : -100,
+	resfixY: me.screensize ? 0 : -120,
+	upperRightResfixX: me.screensize ? 0 : -160,
+	lowerRightResfixX: me.screensize ? 0 : -160,
+	lowerLeftResfixX: me.screensize ? 0 : -50,
+	dashboardWidthResfixX: me.screensize ? 0 : -110,
+
 	monsters: {
 		hooks: [],
 		enabled: true,
@@ -122,6 +131,14 @@ var Hooks = {
 				return;
 			}
 
+			if (!this.getHook("dashboard")) {
+				this.add("dashboard");
+			}
+
+			if (!this.getHook("dashboardframe")) {
+				this.add("dashboardframe");
+			}
+
 			if (!this.getHook("monsterStatus")) {
 				this.add("monsterStatus");
 			}
@@ -145,6 +162,7 @@ var Hooks = {
 			if (!this.getHook("ip")) {
 				this.add("ip");
 			}
+
 		},
 
 		add: function (name) {
@@ -152,35 +170,49 @@ var Hooks = {
 			case "ping":
 				this.hooks.push({
 					name: "ping",
-					hook: new Text("Ping: " + me.ping, 785, 56 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)), 4, 1, 1)
+					hook: new Text("Ping: " + me.ping, 785 + Hooks.upperRightResfixX, 56 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)), 4, 1, 1)
 				});
 
 				break;
 			case "time":
 				this.hooks.push({
 					name: "time",
-					hook: new Text(this.timer(), 785, 72 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)), 4, 1, 1)
+					hook: new Text(this.timer(), 785 + Hooks.upperRightResfixX, 72 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)), 4, 1, 1)
 				});
 
 				break;
 			case "ip":
 				this.hooks.push({
 					name: "ip",
-					hook: new Text("IP: " + (me.gameserverip.length > 0 ? me.gameserverip.split(".")[3] : "0"), 785, 88 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)), 4, 1, 1)
+					hook: new Text("IP: " + (me.gameserverip.length > 0 ? me.gameserverip.split(".")[3] : "0"), 785 + Hooks.upperRightResfixX, 88 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)), 4, 1, 1)
 				});
 
 				break;
 			case "monsterStatus":
 				this.hooks.push({
 					name: "monsterStatus",
-					hook: new Text("Num 7: Disable Monsters", 525, 515)
+					hook: new Text("Num 7: Disable Monsters", 490 + Hooks.lowerRightResfixX, 515 + Hooks.resfixY)
 				});
 
 				break;
 			case "vectorStatus":
 				this.hooks.push({
 					name: "vectorStatus",
-					hook: new Text("Num 8: Disable Vectors", 525, 525)
+					hook: new Text("Num 8: Disable Vectors", 490 + Hooks.lowerRightResfixX, 525 + Hooks.resfixY)
+				});
+
+				break;
+			case "dashboard":
+				this.hooks.push({
+					name: "dashboard",
+					hook: new Box(Hooks.dashboardX + Hooks.resfixX, Hooks.dashboardY + Hooks.resfixY, 500 + Hooks.dashboardWidthResfixX, 65, 0x0, 1, 2)
+				});
+
+				break;
+			case "dashboardframe":
+				this.hooks.push({
+					name: "dashboardframe",
+					hook: new Frame(Hooks.dashboardX + Hooks.resfixX, Hooks.dashboardY + Hooks.resfixY, 500 + Hooks.dashboardWidthResfixX, 65, 2)
 				});
 
 				break;
@@ -540,7 +572,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 8, // Den of Evil
-					hook: new Text("Num 4: " + Pather.getAreaName(8), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(8), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -548,7 +580,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 17, // Burial Grounds
-					hook: new Text("Num 4: " + Pather.getAreaName(17), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(17), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -556,7 +588,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 20, // Forgotten Tower
-					hook: new Text("Num 4: " + Pather.getAreaName(20), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(20), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -564,7 +596,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 12, // Pit Level 1
-					hook: new Text("Num 4: " + Pather.getAreaName(12), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(12), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -572,7 +604,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 14, // Underground Passage Level 2
-					hook: new Text("Num 4: " + Pather.getAreaName(14), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(14), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -580,7 +612,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 19, // Mausoleum
-					hook: new Text("Num 4: " + Pather.getAreaName(19), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(19), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -588,7 +620,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 55, // Stony Tomb Level 1
-					hook: new Text("Num 4: " + Pather.getAreaName(55), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(55), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -596,7 +628,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 56, // Halls of the Dead Level 1
-					hook: new Text("Num 4: " + Pather.getAreaName(56), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(56), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -604,7 +636,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 62, // Maggot Lair Level 1
-					hook: new Text("Num 4: " + Pather.getAreaName(62), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(62), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -612,7 +644,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 65, // Ancient Tunnels
-					hook: new Text("Num 4: " + Pather.getAreaName(65), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(65), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -620,7 +652,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 85, // Spider Cavern
-					hook: new Text("Num 4: " + Pather.getAreaName(85), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(85), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -628,7 +660,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 88, // Flayer Dungeon Level 1
-					hook: new Text("Num 4: " + Pather.getAreaName(88), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(88), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -636,7 +668,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 94, // Ruined Temple
-					hook: new Text("Num 4: " + Pather.getAreaName(94), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(94), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -644,7 +676,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 92, // Sewers Level 1
-					hook: new Text("Num 4: " + Pather.getAreaName(92), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(92), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -652,7 +684,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 80, // Kurast Bazaar
-					hook: new Text("Num 4: " + Pather.getAreaName(80), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(80), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -660,7 +692,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 114, // Frozen River
-					hook: new Text("Num 4: " + Pather.getAreaName(114), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(114), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -668,7 +700,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 116, // Drifter Cavern
-					hook: new Text("Num 4: " + Pather.getAreaName(116), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(116), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -676,7 +708,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 119, // Icy Cellar
-					hook: new Text("Num 4: " + Pather.getAreaName(119), 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(119), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -688,7 +720,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "POI",
 					destination: {x: poi.x, y: poi.y},
-					hook: new Text("Num 3: " + poi.name, 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc<Num 3: " + poi.name, 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 			}
 
@@ -698,7 +730,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Waypoint",
 					destination: {x: wp.x, y: wp.y},
-					hook: new Text("Num 2: WP", 150, 525 - (this.hooks.length * 10))
+					hook: new Text("ÿc9Num 2: WP", 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 			}
 
@@ -710,7 +742,7 @@ var Hooks = {
 						this.hooks.push({
 							name: "Previous Area",
 							destination: this.prevAreas[me.area],
-							hook: new Text("Num 1: " + Pather.getAreaName(this.prevAreas[me.area]), 150, 525 - (this.hooks.length * 10))
+							hook: new Text("ÿc1Num 1: " + Pather.getAreaName(this.prevAreas[me.area]), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 						});
 
 						break;
@@ -723,7 +755,7 @@ var Hooks = {
 						this.hooks.push({
 							name: "Next Area",
 							destination: nextAreas[me.area],
-							hook: new Text("Num 0: " + Pather.getAreaName(nextAreas[me.area]), 150, 525 - (this.hooks.length * 10))
+							hook: new Text("ÿc3Num 0: " + Pather.getAreaName(nextAreas[me.area]), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 						});
 
 						nextCheck = true;
@@ -739,7 +771,7 @@ var Hooks = {
 							this.hooks.push({
 								name: "Next Area",
 								destination: this.prevAreas.indexOf(me.area),
-								hook: new Text("Num 0: " + Pather.getAreaName(this.prevAreas.indexOf(me.area)), 150, 525 - (this.hooks.length * 10))
+								hook: new Text("Num 0: " + Pather.getAreaName(this.prevAreas.indexOf(me.area)), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 							});
 
 							break;
@@ -838,7 +870,7 @@ function main() {
 	};
 
 	var i,
-		hideFlags = [0x09, 0x0C, 0x0D, 0x01, 0x02, 0x0F, 0x18, 0x19, 0x1A, 0x21];
+		hideFlags = [0x09, 0x0C, 0x0D, 0x01, 0x02, 0x0F, 0x18, 0x19, 0x1A, 0x21, 0x05, 0x14, 0x24];
 
 	addEventListener("keyup", this.keyEvent);
 
