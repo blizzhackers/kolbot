@@ -455,7 +455,7 @@ function main() {
 			say("/fps");
 
 			break;
-		case 111: // numpad / - get nearest preset unit id
+		case 105: // numpad 9 - get nearest preset unit id
 			print(this.getNearestPreset());
 
 			break;
