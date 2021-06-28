@@ -1,11 +1,11 @@
 var Hooks = {
 	dashboardX: 400,
 	dashboardY: 480,
-	resfixX: me.screensize ? 0 : -85,
+	resfixX: me.screensize ? 0 : -100,
 	resfixY: me.screensize ? 0 : -120,
 	upperRightResfixX: me.screensize ? 0 : -160,
-	lowerRightResfixX: me.screensize ? 0 : -145,
-	lowerLeftResfixX: me.screensize ? 0 : -25,
+	lowerRightResfixX: me.screensize ? 0 : -160,
+	lowerLeftResfixX: me.screensize ? 0 : -50,
 	dashboardWidthResfixX: me.screensize ? 0 : -110,
 
 	monsters: {
@@ -115,160 +115,6 @@ var Hooks = {
 			while (this.hooks.length) {
 				this.hooks[0].hook[0].remove();
 				this.hooks[0].hook[1].remove();
-				this.hooks.shift();
-			}
-		}
-	},
-
-	shrines: {
-		hooks: [],
-		enabled: true,
-
-		check: function () {
-			if (!this.enabled) {
-				this.flush();
-
-				return;
-			}
-
-			var i, shrine;
-
-			for (i = 0; i < this.hooks.length; i += 1) {
-				if (!copyUnit(this.hooks[i].shrine).x) {
-					this.hooks[i].hook[0].remove();
-					this.hooks.splice(i, 1);
-
-					i -= 1;
-				}
-			}
-
-			shrine = getUnit(2, "shrine");
-
-			if (shrine) {
-				do {
-					if (shrine.mode === 0) {
-						if (!this.getHook(shrine)) {
-							this.add(shrine);
-						} 
-					} else {
-						this.remove(shrine);
-					}
-				} while (shrine.getNext());
-			}
-		},
-
-		newHook: function (shrine) {
-			var arr = [];
-
-			switch (shrine.objtype) {
-				case 1:
-					arr.push(new Text("Refilling", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 2:
-					arr.push(new Text("Health", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 3:
-					arr.push(new Text("Mana", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 4:
-					arr.push(new Text("Health Exchange", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 5:
-					arr.push(new Text("Mana Exchange", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 6:
-					arr.push(new Text("Armor", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 7:
-					arr.push(new Text("Combat", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 8:
-					arr.push(new Text("Resist Fire", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 9:
-					arr.push(new Text("Resist Cold", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 10:
-					arr.push(new Text("Resist Lightning", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 11:
-					arr.push(new Text("Resist Poison", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 12:
-					arr.push(new Text("Skill", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 13:
-					arr.push(new Text("Mana Recharge", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 14:
-					arr.push(new Text("Stamina", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 15:
-					arr.push(new Text("Experience", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 16:
-					arr.push(new Text("Enirhs", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 17:
-					arr.push(new Text("Portal", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 18:
-					arr.push(new Text("Gem", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 19:
-					arr.push(new Text("Fire", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 20:
-					arr.push(new Text("Monster", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 21:
-					arr.push(new Text("Exploding", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 22:
-					arr.push(new Text("Poison", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-			}
-
-			return arr;
-		},
-
-		add: function (shrine) {
-			this.hooks.push({
-				shrine: copyUnit(shrine),
-				hook: this.newHook(shrine)
-			});
-		},
-
-		getHook: function (shrine) {
-			var i;
-
-			for (i = 0; i < this.hooks.length; i += 1) {
-				if (this.hooks[i].shrine.gid === shrine.gid) {
-					return this.hooks[i].hook;
-				}
-			}
-
-			return false;
-		},
-
-		remove: function (shrine) {
-			var i;
-
-			for (i = 0; i < this.hooks.length; i += 1) {
-				if (this.hooks[i].shrine.gid === shrine.gid) {
-					this.hooks[i].hook[0].remove();
-					this.hooks.splice(i, 1);
-
-					return true;
-				}
-			}
-
-			return false;
-		},
-
-		flush: function () {
-			while (this.hooks.length) {
-				this.hooks[0].hook[0].remove();
 				this.hooks.shift();
 			}
 		}
@@ -416,7 +262,6 @@ var Hooks = {
 
 	vector: {
 		hooks: [],
-		names: [],
 		currArea: 0,
 		enabled: true,
 
@@ -459,8 +304,6 @@ var Hooks = {
 						} else {
 							this.add(exits[i].x, exits[i].y, 0x99);
 						}
-
-						this.addNames(exits[i]);
 					}
 				}
 
@@ -484,10 +327,6 @@ var Hooks = {
 			this.hooks.push(new Line(me.x, me.y, x, y, color, true));
 		},
 
-		addNames: function (area) {
-			this.names.push(new Text(Pather.getAreaName(area.target), area.x, area.y, 0, 6, 2, true));
-		},
-
 		update: function () {
 			var i;
 
@@ -500,10 +339,6 @@ var Hooks = {
 		flush: function () {
 			while (this.hooks.length) {
 				this.hooks.shift().remove();
-			}
-
-			while (this.names.length) {
-				this.names.shift().remove();
 			}
 
 			this.currArea = 0;
@@ -737,7 +572,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 8, // Den of Evil
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(8), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(8), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -745,7 +580,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 17, // Burial Grounds
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(17), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(17), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -753,7 +588,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 20, // Forgotten Tower
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(20), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(20), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -761,7 +596,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 12, // Pit Level 1
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(12), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(12), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -769,7 +604,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 14, // Underground Passage Level 2
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(14), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(14), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -777,7 +612,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 19, // Mausoleum
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(19), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(19), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -785,7 +620,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 55, // Stony Tomb Level 1
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(55), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(55), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -793,7 +628,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 56, // Halls of the Dead Level 1
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(56), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(56), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -801,7 +636,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 62, // Maggot Lair Level 1
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(62), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(62), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -809,7 +644,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 65, // Ancient Tunnels
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(65), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(65), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -817,7 +652,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 85, // Spider Cavern
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(85), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(85), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -825,7 +660,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 88, // Flayer Dungeon Level 1
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(88), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(88), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -833,7 +668,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 94, // Ruined Temple
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(94), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(94), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -841,7 +676,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 92, // Sewers Level 1
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(92), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(92), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -849,7 +684,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 80, // Kurast Bazaar
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(80), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(80), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -857,7 +692,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 114, // Frozen River
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(114), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(114), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -865,7 +700,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 116, // Drifter Cavern
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(116), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(116), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -873,7 +708,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Side Area",
 					destination: 119, // Icy Cellar
-					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(119), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc3Num 4: " + Pather.getAreaName(119), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 
 				break;
@@ -885,7 +720,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "POI",
 					destination: {x: poi.x, y: poi.y},
-					hook: new Text("ÿc<Num 3: " + poi.name, 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc<Num 3: " + poi.name, 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 			}
 
@@ -895,7 +730,7 @@ var Hooks = {
 				this.hooks.push({
 					name: "Waypoint",
 					destination: {x: wp.x, y: wp.y},
-					hook: new Text("ÿc9Num 2: WP", 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+					hook: new Text("ÿc9Num 2: WP", 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 				});
 			}
 
@@ -907,7 +742,7 @@ var Hooks = {
 						this.hooks.push({
 							name: "Previous Area",
 							destination: this.prevAreas[me.area],
-							hook: new Text("ÿc1Num 1: " + Pather.getAreaName(this.prevAreas[me.area]), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+							hook: new Text("ÿc1Num 1: " + Pather.getAreaName(this.prevAreas[me.area]), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 						});
 
 						break;
@@ -920,7 +755,7 @@ var Hooks = {
 						this.hooks.push({
 							name: "Next Area",
 							destination: nextAreas[me.area],
-							hook: new Text("ÿc3Num 0: " + Pather.getAreaName(nextAreas[me.area]), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+							hook: new Text("ÿc3Num 0: " + Pather.getAreaName(nextAreas[me.area]), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 						});
 
 						nextCheck = true;
@@ -936,7 +771,7 @@ var Hooks = {
 							this.hooks.push({
 								name: "Next Area",
 								destination: this.prevAreas.indexOf(me.area),
-								hook: new Text("Num 0: " + Pather.getAreaName(this.prevAreas.indexOf(me.area)), 155 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
+								hook: new Text("Num 0: " + Pather.getAreaName(this.prevAreas.indexOf(me.area)), 165 + Hooks.lowerLeftResfixX, 525 - (this.hooks.length * 10) + Hooks.resfixY)
 							});
 
 							break;
@@ -975,7 +810,6 @@ var Hooks = {
 		}
 
 		this.monsters.check();
-		this.shrines.check();
 		this.text.check();
 		this.vector.check();
 		this.tele.check();
@@ -983,7 +817,6 @@ var Hooks = {
 
 	flush: function () {
 		this.monsters.flush();
-		this.shrines.flush();
 		this.text.flush();
 		this.vector.flush();
 		this.tele.flush();
