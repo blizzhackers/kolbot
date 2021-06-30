@@ -1185,7 +1185,7 @@ IngredientLoop:
 					me.cancel(); // inventory
 
 					// If the storage location is known, put the pot to this location
-					Storage[orgin.location] && Storage[orgin.location].moveTo(fullrev);
+					Storage[orgin.location] && Storage[orgin.location].MoveTo(fullrev);
 
 					// If returned true, the prototype some stops looping.
 					return fullrev.location !== locations.Cube;
