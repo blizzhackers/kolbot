@@ -12,7 +12,7 @@ function MFHelper() {
 	function ChatEvent(name, msg) {
 		if (!player) {
 			var i,
-				match = ["kill", "clearlevel", "clear", "quit", "cows", "council"];
+				match = ["kill", "clearlevel", "clear", "quit", "cows", "council", "goto"];
 
 			if (msg) {
 				for (i = 0; i < match.length; i += 1) {
@@ -117,6 +117,20 @@ function MFHelper() {
 
 		player = Misc.findPlayer(Config.Leader);
 	}
+	
+	
+	if (player) {
+		if (!Misc.poll(() => player.area, 120*60, 100 + me.ping)) {
+			throw new Error('Failed to wait for player area');
+		}
+
+		playerAct = Misc.getPlayerAct(Config.Leader);
+
+		if (playerAct && playerAct !== me.act) {
+			Town.goToTown(playerAct);
+			Town.move("portalspot");
+		}
+	}
 
 	// START
 MainLoop:
@@ -132,16 +146,6 @@ MainLoop:
 		}
 
 		if (player) {
-			while (!player.area) {
-				delay(100 + me.ping);
-			}
-
-			playerAct = Misc.getPlayerAct(Config.Leader);
-
-			if (playerAct && playerAct !== me.act) {
-				Town.goToTown(playerAct);
-				Town.move("portalspot");
-			}
 
 			if (Config.LifeChicken > 0 && me.hp <= Math.floor(me.hpmax * Config.LifeChicken / 100)) {
 				Town.heal();
@@ -155,9 +159,25 @@ MainLoop:
 
 			if (command !== oldCommand) {
 				oldCommand = command;
-
+				
 				if (command.indexOf("quit") > -1) {
 					break MainLoop;
+				} else if (command.indexOf("goto") > -1) {
+					print("ÿc4MFHelperÿc0: Goto");
+					split = command.substr(6);
+
+					try {
+						if (!!parseInt(split, 10)) {
+								split = parseInt(split, 10);
+							}
+						
+						Town.goToTown(split, true);
+						Town.move("portalspot");
+					} catch (townerror) {
+						print(townerror);
+					}
+					
+					delay(500 + me.ping);
 				} else if (command.indexOf("cows") > -1) {
 					print("ÿc4MFHelperÿc0: Clear Cows");
 

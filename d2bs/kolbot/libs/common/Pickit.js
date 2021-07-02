@@ -264,7 +264,12 @@ MainLoop:
 			}
 
 			if (stats.useTk) {
-				Skill.cast(43, 0, item);
+				if (Config.PacketCasting == 2) {
+					Skill.setSkill(43, 0);
+					Packet.unitCast(0, item);
+				} else {
+					Skill.cast(43, 0, item);
+				}
 			} else {
 				if (getDistance(me, item) > (Config.FastPick === 2 && i < 1 ? 6 : 4) || checkCollision(me, item, 0x1)) {
 					if (Pather.useTeleport()) {
