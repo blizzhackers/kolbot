@@ -25,7 +25,7 @@ include("common/Runewords.js");
 include("common/Storage.js");
 include("common/Town.js");
 
-function main() {
+function main () {
 	D2Bot.init(); // Get D2Bot# handle
 	D2Bot.ingame();
 
@@ -34,13 +34,15 @@ function main() {
 		delay(50);
 	}
 
+	clearAllEvents() // remove any event listeners from game crash
+
 	if (!getScript("tools/heartbeat.js")) {
 		load("tools/heartbeat.js");
 	}
 
 	if (getScript("d2botmap.dbj")) {
 		load("tools/mapthread.js");
-		load("tools/toolsthread.js");
+		load("tools/maptoolsthread.js");
 		Config.init(true);
 		LocalChat.init();
 
@@ -60,9 +62,20 @@ function main() {
 			delay(1000);
 		}
 	}
-
-	// don't load default for mules
+	
+	// don't load default for mules and suicide walk prevention
 	if (getScript("D2BotMule.dbj")) {
+		while(true) {
+			try {
+				if (me.area === 2) {
+					D2Bot.printToConsole("Saved from suicide walk!");
+					D2Bot.restart();
+				}
+			} catch (e) {
+				D2Bot.restart();
+			}
+			delay(1000);
+		}
 		return true;
 	}
 
@@ -130,7 +143,6 @@ function main() {
 	addEventListener("copydata", this.copyDataEvent);
 
 	// GameAction handler
-
 	if (GameAction.inGameCheck()) {
 		return true;
 	}
@@ -170,7 +182,7 @@ function main() {
 
 	// Load threads
 	load("tools/ToolsThread.js");
-
+	
 	if (Config.TownCheck || Config.TownHP || Config.TownMP) {
 		load("tools/TownChicken.js");
 	}
@@ -196,11 +208,11 @@ function main() {
 	if (!Scripts.UserAddon && !Scripts.Test) {
 		Town.getCorpse();
 		Town.clearBelt();
-		
-		if(Config.ClearInvOnStart) {
+
+		if (Config.ClearInvOnStart) {
 			Town.clearInventory();
 		}
-		
+
 		//Pickit.pickItems();
 	}
 
