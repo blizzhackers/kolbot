@@ -15,7 +15,7 @@ var Hooks = {
 	statBoxBX: 645,
 	statBoxBY: 520,
 	qolBoxX: 715,
-	qolBoxY: 450,
+	qolBoxY: 442,
 	statBoxAResFixX: me.screensize ? 0 : -106,
 	statBoxAResFixY: me.screensize ? 0 : -445,
 	statBoxBResFixX: me.screensize ? 0 : -600,
@@ -30,6 +30,8 @@ var Hooks = {
 	lowerRightResfixX: me.screensize ? 0 : -85,
 	lowerLeftResfixX: me.screensize ? 0 : -85,
 	dashboardWidthResfixX: me.screensize ? 0 : -5,
+	pickitEnabled: false,
+	saidMessage: false,
 
 	items: {
 		hooks: [],
@@ -69,12 +71,22 @@ var Hooks = {
 
 			if (item) {
 				do {
-					if ((item.mode === 3 || item.mode === 5) && (item.quality >= 5 || item.quality === 4 || ([2, 3].indexOf(item.quality) > -1 && this.ignoreItemTypes.indexOf(item.itemType) === -1)) ) {
-						if (!this.getHook(item)) {
-							this.add(item);
+					if ((item.mode === 3 || item.mode === 5) && (item.quality >= 5 || item.quality === 4 || ([2, 3].indexOf(item.quality) > -1 && this.ignoreItemTypes.indexOf(item.itemType) === -1))) {
+						if (Hooks.pickitEnabled) {
+							if ([0, 4].indexOf(Pickit.checkItem(item).result) === -1) {
+								if (!this.getHook(item)) {
+									this.add(item);
+								}
+							}
+						} else {
+							if (!this.getHook(item)) {
+								this.add(item);
+							}
 						}
 
-						this.update(); 
+						if (this.getHook(item)) {
+							this.update(); 
+						}
 					} else {
 						this.remove(item);
 					}
@@ -148,8 +160,12 @@ var Hooks = {
 					break
 				default:
 					if (item.name) {
+						if (item.getStat(194) === 1) {
+							break;
+						}
+
 						color = 0x20;
-						code = "ÿc0" + (item.getFlag(0x400000) ? "Eth: " : "") + "[" + item.getStat(194) + "]";
+						code = "ÿc0" + (item.getFlag(0x400000) ? "Eth: " : "") + (item.getStat(194) > 0 ? "[" + item.getStat(194) + "]" : "");
 						let abbr = item.name.split(" ");
 						let abbrName = "";
 
@@ -400,57 +416,13 @@ var Hooks = {
 					code += item.quality === 5 ? "" : "Spirit Shroud";
 					break;
 				//Set Items/Uniques
-				//--------Set Tal Rasha--------//
-				case 290:
-					code += item.quality === 5 ? "Tal Orb" : "Occulus";
-					break;
-				case 490:
-					code += item.quality === 5 ? "Tal Armor" : "";
-					break;
-				case 358:
-					code += item.quality === 5 ? "Tal Helm" : "Blackhorn's";
-					break;
-				case 392:
-					code += item.quality === 5 ? "Tal Belt" : "Gloom's Trap";
-					break;
-				//--------Set Trang Ouls--------//
-				case 465:
-					code += item.quality === 5 ? "Trang Helm" : "Giant Skull";
-					break;
-				case 371:
-					code += item.quality === 5 ? "Trang Armor" : "Black Hades";
-					break;
-				case 463:
-					code += item.quality === 5 ? "Trang Belt" : "";
-					break;
-				case 382:
-					code += item.quality === 5 ? "Trang Gloves" : "Ghoulhide";
-					break;
-				case 486:
-					code += item.quality === 5 ? "Trang Shield" : "";
-					break;
-				//--------Set Immortal Kings--------//
-				case 219:
-					code += item.quality === 5 ? "IK Maul" : "Windhammer";
-					break;
-				case 407:
-					code += item.quality === 5 ? "IK Helm" : "";
-					break;
-				case 442:
-					code += item.quality === 5 ? "IK Armor" : item.name;
-					break;
-				case 384:
-					code += item.quality === 5 ? "IK Gloves" : "HellMouth";
-					break;
-				case 389:
-					code += item.quality === 5 ? "IK Boots" : "Gore Rider";
-					break;
+				//----------------------------Elite Sets----------------------------//
 				//--------Set Aldurs--------//
 				case 113:
 					code += item.quality === 5 ? "Aldur's Wep" : "Moonfall";
 					break;
 				case 470:
-					code += item.quality === 5 ? "Aldur's Helm" : "";
+					code += item.quality === 5 ? "Aldur's Helm" : item.name;
 					break;
 				case 441:
 					code += item.quality === 5 ? "Aldur's Armor" : "Steel Carapace";
@@ -469,37 +441,27 @@ var Hooks = {
 					code += item.quality === 5 ? "Griswold's Armor" : "Corpsemourn";
 					break;
 				case 502:
-					code += item.quality === 5 ? "Griswold's Shield" : "";
+					code += item.quality === 5 ? "Griswold's Shield" : item.name;
 					break;
-				//--------Set Disciples--------//
-				case 429:
-					code += item.quality === 5 ? "Disciple's Armor" : "Ormus Robe's";
+				//--------Set Immortal Kings--------//
+				case 219:
+					code += item.quality === 5 ? "IK Maul" : "Windhammer";
 					break;
-				case 462:
-					code += item.quality === 5 ? "Disciple's Belt" : "Verdungo's";
+				case 407:
+					code += item.quality === 5 ? "IK Helm" : item.name;
 					break;
-				case 450:
-					code += item.quality === 5 ? "Disciple's Gloves" : "";
+				case 442:
+					code += item.quality === 5 ? "IK Armor" : item.name;
 					break;
-				case 385:
-					code += item.quality === 5 ? "Disciple's Boots" : "Infernostride";
+				case 384:
+					code += item.quality === 5 ? "IK Gloves" : "HellMouth";
 					break;
-				//--------Set Naj's--------//
-				case 418:
-					code += item.quality === 5 ? "Naj's Helm" : "";
-					break;
-				case 438:
-					code += item.quality === 5 ? "Naj's Armor" : "";
-					break;
-				case 261:
-					code += item.quality === 5 ? "Naj's Staff" : "Ondal's";
-					break;
-				case 418:
-					code += item.quality === 5 ? "Naj's Helm" : "Moonfall";
+				case 389:
+					code += item.quality === 5 ? "IK Boots" : "Gore Rider";
 					break;
 				//--------Set Mavina's--------//
 				case 418:
-					code += item.quality === 5 ? "Mavina's Bow" : "";
+					code += item.quality === 5 ? "Mavina's Bow" : item.name;
 					break;
 				case 439:
 					code += item.quality === 5 ? "Mavina's Armor" : "Leviathan";
@@ -513,25 +475,12 @@ var Hooks = {
 				case 383:
 					code += item.quality === 5 ? "Mavina's Gloves" : "Lava Gout";
 					break;
-				//--------Set Orphan's Call--------//
-				case 329:
-					code += item.quality === 5 ? item.name : "Umbral Disk";
-					break;
-				case 356:
-					code += item.quality === 5 ? "G-Face" : "Valk Wing";
-					break;
-				case 347:
-					code += item.quality === 5 ? "Orphan's Belt" : item.name;
-					break;
-				case 335:
-					code += item.quality === 5 ? "Orphan's Gloves" : "Bloodfist";
-					break;
 				//--------Set Natalya's--------//
 				case 181:
-					code += item.quality === 5 ? "Natalya's Wep" : "";
+					code += item.quality === 5 ? "Natalya's Wep" : item.name;
 					break;
 				case 434:
-					code += item.quality === 5 ? "Natalya's Armor" : "";
+					code += item.quality === 5 ? "Natalya's Armor" : item.name;
 					break;
 				case 395:
 					code += item.quality === 5 ? "Natalya's Helm" : "Vamp Gaze";
@@ -539,12 +488,52 @@ var Hooks = {
 				case 387:
 					code += item.quality === 5 ? "Natalya's Boots" : "Silkweave";
 					break;
-				//--------Set Sazabi's--------//
-				case 227:
-					code += item.quality === 5 ? "Sazabi's Wep" : "Frostwind";
+				//--------Set Tal Rasha--------//
+				case 290:
+					code += item.quality === 5 ? "Tal Orb" : "Occulus";
 					break;
-				case 437:
-					code += item.quality === 5 ? "Sazabi's Armor" : "Arkaine's";
+				case 490:
+					code += item.quality === 5 ? "Tal Armor" : item.name;
+					break;
+				case 358:
+					code += item.quality === 5 ? "Tal Helm" : "Blackhorn's";
+					break;
+				case 392:
+					code += item.quality === 5 ? "Tal Belt" : "Gloom's Trap";
+					break;
+				//--------Set Trang Ouls--------//
+				case 465:
+					code += item.quality === 5 ? "Trang Helm" : "Giant Skull";
+					break;
+				case 371:
+					code += item.quality === 5 ? "Trang Armor" : "Black Hades";
+					break;
+				case 463:
+					code += item.quality === 5 ? "Trang Belt" : item.name;
+					break;
+				case 382:
+					code += item.quality === 5 ? "Trang Gloves" : "Ghoulhide";
+					break;
+				case 486:
+					code += item.quality === 5 ? "Trang Shield" : item.name;
+					break;
+				//----------------------------Exceptional Sets----------------------------//
+				//--------Set Bul-Kathos's--------//
+				case 234:
+					code += item.quality === 5 ? "Bul-Kathos' Blade" : "Grandfather";
+					break;
+				case 228:
+					code += item.quality === 5 ? "Bul-Kathos' Sword" : "";
+					break;
+				//--------Set Cow King's--------//
+				case 352:
+					code += item.quality === 5 ? "Cow King's Helm" : "";
+					break;
+				case 316:
+					code += item.quality === 5 ? "Cow King's Armor" : "Twitchthroe";
+					break;
+				case 340:
+					code += item.quality === 5 ? item.name : "Gorefoot";
 					break;
 				//--------Set Heavens's--------//
 				case 19:
@@ -559,19 +548,6 @@ var Hooks = {
 				case 449:
 					code += item.quality === 5 ? "Heavens's Shield" : item.name;
 					break;
-				case 320:
-					code += item.quality === 5 ? item.name : "Venom Ward";
-					break;
-				case 333:
-					code += item.quality === 5 ? item.name : "The Ward";
-					break;
-				//--------Set Bul-Kathos's--------//
-				case 234:
-					code += item.quality === 5 ? "Bul-Kathos' Blade" : "Grandfather";
-					break;
-				case 228:
-					code += item.quality === 5 ? "Bul-Kathos' Sword" : "";
-					break;
 				//--------Set Hwanin's--------//
 				case 151:
 					code += item.quality === 5 ? "Hwanin's Bill" : "Blackleach";
@@ -585,6 +561,60 @@ var Hooks = {
 				case 346:
 					code += item.quality === 5 ? item.name : "Nightsmoke";
 					break;
+				//--------Set Naj's--------//
+				case 418:
+					code += item.quality === 5 ? "Naj's Helm" : "";
+					break;
+				case 438:
+					code += item.quality === 5 ? "Naj's Armor" : "";
+					break;
+				case 261:
+					code += item.quality === 5 ? "Naj's Staff" : "Ondal's";
+					break;
+				case 418:
+					code += item.quality === 5 ? "Naj's Helm" : "Moonfall";
+					break;
+				//--------Set Orphan's Call--------//
+				case 329:
+					code += item.quality === 5 ? item.name : "Umbral Disk";
+					break;
+				case 356:
+					code += item.quality === 5 ? "G-Face" : "Valk Wing";
+					break;
+				case 347:
+					code += item.quality === 5 ? "Orphan's Belt" : item.name;
+					break;
+				case 335:
+					code += item.quality === 5 ? item.name : "Bloodfist";
+					break;
+				//--------Set Sander's Folly--------//
+				//--------Set Sazabi's--------//
+				case 227:
+					code += item.quality === 5 ? "Sazabi's Wep" : "Frostwind";
+					break;
+				case 437:
+					code += item.quality === 5 ? "Sazabi's Armor" : "Arkaine's";
+					break;
+				case 320:
+					code += item.quality === 5 ? item.name : "Venom Ward";
+					break;
+				case 333:
+					code += item.quality === 5 ? item.name : "The Ward";
+					break;
+				//--------Set The Disciples--------//
+				case 429:
+					code += item.quality === 5 ? "Disciple's Armor" : "Ormus Robe's";
+					break;
+				case 462:
+					code += item.quality === 5 ? "Disciple's Belt" : "Verdungo's";
+					break;
+				case 450:
+					code += item.quality === 5 ? "Disciple's Gloves" : "";
+					break;
+				case 385:
+					code += item.quality === 5 ? "Disciple's Boots" : "Infernostride";
+					break;
+				//----------------------------Normal Sets----------------------------//
 				//--------Set Angelics's--------//
 				case 317:
 					code += item.quality === 5 ? "Angelic's Armor" : "Darkglow";
@@ -1227,6 +1257,10 @@ var Hooks = {
 				this.add("killPather");
 			}
 
+			if (!this.getHook("pickitEnabled")) {
+				this.add("pickitEnabled");
+			}
+
 			if (!this.getHook("statBoxA")) {
 				this.add("statBoxA");
 			}
@@ -1451,49 +1485,56 @@ var Hooks = {
 			case "qolBox":
 				this.hooks.push({
 					name: "qolBox",
-					hook: new Box(Hooks.qolBoxX + Hooks.qolBoxResFixX, Hooks.qolBoxY + Hooks.qolBoxResFixY, 135, 40, 0x0, 1, 2)
+					hook: new Box(Hooks.qolBoxX + Hooks.qolBoxResFixX, Hooks.qolBoxY + Hooks.qolBoxResFixY, 140, 47, 0x0, 1, 2)
 				});
 
 				break;
 			case "qolFrame":
 				this.hooks.push({
 					name: "qolFrame",
-					hook: new Frame(Hooks.qolBoxX + Hooks.qolBoxResFixX, Hooks.qolBoxY + Hooks.qolBoxResFixY, 135, 40, 2)
+					hook: new Frame(Hooks.qolBoxX + Hooks.qolBoxResFixX, Hooks.qolBoxY + Hooks.qolBoxResFixY, 140, 47, 2)
 				});
 
 				break;
 			case "nonTownQolsA":
 				this.hooks.push({
 					name: "nonTownQolsA",
-					hook: new Text("Key 5: Make Portal", 656 + Hooks.qolBoxResFixX, 465 + Hooks.qolBoxResFixY, 4)
+					hook: new Text("Key 5: Make Portal", 653 + Hooks.qolBoxResFixX, 455 + Hooks.qolBoxResFixY, 4)
 				});
 
 				break;
 			case "nonTownQolsB":
 				this.hooks.push({
 					name: "nonTownQolsB",
-					hook: new Text("Key 6: Go To Town", 656 + Hooks.qolBoxResFixX, 475 + Hooks.qolBoxResFixY, 4)
+					hook: new Text("Key 6: Go To Town", 653 + Hooks.qolBoxResFixX, 465 + Hooks.qolBoxResFixY, 4)
 				});
 
 				break;
 			case "townQolsA":
 				this.hooks.push({
 					name: "townQolsA",
-					hook: new Text("Key 5: Go To Healer", 656 + Hooks.qolBoxResFixX, 465 + Hooks.qolBoxResFixY, 4)
+					hook: new Text("Key 5: Go To Healer", 653 + Hooks.qolBoxResFixX, 455 + Hooks.qolBoxResFixY, 4)
 				});
 
 				break;
 			case "townQolsB":
 				this.hooks.push({
 					name: "townQolsB",
-					hook: new Text("Key 6: Open Stash", 656 + Hooks.qolBoxResFixX, 475 + Hooks.qolBoxResFixY, 4)
+					hook: new Text("Key 6: Open Stash", 653 + Hooks.qolBoxResFixX, 465 + Hooks.qolBoxResFixY, 4)
 				});
 
 				break;
 			case "killPather":
 				this.hooks.push({
 					name: "killPather",
-					hook: new Text("Num 9: ÿc1Stop Action", 656 + Hooks.qolBoxResFixX, 485 + Hooks.qolBoxResFixY, 4)
+					hook: new Text("Num 9: ÿc1Stop Action", 653 + Hooks.qolBoxResFixX, 475 + Hooks.qolBoxResFixY, 4)
+				});
+
+				break;
+			case "pickitEnabled":
+				this.hooks.push({
+					name: "pickitEnabled",
+					hook: new Text((Hooks.pickitEnabled ? "Num -: ÿc<Your Filter" : "Num -: ÿc1Default Filter"), 653 + Hooks.qolBoxResFixX, 485 + Hooks.qolBoxResFixY, 4)
 				});
 
 				break;
@@ -1531,10 +1572,6 @@ var Hooks = {
 		},
 
 		flush: function () {
-			if (getUIFlag(0x0D)) {
-				return;
-			}
-
 			while (this.hooks.length) {
 				this.hooks.shift().hook.remove();
 			}
@@ -2005,9 +2042,9 @@ var Hooks = {
 				case 97: // Numpad 1
 					hook = this.getHook("Previous Area");
 
-					if ([133, 134, 135, 136].indexOf(me.area) > -1) {
+					if ([133, 135, 136].indexOf(me.area) > -1) {
 						obj.type = "unit";
-					} else if ([38, 39, 125, 126, 127].indexOf(me.area) > -1) {
+					} else if ([38, 39, 125, 126, 127, 134].indexOf(me.area) > -1) {
 						obj.type = "portal";
 					} else {
 						obj.type = "area";
@@ -2474,7 +2511,7 @@ var Hooks = {
 					this.portals.push({
 						name: "Uber Tristam",
 						destination: 136,
-						hook: new Text("ÿc1Num 8: " + Pather.getAreaNam(136), Hooks.portalX, Hooks.portalY + Hooks.resfixY + 45)
+						hook: new Text("ÿc1Num 8: " + Pather.getAreaName(136), Hooks.portalX, Hooks.portalY + Hooks.resfixY + 45)
 					});
 				}
 
@@ -2570,6 +2607,16 @@ var Hooks = {
 					});
 
 					break;
+				// Forgotten sands
+				case 134:
+					this.hooks.push({
+						name: "Previous Area",
+						destination: 109,
+						hook: new Text("ÿc1Num 1: " + Pather.getAreaName(109), 200 + Hooks.lowerLeftResfixX, 545 - (this.hooks.length * 10) + Hooks.resfixY)
+					});
+
+					break;
+				// Matron's
 				case 133:
 					if (me.area === 133) {
 						let lilith = getPresetUnit(me.area, 2, 397);
@@ -2578,22 +2625,29 @@ var Hooks = {
 							case 11:
 								entrance = {x: 20023, y: 7643};
 								break;
+							case 20:
+								entrance = {x: 20303, y: 7803};
+								break;
+							case 21:
+								entrance = {x: 20263, y: 7683};
+								break;
 						}
 					}
-				case 134:
-					if (me.area === 134) {
-						entrance = {x: 20193, y: 8693};
-					}
+				// Furnace
 				case 135:
 					if (me.area === 135) {
 						let izual = getPresetUnit(me.area, 2, 397);
 
 						switch (izual.x) {
+							case 14:
+								entrance = {x: 20138, y: 14873};
+								break;
 							case 15:
 								entrance = {x: 20138, y: 14563};
 								break;
 						}
 					}
+				// Tristram
 				case 136:
 					if (me.area === 136) {
 						entrance = {x: 25105, y: 5140};
@@ -2714,11 +2768,31 @@ var Hooks = {
 
 function main() {
 	include("json2.js");
-	include("common/attack.js");
-	include("common/pather.js");
+	include("NTItemParser.dbl");
+	include("OOG.js");
+	include("AutoMule.js");
+	include("Gambling.js");
+	include("CraftingSystem.js");
+	include("TorchSystem.js");
+	include("common/Attack.js");
+	include("common/Cubing.js");
+	include("common/Config.js");
+	include("common/misc.js");
+	include("common/util.js");
+	include("common/Pickit.js");
+	include("common/Pather.js");
+	include("common/Precast.js");
 	include("common/Prototypes.js");
+	include("common/Runewords.js");
+	include("common/Storage.js");
+	include("common/Town.js");
 	load("tools/maphelper.js");
 	print("ÿc9Map Thread Loaded.");
+	Config.init(false);
+	Pickit.init(true);
+
+	var i,
+		hideFlags = [0x09, 0x0C, 0x01, 0x02, 0x0F, 0x17, 0x18, 0x19, 0x1A, 0x21, 0x05, 0x14, 0x24];
 
 	this.revealArea = function (area) {
 		if (!this.revealedAreas) {
@@ -2756,7 +2830,7 @@ function main() {
 				qolObj.type = "qol";
 				qolObj.action = "heal";
 
-				if (getUIFlag(0x19) || getUIFlag(0x17)) {
+				if (getUIFlag(0x19) || getUIFlag(0x17) || getUIFlag(0x01)) {
 					break;
 				}
 
@@ -2780,7 +2854,7 @@ function main() {
 				qolObj.type = "qol";
 				qolObj.action = "openStash";
 
-				if (getUIFlag(0x19) || getUIFlag(0x17)) {
+				if (getUIFlag(0x19) || getUIFlag(0x17) || getUIFlag(0x01))  {
 					break;
 				}
 
@@ -2789,6 +2863,12 @@ function main() {
 
 			break;
 		case 55: // Numkey 7
+			if (getUIFlag(0x19) || getUIFlag(0x17) || getUIFlag(0x01) || getUIFlag(0x01) || getUIFlag(0x19) || getUIFlag(0x1A) ||
+				getUIFlag(0x09) || getUIFlag(0x0C) || getUIFlag(0x02) || getUIFlag(0x0F) || getUIFlag(0x18) || getUIFlag(0x21) ||
+				getUIFlag(0x05) || getUIFlag(0x14) || getUIFlag(0x24)) {
+				break;
+			}
+
 			if (Hooks.items.enabled) {
 				Hooks.items.enabled = false;
 				Hooks.text.getHook("itemStatus").hook.text = "Key 7: Enable Item Filter";
@@ -2799,6 +2879,12 @@ function main() {
 
 			break;
 		case 56: // Numkey 8
+			if (getUIFlag(0x19) || getUIFlag(0x17) || getUIFlag(0x01) || getUIFlag(0x01) || getUIFlag(0x19) || getUIFlag(0x1A) ||
+				getUIFlag(0x09) || getUIFlag(0x0C) || getUIFlag(0x02) || getUIFlag(0x0F) || getUIFlag(0x18) || getUIFlag(0x21) ||
+				getUIFlag(0x05) || getUIFlag(0x14) || getUIFlag(0x24)) {
+				break;
+			}
+
 			if (Hooks.monsters.enabled) {
 				Hooks.monsters.enabled = false;
 				Hooks.text.getHook("monsterStatus").hook.text = "Key 8: Enable Monsters";
@@ -2809,6 +2895,12 @@ function main() {
 
 			break;
 		case 57: // Numkey 9
+			if (getUIFlag(0x19) || getUIFlag(0x17) || getUIFlag(0x01) || getUIFlag(0x01) || getUIFlag(0x19) || getUIFlag(0x1A) ||
+				getUIFlag(0x09) || getUIFlag(0x0C) || getUIFlag(0x02) || getUIFlag(0x0F) || getUIFlag(0x18) || getUIFlag(0x21) ||
+				getUIFlag(0x05) || getUIFlag(0x14) || getUIFlag(0x24)) {
+				break;
+			}
+
 			if (Hooks.vector.enabled) {
 				Hooks.vector.enabled = false;
 				Hooks.text.getHook("vectorStatus").hook.text = "Key 9: Enable Vectors";
@@ -2818,11 +2910,33 @@ function main() {
 			}
 
 			break;
+		case 109: // Numpad -
+			if (getUIFlag(0x19) || getUIFlag(0x17) || getUIFlag(0x01) || getUIFlag(0x01) || getUIFlag(0x19) || getUIFlag(0x1A) ||
+				getUIFlag(0x09) || getUIFlag(0x0C) || getUIFlag(0x02) || getUIFlag(0x0F) || getUIFlag(0x18) || getUIFlag(0x21) ||
+				getUIFlag(0x05) || getUIFlag(0x14) || getUIFlag(0x24)) {
+				break;
+			}
+
+			if (Hooks.pickitEnabled) {
+				Hooks.pickitEnabled = false;
+				Hooks.text.getHook("pickitEnabled").hook.text = "Num -: ÿc1Default Filter";
+			} else {
+				Hooks.pickitEnabled = true;
+				Hooks.items.flush();
+				Hooks.text.getHook("pickitEnabled").hook.text = "Num -: ÿc<Your Filter";
+
+				if (!Hooks.saidMessage) {
+					showConsole();
+					print("ÿc<Notify :: ÿc0Item filter has switched to using your Pickit files, this is just to notify you of that. If you didn't add any nip files you probably should switch back.");
+					print("ÿc<Notify :: ÿc0Close this console by pressing Ctrl + Home. You will not see this message again.");
+					Hooks.saidMessage = true;
+				}
+			}
+
+			break;
 		}
 	};
 
-	var i,
-		hideFlags = [0x09, 0x0C, 0x0D, 0x01, 0x02, 0x0F, 0x17, 0x18, 0x19, 0x1A, 0x21, 0x05, 0x14, 0x24];
 
 	let itemInfo, info = new UnitInfo();
 
@@ -2861,6 +2975,10 @@ function main() {
 
 				delay(100);
 			}
+		}
+
+		while (getUIFlag(0x0D)) {
+			Hooks.items.flush();
 		}
 	}
 }

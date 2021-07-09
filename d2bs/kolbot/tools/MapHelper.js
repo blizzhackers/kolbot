@@ -214,7 +214,7 @@ function main() {
 							Misc.openChest(chest);
 						}
 
-						if ([4, 54, 109, 111, 112, 117, 133, 134, 135, 136].indexOf(me.area) > -1) {
+						if ([4, 54, 109, 111, 112, 117, 133, 135, 136].indexOf(me.area) > -1) {
 							Pather.usePortal();
 						}
 
@@ -270,6 +270,17 @@ function main() {
 							break;
 						case 39:
 							redPortal = Pather.getPortal(39);
+
+							if (redPortal) {
+								Pather.moveToUnit(redPortal);
+								Pather.usePortal(null, null, redPortal);
+							}
+
+							break;
+						case 109:
+							Pather.moveTo(20193, 8693);
+
+							redPortal = Pather.getPortal(109);
 
 							if (redPortal) {
 								Pather.moveToUnit(redPortal);
@@ -348,6 +359,7 @@ function main() {
 							Pather.usePortal();
 
 							break;
+						// Matron's
 						case 133:
 							redPortal = Pather.getPortal(133);
 
@@ -357,6 +369,7 @@ function main() {
 							}
 
 							break;
+						// Forgotten Sands
 						case 134:
 							redPortal = Pather.getPortal(134);
 							
@@ -366,6 +379,7 @@ function main() {
 							}
 							
 							break;
+						// Furnace
 						case 135:
 							redPortal = Pather.getPortal(135);
 							
@@ -375,6 +389,7 @@ function main() {
 							}
 							
 							break;
+						// Tristram
 						case 136:
 							redPortal = Pather.getPortal(136);
 							

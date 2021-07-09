@@ -429,13 +429,9 @@ function main() {
 				print("Merc stats:\n" + this.getStatsString(merc));
 
 			break;
-		case 109: // Numpad -
+		case 110: // decimal point
 			MuleLogger.logChar();
 			me.overhead("Logged char: " + me.name);
-
-			break;
-		case 110: // decimal point
-			say("/fps");
 
 			break;
 		case 111: // numpad / - get nearest preset unit id
