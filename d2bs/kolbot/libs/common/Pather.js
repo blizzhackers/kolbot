@@ -920,8 +920,9 @@ ModeLoop:
 
 			break;
 		}
+
 		this.broadcastIntent(targetArea);
-		
+
 		var i, tick, wp, coord, retry, npc;
 
 		for (i = 0; i < 12; i += 1) {

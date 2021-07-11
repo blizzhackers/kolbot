@@ -117,8 +117,7 @@ function MFHelper() {
 
 		player = Misc.findPlayer(Config.Leader);
 	}
-	
-	
+
 	if (player) {
 		if (!Misc.poll(() => player.area, 120*60, 100 + me.ping)) {
 			throw new Error('Failed to wait for player area');
@@ -170,13 +169,13 @@ MainLoop:
 						if (!!parseInt(split, 10)) {
 								split = parseInt(split, 10);
 							}
-						
+
 						Town.goToTown(split, true);
 						Town.move("portalspot");
 					} catch (townerror) {
 						print(townerror);
 					}
-					
+
 					delay(500 + me.ping);
 				} else if (command.indexOf("cows") > -1) {
 					print("ÿc4MFHelperÿc0: Clear Cows");
