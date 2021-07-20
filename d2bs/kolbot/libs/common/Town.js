@@ -1627,8 +1627,13 @@ MainLoop:
 				stash = getUnit(2, 267);
 
 				if (stash) {
-					Misc.click(0, 0, stash);
-					//stash.interact();
+					if (this.telekinesis) {
+						Skill.cast(43, 0, stash);
+					}
+					else {
+						Misc.click(0, 0, stash);
+						//stash.interact();
+					}
 
 					tick = getTickCount();
 
@@ -2107,7 +2112,7 @@ MainLoop:
 
 	moveToSpot: function (spot) {
 		var i, path, townSpot,
-			longRange = (spot === "waypoint");
+			longRange = (this.telekinesis && ["stash", "portalspot"].indexOf(spot) > -1) || (spot === "waypoint");
 
 		if (!this.act[me.act - 1].hasOwnProperty("spot") || !this.act[me.act - 1].spot.hasOwnProperty(spot)) {
 			return false;
