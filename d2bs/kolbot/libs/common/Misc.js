@@ -1143,12 +1143,21 @@ var Misc = {
 			return false;
 		}
 
-		var i, tick;
+		var i, tick,
+		    useTk = !!(Config.UseTelekinesis && me.classid === 1 && me.getSkill(43, 1));
 
 		for (i = 0; i < 3; i += 1) {
-			if (getDistance(me, unit) < 4 || Pather.moveToUnit(unit, 3, 0)) {
-				Misc.click(0, 0, unit);
-				//unit.interact();
+			if (useTk) {
+				if (getDistance(me, unit) > 13) {
+					Attack.getIntoPosition(unit, 13, 0x4);
+				}
+				Skill.cast(43, 0, unit);
+			}
+			else {
+				if (getDistance(me, unit) < 4 || Pather.moveToUnit(unit, 3, 0)) {
+					Misc.click(0, 0, unit);
+					//unit.interact();
+				}
 			}
 
 			tick = getTickCount();
