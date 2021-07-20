@@ -462,13 +462,19 @@ ModeLoop:
 		// Regular doors
 		var i, tick,
 			door = getUnit(2, "door", 0);
+		let useTk = !!(Config.UseTelekinesis && me.classid === 1 && me.getSkill(43, 1));
 
 		if (door) {
 			do {
 				if ((getDistance(door, x, y) < 4 && getDistance(me, door) < 9) || getDistance(me, door) < 4) {
 					for (i = 0; i < 3; i += 1) {
-						Misc.click(0, 0, door);
-						//door.interact();
+						if (useTk) {
+							Skill.cast(43, 0, door);
+						}
+						else {
+							Misc.click(0, 0, door);
+							//door.interact();
+						}
 
 						tick = getTickCount();
 
@@ -1142,6 +1148,7 @@ MainLoop:
 
 		var i, tick, portal,
 			preArea = me.area;
+		let useTk;
 
 		for (i = 0; i < 10; i += 1) {
 			if (me.dead) {
@@ -1155,20 +1162,31 @@ MainLoop:
 			portal = unit ? copyUnit(unit) : this.getPortal(targetArea, owner);
 
 			if (portal) {
+				if (i === 0 {
+				    useTk = !!(Config.UseTelekinesis && me.classid === 1 && me.getSkill(43, 1) && me.inTown && portal.getParent());
+				}
 				if (portal.area === me.area) {
-					if (getDistance(me, portal) > 5) {
-						this.moveToUnit(portal);
-					}
-
-					if (getTickCount() - this.lastPortalTick > 2500) {
-						if (i < 2) {
-							sendPacket(1, 0x13, 4, 0x2, 4, portal.gid);
-						} else {
-							Misc.click(0, 0, portal);
+					if (useTk) {
+						if (getDistance(me, portal) > 13) {
+							Attack.getIntoPosition(portal, 13, 0x4);
 						}
-					} else {
-						delay(300);
-						continue;
+						Skill.cast(43, 0, portal);
+					}
+					else {
+						if (getDistance(me, portal) > 5) {
+							this.moveToUnit(portal);
+						}
+
+						if (getTickCount() - this.lastPortalTick > 2500) {
+							if (i < 2) {
+								sendPacket(1, 0x13, 4, 0x2, 4, portal.gid);
+							} else {
+								Misc.click(0, 0, portal);
+							}
+						} else {
+							delay(300);
+							continue;
+						}
 					}
 				}
 
