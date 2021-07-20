@@ -39,7 +39,7 @@ var NPC = {
 };
 
 var Town = {
-	telekinesis: true,
+	telekinesis: false,
 	sellTimer: getTickCount(), // shop speedup test
 
 	tasks: [
@@ -1979,6 +1979,8 @@ MainLoop:
 
 	initialize: function () {
 		//print("Initialize town " + me.act);
+		
+		this.telekinesis = !!(Config.UseTelekinesis && me.classid === 1 && me.getSkill(43, 1));
 
 		switch (me.act) {
 		case 1:
