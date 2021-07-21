@@ -930,6 +930,7 @@ ModeLoop:
 		this.broadcastIntent(targetArea);
 
 		var i, tick, wp, coord, retry, npc;
+		let useTk = !!(Config.UseTelekinesis && me.classid === 1 && me.getSkill(43, 1));
 
 		for (i = 0; i < 12; i += 1) {
 			if (me.area === targetArea || me.dead) {
@@ -962,11 +963,15 @@ ModeLoop:
 				}
 
 				if (check || Config.WaypointMenu) {
-					if (getDistance(me, wp) > 5) {
-						this.moveToUnit(wp);
+					if (useTk) {
+						Skill.cast(43, 0, wp);
 					}
-
-					Misc.click(0, 0, wp);
+					else {
+						if (getDistance(me, wp) > 5) {
+							this.moveToUnit(wp);
+						}
+						Misc.click(0, 0, wp);
+					}
 
 					tick = getTickCount();
 
