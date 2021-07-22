@@ -1,0 +1,803 @@
+/**
+*	@filename	D2BotSoloCleaner.dbj
+*	@author		theBGuy
+*	@credits 	Whoever did the original D2BotAccountCleaner.dbj
+*	@desc		Modified D2BotAccountCleaner, The purpose of this entryscript is to delete old characters and optional related files
+*/
+
+var StarterConfig = {
+	// New Stuff - DataCleaner to delete old files associated with running SoloLeveling, SaveFiles to save important files to SoloLeveling/Data/ for performance review
+	// DataCleaner and SaveFiles can both be used for cleaning/saving files without having to delete associated characters
+	DataCleaner:		true,	// Highly recommened to run this, if using either peformance tracking or the overlay system
+	SaveFiles:		false,	// Highly recommened to run this if using the peformance tracking system
+	
+	// Old Stuff
+	DelayBetweenAccounts: 	rand(10,25), //Seconds to wait before cleaning next account, if doing 10+ accounts recommended to increase this delay to rand(30, 60) prevent R/D
+	SwitchKeyDelay: 	0, // Seconds to wait before switching a used/banned key or after realm down
+	CrashDelay: 		rand(60, 120), // Seconds to wait after a d2 window crash
+	RealmDownDelay: 	rand(3, 6), // Minutes to wait after getting Realm Down message
+	UnableToConnectDelay: 	rand(5, 8), // Minutes to wait after Unable To Connect message
+	CDKeyInUseDelay: 	rand(5, 8), // Minutes to wait before connecting again if CD-Key is in use. SwitchKeys overrides this!
+	ConnectingTimeout: 	rand(30, 60), // Seconds to wait before cancelling the 'Connecting...' screen
+	PleaseWaitTimeout: 	rand(30, 60), // Seconds to wait before cancelling the 'Please Wait...' screen
+	WaitInLineTimeout: 	rand(30, 60) // Seconds to wait before cancelling the 'Waiting in Line...' screen
+};
+
+var AccountsToClean = {
+	/* Format:
+		"account1/password1/realm": ["charname1", "charname2"],
+		"account2/password2/realm": ["charnameX", "charnameY"],
+		"account3/password3/realm": ["all"]
+
+		To clean a full account, put "account/password/realm": ["all"]
+
+		realm = useast, uswest, europe, asia, or singleplayer
+
+		for singleplayer enter null into both account and password
+
+		Individual entries are separated with a comma.
+	*/
+
+	/*	Example:
+		"MyAcc1/tempPass/useast": ["soloSorc"],
+		"null/null/singleplayer": ["solobarb"],
+	*/
+
+	//Enter your lines under here
+		
+};
+	
+//NEW STUFF - Please enter your profile name exactly as is
+var profiles = [
+	/* Format. Enter in profile exactly the way it appears in D2Bot#
+		"SCL-ZON123",
+		"hcnl-pal123",
+	*/
+	//Enter your lines under here
+
+];
+
+function dataCleaner() {
+	if (!profiles.length) {
+		D2Bot.printToConsole("SoloCleaner: No profiles entered to clean. If this was a mistake, fill out profile information under NEW STUFF. Exiting dataCleaner and moving on to clean characters...", 6);
+		return;
+	}
+
+	var charClass, charType;
+	var path, folder;
+
+	for (let i = 0; i < profiles.length; i++) {
+		let buildCheck = profiles[i].toUpperCase();
+		buildCheck = profiles[i].split("-"); // SCL-ZON123
+		
+		if (buildCheck[0].indexOf("CC", "cc") === -1) { // not CC so not classic - true
+			charType = "Expansion";
+		} else{
+			charType = "Classic";
+		} 
+		
+		buildCheck[1] = buildCheck[1].toString().substring(0, 3); // removes numbers ZON for switch
+		buildCheck[1] = buildCheck[1].toUpperCase();
+
+		switch (buildCheck[1]) {
+		case "ZON":
+			charClass = "amazon";
+			break;
+		case "SOR":
+			charClass = "sorceress";
+			break;
+		case "NEC":
+			charClass = "necromancer";
+			break;
+		case "PAL":
+			charClass = "paladin";
+			break;
+		case "BAR":
+			charClass = "barbarian";
+			break;
+		case "DRU":
+			charClass = "druid";
+			break;
+		case "SIN":
+			charClass = "assassin";
+			break;
+		default:
+			D2Bot.printToConsole("SoloCleaner: Failed to get charClass. Please check that your profile was entered correctly under NEW STUFF.", 6);
+			return;
+		}
+
+		if (StarterConfig.SaveFiles) {
+			if (!FileTools.exists("libs/SoloLeveling/Data/" + charType)) {
+				folder = dopen("libs/SoloLeveling/Data");
+				folder.create(charType);
+			}
+
+			if (!FileTools.exists("libs/SoloLeveling/Data/" + charType + "/" + charClass)) {
+				folder = dopen("libs/SoloLeveling/Data/" + charType);
+				folder.create(charClass);
+			}
+
+			var files = dopen("libs/SoloLeveling/Data/" + charType + "/" + charClass + "/").getFolders();
+			var j = 1;
+
+			files.forEach( (file) => {
+				if (FileTools.exists("libs/SoloLeveling/Data/" + charType + "/" + charClass + "/" + j.toString())){
+					j++;
+				}	
+			});
+
+			if (!FileTools.exists("libs/SoloLeveling/Data/" + charType + "/" + charClass + "/" + j.toString())) {
+				folder = dopen("libs/SoloLeveling/Data/" + charType + "/" + charClass);
+				folder.create(j.toString());
+			}
+		}
+				
+		if (FileTools.exists("data/" + profiles[i] + ".json")) {
+			if (StarterConfig.SaveFiles){
+				FileTools.copy("data/" + profiles[i] + ".json", "libs/SoloLeveling/Data/" + charType + "/" + charClass + "/" + j.toString() + "/dataFile.json");
+			}
+			
+			FileTools.remove("data/" + profiles[i] + ".json");
+		}
+		
+		if (FileTools.exists("libs/SoloLeveling/Data/" + profiles[i] + ".GameTime" + ".json")) {
+			if (StarterConfig.SaveFiles) {
+				FileTools.copy("libs/SoloLeveling/Data/" + profiles[i] + ".GameTime" + ".json", "libs/SoloLeveling/Data/" + charType + "/" + charClass + "/" + j.toString() + "/GameTime.json");
+			}
+			
+			FileTools.remove("libs/SoloLeveling/Data/" + profiles[i] + ".GameTime" + ".json");
+		}
+		
+		if (FileTools.exists("libs/SoloLeveling/Data/" + profiles[i] + ".LevelingPerformance" + ".csv")) {
+			if (StarterConfig.SaveFiles) {
+				FileTools.copy("libs/SoloLeveling/Data/" + profiles[i] + ".LevelingPerformance" + ".csv", "libs/SoloLeveling/Data/" + charType + "/" + charClass + "/" + j.toString() + "/LevelingPerformance.csv");
+			}
+			
+			FileTools.remove("libs/SoloLeveling/Data/" + profiles[i] + ".LevelingPerformance" + ".csv");
+		}
+
+		if (FileTools.exists("libs/SoloLeveling/Data/" + profiles[i] + ".ScriptPerformance" + ".csv")) {
+			if (StarterConfig.SaveFiles) {
+				FileTools.copy("libs/SoloLeveling/Data/" + profiles[i] + ".ScriptPerformance" + ".csv", "libs/SoloLeveling/Data/" + charType + "/" + charClass + "/" + j.toString() + "/ScriptPerformance.csv");
+			}
+			
+			FileTools.remove("libs/SoloLeveling/Data/" + profiles[i] + ".ScriptPerformance" + ".csv");
+		}
+		
+		if (StarterConfig.SaveFiles) {
+			D2Bot.printToConsole("SoloCleaner: Files saved to -> libs/SoloLeveling/Data/" + charType + "/" + charClass, 6);
+		}
+
+		D2Bot.printToConsole("SoloCleaner: Cleaned files for -> " + profiles[i], 6);
+		delay(500);
+		
+	}
+
+	D2Bot.printToConsole("SoloCleaner: Done cleaning files", 6);	
+};
+
+/* Generate accounts to entirely clean ("all") 
+	to use this, set generateAccounts to true and setup the rest of the parameters
+	
+	it will generates accounts from start to stop range(included) :
+	account1/password/realm
+	account2/password/realm
+	etc...
+*/
+
+var generateAccounts = false,
+	accountPrefix = "account",
+	accountPassword = "password",
+	accountRealm = "realm",
+	rangeStart = 1,
+	rangeStop = 10;
+
+
+// No touchy!
+include("json2.js");
+include("OOG.js");
+include("common/misc.js");
+
+if (!FileTools.exists("data/" + me.profile + ".json")) {
+	DataFile.create();
+}
+
+var handle, gameInfo, gameStart, ingame, connectFail, currAcc, charList, firstAccount = true,
+	lastGameStatus = "ready",
+	gameCount = DataFile.getStats().runs + 1,
+	accounts = [],
+	chars = [];
+	
+function parseInfo() {
+	var i;
+
+	for (i in AccountsToClean) {
+		if (AccountsToClean.hasOwnProperty(i) && typeof i === "string") {
+			accounts.push(i);
+			chars.push(AccountsToClean[i]);
+		}
+	}
+	
+	if (generateAccounts)
+	{
+		for(var index = rangeStart ; index <= rangeStop ; index += 1)
+		{
+			accounts.push(accountPrefix + index + "/" + accountPassword + "/" + accountRealm);
+			chars.push(["all"]);
+		}
+	}
+
+	if (!accounts.length) {
+		FileTools.remove("logs/AccountCleaner.json");
+		D2Bot.printToConsole("SoloCleaner: No accounts entered. Exiting SoloCleaner", 6);
+		ControlAction.timeoutDelay("Exiting in: ", 3 * 1e3);
+		D2Bot.stop(me.profile, true);
+
+	}
+
+}
+
+function ReceiveCopyData(mode, msg) {
+	switch (msg) {
+	case "Handle":
+		handle = mode;
+
+		break;
+	}
+
+	switch (mode) {
+	case 2: // game info
+		print("Recieved Game Info");
+
+		gameInfo = JSON.parse(msg);
+
+		break;
+	case 4:
+		// Heartbeat ping
+		if (msg === "pingreq") {
+			sendCopyData(null, me.windowtitle, 4, "pingrep");
+		}
+
+		break;
+	}
+}
+
+function timeoutDelay(text, time) {
+	var endTime = getTickCount() + time;
+
+	while (getTickCount() < endTime) {
+		D2Bot.updateStatus(text + " (" + Math.floor((endTime - getTickCount()) / 1000) + "s)");
+		delay(500);
+	}
+}
+
+function locationTimeout(time, location) {
+	var endtime = getTickCount() + time;
+
+	while (getLocation() === location && endtime > getTickCount()) {
+		delay(500);
+	}
+
+	return (getLocation() !== location);
+}
+
+function updateCount() {
+	D2Bot.updateCount();
+	delay(1000);
+	ControlAction.click(6, 264, 366, 272, 35);
+
+	try {
+		login(me.profile);
+	} catch (e) {
+
+	}
+
+	delay(1000);
+	ControlAction.click(6, 33, 572, 128, 35);
+}
+
+function timer (tick) {
+	return " (" + new Date(getTickCount() - tick).toISOString().slice(11, -5) + ")";
+}
+
+function deleteCharacter(info) {
+	me.blockMouse = true;
+
+	var control, text,
+		count = 0;
+
+	// start from beginning of the char list
+	sendKey(0x24);
+
+MainLoop:
+	while (getLocation() === 12) { // cycle until in lobby
+		control = getControl(4, 37, 178, 200, 92);
+
+		if (control) {
+			do {
+				text = control.getText();
+
+				if (text instanceof Array && typeof text[1] === "string") {
+					count++;
+
+					if (text[1].toLowerCase() === info.charName.toLowerCase()) {
+						print("delete character " + info.charName);
+						
+						control.click();
+						ControlAction.click(6, 433, 528, 168, 60);
+						delay(500);
+						ControlAction.click(6, 421, 337, 96, 32);
+						delay(500);
+						me.blockMouse = false;
+						
+						return true;
+					}
+				}
+			} while (control.getNext());
+		}
+
+		if (count === 8 || count === 16) { // check for additional characters up to 24
+			control = getControl(4, 237, 457, 72, 93);
+
+			if (control) {
+				control.click();
+				sendKey(0x28);
+				sendKey(0x28);
+				sendKey(0x28);
+				sendKey(0x28);
+			}
+		} else { // no further check necessary
+			break MainLoop;
+		}
+
+		delay(100);
+	}
+
+	me.blockMouse = false;
+
+	return false;
+}
+	
+function deleteAllCharacters() {
+	var characters  = ControlAction.getCharacters();
+	for (var character of characters)
+	{
+		var info = {charName: character};
+		if (!deleteCharacter(info))
+		{
+			print("failed to delete character " + character);
+			return false;
+		}
+		delay(500);
+	}
+	return true;
+}
+
+function main() {
+	addEventListener('copydata', ReceiveCopyData);
+
+	while (!handle) {
+		delay(100);
+	}
+
+	DataFile.updateStats("handle", handle);
+	D2Bot.init();
+	load("tools/heartbeat.js");
+
+	while (!gameInfo) {
+		D2Bot.requestGameInfo();
+		delay(500);
+	}
+
+	if (gameInfo.error) {
+		if (!!DataFile.getStats().debugInfo) {
+			gameInfo.crashInfo = DataFile.getStats().debugInfo;
+
+			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(gameInfo.crashInfo).currScript + " Area: " + JSON.parse(gameInfo.crashInfo).area, 10);
+		}
+
+		ControlAction.timeoutDelay("Crash Delay", StarterConfig.CrashDelay * 1e3);
+		D2Bot.updateRuns();
+	}
+
+	DataFile.updateStats("debugInfo", JSON.stringify({currScript: "none", area: "out of game"}));
+
+	if (StarterConfig.DataCleaner) {
+		dataCleaner();
+	}
+
+	parseInfo();
+
+	while (true) {
+		locationAction(getLocation());
+		delay(1000);
+	}
+}
+
+function locationAction(location) {
+	var i, control, string, text, currChar,
+		obj = {};
+
+MainSwitch:
+	switch (location) {
+	case 0:
+		break;
+	case 1:	// Lobby
+	case 3: // Lobby Chat
+		break;
+	case 2: // Waiting In Line
+		D2Bot.updateStatus("Waiting...");
+		locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location);
+		ControlAction.click(6, 433, 433, 96, 32);
+
+		break;
+	case 4: // Create Game
+		break;
+	case 5: // Join Game
+		break;
+	case 6: // Ladder
+		break;
+	case 7: // Channel List
+		break;
+	case 8: // Main Menu
+	case 9: // Login
+	case 18: // D2 Splash
+		if (!accounts.length) {
+			FileTools.remove("logs/AccountCleaner.json");
+			D2Bot.printToConsole("SoloCleaner: Done cleaning accounts !", 6);
+			D2Bot.stop(me.profile, true);
+
+			break;
+		}
+		
+		if (!firstAccount)
+		{
+			for (i = 0 ; i < StarterConfig.DelayBetweenAccounts ; i += 1)
+			{
+				D2Bot.updateStatus("Waiting " + (StarterConfig.DelayBetweenAccounts - i) + "s for next account");
+				delay(1e3);
+			}
+		}
+		
+		firstAccount = false;
+
+		if (FileTools.exists("logs/AccountCleaner.json")) {
+			obj = JSON.parse(FileTools.readText("logs/AccountCleaner.json"));
+
+			if (obj.currAcc) {
+				for (i = 0; i < accounts.length; i += 1) {
+					if (accounts[i].split("/")[0] === obj.currAcc) {
+						accounts.splice(0, i);
+						chars.splice(0, i);
+
+						i -= 1;
+
+						break;
+					}
+				}
+			}
+		}
+
+		currAcc = accounts[0];
+		currAcc = currAcc.split("/");
+		charList = chars[0];
+		obj.currAcc = currAcc[0];
+		currAcc[2] = currAcc[2].toLowerCase();
+
+		D2Bot.printToConsole("SoloCleaner: Cleaning account " + currAcc[0] + " ; char list : " + charList, 6);
+		FileTools.writeText("logs/AccountCleaner.json", JSON.stringify(obj));
+		if (currAcc[2] === "singleplayer"){
+			ControlAction.click(2,0,599,800,600);
+			break;
+		}
+
+		ControlAction.loginAccount({account: currAcc[0], password: currAcc[1], realm: currAcc[2]});
+		break;
+	case 10: // Login Error
+		string = "";
+		text = ControlAction.getText(4, 199, 377, 402, 140);
+
+		if (text) {
+			for (i = 0; i < text.length; i += 1) {
+				string += text[i];
+
+				if (i !== text.length - 1) {
+					string += " ";
+				}
+			}
+
+			switch (string) {
+			case getLocaleString(5207):
+				D2Bot.updateStatus("Invalid Password");
+				D2Bot.printToConsole("Invalid Password");
+
+				break;
+			case getLocaleString(5208):
+				D2Bot.updateStatus("Invalid Account");
+				D2Bot.printToConsole("Invalid Account");
+
+				break;
+			case getLocaleString(5202): // cd key intended for another product
+			case getLocaleString(10915): // lod key intended for another product
+				D2Bot.updateStatus("Invalid CDKey");
+				D2Bot.printToConsole("Invalid CDKey: " + gameInfo.mpq, 6);
+				D2Bot.CDKeyDisabled();
+
+				if (gameInfo.switchKeys) {
+					ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
+					D2Bot.restart(true);
+				} else {
+					D2Bot.stop(me.profile, true);
+				}
+
+				break;
+			case getLocaleString(5199):
+				D2Bot.updateStatus("Disabled CDKey");
+				D2Bot.printToConsole("Disabled CDKey: " + gameInfo.mpq, 6);
+				D2Bot.CDKeyDisabled();
+
+				if (gameInfo.switchKeys) {
+					ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
+					D2Bot.restart(true);
+				} else {
+					D2Bot.stop(me.profile, true);
+				}
+
+				break;
+			case getLocaleString(10913):
+				D2Bot.updateStatus("Disabled LoD CDKey");
+				D2Bot.printToConsole("Disabled LoD CDKey: " + gameInfo.mpq, 6);
+				D2Bot.CDKeyDisabled();
+
+				if (gameInfo.switchKeys) {
+					ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
+					D2Bot.restart(true);
+				} else {
+					D2Bot.stop(me.profile, true);
+				}
+
+				break;
+			case getLocaleString(5347):
+				D2Bot.updateStatus("Disconnected");
+				D2Bot.printToConsole("Disconnected");
+				ControlAction.click(6, 335, 412, 128, 35);
+
+				break MainSwitch;
+			default:
+				D2Bot.updateStatus("Login Error");
+				D2Bot.printToConsole("Login Error - " + string);
+
+				if (gameInfo.switchKeys) {
+					ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
+					D2Bot.restart(true);
+				} else {
+					D2Bot.stop(me.profile, true);
+				}
+
+				break;
+			}
+		}
+
+		ControlAction.click(6, 335, 412, 128, 35);
+
+		while (true) {
+			delay(1000);
+		}
+
+		break;
+	case 11: // Unable To Connect
+		D2Bot.updateStatus("Unable To Connect");
+
+		if (connectFail) {
+			timeoutDelay("Unable to Connect", StarterConfig.UnableToConnectDelay * 6e4);
+
+			connectFail = false;
+		}
+
+		if (!ControlAction.click(6, 335, 450, 128, 35)) {
+			break;
+		}
+
+		connectFail = true;
+
+		break;
+	case 12: // Character Select
+	case 42:
+		// Single Player screen fix
+		if (currAcc[2] !== "singleplayer"){
+			if (getLocation() === 12 && !getControl(4, 626, 100, 151, 44)) {
+				ControlAction.click(6, 33, 572, 128, 35);
+
+				break;
+			}
+		}
+		
+		if (!charList.length) {
+			ControlAction.click(6, 33, 572, 128, 35);
+			break;
+		}
+
+		if (charList[0] === "all") {
+			deleteAllCharacters();
+		}
+		else
+		{
+			if (FileTools.exists("logs/AccountCleaner.json")) {
+				obj = JSON.parse(FileTools.readText("logs/AccountCleaner.json"));
+
+				if (obj.currChar) {
+					for (i = 0; i < charList.length; i += 1) {
+						if (charList[i] === obj.currChar) {
+							charList.splice(0, i + 1); // Remove the previous currChar as well
+
+							break;
+						}
+					}
+				}
+			}
+			
+			var charInfo = {charName: charList[0]};
+			deleteCharacter(charInfo);
+			delay(500);
+		}
+
+		currChar = charList.shift();
+		obj.currChar = currChar;
+		
+		// last char in acc = trigger next acc
+		if (!charList.length) {
+			accounts.shift();
+			chars.shift();
+
+			FileTools.writeText("logs/AccountCleaner.json", JSON.stringify(obj));
+			ControlAction.click(6, 33, 572, 128, 35);
+			break;
+		}
+		
+		FileTools.writeText("logs/AccountCleaner.json", JSON.stringify(obj));
+		break;
+	case 13: // Realm Down - Character Select screen
+		D2Bot.updateStatus("Realm Down");
+		delay(1000);
+
+		if (!ControlAction.click(6, 33, 572, 128, 35)) {
+			break;
+		}
+
+		updateCount();
+		timeoutDelay("Realm Down", StarterConfig.RealmDownDelay * 6e4);
+
+		if (gameInfo.switchKeys) {
+			D2Bot.printToConsole("Realm Down - Changing CD-Key");
+			timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
+			D2Bot.restart(true);
+		} else {
+			D2Bot.restart();
+		}
+
+		break;
+	case 14: // Character Select / Main Menu - Disconnected
+		D2Bot.updateStatus("Disconnected");
+		delay(500);
+		ControlAction.click(6, 351, 337, 96, 32);
+		break;
+	case 15: // New Character
+		break;
+	case 16: // Character Select - Please Wait popup
+		if (!locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
+			ControlAction.click(6, 351, 337, 96, 32);
+		}
+
+		break;
+	case 17: // Lobby - Lost Connection - just click okay, since we're toast anyway
+		delay(1000);
+		ControlAction.click(6, 351, 337, 96, 32);
+		break;
+	case 19: // Login - Cdkey In Use
+		D2Bot.printToConsole(gameInfo.mpq + " is in use by " + ControlAction.getText(4, 158, 310, 485, 40), 6);
+		D2Bot.CDKeyInUse();
+
+		if (gameInfo.switchKeys) {
+			ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
+			D2Bot.restart(true);
+		} else {
+			ControlAction.click(6, 335, 450, 128, 35);
+			ControlAction.timeoutDelay("CD-Key in use", StarterConfig.CDKeyInUseDelay * 6e4);
+		}
+
+		break;
+	case 20: // Single Player - Select Difficulty
+		break;
+	case 21: // Main Menu - Connecting
+		if (!locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
+			ControlAction.click(6, 330, 416, 128, 35);
+		}
+
+		break;
+	case 22: // Login - Invalid Cdkey (classic or xpac)
+		text = ControlAction.getText(4, 162, 270, 477, 50);
+		string = "";
+
+		if (text) {
+			for (i = 0; i < text.length; i += 1) {
+				string += text[i];
+
+				if (i !== text.length - 1) {
+					string += " ";
+				}
+			}
+		}
+
+		switch (string) {
+		case getLocaleString(10914):
+			D2Bot.printToConsole(gameInfo.mpq + " LoD key in use by " + ControlAction.getText(4, 158, 310, 485, 40), 6);
+			D2Bot.CDKeyInUse();
+
+			if (gameInfo.switchKeys) {
+				ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
+				D2Bot.restart(true);
+			} else {
+				ControlAction.click(6, 335, 450, 128, 35);
+				ControlAction.timeoutDelay("LoD key in use", StarterConfig.CDKeyInUseDelay * 6e4);
+			}
+
+			break;
+		default:
+			if (gameInfo.switchKeys) {
+				D2Bot.printToConsole("Invalid CD-Key");
+				ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
+				D2Bot.restart(true);
+			} else {
+				ControlAction.click(6, 335, 450, 128, 35);
+				ControlAction.timeoutDelay("Invalid CD-Key", StarterConfig.CDKeyInUseDelay * 6e4);
+			}
+
+			break;
+		}
+
+		break;
+	case 23: // Character Select - Connecting
+		if (!locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
+			ControlAction.click(6, 33, 572, 128, 35);
+		}
+
+		break;
+	case 24: // Server Down - not much to do but wait..
+		break;
+	case 25: // Lobby - Please Wait
+		if (!locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
+			ControlAction.click(6, 351, 337, 96, 32);
+		}
+
+		break;
+	case 26: // Lobby - Game Name Exists
+		ControlAction.click(6, 533, 469, 120, 20);
+
+		break;
+	case 27: // Gateway Select
+		ControlAction.click(6, 436, 538, 96, 32);
+
+		break;
+	case 28: // Lobby - Game Does Not Exist
+		ControlAction.click(6, 533, 469, 120, 20);
+
+		break;
+	case 38: // Game is full
+		D2Bot.printToConsole("Game is full");
+
+		lastGameStatus = "ready";
+
+		delay(500);
+		ControlAction.click(6, 652, 469, 120, 20);
+
+		break;
+	default:
+		if (location !== undefined) {
+			D2Bot.printToConsole("Unhandled location " + location);
+			delay(500);
+			D2Bot.restart();
+		}
+
+		break;
+	}
+}
