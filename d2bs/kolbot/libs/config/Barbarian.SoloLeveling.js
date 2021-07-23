@@ -321,7 +321,7 @@ function LoadConfig () {
 				];
 				NTIP.arrayLooping(botd);
 
-				Config.Runewords.push([Runeword.botd, "Colossus Blade"]);
+				Config.Runewords.push([Runeword.BreathoftheDying, "Colossus Blade"]);
 				Config.KeepRunewords.push("[Type] == sword # [ias] >= 60");
 			}
 
