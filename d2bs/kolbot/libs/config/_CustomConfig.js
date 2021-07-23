@@ -1,13 +1,3 @@
-/* Format:
-	var CustomConfig = {
-		"Config_Filename_Without_Extension": ["array", "of", "profiles"]
-
-		Multiple entries are separated by commas
-
-
-	};
-*/
-
 var CustomConfig, configCheck = me.profile.toUpperCase().split("-");
 
 if (getScript("D2BotSoloLevelingEntry.dbj") && !!configCheck[1]) {
@@ -52,4 +42,14 @@ if (getScript("D2BotSoloLevelingEntry.dbj") && !!configCheck[1]) {
 			"Assassin.SoloLeveling": me.profile,
 		};
 	}
+} else {
+	CustomConfig = {
+		/* Format:
+			"Config_Filename_Without_Extension": ["array", "of", "profiles"]
+
+			Multiple entries are separated by commas
+		*/
+
+
+	};
 }
