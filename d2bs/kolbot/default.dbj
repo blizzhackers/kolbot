@@ -34,7 +34,7 @@ function main() {
 		delay(50);
 	}
 
-	clearAllEvents() // remove any event listeners from game crash
+	clearAllEvents(); // remove any event listeners from game crash
 
 	if (!getScript("tools/heartbeat.js")) {
 		load("tools/heartbeat.js");
@@ -63,9 +63,9 @@ function main() {
 		}
 	}
 
-	// don't load default for mules
+	// don't load default for dropper/mules
 	if (getScript("D2BotMule.dbj")) {
-		while(true) {
+		while (true) {
 			try {
 				if (me.area === 2) {
 					D2Bot.printToConsole("Saved from suicide walk!");
@@ -74,6 +74,7 @@ function main() {
 			} catch (e) {
 				D2Bot.restart();
 			}
+
 			delay(1000);
 		}
 
