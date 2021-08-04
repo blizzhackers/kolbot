@@ -1196,6 +1196,7 @@ var Hooks = {
 				this.frameYSizeScale = -10;
 				this.frameYLocScale = 10;
 				break;
+			case 76:
 			case 78:
 			case 80:
 			case 81:
@@ -1707,6 +1708,7 @@ var Hooks = {
 			case 19: // Mausoleum
 			case 59: // Stony Tomb Level 2
 			case 65: // Ancient Tunnels
+			case 77: // Great Marsh
 			case 84: // Spider Cave
 			case 90: // Swampy Pit Level 3
 			case 95: // Disused Fane
@@ -2109,6 +2111,10 @@ var Hooks = {
 					break;
 				case 102: // Numpad 6
 					switch (me.area) {
+					case 76:
+						hook = this.getHook("Great Marsh");
+						obj.type = "area";
+						break;
 					case 81:
 						hook = this.getHook("Forgotten Temple");
 						obj.type = "area";
@@ -2192,6 +2198,12 @@ var Hooks = {
 
 				break;
 			case 76:
+				this.hooks.push({
+					name: "Great Marsh",
+					destination: 77,
+					hook: new Text("ÿc<Num 6: " + Pather.getAreaName(77), 200 + Hooks.lowerLeftResfixX, 545 - (this.hooks.length * 10) + Hooks.resfixY)
+				});
+
 				this.hooks.push({
 					name: "Spider Cave",
 					destination: 84,
@@ -2792,7 +2804,7 @@ function main() {
 	Pickit.init(true);
 
 	var i,
-		hideFlags = [0x09, 0x0C, 0x01, 0x02, 0x0F, 0x17, 0x18, 0x19, 0x1A, 0x21, 0x05, 0x14, 0x24];
+		hideFlags = [0x09, 0x0C, 0x01, 0x02, 0x03, 0x04, 0x0F, 0x17, 0x18, 0x19, 0x1A, 0x21, 0x05, 0x14, 0x24];
 
 	this.revealArea = function (area) {
 		if (!this.revealedAreas) {
