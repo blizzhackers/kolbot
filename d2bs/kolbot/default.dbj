@@ -67,7 +67,7 @@ function main() {
 	if (getScript("D2BotMule.dbj")) {
 		while (true) {
 			try {
-				if (me.area === 2) {
+				if (me.gameReady && me.ingame && !me.inTown) {
 					D2Bot.printToConsole("Saved from suicide walk!");
 					D2Bot.restart();
 				}
