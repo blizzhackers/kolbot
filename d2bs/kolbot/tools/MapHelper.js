@@ -74,6 +74,14 @@ function main() {
 									break;
 								}
 							}
+						} else if (obj.dest === 103) {
+							Pather.moveTo(17581, 8070);
+
+							for (let i = 0; i < 3; i++) {
+								if (Pather.useUnit(2, 342, 103)) {
+									break;
+								}
+							}
 						} else {
 							Pather.moveToExit(obj.dest, true);
 						}
@@ -224,13 +232,18 @@ function main() {
 							Misc.openChest(chest);
 						}
 
-						if ([4, 54, 109, 111, 112, 117, 133, 135, 136].indexOf(me.area) > -1) {
+						if ([4, 54, 109, 111, 112, 117, 121, 133, 135, 136].indexOf(me.area) > -1) {
 							Pather.usePortal();
 						}
 
 						break;
 					case "wp":
 						Pather.getWP(me.area);
+
+						break;
+					case "npc":
+						print("Going to act: " + obj.dest);
+						Pather.changeAct(obj.dest);
 
 						break;
 					case "portal":
@@ -288,6 +301,7 @@ function main() {
 
 							break;
 						case 74:
+							Pather.moveTo(12692, 5195);
 							redPortal = Pather.getPortal(74);
 
 							if (redPortal) {
@@ -425,12 +439,175 @@ function main() {
 
 						break;
 					case "qol":
+						let unit;
+
 						switch (obj.action) {
 						case "heal":
 							Town.initNPC("Heal", "heal");
+
 							break;
 						case "openStash":
 							Town.openStash();
+
+							break;
+						case "stashItems":
+							Town.stash(true, true);
+
+							break;
+						case "cowportal":
+							openCowPortal(39);
+
+							break;
+						case "uberportal":
+							uberPortals();
+
+							break;
+						case "filltps":
+							Town.fillTome(518);
+							me.cancel();
+
+							break;
+						case "moveItemFromInvoToStash":
+						case "moveItemFromStashToInvo":
+							unit = getUnit(101);
+
+							switch (unit.location) {
+							case 3:
+								if (Storage.Stash.CanFit(unit)) {
+									Storage.Stash.MoveTo(unit);
+								}
+
+								break;
+							case 7:
+								if (Storage.Inventory.CanFit(unit)) {
+									Storage.Inventory.MoveTo(unit);
+								}
+
+								break;
+							}
+
+							break;
+						case "moveItemFromInvoToCube":
+						case "moveItemFromCubeToInvo":
+							unit = getUnit(101);
+
+							switch (unit.location) {
+							case 3:
+								if (Storage.Cube.CanFit(unit)) {
+									Storage.Cube.MoveTo(unit);
+								}
+
+								break;
+							case 6:
+								if (Storage.Inventory.CanFit(unit)) {
+									Storage.Inventory.MoveTo(unit);
+								}
+
+								break;
+							}
+
+							break;
+						case "moveItemFromInvoToTrade":
+						case "moveItemFromTradeToInvo":
+							unit = getUnit(101);
+
+							switch (unit.location) {
+							case 3:
+								if (Storage.TradeScreen.CanFit(unit)) {
+									Storage.TradeScreen.MoveTo(unit);
+								}
+
+								break;
+							case 5:
+								if (Storage.Inventory.CanFit(unit)) {
+									Packet.itemToCursor(unit);
+									Storage.Inventory.MoveTo(unit);
+								}
+
+								break;
+							}
+
+							break;
+						case "pickItems":
+							let item = getUnit(4, -1, 3), items = [],
+								cancelFlags = [0x01, 0x02, 0x04, 0x08, 0x14, 0x16, 0x0c, 0x0f, 0x19, 0x1a];
+
+							for (let i = 0; i < cancelFlags.length; i++) {
+								if (getUIFlag(cancelFlags[i])) {
+									me.cancel();
+								}
+							}
+
+							if (item) {
+								do {
+									items.push(copyUnit(item));
+								} while (item.getNext());
+							}
+
+							while (items.length > 0) {
+								items.sort(sortPickList);
+
+								item = items.shift();
+
+								if (Town.ignoredItemTypes.indexOf(item.itemType) === -1 && Storage.Inventory.CanFit(item)) {
+									Pickit.pickItem(item);
+								}
+							}
+
+							break;
+						case "sellItem":
+							unit = getUnit(101);
+
+							if (unit.location === 3 && Town.questItemClassids.indexOf(unit.classid) === -1 && Town.unsellablesClassids.indexOf(unit.classid) === -1) {
+								try {
+									unit.sell();
+								} catch (e) {
+									print(e);
+								}
+							}
+
+							break;
+						}
+
+						break;
+					case "drop":
+						let item;
+
+						switch (obj.action) {
+						case "invo":
+							let invo = me.findItems(-1, 0, 3);
+
+							if (invo) {
+								while (invo.length > 0) {
+									item = invo.shift();
+									item.drop();
+								}
+							}
+
+							me.cancel();
+
+							break;
+						case "stash":
+							if (!me.inTown || !Town.openStash()) {
+								me.overhead("Failed to open stash");
+
+								break;
+							}
+
+							let stash = me.findItems(-1, 0, 7);
+
+							if (stash) {
+								while (stash.length > 0) {
+									item = stash.shift();
+
+									if (item.classid !== 549) { // Don't drop the cube
+										item.drop();
+									}
+								}
+							}
+
+							me.cancel();
+
 							break;
 						}
 
@@ -447,6 +624,213 @@ function main() {
 		delay(20);
 	}
 }
+
+function sortPickList(a, b) {
+	// Same size - sort by distance
+	if (b.sizex === a.sizex && b.sizey === a.sizey) {
+		return getDistance(me, a) - getDistance(me, b);
+
+	}
+	
+	return b.sizex * b.sizey - a.sizex * a.sizey;
+}
+
+function openCowPortal (portalID) {
+	this.getTome = function () {
+		let tome,
+			myTome = me.findItem("tbk", 0, 3),
+			akara = Town.initNPC("Shop", "buyTome");
+
+		tome = me.getItem("tbk");
+
+		if (tome) {
+			do {
+				if (!myTome || tome.gid !== myTome.gid) {
+					return copyUnit(tome);
+				}
+			} while (tome.getNext());
+		}
+
+		if (!akara) {
+			print("Failed to buy tome");
+		}
+
+		tome = akara.getItem("tbk");
+
+		if (tome.buy()) {
+			tome = me.getItem("tbk");
+
+			if (tome) {
+				do {
+					if (!myTome || tome.gid !== myTome.gid) {
+						return copyUnit(tome);
+					}
+				} while (tome.getNext());
+			}
+		}
+
+		print("Failed to buy tome");
+
+		return false;
+	};
+
+	if (me.area !== 1) {
+		Town.goToTown(1);
+	}
+
+	if (Pather.getPortal(39)) {
+		me.overhead("Portal already opened");
+
+		return false;
+	}
+
+	let leg = me.getItem(88);
+
+	if (!leg) {
+		me.overhead("Missing leg");
+
+		return false;
+	}
+
+	let tome = this.getTome();
+
+	if (!tome) {
+		me.overhead("Missing tome");
+
+		return false;
+	}
+
+	if (!Town.openStash()) {
+		print('Failed to open stash. (openCowPortal)');
+
+		return false;
+	}
+
+	if (!Cubing.emptyCube()) {
+		print('Failed to empty cube. (openCowPortal)');
+
+		return false;
+	}
+
+	let cubingItem, classIDS = [88, 518];
+
+	for (let classID of classIDS) {
+		cubingItem = me.getItem(classID);
+
+		if (!cubingItem || !Storage.Cube.MoveTo(cubingItem)) {
+			return false;
+		}
+	}
+
+	while (!Cubing.openCube()) {
+		delay(1 + me.ping * 2);
+		Packet.flash(me.gid);
+	}
+
+	let cowPortal;
+	let tick = getTickCount();
+
+	while (getTickCount() - tick < 5000) {
+		if (Cubing.openCube()) {
+			transmute();
+			delay(750 + me.ping);
+			cowPortal = Pather.getPortal(portalID);
+
+			if (cowPortal) {
+				break;
+			}
+		}
+	}
+
+	me.cancel();
+
+	return true;
+};
+
+function uberPortals () {
+	let tkeys = me.findItems("pk1", 0).length || 0;
+	let hkeys = me.findItems("pk2", 0).length || 0;
+	let dkeys = me.findItems("pk3", 0).length || 0;
+	let brains = me.findItems("mbr", 0).length || 0;
+	let eyes = me.findItems("bey", 0).length || 0;
+	let horns = me.findItems("dhn", 0).length || 0;
+
+	// End the script if we don't have enough keys nor organs
+	if ((tkeys < 3 || hkeys < 3 || dkeys < 3) && (brains < 1 || eyes < 1 || horns < 1)) {
+		me.overhead("Not enough keys or organs.");
+
+		return false;
+	}
+
+	if (!Pather.accessToAct(5)) {
+		me.overhead("No access to act 5");
+
+		return false;
+	}
+
+	if (me.area !== 109) {
+		Town.goToTown(5);
+	}
+
+	let key1 = me.findItem("pk1", 0);
+	let key2 = me.findItem("pk2", 0);
+	let key3 = me.findItem("pk3", 0);
+	let org1 = me.findItem("mbr", 0);
+	let org2 = me.findItem("mbr", 0);
+	let org3 = me.findItem("mbr", 0);
+
+	if (!!org1 && !!org2 && !!org3) {
+		Town.move("stash");
+
+		if (Pather.getPortal(136)) {
+			me.overhead("Uber tristram already made");
+			return false;
+		}
+
+		if (Town.openStash() && Cubing.emptyCube()) {
+			if (!Storage.Cube.MoveTo(org1) || !Storage.Cube.MoveTo(org2) || !Storage.Cube.MoveTo(org3)) {
+				return false;
+			}
+
+			if (!Cubing.openCube()) {
+				return false;
+			}
+
+			transmute();
+			delay(1000);
+		}
+		
+		return true;
+	}
+
+	if (!!key1 && !!key2 && !!key3) {
+		Town.move("stash");
+
+		if (Pather.getPortal(133) && Pather.getPortal(134) && Pather.getPortal(135)) {
+			me.overhead("All portals already made");
+			return false;
+		}
+
+		if (!portal) {
+			if (Town.openStash() && Cubing.emptyCube()) {
+				if (!Storage.Cube.MoveTo(key1) || !Storage.Cube.MoveTo(key2) || !Storage.Cube.MoveTo(key3)) {
+					return false;
+				}
+
+				if (!Cubing.openCube()) {
+					return false;
+				}
+
+				transmute();
+				delay(1000);
+			}
+		}
+
+		return true;
+	}
+
+	return true;
+};
 
 Pather.stop = false;
 
@@ -625,4 +1009,197 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
 	removeEventListener("keyup", Pather.stopEvent);
 
 	return getDistance(me, node.x, node.y) < 5;
-}
+};
+
+Pather.getWP = function (area, clearPath) {
+	var i, j, wp, preset,
+		wpIDs = [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539];
+
+	if (area !== me.area) {
+		this.journeyTo(area);
+	}
+
+	for (i = 0; i < wpIDs.length; i += 1) {
+		preset = getPresetUnit(area, 2, wpIDs[i]);
+
+		if (preset) {
+			this.moveToUnit(preset, 0, 0, clearPath);
+
+			wp = getUnit(2, "waypoint");
+
+			if (wp) {
+				for (j = 0; j < 10; j += 1) {
+					Misc.click(0, 0, wp);
+
+					if (getUIFlag(0x14)) {
+						delay(500);
+
+						if (me.inTown) {
+							return true;	// Keep wp menu open in town
+						}
+
+						me.cancel();
+
+						return true;
+					}
+
+					delay(500);
+				}
+			}
+		}
+	}
+
+	return false;
+};
+
+Pather.changeAct = function (act) {
+	let npc;
+	let loc;
+
+	switch (act) {
+	case 1:
+		npc = "warriv";
+		loc = 1;
+
+		Town.move(NPC.Warriv);
+
+		break;
+	case 2:
+		switch (me.act) {
+		case 1:
+			npc = "warriv";
+			loc = 40;
+
+			if (!Misc.checkQuest(6, 0)) {
+				me.overhead('Incomplete Quest');
+				return false;
+			}
+
+			Town.move(NPC.Warriv);
+			
+			break;
+		case 3:
+			npc = "meshif";
+			loc = 40;
+
+			Town.move(NPC.Meshif);
+			
+			break;
+		}
+
+		break;
+	case 3:
+		npc = "meshif";
+		loc = 75;
+
+		if (!Misc.checkQuest(22, 0)) {
+			me.overhead('Incomplete Quest');
+			return false;
+		}
+
+		Town.move(NPC.Meshif);
+
+		break;
+	case 5:
+		npc = "tyrael";
+		loc = 109;
+
+		if (!Misc.checkQuest(26, 0)) {
+			me.overhead('Incomplete Quest');
+			return false;
+		}
+
+		Town.move(NPC.Tyrael);
+
+		break;
+	}
+
+	let npcUnit = getUnit(1, npc);
+	let timeout = getTickCount() + 3000;
+
+	while (!npcUnit && timeout < getTickCount()) {
+		Town.move(npc);
+		Packet.flash(me.gid);
+		delay(me.ping * 2 + 100);
+		npcUnit = getUnit(1, npc);
+	}
+
+	if (npcUnit) {
+		for (let i = 0; i < 5; i += 1) {
+			sendPacket(1, 56, 4, 0, 4, npcUnit.gid, 4, loc);
+			delay(500 + me.ping);
+
+			if (me.act === act) {
+				break;
+			}
+		}
+	} else {
+		print('Failed to move to ' + npc);
+		me.overhead('Failed to move to ' + npc);
+	}
+
+	return me.act === act;
+};
+
+Misc.checkQuest = function (id, state) {
+	sendPacket(1, 0x40);
+	delay(500 + me.ping);
+
+	return me.getQuest(id, state);
+};
+
+Town.questItemClassids = [87, 88, 89, 90, 91, 92, 173, 174, 521, 524, 525, 545, 546, 547, 548, 549, 552, 553, 554, 555, 644];
+Town.unsellablesClassids = [647, 648, 649, 650, 651, 652, 653, 654, 655, 656, 657, 658];
+
+Town.stash = function (stashGold, force) {
+	if (stashGold === undefined) {
+		stashGold = true;
+	}
+
+	if (force === undefined) {
+		force = false;
+	}
+
+	if (!this.needStash() && !force) {
+		return true;
+	}
+
+	me.cancel();
+
+	var i, result, tier, bodyLoc,
+		items = Storage.Inventory.Compare(Config.Inventory);
+
+	if (items) {
+		for (i = 0; i < items.length; i += 1) {
+			if (this.canStash(items[i])) {
+				result = (Pickit.checkItem(items[i]).result > 0 && Pickit.checkItem(items[i]).result < 4) || Cubing.keepItem(items[i]) || Runewords.keepItem(items[i]) || CraftingSystem.keepItem(items[i]);
+
+				// Don't stash low tier autoequip items.
+				if (Config.AutoEquip && Pickit.checkItem(items[i]).result === 1) {
+					tier = NTIP.GetTier(items[i]);
+					bodyLoc = Item.getBodyLoc(items[i]);
+
+					if (tier > 0 && tier <= Item.getEquippedItem(bodyLoc).tier) {
+						result = false;
+					}
+				}
+
+				if (result) {
+					Misc.itemLogger("Stashed", items[i]);
+					Storage.Stash.MoveTo(items[i]);
+				}
+			}
+		}
+	}
+
+	// Stash gold
+	if (stashGold) {
+		if (me.getStat(14) >= Config.StashGold && me.getStat(15) < 25e5 && this.openStash()) {
+			gold(me.getStat(14), 3);
+			delay(1000); // allow UI to initialize
+			me.cancel();
+		}
+	}
+
+	return true;
+};
