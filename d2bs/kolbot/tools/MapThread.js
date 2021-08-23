@@ -1,3 +1,4 @@
+/* eslint-disable no-extra-boolean-cast */
 /*
 *	@filename	MapThread.js
 *	@author		theBGuy
@@ -5,7 +6,7 @@
 *	@credits 	kolton for orginal MapThread, isid0re for the box/frame style, laz for gamepacketsent event handler
 */
 
-var Hooks = {
+const Hooks = {
 	dashboardX: 400,
 	dashboardY: 490,
 	portalX: 12,
@@ -46,7 +47,7 @@ var Hooks = {
 				return;
 			}
 
-			var i, item;
+			let i, item;
 
 			for (i = 0; i < this.hooks.length; i += 1) {
 				if (!copyUnit(this.hooks[i].item).x) {
@@ -86,7 +87,7 @@ var Hooks = {
 						}
 
 						if (this.getHook(item)) {
-							this.update(); 
+							this.update();
 						}
 					} else {
 						this.remove(item);
@@ -96,16 +97,14 @@ var Hooks = {
 		},
 
 		update: function () {
-			var i;
-
-			for (i = 0; i < this.hooks.length; i += 1) {
+			for (let i = 0; i < this.hooks.length; i += 1) {
 				this.hooks[i].vector[0].x = me.x;
 				this.hooks[i].vector[0].y = me.y;
 			}
 		},
 
 		newHook: function (item) {
-			var color = 0, code = "", arr = [], name = [], vector = [];
+			let color = 0, code = "", arr = [], name = [], vector = [];
 			// White: ÿc0, Red: ÿc1, Light Green: ÿc2, Blue: ÿc3, Gold: ÿc4, Gray: ÿc5, Black: ÿc6, Lighter Gold?: ÿc7, Orange: ÿc8, Tan?: ÿc9, Dark Green: ÿc:, Purple: ÿc;, Green: ÿc<"
 
 			switch (item.quality) {
@@ -158,7 +157,7 @@ var Hooks = {
 
 					name.push(new Text(code + item.fname, 665 + Hooks.upperRightResfixX, 104 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)) + (this.hooks.length * 14), color, 0, 0));
 
-					break
+					break;
 				default:
 					if (item.name) {
 						if (item.getStat(194) === 1) {
@@ -171,7 +170,7 @@ var Hooks = {
 						let abbrName = "";
 
 						if (abbr[1]) {
-							abbrName += abbr[0] + "-"
+							abbrName += abbr[0] + "-";
 
 							for (let i = 1; i < abbr.length; i++) {
 								abbrName += abbr[i].substring(0, 1);
@@ -186,10 +185,10 @@ var Hooks = {
 							code += "[R: " + item.getStat(39) + "]";
 						}
 
-						name.push(new Text(code + "(" + item.ilvl + ")", 665 + Hooks.upperRightResfixX, 104 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)) + (this.hooks.length * 14), color, 0, 0));	
+						name.push(new Text(code + "(" + item.ilvl + ")", 665 + Hooks.upperRightResfixX, 104 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)) + (this.hooks.length * 14), color, 0, 0));
 					}
 
-					break;	
+					break;
 				}
 
 				break;
@@ -197,12 +196,12 @@ var Hooks = {
 			case 7: 	// Unique
 				if (item.quality === 5) {
 					color = 0x84;
-					code = "ÿc2";	
+					code = "ÿc2";
 				}
 				
 				if (item.quality === 7) {
 					color = 0xA8;
-					code = "ÿc4";	
+					code = "ÿc4";
 				}
 
 				switch (item.classid) {
@@ -332,9 +331,6 @@ var Hooks = {
 				case 353:
 					code += item.quality === 5 ? "" : "Rockstopper";
 					break;
-				case 352:
-					code += item.quality === 5 ? "" : "Peasant Crown";
-					break;
 				case 420:
 					code += item.quality === 5 ? "" : "Kira's";
 					break;
@@ -458,7 +454,7 @@ var Hooks = {
 					code += item.quality === 5 ? "IK Boots" : "Gore Rider";
 					break;
 				//--------Set Mavina's--------//
-				case 418:
+				case 302:
 					code += item.quality === 5 ? "Mavina's Bow" : item.name;
 					break;
 				case 439:
@@ -525,7 +521,7 @@ var Hooks = {
 					break;
 				//--------Set Cow King's--------//
 				case 352:
-					code += item.quality === 5 ? "Cow King's Helm" : "";
+					code += item.quality === 5 ? "Cow King's Helm" : "Peasant Crown";
 					break;
 				case 316:
 					code += item.quality === 5 ? "Cow King's Armor" : "Twitchthroe";
@@ -560,9 +556,6 @@ var Hooks = {
 					code += item.quality === 5 ? item.name : "Nightsmoke";
 					break;
 				//--------Set Naj's--------//
-				case 418:
-					code += item.quality === 5 ? "Naj's Helm" : "";
-					break;
 				case 438:
 					code += item.quality === 5 ? "Naj's Armor" : "";
 					break;
@@ -669,14 +662,14 @@ var Hooks = {
 						code = "ÿc3" + (item.getFlag(0x400000) ? "Eth: " : "") + (item.getStat(194) > 0 ? "[" + item.getStat(194) + "]" : "");
 					} else {
 						color = 0x6F;
-						code = "ÿc9" + (item.getFlag(0x400000) ? "Eth: " : "") + (item.getStat(194) > 0 ? "[" + item.getStat(194) + "]" : "");	
+						code = "ÿc9" + (item.getFlag(0x400000) ? "Eth: " : "") + (item.getStat(194) > 0 ? "[" + item.getStat(194) + "]" : "");
 					}
 					
 					let abbr = item.name.split(" ");
 					let abbrName = "";
 
 					if (abbr[1]) {
-						abbrName += abbr[0] + "-"
+						abbrName += abbr[0] + "-";
 
 						for (let i = 1; i < abbr.length; i++) {
 							abbrName += abbr[i].substring(0, 1);
@@ -687,7 +680,7 @@ var Hooks = {
 						code += item.name;
 					}
 
-					name.push(new Text(code + "(" + item.ilvl + ")", 665 + Hooks.upperRightResfixX, 104 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)) + (this.hooks.length * 14), color, 0, 0));	
+					name.push(new Text(code + "(" + item.ilvl + ")", 665 + Hooks.upperRightResfixX, 104 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)) + (this.hooks.length * 14), color, 0, 0));
 				}
 				
 				break;
@@ -721,9 +714,7 @@ var Hooks = {
 		},
 
 		getHook: function (item) {
-			var i;
-
-			for (i = 0; i < this.hooks.length; i += 1) {
+			for (let i = 0; i < this.hooks.length; i += 1) {
 				if (this.hooks[i].item.gid === item.gid) {
 					return this.hooks[i].hook;
 				}
@@ -733,9 +724,7 @@ var Hooks = {
 		},
 
 		remove: function (item) {
-			var i;
-
-			for (i = 0; i < this.hooks.length; i += 1) {
+			for (let i = 0; i < this.hooks.length; i += 1) {
 				if (this.hooks[i].item.gid === item.gid) {
 					for (let j = 0; j < this.hooks[i].hook.length; j++) {
 						this.hooks[i].hook[j].remove();
@@ -789,7 +778,7 @@ var Hooks = {
 				return;
 			}
 
-			var i, unit;
+			let i, unit;
 
 			for (i = 0; i < this.hooks.length; i += 1) {
 				if (!copyUnit(this.hooks[i].unit).x) {
@@ -818,7 +807,7 @@ var Hooks = {
 		},
 
 		newHook: function (unit) {
-			var arr = [];
+			let arr = [];
 
 			if (unit.spectype & 0xF) {
 				arr.push(new Text("O", unit.x, unit.y, this.specTypeColor(unit), 1, null, true));
@@ -831,36 +820,24 @@ var Hooks = {
 
 		// credit DetectiveSquirrel from his maphack https://github.com/DetectiveSquirrel/Kolbot-MapThread/blob/9c721a72a934518cfca1d1a05211b5e03b5b624f/kolbot/tools/MapThread.js#L2353
 		specTypeColor: function (unit) {
-			var UnitSpecType 			= unit.spectype,
+			let UnitSpecType 			= unit.spectype,
 				UniqueBossSpecType 		= 0x04,
 				UniqueQuestModSpecType 	= 0x05,
 				MagicSpecType		 	= 0x06,
 				BossMinionSpecType		= 0x08;
 
 			switch (UnitSpecType) {
-				case BossMinionSpecType:
-					return 3;
-					
-					break;
-				case MagicSpecType:
-					return 9;
-					
-					break;
-				case UniqueBossSpecType:
-					return 11;
-
-					break;
-				case UniqueQuestModSpecType:
-					return 2;
-
-					break;
-				default:
-					return 8;
-
-					break;
+			case BossMinionSpecType:
+				return 3;
+			case MagicSpecType:
+				return 9;
+			case UniqueBossSpecType:
+				return 11;
+			case UniqueQuestModSpecType:
+				return 2;
+			default:
+				return 8;
 			}
-
-			return false;
 		},
 
 		add: function (unit) {
@@ -871,7 +848,7 @@ var Hooks = {
 		},
 
 		updateCoords: function (unit) {
-			var hook = this.getHook(unit);
+			let hook = this.getHook(unit);
 
 			if (!hook) {
 				return false;
@@ -884,9 +861,7 @@ var Hooks = {
 		},
 
 		getHook: function (unit) {
-			var i;
-
-			for (i = 0; i < this.hooks.length; i += 1) {
+			for (let i = 0; i < this.hooks.length; i += 1) {
 				if (this.hooks[i].unit.gid === unit.gid) {
 					return this.hooks[i].hook;
 				}
@@ -896,9 +871,7 @@ var Hooks = {
 		},
 
 		remove: function (unit) {
-			var i;
-
-			for (i = 0; i < this.hooks.length; i += 1) {
+			for (let i = 0; i < this.hooks.length; i += 1) {
 				if (this.hooks[i].unit.gid === unit.gid) {
 					this.hooks[i].hook[0].remove();
 					this.hooks.splice(i, 1);
@@ -929,7 +902,7 @@ var Hooks = {
 				return;
 			}
 
-			var i, shrine;
+			let i, shrine;
 
 			for (i = 0; i < this.hooks.length; i += 1) {
 				if (!copyUnit(this.hooks[i].shrine).objtype) {
@@ -947,7 +920,7 @@ var Hooks = {
 					if (shrine.mode === 0) {
 						if (!this.getHook(shrine)) {
 							this.add(shrine);
-						} 
+						}
 					} else {
 						this.remove(shrine);
 					}
@@ -956,78 +929,78 @@ var Hooks = {
 		},
 
 		newHook: function (shrine) {
-			var arr = [];
+			let arr = [];
 
 			switch (shrine.objtype) {
-				case 0:
-					arr.push(new Text("Health", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 1:
-					arr.push(new Text("Refilling", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 2:
-					arr.push(new Text("Health", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 3:
-					arr.push(new Text("Mana", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 4:
-					arr.push(new Text("Health Exchange", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 5:
-					arr.push(new Text("Mana Exchange", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 6:
-					arr.push(new Text("Armor", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 7:
-					arr.push(new Text("Combat", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 8:
-					arr.push(new Text("Resist Fire", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 9:
-					arr.push(new Text("Resist Cold", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 10:
-					arr.push(new Text("Resist Lightning", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 11:
-					arr.push(new Text("Resist Poison", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 12:
-					arr.push(new Text("Skill", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 13:
-					arr.push(new Text("Mana Recharge", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 14:
-					arr.push(new Text("Stamina", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 15:
-					arr.push(new Text("Experience", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 16:
-					arr.push(new Text("Enirhs", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 17:
-					arr.push(new Text("Portal", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 18:
-					arr.push(new Text("Gem", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 19:
-					arr.push(new Text("Fire", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 20:
-					arr.push(new Text("Monster", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 21:
-					arr.push(new Text("Exploding", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
-				case 22:
-					arr.push(new Text("Poison", shrine.x, shrine.y, 4, 6, 2, true));
-					break;
+			case 0:
+				arr.push(new Text("Health", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 1:
+				arr.push(new Text("Refilling", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 2:
+				arr.push(new Text("Health", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 3:
+				arr.push(new Text("Mana", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 4:
+				arr.push(new Text("Health Exchange", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 5:
+				arr.push(new Text("Mana Exchange", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 6:
+				arr.push(new Text("Armor", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 7:
+				arr.push(new Text("Combat", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 8:
+				arr.push(new Text("Resist Fire", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 9:
+				arr.push(new Text("Resist Cold", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 10:
+				arr.push(new Text("Resist Lightning", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 11:
+				arr.push(new Text("Resist Poison", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 12:
+				arr.push(new Text("Skill", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 13:
+				arr.push(new Text("Mana Recharge", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 14:
+				arr.push(new Text("Stamina", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 15:
+				arr.push(new Text("Experience", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 16:
+				arr.push(new Text("Enirhs", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 17:
+				arr.push(new Text("Portal", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 18:
+				arr.push(new Text("Gem", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 19:
+				arr.push(new Text("Fire", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 20:
+				arr.push(new Text("Monster", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 21:
+				arr.push(new Text("Exploding", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
+			case 22:
+				arr.push(new Text("Poison", shrine.x, shrine.y, 4, 6, 2, true));
+				break;
 			}
 
 			return arr;
@@ -1045,9 +1018,7 @@ var Hooks = {
 		},
 
 		getHook: function (shrine) {
-			var i;
-
-			for (i = 0; i < this.hooks.length; i += 1) {
+			for (let i = 0; i < this.hooks.length; i += 1) {
 				if (this.hooks[i].shrine.gid === shrine.gid) {
 					return this.hooks[i].hook;
 				}
@@ -1057,9 +1028,7 @@ var Hooks = {
 		},
 
 		remove: function (shrine) {
-			var i;
-
-			for (i = 0; i < this.hooks.length; i += 1) {
+			for (let i = 0; i < this.hooks.length; i += 1) {
 				if (this.hooks[i].shrine.gid === shrine.gid) {
 					this.hooks[i].hook[0].remove();
 					this.hooks.splice(i, 1);
@@ -1175,10 +1144,8 @@ var Hooks = {
 			case 134:
 			case 135:
 			case 136:
-			case 2:
 			case 7:
 			case 10:
-			case 18:
 			case 27:
 			case 28:
 			case 29:
@@ -1370,8 +1337,8 @@ var Hooks = {
 		},
 
 		getBlock: function () {
-			var shield = false,
-			item = me.getItem(-1, 1);
+			let shield = false,
+				item = me.getItem(-1, 1);
 
 			// make sure character has shield equipped
 			if (item) {
@@ -1581,9 +1548,7 @@ var Hooks = {
 		},
 
 		getHook: function (name) {
-			var i;
-
-			for (i = 0; i < this.hooks.length; i += 1) {
+			for (let i = 0; i < this.hooks.length; i += 1) {
 				if (this.hooks[i].name === name) {
 					return this.hooks[i];
 				}
@@ -1593,7 +1558,7 @@ var Hooks = {
 		},
 
 		timer: function () {
-			var min, sec;
+			let min, sec;
 
 			min = Math.floor((getTickCount() - me.gamestarttime) / 60000).toString();
 
@@ -1633,7 +1598,7 @@ var Hooks = {
 			if (me.area !== this.currArea) {
 				this.flush();
 
-				var i, exits, wp, poi,
+				let i, exits, wp, poi,
 					nextAreas = [];
 
 				// Specific area override
@@ -1693,9 +1658,7 @@ var Hooks = {
 		},
 
 		update: function () {
-			var i;
-
-			for (i = 0; i < this.hooks.length; i += 1) {
+			for (let i = 0; i < this.hooks.length; i += 1) {
 				this.hooks[i].x = me.x;
 				this.hooks[i].y = me.y;
 			}
@@ -1718,7 +1681,7 @@ var Hooks = {
 				return false;
 			}
 
-			var i, preset,
+			let i, preset,
 				wpIDs = [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539];
 
 			for (i = 0; i < wpIDs.length; i += 1) {
@@ -1736,7 +1699,7 @@ var Hooks = {
 		},
 
 		getPOI: function () {
-			var unit, name;
+			let unit, name;
 
 			switch (me.area) {
 			case 13: // Cave Level 2
@@ -1857,7 +1820,7 @@ var Hooks = {
 				unit = getPresetUnit(me.area, 5, 20);
 				name = "Sewer's Level 1";
 
-				break;	
+				break;
 			case 49: // Sewers 3
 				unit = getPresetUnit(me.area, 2, 355);
 				name = "Radament";
@@ -2005,7 +1968,7 @@ var Hooks = {
 				if (getUnit(1, 544)) {
 					unit = getUnit(1, 544);
 				} else {
-					unit = {x: 15134, y: 5923}
+					unit = {x: 15134, y: 5923};
 				}
 				
 				name = "Baal";
@@ -2056,10 +2019,10 @@ var Hooks = {
 		currArea: 0,
 		enabled: true,
 		prevAreas: [0, 0, 1, 2, 3, 10, 5, 6, 2, 3, 4, 6, 7, 9, 10, 11, 12, 3, 17, 17, 6, 20, 21, 22, 23, 24, 7, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
-					36, 4, 1, 1, 40, 41, 42, 43, 44, 74, 40, 47, 48, 40, 50, 51, 52, 53, 41, 42, 56, 45, 55, 57, 58, 43, 62, 63, 44, 46, 46, 46, 46, 46,
-					46, 46, 1, 54, 1, 75, 76, 76, 78, 79, 80, 81, 82, 76, 76, 78, 86, 78, 88, 87, 89, 81, 92, 80, 80, 81, 81, 82, 82, 83, 100, 101, 102,
-					103, 104, 105, 106, 107, 103, 109, 110, 111, 112, 113, 113, 115, 115, 117, 118, 118, 109, 121, 122, 123, 111, 112, 117, 120, 128, 129,
-					130, 131, 109, 109, 109, 109],
+			36, 4, 1, 1, 40, 41, 42, 43, 44, 74, 40, 47, 48, 40, 50, 51, 52, 53, 41, 42, 56, 45, 55, 57, 58, 43, 62, 63, 44, 46, 46, 46, 46, 46,
+			46, 46, 1, 54, 1, 75, 76, 76, 78, 79, 80, 81, 82, 76, 76, 78, 86, 78, 88, 87, 89, 81, 92, 80, 80, 81, 81, 82, 82, 83, 100, 101, 102,
+			103, 104, 105, 106, 107, 103, 109, 110, 111, 112, 113, 113, 115, 115, 117, 118, 118, 109, 121, 122, 123, 111, 112, 117, 120, 128, 129,
+			130, 131, 109, 109, 109, 109],
 
 		event: function (keycode) {
 			Hooks.tele.action = keycode;
@@ -2070,7 +2033,7 @@ var Hooks = {
 				return;
 			}
 
-			var hook,
+			let hook,
 				obj = {
 					type: false,
 					dest: false
@@ -2202,7 +2165,7 @@ var Hooks = {
 					case 109:
 						hook = this.getPortalHook("Furnace");
 						obj.type = "portal";
-						break;	
+						break;
 					}
 					
 					break;
@@ -2233,7 +2196,7 @@ var Hooks = {
 		},
 
 		add: function (area) {
-			var i, exits, wp, poi, nextCheck,
+			let i, exits, wp, poi, nextCheck, infSeal, seisSeal, vizSeal,
 				nextAreas = [];
 
 			// Specific area override
@@ -2359,7 +2322,7 @@ var Hooks = {
 
 				break;
 			case 108:
-				let infSeal = this.getDiabloSeals(392);
+				infSeal = this.getDiabloSeals(392);
 
 				if (infSeal) {
 					this.hooks.push({
@@ -2369,7 +2332,7 @@ var Hooks = {
 					});
 				}
 
-				let seisSeal = this.getDiabloSeals(394);
+				seisSeal = this.getDiabloSeals(394);
 
 				if (seisSeal) {
 					this.hooks.push({
@@ -2379,7 +2342,7 @@ var Hooks = {
 					});
 				}
 
-				let vizSeal = this.getDiabloSeals(396);
+				vizSeal = this.getDiabloSeals(396);
 
 				if (vizSeal) {
 					this.hooks.push({
@@ -2595,7 +2558,7 @@ var Hooks = {
 
 				this.frame.push({
 					name: "portalframe",
-					hook: new Frame(Hooks.portalX - 8, Hooks.portalY + Hooks.resfixY - 17, 190, 70 , 0)
+					hook: new Frame(Hooks.portalX - 8, Hooks.portalY + Hooks.resfixY - 17, 190, 70, 0)
 				});
 
 				if (Pather.getPortal(133)) {
@@ -2633,7 +2596,7 @@ var Hooks = {
 			}
 
 			if ([38, 39, 46, 74, 121, 125, 126, 127, 133, 134, 135, 136].indexOf(me.area) > -1) {
-				let chest, entrance = {x: 0, y: 0};
+				let entrance = {x: 0, y: 0};
 
 				switch (me.area) {
 				case 38:
@@ -2721,15 +2684,15 @@ var Hooks = {
 						let lilith = getPresetUnit(me.area, 2, 397);
 
 						switch (lilith.x) {
-							case 11:
-								entrance = {x: 20023, y: 7643};
-								break;
-							case 20:
-								entrance = {x: 20303, y: 7803};
-								break;
-							case 21:
-								entrance = {x: 20263, y: 7683};
-								break;
+						case 11:
+							entrance = {x: 20023, y: 7643};
+							break;
+						case 20:
+							entrance = {x: 20303, y: 7803};
+							break;
+						case 21:
+							entrance = {x: 20263, y: 7683};
+							break;
 						}
 					}
 				// Furnace
@@ -2738,12 +2701,12 @@ var Hooks = {
 						let izual = getPresetUnit(me.area, 2, 397);
 
 						switch (izual.x) {
-							case 14:
-								entrance = {x: 20138, y: 14873};
-								break;
-							case 15:
-								entrance = {x: 20138, y: 14563};
-								break;
+						case 14:
+							entrance = {x: 20138, y: 14873};
+							break;
+						case 15:
+							entrance = {x: 20138, y: 14563};
+							break;
 						}
 					}
 				// Tristram
@@ -2849,16 +2812,14 @@ var Hooks = {
 				return {
 					x: unit.x,
 					y: unit.y,
-				};	
+				};
 			}
 
 			return false;
 		},
 
 		getHook: function (name) {
-			var i;
-
-			for (i = 0; i < this.hooks.length; i += 1) {
+			for (let i = 0; i < this.hooks.length; i += 1) {
 				if (this.hooks[i].name === name) {
 					return this.hooks[i];
 				}
@@ -2868,9 +2829,7 @@ var Hooks = {
 		},
 
 		getPortalHook: function (name) {
-			var i;
-
-			for (i = 0; i < this.portals.length; i += 1) {
+			for (let i = 0; i < this.portals.length; i += 1) {
 				if (this.portals[i].name === name) {
 					return this.portals[i];
 				}
@@ -2925,6 +2884,363 @@ var Hooks = {
 	}
 };
 
+function helpMenu() {
+	let hooks = [];
+	let box = [];
+	this.cleared = true;
+	let helpBoxX = 715 + (me.screensize ? 0 : -160);
+	let helpBoxY = 88 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename) + Number(!!me.gameserverip && !me.realm));
+	let helpBoxTextX = 647 + (me.screensize ? 0 : -160);
+	let helpBoxTextY = 88 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename) + Number(!!me.gameserverip && !me.realm)) + 15;
+
+	function hookHandler (click, x, y) {
+		// Get the hook closest to the clicked location
+		function sortHooks(h1, h2) {
+			return Math.abs(h1.y - y) - Math.abs(h2.y - y);
+		}
+
+		// Left click
+		if (click === 0) {
+			// Sort hooks
+			hooks.sort(sortHooks);
+
+			let cmd = hooks[0].text.split(" ")[0].split(".")[1];
+			let msgList = hooks[0].text.split(" ");
+
+			if (!hooks[0].text.includes(".")) {
+				cmd = hooks[0].text.split(" ")[1];
+			}
+
+			switch (cmd) {
+			case "me":
+				me.overhead("Displays Character level, Area, and x/y coordinates");
+
+				break;
+			case "pick":
+				me.overhead("Pick items from the ground to inventory");
+
+				break;
+			case "hide":
+				me.overhead("Hide this menu");
+
+				break;
+			case "stash":
+				me.overhead("Calls Town.stash() to stash items/gold from inventory");
+
+				break;
+			case "filltps":
+				me.overhead("Fill tp tome");
+
+				break;
+			case "cowportal":
+				me.overhead("Make cow portal as long as bot already has leg");
+
+				break;
+			case "uberportal":
+				me.overhead("Make uber portal as long as bot already has ingrediants. Whole keyset or whole organ set");
+
+				break;
+			case "useraddon":
+				me.overhead("Toggles useraddon mode");
+
+				break;
+			case "drop":
+				switch (msgList[1]) {
+				case "invo":
+					me.overhead("Drop all items in the inventory");
+
+					break;
+				case "stash":
+					me.overhead("Drop all items in the stash excluding the cube");
+
+					break;
+				}
+
+				break;
+			case "Ctrl":
+				me.overhead("Hover over an item then press Ctrl to move that item from one area to the next. In example: Stash to Inventory, Cube to Inventory, Inventory to TradeScreen, or Inventory to Shop (sellItem)");
+
+				break;
+			default:
+				me.overhead(cmd);
+
+				break;
+			}
+
+			// Block click
+			return true;
+		}
+
+		return false;
+	}
+
+	function addHook (text) {
+		hooks.push(new Text("ÿc4." + text, helpBoxTextX, helpBoxTextY + 12 * hooks.length, 0, 0, 0, false, hookHandler));
+	}
+
+	this.showMenu = function () {
+		this.cleared = false;
+
+		let commands = [
+			"me",
+			"pick",
+			"hide",
+			"stash",
+			"filltps",
+			"cowportal",
+			"uberportal",
+			"useraddon",
+			"drop invo",
+			"drop stash",
+		];
+
+		box.push(new Box(helpBoxX, helpBoxY, 150, 165, 0x0, 1, 2));
+		box.push(new Frame(helpBoxX, helpBoxY, 150, 165, 2));
+		hooks.push(new Text("ÿc2Chat Commands:", helpBoxTextX, helpBoxTextY, 0, 0, 0));
+
+		for (let i = 0; i < commands.length; i++) {
+			addHook(commands[i]);
+		}
+
+		hooks.push(new Text("ÿc2Key Commands:", helpBoxTextX, helpBoxTextY + 12 * hooks.length, 0, 0, 0));
+		hooks.push(new Text("ÿc4 Ctrl Key", helpBoxTextX, helpBoxTextY + 12 * hooks.length, 0, 0, 0, false, hookHandler));
+	};
+
+	this.hideMenu = function () {
+		let kill;
+
+		this.cleared = true;
+
+		while (hooks.length) {
+			kill = hooks.shift();
+			kill.remove();
+		}
+
+		while (box.length) {
+			kill = box.shift();
+			kill.remove();
+		}
+
+		return;
+	};
+}
+
+function UnitInfo() {
+	this.x = 200;
+	this.y = 250;
+	this.hooks = [];
+	this.cleared = true;
+
+	this.createInfo = function (unit) {
+		if (typeof unit === "undefined") {
+			this.remove();
+
+			return;
+		}
+
+		switch (unit.type) {
+		case 0:
+			this.playerInfo(unit);
+
+			break;
+		case 1:
+			this.monsterInfo(unit);
+
+			break;
+		case 2:
+		case 5:
+			this.objectInfo(unit);
+
+			break;
+		case 4:
+			this.itemInfo(unit);
+
+			break;
+		}
+	};
+
+	this.playerInfo = function (unit) {
+		let i, items, string,
+			frameXsize = 0,
+			frameYsize = 20,
+			quality = ["ÿc0", "ÿc0", "ÿc0", "ÿc0", "ÿc3", "ÿc2", "ÿc9", "ÿc4", "ÿc8"];
+
+		if (!this.currentGid) {
+			this.currentGid = unit.gid;
+		}
+
+		if (this.currentGid === unit.gid && !this.cleared) {
+			return;
+		}
+
+		if (this.currentGid !== unit.gid) {
+			this.remove();
+			this.currentGid = unit.gid;
+		}
+
+		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, this.x, this.y, 4, 13, 2));
+
+		items = unit.getItems();
+
+		if (items) {
+			this.hooks.push(new Text("Equipped items:", this.x, this.y + 15, 4, 13, 2));
+			frameYsize += 15;
+
+			for (i = 0; i < items.length; i += 1) {
+				if (items[i].getFlag(0x4000000)) {
+					string = items[i].fname.split("\n")[1] + "ÿc0 " + items[i].fname.split("\n")[0];
+				} else {
+					string = quality[items[i].quality] + (items[i].quality > 4 && items[i].getFlag(0x10) ? items[i].fname.split("\n").reverse()[0].replace("ÿc4", "") : items[i].name);
+				}
+
+				this.hooks.push(new Text(string, this.x, this.y + (i + 2) * 15, 0, 13, 2));
+
+				if (string.length > frameXsize) {
+					frameXsize = string.length;
+				}
+
+				frameYsize += 15;
+			}
+		}
+
+		this.cleared = false;
+
+		this.hooks.push(new Box(this.x + 2, this.y - 15, Math.round(frameXsize * 7.5) - 4, frameYsize, 0x0, 1, 2));
+		this.hooks.push(new Frame(this.x, this.y - 15, Math.round(frameXsize * 7.5), frameYsize, 2));
+
+		this.hooks[this.hooks.length - 2].zorder = 0;
+	};
+
+	this.monsterInfo = function (unit) {
+		let frameYsize = 125;
+
+		if (!this.currentGid) {
+			this.currentGid = unit.gid;
+		}
+
+		if (this.currentGid === unit.gid && !this.cleared) {
+			return;
+		}
+
+		if (this.currentGid !== unit.gid) {
+			this.remove();
+			this.currentGid = unit.gid;
+		}
+
+		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, this.x, this.y, 4, 13, 2));
+		this.hooks.push(new Text("HP percent: ÿc0" + Math.round(unit.hp * 100 / 128), this.x, this.y + 15, 4, 13, 2));
+		this.hooks.push(new Text("Fire resist: ÿc0" + unit.getStat(39), this.x, this.y + 30, 4, 13, 2));
+		this.hooks.push(new Text("Cold resist: ÿc0" + unit.getStat(43), this.x, this.y + 45, 4, 13, 2));
+		this.hooks.push(new Text("Lightning resist: ÿc0" + unit.getStat(41), this.x, this.y + 60, 4, 13, 2));
+		this.hooks.push(new Text("Poison resist: ÿc0" + unit.getStat(45), this.x, this.y + 75, 4, 13, 2));
+		this.hooks.push(new Text("Physical resist: ÿc0" + unit.getStat(36), this.x, this.y + 90, 4, 13, 2));
+		this.hooks.push(new Text("Magic resist: ÿc0" + unit.getStat(37), this.x, this.y + 105, 4, 13, 2));
+
+		this.cleared = false;
+
+		this.hooks.push(new Box(this.x + 2, this.y - 15, 136, frameYsize, 0x0, 1, 2));
+		this.hooks.push(new Frame(this.x, this.y - 15, 140, frameYsize, 2));
+
+		this.hooks[this.hooks.length - 2].zorder = 0;
+	};
+
+	this.itemInfo = function (unit) {
+		let i = 0, xpos = 60, ypos = (me.getMerc() ? 80 : 20) + (-1 * Hooks.resfixY),
+			frameYsize = 50;
+
+		if (!this.currentGid) {
+			this.currentGid = unit.gid;
+		}
+
+		if (this.currentGid === unit.gid && !this.cleared) {
+			return;
+		}
+
+		if (this.currentGid !== unit.gid) {
+			this.remove();
+			this.currentGid = unit.gid;
+		}
+
+		this.hooks.push(new Text("Code: ÿc0" + unit.code, xpos, ypos + 0, 4, 13, 2));
+		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, xpos, ypos + 15, 4, 13, 2));
+		this.hooks.push(new Text("Item Type: ÿc0" + unit.itemType, xpos, ypos + 30, 4, 13, 2));
+		this.hooks.push(new Text("Item level: ÿc0" + unit.ilvl, xpos, ypos + 45, 4, 13, 2));
+
+		this.cleared = false;
+		this.socketedItems = unit.getItems();
+
+		if (this.socketedItems) {
+			this.hooks.push(new Text("Socketed with:", xpos, ypos + 60, 4, 13, 2));
+			frameYsize += 30;
+
+			for (i = 0; i < this.socketedItems.length; i += 1) {
+				this.hooks.push(new Text(this.socketedItems[i].fname.split("\n").reverse().join(" "), xpos, ypos + (i + 5) * 15, 0, 13, 2));
+
+				frameYsize += 15;
+			}
+		}
+
+		if (unit.quality === 4 && unit.getFlag(0x10)) {
+			this.hooks.push(new Text("Prefix: ÿc0" + unit.prefixnum, xpos, ypos + frameYsize - 5, 4, 13, 2));
+			this.hooks.push(new Text("Suffix: ÿc0" + unit.suffixnum, xpos, ypos + frameYsize + 10, 4, 13, 2));
+
+			frameYsize += 30;
+		}
+
+		if (unit.getFlag(0x4000000)) {
+			this.hooks.push(new Text("Prefix: ÿc0" + unit.prefixnum, xpos, ypos + frameYsize - 5, 4, 13, 2));
+
+			frameYsize += 15;
+		}
+
+		this.hooks.push(new Box(xpos + 2, ypos - 15, 116, frameYsize, 0x0, 1, 2));
+		this.hooks.push(new Frame(xpos, ypos - 15, 120, frameYsize, 2));
+
+		this.hooks[this.hooks.length - 2].zorder = 0;
+	};
+
+	this.objectInfo = function (unit) {
+		let frameYsize = 35;
+
+		if (!this.currentGid) {
+			this.currentGid = unit.gid;
+		}
+
+		if (this.currentGid === unit.gid && !this.cleared) {
+			return;
+		}
+
+		if (this.currentGid !== unit.gid) {
+			this.remove();
+			this.currentGid = unit.gid;
+		}
+
+		this.hooks.push(new Text("Type: ÿc0" + unit.type, this.x, this.y, 4, 13, 2));
+		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, this.x, this.y + 15, 4, 13, 2));
+
+		if (!!unit.objtype) {
+			this.hooks.push(new Text("Destination: ÿc0" + unit.objtype, this.x, this.y + 30, 4, 13, 2));
+
+			frameYsize += 15;
+		}
+
+		this.cleared = false;
+
+		this.hooks.push(new Box(this.x + 2, this.y - 15, 116, frameYsize, 0x0, 1, 2));
+		this.hooks.push(new Frame(this.x, this.y - 15, 120, frameYsize, 2));
+
+		this.hooks[this.hooks.length - 2].zorder = 0;
+	};
+
+	this.remove = function () {
+		while (this.hooks.length > 0) {
+			this.hooks.shift().remove();
+		}
+
+		this.cleared = true;
+	};
+}
+
 function main() {
 	include("json2.js");
 	include("NTItemParser.dbl");
@@ -2950,7 +3266,7 @@ function main() {
 	Config.init(false);
 	Pickit.init(true);
 
-	var i,
+	let i,
 		hideFlags = [0x09, 0x0C, 0x01, 0x02, 0x03, 0x04, 0x0F, 0x17, 0x18, 0x19, 0x1A, 0x21, 0x05, 0x14, 0x24];
 
 	let help = new helpMenu();
@@ -2970,7 +3286,7 @@ function main() {
 	this.getOnScreenLocation = function () {
 		let possibleLocs = [0x17, 0x19, 0x1A, 0x0C];
 
-		for (let i = 0; i < possibleLocs.length; i++) {
+		for (i = 0; i < possibleLocs.length; i++) {
 			if (getUIFlag(possibleLocs[i])) {
 				return possibleLocs.indexOf(possibleLocs[i]);
 			}
@@ -2980,15 +3296,11 @@ function main() {
 	};
 
 	this.keyEvent = function (key) {
-		let book, qolObj = {
-				type: false,
-				dest: false,
-				action: false
-			};
+		let book, unit, qolObj = {type: false, dest: false, action: false};
 
 		switch (key) {
 		case 17: // Ctrl
-			let unit = getUnit(101);
+			unit = getUnit(101);
 
 			switch (this.getOnScreenLocation()) {
 			case 0: // Trade screen
@@ -3101,7 +3413,7 @@ function main() {
 				qolObj.type = "qol";
 				qolObj.action = "openStash";
 
-				if (getUIFlag(0x19) || getUIFlag(0x17) || getUIFlag(0x01))  {
+				if (getUIFlag(0x19) || getUIFlag(0x17) || getUIFlag(0x01)) {
 					break;
 				}
 
@@ -3184,31 +3496,11 @@ function main() {
 		}
 	};
 
-	// Sent packet handler
-	var PacketSent = function(pBytes) {
-		let ID = pBytes[0].toString(16);
-
-		if (ID == "15") { //Block all commands or irc chat from being sent to server
-			if (pBytes[3] == 46) {
-				let str = "";
-
-				for (let b = 3; b < pBytes.length - 3; b++) {
-					str += String.fromCharCode(pBytes[b]);
-				}
-
-				if (pBytes[3] == 46) {
-					runCommand(str);
-					return true;
-				}
-			}
-		}
-
-		return false;
-	};
-
 	//Run commands from chat
 	function runCommand(msg) {
-		if (msg.length <= 1) return true;
+		if (msg.length <= 1) {
+			return true;
+		}
 
 		let cmd = msg.split(" ")[0].split(".")[1];
 		let msgList = msg.split(" ");
@@ -3298,7 +3590,29 @@ function main() {
 		}
 
 		return true;
-	}; 
+	}
+
+	// Sent packet handler
+	let PacketSent = function(pBytes) {
+		let ID = pBytes[0].toString(16);
+
+		if (ID === "15") { //Block all commands or irc chat from being sent to server
+			if (pBytes[3] === 46) {
+				let str = "";
+
+				for (let b = 3; b < pBytes.length - 3; b++) {
+					str += String.fromCharCode(pBytes[b]);
+				}
+
+				if (pBytes[3] === 46) {
+					runCommand(str);
+					return true;
+				}
+			}
+		}
+
+		return false;
+	};
 
 	let unitInfo, unit = new UnitInfo();
 
@@ -3361,361 +3675,4 @@ function main() {
 			Hooks.items.flush();
 		}
 	}
-}
-
-function helpMenu() {
-	let hooks = [];
-	let box = [];
-	this.cleared = true;
-	let helpBoxX = 715 + (me.screensize ? 0 : -160);
-	let helpBoxY = 88 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename) + Number(!!me.gameserverip && !me.realm));
-	let helpBoxTextX = 647 + (me.screensize ? 0 : -160);
-	let helpBoxTextY = 88 + 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename) + Number(!!me.gameserverip && !me.realm)) + 15;
-
-	function hookHandler (click, x, y) {
-		// Get the hook closest to the clicked location
-		function sortHooks(h1, h2) {
-			return Math.abs(h1.y - y) - Math.abs(h2.y - y);
-		}
-
-		// Left click
-		if (click === 0) {
-			// Sort hooks
-			hooks.sort(sortHooks);
-
-			let cmd = hooks[0].text.split(" ")[0].split(".")[1];
-			let msgList = hooks[0].text.split(" ");
-
-			if (!hooks[0].text.includes(".")) {
-				cmd = hooks[0].text.split(" ")[1];
-			}
-
-			switch (cmd) {
-			case "me":
-				me.overhead("Displays Character level, Area, and x/y coordinates");
-
-				break;
-			case "pick":
-				me.overhead("Pick items from the ground to inventory");
-
-				break;
-			case "hide":
-				me.overhead("Hide this menu");
-
-				break;
-			case "stash":
-				me.overhead("Calls Town.stash() to stash items/gold from inventory");
-
-				break;
-			case "filltps":
-				me.overhead("Fill tp tome");
-
-				break;
-			case "cowportal":
-				me.overhead("Make cow portal as long as bot already has leg");
-
-				break;
-			case "uberportal":
-				me.overhead("Make uber portal as long as bot already has ingrediants. Whole keyset or whole organ set");
-
-				break;
-			case "useraddon":
-				me.overhead("Toggles useraddon mode");
-
-				break;
-			case "drop":
-				switch (msgList[1]) {
-					case "invo":
-						me.overhead("Drop all items in the inventory");
-
-						break;
-					case "stash":
-						me.overhead("Drop all items in the stash excluding the cube");
-
-						break;
-				}
-
-				break;
-			case "Ctrl":
-				me.overhead("Hover over an item then press Ctrl to move that item from one area to the next. In example: Stash to Inventory, Cube to Inventory, Inventory to TradeScreen, or Inventory to Shop (sellItem)");
-
-				break;
-			default:
-				me.overhead(cmd);
-
-				break;
-			}
-
-			// Block click
-			return true;
-		}
-
-		return false; 
-	}
-
-	function addHook (text) {
-		hooks.push(new Text("ÿc4." + text, helpBoxTextX, helpBoxTextY + 12 * hooks.length, 0, 0, 0, false, hookHandler))
-	}
-
-	this.showMenu = function () {
-		this.cleared = false;
-
-		let commands = [
-			"me",
-			"pick",
-			"hide",
-			"stash",
-			"filltps",
-			"cowportal",
-			"uberportal",
-			"useraddon",
-			"drop invo",
-			"drop stash",
-		];
-
-		box.push(new Box(helpBoxX, helpBoxY, 150, 165, 0x0, 1, 2));
-		box.push(new Frame(helpBoxX, helpBoxY, 150, 165, 2));
-		hooks.push(new Text("ÿc2Chat Commands:", helpBoxTextX, helpBoxTextY, 0, 0, 0));
-
-		for (let i = 0; i < commands.length; i++) {
-			addHook(commands[i]);
-		}
-
-		hooks.push(new Text("ÿc2Key Commands:", helpBoxTextX, helpBoxTextY + 12 * hooks.length, 0, 0, 0));
-		hooks.push(new Text("ÿc4 Ctrl Key", helpBoxTextX, helpBoxTextY + 12 * hooks.length, 0, 0, 0, false, hookHandler))
-	};
-
-	this.hideMenu = function () {
-		let kill;
-
-		this.cleared = true;
-
-		while (hooks.length) {
-			kill = hooks.shift();
-			kill.remove();
-		}
-
-		while (box.length) {
-			kill = box.shift();
-			kill.remove();
-		}
-
-		return;
-	};
-}
-
-function UnitInfo() {
-	this.x = 200;
-	this.y = 250;
-	this.hooks = [];
-	this.cleared = true;
-
-	this.createInfo = function (unit) {
-		if (typeof unit === "undefined") {
-			this.remove();
-
-			return;
-		}
-
-		switch (unit.type) {
-		case 0:
-			this.playerInfo(unit);
-
-			break;
-		case 1:
-			this.monsterInfo(unit);
-
-			break;
-		case 2:
-		case 5:
-			this.objectInfo(unit);
-
-			break;
-		case 4:
-			this.itemInfo(unit);
-
-			break;
-		}
-	};
-
-	this.playerInfo = function (unit) {
-		var i, items, string,
-			frameXsize = 0,
-			frameYsize = 20,
-			quality = ["ÿc0", "ÿc0", "ÿc0", "ÿc0", "ÿc3", "ÿc2", "ÿc9", "ÿc4", "ÿc8"];
-
-		if (!this.currentGid) {
-			this.currentGid = unit.gid;
-		}
-
-		if (this.currentGid === unit.gid && !this.cleared) {
-			return;
-		}
-
-		if (this.currentGid !== unit.gid) {
-			this.remove();
-			this.currentGid = unit.gid;
-		}
-
-		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, this.x, this.y, 4, 13, 2));
-
-		items = unit.getItems();
-
-		if (items) {
-			this.hooks.push(new Text("Equipped items:", this.x, this.y + 15, 4, 13, 2));
-			frameYsize += 15;
-
-			for (i = 0; i < items.length; i += 1) {
-				if (items[i].getFlag(0x4000000)) {
-					string = items[i].fname.split("\n")[1] + "ÿc0 " + items[i].fname.split("\n")[0];
-				} else {
-					string = quality[items[i].quality] + (items[i].quality > 4 && items[i].getFlag(0x10) ? items[i].fname.split("\n").reverse()[0].replace("ÿc4", "") : items[i].name);
-				}
-
-				this.hooks.push(new Text(string, this.x, this.y + (i + 2) * 15, 0, 13, 2));
-
-				if (string.length > frameXsize) {
-					frameXsize = string.length;
-				}
-
-				frameYsize += 15;
-			}
-		}
-
-		this.cleared = false;
-
-		this.hooks.push(new Box(this.x + 2, this.y - 15, Math.round(frameXsize * 7.5) - 4, frameYsize, 0x0, 1, 2));
-		this.hooks.push(new Frame(this.x, this.y - 15, Math.round(frameXsize * 7.5), frameYsize, 2));
-
-		this.hooks[this.hooks.length - 2].zorder = 0;
-	};
-
-	this.monsterInfo = function (unit) {
-		var frameYsize = 125;
-
-		if (!this.currentGid) {
-			this.currentGid = unit.gid;
-		}
-
-		if (this.currentGid === unit.gid && !this.cleared) {
-			return;
-		}
-
-		if (this.currentGid !== unit.gid) {
-			this.remove();
-			this.currentGid = unit.gid;
-		}
-
-		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, this.x, this.y, 4, 13, 2));
-		this.hooks.push(new Text("HP percent: ÿc0" + Math.round(unit.hp * 100 / 128), this.x, this.y + 15, 4, 13, 2));
-		this.hooks.push(new Text("Fire resist: ÿc0" + unit.getStat(39), this.x, this.y + 30, 4, 13, 2));
-		this.hooks.push(new Text("Cold resist: ÿc0" + unit.getStat(43), this.x, this.y + 45, 4, 13, 2));
-		this.hooks.push(new Text("Lightning resist: ÿc0" + unit.getStat(41), this.x, this.y + 60, 4, 13, 2));
-		this.hooks.push(new Text("Poison resist: ÿc0" + unit.getStat(45), this.x, this.y + 75, 4, 13, 2));
-		this.hooks.push(new Text("Physical resist: ÿc0" + unit.getStat(36), this.x, this.y + 90, 4, 13, 2));
-		this.hooks.push(new Text("Magic resist: ÿc0" + unit.getStat(37), this.x, this.y + 105, 4, 13, 2));
-
-		this.cleared = false;
-
-		this.hooks.push(new Box(this.x + 2, this.y - 15, 136, frameYsize, 0x0, 1, 2));
-		this.hooks.push(new Frame(this.x, this.y - 15, 140, frameYsize, 2));
-
-		this.hooks[this.hooks.length - 2].zorder = 0;
-	};
-
-	this.itemInfo = function (unit) {
-		let i = 0, xpos = 60, ypos = (me.getMerc() ? 80 : 20) + (-1 * Hooks.resfixY),
-			frameYsize = 50;
-
-		if (!this.currentGid) {
-			this.currentGid = unit.gid;
-		}
-
-		if (this.currentGid === unit.gid && !this.cleared) {
-			return;
-		}
-
-		if (this.currentGid !== unit.gid) {
-			this.remove();
-			this.currentGid = unit.gid;
-		}
-
-		this.hooks.push(new Text("Code: ÿc0" + unit.code, xpos, ypos + 0, 4, 13, 2));
-		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, xpos, ypos + 15, 4, 13, 2));
-		this.hooks.push(new Text("Item Type: ÿc0" + unit.itemType, xpos, ypos + 30, 4, 13, 2));
-		this.hooks.push(new Text("Item level: ÿc0" + unit.ilvl, xpos, ypos + 45, 4, 13, 2));
-
-		this.cleared = false;
-		this.socketedItems = unit.getItems();
-
-		if (this.socketedItems) {
-			this.hooks.push(new Text("Socketed with:", xpos, ypos + 60, 4, 13, 2));
-			frameYsize += 30;
-
-			for (i = 0; i < this.socketedItems.length; i += 1) {
-				this.hooks.push(new Text(this.socketedItems[i].fname.split("\n").reverse().join(" "), xpos, ypos + (i + 5) * 15, 0, 13, 2));
-
-				frameYsize += 15;
-			}
-		}
-
-		if (unit.quality === 4 && unit.getFlag(0x10)) {
-			this.hooks.push(new Text("Prefix: ÿc0" + unit.prefixnum, xpos, ypos + frameYsize - 5, 4, 13, 2));
-			this.hooks.push(new Text("Suffix: ÿc0" + unit.suffixnum, xpos, ypos + frameYsize + 10, 4, 13, 2));
-
-			frameYsize += 30;
-		}
-
-		if (unit.getFlag(0x4000000)) {
-			this.hooks.push(new Text("Prefix: ÿc0" + unit.prefixnum, xpos, ypos + frameYsize - 5, 4, 13, 2));
-
-			frameYsize += 15;
-		}
-
-		this.hooks.push(new Box(xpos + 2, ypos - 15, 116, frameYsize, 0x0, 1, 2));
-		this.hooks.push(new Frame(xpos, ypos - 15, 120, frameYsize, 2));
-
-		this.hooks[this.hooks.length - 2].zorder = 0;
-	};
-
-	this.objectInfo = function (unit) {
-		var frameYsize = 35;
-
-		if (!this.currentGid) {
-			this.currentGid = unit.gid;
-		}
-
-		if (this.currentGid === unit.gid && !this.cleared) {
-			return;
-		}
-
-		if (this.currentGid !== unit.gid) {
-			this.remove();
-			this.currentGid = unit.gid;
-		}
-
-		this.hooks.push(new Text("Type: ÿc0" + unit.type, this.x, this.y, 4, 13, 2));
-		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, this.x, this.y + 15, 4, 13, 2));
-
-		if (!!unit.objtype) {
-			this.hooks.push(new Text("Destination: ÿc0" + unit.objtype, this.x, this.y + 30, 4, 13, 2));
-
-			frameYsize += 15;
-		}
-
-		this.cleared = false;
-
-		this.hooks.push(new Box(this.x + 2, this.y - 15, 116, frameYsize, 0x0, 1, 2));
-		this.hooks.push(new Frame(this.x, this.y - 15, 120, frameYsize, 2));
-
-		this.hooks[this.hooks.length - 2].zorder = 0;
-	};
-
-	this.remove = function () {
-		while (this.hooks.length > 0) {
-			this.hooks.shift().remove();
-		}
-
-		this.cleared = true;
-	};
 }
