@@ -1,4 +1,3 @@
-/* eslint-disable no-extra-boolean-cast */
 /*
 *	@filename	MapThread.js
 *	@author		theBGuy
