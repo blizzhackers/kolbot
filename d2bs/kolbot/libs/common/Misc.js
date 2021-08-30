@@ -901,6 +901,10 @@ var Misc = {
 
 		return count;
 	},
+	
+	useTk: function() {
+		return !!(Config.UseTelekinesis && me.classid === 1 && me.getSkill(43, 1));
+	},
 
 	// Open a chest Unit
 	openChest: function (unit) {
@@ -920,6 +924,7 @@ var Misc = {
 		}
 
 		var i, tick;
+		let useTk = this.useTk();
 
 		for (i = 0; i < 3; i += 1) {
 			if (useTk) {
@@ -1151,8 +1156,8 @@ var Misc = {
 			return false;
 		}
 
-		var i, tick,
-		    useTk = !!(Config.UseTelekinesis && me.classid === 1 && me.getSkill(43, 1));
+		var i, tick;
+		let useTk = this.useTk();
 
 		for (i = 0; i < 3; i += 1) {
 			if (useTk) {
