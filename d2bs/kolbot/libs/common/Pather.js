@@ -117,6 +117,10 @@ var Pather = {
 	wpAreas: [1, 3, 4, 5, 6, 27, 29, 32, 35, 40, 48, 42, 57, 43, 44, 52, 74, 46, 75, 76, 77, 78, 79, 80, 81, 83, 101, 103, 106, 107, 109, 111, 112, 113, 115, 123, 117, 118, 129],
 	recursion: true,
 	lastPortalTick: 0,
+	
+	useTk: function() {
+		return !!(Config.UseTelekinesis && me.classid === 1 && me.getSkill(43, 1));
+	},
 
 	useTeleport: function () {
 		return this.teleport && !Config.NoTele && !me.getState(139) && !me.getState(140) && !me.inTown && ((me.classid === 1 && me.getSkill(54, 1)) || me.getStat(97, 54));
@@ -462,7 +466,7 @@ ModeLoop:
 		// Regular doors
 		var i, tick,
 			door = getUnit(2, "door", 0);
-		let useTk = !!(Config.UseTelekinesis && me.classid === 1 && me.getSkill(43, 1));
+		let useTk = this.useTk();
 
 		if (door) {
 			do {
@@ -929,7 +933,7 @@ ModeLoop:
 		this.broadcastIntent(targetArea);
 
 		var i, tick, wp, coord, retry, npc;
-		let useTk = !!(Config.UseTelekinesis && me.classid === 1 && me.getSkill(43, 1));
+		let useTk = this.useTk();
 
 		for (i = 0; i < 12; i += 1) {
 			if (me.area === targetArea || me.dead) {
@@ -1152,7 +1156,7 @@ MainLoop:
 
 		var i, tick, portal,
 			preArea = me.area;
-		let useTk;
+		let useTk = this.useTk();
 
 		for (i = 0; i < 10; i += 1) {
 			if (me.dead) {
@@ -1166,11 +1170,8 @@ MainLoop:
 			portal = unit ? copyUnit(unit) : this.getPortal(targetArea, owner);
 
 			if (portal) {
-				if (i === 0 {
-				    useTk = !!(Config.UseTelekinesis && me.classid === 1 && me.getSkill(43, 1) && me.inTown && portal.getParent());
-				}
 				if (portal.area === me.area) {
-					if (useTk) {
+					if (useTk && i < 3) {
 						if (getDistance(me, portal) > 13) {
 							Attack.getIntoPosition(portal, 13, 0x4);
 						}
