@@ -922,9 +922,17 @@ var Misc = {
 		var i, tick;
 
 		for (i = 0; i < 3; i += 1) {
-			if (Pather.moveTo(unit.x + 1, unit.y + 2, 3) && getDistance(me, unit.x + 1, unit.y + 2) < 5) {
-				//Misc.click(0, 0, unit);
-				sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
+			if (useTk) {
+				if (getDistance(me, unit) > 13) {
+					Attack.getIntoPosition(unit, 13, 0x4);
+				}
+				Skill.cast(43, 0, unit);
+			}
+			else {
+				if (Pather.moveTo(unit.x + 1, unit.y + 2, 3) && getDistance(me, unit.x + 1, unit.y + 2) < 5) {
+					//Misc.click(0, 0, unit);
+					sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
+				}
 			}
 
 			tick = getTickCount();
