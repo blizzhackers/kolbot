@@ -1156,7 +1156,6 @@ var Misc = {
 			else {
 				if (getDistance(me, unit) < 4 || Pather.moveToUnit(unit, 3, 0)) {
 					Misc.click(0, 0, unit);
-					//unit.interact();
 				}
 			}
 
