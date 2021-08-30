@@ -473,7 +473,6 @@ ModeLoop:
 						}
 						else {
 							Misc.click(0, 0, door);
-							//door.interact();
 						}
 
 						tick = getTickCount();
