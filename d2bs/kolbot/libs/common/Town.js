@@ -1632,7 +1632,6 @@ MainLoop:
 					}
 					else {
 						Misc.click(0, 0, stash);
-						//stash.interact();
 					}
 
 					tick = getTickCount();
