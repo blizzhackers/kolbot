@@ -1171,7 +1171,7 @@ MainLoop:
 
 			if (portal) {
 				if (portal.area === me.area) {
-					if (useTk && i < 3) {
+					if (useTk && me.inTown && i < 3) {
 						if (getDistance(me, portal) > 13) {
 							Attack.getIntoPosition(portal, 13, 0x4);
 						}
