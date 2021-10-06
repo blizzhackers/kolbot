@@ -224,9 +224,25 @@ function Cows() {
 			throw new Error("Already killed the Cow King.");
 		}
 		
-		leg = this.getLeg();
-		tome = this.getTome();
-		this.openPortal(leg, tome);
+		try {
+			leg = this.getLeg();
+			tome = this.getTome();
+			this.openPortal(leg, tome);
+		}
+		catch(err) {
+			
+			// Maybe someone else was trying to create a portal at the same time? Wait up to 15s.
+			Town.goToTown();
+			delay(500);
+			for (var i = 0; i < 15; i += 1) {
+				if (!Pather.getPortal(39)) {
+					delay(1000);
+				}
+			}
+			if (!Pather.getPortal(39)) {
+				throw new Error("Can't get leg. Waited 15s and no one created portal.")
+			}
+		}
 	}
 
 	Pather.usePortal(39);
