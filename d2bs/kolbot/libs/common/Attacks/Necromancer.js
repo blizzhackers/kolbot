@@ -10,6 +10,9 @@ var ClassAttack = {
 	CurseDict: {},
 
 	initCurses: function () {
+		// Maps curse id to curse state in monster.
+		// Nothing; Amplify Damage; Dim Vision; Weaken; Iron Maiden; 
+		// Terror; Confuse; Life Tap; Attract; Decrepify; Lower Resist
 		this.CurseDict = {0:0, 66:9, 71:23, 72:19, 76:55, 77:56, 81:59, 82:58, 86:57, 87:60, 91:61};
 		this.cursesSet = true;
 	},
