@@ -546,6 +546,7 @@ function LoadConfig() {
 	// Class specific config
 	Config.Curse[0] = 0; // Boss curse. Use skill number or set to 0 to disable.
 	Config.Curse[1] = 0; // Other monsters curse. Use skill number or set to 0 to disable.
+	Config.CustomCurse = {} // Allows custom curses for specific monsters. eg: {"Oblivion Knight": 87, "Minion of Destruction": 87}
 
 	Config.ExplodeCorpses = 0; // Explode corpses. Use skill number or 0 to disable. 74 = Corpse Explosion, 83 = Poison Explosion
 	Config.Golem = "None"; // Golem. 0 or "None" = don't summon, 1 or "Clay" = Clay Golem, 2 or "Blood" = Blood Golem, 3 or "Fire" = Fire Golem
