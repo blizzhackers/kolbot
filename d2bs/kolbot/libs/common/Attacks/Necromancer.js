@@ -7,65 +7,10 @@
 var ClassAttack = {
 	novaTick: 0,
 	cursesSet: false,
-	curseState: [],
+	CurseDict: {},
 
 	initCurses: function () {
-		var i;
-
-		for (i = 0; i < Config.Curse.length; i += 1) {
-			switch (Config.Curse[i]) {
-			case 0: //nothing
-				this.curseState[i] = 0;
-
-				break;
-			case 66: //amplify damage
-				this.curseState[i] = 9;
-
-				break;
-			case 71: //dim vision
-				this.curseState[i] = 23;
-
-				break;
-			case 72: //weaken
-				this.curseState[i] = 19;
-
-				break;
-			case 76: //iron maiden
-				this.curseState[i] = 55;
-
-				break;
-			case 77: //terror
-				this.curseState[i] = 56;
-
-				break;
-			case 81: //confuse
-				this.curseState[i] = 59;
-
-				break;
-			case 82: //life tap
-				this.curseState[i] = 58;
-
-				break;
-			case 86: //attract
-				this.curseState[i] = 57;
-
-				break;
-			case 87: //decrepify
-				this.curseState[i] = 60;
-
-				break;
-			case 91: //lower resist
-				this.curseState[i] = 61;
-
-				break;
-			default:
-				Config.Curse[i] = 0;
-				print("Invalid curse id");
-
-				break;
-			}
-		}
-
+		this.CurseDict = {0:0, 66:9, 71:23, 72:19, 76:55, 77:56, 81:59, 82:58, 86:57, 87:60, 91:61};
 		this.cursesSet = true;
 	},
 
@@ -97,28 +42,43 @@ var ClassAttack = {
 
 		index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
 
-		if (Config.Curse[0] > 0 && this.isCursable(unit) && (unit.spectype & 0x7) && !unit.getState(this.curseState[0])) {
-			if (getDistance(me, unit) > 25 || checkCollision(me, unit, 0x4)) {
-				if (!Attack.getIntoPosition(unit, 25, 0x4)) {
-					return 0;
+		if (unit.name in Config.CustomCurse) {
+						
+			if (((Config.Curse[0] > 0 && this.isCursable(unit))) && !unit.getState(this.CurseDict[Config.CustomCurse[unit.name]])) {
+				if (getDistance(me, unit) > 25 || checkCollision(me, unit, 0x4)) {
+					if (!Attack.getIntoPosition(unit, 25, 0x4)) {
+						return 0;
+					}
 				}
+				Skill.cast(Config.CustomCurse[unit.name], 0, unit);
+
+				return 1;
 			}
-
-			Skill.cast(Config.Curse[0], 0, unit);
-
-			return 1;
 		}
-
-		if (Config.Curse[1] > 0 && this.isCursable(unit) && !(unit.spectype & 0x7) && !unit.getState(this.curseState[1])) {
-			if (getDistance(me, unit) > 25 || checkCollision(me, unit, 0x4)) {
-				if (!Attack.getIntoPosition(unit, 25, 0x4)) {
-					return 0;
+		else {
+			if ((Config.Curse[0] > 0 && this.isCursable(unit) && (unit.spectype & 0x7)) && !unit.getState(this.CurseDict[Config.Curse[0]])) {
+				if (getDistance(me, unit) > 25 || checkCollision(me, unit, 0x4)) {
+					if (!Attack.getIntoPosition(unit, 25, 0x4)) {
+						return 0;
+					}
 				}
+
+				Skill.cast(Config.Curse[0], 0, unit);
+
+				return 1;
 			}
 
-			Skill.cast(Config.Curse[1], 0, unit);
+			if (((Config.Curse[1] > 0 && this.isCursable(unit) && !(unit.spectype & 0x7))) && !unit.getState(this.CurseDict[Config.Curse[1]])) {
+				if (getDistance(me, unit) > 25 || checkCollision(me, unit, 0x4)) {
+					if (!Attack.getIntoPosition(unit, 25, 0x4)) {
+						return 0;
+					}
+				}
 
-			return 1;
+				Skill.cast(Config.Curse[1], 0, unit);
+
+				return 1;
+			}
 		}
 
 		// Get timed skill
