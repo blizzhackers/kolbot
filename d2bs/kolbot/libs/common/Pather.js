@@ -1403,124 +1403,142 @@ MainLoop:
 	*/
 	journeyTo: function (area) {
 		var i, special, unit, tick, target;
+		print("traveling to " + area);
+		switch (area) {
+		case 133:
+		case 134:
+		case 135:
+		case 136:
+			Town.goToTown(5)
+			print("Heading to act 5");
+			Pather.usePortal(area)
+			print("Using Portal " + area);
+			break;
+		case 39:
+			Town.goToTown(1)
+			print("Heading to act 1");
+			Pather.usePortal(39)
+			print("Using Portal " + area);
+			break;
 
-		target = this.plotCourse(area, me.area);
+		default:
+			target = this.plotCourse(area, me.area);
+			print(target.course);
 
-		print(target.course);
+			if (target.useWP) {
+				Town.goToTown();
+			}
 
-		if (target.useWP) {
-			Town.goToTown();
-		}
+			// handle variable flayer jungle entrances
+			if (target.course.indexOf(78) > -1) {
+				Town.goToTown(3); // without initiated act, getArea().exits will crash
 
-		// handle variable flayer jungle entrances
-		if (target.course.indexOf(78) > -1) {
-			Town.goToTown(3); // without initiated act, getArea().exits will crash
+				special = getArea(78);
 
-			special = getArea(78);
+				if (special) {
+					special = special.exits;
 
-			if (special) {
-				special = special.exits;
+					for (i = 0; i < special.length; i += 1) {
+						if (special[i].target === 77) {
+							target.course.splice(target.course.indexOf(78), 0, 77); // add great marsh if needed
 
-				for (i = 0; i < special.length; i += 1) {
-					if (special[i].target === 77) {
-						target.course.splice(target.course.indexOf(78), 0, 77); // add great marsh if needed
-
-						break;
+							break;
+						}
 					}
 				}
 			}
-		}
 
-		while (target.course.length) {
-			if (!me.inTown) {
-				Precast.doPrecast(false);
-			}
+			while (target.course.length) {
+				if (!me.inTown) {
+					Precast.doPrecast(false);
+				}
 
-			if (this.wpAreas.indexOf(me.area) > -1 && !getWaypoint(this.wpAreas.indexOf(me.area))) {
-				this.getWP(me.area);
-			}
+				if (this.wpAreas.indexOf(me.area) > -1 && !getWaypoint(this.wpAreas.indexOf(me.area))) {
+					this.getWP(me.area);
+				}
 
-			if (me.inTown && this.wpAreas.indexOf(target.course[0]) > -1 && getWaypoint(this.wpAreas.indexOf(target.course[0]))) {
-				this.useWaypoint(target.course[0], !this.plotCourse_openedWpMenu);
-				Precast.doPrecast(false);
-			} else if (me.area === 109 && target.course[0] === 110) { // Harrogath -> Bloody Foothills
-				this.moveTo(5026, 5095);
+				if (me.inTown && this.wpAreas.indexOf(target.course[0]) > -1 && getWaypoint(this.wpAreas.indexOf(target.course[0]))) {
+					this.useWaypoint(target.course[0], !this.plotCourse_openedWpMenu);
+					Precast.doPrecast(false);
+				} else if (me.area === 109 && target.course[0] === 110) { // Harrogath -> Bloody Foothills
+					this.moveTo(5026, 5095);
 
-				unit = getUnit(2, 449); // Gate
+					unit = getUnit(2, 449); // Gate
 
-				if (unit) {
-					for (i = 0; i < 3; i += 1) {
-						if (unit.mode) {
-							break;
-						}
-
-						Misc.click(0, 0, unit);
-						//unit.interact();
-
-						tick = getTickCount();
-
-						while (getTickCount() - tick < 3000) {
+					if (unit) {
+						for (i = 0; i < 3; i += 1) {
 							if (unit.mode) {
-								delay(1000);
-
 								break;
 							}
 
-							delay(10);
+							Misc.click(0, 0, unit);
+							//unit.interact();
+
+							tick = getTickCount();
+
+							while (getTickCount() - tick < 3000) {
+								if (unit.mode) {
+									delay(1000);
+
+									break;
+								}
+
+								delay(10);
+							}
 						}
 					}
-				}
 
-				this.moveToExit(target.course[0], true);
-			} else if (me.area === 4 && target.course[0] === 38) { // Stony Field -> Tristram
-				this.moveToPreset(me.area, 1, 737, 0, 0, false, true);
+					this.moveToExit(target.course[0], true);
+				} else if (me.area === 4 && target.course[0] === 38) { // Stony Field -> Tristram
+					this.moveToPreset(me.area, 1, 737, 0, 0, false, true);
 
-				for (i = 0; i < 5; i += 1) {
-					if (this.usePortal(38)) {
-						break;
+					for (i = 0; i < 5; i += 1) {
+						if (this.usePortal(38)) {
+							break;
+						}
+
+						delay(1000);
 					}
+				} else if (me.area === 40 && target.course[0] === 47) { // Lut Gholein -> Sewers Level 1 (use Trapdoor)
+					this.moveToPreset(me.area, 5, 19);
+					this.useUnit(2, 74, 47);
+				} else if (me.area === 74 && target.course[0] === 46) { // Arcane Sanctuary -> Canyon of the Magi
+					this.moveToPreset(me.area, 2, 357);
 
-					delay(1000);
-				}
-			} else if (me.area === 40 && target.course[0] === 47) { // Lut Gholein -> Sewers Level 1 (use Trapdoor)
-				this.moveToPreset(me.area, 5, 19);
-				this.useUnit(2, 74, 47);
-			} else if (me.area === 74 && target.course[0] === 46) { // Arcane Sanctuary -> Canyon of the Magi
-				this.moveToPreset(me.area, 2, 357);
+					for (i = 0; i < 5; i += 1) {
+						unit = getUnit(2, 357);
 
-				for (i = 0; i < 5; i += 1) {
-					unit = getUnit(2, 357);
+						Misc.click(0, 0, unit);
+						delay(1000);
+						me.cancel();
 
-					Misc.click(0, 0, unit);
-					delay(1000);
-					me.cancel();
-
-					if (this.usePortal(46)) {
-						break;
+						if (this.usePortal(46)) {
+							break;
+						}
 					}
+				} else if (me.area === 54 && target.course[0] === 74) { // Palace -> Arcane
+					this.moveTo(10073, 8670);
+					this.usePortal(null);
+				} else if (me.area === 109 && target.course[0] === 121) { // Harrogath -> Nihlathak's Temple
+					Town.move(NPC.Anya);
+					this.usePortal(121);
+				} else if (me.area === 111 && target.course[0] === 125) { // Abaddon
+					this.moveToPreset(111, 2, 60);
+					this.usePortal(125);
+				} else if (me.area === 112 && target.course[0] === 126) { // Pits of Archeon
+					this.moveToPreset(112, 2, 60);
+					this.usePortal(126);
+				} else if (me.area === 117 && target.course[0] === 127) { // Infernal Pit
+					this.moveToPreset(117, 2, 60);
+					this.usePortal(127);
+				} else {
+					this.moveToExit(target.course[0], true);
 				}
-			} else if (me.area === 54 && target.course[0] === 74) { // Palace -> Arcane
-				this.moveTo(10073, 8670);
-				this.usePortal(null);
-			} else if (me.area === 109 && target.course[0] === 121) { // Harrogath -> Nihlathak's Temple
-				Town.move(NPC.Anya);
-				this.usePortal(121);
-			} else if (me.area === 111 && target.course[0] === 125) { // Abaddon
-				this.moveToPreset(111, 2, 60);
-				this.usePortal(125);
-			} else if (me.area === 112 && target.course[0] === 126) { // Pits of Archeon
-				this.moveToPreset(112, 2, 60);
-				this.usePortal(126);
-			} else if (me.area === 117 && target.course[0] === 127) { // Infernal Pit
-				this.moveToPreset(117, 2, 60);
-				this.usePortal(127);
-			} else {
-				this.moveToExit(target.course[0], true);
+
+				target.course.shift();
 			}
 
-			target.course.shift();
 		}
-
 		return me.area === area;
 	},
 
