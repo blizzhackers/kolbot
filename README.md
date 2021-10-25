@@ -22,14 +22,14 @@ If you want to contribute to d2bs/d2bot#, come to irc.synirc.net/d2bs and ask ar
 
 # D2BS is NOT SAFE from DETECTION!
 
-[**Join the Forums!**](https://d2bot.discourse.group/)
+[**Join the Forums!**](https://blizzhackers.discourse.group)
 
 [**Join the Discord Channel!**](https://discord.gg/FuBG8N2)
 
 [**Documentation Repo**](https://github.com/blizzhackers/documentation#diablo-2-botting-system-d2bs)
 
 ## Install dependencies - do this first!
-- [Microsoft Visual C++ 2010 Redistributable Package (x86)](https://www.microsoft.com/en-us/download/details.aspx?id=5555)
+- [Microsoft Visual C++ 2010 Redistributable Package (x86)](https://www.microsoft.com/en-us/download/details.aspx?id=26999)
 - [Microsoft .NET Framework 4.0 (or higher)](https://dotnet.microsoft.com/download/dotnet-framework)
 
 ## Getting Started
