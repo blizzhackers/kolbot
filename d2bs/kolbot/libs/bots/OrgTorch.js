@@ -167,6 +167,36 @@ function OrgTorch() {
 		return false;
 	};
 
+	// For Lilith and Izual, Optionally clear surrounding monsters first
+	this.sortfunc = function (unitA, unitB) {
+
+		var ids = [706, 707, 708];
+
+		if (ids.indexOf(unitA.classid) > -1) {
+			return 1;
+		}
+
+		if (ids.indexOf(unitB.classid) > -1) {
+			return -1;
+		}
+
+		if (Config.BossPriority) {
+			if ((unitA.spectype & 0x5) && (unitB.spectype & 0x5)) {
+				return getDistance(me, unitA) - getDistance(me, unitB);
+			}
+
+			if (unitA.spectype & 0x5) {
+				return -1;
+			}
+
+			if (unitB.spectype & 0x5) {
+				return 1;
+			}
+		}
+
+		return getDistance(me, unitA) - getDistance(me, unitB);
+	};
+
 	// Do mini ubers or Tristram based on area we're already in
 	this.pandemoniumRun = function () {
 		let i, findLoc, skillBackup;
@@ -175,8 +205,11 @@ function OrgTorch() {
 		case 133: // Matron's Den
 			Precast.doPrecast(true);
 			Pather.moveToPreset(133, 2, 397, 2, 2);
-			Attack.kill(707);
-			//Attack.clear(5);
+			if (Config.OrgTorch.hasOwnProperty('ClearArea') && Config.OrgTorch.ClearArea) {
+				Attack.clear(Config.OrgTorch.ClearArea, 0, 707, this.sortfunc);
+			} else {
+				Attack.kill(707);
+			}
 			Pickit.pickItems();
 			Town.goToTown();
 
@@ -203,7 +236,11 @@ function OrgTorch() {
 		case 135: // Furnace of Pain
 			Precast.doPrecast(true);
 			Pather.moveToPreset(135, 2, 397, 2, 2);
-			Attack.kill(706);
+			if (Config.OrgTorch.hasOwnProperty('ClearArea') && Config.OrgTorch.ClearArea) {
+				Attack.clear(Config.OrgTorch.ClearArea, 0, 706, this.sortfunc);
+			} else {
+				Attack.kill(706);
+			}
 			Pickit.pickItems();
 			Town.goToTown();
 
@@ -397,9 +434,15 @@ function OrgTorch() {
 	brains = me.findItems("mbr", 0).length || 0;
 	eyes = me.findItems("bey", 0).length || 0;
 	horns = me.findItems("dhn", 0).length || 0;
+	
+	var portalsOpened = Boolean(Pather.getPortal(133)) + Boolean(Pather.getPortal(134)) + Boolean(Pather.getPortal(135)),
+		openPortals = true,
+		completeSet = horns === brains && horns === eyes && brains === eyes;
+	print("Portals Opened: " + portalsOpened + " Complete set: " + completeSet + " " + horns + brains + eyes);
+	print("Portals Opened " + portalsOpened);
 
 	// End the script if we don't have enough keys nor organs
-	if ((tkeys < 3 || hkeys < 3 || dkeys < 3) && (brains < 1 || eyes < 1 || horns < 1)) {
+	if ((tkeys < 3 - portalsOpened || hkeys < 3 - portalsOpened || dkeys < 3 - portalsOpened) && (brains < 1 || eyes < 1 || horns < 1)) {
 		print("Not enough keys or organs.");
 
 		return true;
@@ -408,7 +451,7 @@ function OrgTorch() {
 	Config.UseMerc = false;
 
 	// We have enough keys, do mini ubers
-	if (tkeys >= 3 && hkeys >= 3 && dkeys >= 3) {
+	if (tkeys >= 3 - portalsOpened && hkeys >= 3 - portalsOpened && dkeys >= 3 - portalsOpened) {
 		this.getFade();
 		print("Making organs.");
 		D2Bot.printToConsole("OrgTorch: Making organs.", 7);
@@ -419,26 +462,60 @@ function OrgTorch() {
 			if ((Config.OrgTorch.MakeTorch || i > 0) && this.completeSetCheck()) {
 				break;
 			}
-
-			portal = this.openPortal(0);
-
-			if (portal) {
-				if (portal.objtype === 133 && Config.OrgTorch.AntidotesToChug) {
-					Town.buyAntidotes(Config.OrgTorch.AntidotesToChug);
-					for (chugs = 0; chugs < Config.OrgTorch.AntidotesToChug; chugs++) {
-						delay(500);
-						print("glug glug");
-						let antidote = me.getItem(514);
-						if (antidote) {
-							antidote.interact();
-						}
-					}
-					Town.move("stash");
+			
+			// For semi-manual play. Sometimes our char chickens out and we manually enter the same game we want to re-do the last uber
+			if (portalsOpened >= 1 && !completeSet) {
+				
+				openPortals = false
+				
+				if ((horns < brains || horns < eyes) && Pather.getPortal(133)) {
+					Pather.usePortal(133);
+					this.doneAreas.push(133)
+				} else if ((brains < horns || brains < eyes) && Pather.getPortal(135)) {
+					Pather.usePortal(135);
+					this.doneAreas.push(135)
+				} else if ((eyes < horns || eyes < brains) && Pather.getPortal(134)){
+					Pather.usePortal(134);
+					this.doneAreas.push(134)
+				} else {
+					openPortals = true
 				}
-				Pather.usePortal(null, null, portal);
+				
+			} else if (portalsOpened >= 1) {
+				print("Existing game. Opening portals..." + horns + eyes + brains);
+				openPortals = true
+			}
+			
+			if (openPortals) {
+				portal = this.openPortal(0);
+
+				if (portal) {
+					if (portal.objtype === 133 && Config.OrgTorch.AntidotesToChug) {
+						Town.buyAntidotes(Config.OrgTorch.AntidotesToChug);
+						for (chugs = 0; chugs < Config.OrgTorch.AntidotesToChug; chugs++) {
+							delay(500);
+							print("glug glug");
+							let antidote = me.getItem(514);
+							if (antidote) {
+								antidote.interact();
+							}
+						}
+						Town.move("stash");
+					}
+					Pather.usePortal(null, null, portal);
+				}
 			}
 
-			this.pandemoniumRun();
+			try {
+				this.pandemoniumRun();
+				brains = me.findItems("mbr", 0).length || 0;
+				eyes = me.findItems("bey", 0).length || 0;
+				horns = me.findItems("dhn", 0).length || 0;
+				completeSet = horns === brains && horns === eyes && brains === eyes;
+			} catch (err) {
+				// Target not found
+				print(err)
+			}
 		}
 	}
 

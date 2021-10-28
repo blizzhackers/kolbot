@@ -961,8 +961,8 @@ var Attack = {
 			return getDistance(me, unitA) - getDistance(me, unitB);
 		}
 
-		// Barb optimization
-		if (me.classid === 4) {
+		// Barb and Sorc optimization
+		if ((me.classid === 1) || (me.classid === 4)){
 			if (!Attack.checkResist(unitA, Attack.getSkillElement(Config.AttackSkill[(unitA.spectype & 0x7) ? 1 : 3]))) {
 				return 1;
 			}
