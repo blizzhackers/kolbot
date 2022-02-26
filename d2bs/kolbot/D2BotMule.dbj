@@ -1,6 +1,6 @@
 var StarterConfig = {
 	MinGameTime: 30, // Minimum game length in seconds.
-	MaxGameTime	: 420, // Maximum game length in minutes, only for continuous muling
+	MaxGameTime: 60, // Maximum game length in minutes, only for continuous muling
 
 	SwitchKeyDelay: 0, // Seconds to wait before switching a used/banned key or after realm down
 	FTJDelay: 180, // Seconds to wait after failing to create/join a game
@@ -1257,7 +1257,7 @@ function main() {
 				}
 
 				if (continuousMule) {
-					if (StarterConfig.MaxGameTime && getTickCount() - me.gamestarttime > StarterConfig.MaxGameTime * 1000 * 60 && foreverAlone()) {
+					if (StarterConfig.MaxGameTime > 0 && getTickCount() - me.gamestarttime > StarterConfig.MaxGameTime * 60 * 1000 && foreverAlone()) {
 						print("MaxGameTime Reached");
 						cursorCheck();
 						quit();
