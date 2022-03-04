@@ -8,6 +8,9 @@ var ClassAttack = {
 	novaTick: 0,
 	cursesSet: false,
 	curseState: [],
+	maxSkeletons: 0,
+	maxMages: 0,
+	maxRevives: 0,
 
 	initCurses: function () {
 		var i;
@@ -67,6 +70,55 @@ var ClassAttack = {
 		}
 
 		this.cursesSet = true;
+	},
+
+	setArmySize: function () {
+		let skillNum;
+		if (Config.Skeletons === "max") {
+			skillNum = me.getSkill(70, 1);
+			this.maxSkeletons = skillNum < 4 ? skillNum : (Math.floor(skillNum / 3) + 2);
+		} else {
+			this.maxSkeletons = Config.Skeletons;
+		}
+
+		if (Config.SkeletonMages === "max") {
+			skillNum = me.getSkill(80, 1);
+			this.maxMages = skillNum < 4 ? skillNum : (Math.floor(skillNum / 3) + 2);
+		} else {
+			this.maxMages = Config.SkeletonMages;
+		}
+
+		if (Config.Revives === "max") {
+			skillNum = me.getSkill(95, 1);
+			this.maxRevives = skillNum;
+		} else {
+			this.maxRevives = Config.Revives;
+		}		
+	},
+
+	// Returns: true - doesn't use summons or has all he can summon, false - not full of summons yet
+	isArmyFull: function () {
+		// This necro doesn't summon anything so assume he's full
+		if (Config.Skeletons + Config.SkeletonMages + Config.Revives === 0) {
+			return true;
+		}
+
+		// Make sure we have a current count of summons needed
+		this.setArmySize();
+
+		// See if we're at full army count
+		if (me.getMinionCount(4) < this.maxSkeletons) {
+			return false;
+		}
+		if (me.getMinionCount(5) < this.maxMages) {
+			return false;
+		}
+		if (me.getMinionCount(6) < this.maxRevives) {
+			return false;
+		}
+
+		// If we got this far this necro has all the summons he needs
+		return true;
 	},
 
 	doAttack: function (unit, preattack) {
@@ -211,7 +263,7 @@ var ClassAttack = {
 		}
 
 		// Check for bodies to exploit for CorpseExplosion before committing to an attack for non-summoner type necros
-		if (Config.Skeletons + Config.SkeletonMages + Config.Revives === 0) {
+		if (this.isArmyFull()) {
 			if (this.checkCorpseNearMonster(unit)) {
 				this.explodeCorpses(unit);
 			}
@@ -324,32 +376,13 @@ var ClassAttack = {
 	},
 
 	raiseArmy: function (range) {
-		var i, tick, count, corpse, corpseList, skill, maxSkeletons, maxMages, maxRevives;
+		var i, tick, count, corpse, corpseList, skill;
 
 		if (!range) {
 			range = 25;
 		}
 
-		if (Config.Skeletons === "max") {
-			skill = me.getSkill(70, 1);
-			maxSkeletons = skill < 4 ? skill : (Math.floor(skill / 3) + 2);
-		} else {
-			maxSkeletons = Config.Skeletons;
-		}
-
-		if (Config.SkeletonMages === "max") {
-			skill = me.getSkill(80, 1);
-			maxMages = skill < 4 ? skill : (Math.floor(skill / 3) + 2);
-		} else {
-			maxMages = Config.SkeletonMages;
-		}
-
-		if (Config.Revives === "max") {
-			skill = me.getSkill(95, 1);
-			maxRevives = skill;
-		} else {
-			maxRevives = Config.Revives;
-		}
+		this.setArmySize();
 
 		for (i = 0; i < 3; i += 1) {
 			corpse = getUnit(1, -1, 12);
@@ -367,7 +400,7 @@ MainLoop:
 			while (corpseList.length > 0) {
 				corpse = corpseList.shift();
 
-				if (me.getMinionCount(4) < maxSkeletons) {
+				if (me.getMinionCount(4) < this.maxSkeletons) {
 					if (!Skill.cast(70, 0, corpse)) {
 						return false;
 					}
@@ -382,7 +415,7 @@ MainLoop:
 
 						delay(10);
 					}
-				} else if (me.getMinionCount(5) < maxMages) {
+				} else if (me.getMinionCount(5) < this.maxMages) {
 					if (!Skill.cast(80, 0, corpse)) {
 						return false;
 					}
@@ -397,7 +430,7 @@ MainLoop:
 
 						delay(10);
 					}
-				} else if (me.getMinionCount(6) < maxRevives) {
+				} else if (me.getMinionCount(6) < this.maxRevives) {
 					if (this.checkCorpse(corpse, true)) {
 						print("Reviving " + corpse.name);
 
@@ -447,7 +480,7 @@ MainLoop:
 				corpseList = corpseList.shuffle();
 			}
 
-			if (Config.Skeletons + Config.SkeletonMages + Config.Revives === 0) {
+			if (this.isArmyFull()) {
 				// We don't need corpses as we are not a Summoner Necro, Spam CE till monster dies or we run out of bodies.
 				do {
 					corpse = corpseList.shift();
