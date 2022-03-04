@@ -50,6 +50,7 @@ function main() {
 	CraftingSystem.buildLists();
 	Runewords.init();
 	Cubing.init();
+	const HTTP = require("../libs/modules/HTTP");
 
 	for (i = 0; i < 5; i += 1) {
 		timerLastDrink[i] = 0;
@@ -513,6 +514,28 @@ function main() {
 
 			if (Config.SoJWaitTime && me.gametype === 1) { // only do this in expansion
 				D2Bot.printToConsole(param1 + " Stones of Jordan Sold to Merchants on IP " + me.gameserverip.split(".")[3], 7);
+
+				if (Config.DeepStats.SOJReportsEnabled) {
+					if (!Config.DeepStats.API.Token) {
+						throw new Error("An auth token is required. Set Config.DeepStats.API.Token");
+					}
+					let soj_data = {
+						ip_address: me.gameserverip.split(".")[3],
+						realm: me.realm,
+						ladder: me.ladder > 0,
+						current_count: param1,
+					};
+					HTTP({
+						url: Config.DeepStats.API.ReportSOJsSold,
+						method: "POST",
+						headers: {
+							"Authorization": "Token " + Config.DeepStats.API.Token,
+							"Content-Type": "application/json",
+						},
+						data: JSON.stringify(soj_data)
+					});
+				}
+
 				Messaging.sendToScript("default.dbj", "soj");
 			}
 
@@ -537,6 +560,26 @@ function main() {
 				print("ÿc4Diablo Walks the Earth");
 
 				me.maxgametime = 0;
+
+				if (Config.DeepStats.DCloneReportsEnabled) {
+					if (!Config.DeepStats.API.Token) {
+						throw new Error("An auth token is required. Set Config.DeepStats.API.Token");
+					}
+					let dclone_data = {
+						ip_address: me.gameserverip.split(".")[3],
+						realm: me.realm,
+						ladder: me.ladder > 0,
+					};
+					HTTP({
+						url: Config.DeepStats.API.ReportDClone,
+						method: "POST",
+						headers: {
+							"Authorization": "Token " + Config.DeepStats.API.Token,
+							"Content-Type": "application/json",
+						},
+						data: JSON.stringify(dclone_data)
+					});
+				}
 
 				if (Config.KillDclone) {
 					load("tools/clonekilla.js");

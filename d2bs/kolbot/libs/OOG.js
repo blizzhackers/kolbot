@@ -383,6 +383,7 @@ var DataFile = {
 			experience: 0,
 			deaths: 0,
 			lastArea: "",
+			lastAreaID: 0,
 			gold: 0,
 			level: 0,
 			name: "",
@@ -423,7 +424,7 @@ var DataFile = {
 
 		print("Error reading DataFile. Using null values.");
 
-		return {runs: 0, experience: 0, lastArea: "", gold: 0, level: 0, name: "", gameName: "", ingameTick: 0, handle: 0, nextGame: ""};
+		return {runs: 0, experience: 0, lastArea: "", lastAreaID: 0, gold: 0, level: 0, name: "", gameName: "", ingameTick: 0, handle: 0, nextGame: ""};
 	},
 
 	getStats: function () {
@@ -463,6 +464,7 @@ var DataFile = {
 				}
 
 				obj.lastArea = Pather.getAreaName(me.area);
+				obj.lastAreaID = me.area;
 
 				break;
 			case "gold":
@@ -496,6 +498,62 @@ var DataFile = {
 
 		//FileTools.writeText("data/" + me.profile + ".json", string);
 		Misc.fileAction("data/" + me.profile + ".json", 1, string);
+	}
+};
+
+const DeepStats = {
+	create: function () {
+		let obj = [],
+			string;
+
+		string = JSON.stringify(obj);
+
+		Misc.fileAction("data/deepstats/" + me.profile + ".dump.json", 1, string);
+
+		return obj;
+	},
+
+	getObj: function () {
+		let obj, string;
+
+		if (!FileTools.exists("data/deepstats/" + me.profile + ".dump.json")) {
+			DeepStats.create();
+		}
+
+		string = Misc.fileAction("data/deepstats/" + me.profile + ".dump.json", 0);
+
+		try {
+			obj = JSON.parse(string);
+		} catch (e) {
+			// If we failed, file might be corrupted, so create a new one
+			obj = this.create();
+		}
+
+		if (obj) {
+			return obj;
+		}
+
+		print("Error reading DeepStats file. Using null values.");
+
+		return [];
+	},
+
+	updateStats: function (value) {
+		while (me.ingame && !me.gameReady) {
+			delay(100);
+		}
+
+		let currentStats, string;
+
+		currentStats = this.getObj();
+
+		if (typeof value === "string") {
+			currentStats.push(value);
+		}
+
+		string = JSON.stringify(currentStats);
+
+		Misc.fileAction("data/deepstats/" + me.profile + ".dump.json", 1, string);
 	}
 };
 

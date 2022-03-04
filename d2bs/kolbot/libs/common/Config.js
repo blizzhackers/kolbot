@@ -196,6 +196,18 @@ var Config = {
 	SkipException: [],
 	ScanShrines: [],
 	Debug: false,
+	DeepStats: {
+		StatsEnabled: false,
+		SOJReportsEnabled: false,
+		DCloneReportsEnabled: false,
+		FileLogOnly: false,
+		API: {
+			Token: "", // Auth token used to authenticate, if required, to your backend of choice
+			ReportItem: "", // Item endpoint at your backend of choice
+			ReportDClone: "", // DClone reporting endpoint at your backend of choice
+			ReportSOJsSold: "" // SOJs Sale reporting endpoint at your backend of choice
+		}
+	},
 
 	AutoMule: {
 		Trigger: [],
