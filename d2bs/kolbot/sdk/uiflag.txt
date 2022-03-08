@@ -1,5 +1,5 @@
 0x01    Inventory screen open
-0x02	Character screen open
+0x02	Character Stat screen open
 0x03	Skill select open (left or right)
 0x04	Skill screen open
 0x05	Chat input open
@@ -13,7 +13,7 @@
 0x0D	Holding alt to show items on gound
 0x0E	Npc choose item menu open (imbue, socket, personalize, etc)
 0x0F	Quest log open
-0x10    ? Assume help button visible
+0x10  Key to the Cairn Stones Screen
 0x11	Quest button visible
 0x12	status area
 0x13	Has one or more portraits (merc, minion, party -agnostic of 0x23)
