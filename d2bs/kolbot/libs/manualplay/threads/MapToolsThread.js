@@ -44,7 +44,7 @@ function main() {
 		canQuit = true,
 		timerLastDrink = [];
 
-	print("ÿc3Start MapToolsThread script");
+	print("ÿc9MapToolsThread loaded");
 	D2Bot.init();
 	Config.init(false);
 	Pickit.init(false);
@@ -147,8 +147,8 @@ function main() {
 
 	this.togglePause = function () {
 		let scripts = [
-			"default.dbj", "tools/townchicken.js", "tools/pickthread.js", "tools/antihostile.js",
-			"tools/party.js", "libs/manualplay/threads/maphelper.js",
+			"default.dbj", "tools/townchicken.js", "libs/manualplay/threads/pickthread.js",
+			"tools/antihostile.js", "tools/party.js", "libs/manualplay/threads/maphelper.js",
 		];
 
 		for (let i = 0; i < scripts.length; i += 1) {
@@ -179,8 +179,8 @@ function main() {
 
 	this.stopDefault = function () {
 		let scripts = [
-			"default.dbj", "libs/manualplay/threads/maphelper.js",
-			"libs/manualplay/threads/mapthread.js", "tools/pickthread.js"
+			"default.dbj", "tools/townchicken.js", "libs/manualplay/threads/pickthread.js",
+			"tools/antihostile.js", "tools/party.js", "libs/manualplay/threads/maphelper.js",
 		];
 
 		for (let l = 0; l < scripts.length; l++) {

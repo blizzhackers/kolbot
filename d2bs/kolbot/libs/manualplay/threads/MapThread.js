@@ -28,6 +28,7 @@ include("common/Runewords.js");
 include("common/Storage.js");
 include("common/Town.js");
 include("manualplay/MapMode.js");
+MapMode.include();
 
 const Hooks = {
 	dashBoard: {x: 113, y: 490},
@@ -101,7 +102,6 @@ const Hooks = {
 };
 
 function main() {
-	load("libs/manualplay/threads/maphelper.js");
 	print("ÿc9Map Thread Loaded.");
 	Config.init(false);
 	Pickit.init(true);
@@ -194,6 +194,13 @@ function main() {
 		case "hide":
 			hideConsole();
 			HelpMenu.hideMenu();
+
+			break;
+		case "make":
+			FileTools.copy("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + ".js", "libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js");
+			D2Bot.printToConsole("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+			print("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+			me.overhead("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
 
 			break;
 		default:

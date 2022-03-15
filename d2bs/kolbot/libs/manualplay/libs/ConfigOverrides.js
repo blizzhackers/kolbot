@@ -9,8 +9,7 @@ if (!isIncluded("common/Config.js")) { include("common/Config.js"); }
 let original = Config.init;
 
 Config.init = function (notify) {
-	let filePath = "manualplay/config/",
-		configFilename = "",
+	let configFilename = "",
 		classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"];
 
 	for (let i = 0; i < 5; i += 1) {
@@ -53,14 +52,14 @@ Config.init = function (notify) {
 			break;
 		}
 
-		if (configFilename && FileTools.exists("libs/" + filePath + configFilename)) {
+		if (configFilename && FileTools.exists("libs/manualplay/config/" + configFilename)) {
 			break;
 		}
 	}
 
-	if (FileTools.exists("libs/" + filePath + configFilename)) {
+	if (FileTools.exists("libs/manualplay/config/" + configFilename)) {
 		try {
-			if (!include(filePath + configFilename)) {
+			if (!include("manualplay/config/" + configFilename)) {
 				throw new Error();
 			}
 		} catch (e1) {
@@ -74,12 +73,12 @@ Config.init = function (notify) {
 
 		try {
 			// Try to find default config
-			if (!FileTools.exists("libs/" + filePath + classes[me.classid] + ".js")) {
+			if (!FileTools.exists("libs/manualplay/config/" + classes[me.classid] + ".js")) {
 				D2Bot.printToConsole("Not going well? Read the guides: https://github.com/blizzhackers/documentation");
 				throw new Error("ÿc1Default config not found. \nÿc9     Try reading the kolbot guides.");
 			}
 
-			if (!include(filePath + classes[me.classid] + ".js")) {
+			if (!include("manualplay/config/" + classes[me.classid] + ".js")) {
 				throw new Error("ÿc1Failed to load default config.");
 			}
 		} catch (e) {

@@ -41,14 +41,18 @@ function main () {
 	}
 
 	if (getScript("d2botmap.dbj")) {
-		load("libs/manualplay/threads/mapthread.js");
-		FileTools.exists("libs/manualplay/threads/maptoolsthread.js") ? load("libs/manualplay/threads/maptoolsthread.js") : load("tools/ToolsThread.js");
+		include("manualplay/MapMode.js");
+		MapMode.include();
 		Config.init(true);
 		LocalChat.init();
 
-		Config.PublicMode && load("tools/party.js");
-		Config.ManualPlayPick && load("tools/pickthread.js");
+		// load threads
 		me.automap = true;
+		load("libs/manualplay/threads/mapthread.js");
+		load("libs/manualplay/threads/maphelper.js");
+		load("libs/manualplay/threads/maptoolsthread.js");
+		Config.ManualPlayPick && load("libs/manualplay/threads/pickthread.js");
+		Config.PublicMode && load("tools/party.js");
 
 		while (true) {
 			delay(1000);

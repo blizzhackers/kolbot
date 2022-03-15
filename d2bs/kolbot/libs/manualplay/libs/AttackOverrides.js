@@ -6,7 +6,7 @@
 
 if (!isIncluded("common/Attack.js")) { include("common/Attack.js"); }
 
-Attack.init = function () {
+Attack.init = function (notify = false) {
 	if (Config.Wereform) {
 		include("common/Attacks/wereform.js");
 	} else if (Config.CustomClassAttack && FileTools.exists('libs/common/Attacks/' + Config.CustomClassAttack + '.js')) {
@@ -17,7 +17,7 @@ Attack.init = function () {
 	}
 
 	if (Config.AttackSkill[1] < 0 || Config.AttackSkill[3] < 0) {
-		print("ÿc1Bad attack config. Don't expect your bot to attack.");
+		notify && print("ÿc1Bad attack config. Don't expect your bot to attack.");
 	}
 
 	if (me.expansion) {

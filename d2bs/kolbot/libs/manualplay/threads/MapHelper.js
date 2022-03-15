@@ -57,7 +57,9 @@ function main() {
 		},
 	};
 
+	print("ÿc9MapHelper loaded");
 	Config.init();
+	Attack.init(true);
 	Pickit.init();
 	Storage.Init();
 	addEventListener("scriptmsg", function (msg) {
