@@ -1,4 +1,4 @@
-var StarterConfig = {
+const StarterConfig = {
 	MinGameTime: 120, // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
 	PingQuitDelay: 30, // Time in seconds to wait in lobby after quitting due to high ping
 	CreateGameDelay: 10, // Seconds to wait before creating a new game
@@ -73,12 +73,15 @@ include("torchsystem.js");
 include("common/misc.js");
 include("common/util.js");
 
+let firstRun = false;
+
 if (!FileTools.exists("data/" + me.profile + ".json")) {
 	DataFile.create();
+	firstRun = true;
 }
 
-var gameInfo, gameStart, ingame, chatActionsDone, pingQuit,
-	handle, useChat, firstLogin, connectFail,
+let gameInfo, gameStart, ingame, chatActionsDone, pingQuit,
+	handle, useChat, firstLogin, connectFail, profileInfo = {},
 	gameCount = DataFile.getStats().runs + 1,
 	loginRetry = 0,
 	lastGameStatus = "ready",
@@ -141,6 +144,19 @@ function ReceiveCopyData(mode, msg) {
 	case 0xf124: // Cached info retreival
 		if (msg !== "null") {
 			gameInfo.crashInfo = JSON.parse(msg);
+		}
+
+		break;
+	case 1638: // getProfile
+		try {
+			obj = JSON.parse(msg);
+			profileInfo.profile = me.profile;
+			profileInfo.account = obj.account;
+			profileInfo.charName = obj.Character;
+			obj.Realm = obj.Realm.toLowerCase();
+			profileInfo.realm = ["east", "west"].includes(obj.Realm) ? "us" + obj.Realm : obj.Realm;
+		} catch (e) {
+			print(e);
 		}
 
 		break;
@@ -238,77 +254,6 @@ function randomString(len, useNumbers = false) {
 	}
 
 	return rval;
-}
-
-function main() {
-	debugLog(me.profile);
-	addEventListener('copydata', ReceiveCopyData);
-	addEventListener('scriptmsg', ScriptMsgEvent);
-
-	while (!handle) {
-		delay(100);
-	}
-
-	DataFile.updateStats("handle", handle);
-	delay(500);
-	D2Bot.init();
-	load("tools/heartbeat.js");
-
-	while (!gameInfo) {
-		D2Bot.requestGameInfo();
-		delay(500);
-	}
-
-	if (gameInfo.error) {
-		//D2Bot.retrieve();
-		delay(200);
-
-		if (!!DataFile.getStats().debugInfo) {
-			gameInfo.crashInfo = DataFile.getStats().debugInfo;
-
-			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(gameInfo.crashInfo).currScript + " Area: " + JSON.parse(gameInfo.crashInfo).area, 10);
-		}
-
-		/*if (gameInfo.crashInfo) {
-			D2Bot.printToConsole("Crash Info: Script: " + gameInfo.crashInfo.currScript + " Area: " + gameInfo.crashInfo.area + (gameInfo.crashInfo.hasOwnProperty("lastAction") ? " " + gameInfo.crashInfo.lastAction : ""), 10);
-		}*/
-
-		ControlAction.timeoutDelay("Crash Delay", StarterConfig.CrashDelay * 1e3);
-		D2Bot.updateRuns();
-	}
-
-	//D2Bot.store(JSON.stringify({currScript: "none", area: "out of game"}));
-	DataFile.updateStats("debugInfo", JSON.stringify({currScript: "none", area: "out of game"}));
-
-	while (true) {
-		while (me.ingame) { // returns true before actually in game so we can't only use this check
-			if (me.gameReady) { // returns false when switching acts so we can't use while
-				isUp = "yes";
-
-				if (!ingame) {
-					gameStart = getTickCount();
-
-					print("Updating Status");
-					//D2Bot.updateStatus("Game: " + me.gamename);
-
-					lastGameStatus = "ingame";
-					ingame = true;
-
-					DataFile.updateStats("runs", gameCount);
-					DataFile.updateStats("ingameTick");
-				}
-
-				D2Bot.updateStatus("Game: " + me.gamename + timer(gameStart));
-			}
-
-			delay(1000);
-		}
-
-		isUp = "no";
-
-		locationAction(getLocation());
-		delay(1000);
-	}
 }
 
 function locationAction(location) {
@@ -527,15 +472,17 @@ MainSwitch:
 
 		control = getControl(1, 657, 342, 27, 20);
 
-		// Set character difference
-		if (typeof StarterConfig.CharacterDifference === "number") {
-			if (control.disabled === 4) {
+		// Set character difference - handle open bnet
+		if (Profile().type === 2 && !!control) {
+			if (typeof StarterConfig.CharacterDifference === "number") {
+				if (control.disabled === 4) {
+					ControlAction.click(6, 431, 341, 15, 16);
+				}
+
+				ControlAction.setText(1, 657, 342, 27, 20, StarterConfig.CharacterDifference.toString());
+			} else if (!StarterConfig.CharacterDifference && control.disabled === 5) {
 				ControlAction.click(6, 431, 341, 15, 16);
 			}
-
-			ControlAction.setText(1, 657, 342, 27, 20, StarterConfig.CharacterDifference.toString());
-		} else if (StarterConfig.CharacterDifference === false && control.disabled === 5) {
-			ControlAction.click(6, 431, 341, 15, 16);
 		}
 
 		// Get game name if there is none
@@ -568,8 +515,13 @@ MainSwitch:
 	case 7: // Channel List
 		break;
 	case 8: // Main Menu
+		ingame && (ingame = false);
+		if (Profile().type === 1 && firstRun) {
+			ControlAction.click(6, 264, 324, 272, 35);
+
+			break;
+		}
 	case 9: // Login
-	case 12: // Character Select
 	case 18: // D2 Splash
 		// Single Player screen fix
 		if (getLocation() === 12 && !getControl(4, 626, 100, 151, 44)) {
@@ -578,7 +530,8 @@ MainSwitch:
 			break;
 		}
 
-		if (firstLogin && getLocation() === 9) { // multiple realm botting fix in case of R/D or disconnect
+		// Multiple realm botting fix in case of R/D or disconnect
+		if (firstLogin && getLocation() === 9) {
 			ControlAction.click(6, 33, 572, 128, 35);
 		}
 
@@ -588,29 +541,18 @@ MainSwitch:
 			login(me.profile);
 		} catch (e) {
 			if (getLocation() === 12 && loginRetry < 2) {
-				if (loginRetry === 0) {
-					// start from beginning of the char list
-					sendKey(0x24);
+				if (!ControlAction.findCharacter(profileInfo)) {
+					// dead hardcore character on sp
+					if (getLocation() === 30) {
+						// Exit from that pop-up
+						ControlAction.click(6, 351, 337, 96, 32);
+						D2Bot.printToConsole("Character died", 9);
+						D2Bot.stop();
+					} else {
+						loginRetry++;
+					}
 				}
-
-				control = getControl(4, 237, 457, 72, 93); // char on 1st column, 4th row
-
-				if (control) {
-					me.blockMouse = true;
-					me.blockKeys = true;
-
-					control.click();
-					sendKey(0x28);
-					sendKey(0x28);
-					sendKey(0x28);
-					sendKey(0x28);
-
-					me.blockMouse = false;
-				}
-
-				loginRetry++;
 			} else {
-				me.blockKeys = false;
 				print(e + " " + getLocation());
 			}
 		}
@@ -775,6 +717,14 @@ MainSwitch:
 
 		break;
 	case 20: // Single Player - Select Difficulty
+		if (!Profile().type !== 2) {
+			print("Stuck on select difficulty screen. Exiting to main menu.");
+			sendKey(0x1B);
+			if (getLocation() === 12 && !getControl(4, 626, 100, 151, 44)) {
+				ControlAction.click(6, 33, 572, 128, 35);
+			}
+		}
+
 		break;
 	case 21: // Main Menu - Connecting
 		if (!locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
@@ -824,6 +774,13 @@ MainSwitch:
 		}
 
 		break;
+	case 29: // fix for unhandled location crashes at char creation
+		if (Profile().type !== 2 && firstRun) {
+			// click out of the screen
+			ControlAction.click(6, 33, 572, 128, 35);
+		}
+	case 12: // Character Select
+		hideConsole(); // seems to fix odd crash with single-player characters if the console is open to type in
 	case 23: // Character Select - Connecting
 	case 42: // Empty character screen
 		string = "";
@@ -938,5 +895,72 @@ MainSwitch:
 		}
 
 		break;
+	}
+}
+
+function main() {
+	debugLog(me.profile);
+	addEventListener('copydata', ReceiveCopyData);
+	addEventListener('scriptmsg', ScriptMsgEvent);
+
+	while (!handle) {
+		delay(100);
+	}
+
+	DataFile.updateStats("handle", handle);
+	delay(500);
+	D2Bot.init();
+	load("tools/heartbeat.js");
+
+	while (!gameInfo) {
+		D2Bot.requestGameInfo();
+		delay(500);
+	}
+
+	if (gameInfo.error) {
+		delay(200);
+
+		if (!!DataFile.getStats().debugInfo) {
+			gameInfo.crashInfo = DataFile.getStats().debugInfo;
+
+			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(gameInfo.crashInfo).currScript + " Area: " + JSON.parse(gameInfo.crashInfo).area, 10);
+		}
+
+		ControlAction.timeoutDelay("Crash Delay", StarterConfig.CrashDelay * 1e3);
+		D2Bot.updateRuns();
+	}
+
+	DataFile.updateStats("debugInfo", JSON.stringify({currScript: "none", area: "out of game"}));
+
+	while (!profileInfo) {
+		D2Bot.getProfile();
+		print("Getting Profile");
+		delay(500);
+	}
+
+	while (true) {
+		while (me.ingame) { // returns true before actually in game so we can't only use this check
+			if (me.gameReady) { // returns false when switching acts so we can't use while
+				isUp = "yes";
+
+				if (!ingame) {
+					gameStart = getTickCount();
+					lastGameStatus = "ingame";
+					ingame = true;
+
+					DataFile.updateStats("runs", gameCount);
+					DataFile.updateStats("ingameTick");
+				}
+
+				D2Bot.updateStatus("Game: " + me.gamename + timer(gameStart));
+			}
+
+			delay(1000);
+		}
+
+		isUp = "no";
+
+		locationAction(getLocation());
+		delay(1000);
 	}
 }

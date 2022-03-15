@@ -165,7 +165,11 @@ function main () {
 	// Load threads
 	load("tools/ToolsThread.js");
 	Config.TownCheck || Config.TownHP || Config.TownMP && load("tools/TownChicken.js");
-	Config.PublicMode && Config.PublicMode === true ? require('libs/modules/SimpleParty') : load("tools/Party.js");
+	
+	if (Config.PublicMode) {
+		Config.PublicMode === true ? require('libs/modules/SimpleParty') : load("tools/Party.js");
+	}
+	
 	Config.AntiHostile && load("tools/AntiHostile.js");
 
 	if (Config.FastPick) {
