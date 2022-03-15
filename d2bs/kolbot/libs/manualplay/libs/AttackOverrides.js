@@ -1,0 +1,30 @@
+/*
+*	@filename	AttackOverrides.js
+*	@author		theBGuy
+*	@desc		Attack.js fixes to improve functionality for map mode
+*/
+
+if (!isIncluded("common/Attack.js")) { include("common/Attack.js"); }
+
+Attack.init = function () {
+	if (Config.Wereform) {
+		include("common/Attacks/wereform.js");
+	} else if (Config.CustomClassAttack && FileTools.exists('libs/common/Attacks/' + Config.CustomClassAttack + '.js')) {
+		print('Loading custom attack file');
+		include('common/Attacks/' + Config.CustomClassAttack + '.js');
+	} else {
+		include("common/Attacks/" + this.classes[me.classid] + ".js");
+	}
+
+	if (Config.AttackSkill[1] < 0 || Config.AttackSkill[3] < 0) {
+		// TODO: attack modules to be loaded by default based on our skills if we get here
+		print("ÿc1Bad attack config. Don't expect your bot to attack.");
+	}
+
+	if (me.expansion) {
+		this.checkInfinity();
+		this.getCharges();
+		this.getPrimarySlot();
+	}
+};
+

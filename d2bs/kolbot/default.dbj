@@ -25,7 +25,7 @@ include("common/Runewords.js");
 include("common/Storage.js");
 include("common/Town.js");
 
-function main() {
+function main () {
 	D2Bot.init(); // Get D2Bot# handle
 	D2Bot.ingame();
 
@@ -34,35 +34,44 @@ function main() {
 		delay(50);
 	}
 
+	clearAllEvents(); // remove any event listeners from game crash
+
 	if (!getScript("tools/heartbeat.js")) {
 		load("tools/heartbeat.js");
 	}
 
 	if (getScript("d2botmap.dbj")) {
-		load("tools/mapthread.js");
-		load("tools/toolsthread.js");
+		load("libs/manualplay/threads/mapthread.js");
+		FileTools.exists("libs/manualplay/threads/maptoolsthread.js") ? load("libs/manualplay/threads/maptoolsthread.js") : load("tools/ToolsThread.js");
 		Config.init(true);
 		LocalChat.init();
 
-		if (Config.PublicMode) {
-			load("tools/party.js");
-		}
-
-		if (Config.ManualPlayPick) {
-			load("tools/pickthread.js");
-		}
-
-		if (Config.AutoMap) {
-			me.automap = true;
-		}
+		Config.PublicMode && load("tools/party.js");
+		Config.ManualPlayPick && load("tools/pickthread.js");
+		me.automap = true;
 
 		while (true) {
 			delay(1000);
 		}
 	}
-
-	// don't load default for mules
-	if (getScript("D2BotMule.dbj")) {
+	
+	if (getScript("D2BotShopDrop.dbj")) {
+		return true;
+	}
+	
+	// don't load default for dropper/mules
+	if (getScript("D2BotDropper.dbj") || getScript("D2BotMule.dbj") || getScript("D2BotDrop.dbj")) {
+		while (true) {
+			try {
+				if (me.gameReady && me.ingame && !me.inTown) {
+					D2Bot.printToConsole("Saved from suicide walk!");
+					D2Bot.restart();
+				}
+			} catch (e) {
+				D2Bot.restart();
+			}
+			delay(1000);
+		}
 		return true;
 	}
 
@@ -71,7 +80,7 @@ function main() {
 		return true;
 	}
 
-	var i, sojPause, stats, anni,
+	let i, sojPause, stats, anni,
 		sojCounter = 0,
 		startTime = getTickCount();
 
@@ -92,7 +101,8 @@ function main() {
 	};
 
 	this.copyDataEvent = function (mode, msg) {
-		if (mode === 0 && msg === "mule") { // "Mule Profile" option from D2Bot#
+		// "Mule Profile" option from D2Bot#
+		if (mode === 0 && msg === "mule") {
 			if (AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("muleInfo")) {
 				if (AutoMule.getMuleItems().length > 0) {
 					D2Bot.printToConsole("Mule triggered");
@@ -106,7 +116,8 @@ function main() {
 			}
 		}
 
-		if (mode === 1638) { // getProfile
+		// getProfile
+		if (mode === 1638) {
 			msg = JSON.parse(msg);
 
 			if (msg.Tag) {
@@ -125,33 +136,12 @@ function main() {
 	Cubing.init();
 	LocalChat.init();
 
-	// Load events
+	// Load event listeners
 	addEventListener("scriptmsg", this.scriptEvent);
 	addEventListener("copydata", this.copyDataEvent);
 
-	// GameAction handler
-
-	if (GameAction.inGameCheck()) {
-		return true;
-	}
-
-	// AutoMule handler
-	if (AutoMule.inGameCheck()) {
-		return true;
-	}
-
-	// TorchSystem handler
-	if (TorchSystem.inGameCheck()) {
-		return true;
-	}
-
-	// Gambling System handler
-	if (Gambling.inGameCheck()) {
-		return true;
-	}
-
-	// Crafting System handler
-	if (CraftingSystem.inGameCheck()) {
+	// GameAction/AutoMule/TorchSystem/Gambling/Crafting handler
+	if (GameAction.inGameCheck() || AutoMule.inGameCheck() || TorchSystem.inGameCheck() || Gambling.inGameCheck() || CraftingSystem.inGameCheck()) {
 		return true;
 	}
 
@@ -170,38 +160,29 @@ function main() {
 
 	// Load threads
 	load("tools/ToolsThread.js");
-
-	if (Config.TownCheck || Config.TownHP || Config.TownMP) {
-		load("tools/TownChicken.js");
-	}
-
-	if (Config.PublicMode) {
-		if (Config.PublicMode === true) {
-			require('libs/modules/SimpleParty');
-		} else {
-			load("tools/Party.js");
-		}
-	}
-
-	if (Config.AntiHostile) {
-		load("tools/AntiHostile.js");
-	}
+	Config.TownCheck || Config.TownHP || Config.TownMP && load("tools/TownChicken.js");
+	Config.PublicMode && Config.PublicMode === true ? require('libs/modules/SimpleParty') : load("tools/Party.js");
+	Config.AntiHostile && load("tools/AntiHostile.js");
 
 	if (Config.FastPick) {
 		print("ÿc2Fast pickit active.");
 		addEventListener("itemaction", this.itemEvent);
 	}
 
-	// One time maintenance - get corpse, clear leftover items, pick items in case anything important was dropped
+	// One time maintenance - check cursor, get corpse, clear leftover items, pick items in case anything important was dropped
 	if (!Scripts.UserAddon && !Scripts.Test) {
+		let orgx = me.x, orgy = me.y;
+
+		Cubing.cursorCheck();
 		Town.getCorpse();
 		Town.clearBelt();
-		
-		if(Config.ClearInvOnStart) {
-			Town.clearInventory();
+		Config.ClearInvOnStart && Town.clearInventory();
+
+		if (getDistance(me, orgx, orgy) > 3) {
+			Pather.moveTo(orgx, orgx);
 		}
 		
-		//Pickit.pickItems();
+		Pickit.pickItems();
 	}
 
 	me.automap = Config.AutoMap;
@@ -218,6 +199,11 @@ function main() {
 
 	if (Config.AutoStat.Enabled && include("common/AutoStat.js")) {
 		AutoStat.init(Config.AutoStat.Build, Config.AutoStat.Save, Config.AutoStat.BlockChance, Config.AutoStat.UseBulk);
+	}
+
+	// offline
+	if (!me.realm) {
+		D2Bot.updateRuns();
 	}
 
 	// Go

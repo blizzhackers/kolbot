@@ -925,7 +925,7 @@ const Misc = {
 		!me.idle && Misc.click(0, 0, me.x, me.y); // Click to stop walking in case we got stuck
 
 		return false;
-	}
+	},
 
 	// Open all chests that have preset units in an area
 	openChestsInArea: function (area, chestIds) {
