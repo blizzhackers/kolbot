@@ -1,11 +1,14 @@
 /**
 *	@filename	Prototypes.js
-*	@author		kolton
+*	@author		kolton, theBGuy
+* 	@credits 	Jaenster
 *	@desc		various 'Unit' and 'me' prototypes
 */
 
 // Ensure these are in polyfill.js
 !isIncluded('Polyfill.js') && include('Polyfill.js');
+
+let sdk = require('../modules/sdk');
 
 // Check if unit is idle
 Unit.prototype.__defineGetter__("idle",
@@ -78,7 +81,7 @@ Unit.prototype.openMenu = function (addDelay) {
 		return true;
 	}
 
-	var i, tick;
+	let i, tick;
 
 	for (i = 0; i < 5; i += 1) {
 		if (getDistance(me, this) > 4) {
@@ -126,7 +129,7 @@ Unit.prototype.startTrade = function (mode) {
 		return true;
 	}
 
-	var i, tick,
+	let i, tick,
 		menuId = mode === "Gamble" ? 0x0D46 : mode === "Repair" ? 0x0D06 : 0x0D44;
 
 	for (i = 0; i < 3; i += 1) {
@@ -169,7 +172,7 @@ Unit.prototype.buy = function (shiftBuy, gamble) {
 		return false;
 	}
 
-	var i, tick,
+	let i, tick,
 		oldGold = me.getStat(14) + me.getStat(15),
 		itemCount = me.itemcount;
 
@@ -207,7 +210,7 @@ Unit.prototype.__defineGetter__("parentName",
 			throw new Error("Unit.parentName: Must be used with item units.");
 		}
 
-		var parent = this.getParent();
+		let parent = this.getParent();
 
 		if (parent) {
 			return parent.name;
@@ -230,7 +233,7 @@ Unit.prototype.sell = function () {
 		throw new Error("Unit.sell: Must be used in shops.");
 	}
 
-	var i, tick,
+	let i, tick,
 		itemCount = me.itemcount;
 
 	for (i = 0; i < 5; i += 1) {
@@ -261,7 +264,7 @@ Unit.prototype.toCursor = function () {
 		return true;
 	}
 
-	var i, tick;
+	let i, tick;
 
 	if (this.location === 7) {
 		Town.openStash();
@@ -300,10 +303,10 @@ Unit.prototype.toCursor = function () {
 
 Unit.prototype.drop = function () {
 	if (this.type !== 4) {
-		throw new Error("Unit.drop: Must be used with items.");
+		throw new Error("Unit.drop: Must be used with items. Unit Name: " + this.name);
 	}
 
-	var i, tick, timeout;
+	let i, tick, timeout;
 
 	if (!this.toCursor()) {
 		return false;
@@ -345,24 +348,8 @@ Unit.prototype.drop = function () {
 	return false;
 };
 
-me.findItem = function (id, mode, loc, quality) {
-	if (id === undefined) {
-		id = -1;
-	}
-
-	if (mode === undefined) {
-		mode = -1;
-	}
-
-	if (loc === undefined) {
-		loc = -1;
-	}
-
-	if (quality === undefined) {
-		quality = -1;
-	}
-
-	var item = me.getItem(id, mode);
+me.findItem = function (id = -1, mode = -1, loc = -1, quality = -1) {
+	let item = me.getItem(id, mode);
 
 	if (item) {
 		do {
@@ -375,41 +362,40 @@ me.findItem = function (id, mode, loc, quality) {
 	return false;
 };
 
-me.findItems = function (id, mode, loc) {
-	if (id === undefined) {
-		id = -1;
-	}
-
-	if (mode === undefined) {
-		mode = -1;
-	}
-
-	if (loc === undefined) {
-		loc = false;
-	}
-
-	var list = [],
+me.findItems = function (id = -1, mode = -1, loc = false) {
+	let list = [],
 		item = me.getItem(id, mode);
 
-	if (!item) {
-		return false;
-	}
-
-	do {
-		if (loc) {
-			if (item.location === loc) {
+	if (item) {
+		do {
+			if (loc) {
+				if (item.location === loc) {
+					list.push(copyUnit(item));
+				}
+			} else {
 				list.push(copyUnit(item));
 			}
-		} else {
-			list.push(copyUnit(item));
-		}
-	} while (item.getNext());
+		} while (item.getNext());
+	}
 
 	return list;
 };
 
+Unit.prototype.getItemsEx = function (...args) {
+	let items = [],
+		item = this.getItem.apply(this, args);
+
+	if (item) {
+		do {
+			items.push(copyUnit(item));
+		} while (item.getNext());
+	}
+
+	return items;
+};
+
 Unit.prototype.getPrefix = function (id) {
-	var i;
+	let i;
 
 	switch (typeof id) {
 	case "number":
@@ -442,7 +428,7 @@ Unit.prototype.getPrefix = function (id) {
 };
 
 Unit.prototype.getSuffix = function (id) {
-	var i;
+	let i;
 
 	switch (typeof id) {
 	case "number":
@@ -476,7 +462,7 @@ Unit.prototype.getSuffix = function (id) {
 
 Unit.prototype.__defineGetter__("dexreq",
 	function () {
-		var finalReq,
+		let finalReq,
 			ethereal = this.getFlag(0x400000),
 			reqModifier = this.getStat(91),
 			baseReq = getBaseStat("items", this.classid, "reqdex");
@@ -492,7 +478,7 @@ Unit.prototype.__defineGetter__("dexreq",
 
 Unit.prototype.__defineGetter__("strreq",
 	function () {
-		var finalReq,
+		let finalReq,
 			ethereal = this.getFlag(0x400000),
 			reqModifier = this.getStat(91),
 			baseReq = getBaseStat("items", this.classid, "reqstr");
@@ -524,25 +510,25 @@ Unit.prototype.__defineGetter__('itemclass',
 	});
 
 Unit.prototype.getStatEx = function (id, subid) {
-	var i, temp, rval, regex;
+	let i, temp, rval, regex;
 
 	switch (id) {
 	case 555: //calculates all res, doesnt exists trough
-		{ // Block scope due to the variable declaration
-			// Get all res
-			let allres = [this.getStatEx(39), this.getStatEx(41), this.getStatEx(43), this.getStatEx(45)];
+	{ // Block scope due to the variable declaration
+		// Get all res
+		let allres = [this.getStatEx(39), this.getStatEx(41), this.getStatEx(43), this.getStatEx(45)];
 
-			// What is the minimum of the 4?
-			let min = Math.min.apply(null, allres);
+		// What is the minimum of the 4?
+		let min = Math.min.apply(null, allres);
 
-			// Cap all res to the minimum amount of res
-			allres = allres.map(res => res > min ? min : res);
+		// Cap all res to the minimum amount of res
+		allres = allres.map(res => res > min ? min : res);
 
-			// Get it in local variables, its more easy to read
-			let [fire, cold, light, psn] = allres;
+		// Get it in local variables, its more easy to read
+		let [fire, cold, light, psn] = allres;
 
-			return fire === cold && cold === light && light === psn ? min : 0;
-		}
+		return fire === cold && cold === light && light === psn ? min : 0;
+	}
 	case 20: // toblock
 		switch (this.classid) {
 		case 328: // buckler
@@ -759,8 +745,6 @@ Unit.prototype.getStatEx = function (id, subid) {
 		break;
 	case 216: // itemhpperlevel (for example Fortitude with hp per lvl can be defined now with 1.5)
 		return this.getStat(216) / 2048;
-
-		break;
 	}
 
 	if (this.getFlag(0x04000000)) { // Runeword
@@ -831,7 +815,7 @@ Unit.prototype.getStatEx = function (id, subid) {
 */
 
 Unit.prototype.getColor = function () {
-	var i, colors,
+	let i, colors,
 		Color = {
 			black: 3,
 			lightblue: 4,
@@ -1230,7 +1214,7 @@ Unit.prototype.equip = function (destLocation = undefined) {
 
 	// If destLocation isnt an array, make it one
 	if (!Array.isArray(destLocation)) {
-		destLocation = [destLocation]
+		destLocation = [destLocation];
 	}
 
 	print('equiping ' + this.name);
@@ -1298,17 +1282,17 @@ Unit.prototype.equip = function (destLocation = undefined) {
 
 Unit.prototype.getBodyLoc = function () {
 	let types = {
-		1: [37, 71, 75], // helm
-		2: [12], // amulet
-		3: [3], // armor
-		4: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 42, 43, 44, 67, 68, 69, 72, 85, 86, 87, 88], // weapons
-		5: [2, 5, 6, 70], // shields / Arrows / bolts
-		6: [10], // ring slot 1
-		7: [10], // ring slot 2
-		8: [19], // belt
-		9: [15], // boots
-		10: [16], // gloves
-	}, bodyLoc = [];
+			1: [37, 71, 75], // helm
+			2: [12], // amulet
+			3: [3], // armor
+			4: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 42, 43, 44, 67, 68, 69, 72, 85, 86, 87, 88], // weapons
+			5: [2, 5, 6, 70], // shields / Arrows / bolts
+			6: [10], // ring slot 1
+			7: [10], // ring slot 2
+			8: [19], // belt
+			9: [15], // boots
+			10: [16], // gloves
+		}, bodyLoc = [];
 
 	for (let i in types) {
 		this.itemType && types[i].indexOf(this.itemType) !== -1 && bodyLoc.push(i);
@@ -1317,3 +1301,568 @@ Unit.prototype.getBodyLoc = function () {
 	// Strings are hard to calculate with, parse to int
 	return bodyLoc.map(parseInt);
 };
+
+Unit.prototype.getRes = function (type, difficulty) {
+	if (!type || ![sdk.stats.FireResist, sdk.stats.ColdResist, sdk.stats.PoisonResist, sdk.stats.LightningResist].includes(type)) {
+		return -1;
+	}
+	
+	difficulty === undefined || difficulty < 0 && (difficulty = 0);
+	difficulty > 2 && (difficulty = 2);
+
+	let modifier = me.classic ? [0, 20, 50][difficulty] : [0, 40, 100][difficulty];
+	if (this === me) {
+		switch (type) {
+		case sdk.stats.FireResist:
+			me.getState(sdk.states.ShrineResFire) && (modifier += 75);
+
+			break;
+		case sdk.stats.ColdResist:
+			me.getState(sdk.states.ShrineResCold) && (modifier += 75);
+			me.getState(sdk.states.Thawing) && (modifier += 50);
+
+			break;
+		case sdk.stats.LightningResist:
+			me.getState(sdk.states.ShrineResLighting) && (modifier += 75);
+
+			break;
+		case sdk.stats.PoisonResist:
+			me.getState(sdk.states.ShrineResPoison) && (modifier += 75);
+			me.getState(sdk.states.Antidote) && (modifier += 50);
+
+			break;
+		}
+	}
+	return this.getStat(type) - modifier;
+};
+
+let coords = function () {
+	if (Array.isArray(this) && this.length > 1) {
+		return [this[0], this[1]];
+	}
+
+	if (typeof this.x !== 'undefined' && typeof this.y !== 'undefined') {
+		return this instanceof PresetUnit && [this.roomx * 5 + this.x, this.roomy * 5 + this.y] || [this.x, this.y];
+	}
+
+	return [undefined, undefined];
+};
+
+Object.defineProperties(Object.prototype, {
+	distance: {
+		get: function () {
+			return !me.gameReady ? NaN : Math.round(getDistance.apply(null, [me, ...coords.apply(this)]));
+		},
+		enumerable: false,
+	},
+});
+
+Object.defineProperties(Unit.prototype, {
+	isChampion: {
+		get: function () {
+			return (this.spectype & sdk.units.monsters.spectype.Champion) > 0;
+		},
+	},
+	isUnique: {
+		get: function () {
+			return (this.spectype & sdk.units.monsters.spectype.Unique) > 0;
+		},
+	},
+	isMinion: {
+		get: function () {
+			return (this.spectype & sdk.units.monsters.spectype.Minion) > 0;
+		},
+	},
+	isSuperUnique: {
+		get: function () {
+			return (this.spectype & (sdk.units.monsters.spectype.Super | sdk.units.monsters.spectype.Unique)) > 0;
+		},
+	},
+	isSpecial: {
+		get: function () {
+			return this.isChampion || this.isUnique || this.isSuperUnique;
+		},
+	},
+	isWalking: {
+		get: function () {
+			return this.mode === sdk.units.monsters.monstermode.Walking && (this.targetx !== this.x || this.targety !== this.y);
+		}
+	},
+	isRunning: {
+		get: function () {
+			return this.mode === sdk.units.monsters.monstermode.Running && (this.targetx !== this.x || this.targety !== this.y);
+		}
+	},
+	isMoving: {
+		get: function () {
+			return this.isWalking || this.isRunning;
+		},
+	},
+	isFrozen: {
+		get: function () {
+			return this.getState(sdk.states.FrozenSolid);
+		},
+	},
+	isChilled: {
+		get: function () {
+			return this.getState(sdk.states.Frozen);
+		},
+	},
+	resPenalty: {
+		value: me.classic ? [0, 20, 50][me.diff] : [0, 40, 100][me.diff],
+		writable: true
+	},
+	fireRes: {
+		get: function () {
+			let modifier = 0;
+			if (this === me) {
+				me.getState(sdk.states.ShrineResFire) && (modifier += 75);
+			}
+			return this.getStat(sdk.stats.FireResist) - me.resPenalty - modifier;
+		}
+	},
+	coldRes: {
+		get: function () {
+			let modifier = 0;
+			if (this === me) {
+				me.getState(sdk.states.ShrineResCold) && (modifier += 75);
+				me.getState(sdk.states.Thawing) && (modifier += 50);
+			}
+			return this.getStat(sdk.stats.ColdResist) - me.resPenalty - modifier;
+		}
+	},
+	lightRes: {
+		get: function () {
+			let modifier = 0;
+			if (this === me) {
+				me.getState(sdk.states.ShrineResLighting) && (modifier += 75);
+			}
+			return this.getStat(sdk.stats.LightResist) - me.resPenalty - modifier;
+		}
+	},
+	poisonRes: {
+		get: function () {
+			let modifier = 0;
+			if (this === me) {
+				me.getState(sdk.states.ShrineResPoison) && (modifier += 75);
+				me.getState(sdk.states.Antidote) && (modifier += 50);
+			}
+			return this.getStat(sdk.stats.PoisonResist) - me.resPenalty - modifier;
+		}
+	},
+	hpPercent: {
+		get: function () {
+			return Math.round(this.hp * 100 / this.hpmax);
+		}
+	},
+	isEquipped: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.location === sdk.storage.Equipped;
+		}
+	},
+	isEquippedCharm: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return (this.location === sdk.storage.Inventory && [sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(this.itemType));
+		}
+	},
+	isInInventory: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.location === sdk.storage.Inventory && this.mode === sdk.itemmode.inStorage;
+		}
+	},
+	isInStash: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.location === sdk.storage.Stash && this.mode === sdk.itemmode.inStorage;
+		}
+	},
+	isInCube: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.location === sdk.storage.Cube && this.mode === sdk.itemmode.inStorage;
+		}
+	},
+	isInStorage: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.mode === sdk.itemmode.inStorage && [sdk.storage.Inventory, sdk.storage.Cube, sdk.storage.Stash].includes(this.location);
+		}
+	},
+	isInBelt: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.location === sdk.storage.Belt && this.mode === sdk.itemmode.inBelt;
+		}
+	},
+	isOnSwap: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.location === sdk.storage.Equipped && (me.weaponswitch === 0 && [11, 12].includes(this.bodylocation)) || (me.weaponswitch === 1 && [4, 5].includes(this.bodylocation));
+		}
+	},
+	identified: {
+		get: function () {
+			// Can't tell, as it isn't an item
+			if (this.type !== sdk.unittype.Item) return undefined;
+			// Is also true for white items
+			return this.getFlag(0x10);
+		}
+	},
+	ethereal: {
+		get: function () {
+			// Can't tell, as it isn't an item
+			if (this.type !== sdk.unittype.Item) return undefined;
+			return this.getFlag(0x400000);
+		}
+	},
+	twoHanded: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return getBaseStat("items", this.classid, "2handed") === 1;
+		}
+	},
+	runeword: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return !!this.getFlag(0x4000000);
+		}
+	},
+	questItem: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.itemType === sdk.itemtype.Quest ||
+                [sdk.items.quest.HoradricMalus, sdk.items.quest.WirtsLeg, sdk.items.quest.HoradricStaff, sdk.items.quest.ShaftoftheHoradricStaff,
+                	sdk.items.quest.ViperAmulet, sdk.items.quest.DecoyGidbinn, sdk.items.quest.TheGidbinn, sdk.items.quest.KhalimsFlail,
+                	sdk.items.quest.KhalimsWill, sdk.items.quest.HellForgeHammer, sdk.items.quest.StandardofHeroes].includes(this.classid);
+		}
+	},
+	sellable: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return !this.questItem &&
+				[sdk.items.quest.KeyofTerror, sdk.items.quest.KeyofHate, sdk.items.quest.KeyofDestruction, sdk.items.quest.DiablosHorn,
+					sdk.items.quest.BaalsEye, sdk.items.quest.MephistosBrain, sdk.items.quest.TokenofAbsolution, sdk.items.quest.TwistedEssenceofSuffering,
+					sdk.items.quest.ChargedEssenceofHatred, sdk.items.quest.BurningEssenceofTerror, sdk.items.quest.FesteringEssenceofDestruction].indexOf(this.classid) === -1 &&
+            	!(this.quality === sdk.itemquality.Unique && [sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(this.itemType));
+		}
+	},
+});
+
+Object.defineProperties(me, {
+	highestAct: {
+		get: function () {
+			let acts = [true,
+				me.getQuest(sdk.quests.AbleToGotoActII, 0),
+				me.getQuest(sdk.quests.AbleToGotoActIII, 0),
+				me.getQuest(sdk.quests.AbleToGotoActIV, 0),
+				me.getQuest(sdk.quests.AbleToGotoActV, 0)];
+			let index = acts.findIndex(function (i) { return !i; }); // find first false, returns between 1 and 5
+			return index === -1 ? 5 : index;
+		}
+	},
+	staminaPercent: {
+		get: function () {
+			return Math.round((me.stamina / me.staminamax) * 100);
+		}
+	},
+	staminaDrainPerSec: {
+		get: function () {
+			let bonusReduction = me.getStat(sdk.stats.StaminaRecoveryBonus);
+			let armorMalusReduction = 0; // TODO
+			return 25 * Math.max(40 * (1 + armorMalusReduction / 10) * (100 - bonusReduction) / 100, 1) / 256;
+		}
+	},
+	staminaTimeLeft: {
+		get: function () {
+			return me.stamina / me.staminaDrainPerSec;
+		}
+	},
+	staminaMaxDuration: {
+		get: function () {
+			return me.staminamax / me.staminaDrainPerSec;
+		}
+	},
+	FCR: {
+		get: function () {
+			return me.getStat(sdk.stats.FCR) - (!!Config ? Config.FCR : 0);
+		}
+	},
+	FHR: {
+		get: function () {
+			return me.getStat(sdk.stats.FHR) - (!!Config ? Config.FHR : 0);
+		}
+	},
+	FBR: {
+		get: function () {
+			return me.getStat(sdk.stats.FBR) - (!!Config ? Config.FBR : 0);
+		}
+	},
+	IAS: {
+		get: function () {
+			return me.getStat(sdk.stats.IAS) - (!!Config ? Config.IAS : 0);
+		}
+	},
+	shapeshifted: {
+		get: function () {
+			return me.getState(sdk.states.Wolf) || me.getState(sdk.states.Bear) || me.getState(sdk.states.Delerium);
+		}
+	},
+	mpPercent: {
+		get: function () {
+			return Math.round(me.mp * 100 / me.mpmax);
+		}
+	},
+	skillDelay: {
+		get: function () {
+			return me.getState(sdk.states.SkillDelay);
+		}
+	},
+	classic: {
+		get: function () {
+			return me.gametype === 0;
+		}
+	},
+	expansion: {
+		get: function () {
+			return me.gametype === 1;
+		}
+	},
+	softcore: {
+		get: function () {
+			return me.playertype === false;
+		}
+	},
+	hardcore: {
+		get: function () {
+			return me.playertype === true;
+		}
+	},
+	normal: {
+		get: function () {
+			return me.diff === 0;
+		}
+	},
+	nightmare: {
+		get: function () {
+			return me.diff === 1;
+		}
+	},
+	hell: {
+		get: function () {
+			return me.diff === 2;
+		}
+	},
+	amazon: {
+		get: function () {
+			return me.classid === 0;
+		}
+	},
+	sorceress: {
+		get: function () {
+			return me.classid === 1;
+		}
+	},
+	necromancer: {
+		get: function () {
+			return me.classid === 2;
+		}
+	},
+	paladin: {
+		get: function () {
+			return me.classid === 3;
+		}
+	},
+	barbarian: {
+		get: function () {
+			return me.classid === 4;
+		}
+	},
+	druid: {
+		get: function () {
+			return me.classid === 5;
+		}
+	},
+	assassin: {
+		get: function () {
+			return me.classid === 6;
+		}
+	},
+	den: {
+		get: function () {
+			return me.getQuest(1, 0);
+		}
+	},
+	bloodraven: {
+		get: function () {
+			return me.getQuest(2, 0);
+		}
+	},
+	smith: {
+		get: function () {
+			return me.getQuest(3, 0);
+		}
+	},
+	tristram: {
+		get: function () {
+			return me.getQuest(4, 0);
+		}
+	},
+	countess: {
+		get: function () {
+			return me.getQuest(5, 0);
+		}
+	},
+	andariel: {
+		get: function () {
+			return me.getQuest(7, 0);
+		}
+	},
+	cube: {
+		get: function () {
+			return !!me.getItem(549);
+		}
+	},
+	radament: {
+		get: function () {
+			return me.getQuest(9, 0);
+		}
+	},
+	shaft: {
+		get: function () {
+			return !!me.getItem(92);
+		}
+	},
+	amulet: {
+		get: function () {
+			return !!me.getItem(521);
+		}
+	},
+	staff: {
+		get: function () {
+			return !!me.getItem(91);
+		}
+	},
+	horadricstaff: {
+		get: function () {
+			return me.getQuest(10, 0);
+		}
+	},
+	summoner: {
+		get: function () {
+			return me.getQuest(13, 0);
+		}
+	},
+	duriel: {
+		get: function () {
+			return me.getQuest(15, 0);
+		}
+	},
+	goldenbird: {
+		get: function () {
+			return me.getQuest(20, 0);
+		}
+	},
+	eye: {
+		get: function () {
+			return !!me.getItem(553);
+		}
+	},
+	brain: {
+		get: function () {
+			return !!me.getItem(555);
+		}
+	},
+	heart: {
+		get: function () {
+			return !!me.getItem(554);
+		}
+	},
+	khalimswill: {
+		get: function () {
+			return !!me.getItem(174);
+		}
+	},
+	lamessen: {
+		get: function () {
+			return me.getQuest(17, 0);
+		}
+	},
+	gidbinn: {
+		get: function () {
+			return me.getQuest(19, 0);
+		}
+	},
+	travincal: {
+		get: function () {
+			return me.getQuest(18, 0);
+		}
+	},
+	mephisto: {
+		get: function () {
+			return me.getQuest(23, 0);
+		}
+	},
+	izual: {
+		get: function () {
+			return me.getQuest(25, 0);
+		}
+	},
+	hellforge: {
+		get: function () {
+			return me.getQuest(27, 0);
+		}
+	},
+	diablo: {
+		get: function () {
+			return me.getQuest(26, 0);
+		}
+	},
+	shenk: {
+		get: function () {
+			return me.getQuest(35, 0);
+		}
+	},
+	larzuk: {
+		get: function () {
+			return me.getQuest(35, 1);
+		}
+	},
+	savebarby: {
+		get: function () {
+			return me.getQuest(36, 0);
+		}
+	},
+	anya: {
+		get: function () {
+			return me.getQuest(37, 0);
+		}
+	},
+	ancients: {
+		get: function () {
+			return me.getQuest(39, 0);
+		}
+	},
+	baal: {
+		get: function () {
+			return me.getQuest(40, 0);
+		}
+	},
+	cows: {
+		get: function () {
+			return me.getQuest(4, 10);
+		}
+	},
+	respec: {
+		get: function () {
+			return me.getQuest(41, 0);
+		}
+	},
+	diffCompleted: {
+		get: function () {
+			return !!((me.classic && me.diablo) || me.baal);
+		}
+	},
+});

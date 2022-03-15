@@ -4,13 +4,14 @@
 *	@desc		handle item pickup
 */
 
-var Pickit = {
+// eslint-disable-next-line no-redeclare
+const Pickit = {
 	gidList: [],
 	beltSize: 1,
 	ignoreLog: [4, 5, 6, 22, 41, 76, 77, 78, 79, 80, 81], // Ignored item types for item logging
 
 	init: function (notify) {
-		var i, filename;
+		let i, filename;
 
 		for (i = 0; i < Config.PickitFiles.length; i += 1) {
 			filename = "pickit/" + Config.PickitFiles[i];
@@ -29,7 +30,7 @@ var Pickit = {
 	// 3 - Runeword wants
 	// 4 - Pickup to sell (triggered when low on gold)
 	checkItem: function (unit) {
-		var rval = NTIP.CheckItem(unit, false, true);
+		let rval = NTIP.CheckItem(unit, false, true);
 
 		if ((unit.classid === 617 || unit.classid === 618) && Town.repairIngredientCheck(unit)) {
 			return {
@@ -82,7 +83,7 @@ var Pickit = {
 	},
 
 	pickItems: function () {
-		var status, item, canFit,
+		let status, item, canFit,
 			needMule = false,
 			pickList = [];
 
@@ -180,7 +181,7 @@ var Pickit = {
 			return false;
 		}
 
-		var i,
+		let i,
 			items = Storage.Inventory.Compare(Config.Inventory);
 
 		if (items) {
@@ -221,7 +222,7 @@ var Pickit = {
 			this.picked = false;
 		}
 
-		var i, item, tick, gid, stats,
+		let i, item, tick, gid, stats,
 			cancelFlags = [0x01, 0x08, 0x14, 0x0c, 0x19, 0x1a],
 			itemCount = me.itemcount;
 
@@ -245,7 +246,7 @@ var Pickit = {
 
 		stats = new ItemStats(item);
 
-MainLoop:
+		MainLoop:
 		for (i = 0; i < retry; i += 1) {
 			if (!getUnit(4, -1, -1, gid)) {
 				break MainLoop;
@@ -264,7 +265,7 @@ MainLoop:
 			}
 
 			if (stats.useTk) {
-				if (Config.PacketCasting == 2) {
+				if (Config.PacketCasting === 2) {
 					Skill.setSkill(43, 0);
 					Packet.unitCast(0, item);
 				} else {
@@ -367,7 +368,7 @@ MainLoop:
 	},
 
 	itemQualityToName: function (quality) {
-		var qualNames = ["", "lowquality", "normal", "superior", "magic", "set", "rare", "unique", "crafted"];
+		let qualNames = ["", "lowquality", "normal", "superior", "magic", "set", "rare", "unique", "crafted"];
 
 		return qualNames[quality];
 	},
@@ -409,7 +410,7 @@ MainLoop:
 	},
 
 	canPick: function (unit) {
-		var tome, charm, i, potion, needPots, buffers, pottype, myKey, key;
+		let tome, charm, i, potion, needPots, buffers, pottype, myKey, key;
 
 		switch (unit.classid) {
 		case 92: // Staff of Kings
@@ -576,7 +577,7 @@ MainLoop:
 	},
 
 	checkBelt: function () {
-		var check = 0,
+		let check = 0,
 			item = me.getItem(-1, 2);
 
 		if (item) {
@@ -609,7 +610,7 @@ MainLoop:
 	},
 
 	fastPick: function (retry = 3) {
-		var item, gid, status,
+		let item, gid, status,
 			itemList = [];
 
 		while (this.gidList.length > 0) {

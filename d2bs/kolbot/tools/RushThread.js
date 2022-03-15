@@ -28,7 +28,7 @@ include("common/Runewords.js");
 include("common/Storage.js");
 include("common/Town.js");
 
-var gidList = [];
+const gidList = [];
 
 function main() {
 	this.playerIn = function (area) {
@@ -36,7 +36,7 @@ function main() {
 			area = me.area;
 		}
 
-		var party = getParty();
+		let party = getParty();
 
 		if (party) {
 			do {
@@ -50,7 +50,7 @@ function main() {
 	};
 
 	this.bumperCheck = function () {
-		var party = getParty();
+		let party = getParty();
 
 		if (party) {
 			do {
@@ -77,7 +77,7 @@ function main() {
 	};
 
 	this.playersInAct = function (act) {
-		var area, party,
+		let area, party,
 			areas = [0, 1, 40, 75, 103, 109];
 
 		if (!act) {
@@ -236,7 +236,7 @@ function main() {
 		Pather.useWaypoint(74, true);
 		Precast.doPrecast(true);
 
-		var i, journal,
+		let i, journal,
 			preset = getPresetUnit(me.area, 2, 357),
 			spot = {};
 
@@ -380,7 +380,7 @@ function main() {
 		Pather.useWaypoint(83, true);
 		Precast.doPrecast(true);
 
-		var coords = [me.x, me.y];
+		let coords = [me.x, me.y];
 
 		Pather.moveTo(coords[0] + 23, coords[1] - 102);
 		Pather.makePortal();
@@ -410,7 +410,7 @@ function main() {
 	this.mephisto = function () {
 		say("starting mephisto");
 
-		var hydra;
+		let hydra;
 
 		Town.doChores();
 		Pather.useWaypoint(101, true);
@@ -474,7 +474,7 @@ function main() {
 		say("starting diablo");
 
 		this.getLayout = function (seal, value) {
-			var sealPreset = getPresetUnit(108, 2, seal);
+			let sealPreset = getPresetUnit(108, 2, seal);
 
 			if (!seal) {
 				throw new Error("Seal preset not found. Can't continue.");
@@ -494,7 +494,7 @@ function main() {
 		};
 
 		this.getBoss = function (name) {
-			var i, boss,
+			let i, boss,
 				glow = getUnit(2, 131);
 
 			for (i = 0; i < (name === getLocaleString(2853) ? 14 : 12); i += 1) {
@@ -518,7 +518,7 @@ function main() {
 		};
 
 		this.chaosPreattack = function (name, amount) {
-			var i, n, target, positions;
+			let i, n, target, positions;
 
 			switch (me.classid) {
 			case 0:
@@ -562,7 +562,7 @@ function main() {
 		this.openSeal = function (id) {
 			Pather.moveToPreset(108, 2, id, id === 394 ? 5 : 2, id === 394 ? 5 : 0);
 
-			var i, tick,
+			let i, tick,
 				seal = getUnit(2, id);
 
 			if (seal) {
@@ -691,7 +691,7 @@ function main() {
 
 		say("starting ancients");
 
-		var altar;
+		let altar;
 
 		Town.doChores();
 		Pather.useWaypoint(118, true);
@@ -745,10 +745,10 @@ function main() {
 	this.baal = function () {
 		say("starting baal");
 
-		var tick, portal;
+		let tick, portal;
 
 		this.preattack = function () {
-			var check;
+			let check;
 
 			switch (me.classid) {
 			case 1:
@@ -803,7 +803,7 @@ function main() {
 		};
 
 		this.checkThrone = function () {
-			var monster = getUnit(1);
+			let monster = getUnit(1);
 
 			if (monster) {
 				do {
@@ -835,7 +835,7 @@ function main() {
 		};
 
 		this.clearThrone = function () {
-			var i, monster,
+			let i, monster,
 				monList = [],
 				pos = [15097, 5054, 15085, 5053, 15085, 5040, 15098, 5040, 15099, 5022, 15086, 5024];
 
@@ -862,7 +862,7 @@ function main() {
 		};
 
 		this.checkHydra = function () {
-			var hydra = getUnit(1, getLocaleString(3325));
+			let hydra = getUnit(1, getLocaleString(3325));
 
 			if (hydra) {
 				do {
@@ -902,7 +902,7 @@ function main() {
 		tick = getTickCount();
 		Pather.moveTo(15093, me.classid === 3 ? 5029 : 5039);
 
-MainLoop:
+		MainLoop:
 		while (true) {
 			if (getDistance(me, 15093, me.classid === 3 ? 5029 : 5039) > 3) {
 				Pather.moveTo(15093, me.classid === 3 ? 5029 : 5039);
@@ -1013,9 +1013,9 @@ MainLoop:
 
 		say("starting radament");
 
-		var i, radaCoords, rada, radaPreset, returnSpot,
+		let i, radaCoords, rada, radaPreset, returnSpot,
 			moveIntoPos = function (unit, range) {
-				var i, coordx, coordy,
+				let i, coordx, coordy,
 					coords = [],
 					angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
 					angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 105, -105, 120, -120, 135, -135, 150, -150, 180];
@@ -1032,7 +1032,7 @@ MainLoop:
 							});
 						}
 					} catch (e) {
-
+						continue;
 					}
 				}
 
@@ -1159,9 +1159,9 @@ MainLoop:
 
 		say("starting izual");
 
-		var i, izualCoords, izual, izualPreset, returnSpot,
+		let i, izualCoords, izual, izualPreset, returnSpot,
 			moveIntoPos = function (unit, range) {
-				var i, coordx, coordy,
+				let i, coordx, coordy,
 					coords = [],
 					angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
 					angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 105, -105, 120, -120, 135, -135, 150, -150, 180];
@@ -1178,7 +1178,7 @@ MainLoop:
 							});
 						}
 					} catch (e) {
-
+						continue;
 					}
 				}
 
@@ -1286,7 +1286,7 @@ MainLoop:
 
 		say("starting anya");
 
-		var anya;
+		let anya;
 
 		if (!Town.goToTown() || !Pather.useWaypoint(113, true)) {
 			throw new Error("Anya quest failed");
@@ -1333,7 +1333,7 @@ MainLoop:
 
 	print("Loading RushThread");
 
-	var i, command,
+	let i, command,
 		current = 0,
 		sequence = [
 			"andariel", "radament", "cube", "amulet", "staff", "summoner", "duriel", "lamesen",
@@ -1437,6 +1437,4 @@ MainLoop:
 
 		delay(100);
 	}
-
-	return true;
 }

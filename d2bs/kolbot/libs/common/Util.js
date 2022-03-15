@@ -17,7 +17,7 @@ function getUnits(...args) {
 const clickItemAndWait = (...args) => {
 	let before,
 		itemEvent = false,
-		timeout = getTickCount(),timedOut;
+		timeout = getTickCount(), timedOut;
 
 	before = !me.itemoncursor;
 	clickItem.apply(undefined, args);

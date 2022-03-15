@@ -4,7 +4,7 @@
 *	@desc		handle player prebuff sequence
 */
 
-var Precast = new function () {
+const Precast = new function () {
 	this.haveCTA = -1;
 	this.BODuration = 0;
 	this.BOTick = 0;
@@ -20,7 +20,7 @@ var Precast = new function () {
 		}
 
 		if (this.checkCTA()) {
-			var slot = me.weaponswitch;
+			let slot = me.weaponswitch;
 
 			Attack.weaponSwitch(this.haveCTA);
 			Skill.cast(155, 0); // Battle Command
@@ -42,7 +42,7 @@ var Precast = new function () {
 			return this.bestSlot[skillId];
 		}
 
-		var item, classid, skillTab,
+		let item, classid, skillTab,
 			sumCurr = 0,
 			sumSwap = 0;
 
@@ -121,7 +121,7 @@ var Precast = new function () {
 	};
 
 	this.precastSkill = function (skillId) {
-		var swap = me.weaponswitch;
+		let swap = me.weaponswitch;
 
 		Attack.weaponSwitch(this.getBetterSlot(skillId));
 		Skill.cast(skillId, 0);
@@ -131,7 +131,7 @@ var Precast = new function () {
 	};
 
 	this.doPrecast = function (force) {
-		var buffSummons = false;
+		let buffSummons = false;
 
 		// Force BO 30 seconds before it expires
 		this.precastCTA(!me.getState(32) || force || (getTickCount() - this.BOTick >= this.BODuration - 30000));
@@ -203,7 +203,7 @@ var Precast = new function () {
 			break;
 		case 4: // Barbarian - TODO: BO duration
 			if (!me.getState(32) || !me.getState(51) || !me.getState(26) || force) {
-				var swap = me.weaponswitch;
+				let swap = me.weaponswitch;
 
 				Attack.weaponSwitch(this.getBetterSlot(149));
 
@@ -342,7 +342,7 @@ var Precast = new function () {
 	};
 
 	this.checkCTA = function () {
-		var item;
+		let item;
 
 		if (this.haveCTA > -1) {
 			return true;
@@ -377,7 +377,7 @@ var Precast = new function () {
 			return false;
 		}
 
-		var minion, rv,
+		let minion, rv,
 			count = 1;
 
 		switch (skillId) {
@@ -440,7 +440,7 @@ var Precast = new function () {
 	};
 
 	this.enchant = function () {
-		var unit, slot = me.weaponswitch, chanted = [];
+		let unit, slot = me.weaponswitch, chanted = [];
 
 		Attack.weaponSwitch(this.getBetterSlot(52));
 

@@ -28,7 +28,7 @@ include("common/Town.js");
 
 function main() {
 	// Variables and functions
-	var player, attackCount, prevPos, check, missile, outside,
+	let player, attackCount, prevPos, check, missile, outside,
 		charClass = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"],
 		hostiles = [];
 
@@ -53,7 +53,7 @@ function main() {
 
 	// Find all hostile players and add their names to the 'hostiles' list
 	this.findHostiles = function () {
-		var party = getParty();
+		let party = getParty();
 
 		if (party) {
 			do {
@@ -69,7 +69,7 @@ function main() {
 
 	// Pause default so actions don't conflict
 	this.pause = function () {
-		var script = getScript("default.dbj");
+		let script = getScript("default.dbj");
 
 		if (script && script.running) {
 			print("ÿc1Pausing.");
@@ -79,7 +79,7 @@ function main() {
 
 	// Resume default
 	this.resume = function () {
-		var script = getScript("default.dbj");
+		let script = getScript("default.dbj");
 
 		if (script && !script.running) {
 			print("ÿc2Resuming.");
@@ -89,7 +89,7 @@ function main() {
 
 	// Find hostile player Units
 	this.findPlayer = function () {
-		var i, player;
+		let i, player;
 
 		for (i = 0; i < hostiles.length; i += 1) {
 			player = getUnit(0, hostiles[i]);
@@ -112,7 +112,7 @@ function main() {
 			range = 999;
 		}
 
-		var missile = getUnit(3, id);
+		let missile = getUnit(3, id);
 
 		if (!missile) {
 			return false;
@@ -128,7 +128,7 @@ function main() {
 	};
 
 	this.checkSummons = function (player) {
-		var unit,
+		let unit,
 			name = player.name;
 
 		unit = getUnit(1);
@@ -167,7 +167,7 @@ function main() {
 
 	// A simple but fast player dodge function
 	this.moveAway = function (unit, range) {
-		var i, coordx, coordy,
+		let i, coordx, coordy,
 			angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
 			angles = [0, 45, -45, 90, -90, 135, -135, 180];
 

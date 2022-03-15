@@ -1,10 +1,11 @@
+/* eslint-disable no-labels */
 /**
 *	@filename	AutoStat.js
 *	@author		IMBA
 *	@desc		Automatically allocate stat points
 */
 
-var AutoStat = new function () {
+const AutoStat = new function () {
 	this.statBuildOrder = [];
 	this.save = 0;
 	this.block = 0;
@@ -29,7 +30,7 @@ var AutoStat = new function () {
 	*/
 
 	this.getBlock = function () {
-		var shield = false,
+		let shield = false,
 			item = me.getItem(-1, 1);
 
 		// make sure character has shield equipped
@@ -63,12 +64,12 @@ var AutoStat = new function () {
 
 	// this check may not be necessary with this.validItem(), but consider it double check
 	this.verifySetStats = function (unit, type, stats) { //verify that the set bonuses are there
-		var i, temp, string;
+		let i, temp, string;
 
 		if (type === 0) {
-			string = 3473 //to strength
+			string = 3473; //to strength
 		} else {
-			string = 3474 //to dexterity
+			string = 3474; //to dexterity
 		}
 
 		if (unit) {
@@ -101,19 +102,19 @@ var AutoStat = new function () {
 			return 0;
 		}
 
-		var sets = { //these are the only sets with possible stat bonuses
+		let sets = { //these are the only sets with possible stat bonuses
 			"angelic": [], "artic": [], "civerb": [], "iratha": [],
 			"isenhart": [], "vidala": [], "cowking": [], "disciple": [],
 			"griswold": [], "mavina": [], "naj": [], "orphan": []
 		};
 
-		var i, j, setStat = 0,
+		let i, j, setStat = 0,
 			items = me.getItems();
 
 		if (items) {
 			for (i = 0; i < items.length; i += 1) {
 				if (items[i].mode === 1 && items[i].quality === 5 && this.validItem(items[i])) {
-idSwitch:
+					idSwitch:
 					switch (items[i].classid) {
 					case 311: //crown
 						if (items[i].getStat(41) === 30) { //light resist
@@ -279,7 +280,7 @@ idSwitch:
 
 		for (i in sets) {
 			if (sets.hasOwnProperty(i)) {
-MainSwitch:
+				MainSwitch:
 				switch (i) {
 				case "angelic":
 					if (sets[i].length >= 2 && type === 2) {
@@ -493,7 +494,7 @@ MainSwitch:
 	};
 
 	this.getHardStats = function (type) { // return stat values excluding stat bonuses from sets and/or items
-		var i, statID,
+		let i, statID,
 			addedStat = 0,
 			items = me.getItems();
 
@@ -541,7 +542,7 @@ MainSwitch:
 	};
 
 	this.requiredDex = function () {
-		var i, set = false,
+		let i, set = false,
 			inactiveDex = 0,
 			items = me.getItems();
 
@@ -578,7 +579,7 @@ MainSwitch:
 	};
 
 	this.useStats = function (type, goal = false) {
-		var currStat = me.getStat(4),
+		let currStat = me.getStat(4),
 			tick = getTickCount(),
 			statIDToString = [getLocaleString(4060), getLocaleString(4069), getLocaleString(4062), getLocaleString(4066)];
 
@@ -606,7 +607,7 @@ MainSwitch:
 	};
 
 	this.addStatPoint = function () {
-		var i, hardStats;
+		let i, hardStats;
 
 		this.remaining = me.getStat(4);
 

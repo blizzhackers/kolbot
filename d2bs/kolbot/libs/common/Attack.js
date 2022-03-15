@@ -4,7 +4,8 @@
 *	@desc		handle player attacks
 */
 
-var Attack = {
+// eslint-disable-next-line no-redeclare
+const Attack = {
 	classes: ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"],
 	infinity: false,
 
@@ -12,9 +13,9 @@ var Attack = {
 	init: function () {
 		if (Config.Wereform) {
 			include("common/Attacks/wereform.js");
-		} else if (Config.CustomClassAttack && FileTools.exists('libs/common/Attacks/'+Config.CustomClassAttack+'.js')) {
+		} else if (Config.CustomClassAttack && FileTools.exists('libs/common/Attacks/' + Config.CustomClassAttack + '.js')) {
 			print('Loading custom attack file');
-			include('common/Attacks/'+Config.CustomClassAttack+'.js')
+			include('common/Attacks/' + Config.CustomClassAttack + '.js');
 		} else {
 			include("common/Attacks/" + this.classes[me.classid] + ".js");
 		}
@@ -36,7 +37,7 @@ var Attack = {
 			return true;
 		}
 
-		var i, tick;
+		let i, tick;
 
 		if (slot === undefined) {
 			slot = me.weaponswitch ^ 1;
@@ -64,7 +65,7 @@ var Attack = {
 	},
 
 	checkSlot: function (slot = me.weaponswitch) { // check if slot has items
-		var item = me.getItem(-1, 1);
+		let item = me.getItem(-1, 1);
 
 		if (item) {
 			do {
@@ -102,7 +103,7 @@ var Attack = {
 	},
 
 	getCustomAttack: function (unit) {
-		var i;
+		let i;
 
 		// Check if unit got invalidated
 		if (!unit || !unit.name || !copyUnit(unit).x) {
@@ -124,7 +125,7 @@ var Attack = {
 			Skill.charges = [];
 		}
 
-		var i, stats,
+		let i, stats,
 			item = me.getItem(-1, 1);
 
 		if (item) {
@@ -164,7 +165,7 @@ var Attack = {
 
 	// Check if player or his merc are using Infinity, and adjust resistance checks based on that
 	checkInfinity: function () {
-		var i, merc, item;
+		let i, merc, item;
 
 		for (i = 0; i < 3; i += 1) {
 			merc = me.getMerc();
@@ -213,7 +214,7 @@ var Attack = {
 			return false;
 		}
 
-		var i, target, gid, result,
+		let i, target, gid, result,
 			retry = 0,
 			errorInfo = "",
 			attackCount = 0;
@@ -305,7 +306,7 @@ var Attack = {
 	},
 
 	hurt: function (classId, percent) {
-		var i, target, result,
+		let i, target, result,
 			retry = 0,
 			attackCount = 0;
 
@@ -349,7 +350,7 @@ var Attack = {
 	},
 
 	getScarinessLevel: function (unit) {
-		var scariness = 0, ids = [58, 59, 60, 61, 62, 101, 102, 103, 104, 105, 278, 279, 280, 281, 282, 298, 299, 300, 645, 646, 647, 662, 663, 664, 667, 668, 669, 670, 675, 676];
+		let scariness = 0, ids = [58, 59, 60, 61, 62, 101, 102, 103, 104, 105, 278, 279, 280, 281, 282, 298, 299, 300, 645, 646, 647, 662, 663, 664, 667, 668, 669, 670, 675, 676];
 
 		// Only handling monsters for now
 		if (unit.type !== 1) {
@@ -414,7 +415,7 @@ var Attack = {
 			throw new Error("Attack.clear: range must be a number.");
 		}
 
-		var i, boss, orgx, orgy, target, result, monsterList, start, coord, skillCheck, secAttack,
+		let i, boss, orgx, orgy, target, result, monsterList, start, coord, skillCheck, secAttack,
 			retry = 0,
 			gidAttack = [],
 			attackCount = 0;
@@ -578,7 +579,7 @@ var Attack = {
 
 	// Filter monsters based on classId, spectype and range
 	getMob: function (classid, spectype, range, center) {
-		var monsterList = [],
+		let monsterList = [],
 			monster = getUnit(1);
 
 		if (range === undefined) {
@@ -626,7 +627,7 @@ var Attack = {
 
 	// Clear an already formed array of monstas
 	clearList: function (mainArg, sortFunc, refresh) {
-		var i, target, result, monsterList, coord,
+		let i, target, result, monsterList, coord,
 			retry = 0,
 			gidAttack = [],
 			attackCount = 0;
@@ -752,7 +753,7 @@ var Attack = {
 			throw new Error("securePosition needs 4 arguments");
 		}*/
 
-		var monster, monList, tick;
+		let monster, monList, tick;
 
 		if (skipBlocked === true) {
 			skipBlocked = 0x4;
@@ -783,7 +784,7 @@ var Attack = {
 
 				// only return if it's been safe long enough
 				if (getTickCount() - tick >= timer) {
-					return true;
+					return;
 				}
 			} else {
 				this.clearList(monList);
@@ -808,13 +809,11 @@ var Attack = {
 
 			delay(100);
 		}
-
-		return true;
 	},
 
 	// Draw lines around a room on minimap
 	markRoom: function (room, color) {
-		var arr = [];
+		let arr = [];
 
 		arr.push(new Line(room.x * 5, room.y * 5, room.x * 5, room.y * 5 + room.ysize, color, true));
 		arr.push(new Line(room.x * 5, room.y * 5, room.x * 5 + room.xsize, room.y * 5, color, true));
@@ -831,7 +830,7 @@ var Attack = {
 			this.ignoredGids = [];
 		}
 
-		var monster = getUnit(1);
+		let monster = getUnit(1);
 
 		if (monster) {
 			do {
@@ -844,7 +843,7 @@ var Attack = {
 	},
 
 	storeStatistics: function (area) {
-		var obj;
+		let obj;
 
 		if (!FileTools.exists("statistics.json")) {
 			Misc.fileAction("statistics.json", 1, "{}");
@@ -881,7 +880,7 @@ var Attack = {
 			}
 		}
 
-		var room, result, rooms, myRoom, currentArea, previousArea;
+		let room, result, rooms, myRoom, currentArea, previousArea;
 
 		function RoomSort(a, b) {
 			return getDistance(myRoom[0], myRoom[1], a[0], a[1]) - getDistance(myRoom[0], myRoom[1], b[0], b[1]);
@@ -912,7 +911,7 @@ var Attack = {
 			}
 
 			if (Loader.scriptName() === "MFHelper" && Config.MFHelper.BreakClearLevel && Config.Leader !== "") {
-				var leader = Misc.findPlayer(Config.Leader);
+				let leader = Misc.findPlayer(Config.Leader);
 
 				if (leader && leader.area !== me.area && !leader.inTown) {
 					me.overhead("break the clearing in " + getArea().name);
@@ -942,9 +941,8 @@ var Attack = {
 				if (!this.clear(40, spectype)) {
 					break;
 				}
-			}
-			// Make sure bot does not get stuck in different area.
-			else if (currentArea !== getArea().id) {
+			} else if (currentArea !== getArea().id) {
+				// Make sure bot does not get stuck in different area.
 				Pather.moveTo(previousArea[0], previousArea[1], 3, spectype);
 			}
 		}
@@ -972,7 +970,7 @@ var Attack = {
 			}
 		}
 
-		var ids = [58, 59, 60, 61, 62, 101, 102, 103, 104, 105, 278, 279, 280, 281, 282, 298, 299, 300, 645, 646, 647, 662, 663, 664, 667, 668, 669, 670, 675, 676];
+		let ids = [58, 59, 60, 61, 62, 101, 102, 103, 104, 105, 278, 279, 280, 281, 282, 298, 299, 300, 645, 646, 647, 662, 663, 664, 667, 668, 669, 670, 675, 676];
 
 		if (me.area !== 61 && ids.indexOf(unitA.classid) > -1 && ids.indexOf(unitB.classid) > -1) {
 			// Kill "scary" uniques first (like Bishibosh)
@@ -1018,7 +1016,7 @@ var Attack = {
 
 	// Check if a set of coords is valid/accessable
 	validSpot: function (x, y) {
-		var result;
+		let result;
 
 		if (!me.area || !x || !y) { // Just in case
 			return false;
@@ -1049,7 +1047,7 @@ var Attack = {
 			y = me.y;
 		}
 
-		var i, unit,
+		let unit,
 			list = [],
 			ids = ["chest", "chest3", "weaponrack", "armorstand"];
 
@@ -1075,7 +1073,7 @@ var Attack = {
 	},
 
 	buildMonsterList: function () {
-		var monster,
+		let monster,
 			monList = [];
 
 		monster = getUnit(1);
@@ -1096,14 +1094,13 @@ var Attack = {
 			throw new Error("deploy: Not enough arguments supplied");
 		}
 
-		var i, grid, index, currCount,
-			tick = getTickCount(),
+		let i, grid, index, currCount,
 			monList = [],
-			count = 999,
-			idealPos = {
-				x: Math.round(Math.cos(Math.atan2(me.y - unit.y, me.x - unit.x)) * Config.DodgeRange + unit.x),
-				y: Math.round(Math.sin(Math.atan2(me.y - unit.y, me.x - unit.x)) * Config.DodgeRange + unit.y)
-			};
+			count = 999;
+			// idealPos = {
+			// 	x: Math.round(Math.cos(Math.atan2(me.y - unit.y, me.x - unit.x)) * Config.DodgeRange + unit.x),
+			// 	y: Math.round(Math.sin(Math.atan2(me.y - unit.y, me.x - unit.x)) * Config.DodgeRange + unit.y)
+			// };
 
 		monList = this.buildMonsterList();
 
@@ -1115,8 +1112,8 @@ var Attack = {
 
 		CollMap.getNearbyRooms(unit.x, unit.y);
 
+		// let tick = getTickCount();
 		grid = this.buildGrid(unit.x - distance, unit.x + distance, unit.y - distance, unit.y + distance, spread);
-
 		//print("Grid build time: " + (getTickCount() - tick));
 
 		if (!grid.length) {
@@ -1157,7 +1154,7 @@ var Attack = {
 	},
 
 	getMonsterCount: function (x, y, range, list) {
-		var i,
+		let i,
 			fire,
 			count = 0,
 			ignored = [243];
@@ -1186,7 +1183,7 @@ var Attack = {
 			throw new Error("buildGrid: Bad parameters");
 		}
 
-		var i, j, coll,
+		let i, j, coll,
 			grid = [];
 
 		for (i = xmin; i <= xmax; i += spread) {
@@ -1284,10 +1281,10 @@ var Attack = {
 			return true;
 		}
 
-		var i, j, rval,
+		let i, j, rval,
 			tempArray = [];
 
-EnchantLoop: // Skip enchanted monsters
+		// EnchantLoop: // Skip enchanted monsters
 		for (i = 0; i < Config.SkipEnchant.length; i += 1) {
 			tempArray = Config.SkipEnchant[i].toLowerCase().split(" and ");
 
@@ -1357,7 +1354,7 @@ EnchantLoop: // Skip enchanted monsters
 			}
 		}
 
-ImmuneLoop: // Skip immune monsters
+		// ImmuneLoop: // Skip immune monsters
 		for (i = 0; i < Config.SkipImmune.length; i += 1) {
 			tempArray = Config.SkipImmune[i].toLowerCase().split(" and ");
 
@@ -1372,7 +1369,7 @@ ImmuneLoop: // Skip immune monsters
 			}
 		}
 
-AuraLoop: // Skip monsters with auras
+		// AuraLoop: // Skip monsters with auras
 		for (i = 0; i < Config.SkipAura.length; i += 1) {
 			rval = true;
 
@@ -1444,7 +1441,7 @@ AuraLoop: // Skip monsters with auras
 			return "holybolt"; // no need to use this.elements array because it returns before going over the array
 		}
 
-		var eType = getBaseStat("skills", skillId, "etype");
+		let eType = getBaseStat("skills", skillId, "etype");
 
 		if (typeof (eType) === "number") {
 			return this.elements[eType];
@@ -1496,7 +1493,7 @@ AuraLoop: // Skip monsters with auras
 			return true;
 		}
 
-		var damageType = typeof val === "number" ? this.getSkillElement(val) : val;
+		let damageType = typeof val === "number" ? this.getSkillElement(val) : val;
 
 		if (maxres === undefined) {
 			maxres = 100;
@@ -1541,7 +1538,7 @@ AuraLoop: // Skip monsters with auras
 
 	// Detect use of bows/crossbows
 	usingBow: function () {
-		var item;
+		let item;
 
 		item = me.getItem(-1, 1);
 
@@ -1586,14 +1583,14 @@ AuraLoop: // Skip monsters with auras
 			return !CollMap.checkColl(me, unit, coll);
 		}
 
-		var n, i, cx, cy, t,
+		let n, i, cx, cy,
 			coords = [],
 			fullDistance = distance,
 			name = unit.hasOwnProperty("name") ? unit.name : "",
 			angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
 			angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 135, -135, 180];
 
-		t = getTickCount();
+		//let t = getTickCount();
 
 		for (n = 0; n < 3; n += 1) {
 			if (n > 0) {

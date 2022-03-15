@@ -4,7 +4,7 @@
 *	@desc		Automatically allocate skill points and its pre-requisites if necessary
 */
 
-var AutoSkill = new function () {
+const AutoSkill = new function () {
 	this.skillBuildOrder = [];
 	this.save = 0;
 
@@ -27,8 +27,8 @@ var AutoSkill = new function () {
 	*/
 
 	this.needPreReq = function (skillid) {	//a function to return false if have all prereqs or a skill if not
-		for (var t = 183; t >=181; t--) {		//a loop to go through each reqskill
-			var preReq = (getBaseStat('skills', skillid, t)); // Check ReqSkills
+		for (let t = 183; t >= 181; t--) {		//a loop to go through each reqskill
+			let preReq = (getBaseStat('skills', skillid, t)); // Check ReqSkills
 
 			if (preReq > 0 && preReq < 356 && !me.getSkill(preReq, 0)) {
 				return preReq;
@@ -38,7 +38,7 @@ var AutoSkill = new function () {
 		return false;
 	};
 
-	this.skillCheck = function (skillid, count){
+	this.skillCheck = function (skillid, count) {
 		if (me.getSkill(skillid, 0) <= me.charlvl - getBaseStat("skills", skillid, 176) && me.getSkill(skillid, 0) < count) {
 			return true;
 		}
@@ -47,7 +47,7 @@ var AutoSkill = new function () {
 	};
 
 	this.skillToAdd = function (inputArray) {
-		for (var i = 0; i < inputArray.length; i += 1) {
+		for (let i = 0; i < inputArray.length; i += 1) {
 			// limit maximum allocation count to 20
 			if (inputArray[i][1] > 20) {
 				print("AutoSkill: Skill build index " + i + " has allocation count of " + inputArray[i][1] + " and it will be limited to 20");
@@ -55,11 +55,12 @@ var AutoSkill = new function () {
 			}
 
 			// set satify condition as default if not specified
-			if (inputArray[i][2] === undefined)
+			if (inputArray[i][2] === undefined) {
 				inputArray[i][2] = true;
+			}
 
 			// check to see if skill count in previous array is satisfied
-			if (i > 0 && inputArray[i-1][2] && (!me.getSkill(inputArray[i-1][0], 0) ? 0 : me.getSkill(inputArray[i-1][0], 0)) < inputArray[i-1][1]) {
+			if (i > 0 && inputArray[i - 1][2] && (!me.getSkill(inputArray[i - 1][0], 0) ? 0 : me.getSkill(inputArray[i - 1][0], 0)) < inputArray[i - 1][1]) {
 				return false;
 			}
 
@@ -67,7 +68,7 @@ var AutoSkill = new function () {
 				return inputArray[i][0];
 			}
 
-			var reqIn,
+			let reqIn,
 				reqOut = this.needPreReq(inputArray[i][0]);
 
 			if (!reqOut && this.skillCheck(inputArray[i][0], inputArray[i][1])) {
@@ -88,12 +89,12 @@ var AutoSkill = new function () {
 	};
 
 	this.allocate = function () {
-		var tick = getTickCount();
+		let tick = getTickCount();
 
 		this.remaining = me.getStat(5);
 
 		if (!getUIFlag(0x17)) {
-			var addTo = this.skillToAdd(this.skillBuildOrder);
+			let addTo = this.skillToAdd(this.skillBuildOrder);
 
 			if (addTo) {
 				print("AutoSkill: Using skill point in Skill ID: " + addTo);

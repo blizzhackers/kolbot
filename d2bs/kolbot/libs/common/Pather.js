@@ -5,10 +5,11 @@
 */
 
 // Perform certain actions after moving to each node
-var NodeAction = {
+// eslint-disable-next-line no-redeclare
+const NodeAction = {
 	// Run all the functions within NodeAction (except for itself)
 	go: function (arg) {
-		var i;
+		let i;
 
 		for (i in this) {
 			if (this.hasOwnProperty(i) && typeof this[i] === "function" && i !== "go") {
@@ -19,7 +20,7 @@ var NodeAction = {
 
 	// Kill monsters while pathing
 	killMonsters: function (arg) {
-		var monList;
+		let monList;
 
 		if (Config.Countess.KillGhosts && [21, 22, 23, 24, 25].indexOf(me.area) > -1) {
 			monList = Attack.getMob(38, 0, 30);
@@ -64,7 +65,8 @@ var NodeAction = {
 	}
 };
 
-var PathDebug = {
+// eslint-disable-next-line no-redeclare
+const PathDebug = {
 	hooks: [],
 	enableHooks: false,
 
@@ -75,7 +77,7 @@ var PathDebug = {
 
 		this.removeHooks();
 
-		var i;
+		let i;
 
 		if (path.length < 2) {
 			return;
@@ -87,7 +89,7 @@ var PathDebug = {
 	},
 
 	removeHooks: function () {
-		var i;
+		let i;
 
 		for (i = 0; i < this.hooks.length; i += 1) {
 			this.hooks[i].remove();
@@ -97,7 +99,7 @@ var PathDebug = {
 	},
 
 	coordsInPath: function (path, x, y) {
-		var i;
+		let i;
 
 		for (i = 0; i < path.length; i += 1) {
 			if (getDistance(x, y, path[i].x, path[i].y) < 5) {
@@ -109,12 +111,14 @@ var PathDebug = {
 	}
 };
 
-var Pather = {
+// eslint-disable-next-line no-redeclare
+const Pather = {
 	teleport: true,
 	walkDistance: 5,
 	teleDistance: 40,
 	cancelFlags: [0x01, 0x02, 0x04, 0x08, 0x14, 0x16, 0x0c, 0x0f, 0x17, 0x19, 0x1A],
 	wpAreas: [1, 3, 4, 5, 6, 27, 29, 32, 35, 40, 48, 42, 57, 43, 44, 52, 74, 46, 75, 76, 77, 78, 79, 80, 81, 83, 101, 103, 106, 107, 109, 111, 112, 113, 115, 123, 117, 118, 129],
+	nextAreas: {1: 2, 40: 41, 75: 76, 103: 104, 109: 110},
 	recursion: true,
 	lastPortalTick: 0,
 
@@ -135,7 +139,7 @@ var Pather = {
 			return false;
 		}
 
-		var i, path, adjustedNode, cleared, useTeleport,
+		let i, path, adjustedNode, cleared, useTeleport,
 			node = {x: x, y: y},
 			fail = 0;
 
@@ -305,13 +309,12 @@ var Pather = {
 		y - the y coord to teleport to
 	*/
 	teleportTo: function (x, y, maxRange) {
-		var i, tick;
+		let i, tick;
 
 		if (maxRange === undefined) {
 			maxRange = 5;
 		}
 
-MainLoop:
 		for (i = 0; i < 3; i += 1) {
 			if (Config.PacketCasting) {
 				Skill.setSkill(54, 0);
@@ -349,7 +352,7 @@ MainLoop:
 			minDist = me.inTown ? 2 : 4;
 		}
 
-		var i, angle, angles, nTimer, whereToClick, tick,
+		let i, angle, angles, nTimer, whereToClick, tick,
 			nFail = 0,
 			attemptCount = 0;
 
@@ -394,7 +397,7 @@ MainLoop:
 			attemptCount += 1;
 			nTimer = getTickCount();
 
-ModeLoop:
+			ModeLoop:
 			while (me.mode !== 2 && me.mode !== 3 && me.mode !== 6) {
 				if (me.dead) {
 					return false;
@@ -455,38 +458,63 @@ ModeLoop:
 		y - the y coord of the node close to the door
 	*/
 	openDoors: function (x, y) {
-		if (me.inTown) {
-			return false;
-		}
+		if (me.inTown) return false;
 
 		// Regular doors
-		var i, tick,
-			door = getUnit(2, "door", 0);
+		let door = getUnit(sdk.unittype.Object, "door", 0);
 
 		if (door) {
 			do {
-				if ((getDistance(door, x, y) < 4 && getDistance(me, door) < 9) || getDistance(me, door) < 4) {
-					for (i = 0; i < 3; i += 1) {
+				if ((getDistance(door, x, y) < 4 && door.distance < 9) || door.distance < 4) {
+					for (let i = 0; i < 3; i++) {
 						Misc.click(0, 0, door);
-						//door.interact();
-
-						tick = getTickCount();
+						let tick = getTickCount();
 
 						while (getTickCount() - tick < 1000) {
 							if (door.mode === 2) {
 								me.overhead("Opened a door!");
-
 								return true;
 							}
 
-							delay(10);
+							delay(10 + me.ping);
+						}
+
+						if (i === 2) {
+							Packet.flash(me.gid);
 						}
 					}
 				}
 			} while (door.getNext());
 		}
 
-		// DO: Monsta doors (Barricaded)
+		// Monsta doors (Barricaded)
+		let monstadoor = getUnit(sdk.unittype.Monster, "barricaded door");
+
+		if (monstadoor) {
+			do {
+				if ((getDistance(monstadoor, x, y) < 4 && monstadoor.distance < 9) || monstadoor.distance < 4) {
+					for (let p = 0; p < 20 && monstadoor.hp; p++) {
+						Skill.cast(Config.AttackSkill[1], Skill.getHand(Config.AttackSkill[1]), monstadoor);
+					}
+
+					me.overhead("Broke a barricaded door!");
+				}
+			} while (monstadoor.getNext());
+		}
+
+		let monstawall = getUnit(sdk.unittype.Monster, "barricade");
+		
+		if (monstawall) {
+			do {
+				if ((getDistance(monstawall, x, y) < 4 && monstawall.distance < 9) || monstawall.distance < 4) {
+					for (let p = 0; p < 20 && monstawall.hp; p++) {
+						Skill.cast(Config.AttackSkill[1], Skill.getHand(Config.AttackSkill[1]), monstawall);
+					}
+
+					me.overhead("Broke a barricaded wall!");
+				}
+			} while (monstawall.getNext());
+		}
 
 		return false;
 	},
@@ -500,7 +528,7 @@ ModeLoop:
 		pop - remove last node
 	*/
 	moveToUnit: function (unit, offX, offY, clearPath, pop) {
-		var useTeleport = this.useTeleport();
+		let useTeleport = this.useTeleport();
 
 		if (offX === undefined) {
 			offX = 0;
@@ -565,7 +593,7 @@ ModeLoop:
 			pop = false;
 		}
 
-		var presetUnit = getPresetUnit(area, unitType, unitId);
+		let presetUnit = getPresetUnit(area, unitType, unitId);
 
 		if (!presetUnit) {
 			throw new Error("moveToPreset: Couldn't find preset unit - id " + unitId);
@@ -581,7 +609,7 @@ ModeLoop:
 		clearPath - kill monsters while moving
 	*/
 	moveToExit: function (targetArea, use, clearPath) {
-		var i, j, area, exits, targetRoom, dest, currExit,
+		let i, j, area, exits, targetRoom, dest, currExit,
 			areas = [];
 
 		if (targetArea instanceof Array) {
@@ -665,7 +693,7 @@ ModeLoop:
 		area - the id of area to search for the room nearest to the player character
 	*/
 	getNearestRoom: function (area) {
-		var i, x, y, dist, room,
+		let i, x, y, dist, room,
 			minDist = 10000;
 
 		for (i = 0; i < 5; i += 1) {
@@ -713,6 +741,7 @@ ModeLoop:
 			if (me.area === 40 && getDistance(me, 5218, 5180) < 20) {
 				break;
 			}
+		// eslint-disable-next-line no-fallthrough
 		case 65:
 			return this.useUnit(2, 74, targetArea);
 		case 93:
@@ -747,7 +776,7 @@ ModeLoop:
 		id - id of the unit to open
 	*/
 	openUnit: function (type, id) {
-		var i, tick, unit, coord;
+		let i, tick, unit, coord;
 
 		for (i = 0; i < 5; i += 1) {
 			unit = getUnit(type, id);
@@ -763,7 +792,7 @@ ModeLoop:
 			throw new Error("openUnit: Unit not found. ID: " + unit);
 		}
 
-		if (unit.mode != 0) {
+		if (unit.mode !== 0) {
 			return true;
 		}
 
@@ -778,7 +807,7 @@ ModeLoop:
 			tick = getTickCount();
 
 			while (getTickCount() - tick < 1500) {
-				if (unit.mode != 0) {
+				if (unit.mode !== 0) {
 					delay(100);
 
 					return true;
@@ -801,7 +830,7 @@ ModeLoop:
 		targetArea - area id of where the unit leads to
 	*/
 	useUnit: function (type, id, targetArea) {
-		var i, tick, unit, coord,
+		let i, tick, unit, coord,
 			preArea = me.area;
 
 		for (i = 0; i < 5; i += 1) {
@@ -861,11 +890,10 @@ ModeLoop:
 
 		return targetArea ? me.area === targetArea : me.area !== preArea;
 	},
-	
-	
+
 	/*
-	Pather.getAct(targetArea);
-	targetArea - id of the area to enter
+		Pather.getAct(targetArea);
+		targetArea - id of the area to enter
 	*/
 	getAct: function getAct(targetArea) {
 		const areas = [0, 40, 75, 103, 109];
@@ -881,12 +909,12 @@ ModeLoop:
 	
 	
 	/*
-	Pather.broadcastIntent(targetArea);
-	targetArea - id of the area to enter
+		Pather.broadcastIntent(targetArea);
+		targetArea - id of the area to enter
 	*/
 	broadcastIntent: function broadcastIntent(targetArea) {
 		if (Config.MFLeader) {
-			var targetAct = this.getAct(targetArea);
+			let targetAct = this.getAct(targetArea);
 
 			if (me.act !== targetAct) {
 				say("goto A" + targetAct);
@@ -923,7 +951,7 @@ ModeLoop:
 
 		this.broadcastIntent(targetArea);
 
-		var i, tick, wp, coord, retry, npc;
+		let i, tick, wp, coord, retry, npc;
 
 		for (i = 0; i < 12; i += 1) {
 			if (me.area === targetArea || me.dead) {
@@ -1007,7 +1035,7 @@ ModeLoop:
 
 					if (!getUIFlag(0x14)) {
 						print("waypoint retry " + (i + 1));
-						retry = Math.min(i + 1, 5)
+						retry = Math.min(i + 1, 5);
 						coord = CollMap.getRandCoordinate(me.x, -5 * retry, 5 * retry, me.y, -5 * retry, 5 * retry);
 						this.moveTo(coord.x, coord.y);
 						delay(200 + me.ping);
@@ -1065,7 +1093,7 @@ ModeLoop:
 			return true;
 		}
 
-		var i, portal, oldPortal, oldGid, tick, tpTome;
+		let i, portal, oldPortal, oldGid, tick, tpTome;
 
 		for (i = 0; i < 5; i += 1) {
 			if (me.dead) {
@@ -1098,7 +1126,7 @@ ModeLoop:
 
 			tick = getTickCount();
 
-MainLoop:
+			MainLoop:
 			while (getTickCount() - tick < Math.max(500 + i * 100, me.ping * 2 + 100)) {
 				portal = getUnit(2, "portal");
 
@@ -1140,7 +1168,7 @@ MainLoop:
 
 		me.cancel();
 
-		var i, tick, portal,
+		let i, tick, portal,
 			preArea = me.area;
 
 		for (i = 0; i < 10; i += 1) {
@@ -1218,7 +1246,7 @@ MainLoop:
 		owner - name of the portal's owner
 	*/
 	getPortal: function (targetArea, owner) {
-		var portal = getUnit(2, "portal");
+		let portal = getUnit(2, "portal");
 
 		if (portal) {
 			do {
@@ -1267,7 +1295,7 @@ MainLoop:
 			coll = 0x1;
 		}
 
-		var i, j,
+		let i, j,
 			distance = 1,
 			result = false;
 
@@ -1276,7 +1304,7 @@ MainLoop:
 			result = [x, y];
 		}
 
-MainLoop:
+		MainLoop:
 		while (!result && distance < range) {
 			for (i = -distance; i <= distance; i += 1) {
 				for (j = -distance; j <= distance; j += 1) {
@@ -1307,7 +1335,7 @@ MainLoop:
 		cacheOnly - use only cached room data
 	*/
 	checkSpot: function (x, y, coll, cacheOnly, size) {
-		var dx, dy, value;
+		let dx, dy, value;
 
 		if (coll === undefined) {
 			coll = 0x1;
@@ -1349,7 +1377,7 @@ MainLoop:
 		case 4:
 			return me.getQuest(23, 0) === 1;
 		case 5:
-			return me.getQuest(28, 0) === 1;
+			return !me.classic && me.getQuest(28, 0) === 1;
 		default:
 			return false;
 		}
@@ -1361,7 +1389,7 @@ MainLoop:
 		clearPath - clear path
 	*/
 	getWP: function (area, clearPath) {
-		var i, j, wp, preset,
+		let i, j, wp, preset,
 			wpIDs = [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539];
 
 		if (area !== me.area) {
@@ -1402,15 +1430,20 @@ MainLoop:
 		area - the id of area to move to
 	*/
 	journeyTo: function (area) {
-		var i, special, unit, tick, target;
+		if (area === undefined) return false;
 
-		target = this.plotCourse(area, me.area);
+		let i, special, unit, target;
+
+		if (area !== 73) {
+			target = this.plotCourse(area, me.area);
+		} else {
+			target = {course: [46, 73], useWP: false};
+			this.wpAreas.indexOf(me.area) === -1 && (target.useWP = true);
+		}
 
 		print(target.course);
-
-		if (target.useWP) {
-			Town.goToTown();
-		}
+		area === 103 && me.area === 102 && (target.useWP = false);
+		target.useWP && Town.goToTown();
 
 		// handle variable flayer jungle entrances
 		if (target.course.indexOf(78) > -1) {
@@ -1432,48 +1465,22 @@ MainLoop:
 		}
 
 		while (target.course.length) {
+			let currArea = me.area;
+			let currAct = me.act;
+
 			if (!me.inTown) {
 				Precast.doPrecast(false);
+				
+				if (this.wpAreas.includes(currArea) && !getWaypoint(this.wpAreas.indexOf(currArea))) {
+					this.getWP(currArea);
+				}
 			}
 
-			if (this.wpAreas.indexOf(me.area) > -1 && !getWaypoint(this.wpAreas.indexOf(me.area))) {
-				this.getWP(me.area);
-			}
-
-			if (me.inTown && this.wpAreas.indexOf(target.course[0]) > -1 && getWaypoint(this.wpAreas.indexOf(target.course[0]))) {
+			if (me.inTown && this.nextAreas[currArea] !== target.course[0] && this.wpAreas.includes(target.course[0]) && getWaypoint(this.wpAreas.indexOf(target.course[0]))) {
 				this.useWaypoint(target.course[0], !this.plotCourse_openedWpMenu);
 				Precast.doPrecast(false);
-			} else if (me.area === 109 && target.course[0] === 110) { // Harrogath -> Bloody Foothills
-				this.moveTo(5026, 5095);
-
-				unit = getUnit(2, 449); // Gate
-
-				if (unit) {
-					for (i = 0; i < 3; i += 1) {
-						if (unit.mode) {
-							break;
-						}
-
-						Misc.click(0, 0, unit);
-						//unit.interact();
-
-						tick = getTickCount();
-
-						while (getTickCount() - tick < 3000) {
-							if (unit.mode) {
-								delay(1000);
-
-								break;
-							}
-
-							delay(10);
-						}
-					}
-				}
-
-				this.moveToExit(target.course[0], true);
-			} else if (me.area === 4 && target.course[0] === 38) { // Stony Field -> Tristram
-				this.moveToPreset(me.area, 1, 737, 0, 0, false, true);
+			} else if (currArea === 4 && target.course[0] === 38) { // Stony Field -> Tristram
+				this.moveToPreset(currArea, 1, 737, 0, 0, false, true);
 
 				for (i = 0; i < 5; i += 1) {
 					if (this.usePortal(38)) {
@@ -1482,40 +1489,76 @@ MainLoop:
 
 					delay(1000);
 				}
-			} else if (me.area === 40 && target.course[0] === 47) { // Lut Gholein -> Sewers Level 1 (use Trapdoor)
-				this.moveToPreset(me.area, 5, 19);
+			} else if (currArea === 40 && target.course[0] === 47) { // Lut Gholein -> Sewers Level 1 (use Trapdoor)
+				this.moveToPreset(currArea, 5, 19);
 				this.useUnit(2, 74, 47);
-			} else if (me.area === 74 && target.course[0] === 46) { // Arcane Sanctuary -> Canyon of the Magi
-				this.moveToPreset(me.area, 2, 357);
-
-				for (i = 0; i < 5; i += 1) {
-					unit = getUnit(2, 357);
-
-					Misc.click(0, 0, unit);
-					delay(1000);
-					me.cancel();
-
-					if (this.usePortal(46)) {
-						break;
-					}
-				}
-			} else if (me.area === 54 && target.course[0] === 74) { // Palace -> Arcane
+			} else if (currArea === 54 && target.course[0] === 74) { // Palace -> Arcane
 				this.moveTo(10073, 8670);
 				this.usePortal(null);
-			} else if (me.area === 109 && target.course[0] === 121) { // Harrogath -> Nihlathak's Temple
+			} else if (currArea === 74 && target.course[0] === 54) { // Arcane Sanctuary -> Palace Cellar 3
+				this.moveToPreset(currArea, 2, 298);
+				unit = Misc.poll(function () { return getUnit(2, 298); });
+				unit && Pather.useUnit(2, 298, 54);
+			} else if (currArea === 74 && target.course[0] === 46) { // Arcane Sanctuary -> Canyon of the Magic
+				this.moveToPreset(currArea, 2, 357);
+				unit = Misc.poll(function () { return Pather.getPortal(46); });
+
+				if (!unit || !this.usePortal(null, null, unit)) {
+					for (i = 0; i < 5; i++) {
+						unit = getUnit(2, 357);
+
+						Misc.click(0, 0, unit);
+						delay(1000);
+						me.cancel();
+
+						if (this.usePortal(46)) {
+							break;
+						}
+					}
+				}
+			} else if (currArea === 46 && target.course[0] === 73) { // Canyon -> Duriels Lair
+				this.moveToExit(getRoom().correcttomb, true);
+				this.moveToPreset(me.area, 2, 152);
+				unit = Misc.poll(function () { return getUnit(2, 100); });
+				unit && Pather.useUnit(2, 100, 73);
+			} else if (currArea === 102 && target.course[0] === 103) { // Durance Lvl 3 -> Pandemonium Fortress
+				Pather.moveTo(17581, 8070);
+				delay(250 + me.ping * 2);
+				unit = Misc.poll(function () { return getUnit(2, 342); });
+				unit && Pather.usePortal(null, null, unit);
+			} else if (currArea === 109 && target.course[0] === 110) { // Harrogath -> Bloody Foothills
+				this.moveTo(5026, 5095);
+				this.openUnit(2, 449);
+				this.moveToExit(target.course[0], true);
+			} else if (currArea === 109 && target.course[0] === 121) { // Harrogath -> Nihlathak's Temple
 				Town.move(NPC.Anya);
 				this.usePortal(121);
-			} else if (me.area === 111 && target.course[0] === 125) { // Abaddon
+			} else if (currArea === 111 && target.course[0] === 125) { // Abaddon
 				this.moveToPreset(111, 2, 60);
 				this.usePortal(125);
-			} else if (me.area === 112 && target.course[0] === 126) { // Pits of Archeon
+			} else if (currArea === 112 && target.course[0] === 126) { // Pits of Archeon
 				this.moveToPreset(112, 2, 60);
 				this.usePortal(126);
-			} else if (me.area === 117 && target.course[0] === 127) { // Infernal Pit
+			} else if (currArea === 117 && target.course[0] === 127) { // Infernal Pit
 				this.moveToPreset(117, 2, 60);
 				this.usePortal(127);
+			} else if (target.course[0] === 39) { // Moo Moo farm
+				currArea !== 1 && Town.goToTown(1);
+				Town.move("stash") && (unit = this.getPortal(target.course[0]));
+				unit && this.usePortal(null, null, unit);
+			} else if ([133, 134, 135, 136].includes(target.course[0])) { // Uber Portals
+				currArea !== 109 && Town.goToTown(5);
+				Town.move("stash") && (unit = this.getPortal(target.course[0]));
+				unit && this.usePortal(null, null, unit);
 			} else {
 				this.moveToExit(target.course[0], true);
+			}
+
+			if (currAct !== me.act) {
+				// give time for act to load, increases stabilty of changing acts
+				while (!me.gameReady) {
+					delay(100 + me.ping);
+				}
 			}
 
 			target.course.shift();
@@ -1532,18 +1575,21 @@ MainLoop:
 		src - starting area id
 	*/
 	plotCourse: function (dest, src) {
-		var node, prevArea,
+		let node, prevArea,
 			useWP = false,
 			arr = [],
-			previousAreas = [0, 0, 1, 2, 3, 10, 5, 6, 2, 3, 4, 6, 7, 9, 10, 11, 12, 3, 17, 17, 6, 20, 21, 22, 23, 24, 7, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 4, 1, 1, 40, 41, 42, 43, 44, 74, 40, 47, 48, 40, 50, 51, 52, 53, 41, 42, 56, 45, 55, 57, 58, 43, 62, 63, 44, 46, 46, 46, 46, 46, 46, 46, 1, 54, 1, 75, 76, 76, 78, 79, 80, 81, 82, 76, 76, 78, 86, 78, 88, 87, 89, 80, 92, 80, 80, 81, 81, 82, 82, 83, 100, 101, 1, 103, 104, 105, 106, 107, 1, 109, 110, 111, 112, 113, 113, 115, 115, 117, 118, 118, 109, 121, 122, 123, 111, 112, 117, 120, 128, 129, 130, 131, 109, 109, 109, 109],
+			previousAreas = [
+				0, 0, 1, 2, 3, 10, 5, 6, 2, 3, 4, 6, 7, 9, 10, 11, 12, 3, 17, 17, 6, 20, 21, 22, 23, 24, 7, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 4, 1,
+				1, 40, 41, 42, 43, 44, 74, 40, 47, 48, 40, 50, 51, 52, 53, 41, 42, 56, 45, 55, 57, 58, 43, 62, 63, 44, 46, 46, 46, 46, 46, 46, 46, 1, 54, 1,
+				75, 76, 76, 78, 79, 80, 81, 82, 76, 76, 78, 86, 78, 88, 87, 89, 80, 92, 80, 80, 81, 81, 82, 82, 83, 100, 101, 1, 103, 104, 105, 106, 107, 1,
+				109, 110, 111, 112, 113, 113, 115, 115, 117, 118, 118, 109, 121, 122, 123, 111, 112, 117, 120, 128, 129, 130, 131, 109, 109, 109, 109
+			],
 			visitedNodes = [],
 			toVisitNodes = [{from: dest, to: null}];
 
-		if (!src) {
-			src = me.area;
-		}
+		!src && (src = me.area);
 
-		if (!this.plotCourse_openedWpMenu && me.inTown && Pather.useWaypoint(null)) {
+		if (!this.plotCourse_openedWpMenu && me.inTown && this.nextAreas[me.area] !== dest && Pather.useWaypoint(null)) {
 			this.plotCourse_openedWpMenu = true;
 		}
 
@@ -1560,7 +1606,7 @@ MainLoop:
 							((src !== previousAreas[dest] && dest !== previousAreas[src]) && // check wp if areas aren't linked
 								previousAreas[src] !== previousAreas[dest])) && // check wp if areas aren't linked with a common area
 								Pather.wpAreas.indexOf(node.from) > 0 && getWaypoint(Pather.wpAreas.indexOf(node.from))
-							) {
+					) {
 						if (node.from !== src) {
 							useWP = true;
 						}
@@ -1625,7 +1671,7 @@ MainLoop:
 		area - id of the area to get the name for
 	*/
 	getAreaName: function (area) {
-		var areas = [
+		let areas = [
 			"None",
 			"Rogue Encampment",
 			"Blood Moor",

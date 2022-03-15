@@ -4,11 +4,12 @@
 *	@desc		config loading and default config values storage
 */
 
-var Scripts = {};
+const Scripts = {};
 
-var Config = {
+// eslint-disable-next-line no-redeclare
+let Config = {
 	init: function (notify) {
-		var i, n,
+		let i, n,
 			configFilename = "",
 			classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"];
 
@@ -99,7 +100,7 @@ var Config = {
 		if (Config.Silence && !Config.LocalChat.Enabled) {
 			// Override the say function with print, so it just gets printed to console
 			global._say = global.say;
-			global.say = (what) => print('Tryed to say: '+what);
+			global.say = (what) => print('Tryed to say: ' + what);
 		}
 
 		try {
@@ -256,6 +257,7 @@ var Config = {
 	SoJWaitTime: 0,
 	KillDclone: false,
 	DCloneQuit: false,
+	DCloneWaitTime: 30,
 
 	// Experimental
 	FastParty: false,

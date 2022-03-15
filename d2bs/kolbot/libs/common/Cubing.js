@@ -4,13 +4,13 @@
 *	@desc		transmute Horadric Cube recipes
 */
 
-var Roll = {
+const Roll = {
 	All: 0,
 	Eth: 1,
 	NonEth: 2
 };
 
-var Recipe = {
+const Recipe = {
 	Gem: 0,
 	HitPower: {
 		Helm: 1,
@@ -95,7 +95,8 @@ var Recipe = {
 	}
 };
 
-var Cubing = {
+// eslint-disable-next-line no-redeclare
+const Cubing = {
 	recipes: [],
 	gemList: [],
 
@@ -106,7 +107,7 @@ var Cubing = {
 
 		//print("We have " + Config.Recipes.length + " cubing recipe(s).");
 
-		var i;
+		let i;
 
 		for (i = 0; i < Config.Recipes.length; i += 1) {
 			if (Config.Recipes[i].length > 1 && isNaN(Config.Recipes[i][1])) {
@@ -127,7 +128,7 @@ var Cubing = {
 	},
 
 	buildGemList: function () {
-		var i, j,
+		let i, j,
 			gemList = [561, 566, 571, 576, 581, 586, 601];
 
 		for (i = 0; i < this.recipes.length; i += 1) {
@@ -151,7 +152,7 @@ var Cubing = {
 			return false;
 		}
 
-		var i, cube, chest;
+		let i, cube, chest;
 
 		Pather.useWaypoint(57, true);
 		Precast.doPrecast(true);
@@ -188,7 +189,7 @@ var Cubing = {
 	},
 
 	buildRecipes: function () {
-		var i;
+		let i;
 
 		this.recipes = [];
 
@@ -578,7 +579,7 @@ var Cubing = {
 	subRecipes: [],
 
 	buildLists: function () {
-		var i, j, k, items;
+		let i, j, k, items;
 
 		CraftingSystem.checkSubrecipes();
 
@@ -590,7 +591,7 @@ var Cubing = {
 			// Set default Enabled property - true if recipe is always enabled, false otherwise
 			this.recipes[i].Enabled = this.recipes[i].hasOwnProperty("AlwaysEnabled");
 
-IngredientLoop:
+			IngredientLoop:
 			for (j = 0; j < this.recipes[i].Ingredients.length; j += 1) {
 				for (k = 0; k < items.length; k += 1) {
 					if (((this.recipes[i].Ingredients[j] === "pgem" && this.gemList.indexOf(items[k].classid) > -1) ||
@@ -671,7 +672,7 @@ IngredientLoop:
 
 	// Remove unneeded flawless gem recipes
 	clearSubRecipes: function () {
-		var i;
+		let i;
 
 		this.subRecipes = [];
 
@@ -690,17 +691,17 @@ IngredientLoop:
 	},
 
 	checkRecipe: function (recipe) {
-		var i, j, item,
+		let i, j, item,
 			usedGids = [],
 			matchList = [];
 
 		for (i = 0; i < recipe.Ingredients.length; i += 1) {
 			for (j = 0; j < this.validIngredients.length; j += 1) {
 				if (usedGids.indexOf(this.validIngredients[j].gid) === -1 && (
-						this.validIngredients[j].classid === recipe.Ingredients[i] ||
+					this.validIngredients[j].classid === recipe.Ingredients[i] ||
 						(recipe.Ingredients[i] === "pgem" && this.gemList.indexOf(this.validIngredients[j].classid) > -1) ||
 						(recipe.Ingredients[i] === "cgem" && [557, 562, 567, 572, 577, 582, 597].indexOf(this.validIngredients[j].classid) > -1)
-					)) {
+				)) {
 					item = me.getItem(this.validIngredients[j].classid, -1, this.validIngredients[j].gid);
 
 					if (item && this.validItem(item, recipe)) { // 26.11.2012. check if the item actually belongs to the given recipe
@@ -726,7 +727,7 @@ IngredientLoop:
 
 	// debug function - get what each recipe needs
 	getRecipeNeeds: function (index) {
-		var i,
+		let i,
 			rval = " [";
 
 		for (i = 0; i < this.neededIngredients.length; i += 1) {
@@ -749,7 +750,7 @@ IngredientLoop:
 			return true;
 		}
 
-		var i;
+		let i;
 
 		for (i = 0; i < this.neededIngredients.length; i += 1) {
 			if (unit.classid === this.neededIngredients[i].classid && this.validItem(unit, this.neededIngredients[i].recipe)) {
@@ -767,7 +768,7 @@ IngredientLoop:
 			return false;
 		}
 
-		var i;
+		let i;
 
 		for (i = 0; i < this.validIngredients.length; i += 1) {
 			if (unit.mode === 0 && unit.gid === this.validIngredients[i].gid) {
@@ -917,7 +918,7 @@ IngredientLoop:
 			return false;
 		}
 
-		var i, j, items, string, result, tempArray;
+		let i, j, items, string, result, tempArray;
 
 		this.update();
 		// Randomize the recipe array to prevent recipe blocking (multiple caster items etc.)
@@ -1001,7 +1002,7 @@ IngredientLoop:
 	},
 
 	cursorCheck: function () {
-		var item;
+		let item;
 
 		if (me.itemoncursor) {
 			item = getUnit(100);
@@ -1029,7 +1030,7 @@ IngredientLoop:
 	},
 
 	openCube: function () {
-		var i, tick,
+		let i, tick,
 			cube = me.getItem(549);
 
 		if (!cube) {
@@ -1063,7 +1064,7 @@ IngredientLoop:
 	},
 
 	closeCube: function () {
-		var i, tick;
+		let i, tick;
 
 		if (!getUIFlag(0x1a)) {
 			return true;
@@ -1087,7 +1088,7 @@ IngredientLoop:
 	},
 
 	emptyCube: function () {
-		var cube = me.getItem(549),
+		let cube = me.getItem(549),
 			items = me.findItems(-1, -1, 6);
 
 		if (!cube) {

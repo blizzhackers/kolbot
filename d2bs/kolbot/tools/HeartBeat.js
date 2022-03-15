@@ -13,7 +13,7 @@ function main() {
 	print("Heartbeat loaded");
 
 	function togglePause() {
-		var script = getScript();
+		let script = getScript();
 
 		if (script) {
 			do {

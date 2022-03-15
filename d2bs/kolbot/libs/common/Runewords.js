@@ -6,7 +6,7 @@
 
 // TODO: Config.Runewords[i][0] can be false, but array methods can be used on it
 
-var Runeword = {
+const Runeword = {
 	// 1.09
 	AncientsPledge: [617, 618, 616], // Ral + Ort + Tal
 	Black: [619, 625, 613], // Thul + Io + Nef
@@ -96,7 +96,8 @@ var Runeword = {
 	Test: [624, 624, 624]
 };
 
-var Runewords = {
+// eslint-disable-next-line no-redeclare
+const Runewords = {
 	needList: [],
 	pickitEntries: [],
 	validGids: [],
@@ -106,7 +107,7 @@ var Runewords = {
 			return;
 		}
 
-		var i, info, parsedLine;
+		let i, info, parsedLine;
 
 		this.pickitEntries = [];
 
@@ -153,7 +154,7 @@ var Runewords = {
 
 	// build a list of needed runes. won't count runes until the base item is found for a given runeword
 	buildLists: function () {
-		var i, j, k, items, hel, baseCheck;
+		let i, j, k, items, hel, baseCheck;
 
 		this.validGids = [];
 		this.needList = [];
@@ -161,11 +162,11 @@ var Runewords = {
 
 		for (i = 0; i < Config.Runewords.length; i += 1) {
 			if (!baseCheck) {
-				baseCheck = this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2]||0)) || this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2]||0), true);
+				baseCheck = this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0)) || this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0), true);
 			}
 
-			if (this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2]||0))) {
-RuneLoop:
+			if (this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0))) {
+				RuneLoop:
 				for (j = 0; j < Config.Runewords[i][0].length; j += 1) {
 					for (k = 0; k < items.length; k += 1) {
 						if (items[k].classid === Config.Runewords[i][0][j] && this.validItem(items[k])) {
@@ -202,7 +203,7 @@ RuneLoop:
 	},
 
 	update: function (classid, gid) {
-		var i;
+		let i;
 
 		for (i = 0; i < this.needList.length; i += 1) {
 			if (this.needList[i] === classid) {
@@ -219,18 +220,18 @@ RuneLoop:
 
 	// returns an array of items that make a runeword if found, false if we don't have enough items for any
 	checkRunewords: function () {
-		var i, j, k, items, base, itemList;
+		let i, j, k, items, base, itemList;
 
 		items = me.findItems(-1, 0); // get items in inventory/stash
 
 		for (i = 0; i < Config.Runewords.length; i += 1) {
 			itemList = []; // reset item list
-			base = this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2]||0)); // check base
+			base = this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0)); // check base
 
 			if (base) {
 				itemList.push(base); // push the base
 
-RuneLoop:
+				RuneLoop:
 				for (j = 0; j < Config.Runewords[i][0].length; j += 1) {
 					for (k = 0; k < items.length; k += 1) {
 						if (items[k].classid === Config.Runewords[i][0][j]) { // rune matched
@@ -278,7 +279,7 @@ RuneLoop:
 		rigged to accept item or classid as 2nd arg
 	*/
 	getBase: function (runeword, base, ethFlag, reroll) {
-		var item;
+		let item;
 
 		if (typeof base === "object") {
 			item = base;
@@ -306,7 +307,7 @@ RuneLoop:
 	},
 
 	socketItem: function (base, rune) { // args named this way to prevent confusion
-		var i, tick;
+		let i, tick;
 
 		if (!rune.toCursor()) {
 			return false;
@@ -332,7 +333,7 @@ RuneLoop:
 	},
 
 	getScroll: function () {
-		var i, scroll, npc;
+		let i, scroll, npc;
 
 		scroll = me.getItem(529, 0); // check if we already have the scroll
 
@@ -368,7 +369,7 @@ RuneLoop:
 			return false;
 		}
 
-		var i, items;
+		let i, items;
 
 		while (true) {
 			this.buildLists();
@@ -404,7 +405,7 @@ RuneLoop:
 	},
 
 	rerollRunewords: function () {
-		var i, base, scroll, hel;
+		let i, base, scroll, hel;
 
 		for (i = 0; i < Config.Runewords.length; i += 1) {
 			hel = me.getItem(624, 0);
@@ -413,7 +414,7 @@ RuneLoop:
 				return false;
 			}
 
-			base = this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2]||0), true); // get a bad runeword
+			base = this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0), true); // get a bad runeword
 
 			if (base) {
 				scroll = this.getScroll();

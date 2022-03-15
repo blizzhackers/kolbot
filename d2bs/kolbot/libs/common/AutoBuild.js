@@ -15,15 +15,15 @@
 */
 js_strict(true);
 
-if (!isIncluded("common/Cubing.js")) { include("common/Cubing.js"); };
-if (!isIncluded("common/Prototypes.js")) { include("common/Prototypes.js"); };
-if (!isIncluded("common/Runewords.js")) { include("common/Runewords.js"); };
+if (!isIncluded("common/Cubing.js")) { include("common/Cubing.js"); }
+if (!isIncluded("common/Prototypes.js")) { include("common/Prototypes.js"); }
+if (!isIncluded("common/Runewords.js")) { include("common/Runewords.js"); }
 
-var AutoBuild = new function AutoBuild () {
+const AutoBuild = new function AutoBuild () {
 
 	if (Config.AutoBuild.DebugMode) { Config.AutoBuild.Verbose = true; }
 
-	var debug = !!Config.AutoBuild.DebugMode,
+	let debug = !!Config.AutoBuild.DebugMode,
 		verbose = !!Config.AutoBuild.Verbose,
 		configUpdateLevel = 0;
 
@@ -32,50 +32,50 @@ var AutoBuild = new function AutoBuild () {
 	// By reapplying all of the changes to the Config object, we preserve
 	// the state of the Config file without altering the saved char config.
 	function applyConfigUpdates () {
-		if (debug) { this.print("Updating Config from level "+configUpdateLevel+" to "+me.charlvl)}
+		if (debug) { this.print("Updating Config from level " + configUpdateLevel + " to " + me.charlvl);}
 		while (configUpdateLevel < me.charlvl) {
 			configUpdateLevel += 1;
 			AutoBuildTemplate[configUpdateLevel].Update.apply(Config); // TODO: Make sure this works
 		}
-	};
+	}
 
 
 	function getBuildType () {
-		var build = Config.AutoBuild.Template;
+		let build = Config.AutoBuild.Template;
 		if (!build) {
-			this.print("Config.AutoBuild.Template is either 'false', or invalid ("+build+")");
+			this.print("Config.AutoBuild.Template is either 'false', or invalid (" + build + ")");
 			throw new Error("Invalid build template, read libs/config/Builds/README.txt for information");
 		}
 		return build;
-	};
+	}
 
 
 	function getCurrentScript () {
 		return getScript(true).name.toLowerCase();
-	};
+	}
 
 
 	function getLogFilename () {
-		var d = new Date();
-		var dateString = d.getMonth()+"_"+d.getDate()+"_"+d.getFullYear();
-		return "logs/AutoBuild."+me.realm+"."+me.charname+"."+dateString+".log";
-	};
+		let d = new Date();
+		let dateString = d.getMonth() + "_" + d.getDate() + "_" + d.getFullYear();
+		return "logs/AutoBuild." + me.realm + "." + me.charname + "." + dateString + ".log";
+	}
 
 
 	function getTemplateFilename () {
-		var classname = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"][me.classid];
-		var build = getBuildType();
-		var template = "config/Builds/"+classname+"."+build+".js";
+		let classname = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"][me.classid];
+		let build = getBuildType();
+		let template = "config/Builds/" + classname + "." + build + ".js";
 		return template.toLowerCase();
-	};
+	}
 
 
 	function initialize () {
-		var currentScript = getCurrentScript();
-		var template = getTemplateFilename();
-		this.print("Including build template "+template+" into "+currentScript);
+		let currentScript = getCurrentScript();
+		let template = getTemplateFilename();
+		this.print("Including build template " + template + " into " + currentScript);
 		if (!include(template)) {
-			throw new Error("Failed to include template: "+template);
+			throw new Error("Failed to include template: " + template);
 		}
 
 		// Only load() helper thread from default.dbj if it isn't loaded
@@ -92,28 +92,28 @@ var AutoBuild = new function AutoBuild () {
 		// Resynchronize our Config object with all past changes
 		// made to it by AutoBuild system
 		applyConfigUpdates();
-	};
+	}
 
 
 	function levelUpHandler (obj) {
-		if (typeof obj === "object" && obj.hasOwnProperty("event") && obj["event"] === "level up") {
+		if (typeof obj === "object" && obj.hasOwnProperty("event") && obj.event === "level up") {
 			applyConfigUpdates();
 		}
-	};
+	}
 
 
-	function log (message) { FileTools.appendText(getLogFilename(), message+"\n"); };
+	function log (message) { FileTools.appendText(getLogFilename(), message + "\n"); }
 
 
 	// Only print to console from autobuildthread.js,
 	// but log from all scripts
 	function myPrint () {
-		var args = Array.prototype.slice.call(arguments);
+		let args = Array.prototype.slice.call(arguments);
 		args.unshift("AutoBuild:");
-		var result = args.join(" ");
+		let result = args.join(" ");
 		if (verbose) { print.call(this, result); }
 		if (debug) { log.call(this, result); }
-	};
+	}
 
 
 	this.print = myPrint;

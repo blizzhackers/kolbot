@@ -17,14 +17,14 @@ function main() {
 
 	Config.init();
 
-	var i, myPartyId, player, shitList, currScript, scriptList,
+	let i, myPartyId, player, shitList, currScript, scriptList,
 		classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"],
 		playerLevels = {},
 		partyTick = getTickCount();
 
 	addEventListener("gameevent",
 		function (mode, param1, param2, name1, name2) {
-			var player;
+			let player;
 
 			switch (mode) {
 			case 0x02: // "%Name1(%Name2) joined our world. Diablo's minions grow stronger."
@@ -32,7 +32,7 @@ function main() {
 					try {
 						player = getParty(name1);
 					} catch (e1) {
-
+						break;
 					}
 
 					if (player && player.name !== me.name) {
@@ -46,7 +46,7 @@ function main() {
 					try {
 						player = getParty(name1);
 					} catch (e2) {
-
+						break;
 					}
 
 					if (player && player.name !== me.name) {
@@ -59,7 +59,7 @@ function main() {
 		});
 	addEventListener("scriptmsg",
 		function (msg) {
-			var obj;
+			let obj;
 
 			try {
 				obj = JSON.parse(msg);
@@ -68,7 +68,7 @@ function main() {
 					currScript = obj.currScript;
 				}
 			} catch (e3) {
-
+				return;
 			}
 		});
 
@@ -129,6 +129,7 @@ function main() {
 						if (Config.PublicMode === 3) {
 							break;
 						}
+					// eslint-disable-next-line no-fallthrough
 					case 2: // Accept invites
 						if (myPartyId === 65535) {
 							if (Config.Leader && player.name !== Config.Leader) {

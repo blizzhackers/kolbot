@@ -4,7 +4,8 @@
 *	@desc		misc library containing Skill, Misc and Sort classes
 */
 
-var Skill = {
+// eslint-disable-next-line no-redeclare
+const Skill = {
 	usePvpRange: false,
 
 	getRange: function (skillId) {
@@ -103,11 +104,11 @@ var Skill = {
 		case 42: // Static Field
 			return Math.floor((me.getSkill(42, 1) + 4) * 2 / 3);
 		case 132: // Leap
-			var leap = [4, 7, 8, 10, 11, 12, 12, 13, 14, 14, 14, 14, 15, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 17];
+			let leap = [4, 7, 8, 10, 11, 12, 12, 13, 14, 14, 14, 14, 15, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 17];
 
 			return leap[Math.min(me.getSkill(132, 1) - 1, 24)];
 		case 230: // Arctic Blast
-			var arctic = [5, 6, 6, 6, 6, 7, 7, 8, 8, 8, 8, 9, 9, 10, 10, 10, 10, 11, 11, 12];
+			let arctic = [5, 6, 6, 6, 6, 7, 7, 8, 8, 8, 8, 9, 9, 10, 10, 10, 10, 11, 11, 12];
 
 			return arctic[Math.min(me.getSkill(230, 1) - 1, 19)];
 		case 49: // Lightning
@@ -245,17 +246,25 @@ var Skill = {
 
 	// Cast a skill on self, Unit or coords
 	cast: function (skillId, hand, x, y, item) {
-		if (me.inTown && !this.townSkill(skillId)) {
+		let clickType, shift;
+
+		switch (true) {
+		// cant cast this in town
+		case me.inTown && !this.townSkill(skillId):
+		// dont have enough mana for this
+		case !item && this.getManaCost(skillId) > me.mp:
+		// Dont have this skill
+		case !item && !me.getSkill(skillId, 1):
+		// can't cast in wereform
+		case !this.wereFormCheck(skillId):
 			return false;
+		case skillId === undefined:
+			throw new Error("Unit.cast: Must supply a skill ID");
 		}
 
-		if (!item && !me.getSkill(skillId, 1)) {
-			return false;
-		}
-
-		if (!this.wereFormCheck(skillId)) {
-			return false;
-		}
+		hand === undefined && (hand = this.getHand(skillId));
+		x === undefined && (x = me.x);
+		y === undefined && (y = me.y);
 
 		// Check mana cost, charged skills don't use mana
 		if (!item && this.getManaCost(skillId) > me.mp) {
@@ -267,27 +276,7 @@ var Skill = {
 			return false;
 		}
 
-		if (skillId === undefined) {
-			throw new Error("Skill.cast: Must supply a skill ID");
-		}
-
-		var i, n, clickType, shift;
-
-		if (hand === undefined) {
-			hand = 0;
-		}
-
-		if (x === undefined) {
-			x = me.x;
-		}
-
-		if (y === undefined) {
-			y = me.y;
-		}
-
-		if (!this.setSkill(skillId, hand, item)) {
-			return false;
-		}
+		if (!this.setSkill(skillId, hand, item)) return false;
 
 		if (Config.PacketCasting > 1) {
 			switch (typeof x) {
@@ -326,23 +315,13 @@ var Skill = {
 				break;
 			}
 
-MainLoop:
-			for (n = 0; n < 3; n += 1) {
-				if (typeof x === "object") {
-					clickMap(clickType, shift, x);
-				} else {
-					clickMap(clickType, shift, x, y);
-				}
-
+			MainLoop:
+			for (let n = 0; n < 3; n += 1) {
+				typeof x === "object" ? clickMap(clickType, shift, x) : clickMap(clickType, shift, x, y);
 				delay(20);
+				typeof x === "object" ? clickMap(clickType + 2, shift, x) : clickMap(clickType + 2, shift, x, y);
 
-				if (typeof x === "object") {
-					clickMap(clickType + 2, shift, x);
-				} else {
-					clickMap(clickType + 2, shift, x, y);
-				}
-
-				for (i = 0; i < 8; i += 1) {
+				for (let i = 0; i < 8; i += 1) {
 					if (me.attacking) {
 						break MainLoop;
 					}
@@ -356,13 +335,10 @@ MainLoop:
 			}
 		}
 
-		if (this.isTimed(skillId)) { // account for lag, state 121 doesn't kick in immediately
+		// account for lag, state 121 doesn't kick in immediately
+		if (this.isTimed(skillId)) {
 			for (i = 0; i < 10; i += 1) {
-				if ([4, 9].indexOf(me.mode) > -1) {
-					break;
-				}
-
-				if (me.getState(121)) {
+				if ([4, 9].includes(me.mode) || me.skillDelay) {
 					break;
 				}
 
@@ -443,7 +419,7 @@ MainLoop:
 			return this.manaCostList[skillId];
 		}
 
-		var skillLvl = me.getSkill(skillId, 1),
+		let skillLvl = me.getSkill(skillId, 1),
 			effectiveShift = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024],
 			lvlmana = getBaseStat(3, skillId, "lvlmana") === 65535 ? -1 : getBaseStat(3, skillId, "lvlmana"), // Correction for skills that need less mana with levels (kolton)
 			ret = Math.max((getBaseStat(3, skillId, "mana") + lvlmana * (skillLvl - 1)) * (effectiveShift[getBaseStat(3, skillId, "manashift")] / 256), getBaseStat(3, skillId, "minmana"));
@@ -453,10 +429,20 @@ MainLoop:
 		}
 
 		return ret;
+	},
+
+	useTK: function (unit = undefined) {
+		if (!unit || !me.getSkill(sdk.skills.Telekinesis, 1) || typeof unit !== 'object' || unit.type !== sdk.unittype.Object || (unit.name === 'portal' && !me.inTown) || 
+			[sdk.units.RedPortalToChamber, sdk.units.RedPortal, sdk.units.RedPortalToAct5].includes(unit.classid)) {
+			return false;
+		}
+
+		return me.inTown || (me.mpPercent > 50);
 	}
 };
 
-var Item = {
+// eslint-disable-next-line no-redeclare
+const Item = {
 	hasTier: function (item) {
 		return Config.AutoEquip && NTIP.GetTier(item) > 0;
 	},
@@ -488,7 +474,7 @@ var Item = {
 			return true;
 		}
 
-		var i, cursorItem;
+		let i, cursorItem;
 
 		if (item.location === 7) {
 			if (!Town.openStash()) {
@@ -523,7 +509,7 @@ var Item = {
 	},
 
 	getEquippedItem: function (bodyLoc) {
-		var item = me.getItem();
+		let item = me.getItem();
 
 		if (item) {
 			do {
@@ -544,7 +530,7 @@ var Item = {
 	},
 
 	getBodyLoc: function (item) {
-		var bodyLoc;
+		let bodyLoc;
 
 		switch (item.itemType) {
 		case 2: // Shield
@@ -630,7 +616,7 @@ var Item = {
 			return true;
 		}
 
-		var i,
+		let i,
 			tier = NTIP.GetTier(item),
 			bodyLoc = this.getBodyLoc(item);
 
@@ -657,7 +643,7 @@ var Item = {
 			return true;
 		}
 
-		var i, j, tier, bodyLoc, tome, gid,
+		let i, j, tier, bodyLoc, tome, gid,
 			items = me.findItems(-1, 0);
 
 		if (!items) {
@@ -728,7 +714,8 @@ var Item = {
 	}
 };
 
-var Misc = {
+// eslint-disable-next-line no-redeclare
+const Misc = {
 	// Click something
 	click: function (button, shift, x, y) {
 		if (arguments.length < 2) {
@@ -783,7 +770,7 @@ var Misc = {
 			delay(100);
 		}
 
-		var player, myPartyId;
+		let player, myPartyId;
 
 		try {
 			player = getParty();
@@ -817,7 +804,7 @@ var Misc = {
 
 	// Find a player
 	findPlayer: function (name) {
-		var player = getParty();
+		let player = getParty();
 
 		if (player) {
 			do {
@@ -832,7 +819,7 @@ var Misc = {
 
 	// Get player unit
 	getPlayerUnit: function (name) {
-		var player = getUnit(0, name);
+		let player = getUnit(0, name);
 
 		if (player) {
 			do {
@@ -847,7 +834,7 @@ var Misc = {
 
 	// Get the player act
 	getPlayerAct: function (player) {
-		var unit = this.findPlayer(player);
+		let unit = this.findPlayer(player);
 
 		if (!unit) {
 			return false;
@@ -874,7 +861,7 @@ var Misc = {
 
 	// Get number of players within getUnit distance
 	getNearbyPlayerCount: function () {
-		var count = 0,
+		let count = 0,
 			player = getUnit(0);
 
 		if (player) {
@@ -890,7 +877,7 @@ var Misc = {
 
 	// Get total number of players in game
 	getPlayerCount: function () {
-		var count = 0,
+		let count = 0,
 			party = getParty();
 
 		if (party) {
@@ -902,52 +889,47 @@ var Misc = {
 		return count;
 	},
 
-	// Open a chest Unit
+	// Open a chest Unit (takes chestID or unit)
 	openChest: function (unit) {
-		// Skip invalid and Countess chests
-		if (!unit || unit.x === 12526 || unit.x === 12565) {
-			return false;
-		}
-
-		// already open
-		if (unit.mode) {
-			return true;
-		}
+		typeof unit === "number" && (unit = getUnit(2, unit));
+		
+		// Skip invalid/open and Countess chests
+		if (!unit || unit.x === 12526 || unit.x === 12565 || unit.mode) return false;
 
 		// locked chest, no keys
-		if (me.classid !== 6 && unit.islocked && !me.findItem(543, 0, 3)) {
-			return false;
-		}
+		if (!me.assassin && unit.islocked && !me.findItem(543, 0, 3)) return false;
 
-		var i, tick;
-
-		for (i = 0; i < 3; i += 1) {
-			if (Pather.moveTo(unit.x + 1, unit.y + 2, 3) && getDistance(me, unit.x + 1, unit.y + 2) < 5) {
-				//Misc.click(0, 0, unit);
-				sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
+		for (let i = 0; i < 7; i++) {
+			if (Skill.useTK(unit) && i < 3) {
+				if (getDistance(me, unit) > 13) {
+					Attack.getIntoPosition(unit, 13, 0x4);
+				}
+				
+				Skill.cast(sdk.skills.Telekinesis, 0, unit);
+			} else {
+				if (Pather.moveTo(unit.x + 1, unit.y + 2, 3) && getDistance(me, unit.x + 1, unit.y + 2) < 5) {
+					sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
+				}
 			}
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 1000) {
-				if (unit.mode) {
-					return true;
-				}
-
+				if (unit.mode) return true;
 				delay(10);
 			}
+
+			Packet.flash(me.gid);
 		}
 
-		if (!me.idle) {
-			Misc.click(0, 0, me.x, me.y); // Click to stop walking in case we got stuck
-		}
+		!me.idle && Misc.click(0, 0, me.x, me.y); // Click to stop walking in case we got stuck
 
 		return false;
-	},
+	}
 
 	// Open all chests that have preset units in an area
 	openChestsInArea: function (area, chestIds) {
-		var i, coords, presetUnits;
+		let i, coords, presetUnits;
 
 		if (!area) {
 			area = me.area;
@@ -1000,7 +982,7 @@ var Misc = {
 	},
 
 	openChests: function (range) {
-		var unit,
+		let unit,
 			unitList = [],
 			containers = ["chest", "chest3", "armorstand", "weaponrack"];
 
@@ -1053,7 +1035,7 @@ var Misc = {
 			range = Pather.useTeleport() ? 25 : 15;
 		}
 
-		var i, j, shrine,
+		let i, j, shrine,
 			index = -1,
 			shrineList = [];
 
@@ -1143,7 +1125,7 @@ var Misc = {
 			return false;
 		}
 
-		var i, tick;
+		let i, tick;
 
 		for (i = 0; i < 3; i += 1) {
 			if (getDistance(me, unit) < 4 || Pather.moveToUnit(unit, 3, 0)) {
@@ -1167,7 +1149,7 @@ var Misc = {
 
 	// Check all shrines in area and get the first one of specified type
 	getShrinesInArea: function (area, type, use) {
-		var i, coords, shrine,
+		let i, coords, shrine,
 			shrineLocs = [],
 			shrineIds = [2, 81, 83],
 			unit = getPresetUnits(area);
@@ -1206,7 +1188,7 @@ var Misc = {
 	},
 
 	getItemDesc: function (unit) {
-		var i, desc, index,
+		let i, desc, index,
 			stringColor = "";
 
 		desc = unit.description;
@@ -1250,7 +1232,7 @@ var Misc = {
 	},
 
 	getItemSockets: function (unit) {
-		var i, code,
+		let i, code,
 			sockets = unit.getStat(194),
 			subItems = unit.getItems(),
 			tempArray = [];
@@ -1323,9 +1305,9 @@ var Misc = {
 			return false;
 		}
 
-		var desc,
+		let desc,
 			date = new Date(),
-			dateString = "[" + new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0,-5).replace(/-/g, '/').replace('T', ' ') + "]";
+			dateString = "[" + new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, -5).replace(/-/g, '/').replace('T', ' ') + "]";
 
 		switch (action) {
 		case "Sold":
@@ -1365,7 +1347,7 @@ var Misc = {
 			return false;
 		}
 
-		var i;
+		let i;
 
 		if (!Config.LogKeys && ["pk1", "pk2", "pk3"].indexOf(unit.code) > -1) {
 			return false;
@@ -1401,7 +1383,7 @@ var Misc = {
 			}
 		}
 
-		var lastArea, code, desc, sock, itemObj,
+		let lastArea, code, desc, sock, itemObj,
 			color = -1,
 			name = unit.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<:;.*]|\/|\\/g, "").trim();
 
@@ -1596,12 +1578,12 @@ var Misc = {
 	skipItem: function (id) {
 		switch (id) {
 		//case 549: // horadric cube
-		case   0: // hand axe
-		case  10: // wand
-		case  14: // club
-		case  25: // shortsword
-		case  47: // javelin
-		case  63: // shortstaff
+		case 0: // hand axe
+		case 10: // wand
+		case 14: // club
+		case 25: // shortsword
+		case 47: // javelin
+		case 63: // shortstaff
 		case 175: // katar
 		case 328: // buckler
 		case 513: // stamina potion
@@ -1632,7 +1614,7 @@ var Misc = {
 
 	// Change into werewolf or werebear
 	shapeShift: function (mode) {
-		var i, tick, skill, state;
+		let i, tick, skill, state;
 
 		switch (mode.toString().toLowerCase()) {
 		case "0":
@@ -1678,7 +1660,7 @@ var Misc = {
 
 	// Change back to human shape
 	unShift: function () {
-		var i, tick;
+		let i, tick;
 
 		if (me.getState(139) || me.getState(140)) {
 			for (i = 0; i < 3; i += 1) {
@@ -1705,7 +1687,7 @@ var Misc = {
 
 	// Go to town when low on hp/mp or when out of potions. can be upgraded to check for curses etc.
 	townCheck: function () {
-		var i, potion, check,
+		let i, potion, check,
 			needhp = true,
 			needmp = true;
 
@@ -1788,7 +1770,7 @@ var Misc = {
 			include("common/prototypes.js");
 		}
 
-		var item,
+		let item,
 			unit = getUnit(-1, name);
 
 		if (!unit) {
@@ -1844,10 +1826,10 @@ MainLoop:
 	},*/
 
 	fileAction: function (path, mode, msg) {
-		var i,
+		let i,
 			contents = "";
 
-MainLoop:
+		MainLoop:
 		for (i = 0; i < 30; i += 1) {
 			try {
 				switch (mode) {
@@ -1865,7 +1847,7 @@ MainLoop:
 					break MainLoop;
 				}
 			} catch (e) {
-
+				continue;
 			}
 
 			delay(100);
@@ -1879,11 +1861,11 @@ MainLoop:
 
 	// Report script errors to logs/ScriptErrorLog.txt
 	errorReport: function (error, script) {
-		var i, date, dateString, msg, oogmsg, filemsg, source, stack,
+		let i, date, dateString, msg, oogmsg, filemsg, source, stack,
 			stackLog = "";
 
 		date = new Date();
-		dateString = "[" + new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0,-5).replace(/-/g, '/').replace('T', ' ') + "]";
+		dateString = "[" + new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, -5).replace(/-/g, '/').replace('T', ' ') + "]";
 
 		if (typeof error === "string") {
 			msg = error;
@@ -1949,7 +1931,7 @@ MainLoop:
 	useMenu: function (id) {
 		//print("useMenu " + getLocaleString(id));
 
-		var i, npc, lines;
+		let i, npc, lines;
 
 		switch (id) {
 		case 0x1507: // Resurrect (non-English dialog)
@@ -1985,7 +1967,7 @@ MainLoop:
 	},
 
 	clone: function (obj) {
-		var i, copy, attr;
+		let i, copy, attr;
 
 		// Handle the 3 simple types, and null or undefined
 		if (null === obj || "object" !== typeof obj) {
@@ -2029,7 +2011,7 @@ MainLoop:
 	},
 
 	copy: function (from) {
-		var i,
+		let i,
 			obj = {};
 
 		for (i in from) {
@@ -2045,8 +2027,9 @@ MainLoop:
 		let ret, start = getTickCount();
 
 		while (getTickCount() - start <= timeout) {
-			if ((ret = check()))
+			if ((ret = check())) {
 				return ret;
+			}
 
 			delay(sleep);
 		}
@@ -2076,7 +2059,7 @@ MainLoop:
 	}
 };
 
-var Sort = {
+const Sort = {
 	// Sort units by comparing distance between the player
 	units: function (a, b) {
 		return Math.round(getDistance(me.x, me.y, a.x, a.y)) - Math.round(getDistance(me.x, me.y, b.x, b.y));
@@ -2097,7 +2080,8 @@ var Sort = {
 	}
 };
 
-var Experience = {
+// eslint-disable-next-line no-redeclare
+const Experience = {
 	totalExp: [0, 0, 500, 1500, 3750, 7875, 14175, 22680, 32886, 44396, 57715, 72144, 90180, 112725, 140906, 176132, 220165, 275207, 344008, 430010, 537513, 671891, 839864, 1049830, 1312287, 1640359, 2050449, 2563061, 3203826, 3902260, 4663553, 5493363, 6397855, 7383752, 8458379, 9629723, 10906488, 12298162, 13815086, 15468534, 17270791, 19235252, 21376515, 23710491, 26254525, 29027522, 32050088, 35344686, 38935798, 42850109, 47116709, 51767302, 56836449, 62361819, 68384473, 74949165, 82104680, 89904191, 98405658, 107672256, 117772849, 128782495, 140783010, 153863570, 168121381, 183662396, 200602101, 219066380, 239192444, 261129853, 285041630, 311105466, 339515048, 370481492, 404234916, 441026148, 481128591, 524840254, 572485967, 624419793, 681027665, 742730244, 809986056, 883294891, 963201521, 1050299747, 1145236814, 1248718217, 1361512946, 1484459201, 1618470619, 1764543065, 1923762030, 2097310703, 2286478756, 2492671933, 2717422497, 2962400612, 3229426756, 3520485254, 0, 0],
 	nextExp: [0, 500, 1000, 2250, 4125, 6300, 8505, 10206, 11510, 13319, 14429, 18036, 22545, 28181, 35226, 44033, 55042, 68801, 86002, 107503, 134378, 167973, 209966, 262457, 328072, 410090, 512612, 640765, 698434, 761293, 829810, 904492, 985897, 1074627, 1171344, 1276765, 1391674, 1516924, 1653448, 1802257, 1964461, 2141263, 2333976, 2544034, 2772997, 3022566, 3294598, 3591112, 3914311, 4266600, 4650593, 5069147, 5525370, 6022654, 6564692, 7155515, 7799511, 8501467, 9266598, 10100593, 11009646, 12000515, 13080560, 14257811, 15541015, 16939705, 18464279, 20126064, 21937409, 23911777, 26063836, 28409582, 30966444, 33753424, 36791232, 40102443, 43711663, 47645713, 51933826, 56607872, 61702579, 67255812, 73308835, 79906630, 87098226, 94937067, 103481403, 112794729, 122946255, 134011418, 146072446, 159218965, 173548673, 189168053, 206193177, 224750564, 244978115, 267026144, 291058498, 0, 0],
 	expCurve: [13, 16, 110, 159, 207, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 225, 174, 92, 38, 5],
@@ -2145,12 +2129,12 @@ var Experience = {
 
 	// Total time till next level
 	timeToLevel: function () {
-		var tTLrawSeconds = (Math.floor((getTickCount() - me.gamestarttime) / 1000)).toString(),
+		let tTLrawSeconds = (Math.floor((getTickCount() - me.gamestarttime) / 1000)).toString(),
 			tTLrawtimeToLevel = this.runsToLevel() * tTLrawSeconds,
 			tTLDays = Math.floor(tTLrawtimeToLevel / 86400),
 			tTLHours = Math.floor((tTLrawtimeToLevel % 86400) / 3600),
-			tTLMinutes = Math.floor(((tTLrawtimeToLevel % 86400) % 3600) / 60),
-			tTLSeconds = ((tTLrawtimeToLevel % 86400) % 3600) % 60;
+			tTLMinutes = Math.floor(((tTLrawtimeToLevel % 86400) % 3600) / 60);
+			//tTLSeconds = ((tTLrawtimeToLevel % 86400) % 3600) % 60;
 
 		//return tDays + "d " + tTLHours + "h " + tTLMinutes + "m " + tTLSeconds + "s";
 		//return tTLDays + "d " + tTLHours + "h " + tTLMinutes + "m";
@@ -2159,7 +2143,7 @@ var Experience = {
 
 	// Get Game Time
 	getGameTime: function () {
-		var rawMinutes = Math.floor((getTickCount() - me.gamestarttime) / 60000).toString(),
+		let rawMinutes = Math.floor((getTickCount() - me.gamestarttime) / 60000).toString(),
 			rawSeconds = (Math.floor((getTickCount() - me.gamestarttime) / 1000) % 60).toString();
 
 		if (rawMinutes <= 9) {
@@ -2176,13 +2160,13 @@ var Experience = {
 
 	// Log to manager
 	log: function () {
-		var string,
+		let string,
 			gain = this.gain(),
 			progress = this.progress(),
 			runsToLevel = this.runsToLevel(),
-			totalRunsToLevel = this.totalRunsToLevel(),
-			getGameTime = this.getGameTime(),
-			timeToLevel = this.timeToLevel();
+			getGameTime = this.getGameTime();
+			//totalRunsToLevel = this.totalRunsToLevel(),
+			//timeToLevel = this.timeToLevel();
 
 		//string = "[Game: " + me.gamename + (me.gamepassword ? "//" + me.gamepassword : "") + getGameTime + "] [Level: " + me.getStat(12) + " (" + progress + "%)] [XP: " + gain + "] [Games ETA: " + runsToLevel + "] [Time ETA: " + timeToLevel + "]";
 		string = "[Game: " + me.gamename + (me.gamepassword ? "//" + me.gamepassword : "") + getGameTime + "] [Level: " + me.getStat(12) + " (" + progress + "%)] [XP: " + gain + "] [Games ETA: " + runsToLevel + "]";
@@ -2197,7 +2181,8 @@ var Experience = {
 	}
 };
 
-var Packet = {
+// eslint-disable-next-line no-redeclare
+const Packet = {
 	openMenu: function (unit) {
 		if (unit.type !== 1) {
 			throw new Error("openMenu: Must be used on NPCs.");
@@ -2207,7 +2192,7 @@ var Packet = {
 			return true;
 		}
 
-		var i, tick;
+		let i, tick;
 
 		for (i = 0; i < 5; i += 1) {
 			if (getDistance(me, unit) > 4) {
@@ -2250,7 +2235,7 @@ var Packet = {
 			return true;
 		}
 
-		var i,
+		let i,
 			gamble = mode === "Gamble";
 
 		if (this.openMenu(unit)) {
@@ -2273,7 +2258,7 @@ var Packet = {
 	},
 
 	buyItem: function (unit, shiftBuy, gamble) {
-		var i, tick,
+		let i, tick,
 			oldGold = me.getStat(14) + me.getStat(15),
 			itemCount = me.itemcount,
 			npc = getInteractedNPC();
@@ -2312,7 +2297,7 @@ var Packet = {
 			throw new Error("Unit.sell: Must be used on items.");
 		}
 
-		var i, tick, npc,
+		let i, tick, npc,
 			itemCount = me.itemcount;
 
 		npc = getInteractedNPC();
@@ -2339,13 +2324,13 @@ var Packet = {
 	},
 
 	identifyItem: function (unit, tome) {
-		var i, tick;
+		let i, tick;
 
 		if (!unit || unit.getFlag(0x10)) {
 			return false;
 		}
 
-CursorLoop:
+		CursorLoop:
 		for (i = 0; i < 3; i += 1) {
 			sendPacket(1, 0x27, 4, unit.gid, 4, tome.gid);
 
@@ -2386,7 +2371,7 @@ CursorLoop:
 	},
 
 	itemToCursor: function (item) {
-		var i, tick;
+		let i, tick;
 
 		if (me.itemoncursor) { // Something already on cursor
 			if (getUnit(100).gid === item.gid) { // Return true if the item is already on cursor
@@ -2418,7 +2403,7 @@ CursorLoop:
 	},
 
 	dropItem: function (item) {
-		var i, tick;
+		let i, tick;
 
 		if (!this.itemToCursor(item)) {
 			return false;
@@ -2451,12 +2436,12 @@ CursorLoop:
 		sendPacket(1, hand, 4, who.type, 4, who.gid);
 	},
 
-	moveNPC: function (npc, dwX, dwY) { // commented the patched packet
-		//sendPacket(1, 0x59, 4, npc.type, 4, npc.gid, 4, dwX, 4, dwY);
-	},
+	// moveNPC: function (npc, dwX, dwY) { // commented the patched packet
+	// 	//sendPacket(1, 0x59, 4, npc.type, 4, npc.gid, 4, dwX, 4, dwY);
+	// },
 
 	teleWalk: function (x, y, maxDist) {
-		var i;
+		let i;
 
 		if (maxDist === undefined) {
 			maxDist = 5;
@@ -2501,8 +2486,9 @@ CursorLoop:
 	},
 
 	addListener: function (packetType, callback) { // specialized wrapper for addEventListener
-		if (typeof packetType === 'number')
+		if (typeof packetType === 'number') {
 			packetType = [packetType];
+		}
 
 		if (typeof packetType === 'object' && packetType.length) {
 			addEventListener('gamepacket', packet => (packetType.indexOf(packet[0]) > -1 ? callback(packet) : false));
@@ -2576,9 +2562,9 @@ function PacketBuilder () {
 	this.send = () => (sendPacket(this.buildDataView().buffer), this);
 	this.spoof = () => (getPacket(this.buildDataView().buffer), this);
 	this.get = this.spoof; // same thing but spoof has clearer intent than get
-};
+}
 
-var LocalChat = new function () {
+const LocalChat = new function () {
 	const LOCAL_CHAT_ID = 0xD2BAAAA;
 	let toggle, proxy = say;
 
@@ -2619,6 +2605,7 @@ var LocalChat = new function () {
 		case 2:
 			removeEventListener("chatinputblocker", onChatInput);
 			addEventListener("chatinputblocker", onChatInput);
+		// eslint-disable-next-line no-fallthrough
 		case 1:
 			removeEventListener("copydata", onChatRecv);
 			addEventListener("copydata", onChatRecv);
@@ -2639,9 +2626,9 @@ var LocalChat = new function () {
 	};
 };
 
-var Messaging = {
+const Messaging = {
 	sendToScript: function (name, msg) {
-		var script = getScript(name);
+		let script = getScript(name);
 
 		if (script && script.running) {
 			script.send(msg);
@@ -2653,11 +2640,11 @@ var Messaging = {
 	},
 
 	sendToProfile: function (profileName, mode, message, getResponse) {
-		var response;
+		let response;
 
 		function copyDataEvent(mode2, msg) {
 			if (mode2 === mode) {
-				var obj;
+				let obj;
 
 				try {
 					obj = JSON.parse(msg);
@@ -2704,33 +2691,34 @@ var Messaging = {
 	}
 };
 
-var Events = {
-	// gamepacket
-	gamePacket: function (bytes) {
-		var temp;
+// Unused anywhere
+// var Events = {
+// 	// gamepacket
+// 	gamePacket: function (bytes) {
+// 		let temp;
 
-		switch (bytes[0]) {
-		// Block movement after using TP/WP/Exit
-		case 0x0D: // Player Stop
-			// This can mess up death screen so disable for characters that are allowed to die
-			if (Config.LifeChicken > 0) {
-				return true;
-			}
+// 		switch (bytes[0]) {
+// 		// Block movement after using TP/WP/Exit
+// 		case 0x0D: // Player Stop
+// 			// This can mess up death screen so disable for characters that are allowed to die
+// 			if (Config.LifeChicken > 0) {
+// 				return true;
+// 			}
 
-			break;
-		// Block poison skills that might crash the client
-		case 0x4C: // Cast skill on target
-		case 0x4D: // Cast skill on coords
-			temp = Number("0x" + bytes[7].toString(16) + bytes[6].toString(16));
+// 			break;
+// 		// Block poison skills that might crash the client
+// 		case 0x4C: // Cast skill on target
+// 		case 0x4D: // Cast skill on coords
+// 			temp = Number("0x" + bytes[7].toString(16) + bytes[6].toString(16));
 
-			// Match Poison Javelin, Plague Javelin or Poison Nova
-			if (temp && [15, 25, 92].indexOf(temp) > -1) {
-				return true;
-			}
+// 			// Match Poison Javelin, Plague Javelin or Poison Nova
+// 			if (temp && [15, 25, 92].indexOf(temp) > -1) {
+// 				return true;
+// 			}
 
-			break;
-		}
+// 			break;
+// 		}
 
-		return false;
-	}
-};
+// 		return false;
+// 	}
+// };

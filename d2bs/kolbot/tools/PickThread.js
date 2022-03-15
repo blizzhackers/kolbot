@@ -31,7 +31,7 @@ function main() {
 	Runewords.init();
 	Cubing.init();
 
-	var ii, noPick = false,
+	let ii, noPick = false,
 		UIFlagList = [0x01, 0x02, 0x03, 0x04, 0x05, 0x09, 0x0B, 0x0E, 0x0F, 0x14, 0x16, 0x1A, 0x24];
 
 	this.itemEvent = function (gid, mode, code, global) {
@@ -57,6 +57,4 @@ function main() {
 		noPick = false;
 		delay(100);
 	}
-
-	return true;
 }

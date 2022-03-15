@@ -4,9 +4,9 @@
 *	@desc		script loader, based on mBot's Sequencer.js
 */
 
-var global = this;
+let global = this;
 
-var Loader = {
+const Loader = {
 	fileList: [],
 	scriptList: [],
 	scriptIndex: -1,
@@ -18,10 +18,9 @@ var Loader = {
 	},
 
 	getScripts: function () {
-		var i,
-			fileList = dopen("libs/bots/").getFiles();
+		let fileList = dopen("libs/bots/").getFiles();
 
-		for (i = 0; i < fileList.length; i += 1) {
+		for (let i = 0; i < fileList.length; i += 1) {
 			if (fileList[i].indexOf(".js") > -1) {
 				this.fileList.push(fileList[i].substring(0, fileList[i].indexOf(".js")));
 			}
@@ -30,7 +29,7 @@ var Loader = {
 
 	// see http://stackoverflow.com/questions/728360/copying-an-object-in-javascript#answer-728694
 	clone: function (obj) {
-		var i, copy, attr;
+		let copy, attr;
 
 		// Handle the 3 simple types, and null or undefined
 		if (null === obj || "object" !== typeof obj) {
@@ -40,7 +39,6 @@ var Loader = {
 		// Handle Date
 		if (obj instanceof Date) {
 			copy = new Date();
-
 			copy.setTime(obj.getTime());
 
 			return copy;
@@ -50,7 +48,7 @@ var Loader = {
 		if (obj instanceof Array) {
 			copy = [];
 
-			for (i = 0; i < obj.length; i += 1) {
+			for (let i = 0; i < obj.length; i += 1) {
 				copy[i] = this.clone(obj[i]);
 			}
 
@@ -74,9 +72,7 @@ var Loader = {
 	},
 
 	copy: function (from, to) {
-		var i;
-
-		for (i in from) {
+		for (let i in from) {
 			if (from.hasOwnProperty(i)) {
 				to[i] = this.clone(from[i]);
 			}
@@ -84,7 +80,7 @@ var Loader = {
 	},
 
 	loadScripts: function () {
-		var reconfiguration, s, script,
+		let reconfiguration, s, script,
 			unmodifiedConfig = {};
 
 		this.copy(Config, unmodifiedConfig);
@@ -105,8 +101,12 @@ var Loader = {
 			script = this.scriptList[this.scriptIndex];
 
 			if (this.fileList.indexOf(script) < 0) {
-				Misc.errorReport("ÿc1Script " + script + " doesn't exist.");
-				continue;
+				if (FileTools.exists("bots/" + script + ".js")) {
+					print("ÿc1Something went wrong in loader, file exists in folder but didn't get included during init process. Lets ignore the error and continue to include the script by name instead");
+				} else {
+					Misc.errorReport("ÿc1Script " + script + " doesn't exist.");
+					continue;
+				}
 			}
 
 			if (!include("bots/" + script + ".js")) {
@@ -122,7 +122,6 @@ var Loader = {
 
 					if (this.skipTown.indexOf(script) > -1 || Town.goToTown()) {
 						print("ÿc2Starting script: ÿc9" + script);
-						//scriptBroadcast(JSON.stringify({currScript: script}));
 						Messaging.sendToScript("tools/toolsthread.js", JSON.stringify({currScript: script}));
 
 						reconfiguration = typeof Scripts[script] === 'object';

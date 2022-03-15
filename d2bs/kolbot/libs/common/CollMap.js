@@ -4,12 +4,12 @@
 *	@desc		manipulate map collision data
 */
 
-var CollMap = new function () {
+const CollMap = new function () {
 	this.rooms = [];
 	this.maps = [];
 
 	this.getNearbyRooms = function (x, y) {
-		var i, room, rooms;
+		let i, room, rooms;
 
 		room = getRoom(x, y);
 
@@ -33,7 +33,7 @@ var CollMap = new function () {
 	};
 
 	this.addRoom = function (x, y) {
-		var room, coll;
+		let room, coll;
 
 		room = x instanceof Room ? x : getRoom(x, y);
 
@@ -57,7 +57,7 @@ var CollMap = new function () {
 	};
 
 	this.getColl = function (x, y, cacheOnly) {
-		var i, j,
+		let i, j,
 			index = this.getRoomIndex(x, y, cacheOnly);
 
 		if (index === undefined) {
@@ -79,7 +79,7 @@ var CollMap = new function () {
 			this.reset();
 		}
 
-		var i;
+		let i;
 
 		for (i = 0; i < this.rooms.length; i += 1) {
 			if (this.coordsInRoom(x, y, this.rooms[i])) {
@@ -114,7 +114,7 @@ var CollMap = new function () {
 			thickness = 1;
 		}
 
-		var i, k, l, cx, cy, angle, distance;
+		let i, k, l, cx, cy, angle, distance;
 
 		angle = Math.atan2(unitA.y - unitB.y, unitA.x - unitB.x);
 		distance = Math.round(getDistance(unitA, unitB));
@@ -158,9 +158,7 @@ var CollMap = new function () {
 			}
 
 			if (validTiles.length) {
-				validTiles.sort((a, b) => {
-					return a.distance - b.distance;
-				});
+				validTiles.sort((a, b) => a.distance - b.distance);
 
 				return validTiles[0];
 			}
@@ -173,7 +171,7 @@ var CollMap = new function () {
 
 	this.getRandCoordinate = function (cX, xmin, xmax, cY, ymin, ymax, factor = 1) {
 		// returns randomized {x, y} object with valid coordinates
-		var coordX, coordY,
+		let coordX, coordY,
 			retry = 0;
 
 		do {
@@ -197,6 +195,6 @@ var CollMap = new function () {
 		} while (getCollision(me.area, coordX, coordY) & 1);
 
 		// print("Move " + retry + " from (" + cX + ", " + cY + ") to (" + coordX + ", " + coordY + ")");
-		return {x:coordX, y:coordY};
+		return {x: coordX, y: coordY};
 	};
 };

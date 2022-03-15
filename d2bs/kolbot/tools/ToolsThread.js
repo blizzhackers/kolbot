@@ -29,15 +29,15 @@ include("common/Runewords.js");
 include("common/Storage.js");
 include("common/Town.js");
 
-const sdk = require('../libs/modules/sdk')
-
 function main() {
-	var i, mercHP, ironGolem, tick, merc,
+	let mercHP, ironGolem, tick, merc,
 		debugInfo = {area: 0, currScript: "no entry"},
 		pingTimer = [],
 		quitFlag = false,
 		quitListDelayTime,
 		cloneWalked = false,
+		antiIdle = false,
+		idleTick = 0,
 		canQuit = true,
 		timerLastDrink = [];
 
@@ -51,7 +51,7 @@ function main() {
 	Runewords.init();
 	Cubing.init();
 
-	for (i = 0; i < 5; i += 1) {
+	for (let i = 0; i < 5; i += 1) {
 		timerLastDrink[i] = 0;
 	}
 
@@ -60,15 +60,13 @@ function main() {
 	me.chickenmp = -1;
 
 	// General functions
-	this.checkPing = function (print) {
+	this.checkPing = function (print = true) {
 		// Quit after at least 5 seconds in game
 		if (getTickCount() - me.gamestarttime < 5000) {
 			return false;
 		}
 
-		var i;
-
-		for (i = 0; i < Config.PingQuit.length; i += 1) {
+		for (let i = 0; i < Config.PingQuit.length; i += 1) {
 			if (Config.PingQuit[i].Ping > 0) {
 				if (me.ping >= Config.PingQuit[i].Ping) {
 					me.overhead("High Ping");
@@ -78,10 +76,7 @@ function main() {
 					}
 
 					if (getTickCount() - pingTimer[i] >= Config.PingQuit[i].Duration * 1000) {
-						if (print) {
-							D2Bot.printToConsole("High ping (" + me.ping + "/" + Config.PingQuit[i].Ping + ") - leaving game.", 9);
-						}
-
+						print && D2Bot.printToConsole("High ping (" + me.ping + "/" + Config.PingQuit[i].Ping + ") - leaving game.", 9);
 						scriptBroadcast("pingquit");
 
 						return true;
@@ -96,15 +91,14 @@ function main() {
 	};
 
 	this.initQuitList = function () {
-		var i, string, obj,
-			temp = [];
+		let temp = [];
 
-		for (i = 0; i < Config.QuitList.length; i += 1) {
+		for (let i = 0; i < Config.QuitList.length; i += 1) {
 			if (FileTools.exists("data/" + Config.QuitList[i] + ".json")) {
-				string = Misc.fileAction("data/" + Config.QuitList[i] + ".json", 0);
+				let string = Misc.fileAction("data/" + Config.QuitList[i] + ".json", 0);
 
 				if (string) {
-					obj = JSON.parse(string);
+					let obj = JSON.parse(string);
 
 					if (obj && obj.hasOwnProperty("name")) {
 						temp.push(obj.name);
@@ -117,8 +111,9 @@ function main() {
 	};
 
 	this.getPotion = function (pottype, type) {
-		var i,
-			items = me.getItems();
+		if (!pottype) return false;
+
+		let items = me.getItemsEx().filter(function (item) { return item.itemType === pottype; });
 
 		if (!items || items.length === 0) {
 			return false;
@@ -129,7 +124,7 @@ function main() {
 			return b.classid - a.classid;
 		});
 
-		for (i = 0; i < items.length; i += 1) {
+		for (let i = 0; i < items.length; i += 1) {
 			if (type < 3 && items[i].mode === 0 && items[i].location === 3 && items[i].itemType === pottype) {
 				print("ÿc2Drinking potion from inventory.");
 
@@ -145,27 +140,24 @@ function main() {
 	};
 
 	this.togglePause = function () {
-		var i,	script,
-			scripts = ["default.dbj", "tools/townchicken.js", "tools/antihostile.js", "tools/party.js", "tools/rushthread.js"];
+		let scripts = [
+			"default.dbj", "tools/townchicken.js", "tools/autobuildthread.js", "tools/antihostile.js",
+			"tools/party.js", "tools/rushthread.js"
+		];
 
-		for (i = 0; i < scripts.length; i += 1) {
+		for (let i = 0; i < scripts.length; i++) {
 			script = getScript(scripts[i]);
 
 			if (script) {
 				if (script.running) {
-					if (i === 0) { // default.dbj
-						print("ÿc1Pausing.");
-					}
+					scripts[i] === "default.dbj" && print("ÿc1Pausing.");
 
 					// don't pause townchicken during clone walk
 					if (scripts[i] !== "tools/townchicken.js" || !cloneWalked) {
 						script.pause();
 					}
 				} else {
-					if (i === 0) { // default.dbj
-						print("ÿc2Resuming.");
-					}
-
+					scripts[i] === "default.dbj" && print("ÿc2Resuming.");
 					script.resume();
 				}
 			}
@@ -175,22 +167,33 @@ function main() {
 	};
 
 	this.stopDefault = function () {
-		var script = getScript("default.dbj");
+		let scripts = [
+			"default.dbj", "tools/townchicken.js", "tools/autobuildthread.js", "tools/antihostile.js",
+			"tools/party.js", "tools/rushthread.js"
+		];
+		
+		for (let i = 0; i < scripts.length; i++) {
+			let script = getScript(scripts[i]);
 
-		if (script && script.running) {
-			script.stop();
+			if (script) {
+				if (script.running) {
+					script.stop();
+				}
+			}
 		}
 
 		return true;
 	};
 
-	this.exit = function () {
+	this.exit = function (chickenExit = false) {
+		chickenExit && D2Bot.updateChickens();
+		Config.LogExperience && Experience.log();
 		this.stopDefault();
 		quit();
 	};
 
 	this.drinkPotion = function (type) {
-		var pottype, potion,
+		let pottype, potion,
 			tNow = getTickCount();
 
 		switch (type) {
@@ -202,13 +205,15 @@ function main() {
 
 			break;
 		case 2:
-			if (timerLastDrink[type] && (tNow - timerLastDrink[type] < 300)) { // small delay for juvs just to prevent using more at once
+			// small delay for juvs just to prevent using more at once
+			if (timerLastDrink[type] && (tNow - timerLastDrink[type] < 300)) {
 				return false;
 			}
 
 			break;
 		case 4:
-			if (timerLastDrink[type] && (tNow - timerLastDrink[type] < 2000)) { // larger delay for juvs just to prevent using more at once, considering merc update rate
+			// larger delay for juvs just to prevent using more at once, considering merc update rate
+			if (timerLastDrink[type] && (tNow - timerLastDrink[type] < 2000)) {
 				return false;
 			}
 
@@ -221,7 +226,8 @@ function main() {
 			break;
 		}
 
-		if (me.mode === 0 || me.mode === 17 || me.mode === 18) { // mode 18 - can't drink while leaping/whirling etc.
+		// mode 18 - can't drink while leaping/whirling etc.
+		if (me.mode === 0 || me.mode === 17 || me.mode === 18) {
 			return false;
 		}
 
@@ -267,7 +273,7 @@ function main() {
 	};
 
 	this.getNearestMonster = function () {
-		var gid, distance,
+		let gid, distance,
 			monster = getUnit(1),
 			range = 30;
 
@@ -284,21 +290,13 @@ function main() {
 			} while (monster.getNext());
 		}
 
-		if (gid) {
-			monster = getUnit(1, -1, -1, gid);
-		} else {
-			monster = false;
-		}
+		monster = gid ? getUnit(1, -1, -1, gid) : false;
 
-		if (monster) {
-			return " to " + monster.name;
-		}
-
-		return "";
+		return monster ? " to " + monster.name : "";
 	};
 
 	this.checkVipers = function () {
-		var owner,
+		let owner,
 			monster = getUnit(1, 597);
 
 		if (monster) {
@@ -307,6 +305,8 @@ function main() {
 					owner = monster.getParent();
 
 					if (owner && owner.name !== me.name) {
+						D2Bot.printToConsole("Revived Tomb Vipers found. Leaving game.", 9);
+
 						return true;
 					}
 				}
@@ -317,7 +317,7 @@ function main() {
 	};
 
 	this.getIronGolem = function () {
-		var owner,
+		let owner,
 			golem = getUnit(1, 291);
 
 		if (golem) {
@@ -334,7 +334,7 @@ function main() {
 	};
 
 	this.getNearestPreset = function () {
-		var i, unit, dist, id;
+		let i, unit, dist, id;
 
 		unit = getPresetUnits(me.area);
 		dist = 99;
@@ -350,52 +350,51 @@ function main() {
 	};
 
 	this.getStatsString = function (unit) {
-		var realFCR = unit.getStat(sdk.stats.Fastercastrate);
-		var realIAS = unit.getStat(sdk.stats.Fasterattackrate);
-		var realFBR = unit.getStat(sdk.stats.Fasterblockrate);
-		var realFHR = unit.getStat(sdk.stats.Fastergethitrate);
+		let realFCR = unit.getStat(sdk.stats.FCR);
+		let realIAS = unit.getStat(sdk.stats.IAS);
+		let realFBR = unit.getStat(sdk.stats.FBR);
+		let realFHR = unit.getStat(sdk.stats.FHR);
 		// me.getStat(105) will return real FCR from gear + Config.FCR from char cfg
-		if (unit == me)
-		{
-		        realFCR -= Config.FCR;
-		        realIAS -= Config.IAS;
-		        realFBR -= Config.FBR;
-		        realFHR -= Config.FHR;
+
+		if (unit === me) {
+			realFCR -= Config.FCR;
+			realIAS -= Config.IAS;
+			realFBR -= Config.FBR;
+			realFHR -= Config.FHR;
 		}
-		var maxHellFireRes = 75 + unit.getStat(sdk.stats.Maxfireresist);
-		var hellFireRes = unit.getStat(sdk.stats.Fireresist) - 100;
-		if (hellFireRes > maxHellFireRes)
-		        hellFireRes = maxHellFireRes;
-		var maxHellColdRes = 75 + unit.getStat(sdk.stats.Maxcoldresist);
-		var hellColdRes = unit.getStat(sdk.stats.Coldresist) - 100;
-		if (hellColdRes > maxHellColdRes)
-		        hellColdRes = maxHellColdRes;
-		var maxHellLightRes = 75 + unit.getStat(sdk.stats.Maxlightresist);
-		var hellLightRes = unit.getStat(sdk.stats.Lightresist) - 100;
-		if (hellLightRes > maxHellLightRes)
-		        hellLightRes = maxHellLightRes;
-		var maxHellPoisonRes = 75 + unit.getStat(sdk.stats.Maxpoisonresist);
-		var hellPoisonRes = unit.getStat(sdk.stats.Poisonresist) - 100;
-		if (hellPoisonRes > maxHellPoisonRes)
-		        hellPoisonRes = maxHellPoisonRes;
-		var str = "ÿc4MF: ÿc0" + unit.getStat(sdk.stats.Magicbonus) + "ÿc4 GF: ÿc0" + unit.getStat(sdk.stats.Goldbonus) +
-		"ÿc1 FR: ÿc0" + unit.getStat(sdk.stats.Fireresist) + "ÿc1 Max FR: ÿc0" + unit.getStat(sdk.stats.Maxfireresist) +
-		"ÿc3 CR: ÿc0" + unit.getStat(sdk.stats.Coldresist) + "ÿc3 Max CR: ÿc0" + unit.getStat(sdk.stats.Maxcoldresist) +
-		"ÿc9 LR: ÿc0" + unit.getStat(sdk.stats.Lightresist) + "ÿc9 Max LR: ÿc0" + unit.getStat(sdk.stats.Maxlightresist) +
-		"ÿc2 PR: ÿc0" + unit.getStat(sdk.stats.Poisonresist) + "ÿc2 Max PR: ÿc0" + unit.getStat(sdk.stats.Maxpoisonresist) +
-		"\n" +
-		"Hell res: ÿc1" + hellFireRes + "ÿc0/ÿc3" + hellColdRes + "ÿc0/ÿc9" + hellLightRes + "ÿc0/ÿc2" + hellPoisonRes +
-		"ÿc0\n" +
-		"FCR: " + realFCR + " IAS: " + realIAS + " FBR: " + realFBR +
-		" FHR: " + realFHR + " FRW: " + unit.getStat(sdk.stats.Fastermovevelocity) +
-		"\n" +
-		"CB: " + unit.getStat(sdk.stats.Crushingblow) + " DS: " + unit.getStat(sdk.stats.Deadlystrike) +
-		" OW: " + unit.getStat(sdk.stats.Openwounds) +
-		" ÿc1LL: ÿc0" + unit.getStat(sdk.stats.Lifedrainmindam) + " ÿc3ML: ÿc0" + unit.getStat(sdk.stats.Manadrainmindam) +
-		" DR: " + unit.getStat(sdk.stats.Damageresist) + "% + " + unit.getStat(sdk.stats.NormalDamageReduction) +
-		" MDR: " + unit.getStat(sdk.stats.Magicresist) + "% + " + unit.getStat(sdk.stats.MagicDamageReduction) +
-		"\n" +
-		(unit.getStat(sdk.stats.Cannotbefrozen) > 0 ? "ÿc3Cannot be Frozenÿc1\n" : "\n");
+
+		let maxHellFireRes = 75 + unit.getStat(sdk.stats.MaxFireResist);
+		let hellFireRes = unit.getRes(sdk.stats.FireResist, sdk.difficulty.Hell);
+		hellFireRes > maxHellFireRes && (hellFireRes = maxHellFireRes);
+
+		let maxHellColdRes = 75 + unit.getStat(sdk.stats.MaxColdResist);
+		let hellColdRes = unit.getRes(sdk.stats.ColdResist, sdk.difficulty.Hell);
+		hellColdRes > maxHellColdRes && (hellColdRes = maxHellColdRes);
+
+		let maxHellLightRes = 75 + unit.getStat(sdk.stats.MaxLightResist);
+		let hellLightRes = unit.getRes(sdk.stats.LightResist, sdk.difficulty.Hell);
+		hellLightRes > maxHellLightRes && (hellLightRes = maxHellLightRes);
+
+		let maxHellPoisonRes = 75 + unit.getStat(sdk.stats.MaxPoisonResist);
+		let hellPoisonRes = unit.getRes(sdk.stats.PoisonResist, sdk.difficulty.Hell);
+		hellPoisonRes > maxHellPoisonRes && (hellPoisonRes = maxHellPoisonRes);
+
+		let str =
+		"ÿc4Character Level: ÿc0" + unit.charlvl + (unit === me ? " ÿc4Difficulty: ÿc0" + sdk.difficulty.nameOf(me.diff) + " ÿc4HighestActAvailable: ÿc0" + me.highestAct : "") + "\n" +
+		"ÿc1FR: ÿc0" + unit.getStat(sdk.stats.FireResist) + "ÿc1 Applied FR: ÿc0" + unit.fireRes +
+		"/ÿc3 CR: ÿc0" + unit.getStat(sdk.stats.ColdResist) + "ÿc3 Applied CR: ÿc0" + unit.coldRes +
+		"/ÿc9 LR: ÿc0" + unit.getStat(sdk.stats.LightResist) + "ÿc9 Applied LR: ÿc0" + unit.lightRes +
+		"/ÿc2 PR: ÿc0" + unit.getStat(sdk.stats.PoisonResist) + "ÿc2 Applied PR: ÿc0" + unit.poisonRes + "\n" +
+		(!me.hell ? "Hell res: ÿc1" + hellFireRes + "ÿc0/ÿc3" + hellColdRes + "ÿc0/ÿc9" + hellLightRes + "ÿc0/ÿc2" + hellPoisonRes + "ÿc0\n" : "") +
+		"ÿc4MF: ÿc0" + unit.getStat(sdk.stats.MagicBonus) + "ÿc4 GF: ÿc0" + unit.getStat(sdk.stats.GoldBonus) +
+		" ÿc4FCR: ÿc0" + realFCR + " ÿc4IAS: ÿc0" + realIAS + " ÿc4FBR: ÿc0" + realFBR +
+		" ÿc4FHR: ÿc0" + realFHR + " ÿc4FRW: ÿc0" + unit.getStat(sdk.stats.FRW) + "\n" +
+		"ÿc4CB: ÿc0" + unit.getStat(sdk.stats.CrushingBlow) + " ÿc4DS: ÿc0" + unit.getStat(sdk.stats.DeadlyStrike) +
+		" ÿc4OW: ÿc0" + unit.getStat(sdk.stats.OpenWounds) +
+		" ÿc1LL: ÿc0" + unit.getStat(sdk.stats.LifeLeech) + " ÿc3ML: ÿc0" + unit.getStat(sdk.stats.ManaLeech) +
+		" ÿc8DR: ÿc0" + unit.getStat(sdk.stats.DamageResist) + "% + " + unit.getStat(sdk.stats.NormalDamageReduction) +
+		" ÿc8MDR: ÿc0" + unit.getStat(sdk.stats.MagicResist) + "% + " + unit.getStat(sdk.stats.MagicDamageReduction) + "\n" +
+		(unit.getStat(sdk.stats.CannotbeFrozen) > 0 ? "ÿc3Cannot be Frozenÿc1\n" : "\n");
 
 		return str;
 	};
@@ -422,10 +421,9 @@ function main() {
 		case 107: // Numpad +
 			showConsole();
 
-			var merc = me.getMerc();
-			print(this.getStatsString(me));
-			if (merc)
-				print("Merc stats:\n" + this.getStatsString(merc));
+			print("ÿc8My stats :: " + this.getStatsString(me));
+			merc = me.getMerc();
+			!!merc && print("ÿc8Merc stats :: " + this.getStatsString(merc));
 
 			break;
 		case 101: // numpad 5
@@ -463,6 +461,13 @@ function main() {
 			Precast.doPrecast(true);
 
 			break;
+		case 111: // numpad / - re-load default
+			print("ÿc8ToolsThread :: " + sdk.colors.Red + "Stopping threads and waiting 5 seconds to restart");
+			this.stopDefault() && delay(5e3);
+			print('Starting default.dbj');
+			load('default.dbj');
+
+			break;
 		}
 	};
 
@@ -476,7 +481,7 @@ function main() {
 				print(name1 + (mode === 0 ? " timed out" : " left"));
 
 				if (typeof Config.QuitListDelay !== "undefined" && typeof quitListDelayTime === "undefined" && Config.QuitListDelay.length > 0) {
-					Config.QuitListDelay.sort(function(a, b){return a-b});
+					Config.QuitListDelay.sort(function(a, b) { return a - b; });
 					quitListDelayTime = getTickCount() + rand(Config.QuitListDelay[0] * 1e3, Config.QuitListDelay[1] * 1e3);
 				} else {
 					quitListDelayTime = getTickCount();
@@ -511,7 +516,7 @@ function main() {
 				break;
 			}
 
-			if (Config.SoJWaitTime && me.gametype === 1) { // only do this in expansion
+			if (Config.SoJWaitTime && me.expansion) {
 				D2Bot.printToConsole(param1 + " Stones of Jordan Sold to Merchants on IP " + me.gameserverip.split(".")[3], 7);
 				Messaging.sendToScript("default.dbj", "soj");
 			}
@@ -526,9 +531,8 @@ function main() {
 				break;
 			}
 
-			if (Config.StopOnDClone && me.gametype === 1) { // only do this in expansion
+			if (Config.StopOnDClone && me.expansion) {
 				D2Bot.printToConsole("Diablo Walks the Earth", 7);
-
 				cloneWalked = true;
 
 				this.togglePause();
@@ -538,17 +542,10 @@ function main() {
 
 				me.maxgametime = 0;
 
-				if (Config.KillDclone) {
-					load("tools/clonekilla.js");
-				}
-				else { // not killing so do anti-idle
-					while (true) {
-						sendPacket(1, 0x40);
-						for (let i = (10 * 60); i > 0; i -= 1) {
-							me.overhead("Diablo Walks the Earth! - Next packet in: " + i + " sec.");
-							delay(1000);
-						}
-					}
+				if (Config.KillDclone && load("tools/clonekilla.js")) {
+					break;
+				} else {
+					antiIdle = true;
 				}
 			}
 
@@ -557,7 +554,7 @@ function main() {
 	};
 
 	this.scriptEvent = function (msg) {
-		var obj;
+		let obj;
 
 		switch (msg) {
 		case "toggleQuitlist":
@@ -584,7 +581,6 @@ function main() {
 					debugInfo.lastAction = obj.lastAction;
 				}
 
-				//D2Bot.store(JSON.stringify(debugInfo));
 				DataFile.updateStats("debugInfo", JSON.stringify(debugInfo));
 			}
 
@@ -599,7 +595,6 @@ function main() {
 	addEventListener("keyup", this.keyEvent);
 	addEventListener("gameevent", this.gameEvent);
 	addEventListener("scriptmsg", this.scriptEvent);
-	//addEventListener("gamepacket", Events.gamePacket);
 
 	// Load Fastmod
 	Packet.changeStat(105, Config.FCR);
@@ -607,56 +602,42 @@ function main() {
 	Packet.changeStat(102, Config.FBR);
 	Packet.changeStat(93, Config.IAS);
 
-	if (Config.QuitListMode > 0) {
-		this.initQuitList();
-	}
+	Config.QuitListMode > 0 && this.initQuitList();
 
 	// Start
 	while (true) {
 		try {
 			if (me.gameReady && !me.inTown) {
-				if (Config.UseHP > 0 && me.hp < Math.floor(me.hpmax * Config.UseHP / 100)) {
-					this.drinkPotion(0);
-				}
+				Config.UseHP > 0 && me.hpPercent < Config.UseHP && this.drinkPotion(0);
+				Config.UseRejuvHP > 0 && me.hpPercent < Config.UseRejuvHP && this.drinkPotion(2);
 
-				if (Config.UseRejuvHP > 0 && me.hp < Math.floor(me.hpmax * Config.UseRejuvHP / 100)) {
-					this.drinkPotion(2);
-				}
-
-				if (Config.LifeChicken > 0 && me.hp <= Math.floor(me.hpmax * Config.LifeChicken / 100)) {
+				if (Config.LifeChicken > 0 && me.hpPercent <= Config.LifeChicken) {
 					D2Bot.printToConsole("Life Chicken (" + me.hp + "/" + me.hpmax + ")" + this.getNearestMonster() + " in " + Pather.getAreaName(me.area) + ". Ping: " + me.ping, 9);
-					D2Bot.updateChickens();
-					this.exit();
+					this.exit(true);
 
 					break;
 				}
 
-				if (Config.UseMP > 0 && me.mp < Math.floor(me.mpmax * Config.UseMP / 100)) {
-					this.drinkPotion(1);
-				}
+				Config.UseMP > 0 && me.mpPercent < Config.UseMP && this.drinkPotion(1);
+				Config.UseRejuvMP > 0 && me.mpPercent < Config.UseRejuvMP && this.drinkPotion(2);
 
-				if (Config.UseRejuvMP > 0 && me.mp < Math.floor(me.mpmax * Config.UseRejuvMP / 100)) {
-					this.drinkPotion(2);
-				}
-
-				if (Config.ManaChicken > 0 && me.mp <= Math.floor(me.mpmax * Config.ManaChicken / 100)) {
+				if (Config.ManaChicken > 0 && me.mpPercent <= Config.ManaChicken) {
 					D2Bot.printToConsole("Mana Chicken: (" + me.mp + "/" + me.mpmax + ") in " + Pather.getAreaName(me.area), 9);
-					D2Bot.updateChickens();
-					this.exit();
+					this.exit(true);
 
 					break;
 				}
 
-				if (Config.IronGolemChicken > 0 && me.classid === 2) {
+				if (Config.IronGolemChicken > 0 && me.necromancer) {
 					if (!ironGolem || copyUnit(ironGolem).x === undefined) {
 						ironGolem = this.getIronGolem();
 					}
 
 					if (ironGolem) {
-						if (ironGolem.hp <= Math.floor(128 * Config.IronGolemChicken / 100)) { // ironGolem.hpmax is bugged with BO
+						// ironGolem.hpmax is bugged with BO
+						if (ironGolem.hp <= Math.floor(128 * Config.IronGolemChicken / 100)) {
 							D2Bot.printToConsole("Irom Golem Chicken in " + Pather.getAreaName(me.area), 9);
-							D2Bot.updateChickens();
-							this.exit();
+							this.exit(true);
 
 							break;
 						}
@@ -670,34 +651,35 @@ function main() {
 					if (mercHP > 0 && merc && merc.mode !== 12) {
 						if (mercHP < Config.MercChicken) {
 							D2Bot.printToConsole("Merc Chicken in " + Pather.getAreaName(me.area), 9);
-							D2Bot.updateChickens();
-							this.exit();
+							this.exit(true);
 
 							break;
 						}
 
-						if (mercHP < Config.UseMercHP) {
-							this.drinkPotion(3);
-						}
-
-						if (mercHP < Config.UseMercRejuv) {
-							this.drinkPotion(4);
-						}
+						mercHP < Config.UseMercHP && this.drinkPotion(3);
+						mercHP < Config.UseMercRejuv && this.drinkPotion(4);
 					}
 				}
 
 				if (Config.ViperCheck && getTickCount() - tick >= 250) {
-					if (this.checkVipers()) {
-						D2Bot.printToConsole("Revived Tomb Vipers found. Leaving game.", 9);
-
-						quitFlag = true;
-					}
+					this.checkVipers() && (quitFlag = true);
 
 					tick = getTickCount();
 				}
 
-				if (this.checkPing(true)) {
-					quitFlag = true;
+				this.checkPing(true) && (quitFlag = true);
+			}
+
+			if (antiIdle) {
+				tick = getTickCount();
+
+				while (getTickCount() - tick < (Config.DCloneWaitTime * 60 * 1000)) {
+					if (getTickCount() - idleTick > 0) {
+						sendPacket(1, 0x40);
+						idleTick += rand(1200, 1500) * 1000;
+						me.overhead("Diablo Walks the Earth! - Next packet in: " (" (" + new Date(idleTick - getTickCount()).toISOString().slice(11, -5) + ")"));
+						print("Sent anti-idle packet, next refresh in: " + (" (" + new Date(idleTick - getTickCount()).toISOString().slice(11, -5) + ")"));
+					}
 				}
 			}
 		} catch (e) {
@@ -708,11 +690,6 @@ function main() {
 
 		if (quitFlag && canQuit && (typeof quitListDelayTime === "undefined" || getTickCount() >= quitListDelayTime)) {
 			print("ÿc8Run duration ÿc2" + ((getTickCount() - me.gamestarttime) / 1000));
-
-			if (Config.LogExperience) {
-				Experience.log();
-			}
-
 			this.checkPing(false); // In case of quitlist triggering first
 			this.exit();
 
@@ -721,8 +698,6 @@ function main() {
 
 		if (debugInfo.area !== Pather.getAreaName(me.area)) {
 			debugInfo.area = Pather.getAreaName(me.area);
-
-			//D2Bot.store(JSON.stringify(debugInfo));
 			DataFile.updateStats("debugInfo", JSON.stringify(debugInfo));
 		}
 

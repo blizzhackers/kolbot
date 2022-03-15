@@ -4,7 +4,8 @@
 *	@desc		do town chores like buying, selling and gambling
 */
 
-var NPC = {
+// eslint-disable-next-line no-redeclare
+const NPC = {
 	Akara: getLocaleString(2892).toLowerCase(),
 	Gheed: getLocaleString(2891).toLowerCase(),
 	Charsi: getLocaleString(2894).toLowerCase(),
@@ -38,7 +39,8 @@ var NPC = {
 	Cain: getLocaleString(2890).toLowerCase()
 };
 
-var Town = {
+// eslint-disable-next-line no-redeclare
+const Town = {
 	telekinesis: true,
 	sellTimer: getTickCount(), // shop speedup test
 
@@ -67,12 +69,14 @@ var Town = {
 
 	// Do town chores
 	doChores: function (repair = false) {
-		if (!me.inTown) {
-			this.goToTown();
-		}
+		!me.inTown && this.goToTown();
 
-		var i,
-			cancelFlags = [0x01, 0x02, 0x04, 0x08, 0x14, 0x16, 0x0c, 0x0f, 0x19, 0x1a];
+		let cancelFlags = [0x01, 0x02, 0x04, 0x08, 0x14, 0x16, 0x0c, 0x0f, 0x19, 0x1a];
+
+		// Burst of speed while in town
+		if (me.inTown && me.getSkill(sdk.skills.BurstofSpeed, 1) && !me.getState(sdk.states.BurstofSpeed)) {
+			Skill.cast(sdk.skills.BurstofSpeed, 0);
+		}
 
 		Attack.weaponSwitch(Attack.getPrimarySlot());
 
@@ -80,11 +84,7 @@ var Town = {
 		this.identify();
 		this.shopItems();
 		this.fillTome(518);
-
-		if (Config.FieldID) {
-			this.fillTome(519);
-		}
-
+		Config.FieldID && this.fillTome(519);
 		this.buyPotions();
 		this.clearInventory();
 		Item.autoEquip();
@@ -97,7 +97,7 @@ var Town = {
 		this.stash(true);
 		this.clearScrolls();
 
-		for (i = 0; i < cancelFlags.length; i += 1) {
+		for (let i = 0; i < cancelFlags.length; i++) {
 			if (getUIFlag(cancelFlags[i])) {
 				delay(500);
 				me.cancel();
@@ -108,11 +108,13 @@ var Town = {
 
 		me.cancel();
 
+		!me.barbarian && !Precast.checkCTA() && Precast.doPrecast(false);
+
 		return true;
 	},
 
 	checkQuestItems: function () {
-		var i, npc, item;
+		let i, npc, item;
 
 		// golden bird stuff
 		if (me.getItem(546)) {
@@ -152,11 +154,32 @@ var Town = {
 		}
 	},
 
+	getTpTool: function () {
+		let scroll = me.getItemsEx().filter(function (i) { return i.isInInventory && i.classid === sdk.items.ScrollofTownPortal; }).first();
+		let tome = me.getItemsEx().filter(function (i) { return i.isInInventory && i.classid === sdk.items.TomeofTownPortal; }).first();
+		if (scroll) {
+			return scroll;
+		}
+		if (tome && tome.getStat(sdk.stats.Quantity) > 0) {
+			return tome;
+		}
+		return null;
+	},
+
+	canTpToTown: function () {
+		// I'm dead or in town, no TP tome or scrolls, shouldn't tp from arreatsummit and can't tp from UberTristram
+		if (me.dead || me.inTown || !this.getTpTool() || [sdk.areas.ArreatSummit, sdk.areas.UberTristram].includes(me.area)) {
+			return false;
+		}
+
+		return true;
+	},
+
 	// Start a task and return the NPC Unit
 	initNPC: function (task, reason) {
 		print("initNPC: " + reason);
 
-		var npc = getInteractedNPC();
+		let npc = getInteractedNPC();
 
 		if (npc && npc.name.toLowerCase() !== this.tasks[me.act - 1][task]) {
 			me.cancel();
@@ -212,25 +235,19 @@ var Town = {
 
 	// Go to a town healer
 	heal: function () {
-		if (!this.needHealing()) {
-			return true;
-		}
-
-		if (!this.initNPC("Heal", "heal")) {
-			return false;
-		}
+		if (!this.needHealing()) return true;
+		if (!this.initNPC("Heal", "heal")) return false;
 
 		return true;
 	},
 
 	// Check if healing is needed, based on character config
 	needHealing: function () {
-		if (me.hp * 100 / me.hpmax <= Config.HealHP || me.mp * 100 / me.mpmax <= Config.HealMP) {
-			return true;
-		}
+		if (me.hpPercent <= Config.HealHP || me.mpPercent <= Config.HealMP) return true;
 
 		// Status effects
-		if (Config.HealStatus && (me.getState(2) || me.getState(9) || me.getState(61))) {
+		if (Config.HealStatus
+			&& [sdk.states.Poison, sdk.states.AmplifyDamage, sdk.states.Weaken, sdk.states.Decrepify, sdk.states.LowerResist].some(function (state) { return me.getState(state); })) {
 			return true;
 		}
 
@@ -242,7 +259,7 @@ var Town = {
 			return false;
 		}
 
-		var i, j, npc, useShift, col, beltSize, pot,
+		let i, j, npc, useShift, col, beltSize, pot,
 			needPots = false,
 			needBuffer = true,
 			buffer = {
@@ -361,7 +378,7 @@ var Town = {
 
 	// Check when to shift-buy potions
 	shiftCheck: function (col, beltSize) {
-		var i, fillType;
+		let i, fillType;
 
 		for (i = 0; i < col.length; i += 1) {
 			// Set type based on non-empty column
@@ -404,7 +421,7 @@ var Town = {
 
 	// Return column status (needed potions in each column)
 	checkColumns: function (beltSize) {
-		var col = [beltSize, beltSize, beltSize, beltSize],
+		let col = [beltSize, beltSize, beltSize, beltSize],
 			pot = me.getItem(-1, 2); // Mode 2 = in belt
 
 		if (!pot) { // No potions
@@ -420,7 +437,7 @@ var Town = {
 
 	// Get the highest potion from current npc
 	getPotion: function (npc, type) {
-		var i, result;
+		let i, result;
 
 		if (!type) {
 			return false;
@@ -448,7 +465,7 @@ var Town = {
 			return true;
 		}
 
-		var scroll, tome,
+		let scroll, tome,
 			npc = this.initNPC("Shop", "fillTome");
 
 		if (!npc) {
@@ -492,7 +509,7 @@ var Town = {
 	},
 
 	checkScrolls: function (id) {
-		var tome = me.findItem(id, 0, 3);
+		let tome = me.findItem(id, 0, 3);
 
 		if (!tome) {
 			switch (id) {
@@ -509,8 +526,7 @@ var Town = {
 	},
 
 	identify: function () {
-		var i, item, tome, scroll, npc, list, timer, tpTome, result,
-			tpTomePos = {};
+		let i, item, tome, scroll, npc, list, timer, tpTome, result;
 
 		this.cainID();
 
@@ -544,7 +560,7 @@ var Town = {
 			this.fillTome(519);
 		}
 
-MainLoop:
+		MainLoop:
 		while (list.length > 0) {
 			item = list.shift();
 
@@ -575,8 +591,6 @@ MainLoop:
 								tpTome = me.findItem(518, 0, 3);
 
 								if (tpTome) {
-									tpTomePos = {x: tpTome.x, y: tpTome.y};
-
 									tpTome.sell();
 									delay(500);
 								}
@@ -658,7 +672,7 @@ MainLoop:
 		}
 
 		// Check if we're already in a shop. It would be pointless to go to Cain if so.
-		var i, cain, unids, result,
+		let i, cain, unids, result,
 			npc = getInteractedNPC();
 
 		if (npc && npc.name.toLowerCase() === this.tasks[me.act - 1].Shop) {
@@ -728,7 +742,7 @@ MainLoop:
 	},
 
 	fieldID: function () { // not exactly a town function but whateva
-		var list, tome, item, result;
+		let list, tome, item, result;
 
 		list = this.getUnids();
 
@@ -794,7 +808,7 @@ MainLoop:
 	},
 
 	getUnids: function () {
-		var list = [],
+		let list = [],
 			item = me.getItem(-1, 0);
 
 		if (!item) {
@@ -819,7 +833,7 @@ MainLoop:
 			return Packet.identifyItem(unit, tome);
 		}
 
-		var i, tick;
+		let i, tick;
 
 		if (!unit || unit.getFlag(0x10)) {
 			return false;
@@ -827,7 +841,7 @@ MainLoop:
 
 		this.sellTimer = getTickCount(); // shop speedup test
 
-CursorLoop:
+		CursorLoop:
 		for (i = 0; i < 3; i += 1) {
 			clickItem(1, tome);
 
@@ -876,7 +890,7 @@ CursorLoop:
 			return true;
 		}
 
-		var i, item, result,
+		let i, item, result,
 			items = [],
 			npc = getInteractedNPC();
 
@@ -926,7 +940,7 @@ CursorLoop:
 			return true;
 		}
 
-		var i, item, items, npc, newItem, result,
+		let i, item, items, npc, newItem, result,
 			list = [];
 
 		if (this.gambleIds.length === 0) {
@@ -985,7 +999,7 @@ CursorLoop:
 						return false;
 					}
 
-					me.overhead("Buy: " + items[i].name);
+					//me.overhead("Buy: " + items[i].name);
 					items[i].buy(false, true);
 
 					newItem = this.getGambledItem(list);
@@ -1039,7 +1053,7 @@ CursorLoop:
 	},
 
 	getGambledItem: function (list) {
-		var i, j,
+		let i, j,
 			items = me.findItems(-1, 0, 3);
 
 		for (i = 0; i < items.length; i += 1) {
@@ -1097,7 +1111,7 @@ CursorLoop:
 			this.goToTown(Pather.accessToAct(4) ? 4 : 2);
 		}
 
-		var key,
+		let key,
 			npc = this.initNPC("Key", "buyKeys");
 
 		if (!npc) {
@@ -1126,7 +1140,7 @@ CursorLoop:
 			return 12;
 		}
 
-		var i,
+		let i,
 			count = 0,
 			key = me.findItems(543, 0, 3);
 
@@ -1152,7 +1166,7 @@ CursorLoop:
 			return false;
 		}
 
-		var needRal = 0,
+		let needRal = 0,
 			needOrt = 0,
 			items = this.getItemsForRepair(Config.RepairPercent, false);
 
@@ -1203,7 +1217,7 @@ CursorLoop:
 			return false;
 		}
 
-		var items = this.getItemsForRepair(Config.RepairPercent, false);
+		let items = this.getItemsForRepair(Config.RepairPercent, false);
 
 		items.sort(function (a, b) {
 			return a.getStat(72) * 100 / a.getStat(73) - b.getStat(72) * 100 / b.getStat(73);
@@ -1217,7 +1231,7 @@ CursorLoop:
 	},
 
 	cubeRepairItem: function (item) {
-		var i, rune, cubeItems,
+		let i, rune, cubeItems,
 			bodyLoc = item.bodylocation;
 
 		if (item.mode !== 1) {
@@ -1284,7 +1298,7 @@ CursorLoop:
 	},
 
 	repair: function (force = false) {
-		var i, quiver, myQuiver, npc, repairAction, bowCheck;
+		let i, quiver, myQuiver, npc, repairAction, bowCheck;
 
 		this.cubeRepair();
 
@@ -1349,7 +1363,7 @@ CursorLoop:
 	},
 
 	needRepair: function () {
-		var quiver, bowCheck, quantity,
+		let quiver, bowCheck, quantity,
 			repairAction = [],
 			canAfford = me.gold >= me.getRepairCost();
 
@@ -1392,7 +1406,7 @@ CursorLoop:
 	},
 
 	getItemsForRepair: function (repairPercent, chargedItems) {
-		var i, charge, quantity, durability,
+		let i, charge, quantity, durability,
 			itemList = [],
 			item = me.getItem(-1, 1);
 
@@ -1458,7 +1472,7 @@ CursorLoop:
 			this.goToTown(2);
 		}
 
-		var i, tick, dialog, lines,
+		let i, tick, dialog, lines,
 			preArea = me.area,
 			npc = this.initNPC("Merc", "reviveMerc");
 
@@ -1466,7 +1480,7 @@ CursorLoop:
 			return false;
 		}
 
-MainLoop:
+		MainLoop:
 		for (i = 0; i < 3; i += 1) {
 			dialog = getDialogLines();
 
@@ -1510,7 +1524,7 @@ MainLoop:
 	},
 
 	needMerc: function () {
-		var i, merc;
+		let i, merc;
 
 		if (me.gametype === 0 || !Config.UseMerc || me.gold < me.mercrevivecost) { // gametype 0 = classic
 			return false;
@@ -1535,7 +1549,7 @@ MainLoop:
 	},
 
 	canStash: function (item) {
-		var ignoredClassids = [91, 174]; // Some quest items that have to be in inventory or equipped
+		let ignoredClassids = [91, 174]; // Some quest items that have to be in inventory or equipped
 
 		if (this.ignoredItemTypes.indexOf(item.itemType) > -1 || ignoredClassids.indexOf(item.classid) > -1 || !Storage.Stash.CanFit(item)) {
 			return false;
@@ -1555,7 +1569,7 @@ MainLoop:
 
 		me.cancel();
 
-		var i, result, tier,
+		let i, result, tier,
 			items = Storage.Inventory.Compare(Config.Inventory);
 
 		if (items) {
@@ -1597,7 +1611,7 @@ MainLoop:
 			return true;
 		}
 
-		var i,
+		let i,
 			items = Storage.Inventory.Compare(Config.Inventory);
 
 		for (i = 0; i < items.length; i += 1) {
@@ -1610,7 +1624,7 @@ MainLoop:
 	},
 
 	openStash: function () {
-		var i, tick, stash;
+		let i, tick, stash;
 
 		if (getUIFlag(0x1a) && !Cubing.closeCube()) {
 			return false;
@@ -1651,7 +1665,7 @@ MainLoop:
 	},
 
 	getCorpse: function () {
-		var i, corpse, gid, coord,
+		let i, corpse, gid, coord,
 			corpseList = [],
 			timer = getTickCount();
 
@@ -1714,7 +1728,7 @@ MainLoop:
 	},
 
 	checkShard: function () {
-		var shard,
+		let shard,
 			check = {left: false, right: false},
 			item = me.getItem("bld", 0);
 
@@ -1770,7 +1784,7 @@ MainLoop:
 			delay(100);
 		}
 
-		var item = me.getItem(-1, 2),
+		let item = me.getItem(-1, 2),
 			clearList = [];
 
 		if (item) {
@@ -1807,7 +1821,7 @@ MainLoop:
 	},
 
 	clearScrolls: function () {
-		var i,
+		let i,
 			items = me.getItems();
 
 		for (i = 0; !!items && i < items.length; i += 1) {
@@ -1827,7 +1841,7 @@ MainLoop:
 	},
 
 	clearInventory: function () {
-		var i, col, result, item, beltSize,
+		let i, col, result, item, beltSize,
 			items = [];
 
 		this.checkQuestItems(); // only golden bird quest for now
@@ -1933,7 +1947,7 @@ MainLoop:
 					!Cubing.keepItem(items[i]) && // Don't throw cubing ingredients
 					!Runewords.keepItem(items[i]) && // Don't throw runeword ingredients
 					!CraftingSystem.keepItem(items[i]) // Don't throw crafting system ingredients
-					) {
+			) {
 				result = Pickit.checkItem(items[i]).result;
 
 				if (!Item.autoEquipCheck(items[i])) {
@@ -1975,14 +1989,14 @@ MainLoop:
 		return true;
 	},
 
-	act : [{}, {}, {}, {}, {}],
+	act: [{}, {}, {}, {}, {}],
 
 	initialize: function () {
 		//print("Initialize town " + me.act);
 
 		switch (me.act) {
 		case 1:
-			var fire,
+			let fire,
 				wp = getPresetUnit(1, 2, 119),
 				fireUnit = getPresetUnit(1, 2, 39);
 
@@ -2070,12 +2084,28 @@ MainLoop:
 		return true;
 	},
 
+	getDistance: function (spot) {
+		!me.inTown && this.goToTown();
+		!this.act[me.act - 1].initialized && this.initialize();
+
+		// Act 5 wp->portalspot override - ActMap.cpp crash
+		if (me.act === 5 && spot === "portalspot" && getDistance(me.x, me.y, 5113, 5068) <= 8) {
+			return [5098, 5018].distance;
+		}
+
+		if (typeof (this.act[me.act - 1].spot[spot]) === "object") {
+			return this.act[me.act - 1].spot[spot].distance;
+		} else {
+			return Infinity;
+		}
+	},
+
 	move: function (spot) {
 		if (!me.inTown) {
 			this.goToTown();
 		}
 
-		var i, path;
+		let i, path;
 
 		if (!this.act[me.act - 1].initialized) {
 			this.initialize();
@@ -2104,7 +2134,7 @@ MainLoop:
 	},
 
 	moveToSpot: function (spot) {
-		var i, path, townSpot,
+		let i, path, townSpot,
 			longRange = (spot === "waypoint");
 
 		if (!this.act[me.act - 1].hasOwnProperty("spot") || !this.act[me.act - 1].spot.hasOwnProperty(spot)) {
@@ -2171,7 +2201,7 @@ MainLoop:
 	},
 
 	goToTown: function (act, wpmenu) {
-		var towns = [1, 40, 75, 103, 109];
+		let towns = [1, 40, 75, 103, 109];
 
 		if (!me.inTown) {
 			if (!Pather.makePortal()) {
@@ -2210,7 +2240,9 @@ MainLoop:
 			return true;
 		}
 
-		var preArea = me.area,
+		if (!this.canTpToTown()) return false;
+
+		let preArea = me.area,
 			preAct = me.act;
 
 		try { // not an essential function -> handle thrown errors
@@ -2221,19 +2253,14 @@ MainLoop:
 
 		this.doChores(repair);
 
-		if (me.act !== preAct) {
-			this.goToTown(preAct);
-		}
-
+		me.act !== preAct && this.goToTown(preAct);
 		this.move("portalspot");
 
 		if (!Pather.usePortal(preArea, me.name)) { // this part is essential
 			throw new Error("Town.visitTown: Failed to go back from town");
 		}
 
-		if (Config.PublicMode) {
-			Pather.makePortal();
-		}
+		Config.PublicMode && Pather.makePortal();
 
 		return true;
 	}

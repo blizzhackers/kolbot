@@ -27,10 +27,10 @@ include("common/Storage.js");
 include("common/Town.js");
 
 function main() {
-	var townCheck = false;
+	let townCheck = false;
 
 	this.togglePause = function () {
-		var i,	script,
+		let i,	script,
 			scripts = ["default.dbj", "tools/antihostile.js", "tools/rushthread.js", "tools/CloneKilla.js"];
 
 		for (i = 0; i < scripts.length; i += 1) {
