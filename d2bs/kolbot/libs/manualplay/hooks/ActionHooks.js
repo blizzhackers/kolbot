@@ -75,8 +75,6 @@ const ActionHooks = {
 			qolObj = { type: "qol", dest: false, action: false };
 
 		if (this.action) {
-			print("Key: " + this.action);
-
 			switch (this.action) {
 			case 96: // Numpad 0
 				hook = this.getHook("Next Area");

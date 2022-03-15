@@ -134,7 +134,7 @@ function main() {
 					case "area":
 						if (obj.dest === 120) {
 							Pather.moveToExit(obj.dest, false);
-						} else if ([46, 54, 103, 110].includes(obj.dest)) {
+						} else if ([46, 47, 54, 103, 110].includes(obj.dest)) {
 							Pather.journeyTo(obj.dest);
 						} else if (obj.dest === 73) {
 							Pather.moveToPreset(me.area, 2, 152, -11, 3);

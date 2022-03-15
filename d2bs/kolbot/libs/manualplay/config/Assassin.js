@@ -59,7 +59,7 @@ function LoadConfig() {
 	// Pickit config. Default folder is kolbot/pickit.
 	Config.PickitFiles.push("kolton.nip");
 	Config.PickitFiles.push("LLD.nip");
-	Config.AutoPick = false; // If set to true and D2BotMap entry script is used, will enable picking in manual play.
+	Config.ManualPlayPick = false; // If set to true and D2BotMap entry script is used, will enable picking in manual play.
 
 	// Public game options
 

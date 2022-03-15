@@ -1624,31 +1624,30 @@ const Town = {
 	},
 
 	openStash: function () {
-		let i, tick, stash;
+		if (getUIFlag(sdk.uiflags.Cube) && !Cubing.closeCube()) return false;
+		if (getUIFlag(sdk.uiflags.Stash)) return true;
 
-		if (getUIFlag(0x1a) && !Cubing.closeCube()) {
-			return false;
-		}
-
-		if (getUIFlag(0x19)) {
-			return true;
-		}
-
-		for (i = 0; i < 5; i += 1) {
+		for (let i = 0; i < 5; i += 1) {
 			me.cancel();
 
 			if (this.move("stash")) {
-				stash = getUnit(2, 267);
+				let stash = getUnit(2, 267);
 
 				if (stash) {
-					Misc.click(0, 0, stash);
-					//stash.interact();
+					if (Skill.useTK(stash)) {
+						// Fix for out of range telek
+						i > 0 && stash.distance > (23 - (i * 2)) && Pather.walkTo(stash.x, stash.y, (23 - (i * 2)));
+						Skill.cast(sdk.skills.Telekinesis, 0, stash);
+					} else {
+						Misc.click(0, 0, stash);
+					}
 
-					tick = getTickCount();
+					let tick = getTickCount();
 
 					while (getTickCount() - tick < 5000) {
-						if (getUIFlag(0x19)) {
-							delay(100 + me.ping * 2); // allow UI to initialize
+						if (getUIFlag(sdk.uiflags.Stash)) {
+							// allow UI to initialize
+							delay(100 + me.ping * 2);
 
 							return true;
 						}
@@ -2134,8 +2133,10 @@ const Town = {
 	},
 
 	moveToSpot: function (spot) {
+		this.telekinesis = !!(me.getSkill(sdk.skills.Telekinesis, 1));
+
 		let i, path, townSpot,
-			longRange = (spot === "waypoint");
+			longRange = (this.telekinesis && ["stash", "portalspot"].includes(spot)) || (spot === "waypoint");
 
 		if (!this.act[me.act - 1].hasOwnProperty("spot") || !this.act[me.act - 1].spot.hasOwnProperty(spot)) {
 			return false;

@@ -17,7 +17,6 @@ Attack.init = function () {
 	}
 
 	if (Config.AttackSkill[1] < 0 || Config.AttackSkill[3] < 0) {
-		// TODO: attack modules to be loaded by default based on our skills if we get here
 		print("ÿc1Bad attack config. Don't expect your bot to attack.");
 	}
 

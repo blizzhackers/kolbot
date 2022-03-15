@@ -1300,6 +1300,7 @@
 			LamEsensTome: 193,
 			SewerStairsA3: 366,
 			DuranceEntryStairs: 386,
+			RedPortalToAct4: 342,
 
 			// act 4
 			DiabloSealInfectorActive: 392,

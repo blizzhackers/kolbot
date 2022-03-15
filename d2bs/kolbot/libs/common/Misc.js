@@ -432,8 +432,10 @@ const Skill = {
 	},
 
 	useTK: function (unit = undefined) {
-		if (!unit || !me.getSkill(sdk.skills.Telekinesis, 1) || typeof unit !== 'object' || unit.type !== sdk.unittype.Object || (unit.name === 'portal' && !me.inTown) || 
-			[sdk.units.RedPortalToChamber, sdk.units.RedPortal, sdk.units.RedPortalToAct5].includes(unit.classid)) {
+		if (!unit || !me.getSkill(sdk.skills.Telekinesis, 1)
+			|| typeof unit !== 'object' || unit.type !== sdk.unittype.Object
+			|| (unit.name === 'portal' && !me.inTown && unit.classid !== 298)
+			|| [sdk.units.RedPortalToAct4, sdk.units.RedPortalToChamber, sdk.units.RedPortal, sdk.units.RedPortalToAct5].includes(unit.classid)) {
 			return false;
 		}
 
@@ -1121,25 +1123,25 @@ const Misc = {
 
 	// Use a shrine Unit
 	getShrine: function (unit) {
-		if (unit.mode) {
-			return false;
-		}
+		if (unit.mode === 2) return false;
 
-		let i, tick;
-
-		for (i = 0; i < 3; i += 1) {
-			if (getDistance(me, unit) < 4 || Pather.moveToUnit(unit, 3, 0)) {
-				Misc.click(0, 0, unit);
-				//unit.interact();
+		for (let i = 0; i < 3; i++) {
+			if (Skill.useTK(unit) && i < 2) {
+				if (getDistance(me, unit) > 13) {
+					Attack.getIntoPosition(unit, 13, 0x4);
+				}
+				
+				Skill.cast(sdk.skills.Telekinesis, 0, unit);
+			} else {
+				if (getDistance(me, unit) < 4 || Pather.moveToUnit(unit, 3, 0)) {
+					Misc.click(0, 0, unit);
+				}
 			}
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 1000) {
-				if (unit.mode) {
-					return true;
-				}
-
+				if (unit.mode) return true;
 				delay(10);
 			}
 		}

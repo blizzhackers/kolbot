@@ -95,24 +95,32 @@ Pather.changeAct = function (act) {
 };
 
 Pather.getWP = function (area, clearPath) {
-	let i, j, wp, preset,
+	let useTK = me.getSkill(sdk.skills.Telekinesis, 1),
 		wpIDs = [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539];
 
 	area !== me.area && this.journeyTo(area);
 
-	for (i = 0; i < wpIDs.length; i++) {
-		preset = getPresetUnit(area, 2, wpIDs[i]);
+	for (let i = 0; i < wpIDs.length; i++) {
+		let preset = getPresetUnit(area, 2, wpIDs[i]);
 
 		if (preset) {
-			this.moveToUnit(preset, 0, 0, clearPath);
+			useTK ? this.moveNearUnit(preset, 20, clearPath) : this.moveToUnit(preset, 0, 0, clearPath);
 
-			wp = getUnit(2, "waypoint");
+			let wp = getUnit(2, "waypoint");
 
 			if (wp) {
-				for (j = 0; j < 10; j++) {
-					Misc.click(0, 0, wp);
+				for (let j = 0; j < 10; j++) {
+					if (wp.distance > 5 && Skill.useTK(wp) && j < 3) {
+						if (wp.distance > 21) {
+							Attack.getIntoPosition(wp, 20, 0x4);
+						}
 
-					if (getUIFlag(0x14)) {
+						Skill.cast(sdk.skills.Telekinesis, 0, wp);
+					} else if (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint)) {
+						this.moveToUnit(wp) && Misc.click(0, 0, wp);
+					}
+
+					if (getUIFlag(sdk.uiflags.Waypoint)) {
 						delay(500);
 
 						// Keep wp menu open in town
