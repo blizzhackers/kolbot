@@ -64,6 +64,9 @@
 
                 let proxyCallback = function () {
                     target.processes.running = (callback() && self.pushLowPrio(proxyCallback) > -1);
+                    if (!target.processes.running) {
+                        delete target.processes[name];
+                    }
                 };
 
                 self.pushLowPrio(proxyCallback);
