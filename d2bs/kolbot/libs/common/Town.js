@@ -84,7 +84,7 @@ const Town = {
 		this.identify();
 		this.shopItems();
 		this.fillTome(518);
-		Config.FieldID && this.fillTome(519);
+		Config.FieldID.Enabled && this.fillTome(519);
 		this.buyPotions();
 		this.clearInventory();
 		Item.autoEquip();
@@ -255,7 +255,8 @@ const Town = {
 	},
 
 	buyPotions: function () {
-		if (me.gold < 1000) { // Ain't got money fo' dat shyt
+		// Ain't got money fo' dat shyt
+		if (me.gold < 1000) {
 			return false;
 		}
 
@@ -1299,7 +1300,7 @@ const Town = {
 	},
 
 	repair: function (force = false) {
-		let i, quiver, myQuiver, npc, repairAction, bowCheck;
+		let quiver, myQuiver, npc, repairAction, bowCheck;
 
 		this.cubeRepair();
 
@@ -1313,15 +1314,12 @@ const Town = {
 			return true;
 		}
 
-		for (i = 0; i < repairAction.length; i += 1) {
+		for (let i = 0; i < repairAction.length; i += 1) {
 			switch (repairAction[i]) {
 			case "repair":
+				me.act === 3 && this.goToTown(Pather.accessToAct(4) ? 4 : 2);
 				npc = this.initNPC("Repair", "repair");
-
-				if (!npc) {
-					return false;
-				}
-
+				if (!npc) return false;
 				me.repair();
 
 				break;
@@ -1329,29 +1327,15 @@ const Town = {
 				bowCheck = Attack.usingBow();
 
 				if (bowCheck) {
-					if (bowCheck === "bow") {
-						quiver = "aqv"; // Arrows
-					} else {
-						quiver = "cqv"; // Bolts
-					}
-
+					quiver = bowCheck === "bow" ? "aqv" : "cqv";
 					myQuiver = me.getItem(quiver, 1);
-
-					if (myQuiver) {
-						myQuiver.drop();
-					}
-
+					!!myQuiver && myQuiver.drop();
+					
 					npc = this.initNPC("Repair", "repair");
-
-					if (!npc) {
-						return false;
-					}
+					if (!npc) return false;
 
 					quiver = npc.getItem(quiver);
-
-					if (quiver) {
-						quiver.buy();
-					}
+					!!quiver && quiver.buy();
 				}
 
 				break;
@@ -1464,28 +1448,21 @@ const Town = {
 	},
 
 	reviveMerc: function () {
-		if (!this.needMerc()) {
-			return true;
-		}
+		!this.needMerc() return true;
 
 		// avoid Aheara
-		if (me.act === 3) {
-			this.goToTown(2);
-		}
+		me.act === 3 && this.goToTown(Pather.accessToAct(4) ? 4 : 2);
 
-		let i, tick, dialog, lines,
-			preArea = me.area,
+		let preArea = me.area,
 			npc = this.initNPC("Merc", "reviveMerc");
 
-		if (!npc) {
-			return false;
-		}
+		if (!npc) return false;
 
 		MainLoop:
-		for (i = 0; i < 3; i += 1) {
-			dialog = getDialogLines();
+		for (let i = 0; i < 3; i += 1) {
+			let dialog = getDialogLines();
 
-			for (lines = 0; lines < dialog.length; lines += 1) {
+			for (let lines = 0; lines < dialog.length; lines += 1) {
 				if (dialog[lines].text.match(":", "gi")) {
 					dialog[lines].handler();
 					delay(Math.max(750, me.ping * 2));
@@ -1496,6 +1473,8 @@ const Town = {
 					return false;
 				}
 			}
+
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 2000) {
 				if (!!me.getMerc()) {
@@ -1511,7 +1490,8 @@ const Town = {
 		Attack.checkInfinity();
 
 		if (!!me.getMerc()) {
-			if (Config.MercWatch) { // Cast BO on merc so he doesn't just die again
+			// Cast BO on merc so he doesn't just die again. Only do this is you are a barb or actually have a cta. Otherwise its just a waste of time.
+			if (Config.MercWatch && (me.getSkill(sdk.skills.Shout, 1) || me.getSkill(sdk.skills.BattleOrders, 1) || Precast.checkCTA())) {
 				print("MercWatch precast");
 				Pather.useWaypoint("random");
 				Precast.doPrecast(true);
@@ -1525,14 +1505,14 @@ const Town = {
 	},
 
 	needMerc: function () {
-		let i, merc;
+		let merc;
 
-		if (me.gametype === 0 || !Config.UseMerc || me.gold < me.mercrevivecost) { // gametype 0 = classic
+		if (me.classic || !Config.UseMerc || me.gold < me.mercrevivecost) {
 			return false;
 		}
 
 		// me.getMerc() might return null if called right after taking a portal, that's why there's retry attempts
-		for (i = 0; i < 3; i += 1) {
+		for (let i = 0; i < 3; i += 1) {
 			merc = me.getMerc();
 
 			if (merc && merc.mode !== 0 && merc.mode !== 12) {
@@ -1542,7 +1522,8 @@ const Town = {
 			delay(100);
 		}
 
-		if (!me.mercrevivecost) { // In case we never had a merc and Config.UseMerc is still set to true for some odd reason
+		// In case we never had a merc and Config.UseMerc is still set to true for some odd reason
+		if (!me.mercrevivecost) {
 			return false;
 		}
 
@@ -1559,22 +1540,18 @@ const Town = {
 		return true;
 	},
 
-	stash: function (stashGold) {
-		if (stashGold === undefined) {
-			stashGold = true;
-		}
-
+	stash: function (stashGold = true) {
 		if (!this.needStash()) {
 			return true;
 		}
 
 		me.cancel();
 
-		let i, result, tier,
+		let result, tier,
 			items = Storage.Inventory.Compare(Config.Inventory);
 
 		if (items) {
-			for (i = 0; i < items.length; i += 1) {
+			for (let i = 0; i < items.length; i += 1) {
 				if (this.canStash(items[i])) {
 					result = (Pickit.checkItem(items[i]).result > 0 && Pickit.checkItem(items[i]).result < 4) || Cubing.keepItem(items[i]) || Runewords.keepItem(items[i]) || CraftingSystem.keepItem(items[i]);
 
@@ -1612,10 +1589,9 @@ const Town = {
 			return true;
 		}
 
-		let i,
-			items = Storage.Inventory.Compare(Config.Inventory);
+		let items = Storage.Inventory.Compare(Config.Inventory);
 
-		for (i = 0; i < items.length; i += 1) {
+		for (let i = 0; i < items.length; i += 1) {
 			if (Storage.Stash.CanFit(items[i])) {
 				return true;
 			}
@@ -1921,32 +1897,13 @@ const Town = {
 		items = Storage.Inventory.Compare(Config.Inventory);
 
 		for (i = 0; !!items && i < items.length; i += 1) {
-			if ([18, 41, 76, 77, 78].indexOf(items[i].itemType) === -1 && // Don't drop tomes, keys or potions
-					// Keep some quest items
-					items[i].classid !== 524 && // Scroll of Inifuss
-					items[i].classid !== 525 && // Key to Cairn Stones
-					items[i].classid !== 549 && // Horadric Cube
-					items[i].classid !== 92 && // Staff of Kings
-					items[i].classid !== 521 && // Viper Amulet
-					items[i].classid !== 91 && // Horadric Staff
-					items[i].classid !== 552 && // Book of Skill
-					items[i].classid !== 545 && // Potion of Life
-					items[i].classid !== 546 && // A Jade Figurine
-					items[i].classid !== 547 && // The Golden Bird
-					items[i].classid !== 548 && // Lam Esen's Tome
-					items[i].classid !== 553 && // Khalim's Eye
-					items[i].classid !== 554 && // Khalim's Heart
-					items[i].classid !== 555 && // Khalim's Brain
-					items[i].classid !== 173 && // Khalim's Flail
-					items[i].classid !== 174 && // Khalim's Will
-					items[i].classid !== 644 && // Malah's Potion
-					items[i].classid !== 646 && // Scroll of Resistance
-					//
-					(items[i].code !== 529 || !!me.findItem(518, 0, 3)) && // Don't throw scrolls if no tome is found (obsolete code?)
-					(items[i].code !== 530 || !!me.findItem(519, 0, 3)) && // Don't throw scrolls if no tome is found (obsolete code?)
-					!Cubing.keepItem(items[i]) && // Don't throw cubing ingredients
-					!Runewords.keepItem(items[i]) && // Don't throw runeword ingredients
-					!CraftingSystem.keepItem(items[i]) // Don't throw crafting system ingredients
+			if ([18, 41, 76, 77, 78].indexOf(items[i].itemType) === -1 // Don't drop tomes, keys or potions
+					&& !items[i].questItem // Don't try to sell/drop quest-items
+					&& (items[i].code !== 529 || !!me.findItem(518, 0, 3)) // Don't throw scrolls if no tome is found (obsolete code?)
+					&& (items[i].code !== 530 || !!me.findItem(519, 0, 3)) // Don't throw scrolls if no tome is found (obsolete code?)
+					&& !Cubing.keepItem(items[i]) // Don't throw cubing ingredients
+					&& !Runewords.keepItem(items[i]) // Don't throw runeword ingredients
+					&& !CraftingSystem.keepItem(items[i]) // Don't throw crafting system ingredients
 			) {
 				result = Pickit.checkItem(items[i]).result;
 
@@ -1956,12 +1913,14 @@ const Town = {
 
 				switch (result) {
 				case 0: // Drop item
-					if ((getUIFlag(0x0C) || getUIFlag(0x08)) && (items[i].getItemCost(1) <= 1 || items[i].itemType === 39)) { // Quest items and such
+					// Quest items and such
+					if ((getUIFlag(sdk.uiflags.Shop) || getUIFlag(sdk.uiflags.NPCMenu)) && (items[i].getItemCost(1) <= 1 || !items[i].isSellable)) {
 						me.cancel();
 						delay(200);
 					}
 
-					if (getUIFlag(0xC) || (Config.PacketShopping && getInteractedNPC() && getInteractedNPC().itemcount > 0)) { // Might as well sell the item if already in shop
+					// Might as well sell the item if already in shop
+					if (getUIFlag(sdk.uiflags.Shop) || (Config.PacketShopping && getInteractedNPC() && getInteractedNPC().itemcount > 0)) {
 						print("clearInventory sell " + items[i].name);
 						Misc.itemLogger("Sold", items[i]);
 						items[i].sell();

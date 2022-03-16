@@ -156,7 +156,7 @@ function DiabloHelper() {
 			throw new Error("Failed to kill Vizier");
 		}
 
-		if (Config.FieldID) {
+		if (Config.FieldID.Enabled) {
 			Town.fieldID();
 		}
 
@@ -182,7 +182,7 @@ function DiabloHelper() {
 			throw new Error("Failed to kill de Seis");
 		}
 
-		if (Config.FieldID) {
+		if (Config.FieldID.Enabled) {
 			Town.fieldID();
 		}
 
@@ -215,7 +215,7 @@ function DiabloHelper() {
 			}
 		}
 
-		if (Config.FieldID) {
+		if (Config.FieldID.Enabled) {
 			Town.fieldID();
 		}
 
