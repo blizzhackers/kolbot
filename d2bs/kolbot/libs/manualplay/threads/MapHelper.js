@@ -12,6 +12,7 @@ include("OOG.js");
 include("AutoMule.js");
 include("Gambling.js");
 include("TorchSystem.js");
+include("CraftingSystem.js");
 include("MuleLogger.js");
 include("common/Attack.js");
 include("common/Cubing.js");

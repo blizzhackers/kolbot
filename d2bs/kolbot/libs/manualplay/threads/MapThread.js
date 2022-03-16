@@ -38,6 +38,7 @@ const Hooks = {
 	saidMessage: false,
 	userAddon: false,
 	enabled: true,
+	flushed: false,
 
 	init: function () {
 		let files = dopen("libs/manualplay/hooks/").getFiles();
@@ -70,9 +71,12 @@ const Hooks = {
 		ShrineHooks.check();
 		ItemHooks.check();
 		TextHooks.check();
+		Hooks.flushed = false;
 	},
 
 	flush: function (flag) {
+		if (Hooks.flushed === flag) return true;
+
 		if (flag === true) {
 			this.enabled = false;
 
@@ -87,6 +91,9 @@ const Hooks = {
 				VectorHooks.flush();
 				TextHooks.displaySettings = false;
 				TextHooks.check();
+			} else if (sdk.uiflags.Inventory === flag && [sdk.uiflags.stash, sdk.uiflags.Cube, sdk.uiflags.TradePrompt].every((el) => { return !getUIFlag(el); })) {
+				ItemHooks.flush();
+				TextHooks.check();
 			} else {
 				MonsterHooks.flush();
 				ShrineHooks.flush();
@@ -96,6 +103,8 @@ const Hooks = {
 				ItemHooks.flush();
 			}
 		}
+
+		Hooks.flushed = flag;
 
 		return true;
 	}

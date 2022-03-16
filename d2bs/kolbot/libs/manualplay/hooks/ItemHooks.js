@@ -14,10 +14,13 @@ const ItemHooks = {
 		81, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 15, 19, 44, 42, 43
 	],
 	itemCodeByClassId: {
+		7: "The Chieftain",
+		28: "Gleamscythe",
 		103: "Suicide Branch",
 		104: "Carin Shard",
 		105: "King Leoric's Arm",
 		157: "Ribcracker",
+		161: "Skystrike",
 		187: "Bartuc's",
 		190: "Jade Talon",
 		192: "Shadow Killer",
@@ -244,7 +247,7 @@ const ItemHooks = {
 			switch (item.itemType) {
 			case 39:
 				color = 0x9A;
-				code += (this.itemCodeByClassId[item.classid] ? this.itemCodeByClassId[item.classid] : "ÿc8" + item.fname);
+				code += (!!this.itemCodeByClassId[item.classid] ? this.itemCodeByClassId[item.classid] : "ÿc8" + item.fname);
 
 				break;
 			case 74:
@@ -289,7 +292,7 @@ const ItemHooks = {
 					
 					break;
 				default:
-					code += (this.itemCodeByClassIdAndQuality[item.classid][item.quality] ? this.itemCodeByClassIdAndQuality[item.classid][item.quality] : item.name);
+					code += (!!this.itemCodeByClassIdAndQuality[item.classid] ? this.itemCodeByClassIdAndQuality[item.classid][item.quality] : item.name);
 					
 					break;
 				}
