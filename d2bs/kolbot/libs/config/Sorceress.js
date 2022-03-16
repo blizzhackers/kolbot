@@ -325,7 +325,9 @@ function LoadConfig() {
 	Config.CainID.Enable = false; // Identify items at Cain
 	Config.CainID.MinGold = 2500000; // Minimum gold (stash + character) to have in order to use Cain.
 	Config.CainID.MinUnids = 3; // Minimum number of unid items in order to use Cain.
-	Config.FieldID = false; // Identify items in the field instead of going to town.
+	Config.FieldID.Enabled = false; // Identify items while in the field
+	Config.FieldID.PacketID = true; // use packets to speed up id process (recommended to use this)
+	Config.FieldID.UsedSpace = 80; // how much space has been used before trying to field id, set to 0 to id after every item picked
 	Config.DroppedItemsAnnounce.Enable = false;	// Announce Dropped Items to in-game newbs
 	Config.DroppedItemsAnnounce.Quality = []; // Quality of item to announce. See NTItemAlias.dbl for values. Example: Config.DroppedItemsAnnounce.Quality = [6, 7, 8];
 

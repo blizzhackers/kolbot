@@ -741,7 +741,8 @@ const Town = {
 		return true;
 	},
 
-	fieldID: function () { // not exactly a town function but whateva
+	// Identify items while in the field if we have a id tome
+	fieldID: function () {
 		let list, tome, item, result;
 
 		list = this.getUnids();
@@ -765,10 +766,10 @@ const Town = {
 				result.result = -1;
 			}
 
-			if (result.result === -1) { // unid item that should be identified
-				this.identifyItem(item, tome);
+			// unid item that should be identified
+			if (result.result === -1) {
+				this.identifyItem(item, tome, Config.FieldID.PacketID);
 				delay(me.ping + 1);
-
 				result = Pickit.checkItem(item);
 
 				if (!Item.autoEquipCheck(item)) {
@@ -828,8 +829,8 @@ const Town = {
 		return list;
 	},
 
-	identifyItem: function (unit, tome) {
-		if (Config.PacketShopping) {
+	identifyItem: function (unit, tome, packetID) {
+		if (Config.PacketShopping || packetID) {
 			return Packet.identifyItem(unit, tome);
 		}
 

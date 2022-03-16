@@ -144,7 +144,11 @@ let Config = {
 	MercWatch: false,
 	LowGold: 0,
 	StashGold: 0,
-	FieldID: false,
+	FieldID: {
+		Enabled: false,
+		PacketID: true,
+		UsedSpace: 90,
+	},
 	DroppedItemsAnnounce: {
 		Enable: false,
 		Quality: [],

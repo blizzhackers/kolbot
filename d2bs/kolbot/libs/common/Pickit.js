@@ -115,8 +115,9 @@ const Pickit = {
 			pickList.sort(this.sortItems);
 
 			// Check if the item unit is still valid and if it's on ground or being dropped
-			if (copyUnit(pickList[0]).x !== undefined && (pickList[0].mode === 3 || pickList[0].mode === 5) &&
-					(Pather.useTeleport() || me.inTown || !checkCollision(me, pickList[0], 0x1))) { // Don't pick items behind walls/obstacles when walking
+			// Don't pick items behind walls/obstacles when walking
+			if (copyUnit(pickList[0]).x !== undefined && (pickList[0].mode === 3 || pickList[0].mode === 5)
+					&& (Pather.useTeleport() || me.inTown || !checkCollision(me, pickList[0], 0x1))) {
 				// Check if the item should be picked
 				status = this.checkItem(pickList[0]);
 
@@ -124,9 +125,9 @@ const Pickit = {
 					// Override canFit for scrolls, potions and gold
 					canFit = Storage.Inventory.CanFit(pickList[0]) || [4, 22, 76, 77, 78].indexOf(pickList[0].itemType) > -1;
 
-					// Try to make room with FieldID
-					if (!canFit && Config.FieldID && Town.fieldID()) {
-						canFit = Storage.Inventory.CanFit(pickList[0]) || [4, 22, 76, 77, 78].indexOf(pickList[0].itemType) > -1;
+					// Field id when our used space is above a certain percent or if we are full try to make room with FieldID
+					if (Config.FieldID.Enabled && (!canFit || Storage.Inventory.UsedSpacePercent() > Config.FieldID.UsedSpace)) {
+						Town.fieldID() && (canFit = (pickList[0].gid !== undefined && Storage.Inventory.CanFit(pickList[0])));
 					}
 
 					// Try to make room by selling items in town
