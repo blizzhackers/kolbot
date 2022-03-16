@@ -1448,7 +1448,7 @@ const Town = {
 	},
 
 	reviveMerc: function () {
-		!this.needMerc() return true;
+		if (!this.needMerc()) return true;
 
 		// avoid Aheara
 		me.act === 3 && this.goToTown(Pather.accessToAct(4) ? 4 : 2);
