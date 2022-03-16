@@ -255,16 +255,22 @@ function main() {
 			delay(100);
 		}
 
+		let hideFlagFound = false;
+
 		this.revealArea(me.area);
 		
 		for (let i = 0; i < hideFlags.length; i++) {
-			while (getUIFlag(hideFlags[i])) {
+			if (getUIFlag(hideFlags[i])) {
 				Hooks.flush(hideFlags[i]);
 				ActionHooks.checkAction();
-
+				hideFlagFound = true;
 				delay(100);
+
+				break;
 			}
 		}
+
+		if (hideFlagFound) continue;
 
 		getUIFlag(0x0A) ? Hooks.update() : Hooks.flush(true) && (!HelpMenu.cleared && HelpMenu.hideMenu());
 

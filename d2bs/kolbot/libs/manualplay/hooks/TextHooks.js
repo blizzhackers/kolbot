@@ -64,7 +64,7 @@ const TextHooks = {
 		this.getScale(hkLen);
 		this.add("dashboard");
 		updateSettingsDisplay && this.add("showSettings");
-		(this.lastAct !== me.act || this.wasInTown !== me.inTown) && this.add("qolBoard");
+		(this.lastAct !== me.act || this.wasInTown !== me.inTown || !this.getHook("qolBoard", this.qolHooks)) && this.add("qolBoard");
 	},
 
 	hookHandler: function (click, x, y) {
