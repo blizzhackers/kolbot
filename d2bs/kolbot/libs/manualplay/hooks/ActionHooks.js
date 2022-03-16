@@ -100,6 +100,7 @@ const ActionHooks = {
 				switch (me.area) {
 				case 1:
 				case 38:
+				case 46:
 				case 76:
 				case 78:
 				case 80:
@@ -118,6 +119,7 @@ const ActionHooks = {
 				break;
 			case 102: // Numpad 6
 				switch (me.area) {
+				case 46:
 				case 76:
 				case 81:
 				case 82:
@@ -134,6 +136,7 @@ const ActionHooks = {
 				break;
 			case 103: // Numpad 7
 				switch (me.area) {
+				case 46:
 				case 108:
 					hook = this.getHook("POI4");
 
@@ -146,7 +149,7 @@ const ActionHooks = {
 				
 				break;
 			case 104: // Numpad 8
-				hook = this.getPortalHook("Uber Tristam");
+				hook = me.area === 46 ? this.getHook("POI5") : this.getPortalHook("Uber Tristam");
 
 				break;
 			case 188: // shift <
@@ -304,6 +307,44 @@ const ActionHooks = {
 				dest: {x: 25048, y: 5177},
 				hook: new Text("ÿc<Num 5: Wirt's Leg", Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
+
+			break;
+		case 46:
+			{
+				let correctTomb = getRoom().correcttomb;
+				let currExits = getArea().exits
+					.filter(function (ex) { return ex.target !== correctTomb; })
+					.sort(function(a, b) {
+					return a.target - b.target;
+				}).reverse();
+				
+				let curr;
+				for (let i = 8; i > 4; i--) {
+					curr = currExits.shift();
+					this.hooks.push({
+						name: "POI" + (i - 3), 
+						type: "area",
+						dest: curr.target,
+						hook: new Text("ÿc<Num " + i + ": " + Pather.getAreaName(curr.target), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+					});
+				}
+
+				curr = currExits.shift();
+				this.hooks.push({
+					name: "Side Area",
+					type: "area",
+					dest: curr.target,
+					hook: new Text("ÿc<Num 4: " + Pather.getAreaName(curr.target), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				});
+
+				curr = currExits.shift();
+				this.hooks.push({
+					name: "POI",
+					type: "area",
+					dest: curr.target,
+					hook: new Text("ÿc<Num 3: " + Pather.getAreaName(curr.target), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				});
+			}
 
 			break;
 		case 76:

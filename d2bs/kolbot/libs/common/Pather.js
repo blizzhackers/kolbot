@@ -1132,7 +1132,7 @@ const Pather = {
 				}
 
 				if (check || Config.WaypointMenu) {
-					if (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint)) {
+					if ((!Skill.useTK(wp) || i > 3) && (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint))) {
 						this.moveToUnit(wp) && Misc.click(0, 0, wp);
 					}
 

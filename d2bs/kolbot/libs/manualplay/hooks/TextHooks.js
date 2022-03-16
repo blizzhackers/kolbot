@@ -23,7 +23,7 @@ const TextHooks = {
 	dashBoard: [],
 	qolHooks: [],
 	hooks: [],
-	yLocMapScale: {1: 40, 2: 30, 3: 20, 4: 10, 6: -10},
+	yLocMapScale: {1: 40, 2: 30, 3: 20, 4: 10, 6: -10, 9: -40},
 	modifier: 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename) + Number(!!me.gameserverip && !me.realm)),
 
 	getScale: function (hkLen) {

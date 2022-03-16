@@ -236,6 +236,7 @@ function main() {
 						case 74:
 							Pather.moveTo(12692, 5195);
 							redPortal = Pather.getPortal(74);
+							!redPortal && Pather.useWaypoint(74);
 
 							break;
 						case 109:
