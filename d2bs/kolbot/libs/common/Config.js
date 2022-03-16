@@ -9,18 +9,17 @@ const Scripts = {};
 // eslint-disable-next-line no-redeclare
 let Config = {
 	init: function (notify) {
-		let i, n,
-			configFilename = "",
+		let configFilename = "",
 			classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"];
 
-		for (i = 0; i < 5; i += 1) {
+		for (let i = 0; i < 5; i++) {
 			switch (i) {
 			case 0: // Custom config
 				if (!isIncluded("config/_customconfig.js")) {
 					include("config/_customconfig.js");
 				}
 
-				for (n in CustomConfig) {
+				for (let n in CustomConfig) {
 					if (CustomConfig.hasOwnProperty(n)) {
 						if (CustomConfig[n].indexOf(me.profile) > -1) {
 							if (notify) {

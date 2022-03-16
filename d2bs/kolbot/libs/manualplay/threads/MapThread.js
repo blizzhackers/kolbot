@@ -91,7 +91,7 @@ const Hooks = {
 				VectorHooks.flush();
 				TextHooks.displaySettings = false;
 				TextHooks.check();
-			} else if (sdk.uiflags.Inventory === flag && [sdk.uiflags.stash, sdk.uiflags.Cube, sdk.uiflags.TradePrompt].every((el) => { return !getUIFlag(el); })) {
+			} else if (sdk.uiflags.Inventory === flag && [sdk.uiflags.stash, sdk.uiflags.Cube, sdk.uiflags.TradePrompt].every((el) => !getUIFlag(el))) {
 				ItemHooks.flush();
 				TextHooks.check();
 			} else {

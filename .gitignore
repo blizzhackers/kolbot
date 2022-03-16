@@ -6,3 +6,4 @@ d2bs/kolbot/logs/*.txt
 d2bs/kolbot/logs/**/**
 d2bs/kolbot/mules/**/*.txt
 d2bs/logs/*.log
+d2bs/kolbot/libs/manualplay/config/*.*.js

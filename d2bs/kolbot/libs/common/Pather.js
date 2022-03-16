@@ -975,7 +975,7 @@ const Pather = {
 		targetArea - area id of where the unit leads to
 	*/
 	useUnit: function (type, id, targetArea) {
-		let tick, unit, coord,
+		let unit, coord,
 			preArea = me.area;
 
 		for (let i = 0; i < 5; i += 1) {
@@ -1092,7 +1092,6 @@ const Pather = {
 		this.broadcastIntent(targetArea);
 
 		let tick, wp, coord, retry, npc;
-		let once = false;
 		let startAct = me.act;
 
 		for (let i = 0; i < 12; i += 1) {
@@ -1250,27 +1249,27 @@ const Pather = {
 			if (!tpTool) return false;
 
 			oldPortal = getUnits(sdk.unittype.Object, "portal")
-	            .filter(function (p) { return p.getParent() === me.name; })
-	            .first();
+				.filter(function (p) { return p.getParent() === me.name; })
+				.first();
 
 			!!oldPortal && (oldGid = oldPortal.gid);
-	        tpTool.interact();
+			tpTool.interact();
 			let tick = getTickCount();
 
 			MainLoop:
 			while (getTickCount() - tick < Math.max(500 + i * 100, me.ping * 2 + 100)) {
 				portal = getUnits(sdk.unittype.Object, "portal")
-	                .filter(function (p) { return p.getParent() === me.name && p.gid !== oldGid; })
-	                .first();
+					.filter(function (p) { return p.getParent() === me.name && p.gid !== oldGid; })
+					.first();
 
 				if (portal) {
-	                if (use) {
-	                    if (this.usePortal(null, null, copyUnit(portal))) return true;
-	                    break MainLoop; // don't spam usePortal
-	                } else {
-	                    return copyUnit(portal);
-	                }
-	            }
+					if (use) {
+						if (this.usePortal(null, null, copyUnit(portal))) return true;
+						break MainLoop; // don't spam usePortal
+					} else {
+						return copyUnit(portal);
+					}
+				}
 
 				delay(10);
 			}
@@ -1295,7 +1294,7 @@ const Pather = {
 
 		me.cancel();
 
-		let i, tick, portal,
+		let tick, portal,
 			preArea = me.area;
 
 		for (let i = 0; i < 10; i += 1) {

@@ -146,7 +146,7 @@ function main() {
 		];
 
 		for (let i = 0; i < scripts.length; i++) {
-			script = getScript(scripts[i]);
+			let script = getScript(scripts[i]);
 
 			if (script) {
 				if (script.running) {
