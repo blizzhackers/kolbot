@@ -6,24 +6,23 @@
 
 function Cows() {
 	this.buildCowRooms = function () {
-		var i, j, room, kingPreset, badRooms, badRooms2,
-			finalRooms = [],
+		let finalRooms = [],
 			indexes = [];
 
-		kingPreset = getPresetUnit(me.area, 1, 773);
-		badRooms = getRoom(kingPreset.roomx * 5 + kingPreset.x, kingPreset.roomy * 5 + kingPreset.y).getNearby();
+		let kingPreset = getPresetUnit(me.area, 1, 773);
+		let badRooms = getRoom(kingPreset.roomx * 5 + kingPreset.x, kingPreset.roomy * 5 + kingPreset.y).getNearby();
 
-		for (i = 0; i < badRooms.length; i += 1) {
-			badRooms2 = badRooms[i].getNearby();
+		for (let i = 0; i < badRooms.length; i += 1) {
+			let badRooms2 = badRooms[i].getNearby();
 
-			for (j = 0; j < badRooms2.length; j += 1) {
+			for (let j = 0; j < badRooms2.length; j += 1) {
 				if (indexes.indexOf(badRooms2[j].x + "" + badRooms2[j].y) === -1) {
 					indexes.push(badRooms2[j].x + "" + badRooms2[j].y);
 				}
 			}
 		}
 
-		room = getRoom();
+		let room = getRoom();
 
 		do {
 			if (indexes.indexOf(room.x + "" + room.y) === -1) {
@@ -40,7 +39,7 @@ function Cows() {
 			say("cows");
 		}
 
-		var room, result, myRoom,
+		let room, result, myRoom,
 			rooms = this.buildCowRooms();
 
 		function RoomSort(a, b) {
@@ -49,9 +48,7 @@ function Cows() {
 
 		while (rooms.length > 0) {
 			// get the first room + initialize myRoom var
-			if (!myRoom) {
-				room = getRoom(me.x, me.y);
-			}
+			!myRoom && (room = getRoom(me.x, me.y));
 
 			if (room) {
 				if (room instanceof Array) { // use previous room to calculate distance
@@ -63,7 +60,6 @@ function Cows() {
 
 			rooms.sort(RoomSort);
 			room = rooms.shift();
-
 			result = Pather.getNearestWalkable(room[0], room[1], 10, 2);
 
 			if (result) {
@@ -79,18 +75,18 @@ function Cows() {
 	};
 
 	this.getLeg = function () {
-		var i, portal, wirt, leg, gid;
+		let portal, wirt, leg, gid;
 
-		if (me.getItem(88)) {
-			return me.getItem(88);
+		if (me.getItem(sdk.items.quest.WirtsLeg)) {
+			return me.getItem(sdk.items.quest.WirtsLeg);
 		}
 
-		Pather.useWaypoint(4);
+		Pather.useWaypoint(sdk.areas.StonyField);
 		Precast.doPrecast(true);
 		Pather.moveToPreset(me.area, 1, 737, 8, 8);
 
-		for (i = 0; i < 6; i += 1) {
-			portal = Pather.getPortal(38);
+		for (let i = 0; i < 6; i += 1) {
+			portal = Pather.getPortal(sdk.areas.Tristram);
 
 			if (portal) {
 				Pather.usePortal(null, null, portal);
@@ -109,11 +105,11 @@ function Cows() {
 
 		wirt = getUnit(2, 268);
 
-		for (i = 0; i < 8; i += 1) {
+		for (let i = 0; i < 8; i += 1) {
 			wirt.interact();
 			delay(500);
 
-			leg = getUnit(4, 88);
+			leg = getUnit(4, sdk.items.quest.WirtsLeg);
 
 			if (leg) {
 				gid = leg.gid;
@@ -129,44 +125,43 @@ function Cows() {
 	};
 
 	this.getTome = function () {
-		var tome,
-			myTome = me.findItem("tbk", 0, 3),
-			akara = Town.initNPC("Shop");
+		let npc, scroll;
+		let tpTome = me.findItems(sdk.items.TomeofTownPortal, 0, 3);
 
-		tome = me.getItem("tbk");
+		if (tpTome.length < 2) {
+			npc = Town.initNPC("Shop", "buyTpTome");
 
-		if (tome) {
-			do {
-				if (!myTome || tome.gid !== myTome.gid) {
-					return copyUnit(tome);
-				}
-			} while (tome.getNext());
-		}
+			if (!getInteractedNPC()) {
+				throw new Error("Failed to find npc");
+			}
 
-		if (!akara) {
-			throw new Error("Failed to buy tome");
-		}
+			let tome = npc.getItem(sdk.items.TomeofTownPortal);
 
-		tome = akara.getItem("tbk");
+			if (!!tome && tome.getItemCost(0) < me.gold && tome.buy()) {
+				delay(500);
+				tpTome = me.findItems(sdk.items.TomeofTownPortal, 0, 3);
+				tpTome.forEach(function (book) {
+					while (book.getStat(sdk.stats.Quantity) < 20) {
+						scroll = npc.getItem(sdk.items.ScrollofTownPortal);
+						
+						if (!!scroll && scroll.getItemCost(0) < me.gold) {
+							scroll.buy();
+						} else {
+							break;
+						}
 
-		if (tome.buy()) {
-			tome = me.getItem("tbk");
-
-			if (tome) {
-				do {
-					if (!myTome || tome.gid !== myTome.gid) {
-						return copyUnit(tome);
+						delay(20);
 					}
-				} while (tome.getNext());
+				});
+			} else {
+				throw new Error("Failed to buy tome");
 			}
 		}
 
-		throw new Error("Failed to buy tome");
+		return tpTome.first();
 	};
 
 	this.openPortal = function (leg, tome) {
-		var i;
-
 		if (!Town.openStash()) {
 			throw new Error("Failed to open stash");
 		}
@@ -182,8 +177,8 @@ function Cows() {
 		transmute();
 		delay(500);
 
-		for (i = 0; i < 10; i += 1) {
-			if (Pather.getPortal(39)) {
+		for (let i = 0; i < 10; i += 1) {
+			if (Pather.getPortal(sdk.areas.MooMooFarm)) {
 				return true;
 			}
 
@@ -193,43 +188,59 @@ function Cows() {
 		throw new Error("Portal not found");
 	};
 
-	var leg, tome;
 
 	// we can begin now
-	switch (me.gametype) {
-	case 0: // classic
-		if (!me.getQuest(26, 0)) { // diablo not completed
-			throw new Error("Diablo quest incomplete.");
+	try {
+		if (!me.diffCompleted) {
+			throw new Error("Final quest incomplete.");
 		}
 
-		break;
-	case 1: // expansion
-		if (!me.getQuest(40, 0)) { // baal not completed
-			throw new Error("Baal quest incomplete.");
-		}
+		Town.goToTown(1);
+		Town.doChores();
+		Town.move("stash");
 
-		break;
+		// Check to see if portal is already open, if not get the ingredients
+		if (!Pather.getPortal(sdk.areas.MooMooFarm)) {
+			if (!me.tristram) {
+				throw new Error("Cain quest incomplete");
+			}
+
+			if (me.cows) {
+				throw new Error("Already killed the Cow King.");
+			}
+			
+			let leg = this.getLeg();
+			let tome = this.getTome();
+			this.openPortal(leg, tome);
+		}
+	} catch (e) {
+		print("ÿc1" + e);
+
+		if (Misc.getPlayerCount() > 1) {
+			!me.inTown && Town.goToTown(1);
+			Town.move("stash");
+			print("ÿc9(Cows) :: ÿc0Waiting 1 minute to see if anyone else opens the cow portal");
+
+			let tick = getTickCount();
+			let found = false;
+			while (getTickCount() - tick > 60e3) {
+				found = Pather.getPortal(sdk.areas.MooMooFarm);
+
+				if (found) {
+					break;
+				}
+				delay(250);
+			}
+
+			if (!found) {
+				throw new Error("No cow portal");
+			}
+		} else {
+			return false;
+		}
 	}
 
-	Town.goToTown(1);
-	Town.doChores();
-	Town.move("stash");
-
-	// Check to see if portal is already open, if not get the ingredients
-	if (!Pather.getPortal(39)) {
-		if (!me.getQuest(4, 0)) {
-			throw new Error("Cain quest incomplete");
-		}
-		if (me.getQuest(4, 10)) { // king dead or cain not saved
-			throw new Error("Already killed the Cow King.");
-		}
-		
-		leg = this.getLeg();
-		tome = this.getTome();
-		this.openPortal(leg, tome);
-	}
-
-	Pather.usePortal(39);
+	Pather.usePortal(sdk.areas.MooMooFarm);
 	Precast.doPrecast(false);
 	this.clearCowLevel();
 
