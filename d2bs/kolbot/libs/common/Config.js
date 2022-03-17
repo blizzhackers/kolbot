@@ -291,6 +291,8 @@ let Config = {
 	UseTelekinesis: false,
 	CastStatic: false,
 	StaticList: [],
+	UseEnergyShield: false,
+	UseColdArmor: true,
 
 	// Necromancer specific
 	Golem: 0,

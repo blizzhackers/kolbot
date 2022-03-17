@@ -550,6 +550,9 @@ function LoadConfig() {
 	Config.CastStatic = 60; // Cast static until the target is at designated life percent. 100 = disabled.
 	Config.StaticList = []; // List of monster NAMES or CLASSIDS to static. Example: Config.StaticList = ["Andariel", 243];
 	Config.UseTelekinesis = true; // Use telekinesis on units that allow it. Example: Shrines, Waypoints, Chests, and Portals
+	Config.UseEnergyShield = false; // set to true to use energy shield if its available
+	Config.UseColdArmor = true; // use armor skills, uses skill ids or set to true to let the bot decide based on skill level or false to disable completely
+	// (40 / sdk.skills.FrozenArmor)(50 / sdk.skills.ShiverArmor)(60 / sdk.skills.ChillingArmor)
 
 	/* AutoSkill builds character based on array defined by the user and it replaces AutoBuild's skill system.
 	 * AutoSkill will automatically spend skill points and it can also allocate any prerequisite skills as required.

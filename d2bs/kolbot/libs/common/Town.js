@@ -1129,7 +1129,7 @@ const Town = {
 
 		for (let pots = 0; pots < quantity; pots++) {
 			if (jugs && Storage.Inventory.CanFit(jugs)) {
-				jugs.buy(false);
+				Packet.buyItem(jugs, false);
 			}
 		}
 

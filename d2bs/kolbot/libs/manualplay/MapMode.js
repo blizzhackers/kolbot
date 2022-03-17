@@ -24,11 +24,9 @@ const MapMode = {
 		// General
 		Config.WaypointMenu = true;
 		Config.MiniShopBot = false; // Scan items in NPC shops.
-		Config.PacketShopping = false; // Use packets to shop. Improves shopping speed.
+		Config.PacketShopping = true; // Use packets to shop. Improves shopping speed.
 		Config.TownCheck = false; // Go to town if out of potions
-		Config.LogExperience = false; // Print experience statistics in the manager.
-		Config.LastMessage = ""; // Message or array of messages to say at the end of the run. Use $nextgame to say next game - "Next game: $nextgame" (works with lead entry point)
-
+		
 		// Additional item info log settings. All info goes to \logs\ItemLog.txt
 		Config.ItemInfo = false; // Log stashed, skipped (due to no space) or sold items.
 		Config.ItemInfoQuality = []; // The quality of sold items to log. See NTItemAlias.dbl for values. Example: Config.ItemInfoQuality = [6, 7, 8];
