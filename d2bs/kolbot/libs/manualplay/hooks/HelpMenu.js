@@ -31,6 +31,11 @@ const HelpMenu = new function () {
 			"invo": "Drop all items in the inventory",
 			"stash": "Drop all items in the stash excluding the cube"
 		},
+		"stack": {
+			"antidote": "Buy and Stack 10 antidote potions for 5 minutes of boosted poison resistance",
+			"thawing": "Buy and Stack 10 thawing potions for 5 minutes of boosted cold resistance",
+			"stamina": "Buy and Stack 10 stamina potions for 5 minutes of boosted stamina",
+		},
 		"Num": {
 			"9:": "Stops current pathing action",
 		},
@@ -70,6 +75,9 @@ const HelpMenu = new function () {
 			"useraddon",
 			"drop invo",
 			"drop stash",
+			"stack antidote",
+			"stack thawing",
+			"stack stamina",
 		];
 
 		this.hooks.push(new Text("ÿc2Chat Commands:", this.helpBoxTextX, this.helpBoxTextY, 0, 0, 0));

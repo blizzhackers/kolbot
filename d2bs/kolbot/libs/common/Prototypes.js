@@ -1336,6 +1336,23 @@ Unit.prototype.getRes = function (type, difficulty) {
 	return this.getStat(type) - modifier;
 };
 
+Unit.prototype.cancelUIFlags = function () {
+	if (this !== me) return;
+	let flags = [
+		sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.SkillWindow, sdk.uiflags.NPCMenu,
+		sdk.uiflags.Waypoint, sdk.uiflags.Party, sdk.uiflags.Shop, sdk.uiflags.Quest, sdk.uiflags.Stash,
+		sdk.uiflags.Cube, sdk.uiflags.KeytotheCairnStonesScreen, sdk.uiflags.SubmitItem
+	];
+
+	for (let i = 0; i < flags.length; i++) {
+		if (getUIFlag(flags[i])) {
+			me.cancel();
+			delay(500);
+			i = 0; // Reset
+		}
+	}
+};
+
 let coords = function () {
 	if (Array.isArray(this) && this.length > 1) {
 		return [this[0], this[1]];

@@ -71,7 +71,7 @@ const Town = {
 	doChores: function (repair = false) {
 		!me.inTown && this.goToTown();
 
-		let cancelFlags = [0x01, 0x02, 0x04, 0x08, 0x14, 0x16, 0x0c, 0x0f, 0x19, 0x1a];
+		let preAct = me.act;
 
 		// Burst of speed while in town
 		if (me.inTown && me.getSkill(sdk.skills.BurstofSpeed, 1) && !me.getState(sdk.states.BurstofSpeed)) {
@@ -97,17 +97,8 @@ const Town = {
 		this.stash(true);
 		this.clearScrolls();
 
-		for (let i = 0; i < cancelFlags.length; i++) {
-			if (getUIFlag(cancelFlags[i])) {
-				delay(500);
-				me.cancel();
-
-				break;
-			}
-		}
-
-		me.cancel();
-
+		me.act !== preAct && this.goToTown(preAct);
+		me.cancelUIFlags();
 		!me.barbarian && !Precast.checkCTA() && Precast.doPrecast(false);
 
 		return true;
@@ -228,6 +219,12 @@ const Town = {
 			me.cancel();
 
 			break;
+		case "Heal":
+			if (me.getState(sdk.states.Frozen)) {
+				Town.buyPots(2, "Thawing", true, true);
+			}
+
+			break;
 		}
 
 		return npc;
@@ -247,7 +244,7 @@ const Town = {
 
 		// Status effects
 		if (Config.HealStatus
-			&& [sdk.states.Poison, sdk.states.AmplifyDamage, sdk.states.Weaken, sdk.states.Decrepify, sdk.states.LowerResist].some(function (state) { return me.getState(state); })) {
+			&& [sdk.states.Poison, sdk.states.AmplifyDamage, sdk.states.Frozen, sdk.states.Weaken, sdk.states.Decrepify, sdk.states.LowerResist].some(function (state) { return me.getState(state); })) {
 			return true;
 		}
 
@@ -1075,29 +1072,96 @@ const Town = {
 		return false;
 	},
 
-	buyAntidotes: function (quantity) {
-		let i,
-			antidote,
-			npc = this.initNPC("Shop", "buy Antidote");
+	buyPots: function (quantity = 0, type = "", drink = false, force = false) {
+		if (!quantity || !type) return false;
+		type = type[0].toUpperCase() + type.substring(1).toLowerCase();
+		let npc, jugs, potDealer = ["Akara", "Lysander", "Alkor", "Jamella", "Malah"][me.act - 1];
 
-		if (!npc) {
-			return false;
+		// Don't buy if already at max res
+		if (type === "Thawing" && me.coldRes >= 75 && !force) {
+			return true;
+		} else if (type === "Thawing") {
+			print("ÿc9BuyPotsÿc0 :: Current cold resistance: " + me.coldRes);
 		}
 
-		antidote = npc.getItem("yps");
-
-		if (!antidote) {
-			return false;
+		// Don't buy if already at max res
+		if (type === "Antidote" && me.poisonRes >= 75 && !force) {
+			return true;
+		} else if (type === "Antidote") {
+			print("ÿc9BuyPotsÿc0 :: Current poison resistance: " + me.poisonRes);
 		}
 
-		try {
-			for (i = 0; i < quantity; i++) {
-				antidote.buy(false);
+		// Don't buy if teleport or vigor
+		if (type === "Stamina" && (Config.Vigor && me.getSkill(sdk.skills.Vigor, 0) || Pather.canTeleport()) && !force) return true;
+
+		npc = getInteractedNPC();
+
+		if (npc && npc.name.toLowerCase() === NPC[potDealer] && getUIFlag(sdk.uiflags.NPCMenu)) {
+			!getUIFlag(sdk.uiflags.Shop) && Misc.useMenu(sdk.menu.Trade);
+		} else {
+			me.cancel();
+			npc = null;
+
+			Town.move(NPC[potDealer]);
+			npc = getUnit(sdk.unittype.NPC, NPC[potDealer]);
+
+			if (!npc || !npc.openMenu()) return false;
+
+			Misc.useMenu(sdk.menu.Trade);
+		}
+
+		switch (type) {
+		case "Thawing":
+			jugs = npc.getItem("wms");
+
+			break;
+		case "Stamina":
+			jugs = npc.getItem("vps");
+
+			break;
+		case "Antidote":
+			jugs = npc.getItem("yps");
+
+			break;
+		}
+
+		print('ÿc9BuyPotsÿc0 :: buying ' + quantity + ' ' + type + ' Potions');
+
+		for (let pots = 0; pots < quantity; pots++) {
+			if (jugs && Storage.Inventory.CanFit(jugs)) {
+				jugs.buy(false);
 			}
-		} catch (e) {
-			print(e.message);
+		}
 
-			return false;
+		me.cancelUIFlags();
+		drink && Town.drinkPots(type);
+
+		return true;
+	},
+
+	drinkPots: function (type) {
+		let classIds = [sdk.items.StaminaPotion, sdk.items.AntidotePotion, sdk.items.ThawingPotion];
+		!!type && (classIds = classIds.filter(function (el) { return el === sdk.items[type + "Potion"]; }));
+
+		for (let i = 0; i < classIds.length; i++) {
+			let name;
+			let quantity = 0;
+			let chugs = me.getItemsEx(classIds[i]).filter(pot => pot.isInInventory);
+
+			if (chugs.length > 0) {
+				chugs.forEach(function (pot) {
+					if (!!pot) {
+						name === undefined && (name = pot.name);
+						pot.interact();
+						quantity++;
+						delay(10 + me.ping);
+					}
+				});
+
+				if (name) {
+					print('ÿc9DrinkPotsÿc0 :: drank ' + quantity + " " + name + "s. Timer [" + (new Date(quantity * 30 * 1000).toISOString().slice(11, -5)) + "]");
+				}
+			}
 		}
 
 		return true;

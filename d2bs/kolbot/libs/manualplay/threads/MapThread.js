@@ -193,6 +193,16 @@ function main() {
 			qolObj.action = msgList[1];
 
 			break;
+		case "stack":
+			if (msgList.length < 2) {
+				print("ÿc1Missing arguments");
+				break;
+			}
+
+			qolObj.type = "stack";
+			qolObj.action = msgList[1];
+
+			break;
 		case "help":
 			if (HelpMenu.cleared) {
 				HelpMenu.showMenu();
@@ -206,10 +216,12 @@ function main() {
 
 			break;
 		case "make":
-			FileTools.copy("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + ".js", "libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js");
-			D2Bot.printToConsole("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
-			print("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
-			me.overhead("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+			if (!FileTools.exists("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js")) {
+				FileTools.copy("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + ".js", "libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js");
+				D2Bot.printToConsole("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+				print("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+				me.overhead("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+			}
 
 			break;
 		default:

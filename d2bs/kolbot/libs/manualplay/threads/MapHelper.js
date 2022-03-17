@@ -403,6 +403,23 @@ function main() {
 						}
 
 						break;
+					case "stack":
+						switch (obj.action) {
+						case "thawing":
+							Town.buyPots(10, "Thawing", true, true);
+							
+							break;
+						case "antidote":
+							Town.buyPots(10, "Antidote", true, true);
+
+							break;
+						case "stamina":
+							Town.buyPots(10, "Stamina", true, true);
+
+							break;
+						}
+
+						break;
 					}
 				}
 			} catch (e) {

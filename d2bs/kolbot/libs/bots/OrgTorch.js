@@ -424,7 +424,7 @@ function OrgTorch() {
 
 			if (portal) {
 				if (portal.objtype === 133 && Config.OrgTorch.AntidotesToChug) {
-					Town.buyAntidotes(Config.OrgTorch.AntidotesToChug);
+					Town.buyPots(Config.OrgTorch.AntidotesToChug, "Antidote", true, true);
 					for (chugs = 0; chugs < Config.OrgTorch.AntidotesToChug; chugs++) {
 						delay(500);
 						print("glug glug");
