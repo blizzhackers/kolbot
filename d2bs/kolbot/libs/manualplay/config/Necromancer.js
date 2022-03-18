@@ -7,6 +7,11 @@
  * To comment out something, put // in front of that line
  * !!!Never comment out something you're not sure about, set it to false or disable as noted in description if you don't want to use it.
  * true and false are case sensitive. Good: Config.SomeVar = true; Bad: Config.SomeVar = True;
+ * Arrayname = [1, 0, 1] is an array. Elements in an Array need commas seperatings them
+ * Array Example: Good: Config.QuitList = ["sorcCharname", "bobarbCharname"]; Bad: Config.QuitList = ["sorcCharname" "bobarbCharname"];
+ * Types: "sorcCharname" is an example of a string. String elements need " " around them.
+ * Continuing with QuitList this is Bad: Config.QuitList = [sorcCharname, bobarbCharname];
+ * Javascript statements need to end with a semi-colon; Good: Scripts.Corpsefire = false; Bad: Scripts.Corpsefire = false
  */
 
 include("manualplay/MapMode.js");
@@ -107,6 +112,7 @@ function LoadConfig() {
 	/* Attack config
 	 * To disable an attack, set it to -1
 	 * Skills MUST be POSITIVE numbers. For reference see ...\kolbot\sdk\skills.txt
+	 * DO NOT LEAVE THE NEGATIVE SIGN IN FRONT OF THE SKILLID. GOOD: Config.AttackSkill[1] = 84; BAD: Config.AttackSkill[1] = -84;
 	 */
 
 	Config.PrimarySlot = -1; // Set to use specific weapon slot as primary weapon slot: -1 = disabled, 0 = slot I, 1 = slot II
@@ -157,6 +163,19 @@ function LoadConfig() {
 	// Class specific config
 	Config.Curse[0] = 0; // Boss curse. Use skill number or set to 0 to disable.
 	Config.Curse[1] = 0; // Other monsters curse. Use skill number or set to 0 to disable.
+	
+	/* Custom curses for monster
+	 * Can use monster name or classid
+	 * Format: Config.CustomCurse = [["monstername", skillid], [156, skillid]];
+	 * Optional 3rd parameter for spectype, leave blank to use on all
+	 	0x00    Normal Monster
+		0x01    Super Unique
+		0x02    Champion
+		0x04    Boss
+		0x08    Minion
+		Example: Config.CustomCurse = [["HellBovine", 60], [571, 87], ["SkeletonArcher", 71, 0x00]];
+	 */
+	Config.CustomCurse = [];
 
 	Config.ExplodeCorpses = 0; // Explode corpses. Use skill number or 0 to disable. 74 = Corpse Explosion, 83 = Poison Explosion
 	Config.Golem = "None"; // Golem. 0 or "None" = don't summon, 1 or "Clay" = Clay Golem, 2 or "Blood" = Blood Golem, 3 or "Fire" = Fire Golem

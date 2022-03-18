@@ -502,6 +502,7 @@ function LoadConfig() {
 	/* Attack config
 	 * To disable an attack, set it to -1
 	 * Skills MUST be POSITIVE numbers. For reference see ...\kolbot\sdk\skills.txt
+	 * DO NOT LEAVE THE NEGATIVE SIGN IN FRONT OF THE SKILLID. GOOD: Config.AttackSkill[1] = 56; BAD: Config.AttackSkill[1] = -56;
 	 */
 	Config.AttackSkill[0] = -1; // Preattack skill.
 	Config.AttackSkill[1] = -1; // Primary skill to bosses.

@@ -303,6 +303,7 @@ let Config = {
 	ReviveUnstackable: false,
 	PoisonNovaDelay: 2000,
 	Curse: [],
+	CustomCurse: [],
 	ExplodeCorpses: 0,
 
 	// Paladin speficic

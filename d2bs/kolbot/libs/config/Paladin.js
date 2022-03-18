@@ -1,10 +1,17 @@
 // Paladin config file
 
 /* Brief instructions:
- * Notepad++ is HIGHLY recommended to use for editing these files. Visit http://notepad-plus-plus.org/
+ * Use any IDE to modify these files, Sublime Text 3, Visual Studio Code, NotePad++
+ * 
+ * Basic JS Rules:
  * To comment out something, put // in front of that line
  * !!!Never comment out something you're not sure about, set it to false or disable as noted in description if you don't want to use it.
  * true and false are case sensitive. Good: Config.SomeVar = true; Bad: Config.SomeVar = True;
+ * Arrayname = [1, 0, 1] is an array. Elements in an Array need commas seperatings them
+ * Array Example: Good: Config.QuitList = ["sorcCharname", "bobarbCharname"]; Bad: Config.QuitList = ["sorcCharname" "bobarbCharname"];
+ * Types: "sorcCharname" is an example of a string. String elements need " " around them.
+ * Continuing with QuitList this is Bad: Config.QuitList = [sorcCharname, bobarbCharname];
+ * Javascript statements need to end with a semi-colon; Good: Scripts.Corpsefire = false; Bad: Scripts.Corpsefire = false
  */
 
 function LoadConfig() {
@@ -297,7 +304,6 @@ function LoadConfig() {
 	Config.PickitFiles.push("LLD.nip");
 	Config.PickRange = 40; // Pick radius
 	Config.FastPick = false; // Check and pick items between attacks
-	Config.ManualPlayPick = false; // If set to true and D2BotMap entry script is used, will enable picking in manual play.
 
 	/* Advanced automule settings
 	 * Trigger - Having an item that is on the list will initiate muling. Useful if you want to mule something immediately upon finding.
@@ -502,6 +508,7 @@ function LoadConfig() {
 	/* Attack config
 	 * To disable an attack, set it to -1
 	 * Skills MUST be POSITIVE numbers. For reference see ...\kolbot\sdk\skills.txt
+	 * DO NOT LEAVE THE NEGATIVE SIGN IN FRONT OF THE SKILLID. GOOD: Config.AttackSkill[1] = 96; BAD: Config.AttackSkill[1] = -96;
 	 */
 	Config.AttackSkill[0] = -1; // Preattack skill.
 	Config.AttackSkill[1] = -1; // Primary skill to bosses.
