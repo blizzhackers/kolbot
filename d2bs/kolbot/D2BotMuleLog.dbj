@@ -419,7 +419,7 @@ MainSwitch:
 		if (FileTools.exists("logs/MuleLog.json")) {
 			obj = JSON.parse(FileTools.readText("logs/MuleLog.json"));
 
-			if (obj.currChar && obj.currChar !== "Private") { // ControlAction.getCharacters() always returns a non-existent character "Private" at the end of the list
+			if (obj.currChar) {
 				for (i = 0; i < charList.length; i += 1) {
 					if (charList[i] === obj.currChar) {
 						charList.splice(0, i + 1); // Remove the previous currChar as well
