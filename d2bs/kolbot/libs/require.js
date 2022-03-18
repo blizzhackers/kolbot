@@ -1,3 +1,4 @@
+/* eslint-disable dot-notation */
 /**
  * @description A node like require function.
  * @author Jaenster
@@ -55,7 +56,7 @@ global.require = (function (include, isIncluded, print, notify) {
 		let fullpath = removeRelativePath((path + field).replace(/\\/, '/')).toLowerCase();
 		// remove lib again, if required in e.g. kolbot\tools but wants modules\whatever
 		if (fullpath.startsWith('lib')) {
-			fullpath = fullpath.substr(4); 
+			fullpath = fullpath.substr(4);
 		}
 		const packageName = fullpath;
 
@@ -94,7 +95,7 @@ global.require = (function (include, isIncluded, print, notify) {
 					throw err;
 				}
 			} finally {
-				depth--
+				depth--;
 			}
 
 			if (!global['module']['exports'] && Object.keys(global['exports'])) { // Incase its transpiled typescript

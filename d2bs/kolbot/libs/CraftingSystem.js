@@ -50,7 +50,7 @@ CraftingSystem.Teams = {
 
 // Get the Crafting System information for current profile
 CraftingSystem.getInfo = function () {
-	var i, j, info;
+	let i, j, info;
 
 	for (i in CraftingSystem.Teams) {
 		if (CraftingSystem.Teams.hasOwnProperty(i)) {
@@ -91,11 +91,11 @@ CraftingSystem.outOfGameCheck = function () {
 		return false;
 	}
 
-	var worker,
+	let worker,
 		info = CraftingSystem.getInfo();
 
 	function scriptMsg(msg) {
-		var obj;
+		let obj;
 
 		try {
 			obj = JSON.parse(msg);
@@ -145,7 +145,7 @@ CraftingSystem.outOfGameCheck = function () {
 };
 
 CraftingSystem.getWorker = function () {
-	var i,
+	let i,
 		rval = {
 			game: false,
 			name: false
@@ -153,7 +153,7 @@ CraftingSystem.getWorker = function () {
 		info = CraftingSystem.getInfo();
 
 	function CheckEvent(mode, msg) {
-		var i;
+		let i;
 
 		if (mode === 4) {
 			for (i = 0; i < info.CraftingGames.length; i += 1) {
@@ -195,7 +195,7 @@ CraftingSystem.getWorker = function () {
 // #############################################
 
 CraftingSystem.inGameCheck = function () {
-	var i,
+	let i,
 		info = CraftingSystem.getInfo();
 
 	if (info && info.collector) {
@@ -231,7 +231,7 @@ CraftingSystem.validItem = function (item) {
 
 // Check if the item should be picked for crafting
 CraftingSystem.checkItem = function (item) {
-	var i,
+	let i,
 		info = CraftingSystem.getInfo();
 
 	if (info) {
@@ -247,7 +247,7 @@ CraftingSystem.checkItem = function (item) {
 
 // Check if the item should be kept or dropped
 CraftingSystem.keepItem = function (item) {
-	var info = CraftingSystem.getInfo();
+	let info = CraftingSystem.getInfo();
 
 	if (info) {
 		if (info.collector) {
@@ -268,11 +268,11 @@ CraftingSystem.keepItem = function (item) {
 
 // Collect ingredients only if a worker needs them
 CraftingSystem.getSetInfoFromWorker = function (workerName) {
-	var setInfo = false,
+	let setInfo = false,
 		info = CraftingSystem.getInfo();
 
 	function copyData(mode, msg) {
-		var obj;
+		let obj;
 
 		if (mode === 4) {
 			try {
@@ -307,7 +307,7 @@ CraftingSystem.getSetInfoFromWorker = function (workerName) {
 };
 
 CraftingSystem.init = function (name) {
-	var i, setInfo,
+	let i, setInfo,
 		info = CraftingSystem.getInfo();
 
 	if (info && info.collector) {
@@ -329,7 +329,7 @@ CraftingSystem.init = function (name) {
 
 // Build global lists of needed items and valid ingredients
 CraftingSystem.buildLists = function (onlyNeeded) {
-	var i,
+	let i,
 		info = CraftingSystem.getInfo();
 
 	if (info && info.collector) {
@@ -352,7 +352,7 @@ CraftingSystem.buildLists = function (onlyNeeded) {
 
 // Check which ingredients a set needs and has
 CraftingSystem.checkSet = function (set) {
-	var i, j, amount,
+	let i, j, amount,
 		rval = {},
 		setNeeds = [],
 		setHas = [];
@@ -402,7 +402,7 @@ CraftingSystem.update = function (item) {
 
 // Cube flawless gems if the ingredient is a perfect gem
 CraftingSystem.checkSubrecipes = function () {
-	var i;
+	let i;
 
 	for (i = 0; i < CraftingSystem.neededItems.length; i += 1) {
 		switch (CraftingSystem.neededItems[i]) {
@@ -432,7 +432,7 @@ CraftingSystem.checkSubrecipes = function () {
 
 // Check if there are any complete ingredient sets
 CraftingSystem.checkFullSets = function () {
-	var i,
+	let i,
 		info = CraftingSystem.getInfo();
 
 	if (info && info.collector) {
@@ -455,10 +455,10 @@ CraftingSystem.dropItems = function () {
 	Town.move("stash");
 	Town.openStash();
 
-	var gidList, item, worker;
+	let gidList, item, worker;
 
 	function scriptMsg(msg) {
-		var obj;
+		let obj;
 
 		try {
 			obj = JSON.parse(msg);

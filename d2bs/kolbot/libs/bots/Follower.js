@@ -47,7 +47,7 @@
 */
 
 function Follower() {
-	var i, j, stop, leader, leaderUnit, charClass, piece, skill, result, unit, player, coord,
+	let i, j, stop, leader, leaderUnit, charClass, piece, skill, result, unit, player, coord,
 		commanders = [Config.Leader],
 		attack = true,
 		openContainers = true,
@@ -60,7 +60,7 @@ function Follower() {
 			return false;
 		}
 
-		var i, target,
+		let i, target,
 			exits = getArea().exits;
 
 		for (i = 0; i < exits.length; i += 1) {
@@ -133,7 +133,7 @@ function Follower() {
 			return false;
 		}
 
-		var npc, names;
+		let npc, names;
 
 		switch (me.act) {
 		case 1:
@@ -194,7 +194,7 @@ function Follower() {
 
 	// Change act after completing last act quest
 	this.changeAct = function (act) {
-		var npc, preArea, target;
+		let npc, preArea, target;
 
 		preArea = me.area;
 
@@ -284,7 +284,7 @@ function Follower() {
 				try {
 					Pather.useUnit(2, 566, 109);
 				} catch (a5e) {
-
+					break;
 				}
 			}
 
@@ -326,7 +326,7 @@ function Follower() {
 			delay(40);
 		}
 
-		var status,
+		let status,
 			pickList = [],
 			item = getUnit(4);
 
@@ -356,17 +356,15 @@ function Follower() {
 	};
 
 	this.openContainers = function (range) {
-		var unit, ox, oy,
+		let unit,
 			unitList = [],
 			containers = ["chest", "loose rock", "hidden stash", "loose boulder", "corpseonstick", "casket", "armorstand", "weaponrack", "barrel", "holeanim",
-							"roguecorpse", "ratnest", "corpse", "goo pile", "largeurn", "urn", "chest3", "jug", "skeleton", "guardcorpse", "sarcophagus",
-							"cocoon", "basket", "stash", "hollow log", "hungskeleton", "pillar", "skullpile", "skull pile", "jar3", "jar2", "jar1", "bonechest", "woodchestl",
-							"woodchestr", "barrel wilderness", "burialchestr", "burialchestl", "explodingchest", "chestl", "chestr", "icecavejar1", "icecavejar2",
-							"icecavejar3", "icecavejar4", "deadperson", "deadperson2", "evilurn", "tomb1l", "tomb3l", "tomb2", "tomb3", "object2", "groundtomb", "groundtombl"
-						];
+				"roguecorpse", "ratnest", "corpse", "goo pile", "largeurn", "urn", "chest3", "jug", "skeleton", "guardcorpse", "sarcophagus",
+				"cocoon", "basket", "stash", "hollow log", "hungskeleton", "pillar", "skullpile", "skull pile", "jar3", "jar2", "jar1", "bonechest", "woodchestl",
+				"woodchestr", "barrel wilderness", "burialchestr", "burialchestl", "explodingchest", "chestl", "chestr", "icecavejar1", "icecavejar2",
+				"icecavejar3", "icecavejar4", "deadperson", "deadperson2", "evilurn", "tomb1l", "tomb3l", "tomb2", "tomb3", "object2", "groundtomb", "groundtombl"
+			];
 
-		ox = me.x;
-		oy = me.y;
 		unit = getUnit(2);
 
 		if (unit) {
@@ -698,7 +696,7 @@ function Follower() {
 			unit = getUnit(2, "waypoint");
 
 			if (unit) {
-WPLoop:
+				WPLoop:
 				for (i = 0; i < 3; i += 1) {
 					if (getDistance(me, unit) > 3) {
 						Pather.moveToUnit(unit);

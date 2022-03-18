@@ -5,13 +5,13 @@
 */
 
 function MFHelper() {
-	var i, player, playerAct, split,
+	let i, player, playerAct, split,
 		oldCommand = "",
 		command = "";
 
 	function ChatEvent(name, msg) {
 		if (!player) {
-			var i,
+			let i,
 				match = ["kill", "clearlevel", "clear", "quit", "cows", "council", "goto"];
 
 			if (msg) {
@@ -31,7 +31,7 @@ function MFHelper() {
 	}
 
 	this.buildCowRooms = function () {
-		var i, j, room, kingPreset, badRooms, badRooms2,
+		let i, j, room, kingPreset, badRooms, badRooms2,
 			finalRooms = [],
 			indexes = [];
 
@@ -60,7 +60,7 @@ function MFHelper() {
 	};
 
 	this.clearCowLevel = function () {
-		var room, result, myRoom,
+		let room, result, myRoom,
 			rooms = this.buildCowRooms();
 
 		function RoomSort(a, b) {
@@ -119,7 +119,7 @@ function MFHelper() {
 	}
 
 	if (player) {
-		if (!Misc.poll(() => player.area, 120*60, 100 + me.ping)) {
+		if (!Misc.poll(() => player.area, 120 * 60, 100 + me.ping)) {
 			throw new Error('Failed to wait for player area');
 		}
 
@@ -132,9 +132,9 @@ function MFHelper() {
 	}
 
 	// START
-MainLoop:
+	MainLoop:
 	while (true) {
-		if (me.playertype != 1 && me.mode === 17) {
+		if (!me.hardcore && me.mode === 17) {
 			while (!me.inTown) {
 				me.revive();
 				delay(1000);
@@ -167,8 +167,8 @@ MainLoop:
 
 					try {
 						if (!!parseInt(split, 10)) {
-								split = parseInt(split, 10);
-							}
+							split = parseInt(split, 10);
+						}
 
 						Town.goToTown(split, true);
 						Town.move("portalspot");

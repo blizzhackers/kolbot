@@ -5,7 +5,7 @@
 */
 
 function Gamble() {
-	var gold,
+	let gold,
 		info = Gambling.getInfo(),
 		needGold = false;
 

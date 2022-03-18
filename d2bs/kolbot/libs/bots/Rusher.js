@@ -16,7 +16,7 @@ function Rusher() {
 	load("tools/rushthread.js");
 	delay(500);
 
-	var i, rushThread, command, master, commandSplit0,
+	let i, rushThread, command, master, commandSplit0,
 		commands = [],
 		sequence = [
 			"andariel", "radament", "cube", "amulet", "staff", "summoner", "duriel", "lamesen",
@@ -40,7 +40,7 @@ function Rusher() {
 	};
 
 	this.getPlayerCount = function () {
-		var count = 0,
+		let count = 0,
 			party = getParty();
 
 		if (party) {
@@ -53,7 +53,7 @@ function Rusher() {
 	};
 
 	this.getPartyAct = function () {
-		var party = getParty(),
+		let party = getParty(),
 			minArea = 999;
 
 		do {

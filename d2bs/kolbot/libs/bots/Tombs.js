@@ -5,7 +5,7 @@
 */
 
 function Tombs() {
-	var i;
+	let i;
 
 	Town.doChores();
 	Pather.useWaypoint(46);

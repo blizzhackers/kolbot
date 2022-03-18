@@ -5,10 +5,10 @@
  */
 
 function Baal() {
-	var portal, tick;
+	let portal, tick;
 
 	this.preattack = function () {
-		var check;
+		let check;
 
 		switch (me.classid) {
 		case 1: // Sorceress
@@ -66,7 +66,7 @@ function Baal() {
 	};
 
 	this.checkThrone = function () {
-		var monster = getUnit(1);
+		let monster = getUnit(1);
 
 		if (monster) {
 			do {
@@ -98,7 +98,7 @@ function Baal() {
 	};
 
 	this.clearThrone = function () {
-		var i, monster,
+		let i, monster,
 			monList = [],
 			pos = [15094, 5022, 15094, 5041, 15094, 5060, 15094, 5041, 15094, 5022];
 
@@ -125,7 +125,7 @@ function Baal() {
 	};
 
 	this.checkHydra = function () {
-		var hydra = getUnit(1, getLocaleString(3325));
+		let hydra = getUnit(1, getLocaleString(3325));
 		if (hydra) {
 			do {
 				if (hydra.mode !== 12 && hydra.getStat(172) !== 2) {
@@ -146,7 +146,7 @@ function Baal() {
 	};
 
 	this.announce = function () {
-		var count, string, souls, dolls,
+		let count, string, souls, dolls,
 			monster = getUnit(1);
 
 		if (monster) {
@@ -243,7 +243,7 @@ function Baal() {
 
 	Pather.moveTo(15094, me.classid === 3 ? 5029 : 5038);
 
-MainLoop:
+	MainLoop:
 	while (true) {
 		if (getDistance(me, 15094, me.classid === 3 ? 5029 : 5038) > 3) {
 			Pather.moveTo(15094, me.classid === 3 ? 5029 : 5038);

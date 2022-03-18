@@ -21,16 +21,14 @@ function OrgTorch() {
 			return false;
 		}
 
-		var item = me.getItem("cm2");
+		let item = me.getItem("cm2");
 
 		if (item) {
 			do {
 				if (item.quality === 7 && Pickit.checkItem(item).result === 1) {
 					if (AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
 						scriptBroadcast("muleTorch");
-						//quit();
 						scriptBroadcast("quit");
-						//delay(10000);
 					}
 
 					return true;
@@ -43,7 +41,7 @@ function OrgTorch() {
 
 	// Check whether the killer is alone in the game
 	this.aloneInGame = function () {
-		var party = getParty();
+		let party = getParty();
 
 		if (party) {
 			do {
@@ -58,7 +56,7 @@ function OrgTorch() {
 
 	// Try to lure a monster - wait until it's close enough
 	this.lure = function (bossId) {
-		var tick,
+		let tick,
 			unit = getUnit(1, bossId);
 
 		if (unit) {
@@ -78,7 +76,7 @@ function OrgTorch() {
 
 	// Check if we have complete sets of organs
 	this.completeSetCheck = function () {
-		var horns = me.findItems("dhn"),
+		let horns = me.findItems("dhn"),
 			brains = me.findItems("mbr"),
 			eyes = me.findItems("bey");
 
@@ -120,7 +118,7 @@ function OrgTorch() {
 
 	// Open a red portal. Mode 0 = mini ubers, mode 1 = Tristram
 	this.openPortal = function (mode) {
-		var portal,
+		let portal,
 			item1 = mode === 0 ? me.findItem("pk1", 0) : me.findItem("dhn", 0),
 			item2 = mode === 0 ? me.findItem("pk2", 0) : me.findItem("bey", 0),
 			item3 = mode === 0 ? me.findItem("pk3", 0) : me.findItem("mbr", 0);
@@ -265,7 +263,7 @@ function OrgTorch() {
 	};
 
 	this.juvCheck = function () {
-		var i,
+		let i,
 			needJuvs = 0,
 			col = Town.checkColumns(Storage.BeltSize());
 
@@ -281,7 +279,7 @@ function OrgTorch() {
 	};
 
 	// Start
-	var i, portal, tkeys, hkeys, dkeys, brains, eyes, horns, timer, farmer, busy, busyTick, chugs,
+	let i, portal, tkeys, hkeys, dkeys, brains, eyes, horns, timer, farmer, busy, busyTick, chugs,
 		neededItems = {pk1: 0, pk2: 0, pk3: 0, rv: 0};
 
 	// Do town chores and quit if MakeTorch is true and we have a torch.
@@ -295,7 +293,7 @@ function OrgTorch() {
 		farmer = TorchSystem.isFarmer();
 
 		this.torchSystemEvent = function (mode, msg) {
-			var obj, farmer;
+			let obj, farmer;
 
 			if (mode === 6) {
 				farmer = TorchSystem.isFarmer();

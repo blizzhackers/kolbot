@@ -53,7 +53,7 @@ function DiabloHelper() {
 
 	// general functions
 	this.getLayout = function (seal, value) {
-		var sealPreset = getPresetUnit(108, 2, seal);
+		let sealPreset = getPresetUnit(108, 2, seal);
 
 		if (!seal) {
 			throw new Error("Seal preset not found. Can't continue");
@@ -110,7 +110,7 @@ function DiabloHelper() {
 	};
 
 	this.getBoss = function (name) {
-		var i, boss, glow;
+		let i, boss, glow;
 
 		while (true) {
 			if (!this.preattack(name)) {
@@ -232,22 +232,22 @@ function DiabloHelper() {
 			"seis": () => this.seisSeal(),
 			"infector": () => this.infectorSeal(),
 		};
-		Config.DiabloHelper.SealOrder.forEach(seal => {seals[seal]()});
+		Config.DiabloHelper.SealOrder.forEach(seal => {seals[seal]();});
 	};
 
 	this.diabloPrep = function () {
-		var trapCheck,
+		let trapCheck,
 			tick = getTickCount();
 
 		switch (me.classid) {
-			case 1:
-				Pather.moveTo(7793, 5291);
+		case 1:
+			Pather.moveTo(7793, 5291);
 
-				break;
-			default:
-				Pather.moveTo(7788, 5292);
+			break;
+		default:
+			Pather.moveTo(7788, 5292);
 
-				break;
+			break;
 		}
 
 		while (getTickCount() - tick < 30000) {
@@ -314,7 +314,7 @@ function DiabloHelper() {
 	};
 
 	this.preattack = function (id) {
-		var trapCheck,
+		let trapCheck,
 			coords = [];
 
 		switch (id) {
@@ -377,7 +377,7 @@ function DiabloHelper() {
 	};
 
 	this.followPath = function (path) {
-		var i;
+		let i;
 
 		for (i = 0; i < path.length; i += 2) {
 			if (this.cleared.length) {
@@ -403,7 +403,7 @@ function DiabloHelper() {
 			return false;
 		}*/
 
-		var i,
+		let i,
 			oldPos = {x: me.x, y: me.y},
 			monster = getUnit(1);
 
@@ -441,13 +441,13 @@ function DiabloHelper() {
 	this.starToInfA = [7809, 5268, 7834, 5306, 7852, 5280, 7852, 5310, 7869, 5294, 7895, 5295, 7919, 5290];
 	this.starToInfB = [7809, 5268, 7834, 5306, 7852, 5280, 7852, 5310, 7869, 5294, 7895, 5274, 7927, 5275, 7932, 5297, 7923, 5313];
 
-	var i, party;
+	let i, party;
 
 	// start
 	Town.doChores();
 
 	if (Config.DiabloHelper.SkipIfBaal) {
-AreaInfoLoop:
+		AreaInfoLoop:
 		while (true) {
 			me.overhead("Getting party area info");
 
@@ -497,7 +497,7 @@ AreaInfoLoop:
 			Pather.moveTo(7774, 5305);
 		}
 
-CSLoop:
+		CSLoop:
 		for (i = 0; i < Config.DiabloHelper.Wait; i += 1) {
 			party = getParty();
 

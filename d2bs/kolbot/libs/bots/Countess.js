@@ -5,8 +5,6 @@
 */
 
 function Countess() {
-	var i, poi;
-
 	Town.doChores();
 	Pather.useWaypoint(6);
 	Precast.doPrecast(true);
@@ -15,7 +13,7 @@ function Countess() {
 		throw new Error("Failed to move to Countess");
 	}
 
-	poi = getPresetUnit(me.area, 2, 580);
+	let poi = getPresetUnit(me.area, 2, 580);
 
 	if (!poi) {
 		throw new Error("Failed to move to Countess (preset not found)");

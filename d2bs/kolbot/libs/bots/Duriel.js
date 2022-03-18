@@ -6,7 +6,7 @@
 
 function Duriel () {
 	this.killDuriel = function () {
-		var i, target;
+		let i, target;
 
 		for (i = 0; i < 3; i += 1) {
 			target = getUnit(1, 211);
@@ -42,7 +42,7 @@ function Duriel () {
 		return target.dead;
 	};
 
-	var i, unit;
+	let i, unit;
 
 	if (me.area !== 46) {
 		Town.doChores();

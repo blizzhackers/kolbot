@@ -5,8 +5,6 @@
 */
 
 function Pindleskin() {
-	var anya;
-
 	Town.goToTown(Config.Pindleskin.UseWaypoint ? undefined : 5);
 	Town.doChores();
 
@@ -21,7 +19,7 @@ function Pindleskin() {
 		Town.move(NPC.Anya);
 
 		if (!Pather.getPortal(121) && me.getQuest(37, 1)) {
-			anya = getUnit(1, NPC.Anya);
+			let anya = getUnit(1, NPC.Anya);
 
 			if (anya) {
 				anya.openMenu();
@@ -62,7 +60,6 @@ function Pindleskin() {
 		}
 
 		Attack.kill(526); // Nihlathak
-		//Attack.clear(15, 0, 526);
 		Pickit.pickItems();
 	}
 

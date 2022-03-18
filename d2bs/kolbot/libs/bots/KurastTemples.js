@@ -9,7 +9,7 @@ function KurastTemples() {
 	Pather.useWaypoint(80);
 	Precast.doPrecast(true);
 
-	var i,
+	let i,
 		areas = [94, 95, 96, 97, 98, 99];
 
 	for (i = 0; i < 6; i += 1) {

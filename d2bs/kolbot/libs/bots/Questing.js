@@ -5,7 +5,7 @@
 */
 
 function Questing() {
-	var i, j,
+	let i, j,
 		quests = [
 			[1, "clearDen"],
 			[9, "killRadament"],
@@ -25,7 +25,7 @@ function Questing() {
 	this.clearDen = function () {
 		print("starting den");
 
-		var akara;
+		let akara;
 
 		if (!Town.goToTown(1) || !Pather.moveToExit([2, 8], true)) {
 			throw new Error();
@@ -51,7 +51,7 @@ function Questing() {
 
 		print("starting radament");
 
-		var book, atma;
+		let book, atma;
 
 		if (!Town.goToTown() || !Pather.useWaypoint(48, true)) {
 			throw new Error();
@@ -91,7 +91,7 @@ function Questing() {
 
 		print("starting izual");
 
-		var tyrael;
+		let tyrael;
 
 		if (!Town.goToTown() || !Pather.useWaypoint(106, true)) {
 			throw new Error();
@@ -126,7 +126,7 @@ function Questing() {
 
 		print("starting lam essen");
 
-		var stand, book, alkor;
+		let stand, book, alkor;
 
 		if (!Town.goToTown() || !Pather.useWaypoint(80, true)) {
 			throw new Error();
@@ -191,7 +191,7 @@ function Questing() {
 
 		print("starting anya");
 
-		var anya, malah, scroll;
+		let anya, malah, scroll;
 
 		if (!Town.goToTown() || !Pather.useWaypoint(113, true)) {
 			throw new Error();
@@ -251,7 +251,7 @@ function Questing() {
 						break;
 					}
 				} catch (e) {
-
+					continue;
 				}
 			} else {
 				break;

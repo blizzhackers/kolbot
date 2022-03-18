@@ -1,4 +1,4 @@
-var AutoMule = {
+const AutoMule = {
 	Mules: {
 		"Mule1": {
 			muleProfile: "", // The name of mule profile in d2bot#. It will be started and stopped when needed.
@@ -67,7 +67,7 @@ var AutoMule = {
 			skipMuleResponse: true, // Skip mule response check and attempt to join mule game. Useful if mule is shared and/or ran on different system.
 			onlyLogWhenFull: true // Only log character when full, solves an issue with droppers attempting to use characters who are already in game
 		}
-//##########################################################################################
+		//##########################################################################################
 	},
 
 	inGame: false,
@@ -184,7 +184,7 @@ var AutoMule = {
 			D2Bot.printToConsole("Starting " + (this.torchAnniCheck === 2 ? "anni " : this.torchAnniCheck === 1 ? "torch " : "") + "mule profile: " + muleObj.muleProfile, 7);
 		}
 
-MainLoop:
+		MainLoop:
 		while (true) {
 			// Set status to ready if using continuous mule with no response check
 			if (muleObj.continuousMule && muleObj.skipMuleResponse) {
@@ -236,7 +236,7 @@ MainLoop:
 				try {
 					joinGame(muleObj.muleGameName[0], muleObj.muleGameName[1]);
 				} catch (joinError) {
-
+					delay(100);
 				}
 
 				me.blockMouse = false;
@@ -298,7 +298,7 @@ MainLoop:
 	},
 
 	inGameCheck: function () {
-		var muleObj, tick, info,
+		let muleObj, tick, info,
 			begin = false,
 			timeout = 150 * 1000, // Ingame mule timeout
 			status = "muling";
@@ -499,6 +499,7 @@ MainLoop:
 				} while (player.getNext());
 			}
 		} catch (e) {
+			delay(100);
 		}
 
 		return false;
@@ -609,7 +610,7 @@ MainLoop:
 			this.baseGids = [];
 
 			for (let i = 0; i < Config.Runewords.length; i += 1) {
-				let base = Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2]||0)) || Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2]||0), true);
+				let base = Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0)) || Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0), true);
 
 				if (base) {
 					this.baseGids.push(base.gid);
@@ -760,7 +761,7 @@ MainLoop:
 					return 1;
 				}
 			}
-		}		
+		}
 
 		return 0;
 	},
@@ -782,7 +783,7 @@ MainLoop:
 					return this.TorchAnniMules[i].continuousMule;
 				}
 			}
-		}		
+		}
 
 		return false;
 	}

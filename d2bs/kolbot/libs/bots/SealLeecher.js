@@ -1,5 +1,5 @@
 function SealLeecher() {
-	var monster,
+	let monster,
 		commands = [];
 
 	Town.goToTown(4);

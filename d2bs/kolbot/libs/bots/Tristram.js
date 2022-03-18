@@ -5,7 +5,7 @@
 */
 
 function Tristram() {
-	var tree, scroll, akara, stones, gibbet;
+	let tree, scroll, akara, stones, gibbet;
 
 	if (!me.getQuest(4, 4) && !me.getItem(525)) {
 		if (!me.getItem(524)) {

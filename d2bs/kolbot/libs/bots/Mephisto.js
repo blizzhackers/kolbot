@@ -6,7 +6,7 @@
 
 function Mephisto() {
 	this.killMephisto = function () {
-		var i, angle, angles,
+		let i, angle, angles,
 			pos = {},
 			attackCount = 0,
 			meph = getUnit(1, 242);
@@ -53,7 +53,7 @@ function Mephisto() {
 	};
 
 	this.moat = function () {
-		var count, distance, mephisto;
+		let count, distance, mephisto;
 
 		count = 0;
 
@@ -113,15 +113,15 @@ function Mephisto() {
 	};
 
 	this.killCouncil = function () {
-		var i,
+		let i,
 			coords = [17600, 8125, 17600, 8015, 17643, 8068];
 
 		for (i = 0; i < coords.length; i += 2) {
 			Pather.moveTo(coords[i], coords[i + 1]);
 
 			if (Config.MFLeader) {
-				Pather.makePortal();
-				say("council " + i);
+				//Pather.makePortal();
+				//say("council " + i);
 			}
 
 			Attack.clearList(Attack.getMob([345, 346, 347], 0, 40));
@@ -179,11 +179,11 @@ function Mephisto() {
 
 	if (Config.Mephisto.TakeRedPortal) {
 		Pather.moveTo(17590, 8068);
-		let tick = getTickCount(),  time = 0;
+		let tick = getTickCount(), time = 0;
 
 		// Wait until bridge is there
 		while (getCollision(me.area, 17601, 8070, 17590, 8068) !== 0 && (time = getTickCount() - tick) < 2000) {
-			Pather.moveTo(17590, 8068);  // Activate it
+			Pather.moveTo(17590, 8068); // Activate it
 			delay(3);
 		}
 

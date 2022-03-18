@@ -5,8 +5,6 @@
 */
 
 function Eldritch() {
-	var chest;
-
 	Town.doChores();
 	Pather.useWaypoint(111);
 	Precast.doPrecast(true);
@@ -14,14 +12,14 @@ function Eldritch() {
 	Attack.clear(15, 0, getLocaleString(22500)); // Eldritch the Rectifier
 
 	if (Config.Eldritch.OpenChest) {
-		chest = getPresetUnit(me.area, 2, 455);
+		let chest = getPresetUnit(me.area, 2, 455);
 
 		if (chest) {
 			Pather.moveToUnit(chest);
 
-			chest = getUnit(2, 455);
+			let superChest = getUnit(2, 455);
 
-			if (Misc.openChest(chest)) {
+			if (Misc.openChest(superChest)) {
 				Pickit.pickItems();
 			}
 		}

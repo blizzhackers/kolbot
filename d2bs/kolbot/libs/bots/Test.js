@@ -1,7 +1,7 @@
 function Test() {
 	print("ÿc8TESTING");
 
-	var c;
+	let c;
 
 	function KeyDown(key) {
 		if (key === 45) {

@@ -5,7 +5,7 @@
 */
 
 function Vizier() {
-	var i, tick, seal;
+	let i, tick, seal;
 
 	this.openSeal = function (id) {
 		Pather.moveToPreset(108, 2, id, 4);

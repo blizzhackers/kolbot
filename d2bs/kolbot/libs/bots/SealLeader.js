@@ -1,6 +1,6 @@
 function SealLeader() {
 	this.getLayout = function (seal, value) {
-		var sealPreset = getPresetUnit(108, 2, seal);
+		let sealPreset = getPresetUnit(108, 2, seal);
 
 		if (!seal) {
 			throw new Error("Seal preset not found");
@@ -20,7 +20,7 @@ function SealLeader() {
 	};
 
 	this.getBoss = function (name) {
-		var i, boss,
+		let i, boss,
 			glow = getUnit(2, 131);
 
 		for (i = 0; i < 16; i += 1) {
@@ -39,7 +39,7 @@ function SealLeader() {
 	};
 
 	this.chaosPreattack = function (name, amount) {
-		var i, n, target, positions;
+		let i, n, target, positions;
 
 		switch (me.classid) {
 		case 0:
@@ -81,7 +81,7 @@ function SealLeader() {
 	};
 
 	this.diabloPrep = function () {
-		var trapCheck,
+		let trapCheck,
 			tick = getTickCount();
 
 		while (getTickCount() - tick < 17500) {
@@ -146,7 +146,7 @@ function SealLeader() {
 	};
 
 	this.openSeal = function (classid) {
-		var i, j, seal;
+		let i, j, seal;
 
 		for (i = 0; i < 5; i += 1) {
 			Pather.moveToPreset(108, 2, classid, classid === 394 ? 5 : 2, classid === 394 ? 5 : 0);

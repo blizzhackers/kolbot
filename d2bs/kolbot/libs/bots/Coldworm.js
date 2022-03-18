@@ -5,8 +5,6 @@
 */
 
 function Coldworm() {
-	var i;
-
 	Town.doChores();
 	Pather.useWaypoint(43);
 	Precast.doPrecast(true);
@@ -20,7 +18,7 @@ function Coldworm() {
 		Attack.clear(15, 0, getLocaleString(2882));
 	}
 
-	for (i = 62; i <= 64; i += 1) {
+	for (let i = 62; i <= 64; i += 1) {
 		if (!Pather.moveToExit(i, true)) {
 			throw new Error("Failed to move to Coldworm");
 		}

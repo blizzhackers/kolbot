@@ -3,7 +3,7 @@ function WPGetter() {
 	Town.goToTown(1);
 	Pather.getWP(me.area);
 
-	var i, access;
+	let i, access;
 
 	for (i = 0; i < Pather.wpAreas.length; i += 1) {
 		if (Pather.wpAreas[i] < 40) {

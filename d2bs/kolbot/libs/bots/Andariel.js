@@ -6,8 +6,7 @@
 
 function Andariel () {
 	this.killAndariel = function () {
-		var i,
-			target = getUnit(1, 156);
+		let target = getUnit(1, 156);
 
 		if (!target) {
 			throw new Error("Andariel not found.");
@@ -18,7 +17,7 @@ function Andariel () {
 			say("kill " + 156);
 		}
 
-		for (i = 0; i < 300; i += 1) {
+		for (let i = 0; i < 300; i += 1) {
 			ClassAttack.doAttack(target);
 
 			if (target.dead) {
@@ -42,12 +41,7 @@ function Andariel () {
 	}
 
 	Pather.moveTo(22549, 9520);
-
-	if (me.classid === 1 && me.gametype === 0) {
-		this.killAndariel();
-	} else {
-		Attack.kill(156); // Andariel
-	}
+	me.sorceress && me.classic ? this.killAndariel() : Attack.kill(sdk.monsters.Andariel);
 
 	delay(2000); // Wait for minions to die.
 	Pickit.pickItems();

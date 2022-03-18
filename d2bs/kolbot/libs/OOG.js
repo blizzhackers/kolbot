@@ -4,11 +4,11 @@
 *	@desc		handle out of game operations like creating characters/accounts, maintaining profile datafiles, d2bot# logging etc.
 */
 
-var D2Bot = {
+const D2Bot = {
 	handle: 0,
 
 	init: function () {
-		var handle = DataFile.getStats().handle;
+		let handle = DataFile.getStats().handle;
 
 		if (handle) {
 			this.handle = handle;
@@ -22,7 +22,7 @@ var D2Bot = {
 	},
 
 	printToConsole: function (msg, color, tooltip, trigger) {
-		var printObj = {
+		let printObj = {
 				msg: msg,
 				color: color || 0,
 				tooltip: tooltip || "",
@@ -39,27 +39,27 @@ var D2Bot = {
 	},
 
 	printToItemLog: function (itemObj) {
-		var obj = {
-				profile: me.profile,
-				func: "printToItemLog",
-				args: [JSON.stringify(itemObj)]
-			};
+		let obj = {
+			profile: me.profile,
+			func: "printToItemLog",
+			args: [JSON.stringify(itemObj)]
+		};
 
 		sendCopyData(null, this.handle, 0, JSON.stringify(obj));
 	},
 
 	uploadItem: function (itemObj) {
-		var obj = {
-				profile: me.profile,
-				func: "uploadItem",
-				args: [JSON.stringify(itemObj)]
-			};
+		let obj = {
+			profile: me.profile,
+			func: "uploadItem",
+			args: [JSON.stringify(itemObj)]
+		};
 
 		sendCopyData(null, this.handle, 0, JSON.stringify(obj));
 	},
 
 	writeToFile: function (filename, msg) {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "writeToFile",
 			args: [filename, msg]
@@ -69,7 +69,7 @@ var D2Bot = {
 	},
 
 	postToIRC: function (ircProfile, recepient, msg) {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "postToIRC",
 			args: [ircProfile, recepient, msg]
@@ -79,7 +79,7 @@ var D2Bot = {
 	},
 
 	ircEvent: function (mode) {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "ircEvent",
 			args: [mode ? "true" : "false"]
@@ -89,7 +89,7 @@ var D2Bot = {
 	},
 
 	notify: function (msg) {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "notify",
 			args: [msg]
@@ -99,17 +99,17 @@ var D2Bot = {
 	},
 
 	saveItem: function (itemObj) {
-		var obj = {
-				profile: me.profile,
-				func: "saveItem",
-				args: [JSON.stringify(itemObj)]
-			};
+		let obj = {
+			profile: me.profile,
+			func: "saveItem",
+			args: [JSON.stringify(itemObj)]
+		};
 
 		sendCopyData(null, this.handle, 0, JSON.stringify(obj));
 	},
 
 	updateStatus: function (msg) {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "updateStatus",
 			args: [msg]
@@ -119,7 +119,7 @@ var D2Bot = {
 	},
 
 	updateRuns: function () {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "updateRuns",
 			args: []
@@ -129,7 +129,7 @@ var D2Bot = {
 	},
 
 	updateChickens: function () {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "updateChickens",
 			args: []
@@ -139,7 +139,7 @@ var D2Bot = {
 	},
 
 	updateDeaths: function () {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "updateDeaths",
 			args: []
@@ -149,7 +149,7 @@ var D2Bot = {
 	},
 
 	requestGameInfo: function () {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "requestGameInfo",
 			args: []
@@ -159,7 +159,7 @@ var D2Bot = {
 	},
 
 	restart: function (keySwap) {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "restartProfile",
 			args: arguments.length > 0 ? [me.profile, keySwap] : [me.profile]
@@ -169,7 +169,7 @@ var D2Bot = {
 	},
 
 	CDKeyInUse: function () {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "CDKeyInUse",
 			args: []
@@ -179,7 +179,7 @@ var D2Bot = {
 	},
 
 	CDKeyDisabled: function () {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "CDKeyDisabled",
 			args: []
@@ -189,7 +189,7 @@ var D2Bot = {
 	},
 
 	CDKeyRD: function () {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "CDKeyRD",
 			args: []
@@ -203,7 +203,7 @@ var D2Bot = {
 			profile = me.profile;
 		}
 
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "stop",
 			args: [profile, release ? "True" : "False"]
@@ -213,7 +213,7 @@ var D2Bot = {
 	},
 
 	start: function (profile) {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "start",
 			args: [profile]
@@ -223,7 +223,7 @@ var D2Bot = {
 	},
 
 	startSchedule: function (profile) {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "startSchedule",
 			args: [profile]
@@ -233,7 +233,7 @@ var D2Bot = {
 	},
 
 	stopSchedule: function (profile) {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "stopSchedule",
 			args: [profile]
@@ -243,7 +243,7 @@ var D2Bot = {
 	},
 
 	updateCount: function () {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "updateCount",
 			args: ["1"]
@@ -253,7 +253,7 @@ var D2Bot = {
 	},
 
 	shoutGlobal: function (msg, mode) {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "shoutGlobal",
 			args: [msg, mode]
@@ -263,7 +263,7 @@ var D2Bot = {
 	},
 
 	heartBeat: function () {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "heartBeat",
 			args: []
@@ -274,7 +274,7 @@ var D2Bot = {
 	},
 
 	sendWinMsg: function (wparam, lparam) {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "winmsg",
 			args: [wparam, lparam]
@@ -291,7 +291,7 @@ var D2Bot = {
 
 	// Profile to profile communication
 	joinMe: function (profile, gameName, gameCount, gamePass, isUp) {
-		var obj = {
+		let obj = {
 			gameName: gameName + gameCount,
 			gamePass: gamePass,
 			inGame: isUp === "yes"
@@ -301,7 +301,7 @@ var D2Bot = {
 	},
 
 	requestGame: function (profile) {
-		var obj = {
+		let obj = {
 			profile: me.profile
 		};
 
@@ -309,7 +309,7 @@ var D2Bot = {
 	},
 
 	getProfile: function () {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "getProfile",
 			args: []
@@ -319,17 +319,17 @@ var D2Bot = {
 	},
 
 	setProfile: function (account, password, character, difficulty, realm, infoTag, gamePath) {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "setProfile",
 			args: [account, password, character, difficulty, realm, infoTag, gamePath]
 		};
 
-        sendCopyData(null, this.handle, 0, JSON.stringify(obj));
+		sendCopyData(null, this.handle, 0, JSON.stringify(obj));
 	},
 
 	setTag: function (tag) {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "setTag",
 			args: [JSON.stringify(tag)]
@@ -342,7 +342,7 @@ var D2Bot = {
 	store: function (info) {
 		this.remove();
 
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "store",
 			args: [me.profile, info]
@@ -353,7 +353,7 @@ var D2Bot = {
 
 	// Get info from d2bot# cache
 	retrieve: function () {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "retrieve",
 			args: [me.profile]
@@ -364,7 +364,7 @@ var D2Bot = {
 
 	// Delete info from d2bot# cache
 	remove: function () {
-		var obj = {
+		let obj = {
 			profile: me.profile,
 			func: "delete",
 			args: [me.profile]
@@ -374,9 +374,9 @@ var D2Bot = {
 	}
 };
 
-var DataFile = {
+const DataFile = {
 	create: function () {
-		var obj, string;
+		let obj, string;
 
 		obj = {
 			runs: 0,
@@ -401,7 +401,7 @@ var DataFile = {
 	},
 
 	getObj: function () {
-		var obj, string;
+		let obj, string;
 
 		if (!FileTools.exists("data/" + me.profile + ".json")) {
 			DataFile.create();
@@ -427,7 +427,7 @@ var DataFile = {
 	},
 
 	getStats: function () {
-		var obj = this.getObj();
+		let obj = this.getObj();
 
 		return Misc.clone(obj);
 	},
@@ -437,7 +437,7 @@ var DataFile = {
 			delay(100);
 		}
 
-		var i, obj, string,
+		let i, obj, string,
 			statArr = [];
 
 		if (typeof arg === "object") {
@@ -499,11 +499,11 @@ var DataFile = {
 	}
 };
 
-var ControlAction = {
+const ControlAction = {
 	mutedKey: false,
 
 	timeoutDelay: function (text, time, stopfunc, arg) {
-		var currTime = 0,
+		let currTime = 0,
 			endTime = getTickCount() + time;
 
 		while (getTickCount() < endTime) {
@@ -522,7 +522,7 @@ var ControlAction = {
 	},
 
 	click: function (type, x, y, xsize, ysize, targetx, targety) {
-		var control = getControl(type, x, y, xsize, ysize);
+		let control = getControl(type, x, y, xsize, ysize);
 
 		if (!control) {
 			print("control not found " + type + " " + x + " " + y + " location " + getLocation());
@@ -540,7 +540,7 @@ var ControlAction = {
 			return false;
 		}
 
-		var currText,
+		let currText,
 			control = getControl(type, x, y, xsize, ysize);
 
 		if (!control) {
@@ -566,7 +566,7 @@ var ControlAction = {
 	},
 
 	getText: function (type, x, y, xsize, ysize) {
-		var control = getControl(type, x, y, xsize, ysize);
+		let control = getControl(type, x, y, xsize, ysize);
 
 		if (!control) {
 			return false;
@@ -578,11 +578,11 @@ var ControlAction = {
 	joinChannel: function (channel) {
 		me.blockMouse = true;
 
-		var i, currChan, tick,
+		let i, currChan, tick,
 			rval = false,
 			timeout = 5000;
 
-MainLoop:
+		MainLoop:
 		while (true) {
 			switch (getLocation()) {
 			case 1: // Lobby
@@ -629,7 +629,7 @@ MainLoop:
 	},
 
 	createGame: function (name, pass, diff, delay) {
-		var control;
+		let control;
 
 		ControlAction.setText(1, 432, 162, 158, 20, name);
 		ControlAction.setText(1, 432, 217, 158, 20, pass);
@@ -686,11 +686,11 @@ MainLoop:
 			throw new Error("clickRealm: Invalid realm!");
 		}
 
-		var control, currentRealm;
+		let control, currentRealm;
 
 		me.blockMouse = true;
 
-MainLoop:
+		MainLoop:
 		while (true) {
 			switch (getLocation()) {
 			case 8:
@@ -742,7 +742,7 @@ MainLoop:
 	loginAccount: function (info) {
 		me.blockMouse = true;
 
-		var tick, locTick,
+		let tick, locTick,
 			realms = {
 				"uswest": 0,
 				"useast": 1,
@@ -752,7 +752,7 @@ MainLoop:
 
 		tick = getTickCount();
 
-MainLoop:
+		MainLoop:
 		while (true) {
 			switch (getLocation()) {
 			case 0:
@@ -826,7 +826,7 @@ MainLoop:
 	makeAccount: function (info) {
 		me.blockMouse = true;
 
-		var realms = {
+		let realms = {
 			"uswest": 0,
 			"useast": 1,
 			"asia": 2,
@@ -888,7 +888,7 @@ MainLoop:
 	},
 
 	findCharacter: function (info) {
-		var control, text, tick,
+		let control, text, tick,
 			count = 0;
 
 		tick = getTickCount();
@@ -945,7 +945,7 @@ MainLoop:
 
 	// get all characters
 	getCharacters: function () {
-		var control, text,
+		let control, text,
 			count = 0,
 			list = [];
 
@@ -996,7 +996,7 @@ MainLoop:
 
 	// get character position
 	getPosition: function () {
-		var control, text,
+		let control, text,
 			position = 0;
 
 		if (getLocation() === 12) {
@@ -1019,14 +1019,14 @@ MainLoop:
 	loginCharacter: function (info, startFromTop = true) {
 		me.blockMouse = true;
 
-		var control, text,
+		let control, text,
 			count = 0;
 
 		if (startFromTop) { // start from beginning of the char list
 			sendKey(0x24);
 		}
 
-MainLoop:
+		MainLoop:
 		while (getLocation() !== 1) { // cycle until in lobby
 			switch (getLocation()) {
 			case 12: // character select
@@ -1091,7 +1091,7 @@ MainLoop:
 			info.charClass = "barbarian";
 		}
 
-		var control,
+		let control,
 			clickCoords = [];
 
 		while (getLocation() !== 1) { // cycle until in lobby
@@ -1197,7 +1197,7 @@ MainLoop:
 
 	// Test version - modified core only
 	getGameList: function () {
-		var i, text, gameList;
+		let i, text, gameList;
 
 		text = this.getText(4, 432, 393, 160, 173);
 
@@ -1218,9 +1218,9 @@ MainLoop:
 	}
 };
 
-var ShitList = {
+const ShitList = {
 	create: function () {
-		var string,
+		let string,
 			obj = {
 				shitlist: []
 			};
@@ -1234,7 +1234,7 @@ var ShitList = {
 	},
 
 	getObj: function () {
-		var obj,
+		let obj,
 			//string = FileTools.readText("shitlist.json");
 			string = Misc.fileAction("shitlist.json", 0);
 
@@ -1254,7 +1254,7 @@ var ShitList = {
 	},
 
 	read: function () {
-		var obj;
+		let obj;
 
 		if (!FileTools.exists("shitlist.json")) {
 			this.create();
@@ -1266,7 +1266,7 @@ var ShitList = {
 	},
 
 	add: function (name) {
-		var obj, string;
+		let obj, string;
 
 		obj = this.getObj();
 

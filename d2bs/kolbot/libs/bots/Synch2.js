@@ -1,7 +1,6 @@
-var Synched2 = false;
-
-var uRdyMsg2 = "Yo, I'm rdy, u?";
-var rdyMsg2 = "Let's go";
+let Synched2 = false;
+let uRdyMsg2 = "Yo, I'm rdy, u?";
+let rdyMsg2 = "Let's go";
 
 function messageHandler2(nick, msg) {
 	if (nick !== me.name) {
@@ -18,7 +17,7 @@ function messageHandler2(nick, msg) {
 }
 
 function Synch2() {
-	var i, party, j;
+	let i, party, j;
 
 	addEventListener("chatmsg", messageHandler2);
 

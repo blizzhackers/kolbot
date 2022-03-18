@@ -6,7 +6,7 @@
 
 function BaalAssistant() {
 
-	var Leader = Config.Leader, // Not entriely needed in the configs.
+	let Leader = Config.Leader, // Not entriely needed in the configs.
 		KillNihlathak = Config.BaalAssistant.KillNihlathak,
 		FastChaos = Config.BaalAssistant.FastChaos,
 		Wait = Config.BaalAssistant.Wait, // Not entriely needed in the configs.
@@ -35,37 +35,37 @@ function BaalAssistant() {
 
 	addEventListener('chatmsg',
 
-	function (nick, msg) {
-		if (nick === Leader) {
-			for (i = 0; i < hotTPMessage.length; i += 1) {
-				if (msg.toLowerCase().indexOf(hotTPMessage[i].toLowerCase()) > -1) {
-					hotCheck = true;
-					break;
+		function (nick, msg) {
+			if (nick === Leader) {
+				for (i = 0; i < hotTPMessage.length; i += 1) {
+					if (msg.toLowerCase().indexOf(hotTPMessage[i].toLowerCase()) > -1) {
+						hotCheck = true;
+						break;
+					}
 				}
-			}
 
-			for (i = 0; i < safeTPMessage.length; i += 1) {
-				if (msg.toLowerCase().indexOf(safeTPMessage[i].toLowerCase()) > -1) {
-					safeCheck = true;
-					break;
+				for (i = 0; i < safeTPMessage.length; i += 1) {
+					if (msg.toLowerCase().indexOf(safeTPMessage[i].toLowerCase()) > -1) {
+						safeCheck = true;
+						break;
+					}
 				}
-			}
 
-			for (i = 0; i < baalMessage.length; i += 1) {
-				if (msg.toLowerCase().indexOf(baalMessage[i].toLowerCase()) > -1) {
-					baalCheck = true;
-					break;
+				for (i = 0; i < baalMessage.length; i += 1) {
+					if (msg.toLowerCase().indexOf(baalMessage[i].toLowerCase()) > -1) {
+						baalCheck = true;
+						break;
+					}
 				}
-			}
 
-			for (i = 0; i < nextGameMessage.length; i += 1) {
-				if (msg.toLowerCase().indexOf(nextGameMessage[i].toLowerCase()) > -1) {
-					ngCheck = true;
-					break;
+				for (i = 0; i < nextGameMessage.length; i += 1) {
+					if (msg.toLowerCase().indexOf(nextGameMessage[i].toLowerCase()) > -1) {
+						ngCheck = true;
+						break;
+					}
 				}
 			}
-		}
-	});
+		});
 
 	function autoLeaderDetect(destination) {
 		do {
@@ -95,110 +95,110 @@ function BaalAssistant() {
 	}
 
 	this.preattack = function () {
-		var check;
+		let check;
 		switch (me.classid) {
-			case 1:
-				// Sorceress
-				if ([49].indexOf(Config.AttackSkill[1]) > -1) {
-					if (me.getState(121)) {
-						delay(500);
-					} else {
-						Skill.cast(Config.AttackSkill[1], 0, 15094, 5028);
-					}
+		case 1:
+			// Sorceress
+			if ([49].indexOf(Config.AttackSkill[1]) > -1) {
+				if (me.getState(121)) {
+					delay(500);
+				} else {
+					Skill.cast(Config.AttackSkill[1], 0, 15094, 5028);
 				}
-				if ([53].indexOf(Config.AttackSkill[1]) > -1) {
-					if (me.getState(121)) {
-						delay(500);
-					} else {
-						Skill.cast(Config.AttackSkill[1], 0, 15094, 5028);
-					}
+			}
+			if ([53].indexOf(Config.AttackSkill[1]) > -1) {
+				if (me.getState(121)) {
+					delay(500);
+				} else {
+					Skill.cast(Config.AttackSkill[1], 0, 15094, 5028);
 				}
-				if ([56].indexOf(Config.AttackSkill[1]) > -1) {
-					if (me.getState(121)) {
-						delay(500);
-					} else {
-						Skill.cast(Config.AttackSkill[1], 0, 15093, 5028);
-					}
+			}
+			if ([56].indexOf(Config.AttackSkill[1]) > -1) {
+				if (me.getState(121)) {
+					delay(500);
+				} else {
+					Skill.cast(Config.AttackSkill[1], 0, 15093, 5028);
 				}
-				if ([59].indexOf(Config.AttackSkill[1]) > -1) {
-					if (me.getState(121)) {
-						delay(500);
-					} else {
-						Skill.cast(Config.AttackSkill[1], 0, 15095, 5028);
-					}
+			}
+			if ([59].indexOf(Config.AttackSkill[1]) > -1) {
+				if (me.getState(121)) {
+					delay(500);
+				} else {
+					Skill.cast(Config.AttackSkill[1], 0, 15095, 5028);
 				}
-				if ([64].indexOf(Config.AttackSkill[1]) > -1) {
-					if (me.getState(121)) {
-						delay(500);
-					} else {
-						Skill.cast(Config.AttackSkill[1], 0, 15094, 5028);
-					}
+			}
+			if ([64].indexOf(Config.AttackSkill[1]) > -1) {
+				if (me.getState(121)) {
+					delay(500);
+				} else {
+					Skill.cast(Config.AttackSkill[1], 0, 15094, 5028);
 				}
+			}
+			return true;
+		case 3:
+			// Paladin
+			if (Config.AttackSkill[3] !== 112) {
+				return false;
+			}
+			if (getDistance(me, 15094, 5029) > 3) {
+				Pather.moveTo(15094, 5029);
+			}
+			if (Config.AttackSkill[4] > 0) {
+				Skill.setSkill(Config.AttackSkill[4], 0);
+			}
+			Skill.cast(Config.AttackSkill[3], 1);
+			return true;
+		case 5:
+			// Druid
+			if (Config.AttackSkill[3] === 245) {
+				Skill.cast(Config.AttackSkill[3], 0, 15094, 5028);
 				return true;
-			case 3:
-				// Paladin
-				if (Config.AttackSkill[3] !== 112) {
-					return false;
-				}
-				if (getDistance(me, 15094, 5029) > 3) {
-					Pather.moveTo(15094, 5029);
-				}
-				if (Config.AttackSkill[4] > 0) {
-					Skill.setSkill(Config.AttackSkill[4], 0);
-				}
-				Skill.cast(Config.AttackSkill[3], 1);
-				return true;
-			case 5:
-				// Druid
-				if (Config.AttackSkill[3] === 245) {
-					Skill.cast(Config.AttackSkill[3], 0, 15094, 5028);
-					return true;
-				}
-				break;
-			case 6:
-				// Assassin
-				if (Config.UseTraps) {
-					check = ClassAttack.checkTraps({
+			}
+			break;
+		case 6:
+			// Assassin
+			if (Config.UseTraps) {
+				check = ClassAttack.checkTraps({
+					x: 15094,
+					y: 5028
+				});
+				if (check) {
+					ClassAttack.placeTraps({
 						x: 15094,
 						y: 5028
-					});
-					if (check) {
-						ClassAttack.placeTraps({
-							x: 15094,
-							y: 5028
-						}, 5);
-						return true;
-					}
+					}, 5);
+					return true;
 				}
-				break;
+			}
+			break;
 		}
 		return false;
 	};
 
 	this.checkThrone = function () {
-		var monster = getUnit(1);
+		let monster = getUnit(1);
 		if (monster) {
 			do {
 				if (Attack.checkMonster(monster) && monster.y < 5080) {
 					switch (monster.classid) {
-						case 23:
-						case 62:
-							return 1;
-						case 105:
-						case 381:
-							return 2;
-						case 557:
-							return 3;
-						case 558:
-							return 4;
-						case 571:
-							return 5;
-						default:
-							if (Helper) {
-								Attack.getIntoPosition(monster, 10, 0x4);
-								Attack.clear(15);
-							}
-							return false;
+					case 23:
+					case 62:
+						return 1;
+					case 105:
+					case 381:
+						return 2;
+					case 557:
+						return 3;
+					case 558:
+						return 4;
+					case 571:
+						return 5;
+					default:
+						if (Helper) {
+							Attack.getIntoPosition(monster, 10, 0x4);
+							Attack.clear(15);
+						}
+						return false;
 
 					}
 				}
@@ -208,8 +208,8 @@ function BaalAssistant() {
 	};
 
 	this.clearThrone = function () {
-		var i, monster,
-		monList = [],
+		let i, monster,
+			monList = [],
 			pos = [15094, 5022, 15094, 5041, 15094, 5060, 15094, 5041, 15094, 5022];
 		if (Config.AvoidDolls) {
 			monster = getUnit(1, 691);
@@ -231,7 +231,7 @@ function BaalAssistant() {
 	};
 
 	this.checkHydra = function () {
-		var hydra = getUnit(1, getLocaleString(3325));
+		let hydra = getUnit(1, getLocaleString(3325));
 		if (hydra) {
 			do {
 				if (hydra.mode !== 12 && hydra.getStat(172) !== 2) {
@@ -250,7 +250,7 @@ function BaalAssistant() {
 	};
 
 	this.checkParty = function () {
-		var i, partycheck;
+		let i, partycheck;
 		for (i = 0; i < Wait; i += 1) {
 			partycheck = getParty();
 			if (partycheck) {
@@ -533,63 +533,63 @@ function BaalAssistant() {
 						}
 
 						switch (this.checkThrone()) {
-							case 1:
-								if (Helper) {
-									Attack.clear(40);
-								}
-								tick = getTickCount();
+						case 1:
+							if (Helper) {
+								Attack.clear(40);
+							}
+							tick = getTickCount();
 
-								break;
-							case 2:
-								if (Helper) {
-									Attack.clear(40);
-								}
-								tick = getTickCount();
+							break;
+						case 2:
+							if (Helper) {
+								Attack.clear(40);
+							}
+							tick = getTickCount();
 
-								break;
-							case 4:
-								if (Helper) {
-									Attack.clear(40);
-								}
-								tick = getTickCount();
+							break;
+						case 4:
+							if (Helper) {
+								Attack.clear(40);
+							}
+							tick = getTickCount();
 
-								break;
-							case 3:
-								if (Helper) {
-									Attack.clear(40);
-									this.checkHydra();
-								}
+							break;
+						case 3:
+							if (Helper) {
+								Attack.clear(40);
+								this.checkHydra();
+							}
 
-								tick = getTickCount();
+							tick = getTickCount();
 
-								break;
-							case 5:
-								if (Helper) {
-									Attack.clear(40);
-								} else {
-									while (Attack.checkMonster(getUnit(1, 571)) || Attack.checkMonster(getUnit(1, 572)) || Attack.checkMonster(getUnit(1, 573))) {
-										delay(1000);
-									}
+							break;
+						case 5:
+							if (Helper) {
+								Attack.clear(40);
+							} else {
+								while (Attack.checkMonster(getUnit(1, 571)) || Attack.checkMonster(getUnit(1, 572)) || Attack.checkMonster(getUnit(1, 573))) {
 									delay(1000);
 								}
+								delay(1000);
+							}
 
-								break MainLoop;
-							default:
-								if (getTickCount() - tick < 7e3) {
-									if (me.getState(2)) {
-										Skill.setSkill(109, 0);
-									}
-
-									break;
-								}
-
-								if (Helper) {
-									if (!this.preattack()) {
-										delay(100);
-									}
+							break MainLoop;
+						default:
+							if (getTickCount() - tick < 7e3) {
+								if (me.getState(2)) {
+									Skill.setSkill(109, 0);
 								}
 
 								break;
+							}
+
+							if (Helper) {
+								if (!this.preattack()) {
+									delay(100);
+								}
+							}
+
+							break;
 						}
 						delay(10);
 					}

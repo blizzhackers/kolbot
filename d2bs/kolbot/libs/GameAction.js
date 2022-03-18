@@ -1,10 +1,11 @@
+/* eslint-disable dot-notation */
 /**
 *	@filename	GameAction.js
 *	@author		noah-@github.com
 *	@desc		Perform task based actions specified by Profile Tag
 */
 
-var GameAction = {
+const GameAction = {
 	LogNames: true, // Put account/character name on the picture
 	LogItemLevel: true, // Add item level to the picture
 	LogEquipped: false, // include equipped items
@@ -34,14 +35,14 @@ var GameAction = {
 
 		D2Bot.printToConsole(data);
 
-		var tag = JSON.parse(JSON.stringify(this.task)); // deep copy
+		let tag = JSON.parse(JSON.stringify(this.task)); // deep copy
 		tag.action = action;
 		tag.data = data;
 		D2Bot.setTag(tag);
 	},
 
 	gameInfo: function () {
-		var gi = { gameName: null, gamePass: null };
+		let gi = { gameName: null, gamePass: null };
 
 		switch (this.task.action) {
 		case "doMule":
@@ -60,7 +61,7 @@ var GameAction = {
 	},
 
 	getLogin: function () {
-		var li = { realm: null, account: null, password: null };
+		let li = { realm: null, account: null, password: null };
 
 		if (this.task && this.task.data) {
 			li.password = this.load(this.task.hash);
@@ -68,7 +69,7 @@ var GameAction = {
 
 		// drop specific object
 		if (this.task.data["items"] && this.task.data.items.length > 0) {
-			li.realm = this.task.data.items[0].realm
+			li.realm = this.task.data.items[0].realm;
 			li.account = this.task.data.items[0].account;
 		}
 
@@ -91,8 +92,8 @@ var GameAction = {
 	},
 
 	getCharacters: function () {
-		var i = 0;
-		var chars = [];
+		let i = 0;
+		let chars = [];
 
 		// drop specific object
 		if (this.task.data["items"]) {
@@ -112,7 +113,7 @@ var GameAction = {
 	},
 
 	getItemDesc: function (unit, logIlvl) {
-		var i, desc, index,
+		let i, desc, index,
 			stringColor = "";
 
 		if (logIlvl === undefined) {
@@ -185,7 +186,7 @@ var GameAction = {
 	},
 
 	load: function (hash) {
-		var filename = "data/secure/" + hash + ".txt";
+		let filename = "data/secure/" + hash + ".txt";
 
 		if (!FileTools.exists(filename)) {
 			this.update("done", "File " + filename + " does not exist!");
@@ -198,7 +199,7 @@ var GameAction = {
 	},
 
 	save: function (hash, data) {
-		var filename = "data/secure/" + hash + ".txt";
+		let filename = "data/secure/" + hash + ".txt";
 		FileTools.writeText(filename, data);
 	},
 
@@ -211,7 +212,7 @@ var GameAction = {
 			delay(100);
 		}
 
-		var i, items = me.getItems();
+		let i, items = me.getItems();
 
 		if (!items || !items.length) {
 			return;
@@ -222,17 +223,17 @@ var GameAction = {
 				continue;
 			}
 
-			var info = droplist[i].itemid.split(":");//":" + unit.classid + ":" + unit.location + ":" + unit.x + ":" + unit.y;
+			let info = droplist[i].itemid.split(":");//":" + unit.classid + ":" + unit.location + ":" + unit.x + ":" + unit.y;
 
-			var classid = info[1];
-			var loc = info[2];
-			var unitX = info[3];
-			var unitY = info[4];
+			let classid = info[1];
+			let loc = info[2];
+			let unitX = info[3];
+			let unitY = info[4];
 
 			// for debug purposes
 			print("classid: " + classid + " location: " + loc + " X: " + unitX + " Y: " + unitY);
 
-			for (var j = 0; j < items.length; j += 1) {
+			for (let j = 0; j < items.length; j += 1) {
 				if (items[j].classid.toString() === classid && items[j].location.toString() === loc && items[j].x.toString() === unitX && items[j].y.toString() === unitY) {
 					items[j].drop();
 				}
@@ -251,7 +252,7 @@ var GameAction = {
 			logIlvl = this.LogItemLevel;
 		}
 
-		var i, code, desc, sock,
+		let i, code, desc, sock,
 			header = "",
 			color = -1,
 			name = unit.itemType + "_" + unit.fname.split("\n").reverse().join(" ").replace(/(y|ÿ)c[0-9!"+<:;.*]|\/|\\/g, "").trim();
@@ -439,7 +440,7 @@ var GameAction = {
 			saveImg = this.SaveScreenShot;
 		}
 
-		var i, folder, string, parsedItem,
+		let i, folder, string, parsedItem,
 			items = me.getItems(),
 			realm = me.realm || "Single Player",
 			merc,

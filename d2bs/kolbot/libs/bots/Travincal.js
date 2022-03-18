@@ -5,10 +5,10 @@
 */
 
 function Travincal() {
-	var i, orgX, orgY, coords;
+	let i, orgX, orgY, coords;
 
 	this.buildList = function (checkColl) {
-		var monsterList = [],
+		let monsterList = [],
 			monster = getUnit(1);
 
 		if (monster) {

@@ -141,16 +141,18 @@ function Cows() {
 				delay(500);
 				tpTome = me.findItems(sdk.items.TomeofTownPortal, 0, 3);
 				tpTome.forEach(function (book) {
-					while (book.getStat(sdk.stats.Quantity) < 20) {
-						scroll = npc.getItem(sdk.items.ScrollofTownPortal);
-						
-						if (!!scroll && scroll.getItemCost(0) < me.gold) {
-							scroll.buy();
-						} else {
-							break;
-						}
+					if (book.isInInventory) {
+						while (book.getStat(sdk.stats.Quantity) < 20) {
+							scroll = npc.getItem(sdk.items.ScrollofTownPortal);
+							
+							if (!!scroll && scroll.getItemCost(0) < me.gold) {
+								scroll.buy();
+							} else {
+								break;
+							}
 
-						delay(20);
+							delay(20);
+						}
 					}
 				});
 			} else {

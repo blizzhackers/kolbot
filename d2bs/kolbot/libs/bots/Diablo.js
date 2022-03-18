@@ -53,7 +53,7 @@ function Diablo() {
 
 	// general functions
 	this.getLayout = function (seal, value) {
-		var sealPreset = getPresetUnit(108, 2, seal);
+		let sealPreset = getPresetUnit(108, 2, seal);
 
 		if (!seal) {
 			throw new Error("Seal preset not found. Can't continue.");
@@ -73,7 +73,7 @@ function Diablo() {
 	};
 
 	this.openSeal = function (classid) {
-		var i, seal, warn;
+		let i, seal, warn;
 
 		switch (classid) {
 		case 396:
@@ -132,7 +132,7 @@ function Diablo() {
 	};
 
 	this.chaosPreattack = function (name, amount) {
-		var i, n, target, positions;
+		let i, n, target, positions;
 
 		switch (me.classid) {
 		case 0:
@@ -174,7 +174,7 @@ function Diablo() {
 	};
 
 	this.getBoss = function (name) {
-		var i, boss,
+		let i, boss,
 			glow = getUnit(2, 131);
 
 		for (i = 0; i < 16; i += 1) {
@@ -270,22 +270,22 @@ function Diablo() {
 			"seis": () => this.seisSeal(),
 			"infector": () => this.infectorSeal(),
 		};
-		Config.Diablo.SealOrder.forEach(seal => {seals[seal]()});
+		Config.Diablo.SealOrder.forEach(seal => {seals[seal]();});
 	};
 
 	this.diabloPrep = function () {
-		var trapCheck,
+		let trapCheck,
 			tick = getTickCount();
 
 		switch (me.classid) {
-			case 1:
-				Pather.moveTo(7792, 5294);
+		case 1:
+			Pather.moveTo(7792, 5294);
 
-				break;
-			default:
-				Pather.moveTo(7788, 5292);
+			break;
+		default:
+			Pather.moveTo(7788, 5292);
 
-				break;
+			break;
 		}
 
 		while (getTickCount() - tick < 30000) {
@@ -352,7 +352,7 @@ function Diablo() {
 	};
 
 	this.followPath = function (path) {
-		var i;
+		let i;
 
 		for (i = 0; i < path.length; i += 2) {
 			if (this.cleared.length) {
@@ -378,7 +378,7 @@ function Diablo() {
 			return false;
 		}*/
 
-		var i,
+		let i,
 			oldPos = {x: me.x, y: me.y},
 			monster = getUnit(1);
 
@@ -387,7 +387,7 @@ function Diablo() {
 				if (Attack.checkMonster(monster)) {
 					for (i = 0; i < this.cleared.length; i += 1) {
 						if (getDistance(monster, this.cleared[i][0], this.cleared[i][1]) < 30 && Attack.validSpot(monster.x, monster.y)) {
-							me.overhead("we got a stray");
+							me.overhead("");
 							Pather.moveToUnit(monster);
 							Attack.clear(15, 0, false, this.sort);
 
@@ -406,7 +406,7 @@ function Diablo() {
 	};
 
 	this.defendPlayers = function () {
-		var player,
+		let player,
 			oldPos = {x: me.x, y: me.y},
 			monster = getUnit(1);
 
@@ -418,7 +418,7 @@ function Diablo() {
 					if (player) {
 						do {
 							if (player.name !== me.name && getDistance(monster, player) < 30) {
-								me.overhead("defending players");
+								me.overhead("");
 								Pather.moveToUnit(monster);
 								Attack.clear(15, 0, false, this.sort);
 							}
@@ -467,6 +467,7 @@ function Diablo() {
 		Pather.moveTo(7790, 5544);
 
 		if (Config.PublicMode) {
+			//Attack.securePosition(me.x, me.y, 20, 3000);
 			Pather.makePortal();
 			say(Config.Diablo.EntranceTP);
 			Pather.teleport = !Config.Diablo.WalkClear && Pather._teleport;

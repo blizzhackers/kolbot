@@ -6,7 +6,7 @@
 
 function BaalHelper() { // experi-mental
 	this.preattack = function () {
-		var check;
+		let check;
 
 		switch (me.classid) {
 		case 1: // Sorceress
@@ -64,7 +64,7 @@ function BaalHelper() { // experi-mental
 	};
 
 	this.checkThrone = function () {
-		var monster = getUnit(1);
+		let monster = getUnit(1);
 
 		if (monster) {
 			do {
@@ -96,7 +96,7 @@ function BaalHelper() { // experi-mental
 	};
 
 	this.clearThrone = function () {
-		var i, monster,
+		let i, monster,
 			monList = [],
 			pos = [15097, 5054, 15085, 5053, 15085, 5040, 15098, 5040, 15099, 5022, 15086, 5024];
 
@@ -123,7 +123,7 @@ function BaalHelper() { // experi-mental
 	};
 
 	this.checkHydra = function () {
-		var hydra = getUnit(1, getLocaleString(3325));
+		let hydra = getUnit(1, getLocaleString(3325));
 
 		if (hydra) {
 			do {
@@ -167,7 +167,7 @@ function BaalHelper() { // experi-mental
 		}
 	}
 
-	var i, tick, portal, party, entrance;
+	let i, tick, portal, party, entrance;
 
 	Town.goToTown(5);
 	Town.doChores();
@@ -183,7 +183,7 @@ function BaalHelper() { // experi-mental
 			throw new Error("Failed to move to WSK3.");
 		}
 
-WSKLoop:
+		WSKLoop:
 		for (i = 0; i < Config.BaalHelper.Wait; i += 1) {
 			party = getParty();
 
@@ -258,7 +258,7 @@ WSKLoop:
 
 	Pather.moveTo(15093, me.classid === 3 ? 5029 : 5039);
 
-MainLoop:
+	MainLoop:
 	while (true) {
 		if (getDistance(me, 15093, me.classid === 3 ? 5029 : 5039) > 3) {
 			Pather.moveTo(15093, me.classid === 3 ? 5029 : 5039);

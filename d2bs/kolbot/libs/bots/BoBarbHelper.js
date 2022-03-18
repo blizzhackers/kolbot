@@ -13,7 +13,7 @@ const BoBarbHelper = () => {
 	const townNearbyMonster = true; // go to town if monsters nearby
 	const townLowMana = 20; // go refill mana if mana drops below this percent
 
-	const shouldHealMana = amount => me.mp < Math.floor(me.mpmax * amount / 100)
+	const shouldHealMana = amount => me.mp < Math.floor(me.mpmax * amount / 100);
 
 	const healMana = () => {
 		Pather.useWaypoint(1);
@@ -27,7 +27,7 @@ const BoBarbHelper = () => {
 		unit.name !== me.name &&
 		!unit.dead &&
 		!unit.inTown
-	)	
+	);
 
 	const giveBuff = () => {
 		const unit = getUnit(0);
@@ -37,7 +37,7 @@ const BoBarbHelper = () => {
 				Precast.doPrecast(true);
 				delay(50);
 			}
-		} while(unit.getNext());
+		} while (unit.getNext());
 	};
 
 	const monsterNear = () => {
@@ -48,7 +48,7 @@ const BoBarbHelper = () => {
 				if (Attack.checkMonster(unit) && getDistance(me, unit) < 20) {
 					return true;
 				}
-			} while(unit.getNext());
+			} while (unit.getNext());
 		}
 
 		return false;
@@ -60,7 +60,7 @@ const BoBarbHelper = () => {
 		print('if you don\'t I will idle indefinitely');
 	}
 
-	if (me.playertype == 1 && Config.LifeChicken <= 0) {
+	if (me.hardcore && Config.LifeChicken <= 0) {
 		showConsole();
 		print('on HARDCORE');
 		print('you should set Config.LifeChicken');
@@ -109,4 +109,4 @@ const BoBarbHelper = () => {
 	Town.goToTown();
 
 	return true;
-}
+};

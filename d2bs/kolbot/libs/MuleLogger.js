@@ -4,7 +4,7 @@
 *	@desc		Log items and perm configurable accounts/characters
 */
 
-var MuleLogger = {
+const MuleLogger = {
 	LogAccounts: {
 		/* Format:
 			"account1/password1/realm": ["charname1", "charname2 etc"],
@@ -17,8 +17,7 @@ var MuleLogger = {
 
 			Individual entries are separated with a comma.
 		*/
-
-		"account/password/realm": ["all"]
+		
 	},
 
 	LogGame: ["", ""], // ["gamename", "password"]
@@ -31,7 +30,7 @@ var MuleLogger = {
 
 	// don't edit
 	getItemDesc: function (unit, logIlvl) {
-		var i, desc, index,
+		let i, desc, index,
 			stringColor = "";
 
 		if (logIlvl === undefined) {
@@ -73,7 +72,7 @@ var MuleLogger = {
 	},
 
 	inGameCheck: function () {
-		var tick;
+		let tick;
 
 		if (getScript("D2BotMuleLog.dbj") && this.LogGame[0] && me.gamename.match(this.LogGame[0], "i")) {
 			print("ÿc4MuleLoggerÿc0: Logging items on " + me.account + " - " + me.name + ".");
@@ -101,7 +100,7 @@ var MuleLogger = {
 	},
 
 	load: function (hash) {
-		var filename = "data/secure/" + hash + ".txt";
+		let filename = "data/secure/" + hash + ".txt";
 
 		if (!FileTools.exists(filename)) {
 			throw new Error("File " + filename + " does not exist!");
@@ -111,7 +110,7 @@ var MuleLogger = {
 	},
 
 	save: function (hash, data) {
-		var filename = "data/secure/" + hash + ".txt";
+		let filename = "data/secure/" + hash + ".txt";
 		FileTools.writeText(filename, data);
 	},
 
@@ -126,7 +125,7 @@ var MuleLogger = {
 			logIlvl = this.LogItemLevel;
 		}
 
-		var i, code, desc, sock,
+		let i, code, desc, sock,
 			header = "",
 			color = -1,
 			name = unit.itemType + "_" + unit.fname.split("\n").reverse().join(" ").replace(/(y|ÿ)c[0-9!"+<:;.*]|\/|\\/g, "").trim();
@@ -314,7 +313,7 @@ var MuleLogger = {
 			saveImg = this.SaveScreenShot;
 		}
 
-		var i, folder, string, parsedItem,
+		let i, folder, string, parsedItem,
 			items = me.getItems(),
 			realm = me.realm || "Single Player",
 			merc,

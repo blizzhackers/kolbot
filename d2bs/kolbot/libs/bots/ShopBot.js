@@ -1,5 +1,5 @@
 function ShopBot() {
-	var i, tickCount,
+	let i, tickCount,
 		cycles = 0,
 		cyclesText = new Text("Cycles in last minute:", 50, 260, 2, 1),
 		title = new Text("kolbot shopbot", 50, 245, 2, 1),
@@ -13,7 +13,7 @@ function ShopBot() {
 	this.npcs = {};
 
 	this.buildPickList = function () {
-		var i, nipfile, line, lines, info,
+		let i, nipfile, line, lines, info,
 			filepath = "pickit/shopbot.nip",
 			filename = filepath.substring(filepath.lastIndexOf("/") + 1, filepath.length);
 
@@ -57,7 +57,7 @@ function ShopBot() {
 			throw new Error("Unit.openMenu: Must be used on NPCs.");
 		}
 
-		var i, tick,
+		let i, tick,
 			interactedNPC = getInteractedNPC();
 
 		if (interactedNPC && interactedNPC.name !== npc.name) {
@@ -96,7 +96,7 @@ function ShopBot() {
 	};
 
 	this.shopItems = function (npc, menuId) {
-		var i, item, items, bought;
+		let i, item, items, bought;
 
 		if (!Storage.Inventory.CanFit({sizex: 2, sizey: 4}) && AutoMule.getMuleItems().length > 0) {
 			D2Bot.printToConsole("Mule triggered");
@@ -145,7 +145,7 @@ function ShopBot() {
 			if (Storage.Inventory.CanFit(items[i]) && Pickit.canPick(items[i]) &&
 					me.gold >= items[i].getItemCost(0) &&
 					NTIP.CheckItem(items[i], this.pickEntries)
-					) {
+			) {
 				beep();
 				D2Bot.printToConsole("Match found!", 7);
 				delay(1000);
@@ -171,7 +171,7 @@ function ShopBot() {
 	};
 
 	this.shopAtNPC = function (name) {
-		var i, npc, wp,
+		let npc, wp,
 			menuId = "Shop";
 
 		switch (name) {
@@ -287,7 +287,7 @@ function ShopBot() {
 		}
 
 		if (me.inTown) {
-			var area = getArea(),
+			let area = getArea(),
 				wp = getPresetUnit(me.area, 2, [119, 156, 237, 398, 429][me.act - 1]),
 				wpX = wp.roomx * 5 + wp.x,
 				wpY = wp.roomy * 5 + wp.y,

@@ -4,7 +4,7 @@
 *	@desc		walking Chaos Sanctuary leecher
 */
 
-var stopLvl = 99;
+const stopLvl = 99;
 
 function Wakka() {
 	let i, safeTP, portal, vizClear, seisClear, infClear, tick, diablo,
@@ -55,7 +55,7 @@ function Wakka() {
 	}
 
 	this.checkMonsters = function (range, dodge) {
-		var monList = [],
+		let monList = [],
 			monster = getUnit(1);
 
 		if (monster) {
@@ -84,7 +84,7 @@ function Wakka() {
 	};
 
 	this.getLayout = function (seal, value) {
-		var sealPreset = getPresetUnit(108, 2, seal);
+		let sealPreset = getPresetUnit(108, 2, seal);
 
 		if (!seal) {
 			throw new Error("Seal preset not found. Can't continue.");
@@ -116,7 +116,7 @@ function Wakka() {
 	};
 
 	this.checkBoss = function (name) {
-		var i, boss,
+		let i, boss,
 			glow = getUnit(2, 131);
 
 		if (glow) {
@@ -145,7 +145,7 @@ function Wakka() {
 			me.revive();
 		}
 
-		var corpse,
+		let corpse,
 			rval = false;
 
 		corpse = getUnit(0, me.name, 17);
@@ -166,7 +166,7 @@ function Wakka() {
 	};
 
 	this.followPath = function (dest) {
-		var path = getPath(me.area, me.x, me.y, dest[0], dest[1], 0, 10);
+		let path = getPath(me.area, me.x, me.y, dest[0], dest[1], 0, 10);
 
 		if (!path) {
 			throw new Error("Failed go get path");
@@ -272,6 +272,7 @@ function Wakka() {
 
 					//Pather.usePortal(108, leader);
 					Pather.usePortal(108, null);
+					Precast.doPrecast(true);
 				}
 
 				break;
@@ -309,6 +310,7 @@ function Wakka() {
 						}
 
 						me.overhead("vizier dead");
+						Precast.doPrecast(true);
 					}
 
 					break;
@@ -332,6 +334,7 @@ function Wakka() {
 						}
 
 						me.overhead("seis dead");
+						Precast.doPrecast(true);
 					}
 
 					break;
@@ -355,6 +358,7 @@ function Wakka() {
 						}
 
 						me.overhead("infector dead");
+						Precast.doPrecast(true);
 					}
 
 					break;

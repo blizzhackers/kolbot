@@ -7,7 +7,7 @@
 function TravincalLeech() {
 	
 	this.findLeader = function (name) {
-		var party = getParty(name);
+		let party = getParty(name);
 
 		if (party) {
 			return party;
@@ -24,7 +24,7 @@ function TravincalLeech() {
 		delay(500);
 	}
 	
-	var leader = this.findLeader(Config.Leader);
+	let leader = this.findLeader(Config.Leader);
 
 	while (Misc.inMyParty(Config.Leader)) {
 		if (me.inTown && Pather.getPortal(83, Config.Leader)) {
@@ -32,7 +32,7 @@ function TravincalLeech() {
 			Town.getCorpse();
 		}
 		
-		if(me.area === 83 && leader.area !== 83 && leader.area !== 75) {
+		if (me.area === 83 && leader.area !== 83 && leader.area !== 75) {
 			break;
 		}
 		

@@ -6,7 +6,7 @@
 
 function GhostBusters() {
 	this.clearGhosts = function () {
-		var room, result, rooms, monster, monList;
+		let room, result, rooms, monster, monList;
 
 		room = getRoom();
 
@@ -50,7 +50,7 @@ function GhostBusters() {
 	};
 
 	this.cellar = function () { // black marsh wp
-		var i;
+		let i;
 
 		Pather.useWaypoint(6);
 		Precast.doPrecast(true);
@@ -64,7 +64,7 @@ function GhostBusters() {
 	};
 
 	this.jail = function () { // gonna use inner cloister wp and travel backwards
-		var i;
+		let i;
 
 		Pather.useWaypoint(32);
 		Precast.doPrecast(true);
@@ -87,7 +87,7 @@ function GhostBusters() {
 	};
 
 	this.tombs = function () { // canyon wp
-		var i;
+		let i;
 
 		Pather.useWaypoint(46);
 		Precast.doPrecast(true);
@@ -102,7 +102,7 @@ function GhostBusters() {
 	};
 
 	this.flayerDungeon = function () { // flayer jungle wp
-		var areas = [88, 89, 91];
+		let areas = [88, 89, 91];
 
 		Pather.useWaypoint(78);
 		Precast.doPrecast(true);
@@ -144,7 +144,7 @@ function GhostBusters() {
 		return true;
 	};
 
-	var i,
+	let i,
 		sequence = ["cellar", "jail", "cathedral", "tombs", "flayerDungeon", "crystalinePassage", "glacialTrail", "icyCellar"];
 
 	for (i = 0; i < sequence.length; i += 1) {

@@ -4,11 +4,11 @@
 *	@desc		Part of CraftingSystem
 */
 
-var info,
+let info,
 	gameRequest = false;
 
 function Crafting() {
-	var i, npcName, num;
+	let i, npcName, num;
 
 	info = CraftingSystem.getInfo();
 
@@ -25,7 +25,7 @@ function Crafting() {
 
 	addEventListener('copydata',
 		function (mode, msg) {
-			var i, obj, rval;
+			let i, obj, rval;
 
 			if (mode === 0) {
 				try {
@@ -128,7 +128,7 @@ function Crafting() {
 }
 
 function getNPCName(idList) {
-	var i;
+	let i;
 
 	for (i = 0; i < idList.length; i += 1) {
 		switch (idList[i]) {
@@ -147,7 +147,7 @@ function getNPCName(idList) {
 }
 
 function othersInGame() {
-	var p = getParty();
+	let p = getParty();
 
 	if (p) {
 		do {
@@ -161,7 +161,7 @@ function othersInGame() {
 }
 
 function countItems(idList, quality) {
-	var item,
+	let item,
 		count = 0;
 
 	item = me.getItem(-1, 0);
@@ -178,13 +178,13 @@ function countItems(idList, quality) {
 }
 
 function updateInfo() {
-	var i, j, items;
+	let i, j, items;
 
 	if (info) {
 		items = me.findItems(-1, 0);
 
 		for (i = 0; i < info.Sets.length; i += 1) {
-MainSwitch:
+			MainSwitch:
 			switch (info.Sets[i].Type) {
 			// Always enable crafting because the base can be shopped
 			// Recipes with bases that can't be shopped don't need to be used with CraftingSystem
@@ -252,12 +252,12 @@ function runewordIngredient(item) {
 		return true;
 	}
 
-	var i, base, baseGids;
+	let i, base, baseGids;
 
 	baseGids = [];
 
 	for (i = 0; i < Config.Runewords.length; i += 1) {
-		base = Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2]||0)) || Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2]||0), true);
+		base = Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0)) || Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0), true);
 
 		if (base) {
 			baseGids.push(base.gid);
@@ -272,7 +272,7 @@ function runewordIngredient(item) {
 }
 
 function pickItems() {
-	var items = [],
+	let items = [],
 		item = getUnit(4, -1, 3);
 
 	if (item) {
@@ -298,7 +298,7 @@ function pickItems() {
 }
 
 function checkItem(item) {
-	var i;
+	let i;
 
 	for (i = 0; i < info.Sets.length; i += 1) {
 		if (info.Sets[i].Enabled) {
@@ -340,12 +340,12 @@ function checkItem(item) {
 function shopStuff(npcId, classids, amount) {
 	print("shopStuff: " + npcId + " " + amount);
 
-	var wpArea, town, path, menuId, npc, tickCount,
+	let wpArea, town, path, menuId, npc, tickCount,
 		leadTimeout = 30,
 		leadRetry = 3;
 
 	this.mover = function (npc, path) {
-		var i, j;
+		let i, j;
 
 		path = this.processPath(npc, path);
 
@@ -380,7 +380,7 @@ function shopStuff(npcId, classids, amount) {
 	};
 
 	this.processPath = function (npc, path) {
-		var i,
+		let i,
 			cutIndex = 0,
 			dist = 100;
 
@@ -395,7 +395,7 @@ function shopStuff(npcId, classids, amount) {
 	};
 
 	this.shopItems = function (classids, amount) {
-		var i, items,
+		let i, items,
 			num = 0,
 			npc = getInteractedNPC();
 
@@ -541,6 +541,11 @@ function shopStuff(npcId, classids, amount) {
 
 		if (me.area === wpArea) {
 			Pather.useWaypoint(town);
+		}
+
+		// end script 5 seconds before we need to exit
+		if (getTickCount() - tickCount > me.maxgametime - 5000) {
+			break;
 		}
 
 		delay(5);

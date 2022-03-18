@@ -5,15 +5,13 @@
 */
 
 function ChestMania() {
-	var prop, i;
-
 	Town.doChores();
 
-	for (prop in Config.ChestMania) {
+	for (let prop in Config.ChestMania) {
 		if (Config.ChestMania.hasOwnProperty(prop)) {
-			for (i = 0; i < Config.ChestMania[prop].length; i += 1) {
+			for (let i = 0; i < Config.ChestMania[prop].length; i += 1) {
 				Pather.journeyTo(Config.ChestMania[prop][i]);
-				Precast.doPrecast(i == 0 ? true : false);
+				Precast.doPrecast(false);
 				Misc.openChestsInArea(Config.ChestMania[prop][i]);
 			}
 

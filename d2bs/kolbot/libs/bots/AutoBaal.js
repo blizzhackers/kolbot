@@ -9,7 +9,7 @@
 
 function AutoBaal() {
 	// editable variables
-	var i, baalCheck, throneCheck, hotCheck, leader, suspect, solofail, portal, baal,
+	let i, baalCheck, throneCheck, hotCheck, leader, suspect, solofail, portal, baal,
 		// internal variables
 		safeMsg = ["safe", "throne clear", "leechers can come", "tp is up", "1 clear"], // safe message - casing doesn't matter
 		baalMsg = ["baal"], // baal message - casing doesn't matter
@@ -17,7 +17,7 @@ function AutoBaal() {
 
 	addEventListener('chatmsg', // chat event, listen to what leader says
 		function (nick, msg) { // handler function
-			var i;
+			let i;
 
 			if (nick === leader) { // filter leader messages
 				for (i = 0; i < hotMsg.length; i += 1) { // loop through all predefined messages to find a match
@@ -48,7 +48,7 @@ function AutoBaal() {
 
 	// test
 	this.longRangeSupport = function () {
-		var monster, monList, index;
+		let monster, monList, index;
 
 		switch (me.classid) {
 		case 0:

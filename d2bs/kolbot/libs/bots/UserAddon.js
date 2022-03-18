@@ -8,7 +8,7 @@
 */
 
 function UserAddon() {
-	var i, unit, title, dummy,
+	let i, unit, title, dummy,
 		info = new UnitInfo(),
 		classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"],
 		flags = [0x1, 0x2, 0x3, 0x4, 0x5, 0xf, 0x18, 0x19, 0xc, 0x9];
@@ -94,7 +94,7 @@ function UnitInfo() {
 	};
 
 	this.playerInfo = function (unit) {
-		var i, items, string,
+		let i, items, string,
 			frameXsize = 0,
 			frameYsize = 20,
 			quality = ["ÿc0", "ÿc0", "ÿc0", "ÿc0", "ÿc3", "ÿc2", "ÿc9", "ÿc4", "ÿc8"];
@@ -146,7 +146,7 @@ function UnitInfo() {
 	};
 
 	this.monsterInfo = function (unit) {
-		var frameYsize = 125;
+		let frameYsize = 125;
 
 		if (!this.currentGid) {
 			this.currentGid = unit.gid;
@@ -179,7 +179,7 @@ function UnitInfo() {
 	};
 
 	this.itemInfo = function (unit) {
-		var i = 0,
+		let i = 0,
 			frameYsize = 50;
 
 		if (!this.currentGid) {

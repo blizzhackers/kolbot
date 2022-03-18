@@ -6,7 +6,7 @@
 */
 
 function CrushTele() {
-	var go = false;
+	let go = false;
 
 	addEventListener("keyup",
 		function (key) {
@@ -38,7 +38,7 @@ function CrushTele() {
 				Pather.moveToPreset(me.area, 2, 152);
 				break;
 			case 74:
-				Pather.moveToPreset(me.area, 2, 357, 0, 0, false , true);
+				Pather.moveToPreset(me.area, 2, 357, 0, 0, false, true);
 				break;
 			case 101:
 				Pather.moveToExit(102, true);

@@ -5,11 +5,11 @@
 */
 
 function Rushee() {
-	var act, leader, target,
+	let act, leader, target, done = false,
 		actions = [];
 
 	this.findLeader = function (name) {
-		var party = getParty(name);
+		let party = getParty(name);
 
 		if (party) {
 			return party;
@@ -61,7 +61,7 @@ function Rushee() {
 	};
 
 	this.getQuestItem = function (classid, chestid) {
-		var chest, item,
+		let chest, item,
 			tick = getTickCount();
 
 		if (me.getItem(classid)) {
@@ -94,7 +94,7 @@ function Rushee() {
 	};
 
 	this.checkQuestMonster = function (classid) {
-		var monster = getUnit(1, classid);
+		let monster = getUnit(1, classid);
 
 		if (monster) {
 			while (monster.mode !== 12 && monster.mode !== 0) {
@@ -108,7 +108,7 @@ function Rushee() {
 	};
 
 	this.tyraelTalk = function () {
-		var i,
+		let i,
 			npc = getUnit(1, NPC.Tyrael);
 
 		if (!npc) {
@@ -135,7 +135,7 @@ function Rushee() {
 	};
 
 	this.cubeStaff = function () {
-		var staff = me.getItem("vip"),
+		let staff = me.getItem("vip"),
 			amulet = me.getItem("msf");
 
 		if (!staff || !amulet) {
@@ -162,7 +162,7 @@ function Rushee() {
 	};
 
 	this.placeStaff = function () {
-		var staff, item,
+		let staff, item,
 			tick = getTickCount(),
 			orifice = getUnit(2, 152);
 
@@ -197,7 +197,7 @@ function Rushee() {
 	};
 
 	this.changeAct = function (act) {
-		var npc,
+		let npc,
 			preArea = me.area;
 
 		if (me.mode === 17) {
@@ -899,7 +899,7 @@ function Rushee() {
 
 					break;
 				case "quit":
-					quit();
+					done = true;
 
 					break;
 				case "exit":
@@ -971,8 +971,14 @@ function Rushee() {
 			me.cancel();
 		}
 
+		if (done) {
+			break;
+		}
+
 		delay(500);
 	}
+
+	done && quit();
 
 	return true;
 }

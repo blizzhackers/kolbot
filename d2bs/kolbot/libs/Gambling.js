@@ -4,9 +4,9 @@
 *	@desc		multi-profile gambling system
 */
 
-var Gambling = {
+const Gambling = {
 	Teams: {
-//####################################################################################################
+		//####################################################################################################
 		/* Gambling system for kolbot
 
 			Allows lower level characters to get a steady income of gold to gamble LLD/VLLD items
@@ -40,13 +40,13 @@ var Gambling = {
 			goldReserve: 200000
 		}
 
-//####################################################################################################
+		//####################################################################################################
 	},
 
 	inGame: false,
 
 	getInfo: function (profile) {
-		var i, j;
+		let i, j;
 
 		if (!profile) {
 			profile = me.profile;
@@ -78,7 +78,7 @@ var Gambling = {
 	},
 
 	inGameCheck: function () {
-		var i,
+		let i,
 			info = this.getInfo();
 
 		if (info && info.goldFinder) {
@@ -99,7 +99,7 @@ var Gambling = {
 	},
 
 	dropGold: function () {
-		var info = this.getInfo();
+		let info = this.getInfo();
 
 		if (info && info.goldFinder) {
 			Town.goToTown(1);
@@ -121,7 +121,7 @@ var Gambling = {
 	},
 
 	outOfGameCheck: function () {
-		var game,
+		let game,
 			info = this.getInfo();
 
 		if (info && info.goldFinder && DataFile.getStats().gold >= info.goldTrigger) {
@@ -154,7 +154,7 @@ var Gambling = {
 	},
 
 	getGame: function () {
-		var i, game,
+		let i, game,
 			info = this.getInfo();
 
 		if (!info || !info.goldFinder) {
@@ -162,7 +162,7 @@ var Gambling = {
 		}
 
 		function CheckEvent(mode, msg) {
-			var i;
+			let i;
 
 			if (mode === 4) {
 				for (i = 0; i < info.gambleGames.length; i += 1) {
