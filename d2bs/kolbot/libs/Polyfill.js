@@ -61,8 +61,8 @@ if (!String.prototype.includes) {
 	};
 }
 
-String.prototype.capitalize = function () {
-	return this.charAt(0).toUpperCase() + this.slice(1);
+String.prototype.capitalize = function (downcase = false) {
+	return this.charAt(0).toUpperCase() + (downcase ? this.slice(1).toLowerCase() : this.slice(1));
 };
 
 Array.prototype.isEqual = function (t) {
@@ -129,6 +129,17 @@ if (!Array.prototype.findIndex) {
 		configurable: true,
 		writable: true
 	});
+}
+
+// basic remove prototype
+if (!Array.prototype.remove) {
+	Array.prototype.remove = function (val) {
+		if (this === undefined || !this.length) { throw new Error("No Array defined"); }
+		if (val === undefined || !val) { throw new Error("Cannot remove and element if there is no element defined"); }
+		let index = this.indexOf(val);
+		index >= 0 && this.splice(index, 1);
+		return this;
+	};
 }
 
 String.prototype.startsWith = function (prefix) {
