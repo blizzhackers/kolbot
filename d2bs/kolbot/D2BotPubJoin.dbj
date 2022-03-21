@@ -1,4 +1,4 @@
-var StarterConfig = {
+const StarterConfig = {
 	MinGameTime: 0, // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
 	PingQuitDelay: 30, // Time in seconds to wait in lobby after quitting due to high ping
 	CreateGameDelay: 5, // Seconds to wait before creating a new game
@@ -44,11 +44,11 @@ var StarterConfig = {
 	this will ignore all games with "somebaal" or "somediablo" in their names
 */
 
-var IncludeFilter = [
+const IncludeFilter = [
 	[""]
 ];
 
-var ExcludeFilter = [
+const ExcludeFilter = [
 	[""]
 ];
 
@@ -60,7 +60,7 @@ function includeCheck(game) {
 		return true;
 	}
 
-	var i, j;
+	let i, j;
 
 	for (i = 0; i < IncludeFilter.length; i += 1) {
 		for (j = 0; j < IncludeFilter[i].length; j += 1) {
@@ -85,7 +85,7 @@ function excludeCheck(game) {
 		return true;
 	}
 
-	var i, j;
+	let i, j;
 
 	for (i = 0; i < ExcludeFilter.length; i += 1) {
 		for (j = 0; j < ExcludeFilter[i].length; j += 1) {
@@ -118,7 +118,7 @@ if (!FileTools.exists("data/" + me.profile + ".json")) {
 	DataFile.create();
 }
 
-var gameInfo, gameStart, ingame, chatActionsDone, pingQuit,
+let gameInfo, gameStart, ingame, chatActionsDone, pingQuit,
 	handle, useChat, firstLogin, connectFail, lastGameTick,
 	gameCount = DataFile.getStats().runs + 1,
 	lastGameStatus = "ready",
@@ -132,16 +132,14 @@ var gameInfo, gameStart, ingame, chatActionsDone, pingQuit,
 		announce: false
 	};
 
-function sayMsg(string) {
-	if (!useChat) {
-		return;
-	}
+function sayMsg (string) {
+	if (!useChat) return;
 
 	say(string);
 }
 
-function ReceiveCopyData(mode, msg) {
-	var obj;
+function ReceiveCopyData (mode, msg) {
+	let obj;
 
 	switch (msg) {
 	case "Handle":
@@ -189,8 +187,8 @@ function ReceiveCopyData(mode, msg) {
 	}
 }
 
-function setNextGame() {
-	var nextGame = gameInfo.gameName;
+function setNextGame () {
+	let nextGame = gameInfo.gameName;
 
 	if (StarterConfig.ResetCount && gameCount + 1 >= StarterConfig.ResetCount) {
 		nextGame += 1;
@@ -201,8 +199,8 @@ function setNextGame() {
 	DataFile.updateStats("nextGame", nextGame);
 }
 
-function locationTimeout(time, location) {
-	var endtime = getTickCount() + time;
+function locationTimeout (time, location) {
+	let endtime = getTickCount() + time;
 
 	while (getLocation() === location && endtime > getTickCount()) {
 		delay(500);
@@ -211,7 +209,7 @@ function locationTimeout(time, location) {
 	return (getLocation() !== location);
 }
 
-function updateCount() {
+function updateCount () {
 	D2Bot.updateCount();
 	delay(1000);
 	ControlAction.click(6, 264, 366, 272, 35);
@@ -226,7 +224,7 @@ function updateCount() {
 	ControlAction.click(6, 33, 572, 128, 35);
 }
 
-function ScriptMsgEvent(msg) {
+function ScriptMsgEvent (msg) {
 	switch (msg) {
 	case "mule":
 		AutoMule.check = true;
@@ -261,30 +259,20 @@ function ScriptMsgEvent(msg) {
 	}
 }
 
-function timer(tick) {
-	if (!tick) {
-		return "";
-	}
+function timer (tick) {
+	if (!tick) return "";
 
-	var min, sec;
+	let min = Math.floor((getTickCount() - tick) / 60000).toString();
+	min <= 9 && (min = "0" + min);
 
-	min = Math.floor((getTickCount() - tick) / 60000).toString();
-
-	if (min <= 9) {
-		min = "0" + min;
-	}
-
-	sec = (Math.floor((getTickCount() - tick) / 1000) % 60).toString();
-
-	if (sec <= 9) {
-		sec = "0" + sec;
-	}
+	let sec = (Math.floor((getTickCount() - tick) / 1000) % 60).toString();
+	sec <= 9 && (sec = "0" + sec);
 
 	return " (" + min + ":" + sec + ")";
 }
 
-function randomString(len) {
-	var i,
+function randomString (len) {
+	let i,
 		rval = "",
 		letters = "abcdefghijklmnopqrstuvwxyz";
 
@@ -295,72 +283,8 @@ function randomString(len) {
 	return rval;
 }
 
-function main() {
-	debugLog(me.profile);
-	addEventListener('copydata', ReceiveCopyData);
-	addEventListener('scriptmsg', ScriptMsgEvent);
-
-	while (!handle) {
-		delay(100);
-	}
-
-	DataFile.updateStats("handle", handle);
-	delay(500);
-	D2Bot.init();
-	load("tools/heartbeat.js");
-
-	while (!gameInfo) {
-		D2Bot.requestGameInfo();
-		delay(500);
-	}
-
-	if (gameInfo.error) {
-		D2Bot.retrieve();
-		delay(200);
-
-		if (gameInfo.crashInfo) {
-			D2Bot.printToConsole("Crash Info: Script: " + gameInfo.crashInfo.currScript + " Area: " + gameInfo.crashInfo.area, 10);
-		}
-
-		ControlAction.timeoutDelay("Crash Delay", StarterConfig.CrashDelay * 1e3);
-		D2Bot.updateRuns();
-	}
-
-	D2Bot.store(JSON.stringify({currScript: "none", area: "out of game"}));
-
-	while (true) {
-		while (me.ingame) { // returns true before actually in game so we can't only use this check
-			if (me.gameReady) { // returns false when switching acts so we can't use while
-				isUp = "yes";
-
-				if (!ingame) {
-					gameStart = getTickCount();
-
-					print("Updating Status");
-					//D2Bot.updateStatus("Game: " + me.gamename);
-
-					lastGameStatus = "ingame";
-					ingame = true;
-
-					DataFile.updateStats("runs", gameCount);
-					DataFile.updateStats("ingameTick");
-				}
-
-				D2Bot.updateStatus("Game: " + me.gamename + timer(gameStart));
-			}
-
-			delay(1000);
-		}
-
-		isUp = "no";
-
-		locationAction(getLocation());
-		delay(1000);
-	}
-}
-
-function locationAction(location) {
-	var i, string, control, text, gameToJoin, doneGames, gameList;
+function locationAction (location) {
+	let i, string, control, text, gameToJoin, doneGames, gameList;
 
 MainSwitch:
 	switch (location) {
@@ -845,5 +769,69 @@ MainSwitch:
 		}
 
 		break;
+	}
+}
+
+function main() {
+	debugLog(me.profile);
+	addEventListener('copydata', ReceiveCopyData);
+	addEventListener('scriptmsg', ScriptMsgEvent);
+
+	while (!handle) {
+		delay(100);
+	}
+
+	DataFile.updateStats("handle", handle);
+	delay(500);
+	D2Bot.init();
+	load("tools/heartbeat.js");
+
+	while (!gameInfo) {
+		D2Bot.requestGameInfo();
+		delay(500);
+	}
+
+	if (gameInfo.error) {
+		D2Bot.retrieve();
+		delay(200);
+
+		if (gameInfo.crashInfo) {
+			D2Bot.printToConsole("Crash Info: Script: " + gameInfo.crashInfo.currScript + " Area: " + gameInfo.crashInfo.area, 10);
+		}
+
+		ControlAction.timeoutDelay("Crash Delay", StarterConfig.CrashDelay * 1e3);
+		D2Bot.updateRuns();
+	}
+
+	D2Bot.store(JSON.stringify({currScript: "none", area: "out of game"}));
+
+	while (true) {
+		while (me.ingame) { // returns true before actually in game so we can't only use this check
+			if (me.gameReady) { // returns false when switching acts so we can't use while
+				isUp = "yes";
+
+				if (!ingame) {
+					gameStart = getTickCount();
+
+					print("Updating Status");
+					//D2Bot.updateStatus("Game: " + me.gamename);
+
+					lastGameStatus = "ingame";
+					ingame = true;
+
+					DataFile.updateStats("runs", gameCount);
+					DataFile.updateStats("ingameTick");
+				}
+
+				D2Bot.updateStatus("Game: " + me.gamename + timer(gameStart));
+			}
+
+			delay(1000);
+		}
+
+		isUp = "no";
+
+		locationAction(getLocation());
+		delay(1000);
 	}
 }

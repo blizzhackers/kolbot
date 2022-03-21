@@ -4,10 +4,12 @@ function main () {
 	include("common/misc.js");
 	include("common/util.js");
 
-	var handle,
+	let handle,
 		isUp = "no";
 
 	function copyDataEvent (mode, msg) {
+		let obj;
+
 		switch (msg) {
 		case "Handle":
 			handle = mode;
@@ -17,7 +19,7 @@ function main () {
 
 		switch (mode) {
 		case 3: // request game
-			var obj = JSON.parse(msg);
+			obj = JSON.parse(msg);
 
 			if (me.gameReady) {
 				D2Bot.joinMe(obj.profile, me.gamename.toLowerCase(), "", me.gamepassword.toLowerCase(), isUp);
@@ -47,10 +49,13 @@ function main () {
 
 	while (true) {
 		if (me.gameReady) {
-			if (isUp === "no") {
-				isUp = "yes";
+			isUp === "no" && (isUp = "yes");
+
+			if (me.ingame) {
+				D2Bot.updateStatus("Game: " + me.gamename + " | Level: " + me.charlvl);
 			}
 		} else {
+			D2Bot.updateStatus("Lobby");
 			isUp = "no";
 		}
 

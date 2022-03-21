@@ -25,7 +25,7 @@ const StarterConfig = {
 	GameDoesNotExistTimeout: 30 // Seconds to wait before cancelling the 'Game does not exist.' screen
 };
 
-var ChannelConfig = {
+const ChannelConfig = {
 	/* Override default values for JoinChannel, FirstJoinMessage, AnnounceGames and AfterGameMessage per profile
 		It's possible to override any number of these options (you don't have to put all of them)
 
@@ -61,8 +61,6 @@ var ChannelConfig = {
 
 };
 
-
-
 // No touchy!
 include("json2.js");
 include("OOG.js");
@@ -70,7 +68,9 @@ include("automule.js");
 include("gambling.js");
 include("craftingsystem.js");
 include("torchsystem.js");
+include('Polyfill.js');
 include("common/misc.js");
+include("common/util.js");
 include("common/util.js");
 
 let firstRun = false;
@@ -102,7 +102,7 @@ function sayMsg(string) {
 }
 
 function ReceiveCopyData(mode, msg) {
-	var obj;
+	let obj;
 
 	switch (msg) {
 	case "Handle":
@@ -127,10 +127,16 @@ function ReceiveCopyData(mode, msg) {
 		if (gameInfo) {
 			obj = JSON.parse(msg);
 
-			if (me.gameReady) {
-				D2Bot.joinMe(obj.profile, me.gamename.toLowerCase(), "", me.gamepassword.toLowerCase(), isUp);
+			if ([4, 5].includes(Profile().type)) {
+				if (me.gameReady) {
+					D2Bot.joinMe(obj.profile, me.gameserverip.toString(), "", "", isUp);
+				}
 			} else {
-				D2Bot.joinMe(obj.profile, gameInfo.gameName.toLowerCase(), gameCount, gameInfo.gamePass.toLowerCase(), isUp);
+				if (me.gameReady) {
+					D2Bot.joinMe(obj.profile, me.gamename.toLowerCase(), "", me.gamepassword.toLowerCase(), isUp);
+				} else {
+					D2Bot.joinMe(obj.profile, gameInfo.gameName.toLowerCase(), gameCount, gameInfo.gamePass.toLowerCase(), isUp);
+				}
 			}
 		}
 
@@ -163,8 +169,8 @@ function ReceiveCopyData(mode, msg) {
 	}
 }
 
-function setNextGame() {
-	var nextGame = gameInfo.gameName;
+function setNextGame () {
+	let nextGame = gameInfo.gameName;
 
 	if (StarterConfig.ResetCount && gameCount + 1 >= StarterConfig.ResetCount) {
 		nextGame += 1;
@@ -175,8 +181,8 @@ function setNextGame() {
 	DataFile.updateStats("nextGame", nextGame);
 }
 
-function locationTimeout(time, location) {
-	var endtime = getTickCount() + time;
+function locationTimeout (time, location) {
+	let endtime = getTickCount() + time;
 
 	while (getLocation() === location && endtime > getTickCount()) {
 		delay(500);
@@ -185,7 +191,7 @@ function locationTimeout(time, location) {
 	return (getLocation() !== location);
 }
 
-function updateCount() {
+function updateCount () {
 	D2Bot.updateCount();
 	delay(1000);
 	ControlAction.click(6, 264, 366, 272, 35);
@@ -200,7 +206,7 @@ function updateCount() {
 	ControlAction.click(6, 33, 572, 128, 35);
 }
 
-function ScriptMsgEvent(msg) {
+function ScriptMsgEvent (msg) {
 	switch (msg) {
 	case "mule":
 		AutoMule.check = true;
@@ -243,8 +249,8 @@ function timer (tick) {
 	return " (" + new Date(getTickCount() - tick).toISOString().slice(11, -5) + ")";
 }
 
-function randomString(len, useNumbers = false) {
-	var i, rval = "",
+function randomString (len, useNumbers = false) {
+	let i, rval = "",
 		letters = useNumbers ? "abcdefghijklmnopqrstuvwxyz0123456789" : "abcdefghijklmnopqrstuvwxyz";
 
 	len = len ? len : rand(5, 14);
@@ -256,8 +262,8 @@ function randomString(len, useNumbers = false) {
 	return rval;
 }
 
-function locationAction(location) {
-	var i, control, string, text;
+function locationAction (location) {
+	let i, control, string, text;
 
 MainSwitch:
 	switch (location) {
@@ -270,14 +276,8 @@ MainSwitch:
 
 		me.blockKeys = false;
 		loginRetry = 0;
-
-		if (!firstLogin) {
-			firstLogin = true;
-		}
-
-		if (lastGameStatus === "pending") {
-			gameCount += 1;
-		}
+		!firstLogin && (firstLogin = true);
+		lastGameStatus === "pending" && (gameCount += 1);
 
 		if (StarterConfig.PingQuitDelay && pingQuit) {
 			ControlAction.timeoutDelay("Ping Delay", StarterConfig.PingQuitDelay * 1e3);
@@ -302,8 +302,6 @@ MainSwitch:
 		}
 
 		if (ingame) {
-			//D2Bot.store(JSON.stringify({currScript: "none", area: "out of game"}));
-
 			if (AutoMule.outOfGameCheck() || TorchSystem.outOfGameCheck() || Gambling.outOfGameCheck() || CraftingSystem.outOfGameCheck()) {
 				break;
 			}
@@ -345,15 +343,10 @@ MainSwitch:
 		break;
 	case 3: // Lobby Chat
 		D2Bot.updateStatus("Lobby Chat");
-
-		if (lastGameStatus === "pending") {
-			gameCount += 1;
-		}
+		lastGameStatus === "pending" && (gameCount += 1);
 
 		if (ingame || gameInfo.error) {
-			if (!gameStart) {
-				gameStart = DataFile.getStats().ingameTick;
-			}
+			!gameStart && (gameStart = DataFile.getStats().ingameTick);
 
 			if (getTickCount() - gameStart < StarterConfig.MinGameTime * 1e3) {
 				ControlAction.timeoutDelay("Min game time wait", StarterConfig.MinGameTime * 1e3 + gameStart - getTickCount());
@@ -361,8 +354,6 @@ MainSwitch:
 		}
 
 		if (ingame) {
-			//D2Bot.store(JSON.stringify({currScript: "none", area: "out of game"}));
-
 			if (AutoMule.outOfGameCheck() || TorchSystem.outOfGameCheck() || Gambling.outOfGameCheck() || CraftingSystem.outOfGameCheck()) {
 				break;
 			}
@@ -939,8 +930,10 @@ function main() {
 	}
 
 	while (true) {
-		while (me.ingame) { // returns true before actually in game so we can't only use this check
-			if (me.gameReady) { // returns false when switching acts so we can't use while
+		// returns true before actually in game so we can't only use this check
+		while (me.ingame) {
+			// returns false when switching acts so we can't use while
+			if (me.gameReady) {
 				isUp = "yes";
 
 				if (!ingame) {

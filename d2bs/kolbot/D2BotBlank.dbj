@@ -5,11 +5,11 @@ function main() {
 	include("common/misc.js");
 	include("common/util.js");
 
-	var handle,
+	let handle,
 		isUp = "no";
 
 	this.copyDataEvent = function (mode, msg) {
-		var obj;
+		let obj;
 
 		switch (msg) {
 		case "Handle":
@@ -54,11 +54,7 @@ function main() {
 	}
 
 	while (true) {
-		if (me.ingame) {
-			isUp = "yes";
-		} else {
-			isUp = "no";
-		}
+		isUp = me.ingame ? "yes" : "no";
 
 		delay(1000);
 	}

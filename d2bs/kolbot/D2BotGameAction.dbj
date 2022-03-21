@@ -1,4 +1,4 @@
-var StarterConfig = {
+const StarterConfig = {
 	MinGameTime: 0, // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
 	CreateGameDelay: 5, // Seconds to wait before creating a new game
 	SwitchKeyDelay: 0, // Seconds to wait before switching a used/banned key or after realm down
@@ -25,13 +25,13 @@ if (!FileTools.exists("data/" + me.profile + ".json")) {
 	DataFile.create();
 }
 
-var handle, tag, gameInfo, gameStart, ingame, connectFail, charList,
+let handle, tag, gameInfo, gameStart, ingame, connectFail, charList,
 	ftj = 0,
 	lastGameStatus = "ready",
 	gameCount = DataFile.getStats().runs + 1,
 	creatingActions = ["doMule"];
 
-function ReceiveCopyData(mode, msg) {
+function ReceiveCopyData (mode, msg) {
 	switch (msg) {
 	case "Handle":
 		handle = mode;
@@ -61,8 +61,8 @@ function ReceiveCopyData(mode, msg) {
 	}
 }
 
-function locationTimeout(time, location) {
-	var endtime = getTickCount() + time;
+function locationTimeout (time, location) {
+	let endtime = getTickCount() + time;
 
 	while (getLocation() === location && endtime > getTickCount()) {
 		delay(500);
@@ -71,7 +71,7 @@ function locationTimeout(time, location) {
 	return (getLocation() !== location);
 }
 
-function updateCount() {
+function updateCount () {
 	D2Bot.updateCount();
 	delay(1000);
 	ControlAction.click(6, 264, 366, 272, 35);
@@ -86,75 +86,8 @@ function updateCount() {
 	ControlAction.click(6, 33, 572, 128, 35);
 }
 
-function main () {
-	addEventListener('copydata', ReceiveCopyData);
-
-	while (!handle) {
-		delay(100);
-	}
-
-	DataFile.updateStats("handle", handle);
-	D2Bot.init();
-	load("tools/heartbeat.js");
-
-	while (!gameInfo) {
-		D2Bot.requestGameInfo();
-		delay(500);
-	}
-
-	while (!tag) {
-		D2Bot.getProfile();
-		delay(500);
-	}
-
-	if (gameInfo.rdBlocker) {
-		D2Bot.printToConsole("You must disable RD Blocker for Mule Logger to work properly. Stopping.");
-		GameAction.update("done", "GameAction has failed, please disable RD Blocker");
-		D2Bot.stop(me.profile,true);
-
-		return;
-	}
-
-	GameAction.init(tag);
-
-	if (gameInfo.error) {
-		if (!!DataFile.getStats().debugInfo) {
-			gameInfo.crashInfo = DataFile.getStats().debugInfo;
-
-			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(gameInfo.crashInfo).currScript + " Area: " + JSON.parse(gameInfo.crashInfo).area, 10);
-		}
-
-		ControlAction.timeoutDelay("Crash Delay", StarterConfig.CrashDelay * 1e3);
-		D2Bot.updateRuns();
-	}
-
-	DataFile.updateStats("debugInfo", JSON.stringify({currScript: "none", area: "out of game"}));
-
-	while (true) {
-		while (me.ingame) { // returns true before actually in game so we can't only use this check
-			if (me.gameReady) { // returns false when switching acts so we can't use while
-				if (!ingame) {
-					print("Updating Status");
-					D2Bot.updateStatus("Game: " + me.gamename);
-
-					lastGameStatus = "ingame";
-					ingame = true;
-					gameStart = getTickCount();
-
-					DataFile.updateStats("runs", gameCount);
-				}
-			}
-
-			delay(1000);
-		}
-
-		locationAction(getLocation());
-		delay(1000);
-	}
-}
-
-function locationAction(location) {
-	var i, control, string, text, currChar;
+function locationAction (location) {
+	let i, control, string, text, currChar;
 
 MainSwitch:
 	switch (location) {
@@ -283,7 +216,7 @@ MainSwitch:
 		break;
 	case 5: // Join Game
 		D2Bot.updateStatus("Join Game");
-		var joinInfo = GameAction.gameInfo();
+		let joinInfo = GameAction.gameInfo();
 
 		joinGame(joinInfo.gameName, joinInfo.gamePass);
 		locationTimeout(5000, location);
@@ -683,5 +616,74 @@ MainSwitch:
 		}
 
 		break;
+	}
+}
+
+function main () {
+	addEventListener('copydata', ReceiveCopyData);
+
+	while (!handle) {
+		delay(100);
+	}
+
+	DataFile.updateStats("handle", handle);
+	D2Bot.init();
+	load("tools/heartbeat.js");
+
+	while (!gameInfo) {
+		D2Bot.requestGameInfo();
+		delay(500);
+	}
+
+	while (!tag) {
+		D2Bot.getProfile();
+		delay(500);
+	}
+
+	if (gameInfo.rdBlocker) {
+		D2Bot.printToConsole("You must disable RD Blocker for Mule Logger to work properly. Stopping.");
+		GameAction.update("done", "GameAction has failed, please disable RD Blocker");
+		D2Bot.stop(me.profile,true);
+
+		return;
+	}
+
+	GameAction.init(tag);
+
+	if (gameInfo.error) {
+		if (!!DataFile.getStats().debugInfo) {
+			gameInfo.crashInfo = DataFile.getStats().debugInfo;
+
+			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(gameInfo.crashInfo).currScript + " Area: " + JSON.parse(gameInfo.crashInfo).area, 10);
+		}
+
+		ControlAction.timeoutDelay("Crash Delay", StarterConfig.CrashDelay * 1e3);
+		D2Bot.updateRuns();
+	}
+
+	DataFile.updateStats("debugInfo", JSON.stringify({currScript: "none", area: "out of game"}));
+
+	while (true) {
+		// returns true before actually in game so we can't only use this check
+		while (me.ingame) {
+			// returns false when switching acts so we can't use while
+			if (me.gameReady) {
+				if (!ingame) {
+					print("Updating Status");
+					D2Bot.updateStatus("Game: " + me.gamename);
+
+					lastGameStatus = "ingame";
+					ingame = true;
+					gameStart = getTickCount();
+
+					DataFile.updateStats("runs", gameCount);
+				}
+			}
+
+			delay(1000);
+		}
+
+		locationAction(getLocation());
+		delay(1000);
 	}
 }
