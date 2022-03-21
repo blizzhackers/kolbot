@@ -252,6 +252,14 @@ const ActionHooks = {
 				}
 
 				break;
+			case 45: // Ins key
+				if (me.inTown) {
+					break;
+				}
+
+				qolObj.action = "clear";
+
+				break;
 			}
 
 			if (hook) {

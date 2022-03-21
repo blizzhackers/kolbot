@@ -303,6 +303,10 @@ function main() {
 							Town.goToTown();
 
 							break;
+						case "clear":
+							Attack.clear(10);
+
+							break;
 						case "cowportal":
 							Misc.openRedPortal(sdk.areas.MooMooFarm);
 
