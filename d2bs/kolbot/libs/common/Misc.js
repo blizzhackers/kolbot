@@ -891,6 +891,26 @@ const Misc = {
 		return count;
 	},
 
+	// Get total number of players in game and in my party
+	getPartyCount: function () {
+		let count = 0,
+			myPartyId = 0,
+			party = getParty();
+
+		if (party) {
+			myPartyId = party.partyid;
+			
+			do {
+				if (party.partyid !== 65535 && party.partyid === myPartyId && party.name !== me.name) {
+					print(party.name);
+					count += 1;
+				}
+			} while (party.getNext());
+		}
+
+		return count;
+	},
+
 	// Open a chest Unit (takes chestID or unit)
 	openChest: function (unit) {
 		typeof unit === "number" && (unit = getUnit(2, unit));
@@ -901,6 +921,8 @@ const Misc = {
 		// locked chest, no keys
 		if (!me.assassin && unit.islocked && !me.findItem(543, 0, 3)) return false;
 
+		let specialChest = [17, 18, 19, 20, 21, 30].includes(unit.classid);
+
 		for (let i = 0; i < 7; i++) {
 			if (Skill.useTK(unit) && i < 3) {
 				if (getDistance(me, unit) > 13) {
@@ -910,7 +932,7 @@ const Misc = {
 				Skill.cast(sdk.skills.Telekinesis, 0, unit);
 			} else {
 				if (Pather.moveTo(unit.x + 1, unit.y + 2, 3) && getDistance(me, unit.x + 1, unit.y + 2) < 5) {
-					sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
+					specialChest && i > 2 ? Misc.click(0, 0, unit) : sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
 				}
 			}
 

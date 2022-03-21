@@ -1580,6 +1580,21 @@ Object.defineProperties(me, {
 			return index === -1 ? 5 : index;
 		}
 	},
+	highestQuestDone: {
+		get: function () {
+			for (let i = sdk.quests.SecretCowLevel; i >= sdk.quests.SpokeToWarriv; i--) {
+				if (me.getQuest(i, 0)) {
+					return i;
+				}
+
+				// check if we've completed main part but not used our reward
+				if ([sdk.quests.RescueonMountArreat, sdk.quests.SiegeOnHarrogath, sdk.quests.ToolsoftheTrade].includes(i) && me.getQuest(i, 1)) {
+					return i;
+				}
+			}
+			return undefined;
+		}
+	},
 	staminaPercent: {
 		get: function () {
 			return Math.round((me.stamina / me.staminamax) * 100);

@@ -343,6 +343,10 @@ let Config = {
 		KillBloodRaven: false,
 		ClearCrypt: false
 	},
+	Cows: {
+		MakeCows: false,
+		KillKing: false
+	},
 	Eldritch: {
 		OpenChest: false,
 		KillSharptooth: false,
@@ -448,7 +452,10 @@ let Config = {
 		BreakClearLevel: false
 	},
 	Wakka: {
-		Wait: 1
+		Wait: 1,
+		StopAtLevel: 99,
+		StopProfile: false,
+		SkipIfBaal: true,
 	},
 	BattleOrders: {
 		Mode: 0,
@@ -542,16 +549,22 @@ let Config = {
 	},
 	Rusher: {
 		WaitPlayerCount: 0,
+		Cain: false,
 		Radament: false,
 		LamEsen: false,
 		Izual: false,
 		Shenk: false,
 		Anya: false,
+		HellAncients: false,
+		GiveWps: false,
 		LastRun: ""
 	},
 	Rushee: {
 		Quester: false,
 		Bumper: false
+	},
+	Questing: {
+		StopProfile: false
 	},
 	AutoSkill: {
 		Enabled: false,

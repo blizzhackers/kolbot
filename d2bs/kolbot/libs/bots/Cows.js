@@ -203,13 +203,8 @@ function Cows() {
 
 		// Check to see if portal is already open, if not get the ingredients
 		if (!Pather.getPortal(sdk.areas.MooMooFarm)) {
-			if (!me.tristram) {
-				throw new Error("Cain quest incomplete");
-			}
-
-			if (me.cows) {
-				throw new Error("Already killed the Cow King.");
-			}
+			if (!me.tristram) { throw new Error("Cain quest incomplete"); }
+			if (me.cows) { throw new Error("Already killed the Cow King."); }
 			
 			let leg = this.getLeg();
 			let tome = this.getTome();
@@ -242,9 +237,17 @@ function Cows() {
 		}
 	}
 
+	if (Config.Cows.MakeCows) {
+		if (Pather.getPortal(sdk.areas.MooMooFarm)) {
+			return true;
+		} else {
+			throw new Error("I failed to make cow portal");
+		}
+	}
+
 	Pather.usePortal(sdk.areas.MooMooFarm);
 	Precast.doPrecast(false);
-	this.clearCowLevel();
+	Config.Cows.KillKing ? Attack.clearLevel() : this.clearCowLevel();
 
 	return true;
 }

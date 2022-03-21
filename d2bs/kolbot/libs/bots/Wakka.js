@@ -4,8 +4,6 @@
 *	@desc		walking Chaos Sanctuary leecher
 */
 
-const stopLvl = 99;
-
 function Wakka() {
 	let i, safeTP, portal, vizClear, seisClear, infClear, tick, diablo,
 		timeout = Config.Wakka.Wait,
@@ -15,7 +13,8 @@ function Wakka() {
 		leaderPartyUnit = null,
 		leader = "";
 
-	function autoLeaderDetect(destination) { // autoleader by Ethic
+	// autoleader by Ethic
+	function autoLeaderDetect(destination) {
 		let solofail, suspect;
 
 		do {
@@ -23,11 +22,11 @@ function Wakka() {
 			suspect = getParty(); // get party object (players in game)
 
 			do {
-				if (suspect.name !== me.name) { // player isn't alone
-					solofail += 1;
-				}
-
-				if (suspect.area === destination && !getPlayerFlag(me.gid, suspect.gid, 8)) { // first player not hostile found in destination area...
+				// player isn't alone
+				suspect.name !== me.name && (solofail += 1);
+				
+				// first player not hostile found in destination area...
+				if (suspect.area === destination && !getPlayerFlag(me.gid, suspect.gid, 8)) {
 					leader = suspect.name; // ... is our leader
 
 					if (suspect.area === 131) {
@@ -40,9 +39,8 @@ function Wakka() {
 				}
 			} while (suspect.getNext());
 
-			if (solofail === 0) { // empty game, nothing left to do
-				return false;
-			}
+			// empty game, nothing left to do
+			if (solofail === 0) return false;
 
 			delay(500);
 
@@ -61,18 +59,14 @@ function Wakka() {
 		if (monster) {
 			do {
 				if (monster.y < 5565 && Attack.checkMonster(monster) && getDistance(me, monster) <= range) {
-					if (!dodge) {
-						return true;
-					}
+					if (!dodge) return true;
 
 					monList.push(copyUnit(monster));
 				}
 			} while (monster.getNext());
 		}
 
-		if (!monList.length) {
-			return false;
-		}
+		if (!monList.length) return false;
 
 		monList.sort(Sort.units);
 
@@ -86,9 +80,7 @@ function Wakka() {
 	this.getLayout = function (seal, value) {
 		let sealPreset = getPresetUnit(108, 2, seal);
 
-		if (!seal) {
-			throw new Error("Seal preset not found. Can't continue.");
-		}
+		if (!seal) { throw new Error("Seal preset not found. Can't continue."); }
 
 		switch (seal) {
 		case 396:
@@ -116,16 +108,18 @@ function Wakka() {
 	};
 
 	this.checkBoss = function (name) {
-		let i, boss,
-			glow = getUnit(2, 131);
+		let glow = getUnit(2, 131);
 
 		if (glow) {
-			for (i = 0; i < 10; i += 1) {
-				if (me.getStat(12) >= stopLvl) {
-					D2Bot.stop();
+			for (let i = 0; i < 10; i += 1) {
+				if (me.charlvl >= Config.Wakka.StopAtLevel) {
+					Config.Wakka.StopProfile && D2Bot.stop();
+					return true;
 				}
 
-				boss = getUnit(1, name);
+				if (Config.Wakka.SkipIfBaal && this.getLeaderUnitArea() === sdk.areas.ThroneofDestruction) return true;
+
+				let boss = getUnit(1, name);
 
 				if (boss && boss.mode === 12) {
 					return true;
@@ -141,14 +135,10 @@ function Wakka() {
 	};
 
 	this.getCorpse = function () {
-		if (me.mode === 17) {
-			me.revive();
-		}
+		me.dead && me.revive();
 
-		let corpse,
-			rval = false;
-
-		corpse = getUnit(0, me.name, 17);
+		let rval = false;
+		let corpse = getUnit(0, me.name, 17);
 
 		if (corpse) {
 			do {
@@ -168,25 +158,21 @@ function Wakka() {
 	this.followPath = function (dest) {
 		let path = getPath(me.area, me.x, me.y, dest[0], dest[1], 0, 10);
 
-		if (!path) {
-			throw new Error("Failed go get path");
-		}
+		if (!path) { throw new Error("Failed go get path"); }
 
 		while (path.length > 0) {
-			if (me.getStat(12) >= stopLvl) {
-				D2Bot.stop();
+			if (me.charlvl >= Config.Wakka.StopAtLevel) {
+				Config.Wakka.StopProfile && D2Bot.stop();
+				return true;
 			}
 
-			if (me.mode === 17 || me.inTown) {
-				return false;
-			}
-
-			if (!leaderUnit || !copyUnit(leaderUnit).x) {
-				leaderUnit = getUnit(0, leader);
-			}
+			if (Config.Wakka.SkipIfBaal && this.getLeaderUnitArea() === sdk.areas.ThroneofDestruction) return true;
+			if (me.mode === 17 || me.inTown) return false;
+			!leaderUnit || !copyUnit(leaderUnit).x && (leaderUnit = getUnit(0, leader));
 
 			if (leaderUnit) {
-				if (this.checkMonsters(45, true) && getDistance(me, leaderUnit) <= maxDist) { // monsters nearby - don't move
+				// monsters nearby - don't move
+				if (this.checkMonsters(45, true) && getDistance(me, leaderUnit) <= maxDist) {
 					path = getPath(me.area, me.x, me.y, dest[0], dest[1], 0, 15);
 
 					delay(200);
@@ -194,7 +180,8 @@ function Wakka() {
 					continue;
 				}
 
-				if (getDistance(me, leaderUnit) <= minDist) { // leader within minDist range - don't move
+				// leader within minDist range - don't move
+				if (getDistance(me, leaderUnit) <= minDist) {
 					delay(200);
 
 					continue;
@@ -204,7 +191,8 @@ function Wakka() {
 				leaderPartyUnit = getParty(leader);
 
 				if (leaderPartyUnit) {
-					if (leaderPartyUnit.area !== me.area) { // leader went to town - don't move
+					 // leader went to town - don't move
+					if (leaderPartyUnit.area !== me.area) {
 						delay(200);
 
 						continue;
@@ -221,14 +209,20 @@ function Wakka() {
 				}
 			}
 
-			if (Pather.moveTo(path[0].x, path[0].y)) {
-				path.shift();
-			}
-
+			Pather.moveTo(path[0].x, path[0].y) && path.shift();
+			getUnits(1).filter(mon => mon.distance <= 10 && mon.attackable).length === 0 && Pickit.pickItems(5);
 			this.getCorpse();
 		}
 
 		return true;
+	};
+
+	this.getLeaderUnitArea = function () {
+		if (!leaderUnit || !copyUnit(leaderUnit).x) {
+			leaderUnit = getUnit(0, leader);
+		}
+
+		return !!leaderUnit ? leaderUnit.area : getParty(leader).area;
 	};
 
 	// start
@@ -236,6 +230,7 @@ function Wakka() {
 	Town.move("portalspot");
 
 	if (Config.Leader) {
+		let i;
 		leader = Config.Leader;
 
 		for (i = 0; i < 30; i += 1) {
@@ -246,9 +241,7 @@ function Wakka() {
 			delay(1000);
 		}
 
-		if (i === 30) {
-			throw new Error("Wakka: Leader not partied");
-		}
+		if (i === 30) { throw new Error("Wakka: Leader not partied"); }
 	}
 
 	autoLeaderDetect(108);
@@ -256,32 +249,29 @@ function Wakka() {
 
 	if (leader) {
 		while (Misc.inMyParty(leader)) {
-			if (me.getStat(12) >= stopLvl) {
-				D2Bot.stop();
+			if (me.charlvl >= Config.Wakka.StopAtLevel) {
+				Config.Wakka.StopProfile && D2Bot.stop();
+				return true;
 			}
 
+			if (Config.Wakka.SkipIfBaal && this.getLeaderUnitArea() === sdk.areas.ThroneofDestruction) return true;
+
 			switch (me.area) {
-			case 103:
-				//portal = Pather.getPortal(108, leader);
-				portal = Pather.getPortal(108, null);
+			case sdk.areas.PandemoniumFortress:
+				portal = Pather.getPortal(sdk.areas.ChaosSanctuary, null);
 
 				if (portal) {
-					if (!safeTP) {
-						delay(5000);
-					}
-
-					//Pather.usePortal(108, leader);
-					Pather.usePortal(108, null);
+					!safeTP && delay(5000);
+					Pather.usePortal(sdk.areas.ChaosSanctuary, null);
 					Precast.doPrecast(true);
 				}
 
 				break;
-			case 108:
+			case sdk.areas.ChaosSanctuary:
 				if (!safeTP) {
 					if (this.checkMonsters(25, false)) {
 						me.overhead("hot tp");
-						//Pather.usePortal(103, leader);
-						Pather.usePortal(103, null);
+						Pather.usePortal(sdk.areas.PandemoniumFortress, null);
 						this.getCorpse();
 
 						break;
@@ -305,10 +295,7 @@ function Wakka() {
 					}
 
 					if (this.checkBoss(getLocaleString(2851))) {
-						if (!tick) {
-							tick = getTickCount();
-						}
-
+						!tick && (tick = getTickCount());
 						me.overhead("vizier dead");
 						Precast.doPrecast(true);
 					}
@@ -327,12 +314,10 @@ function Wakka() {
 
 						break;
 					}
+					
 
 					if (this.checkBoss(getLocaleString(2852))) {
-						if (!tick) {
-							tick = getTickCount();
-						}
-
+						!tick && (tick = getTickCount());
 						me.overhead("seis dead");
 						Precast.doPrecast(true);
 					}
@@ -353,10 +338,7 @@ function Wakka() {
 					}
 
 					if (this.checkBoss(getLocaleString(2853))) {
-						if (!tick) {
-							tick = getTickCount();
-						}
-
+						!tick && (tick = getTickCount());
 						me.overhead("infector dead");
 						Precast.doPrecast(true);
 					}
@@ -375,9 +357,7 @@ function Wakka() {
 				break;
 			}
 
-			if (me.mode === 17) {
-				me.revive();
-			}
+			me.dead && me.revive();
 
 			delay(200);
 		}

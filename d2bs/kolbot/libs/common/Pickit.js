@@ -78,20 +78,18 @@ const Pickit = {
 				line: null
 			};
 		}
-		
+
 		return rval;
 	},
 
-	pickItems: function () {
+	pickItems: function (range = Config.PickRange) {
 		let status, item, canFit,
 			needMule = false,
 			pickList = [];
 
 		Town.clearBelt();
 
-		if (me.dead) {
-			return false;
-		}
+		if (me.dead) return false;
 
 		while (!me.idle) {
 			delay(40);
@@ -101,16 +99,14 @@ const Pickit = {
 
 		if (item) {
 			do {
-				if ((item.mode === 3 || item.mode === 5) && getDistance(me, item) <= Config.PickRange) {
+				if ((item.mode === 3 || item.mode === 5) && getDistance(me, item) <= range) {
 					pickList.push(copyUnit(item));
 				}
 			} while (item.getNext());
 		}
 
 		while (pickList.length > 0) {
-			if (me.dead) {
-				return false;
-			}
+			if (me.dead) return false;
 
 			pickList.sort(this.sortItems);
 
@@ -158,9 +154,7 @@ const Pickit = {
 					}
 
 					// Item can fit - pick it up
-					if (canFit) {
-						this.pickItem(pickList[0], status.result, status.line);
-					}
+					canFit && this.pickItem(pickList[0], status.result, status.line);
 				}
 			}
 
@@ -253,9 +247,7 @@ const Pickit = {
 				break MainLoop;
 			}
 
-			if (me.dead) {
-				return false;
-			}
+			if (me.dead) return false;
 
 			while (!me.idle) {
 				delay(40);
@@ -273,7 +265,7 @@ const Pickit = {
 					Skill.cast(43, 0, item);
 				}
 			} else {
-				if (getDistance(me, item) > (Config.FastPick === 2 && i < 1 ? 6 : 4) || checkCollision(me, item, 0x1)) {
+				if (getDistance(me, item) > (Config.FastPick && i < 1 ? 6 : 4) || checkCollision(me, item, 0x1)) {
 					if (Pather.useTeleport()) {
 						Pather.moveToUnit(item);
 					} else if (!Pather.moveTo(item.x, item.y, 0)) {
@@ -281,11 +273,7 @@ const Pickit = {
 					}
 				}
 
-				if (Config.FastPick < 2) {
-					Misc.click(0, 0, item);
-				} else {
-					sendPacket(1, 0x16, 4, 0x4, 4, item.gid, 4, 0);
-				}
+				Config.FastPick ? sendPacket(1, 0x16, 4, 0x4, 4, item.gid, 4, 0) : Misc.click(0, 0, item);
 			}
 
 			tick = getTickCount();
@@ -322,8 +310,6 @@ const Pickit = {
 
 			// TK failed, disable it
 			stats.useTk = false;
-
-			//print("pick retry");
 		}
 
 		stats.picked = me.itemcount > itemCount || !!me.getItem(-1, -1, gid);

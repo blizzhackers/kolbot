@@ -5,27 +5,18 @@
 */
 
 function Questing() {
-	let i, j,
-		quests = [
+	let quests = [
 			[1, "clearDen"],
 			[9, "killRadament"],
 			[17, "lamEssen"],
 			[25, "killIzual"],
 			[35, "killShenk"],
-			[37, "freeAnya"]
+			[37, "freeAnya"],
+			[39, "ancients"]
 		];
-
-	this.checkQuest = function (id, state) {
-		sendPacket(1, 0x40);
-		delay(500);
-
-		return me.getQuest(id, state);
-	};
 
 	this.clearDen = function () {
 		print("starting den");
-
-		let akara;
 
 		if (!Town.goToTown(1) || !Pather.moveToExit([2, 8], true)) {
 			throw new Error();
@@ -36,7 +27,7 @@ function Questing() {
 		Town.goToTown();
 		Town.move(NPC.Akara);
 
-		akara = getUnit(1, NPC.Akara);
+		let akara = getUnit(1, NPC.Akara);
 
 		akara.openMenu();
 		me.cancel();
@@ -45,13 +36,9 @@ function Questing() {
 	};
 
 	this.killRadament = function () {
-		if (!Pather.accessToAct(2)) {
-			return false;
-		}
+		if (!Pather.accessToAct(2)) return false;
 
 		print("starting radament");
-
-		let book, atma;
 
 		if (!Town.goToTown() || !Pather.useWaypoint(48, true)) {
 			throw new Error();
@@ -65,7 +52,7 @@ function Questing() {
 
 		Attack.kill(229); // Radament
 
-		book = getUnit(4, 552);
+		let book = getUnit(4, 552);
 
 		if (book) {
 			Pickit.pickItem(book);
@@ -76,7 +63,7 @@ function Questing() {
 		Town.goToTown();
 		Town.move(NPC.Atma);
 
-		atma = getUnit(1, NPC.Atma);
+		let atma = getUnit(1, NPC.Atma);
 
 		atma.openMenu();
 		me.cancel();
@@ -85,13 +72,9 @@ function Questing() {
 	};
 
 	this.killIzual = function () {
-		if (!Pather.accessToAct(4)) {
-			return false;
-		}
+		if (!Pather.accessToAct(4)) return false;
 
 		print("starting izual");
-
-		let tyrael;
 
 		if (!Town.goToTown() || !Pather.useWaypoint(106, true)) {
 			throw new Error();
@@ -107,26 +90,19 @@ function Questing() {
 		Town.goToTown();
 		Town.move(NPC.Tyrael);
 
-		tyrael = getUnit(1, NPC.Tyrael);
+		let tyrael = getUnit(1, NPC.Tyrael);
 
 		tyrael.openMenu();
 		me.cancel();
-
-		if (getUnit(2, 566)) {
-			Pather.useUnit(2, 566, 109);
-		}
+		getUnit(2, 566) && Pather.useUnit(2, 566, 109);
 
 		return true;
 	};
 
 	this.lamEssen = function () {
-		if (!Pather.accessToAct(3)) {
-			return false;
-		}
+		if (!Pather.accessToAct(3)) return false;
 
 		print("starting lam essen");
-
-		let stand, book, alkor;
 
 		if (!Town.goToTown() || !Pather.useWaypoint(80, true)) {
 			throw new Error();
@@ -138,18 +114,18 @@ function Questing() {
 			throw new Error();
 		}
 
-		stand = getUnit(2, 193);
+		let stand = getUnit(2, 193);
 
 		Misc.openChest(stand);
 		delay(300);
 
-		book = getUnit(4, 548);
+		let book = getUnit(4, 548);
 
 		Pickit.pickItem(book);
 		Town.goToTown();
 		Town.move(NPC.Alkor);
 
-		alkor = getUnit(1, NPC.Alkor);
+		let alkor = getUnit(1, NPC.Alkor);
 
 		alkor.openMenu();
 		me.cancel();
@@ -158,13 +134,8 @@ function Questing() {
 	};
 
 	this.killShenk = function () {
-		if (!Pather.accessToAct(5)) {
-			return false;
-		}
-
-		if (this.checkQuest(35, 1)) {
-			return true;
-		}
+		if (!Pather.accessToAct(5)) return false;
+		if (Packet.checkQuest(35, 1)) return true;
 
 		print("starting shenk");
 
@@ -181,17 +152,10 @@ function Questing() {
 	};
 
 	this.freeAnya = function () {
-		if (!Pather.accessToAct(5)) {
-			return false;
-		}
-
-		if (this.checkQuest(37, 1)) {
-			return true;
-		}
+		if (!Pather.accessToAct(5)) return false;
+		if (Packet.checkQuest(37, 1)) return true;
 
 		print("starting anya");
-
-		let anya, malah, scroll;
 
 		if (!Town.goToTown() || !Pather.useWaypoint(113, true)) {
 			throw new Error();
@@ -205,17 +169,16 @@ function Questing() {
 
 		delay(1000);
 
-		anya = getUnit(2, 558);
+		let anya = getUnit(2, 558);
 
 		Pather.moveToUnit(anya);
-		//anya.interact();
 		sendPacket(1, 0x13, 4, 0x2, 4, anya.gid);
 		delay(300);
 		me.cancel();
 		Town.goToTown();
 		Town.move(NPC.Malah);
 
-		malah = getUnit(1, NPC.Malah);
+		let malah = getUnit(1, NPC.Malah);
 
 		malah.openMenu();
 		me.cancel();
@@ -230,22 +193,164 @@ function Questing() {
 		me.cancel();
 		delay(500);
 
-		scroll = me.getItem(646);
+		let scroll = me.getItem(646);
 
-		if (scroll) {
-			clickItem(1, scroll);
-		}
+		scroll && clickItem(1, scroll);
 
 		return true;
 	};
 
-	for (i = 0; i < quests.length; i += 1) {
-		if (me.inTown) {
-			Town.doChores();
+	// @theBGuy
+	this.ancients = function () {
+		// ancients resists
+		let canAncients = function () {
+			let ancient = getUnit(1);
+
+			if (ancient) {
+				do {
+					if (!ancient.getParent() && !Attack.canAttack(ancient)) {
+						return false;
+					}
+				} while (ancient.getNext());
+			}
+
+			return true;
+		};
+
+		// touch altar
+		let touchAltar = function () {
+			let tick = getTickCount();
+
+			while (getTickCount() - tick < 5000) {
+				if (getUnit(2, 546)) {
+					break;
+				}
+
+				delay(20 + me.ping);
+			}
+
+			let altar = getUnit(2, 546);
+
+			if (altar) {
+				while (altar.mode !== 2) {
+					Pather.moveToUnit(altar);
+					altar.interact();
+					delay(200 + me.ping);
+					me.cancel();
+				}
+
+				return true;
+			}
+
+			return false;
+		};
+
+		// ancients prep
+		let ancientsPrep = function () { 
+			Town.goToTown();
+			Town.fillTome(sdk.items.TomeofTownPortal);
+			Town.buyPots(10, "Thawing", true);
+			Town.buyPots(10, "Antidote", true);
+			Town.buyPots(10, "Stamina", true);
+			Town.buyPotions();
+			Pather.usePortal(sdk.areas.ArreatSummit, me.name);
+		};
+
+		Town.doChores();
+		print('starting ancients');
+		me.overhead("ancients");
+
+		Pather.useWaypoint(sdk.areas.AncientsWay);
+		Precast.doPrecast(true);
+		Pather.moveToExit(sdk.areas.ArreatSummit, true); // enter Arreat Summit
+
+		// failed to move to Arreat Summit
+		if (me.area !== sdk.areas.ArreatSummit) return false;
+
+		// ancients prep
+		Town.townTasks();
+		Town.buyPots(10, "Thawing", true);
+		Town.buyPots(10, "Antidote", true);
+		Town.buyPots(10, "Stamina", true);
+
+		let tempConfig = Misc.copy(Config); // save and update config settings
+		let townChicken = getScript("tools/townchicken.js");
+		townChicken && townChicken.running && townChicken.stop();
+
+		Config.TownCheck = false;
+		Config.MercWatch = false;
+		Config.TownHP = 0;
+		Config.TownMP = 0;
+		Config.HPBuffer = 15;
+		Config.MPBuffer = 15;
+		Config.LifeChicken = 10;
+		me.overhead('updated settings');
+
+		Town.buyPotions();
+		if (!Pather.usePortal(sdk.areas.ArreatSummit, me.name)) {
+			print("Failed to take portal back to Arreat Summit");
+			Pather.journeyTo(sdk.areas.ArreatSummit); // enter Arreat Summit
+		}
+		
+		Precast.doPrecast(true);
+
+		// move to altar
+		if (!Pather.moveToPreset(sdk.areas.ArreatSummit, sdk.unittype.Object, 546)) {
+			print("ÿc8Kolbot-SoloPlayÿc0: Failed to move to ancients' altar");
 		}
 
+		touchAltar(); //activate altar
+
+		// wait for ancients to spawn
+		while (!getUnit(sdk.unittype.Monster, sdk.monsters.TalictheDefender)) {
+			delay(250 + me.ping);
+		}
+
+		// reroll ancients if unable to attack
+		while (!canAncients()) {
+			Pather.makePortal(true);
+			ancientsPrep();
+			Pather.usePortal(sdk.areas.ArreatSummit, me.name);
+			touchAltar();
+
+			while (!getUnit(sdk.unittype.Monster, sdk.monsters.TalictheDefender)) {
+				delay(10 + me.ping);
+			}
+		}
+
+		for (let i = 0; i < 3 && !me.ancients; i++) {
+			Attack.clearList([getUnit(2, sdk.monsters.KorlictheProtector), getUnit(2, sdk.monsters.TalictheDefender), getUnit(2, sdk.monsters.MadawctheGuardian)]);
+			Pather.moveTo(10048, 12628);
+
+			if (!Packet.checkQuest(39, 0)) {
+				me.overhead("Failed to kill anicents. Attempt: " + i);
+				touchAltar(); //activate altar
+			}
+		}
+		
+		me.cancel();
+		Config = tempConfig;
+		me.overhead('restored settings');
+		Precast.doPrecast(true);
+
+		try {
+			if (Packet.checkQuest(39, 0)) {
+				Pather.clearToExit(sdk.areas.ArreatSummit, sdk.areas.WorldstoneLvl1, true);
+				Pather.clearToExit(sdk.areas.WorldstoneLvl1, sdk.areas.WorldstoneLvl2, true);
+				Pather.getWP(sdk.areas.WorldstoneLvl2);
+			}
+		} catch (err) {
+			print('Cleared Ancients. Failed to get WSK Waypoint');
+		}
+	};
+
+	for (let i = 0; i < quests.length; i += 1) {
+		me.inTown && Town.doChores();
+		
+		let j;
+
 		for (j = 0; j < 3; j += 1) {
-			if (!this.checkQuest(quests[i][0], 0)) {
+			if (!Packet.checkQuest(quests[i][0], 0)) {
 				try {
 					if (this[quests[i][1]]()) {
 						break;
@@ -258,13 +363,16 @@ function Questing() {
 			}
 		}
 
-		if (j === 3) {
-			D2Bot.printToConsole("Quest " + quests[i][1] + " failed.");
-		}
+		j === 3 && D2Bot.printToConsole("Quest " + quests[i][1] + " failed.");
 	}
 
-	D2Bot.printToConsole("All quests done. Stopping profile.");
-	D2Bot.stop();
+	if (Config.Questing.StopProfile) {
+		D2Bot.printToConsole("All quests done. Stopping profile.");
+		D2Bot.stop();
+	} else {
+		// reload town chicken in case we are doing others scripts after this one finishes
+		(Config.TownHP > 0 || Config.TownMP > 0) && load("tools/TownChicken.js");
+	}
 
 	return true;
 }
