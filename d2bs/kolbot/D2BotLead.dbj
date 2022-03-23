@@ -4,6 +4,7 @@ const StarterConfig = {
 	CreateGameDelay: 10, // Seconds to wait before creating a new game
 	ResetCount: 999, // Reset game count back to 1 every X games.
 	CharacterDifference: 99, // Character level difference. Set to false to disable character difference.
+	MaxPlayerCount: 8, // Max amount of players in game between 1 and 8
 	ChatActionsDelay: 2, // Seconds to wait in lobby before entering a channel
 
 	// ChannelConfig can override these options for individual profiles.
@@ -466,14 +467,18 @@ MainSwitch:
 		// Set character difference - handle open bnet
 		if (Profile().type === 2 && !!control) {
 			if (typeof StarterConfig.CharacterDifference === "number") {
-				if (control.disabled === 4) {
-					ControlAction.click(6, 431, 341, 15, 16);
-				}
-
+				control.disabled === 4 && ControlAction.click(6, 431, 341, 15, 16);
 				ControlAction.setText(1, 657, 342, 27, 20, StarterConfig.CharacterDifference.toString());
 			} else if (!StarterConfig.CharacterDifference && control.disabled === 5) {
 				ControlAction.click(6, 431, 341, 15, 16);
 			}
+
+		}
+
+		control = getControl(1, 657, 308, 27, 20);
+
+		if (!!control && typeof StarterConfig.MaxPlayerCount === "number") {
+			ControlAction.setText(1, 657, 308, 27, 20, StarterConfig.MaxPlayerCount.toString());
 		}
 
 		// Get game name if there is none

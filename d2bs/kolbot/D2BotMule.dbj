@@ -475,8 +475,13 @@ MainSwitch:
 		control = getControl(1, 657, 342, 27, 20);
 
 		if (control && control.disabled === 5) {
-			ControlAction.click(6, 431, 341, 15, 16); // remove level restriction
+			// remove level restriction
+			ControlAction.click(6, 431, 341, 15, 16);
 		}
+
+		// Max number of players
+		control = getControl(1, 657, 308, 27, 20);
+		!!control && ControlAction.setText(1, 657, 308, 27, 20, "8");
 
 		delay(2000);
 
