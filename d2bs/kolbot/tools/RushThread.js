@@ -1,6 +1,6 @@
 /**
 *	@filename	RushThread.js
-*	@author		kolton
+*	@author		kolton, theBGuy
 *	@desc		Second half of the Rusher script
 */
 
@@ -28,13 +28,73 @@ include("common/Runewords.js");
 include("common/Storage.js");
 include("common/Town.js");
 
+let Override_1 = require('../modules/Override');
+let count = 0;
 const gidList = [];
+let wpsToGive = Pather.wpAreas.slice(0).filter(function (area) {
+	if (sdk.areas.Towns.includes(area) || area === sdk.areas.HallsofPain) return false;
+	if (me.classic && area >= sdk.areas.Harrogath) return false;
+	return true;
+});
+
+function wpEvent(who, msg) {
+	if (typeof msg === "string" && msg === "gotwp") {
+		count++;
+	}
+}
+
+function giveWP () {
+	let wp = getUnit(2, "waypoint");
+	let success = false;
+	if (wp && !me.inTown && wpsToGive.includes(me.area)) {
+		try {
+			addEventListener("chatmsg", wpEvent);
+			let playerCount = Misc.getPartyCount() - 1;
+			let mobCount = getUnits(1).filter(mon => mon.distance <= 15 && mon.attackable).length;
+			mobCount > 0 && Attack.securePosition(me.x, me.y, 15, 30e3, true);
+			wp.distance > 5 && Pather.moveToUnit(wp);
+			Pather.makePortal();
+			say("wp");
+			let tick = getTickCount();
+			while (getTickCount() - tick < 2 * 60 * 1000) {
+				if (count === playerCount) {
+					wpsToGive.remove(me.area);
+					success = true;
+					break;
+				}
+				delay(50);
+			}
+		} catch (e) {
+			print(e);
+			say("Failed to give wp");
+		} finally {
+			removeEventListener("chatmsg", wpEvent);
+			count = 0;
+			return success;
+		}
+	}
+
+	return false;
+}
+
+new Override_1.Override(Pather, Pather.useWaypoint, function(orignal) {
+	let args = [];
+    for (let _i = 1; _i < arguments.length; _i++) {
+        args[_i - 1] = arguments[_i];
+    }
+	if (orignal.apply(Pather, args)) {
+		return (Config.Rusher.GiveWps && giveWP()) || true;
+	} else {
+		print("failed");
+		return false;
+	}
+}).apply();
 
 function main() {
+	let tick;
+
 	this.playerIn = function (area) {
-		if (!area) {
-			area = me.area;
-		}
+		!area && (area = me.area);
 
 		let party = getParty();
 
@@ -56,16 +116,16 @@ function main() {
 			do {
 				if (party.name !== me.name) {
 					switch (me.diff) {
-					case 0:
-						if (party.level >= 20) {
-							return true;
-						}
+					case sdk.difficulty.Normal:
+						if (party.level >= 20) return true;
 
 						break;
-					case 1:
-						if (party.level >= 40) {
-							return true;
-						}
+					case sdk.difficulty.Nightmare:
+						if (party.level >= 40) return true;
+
+						break;
+					case sdk.difficulty.Hell:
+						if (party.level >= 60) return true;
 
 						break;
 					}
@@ -80,9 +140,7 @@ function main() {
 		let area, party,
 			areas = [0, 1, 40, 75, 103, 109];
 
-		if (!act) {
-			act = me.act;
-		}
+		!act && (act = me.act);
 
 		area = areas[act];
 		party = getParty();
@@ -137,7 +195,7 @@ function main() {
 	};
 
 	this.cube = function () {
-		if (me.diff === 0) {
+		if (me.normal) {
 			say("starting cube");
 			Pather.useWaypoint(57, true);
 			Precast.doPrecast(true);
@@ -312,6 +370,8 @@ function main() {
 		if (me.inTown) {
 			Town.doChores();
 			Pather.useWaypoint(46, true);
+		} else {
+			giveWP();
 		}
 
 		Precast.doPrecast(true);
@@ -396,10 +456,6 @@ function main() {
 		Pather.moveTo(coords[0] + 71, coords[1] - 94);
 		Attack.securePosition(me.x, me.y, 40, 3000);
 
-		/*Attack.kill(getLocaleString(2863));
-		Attack.kill(getLocaleString(2862));
-		Attack.kill(getLocaleString(2860));*/
-
 		say("2");
 		Pather.moveTo(coords[0] + 23, coords[1] - 102);
 		Pather.usePortal(null, me.name);
@@ -458,7 +514,6 @@ function main() {
 		}
 
 		say("a4");
-		//Pather.moveTo(17591, 8070);
 
 		while (!this.playersInAct(4)) {
 			delay(250);
@@ -528,6 +583,10 @@ function main() {
 			case 2:
 				break;
 			case 3:
+				if (Config.AttackSkill[3] !== sdk.skills.BlessedHammer) {
+					return;
+				}
+
 				target = getUnit(1, name);
 
 				if (!target) {
@@ -593,49 +652,20 @@ function main() {
 		Pather.useWaypoint(107, true);
 		Precast.doPrecast(true);
 		Pather.moveTo(7790, 5544);
+		
 		this.initLayout();
+		if (!this.openSeal(395) || !this.openSeal(396)) { throw new Error("Failed to open seals"); }
 
-		if (!this.openSeal(395) || !this.openSeal(396)) {
-			throw new Error("Failed to open seals");
-		}
+		this.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
+		if (!this.getBoss(getLocaleString(2851))) { throw new Error("Failed to kill Vizier"); }
+		if (!this.openSeal(394)) { throw new Error("Failed to open seals"); }
 
-		if (this.vizLayout === 1) {
-			Pather.moveTo(7691, 5292);
-		} else {
-			Pather.moveTo(7695, 5316);
-		}
+		this.seisLayout === 1 ? Pather.moveTo(7771, 5196) : Pather.moveTo(7798, 5186);
+		if (!this.getBoss(getLocaleString(2852))) { throw new Error("Failed to kill de Seis"); }
+		if (!this.openSeal(392) || !this.openSeal(393)) { throw new Error("Failed to open seals"); }
 
-		if (!this.getBoss(getLocaleString(2851))) {
-			throw new Error("Failed to kill Vizier");
-		}
-
-		if (!this.openSeal(394)) {
-			throw new Error("Failed to open seals");
-		}
-
-		if (this.seisLayout === 1) {
-			Pather.moveTo(7771, 5196);
-		} else {
-			Pather.moveTo(7798, 5186);
-		}
-
-		if (!this.getBoss(getLocaleString(2852))) {
-			throw new Error("Failed to kill de Seis");
-		}
-
-		if (!this.openSeal(392) || !this.openSeal(393)) {
-			throw new Error("Failed to open seals");
-		}
-
-		if (this.infLayout === 1) {
-			delay(1);
-		} else {
-			Pather.moveTo(7928, 5295); // temp
-		}
-
-		if (!this.getBoss(getLocaleString(2853))) {
-			throw new Error("Failed to kill Infector");
-		}
+		this.infLayout === 1 ? delay(1) : Pather.moveTo(7928, 5295);
+		if (!this.getBoss(getLocaleString(2853))) { throw new Error("Failed to kill Infector"); }
 
 		Pather.moveTo(7763, 5267);
 		Pather.makePortal();
@@ -655,7 +685,7 @@ function main() {
 		Attack.kill(243);
 		say("2");
 
-		if (me.gametype > 0) {
+		if (me.expansion) {
 			say("a5");
 
 			while (!this.playersInAct(5)) {
@@ -673,18 +703,24 @@ function main() {
 	};
 
 	this.ancients = function () {
-		if (me.diff === 2) {
-			say("Hell rush complete~");
-			delay(500);
-			quit();
+		if (me.hell && !Config.Rusher.HellAncients) {
+			if (!Config.Rusher.GiveWps) {
+				say("Hell rush complete~");
+				print("Hell rush complete~");
+				delay(500);
+				quit();
+			}
 
 			return false;
 		}
 
 		if (!this.bumperCheck()) {
-			say("No eligible bumpers detected. Rush complete~");
-			delay(500);
-			quit();
+			if (!Config.Rusher.GiveWps) {
+				say("No eligible bumpers detected. Rush complete~");
+				print("No eligible bumpers detected. Rush complete~");
+				delay(500);
+				quit();
+			}
 
 			return false;
 		}
@@ -743,6 +779,30 @@ function main() {
 	};
 
 	this.baal = function () {
+		if (me.hell) {
+			if (!Config.Rusher.GiveWps) {
+				say("Hell rush complete~");
+				print("Baal not done in Hell. rush complete~")
+				delay(500);
+				quit();
+			}
+			wpsToGive.remove(sdk.area.WorldstoneLvl2);
+
+			return false;
+		}
+
+		if (!this.bumperCheck()) {
+			if (!Config.Rusher.GiveWps) {
+				say("No eligible bumpers detected. Rush complete~");
+				print("No eligible bumpers detected. Rush complete~");
+				delay(500);
+				quit();
+			}
+			wpsToGive.remove(sdk.area.WorldstoneLvl2);
+
+			return false;
+		}
+
 		say("starting baal");
 
 		let tick, portal;
@@ -1006,10 +1066,82 @@ function main() {
 	};
 
 	// Quests
-	this.radament = function () {
-		if (!Config.Rusher.Radament) {
-			return false;
+	this.cain = function () {
+		if (!Config.Rusher.Cain) return true;
+
+		say("starting cain");
+		Town.doChores();
+		Pather.useWaypoint(sdk.areas.DarkWood, true);
+		Precast.doPrecast(true);
+
+		if (!Pather.moveToPreset(sdk.areas.DarkWood, 2, 30, 5, 5)) {
+			throw new Error("Failed to move to Tree of Inifuss");
 		}
+
+		let tree = getUnit(2, 30);
+		!!tree && tree.distance > 5 && Pather.moveToUnit(tree);
+		Attack.securePosition(me.x, me.y, 40, 3000, true);
+		!!tree && tree.distance > 5 && Pather.moveToUnit(tree);
+		Pather.makePortal();
+		say("1");
+		tick = getTickCount();
+
+		// wait up to two minutes
+		while (getTickCount() - tick < 60 * 1000 * 2) {
+			if (tree.mode) {
+				break;
+			}
+			Attack.securePosition(me.x, me.y, 20, 1000);
+		}
+
+		Pather.usePortal(1) || Town.goToTown();
+		Pather.useWaypoint(sdk.areas.StonyField, true);
+		Precast.doPrecast(true);
+		Pather.moveToPreset(sdk.areas.StonyField, 1, 737, 10, 10, false, true);
+		Attack.securePosition(me.x, me.y, 40, 3000, true);
+		Pather.moveToPreset(sdk.areas.StonyField, 2, 17, null, null, true);
+		Pather.makePortal();
+		say("1");
+
+		tick = getTickCount();
+		// wait up to two minutes
+		while (getTickCount() - tick < 60 * 1000 * 2) {
+			if (Pather.usePortal(sdk.areas.Tristram)) {
+				break;
+			}
+			Attack.securePosition(me.x, me.y, 25, 1000);
+		}
+
+		if (me.area === sdk.areas.Tristram) {
+			Pather.moveTo(me.x, me.y + 6);
+			let gibbet = getUnit(2, 26);
+
+			if (gibbet && !gibbet.mode) {
+				if (!Pather.moveToPreset(me.area, 2, 26, 0, 0, true, true)) {
+					throw new Error("Failed to move to Cain's Gibbet");
+				}
+
+				Attack.securePosition(gibbet.x, gibbet.y, 20, 3000);
+				Pather.makePortal();
+				say("1");
+
+				tick = getTickCount();
+
+				// wait up to two minutes
+				while (getTickCount() - tick < 60 * 1000 * 2) {
+					if (gibbet.mode) {
+						break;
+					}
+					Attack.securePosition(me.x, me.y, 10, 1000);
+				}
+			}
+		}
+
+		return true;
+	};
+
+	this.radament = function () {
+		if (!Config.Rusher.Radament) return false;
 
 		say("starting radament");
 
@@ -1068,12 +1200,7 @@ function main() {
 			delay(500);
 		}
 
-		if (rada) {
-			moveIntoPos(rada, 60);
-		} else {
-			print("radament unit not found");
-		}
-
+		rada ? moveIntoPos(rada, 60) : print("radament unit not found");
 		Attack.securePosition(me.x, me.y, 35, 3000);
 		Pather.makePortal();
 		say("1");
@@ -1119,9 +1246,7 @@ function main() {
 	};
 
 	this.lamesen = function () {
-		if (!Config.Rusher.LamEsen) {
-			return false;
-		}
+		if (!Config.Rusher.LamEsen) return false;
 
 		say("starting lamesen");
 
@@ -1153,9 +1278,7 @@ function main() {
 	};
 
 	this.izual = function () {
-		if (!Config.Rusher.Izual) {
-			return false;
-		}
+		if (!Config.Rusher.Izual) return false;
 
 		say("starting izual");
 
@@ -1214,11 +1337,7 @@ function main() {
 			delay(500);
 		}
 
-		if (izual) {
-			moveIntoPos(izual, 60);
-		} else {
-			print("izual unit not found");
-		}
+		izual ? moveIntoPos(izual, 60) : print("izual unit not found");
 
 		returnSpot = {
 			x: me.x,
@@ -1248,9 +1367,7 @@ function main() {
 	};
 
 	this.shenk = function () {
-		if (!Config.Rusher.Shenk) {
-			return false;
-		}
+		if (!Config.Rusher.Shenk) return false;
 
 		say("starting shenk");
 
@@ -1280,15 +1397,13 @@ function main() {
 	};
 
 	this.anya = function () {
-		if (!Config.Rusher.Anya) {
-			return false;
-		}
+		if (!Config.Rusher.Anya) return false;
+
+		!me.inTown && Town.goToTown();
 
 		say("starting anya");
 
-		let anya;
-
-		if (!Town.goToTown() || !Pather.useWaypoint(113, true)) {
+		if (!Pather.useWaypoint(113, true)) {
 			throw new Error("Anya quest failed");
 		}
 
@@ -1300,7 +1415,7 @@ function main() {
 
 		Attack.securePosition(me.x, me.y, 30, 2000);
 
-		anya = getUnit(2, 558);
+		let anya = getUnit(2, 558);
 
 		if (anya) {
 			Pather.moveToUnit(anya);
@@ -1331,17 +1446,36 @@ function main() {
 		return true;
 	};
 
+	this.givewps = function () {
+		if (!Config.Rusher.GiveWps) return false;
+
+		let wpsLeft = wpsToGive.slice(0);
+		let tpTool = Town.getTpTool();
+		print(JSON.stringify(wpsLeft));
+
+		wpsLeft.forEach(function (wp) {
+			Town.checkScrolls(sdk.items.TomeofTownPortal) <= 5 && (Pather.useWaypoint(sdk.areas.townOf(me.area)) || Town.goToTown()) && Town.doChores();
+			Pather.useWaypoint(wp);
+		});
+
+		return true;
+	};
+
 	print("Loading RushThread");
 
-	let i, command,
+	let command = "",
 		current = 0,
+		commandsplit = "",
+		check = -1,
 		sequence = [
-			"andariel", "radament", "cube", "amulet", "staff", "summoner", "duriel", "lamesen",
-			"travincal", "mephisto", "izual", "diablo", "shenk", "anya", "ancients", "baal"
+			"cain", "andariel", "radament", "cube", "amulet", "staff", "summoner", "duriel", "lamesen",
+			"travincal", "mephisto", "izual", "diablo", "shenk", "anya", "ancients", "baal", "givewps"
 		];
 
 	this.scriptEvent = function (msg) {
-		command = msg;
+		if (typeof msg === "string") {
+			command = msg;
+		}
 	};
 
 	addEventListener("scriptmsg", this.scriptEvent);
@@ -1362,7 +1496,9 @@ function main() {
 				// End run if entire sequence is done or if Config.Rusher.LastRun is done
 				if (current >= sequence.length || (Config.Rusher.LastRun && current > sequence.indexOf(Config.Rusher.LastRun))) {
 					delay(3000);
+					print("bye ~");
 					say("bye ~");
+					print("Current sequence length: " + current + " sequence length: " + sequence.length);
 
 					while (Misc.getPlayerCount() > 1) {
 						delay(1000);
@@ -1370,8 +1506,10 @@ function main() {
 
 					scriptBroadcast("quit");
 
-					return true;
+					break;
 				}
+
+				Town.doChores();
 
 				try {
 					this[sequence[current]]();
@@ -1382,59 +1520,72 @@ function main() {
 				}
 
 				current += 1;
-
 				command = "go";
 
 				break;
 			default:
-				if (command.split(" ")[0] !== undefined && command.split(" ")[0] === "skiptoact") {
-					if (!isNaN(parseInt(command.split(" ")[1], 10))) {
-						switch (parseInt(command.split(" ")[1], 10)) {
-						case 2:
-							current = sequence.indexOf("andariel") + 1;
+				if (typeof command === "string") {
+					if (command.split(" ")[0] !== undefined && command.split(" ")[0] === "skiptoact") {
+						if (!isNaN(parseInt(command.split(" ")[1], 10))) {
+							switch (parseInt(command.split(" ")[1], 10)) {
+							case 2:
+								current = sequence.indexOf("andariel") + 1;
+								Town.goToTown(2);
 
-							break;
-						case 3:
-							current = sequence.indexOf("duriel") + 1;
+								break;
+							case 3:
+								current = sequence.indexOf("duriel") + 1;
+								Town.goToTown(3);
 
-							break;
-						case 4:
-							current = sequence.indexOf("mephisto") + 1;
+								break;
+							case 4:
+								current = sequence.indexOf("mephisto") + 1;
+								Town.goToTown(4);
 
-							break;
-						case 5:
-							current = sequence.indexOf("diablo") + 1;
+								break;
+							case 5:
+								current = sequence.indexOf("diablo") + 1;
+								Town.goToTown(5);
 
-							break;
+								break;
+							}
 						}
-					}
-				} else if (command.split(" ")[0] !== undefined && command.split(" ")[0] === "clear") {
-					this.clearArea(Number(command.split(" ")[1]));
-					Town.goToTown();
 
-					command = "go";
-				} else {
-					for (i = 0; i < sequence.length; i += 1) {
-						if (command && sequence[i].match(command, "gi")) {
-							current = i;
+						command = "";
+					} else if (command.split(" ")[0] !== undefined && command.split(" ")[0] === "clear") {
+						this.clearArea(Number(command.split(" ")[1]));
+						Town.goToTown();
 
-							break;
+						command = "go";
+					} else if (command.split(" ")[0] !== undefined && command.split(" ")[0] === "highestquest") {
+						command.split(" ")[1] !== undefined && (commandsplit = command.split(" ")[1]);
+						check = sequence.findIndex(i => i === commandsplit);
+						check > -1 && (current = check + 1);
+
+						command = "";
+					} else {
+						for (let i = 0; i < sequence.length; i += 1) {
+							if (command && sequence[i].match(command, "gi")) {
+								current = i;
+
+								break;
+							}
 						}
+
+						Town.goToTown();
+
+						command = "go";
+
+						break;
 					}
-
-					Town.goToTown();
-
-					command = "go";
-
-					break;
 				}
 
 				break;
 			}
-
-			//command = false;
 		}
 
 		delay(100);
 	}
+
+	return true;
 }

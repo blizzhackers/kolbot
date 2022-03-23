@@ -19,17 +19,14 @@ function Rusher() {
 	let i, rushThread, command, master, commandSplit0,
 		commands = [],
 		sequence = [
-			"andariel", "radament", "cube", "amulet", "staff", "summoner", "duriel", "lamesen",
-			"travincal", "mephisto", "izual", "diablo", "shenk", "anya", "ancients", "baal"
+			"cain", "andariel", "radament", "cube", "amulet", "staff", "summoner", "duriel", "lamesen",
+			"travincal", "mephisto", "izual", "diablo", "shenk", "anya", "ancients", "baal", "givewps"
 		];
 	rushThread = getScript("tools/rushthread.js");
 
 	this.reloadThread = function () {
 		rushThread = getScript("tools/rushthread.js");
-
-		if (rushThread) {
-			rushThread.stop();
-		}
+		rushThread && rushThread.stop();
 
 		delay(500);
 		load("tools/rushthread.js");
@@ -37,19 +34,6 @@ function Rusher() {
 		rushThread = getScript("tools/rushthread.js");
 
 		delay(500);
-	};
-
-	this.getPlayerCount = function () {
-		let count = 0,
-			party = getParty();
-
-		if (party) {
-			do {
-				count += 1;
-			} while (party.getNext());
-		}
-
-		return count;
 	};
 
 	this.getPartyAct = function () {
@@ -90,6 +74,7 @@ function Rusher() {
 
 	this.chatEvent = function (nick, msg) {
 		if (nick !== me.name) {
+			if (typeof msg !== "string") return;
 			switch (msg) {
 			case "master":
 				if (!master) {
@@ -127,6 +112,12 @@ function Rusher() {
 					} else {
 						say("I'm only accepting commands from my master.");
 					}
+				} else if (msg && msg.includes("highestquest")) {
+					if (!!master && nick === master || !master) {
+						command = msg;
+					} else {
+						say("I'm only accepting commands from my master.");
+					}
 				}
 
 				break;
@@ -136,7 +127,7 @@ function Rusher() {
 
 	addEventListener("chatmsg", this.chatEvent);
 
-	while (this.getPlayerCount() < Math.min(8, Config.Rusher.WaitPlayerCount)) {
+	while (Misc.getPartyCount() < Math.min(8, Config.Rusher.WaitPlayerCount)) {
 		me.overhead("Waiting for players to join");
 		delay(500);
 	}
@@ -165,6 +156,21 @@ function Rusher() {
 		break;
 	}
 
+	// get info from master
+	let tick = getTickCount();
+	say("questinfo");
+	while (!command) {
+		// wait up to 3 minutes
+		if (getTickCount() - tick > 3 * 60 * 1000) {
+			break;
+		}
+	}
+
+	if (command) {
+		commandSplit0 = command.split(" ")[1];
+		!!commandSplit0 && sequence.some(el => el.toLowerCase() === commandSplit0) && rushThread.send(command.toLowerCase());
+	}
+
 	delay(200);
 	rushThread.send("go");
 
@@ -190,31 +196,31 @@ function Rusher() {
 
 				break;
 			default:
-				commandSplit0 = command.split(" ")[0];
+				if (typeof command === "string") {
+					commandSplit0 = command.split(" ")[0];
 
-				if (commandSplit0 === undefined) {
-					break;
-				}
+					if (commandSplit0 === undefined) {
+						break;
+					}
 
-				if (commandSplit0.toLowerCase() === "do") {
-					for (i = 0; i < sequence.length; i += 1) {
-						if (command.split(" ")[1] && sequence[i].match(command.split(" ")[1], "gi")) {
-							this.reloadThread();
-							rushThread.send(command.split(" ")[1]);
+					if (commandSplit0.toLowerCase() === "do") {
+						for (i = 0; i < sequence.length; i += 1) {
+							if (command.split(" ")[1] && sequence[i].match(command.split(" ")[1], "gi")) {
+								this.reloadThread();
+								rushThread.send(command.split(" ")[1]);
 
-							break;
+								break;
+							}
 						}
-					}
 
-					if (i === sequence.length) {
-						say("Invalid sequence");
-					}
-				} else if (commandSplit0.toLowerCase() === "clear") {
-					if (!isNaN(parseInt(command.split(" ")[1], 10)) && parseInt(command.split(" ")[1], 10) > 0 && parseInt(command.split(" ")[1], 10) <= 132) {
-						this.reloadThread();
-						rushThread.send(command);
-					} else {
-						say("Invalid area");
+						i === sequence.length && say("Invalid sequence");
+					} else if (commandSplit0.toLowerCase() === "clear") {
+						if (!isNaN(parseInt(command.split(" ")[1], 10)) && parseInt(command.split(" ")[1], 10) > 0 && parseInt(command.split(" ")[1], 10) <= 132) {
+							this.reloadThread();
+							rushThread.send(command);
+						} else {
+							say("Invalid area");
+						}
 					}
 				}
 

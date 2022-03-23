@@ -132,44 +132,28 @@ function Diablo() {
 	};
 
 	this.chaosPreattack = function (name, amount) {
-		let i, n, target, positions;
-
-		switch (me.classid) {
-		case 0:
-			break;
-		case 1:
-			break;
-		case 2:
-			break;
-		case 3:
-			target = getUnit(1, name);
+		if (me.paladin && Config.AttackSkill[1] === sdk.skills.BlessedHammer) {
+			let target = getUnit(1, name);
 
 			if (!target) {
 				return;
 			}
 
-			positions = [[6, 11], [0, 8], [8, -1], [-9, 2], [0, -11], [8, -8]];
+			let positions = [[6, 11], [0, 8], [8, -1], [-9, 2], [0, -11], [8, -8]];
 
-			for (i = 0; i < positions.length; i += 1) {
-				if (Attack.validSpot(target.x + positions[i][0], target.y + positions[i][1])) { // check if we can move there
+			for (let i = 0; i < positions.length; i += 1) {
+				// check if we can move there
+				if (Attack.validSpot(target.x + positions[i][0], target.y + positions[i][1])) {
 					Pather.moveTo(target.x + positions[i][0], target.y + positions[i][1]);
 					Skill.setSkill(Config.AttackSkill[2], 0);
 
-					for (n = 0; n < amount; n += 1) {
+					for (let n = 0; n < amount; n += 1) {
 						Skill.cast(Config.AttackSkill[1], 1);
 					}
 
-					break;
+					return;
 				}
 			}
-
-			break;
-		case 4:
-			break;
-		case 5:
-			break;
-		case 6:
-			break;
 		}
 	};
 
@@ -200,6 +184,7 @@ function Diablo() {
 			throw new Error("Failed to open Vizier seals.");
 		}
 
+		delay(1 + me.ping);
 		if (this.vizLayout === 1) {
 			Pather.moveTo(7691, 5292);
 		} else {
@@ -221,11 +206,7 @@ function Diablo() {
 			throw new Error("Failed to open de Seis seal.");
 		}
 
-		if (this.seisLayout === 1) {
-			Pather.moveTo(7771, 5196);
-		} else {
-			Pather.moveTo(7798, 5186);
-		}
+		this.seisLayout === 1 ? Pather.moveTo(7798, 5194) : Pather.moveTo(7796, 5155);
 
 		if (!this.getBoss(getLocaleString(2852))) {
 			throw new Error("Failed to kill de Seis");
@@ -244,8 +225,13 @@ function Diablo() {
 		}
 
 		if (this.infLayout === 1) {
-			delay(1);
+			if (me.sorceress || me.assassin) {
+				Pather.moveTo(7876, 5296);
+			}
+
+			delay(1 + me.ping);
 		} else {
+			delay(1 + me.ping);
 			Pather.moveTo(7928, 5295); // temp
 		}
 
@@ -278,11 +264,16 @@ function Diablo() {
 			tick = getTickCount();
 
 		switch (me.classid) {
-		case 1:
-			Pather.moveTo(7792, 5294);
+		case sdk.charclass.Amazon:
+		case sdk.charclass.Sorceress:
+		case sdk.charclass.Necromancer:
+		case sdk.charclass.Assassin:
+			Pather.moveNear(7791, 5293, (me.sorceress ? 35 : 25), {returnSpotOnError: true});
 
 			break;
-		default:
+		case sdk.charclass.Paladin:
+		case sdk.charclass.Druid:
+		case sdk.charclass.Barbarian:
 			Pather.moveTo(7788, 5292);
 
 			break;
@@ -352,9 +343,7 @@ function Diablo() {
 	};
 
 	this.followPath = function (path) {
-		let i;
-
-		for (i = 0; i < path.length; i += 2) {
+		for (let i = 0; i < path.length; i += 2) {
 			if (this.cleared.length) {
 				this.clearStrays();
 			}
@@ -374,18 +363,13 @@ function Diablo() {
 	};
 
 	this.clearStrays = function () {
-		/*if (!Config.PublicMode) {
-			return false;
-		}*/
-
-		let i,
-			oldPos = {x: me.x, y: me.y},
+		let oldPos = {x: me.x, y: me.y},
 			monster = getUnit(1);
 
 		if (monster) {
 			do {
 				if (Attack.checkMonster(monster)) {
-					for (i = 0; i < this.cleared.length; i += 1) {
+					for (let i = 0; i < this.cleared.length; i += 1) {
 						if (getDistance(monster, this.cleared[i][0], this.cleared[i][1]) < 30 && Attack.validSpot(monster.x, monster.y)) {
 							me.overhead("");
 							Pather.moveToUnit(monster);
@@ -449,12 +433,9 @@ function Diablo() {
 
 	// start
 	Town.doChores();
-	Pather.useWaypoint(Config.RandomPrecast ? "random" : 107);
+	Pather.useWaypoint(Config.RandomPrecast ? "random" : sdk.areas.RiverofFlame);
 	Precast.doPrecast(true);
-
-	if (me.area !== 107) {
-		Pather.useWaypoint(107);
-	}
+	me.area !== sdk.areas.RiverofFlame && Pather.useWaypoint(sdk.areas.RiverofFlame);
 
 	if (!Pather.moveTo(7790, 5544)) {
 		throw new Error("Failed to move to Chaos Sanctuary");
@@ -467,7 +448,6 @@ function Diablo() {
 		Pather.moveTo(7790, 5544);
 
 		if (Config.PublicMode) {
-			//Attack.securePosition(me.x, me.y, 20, 3000);
 			Pather.makePortal();
 			say(Config.Diablo.EntranceTP);
 			Pather.teleport = !Config.Diablo.WalkClear && Pather._teleport;
@@ -492,10 +472,7 @@ function Diablo() {
 
 	Attack.clear(30, 0, false, this.sort);
 	openSeals();
-
-	if (Config.PublicMode) {
-		say(Config.Diablo.DiabloMsg);
-	}
+	Config.PublicMode && say(Config.Diablo.DiabloMsg);
 
 	try {
 		print("Attempting to find Diablo");

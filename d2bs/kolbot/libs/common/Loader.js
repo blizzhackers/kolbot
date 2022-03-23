@@ -145,6 +145,51 @@ const Loader = {
 		}
 	},
 
+	runScript: function (script) {
+		let reconfiguration, unmodifiedConfig = {};
+
+		this.copy(Config, unmodifiedConfig);
+
+		if (!include("bots/" + script + ".js")) {
+			Misc.errorReport("Failed to include script: " + script);
+			return false;
+		}
+
+		if (isIncluded("bots/" + script + ".js")) {
+			try {
+				if (typeof (global[script]) !== "function") {
+					throw new Error("Invalid script function name");
+				}
+
+				if (this.skipTown.indexOf(script) > -1 || Town.goToTown()) {
+					print("ÿc2Starting script: ÿc9" + script);
+					Messaging.sendToScript("tools/toolsthread.js", JSON.stringify({currScript: script}));
+
+					reconfiguration = typeof Scripts[script] === 'object';
+
+					if (reconfiguration) {
+						print("ÿc2Copying Config properties from " + script + " object.");
+						this.copy(Scripts[script], Config);
+					}
+
+					global[script]();
+
+					if (reconfiguration) {
+						print("ÿc2Reverting back unmodified config properties.");
+						this.copy(unmodifiedConfig, Config);
+					}
+
+					return true;
+				}
+			} catch (error) {
+				Misc.errorReport(error, script);
+				return false;
+			}
+		}
+
+		return false;
+	},
+
 	scriptName: function (offset = 0) {
 		let index = this.scriptIndex + offset;
 

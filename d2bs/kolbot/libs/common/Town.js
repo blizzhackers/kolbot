@@ -2124,19 +2124,14 @@ const Town = {
 	},
 
 	move: function (spot) {
-		if (!me.inTown) {
-			this.goToTown();
-		}
+		!me.inTown && this.goToTown();
+		!this.act[me.act - 1].initialized && this.initialize();
 
-		let i, path;
-
-		if (!this.act[me.act - 1].initialized) {
-			this.initialize();
-		}
+		let i;
 
 		// Act 5 wp->portalspot override - ActMap.cpp crash
 		if (me.act === 5 && spot === "portalspot" && getDistance(me.x, me.y, 5113, 5068) <= 8) {
-			path = [5113, 5068, 5108, 5051, 5106, 5046, 5104, 5041, 5102, 5027, 5098, 5018];
+			let path = [5113, 5068, 5108, 5051, 5106, 5046, 5104, 5041, 5102, 5027, 5098, 5018];
 
 			for (i = 0; i < path.length; i += 2) {
 				Pather.walkTo(path[i], path[i + 1]);

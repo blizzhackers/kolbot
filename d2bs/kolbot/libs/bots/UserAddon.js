@@ -8,7 +8,7 @@
 */
 
 function UserAddon() {
-	let i, unit, title, dummy,
+	let i, unit, title, dummy, command = "",
 		info = new UnitInfo(),
 		classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"],
 		flags = [0x1, 0x2, 0x3, 0x4, 0x5, 0xf, 0x18, 0x19, 0xc, 0x9];
@@ -25,9 +25,32 @@ function UserAddon() {
 		}
 	};
 
-	if (!Config.FastPick) { // Make sure the item event is loaded
-		addEventListener("itemaction", this.itemEvent);
-	}
+	this.packetSent = function (pBytes) {
+		let ID = pBytes[0].toString(16);
+
+		// Block all commands or irc chat from being sent to server
+		if (ID === "15") {
+			if (pBytes[3] === 46) {
+				let str = "";
+
+				for (let b = 3; b < pBytes.length - 3; b++) {
+					str += String.fromCharCode(pBytes[b]);
+				}
+
+				if (pBytes[3] === 46) {
+					command = str.split(" ")[0].split(".")[1];
+
+					return true;
+				}
+			}
+		}
+
+		return false;
+	};
+
+	// Make sure the item event is loaded
+	!Config.FastPick && addEventListener("itemaction", this.itemEvent);
+	addEventListener("gamepacketsent", this.packetSent);
 
 	if (!FileTools.exists("libs/config/" + classes[me.classid] + "." + me.name + ".js")) {
 		showConsole();
@@ -53,6 +76,18 @@ function UserAddon() {
 		if (i === flags.length && !title) {
 			title = new Text(":: kolbot user addon ::", 400, 525, 4, 0, 2);
 			dummy = new Text("`", 1, 1); // Prevents crash
+		}
+
+		if (command && command.toLowerCase() === "done") {
+			print("ÿc4UserAddon ÿc1ended");
+			removeEventListener("keyup", this.keyEvent);
+			removeEventListener("itemaction", this.itemEvent);
+			removeEventListener("gamepacketsent", this.packetSent);
+
+			return;
+		} else {
+			print(command);
+			command = "";
 		}
 
 		Pickit.fastPick();

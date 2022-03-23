@@ -288,7 +288,7 @@ function Questing() {
 
 		Town.buyPotions();
 		if (!Pather.usePortal(sdk.areas.ArreatSummit, me.name)) {
-			print("Failed to take portal back to Arreat Summit");
+			print("ÿc8(Questing)ÿc1 :: Failed to take portal back to Arreat Summit");
 			Pather.journeyTo(sdk.areas.ArreatSummit); // enter Arreat Summit
 		}
 		
@@ -296,7 +296,7 @@ function Questing() {
 
 		// move to altar
 		if (!Pather.moveToPreset(sdk.areas.ArreatSummit, sdk.unittype.Object, 546)) {
-			print("ÿc8Kolbot-SoloPlayÿc0: Failed to move to ancients' altar");
+			print("ÿc8(Questing)ÿc1 :: Failed to move to ancients' altar");
 		}
 
 		touchAltar(); //activate altar
@@ -340,7 +340,7 @@ function Questing() {
 				Pather.getWP(sdk.areas.WorldstoneLvl2);
 			}
 		} catch (err) {
-			print('Cleared Ancients. Failed to get WSK Waypoint');
+			print('ÿc8(Questing)ÿc1 :: Cleared Ancients. Failed to get WSK Waypoint');
 		}
 	};
 

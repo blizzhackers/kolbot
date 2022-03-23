@@ -1,12 +1,31 @@
 /**
 *	@filename	Rushee.js
-*	@author		kolton
+*	@author		kolton, theBGuy
 *	@desc		Rushee script that works with Rusher
 */
+
+let Override_1 = require('../modules/Override');
+
+new Override_1.Override(Town, Town.goToTown, function(orignal, act, wpmenu) {
+    try {
+    	orignal(act, wpmenu);
+
+    	return true;
+    } catch (e) {
+    	print(e);
+    	
+    	return Pather.useWaypoint(sdk.areas.townOf(me.area));
+    }
+}).apply();
 
 function Rushee() {
 	let act, leader, target, done = false,
 		actions = [];
+
+	this.log = function (msg = "", sayMsg = false) {
+		print(msg);
+		!!sayMsg && say(msg);
+	};
 
 	this.findLeader = function (name) {
 		let party = getParty(name);
@@ -53,32 +72,32 @@ function Rushee() {
 		}
 	};
 
-	this.checkQuest = function (id, state) {
-		sendPacket(1, 0x40);
-		delay(500);
-
-		return me.getQuest(id, state);
-	};
-
 	this.getQuestItem = function (classid, chestid) {
 		let chest, item,
 			tick = getTickCount();
 
 		if (me.getItem(classid)) {
+			this.log("Already have: " + classid);
 			return true;
 		}
 
-		if (me.inTown) {
-			return false;
-		}
+		if (me.inTown) return false;
 
 		chest = getUnit(2, chestid);
 
 		if (!chest) {
+			this.log("Couldn't find: " + chestid);
 			return false;
 		}
 
-		Misc.openChest(chest);
+		for (let i = 0; i < 5; i++) {
+			if (Misc.openChest(chest)) {
+				break;
+			}
+			this.log("Failed to open chest: Attempt[" + (i + 1) + "]");
+			let coord = CollMap.getRandCoordinate(chest.x, -4, 4, chest.y, -4, 4);
+			coord && Pather.moveTo(coord.x, coord.y);
+		}
 
 		item = getUnit(4, classid);
 
@@ -330,17 +349,32 @@ function Rushee() {
 			if (me.area === preArea) {
 				me.cancel();
 				Town.move("portalspot");
-				say("Act change failed.");
+				this.log("Act change failed.", Config.LocalChat.Enabled);
 
 				return false;
 			}
 
-			say("Act change done.");
+			this.log("Act change done.", Config.LocalChat.Enabled);
 		} catch (e) {
 			return false;
 		}
 
 		return true;
+	};
+
+	this.getQuestInfo = function (id) {
+		// note: end bosses double printed to match able to go to act flag
+		let quests = [
+			["cain", 4], ["andariel", 6], ["andariel", 7],
+			["radament", 9], ["cube", 10], ["amulet", 11], ["summoner", 12], ["duriel", 14], ["duriel", 15],
+			["lamesen", 20], ["travincal", 21], ["mephisto", 22], ["mephisto", 23],
+			["izual", 25], ["diablo", 26], ["diablo", 28],
+			["shenk", 35], ["anya", 37], ["ancients", 39], ["baal", 40]
+		];
+
+		let quest = quests.find(element => element[1] === id);
+
+		return (!!quest ? quest[0] : "");
 	};
 
 	addEventListener("chatmsg",
@@ -351,9 +385,8 @@ function Rushee() {
 		});
 
 	// START
-	if (me.inTown) {
-		Town.move("portalspot");
-	}
+	Town.goToTown(me.highestAct);
+	me.inTown && Town.move("portalspot");
 
 	while (!leader) {
 		leader = this.findLeader(Config.Leader);
@@ -361,7 +394,7 @@ function Rushee() {
 		delay(500);
 	}
 
-	say("Leader found.");
+	Config.Rushee.Quester && say("Leader found");
 
 	while (true) {
 		try {
@@ -401,15 +434,69 @@ function Rushee() {
 					actions.shift();
 
 					break;
+				case "questinfo":
+					if (!Config.Rushee.Quester) {
+						actions.shift();
+
+						break;
+					}
+
+					say("highestquest " + this.getQuestInfo(me.highestQuestDone));
+					actions.shift();
+
+					break;
+				case "wpinfo":
+					if (!Config.Rushee.Quester) {
+						actions.shift();
+
+						break;
+					}
+
+					// go activate wp if we don't know our wps yet
+					!getWaypoint(1) && Pather.getWP(me.area);
+
+					let myWps = Pather.wpAreas.slice(0).filter(function (area) {
+						if (sdk.areas.Towns.includes(area) || area === sdk.areas.HallsofPain) return false;
+						if (me.classic && area >= sdk.areas.Harrogath) return false;
+						if (getWaypoint(area)) return false;
+						return true;
+					});
+
+					say("mywps " + JSON.stringify(myWps));
+					actions.shift();
+
+					break;
+				case "wp":
+					if (!me.inTown && !Town.goToTown()) {
+						this.log("I can't get to town :(", Config.LocalChat.Enabled);
+
+						break;
+					}
+
+					act = this.checkLeaderAct(leader);
+
+					if (me.act !== act) {
+						Town.goToTown(act);
+						Town.move("portalspot");
+					}
+
+					Town.getDistance("portalspot") > 10 && Town.move("portalspot");
+					if (Pather.usePortal(null, Config.Leader) && Pather.getWP(me.area) && Pather.usePortal(sdk.areas.townOf(me.area), Config.Leader) && Town.move("portalspot")) {
+						me.inTown && say("gotwp");
+					} else {
+						this.log("Failed to get wp", Config.LocalChat.Enabled);
+						!me.inTown && Town.goToTown();
+					}
+
+					actions.shift();
+
+					break;
 				case "1":
 					while (!leader.area) {
 						delay(500);
 					}
 
-					//print(leader.area);
-
 					if (!Config.Rushee.Quester) {
-						//print("not a quester");
 						actions.shift();
 
 						break;
@@ -423,8 +510,91 @@ function Rushee() {
 					}
 
 					switch (leader.area) {
+					case sdk.areas.StonyField:
+						if (!Pather.usePortal(sdk.areas.StonyField, Config.Leader)) {
+							this.log("Failed to us portal to stony field", Config.LocalChat.Enabled);
+							break;
+						}
+
+						let stones = [getUnit(2, 17), getUnit(2, 18), getUnit(2, 19), getUnit(2, 20), getUnit(2, 21)];
+
+						while (stones.some(function (stone) { return !stone.mode; })) {
+							for (let i = 0, stone = void 0; i < stones.length; i++) {
+								stone = stones[i];
+
+								if (Misc.openChest(stone)) {
+									stones.splice(i, 1);
+									i--;
+								}
+								delay(10);
+							}
+						}
+
+						let tick = getTickCount();
+						// wait up to two minutes
+						while (getTickCount() - tick < 60 * 1000 * 2) {
+							if (Pather.getPortal(sdk.areas.Tristram)) {
+								Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader)
+								
+								break;
+							}
+						}
+						Town.move("portalspot");
+						actions.shift();
+
+						break;
+					case sdk.areas.DarkWood:
+						if (!Pather.usePortal(sdk.areas.DarkWood, Config.Leader)) {
+							this.log("Failed to use portal to dark wood", Config.LocalChat.Enabled);
+							break;
+						}
+
+						this.getQuestItem(sdk.items.quest.ScrollofInifuss, 30);
+						delay(500);
+						Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader);
+						Town.move(NPC.Akara);
+
+						target = getUnit(1, NPC.Akara);
+
+						if (target && target.openMenu()) {
+							actions.shift();
+							me.cancel();
+							this.log("Akara done", Config.LocalChat.Enabled);
+						}
+
+						Town.move("portalspot");
+						actions.shift();
+
+						break;
+					case sdk.areas.Tristram:
+						if (!Pather.usePortal(sdk.areas.Tristram, Config.Leader)) {
+							this.log("Failed to use portal to Tristram", Config.LocalChat.Enabled);
+							break;
+						}
+
+						let gibbet = getUnit(2, 26);
+
+						if (gibbet && !gibbet.mode) {
+							Pather.moveTo(gibbet.x, gibbet.y);
+							if (Misc.poll(function () { return Misc.openChest(gibbet); }, 2000, 100)) {
+								Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader);
+								Town.move(NPC.Akara);
+
+								target = getUnit(1, NPC.Akara);
+
+								if (target && target.openMenu()) {
+									me.cancel();
+									this.log("Akara done", Config.LocalChat.Enabled);
+								}
+							}
+						}
+						Town.move("portalspot");
+						actions.shift();
+
+						break;
 					case 37: // Catacombs level 4
 						if (!Pather.usePortal(37, Config.Leader)) {
+							this.log("Failed to use portal to catacombs", Config.LocalChat.Enabled);
 							break;
 						}
 
@@ -649,7 +819,7 @@ function Rushee() {
 							break;
 						case 104:
 						case 105:
-							if (me.act === 4 && this.checkQuest(25, 1)) {
+							if (me.act === 4 && Packet.checkQuest(25, 1)) {
 								Town.move(NPC.Tyrael);
 
 								target = getUnit(1, NPC.Tyrael);
@@ -676,7 +846,7 @@ function Rushee() {
 							break;
 						}
 
-						if (!this.checkQuest(6, 4)) {
+						if (!Packet.checkQuest(6, 4)) {
 							D2Bot.printToConsole("Andariel quest failed", 9);
 							quit();
 						}
@@ -711,7 +881,7 @@ function Rushee() {
 							break;
 						}
 
-						if (!this.checkQuest(13, 0)) {
+						if (!Packet.checkQuest(13, 0)) {
 							D2Bot.printToConsole("Summoner quest failed", 9);
 							quit();
 						}
@@ -737,7 +907,7 @@ function Rushee() {
 							break;
 						}
 
-						if (!this.checkQuest(21, 0)) {
+						if (!Packet.checkQuest(21, 0)) {
 							D2Bot.printToConsole("Travincal quest failed", 9);
 							quit();
 						}
@@ -764,7 +934,7 @@ function Rushee() {
 							break;
 						}
 
-						if (this.checkQuest(25, 1)) {
+						if (Packet.checkQuest(25, 1)) {
 							Town.move(NPC.Tyrael);
 
 							target = getUnit(1, NPC.Tyrael);

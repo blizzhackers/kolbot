@@ -197,14 +197,12 @@ function Baal() {
 	};
 
 	Town.doChores();
-	Pather.useWaypoint(Config.RandomPrecast ? "random" : 129);
+	Pather.useWaypoint(Config.RandomPrecast ? "random" : sdk.areas.WorldstoneLvl2);
 	Precast.doPrecast(true);
 
-	if (me.area !== 129) {
-		Pather.useWaypoint(129);
-	}
+	me.area !== sdk.areas.WorldstoneLvl2 && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
 
-	if (!Pather.moveToExit([130, 131], true)) {
+	if (!Pather.moveToExit([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction], true)) {
 		throw new Error("Failed to move to Throne of Destruction.");
 	}
 
@@ -245,10 +243,6 @@ function Baal() {
 
 	MainLoop:
 	while (true) {
-		if (getDistance(me, 15094, me.classid === 3 ? 5029 : 5038) > 3) {
-			Pather.moveTo(15094, me.classid === 3 ? 5029 : 5038);
-		}
-
 		if (!getUnit(1, 543)) {
 			break MainLoop;
 		}
@@ -287,8 +281,8 @@ function Baal() {
 			break MainLoop;
 		default:
 			if (getTickCount() - tick < 7e3) {
-				if (me.getState(2)) {
-					Skill.setSkill(109, 0);
+				if (me.paladin && me.getState(sdk.states.Poison)) {
+					Skill.setSkill(sdk.skills.Cleansing, 0);
 				}
 
 				break;
@@ -301,14 +295,43 @@ function Baal() {
 			break;
 		}
 
+		switch (me.classid) {
+		case sdk.charclass.Amazon:
+		case sdk.charclass.Sorceress:
+		case sdk.charclass.Necromancer:
+		case sdk.charclass.Assassin:
+			[15116, 5026].distance > 3 && Pather.moveTo(15116, 5026);
+
+			break;
+		case sdk.charclass.Paladin:
+			if (Config.AttackSkill[3] === sdk.skills.BlessedHammer) {
+				[15094, 5029].distance > 3 && Pather.moveTo(15094, 5029);
+				
+				break;
+			}
+		case sdk.charclass.Druid:
+			if ([sdk.skills.Fissure, sdk.skills.Volcano].includes(Config.AttackSkill[3])) {
+				[15116, 5026].distance > 3 && Pather.moveTo(15116, 5026);
+
+				break;
+			}
+
+			if (Config.AttackSkill[3] === sdk.skills.Tornado) {
+				[15094, 5029].distance > 3 && Pather.moveTo(15094, 5029);
+				
+				break;
+			}
+		case sdk.charclass.Barbarian:
+			[15112, 5062].distance > 3 && Pather.moveTo(15112, 5062);
+
+			break;
+		}
+
 		delay(10);
 	}
 
 	if (Config.Baal.KillBaal) {
-		if (Config.PublicMode) {
-			say(Config.Baal.BaalMessage);
-		}
-
+		Config.PublicMode && say(Config.Baal.BaalMessage);
 		Pather.moveTo(15090, 5008);
 		delay(5000);
 		Precast.doPrecast(true);

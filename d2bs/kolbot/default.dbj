@@ -164,7 +164,7 @@ function main () {
 
 	// Load threads
 	load("tools/ToolsThread.js");
-	Config.TownCheck || Config.TownHP || Config.TownMP && load("tools/TownChicken.js");
+	(Config.TownCheck || Config.TownHP > 0 || Config.TownMP > 0) && load("tools/TownChicken.js");
 	
 	if (Config.PublicMode) {
 		Config.PublicMode === true ? require('libs/modules/SimpleParty') : load("tools/Party.js");

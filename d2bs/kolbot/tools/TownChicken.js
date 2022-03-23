@@ -71,6 +71,7 @@ function main() {
 		});
 
 	// Init config and attacks
+	print("ÿc3Start TownChicken thread");
 	D2Bot.init();
 	Config.init();
 	Pickit.init();

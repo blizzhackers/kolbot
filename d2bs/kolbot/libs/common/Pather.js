@@ -9,9 +9,7 @@
 const NodeAction = {
 	// Run all the functions within NodeAction (except for itself)
 	go: function (arg) {
-		let i;
-
-		for (i in this) {
+		for (let i in this) {
 			if (this.hasOwnProperty(i) && typeof this[i] === "function" && i !== "go") {
 				this[i](arg);
 			}
@@ -71,27 +69,19 @@ const PathDebug = {
 	enableHooks: false,
 
 	drawPath: function (path) {
-		if (!this.enableHooks) {
-			return;
-		}
+		if (!this.enableHooks) return;
 
 		this.removeHooks();
 
-		let i;
+		if (path.length < 2) return;
 
-		if (path.length < 2) {
-			return;
-		}
-
-		for (i = 0; i < path.length - 1; i += 1) {
+		for (let i = 0; i < path.length - 1; i += 1) {
 			this.hooks.push(new Line(path[i].x, path[i].y, path[i + 1].x, path[i + 1].y, 0x84, true));
 		}
 	},
 
 	removeHooks: function () {
-		let i;
-
-		for (i = 0; i < this.hooks.length; i += 1) {
+		for (let i = 0; i < this.hooks.length; i += 1) {
 			this.hooks[i].remove();
 		}
 
@@ -99,9 +89,7 @@ const PathDebug = {
 	},
 
 	coordsInPath: function (path, x, y) {
-		let i;
-
-		for (i = 0; i < path.length; i += 1) {
+		for (let i = 0; i < path.length; i += 1) {
 			if (getDistance(x, y, path[i].x, path[i].y) < 5) {
 				return true;
 			}
@@ -126,9 +114,26 @@ const Pather = {
 		return this.teleport && !Config.NoTele && !me.getState(139) && !me.getState(140) && !me.inTown && ((me.classid === 1 && me.getSkill(54, 1)) || me.getStat(97, 54));
 	},
 
-	moveNear: function (x = undefined, y = undefined, minDist = undefined, clearPath = false, pop = false) {
+	spotOnDistance: function (spot, distance, area, returnSpotOnError = true) {
+		area === undefined && (area = me.area);
+		let nodes = getPath(area, me.x, me.y, spot.x, spot.y, 2, 5);
+		
+		if (!nodes) {
+			return returnSpotOnError ? spot : { x: me.x, y: me.y };
+		}
+
+		return nodes.find(function (node) { return getDistance(spot, node) < distance; }) || (returnSpotOnError ? spot : { x: me.x, y: me.y });
+	},
+
+	moveNear: function (x, y, minDist, givenSettings = {}) {
 		// Abort if dead
 		if (me.dead) return false;
+		let settings = Object.assign({}, {
+			allowTeleport: true,
+			clearPath: true,
+			pop: false,
+			returnSpotOnError: true
+		}, givenSettings);
 
 		let path, adjustedNode, cleared, leaped = false,
 			node = {x: x, y: y},
@@ -140,27 +145,25 @@ const Pather = {
 
 		if (!x || !y) return false; // I don't think this is a fatal error so just return false
 		if (typeof x !== "number" || typeof y !== "number") { throw new Error("moveNear: Coords must be numbers"); }
-		if (getDistance(me, x, y) < 2) return true;
 
-		let useTele = this.useTeleport();
+		let useTele = this.useTeleport() && settings.allowTeleport;
 		let tpMana = Skill.getManaCost(sdk.skills.Teleport);
 		minDist === undefined && (minDist = me.inTown ? 2 : 5);
+		({x, y} = this.spotOnDistance(node, minDist, me.area, settings.returnSpotOnError));
+		if (getDistance(me, x, y) < 2) return true;
 		path = getPath(me.area, x, y, me.x, me.y, useTele ? 1 : 0, useTele ? ([sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.MaggotLairLvl3].includes(me.area) ? 30 : this.teleDistance) : this.walkDistance);
 
 		if (!path) { throw new Error("moveNear: Failed to generate path."); }
 
 		path.reverse();
-		pop && path.pop();
+		settings.pop && path.pop();
 		PathDebug.drawPath(path);
 		useTele && Config.TeleSwitch && path.length > 5 && Attack.weaponSwitch(Attack.getPrimarySlot() ^ 1);
 
 		while (path.length > 0) {
 			// Abort if dead
 			if (me.dead) return false;
-			// reached goal
-			if (getDistance(me.x, me.y, x, y) <= minDist) return true;
 
-			//print("distance from goal: " + getDistance(me.x, me.y, x, y));
 
 			for (let i = 0; i < this.cancelFlags.length; i += 1) {
 				getUIFlag(this.cancelFlags[i]) && me.cancel();
@@ -183,7 +186,7 @@ const Pather = {
 						if (this.recursion) {
 							this.recursion = false;
 
-							NodeAction.go({clearPath: clearPath});
+							NodeAction.go({clearPath: settings.clearPath});
 
 							if (getDistance(me, node.x, node.y) > 5) {
 								this.moveNear(node.x, node.y);
@@ -214,7 +217,7 @@ const Pather = {
 					fail += 1;
 					path.reverse();
 					PathDebug.drawPath(path);
-					pop && path.pop();
+					settings.pop && path.pop();
 					print("move retry " + fail);
 
 					if (fail > 0) {
@@ -245,88 +248,42 @@ const Pather = {
 		clearPath - kill monsters while moving
 		pop - remove last node
 	*/
-	moveTo: function (x, y, retry, clearPath, pop) {
-		if (me.dead) { // Abort if dead
-			return false;
-		}
+	moveTo: function (x, y, retry = 3, clearPath = false, pop = false) {
+		// Abort if dead
+		if (me.dead) return false;
 
-		let i, path, adjustedNode, cleared, useTeleport,
+		let path, adjustedNode, cleared, useTeleport,
+			leaped = false,
 			node = {x: x, y: y},
 			fail = 0;
 
-		for (i = 0; i < this.cancelFlags.length; i += 1) {
-			if (getUIFlag(this.cancelFlags[i])) {
-				me.cancel();
-			}
+		for (let i = 0; i < this.cancelFlags.length; i += 1) {
+			getUIFlag(this.cancelFlags[i]) && me.cancel();
 		}
 
 		if (getDistance(me, x, y) < 2) {
 			return true;
 		}
 
-		if (x === undefined || y === undefined) {
-			throw new Error("moveTo: Function must be called with at least 2 arguments.");
-		}
-
-		if (typeof x !== "number" || typeof y !== "number") {
-			throw new Error("moveTo: Coords must be numbers");
-		}
-
-		if (retry === undefined) {
-			retry = 3;
-		}
-
-		if (clearPath === undefined) {
-			clearPath = false;
-		}
-
-		if (pop === undefined) {
-			pop = false;
-		}
+		if (!x || !y) { throw new Error("moveTo: Function must be called with at least 2 arguments."); }
+		if (typeof x !== "number" || typeof y !== "number") { throw new Error("moveTo: Coords must be numbers"); }
 
 		useTeleport = this.useTeleport();
-
-		/* Disabling getPath optimizations, they are causing desync -- noah
-		// Teleport without calling getPath if the spot is close enough
-		if (useTeleport && getDistance(me, x, y) <= this.teleDistance) {
-			//Misc.townCheck();
-
-			return this.teleportTo(x, y);
-		}
-
-		// Walk without calling getPath if the spot is close enough
-		if (!useTeleport && (getDistance(me, x, y) <= 5 || (getDistance(me, x, y) <= 25 && !CollMap.checkColl(me, {x: x, y: y}, 0x1)))) {
-			return this.walkTo(x, y);
-		}
-		*/
-
 		path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? ([62, 63, 64].indexOf(me.area) > -1 ? 30 : this.teleDistance) : this.walkDistance);
 
-		if (!path) {
-			throw new Error("moveTo: Failed to generate path.");
-		}
+		if (!path) { throw new Error("moveTo: Failed to generate path."); }
 
 		path.reverse();
-
-		if (pop) {
-			path.pop();
-		}
-
+		pop && path.pop();
 		PathDebug.drawPath(path);
-
-		if (useTeleport && Config.TeleSwitch && path.length > 5) {
-			Attack.weaponSwitch(Attack.getPrimarySlot() ^ 1);
-		}
+		useTeleport && Config.TeleSwitch && path.length > 5 && Attack.weaponSwitch(Attack.getPrimarySlot() ^ 1);
 
 		while (path.length > 0) {
-			if (me.dead) { // Abort if dead
-				return false;
-			}
+			// Abort if dead
+			if (me.dead) return false;
 
-			for (i = 0; i < this.cancelFlags.length; i += 1) {
-				if (getUIFlag(this.cancelFlags[i])) {
-					me.cancel();
-				}
+			for (let i = 0; i < this.cancelFlags.length; i += 1) {
+				getUIFlag(this.cancelFlags[i]) && me.cancel();
 			}
 
 			node = path.shift();
@@ -365,37 +322,32 @@ const Pather = {
 					if (fail > 0 && !useTeleport && !me.inTown) {
 						// Don't go berserk on longer paths
 						if (!cleared) {
-							Attack.clear(5);
-
+							Attack.clear(5) && Misc.openChests(2);
 							cleared = true;
 						}
 
-						if (fail > 1 && me.getSkill(143, 1)) {
-							Skill.cast(143, 0, node.x, node.y);
+						// Only do this once
+						if (fail > 1 && me.getSkill(sdk.skills.LeapAttack, 1) && !leaped) {
+							Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y);
+							leaped = true;
 						}
 					}
 
 					// Reduce node distance in new path
 					path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? rand(25, 35) : rand(10, 15));
+					if (!path) { throw new Error("moveNear: Failed to generate path."); }
+
 					fail += 1;
-
-					if (!path) {
-						throw new Error("moveTo: Failed to generate path.");
-					}
-
 					path.reverse();
 					PathDebug.drawPath(path);
-
-					if (pop) {
-						path.pop();
-					}
-
+					settings.pop && path.pop();
 					print("move retry " + fail);
 
 					if (fail > 0) {
 						Packet.flash(me.gid);
+						Attack.clear(5) && Misc.openChests(2);
 
-						if (fail >= retry) {
+						if (fail >= 15) {
 							break;
 						}
 					}
@@ -405,10 +357,7 @@ const Pather = {
 			delay(5);
 		}
 
-		if (useTeleport && Config.TeleSwitch) {
-			Attack.weaponSwitch(Attack.getPrimarySlot());
-		}
-
+		useTeleport && Config.TeleSwitch && Attack.weaponSwitch(Attack.getPrimarySlot() ^ 1);
 		PathDebug.removeHooks();
 
 		return getDistance(me, node.x, node.y) < 5;
@@ -682,15 +631,15 @@ const Pather = {
 		}
 
 		if (unit instanceof PresetUnit) {
-			return this.moveNear(unit.roomx * 5 + unit.x, unit.roomy * 5 + unit.y, minDist, clearPath);
+			unit = { x: unit.roomx * 5 + unit.x, y: unit.roomy * 5 + unit.y };
 		}
 
 		if (!useTeleport) {
 			// The unit will most likely be moving so call the first walk with 'pop' parameter
-			this.moveNear(unit.x, unit.y, minDist, clearPath, true);
+			this.moveNear(unit.x, unit.y, minDist, {clearPath: clearPath, pop: true});
 		}
 
-		return this.moveNear(unit.x, unit.y, minDist, clearPath, pop);
+		return this.moveNear(unit.x, unit.y, minDist, {clearPath: clearPath, pop: pop});
 	},
 
 	moveNearPreset: function (area, unitType, unitId, minDist, clearPath = false, pop = false) {
@@ -704,7 +653,9 @@ const Pather = {
 			throw new Error("moveToPreset: Couldn't find preset unit - id " + unitId);
 		}
 
-		return this.moveNear(presetUnit.roomx * 5 + presetUnit.x, presetUnit.roomy * 5 + presetUnit.y, minDist, clearPath, pop);
+		let unit = { x: presetUnit.roomx * 5 + presetUnit.x, y: presetUnit.roomy * 5 + presetUnit.y };
+
+		return this.moveNear(unit.x, unit.y, minDist, {clearPath: clearPath, pop: pop});
 	},
 
 	/*
@@ -992,11 +943,13 @@ const Pather = {
 			throw new Error("useUnit: Unit not found. ID: " + id);
 		}
 
-		for (let i = 0; i < 3; i += 1) {
-			let usetk = (i === 0 && Skill.useTK(unit));
+		for (let i = 0; i < 5; i += 1) {
+			let usetk = (i < 2 && Skill.useTK(unit));
 			
 			if (getDistance(me, unit) > 5) {
 				usetk ? this.moveNearUnit(unit, 20) : this.moveToUnit(unit);
+				// try to activate it once
+				usetk && i === 0 && unit.mode === 0 && unit.distance < 21 && Skill.cast(sdk.skills.Telekinesis, 0, unit);
 			}
 
 			if (type === 2 && unit.mode === 0) {
@@ -1121,9 +1074,8 @@ const Pather = {
 
 			if (wp && wp.area === me.area) {
 				if (Skill.useTK(wp) && i < 3 && !getUIFlag(sdk.uiflags.Waypoint)) {
-					if (wp.distance > 21) {
-						Attack.getIntoPosition(wp, 20, 0x4);
-					}
+					wp.distance > 21 && Pather.moveNearUnit(wp, 20);
+					checkCollision(me, wp, 0x4) && Attack.getIntoPosition(wp, 20, 0x4);
 
 					Skill.cast(sdk.skills.Telekinesis, 0, wp);
 				} else if (!me.inTown && wp.distance > 7) {
@@ -1138,7 +1090,8 @@ const Pather = {
 					tick = getTickCount();
 
 					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
-						if (getUIFlag(0x14)) { // Waypoint screen is open
+						// Waypoint screen is open
+						if (getUIFlag(0x14)) {
 							delay(500);
 
 							switch (targetArea) {

@@ -11,10 +11,8 @@ const Pickit = {
 	ignoreLog: [4, 5, 6, 22, 41, 76, 77, 78, 79, 80, 81], // Ignored item types for item logging
 
 	init: function (notify) {
-		let i, filename;
-
-		for (i = 0; i < Config.PickitFiles.length; i += 1) {
-			filename = "pickit/" + Config.PickitFiles[i];
+		for (let i = 0; i < Config.PickitFiles.length; i += 1) {
+			let filename = "pickit/" + Config.PickitFiles[i];
 
 			NTIP.OpenFile(filename, notify);
 		}
@@ -70,8 +68,8 @@ const Pickit = {
 			}
 		}
 
-		// make sure we have essentials
-		if (rval.result === 0 && [sdk.itemtype.Gold, sdk.itemtype.Scroll, sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion].includes(unit.itemType)
+		// make sure we have essentials - no pickit files loaded
+		if (rval.result === 0 && Config.PickitFiles.length === 0 && [sdk.itemtype.Gold, sdk.itemtype.Scroll, sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion].includes(unit.itemType)
 			&& this.canPick(unit)) {
 			return {
 				result: 1,
