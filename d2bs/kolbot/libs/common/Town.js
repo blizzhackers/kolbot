@@ -376,9 +376,9 @@ const Town = {
 
 	// Check when to shift-buy potions
 	shiftCheck: function (col, beltSize) {
-		let i, fillType;
+		let fillType;
 
-		for (i = 0; i < col.length; i += 1) {
+		for (let i = 0; i < col.length; i += 1) {
 			// Set type based on non-empty column
 			if (!fillType && col[i] > 0 && col[i] < beltSize) {
 				fillType = Config.BeltColumn[i];
@@ -435,15 +435,11 @@ const Town = {
 
 	// Get the highest potion from current npc
 	getPotion: function (npc, type) {
-		let i, result;
-
-		if (!type) {
-			return false;
-		}
+		if (!type) return false;
 
 		if (type === "hp" || type === "mp") {
-			for (i = 5; i > 0; i -= 1) {
-				result = npc.getItem(type + i);
+			for (let i = 5; i > 0; i -= 1) {
+				let result = npc.getItem(type + i);
 
 				if (result) {
 					return result;
@@ -455,25 +451,17 @@ const Town = {
 	},
 
 	fillTome: function (code) {
-		if (me.gold < 450) {
-			return false;
-		}
+		if (me.gold < 450) return false;
+		if (this.checkScrolls(code) >= 13) return true;
 
-		if (this.checkScrolls(code) >= 13) {
-			return true;
-		}
+		let npc = this.initNPC("Shop", "fillTome");
 
-		let scroll, tome,
-			npc = this.initNPC("Shop", "fillTome");
-
-		if (!npc) {
-			return false;
-		}
+		if (!npc) return false;
 
 		delay(500);
 
 		if (code === 518 && !me.findItem(518, 0, 3)) {
-			tome = npc.getItem(518);
+			let tome = npc.getItem(518);
 
 			if (tome && Storage.Inventory.CanFit(tome)) {
 				try {
@@ -489,11 +477,8 @@ const Town = {
 			}
 		}
 
-		scroll = npc.getItem(code === 518 ? 529 : 530);
-
-		if (!scroll) {
-			return false;
-		}
+		let scroll = npc.getItem(code === 518 ? 529 : 530);
+		if (!scroll) return false;
 
 		try {
 			scroll.buy(true);
@@ -530,9 +515,7 @@ const Town = {
 
 		list = Storage.Inventory.Compare(Config.Inventory);
 
-		if (!list) {
-			return false;
-		}
+		if (!list) return false;
 
 		// Avoid unnecessary NPC visits
 		for (i = 0; i < list.length; i += 1) {
@@ -542,15 +525,10 @@ const Town = {
 			}
 		}
 
-		if (i === list.length) {
-			return false;
-		}
+		if (i === list.length) return false;
 
 		npc = this.initNPC("Shop", "identify");
-
-		if (!npc) {
-			return false;
-		}
+		if (!npc) return false;
 
 		tome = me.findItem(519, 0, 3);
 
@@ -665,13 +643,10 @@ const Town = {
 	},
 
 	cainID: function () {
-		if (!Config.CainID.Enable) {
-			return false;
-		}
+		if (!Config.CainID.Enable) return false;
 
 		// Check if we're already in a shop. It would be pointless to go to Cain if so.
-		let i, cain, unids, result,
-			npc = getInteractedNPC();
+		let npc = getInteractedNPC();
 
 		if (npc && npc.name.toLowerCase() === this.tasks[me.act - 1].Shop) {
 			return false;
@@ -687,7 +662,7 @@ const Town = {
 		me.cancel();
 		this.stash(false);
 
-		unids = this.getUnids();
+		let unids = this.getUnids();
 
 		if (unids) {
 			// Check if we may use Cain - number of unid items
@@ -698,7 +673,7 @@ const Town = {
 			}
 
 			// Check if we may use Cain - kept unid items
-			for (i = 0; i < unids.length; i += 1) {
+			for (let i = 0; i < unids.length; i += 1) {
 				if (Pickit.checkItem(unids[i]).result > 0) {
 					//print("Can't use Cain - can't id a valid item.");
 
@@ -706,14 +681,12 @@ const Town = {
 				}
 			}
 
-			cain = this.initNPC("CainID", "cainID");
+			let cain = this.initNPC("CainID", "cainID");
 
-			if (!cain) {
-				return false;
-			}
+			if (!cain) return false;
 
-			for (i = 0; i < unids.length; i += 1) {
-				result = Pickit.checkItem(unids[i]);
+			for (let i = 0; i < unids.length; i += 1) {
+				let result = Pickit.checkItem(unids[i]);
 
 				if (!Item.autoEquipCheck(unids[i])) {
 					result = 0;
@@ -741,23 +714,15 @@ const Town = {
 
 	// Identify items while in the field if we have a id tome
 	fieldID: function () {
-		let list, tome, item, result;
+		let list = this.getUnids();
+		if (!list) return false;
 
-		list = this.getUnids();
-
-		if (!list) {
-			return false;
-		}
-
-		tome = me.findItem(519, 0, 3);
-
-		if (!tome || tome.getStat(70) < list.length) {
-			return false;
-		}
+		let tome = me.findItem(519, 0, 3);
+		if (!tome || tome.getStat(70) < list.length) return false;
 
 		while (list.length > 0) {
-			item = list.shift();
-			result = Pickit.checkItem(item);
+			let item = list.shift();
+			let result = Pickit.checkItem(item);
 
 			// Force ID for unid items matching autoEquip criteria
 			if (result.result === 1 && !item.getFlag(0x10) && Item.hasTier(item)) {
@@ -810,9 +775,7 @@ const Town = {
 		let list = [],
 			item = me.getItem(-1, 0);
 
-		if (!item) {
-			return false;
-		}
+		if (!item) return false;
 
 		do {
 			if (item.location === 3 && !item.getFlag(0x10)) {
@@ -820,9 +783,7 @@ const Town = {
 			}
 		} while (item.getNext());
 
-		if (!list.length) {
-			return false;
-		}
+		if (!list.length) return false;
 
 		return list;
 	},
@@ -832,16 +793,14 @@ const Town = {
 			return Packet.identifyItem(unit, tome);
 		}
 
-		let i, tick;
+		let tick;
 
-		if (!unit || unit.getFlag(0x10)) {
-			return false;
-		}
+		if (!unit || unit.getFlag(0x10)) return false;
 
 		this.sellTimer = getTickCount(); // shop speedup test
 
 		CursorLoop:
-		for (i = 0; i < 3; i += 1) {
+		for (let i = 0; i < 3; i += 1) {
 			clickItem(1, tome);
 
 			tick = getTickCount();
@@ -855,13 +814,11 @@ const Town = {
 			}
 		}
 
-		if (getCursorType() !== 6) {
-			return false;
-		}
+		if (getCursorType() !== 6) return false;
 
 		delay(270);
 
-		for (i = 0; i < 3; i += 1) {
+		for (let i = 0; i < 3; i += 1) {
 			if (getCursorType() === 6) {
 				clickItem(0, unit);
 			}
@@ -885,23 +842,16 @@ const Town = {
 	},
 
 	shopItems: function () {
-		if (!Config.MiniShopBot) {
-			return true;
-		}
+		if (!Config.MiniShopBot) return true;
 
-		let i, item, result,
-			items = [],
+		let items = [],
 			npc = getInteractedNPC();
 
-		if (!npc || !npc.itemcount) {
-			return false;
-		}
+		if (!npc || !npc.itemcount) return false;
 
-		item = npc.getItem();
+		let item = npc.getItem();
 
-		if (!item) {
-			return false;
-		}
+		if (!item) return false;
 
 		print("ÿc4MiniShopBotÿc0: Scanning " + npc.itemcount + " items.");
 
@@ -911,8 +861,8 @@ const Town = {
 			}
 		} while (item.getNext());
 
-		for (i = 0; i < items.length; i += 1) {
-			result = Pickit.checkItem(items[i]);
+		for (let i = 0; i < items.length; i += 1) {
+			let result = Pickit.checkItem(items[i]);
 
 			if (result.result === 1 && Item.autoEquipCheck(items[i])) {
 				try {
@@ -957,20 +907,13 @@ const Town = {
 			}
 		}
 
-		if (this.gambleIds.length === 0) {
-			return true;
-		}
+		if (this.gambleIds.length === 0) return true;
 
 		// avoid Alkor
-		if (me.act === 3) {
-			this.goToTown(2);
-		}
-
+		me.act === 3 && this.goToTown(2);
 		npc = this.initNPC("Gamble", "gamble");
 
-		if (!npc) {
-			return false;
-		}
+		if (!npc) return false;
 
 		items = me.findItems(-1, 0, 3);
 
@@ -1051,13 +994,12 @@ const Town = {
 		return Config.Gamble && me.gold >= Config.GambleGoldStart;
 	},
 
-	getGambledItem: function (list) {
-		let i, j,
-			items = me.findItems(-1, 0, 3);
+	getGambledItem: function (list = []) {
+		let items = me.findItems(-1, 0, 3);
 
-		for (i = 0; i < items.length; i += 1) {
+		for (let i = 0; i < items.length; i += 1) {
 			if (list.indexOf(items[i].gid) === -1) {
-				for (j = 0; j < 3; j += 1) {
+				for (let j = 0; j < 3; j += 1) {
 					if (items[i].getFlag(0x10)) {
 						break;
 					}
@@ -1168,27 +1110,18 @@ const Town = {
 	},
 
 	buyKeys: function () {
-		if (!this.wantKeys()) {
-			return true;
-		}
+		if (!this.wantKeys()) return true;
 
 		// avoid Hratli
-		if (me.act === 3) {
-			this.goToTown(Pather.accessToAct(4) ? 4 : 2);
-		}
+		me.act === 3 && this.goToTown(Pather.accessToAct(4) ? 4 : 2);
 
-		let key,
-			npc = this.initNPC("Key", "buyKeys");
+		let npc = this.initNPC("Key", "buyKeys");
 
-		if (!npc) {
-			return false;
-		}
+		if (!npc) return false;
 
-		key = npc.getItem("key");
+		let key = npc.getItem("key");
 
-		if (!key) {
-			return false;
-		}
+		if (!key) return false;
 
 		try {
 			key.buy(true);
@@ -1569,15 +1502,13 @@ const Town = {
 	},
 
 	needMerc: function () {
-		let merc;
-
 		if (me.classic || !Config.UseMerc || me.gold < me.mercrevivecost) {
 			return false;
 		}
 
 		// me.getMerc() might return null if called right after taking a portal, that's why there's retry attempts
 		for (let i = 0; i < 3; i += 1) {
-			merc = me.getMerc();
+			let merc = me.getMerc();
 
 			if (merc && merc.mode !== 0 && merc.mode !== 12) {
 				return false;
@@ -1587,11 +1518,7 @@ const Town = {
 		}
 
 		// In case we never had a merc and Config.UseMerc is still set to true for some odd reason
-		if (!me.mercrevivecost) {
-			return false;
-		}
-
-		return true;
+		return (!me.mercrevivecost ? false : true);
 	},
 
 	canStash: function (item) {
@@ -1861,12 +1788,12 @@ const Town = {
 	},
 
 	clearScrolls: function () {
-		let i,
-			items = me.getItems();
+		let items = me.getItems();
 
-		for (i = 0; !!items && i < items.length; i += 1) {
+		for (let i = 0; !!items && i < items.length; i += 1) {
 			if (items[i].location === 3 && items[i].mode === 0 && items[i].itemType === 22) {
-				if (getUIFlag(0xC) || (Config.PacketShopping && getInteractedNPC() && getInteractedNPC().itemcount > 0)) { // Might as well sell the item if already in shop
+				// Might as well sell the item if already in shop
+				if (getUIFlag(0xC) || (Config.PacketShopping && getInteractedNPC() && getInteractedNPC().itemcount > 0)) {
 					print("clearInventory sell " + items[i].name);
 					Misc.itemLogger("Sold", items[i]);
 					items[i].sell();
@@ -2127,20 +2054,18 @@ const Town = {
 		!me.inTown && this.goToTown();
 		!this.act[me.act - 1].initialized && this.initialize();
 
-		let i;
-
 		// Act 5 wp->portalspot override - ActMap.cpp crash
 		if (me.act === 5 && spot === "portalspot" && getDistance(me.x, me.y, 5113, 5068) <= 8) {
 			let path = [5113, 5068, 5108, 5051, 5106, 5046, 5104, 5041, 5102, 5027, 5098, 5018];
 
-			for (i = 0; i < path.length; i += 2) {
+			for (let i = 0; i < path.length; i += 2) {
 				Pather.walkTo(path[i], path[i + 1]);
 			}
 
 			return true;
 		}
 
-		for (i = 0; i < 3; i += 1) {
+		for (let i = 0; i < 3; i += 1) {
 			if (this.moveToSpot(spot)) {
 				return true;
 			}
@@ -2154,7 +2079,7 @@ const Town = {
 	moveToSpot: function (spot) {
 		this.telekinesis = !!(me.getSkill(sdk.skills.Telekinesis, 1));
 
-		let i, path, townSpot,
+		let townSpot,
 			longRange = (this.telekinesis && ["stash", "portalspot"].includes(spot)) || (spot === "waypoint");
 
 		if (!this.act[me.act - 1].hasOwnProperty("spot") || !this.act[me.act - 1].spot.hasOwnProperty(spot)) {
@@ -2168,14 +2093,14 @@ const Town = {
 		}
 
 		if (longRange) {
-			path = getPath(me.area, townSpot[0], townSpot[1], me.x, me.y, 1, 8);
+			let path = getPath(me.area, townSpot[0], townSpot[1], me.x, me.y, 1, 8);
 
 			if (path && path[1]) {
 				townSpot = [path[1].x, path[1].y];
 			}
 		}
 
-		for (i = 0; i < townSpot.length; i += 2) {
+		for (let i = 0; i < townSpot.length; i += 2) {
 			//print("moveToSpot: " + spot + " from " + me.x + ", " + me.y);
 
 			if (getDistance(me, townSpot[i], townSpot[i + 1]) > 2) {
@@ -2224,22 +2149,18 @@ const Town = {
 		let towns = [1, 40, 75, 103, 109];
 
 		if (!me.inTown) {
-			if (!Pather.makePortal()) {
+			if (!Pather.makePortal(true)) {
 				throw new Error("Town.goToTown: Failed to make TP");
 			}
 
-			if (!Pather.usePortal(null, me.name)) {
+			if (!me.inTown && !Pather.usePortal(null, me.name)) {
 				throw new Error("Town.goToTown: Failed to take TP");
 			}
 		}
 
-		if (act === undefined) {
-			return true;
-		}
-
-		if (act < 1 || act > 5) {
-			throw new Error("Town.goToTown: Invalid act");
-		}
+		if (!act) return true;
+		if (act < 1 || act > 5) { throw new Error("Town.goToTown: Invalid act"); }
+		if (act > me.highestAct) return false;
 
 		if (act !== me.act) {
 			try {

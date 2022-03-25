@@ -55,9 +55,7 @@ function Diablo() {
 	this.getLayout = function (seal, value) {
 		let sealPreset = getPresetUnit(108, 2, seal);
 
-		if (!seal) {
-			throw new Error("Seal preset not found. Can't continue.");
-		}
+		if (!seal) { throw new Error("Seal preset not found. Can't continue."); }
 
 		if (sealPreset.roomy * 5 + sealPreset.y === value || sealPreset.roomx * 5 + sealPreset.x === value) {
 			return 1;
@@ -72,51 +70,61 @@ function Diablo() {
 		this.infLayout = this.getLayout(392, 7893);
 	};
 
-	this.openSeal = function (classid) {
-		let i, seal, warn;
+	this.tkSeal = function (seal) {
+		if (!Skill.useTK(seal)) return false;
 
-		switch (classid) {
-		case 396:
-		case 394:
-		case 392:
-			warn = true;
+		for (let i = 0; i < 3; i++) {
+			seal.distance > 13 && Attack.getIntoPosition(seal, 13, 0x4);
+			Skill.cast(43, 0, seal);
 
-			break;
-		default:
-			warn = false;
-
-			break;
+			if (seal.mode) return true;
 		}
 
-		for (i = 0; i < 5; i += 1) {
+		if (!seal.mode) {
+			Pather.moveTo(seal);
+			seal.interact();
+		}
+
+		return seal.mode;
+	};
+
+	this.openSeal = function (classid) {
+		let warn = [396, 394, 392].includes(classid);
+
+		for (let i = 0; i < 5; i += 1) {
 			Pather.moveToPreset(108, 2, classid, classid === 394 ? 5 : 2, classid === 394 ? 5 : 0);
+			let seal = Misc.poll(function () { return getUnit(sdk.unittype.Object, classid); });
 
-			seal = getUnit(2, classid);
+			if (!seal) return false;
 
-			if (!seal) {
-				return false;
-			}
-
-			if (seal.mode) { // for pubbies
-				if (warn) {
-					say(Config.Diablo.SealWarning);
-				}
+			if (seal.mode) {
+				// for pubbies
+				warn && say(Config.Diablo.SealWarning);
 
 				return true;
 			}
 
-			warn = false;
-
-			if (classid === 394) {
-				Misc.click(0, 0, seal);
+			if (me.sorceress) {
+				this.tkSeal(seal);
 			} else {
-				seal.interact();
+				if (classid === 392 && me.assassin && this.infLayout === 1) {
+					if (Config.UseTraps) {
+						let check = ClassAttack.checkTraps({x: 7899, y: 5293});
+
+						if (check) {
+							ClassAttack.placeTraps({x: 7899, y: 5293}, check);
+						}
+					}
+				}
+
+				classid === 394 ? Misc.click(0, 0, seal) : seal.interact();
 			}
 
-			delay(classid === 394 ? 1000 : 500);
+			delay(classid === 394 ? 1000 + me.ping : 500 + me.ping);
 
 			if (!seal.mode) {
-				if (classid === 394 && Attack.validSpot(seal.x + 15, seal.y)) { // de seis optimization
+				// de seis optimization
+				if (classid === 394 && Attack.validSpot(seal.x + 15, seal.y)) {
 					Pather.moveTo(seal.x + 15, seal.y);
 				} else {
 					Pather.moveTo(seal.x - 5, seal.y - 5);
@@ -135,9 +143,7 @@ function Diablo() {
 		if (me.paladin && Config.AttackSkill[1] === sdk.skills.BlessedHammer) {
 			let target = getUnit(1, name);
 
-			if (!target) {
-				return;
-			}
+			if (!target) return;
 
 			let positions = [[6, 11], [0, 8], [8, -1], [-9, 2], [0, -11], [8, -8]];
 
@@ -158,11 +164,10 @@ function Diablo() {
 	};
 
 	this.getBoss = function (name) {
-		let i, boss,
-			glow = getUnit(2, 131);
+		let glow = getUnit(2, 131);
 
-		for (i = 0; i < 16; i += 1) {
-			boss = getUnit(1, name);
+		for (let i = 0; i < 16; i += 1) {
+			let boss = getUnit(1, name);
 
 			if (boss) {
 				this.chaosPreattack(name, 8);
@@ -232,7 +237,7 @@ function Diablo() {
 			delay(1 + me.ping);
 		} else {
 			delay(1 + me.ping);
-			Pather.moveTo(7928, 5295); // temp
+			Pather.moveTo(7928, 5295);
 		}
 
 		if (!this.getBoss(getLocaleString(2853))) {

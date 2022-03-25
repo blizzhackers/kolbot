@@ -4,12 +4,12 @@
 *	@desc		Amazon attack sequence
 */
 
-var ClassAttack = {
+const ClassAttack = {
 	bowCheck: false,
 	lightFuryTick: 0,
 
 	doAttack: function (unit, preattack) {
-		var needRepair = Town.needRepair();
+		let needRepair = Town.needRepair();
 
 		if ((Config.MercWatch && Town.needMerc()) || needRepair.length > 0) {
 			Town.visitTown(!!needRepair.length);
@@ -27,7 +27,7 @@ var ClassAttack = {
 			return 1;
 		}
 
-		var index, checkSkill, result,
+		let index, checkSkill, result,
 			mercRevive = 0,
 			timedSkill = -1,
 			untimedSkill = -1;
@@ -96,7 +96,7 @@ var ClassAttack = {
 	},
 
 	afterAttack: function () {
-		var needRepair;
+		let needRepair;
 
 		Misc.unShift();
 		Precast.doPrecast(false);
@@ -112,7 +112,7 @@ var ClassAttack = {
 
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, timedSkill, untimedSkill) {
-		var i, walk;
+		let i, walk;
 
 		// No valid skills can be found
 		if (timedSkill < 0 && untimedSkill < 0) {

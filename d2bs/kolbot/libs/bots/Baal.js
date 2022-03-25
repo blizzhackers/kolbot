@@ -1,48 +1,37 @@
 /**
  *	@filename	Baal.js
- *	@author		kolton, modified by YGM
+ *	@author		kolton, YGM, theBGuy
  *	@desc		clear Throne of Destruction and kill Baal
  */
 
 function Baal() {
-	let portal, tick;
-
 	this.preattack = function () {
 		let check;
 
 		switch (me.classid) {
-		case 1: // Sorceress
-			switch (Config.AttackSkill[3]) {
-			case 49:
-			case 53:
-			case 56:
-			case 59:
-			case 64:
-				if (me.getState(121)) {
-					while (me.getState(121)) {
-						delay(100);
-					}
+		case sdk.charclass.Sorceress:
+			if ([sdk.skills.Meteor, sdk.skills.Blizzard, sdk.skills.FrozenOrb, sdk.skills.FireWall].includes(Config.AttackSkill[1])) {
+				if (me.getState(sdk.states.SkillDelay)) {
+					delay(50);
 				} else {
-					return Skill.cast(Config.AttackSkill[1], 0, 15094 + rand(-1, 1), 5028);
+					Skill.cast(Config.AttackSkill[1], 0, 15094 + rand(-1, 1), 5024);
 				}
-
-				break;
 			}
 
 			break;
-		case 3: // Paladin
-			if (Config.AttackSkill[3] === 112) {
-				if (Config.AttackSkill[4] > 0) {
-					Skill.setSkill(Config.AttackSkill[4], 0);
-				}
+		case sdk.charclass.Paladin:
+			if (Config.AttackSkill[3] === sdk.skills.BlessedHammer) {
+				Config.AttackSkill[4] > 0 && Skill.setSkill(Config.AttackSkill[4], 0);
 
 				return Skill.cast(Config.AttackSkill[3], 1);
 			}
 
 			break;
-		case 5: // Druid
-			if (Config.AttackSkill[3] === 245) {
-				return Skill.cast(Config.AttackSkill[3], 0, 15094 + rand(-1, 1), 5028);
+		case sdk.charclass.Druid:
+			if ([sdk.skills.Tornado, sdk.skills.Fissure, sdk.skills.Volcano].includes(Config.AttackSkill[3])) {
+				Skill.cast(Config.AttackSkill[3], 0, 15094 + rand(-1, 1), 5029);
+
+				return true;
 			}
 
 			break;
@@ -55,7 +44,7 @@ function Baal() {
 				}
 			}
 
-			if (Config.AttackSkill[3] === 256) { // shock-web
+			if (Config.AttackSkill[3] === sdk.skills.ShockWeb) {
 				return Skill.cast(Config.AttackSkill[3], 0, 15094, 5028);
 			}
 
@@ -70,7 +59,7 @@ function Baal() {
 
 		if (monster) {
 			do {
-				if (Attack.checkMonster(monster) && monster.y < 5080) {
+				if (monster.attackable && monster.y < 5080) {
 					switch (monster.classid) {
 					case 23:
 					case 62:
@@ -98,16 +87,15 @@ function Baal() {
 	};
 
 	this.clearThrone = function () {
-		let i, monster,
-			monList = [],
+		let monList = [],
 			pos = [15094, 5022, 15094, 5041, 15094, 5060, 15094, 5041, 15094, 5022];
 
 		if (Config.AvoidDolls) {
-			monster = getUnit(1, 691);
+			let monster = getUnit(1, 691);
 
 			if (monster) {
 				do {
-					if (monster.x >= 15072 && monster.x <= 15118 && monster.y >= 5002 && monster.y <= 5079 && Attack.checkMonster(monster) && Attack.skipCheck(monster)) {
+					if (monster.x >= 15072 && monster.x <= 15118 && monster.y >= 5002 && monster.y <= 5079 && monster.attackable && Attack.skipCheck(monster)) {
 						monList.push(copyUnit(monster));
 					}
 				} while (monster.getNext());
@@ -118,7 +106,7 @@ function Baal() {
 			}
 		}
 
-		for (i = 0; i < pos.length; i += 2) {
+		for (let i = 0; i < pos.length; i += 2) {
 			Pather.moveTo(pos[i], pos[i + 1]);
 			Attack.clear(25);
 		}
@@ -237,9 +225,9 @@ function Baal() {
 		Precast.doPrecast(true);
 	}
 
-	tick = getTickCount();
+	let tick = getTickCount();
 
-	Pather.moveTo(15094, me.classid === 3 ? 5029 : 5038);
+	Pather.moveTo(15094, me.paladin ? 5029 : 5038);
 
 	MainLoop:
 	while (true) {
@@ -284,8 +272,11 @@ function Baal() {
 				if (me.paladin && me.getState(sdk.states.Poison)) {
 					Skill.setSkill(sdk.skills.Cleansing, 0);
 				}
+			}
 
-				break;
+			if (getTickCount() - tick > 20000) {
+				tick = getTickCount();
+				this.clearThrone();
 			}
 
 			if (!this.preattack()) {
@@ -340,7 +331,7 @@ function Baal() {
 			delay(500);
 		}
 
-		portal = getUnit(2, 563);
+		let portal = getUnit(2, 563);
 
 		if (portal) {
 			Pather.usePortal(null, null, portal);

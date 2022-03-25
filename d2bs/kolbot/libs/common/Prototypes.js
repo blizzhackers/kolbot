@@ -1900,7 +1900,7 @@ Object.defineProperties(me, {
 });
 
 Unit.prototype.__defineGetter__('attackable', function () {
-	if (this === undefined) return false;
+	if (this === undefined || this.area !== me.area) return false;
 	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) {
 		return true;
 	}

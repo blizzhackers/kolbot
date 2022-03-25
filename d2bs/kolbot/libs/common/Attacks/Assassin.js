@@ -4,7 +4,7 @@
 *	@desc		Assassin attack sequence
 */
 
-var ClassAttack = {
+const ClassAttack = {
 	lastTrapPos: {},
 	trapRange: 20,
 
@@ -25,7 +25,7 @@ var ClassAttack = {
 			return 1;
 		}
 
-		var index, checkTraps, checkSkill, result,
+		let index, checkTraps, checkSkill, result,
 			mercRevive = 0,
 			timedSkill = -1,
 			untimedSkill = -1;
@@ -126,7 +126,7 @@ var ClassAttack = {
 
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, timedSkill, untimedSkill) {
-		var i, walk;
+		let i, walk;
 
 		// No valid skills can be found
 		if (timedSkill < 0 && untimedSkill < 0) {
@@ -215,7 +215,7 @@ var ClassAttack = {
 	},
 
 	placeTraps: function (unit, amount) {
-		var i, j,
+		let i, j,
 			traps = 0;
 
 		this.lastTrapPos = {x: unit.x, y: unit.y};
@@ -255,7 +255,7 @@ var ClassAttack = {
 			return true;
 		}
 
-		var i, coords, angle,
+		let i, coords, angle,
 			angles = [180, 175, -175, 170, -170, 165, -165, 150, -150, 135, -135, 45, -45, 90, -90];
 
 		if (unit.spectype & 0x7) {

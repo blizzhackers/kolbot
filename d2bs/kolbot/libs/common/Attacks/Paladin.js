@@ -4,7 +4,7 @@
 *	@desc		Paladin attack sequence
 */
 
-var ClassAttack = {
+const ClassAttack = {
 	doAttack: function (unit, preattack) {
 		if (Config.MercWatch && Town.needMerc()) {
 			print("mercwatch");
@@ -23,7 +23,7 @@ var ClassAttack = {
 			return 1;
 		}
 
-		var index, result,
+		let index, result,
 			mercRevive = 0,
 			attackSkill = -1,
 			aura = -1;
@@ -92,7 +92,7 @@ var ClassAttack = {
 	},
 
 	doCast: function (unit, attackSkill, aura) {
-		var i, walk;
+		let i, walk;
 
 		if (attackSkill < 0) {
 			return 2;
@@ -223,7 +223,7 @@ var ClassAttack = {
 	},
 
 	dollAvoid: function (unit) {
-		var i, cx, cy,
+		let i, cx, cy,
 			distance = 14;
 
 		for (i = 0; i < 2 * Math.PI; i += Math.PI / 6) {
@@ -239,7 +239,7 @@ var ClassAttack = {
 	},
 
 	getHammerPosition: function (unit) {
-		var i, x, y, positions, check,
+		let i, x, y, positions, check,
 			baseId = getBaseStat("monstats", unit.classid, "baseid"),
 			size = getBaseStat("monstats2", baseId, "sizex");
 
@@ -290,8 +290,6 @@ var ClassAttack = {
 	},
 
 	reposition: function (x, y) {
-		var i;
-
 		if (Math.round(getDistance(me, x, y) > 0)) {
 			if (Pather.teleport && !me.inTown && me.getStat(97, 54)) {
 				if (getDistance(me, x, y) > 40) {

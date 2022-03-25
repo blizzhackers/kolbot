@@ -4,7 +4,7 @@
 *	@desc		Sorceress attack sequence
 */
 
-var ClassAttack = {
+const ClassAttack = {
 	doAttack: function (unit, preattack) {
 		if (Config.MercWatch && Town.needMerc()) {
 			print("mercwatch");
@@ -27,36 +27,36 @@ var ClassAttack = {
 			return 1;
 		}
 
-		var index, staticRange, checkSkill, result,
+		let index, staticRange, checkSkill, result,
 			mercRevive = 0,
 			timedSkill = -1,
 			untimedSkill = -1;
 
 		// Static
 		if (Config.CastStatic < 100 && me.getSkill(42, 1) && Attack.checkResist(unit, "lightning") && Config.StaticList.some(
-				function (id) {
-					if (unit) {
-						switch (typeof id) {
-						case "number":
-							if (unit.classid && unit.classid === id) {
-								return 1;
-							}
-
-							break;
-						case "string":
-							if (unit.name && unit.name.toLowerCase() === id.toLowerCase()) {
-								return 1;
-							}
-
-							break;
-						default:
-							throw new Error("Bad Config.StaticList settings.");
+			function (id) {
+				if (unit) {
+					switch (typeof id) {
+					case "number":
+						if (unit.classid && unit.classid === id) {
+							return 1;
 						}
-					}
 
-					return 0;
+						break;
+					case "string":
+						if (unit.name && unit.name.toLowerCase() === id.toLowerCase()) {
+							return 1;
+						}
+
+						break;
+					default:
+						throw new Error("Bad Config.StaticList settings.");
+					}
 				}
-			) && Math.round(unit.hp * 100 / unit.hpmax) > Config.CastStatic) {
+
+				return 0;
+			}
+		) && Math.round(unit.hp * 100 / unit.hpmax) > Config.CastStatic) {
 			staticRange = Math.floor((me.getSkill(42, 1) + 4) * 2 / 3);
 
 			while (!me.dead && Math.round(unit.hp * 100 / unit.hpmax) > Config.CastStatic && Attack.checkMonster(unit)) {
@@ -141,7 +141,7 @@ var ClassAttack = {
 
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, timedSkill, untimedSkill) {
-		var i, walk;
+		let i, walk;
 
 		// No valid skills can be found
 		if (timedSkill < 0 && untimedSkill < 0) {

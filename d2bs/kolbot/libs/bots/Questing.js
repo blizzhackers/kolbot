@@ -135,7 +135,7 @@ function Questing() {
 
 	this.killShenk = function () {
 		if (!Pather.accessToAct(5)) return false;
-		if (Packet.checkQuest(35, 1)) return true;
+		if (Misc.checkQuest(35, 1)) return true;
 
 		print("starting shenk");
 
@@ -153,7 +153,7 @@ function Questing() {
 
 	this.freeAnya = function () {
 		if (!Pather.accessToAct(5)) return false;
-		if (Packet.checkQuest(37, 1)) return true;
+		if (Misc.checkQuest(37, 1)) return true;
 
 		print("starting anya");
 
@@ -322,7 +322,7 @@ function Questing() {
 			Attack.clearList([getUnit(2, sdk.monsters.KorlictheProtector), getUnit(2, sdk.monsters.TalictheDefender), getUnit(2, sdk.monsters.MadawctheGuardian)]);
 			Pather.moveTo(10048, 12628);
 
-			if (!Packet.checkQuest(39, 0)) {
+			if (!Misc.checkQuest(39, 0)) {
 				me.overhead("Failed to kill anicents. Attempt: " + i);
 				touchAltar(); //activate altar
 			}
@@ -334,7 +334,7 @@ function Questing() {
 		Precast.doPrecast(true);
 
 		try {
-			if (Packet.checkQuest(39, 0)) {
+			if (Misc.checkQuest(39, 0)) {
 				Pather.clearToExit(sdk.areas.ArreatSummit, sdk.areas.WorldstoneLvl1, true);
 				Pather.clearToExit(sdk.areas.WorldstoneLvl1, sdk.areas.WorldstoneLvl2, true);
 				Pather.getWP(sdk.areas.WorldstoneLvl2);
@@ -350,7 +350,7 @@ function Questing() {
 		let j;
 
 		for (j = 0; j < 3; j += 1) {
-			if (!Packet.checkQuest(quests[i][0], 0)) {
+			if (!Misc.checkQuest(quests[i][0], 0)) {
 				try {
 					if (this[quests[i][1]]()) {
 						break;

@@ -130,7 +130,7 @@ const Pather = {
 		if (me.dead) return false;
 		let settings = Object.assign({}, {
 			allowTeleport: true,
-			clearPath: true,
+			clearPath: false,
 			pop: false,
 			returnSpotOnError: true
 		}, givenSettings);
@@ -163,7 +163,6 @@ const Pather = {
 		while (path.length > 0) {
 			// Abort if dead
 			if (me.dead) return false;
-
 
 			for (let i = 0; i < this.cancelFlags.length; i += 1) {
 				getUIFlag(this.cancelFlags[i]) && me.cancel();
@@ -248,7 +247,7 @@ const Pather = {
 		clearPath - kill monsters while moving
 		pop - remove last node
 	*/
-	moveTo: function (x, y, retry = 3, clearPath = false, pop = false) {
+	moveTo: function (x, y, retry, clearPath = false, pop = false) {
 		// Abort if dead
 		if (me.dead) return false;
 
@@ -269,6 +268,7 @@ const Pather = {
 		if (typeof x !== "number" || typeof y !== "number") { throw new Error("moveTo: Coords must be numbers"); }
 
 		useTeleport = this.useTeleport();
+		retry === undefined && (retry = useTeleport ? 5 : 15);
 		path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? ([62, 63, 64].indexOf(me.area) > -1 ? 30 : this.teleDistance) : this.walkDistance);
 
 		if (!path) { throw new Error("moveTo: Failed to generate path."); }
@@ -340,14 +340,14 @@ const Pather = {
 					fail += 1;
 					path.reverse();
 					PathDebug.drawPath(path);
-					settings.pop && path.pop();
+					pop && path.pop();
 					print("move retry " + fail);
 
 					if (fail > 0) {
 						Packet.flash(me.gid);
 						Attack.clear(5) && Misc.openChests(2);
 
-						if (fail >= 15) {
+						if (fail >= retry) {
 							break;
 						}
 					}
@@ -520,6 +520,9 @@ const Pather = {
 	openDoors: function (x, y) {
 		if (me.inTown) return false;
 
+		x === undefined && (x = me.x);
+		y === undefined && (y = me.y);
+
 		// Regular doors
 		let door = getUnit(sdk.unittype.Object, "door", 0);
 
@@ -590,28 +593,17 @@ const Pather = {
 	moveToUnit: function (unit, offX, offY, clearPath, pop) {
 		let useTeleport = this.useTeleport();
 
-		if (offX === undefined) {
-			offX = 0;
-		}
-
-		if (offY === undefined) {
-			offY = 0;
-		}
-
-		if (clearPath === undefined) {
-			clearPath = false;
-		}
-
-		if (pop === undefined) {
-			pop = false;
-		}
+		offX === undefined && (offX = 0);
+		offY === undefined && (offY = 0);
+		clearPath === undefined && (clearPath = false);
+		pop === undefined && (pop = false);
 
 		if (!unit || !unit.hasOwnProperty("x") || !unit.hasOwnProperty("y")) {
 			throw new Error("moveToUnit: Invalid unit.");
 		}
 
 		if (unit instanceof PresetUnit) {
-			return this.moveTo(unit.roomx * 5 + unit.x + offX, unit.roomy * 5 + unit.y + offY, 3, clearPath);
+			unit = { x: unit.roomx * 5 + unit.x, y: unit.roomy * 5 + unit.y };
 		}
 
 		if (!useTeleport) {
@@ -622,7 +614,7 @@ const Pather = {
 		return this.moveTo(unit.x + offX, unit.y + offY, useTeleport && unit.type && unit.type === 1 ? 3 : 0, clearPath, pop);
 	},
 
-	moveNearUnit: function (unit, minDist, clearPath = false, pop = false) {
+	moveNearUnit: function (unit, minDist, clearPath, pop = false) {
 		let useTeleport = this.useTeleport();
 		minDist === undefined && (minDist = me.inTown ? 2 : 5);
 
@@ -673,21 +665,10 @@ const Pather = {
 			throw new Error("moveToPreset: Invalid parameters.");
 		}
 
-		if (offX === undefined) {
-			offX = 0;
-		}
-
-		if (offY === undefined) {
-			offY = 0;
-		}
-
-		if (clearPath === undefined) {
-			clearPath = false;
-		}
-
-		if (pop === undefined) {
-			pop = false;
-		}
+		offX === undefined && (offX = 0);
+		offY === undefined && (offY = 0);
+		clearPath === undefined && (clearPath = false);
+		pop === undefined && (pop = false);
 
 		let presetUnit = getPresetUnit(area, unitType, unitId);
 
@@ -705,7 +686,7 @@ const Pather = {
 		clearPath - kill monsters while moving
 	*/
 	moveToExit: function (targetArea, use, clearPath) {
-		let i, j, area, exits, targetRoom, dest, currExit,
+		let area, exits, targetRoom, dest, currExit,
 			areas = [];
 
 		if (targetArea instanceof Array) {
@@ -714,7 +695,9 @@ const Pather = {
 			areas.push(targetArea);
 		}
 
-		for (i = 0; i < areas.length; i += 1) {
+		for (let i = 0; i < areas.length; i += 1) {
+			let checkExits = [];
+			
 			area = getArea();
 
 			if (!area) {
@@ -727,7 +710,7 @@ const Pather = {
 				return false;
 			}
 
-			for (j = 0; j < exits.length; j += 1) {
+			for (let j = 0; j < exits.length; j += 1) {
 				currExit = {
 					x: exits[j].x,
 					y: exits[j].y,
@@ -737,13 +720,19 @@ const Pather = {
 				};
 
 				if (currExit.target === areas[i]) {
+					checkExits.push(currExit);
+				}
+			}
+
+			if (checkExits.length > 0) {
+				// if there are multiple exits to the same location find the closest one
+				checkExits.length > 1 && (checkExits = checkExits.sort((a, b) => getDistance(me, a.x, a.y) - getDistance(me, b.x, b.y)));
+
+				for (let k = 0; k < checkExits.length; k++) {
+					currExit = checkExits[k];
 					dest = this.getNearestWalkable(currExit.x, currExit.y, 5, 1);
 
-					if (!dest) {
-						return false;
-					}
-
-					if (!this.moveTo(dest[0], dest[1], 3, clearPath)) {
+					if (!dest || !this.moveTo(dest[0], dest[1], 3, clearPath)) {
 						return false;
 					}
 
@@ -926,10 +915,9 @@ const Pather = {
 		targetArea - area id of where the unit leads to
 	*/
 	useUnit: function (type, id, targetArea) {
-		let unit, coord,
-			preArea = me.area;
+		let unit, preArea = me.area;
 
-		for (let i = 0; i < 5; i += 1) {
+		for (let i = 0; i < 10; i += 1) {
 			unit = getUnit(type, id);
 
 			if (unit) {
@@ -940,7 +928,7 @@ const Pather = {
 		}
 
 		if (!unit) {
-			throw new Error("useUnit: Unit not found. ID: " + id);
+			throw new Error("useUnit: Unit not found. TYPE: " + type + " ID: " + id + " MyArea: " + this.getAreaName(me.area) + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetarea) : ""));
 		}
 
 		for (let i = 0; i < 5; i += 1) {
@@ -953,12 +941,16 @@ const Pather = {
 			}
 
 			if (type === 2 && unit.mode === 0) {
-				if ((me.area === sdk.areas.Travincal && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(21, 0) !== 1) ||
-					(me.area === sdk.areas.ArreatSummit && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(39, 0) !== 1)) {
-					throw new Error("useUnit: Incomplete quest.");
+				if ((me.area === sdk.areas.Travincal && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(21, 0) !== 1)
+					|| (me.area === sdk.areas.ArreatSummit && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(39, 0) !== 1)) {
+					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetarea) : ""));
 				}
 
 				me.area === sdk.areas.A3SewersLvl1 ? this.openUnit(2, 367) : this.openUnit(2, id);
+			}
+
+			if (type === 2 && id === 342 && me.area === sdk.areas.DuranceofHateLvl3 && targetArea === sdk.areas.PandemoniumFortress && me.getQuest(22, 0) !== 1) {
+				throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetarea) : ""));
 			}
 
 			delay(300);
@@ -969,7 +961,11 @@ const Pather = {
 
 			while (getTickCount() - tick < 3000) {
 				if ((!targetArea && me.area !== preArea) || me.area === targetArea) {
-					delay(100);
+					delay(200 + me.ping);
+
+					while (!me.gameReady) {
+						delay(100);
+					}
 
 					return true;
 				}
@@ -977,8 +973,9 @@ const Pather = {
 				delay(10);
 			}
 
-			coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 3);
-			this.moveTo(coord.x, coord.y);
+			i > 2 && Packet.flash(me.gid);
+			let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 3);
+			coord && this.moveTo(coord.x, coord.y);
 		}
 
 		return targetArea ? me.area === targetArea : me.area !== preArea;
@@ -1087,6 +1084,12 @@ const Pather = {
 						this.moveToUnit(wp) && Misc.click(0, 0, wp);
 					}
 
+					// handle getUnit bug
+					if (!getUIFlag(sdk.uiflags.Waypoint) && wp.name.toLowerCase() === "dummy") {
+						Town.getDistance("waypoint") > 5 && Town.move("waypoint");
+						Misc.click(0, 0, wp);
+					}
+
 					tick = getTickCount();
 
 					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
@@ -1164,10 +1167,8 @@ const Pather = {
 				}
 
 				Packet.flash(me.gid);
-
-				if (i > 1) { // Activate check if we fail direct interact twice
-					check = true;
-				}
+				// Activate check if we fail direct interact twice
+				i > 1 && (check = true);
 			} else {
 				Packet.flash(me.gid);
 			}
@@ -1192,6 +1193,7 @@ const Pather = {
 		if (me.inTown) return true;
 
 		let portal, oldPortal, oldGid;
+		let buggedPortal;
 
 		for (let i = 0; i < 5; i += 1) {
 			if (me.dead) {
@@ -1221,6 +1223,19 @@ const Pather = {
 						break MainLoop; // don't spam usePortal
 					} else {
 						return copyUnit(portal);
+					}
+				} else {
+					// probably getUnit bug - find portal without owner thats blue
+					buggedPortal = getUnits(sdk.unittype.Object, "portal")
+						.filter(function (p) { return !p.getParent() && p.gid !== oldGid && p.classid === 41; })
+						.first();
+					if (buggedPortal) {
+						if (use) {
+							if (this.usePortal(null, null, copyUnit(buggedPortal))) return true;
+							break MainLoop; // don't spam usePortal
+						} else {
+							return copyUnit(buggedPortal);
+						}
 					}
 				}
 
@@ -1472,27 +1487,32 @@ const Pather = {
 		clearPath - clear path
 	*/
 	getWP: function (area, clearPath) {
-		let i, j, wp, preset,
+		let useTK = me.getSkill(sdk.skills.Telekinesis, 1),
 			wpIDs = [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539];
 
-		if (area !== me.area) {
-			this.journeyTo(area);
-		}
+		area !== me.area && this.journeyTo(area);
 
-		for (i = 0; i < wpIDs.length; i += 1) {
-			preset = getPresetUnit(area, 2, wpIDs[i]);
+		for (let i = 0; i < wpIDs.length; i++) {
+			let preset = getPresetUnit(area, 2, wpIDs[i]);
 
 			if (preset) {
-				this.moveToUnit(preset, 0, 0, clearPath);
+				useTK ? this.moveNearUnit(preset, 20, clearPath) : this.moveToUnit(preset, 0, 0, clearPath);
 
-				wp = getUnit(2, "waypoint");
+				let wp = getUnit(2, "waypoint");
 
 				if (wp) {
-					for (j = 0; j < 10; j += 1) {
-						Misc.click(0, 0, wp);
-						//wp.interact();
+					for (let j = 0; j < 10; j++) {
+						if (wp.distance > 5 && Skill.useTK(wp) && j < 3) {
+							if (wp.distance > 21) {
+								Attack.getIntoPosition(wp, 20, 0x4);
+							}
 
-						if (getUIFlag(0x14)) {
+							Skill.cast(sdk.skills.Telekinesis, 0, wp);
+						} else if (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint)) {
+							this.moveToUnit(wp) && Misc.click(0, 0, wp);
+						}
+
+						if (getUIFlag(sdk.uiflags.Waypoint)) {
 							delay(500);
 							me.cancel();
 
@@ -1515,31 +1535,31 @@ const Pather = {
 	journeyTo: function (area) {
 		if (area === undefined) return false;
 
-		let i, special, unit, target;
+		let i, special, unit, target, retry = 0;
 
-		if (area !== 73) {
+		if (area !== sdk.areas.DurielsLair) {
 			target = this.plotCourse(area, me.area);
 		} else {
-			target = {course: [46, 73], useWP: false};
+			target = {course: [sdk.areas.CanyonofMagic, sdk.areas.DurielsLair], useWP: false};
 			this.wpAreas.indexOf(me.area) === -1 && (target.useWP = true);
 		}
 
 		print(target.course);
-		area === 103 && me.area === 102 && (target.useWP = false);
+		area === sdk.areas.PandemoniumFortress && me.area === sdk.areas.DuranceofHateLvl3 && (target.useWP = false);
 		target.useWP && Town.goToTown();
 
 		// handle variable flayer jungle entrances
-		if (target.course.indexOf(78) > -1) {
+		if (target.course.indexOf(sdk.areas.FlayerJungle) > -1) {
 			Town.goToTown(3); // without initiated act, getArea().exits will crash
-
-			special = getArea(78);
+			special = getArea(sdk.areas.FlayerJungle);
 
 			if (special) {
 				special = special.exits;
 
 				for (i = 0; i < special.length; i += 1) {
-					if (special[i].target === 77) {
-						target.course.splice(target.course.indexOf(78), 0, 77); // add great marsh if needed
+					if (special[i].target === sdk.areas.GreatMarsh) {
+						// add great marsh if needed
+						target.course.splice(target.course.indexOf(sdk.areas.FlayerJungle), 0, sdk.areas.GreatMarsh);
 
 						break;
 					}
@@ -1562,30 +1582,36 @@ const Pather = {
 			if (me.inTown && this.nextAreas[currArea] !== target.course[0] && this.wpAreas.includes(target.course[0]) && getWaypoint(this.wpAreas.indexOf(target.course[0]))) {
 				this.useWaypoint(target.course[0], !this.plotCourse_openedWpMenu);
 				Precast.doPrecast(false);
-			} else if (currArea === 4 && target.course[0] === 38) { // Stony Field -> Tristram
+			} else if (currArea === sdk.areas.StonyField && target.course[0] === sdk.areas.Tristram) {
+				// Stony Field -> Tristram
 				this.moveToPreset(currArea, 1, 737, 0, 0, false, true);
 
 				for (i = 0; i < 5; i += 1) {
-					if (this.usePortal(38)) {
+					if (this.usePortal(sdk.areas.Tristram)) {
 						break;
 					}
 
 					delay(1000);
 				}
-			} else if (currArea === 40 && target.course[0] === 47) { // Lut Gholein -> Sewers Level 1 (use Trapdoor)
+			} else if (currArea === sdk.areas.LutGholein && target.course[0] === sdk.areas.A2SewersLvl1) {
+				// Lut Gholein -> Sewers Level 1 (use Trapdoor)
 				this.moveToPreset(currArea, 5, 19);
-				this.useUnit(2, 74, 47);
-			} else if (currArea === 48 && target.course[0] === 47) { // Sewers Level 2 -> Sewers Level 1
+				this.useUnit(2, 74, sdk.areas.A2SewersLvl1);
+			} else if (currArea === sdk.areas.A2SewersLvl2 && target.course[0] === sdk.areas.A2SewersLvl1) {
+				// Sewers Level 2 -> Sewers Level 1
 				Pather.moveToExit(target.course[0], false);
 				this.useUnit(5, 22, 47);
-			} else if (currArea === 54 && target.course[0] === 74) { // Palace -> Arcane
+			} else if (currArea === sdk.areas.PalaceCellarLvl3 && target.course[0] === sdk.areas.ArcaneSanctuary) {
+				// Palace -> Arcane
 				this.moveTo(10073, 8670);
 				this.usePortal(null);
-			} else if (currArea === 74 && target.course[0] === 54) { // Arcane Sanctuary -> Palace Cellar 3
+			} else if (currArea === sdk.areas.ArcaneSanctuary && target.course[0] === sdk.areas.PalaceCellarLvl3) {
+				// Arcane Sanctuary -> Palace Cellar 3
 				me.getSkill(sdk.skills.Telekinesis, 1) ? this.moveNearPreset(currArea, 2, 298, 20) : this.moveToPreset(currArea, 2, 298);
 				unit = Misc.poll(function () { return getUnit(2, 298); });
 				unit && Pather.useUnit(2, 298, 54);
-			} else if (currArea === 74 && target.course[0] === 46) { // Arcane Sanctuary -> Canyon of the Magic
+			} else if (currArea === sdk.areas.ArcaneSanctuary && target.course[0] === sdk.areas.CanyonofMagic) {
+				// Arcane Sanctuary -> Canyon of the Magic
 				this.moveToPreset(currArea, 2, 357);
 				unit = getUnit(2, 60);
 
@@ -1602,38 +1628,51 @@ const Pather = {
 						}
 					}
 				}
-			} else if (currArea === 46 && target.course[0] === 73) { // Canyon -> Duriels Lair
+			} else if (currArea === sdk.areas.CanyonofMagic && target.course[0] === sdk.areas.DurielsLair) {
+				// Canyon -> Duriels Lair
 				this.moveToExit(getRoom().correcttomb, true);
 				this.moveToPreset(me.area, 2, 152);
 				unit = Misc.poll(function () { return getUnit(2, 100); });
 				unit && Pather.useUnit(2, 100, 73);
-			} else if (currArea === 102 && target.course[0] === 103) { // Durance Lvl 3 -> Pandemonium Fortress
+			} else if (currArea === sdk.areas.DuranceofHateLvl3 && target.course[0] === sdk.areas.PandemoniumFortress) {
+				// Durance Lvl 3 -> Pandemonium Fortress
+				if (me.getQuest(22, 0) !== 1) {
+					print(sdk.colors.Red + "(journeyTo) :: Incomplete Quest");
+					return false;
+				}
+
 				Pather.moveTo(17581, 8070);
 				delay(250 + me.ping * 2);
-				unit = Misc.poll(function () { return getUnit(2, 342); });
-				unit && Pather.usePortal(null, null, unit);
-			} else if (currArea === 109 && target.course[0] === 110) { // Harrogath -> Bloody Foothills
+				this.useUnit(2, 342, sdk.areas.PandemoniumFortress);
+			} else if (currArea === sdk.areas.Harrogath && target.course[0] === sdk.areas.BloodyFoothills) {
+				// Harrogath -> Bloody Foothills
 				this.moveTo(5026, 5095);
 				this.openUnit(2, 449);
 				this.moveToExit(target.course[0], true);
-			} else if (currArea === 109 && target.course[0] === 121) { // Harrogath -> Nihlathak's Temple
+			} else if (currArea === sdk.areas.Harrogath && target.course[0] === sdk.areas.NihlathaksTemple) {
+				// Harrogath -> Nihlathak's Temple
 				Town.move(NPC.Anya);
-				this.usePortal(121);
-			} else if (currArea === 111 && target.course[0] === 125) { // Abaddon
-				this.moveToPreset(111, 2, 60);
-				this.usePortal(125);
-			} else if (currArea === 112 && target.course[0] === 126) { // Pits of Archeon
-				this.moveToPreset(112, 2, 60);
-				this.usePortal(126);
-			} else if (currArea === 117 && target.course[0] === 127) { // Infernal Pit
-				this.moveToPreset(117, 2, 60);
-				this.usePortal(127);
-			} else if (target.course[0] === 39) { // Moo Moo farm
+				this.usePortal(sdk.areas.NihlathaksTemple);
+			} else if (currArea === sdk.areas.FrigidHighlands && target.course[0] === sdk.areas.Abaddon) {
+				// Abaddon
+				this.moveToPreset(sdk.areas.FrigidHighlands, 2, 60);
+				this.usePortal(sdk.areas.Abaddon);
+			} else if (currArea === sdk.areas.ArreatPlateau && target.course[0] === sdk.areas.PitofArcheon) {
+				// Pits of Archeon
+				this.moveToPreset(sdk.areas.ArreatPlateau, 2, 60);
+				this.usePortal(sdk.areas.PitofArcheon);
+			} else if (currArea === sdk.areas.FrozenTundra && target.course[0] === sdk.areas.InfernalPit) {
+				// Infernal Pit
+				this.moveToPreset(sdk.areas.FrozenTundra, 2, 60);
+				this.usePortal(sdk.areas.InfernalPit);
+			} else if (target.course[0] === sdk.areas.MooMooFarm) {
+				// Moo Moo farm
 				currArea !== 1 && Town.goToTown(1);
 				Town.move("stash") && (unit = this.getPortal(target.course[0]));
 				unit && this.usePortal(null, null, unit);
-			} else if ([133, 134, 135, 136].includes(target.course[0])) { // Uber Portals
-				currArea !== 109 && Town.goToTown(5);
+			} else if ([sdk.areas.MatronsDen, sdk.areas.FogottenSands, sdk.areas.FurnaceofPain, sdk.areas.UberTristram].includes(target.course[0])) {
+				// Uber Portals
+				currArea !== sdk.areas.Harrogath && Town.goToTown(5);
 				Town.move("stash") && (unit = this.getPortal(target.course[0]));
 				unit && this.usePortal(null, null, unit);
 			} else {
@@ -1647,7 +1686,17 @@ const Pather = {
 				}
 			}
 
-			target.course.shift();
+			if (me.area === target.course[0]) {
+				target.course.shift();
+				retry = 0;
+			} else {
+				if (retry > 3) {
+					print(sdk.colors.Red + "Failed to journeyTo " + Pather.getAreaName(area) + " currentarea: " + Pather.getAreaName(me.area));
+					
+					return false;
+				}
+				retry++;
+			}
 		}
 
 		return me.area === area;
@@ -1752,144 +1801,146 @@ const Pather = {
 		return true;
 	},
 
-	areaNames: 
-		["None",
-		"Rogue Encampment",
-		"Blood Moor",
-		"Cold Plains",
-		"Stony Field",
-		"Dark Wood",
-		"Black Marsh",
-		"Tamoe Highland",
-		"Den Of Evil",
-		"Cave Level 1",
-		"Underground Passage Level 1",
-		"Hole Level 1",
-		"Pit Level 1",
-		"Cave Level 2",
-		"Underground Passage Level 2",
-		"Hole Level 2",
-		"Pit Level 2",
-		"Burial Grounds",
-		"Crypt",
-		"Mausoleum",
-		"Forgotten Tower",
-		"Tower Cellar Level 1",
-		"Tower Cellar Level 2",
-		"Tower Cellar Level 3",
-		"Tower Cellar Level 4",
-		"Tower Cellar Level 5",
-		"Monastery Gate",
-		"Outer Cloister",
-		"Barracks",
-		"Jail Level 1",
-		"Jail Level 2",
-		"Jail Level 3",
-		"Inner Cloister",
-		"Cathedral",
-		"Catacombs Level 1",
-		"Catacombs Level 2",
-		"Catacombs Level 3",
-		"Catacombs Level 4",
-		"Tristram",
-		"Moo Moo Farm",
-		"Lut Gholein",
-		"Rocky Waste",
-		"Dry Hills",
-		"Far Oasis",
-		"Lost City",
-		"Valley Of Snakes",
-		"Canyon Of The Magi",
-		"Sewers Level 1",
-		"Sewers Level 2",
-		"Sewers Level 3",
-		"Harem Level 1",
-		"Harem Level 2",
-		"Palace Cellar Level 1",
-		"Palace Cellar Level 2",
-		"Palace Cellar Level 3",
-		"Stony Tomb Level 1",
-		"Halls Of The Dead Level 1",
-		"Halls Of The Dead Level 2",
-		"Claw Viper Temple Level 1",
-		"Stony Tomb Level 2",
-		"Halls Of The Dead Level 3",
-		"Claw Viper Temple Level 2",
-		"Maggot Lair Level 1",
-		"Maggot Lair Level 2",
-		"Maggot Lair Level 3",
-		"Ancient Tunnels",
-		"Tal Rashas Tomb #1",
-		"Tal Rashas Tomb #2",
-		"Tal Rashas Tomb #3",
-		"Tal Rashas Tomb #4",
-		"Tal Rashas Tomb #5",
-		"Tal Rashas Tomb #6",
-		"Tal Rashas Tomb #7",
-		"Duriels Lair",
-		"Arcane Sanctuary",
-		"Kurast Docktown",
-		"Spider Forest",
-		"Great Marsh",
-		"Flayer Jungle",
-		"Lower Kurast",
-		"Kurast Bazaar",
-		"Upper Kurast",
-		"Kurast Causeway",
-		"Travincal",
-		"Spider Cave",
-		"Spider Cavern",
-		"Swampy Pit Level 1",
-		"Swampy Pit Level 2",
-		"Flayer Dungeon Level 1",
-		"Flayer Dungeon Level 2",
-		"Swampy Pit Level 3",
-		"Flayer Dungeon Level 3",
-		"Sewers Level 1",
-		"Sewers Level 2",
-		"Ruined Temple",
-		"Disused Fane",
-		"Forgotten Reliquary",
-		"Forgotten Temple",
-		"Ruined Fane",
-		"Disused Reliquary",
-		"Durance Of Hate Level 1",
-		"Durance Of Hate Level 2",
-		"Durance Of Hate Level 3",
-		"The Pandemonium Fortress",
-		"Outer Steppes",
-		"Plains Of Despair",
-		"City Of The Damned",
-		"River Of Flame",
-		"Chaos Sanctuary",
-		"Harrogath",
-		"Bloody Foothills",
-		"Frigid Highlands",
-		"Arreat Plateau",
-		"Crystalline Passage",
-		"Frozen River",
-		"Glacial Trail",
-		"Drifter Cavern",
-		"Frozen Tundra",
-		"Ancient's Way",
-		"Icy Cellar",
-		"Arreat Summit",
-		"Nihlathak's Temple",
-		"Halls Of Anguish",
-		"Halls Of Pain",
-		"Halls Of Vaught",
-		"Abaddon",
-		"Pit Of Acheron",
-		"Infernal Pit",
-		"Worldstone Keep Level 1",
-		"Worldstone Keep Level 2",
-		"Worldstone Keep Level 3",
-		"Throne Of Destruction",
-		"The Worldstone Chamber",
-		"Matron's Den",
-		"Fogotten Sands",
-		"Furnace of Pain",
-		"Tristram"],
+	areaNames:
+		[
+			"None",
+			"Rogue Encampment",
+			"Blood Moor",
+			"Cold Plains",
+			"Stony Field",
+			"Dark Wood",
+			"Black Marsh",
+			"Tamoe Highland",
+			"Den Of Evil",
+			"Cave Level 1",
+			"Underground Passage Level 1",
+			"Hole Level 1",
+			"Pit Level 1",
+			"Cave Level 2",
+			"Underground Passage Level 2",
+			"Hole Level 2",
+			"Pit Level 2",
+			"Burial Grounds",
+			"Crypt",
+			"Mausoleum",
+			"Forgotten Tower",
+			"Tower Cellar Level 1",
+			"Tower Cellar Level 2",
+			"Tower Cellar Level 3",
+			"Tower Cellar Level 4",
+			"Tower Cellar Level 5",
+			"Monastery Gate",
+			"Outer Cloister",
+			"Barracks",
+			"Jail Level 1",
+			"Jail Level 2",
+			"Jail Level 3",
+			"Inner Cloister",
+			"Cathedral",
+			"Catacombs Level 1",
+			"Catacombs Level 2",
+			"Catacombs Level 3",
+			"Catacombs Level 4",
+			"Tristram",
+			"Moo Moo Farm",
+			"Lut Gholein",
+			"Rocky Waste",
+			"Dry Hills",
+			"Far Oasis",
+			"Lost City",
+			"Valley Of Snakes",
+			"Canyon Of The Magi",
+			"Sewers Level 1",
+			"Sewers Level 2",
+			"Sewers Level 3",
+			"Harem Level 1",
+			"Harem Level 2",
+			"Palace Cellar Level 1",
+			"Palace Cellar Level 2",
+			"Palace Cellar Level 3",
+			"Stony Tomb Level 1",
+			"Halls Of The Dead Level 1",
+			"Halls Of The Dead Level 2",
+			"Claw Viper Temple Level 1",
+			"Stony Tomb Level 2",
+			"Halls Of The Dead Level 3",
+			"Claw Viper Temple Level 2",
+			"Maggot Lair Level 1",
+			"Maggot Lair Level 2",
+			"Maggot Lair Level 3",
+			"Ancient Tunnels",
+			"Tal Rashas Tomb #1",
+			"Tal Rashas Tomb #2",
+			"Tal Rashas Tomb #3",
+			"Tal Rashas Tomb #4",
+			"Tal Rashas Tomb #5",
+			"Tal Rashas Tomb #6",
+			"Tal Rashas Tomb #7",
+			"Duriels Lair",
+			"Arcane Sanctuary",
+			"Kurast Docktown",
+			"Spider Forest",
+			"Great Marsh",
+			"Flayer Jungle",
+			"Lower Kurast",
+			"Kurast Bazaar",
+			"Upper Kurast",
+			"Kurast Causeway",
+			"Travincal",
+			"Spider Cave",
+			"Spider Cavern",
+			"Swampy Pit Level 1",
+			"Swampy Pit Level 2",
+			"Flayer Dungeon Level 1",
+			"Flayer Dungeon Level 2",
+			"Swampy Pit Level 3",
+			"Flayer Dungeon Level 3",
+			"Sewers Level 1",
+			"Sewers Level 2",
+			"Ruined Temple",
+			"Disused Fane",
+			"Forgotten Reliquary",
+			"Forgotten Temple",
+			"Ruined Fane",
+			"Disused Reliquary",
+			"Durance Of Hate Level 1",
+			"Durance Of Hate Level 2",
+			"Durance Of Hate Level 3",
+			"The Pandemonium Fortress",
+			"Outer Steppes",
+			"Plains Of Despair",
+			"City Of The Damned",
+			"River Of Flame",
+			"Chaos Sanctuary",
+			"Harrogath",
+			"Bloody Foothills",
+			"Frigid Highlands",
+			"Arreat Plateau",
+			"Crystalline Passage",
+			"Frozen River",
+			"Glacial Trail",
+			"Drifter Cavern",
+			"Frozen Tundra",
+			"Ancient's Way",
+			"Icy Cellar",
+			"Arreat Summit",
+			"Nihlathak's Temple",
+			"Halls Of Anguish",
+			"Halls Of Pain",
+			"Halls Of Vaught",
+			"Abaddon",
+			"Pit Of Acheron",
+			"Infernal Pit",
+			"Worldstone Keep Level 1",
+			"Worldstone Keep Level 2",
+			"Worldstone Keep Level 3",
+			"Throne Of Destruction",
+			"The Worldstone Chamber",
+			"Matron's Den",
+			"Fogotten Sands",
+			"Furnace of Pain",
+			"Tristram"
+		],
 
 	/*
 		Pather.getAreaName(area);

@@ -4,9 +4,9 @@
 *	@desc		Barbarian attack sequence
 */
 
-var ClassAttack = {
+const ClassAttack = {
 	doAttack: function (unit, preattack) {
-		var needRepair = Town.needRepair();
+		let needRepair = Town.needRepair();
 
 		if ((Config.MercWatch && Town.needMerc()) || needRepair.length > 0) {
 			Town.visitTown(!!needRepair.length);
@@ -24,7 +24,7 @@ var ClassAttack = {
 			return 1;
 		}
 
-		var index,
+		let index,
 			attackSkill = -1;
 
 		index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
@@ -53,7 +53,7 @@ var ClassAttack = {
 	},
 
 	afterAttack: function (pickit) {
-		var needRepair;
+		let needRepair;
 
 		Misc.unShift();
 		Precast.doPrecast(false);
@@ -70,7 +70,7 @@ var ClassAttack = {
 	},
 
 	doCast: function (unit, attackSkill) {
-		var walk;
+		let walk;
 
 		if (attackSkill < 0) {
 			return 2;
@@ -115,7 +115,7 @@ var ClassAttack = {
 			return true;
 		}
 
-		var i, coords, angle,
+		let i, coords, angle,
 			angles = [180, 175, -175, 170, -170, 165, -165, 150, -150, 135, -135, 45, -45, 90, -90];
 
 		if (unit.spectype & 0x7) {
@@ -141,7 +141,7 @@ var ClassAttack = {
 	},
 
 	checkCloseMonsters: function (range) {
-		var monster;
+		let monster;
 
 		monster = getUnit(1);
 
@@ -163,13 +163,13 @@ var ClassAttack = {
 			return false;
 		}
 
-		var i, j, tick, corpse, orgX, orgY, retry,
+		let i, j, tick, corpse, orgX, orgY, retry,
 			corpseList = [];
 
 		orgX = me.x;
 		orgY = me.y;
 
-MainLoop:
+		MainLoop:
 		for (i = 0; i < 3; i += 1) {
 			corpse = getUnit(1);
 
@@ -207,7 +207,7 @@ MainLoop:
 						Attack.weaponSwitch(Attack.getPrimarySlot() ^ 1);
 					}
 
-CorpseLoop:
+					CorpseLoop:
 					for (j = 0; j < 3; j += 1) {
 						Skill.cast(142, 0, corpse);
 
@@ -260,7 +260,7 @@ CorpseLoop:
 				!unit.getState(104) && // nodraw
 				!unit.getState(107) && // shatter
 				!unit.getState(118) // noselect
-				) {
+		) {
 			return true;
 		}
 

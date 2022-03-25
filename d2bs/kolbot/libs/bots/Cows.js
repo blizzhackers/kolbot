@@ -75,7 +75,7 @@ function Cows() {
 	};
 
 	this.getLeg = function () {
-		let portal, wirt, leg, gid;
+		let portal;
 
 		if (me.getItem(sdk.items.quest.WirtsLeg)) {
 			return me.getItem(sdk.items.quest.WirtsLeg);
@@ -103,16 +103,16 @@ function Cows() {
 
 		Pather.moveTo(25048, 5177);
 
-		wirt = getUnit(2, 268);
+		let wirt = getUnit(2, 268);
 
 		for (let i = 0; i < 8; i += 1) {
 			wirt.interact();
 			delay(500);
 
-			leg = getUnit(4, sdk.items.quest.WirtsLeg);
+			let leg = getUnit(4, sdk.items.quest.WirtsLeg);
 
 			if (leg) {
-				gid = leg.gid;
+				let gid = leg.gid;
 
 				Pickit.pickItem(leg);
 				Town.goToTown();
@@ -125,11 +125,10 @@ function Cows() {
 	};
 
 	this.getTome = function () {
-		let npc, scroll;
 		let tpTome = me.findItems(sdk.items.TomeofTownPortal, 0, 3);
 
 		if (tpTome.length < 2) {
-			npc = Town.initNPC("Shop", "buyTpTome");
+			let npc = Town.initNPC("Shop", "buyTpTome");
 
 			if (!getInteractedNPC()) {
 				throw new Error("Failed to find npc");
@@ -142,11 +141,10 @@ function Cows() {
 				tpTome = me.findItems(sdk.items.TomeofTownPortal, 0, 3);
 				tpTome.forEach(function (book) {
 					if (book.isInInventory) {
+						let scroll = npc.getItem(sdk.items.ScrollofTownPortal);
 						while (book.getStat(sdk.stats.Quantity) < 20) {
-							scroll = npc.getItem(sdk.items.ScrollofTownPortal);
-							
 							if (!!scroll && scroll.getItemCost(0) < me.gold) {
-								scroll.buy();
+								scroll.buy(true);
 							} else {
 								break;
 							}
@@ -164,14 +162,8 @@ function Cows() {
 	};
 
 	this.openPortal = function (leg, tome) {
-		if (!Town.openStash()) {
-			throw new Error("Failed to open stash");
-		}
-
-		if (!Cubing.emptyCube()) {
-			throw new Error("Failed to empty cube");
-		}
-
+		if (!Town.openStash()) { throw new Error("Failed to open stash"); }
+		if (!Cubing.emptyCube()) { throw new Error("Failed to empty cube"); }
 		if (!Storage.Cube.MoveTo(leg) || !Storage.Cube.MoveTo(tome) || !Cubing.openCube()) {
 			throw new Error("Failed to cube leg and tome");
 		}

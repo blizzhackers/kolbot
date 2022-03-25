@@ -819,7 +819,7 @@ function Rushee() {
 							break;
 						case 104:
 						case 105:
-							if (me.act === 4 && Packet.checkQuest(25, 1)) {
+							if (me.act === 4 && Misc.checkQuest(25, 1)) {
 								Town.move(NPC.Tyrael);
 
 								target = getUnit(1, NPC.Tyrael);
@@ -846,7 +846,7 @@ function Rushee() {
 							break;
 						}
 
-						if (!Packet.checkQuest(6, 4)) {
+						if (!Misc.checkQuest(6, 4)) {
 							D2Bot.printToConsole("Andariel quest failed", 9);
 							quit();
 						}
@@ -881,7 +881,7 @@ function Rushee() {
 							break;
 						}
 
-						if (!Packet.checkQuest(13, 0)) {
+						if (!Misc.checkQuest(13, 0)) {
 							D2Bot.printToConsole("Summoner quest failed", 9);
 							quit();
 						}
@@ -907,7 +907,7 @@ function Rushee() {
 							break;
 						}
 
-						if (!Packet.checkQuest(21, 0)) {
+						if (!Misc.checkQuest(21, 0)) {
 							D2Bot.printToConsole("Travincal quest failed", 9);
 							quit();
 						}
@@ -934,7 +934,7 @@ function Rushee() {
 							break;
 						}
 
-						if (Packet.checkQuest(25, 1)) {
+						if (Misc.checkQuest(25, 1)) {
 							Town.move(NPC.Tyrael);
 
 							target = getUnit(1, NPC.Tyrael);
@@ -1118,6 +1118,12 @@ function Rushee() {
 
 					Config.Rushee.Quester = true;
 
+					actions.shift();
+
+					break;
+				case "leader":
+					print(Config.Leader + " is my leader in my config. " + leader.name + " is my leader right now");
+					say(Config.Leader + " is my leader in my config. " + leader.name + " is my leader right now");
 					actions.shift();
 
 					break;

@@ -4,7 +4,7 @@
 *	@desc		Druid attack sequence
 */
 
-var ClassAttack = {
+const ClassAttack = {
 	doAttack: function (unit, preattack) {
 		if (Config.MercWatch && Town.needMerc()) {
 			Town.visitTown();
@@ -30,7 +30,7 @@ var ClassAttack = {
 			return 1;
 		}
 
-		var index, checkSkill, result,
+		let index, checkSkill, result,
 			mercRevive = 0,
 			timedSkill = -1,
 			untimedSkill = -1;
@@ -105,7 +105,7 @@ var ClassAttack = {
 
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, timedSkill, untimedSkill) {
-		var i, walk;
+		let i, walk;
 
 		// No valid skills can be found
 		if (timedSkill < 0 && untimedSkill < 0) {

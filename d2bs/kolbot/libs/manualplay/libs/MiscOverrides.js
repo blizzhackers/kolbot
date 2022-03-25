@@ -124,7 +124,7 @@ Misc.talkToTyrael = function () {
 	let tyrael = getUnit(1, NPC.Tyrael);
 
 	if (tyrael) {
-		for (i = 0; i < 3; i++) {
+		for (let i = 0; i < 3; i++) {
 			if (getDistance(me, tyrael) > 3) {
 				Pather.moveToUnit(tyrael);
 			}

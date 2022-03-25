@@ -434,6 +434,7 @@ const Skill = {
 	useTK: function (unit = undefined) {
 		if (!unit || !me.getSkill(sdk.skills.Telekinesis, 1) || !Config.UseTelekinesis
 			|| typeof unit !== 'object' || unit.type !== sdk.unittype.Object
+			|| unit.name.toLowerCase() === 'dummy'
 			|| (unit.name.toLowerCase() === 'portal' && !me.inTown && unit.classid !== 298)
 			|| [sdk.units.RedPortalToAct4, sdk.units.RedPortalToChamber, sdk.units.RedPortal, sdk.units.RedPortalToAct5].includes(unit.classid)) {
 			return false;
@@ -1638,7 +1639,7 @@ const Misc = {
 
 	// Change into werewolf or werebear
 	shapeShift: function (mode) {
-		let i, tick, skill, state;
+		let skill, state;
 
 		switch (mode.toString().toLowerCase()) {
 		case "0":
@@ -1663,10 +1664,10 @@ const Misc = {
 			return true;
 		}
 
-		for (i = 0; i < 3; i += 1) {
+		for (let i = 0; i < 3; i += 1) {
 			Skill.cast(skill, 0);
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 2000) {
 				if (me.getState(state)) {
@@ -1684,13 +1685,11 @@ const Misc = {
 
 	// Change back to human shape
 	unShift: function () {
-		let i, tick;
-
 		if (me.getState(139) || me.getState(140)) {
-			for (i = 0; i < 3; i += 1) {
+			for (let i = 0; i < 3; i += 1) {
 				Skill.cast(me.getState(139) ? 223 : 228);
 
-				tick = getTickCount();
+				let tick = getTickCount();
 
 				while (getTickCount() - tick < 2000) {
 					if (!me.getState(139) && !me.getState(140)) {
@@ -1711,7 +1710,7 @@ const Misc = {
 
 	// Go to town when low on hp/mp or when out of potions. can be upgraded to check for curses etc.
 	townCheck: function () {
-		let i, potion, check,
+		let potion, check,
 			needhp = true,
 			needmp = true;
 
@@ -1723,7 +1722,7 @@ const Misc = {
 		if (Config.TownCheck && !me.inTown) {
 			try {
 				if (me.gold > 1000) {
-					for (i = 0; i < 4; i += 1) {
+					for (let i = 0; i < 4; i += 1) {
 						if (Config.BeltColumn[i] === "hp" && Config.MinColumn[i] > 0) {
 							potion = me.getItem(-1, 2); // belt item
 
@@ -1786,16 +1785,10 @@ const Misc = {
 
 	// Log someone's gear
 	spy: function (name) {
-		if (!isIncluded("oog.js")) {
-			include("oog.js");
-		}
+		if (!isIncluded("oog.js")) { include("oog.js"); }
+		if (!isIncluded("common/prototypes.js")) { include("common/prototypes.js"); }
 
-		if (!isIncluded("common/prototypes.js")) {
-			include("common/prototypes.js");
-		}
-
-		let item,
-			unit = getUnit(-1, name);
+		let unit = getUnit(-1, name);
 
 		if (!unit) {
 			print("player not found");
@@ -1803,7 +1796,7 @@ const Misc = {
 			return false;
 		}
 
-		item = unit.getItem();
+		let item = unit.getItem();
 
 		if (item) {
 			do {
@@ -1814,47 +1807,11 @@ const Misc = {
 		return true;
 	},
 
-	// hopefully multi-thread and multi-profile friendly txt func
-	/*fileAction: function (path, mode, msg) {
-		var i, file,
-			contents = "";
-
-MainLoop:
-		for (i = 0; i < 30; i += 1) {
-			try {
-				file = File.open(path, mode);
-
-				switch (mode) {
-				case 0: // read
-					contents = file.readLine();
-
-					break MainLoop;
-				case 1: // write
-				case 2: // append
-					file.write(msg);
-
-					break MainLoop;
-				}
-			} catch (e) {
-
-			} finally {
-				if (file) {
-					file.close();
-				}
-			}
-
-			delay(100);
-		}
-
-		return mode === 0 ? contents : true;
-	},*/
-
 	fileAction: function (path, mode, msg) {
-		let i,
-			contents = "";
+		let contents = "";
 
 		MainLoop:
-		for (i = 0; i < 30; i += 1) {
+		for (let i = 0; i < 30; i += 1) {
 			try {
 				switch (mode) {
 				case 0: // read
@@ -1881,7 +1838,7 @@ MainLoop:
 	},
 
 	errorConsolePrint: true,
-	screenshotErrors: false,
+	screenshotErrors: true,
 
 	// Report script errors to logs/ScriptErrorLog.txt
 	errorReport: function (error, script) {
@@ -1955,7 +1912,7 @@ MainLoop:
 	useMenu: function (id) {
 		//print("useMenu " + getLocaleString(id));
 
-		let i, npc, lines;
+		let npc;
 
 		switch (id) {
 		case 0x1507: // Resurrect (non-English dialog)
@@ -1972,13 +1929,13 @@ MainLoop:
 			break;
 		}
 
-		lines = getDialogLines();
+		let lines = getDialogLines();
 
 		if (!lines) {
 			return false;
 		}
 
-		for (i = 0; i < lines.length; i += 1) {
+		for (let i = 0; i < lines.length; i += 1) {
 			if (lines[i].selectable && lines[i].text.indexOf(getLocaleString(id)) > -1) {
 				getDialogLines()[i].handler();
 				delay(750);
@@ -1991,7 +1948,7 @@ MainLoop:
 	},
 
 	clone: function (obj) {
-		let i, copy, attr;
+		let copy;
 
 		// Handle the 3 simple types, and null or undefined
 		if (null === obj || "object" !== typeof obj) {
@@ -2011,7 +1968,7 @@ MainLoop:
 		if (obj instanceof Array) {
 			copy = [];
 
-			for (i = 0; i < obj.length; i += 1) {
+			for (let i = 0; i < obj.length; i += 1) {
 				copy[i] = this.clone(obj[i]);
 			}
 
@@ -2022,7 +1979,7 @@ MainLoop:
 		if (obj instanceof Object) {
 			copy = {};
 
-			for (attr in obj) {
+			for (let attr in obj) {
 				if (obj.hasOwnProperty(attr)) {
 					copy[attr] = this.clone(obj[attr]);
 				}
@@ -2035,10 +1992,9 @@ MainLoop:
 	},
 
 	copy: function (from) {
-		let i,
-			obj = {};
+		let obj = {};
 
-		for (i in from) {
+		for (let i in from) {
 			if (from.hasOwnProperty(i)) {
 				obj[i] = this.clone(from[i]);
 			}
@@ -2061,25 +2017,35 @@ MainLoop:
 		return false;
 	},
 
-	getUIFlags: function (excluded = []) { // returns array of UI flags that are set, or null if none are set
+	// returns array of UI flags that are set, or null if none are set
+	getUIFlags: function (excluded = []) {
 		if (!me.gameReady) {
 			return null;
 		}
 
-		const MAX_FLAG = 37;
+		const MAX_FLAG = 37; // anything over 37 crashes
 		let flags = [];
 
 		if (typeof excluded !== 'object' || excluded.length === undefined) {
-			excluded = [excluded]; // not an array-like object, make it an array
+			// not an array-like object, make it an array
+			excluded = [excluded];
 		}
 
-		for (let c = 1; c <= MAX_FLAG; c++) { // anything over 37 crashes
-			if (c !== 0x23 && excluded.indexOf(c) === -1 && getUIFlag(c)) { // 0x23 is always set in-game
+		for (let c = 1; c <= MAX_FLAG; c++) {
+			// 0x23 is always set in-game
+			if (c !== 0x23 && excluded.indexOf(c) === -1 && getUIFlag(c)) {
 				flags.push(c);
 			}
 		}
 
 		return flags.length ? flags : null;
+	},
+
+	checkQuest: function (id, state) {
+		sendPacket(1, 0x40);
+		delay(500 + me.ping);
+
+		return me.getQuest(id, state);
 	}
 };
 
