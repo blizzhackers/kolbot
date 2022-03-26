@@ -34,7 +34,6 @@ function BaalAssistant() {
 		i, solofail, partymembers, baal, portal, tick, entrance;
 
 	addEventListener('chatmsg',
-
 		function (nick, msg) {
 			if (nick === Leader) {
 				for (i = 0; i < hotTPMessage.length; i += 1) {
@@ -94,87 +93,6 @@ function BaalAssistant() {
 		return false;
 	}
 
-	this.preattack = function () {
-		let check;
-		switch (me.classid) {
-		case 1:
-			// Sorceress
-			if ([49].indexOf(Config.AttackSkill[1]) > -1) {
-				if (me.getState(121)) {
-					delay(500);
-				} else {
-					Skill.cast(Config.AttackSkill[1], 0, 15094, 5028);
-				}
-			}
-			if ([53].indexOf(Config.AttackSkill[1]) > -1) {
-				if (me.getState(121)) {
-					delay(500);
-				} else {
-					Skill.cast(Config.AttackSkill[1], 0, 15094, 5028);
-				}
-			}
-			if ([56].indexOf(Config.AttackSkill[1]) > -1) {
-				if (me.getState(121)) {
-					delay(500);
-				} else {
-					Skill.cast(Config.AttackSkill[1], 0, 15093, 5028);
-				}
-			}
-			if ([59].indexOf(Config.AttackSkill[1]) > -1) {
-				if (me.getState(121)) {
-					delay(500);
-				} else {
-					Skill.cast(Config.AttackSkill[1], 0, 15095, 5028);
-				}
-			}
-			if ([64].indexOf(Config.AttackSkill[1]) > -1) {
-				if (me.getState(121)) {
-					delay(500);
-				} else {
-					Skill.cast(Config.AttackSkill[1], 0, 15094, 5028);
-				}
-			}
-			return true;
-		case 3:
-			// Paladin
-			if (Config.AttackSkill[3] !== 112) {
-				return false;
-			}
-			if (getDistance(me, 15094, 5029) > 3) {
-				Pather.moveTo(15094, 5029);
-			}
-			if (Config.AttackSkill[4] > 0) {
-				Skill.setSkill(Config.AttackSkill[4], 0);
-			}
-			Skill.cast(Config.AttackSkill[3], 1);
-			return true;
-		case 5:
-			// Druid
-			if (Config.AttackSkill[3] === 245) {
-				Skill.cast(Config.AttackSkill[3], 0, 15094, 5028);
-				return true;
-			}
-			break;
-		case 6:
-			// Assassin
-			if (Config.UseTraps) {
-				check = ClassAttack.checkTraps({
-					x: 15094,
-					y: 5028
-				});
-				if (check) {
-					ClassAttack.placeTraps({
-						x: 15094,
-						y: 5028
-					}, 5);
-					return true;
-				}
-			}
-			break;
-		}
-		return false;
-	};
-
 	this.checkThrone = function () {
 		let monster = getUnit(1);
 		if (monster) {
@@ -205,48 +123,6 @@ function BaalAssistant() {
 			} while (monster.getNext());
 		}
 		return false;
-	};
-
-	this.clearThrone = function () {
-		let i, monster,
-			monList = [],
-			pos = [15094, 5022, 15094, 5041, 15094, 5060, 15094, 5041, 15094, 5022];
-		if (Config.AvoidDolls) {
-			monster = getUnit(1, 691);
-			if (monster) {
-				do {
-					if (monster.x >= 15072 && monster.x <= 15118 && monster.y >= 5002 && monster.y <= 5079 && Attack.checkMonster(monster) && Attack.skipCheck(monster)) {
-						monList.push(copyUnit(monster));
-					}
-				} while (monster.getNext());
-			}
-			if (monList.length) {
-				Attack.clearList(monList);
-			}
-		}
-		for (i = 0; i < pos.length; i += 2) {
-			Pather.moveTo(pos[i], pos[i + 1]);
-			Attack.clear(25);
-		}
-	};
-
-	this.checkHydra = function () {
-		let hydra = getUnit(1, getLocaleString(3325));
-		if (hydra) {
-			do {
-				if (hydra.mode !== 12 && hydra.getStat(172) !== 2) {
-					Pather.moveTo(15072, 5002);
-					while (hydra.mode !== 12) {
-						delay(500);
-						if (!copyUnit(hydra).x) {
-							break;
-						}
-					}
-					break;
-				}
-			} while (hydra.getNext());
-		}
-		return true;
 	};
 
 	this.checkParty = function () {
@@ -513,7 +389,7 @@ function BaalAssistant() {
 				if (!baalCheck && !throneStatus) {
 					if (Helper) {
 						Attack.clear(15);
-						this.clearThrone();
+						Common.Baal.clearThrone();
 
 						Pather.moveTo(15094, me.classid === 3 ? 5029 : 5038);
 						Precast.doPrecast(true);
@@ -557,7 +433,7 @@ function BaalAssistant() {
 						case 3:
 							if (Helper) {
 								Attack.clear(40);
-								this.checkHydra();
+								Common.Baal.checkHydra();
 							}
 
 							tick = getTickCount();
@@ -584,7 +460,7 @@ function BaalAssistant() {
 							}
 
 							if (Helper) {
-								if (!this.preattack()) {
+								if (!Common.Baal.preattack()) {
 									delay(100);
 								}
 							}

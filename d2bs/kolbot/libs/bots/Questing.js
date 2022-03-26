@@ -268,7 +268,7 @@ function Questing() {
 		if (me.area !== sdk.areas.ArreatSummit) return false;
 
 		// ancients prep
-		Town.townTasks();
+		Town.doChores();
 		Town.buyPots(10, "Thawing", true);
 		Town.buyPots(10, "Antidote", true);
 		Town.buyPots(10, "Stamina", true);
