@@ -835,31 +835,17 @@ const Misc = {
 		return false;
 	},
 
-	// Get the player act
+	// Get the player act, accepts party unit or name
 	getPlayerAct: function (player) {
-		let unit = this.findPlayer(player);
+		if (!player) return false;
+
+		let unit = (typeof player === "object" ? player : this.findPlayer(player));
 
 		if (!unit) {
 			return false;
+		} else {
+			return sdk.areas.actOf(unit.area);
 		}
-
-		if (unit.area <= 39) {
-			return 1;
-		}
-
-		if (unit.area >= 40 && unit.area <= 74) {
-			return 2;
-		}
-
-		if (unit.area >= 75 && unit.area <= 102) {
-			return 3;
-		}
-
-		if (unit.area >= 103 && unit.area <= 108) {
-			return 4;
-		}
-
-		return 5;
 	},
 
 	// Get number of players within getUnit distance

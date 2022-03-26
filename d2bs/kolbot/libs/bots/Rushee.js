@@ -7,15 +7,15 @@
 let Override_1 = require('../modules/Override');
 
 new Override_1.Override(Town, Town.goToTown, function(orignal, act, wpmenu) {
-    try {
-    	orignal(act, wpmenu);
+	try {
+		orignal(act, wpmenu);
 
-    	return true;
-    } catch (e) {
-    	print(e);
-    	
-    	return Pather.useWaypoint(sdk.areas.townOf(me.area));
-    }
+		return true;
+	} catch (e) {
+		print(e);
+    
+		return Pather.useWaypoint(sdk.areas.townOf(me.area));
+	}
 }).apply();
 
 function Rushee() {
@@ -24,38 +24,7 @@ function Rushee() {
 
 	this.log = function (msg = "", sayMsg = false) {
 		print(msg);
-		!!sayMsg && say(msg);
-	};
-
-	this.findLeader = function (name) {
-		let party = getParty(name);
-
-		if (party) {
-			return party;
-		}
-
-		return false;
-	};
-
-	// Get leader's act from Party Unit
-	this.checkLeaderAct = function (unit) {
-		if (unit.area <= 39) {
-			return 1;
-		}
-
-		if (unit.area >= 40 && unit.area <= 74) {
-			return 2;
-		}
-
-		if (unit.area >= 75 && unit.area <= 102) {
-			return 3;
-		}
-
-		if (unit.area >= 103 && unit.area <= 108) {
-			return 4;
-		}
-
-		return 5;
+		sayMsg && say(msg);
 	};
 
 	this.revive = function () {
@@ -73,8 +42,7 @@ function Rushee() {
 	};
 
 	this.getQuestItem = function (classid, chestid) {
-		let chest, item,
-			tick = getTickCount();
+		let tick = getTickCount();
 
 		if (me.getItem(classid)) {
 			this.log("Already have: " + classid);
@@ -83,7 +51,7 @@ function Rushee() {
 
 		if (me.inTown) return false;
 
-		chest = getUnit(2, chestid);
+		let chest = getUnit(2, chestid);
 
 		if (!chest) {
 			this.log("Couldn't find: " + chestid);
@@ -99,7 +67,7 @@ function Rushee() {
 			coord && Pather.moveTo(coord.x, coord.y);
 		}
 
-		item = getUnit(4, classid);
+		let item = getUnit(4, classid);
 
 		if (!item) {
 			if (getTickCount() - tick < 500) {
@@ -127,14 +95,11 @@ function Rushee() {
 	};
 
 	this.tyraelTalk = function () {
-		let i,
-			npc = getUnit(1, NPC.Tyrael);
+		let npc = getUnit(1, NPC.Tyrael);
 
-		if (!npc) {
-			return false;
-		}
+		if (!npc) return false;
 
-		for (i = 0; i < 3; i += 1) {
+		for (let i = 0; i < 3; i += 1) {
 			if (getDistance(me, npc) > 3) {
 				Pather.moveToUnit(npc);
 			}
@@ -157,9 +122,7 @@ function Rushee() {
 		let staff = me.getItem("vip"),
 			amulet = me.getItem("msf");
 
-		if (!staff || !amulet) {
-			return false;
-		}
+		if (!staff || !amulet) return false;
 
 		Storage.Cube.MoveTo(amulet);
 		Storage.Cube.MoveTo(staff);
@@ -170,9 +133,7 @@ function Rushee() {
 
 		staff = me.getItem(91);
 
-		if (!staff) {
-			return false;
-		}
+		if (!staff) return false;
 
 		Storage.Inventory.MoveTo(staff);
 		me.cancel();
@@ -181,17 +142,14 @@ function Rushee() {
 	};
 
 	this.placeStaff = function () {
-		let staff, item,
-			tick = getTickCount(),
+		let tick = getTickCount(),
 			orifice = getUnit(2, 152);
 
-		if (!orifice) {
-			return false;
-		}
+		if (!orifice) return false;
 
 		Misc.openChest(orifice);
 
-		staff = me.getItem(91);
+		let staff = me.getItem(91);
 
 		if (!staff) {
 			if (getTickCount() - tick < 500) {
@@ -206,7 +164,7 @@ function Rushee() {
 		delay(750 + me.ping);
 
 		// unbug cursor
-		item = me.findItem(-1, 0, 3);
+		let item = me.findItem(-1, 0, 3);
 
 		if (item && item.toCursor()) {
 			Storage.Inventory.MoveTo(item);
@@ -227,9 +185,7 @@ function Rushee() {
 			}
 		}
 
-		if (me.act === act) {
-			return true;
-		}
+		if (me.act === act) return true;
 
 		try {
 			switch (act) {
@@ -254,8 +210,10 @@ function Rushee() {
 					break;
 				}
 
-				if (!Config.Rushee.Quester) { // Non Quester needs to talk to Townsfolk to enable Harem TP
-					Town.move(NPC.Atma); // Talk to Atma
+				// Non Quester needs to talk to Townsfolk to enable Harem TP
+				if (!Config.Rushee.Quester) {
+					// Talk to Atma
+					Town.move(NPC.Atma);
 
 					target = getUnit(1, 176); // Atma
 
@@ -389,12 +347,12 @@ function Rushee() {
 	me.inTown && Town.move("portalspot");
 
 	while (!leader) {
-		leader = this.findLeader(Config.Leader);
+		leader = Misc.findPlayer(Config.Leader);
 
 		delay(500);
 	}
 
-	Config.Rushee.Quester && say("Leader found");
+	Config.Rushee.Quester && this.log("Leader found", Config.LocalChat.Enabled);
 
 	while (true) {
 		try {
@@ -473,7 +431,7 @@ function Rushee() {
 						break;
 					}
 
-					act = this.checkLeaderAct(leader);
+					act = Misc.getPlayerAct(leader);
 
 					if (me.act !== act) {
 						Town.goToTown(act);
@@ -482,7 +440,7 @@ function Rushee() {
 
 					Town.getDistance("portalspot") > 10 && Town.move("portalspot");
 					if (Pather.usePortal(null, Config.Leader) && Pather.getWP(me.area) && Pather.usePortal(sdk.areas.townOf(me.area), Config.Leader) && Town.move("portalspot")) {
-						me.inTown && say("gotwp");
+						me.inTown && Config.LocalChat.Enabled && say("gotwp");
 					} else {
 						this.log("Failed to get wp", Config.LocalChat.Enabled);
 						!me.inTown && Town.goToTown();
@@ -502,7 +460,7 @@ function Rushee() {
 						break;
 					}
 
-					act = this.checkLeaderAct(leader);
+					act = Misc.getPlayerAct(leader);
 
 					if (me.act !== act) {
 						Town.goToTown(act);
@@ -534,7 +492,7 @@ function Rushee() {
 						// wait up to two minutes
 						while (getTickCount() - tick < 60 * 1000 * 2) {
 							if (Pather.getPortal(sdk.areas.Tristram)) {
-								Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader)
+								Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader);
 								
 								break;
 							}
@@ -634,7 +592,7 @@ function Rushee() {
 						if (target && target.openMenu()) {
 							actions.shift();
 							me.cancel();
-							say("drognan done");
+							say("drognan done", Config.LocalChat.Enabled);
 						}
 
 						Town.move("portalspot");
@@ -1027,7 +985,7 @@ function Rushee() {
 						delay(500);
 					}
 
-					act = this.checkLeaderAct(leader);
+					act = Misc.getPlayerAct(leader);
 
 					if (me.act !== act) {
 						Town.goToTown(act);
@@ -1123,7 +1081,7 @@ function Rushee() {
 					break;
 				case "leader":
 					print(Config.Leader + " is my leader in my config. " + leader.name + " is my leader right now");
-					say(Config.Leader + " is my leader in my config. " + leader.name + " is my leader right now");
+					Config.LocalChat.Enabled && say(Config.Leader + " is my leader in my config. " + leader.name + " is my leader right now");
 					actions.shift();
 
 					break;

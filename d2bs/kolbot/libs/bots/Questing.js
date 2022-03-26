@@ -6,14 +6,14 @@
 
 function Questing() {
 	let quests = [
-			[1, "clearDen"],
-			[9, "killRadament"],
-			[17, "lamEssen"],
-			[25, "killIzual"],
-			[35, "killShenk"],
-			[37, "freeAnya"],
-			[39, "ancients"]
-		];
+		[1, "clearDen"],
+		[9, "killRadament"],
+		[17, "lamEssen"],
+		[25, "killIzual"],
+		[35, "killShenk"],
+		[37, "freeAnya"],
+		[39, "ancients"]
+	];
 
 	this.clearDen = function () {
 		print("starting den");
@@ -246,7 +246,7 @@ function Questing() {
 		};
 
 		// ancients prep
-		let ancientsPrep = function () { 
+		let ancientsPrep = function () {
 			Town.goToTown();
 			Town.fillTome(sdk.items.TomeofTownPortal);
 			Town.buyPots(10, "Thawing", true);

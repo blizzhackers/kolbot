@@ -29,8 +29,8 @@ include("common/Storage.js");
 include("common/Town.js");
 
 let Override_1 = require('../modules/Override');
+
 let count = 0;
-const gidList = [];
 let wpsToGive = Pather.wpAreas.slice(0).filter(function (area) {
 	if (sdk.areas.Towns.includes(area) || area === sdk.areas.HallsofPain) return false;
 	if (me.classic && area >= sdk.areas.Harrogath) return false;
@@ -40,6 +40,7 @@ let wpsToGive = Pather.wpAreas.slice(0).filter(function (area) {
 function wpEvent(who, msg) {
 	if (typeof msg === "string" && msg === "gotwp") {
 		count++;
+		!silentNameTracker.includes(who) && silentNameTracker.push(who);
 	}
 }
 
@@ -48,6 +49,7 @@ function giveWP () {
 	let success = false;
 	if (wp && !me.inTown && wpsToGive.includes(me.area)) {
 		try {
+			let silentNameTracker = [];
 			addEventListener("chatmsg", wpEvent);
 			let playerCount = Misc.getPartyCount() - 1;
 			let mobCount = getUnits(1).filter(mon => mon.distance <= 15 && mon.attackable).length;
@@ -57,7 +59,15 @@ function giveWP () {
 			say("wp");
 			let tick = getTickCount();
 			while (getTickCount() - tick < 2 * 60 * 1000) {
-				if (count === playerCount) {
+				let player = getUnit(sdk.unittype.Player);
+				if (player) {
+					do {
+						if (!silentNameTracker.includes(player.name)) {
+							silentNameTracker.push(player.name);
+						}
+					} while (player.getNext());
+				}
+				if (count === playerCount || (silentNameTracker.length === playerCount && Misc.getNearbyPlayerCount() === 1)) {
 					wpsToGive.remove(me.area);
 					success = true;
 					break;
@@ -66,26 +76,23 @@ function giveWP () {
 			}
 		} catch (e) {
 			print(e);
-			say("Failed to give wp");
+			Config.LocalChat.Enabled && say("Failed to give wp");
 		} finally {
 			removeEventListener("chatmsg", wpEvent);
 			count = 0;
-			return success;
 		}
+		return success;
 	}
 
 	return false;
 }
 
-new Override_1.Override(Pather, Pather.useWaypoint, function(orignal) {
-	let args = [];
-    for (let _i = 1; _i < arguments.length; _i++) {
-        args[_i - 1] = arguments[_i];
-    }
-	if (orignal.apply(Pather, args)) {
+new Override_1.Override(Pather, Pather.useWaypoint, function(orignal, targetArea, check) {
+	if (orignal(targetArea, check)) {
 		return (Config.Rusher.GiveWps && giveWP()) || true;
 	} else {
 		print("failed");
+		
 		return false;
 	}
 }).apply();
@@ -528,36 +535,15 @@ function main() {
 	this.diablo = function () {
 		say("starting diablo");
 
-		this.getLayout = function (seal, value) {
-			let sealPreset = getPresetUnit(108, 2, seal);
-
-			if (!seal) {
-				throw new Error("Seal preset not found. Can't continue.");
-			}
-
-			if (sealPreset.roomy * 5 + sealPreset.y === value || sealPreset.roomx * 5 + sealPreset.x === value) {
-				return 1;
-			}
-
-			return 2;
-		};
-
-		this.initLayout = function () {
-			this.vizLayout = this.getLayout(396, 5275);
-			this.seisLayout = this.getLayout(394, 7773);
-			this.infLayout = this.getLayout(392, 7893);
-		};
-
 		this.getBoss = function (name) {
-			let i, boss,
-				glow = getUnit(2, 131);
+			let glow = getUnit(2, 131);
 
-			for (i = 0; i < (name === getLocaleString(2853) ? 14 : 12); i += 1) {
-				boss = getUnit(1, name);
+			for (let i = 0; i < (name === getLocaleString(2853) ? 14 : 12); i += 1) {
+				let boss = getUnit(1, name);
 
 				if (boss) {
 					if (name === getLocaleString(2852)) {
-						this.chaosPreattack(getLocaleString(2852), 8);
+						Common.Diablo.chaosPreattack(getLocaleString(2852), 8);
 					}
 
 					Attack.kill(name);
@@ -572,99 +558,32 @@ function main() {
 			return !!glow;
 		};
 
-		this.chaosPreattack = function (name, amount) {
-			let i, n, target, positions;
-
-			switch (me.classid) {
-			case 0:
-				break;
-			case 1:
-				break;
-			case 2:
-				break;
-			case 3:
-				if (Config.AttackSkill[3] !== sdk.skills.BlessedHammer) {
-					return;
-				}
-
-				target = getUnit(1, name);
-
-				if (!target) {
-					return;
-				}
-
-				positions = [[6, 11], [0, 8], [8, -1], [-9, 2], [0, -11], [8, -8]];
-
-				for (i = 0; i < positions.length; i += 1) {
-					if (Attack.validSpot(target.x + positions[i][0], target.y + positions[i][1])) { // check if we can move there
-						Pather.moveTo(target.x + positions[i][0], target.y + positions[i][1]);
-						Skill.setSkill(Config.AttackSkill[2], 0);
-
-						for (n = 0; n < amount; n += 1) {
-							Skill.cast(Config.AttackSkill[1], 1);
-						}
-
-						break;
-					}
-				}
-
-				break;
-			case 4:
-				break;
-			case 5:
-				break;
-			case 6:
-				break;
-			}
-		};
-
-		this.openSeal = function (id) {
-			Pather.moveToPreset(108, 2, id, id === 394 ? 5 : 2, id === 394 ? 5 : 0);
-
-			let i, tick,
-				seal = getUnit(2, id);
-
-			if (seal) {
-				for (i = 0; i < 3; i += 1) {
-
-					if (id === 394) {
-						Misc.click(0, 0, seal);
-					} else {
-						seal.interact();
-					}
-
-					tick = getTickCount();
-
-					while (getTickCount() - tick < 500) {
-						if (seal.mode) {
-							return true;
-						}
-
-						delay(10);
-					}
-				}
-			}
-
-			return false;
-		};
-
 		Town.doChores();
 		Pather.useWaypoint(107, true);
 		Precast.doPrecast(true);
 		Pather.moveTo(7790, 5544);
 		
-		this.initLayout();
-		if (!this.openSeal(395) || !this.openSeal(396)) { throw new Error("Failed to open seals"); }
+		Common.Diablo.initLayout();
+		if (!Common.Diablo.openSeal(395) || !Common.Diablo.openSeal(396)) { throw new Error("Failed to open seals"); }
 
-		this.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
+		Common.Diablo.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
 		if (!this.getBoss(getLocaleString(2851))) { throw new Error("Failed to kill Vizier"); }
-		if (!this.openSeal(394)) { throw new Error("Failed to open seals"); }
+		if (!Common.Diablo.openSeal(394)) { throw new Error("Failed to open seals"); }
 
-		this.seisLayout === 1 ? Pather.moveTo(7771, 5196) : Pather.moveTo(7798, 5186);
+		Common.Diablo.seisLayout === 1 ? Pather.moveTo(7771, 5196) : Pather.moveTo(7798, 5186);
 		if (!this.getBoss(getLocaleString(2852))) { throw new Error("Failed to kill de Seis"); }
-		if (!this.openSeal(392) || !this.openSeal(393)) { throw new Error("Failed to open seals"); }
+		if (!Common.Diablo.openSeal(392) || !Common.Diablo.openSeal(393)) { throw new Error("Failed to open seals"); }
 
-		this.infLayout === 1 ? delay(1) : Pather.moveTo(7928, 5295);
+		if (Common.Diablo.infLayout === 1) {
+			if (me.sorceress || me.assassin) {
+				Pather.moveTo(7876, 5296);
+			}
+
+			delay(1 + me.ping);
+		} else {
+			delay(1 + me.ping);
+			Pather.moveTo(7928, 5295);
+		}
 		if (!this.getBoss(getLocaleString(2853))) { throw new Error("Failed to kill Infector"); }
 
 		Pather.moveTo(7763, 5267);
@@ -782,7 +701,7 @@ function main() {
 		if (me.hell) {
 			if (!Config.Rusher.GiveWps) {
 				say("Hell rush complete~");
-				print("Baal not done in Hell. rush complete~")
+				print("Baal not done in Hell. rush complete~");
 				delay(500);
 				quit();
 			}
@@ -1450,7 +1369,6 @@ function main() {
 		if (!Config.Rusher.GiveWps) return false;
 
 		let wpsLeft = wpsToGive.slice(0);
-		let tpTool = Town.getTpTool();
 		print(JSON.stringify(wpsLeft));
 
 		wpsLeft.forEach(function (wp) {

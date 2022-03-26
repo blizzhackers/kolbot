@@ -5,130 +5,25 @@
 */
 
 function DiabloHelper() {
-	// Sort function
-	this.sort = function (a, b) {
-		if (Config.BossPriority) {
-			if ((a.spectype & 0x5) && (b.spectype & 0x5)) {
-				return getDistance(me, a) - getDistance(me, b);
-			}
-
-			if (a.spectype & 0x5) {
-				return -1;
-			}
-
-			if (b.spectype & 0x5) {
-				return 1;
-			}
-		}
-
-		// Entrance to Star / De Seis
-		if (me.y > 5325 || me.y < 5260) {
-			if (a.y > b.y) {
-				return -1;
-			}
-
-			return 1;
-		}
-
-		// Vizier
-		if (me.x < 7765) {
-			if (a.x > b.x) {
-				return -1;
-			}
-
-			return 1;
-		}
-
-		// Infector
-		if (me.x > 7825) {
-			if (!checkCollision(me, a, 0x1) && a.x < b.x) {
-				return -1;
-			}
-
-			return 1;
-		}
-
-		return getDistance(me, a) - getDistance(me, b);
-	};
-
 	// general functions
-	this.getLayout = function (seal, value) {
-		let sealPreset = getPresetUnit(108, 2, seal);
-
-		if (!seal) {
-			throw new Error("Seal preset not found. Can't continue");
-		}
-
-		if (sealPreset.roomy * 5 + sealPreset.y === value || sealPreset.roomx * 5 + sealPreset.x === value) {
-			return 1;
-		}
-
-		return 2;
-	};
-
-	this.initLayout = function () {
-		this.vizLayout = this.getLayout(396, 5275); // 1 = "Y", 2 = "L"
-		this.seisLayout = this.getLayout(394, 7773); // 1 = "2", 2 = "5"
-		this.infLayout = this.getLayout(392, 7893); // 1 = "I", 2 = "J"
-	};
-
-	this.openSeal = function (classid) {
-		let i,
-			seal;
-
-		for (i = 0; i < 5; i += 1) {
-			Pather.moveToPreset(108, 2, classid, classid === 394 ? 5 : 2, classid === 394 ? 5 : 0);
-
-			seal = getUnit(2, classid);
-
-			if (!seal) {
-				return false;
-			}
-
-			if (classid === 394) {
-				Misc.click(0, 0, seal);
-			} else {
-				seal.interact();
-			}
-
-			delay(classid === 394 ? 1000 : 500);
-
-			if (!seal.mode) {
-				if (classid === 394 && Attack.validSpot(seal.x + 15, seal.y)) { // de seis optimization
-					Pather.moveTo(seal.x + 15, seal.y);
-				} else {
-					Pather.moveTo(seal.x - 5, seal.y - 5);
-				}
-
-				delay(500);
-			} else {
-				return true;
-			}
-		}
-
-		return false;
-	};
-
 	this.getBoss = function (name) {
-		let i, boss, glow;
-
 		while (true) {
 			if (!this.preattack(name)) {
 				delay(500);
 			}
 
-			glow = getUnit(2, 131);
+			let glow = getUnit(2, 131);
 
 			if (glow) {
 				break;
 			}
 		}
 
-		for (i = 0; i < 16; i += 1) {
-			boss = getUnit(1, name);
+		for (let i = 0; i < 16; i += 1) {
+			let boss = getUnit(1, name);
 
 			if (boss) {
-				return Attack.clear(40, 0, name, this.sort);
+				return Attack.clear(40, 0, name, Common.Diablo.sort);
 			}
 
 			delay(250);
@@ -138,19 +33,15 @@ function DiabloHelper() {
 	};
 
 	this.vizierSeal = function () {
-		this.followPath(this.vizLayout === 1 ? this.starToVizA : this.starToVizB, this.sort);
+		this.followPath(Common.Diablo.vizLayout === 1 ? this.starToVizA : this.starToVizB, Common.Diablo.sort);
 
 		if (Config.DiabloHelper.OpenSeals) {
-			if (!this.openSeal(395) || !this.openSeal(396)) {
+			if (!Common.Diablo.openSeal(395) || !Common.Diablo.openSeal(396)) {
 				throw new Error("Failed to open Vizier seals.");
 			}
 		}
 
-		if (this.vizLayout === 1) {
-			Pather.moveTo(7691, 5292);
-		} else {
-			Pather.moveTo(7695, 5316);
-		}
+		Common.Diablo.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
 
 		if (!this.getBoss(getLocaleString(2851))) {
 			throw new Error("Failed to kill Vizier");
@@ -164,19 +55,15 @@ function DiabloHelper() {
 	};
 
 	this.seisSeal = function () {
-		this.followPath(this.seisLayout === 1 ? this.starToSeisA : this.starToSeisB, this.sort);
+		this.followPath(Common.Diablo.seisLayout === 1 ? this.starToSeisA : this.starToSeisB, Common.Diablo.sort);
 
 		if (Config.DiabloHelper.OpenSeals) {
-			if (!this.openSeal(394)) {
+			if (!Common.Diablo.openSeal(394)) {
 				throw new Error("Failed to open de Seis seal.");
 			}
 		}
 
-		if (this.seisLayout === 1) {
-			Pather.moveTo(7771, 5196);
-		} else {
-			Pather.moveTo(7798, 5186);
-		}
+		Common.Diablo.seisLayout === 1 ? Pather.moveTo(7771, 5196) : Pather.moveTo(7798, 5186);
 
 		if (!this.getBoss(getLocaleString(2852))) {
 			throw new Error("Failed to kill de Seis");
@@ -191,18 +78,23 @@ function DiabloHelper() {
 
 	this.infectorSeal = function () {
 		Precast.doPrecast(true);
-		this.followPath(this.infLayout === 1 ? this.starToInfA : this.starToInfB, this.sort);
+		this.followPath(Common.Diablo.infLayout === 1 ? this.starToInfA : this.starToInfB, Common.Diablo.sort);
 
 		if (Config.DiabloHelper.OpenSeals) {
-			if (!this.openSeal(392)) {
+			if (!Common.Diablo.openSeal(392)) {
 				throw new Error("Failed to open Infector seals.");
 			}
 		}
 
-		if (this.infLayout === 1) {
-			delay(1);
+		if (Common.Diablo.infLayout === 1) {
+			if (me.sorceress || me.assassin) {
+				Pather.moveTo(7876, 5296);
+			}
+
+			delay(1 + me.ping);
 		} else {
-			Pather.moveTo(7928, 5295); // temp
+			delay(1 + me.ping);
+			Pather.moveTo(7928, 5295);
 		}
 
 		if (!this.getBoss(getLocaleString(2853))) {
@@ -210,7 +102,7 @@ function DiabloHelper() {
 		}
 
 		if (Config.DiabloHelper.OpenSeals) {
-			if (!this.openSeal(393)) {
+			if (!Common.Diablo.openSeal(393)) {
 				throw new Error("Failed to open Infector seals.");
 			}
 		}
@@ -235,91 +127,13 @@ function DiabloHelper() {
 		Config.DiabloHelper.SealOrder.forEach(seal => {seals[seal]();});
 	};
 
-	this.diabloPrep = function () {
-		let trapCheck,
-			tick = getTickCount();
-
-		switch (me.classid) {
-		case 1:
-			Pather.moveTo(7793, 5291);
-
-			break;
-		default:
-			Pather.moveTo(7788, 5292);
-
-			break;
-		}
-
-		while (getTickCount() - tick < 30000) {
-			if (getTickCount() - tick >= 8000) {
-				switch (me.classid) {
-				case 1: // Sorceress
-					if ([56, 59, 64].indexOf(Config.AttackSkill[1]) > -1) {
-						if (me.getState(121)) {
-							delay(500);
-						} else {
-							Skill.cast(Config.AttackSkill[1], 0, 7793, 5293);
-						}
-
-						break;
-					}
-
-					delay(500);
-
-					break;
-				case 3: // Paladin
-					Skill.setSkill(Config.AttackSkill[2]);
-					Skill.cast(Config.AttackSkill[1], 1);
-
-					break;
-				case 5: // Druid
-					if (Config.AttackSkill[1] === 245) {
-						Skill.cast(Config.AttackSkill[1], 0, 7793, 5293);
-
-						break;
-					}
-
-					delay(500);
-
-					break;
-				case 6: // Assassin
-					if (Config.UseTraps) {
-						trapCheck = ClassAttack.checkTraps({x: 7793, y: 5293});
-
-						if (trapCheck) {
-							ClassAttack.placeTraps({x: 7793, y: 5293, classid: 243}, trapCheck);
-
-							break;
-						}
-					}
-
-					delay(500);
-
-					break;
-				default:
-					delay(500);
-
-					break;
-				}
-			} else {
-				delay(500);
-			}
-
-			if (getUnit(1, 243)) {
-				return true;
-			}
-		}
-
-		throw new Error("Diablo not found");
-	};
-
 	this.preattack = function (id) {
 		let trapCheck,
 			coords = [];
 
 		switch (id) {
 		case getLocaleString(2851):
-			if (this.vizLayout === 1) {
+			if (Common.Diablo.vizLayout === 1) {
 				coords = [7676, 5295];
 			}
 
@@ -327,7 +141,7 @@ function DiabloHelper() {
 
 			break;
 		case getLocaleString(2852):
-			if (this.seisLayout === 1) {
+			if (Common.Diablo.seisLayout === 1) {
 				coords = [7778, 5216];
 			}
 
@@ -335,7 +149,7 @@ function DiabloHelper() {
 
 			break;
 		case getLocaleString(2853):
-			if (this.infLayout === 1) {
+			if (Common.Diablo.infLayout === 1) {
 				coords = [7913, 5292];
 			}
 
@@ -377,15 +191,13 @@ function DiabloHelper() {
 	};
 
 	this.followPath = function (path) {
-		let i;
-
-		for (i = 0; i < path.length; i += 2) {
+		for (let i = 0; i < path.length; i += 2) {
 			if (this.cleared.length) {
 				this.clearStrays();
 			}
 
 			Pather.moveTo(path[i], path[i + 1], 3, getDistance(me, path[i], path[i + 1]) > 50);
-			Attack.clear(30, 0, false, this.sort);
+			Attack.clear(30, 0, false, Common.Diablo.sort);
 
 			// Push cleared positions so they can be checked for strays
 			this.cleared.push([path[i], path[i + 1]]);
@@ -399,22 +211,17 @@ function DiabloHelper() {
 	};
 
 	this.clearStrays = function () {
-		/*if (!Config.PublicMode) {
-			return false;
-		}*/
-
-		let i,
-			oldPos = {x: me.x, y: me.y},
+		let oldPos = {x: me.x, y: me.y},
 			monster = getUnit(1);
 
 		if (monster) {
 			do {
 				if (Attack.checkMonster(monster)) {
-					for (i = 0; i < this.cleared.length; i += 1) {
+					for (let i = 0; i < this.cleared.length; i += 1) {
 						if (getDistance(monster, this.cleared[i][0], this.cleared[i][1]) < 30 && Attack.validSpot(monster.x, monster.y)) {
 							me.overhead("we got a stray");
 							Pather.moveToUnit(monster);
-							Attack.clear(15, 0, false, this.sort);
+							Attack.clear(15, 0, false, Common.Diablo.sort);
 
 							break;
 						}
@@ -452,7 +259,7 @@ function DiabloHelper() {
 			me.overhead("Getting party area info");
 
 			if (Misc.getPlayerCount() <= 1) {
-				throw new Error("Empty game"); // Alone in game
+				throw new Error("Empty game");
 			}
 
 			party = getParty();
@@ -460,7 +267,8 @@ function DiabloHelper() {
 			if (party) {
 				do {
 					if (party.name !== me.name && party.area) {
-						break AreaInfoLoop; // Can read player area
+						// Can read player area
+						break AreaInfoLoop;
 					}
 				} while (party.getNext());
 			}
@@ -472,7 +280,8 @@ function DiabloHelper() {
 
 		if (party) {
 			do {
-				if (party.area === 131 || party.area === 132) { // Player is in Throne of Destruction or Worldstone Chamber
+				// Player is in Throne of Destruction or Worldstone Chamber
+				if (party.area === 131 || party.area === 132) {
 					return false; // End script
 				}
 			} while (party.getNext());
@@ -480,14 +289,12 @@ function DiabloHelper() {
 	}
 
 	if (Config.DiabloHelper.SafePrecast) {
-		Pather.useWaypoint(Config.RandomPrecast ? "random" : 107);
+		Pather.useWaypoint(Config.RandomPrecast ? "random" : sdk.areas.RiverofFlame);
 		Precast.doPrecast(true);
 	}
 
 	if (Config.DiabloHelper.SkipTP) {
-		if (me.area !== 107) {
-			Pather.useWaypoint(107);
-		}
+		me.area !== sdk.areas.RiverofFlame && Pather.useWaypoint(sdk.areas.RiverofFlame);
 
 		if (!Pather.moveTo(7790, 5544)) {
 			throw new Error("Failed to move to Chaos Sanctuary");
@@ -509,7 +316,7 @@ function DiabloHelper() {
 				} while (party.getNext());
 			}
 
-			Attack.clear(30, 0, false, this.sort);
+			Attack.clear(30, 0, false, Common.Diablo.sort);
 			delay(1000);
 		}
 
@@ -533,31 +340,29 @@ function DiabloHelper() {
 		}
 	}
 
-	this.initLayout();
+	Common.Diablo.initLayout();
 
 	if (Config.DiabloHelper.Entrance) {
-		Attack.clear(35, 0, false, this.sort);
+		Attack.clear(35, 0, false, Common.Diablo.sort);
 		this.followPath(this.entranceToStar);
 	} else {
 		Pather.moveTo(7774, 5305);
-		Attack.clear(35, 0, false, this.sort);
+		Attack.clear(35, 0, false, Common.Diablo.sort);
 	}
 
 	Pather.moveTo(7774, 5305);
-	Attack.clear(35, 0, false, this.sort);
+	Attack.clear(35, 0, false, Common.Diablo.sort);
 	clearSeals();
 
 	try {
 		print("Attempting to find Diablo");
-		this.diabloPrep();
+		Common.Diablo.diabloPrep();
 	} catch (error) {
 		print("Diablo wasn't found");
 		if (Config.DiabloHelper.RecheckSeals) {
 			print("Rechecking seals");
-			this.vizierSeal();
-			this.seisSeal();
-			this.infectorSeal();
-			this.diabloPrep();
+			clearSeals();
+			Common.Diablo.diabloPrep();
 		}
 	}
 

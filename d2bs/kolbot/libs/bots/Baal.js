@@ -35,7 +35,7 @@ function Baal() {
 			}
 
 			break;
-		case 6: // Assassin
+		case sdk.charclass.Assassin:
 			if (Config.UseTraps) {
 				check = ClassAttack.checkTraps({x: 15094, y: 5028});
 
