@@ -1705,6 +1705,10 @@ const Misc = {
 			return false;
 		}
 
+		// check that townchicken is running - so we don't spam needing potions if it isn't
+		let townChick = getScript("tools/TownChicken.js");
+		if (!townChick || townChick && !townChick.running) return false;
+
 		if (Config.TownCheck && !me.inTown) {
 			try {
 				if (me.gold > 1000) {
@@ -1760,7 +1764,7 @@ const Misc = {
 		}
 
 		if (check) {
-			scriptBroadcast("townCheck");
+			townChick.send("townCheck");
 			delay(500);
 
 			return true;

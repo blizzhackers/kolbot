@@ -342,6 +342,8 @@ function Questing() {
 		} catch (err) {
 			print('ÿc8(Questing)ÿc1 :: Cleared Ancients. Failed to get WSK Waypoint');
 		}
+
+		return true;
 	};
 
 	for (let i = 0; i < quests.length; i += 1) {
@@ -366,12 +368,14 @@ function Questing() {
 		j === 3 && D2Bot.printToConsole("Quest " + quests[i][1] + " failed.");
 	}
 
-	if (Config.Questing.StopProfile) {
-		D2Bot.printToConsole("All quests done. Stopping profile.");
+	if (Config.Questing.StopProfile || Loader.scriptList.length === 1) {
+		D2Bot.printToConsole("All quests done. Stopping profile.", 5);
 		D2Bot.stop();
 	} else {
+		print("ÿc9(Questing) :: ÿc2Complete");
 		// reload town chicken in case we are doing others scripts after this one finishes
-		(Config.TownHP > 0 || Config.TownMP > 0) && load("tools/TownChicken.js");
+		let townChick = getScript("tools/TownChicken.js");
+		(Config.TownHP > 0 || Config.TownMP > 0) && townChick && !townChick.running && load("tools/TownChicken.js");
 	}
 
 	return true;
