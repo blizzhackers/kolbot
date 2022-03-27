@@ -521,6 +521,19 @@ function LoadConfig() {
 	Config.IronGolemChicken = 30; // Exit game if Iron Golem's life is less or equal to designated percent.
 
 	// ########################### //
+	/* ##### Gamble SETTINGS ##### */
+	// ########################### //
+	Config.Gamble = false;
+	Config.GambleGoldStart = 1000000;
+	Config.GambleGoldStop = 500000;
+
+	// List of item names or classids for gambling. Check libs/NTItemAlias.dbl file for other item classids.
+	Config.GambleItems.push("Amulet");
+	Config.GambleItems.push("Ring");
+	Config.GambleItems.push("Circlet");
+	Config.GambleItems.push("Coronet");
+
+	// ########################### //
 	/* ##### CUBING SETTINGS ##### */
 	// ########################### //
 	/* All recipe names are available in Templates/Cubing.txt. For item names/classids check NTItemAlias.dbl

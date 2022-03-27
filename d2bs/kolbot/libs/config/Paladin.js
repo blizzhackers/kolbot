@@ -500,6 +500,19 @@ function LoadConfig() {
 	Config.Redemption = [50, 50]; // Switch to Redemption after clearing an area if under designated life or mana. Format: [lifepercent, manapercent]
 
 	// ########################### //
+	/* ##### Gamble SETTINGS ##### */
+	// ########################### //
+	Config.Gamble = false;
+	Config.GambleGoldStart = 1000000;
+	Config.GambleGoldStop = 500000;
+
+	// List of item names or classids for gambling. Check libs/NTItemAlias.dbl file for other item classids.
+	Config.GambleItems.push("Amulet");
+	Config.GambleItems.push("Ring");
+	Config.GambleItems.push("Circlet");
+	Config.GambleItems.push("Coronet");
+
+	// ########################### //
 	/* ##### CUBING SETTINGS ##### */
 	// ########################### //
 	/* All recipe names are available in Templates/Cubing.txt. For item names/classids check NTItemAlias.dbl

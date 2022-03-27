@@ -500,6 +500,19 @@ function LoadConfig() {
 	Config.SummonVine = "Poison Creeper"; // 0 = disabled, 1 / "Poison Creeper", 2 / "Carrion Vine", 3 / "Solar Creeper"
 
 	// ########################### //
+	/* ##### Gamble SETTINGS ##### */
+	// ########################### //
+	Config.Gamble = false;
+	Config.GambleGoldStart = 1000000;
+	Config.GambleGoldStop = 500000;
+
+	// List of item names or classids for gambling. Check libs/NTItemAlias.dbl file for other item classids.
+	Config.GambleItems.push("Amulet");
+	Config.GambleItems.push("Ring");
+	Config.GambleItems.push("Circlet");
+	Config.GambleItems.push("Coronet");
+
+	// ########################### //
 	/* ##### CUBING SETTINGS ##### */
 	// ########################### //
 	/* All recipe names are available in Templates/Cubing.txt. For item names/classids check NTItemAlias.dbl
