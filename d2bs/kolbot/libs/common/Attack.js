@@ -25,7 +25,7 @@ const Attack = {
 			print("ÿc1Bad attack config. Don't expect your bot to attack.");
 		}
 
-		if (me.gametype === 1) {
+		if (me.expansion) {
 			this.checkInfinity();
 			this.getCharges();
 			this.getPrimarySlot();
@@ -33,27 +33,17 @@ const Attack = {
 	},
 
 	weaponSwitch: function (slot) {
-		if (me.gametype === 0 || me.weaponswitch === slot) {
-			return true;
-		}
+		if (me.classic || me.weaponswitch === slot) return true;
+		slot === undefined && (slot = me.weaponswitch ^ 1);
 
-		let i, tick;
-
-		if (slot === undefined) {
-			slot = me.weaponswitch ^ 1;
-		}
-
-		delay(500);
-
-		for (i = 0; i < 5; i += 1) {
+		for (let i = 0; i < 5; i += 1) {
+			delay(100 + me.ping);
 			weaponSwitch();
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 2000 + me.ping) {
 				if (me.weaponswitch === slot) {
-					//delay(me.ping + 1);
-
 					return true;
 				}
 
@@ -64,7 +54,8 @@ const Attack = {
 		return false;
 	},
 
-	checkSlot: function (slot = me.weaponswitch) { // check if slot has items
+	 // check if slot has items
+	checkSlot: function (slot = me.weaponswitch) {
 		let item = me.getItem(-1, 1);
 
 		if (item) {
@@ -103,14 +94,12 @@ const Attack = {
 	},
 
 	getCustomAttack: function (unit) {
-		let i;
-
 		// Check if unit got invalidated
 		if (!unit || !unit.name || !copyUnit(unit).x) {
 			return false;
 		}
 
-		for (i in Config.CustomAttack) {
+		for (let i in Config.CustomAttack) {
 			if (Config.CustomAttack.hasOwnProperty(i) && unit.name.toLowerCase() === i.toLowerCase()) {
 				return Config.CustomAttack[i];
 			}
@@ -210,60 +199,57 @@ const Attack = {
 
 	// Kill a monster based on its classId, can pass a unit as well
 	kill: function (classId) {
-		if (Config.AttackSkill[1] < 0) {
-			return false;
-		}
-
-		let i, target, gid, result,
-			retry = 0,
-			errorInfo = "",
-			attackCount = 0;
-
-		if (typeof classId === "object") {
-			target = classId;
-		}
-
-		for (i = 0; !target && i < 5; i += 1) {
-			target = getUnit(1, classId);
-
-			delay(200);
-		}
+		if (!classId || Config.AttackSkill[1] < 0) return false;
+		let target = (typeof classId === "object" ? classid : Misc.poll(function () { return getUnit(1, classId); }, 2000, 100));
 
 		if (!target) {
-			throw new Error("Attack.kill: Target not found");
+			console.warn("Attack.kill: Target not found");
+			return Attack.clear(10);
 		}
 
-		gid = target.gid;
+		let retry = 0,
+			errorInfo = "",
+			attackCount = 0,
+			gid = target.gid;
 
-		if (Config.MFLeader) {
-			Pather.makePortal();
-			say("kill " + classId);
-		}
+		let findTarget = function (gid, loc) {
+			let path = getPath(me.area, me.x, me.y, loc.x, loc.y, 1, 5);
+			if (!path) return false;
 
-		while (attackCount < Config.MaxAttackCount && this.checkMonster(target) && this.skipCheck(target)) {
+			if (path.some(function (node) {
+				Pather.walkTo(node.x, node.y);
+				return getUnit(1, -1, -1, gid);
+			})) {
+				return getUnit(1, -1, -1, gid);
+			} else {
+				return false;
+			}
+		};
+
+		let lastLoc = {x: me.x, y: me.y};
+		Config.MFLeader && Pather.makePortal() && say("kill " + classId);
+
+		while (attackCount < Config.MaxAttackCount && target.attackable && this.skipCheck(target)) {
 			Misc.townCheck();
-
-			if (!target || !copyUnit(target).x) { // Check if unit got invalidated, happens if necro raises a skeleton from the boss's corpse.
+			
+			// Check if unit got invalidated, happens if necro raises a skeleton from the boss's corpse.
+			if (!target || !copyUnit(target).x) { 
 				target = getUnit(1, -1, -1, gid);
+				!target && (target = findTarget(gid, lastLoc));
 
 				if (!target) {
 					break;
 				}
 			}
 
-			if (Config.Dodge && me.hp * 100 / me.hpmax <= Config.DodgeHP) {
-				this.deploy(target, Config.DodgeRange, 5, 9);
-			}
-
-			if (Config.MFSwitchPercent && target.hp / 128 * 100 < Config.MFSwitchPercent) {
-				this.weaponSwitch(this.getPrimarySlot() ^ 1);
-			}
+			Config.Dodge && me.hpPercent <= Config.DodgeHP && this.deploy(target, Config.DodgeRange, 5, 9);
+			Config.MFSwitchPercent && target.hpPercent < Config.MFSwitchPercent && this.weaponSwitch(this.getPrimarySlot() ^ 1);
 
 			if (attackCount > 0 && attackCount % 15 === 0 && Skill.getRange(Config.AttackSkill[1]) < 4) {
 				Packet.flash(me.gid);
 			}
 
-			result = ClassAttack.doAttack(target, attackCount % 15 === 0);
+			let result = ClassAttack.doAttack(target, attackCount % 15 === 0);
 
 			if (result === 0) {
 				if (retry++ > 3) {
@@ -277,51 +263,43 @@ const Attack = {
 				errorInfo = " (No valid attack skills)";
 
 				break;
+			} else if (result === 3) {
+
+				continue;
 			} else {
 				retry = 0;
 			}
 
-			attackCount += 1;
+			lastLoc = {x: me.x, y: me.y};
+			attackCount++;
 		}
 
-		if (attackCount === Config.MaxAttackCount) {
-			errorInfo = " (attackCount exceeded)";
-		}
-
-		if (Config.MFSwitchPercent) {
-			this.weaponSwitch(this.getPrimarySlot());
-		}
-
+		attackCount === Config.MaxAttackCount && (errorInfo = " (attackCount exceeded: " + attackCount + ")");
+		Config.MFSwitchPercent && this.weaponSwitch(this.getPrimarySlot());
 		ClassAttack.afterAttack();
+		Pickit.pickItems();
 
-		if (!target || !copyUnit(target).x) {
-			return true;
+		if (target && target.attackable) {
+			console.warn("Failed to kill " + target.name + errorInfo);
+			return false;
 		}
 
-		if (target.hp > 0 && target.mode !== 0 && target.mode !== 12) {
-			throw new Error("Failed to kill " + target.name + errorInfo);
-		}
-
-		return true;
+		return (!target || !copyUnit(target).x || target.dead || !target.attackable);
 	},
 
 	hurt: function (classId, percent) {
-		let i, target, result,
-			retry = 0,
-			attackCount = 0;
+		if (!classId || !percent) return false;
+		let target = (typeof classId === "object" ? classid : Misc.poll(function () { return getUnit(1, classId); }, 2000, 100));
 
-		for (i = 0; i < 5; i += 1) {
-			target = getUnit(1, classId);
-
-			if (target) {
-				break;
-			}
-
-			delay(200);
+		if (!target) {
+			console.warn("Attack.hurt: Target not found");
+			return false
 		}
 
-		while (attackCount < Config.MaxAttackCount && Attack.checkMonster(target) && Attack.skipCheck(target)) {
-			result = ClassAttack.doAttack(target, attackCount % 15 === 0);
+		let retry = 0, attackCount = 0;
+
+		while (attackCount < Config.MaxAttackCount && target.attackable && Attack.skipCheck(target)) {
+			let result = ClassAttack.doAttack(target, attackCount % 15 === 0);
 
 			if (result === 0) {
 				if (retry++ > 3) {
@@ -331,6 +309,9 @@ const Attack = {
 				Packet.flash(me.gid);
 			} else if (result === 2) {
 				break;
+			} else if (result === 3) {
+
+				continue;
 			} else {
 				retry = 0;
 			}
@@ -341,7 +322,7 @@ const Attack = {
 
 			attackCount += 1;
 
-			if (target.hp * 100 / 128 <= percent) {
+			if (target.hpPercent <= percent) {
 				break;
 			}
 		}
@@ -353,108 +334,69 @@ const Attack = {
 		let scariness = 0, ids = [58, 59, 60, 61, 62, 101, 102, 103, 104, 105, 278, 279, 280, 281, 282, 298, 299, 300, 645, 646, 647, 662, 663, 664, 667, 668, 669, 670, 675, 676];
 
 		// Only handling monsters for now
-		if (unit.type !== 1) {
-			return undefined;
-		}
+		if (unit.type !== 1) return undefined;
 
 		// Minion
-		if (unit.spectype & 0x08) {
-			scariness += 1;
-		}
+		(unit.spectype & 0x08) && (scariness += 1);
 
 		// Champion
-		if (unit.spectype & 0x02) {
-			scariness += 2;
-		}
+		(unit.spectype & 0x02) && (scariness += 2);
 
 		// Boss
-		if (unit.spectype & 0x04) {
-			scariness += 4;
-		}
+		(unit.spectype & 0x04) && (scariness += 4);
 
 		// Summoner or the like
-		if (ids.indexOf(unit.classid) > -1) {
-			scariness += 8;
-		}
+		ids.includes(unit.classid) && (scariness += 8);
 
 		return scariness;
 	},
 
 	// Clear monsters in a section based on range and spectype or clear monsters around a boss monster
-	clear: function (range, spectype, bossId, sortfunc, pickit) { // probably going to change to passing an object
+	// probably going to change to passing an object
+	clear: function (range, spectype, bossId, sortfunc, pickit) {
 		while (!me.gameReady) {
 			delay(40);
 		}
 
-		if (Config.MFLeader && !!bossId) {
-			Pather.makePortal();
-			say("clear " + bossId);
-		}
+		if (Config.AttackSkill[1] < 0 || Config.AttackSkill[3] < 0) return false;
 
-		if (range === undefined) {
-			range = 25;
-		}
+		range === undefined && (range = 25);
+		spectype === undefined && (spectype = 0);
+		bossId === undefined && (bossId = false);
+		sortfunc === undefined && (sortfunc = false);
+		pickit === undefined && (pickit = true);
+		!sortfunc && (sortfunc = this.sortMonsters);
 
-		if (spectype === undefined) {
-			spectype = 0;
-		}
+		if (typeof (range) !== "number") { throw new Error("Attack.clear: range must be a number."); }
 
-		if (bossId === undefined) {
-			bossId = false;
-		}
-
-		if (sortfunc === undefined) {
-			sortfunc = false;
-		}
-
-		if (pickit === undefined) {
-			pickit = true;
-		}
-
-		if (typeof (range) !== "number") {
-			throw new Error("Attack.clear: range must be a number.");
-		}
-
-		let i, boss, orgx, orgy, target, result, monsterList, start, coord, skillCheck, secAttack,
+		let i, boss, orgx, orgy, result, start, skillCheck,
 			retry = 0,
 			gidAttack = [],
 			attackCount = 0;
 
-		if (Config.AttackSkill[1] < 0 || Config.AttackSkill[3] < 0) {
-			return false;
-		}
-
-		if (!sortfunc) {
-			sortfunc = this.sortMonsters;
-		}
-
 		if (bossId) {
-			for (i = 0; !boss && i < 5; i += 1) {
-				boss = bossId > 999 ? getUnit(1, -1, -1, bossId) : getUnit(1, bossId);
-
-				delay(200);
-			}
+			boss = Misc.poll(function () { return bossId > 999 ? getUnit(1, -1, -1, bossId) : getUnit(1, bossId); }, 2000, 100);
 
 			if (!boss) {
-				throw new Error("Attack.clear: " + bossId + " not found");
+				console.warn("Attack.clear: " + bossId + " not found");
+				return Attack.clear(10);
 			}
 
-			orgx = boss.x;
-			orgy = boss.y;
+			({orgx, orgy} = {orgx: boss.x, orgy: boss.y});
+			Config.MFLeader && !!bossId && Pather.makePortal() && say("clear " + bossId);
 		} else {
-			orgx = me.x;
-			orgy = me.y;
+			({orgx, orgy} = {orgx: me.x, orgy: me.y});
 		}
 
-		monsterList = [];
-		target = getUnit(1);
+		let monsterList = [];
+		let target = getUnit(1);
 
 		if (target) {
 			do {
-				if ((!spectype || (target.spectype & spectype)) && this.checkMonster(target) && this.skipCheck(target)) {
+				if ((!spectype || (target.spectype & spectype)) && target.attackable && this.skipCheck(target)) {
 					// Speed optimization - don't go through monster list until there's at least one within clear range
 					if (!start && getDistance(target, orgx, orgy) <= range &&
-							(me.getSkill(54, 1) || !Scripts.Follower || !checkCollision(me, target, 0x1))) {
+							(Pather.canTeleport() || !Scripts.Follower || !checkCollision(me, target, 0x1))) {
 						start = true;
 					}
 
@@ -463,26 +405,15 @@ const Attack = {
 			} while (target.getNext());
 		}
 
-		while (start && monsterList.length > 0 && attackCount < 300) {
-			if (boss) {
-				orgx = boss.x;
-				orgy = boss.y;
-			}
-
-			if (me.dead) {
-				return false;
-			}
-
-			//monsterList.sort(Sort.units);
+		while (start && monsterList.length > 0 && attackCount < Config.MaxAttackCount) {
+			if (me.dead) return false;
+			
+			boss && (({orgx, orgy} = {orgx: boss.x, orgy: boss.y}));
 			monsterList.sort(sortfunc);
-
 			target = copyUnit(monsterList[0]);
 
 			if (target.x !== undefined && (getDistance(target, orgx, orgy) <= range || (this.getScarinessLevel(target) > 7 && getDistance(me, target) <= range)) && this.checkMonster(target)) {
-				if (Config.Dodge && me.hp * 100 / me.hpmax <= Config.DodgeHP) {
-					this.deploy(target, Config.DodgeRange, 5, 9);
-				}
-
+				Config.Dodge && me.hpPercent <= Config.DodgeHP && this.deploy(target, Config.DodgeRange, 5, 9);
 				Misc.townCheck(true);
 				//me.overhead("attacking " + target.name + " spectype " + target.spectype + " id " + target.classid);
 
@@ -494,6 +425,10 @@ const Attack = {
 					if (result === 2) {
 						monsterList.shift();
 
+						continue;
+					}
+
+					if (result === 3) {
 						continue;
 					}
 
@@ -509,12 +444,7 @@ const Attack = {
 
 					gidAttack[i].attacks += 1;
 					attackCount += 1;
-
-					if (me.classid === 4) {
-						secAttack = (target.spectype & 0x7) ? 2 : 4;
-					} else {
-						secAttack = 5;
-					}
+					let secAttack = me.barbarian ? ((target.spectype & 0x7) ? 2 : 4) : 5;
 
 					if (Config.AttackSkill[secAttack] > -1 && (!Attack.checkResist(target, Config.AttackSkill[(target.spectype & 0x7) ? 1 : 3]) ||
 							(me.classid === 3 && Config.AttackSkill[(target.spectype & 0x7) ? 1 : 3] === 112 && !ClassAttack.getHammerPosition(target)))) {
@@ -526,12 +456,9 @@ const Attack = {
 					// Desync/bad position handler
 					switch (skillCheck) {
 					case 112:
-						//print(gidAttack[i].name + " " + gidAttack[i].attacks);
-
 						// Tele in random direction with Blessed Hammer
 						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % ((target.spectype & 0x7) ? 4 : 2) === 0) {
-							//print("random move m8");
-							coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 5);
+							let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 5);
 							Pather.moveTo(coord.x, coord.y);
 						}
 
@@ -569,9 +496,24 @@ const Attack = {
 
 		ClassAttack.afterAttack(pickit);
 		this.openChests(range, orgx, orgy);
+		attackCount > 0 && pickit && Pickit.pickItems();
 
-		if (attackCount > 0 && pickit) {
-			Pickit.pickItems();
+		return true;
+	},
+
+	clearClassids: function (...ids) {
+		let monster = getUnit(1);
+
+		if (monster) {
+			let list = [];
+
+			do {
+				if (ids.includes(monster.classid) && monster.attackable) {
+					list.push(copyUnit(monster));
+				}
+			} while (monster.getNext());
+
+			Attack.clearList(list);
 		}
 
 		return true;
@@ -627,7 +569,7 @@ const Attack = {
 
 	// Clear an already formed array of monstas
 	clearList: function (mainArg, sortFunc, refresh) {
-		let i, target, result, monsterList, coord,
+		let i, target, monsterList,
 			retry = 0,
 			gidAttack = [],
 			attackCount = 0;
@@ -647,32 +589,24 @@ const Attack = {
 			throw new Error("clearList: Invalid argument");
 		}
 
-		if (!sortFunc) {
-			sortFunc = this.sortMonsters;
-		}
+		!sortFunc && (sortFunc = this.sortMonsters);
 
-		while (monsterList.length > 0 && attackCount < 300) {
+		while (monsterList.length > 0 && attackCount < Config.MaxAttackCount) {
 			if (refresh && attackCount > 0 && attackCount % refresh === 0) {
 				monsterList = mainArg.call();
 			}
 
-			if (me.dead) {
-				return false;
-			}
+			if (me.dead) return false;
 
 			monsterList.sort(sortFunc);
-
 			target = copyUnit(monsterList[0]);
 
 			if (target.x !== undefined && this.checkMonster(target)) {
-				if (Config.Dodge && me.hp * 100 / me.hpmax <= Config.DodgeHP) {
-					this.deploy(target, Config.DodgeRange, 5, 9);
-				}
-
+				Config.Dodge && me.hpPercent <= Config.DodgeHP && this.deploy(target, Config.DodgeRange, 5, 9);
 				Misc.townCheck(true);
 				//me.overhead("attacking " + target.name + " spectype " + target.spectype + " id " + target.classid);
 
-				result = ClassAttack.doAttack(target, attackCount % 15 === 0);
+				let result = ClassAttack.doAttack(target, attackCount % 15 === 0);
 
 				if (result) {
 					retry = 0;
@@ -680,6 +614,10 @@ const Attack = {
 					if (result === 2) {
 						monsterList.shift();
 
+						continue;
+					}
+
+					if (result === 3) {
 						continue;
 					}
 
@@ -700,7 +638,7 @@ const Attack = {
 					case 112:
 						// Tele in random direction with Blessed Hammer
 						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % ((target.spectype & 0x7) ? 5 : 15) === 0) {
-							coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 4);
+							let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 4);
 							Pather.moveTo(coord.x, coord.y);
 						}
 
@@ -740,47 +678,37 @@ const Attack = {
 
 		ClassAttack.afterAttack(true);
 		this.openChests(30);
-
-		if (attackCount > 0) {
-			Pickit.pickItems();
-		}
+		attackCount > 0 && Pickit.pickItems();
 
 		return true;
 	},
 
 	securePosition: function (x, y, range, timer, skipBlocked, special) {
-		/*if (arguments.length < 4) {
-			throw new Error("securePosition needs 4 arguments");
-		}*/
+		let tick;
 
-		let monster, monList, tick;
-
-		if (skipBlocked === true) {
-			skipBlocked = 0x4;
-		}
+		x === undefined && (x = me.x);
+		y === undefined && (y = me.y);
+		timer === undefined && (timer = 3000);
+		skipBlocked === true && (skipBlocked = 0x4);
 
 		while (true) {
-			if (getDistance(me, x, y) > 5) {
-				Pather.moveTo(x, y);
-			}
+			getDistance(me, x, y) > 5 && Pather.moveTo(x, y);
 
-			monster = getUnit(1);
-			monList = [];
+			let monster = getUnit(1);
+			let monList = [];
 
 			if (monster) {
 				do {
-					if (getDistance(monster, x, y) <= range && this.checkMonster(monster) && this.canAttack(monster) &&
+					if (getDistance(monster, x, y) <= range && monster.attackable && this.canAttack(monster) &&
 							(!skipBlocked || !checkCollision(me, monster, skipBlocked)) &&
-							((me.classid === 1 && me.getSkill(54, 1)) || me.getStat(97, 54) || !checkCollision(me, monster, 0x1))) {
+							(Pather.canTeleport() || !checkCollision(me, monster, 0x1))) {
 						monList.push(copyUnit(monster));
 					}
 				} while (monster.getNext());
 			}
 
 			if (!monList.length) {
-				if (!tick) {
-					tick = getTickCount();
-				}
+				!tick && (tick = getTickCount());
 
 				// only return if it's been safe long enough
 				if (getTickCount() - tick >= timer) {
@@ -790,20 +718,13 @@ const Attack = {
 				this.clearList(monList);
 
 				// reset the timer when there's monsters in range
-				if (tick) {
-					tick = false;
-				}
+				tick && (tick = false);
 			}
 
 			if (special) {
-				switch (me.classid) {
-				case 3: // Paladin Redemption addon
-					if (me.getSkill(124, 1)) {
-						Skill.setSkill(124, 0);
-						delay(1000);
-					}
-
-					break;
+				if (me.paladin && me.getSkill(sdk.skills.Redemption, 1)) {
+					Skill.setSkill(sdk.skills.Redemption, 0);
+					delay(1000);
 				}
 			}
 
@@ -822,13 +743,8 @@ const Attack = {
 	},
 
 	countUniques: function () {
-		if (!this.uniques) {
-			this.uniques = 0;
-		}
-
-		if (!this.ignoredGids) {
-			this.ignoredGids = [];
-		}
+		!this.uniques && (this.uniques = 0);
+		!this.ignoredGids && (this.ignoredGids = []);
 
 		let monster = getUnit(1);
 
@@ -843,13 +759,11 @@ const Attack = {
 	},
 
 	storeStatistics: function (area) {
-		let obj;
-
 		if (!FileTools.exists("statistics.json")) {
 			Misc.fileAction("statistics.json", 1, "{}");
 		}
 
-		obj = JSON.parse(Misc.fileAction("statistics.json", 0));
+		let obj = JSON.parse(Misc.fileAction("statistics.json", 0));
 
 		if (obj) {
 			if (obj[area] === undefined) {
@@ -873,7 +787,8 @@ const Attack = {
 	clearLevel: function (spectype) {
 		if (Config.MFLeader) {
 			Pather.makePortal();
-			if (me.area > 65 && me.area < 73) { // tombs exception
+			 // tombs exception
+			if (me.area > 65 && me.area < 73) {
 				say("clearlevel " + me.area);
 			} else {
 				say("clearlevel " + getArea().name);
@@ -1089,47 +1004,28 @@ const Attack = {
 		return monList;
 	},
 
-	deploy: function (unit, distance, spread, range) {
+	findSafeSpot: function (unit, distance, spread, range) {
 		if (arguments.length < 4) {
 			throw new Error("deploy: Not enough arguments supplied");
 		}
 
-		let i, grid, index, currCount,
+		let index,
 			monList = [],
 			count = 999;
-			// idealPos = {
-			// 	x: Math.round(Math.cos(Math.atan2(me.y - unit.y, me.x - unit.x)) * Config.DodgeRange + unit.x),
-			// 	y: Math.round(Math.sin(Math.atan2(me.y - unit.y, me.x - unit.x)) * Config.DodgeRange + unit.y)
-			// };
 
 		monList = this.buildMonsterList();
-
 		monList.sort(Sort.units);
-
-		if (this.getMonsterCount(me.x, me.y, 15, monList) === 0) {
-			return true;
-		}
+		if (this.getMonsterCount(me.x, me.y, 15, monList) === 0) return true;
 
 		CollMap.getNearbyRooms(unit.x, unit.y);
+		let grid = this.buildGrid(unit.x - distance, unit.x + distance, unit.y - distance, unit.y + distance, spread);
 
-		// let tick = getTickCount();
-		grid = this.buildGrid(unit.x - distance, unit.x + distance, unit.y - distance, unit.y + distance, spread);
-		//print("Grid build time: " + (getTickCount() - tick));
+		if (!grid.length) return false;
+		grid.sort((a, b) => getDistance(b.x, b.y, unit.x, unit.y) - getDistance(a.x, a.y, unit.x, unit.y));
 
-		if (!grid.length) {
-			return false;
-		}
-
-		function sortGrid(a, b) {
-			//return getDistance(a.x, a.y, idealPos.x, idealPos.y) - getDistance(b.x, b.y, idealPos.x, idealPos.y);
-			return getDistance(b.x, b.y, unit.x, unit.y) - getDistance(a.x, a.y, unit.x, unit.y);
-		}
-
-		grid.sort(sortGrid);
-
-		for (i = 0; i < grid.length; i += 1) {
+		for (let i = 0; i < grid.length; i += 1) {
 			if (!(CollMap.getColl(grid[i].x, grid[i].y, true) & 0x1) && !CollMap.checkColl(unit, {x: grid[i].x, y: grid[i].y}, 0x4)) {
-				currCount = this.getMonsterCount(grid[i].x, grid[i].y, range, monList);
+				let currCount = this.getMonsterCount(grid[i].x, grid[i].y, range, monList);
 
 				if (currCount < count) {
 					index = i;
@@ -1142,30 +1038,37 @@ const Attack = {
 			}
 		}
 
-		//print("Safest spot with " + count + " monsters.");
-
 		if (typeof index === "number") {
-			//print("Dodge build time: " + (getTickCount() - tick));
-
-			return Pather.moveTo(grid[index].x, grid[index].y, 0);
+			return {
+				x: grid[index].x,
+				y: grid[index].y,
+			};
 		}
 
 		return false;
 	},
 
+	deploy: function (unit, distance, spread, range) {
+		if (arguments.length < 4) {
+			throw new Error("deploy: Not enough arguments supplied");
+		}
+
+		let safeLoc = this.findSafeSpot(unit, distance, spread, range);
+
+		return (typeof safeLoc === "object" ? Pather.moveToUnit(safeLoc, 0) : false);
+	},
+
 	getMonsterCount: function (x, y, range, list) {
-		let i,
-			fire,
-			count = 0,
+		let count = 0,
 			ignored = [243];
 
-		for (i = 0; i < list.length; i += 1) {
-			if (ignored.indexOf(list[i].classid) === -1 && this.checkMonster(list[i]) && getDistance(x, y, list[i].x, list[i].y) <= range) {
+		for (let i = 0; i < list.length; i += 1) {
+			if (ignored.indexOf(list[i].classid) === -1 && list[i].attackable && getDistance(x, y, list[i].x, list[i].y) <= range) {
 				count += 1;
 			}
 		}
 
-		fire = getUnit(2, "fire");
+		let fire = getUnit(2, "fire");
 
 		if (fire) {
 			do {
@@ -1183,12 +1086,11 @@ const Attack = {
 			throw new Error("buildGrid: Bad parameters");
 		}
 
-		let i, j, coll,
-			grid = [];
+		let grid = [];
 
-		for (i = xmin; i <= xmax; i += spread) {
-			for (j = ymin; j <= ymax; j += spread) {
-				coll = CollMap.getColl(i, j, true);
+		for (let i = xmin; i <= xmax; i += spread) {
+			for (let j = ymin; j <= ymax; j += spread) {
+				let coll = CollMap.getColl(i, j, true);
 
 				if (typeof coll === "number") {
 					grid.push({x: i, y: j, coll: coll});
@@ -1452,13 +1354,11 @@ const Attack = {
 
 	// Get a monster's resistance to specified element
 	getResist: function (unit, type) {
-		if (!unit || !unit.getStat) {	// some scripts pass empty units in throne room
-			return 100;
-		}
-
-		if (unit.type === 0) { // player
-			return 0;
-		}
+		// some scripts pass empty units in throne room
+		if (!unit || !unit.getStat) return 100;
+		
+		// player
+		if (unit.type === sdk.unittype.Player) return 0;
 
 		switch (type) {
 		case "physical":
@@ -1488,20 +1388,14 @@ const Attack = {
 
 	// Check if a monster is immune to specified attack type
 	checkResist: function (unit, val, maxres) {
-		// Ignore player resistances
-		if (unit.type === 0) {
-			return true;
-		}
-
+		if (unit.type === sdk.unittype.Player) return true;
+		
+		maxres === undefined && (maxres = 100);
 		let damageType = typeof val === "number" ? this.getSkillElement(val) : val;
-
-		if (maxres === undefined) {
-			maxres = 100;
-		}
 
 		// Static handler
 		if (val === 42 && this.getResist(unit, damageType) < 100) {
-			return (unit.hp * 100 / 128) > Config.CastStatic;
+			return (unit.hpPercent > Config.CastStatic);
 		}
 
 		if (this.infinity && ["fire", "lightning", "cold"].indexOf(damageType) > -1 && unit.getState) { // baal in throne room doesn't have getState
@@ -1538,9 +1432,7 @@ const Attack = {
 
 	// Detect use of bows/crossbows
 	usingBow: function () {
-		let item;
-
-		item = me.getItem(-1, 1);
+		let item = me.getItem(-1, 1);
 
 		if (item) {
 			do {

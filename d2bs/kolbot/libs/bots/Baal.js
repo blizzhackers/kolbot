@@ -97,7 +97,9 @@ function Baal() {
 		Precast.doPrecast(true);
 	}
 
-	if (!Common.Baal.clearWaves()) { throw new Error("Couldn't clear baal waves"); }
+	if (!Common.Baal.clearWaves()) { 
+		throw new Error("Couldn't clear baal waves");
+	}
 
 	if (Config.Baal.KillBaal) {
 		Config.PublicMode && say(Config.Baal.BaalMessage);

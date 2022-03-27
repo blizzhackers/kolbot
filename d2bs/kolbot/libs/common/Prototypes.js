@@ -10,6 +10,32 @@
 
 let sdk = require('../modules/sdk');
 
+(function (global, print) {
+	global['console'] = global['console'] || (function () {
+		const console = {};
+		const argMap = el => typeof el === 'object' && el /*not null */ && JSON.stringify(el) || el;
+
+		console.log = function (...args) {
+			// use call to avoid type errors
+			print.call(null, args.map(argMap).join(','));
+		};
+
+		console.printDebug = true;
+		console.debug = function (...args) {
+			if (console.printDebug) {
+				const stack = new Error().stack.match(/[^\r\n]+/g),
+					filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf('\\') + 1) || 'unknown:0';
+				this.log('ÿc:[ÿc:' + filenameAndLine + 'ÿc:]ÿc0 ' + args.map(argMap).join(','));
+			}
+		};
+
+		console.warn = console.debug;
+
+		return console;
+
+	})()
+})([].filter.constructor('return this')(), print);
+
 // Check if unit is idle
 Unit.prototype.__defineGetter__("idle",
 	function () {
@@ -1923,7 +1949,7 @@ Unit.prototype.__defineGetter__('attackable', function () {
 	// Monsters that are Burrowed/Submerged
 	if ([68, 69, 70, 71, 72, 258, 258, 259, 260, 261, 262, 263].includes(this.classid) && this.mode === 14) return false;
 
-	return [sdk.monsters.ThroneBaal, 179].indexOf(this.classid) <= -1;
+	return [sdk.monsters.ThroneBaal, 179].indexOf(this.classid) === -1;
 });
 
 Unit.prototype.__defineGetter__('curseable', function () {

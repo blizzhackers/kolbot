@@ -71,16 +71,19 @@ const Common = {
 		tkSeal: function (seal) {
 			if (!Skill.useTK(seal)) return false;
 
-			for (let i = 0; i < 3; i++) {
+			for (let i = 0; i < 5; i++) {
 				seal.distance > 13 && Attack.getIntoPosition(seal, 13, 0x4);
-				Skill.cast(43, 0, seal);
+				Skill.cast(sdk.skills.Telekinesis, 0, seal);
 
 				if (seal.mode) return true;
 			}
 
 			if (!seal.mode) {
-				Pather.moveTo(seal);
-				seal.interact();
+				Pather.moveToUnit(seal) && sendPacket(1, 0x13, 4, seal.type, 4, seal.gid);
+				Misc.poll(function () {
+					seal.classid === 394 ? Misc.click(0, 0, seal) : seal.interact();
+					return seal.mode;
+					}, 3000, (250 + me.ping));
 			}
 
 			return seal.mode;
@@ -97,7 +100,7 @@ const Common = {
 					Pather.moveToPreset(108, 2, classid, classid === 394 ? 5 : 2, classid === 394 ? 5 : 0);
 				}
 
-				let seal = Misc.poll(function () { return getUnit(sdk.unittype.Object, classid); });
+				let seal = Misc.poll(function () { return getUnit(sdk.unittype.Object, classid); }, 1000, 100);
 				if (!seal) return false;
 
 				if (seal.mode) {
@@ -108,7 +111,7 @@ const Common = {
 				}
 
 				// Clear around Infector seal, Any leftover abyss knights casting decrep is bad news with Infector
-				if ([392, 393].indexOf(classid) > -1 || i > 1) {
+				if ([392, 393].includes(classid) || i > 1) {
 					Attack.clear(25);
 					// Move back to seal
 					if (usetk) {
@@ -317,8 +320,7 @@ const Common = {
 		},
 
 		clearThrone: function () {
-			let monList = [],
-				pos = [15094, 5022, 15094, 5041, 15094, 5060, 15094, 5041, 15094, 5022];
+			let monList = [];
 
 			if (Config.AvoidDolls) {
 				let monster = getUnit(1, 691);
@@ -331,15 +333,18 @@ const Common = {
 					} while (monster.getNext());
 				}
 
-				if (monList.length) {
-					Attack.clearList(monList);
-				}
+				return monList.length > 0 && Attack.clearList(monList);
 			}
 
-			for (let i = 0; i < pos.length; i += 2) {
-				Pather.moveTo(pos[i], pos[i + 1]);
-				Attack.clear(25);
-			}
+			let pos = [
+				{ x: 15097, y: 5054 }, { x: 15085, y: 5053 },
+				{ x: 15085, y: 5040 }, { x: 15098, y: 5040 },
+				{ x: 15099, y: 5022 }, { x: 15086, y: 5024 }
+			];
+			return pos.forEach((node) => {
+				Pather.moveTo(node.x, node.y);
+				Attack.clear(30);
+			});
 		},
 
 		preattack: function () {
@@ -403,34 +408,24 @@ const Common = {
 
 				switch (this.checkThrone()) {
 				case 1:
-					Attack.clear(40);
-
-					tick = getTickCount();
-
-					Precast.doPrecast(true);
+					Attack.clearClassids(23, 62) && (tick = getTickCount());
 
 					break;
 				case 2:
-					Attack.clear(40);
-
-					tick = getTickCount();
-
-					break;
-				case 4:
-					Attack.clear(40);
-
-					tick = getTickCount();
+					Attack.clearClassids(105, 381) && (tick = getTickCount());
 
 					break;
 				case 3:
-					Attack.clear(40);
-					this.checkHydra();
+					Attack.clearClassids(557) && (tick = getTickCount());
+					this.checkHydra() && (tick = getTickCount());
 
-					tick = getTickCount();
+					break;
+				case 4:
+					Attack.clearClassids(558) && (tick = getTickCount());
 
 					break;
 				case 5:
-					Attack.clear(40);
+					Attack.clearClassids(571) && (tick = getTickCount());
 
 					break MainLoop;
 				default:
@@ -441,8 +436,8 @@ const Common = {
 					}
 
 					if (getTickCount() - tick > 20000) {
-						tick = getTickCount();
 						this.clearThrone();
+						tick = getTickCount();
 					}
 
 					if (!this.preattack()) {
@@ -491,6 +486,8 @@ const Common = {
 
 				delay(10);
 			}
+
+			this.clearThrone();
 
 			return true;
 		}

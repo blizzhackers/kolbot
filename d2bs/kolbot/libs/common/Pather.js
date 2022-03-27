@@ -110,8 +110,14 @@ const Pather = {
 	recursion: true,
 	lastPortalTick: 0,
 
+	canTeleport: function () {
+		return this.teleport && (me.getSkill(sdk.skills.Teleport, 1) || me.getStat(sdk.stats.OSkill, sdk.skills.Teleport));
+	},
+
 	useTeleport: function () {
-		return this.teleport && !Config.NoTele && !me.getState(139) && !me.getState(140) && !me.inTown && ((me.classid === 1 && me.getSkill(54, 1)) || me.getStat(97, 54));
+		let manaTP = Skill.getManaCost(sdk.skills.Teleport);
+		let numberOfTeleport = ~~(me.mpmax / manaTP);
+		return !me.inTown && !Config.NoTele && !me.shapeshifted && this.canTeleport() && numberOfTeleport > 2;
 	},
 
 	spotOnDistance: function (spot, distance, area, returnSpotOnError = true) {
