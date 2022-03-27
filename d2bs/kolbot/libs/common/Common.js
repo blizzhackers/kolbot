@@ -75,15 +75,9 @@ const Common = {
 				seal.distance > 13 && Attack.getIntoPosition(seal, 13, 0x4);
 				Skill.cast(sdk.skills.Telekinesis, 0, seal);
 
-				if (seal.mode) return true;
-			}
-
-			if (!seal.mode) {
-				Pather.moveToUnit(seal) && sendPacket(1, 0x13, 4, seal.type, 4, seal.gid);
-				Misc.poll(function () {
-					seal.classid === 394 ? Misc.click(0, 0, seal) : seal.interact();
-					return seal.mode;
-					}, 3000, (250 + me.ping));
+				if (seal.mode) {
+					break;
+				}
 			}
 
 			return seal.mode;
@@ -91,22 +85,22 @@ const Common = {
 
 		openSeal: function (classid) {
 			let warn = Config.PublicMode && [396, 394, 392].includes(classid) && Loader.scriptName() === "Diablo";
-			let usetk = Config.UseTelekinesis && me.getSkill(sdk.skills.Telekinesis, 1);
+			let usetk = !!(Config.UseTelekinesis && me.getSkill(sdk.skills.Telekinesis, 1));
+			let seal;
 
-			for (let i = 0; i < 5; i += 1) {
-				if (usetk) {
-					Pather.moveNearPreset(108, 2, classid, 15);
-				} else {
-					Pather.moveToPreset(108, 2, classid, classid === 394 ? 5 : 2, classid === 394 ? 5 : 0);
+			for (let i = 0; i < 5; i++) {
+				if (!seal) {
+					usetk ? Pather.moveNearPreset(108, 2, classid, 15) : Pather.moveToPreset(108, 2, classid, classid === 394 ? 5 : 2, classid === 394 ? 5 : 0);
 				}
 
-				let seal = Misc.poll(function () { return getUnit(sdk.unittype.Object, classid); }, 1000, 100);
-				if (!seal) return false;
+				seal = Misc.poll(function () { return getUnit(sdk.unittype.Object, classid); }, 1000, 100);
+				if (!seal) { 
+					console.debug("Couldn't find seal: " + classid);
+					return false;
+				}
 
 				if (seal.mode) {
-					// for pubbies
 					warn && say(Config.Diablo.SealWarning);
-
 					return true;
 				}
 
@@ -114,14 +108,14 @@ const Common = {
 				if ([392, 393].includes(classid) || i > 1) {
 					Attack.clear(25);
 					// Move back to seal
-					if (usetk) {
-						Pather.moveNearUnit(seal, 15);
-					} else {
-						Pather.moveToUnit(seal, classid === 394 ? 5 : 2, classid === 394 ? 5 : 0);
-					}
+					usetk ? Pather.moveNearUnit(seal, 15) : Pather.moveToUnit(seal, classid === 394 ? 5 : 2, classid === 394 ? 5 : 0);
 				}
 
-				if (!this.tkSeal(seal)) {
+				if (usetk && this.tkSeal(seal)) {
+					return seal.mode;
+				} else {
+					usetk && i > 1 && (usetk = false);
+					console.debug("Failed to use tk: Attempt[" + i + "] Using tk again? " + usetk);
 					if (classid === 392 && me.assassin && this.infLayout === 1) {
 						if (Config.UseTraps) {
 							let check = ClassAttack.checkTraps({x: 7899, y: 5293});
@@ -132,12 +126,6 @@ const Common = {
 						}
 					}
 
-					classid === 394 ? Misc.click(0, 0, seal) : seal.interact();
-				}
-
-				delay(classid === 394 ? 1000 + me.ping : 500 + me.ping);
-
-				if (!seal.mode) {
 					// de seis optimization
 					if (classid === 394 && Attack.validSpot(seal.x + 15, seal.y)) {
 						Pather.moveTo(seal.x + 15, seal.y);
@@ -145,9 +133,18 @@ const Common = {
 						Pather.moveTo(seal.x - 5, seal.y - 5);
 					}
 
-					delay(500);
-				} else {
+					classid === 394 ? Misc.click(0, 0, seal) : seal.interact();
+				}
+
+				delay(classid === 394 ? 1000 + me.ping : 500 + me.ping);
+
+				if (seal.mode) {
 					return true;
+				} else if (i === 4) {
+					console.log("Attempting portal trick");
+					D2Bot.printToConsole("Attempting portal trick");
+					Pather.makePortal(true) && delay(500);
+					me.inTown && Pather.usePortal(null, me.name);
 				}
 			}
 

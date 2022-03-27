@@ -225,6 +225,7 @@ function updateCount () {
 }
 
 function ScriptMsgEvent (msg) {
+	if (msg && typeof msg !== "string") return;
 	switch (msg) {
 	case "mule":
 		AutoMule.check = true;

@@ -257,7 +257,7 @@ const Pather = {
 		// Abort if dead
 		if (me.dead) return false;
 
-		let path, adjustedNode, cleared, useTeleport,
+		let path, adjustedNode, cleared,
 			leaped = false,
 			node = {x: x, y: y},
 			fail = 0;
@@ -273,7 +273,8 @@ const Pather = {
 		if (!x || !y) { throw new Error("moveTo: Function must be called with at least 2 arguments."); }
 		if (typeof x !== "number" || typeof y !== "number") { throw new Error("moveTo: Coords must be numbers"); }
 
-		useTeleport = this.useTeleport();
+		let useTeleport = this.useTeleport();
+		let tpMana = Skill.getManaCost(sdk.skills.Teleport);
 		retry === undefined && (retry = useTeleport ? 5 : 15);
 		path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? ([62, 63, 64].indexOf(me.area) > -1 ? 30 : this.teleDistance) : this.walkDistance);
 
@@ -308,7 +309,7 @@ const Pather = {
 					}
 				}
 
-				if (useTeleport ? this.teleportTo(node.x, node.y) : this.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
+				if (useTeleport && tpMana <= me.mp ? this.teleportTo(node.x, node.y) : this.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
 					if (!me.inTown) {
 						if (this.recursion) {
 							this.recursion = false;
@@ -325,7 +326,7 @@ const Pather = {
 						Misc.townCheck();
 					}
 				} else {
-					if (fail > 0 && !useTeleport && !me.inTown) {
+					if (fail > 0 && (!useTeleport || tpMana > me.mp) && !me.inTown) {
 						// Don't go berserk on longer paths
 						if (!cleared) {
 							Attack.clear(5) && Misc.openChests(2);
@@ -375,21 +376,16 @@ const Pather = {
 		y - the y coord to teleport to
 	*/
 	teleportTo: function (x, y, maxRange) {
-		let i, tick;
+		maxRange === undefined && (maxRange = 5);
 
-		if (maxRange === undefined) {
-			maxRange = 5;
-		}
-
-		for (i = 0; i < 3; i += 1) {
+		for (let i = 0; i < 3; i += 1) {
 			if (Config.PacketCasting) {
-				Skill.setSkill(54, 0);
-				Packet.castSkill(0, x, y);
+				Skill.setSkill(54, 0) && Packet.castSkill(0, x, y);
 			} else {
 				Skill.cast(54, 0, x, y);
 			}
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < Math.max(500, me.ping * 2 + 200)) {
 				if (getDistance(me.x, me.y, x, y) < maxRange) {
@@ -784,10 +780,10 @@ const Pather = {
 		area - the id of area to search for the room nearest to the player character
 	*/
 	getNearestRoom: function (area) {
-		let i, x, y, dist, room,
+		let x, y, room,
 			minDist = 10000;
 
-		for (i = 0; i < 5; i += 1) {
+		for (let i = 0; i < 5; i += 1) {
 			room = getRoom(area);
 
 			if (room) {
@@ -797,12 +793,10 @@ const Pather = {
 			delay(200);
 		}
 
-		if (!room) {
-			return false;
-		}
+		if (!room) return false;
 
 		do {
-			dist = getDistance(me, room.x * 5 + room.xsize / 2, room.y * 5 + room.ysize / 2);
+			let dist = getDistance(me, room.x * 5 + room.xsize / 2, room.y * 5 + room.ysize / 2);
 
 			if (dist < minDist) {
 				x = room.x * 5 + room.xsize / 2;
@@ -867,9 +861,9 @@ const Pather = {
 		id - id of the unit to open
 	*/
 	openUnit: function (type, id) {
-		let i, tick, unit, coord;
+		let unit;
 
-		for (i = 0; i < 5; i += 1) {
+		for (let i = 0; i < 5; i += 1) {
 			unit = getUnit(type, id);
 
 			if (unit) {
@@ -879,23 +873,16 @@ const Pather = {
 			delay(200);
 		}
 
-		if (!unit) {
-			throw new Error("openUnit: Unit not found. ID: " + unit);
-		}
+		if (!unit) { throw new Error("openUnit: Unit not found. ID: " + unit); }
+		if (unit.mode !== 0) return true;
 
-		if (unit.mode !== 0) {
-			return true;
-		}
-
-		for (i = 0; i < 3; i += 1) {
-			if (getDistance(me, unit) > 5) {
-				this.moveToUnit(unit);
-			}
+		for (let i = 0; i < 3; i += 1) {
+			unit.distance > 5 && this.moveToUnit(unit);
 
 			delay(300);
 			sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 1500) {
 				if (unit.mode !== 0) {
@@ -907,7 +894,7 @@ const Pather = {
 				delay(10);
 			}
 
-			coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 3);
+			let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 3);
 			this.moveTo(coord.x, coord.y);
 		}
 
@@ -988,35 +975,14 @@ const Pather = {
 	},
 
 	/*
-		Pather.getAct(targetArea);
-		targetArea - id of the area to enter
-	*/
-	getAct: function getAct(targetArea) {
-		const areas = [0, 40, 75, 103, 109];
-	
-		while (areas.length) {
-			if (areas.pop() < targetArea) {
-				return areas.length + 1;
-			}
-		}
-		
-		return 0;
-	},
-	
-	
-	/*
 		Pather.broadcastIntent(targetArea);
-		targetArea - id of the area to enter
+		targetArea - area id
 	*/
 	broadcastIntent: function broadcastIntent(targetArea) {
 		if (Config.MFLeader) {
-			let targetAct = this.getAct(targetArea);
-
-			if (me.act !== targetAct) {
-				say("goto A" + targetAct);
-			}
+			let targetAct = sdk.areas.actOf(targetArea);
+			me.act !== targetAct && say("goto A" + targetAct);
 		}
-		
 	},
 
 	/*
@@ -1047,7 +1013,7 @@ const Pather = {
 
 		this.broadcastIntent(targetArea);
 
-		let tick, wp, coord, retry, npc;
+		let tick;
 		let startAct = me.act;
 
 		for (let i = 0; i < 12; i += 1) {
@@ -1056,7 +1022,7 @@ const Pather = {
 			}
 
 			if (me.inTown) {
-				npc = getUnit(1, NPC.Warriv);
+				let npc = getUnit(1, NPC.Warriv);
 
 				if (me.area === 40 && npc && getDistance(me, npc) < 50) {
 					if (npc && npc.openMenu()) {
@@ -1073,7 +1039,7 @@ const Pather = {
 				!getUIFlag(sdk.uiflags.Waypoint) && (!Skill.useTK(wp) || i > 1) && Town.move("waypoint");
 			}
 
-			wp = getUnit(2, "waypoint");
+			let wp = getUnit(2, "waypoint");
 
 			if (wp && wp.area === me.area) {
 				if (Skill.useTK(wp) && i < 3 && !getUIFlag(sdk.uiflags.Waypoint)) {
@@ -1100,7 +1066,7 @@ const Pather = {
 
 					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
 						// Waypoint screen is open
-						if (getUIFlag(0x14)) {
+						if (getUIFlag(sdk.uiflags.Waypoint)) {
 							delay(500);
 
 							switch (targetArea) {
@@ -1140,10 +1106,10 @@ const Pather = {
 						delay(10);
 					}
 
-					if (!getUIFlag(0x14)) {
+					if (!getUIFlag(sdk.uiflags.Waypoint)) {
 						print("waypoint retry " + (i + 1));
-						retry = Math.min(i + 1, 5);
-						coord = CollMap.getRandCoordinate(me.x, -5 * retry, 5 * retry, me.y, -5 * retry, 5 * retry);
+						let retry = Math.min(i + 1, 5);
+						let coord = CollMap.getRandCoordinate(me.x, -5 * retry, 5 * retry, me.y, -5 * retry, 5 * retry);
 						this.moveTo(coord.x, coord.y);
 						delay(200 + me.ping);
 

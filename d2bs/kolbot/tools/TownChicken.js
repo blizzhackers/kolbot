@@ -61,12 +61,9 @@ function main() {
 
 	addEventListener("scriptmsg",
 		function (msg) {
-			if (msg === "townCheck") {
-				if (me.area === 136) {
-					print("Can't tp from uber trist.");
-				} else {
-					townCheck = true;
-				}
+			if (typeof msg !== "string") return;
+			if (msg === "townCheck" && Town.canTpToTown()) {
+				townCheck = true;
 			}
 		});
 
@@ -81,13 +78,19 @@ function main() {
 	Runewords.init();
 	Cubing.init();
 
+	let checkHP = Config.TownHP > 0;
+	let checkMP = Config.TownMP > 0;
+
 	while (true) {
-		if (!me.inTown && (townCheck ||
-			(Config.TownHP > 0 && me.hp < Math.floor(me.hpmax * Config.TownHP / 100)) ||
-			(Config.TownMP > 0 && me.mp < Math.floor(me.mpmax * Config.TownMP / 100)))) {
+		if (!me.inTown && (townCheck
+			|| ((checkHP && me.hpPercent < Config.TownHP) || (checkMP && me.mpPercent < Config.TownMP)) && Town.canTpToTown())) {
 			this.togglePause();
 
 			while (!me.gameReady) {
+				if (me.dead) {
+					return;
+				}
+
 				delay(100);
 			}
 

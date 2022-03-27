@@ -246,8 +246,6 @@ const Skill = {
 
 	// Cast a skill on self, Unit or coords
 	cast: function (skillId, hand, x, y, item) {
-		let clickType, shift;
-
 		switch (true) {
 		// cant cast this in town
 		case me.inTown && !this.townSkill(skillId):
@@ -292,6 +290,8 @@ const Skill = {
 				break;
 			}
 		} else {
+			let clickType, shift;
+
 			switch (hand) {
 			case 0: // Right hand + No Shift
 				clickType = 3;
@@ -411,9 +411,7 @@ const Skill = {
 
 	// Get mana cost of the skill (mBot)
 	getManaCost: function (skillId) {
-		if (skillId < 6) {
-			return 0;
-		}
+		if (skillId < 6) return 0;
 
 		if (this.manaCostList.hasOwnProperty(skillId)) {
 			return this.manaCostList[skillId];
@@ -440,7 +438,7 @@ const Skill = {
 			return false;
 		}
 
-		return me.inTown || (me.mpPercent > 50);
+		return me.inTown || (me.mpPercent > 25);
 	}
 };
 
@@ -536,80 +534,79 @@ const Item = {
 		let bodyLoc;
 
 		switch (item.itemType) {
-		case 2: // Shield
-		case 70: // Auric Shields
+		case sdk.itemtype.Shield:
+		case sdk.itemtype.AuricShields:
+		case sdk.itemtype.VoodooHeads:
+		case sdk.itemtype.BowQuiver:
+		case sdk.itemtype.CrossbowQuiver:
 			bodyLoc = 5;
 
 			break;
-		case 3: // Armor
+		case sdk.itemtype.Armor:
 			bodyLoc = 3;
 
 			break;
-		case 5: // Arrows
-		case 6: // Bolts
-			bodyLoc = 5;
-
-			break;
-		case 10: // Ring
+		case sdk.itemtype.Ring:
 			bodyLoc = [6, 7];
 
 			break;
-		case 12: // Amulet
+		case sdk.itemtype.Amulet:
 			bodyLoc = 2;
 
 			break;
-		case 15: // Boots
+		case sdk.itemtype.Boots:
 			bodyLoc = 9;
 
 			break;
-		case 16: // Gloves
+		case sdk.itemtype.Gloves:
 			bodyLoc = 10;
 
 			break;
-		case 19: // Belt
+		case sdk.itemtype.Belt:
 			bodyLoc = 8;
 
 			break;
-		case 37: // Helm
-		case 71: // Barb Helm
-		case 75: // Circlet
+		case sdk.itemtype.Helm:
+		case sdk.itemtype.PrimalHelm:
+		case sdk.itemtype.Circlet:
+		case sdk.itemtype.Pelt:
 			bodyLoc = 1;
 
 			break;
-		case 24: //
-		case 25: //
-		case 26: //
-		case 27: //
-		case 28: //
-		case 29: //
-		case 30: //
-		case 31: //
-		case 32: //
-		case 33: //
-		case 34: //
-		case 35: //
-		case 36: //
-		case 42: //
-		case 43: //
-		case 44: //
-		case 67: // Handtohand (Assasin Claw)
-		case 68: //
-		case 69: //
-		case 72: //
-		case 85: //
-		case 86: //
-		case 87: //
-		case 88: //
-			bodyLoc = 4;
+		case sdk.itemtype.Scepter:
+		case sdk.itemtype.Wand:
+		case sdk.itemtype.Staff:
+		case sdk.itemtype.Bow:
+		case sdk.itemtype.Axe:
+		case sdk.itemtype.Club:
+		case sdk.itemtype.Sword:
+		case sdk.itemtype.Hammer:
+		case sdk.itemtype.Knife:
+		case sdk.itemtype.Spear:
+		case sdk.itemtype.Polearm:
+		case sdk.itemtype.Crossbow:
+		case sdk.itemtype.Mace:
+		case sdk.itemtype.ThrowingKnife:
+		case sdk.itemtype.ThrowingAxe:
+		case sdk.itemtype.Javelin:
+		case sdk.itemtype.Orb:
+		case sdk.itemtype.AmazonBow:
+		case sdk.itemtype.AmazonSpear:
+		case sdk.itemtype.AmazonJavelin:
+		case sdk.itemtype.MissilePotion:
+			bodyLoc = me.barbarian ? [4, 5] : 4;
+
+			break;
+		case sdk.itemtype.HandtoHand:
+		case sdk.itemtype.AssassinClaw:
+			bodyLoc = me.assassin ? [4, 5] : 4;
 
 			break;
 		default:
 			return false;
 		}
 
-		if (typeof bodyLoc === "number") {
-			bodyLoc = [bodyLoc];
-		}
+		!Array.isArray(bodyLoc) && (bodyLoc = [bodyLoc]);
 
 		return bodyLoc;
 	},

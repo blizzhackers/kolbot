@@ -227,10 +227,10 @@ function Diablo() {
 	}
 
 	Attack.clear(30, 0, false, Common.Diablo.sort);
-	openSeals();
-	Config.PublicMode && say(Config.Diablo.DiabloMsg);
 
 	try {
+		openSeals();
+		Config.PublicMode && say(Config.Diablo.DiabloMsg);
 		print("Attempting to find Diablo");
 		Common.Diablo.diabloPrep();
 	} catch (error) {

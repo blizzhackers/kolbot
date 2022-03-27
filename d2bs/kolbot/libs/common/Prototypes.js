@@ -36,6 +36,30 @@ let sdk = require('../modules/sdk');
 	})()
 })([].filter.constructor('return this')(), print);
 
+(function (global, original) {
+	let firstRun = true;
+	global['getUnit'] = function (...args) {
+		const test = original(1);
+		// Stupid reference thing
+
+		if (firstRun) {
+			delay(1000);
+			firstRun = false;
+		}
+
+		let [first] = args, second = args.length >= 2 ? args[1] : undefined;
+
+		const ret = original.apply(this, args);
+
+		// deal with bug
+		if (first === 1 && typeof second === 'string' && ret && ((me.act === 1 && ret.classid === 149) || me.act === 2 && ret.classid === 268)) {
+			return null;
+		}
+
+		return original.apply(this, args);
+	}
+})([].filter.constructor('return this')(), getUnit);
+
 // Check if unit is idle
 Unit.prototype.__defineGetter__("idle",
 	function () {

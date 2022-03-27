@@ -554,18 +554,22 @@ function main() {
 	};
 
 	this.scriptEvent = function (msg) {
-		let obj;
+		if (msg && typeof msg === "string") {
+			switch (msg) {
+			case "toggleQuitlist":
+				canQuit = !canQuit;
 
-		switch (msg) {
-		case "toggleQuitlist":
-			canQuit = !canQuit;
+				break;
+			case "quit":
+				quitFlag = true;
 
-			break;
-		case "quit":
-			quitFlag = true;
+				break;
+			default:
+				break;
+			}
+		} else if (msg && typeof msg === "object") {
+			let obj;
 
-			break;
-		default:
 			try {
 				obj = JSON.parse(msg);
 			} catch (e) {
@@ -583,8 +587,6 @@ function main() {
 
 				DataFile.updateStats("debugInfo", JSON.stringify(debugInfo));
 			}
-
-			break;
 		}
 	};
 

@@ -264,7 +264,6 @@ const Attack = {
 
 				break;
 			} else if (result === 3) {
-
 				continue;
 			} else {
 				retry = 0;
@@ -310,7 +309,6 @@ const Attack = {
 			} else if (result === 2) {
 				break;
 			} else if (result === 3) {
-
 				continue;
 			} else {
 				retry = 0;
@@ -524,13 +522,8 @@ const Attack = {
 		let monsterList = [],
 			monster = getUnit(1);
 
-		if (range === undefined) {
-			range = 25;
-		}
-
-		if (!center) {
-			center = me;
-		}
+		range === undefined && (range = 25);
+		!center && (center = me);
 
 		switch (typeof classid) {
 		case "number":
@@ -785,7 +778,24 @@ const Attack = {
 
 	// Clear an entire area based on monster spectype
 	clearLevel: function (spectype) {
-		if (Config.MFLeader) {
+		function RoomSort(a, b) {
+			return getDistance(myRoom[0], myRoom[1], a[0], a[1]) - getDistance(myRoom[0], myRoom[1], b[0], b[1]);
+		}
+
+		spectype === undefined && (spectype = 0);
+
+		let room = getRoom();
+		if (!room) return false;
+
+		let myRoom, previousArea;
+		let rooms = [];
+		let currentArea = getArea().id;
+
+		do {
+			rooms.push([room.x * 5 + room.xsize / 2, room.y * 5 + room.ysize / 2]);
+		} while (room.getNext());
+		
+		if (Config.MFLeader && rooms.length > 0) {
 			Pather.makePortal();
 			 // tombs exception
 			if (me.area > 65 && me.area < 73) {
@@ -795,35 +805,9 @@ const Attack = {
 			}
 		}
 
-		let room, result, rooms, myRoom, currentArea, previousArea;
-
-		function RoomSort(a, b) {
-			return getDistance(myRoom[0], myRoom[1], a[0], a[1]) - getDistance(myRoom[0], myRoom[1], b[0], b[1]);
-		}
-
-		room = getRoom();
-
-		if (!room) {
-			return false;
-		}
-
-		if (spectype === undefined) {
-			spectype = 0;
-		}
-
-		rooms = [];
-
-		currentArea = getArea().id;
-
-		do {
-			rooms.push([room.x * 5 + room.xsize / 2, room.y * 5 + room.ysize / 2]);
-		} while (room.getNext());
-
 		while (rooms.length > 0) {
 			// get the first room + initialize myRoom var
-			if (!myRoom) {
-				room = getRoom(me.x, me.y);
-			}
+			!myRoom && (room = getRoom(me.x, me.y));
 
 			if (Loader.scriptName() === "MFHelper" && Config.MFHelper.BreakClearLevel && Config.Leader !== "") {
 				let leader = Misc.findPlayer(Config.Leader);
@@ -836,9 +820,11 @@ const Attack = {
 			}
 
 			if (room) {
-				if (room instanceof Array) { // use previous room to calculate distance
+				// use previous room to calculate distance
+				if (room instanceof Array) {
 					myRoom = [room[0], room[1]];
-				} else { // create a new room to calculate distance (first room, done only once)
+				} else {
+					// create a new room to calculate distance (first room, done only once)
 					myRoom = [room.x * 5 + room.xsize / 2, room.y * 5 + room.ysize / 2];
 				}
 			}
@@ -846,7 +832,7 @@ const Attack = {
 			rooms.sort(RoomSort);
 			room = rooms.shift();
 
-			result = Pather.getNearestWalkable(room[0], room[1], 18, 3);
+			let result = Pather.getNearestWalkable(room[0], room[1], 18, 3);
 
 			if (result) {
 				Pather.moveTo(result[0], result[1], 3, spectype);
@@ -875,7 +861,7 @@ const Attack = {
 		}
 
 		// Barb optimization
-		if (me.classid === 4) {
+		if (me.barbarian) {
 			if (!Attack.checkResist(unitA, Attack.getSkillElement(Config.AttackSkill[(unitA.spectype & 0x7) ? 1 : 3]))) {
 				return 1;
 			}

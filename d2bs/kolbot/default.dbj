@@ -96,6 +96,7 @@ function main () {
 	};
 
 	this.scriptEvent = function (msg) {
+		if (msg && typeof msg !== "string") return;
 		switch (msg) {
 		case "soj":
 			sojPause = true;
