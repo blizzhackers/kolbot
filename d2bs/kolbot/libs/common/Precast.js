@@ -1,6 +1,6 @@
 /**
 *	@filename	Precast.js
-*	@author		noah-, kolton
+*	@author		noah-, kolton, theBGuy
 *	@desc		handle player prebuff sequence
 */
 
@@ -11,7 +11,7 @@ const Precast = new function () {
 	this.bestSlot = {};
 
 	this.precastCTA = function (force) {
-		if (me.classic || me.barbarian || me.inTown || me.shapeshifted) {
+		if (this.haveCTA === -1 || me.classic || me.barbarian || me.inTown || me.shapeshifted) {
 			return false;
 		}
 
@@ -19,7 +19,7 @@ const Precast = new function () {
 			return true;
 		}
 
-		if (this.checkCTA()) {
+		if (this.haveCTA > -1) {
 			let slot = me.weaponswitch;
 
 			Attack.weaponSwitch(this.haveCTA);
@@ -43,7 +43,7 @@ const Precast = new function () {
 			return this.bestSlot[skillId];
 		}
 
-		let item, classid, skillTab,
+		let classid, skillTab,
 			sumCurr = 0,
 			sumSwap = 0;
 
@@ -103,7 +103,7 @@ const Precast = new function () {
 			return me.weaponswitch;
 		}
 
-		item = me.getItem();
+		let item = me.getItem();
 
 		if (item) {
 			do {
@@ -152,7 +152,7 @@ const Precast = new function () {
 				this.precastSkill(sdk.skills.ThunderStorm);
 			}
 
-			if (me.getSkill(sdk.skills.EnergyShield, 0) && (!me.getState(sdk.states.EnergyShield) || force)) {
+			if (Config.UseEnergyShield && me.getSkill(sdk.skills.EnergyShield, 0) && (!me.getState(sdk.states.EnergyShield) || force)) {
 				this.precastSkill(sdk.skills.EnergyShield);
 			}
 
@@ -227,7 +227,7 @@ const Precast = new function () {
 			}
 
 			break;
-		case 4: // Barbarian - TODO: BO duration
+		case sdk.charclass.Barbarian: // - TODO: BO duration
 			if (((!me.getState(sdk.states.Shout) || force) && me.getSkill(sdk.skills.Shout, 1))
 				|| ((!me.getState(sdk.states.BattleOrders) || force) && me.getSkill(sdk.skills.BattleOrders, 1))
 				|| ((!me.getState(sdk.states.BattleCommand) || force) && me.getSkill(sdk.skills.BattleCommand, 1))) {
@@ -249,7 +249,7 @@ const Precast = new function () {
 			}
 
 			break;
-		case sdk.charclass.Druid: // Druid
+		case sdk.charclass.Druid:
 			if (me.getSkill(sdk.skills.CycloneArmor, 1) && (!me.getState(sdk.states.CycloneArmor) || force)) {
 				this.precastSkill(sdk.skills.CycloneArmor);
 			}
@@ -337,15 +337,17 @@ const Precast = new function () {
 			switch (Config.SummonShadow) {
 			case 1:
 			case "Warrior":
-				this.summon(sdk.skills.ShadowWarrior, sdk.minions.Shadow);
+				buffSummons = this.summon(sdk.skills.ShadowWarrior, sdk.minions.Shadow);
 
 				break;
 			case 2:
 			case "Master":
-				this.summon(sdk.skills.ShadowMaster, sdk.minions.Shadow);
+				buffSummons = this.summon(sdk.skills.ShadowMaster, sdk.minions.Shadow);
 
 				break;
 			}
+
+			buffSummons && this.precastCTA(force);
 
 			break;
 		}
@@ -354,31 +356,23 @@ const Precast = new function () {
 	};
 
 	this.checkCTA = function () {
-		let item;
+		if (this.haveCTA > -1 || me.barbarian) return true;
 
-		if (this.haveCTA > -1) {
-			return true;
-		}
+		let check = me.checkItem({name: sdk.locale.items.CalltoArms, equipped: true})
 
-		item = me.getItem(-1, 1);
+		if (check.have) {
+			switch (check.item.bodylocation) {
+			case 4:
+			case 5:
+				this.haveCTA = me.weaponswitch;
 
-		if (item) {
-			do {
-				if (item.getPrefix(20519)) { // Call to Arms
-					switch (item.bodylocation) {
-					case 4:
-					case 5:
-						this.haveCTA = me.weaponswitch;
+				return true;
+			case 11:
+			case 12:
+				this.haveCTA = me.weaponswitch ^ 1;
 
-						return true;
-					case 11:
-					case 12:
-						this.haveCTA = me.weaponswitch ^ 1;
-
-						return true;
-					}
-				}
-			} while (item.getNext());
+				return true;
+			}
 		}
 
 		return false;

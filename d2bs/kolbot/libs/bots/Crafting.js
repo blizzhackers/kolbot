@@ -400,9 +400,9 @@ function shopStuff(npcId, classids, amount) {
 			npc = getInteractedNPC();
 
 		if (npc) {
-			items = npc.getItems();
+			items = npc.getItemsEx();
 
-			if (items) {
+			if (items.length) {
 				for (i = 0; i < items.length; i += 1) {
 					if (Storage.Inventory.CanFit(items[i]) &&
 							Pickit.canPick(items[i]) &&

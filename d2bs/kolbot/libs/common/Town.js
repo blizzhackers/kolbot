@@ -69,6 +69,10 @@ const Town = {
 
 	// Do town chores
 	doChores: function (repair = false) {
+		while (!me.gameReady) {
+			delay(250 + me.ping);
+		}
+
 		!me.inTown && this.goToTown();
 
 		let preAct = me.act;
@@ -99,7 +103,9 @@ const Town = {
 
 		me.act !== preAct && this.goToTown(preAct);
 		me.cancelUIFlags();
-		!me.barbarian && !Precast.checkCTA() && Precast.doPrecast(false);
+		!me.barbarian && Precast.haveCTA === -1 && Precast.doPrecast(false);
+
+		delay(200 + me.ping * 2);
 
 		return true;
 	},
@@ -319,7 +325,7 @@ const Town = {
 			return true;
 		}
 
-		if (me.diff === 0 && Pather.accessToAct(4) && me.act < 4) {
+		if (me.normal && Pather.accessToAct(4) && me.act < 4) {
 			this.goToTown(4);
 		}
 
@@ -1788,7 +1794,7 @@ const Town = {
 	},
 
 	clearScrolls: function () {
-		let items = me.getItems();
+		let items = me.getItemsEx();
 
 		for (let i = 0; !!items && i < items.length; i += 1) {
 			if (items[i].location === 3 && items[i].mode === 0 && items[i].itemType === 22) {
@@ -2150,7 +2156,7 @@ const Town = {
 
 		if (!me.inTown) {
 			if (!Pather.makePortal(true)) {
-				throw new Error("Town.goToTown: Failed to make TP");
+				console.warn("Town.goToTown: Failed to make TP");
 			}
 
 			if (!me.inTown && !Pather.usePortal(null, me.name)) {

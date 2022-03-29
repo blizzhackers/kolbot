@@ -13,7 +13,7 @@ Attack.init = function (notify = false) {
 		print('Loading custom attack file');
 		include('common/Attacks/' + Config.CustomClassAttack + '.js');
 	} else {
-		include("common/Attacks/" + this.classes[me.classid] + ".js");
+		include("common/Attacks/" + sdk.charclass.nameOf(me.classid) + ".js");
 	}
 
 	if (Config.AttackSkill[1] < 0 || Config.AttackSkill[3] < 0) {
@@ -22,7 +22,6 @@ Attack.init = function (notify = false) {
 
 	if (me.expansion) {
 		this.checkInfinity();
-		this.getCharges();
 		this.getPrimarySlot();
 	}
 };

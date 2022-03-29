@@ -6,10 +6,18 @@
 
 const ClassAttack = {
 	doAttack: function (unit, preattack) {
+		if (!unit) return 1;
+		let gid = unit.gid;
 		let needRepair = Town.needRepair();
 
 		if ((Config.MercWatch && Town.needMerc()) || needRepair.length > 0) {
-			Town.visitTown(!!needRepair.length);
+			print("towncheck");
+
+			if (Town.visitTown(!!needRepair.length)) {
+				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
+					return 1; // lost reference to the mob we were attacking
+				}
+			}
 		}
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Attack.getSkillElement(Config.AttackSkill[0])) && (!me.getState(121) || !Skill.isTimed(Config.AttackSkill[0]))) {
@@ -24,16 +32,8 @@ const ClassAttack = {
 			return 1;
 		}
 
-		let index,
-			attackSkill = -1;
-
-		index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
-
-		if (Attack.getCustomAttack(unit)) {
-			attackSkill = Attack.getCustomAttack(unit)[0];
-		} else {
-			attackSkill = Config.AttackSkill[index];
-		}
+		let index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
+		let attackSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
 
 		if (!Attack.checkResist(unit, attackSkill)) {
 			attackSkill = -1;
@@ -53,20 +53,13 @@ const ClassAttack = {
 	},
 
 	afterAttack: function (pickit) {
-		let needRepair;
-
-		Misc.unShift();
 		Precast.doPrecast(false);
 
-		needRepair = Town.needRepair();
+		let needRepair = Town.needRepair();
 
-		if (needRepair && needRepair.length > 0) { // Repair check
-			Town.visitTown(true);
-		}
-
-		if (pickit) {
-			this.findItem(me.area === 83 ? 60 : 20);
-		}
+		// Repair check
+		needRepair && needRepair.length > 0 && Town.visitTown(true);
+		pickit && this.findItem(me.area === 83 ? 60 : 20);
 	},
 
 	doCast: function (unit, attackSkill) {
@@ -241,29 +234,19 @@ const ClassAttack = {
 	},
 
 	checkCorpse: function (unit) {
-		if (unit.mode !== 0 && unit.mode !== 12) {
+		if (!unit || unit.mode !== sdk.units.monsters.monstermode.Death && unit.mode !== sdk.units.monsters.monstermode.Dead) return false;
+		if ([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3].indexOf(unit.classid) === -1 && unit.spectype === 0) return false;
+
+		// monstats2 doesn't contain guest monsters info. sigh..
+		if (unit.classid <= 575 && !getBaseStat("monstats2", unit.classid, "corpseSel")) {
 			return false;
 		}
 
-		if ([345, 346, 347].indexOf(unit.classid) === -1 && unit.spectype === 0) {
-			return false;
-		}
+		let states = [
+			sdk.states.FrozenSolid, sdk.states.Revive, sdk.states.Redeemed,
+	        sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
+	    ];
 
-		if (unit.classid <= 575 && !getBaseStat("monstats2", unit.classid, "corpseSel")) { // monstats2 doesn't contain guest monsters info. sigh..
-			return false;
-		}
-
-		if (getDistance(me, unit) <= 25 &&
-				!unit.getState(1) && // freeze
-				!unit.getState(96) && // revive
-				!unit.getState(99) && // redeemed
-				!unit.getState(104) && // nodraw
-				!unit.getState(107) && // shatter
-				!unit.getState(118) // noselect
-		) {
-			return true;
-		}
-
-		return false;
+		return !!(getDistance(me, unit) <= 25 && !checkCollision(me, unit, 0x4) && states.every(state => !unit.getState(state)))
 	}
 };

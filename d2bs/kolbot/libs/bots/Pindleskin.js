@@ -37,7 +37,7 @@ function Pindleskin() {
 	Pather.moveTo(10058, 13234);
 
 	try {
-		Attack.clear(15, 0, getLocaleString(22497)); // Pindleskin
+		Attack.kill(getLocaleString(sdk.locale.monsters.Pindleskin));
 	} catch (e) {
 		print(e);
 	}

@@ -92,6 +92,10 @@ const Skill = {
 		case 22: // Guided Arrow
 		case 27: // Immolation Arrow
 		case 31: // Freezing Arrow
+		case sdk.skills.IceBolt:
+		case sdk.skills.IceBlast:
+		case sdk.skills.FireBolt:
+		case sdk.skills.FireBall:
 		case 95: // Revive
 		case 121: // Fist of the Heavens
 		case 140: // Double Throw
@@ -102,42 +106,36 @@ const Skill = {
 			return 50;
 		// Variable range
 		case 42: // Static Field
-			return Math.floor((me.getSkill(42, 1) + 4) * 2 / 3);
+			return Math.floor((me.getSkill(sdk.skills.StaticField, 1) + 3) * 2 / 3);
 		case 132: // Leap
-			let leap = [4, 7, 8, 10, 11, 12, 12, 13, 14, 14, 14, 14, 15, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 17];
-
-			return leap[Math.min(me.getSkill(132, 1) - 1, 24)];
+			{
+				let skLvl = me.getSkill(sdk.skills.Leap, 1);
+				return Math.floor(Math.min(4 + (26 * ((110 * skLvl / (skLvl + 6)) / 100)), 30) * (2 / 3));
+			}
 		case 230: // Arctic Blast
-			let arctic = [5, 6, 6, 6, 6, 7, 7, 8, 8, 8, 8, 9, 9, 10, 10, 10, 10, 11, 11, 12];
-
-			return arctic[Math.min(me.getSkill(230, 1) - 1, 19)];
+			{
+				let skLvl = me.getSkill(sdk.skills.ArcticBlast, 1);
+				let range = Math.floor(((33 + (2 * skLvl)) / 4) * (2 / 3));
+				// Druid using this on physical immunes needs the monsters to be within range of hurricane
+				range > 6 && Config.AttackSkill[5] === sdk.skills.ArcticBlast && (range = 6);
+		
+				return range;
+			}
 		case 49: // Lightning
 		case 84: // Bone Spear
 		case 93: // Bone Spirit
-			if (this.usePvpRange) {
-				return 40;
-			}
-
-			return 15;
+			return !!this.usePvpRange ? 35 : 15;
 		case 47: // Fire Ball
 		case 51: // Fire Wall
 		case 53: // Chain Lightning
 		case 56: // Meteor
 		case 59: // Blizzard
 		case 273: // Mind Blast
-			if (this.usePvpRange) {
-				return 40;
-			}
-
-			return 20;
+			return !!this.usePvpRange ? 35 : 20;
 		}
 
 		// Every other skill
-		if (this.usePvpRange) {
-			return 40;
-		}
-
-		return 20;
+		return !!this.usePvpRange ? 30 : 20;
 	},
 
 	getHand: function (skillId) {
@@ -149,7 +147,6 @@ const Skill = {
 		case 11: // Cold Arrow
 		case 12: // Multiple Shot
 		case 13: // Dodge
-		case 14: // Power Strike
 		case 15: // Poison Javelin
 		case 16: // Exploding Arrow
 		case 18: // Avoid
@@ -158,7 +155,6 @@ const Skill = {
 		case 21: // Ice Arrow
 		case 22: // Guided Arrow
 		case 23: // Penetrate
-		case 24: // Charged Strike
 		case 25: // Plague Javelin
 		case 26: // Strafe
 		case 27: // Immolation Arrow
@@ -166,7 +162,6 @@ const Skill = {
 		case 30: // Fend
 		case 31: // Freezing Arrow
 		case 33: // Pierce
-		case 34: // Lightning Strike
 		case 35: // Lightning Fury
 		case 36: // Fire Bolt
 		case 37: // Warmth
@@ -216,6 +211,9 @@ const Skill = {
 		case 275: // Dragon Flight
 			return 1;
 		case 0: // Normal Attack
+		case 14: // Power Strike
+		case 24: // Charged Strike
+		case 34: // Lightning Strike
 		case 96: // Sacrifice
 		case 97: // Smite
 		case 106: // Zeal
@@ -1242,10 +1240,10 @@ const Misc = {
 	getItemSockets: function (unit) {
 		let i, code,
 			sockets = unit.getStat(194),
-			subItems = unit.getItems(),
+			subItems = unit.getItemsEx(),
 			tempArray = [];
 
-		if (subItems) {
+		if (subItems.length) {
 			switch (unit.sizex) {
 			case 2:
 				switch (unit.sizey) {

@@ -13,11 +13,8 @@ function Frozenstein() {
 		throw new Error("Failed to move to Frozenstein");
 	}
 
-	Attack.clear(15, 0, getLocaleString(22504)); // Frozenstein
-
-	if (Config.Frozenstein.ClearFrozenRiver) {
-		Attack.clearLevel(Config.ClearType);
-	}
+	Attack.kill(getLocaleString(sdk.locale.monsters.Frozenstein));
+	Config.Frozenstein.ClearFrozenRiver && Attack.clearLevel(Config.ClearType);
 
 	return true;
 }

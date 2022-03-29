@@ -1,13 +1,13 @@
 /**
 *	@filename	Attack.js
-*	@author		kolton
+*	@author		kolton, theBGuy
 *	@desc		handle player attacks
 */
 
 // eslint-disable-next-line no-redeclare
 const Attack = {
-	classes: ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"],
 	infinity: false,
+	auradin: false,
 
 	// Initialize attacks
 	init: function () {
@@ -17,18 +17,20 @@ const Attack = {
 			print('Loading custom attack file');
 			include('common/Attacks/' + Config.CustomClassAttack + '.js');
 		} else {
-			include("common/Attacks/" + this.classes[me.classid] + ".js");
+			include("common/Attacks/" + sdk.charclass.nameOf(me.classid) + ".js");
 		}
 
 		if (Config.AttackSkill[1] < 0 || Config.AttackSkill[3] < 0) {
 			showConsole();
-			print("ÿc1Bad attack config. Don't expect your bot to attack.");
+			console.log("ÿc1Bad attack config. Don't expect your bot to attack.");
 		}
 
+		this.getPrimarySlot();
+
 		if (me.expansion) {
+			Precast.checkCTA();
 			this.checkInfinity();
-			this.getCharges();
-			this.getPrimarySlot();
+			this.checkAuradin();
 		}
 	},
 
@@ -76,17 +78,29 @@ const Attack = {
 	},
 
 	getPrimarySlot: function () {
-		if (Config.PrimarySlot === -1) { // determine primary slot if not set
-			if ((Precast.haveCTA > -1) || Precast.checkCTA()) { // have cta
-				if (this.checkSlot(Precast.haveCTA ^ 1)) { // have item on non-cta slot
-					Config.PrimarySlot = Precast.haveCTA ^ 1; // set non-cta slot as primary
-				} else { // other slot is empty
-					Config.PrimarySlot = Precast.haveCTA; // set cta as primary slot
-				}
-			} else if (!this.checkSlot(0) && this.checkSlot(1)) { // only slot II has items
-				Config.PrimarySlot = 1;
-			} else { // both slots have items, both are empty, or only slot I has items
+		// determine primary slot if not set
+		if (Config.PrimarySlot === -1) {
+			if (me.classic) {
 				Config.PrimarySlot = 0;
+			} else {
+				// Always start on main-hand
+				me.weaponswitch !== 0 && this.weaponSwitch(0);
+				// have cta
+				if ((Precast.haveCTA > -1) || Precast.checkCTA()) {
+					// have item on non-cta slot
+					if (this.checkSlot(Precast.haveCTA ^ 1)) {
+						Config.PrimarySlot = Precast.haveCTA ^ 1; // set non-cta slot as primary
+					} else {
+						// other slot is empty
+						Config.PrimarySlot = Precast.haveCTA; // set cta as primary slot
+					}
+				} else if (!this.checkSlot(0) && this.checkSlot(1)) {
+					// only slot II has items
+					Config.PrimarySlot = 1;
+				} else {
+					// both slots have items, both are empty, or only slot I has items
+					Config.PrimarySlot = 0;
+				}
 			}
 		}
 
@@ -154,47 +168,26 @@ const Attack = {
 
 	// Check if player or his merc are using Infinity, and adjust resistance checks based on that
 	checkInfinity: function () {
-		let i, merc, item;
-
-		for (i = 0; i < 3; i += 1) {
-			merc = me.getMerc();
-
-			if (merc) {
-				break;
-			}
-
-			delay(50);
-		}
+		let merc = Misc.poll(function () { return me.getMerc(); }, 2000, (250 + me.ping));
 
 		// Check merc infinity
-		if (merc) {
-			item = merc.getItem();
+		!!merc && (this.infinity = merc.checkItem({name: sdk.locale.items.Infinity}).have);
 
-			if (item) {
-				do {
-					if (item.getPrefix(20566)) {
-						this.infinity = true;
+		// Check player infinity - only check if merc doesn't have
+		!this.infinity && (this.infinity = me.checkItem({name: sdk.locale.items.Infinity, equipped: true}).have);
 
-						return true;
-					}
-				} while (item.getNext());
-			}
-		}
+		return this.infinity;
+	},
 
-		// Check player infinity
-		item = me.getItem(-1, 1);
-
-		if (item) {
-			do {
-				if (item.getPrefix(20566)) {
-					this.infinity = true;
-
-					return true;
-				}
-			} while (item.getNext());
-		}
-
-		return false;
+	checkAuradin: function () {
+		// Check player Dragon, Dream, or HoJ
+		this.auradin = me.getItemsEx(-1, sdk.itemmode.Equipped)
+			.filter(item => item.runeword)
+			.some(function (item) {
+				return [sdk.locale.items.Dragon, sdk.locale.items.Dream, sdk.locale.items.HandofJustice].includes(item.prefixnum);
+			});
+	    
+		return this.auradin;
 	},
 
 	// Kill a monster based on its classId, can pass a unit as well
@@ -373,7 +366,9 @@ const Attack = {
 			attackCount = 0;
 
 		if (bossId) {
-			boss = Misc.poll(function () { return bossId > 999 ? getUnit(1, -1, -1, bossId) : getUnit(1, bossId); }, 2000, 100);
+			boss = Misc.poll(function () {
+				return ((typeof bossId === "number" && bossId > 999) ? getUnit(1, -1, -1, bossId) : getUnit(1, bossId));
+			}, 2000, 100);
 
 			if (!boss) {
 				console.warn("Attack.clear: " + bossId + " not found");
@@ -939,14 +934,9 @@ const Attack = {
 
 	// Open chests when clearing
 	openChests: function (range, x, y) {
-		if (!Config.OpenChests) {
-			return false;
-		}
-
-		if (x === undefined || y === undefined) {
-			x = me.x;
-			y = me.y;
-		}
+		if (!Config.OpenChests) return false;
+		x === undefined && (x = me.x);
+		y === undefined && (y = me.y);
 
 		let unit,
 			list = [],
@@ -974,10 +964,8 @@ const Attack = {
 	},
 
 	buildMonsterList: function () {
-		let monster,
-			monList = [];
-
-		monster = getUnit(1);
+		let monList = [];
+		let monster = getUnit(1);
 
 		if (monster) {
 			do {
@@ -1319,23 +1307,26 @@ const Attack = {
 		this.elements = ["physical", "fire", "lightning", "magic", "cold", "poison", "none"];
 
 		switch (skillId) {
-		case 74: // Corpse Explosion
-		case 144: // Concentrate
-		case 147: // Frenzy
-		case 273: // Minge Blast
+		case sdk.skills.HolyFire:
+			return "fire";
+		case sdk.skills.HolyFreeze:
+			return "cold";
+		case sdk.skills.HolyShock:
+			return "lightning";
+		case sdk.skills.CorpseExplosion:
+		case sdk.skills.Stun:
+		case sdk.skills.Concentrate:
+		case sdk.skills.Frenzy:
+		case sdk.skills.MindBlast:
 		case 500: // Summoner
 			return "physical";
-		case 101: // Holy Bolt
+		case sdk.skills.HolyBolt:
 			return "holybolt"; // no need to use this.elements array because it returns before going over the array
 		}
 
 		let eType = getBaseStat("skills", skillId, "etype");
 
-		if (typeof (eType) === "number") {
-			return this.elements[eType];
-		}
-
-		return false;
+		return typeof (eType) === "number" ? this.elements[eType] : false;
 	},
 
 	// Get a monster's resistance to specified element
@@ -1372,24 +1363,81 @@ const Attack = {
 		return 100;
 	},
 
+	getLowerResistPercent: function () {
+		let calc = function (level) { return Math.floor(Math.min(25 + (45 * ((110 * level) / (level + 6)) / 100), 70))};
+		if (me.getSkill(sdk.skills.LowerResist, 1)) {
+			return calc(me.getSkill(sdk.skills.LowerResist, 1));
+		}
+		return 0;
+	},
+
+	getConvictionPercent: function () {
+		let calc = function (level) { return Math.floor(Math.min(25 + (5 * level), 150))};
+		if (me.expansion && this.checkInfinity()) {
+			return calc(12);
+		}
+		if (me.getSkill(sdk.skills.Conviction, 1)) {
+			return calc(me.getSkill(sdk.skills.Conviction, 1));
+		}
+		return 0;
+	},
+
 	// Check if a monster is immune to specified attack type
-	checkResist: function (unit, val, maxres) {
-		if (unit.type === sdk.unittype.Player) return true;
-		
-		maxres === undefined && (maxres = 100);
+	checkResist: function (unit, val, maxres = 100) {
+		if (!unit || !unit.type || unit.type === sdk.unittype.Player) return true;
+
 		let damageType = typeof val === "number" ? this.getSkillElement(val) : val;
+		let addLowerRes = !!(me.getSkill(sdk.skills.LowerResist, 1) && unit.curseable);
 
 		// Static handler
-		if (val === 42 && this.getResist(unit, damageType) < 100) {
-			return (unit.hpPercent > Config.CastStatic);
+		if (val === sdk.skills.StaticField && this.getResist(unit, damageType) < 100) {
+			return unit.hpPercent > Config.CastStatic;
 		}
 
-		if (this.infinity && ["fire", "lightning", "cold"].indexOf(damageType) > -1 && unit.getState) { // baal in throne room doesn't have getState
-			if (!unit.getState(28)) {
+		// TODO: sometimes unit is out of range of conviction so need to check that
+		// baal in throne room doesn't have getState
+		if (this.infinity && ["fire", "lightning", "cold"].includes(damageType) && unit.getState) {
+			if (!unit.getState(sdk.states.Conviction)) {
+				if (addLowerRes && !unit.getState(sdk.states.LowerResist)) {
+					let lowerResPercent = this.getLowerResistPercent();
+					return (this.getResist(unit, damageType) - (Math.floor((lowerResPercent + 85) / 5))) < 100;
+				}
 				return this.getResist(unit, damageType) < 117;
 			}
 
 			return this.getResist(unit, damageType) < maxres;
+		}
+
+		if (this.auradin && ["physical", "fire", "cold", "lightning"].includes(damageType) && me.getState(sdk.states.Conviction) && unit.getState) {
+			let valid = false;
+
+			// our main dps is not physical despite using zeal
+			if (damageType === "physical") return true;
+
+			if (!unit.getState(sdk.states.Conviction)) {
+				return (this.getResist(unit, damageType) - (this.getConvictionPercent() / 5) < 100);
+			}
+
+			// check unit's fire resistance
+			if (me.getState(sdk.states.HolyFire)) {
+				valid = this.getResist(unit, "fire") < maxres;
+			}
+
+			// check unit's light resistance but only if the above check failed
+			if (me.getState(sdk.states.HolyShock) && !valid) {
+				valid = this.getResist(unit, "lightning") < maxres;
+			}
+
+			// TODO: maybe if still invalid at this point check physical resistance? Although if we are an auradin our physcial dps is low
+
+			return valid;
+		}
+
+		if (addLowerRes && ["fire", "lightning", "cold", "poison"].includes(damageType) && unit.getState) {
+			let lowerResPercent = this.getLowerResistPercent();
+			if (!unit.getState(sdk.states.LowerResist)) {
+				return (this.getResist(unit, damageType) - (Math.floor(lowerResPercent / 5)) < 100);
+			}
 		}
 
 		return this.getResist(unit, damageType) < maxres;
@@ -1524,5 +1572,28 @@ const Attack = {
 		}
 
 		return false;
+	},
+
+	getNearestMonster: function (skipBlocked = false, skipImmune = false) {
+		let gid, distance,
+			monster = getUnit(1),
+			range = 30;
+
+		if (monster) {
+			do {
+				if (monster.attackable && !monster.getParent()) {
+					distance = getDistance(me, monster);
+
+					if (distance < range
+						&& (!skipBlocked || (!checkCollision(me, monster, 0x4) || !checkCollision(me, monster, 0x1)))
+						&& (!skipImmune || Attack.canAttack(monster))) {
+						range = distance;
+						gid = monster.gid;
+					}
+				}
+			} while (monster.getNext());
+		}
+
+		return !!gid ? getUnit(sdk.unittype.Monster, -1, -1, gid) : false;
 	}
 };

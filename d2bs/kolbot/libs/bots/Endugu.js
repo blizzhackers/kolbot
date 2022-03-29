@@ -13,7 +13,7 @@ function Endugu() {
 		throw new Error("Failed to move to Endugu");
 	}
 
-	Attack.clear(15, 0, getLocaleString(2867)); // Witch Doctor Endugu
+	Attack.kill(getLocaleString(sdk.locale.monsters.WitchDoctorEndugu));
 
 	return true;
 }

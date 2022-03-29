@@ -13,7 +13,7 @@ function Bonesaw() {
 		throw new Error("Failed to move to Bonesaw");
 	}
 
-	Attack.clear(15, 0, getLocaleString(22502)); // Bonesaw Breaker
+	Attack.kill(getLocaleString(sdk.locale.monsters.BonesawBreaker));
 
 	if (Config.Bonesaw.ClearDrifterCavern && Pather.moveToExit(116, true)) {
 		Attack.clearLevel(Config.ClearType);

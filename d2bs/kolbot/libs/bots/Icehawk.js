@@ -13,7 +13,7 @@ function Icehawk() {
 		throw new Error("Failed to move to Icehawk");
 	}
 
-	Attack.clear(15, 0, getLocaleString(2864)); // Icehawk Riftwing
+	Attack.kill(getLocaleString(sdk.locale.monsters.IcehawkRiftwing));
 
 	return true;
 }

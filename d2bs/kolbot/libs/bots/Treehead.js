@@ -6,14 +6,14 @@
 
 function Treehead() {
 	Town.doChores();
-	Pather.useWaypoint(5);
+	Pather.useWaypoint(sdk.areas.DarkWood);
 	Precast.doPrecast(true);
 
 	if (!Pather.moveToPreset(me.area, 2, 30, 5, 5)) {
 		throw new Error("Failed to move to Treehead");
 	}
 
-	Attack.clear(15, 0, getLocaleString(2873)); // Treehead Woodfist
+	Attack.kill(getLocaleString(sdk.locale.monsters.TreeheadWoodFist));
 
 	return true;
 }

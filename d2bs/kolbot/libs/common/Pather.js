@@ -275,6 +275,7 @@ const Pather = {
 
 		let useTeleport = this.useTeleport();
 		let tpMana = Skill.getManaCost(sdk.skills.Teleport);
+		!clearPath && !useTeleport && !Config.ClearPath && (clearPath = {Range: 10, Spectype: 0}); // walking characters need to clear in front of them
 		retry === undefined && (retry = useTeleport ? 5 : 15);
 		path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? ([62, 63, 64].indexOf(me.area) > -1 ? 30 : this.teleDistance) : this.walkDistance);
 
@@ -327,6 +328,7 @@ const Pather = {
 					}
 				} else {
 					if (fail > 0 && (!useTeleport || tpMana > me.mp) && !me.inTown) {
+						this.kickBarrels(node.x, node.y);
 						// Don't go berserk on longer paths
 						if (!cleared) {
 							Attack.clear(5) && Misc.openChests(2);
@@ -352,7 +354,7 @@ const Pather = {
 
 					if (fail > 0) {
 						Packet.flash(me.gid);
-						Attack.clear(5) && Misc.openChests(2);
+						!me.inTown && Attack.clear(5) && Misc.openChests(2);
 
 						if (fail >= retry) {
 							break;
@@ -410,45 +412,45 @@ const Pather = {
 			delay(100);
 		}
 
-		if (minDist === undefined) {
-			minDist = me.inTown ? 2 : 4;
-		}
+		if (!x || !y) return false;
+		minDist === undefined && (minDist = me.inTown ? 2 : 4);
 
-		let i, angle, angles, nTimer, whereToClick, tick,
+		let angle, angles, nTimer, whereToClick, _a,
 			nFail = 0,
 			attemptCount = 0;
 
+		// credit @Jaenster
 		// Stamina handler and Charge
 		if (!me.inTown && !me.dead) {
-			if (me.runwalk === 1 && me.stamina / me.staminamax * 100 <= 20) {
-				me.runwalk = 0;
+			// Check if I have a stamina potion and use it if I do
+			if (me.staminaPercent <= 20) {
+				(_a = me.getItemsEx()
+					.filter(function (i) { return i.classid === sdk.items.StaminaPotion && i.isInInventory; })
+					.first()) === null || _a === void 0 ? void 0 : _a.interact();
 			}
-
-			if (me.runwalk === 0 && me.stamina / me.staminamax * 100 >= 50) {
-				me.runwalk = 1;
-			}
-
-			if (Config.Charge && me.classid === 3 && me.mp >= 9 && getDistance(me.x, me.y, x, y) > 8 && Skill.setSkill(107, 1)) {
+			(me.runwalk === 1 && me.staminaPercent <= 15) && (me.runwalk = 0);
+			// the less stamina you have, the more you wait to recover
+			let recover = me.staminaMaxDuration < 30 ? 80 : 50;
+			(me.runwalk === 0 && me.staminaPercent >= recover) && (me.runwalk = 1);
+			if (Config.Charge && me.paladin && me.mp >= 9 && getDistance(me.x, me.y, x, y) > 8 && Skill.setSkill(sdk.skills.Charge, 1)) {
 				if (Config.Vigor) {
-					Skill.setSkill(115, 0);
+					Skill.setSkill(sdk.skills.Vigor, 0);
+				} else if (!Config.Vigor && !Attack.auradin && me.getSkill(sdk.skills.HolyFreeze, 1)) {
+					// Useful in classic to keep mobs cold while you rush them
+					Skill.setSkill(sdk.skills.HolyFreeze, 0);
 				}
-
 				Misc.click(0, 1, x, y);
-
 				while (me.mode !== 1 && me.mode !== 5 && !me.dead) {
 					delay(40);
 				}
 			}
 		}
 
-		if (me.inTown && me.runwalk === 0) {
-			me.runwalk = 1;
-		}
+		(me.inTown && me.runwalk === 0) && (me.runwalk = 1);
 
 		while (getDistance(me.x, me.y, x, y) > minDist && !me.dead) {
-			if (me.classid === 3 && Config.Vigor) {
-				Skill.setSkill(115, 0);
-			}
+			me.paladin && Config.Vigor && Skill.setSkill(sdk.skills.Vigor, 0);
+			me.paladin && !Config.Vigor && Skill.setSkill(Config.AttackSkill[2], 0);
 
 			if (this.openDoors(x, y) && getDistance(me.x, me.y, x, y) <= minDist) {
 				return true;
@@ -461,21 +463,16 @@ const Pather = {
 
 			ModeLoop:
 			while (me.mode !== 2 && me.mode !== 3 && me.mode !== 6) {
-				if (me.dead) {
-					return false;
-				}
+				if (me.dead) return false;
 
 				if ((getTickCount() - nTimer) > 500) {
+					if (nFail >= 3) return false;
+
 					nFail += 1;
-
-					if (nFail >= 3) {
-						return false;
-					}
-
 					angle = Math.atan2(me.y - y, me.x - x);
 					angles = [Math.PI / 2, -Math.PI / 2];
 
-					for (i = 0; i < angles.length; i += 1) {
+					for (let i = 0; i < angles.length; i += 1) {
 						// TODO: might need rework into getnearestwalkable
 						whereToClick = {
 							x: Math.round(Math.cos(angle + angles[i]) * 5 + me.x),
@@ -485,7 +482,7 @@ const Pather = {
 						if (Attack.validSpot(whereToClick.x, whereToClick.y)) {
 							Misc.click(0, 0, whereToClick.x, whereToClick.y);
 
-							tick = getTickCount();
+							let tick = getTickCount();
 
 							while (getDistance(me, whereToClick) > 2 && getTickCount() - tick < 1000) {
 								delay(40);
@@ -501,14 +498,16 @@ const Pather = {
 				delay(10);
 			}
 
+			if (attemptCount > 1) {
+				this.kickBarrels(x, y);
+			}
+
 			// Wait until we're done walking - idle or dead
 			while (getDistance(me.x, me.y, x, y) > minDist && me.mode !== 1 && me.mode !== 5 && !me.dead) {
 				delay(10);
 			}
 
-			if (attemptCount >= 3) {
-				return false;
-			}
+			if (attemptCount >= 3) return false;
 		}
 
 		return !me.dead && getDistance(me.x, me.y, x, y) <= minDist;
@@ -579,6 +578,36 @@ const Pather = {
 					me.overhead("Broke a barricaded wall!");
 				}
 			} while (monstawall.getNext());
+		}
+
+		return false;
+	},
+
+	/*
+		Pather.kickBarrels(x, y);
+		x - the x coord of the node close to the barrel
+		y - the y coord of the node close to the barrel
+	*/
+	kickBarrels: function (x, y) {
+		if (me.inTown) return false;
+
+		x === undefined && (x = me.x);
+		y === undefined && (y = me.y);
+
+		// anything small and annoying really
+		let barrels = getUnits(sdk.unittype.Object)
+			.filter(function (el) {
+				return (el.name && el.mode === 0 && ["barrel", "largeurn", "jar3", "jar2", "jar1", "urn", "jug"].includes(el.name.toLowerCase())
+				&& ((getDistance(el, x, y) < 4 && el.distance < 9) || el.distance < 4));
+			});
+
+		while (barrels.length > 0) {
+			barrels.sort(Sort.units);
+			let unit = barrels.shift();
+
+			if (unit && !checkCollision(me, unit, 0x4)) {
+				Misc.click(0, 0, unit);
+			}
 		}
 
 		return false;
@@ -699,6 +728,10 @@ const Pather = {
 
 		for (let i = 0; i < areas.length; i += 1) {
 			let checkExits = [];
+
+			while (!me.gameReady) {
+				delay(250 + me.ping);
+			}
 			
 			area = getArea();
 
@@ -729,7 +762,6 @@ const Pather = {
 			if (checkExits.length > 0) {
 				// if there are multiple exits to the same location find the closest one
 				checkExits.length > 1 && (checkExits = checkExits.sort((a, b) => getDistance(me, a.x, a.y) - getDistance(me, b.x, b.y)));
-
 				for (let k = 0; k < checkExits.length; k++) {
 					currExit = checkExits[k];
 					dest = this.getNearestWalkable(currExit.x, currExit.y, 5, 1);
@@ -1164,8 +1196,7 @@ const Pather = {
 	makePortal: function (use = false) {
 		if (me.inTown) return true;
 
-		let portal, oldPortal, oldGid;
-		let buggedPortal;
+		let oldGid;
 
 		for (let i = 0; i < 5; i += 1) {
 			if (me.dead) {
@@ -1175,7 +1206,7 @@ const Pather = {
 			let tpTool = Town.getTpTool();
 			if (!tpTool) return false;
 
-			oldPortal = getUnits(sdk.unittype.Object, "portal")
+			let oldPortal = getUnits(sdk.unittype.Object, "portal")
 				.filter(function (p) { return p.getParent() === me.name; })
 				.first();
 
@@ -1185,29 +1216,18 @@ const Pather = {
 
 			MainLoop:
 			while (getTickCount() - tick < Math.max(500 + i * 100, me.ping * 2 + 100)) {
-				portal = getUnits(sdk.unittype.Object, "portal")
+				let portal = getUnits(sdk.unittype.Object, "portal")
 					.filter(function (p) { return p.getParent() === me.name && p.gid !== oldGid; })
 					.first();
 
 				if (portal) {
 					if (use) {
-						if (this.usePortal(null, null, copyUnit(portal))) return true;
+						if (this.usePortal(null, null, copyUnit(portal))) {
+							return true;
+						}
 						break MainLoop; // don't spam usePortal
 					} else {
 						return copyUnit(portal);
-					}
-				} else {
-					// probably getUnit bug - find portal without owner thats blue
-					buggedPortal = getUnits(sdk.unittype.Object, "portal")
-						.filter(function (p) { return !p.getParent() && p.gid !== oldGid && p.classid === 41; })
-						.first();
-					if (buggedPortal) {
-						if (use) {
-							if (this.usePortal(null, null, copyUnit(buggedPortal))) return true;
-							break MainLoop; // don't spam usePortal
-						} else {
-							return copyUnit(buggedPortal);
-						}
 					}
 				}
 
@@ -1234,10 +1254,10 @@ const Pather = {
 
 		me.cancel();
 
-		let tick, portal,
+		let tick, i,
 			preArea = me.area;
 
-		for (let i = 0; i < 10; i += 1) {
+		for (i = 0; i < 10; i += 1) {
 			if (me.dead) {
 				break;
 			}
@@ -1246,7 +1266,7 @@ const Pather = {
 				Town.move("portalspot");
 			}
 
-			portal = unit ? copyUnit(unit) : this.getPortal(targetArea, owner);
+			let portal = unit ? copyUnit(unit) : this.getPortal(targetArea, owner);
 
 			if (portal) {
 				if (portal.area === me.area) {
@@ -1307,6 +1327,10 @@ const Pather = {
 			delay(200 + me.ping);
 		}
 
+		if (portal && me.area === preArea && portal.classid === 42 && !portal.getParent()) {
+			sendPacket(1, 0x13, 4, 0x2, 4, portal.gid);
+		}
+
 		return targetArea ? me.area === targetArea : me.area !== preArea;
 	},
 
@@ -1357,16 +1381,10 @@ const Pather = {
 		coll - collision flag to avoid
 	*/
 	getNearestWalkable: function (x, y, range, step, coll, size) {
-		if (!step) {
-			step = 1;
-		}
+		!step && (step = 1);
+		coll === undefined && (coll = 0x1);
 
-		if (coll === undefined) {
-			coll = 0x1;
-		}
-
-		let i, j,
-			distance = 1,
+		let distance = 1,
 			result = false;
 
 		// Check if the original spot is valid
@@ -1376,8 +1394,8 @@ const Pather = {
 
 		MainLoop:
 		while (!result && distance < range) {
-			for (i = -distance; i <= distance; i += 1) {
-				for (j = -distance; j <= distance; j += 1) {
+			for (let i = -distance; i <= distance; i += 1) {
+				for (let j = -distance; j <= distance; j += 1) {
 					// Check outer layer only (skip previously checked)
 					if (Math.abs(i) >= Math.abs(distance) || Math.abs(j) >= Math.abs(distance)) {
 						if (this.checkSpot(x + i, y + j, coll, false, size)) {
@@ -1405,20 +1423,13 @@ const Pather = {
 		cacheOnly - use only cached room data
 	*/
 	checkSpot: function (x, y, coll, cacheOnly, size) {
-		let dx, dy, value;
+		coll === undefined && (coll = 0x1);
+		!size && (size = 1);
 
-		if (coll === undefined) {
-			coll = 0x1;
-		}
-
-		if (!size) {
-			size = 1;
-		}
-
-		for (dx = -size; dx <= size; dx += 1) {
-			for (dy = -size; dy <= size; dy += 1) {
+		for (let dx = -size; dx <= size; dx += 1) {
+			for (let dy = -size; dy <= size; dy += 1) {
 				if (Math.abs(dx) !== Math.abs(dy)) {
-					value = CollMap.getColl(x + dx, y + dy, cacheOnly);
+					let value = CollMap.getColl(x + dx, y + dy, cacheOnly);
 
 					if (value & coll) {
 						return false;

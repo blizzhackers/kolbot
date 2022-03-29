@@ -13,7 +13,7 @@ function Eyeback() {
 		throw new Error("Failed to move to Eyeback the Unleashed");
 	}
 
-	Attack.clear(15, 0, getLocaleString(22499)); // Eyeback the Unleashed
+	Attack.kill(getLocaleString(sdk.locale.monsters.EyebacktheUnleashed));
 
 	return true;
 }

@@ -52,7 +52,8 @@ let sdk = require('../modules/sdk');
 		const ret = original.apply(this, args);
 
 		// deal with bug
-		if (first === 1 && typeof second === 'string' && ret && ((me.act === 1 && ret.classid === 149) || me.act === 2 && ret.classid === 268)) {
+		if (first === 1 && typeof second === 'string' && ret 
+			&& ((me.act === 1 && ret.classid === 149) || me.act === 2 && ret.classid === 268)) {
 			return null;
 		}
 
@@ -429,6 +430,81 @@ me.findItems = function (id = -1, mode = -1, loc = false) {
 	}
 
 	return list;
+};
+
+/**
+ * @description Returns item given by itemInfo
+ * @param itemInfo object -
+ * 	{
+ * 		classid: Number,
+ * 		itemtype: Number,
+ * 		quality: Number,
+ * 		runeword: Boolean,
+ * 		ethereal: Boolean,
+ * 		name: getLocaleString(id) || localeStringId,
+ * 		equipped: Boolean || Number (bodylocation)
+ * 	}
+ * @returns Unit[]
+ */
+Unit.prototype.checkItem = function (itemInfo) {
+	if (typeof itemInfo !== "object") {
+		return { have: false, item: null};
+	}
+
+	let itemObj = Object.assign({}, {
+		classid: -1,
+		itemtype: -1,
+		quality: -1,
+		runeword: null,
+		ethereal: null,
+		equipped: null,
+		name: ""
+	}, itemInfo);
+
+	// convert id into string
+	typeof itemObj.name === "number" && (itemObj.name = getLocaleString(itemObj.name));
+
+	let items = this.getItemsEx()
+		.filter(function (item) {
+			return (!item.questItem
+				&& (itemObj.classid === -1 || item.classid === itemObj.classid)
+				&& (itemObj.itemtype === -1 || item.itemType === itemObj.itemtype)
+				&& (itemObj.quality === -1 || item.quality === itemObj.quality)
+				&& (itemObj.runeword === null || (item.runeword === itemObj.runeword))
+				&& (itemObj.ethereal === null || (item.ethereal === itemObj.ethereal))
+				&& (itemObj.equipped === null || (typeof itemObj.equipped === "number" ? item.bodylocation === itemObj.equipped : item.isEquipped === itemObj.equipped))
+				&& (!itemObj.name || item.fname.toLowerCase().includes(itemObj.name.toLowerCase()))
+				);
+		});
+	if (items.length > 0) {
+		return {
+			have: true,
+			item: copyUnit(items.first())
+		};
+	} else {
+		return {
+			have: false,
+			item: null
+		};
+	}
+};
+
+/**
+ * @description Return the items of a player, or an empty array
+ * @param args
+ * @returns Unit[]
+ */
+Unit.prototype.getItems = function (...args) {
+	let items = [];
+	let item = this.getItem.apply(this, args);
+
+	if (item) {
+		do {
+			items.push(copyUnit(item));
+		} while (item.getNext());
+	}
+
+	return Array.isArray(items) ? items : [];
 };
 
 Unit.prototype.getItemsEx = function (...args) {
@@ -1090,24 +1166,6 @@ Unit.prototype.getColor = function () {
 	return -1;
 };
 
-
-/**
- * @description Return the items of a player, or an empty array
- * @param args
- * @returns Unit[]
- */
-Unit.prototype.getItems = function (...args) {
-	let item = this.getItem.apply(this, args), items = [];
-
-	if (item) {
-		do {
-			items.push(copyUnit(item));
-		} while (item.getNext());
-	}
-
-	return items;
-};
-
 /**
  * @description Used upon item units like ArachnidMesh.castChargedSkill([skillId]) or directly on the "me" unit me.castChargedSkill(278);
  * @param {int} skillId = undefined
@@ -1171,7 +1229,7 @@ Unit.prototype.castChargedSkill = function (...args) {
 
 		chargedItems = [];
 
-		this.getItems(-1) // Item must be in inventory, or a charm in inventory
+		this.getItemsEx(-1) // Item must be in inventory, or a charm in inventory
 			.filter(item => item && (item.location === 1 || (item.location === 3 && item.itemType === 82)))
 			.forEach(function (item) {
 				let stats = item.getStat(-2);
@@ -1270,7 +1328,7 @@ Unit.prototype.equip = function (destLocation = undefined) {
 	print('equiping ' + this.name);
 
 
-	let currentEquiped = me.getItems(-1).filter(item =>
+	let currentEquiped = me.getItemsEx(-1).filter(item =>
 		destLocation.indexOf(item.bodylocation) !== -1
 		|| ( // Deal with double handed weapons
 
@@ -1950,7 +2008,8 @@ Object.defineProperties(me, {
 });
 
 Unit.prototype.__defineGetter__('attackable', function () {
-	if (this === undefined || this.area !== me.area) return false;
+	if (this === undefined || !copyUnit(this).x) return false;
+	if (this.type > 1) return false;
 	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) {
 		return true;
 	}
@@ -1978,7 +2037,7 @@ Unit.prototype.__defineGetter__('attackable', function () {
 
 Unit.prototype.__defineGetter__('curseable', function () {
 	// must be player or monster
-	if (this === undefined || this.type > 1) return false;
+	if (this === undefined || !copyUnit(this).x || this.type > 1) return false;
 
 	// attract can't be overridden
 	if (this.getState(sdk.states.Attract)) return false;

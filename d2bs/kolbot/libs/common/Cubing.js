@@ -1120,7 +1120,7 @@ const Cubing = {
 			origin = [], cube = me.getItem(549/* the cube it self*/), cubeInStash;
 
 		// Get a list of all items
-		let revpots = me.getItems()
+		let revpots = me.getItemsEx()
 			.filter(item => item.classid === 515); // Filter out all those rev pots
 
 		// Stop if less as 3 pots

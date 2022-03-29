@@ -13,7 +13,7 @@ function Rakanishu() {
 		throw new Error("Failed to move to Rakanishu");
 	}
 
-	Attack.clear(15, 0, getLocaleString(2872)); // Rakanishu
+	Attack.kill(getLocaleString(sdk.locale.monsters.Rakanishu));
 
 	if (Config.Rakanishu.KillGriswold && me.getQuest(4, 4)) {
 		if (!Pather.usePortal(38)) {

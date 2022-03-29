@@ -13,7 +13,7 @@ function BoneAsh() {
 		throw new Error("Failed to move to Bone Ash");
 	}
 
-	Attack.kill(getLocaleString(2878)); // Bone Ash
+	Attack.kill(getLocaleString(sdk.locale.monsters.BoneAsh));
 	Pickit.pickItems();
 
 	return true;

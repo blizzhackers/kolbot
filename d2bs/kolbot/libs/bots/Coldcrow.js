@@ -17,7 +17,7 @@ function Coldcrow() {
 		throw new Error("Failed to move to Coldcrow");
 	}
 
-	Attack.clear(15, 0, getLocaleString(2871)); // Coldcrow
+	Attack.kill(getLocaleString(sdk.locale.monsters.Coldcrow));
 
 	return true;
 }

@@ -6,18 +6,15 @@
 
 function Snapchip() {
 	Town.doChores();
-	Pather.useWaypoint(118);
+	Pather.useWaypoint(sdk.areas.AncientsWay);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToExit(119, true) || !Pather.moveToPreset(me.area, 2, 397)) {
+	if (!Pather.moveToExit(sdk.areas.IcyCellar, true) || !Pather.moveToPreset(me.area, 2, 397)) {
 		throw new Error("Failed to move to Snapchip Shatter");
 	}
 
-	Attack.clear(15, 0, getLocaleString(22496)); // Snapchip Shatter
-
-	if (Config.Snapchip.ClearIcyCellar) {
-		Attack.clearLevel(Config.ClearType);
-	}
+	Attack.kill(getLocaleString(sdk.locale.monsters.SnapchipShatter));
+	Config.Snapchip.ClearIcyCellar && Attack.clearLevel(Config.ClearType);
 
 	return true;
 }

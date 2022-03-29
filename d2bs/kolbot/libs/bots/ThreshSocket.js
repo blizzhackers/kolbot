@@ -6,14 +6,14 @@
 
 function ThreshSocket() {
 	Town.doChores();
-	Pather.useWaypoint(112);
+	Pather.useWaypoint(sdk.areas.ArreatPlateau);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToExit(113, false)) {
+	if (!Pather.moveToExit(sdk.areas.CrystalizedPassage, false)) {
 		throw new Error("Failed to move to Thresh Socket");
 	}
 
-	Attack.kill(getLocaleString(22498)); // Thresh Socket
+	Attack.kill(getLocaleString(sdk.locale.monsters.ThreshSocket));
 	Pickit.pickItems();
 
 	return true;

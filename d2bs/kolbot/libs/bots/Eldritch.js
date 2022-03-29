@@ -9,7 +9,7 @@ function Eldritch() {
 	Pather.useWaypoint(111);
 	Precast.doPrecast(true);
 	Pather.moveTo(3745, 5084);
-	Attack.clear(15, 0, getLocaleString(22500)); // Eldritch the Rectifier
+	Attack.kill(getLocaleString(sdk.locale.monsters.EldritchtheRectifier));
 
 	if (Config.Eldritch.OpenChest) {
 		let chest = getPresetUnit(me.area, 2, 455);
@@ -27,12 +27,12 @@ function Eldritch() {
 
 	if (Config.Eldritch.KillShenk) {
 		Pather.moveTo(3876, 5130);
-		Attack.clear(15, 0, getLocaleString(22435)); // Shenk the Overseer
+		Attack.kill(getLocaleString(sdk.locale.monsters.ShenktheOverseer));
 	}
 
 	if (Config.Eldritch.KillDacFarren) {
 		Pather.moveTo(4478, 5108);
-		Attack.clear(15, 0, getLocaleString(22501)); // Dac Farren
+		Attack.kill(getLocaleString(sdk.locale.monsters.DacFarren));
 	}
 
 	return true;

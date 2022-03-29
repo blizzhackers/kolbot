@@ -1,18 +1,33 @@
 /**
 *	@filename	Sorceress.js
-*	@author		kolton
+*	@author		kolton, theBGuy
 *	@desc		Sorceress attack sequence
 */
 
 const ClassAttack = {
 	doAttack: function (unit, preattack) {
+		if (!unit) return 1;
+		let gid = unit.gid;
+
 		if (Config.MercWatch && Town.needMerc()) {
 			print("mercwatch");
-			Town.visitTown();
+
+			if (Town.visitTown()) {
+				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
+					console.debug("Lost reference to unit");
+					return 1; // lost reference to the mob we were attacking
+				}
+			}
 		}
 
-		if (!me.getState(30) && me.getSkill(58, 1)) {
-			Skill.cast(58, 0);
+		// Keep Energy Shield active
+		if (Config.UseEnergyShield && !me.getState(sdk.states.EnergyShield) && me.getSkill(sdk.skills.EnergyShield, 1)) {
+			Skill.cast(sdk.skills.EnergyShield, 0);
+		}
+
+		// Keep Thunder-Storm active
+		if (!me.getState(sdk.states.ThunderStorm) && me.getSkill(sdk.skills.ThunderStorm, 1)) {
+			Skill.cast(sdk.skills.ThunderStorm, 0);
 		}
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.getState(121) || !Skill.isTimed(Config.AttackSkill[0]))) {
@@ -27,13 +42,14 @@ const ClassAttack = {
 			return 1;
 		}
 
-		let index, staticRange, checkSkill, result,
+		let checkSkill,
 			mercRevive = 0,
 			timedSkill = -1,
 			untimedSkill = -1;
+		let useStatic = (Config.StaticList.length > 0 && Config.CastStatic < 100 && me.getSkill(42, 1) && Attack.checkResist(unit, "lightning"));
 
 		// Static
-		if (Config.CastStatic < 100 && me.getSkill(42, 1) && Attack.checkResist(unit, "lightning") && Config.StaticList.some(
+		if (useStatic && Config.StaticList.some(
 			function (id) {
 				if (unit) {
 					switch (typeof id) {
@@ -56,11 +72,11 @@ const ClassAttack = {
 
 				return 0;
 			}
-		) && Math.round(unit.hp * 100 / unit.hpmax) > Config.CastStatic) {
-			staticRange = Math.floor((me.getSkill(42, 1) + 4) * 2 / 3);
+		) && unit.hpPercent > Config.CastStatic) {
+			let staticRange = Math.floor((me.getSkill(42, 1) + 4) * 2 / 3);
 
-			while (!me.dead && Math.round(unit.hp * 100 / unit.hpmax) > Config.CastStatic && Attack.checkMonster(unit)) {
-				if (getDistance(me, unit) > staticRange || checkCollision(me, unit, 0x4)) {
+			while (!me.dead && unit.hpPercent > Config.CastStatic && unit.attackable) {
+				if (unit.distance > staticRange || checkCollision(me, unit, 0x4)) {
 					if (!Attack.getIntoPosition(unit, staticRange, 0x4)) {
 						return 0;
 					}
@@ -70,16 +86,15 @@ const ClassAttack = {
 					break;
 				}
 			}
+
+			// re-check mob after static
+			if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) return 1; // lost reference to the mob we were attacking or its dead
 		}
 
-		index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
+		let index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
 
 		// Get timed skill
-		if (Attack.getCustomAttack(unit)) {
-			checkSkill = Attack.getCustomAttack(unit)[0];
-		} else {
-			checkSkill = Config.AttackSkill[index];
-		}
+		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
 
 		if (Attack.checkResist(unit, checkSkill) && ([56, 59].indexOf(checkSkill) === -1 || Attack.validSpot(unit.x, unit.y))) {
 			timedSkill = checkSkill;
@@ -88,11 +103,7 @@ const ClassAttack = {
 		}
 
 		// Get untimed skill
-		if (Attack.getCustomAttack(unit)) {
-			checkSkill = Attack.getCustomAttack(unit)[1];
-		} else {
-			checkSkill = Config.AttackSkill[index + 1];
-		}
+		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[1] : Config.AttackSkill[index + 1];
 
 		if (Attack.checkResist(unit, checkSkill) && ([56, 59].indexOf(checkSkill) === -1 || Attack.validSpot(unit.x, unit.y))) {
 			untimedSkill = checkSkill;
@@ -110,23 +121,40 @@ const ClassAttack = {
 			untimedSkill = Config.LowManaSkill[1];
 		}
 
-		result = this.doCast(unit, timedSkill, untimedSkill);
+		let result = this.doCast(unit, timedSkill, untimedSkill);
 
-		if (result === 2 && Config.TeleStomp && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
-			while (Attack.checkMonster(unit)) {
+		if (result === 2 && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
+			let merc = me.getMerc();
+			let haveTK = !!(me.getSkill(sdk.skills.Telekinesis, 1));
+
+			while (unit.attackable) {
+				if (Misc.townCheck()) {
+					if (!unit || !copyUnit(unit).x) {
+						unit = Misc.poll(function () { return getUnit(1, -1, -1, gid); }, 1000, 80);
+					}
+				}
+
+				if (!unit) return 1;
+
 				if (Town.needMerc()) {
 					if (Config.MercWatch && mercRevive++ < 1) {
 						Town.visitTown();
 					} else {
 						return 2;
 					}
+
+					(merc === undefined || !merc) && (merc = me.getMerc());
 				}
 
-				if (getDistance(me, unit) > 3) {
+				if (!!merc && getDistance(merc, unit) > 5) {
 					Pather.moveToUnit(unit);
+
+					let spot = Attack.findSafeSpot(unit, 10, 5, 9);
+					!!spot && Pather.walkTo(spot.x, spot.y);
 				}
 
-				this.doCast(unit, Config.AttackSkill[1], Config.AttackSkill[2]);
+				let closeMob = Attack.getNearestMonster(true, true);
+				!!closeMob && closeMob.gid !== gid ? this.doCast(closeMob, timedSkill, untimedSkill) : haveTK && Skill.cast(sdk.skills.Telekinesis, 0, unit);
 			}
 
 			return 1;
@@ -141,14 +169,12 @@ const ClassAttack = {
 
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, timedSkill, untimedSkill) {
-		let i, walk;
+		let walk, noMana = false;
 
 		// No valid skills can be found
-		if (timedSkill < 0 && untimedSkill < 0) {
-			return 2;
-		}
+		if (timedSkill < 0 && untimedSkill < 0) return 2;
 
-		if (timedSkill > -1 && (!me.getState(121) || !Skill.isTimed(timedSkill))) {
+		if (timedSkill > -1 && (!me.getState(121) || !Skill.isTimed(timedSkill)) && Skill.getManaCost(timedSkill) < me.mp) {
 			if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
 				return 0;
 			}
@@ -167,9 +193,11 @@ const ClassAttack = {
 			}
 
 			return 1;
+		} else {
+			noMana = !me.skillDelay;
 		}
 
-		if (untimedSkill > -1) {
+		if (untimedSkill > -1 && Skill.getManaCost(untimedSkill) < me.mp) {
 			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
 				return 0;
 			}
@@ -188,9 +216,14 @@ const ClassAttack = {
 			}
 
 			return 1;
+		} else {
+			noMana = true;
 		}
 
-		for (i = 0; i < 25; i += 1) {
+		// don't count as failed
+		if (noMana) return 3;
+
+		for (let i = 0; i < 25; i += 1) {
 			if (!me.getState(121)) {
 				break;
 			}
