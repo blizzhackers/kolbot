@@ -1452,13 +1452,12 @@ const Town = {
 
 	reviveMerc: function () {
 		if (!this.needMerc()) return true;
+		let preArea = me.area;
 
 		// avoid Aheara
 		me.act === 3 && this.goToTown(Pather.accessToAct(4) ? 4 : 2);
 
-		let preArea = me.area,
-			npc = this.initNPC("Merc", "reviveMerc");
-
+		let npc = this.initNPC("Merc", "reviveMerc");
 		if (!npc) return false;
 
 		MainLoop:

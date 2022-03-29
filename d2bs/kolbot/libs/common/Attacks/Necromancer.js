@@ -56,7 +56,7 @@ const ClassAttack = {
 		return true;
 	},
 
-	getCurseState: function (unit, curseID) {
+	canCurse: function (unit, curseID) {
 		if (unit === undefined || unit.dead || !me.getSkill(curseID, 1)) return false;
 
 		let state = 0;
@@ -87,7 +87,7 @@ const ClassAttack = {
 			break;
 		case sdk.skills.Confuse:
 			// doens't work on specials
-			if (unit.scareable || unit.classid === sdk.monsters.ListerTheTormentor) return false;
+			if (!unit.scareable) return false;
 			state = sdk.states.Confuse;
 
 			break;
@@ -97,7 +97,7 @@ const ClassAttack = {
 			break;
 		case sdk.skills.Attract:
 			// doens't work on specials
-			if (unit.scareable || unit.classid === sdk.monsters.ListerTheTormentor) return false;
+			if (!unit.scareable) return false;
 			state = sdk.states.Attract;
 
 			break;
@@ -110,7 +110,7 @@ const ClassAttack = {
 
 			break;
 		default:
-			print("(ÿc9getCurseState) :: ÿc1Invalid Curse ID: " + curseID);
+			print("(ÿc9canCurse) :: ÿc1Invalid Curse ID: " + curseID);
 			
 			return false;
 		}
@@ -144,7 +144,7 @@ const ClassAttack = {
 	doAttack: function (unit, preattack) {
 		if (!unit || unit.dead) return 1;
 
-		let checkSkill, result,
+		let checkSkill,
 			mercRevive = 0,
 			timedSkill = -1,
 			untimedSkill = -1,
@@ -178,7 +178,7 @@ const ClassAttack = {
 		if (unit.curseable) {
 			customCurse = this.getCustomCurse(unit);
 
-			if (customCurse && !this.getCurseState(unit, customCurse)) {
+			if (customCurse && this.canCurse(unit, customCurse)) {
 				if (getDistance(me, unit) > 25 || checkCollision(me, unit, 0x4)) {
 					if (!Attack.getIntoPosition(unit, 25, 0x4)) {
 						return 0;
@@ -189,7 +189,7 @@ const ClassAttack = {
 
 				return 1;
 			} else if (!customCurse) {
-				if (Config.Curse[0] > 0 && (unit.spectype & 0x7) && !this.getCurseState(unit, Config.Curse[0])) {
+				if (Config.Curse[0] > 0 && (unit.spectype & 0x7) && this.canCurse(unit, Config.Curse[0])) {
 					if (getDistance(me, unit) > 25 || checkCollision(me, unit, 0x4)) {
 						if (!Attack.getIntoPosition(unit, 25, 0x4)) {
 							return 0;
@@ -201,7 +201,7 @@ const ClassAttack = {
 					return 1;
 				}
 
-				if (Config.Curse[1] > 0 && !(unit.spectype & 0x7) && !this.getCurseState(unit, Config.Curse[1])) {
+				if (Config.Curse[1] > 0 && !(unit.spectype & 0x7) && this.canCurse(unit, Config.Curse[1])) {
 					if (getDistance(me, unit) > 25 || checkCollision(me, unit, 0x4)) {
 						if (!Attack.getIntoPosition(unit, 25, 0x4)) {
 							return 0;
@@ -414,7 +414,7 @@ const ClassAttack = {
 				corpse = corpseList.shift();
 
 				if (me.getMinionCount(4) < this.maxSkeletons) {
-					if (!Skill.cast(70, 0, corpse)) {
+					if (!Skill.cast(sdk.skills.RaiseSkeleton, 0, corpse)) {
 						return false;
 					}
 
@@ -429,7 +429,7 @@ const ClassAttack = {
 						delay(10);
 					}
 				} else if (me.getMinionCount(5) < this.maxMages) {
-					if (!Skill.cast(80, 0, corpse)) {
+					if (!Skill.cast(sdk.skills.RaiseSkeletalMage, 0, corpse)) {
 						return false;
 					}
 
@@ -447,7 +447,7 @@ const ClassAttack = {
 					if (this.checkCorpse(corpse, true)) {
 						print("Reviving " + corpse.name);
 
-						if (!Skill.cast(95, 0, corpse)) {
+						if (!Skill.cast(sdk.skills.Revive, 0, corpse)) {
 							return false;
 						}
 

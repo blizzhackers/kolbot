@@ -360,7 +360,7 @@ const Attack = {
 
 		if (typeof (range) !== "number") { throw new Error("Attack.clear: range must be a number."); }
 
-		let i, boss, orgx, orgy, result, start, skillCheck,
+		let i, boss, orgx, orgy, start, skillCheck,
 			retry = 0,
 			gidAttack = [],
 			attackCount = 0;
@@ -405,12 +405,12 @@ const Attack = {
 			monsterList.sort(sortfunc);
 			target = copyUnit(monsterList[0]);
 
-			if (target.x !== undefined && (getDistance(target, orgx, orgy) <= range || (this.getScarinessLevel(target) > 7 && getDistance(me, target) <= range)) && this.checkMonster(target)) {
+			if (target.x !== undefined && (getDistance(target, orgx, orgy) <= range || (this.getScarinessLevel(target) > 7 && getDistance(me, target) <= range)) && target.attackable) {
 				Config.Dodge && me.hpPercent <= Config.DodgeHP && this.deploy(target, Config.DodgeRange, 5, 9);
 				Misc.townCheck(true);
 				//me.overhead("attacking " + target.name + " spectype " + target.spectype + " id " + target.classid);
 
-				result = ClassAttack.doAttack(target, attackCount % 15 === 0);
+				let result = ClassAttack.doAttack(target, attackCount % 15 === 0);
 
 				if (result) {
 					retry = 0;
@@ -527,7 +527,8 @@ const Attack = {
 
 			if (monster) {
 				do {
-					if (getDistance(center.x, center.y, monster.x, monster.y) <= range && (!spectype || (monster.spectype & spectype)) && this.checkMonster(monster)) {
+					if (getDistance(center.x, center.y, monster.x, monster.y) <= range
+						&& (!spectype || (monster.spectype & spectype)) && monster.attackable) {
 						monsterList.push(copyUnit(monster));
 					}
 				} while (monster.getNext());
@@ -539,7 +540,8 @@ const Attack = {
 
 			if (monster) {
 				do {
-					if (classid.indexOf(monster.classid) > -1 && getDistance(center.x, center.y, monster.x, monster.y) <= range && (!spectype || (monster.spectype & spectype)) && this.checkMonster(monster)) {
+					if (classid.indexOf(monster.classid) > -1 && getDistance(center.x, center.y, monster.x, monster.y) <= range
+						&& (!spectype || (monster.spectype & spectype)) && monster.attackable) {
 						monsterList.push(copyUnit(monster));
 					}
 				} while (monster.getNext());
@@ -589,7 +591,7 @@ const Attack = {
 			monsterList.sort(sortFunc);
 			target = copyUnit(monsterList[0]);
 
-			if (target.x !== undefined && this.checkMonster(target)) {
+			if (target.x !== undefined && target.attackable) {
 				Config.Dodge && me.hpPercent <= Config.DodgeHP && this.deploy(target, Config.DodgeRange, 5, 9);
 				Misc.townCheck(true);
 				//me.overhead("attacking " + target.name + " spectype " + target.spectype + " id " + target.classid);
@@ -849,10 +851,27 @@ const Attack = {
 	},
 
 	// Sort monsters based on distance, spectype and classId (summoners are attacked first)
+	// Think this needs a collison check included for non tele chars, might prevent choosing closer mob that is actually behind a wall vs the one we pass trying to get behind the wall
 	sortMonsters: function (unitA, unitB) {
 		// No special sorting for were-form
 		if (Config.Wereform) {
 			return getDistance(me, unitA) - getDistance(me, unitB);
+		}
+
+		// sort main bosses first
+		// Andy
+		if (me.area === sdk.areas.CatacombsLvl4) {
+			if (unitA.distance < 5 && unitA.classid === sdk.monsters.Andariel && !checkCollision(me, unitA, 0x4)) return -1;
+		}
+
+		// Meph
+		if (me.area === sdk.areas.DuranceofHateLvl3) {
+			if (unitA.distance < 5 && unitA.classid === sdk.monsters.Mephisto && !checkCollision(me, unitA, 0x4)) return -1;
+		}
+
+		// Baal
+		if (me.area === sdk.areas.WorldstoneChamber) {
+			if (unitA.classid === sdk.monsters.Baal) return -1;
 		}
 
 		// Barb optimization
@@ -866,9 +885,18 @@ const Attack = {
 			}
 		}
 
-		let ids = [58, 59, 60, 61, 62, 101, 102, 103, 104, 105, 278, 279, 280, 281, 282, 298, 299, 300, 645, 646, 647, 662, 663, 664, 667, 668, 669, 670, 675, 676];
+		// Put monsters under Attract curse at the end of the list - They are helping us
+		if (unitA.getState(sdk.states.Attract)) {
+			return 1;
+		}
 
-		if (me.area !== 61 && ids.indexOf(unitA.classid) > -1 && ids.indexOf(unitB.classid) > -1) {
+		if (unitB.getState(sdk.states.Attract)) {
+			return -1;
+		}
+
+		let ids = [312, 58, 59, 60, 61, 62, 101, 102, 103, 104, 105, 278, 279, 280, 281, 282, 298, 299, 300, 645, 646, 647, 662, 663, 664, 667, 668, 669, 670, 675, 676];
+
+		if (me.area !== sdk.areas.ClawViperTempleLvl2 && ids.includes(unitA.classid) && ids.includes(unitB.classid)) {
 			// Kill "scary" uniques first (like Bishibosh)
 			if ((unitA.spectype & 0x04) && (unitB.spectype & 0x04)) {
 				return getDistance(me, unitA) - getDistance(me, unitB);
@@ -969,7 +997,7 @@ const Attack = {
 
 		if (monster) {
 			do {
-				if (this.checkMonster(monster)) {
+				if (monster.attackable) {
 					monList.push(copyUnit(monster));
 				}
 			} while (monster.getNext());

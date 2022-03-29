@@ -308,6 +308,8 @@ const Pather = {
 						node.x = adjustedNode[0];
 						node.y = adjustedNode[1];
 					}
+
+					retry === 3 && !useTeleport && (retry = 15);
 				}
 
 				if (useTeleport && tpMana <= me.mp ? this.teleportTo(node.x, node.y) : this.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
@@ -329,6 +331,7 @@ const Pather = {
 				} else {
 					if (fail > 0 && (!useTeleport || tpMana > me.mp) && !me.inTown) {
 						this.kickBarrels(node.x, node.y);
+						this.openDoors(node.x, node.y);
 						// Don't go berserk on longer paths
 						if (!cleared) {
 							Attack.clear(5) && Misc.openChests(2);
@@ -701,10 +704,11 @@ const Pather = {
 		clearPath === undefined && (clearPath = false);
 		pop === undefined && (pop = false);
 
+		me.area !== area && Pather.journeyTo(area);
 		let presetUnit = getPresetUnit(area, unitType, unitId);
 
 		if (!presetUnit) {
-			throw new Error("moveToPreset: Couldn't find preset unit - id " + unitId);
+			throw new Error("moveToPreset: Couldn't find preset unit - id: " + unitId + " unitType: " + unitType + " in area: " + this.getAreaName(area));
 		}
 
 		return this.moveTo(presetUnit.roomx * 5 + presetUnit.x + offX, presetUnit.roomy * 5 + presetUnit.y + offY, 3, clearPath, pop);
@@ -953,7 +957,7 @@ const Pather = {
 		}
 
 		if (!unit) {
-			throw new Error("useUnit: Unit not found. TYPE: " + type + " ID: " + id + " MyArea: " + this.getAreaName(me.area) + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetarea) : ""));
+			throw new Error("useUnit: Unit not found. TYPE: " + type + " ID: " + id + " MyArea: " + this.getAreaName(me.area) + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 		}
 
 		for (let i = 0; i < 5; i += 1) {
@@ -968,14 +972,14 @@ const Pather = {
 			if (type === 2 && unit.mode === 0) {
 				if ((me.area === sdk.areas.Travincal && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(21, 0) !== 1)
 					|| (me.area === sdk.areas.ArreatSummit && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(39, 0) !== 1)) {
-					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetarea) : ""));
+					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 				}
 
 				me.area === sdk.areas.A3SewersLvl1 ? this.openUnit(2, 367) : this.openUnit(2, id);
 			}
 
 			if (type === 2 && id === 342 && me.area === sdk.areas.DuranceofHateLvl3 && targetArea === sdk.areas.PandemoniumFortress && me.getQuest(22, 0) !== 1) {
-				throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetarea) : ""));
+				throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 			}
 
 			delay(300);
@@ -1327,8 +1331,8 @@ const Pather = {
 			delay(200 + me.ping);
 		}
 
-		if (portal && me.area === preArea && portal.classid === 42 && !portal.getParent()) {
-			sendPacket(1, 0x13, 4, 0x2, 4, portal.gid);
+		if (!!unit && me.area === preArea && unit.classid === 42 && !unit.getParent()) {
+			sendPacket(1, 0x13, 4, 0x2, 4, unit.gid);
 		}
 
 		return targetArea ? me.area === targetArea : me.area !== preArea;

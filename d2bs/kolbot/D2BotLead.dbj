@@ -82,7 +82,7 @@ if (!FileTools.exists("data/" + me.profile + ".json")) {
 }
 
 let gameInfo, gameStart, ingame, chatActionsDone, pingQuit,
-	handle, useChat, firstLogin, connectFail, profileInfo = {},
+	handle, useChat, firstLogin, connectFail, profileInfo,
 	gameCount = DataFile.getStats().runs + 1,
 	loginRetry = 0,
 	lastGameStatus = "ready",
@@ -157,6 +157,7 @@ function ReceiveCopyData(mode, msg) {
 	case 1638: // getProfile
 		try {
 			obj = JSON.parse(msg);
+			profileInfo = {};
 			profileInfo.profile = me.profile;
 			profileInfo.account = obj.account;
 			profileInfo.charName = obj.Character;
@@ -548,6 +549,8 @@ MainSwitch:
 					} else {
 						loginRetry++;
 					}
+				} else {
+					login(me.profile);
 				}
 			} else {
 				print(e + " " + getLocation());

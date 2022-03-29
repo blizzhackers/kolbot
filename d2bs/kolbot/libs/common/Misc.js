@@ -928,7 +928,8 @@ const Misc = {
 			Packet.flash(me.gid);
 		}
 
-		!me.idle && Misc.click(0, 0, me.x, me.y); // Click to stop walking in case we got stuck
+		// Click to stop walking in case we got stuck
+		!me.idle && Misc.click(0, 0, me.x, me.y);
 
 		return false;
 	},
@@ -2159,26 +2160,16 @@ const Experience = {
 // eslint-disable-next-line no-redeclare
 const Packet = {
 	openMenu: function (unit) {
-		if (unit.type !== 1) {
-			throw new Error("openMenu: Must be used on NPCs.");
-		}
+		if (unit.type !== 1) { throw new Error("openMenu: Must be used on NPCs."); }
+		if (getUIFlag(sdk.uiflags.NPCMenu)) return true;
 
-		if (getUIFlag(0x08)) {
-			return true;
-		}
-
-		let i, tick;
-
-		for (i = 0; i < 5; i += 1) {
-			if (getDistance(me, unit) > 4) {
-				Pather.moveToUnit(unit);
-			}
-
+		for (let i = 0; i < 5; i += 1) {
+			unit.distance > 4 && Pather.moveToUnit(unit);
 			sendPacket(1, 0x13, 4, 1, 4, unit.gid);
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 5000) {
-				if (getUIFlag(0x08)) {
+				if (getUIFlag(sdk.uiflags.NPCMenu)) {
 					delay(Math.max(500, me.ping * 2));
 
 					return true;
@@ -2192,9 +2183,9 @@ const Packet = {
 			}
 
 			sendPacket(1, 0x2f, 4, 1, 4, unit.gid);
-			delay(me.ping * 2);
+			delay(me.ping + 1 * 2);
 			sendPacket(1, 0x30, 4, 1, 4, unit.gid);
-			delay(me.ping * 2);
+			delay(me.ping + 1 * 2);
 			this.flash(me.gid);
 		}
 

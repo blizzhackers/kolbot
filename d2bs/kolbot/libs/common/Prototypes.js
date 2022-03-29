@@ -124,26 +124,20 @@ Unit.prototype.openMenu = function (addDelay) {
 		throw new Error("Unit.openMenu: Must be used on NPCs.");
 	}
 
-	if (addDelay === undefined) {
-		addDelay = 0;
-	}
+	addDelay === undefined && (addDelay = 0);
 
-	if (getUIFlag(0x08)) {
-		return true;
-	}
+	if (getUIFlag(sdk.uiflags.NPCMenu)) return true;
 
-	let i, tick;
-
-	for (i = 0; i < 5; i += 1) {
+	for (let i = 0; i < 5; i += 1) {
 		if (getDistance(me, this) > 4) {
 			Pather.moveToUnit(this);
 		}
 
 		Misc.click(0, 0, this);
-		tick = getTickCount();
+		let tick = getTickCount();
 
 		while (getTickCount() - tick < 5000) {
-			if (getUIFlag(0x08)) {
+			if (getUIFlag(sdk.uiflags.NPCMenu)) {
 				delay(Math.max(700 + me.ping, 500 + me.ping * 2 + addDelay * 500));
 
 				return true;
@@ -176,18 +170,16 @@ Unit.prototype.startTrade = function (mode) {
 		throw new Error("Unit.startTrade: Must be used on NPCs.");
 	}
 
-	if (getUIFlag(0x0C)) {
-		return true;
-	}
+	if (getUIFlag(sdk.uiflags.Shop)) return true;
 
-	let i, tick,
-		menuId = mode === "Gamble" ? 0x0D46 : mode === "Repair" ? 0x0D06 : 0x0D44;
+	let menuId = mode === "Gamble" ? 0x0D46 : mode === "Repair" ? 0x0D06 : 0x0D44;
 
-	for (i = 0; i < 3; i += 1) {
-		if (this.openMenu(i)) { // Incremental delay on retries
+	for (let i = 0; i < 3; i += 1) {
+		// Incremental delay on retries
+		if (this.openMenu(i)) {
 			Misc.useMenu(menuId);
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 1000) {
 				if (getUIFlag(0x0C) && this.itemcount > 0) {
@@ -211,28 +203,28 @@ Unit.prototype.buy = function (shiftBuy, gamble) {
 		return Packet.buyItem(this, shiftBuy, gamble);
 	}
 
-	if (this.type !== 4) { // Check if it's an item we want to buy
+	// Check if it's an item we want to buy
+	if (this.type !== 4) {
 		throw new Error("Unit.buy: Must be used on items.");
 	}
 
-	if (!getUIFlag(0xC) || (this.getParent() && this.getParent().gid !== getInteractedNPC().gid)) { // Check if it's an item belonging to a NPC
+	// Check if it's an item belonging to a NPC
+	if (!getUIFlag(sdk.uiflags.Shop) || (this.getParent() && this.getParent().gid !== getInteractedNPC().gid)) {
 		throw new Error("Unit.buy: Must be used in shops.");
 	}
 
-	if (me.getStat(14) + me.getStat(15) < this.getItemCost(0)) { // Can we afford the item?
+	// Can we afford the item?
+	if (me.getStat(14) + me.getStat(15) < this.getItemCost(0)) { 
 		return false;
 	}
 
-	let i, tick,
-		oldGold = me.getStat(14) + me.getStat(15),
+	let oldGold = me.getStat(14) + me.getStat(15),
 		itemCount = me.itemcount;
 
-	for (i = 0; i < 3; i += 1) {
-		//print("BUY " + this.name + " " + i);
-
+	for (let i = 0; i < 3; i += 1) {
 		this.shop(shiftBuy ? 6 : 2);
 
-		tick = getTickCount();
+		let tick = getTickCount();
 
 		while (getTickCount() - tick < Math.max(2000, me.ping * 2 + 500)) {
 			if (shiftBuy && me.getStat(14) + me.getStat(15) < oldGold) {
@@ -276,21 +268,22 @@ Unit.prototype.sell = function () {
 		return Packet.sellItem(this);
 	}
 
-	if (this.type !== 4) { // Check if it's an item we want to buy
+	// Check if it's an item we want to buy
+	if (this.type !== 4) { 
 		throw new Error("Unit.sell: Must be used on items.");
 	}
 
-	if (!getUIFlag(0xC)) { // Check if it's an item belonging to a NPC
+	// Check if it's an item belonging to a NPC
+	if (!getUIFlag(sdk.uiflags.Shop)) {
 		throw new Error("Unit.sell: Must be used in shops.");
 	}
 
-	let i, tick,
-		itemCount = me.itemcount;
+	let itemCount = me.itemcount;
 
-	for (i = 0; i < 5; i += 1) {
+	for (let i = 0; i < 5; i += 1) {
 		this.shop(1);
 
-		tick = getTickCount();
+		let tick = getTickCount();
 
 		while (getTickCount() - tick < 2000) {
 			if (me.itemcount !== itemCount) {
@@ -311,24 +304,16 @@ Unit.prototype.toCursor = function () {
 		throw new Error("Unit.toCursor: Must be used with items.");
 	}
 
-	if (me.itemoncursor && this.mode === 4) {
-		return true;
-	}
+	if (me.itemoncursor && this.mode === 4) return true;
 
-	let i, tick;
+	this.location === 7 && Town.openStash();
+	this.location === 6 && Cubing.openCube();
 
-	if (this.location === 7) {
-		Town.openStash();
-	}
-
-	if (this.location === 6) {
-		Cubing.openCube();
-	}
-
-	for (i = 0; i < 3; i += 1) {
+	for (let i = 0; i < 3; i += 1) {
 		try {
 			if (this.mode === 1) {
-				clickItem(0, this.bodylocation); // fix for equipped items (cubing viper staff for example)
+				// fix for equipped items (cubing viper staff for example)
+				clickItem(0, this.bodylocation);
 			} else {
 				clickItem(0, this);
 			}
@@ -336,7 +321,7 @@ Unit.prototype.toCursor = function () {
 			return false;
 		}
 
-		tick = getTickCount();
+		let tick = getTickCount();
 
 		while (getTickCount() - tick < 1000) {
 			if (me.itemoncursor) {
@@ -357,14 +342,10 @@ Unit.prototype.drop = function () {
 		throw new Error("Unit.drop: Must be used with items. Unit Name: " + this.name);
 	}
 
-	let i, tick, timeout;
+	if (!this.toCursor()) return false;
 
-	if (!this.toCursor()) {
-		return false;
-	}
-
-	tick = getTickCount();
-	timeout = Math.max(1000, me.ping * 6);
+	let tick = getTickCount();
+	let timeout = Math.max(1000, me.ping * 6);
 
 	while (getUIFlag(0x1a) || getUIFlag(0x19) || !me.gameReady) {
 		if (getTickCount() - tick > timeout) {
@@ -378,7 +359,7 @@ Unit.prototype.drop = function () {
 		delay(me.ping * 2 + 100);
 	}
 
-	for (i = 0; i < 3; i += 1) {
+	for (let i = 0; i < 3; i += 1) {
 		clickMap(0, 0, me.x, me.y);
 		delay(40);
 		clickMap(2, 0, me.x, me.y);
@@ -430,6 +411,21 @@ me.findItems = function (id = -1, mode = -1, loc = false) {
 	}
 
 	return list;
+};
+
+me.cancelUIFlags = function () {
+	let flags = [
+		sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.SkillWindow, sdk.uiflags.NPCMenu,
+		sdk.uiflags.Waypoint, sdk.uiflags.Party, sdk.uiflags.Shop, sdk.uiflags.Quest, sdk.uiflags.Stash,
+		sdk.uiflags.Cube, sdk.uiflags.KeytotheCairnStonesScreen, sdk.uiflags.SubmitItem
+	];
+
+	for (let i = 0; i < flags.length; i++) {
+		if (getUIFlag(flags[i]) && me.cancel()) {
+			delay(500 + me.ping);
+			i = 0; // Reset
+		}
+	}
 };
 
 /**
@@ -521,15 +517,13 @@ Unit.prototype.getItemsEx = function (...args) {
 };
 
 Unit.prototype.getPrefix = function (id) {
-	let i;
-
 	switch (typeof id) {
 	case "number":
 		if (typeof this.prefixnums !== "object") {
 			return this.prefixnum === id;
 		}
 
-		for (i = 0; i < this.prefixnums.length; i += 1) {
+		for (let i = 0; i < this.prefixnums.length; i += 1) {
 			if (id === this.prefixnums[i]) {
 				return true;
 			}
@@ -541,7 +535,7 @@ Unit.prototype.getPrefix = function (id) {
 			return this.prefix.replace(/\s+/g, "").toLowerCase() === id.replace(/\s+/g, "").toLowerCase();
 		}
 
-		for (i = 0; i < this.prefixes.length; i += 1) {
+		for (let i = 0; i < this.prefixes.length; i += 1) {
 			if (id.replace(/\s+/g, "").toLowerCase() === this.prefixes[i].replace(/\s+/g, "").toLowerCase()) {
 				return true;
 			}
@@ -554,15 +548,13 @@ Unit.prototype.getPrefix = function (id) {
 };
 
 Unit.prototype.getSuffix = function (id) {
-	let i;
-
 	switch (typeof id) {
 	case "number":
 		if (typeof this.suffixnums !== "object") {
 			return this.suffixnum === id;
 		}
 
-		for (i = 0; i < this.suffixnums.length; i += 1) {
+		for (let i = 0; i < this.suffixnums.length; i += 1) {
 			if (id === this.suffixnums[i]) {
 				return true;
 			}
@@ -574,7 +566,7 @@ Unit.prototype.getSuffix = function (id) {
 			return this.suffix.replace(/\s+/g, "").toLowerCase() === id.replace(/\s+/g, "").toLowerCase();
 		}
 
-		for (i = 0; i < this.suffixes.length; i += 1) {
+		for (let i = 0; i < this.suffixes.length; i += 1) {
 			if (id.replace(/\s+/g, "").toLowerCase() === this.suffixes[i].replace(/\s+/g, "").toLowerCase()) {
 				return true;
 			}
@@ -1444,23 +1436,6 @@ Unit.prototype.getRes = function (type, difficulty) {
 	return this.getStat(type) - modifier;
 };
 
-Unit.prototype.cancelUIFlags = function () {
-	if (this !== me) return;
-	let flags = [
-		sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.SkillWindow, sdk.uiflags.NPCMenu,
-		sdk.uiflags.Waypoint, sdk.uiflags.Party, sdk.uiflags.Shop, sdk.uiflags.Quest, sdk.uiflags.Stash,
-		sdk.uiflags.Cube, sdk.uiflags.KeytotheCairnStonesScreen, sdk.uiflags.SubmitItem
-	];
-
-	for (let i = 0; i < flags.length; i++) {
-		if (getUIFlag(flags[i])) {
-			me.cancel();
-			delay(500);
-			i = 0; // Reset
-		}
-	}
-};
-
 let coords = function () {
 	if (Array.isArray(this) && this.length > 1) {
 		return [this[0], this[1]];
@@ -2075,5 +2050,5 @@ Unit.prototype.__defineGetter__('curseable', function () {
 });
 
 Unit.prototype.__defineGetter__('scareable', function () {
-	return this.curseable && !(this.spectype & 0x7);
+	return this.curseable && !(this.spectype & 0x7) && this.classid !== sdk.monsters.ListerTheTormentor;
 });
