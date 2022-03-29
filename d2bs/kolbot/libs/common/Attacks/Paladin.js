@@ -170,7 +170,7 @@ const ClassAttack = {
 				Skill.setSkill(aura, 0);
 			}
 
-			for (i = 0; i < 3; i += 1) {
+			for (let i = 0; i < 3; i += 1) {
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 
 				if (!Attack.checkMonster(unit) || getDistance(me, unit) > 9 || unit.type === 0) {
