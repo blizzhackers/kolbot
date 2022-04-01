@@ -25,10 +25,8 @@ if (!FileTools.exists("data/" + me.profile + ".json")) {
 	DataFile.create();
 }
 
-let handle, tag, gameInfo, gameStart, ingame, connectFail, charList,
+let handle, tag, gameInfo, connectFail, charList,
 	ftj = 0,
-	lastGameStatus = "ready",
-	gameCount = DataFile.getStats().runs + 1,
 	creatingActions = ["doMule"];
 
 function ReceiveCopyData (mode, msg) {
@@ -61,31 +59,6 @@ function ReceiveCopyData (mode, msg) {
 	}
 }
 
-function locationTimeout (time, location) {
-	let endtime = getTickCount() + time;
-
-	while (getLocation() === location && endtime > getTickCount()) {
-		delay(500);
-	}
-
-	return (getLocation() !== location);
-}
-
-function updateCount () {
-	D2Bot.updateCount();
-	delay(1000);
-	ControlAction.click(6, 264, 366, 272, 35);
-
-	try {
-		login(me.profile);
-	} catch (e) {
-
-	}
-
-	delay(1000);
-	ControlAction.click(6, 33, 572, 128, 35);
-}
-
 function locationAction (location) {
 	let i, control, string, text, currChar;
 
@@ -97,18 +70,18 @@ MainSwitch:
 	case 3: // Lobby Chat
 		D2Bot.updateStatus("Lobby");
 
-		if (ingame) {
-			if (getTickCount() - gameStart < StarterConfig.MinGameTime * 1e3) {
-				ControlAction.timeoutDelay("Min game time wait", StarterConfig.MinGameTime * 1e3 + gameStart - getTickCount());
+		if (Starter.ingame) {
+			if (getTickCount() - Starter.gameStart < StarterConfig.MinGameTime * 1e3) {
+				ControlAction.timeoutDelay("Min game time wait", StarterConfig.MinGameTime * 1e3 + Starter.gameStart - getTickCount());
 			}
 
 			print("updating runs");
 			D2Bot.updateRuns();
 			delay(1000);
 
-			gameCount += 1;
-			lastGameStatus = "ready";
-			ingame = false;
+			Starter.gameCount += 1;
+			Starter.lastGameStatus = "ready";
+			Starter.inGame = false;
 
 			ControlAction.click(6, 693, 490, 80, 20); // Quit from Lobby
 
@@ -136,7 +109,7 @@ MainSwitch:
 				break;
 			}
 
-			if (!locationTimeout(5000, location)) { // in case join button gets bugged
+			if (!Starter.locationTimeout(5000, location)) { // in case join button gets bugged
 				if (!ControlAction.click(6, 533, 469, 120, 20)) { // Create
 					break;
 				}
@@ -162,7 +135,7 @@ MainSwitch:
 				break;
 			}
 
-			if (!locationTimeout(5000, location)) { // in case join button gets bugged
+			if (!Starter.locationTimeout(5000, location)) { // in case join button gets bugged
 				if (!ControlAction.click(6, 652, 469, 120, 20)) { // Join
 					break;
 				}
@@ -176,7 +149,7 @@ MainSwitch:
 		break;
 	case 2: // Waiting In Line
 		D2Bot.updateStatus("Waiting...");
-		locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location);
+		Starter.locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location);
 		ControlAction.click(6, 433, 433, 96, 32);
 
 		break;
@@ -200,23 +173,23 @@ MainSwitch:
 		control = getControl(1, 657, 308, 27, 20);
 		!!control && ControlAction.setText(1, 657, 308, 27, 20, "8");
 
-		if (gameCount >= 99) {
-			gameCount = 1;
+		if (Starter.gameCount >= 99) {
+			Starter.gameCount = 1;
 
-			DataFile.updateStats("runs", gameCount);
+			DataFile.updateStats("runs", Starter.gameCount);
 		}
 
-		if (lastGameStatus === "pending") {
+		if (Starter.lastGameStatus === "pending") {
 			D2Bot.printToConsole("Failed to create game");
 
-			gameCount += 1;
+			Starter.gameCount += 1;
 		}
 
 		ControlAction.timeoutDelay("Make Game Delay", StarterConfig.CreateGameDelay * 1e3);
-		ControlAction.createGame(gameInfo.gameName + gameCount, gameInfo.gamePass, 0);
-		locationTimeout(5000, location);
+		ControlAction.createGame(gameInfo.gameName + Starter.gameCount, gameInfo.gamePass, 0);
+		Starter.locationTimeout(5000, location);
 
-		lastGameStatus = "pending";
+		Starter.lastGameStatus = "pending";
 		
 		break;
 	case 5: // Join Game
@@ -224,7 +197,7 @@ MainSwitch:
 		let joinInfo = GameAction.gameInfo();
 
 		joinGame(joinInfo.gameName, joinInfo.gamePass);
-		locationTimeout(5000, location);
+		Starter.locationTimeout(5000, location);
 
 		break;
 	case 6: // Ladder
@@ -409,7 +382,7 @@ MainSwitch:
 			break;
 		}
 
-		updateCount();
+		Starter.updateCount();
 		ControlAction.timeoutDelay("Realm Down", StarterConfig.RealmDownDelay * 6e4);
 
 		if (gameInfo.switchKeys) {
@@ -429,7 +402,7 @@ MainSwitch:
 	case 15: // New Character
 		break;
 	case 16: // Character Select - Please Wait popup
-		if (!locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
 			ControlAction.click(6, 351, 337, 96, 32);
 		}
 
@@ -454,7 +427,7 @@ MainSwitch:
 	case 20: // Single Player - Select Difficulty
 		break;
 	case 21: // Main Menu - Connecting
-		if (!locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
 			ControlAction.click(6, 330, 416, 128, 35);
 		}
 
@@ -502,7 +475,7 @@ MainSwitch:
 
 		break;
 	case 23: // Character Select - Connecting
-		if (!locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
 			ControlAction.click(6, 33, 572, 128, 35);
 		}
 
@@ -510,7 +483,7 @@ MainSwitch:
 	case 24: // Server Down - not much to do but wait..
 		break;
 	case 25: // Lobby - Please Wait
-		if (!locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
 			ControlAction.click(6, 351, 337, 96, 32);
 		}
 
@@ -542,7 +515,7 @@ MainSwitch:
 	case 38: // Game is full
 		D2Bot.printToConsole("Game is full");
 
-		lastGameStatus = "ready";
+		Starter.lastGameStatus = "ready";
 
 		delay(500);
 		ControlAction.click(6, 652, 469, 120, 20);
@@ -577,7 +550,7 @@ MainSwitch:
 			}
 		}
 
-		if (!locationTimeout(5000, location)) {
+		if (!Starter.locationTimeout(5000, location)) {
 			GameAction.update("done", "Account has no chars! location 42");
 			D2Bot.stop(me.profile,true);
 		}
@@ -640,6 +613,8 @@ function main () {
 		delay(500);
 	}
 
+	Starter.gameCount = (DataFile.getStats().runs + 1 || 1);
+
 	while (!tag) {
 		D2Bot.getProfile();
 		delay(500);
@@ -673,15 +648,15 @@ function main () {
 		while (me.ingame) {
 			// returns false when switching acts so we can't use while
 			if (me.gameReady) {
-				if (!ingame) {
+				if (!Starter.inGame) {
 					print("Updating Status");
 					D2Bot.updateStatus("Game: " + me.gamename);
 
-					lastGameStatus = "ingame";
-					ingame = true;
-					gameStart = getTickCount();
+					Starter.lastGameStatus = "ingame";
+					Starter.inGame = true;
+					Starter.gameStart = getTickCount();
 
-					DataFile.updateStats("runs", gameCount);
+					DataFile.updateStats("runs", Starter.gameCount);
 				}
 			}
 

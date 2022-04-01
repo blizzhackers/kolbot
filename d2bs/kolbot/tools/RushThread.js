@@ -14,6 +14,7 @@ include("AutoMule.js");
 include("CraftingSystem.js");
 include("TorchSystem.js");
 include("common/Attack.js");
+include("common/Common.js");
 include("common/Cubing.js");
 include("common/Config.js");
 include("common/CollMap.js");

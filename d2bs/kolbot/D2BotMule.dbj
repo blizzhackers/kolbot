@@ -37,8 +37,6 @@ let master, gameInfo, connectFail, makeAcc, joinInfo,
 	muleMode, muleFilename, muleObj, handle, maxCharCount,
 	clearedJunk = false,
 	continuousMule = false,
-	firstLogin = true,
-	inGame = false,
 	makeNext = false,
 	status = "loading",
 	masterStatus = {
@@ -353,20 +351,6 @@ function nextChar () {
 	return obj.character;
 }
 
-function timer (tick) {
-	return " (" + new Date(getTickCount() - tick).toISOString().slice(11, -5) + ")";
-}
-
-function locationTimeout (time, location) {
-	let endtime = getTickCount() + time;
-
-	while (getLocation() === location && endtime > getTickCount()) {
-		delay(500);
-	}
-
-	return (getLocation() !== location);
-}
-
 function ingameTimeout (time) {
 	let tick = getTickCount();
 
@@ -441,11 +425,11 @@ MainSwitch:
 	case 3:
 		D2Bot.updateStatus("Lobby");
 
-		if (inGame) {
+		if (Starter.inGame) {
 			print("updating runs");
 			D2Bot.updateRuns();
 			status = "ready";
-			inGame = false;
+			Starter.inGame = false;
 		}
 
 		if (makeNext) {
@@ -458,7 +442,7 @@ MainSwitch:
 			break;
 		}
 
-		if (!locationTimeout(5000, location)) { // in case join button gets bugged
+		if (!Starter.locationTimeout(5000, location)) { // in case join button gets bugged
 			if (!ControlAction.click(6, 533, 469, 120, 20)) { // Create
 				break;
 			}
@@ -513,7 +497,7 @@ MainSwitch:
 					
 					// If stuck here for too long, game creation likely failed. Exit to char selection and try again.
 					if (queue < 10) {
-						if (!locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location)) {
+						if (!Starter.locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location)) {
 							print("Failed to create game");
 							ControlAction.click(6, 433, 433, 96, 32); // Cancel creategame
 							ControlAction.click(6, 693, 490, 80, 20); // Quit from Lobby
@@ -706,7 +690,7 @@ MainSwitch:
 		break;
 	case 11: // Unable To Connect
 		if (connectFail) {
-			if (!locationTimeout(10 * 1000, location)) {
+			if (!Starter.locationTimeout(10 * 1000, location)) {
 				string = "";
 				text = ControlAction.getText(4,158,220,485,40);
 
@@ -896,7 +880,7 @@ MainSwitch:
 
 		break;
 	case 16: // Character Select - Please Wait popup
-		if (!locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
 			ControlAction.click(6, 351, 337, 96, 32);
 		}
 
@@ -922,7 +906,7 @@ MainSwitch:
 	case 20: // Single Player - Select Difficulty
 		break;
 	case 21: // Main Menu - Connecting
-		if (!locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
 			ControlAction.click(6, 330, 416, 128, 35);
 		}
 
@@ -970,7 +954,7 @@ MainSwitch:
 
 		break;
 	case 23: // Character Select - Connecting
-		if (!locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
 			ControlAction.click(6, 33, 528, 168, 60); // Click create char button on infinite "connecting" screen
 			delay(1000);
 			
@@ -988,7 +972,7 @@ MainSwitch:
 	case 24: // Server Down - not much to do but wait..
 		break;
 	case 25: // Lobby - Please Wait
-		if (!locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
 			ControlAction.click(6, 351, 337, 96, 32);
 		}
 
@@ -1078,7 +1062,7 @@ function gameEvent (mode, param1, param2, name1, name2) {
 
 addEventListener("copydata", ReceiveCopyData);
 
-function main() {
+function main () {
 	while (!handle) {
 		delay(100);
 	}
@@ -1123,8 +1107,7 @@ function main() {
 
 	print("Mule filename: " + muleFilename);
 
-	let obj, tick, idleTick, statusString = "",
-		inGame = false;
+	let obj, tick, idleTick, statusString = "";
 
 	try {
 		// ugly solution to uglier problem - pickItem area update
@@ -1151,8 +1134,8 @@ function main() {
 	while (true) {
 		try {
 			if (me.ingame && me.gameReady) {
-				if (!inGame) {
-					firstLogin && (firstLogin = false);
+				if (!Starter.inGame) {
+					Starter.firstLogin && (Starter.firstLogin = false);
 					status !== "begin" && (status = "ready");
 					statusString = "In " + (muleMode === 2 ? "anni " : muleMode === 1 ? "torch " : "") + "mule game.";
 
@@ -1172,7 +1155,7 @@ function main() {
 					Town.move("stash");
 					Storage.Init();
 					idleTick = getTickCount() + rand(1200, 1500) * 1000;
-					inGame = true;
+					Starter.inGame = true;
 
 					if (continuousMule && !muleObj.onlyLogWhenFull) {
 						MuleLogger.logChar();
@@ -1271,11 +1254,11 @@ function main() {
 							delay(100);
 						}
 						
-						firstLogin = true;
+						Starter.firstLogin = true;
 						print("updating runs");
 						D2Bot.updateRuns();						
 						status = "ready";
-						inGame = false;				
+						Starter.inGame = false;				
 						
 						delay(1000);
 						ControlAction.click(6, 693, 490, 80, 20); // Quit from Lobby
@@ -1292,7 +1275,7 @@ function main() {
 					print("Sent anti-idle packet, next refresh in: " + (" (" + new Date(idleTick - getTickCount()).toISOString().slice(11, -5) + ")"));
 				}
 
-				D2Bot.updateStatus(statusString + timer(me.gamestarttime));
+				D2Bot.updateStatus(statusString + Starter.timer(me.gamestarttime));
 			}
 
 			if (!me.ingame) {

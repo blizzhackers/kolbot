@@ -832,8 +832,8 @@ const ControlAction = {
 			"asia": 2,
 			"europe": 3
 		};
-
-		while (getLocation() !== 42) {// cycle until in empty char screen
+		// cycle until in empty char screen
+		while (getLocation() !== 42) {
 			switch (getLocation()) {
 			case 8: // main menu
 				ControlAction.clickRealm(realms[info.realm]);
@@ -888,10 +888,8 @@ const ControlAction = {
 	},
 
 	findCharacter: function (info) {
-		let control, text, tick,
-			count = 0;
-
-		tick = getTickCount();
+		let count = 0;
+		let tick = getTickCount();
 
 		while (getLocation() !== 12) {
 			if (getTickCount() - tick >= 5000) {
@@ -909,7 +907,7 @@ const ControlAction = {
 
 			if (control) {
 				do {
-					text = control.getText();
+					let text = control.getText();
 
 					if (text instanceof Array && typeof text[1] === "string") {
 						count++;
@@ -921,7 +919,8 @@ const ControlAction = {
 				} while (count < 24 && control.getNext());
 			}
 
-			if (count === 8 || count === 16) { // check for additional characters up to 24
+			// check for additional characters up to 24
+			if (count === 8 || count === 16) {
 				control = getControl(4, 237, 457, 72, 93);
 
 				if (control) {
@@ -935,7 +934,8 @@ const ControlAction = {
 
 					me.blockMouse = false;
 				}
-			} else { // no further check necessary
+			} else {
+				// no further check necessary
 				break;
 			}
 		}
@@ -1019,22 +1019,21 @@ const ControlAction = {
 	loginCharacter: function (info, startFromTop = true) {
 		me.blockMouse = true;
 
-		let control, text,
-			count = 0;
+		let count = 0;
 
-		if (startFromTop) { // start from beginning of the char list
-			sendKey(0x24);
-		}
+		// start from beginning of the char list
+		startFromTop && sendKey(0x24);
 
 		MainLoop:
-		while (getLocation() !== 1) { // cycle until in lobby
+		// cycle until in lobby or in game
+		while (getLocation() !== 1) {
 			switch (getLocation()) {
 			case 12: // character select
-				control = getControl(4, 37, 178, 200, 92);
+				let control = getControl(4, 37, 178, 200, 92);
 
 				if (control) {
 					do {
-						text = control.getText();
+						let text = control.getText();
 
 						if (text instanceof Array && typeof text[1] === "string") {
 							count++;
@@ -1043,6 +1042,19 @@ const ControlAction = {
 								control.click();
 								this.click(6, 627, 572, 128, 35);
 								me.blockMouse = false;
+
+								// select difficulty - single player
+								if (getLocation() === 20) {
+									try {
+										login(info.profile);
+									} catch (err) {
+										break MainLoop;
+									}
+
+									if (me.ingame) {
+										return true;
+									}
+								}
 
 								return true;
 							}
@@ -1086,21 +1098,20 @@ const ControlAction = {
 
 	makeCharacter: function (info) {
 		me.blockMouse = true;
-
-		if (!info.charClass) {
-			info.charClass = "barbarian";
-		}
+		!info.charClass && (info.charClass = "barbarian");
 
 		let control,
 			clickCoords = [];
 
-		while (getLocation() !== 1) { // cycle until in lobby
+		// cycle until in lobby
+		while (getLocation() !== 1) {
 			switch (getLocation()) {
 			case 12: // character select
 			case 42: // empty character select
 				control = getControl(6, 33, 528, 168, 60);
 
-				if (control && control.disabled === 4) { // Create Character greyed out
+				// Create Character greyed out
+				if (control && control.disabled === 4) {
 					me.blockMouse = false;
 
 					return false;
@@ -1155,22 +1166,15 @@ const ControlAction = {
 
 				break;
 			case 15: // new character
-				if (getControl(6, 421, 337, 96, 32)) { // hardcore char warning
+				// hardcore char warning
+				if (getControl(6, 421, 337, 96, 32)) {
 					this.click(6, 421, 337, 96, 32);
 				} else {
 					this.setText(1, 318, 510, 157, 16, info.charName);
 
-					if (!info.expansion) {
-						this.click(6, 319, 540, 15, 16);
-					}
-
-					if (!info.ladder) {
-						this.click(6, 319, 580, 15, 16);
-					}
-
-					if (info.hardcore) {
-						this.click(6, 319, 560, 15, 16);
-					}
+					!info.expansion && this.click(6, 319, 540, 15, 16);
+					!info.ladder && this.click(6, 319, 580, 15, 16);
+					info.hardcore && this.click(6, 319, 560, 15, 16);
 
 					this.click(6, 627, 572, 128, 35);
 				}
@@ -1184,6 +1188,11 @@ const ControlAction = {
 
 				return false;
 			default:
+				break;
+			}
+
+			// Singleplayer loop break fix.
+			if (me.ingame) {
 				break;
 			}
 
@@ -1215,7 +1224,67 @@ const ControlAction = {
 		}
 
 		return false;
-	}
+	},
+
+	deleteCharacter: function (info) {
+		me.blockMouse = true;
+
+		let control, text, count = 0;
+
+		// start from beginning of the char list
+		sendKey(0x24);
+
+	MainLoop:
+		// cycle until in lobby
+		while (getLocation() === 12) {
+			control = getControl(4, 37, 178, 200, 92);
+
+			if (control) {
+				do {
+					text = control.getText();
+
+					if (text instanceof Array && typeof text[1] === "string") {
+						count++;
+
+						if (text[1].toLowerCase() === info.charName.toLowerCase()) {
+							print("delete character " + info.charName);
+							
+							control.click();
+							ControlAction.click(6, 433, 528, 168, 60);
+							delay(500);
+							ControlAction.click(6, 421, 337, 96, 32);
+							delay(500);
+							me.blockMouse = false;
+							
+							return true;
+						}
+					}
+				} while (control.getNext());
+			}
+
+			// check for additional characters up to 24
+			if (count === 8 || count === 16) {
+				control = getControl(4, 237, 457, 72, 93);
+
+				if (control) {
+					control.click();
+					sendKey(0x28);
+					sendKey(0x28);
+					sendKey(0x28);
+					sendKey(0x28);
+				}
+			} else {
+				// no further check necessary
+				break MainLoop;
+			}
+
+			delay(100);
+		}
+
+		me.blockMouse = false;
+
+		return false;
+	},
 };
 
 const ShitList = {
@@ -1277,4 +1346,121 @@ const ShitList = {
 		//FileTools.writeText("shitlist.json", string);
 		Misc.fileAction("shitlist.json", 1, string);
 	}
+};
+
+const Starter = {
+	useChat: false,
+	pingQuit: false,
+	inGame: false,
+	firstLogin: true,
+	chatActionsDone: false,
+	gameStart: 0,
+	gameCount: 0,
+	lastGameStatus: "ready",
+	chanInfo: {
+		joinChannel: "",
+		firstMsg: "",
+		afterMsg: "",
+		announce: false
+	},
+
+	sayMsg: function (string) {
+		if (!this.useChat) return;
+		say(string);
+	},
+
+	timer: function (tick) {
+		return " (" + new Date(getTickCount() - tick).toISOString().slice(11, -5) + ")";
+	},
+
+	locationTimeout: function (time, location) {
+		let endtime = getTickCount() + time;
+
+		while (!me.ingame && getLocation() === location && endtime > getTickCount()) {
+			delay(500);
+		}
+
+		return (getLocation() !== location);
+	},
+
+	setNextGame: function (gameInfo) {
+		let nextGame = gameInfo.gameName;
+
+		if (StarterConfig.ResetCount && this.gameCount + 1 >= StarterConfig.ResetCount) {
+			nextGame++;
+		} else {
+			nextGame += (this.gameCount + 1);
+		}
+
+		DataFile.updateStats("nextGame", nextGame);
+	},
+
+	updateCount: function () {
+		D2Bot.updateCount();
+		delay(1000);
+		ControlAction.click(6, 264, 366, 272, 35);
+
+		try {
+			login(me.profile);
+		} catch (e) {
+
+		}
+
+		delay(1000);
+		ControlAction.click(6, 33, 572, 128, 35);
+	},
+
+	scriptMsgEvent: function (msg) {
+		if (msg && typeof msg !== "string") return;
+		switch (msg) {
+		case "mule":
+			AutoMule.check = true;
+
+			break;
+		case "muleTorch":
+			AutoMule.torchAnniCheck = 1;
+
+			break;
+		case "muleAnni":
+			AutoMule.torchAnniCheck = 2;
+
+			break;
+		case "torch":
+			TorchSystem.check = true;
+
+			break;
+		case "crafting":
+			CraftingSystem.check = true;
+
+			break;
+		case "getMuleMode":
+			if (AutoMule.torchAnniCheck === 2) {
+				scriptBroadcast("2");
+			} else if (AutoMule.torchAnniCheck === 1) {
+				scriptBroadcast("1");
+			} else if (AutoMule.check) {
+				scriptBroadcast("0");
+			}
+
+			break;
+		case "pingquit":
+			this.pingQuit = true;
+
+			break;
+		}
+	},
+
+	randomString: function (len, useNumbers = false) {
+		len === undefined && (len = rand(5, 14));
+
+		let rval = "",
+			letters = useNumbers ? "abcdefghijklmnopqrstuvwxyz0123456789" : "abcdefghijklmnopqrstuvwxyz";
+
+
+		for (let i = 0; i < len; i += 1) {
+			rval += letters[rand(0, letters.length - 1)];
+		}
+
+		return rval;
+	},
 };

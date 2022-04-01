@@ -675,9 +675,10 @@ const ActionHooks = {
 			});
 		}
 
-		let uberPortals = (me.area === 109 && me.diff === 2) ? getUnit(2, "portal") : false;
+		let uberPortals = (me.area === 109 && me.hell) ? getUnits(2, 60) : false;
 
-		if (uberPortals && [133, 134, 135, 136].indexOf(uberPortals.objtype) > -1) {
+		if (uberPortals && uberPortals.some((portal) => [133, 134, 135, 136].includes(portal.objtype))) {
+			TextHooks.displaySettings = false;
 			this.frame.push({
 				name: "portalbox",
 				hook: new Box (Hooks.portalBoard.x - 8, Hooks.portalBoard.y + Hooks.resfix.y - 17, 190, 70, 0x0, 1, 0)
@@ -699,21 +700,21 @@ const ActionHooks = {
 				name: "Sands",
 				type: "portal",
 				dest: 134,
-				hook: new Text("ÿc1Num 6: Forgotten Sands", Hooks.portalBoard.x, Hooks.Hooks.portalBoard.y + Hooks.resfix.y + 15)
+				hook: new Text("ÿc1Num 6: Forgotten Sands", Hooks.portalBoard.x, Hooks.portalBoard.y + Hooks.resfix.y + 15)
 			});
 
 			Pather.getPortal(135) && this.portals.push({
 				name: "Furnace",
 				type: "portal",
 				dest: 135,
-				hook: new Text("ÿc1Num 7: Furnace of Pain", Hooks.portalBoard.x, Hooks.Hooks.portalBoard.y + Hooks.resfix.y + 30)
+				hook: new Text("ÿc1Num 7: Furnace of Pain", Hooks.portalBoard.x, Hooks.portalBoard.y + Hooks.resfix.y + 30)
 			});
 
 			Pather.getPortal(136) && this.portals.push({
 				name: "Uber Tristam",
 				type: "portal",
 				dest: 136,
-				hook: new Text("ÿc1Num 8: " + Pather.getAreaName(136), Hooks.portalBoard.x, Hooks.Hooks.portalBoard.y + Hooks.resfix.y + 45)
+				hook: new Text("ÿc1Num 8: Uber Tristam", Hooks.portalBoard.x, Hooks.portalBoard.y + Hooks.resfix.y + 45)
 			});
 		}
 
@@ -802,20 +803,13 @@ const ActionHooks = {
 			break;
 		// Forgotten sands
 		case 134:
-			this.hooks.push({
-				name: "Previous Area",
-				type: "portal",
-				dest: 109,
-				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(109), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
-			});
-
-			break;
+			me.area === 134 && (entrance = {x: 20193, y: 8693});
 		// Matron's
 		case 133:
 		// Furnace
 		case 135:
 			bossX = getPresetUnit(me.area, 2, 397);
-			bossX && (entrance = areaInfo[me.area][bossX.x]);
+			bossX && (entrance = this.areaInfo[me.area][bossX.x]);
 		// Tristram
 		case 136:
 			me.area === 136 && (entrance = {x: 25105, y: 5140});

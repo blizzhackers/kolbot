@@ -59,73 +59,14 @@ include("torchsystem.js");
 include("common/misc.js");
 include("common/util.js");
 
-let i, j, gameInfo, joinInfo, gameStart, ingame, handle,
-	firstLogin, chatActionsDone, lastGameTick, connectFail,
-	gameCount = DataFile.getStats().runs + 1,
+let i, j, gameInfo, joinInfo, handle,
+	lastGameTick, connectFail,
 	loginRetry = 0,
-	lastGameStatus = "ready",
 	leader = "",
 	lastGame = [];
 
 if (!FileTools.exists("data/" + me.profile + ".json")) {
 	DataFile.create();
-}
-
-function locationTimeout (time, location) {
-	let endtime = getTickCount() + time;
-
-	while (!me.ingame && getLocation() === location && endtime > getTickCount()) {
-		delay(500);
-	}
-
-	return (getLocation() !== location);
-}
-
-function updateCount () {
-	D2Bot.updateCount();
-	delay(1000);
-	ControlAction.click(6, 264, 366, 272, 35);
-
-	try {
-		login(me.profile);
-	} catch (e) {
-
-	}
-
-	delay(1000);
-	ControlAction.click(6, 33, 572, 128, 35);
-}
-
-function ScriptMsgEvent (msg) {
-	if (msg && typeof msg !== "string") return;
-	switch (msg) {
-	case "mule":
-		AutoMule.check = true;
-
-		break;
-	case "muleTorch":
-		AutoMule.torchCheck = true;
-
-		break;
-	case "torch":
-		TorchSystem.check = true;
-
-		break;
-	case "crafting":
-		CraftingSystem.check = true;
-
-		break;
-	case "getMuleMode":
-		if (AutoMule.torchAnniCheck === 2) {
-			scriptBroadcast("2");
-		} else if (AutoMule.torchAnniCheck === 1) {
-			scriptBroadcast("1");
-		} else if (AutoMule.check) {
-			scriptBroadcast("0");
-		}
-
-		break;
-	}
 }
 
 function ReceiveCopyData (mode, msg) {
@@ -172,10 +113,6 @@ function ReceiveCopyData (mode, msg) {
 	}
 }
 
-function timer (tick) {
-	return " (" + new Date(getTickCount() - tick).toISOString().slice(11, -5) + ")";
-}
-
 function joinCheck (leader) {
 	D2Bot.requestGame(leader);
 	delay(500);
@@ -209,7 +146,7 @@ MainSwitch:
 
 		me.blockKeys = false;
 		loginRetry = 0;
-		!firstLogin && (firstLogin = true);
+		!Starter.firstLogin && (Starter.firstLogin = true);
 
 		if (StarterConfig.JoinChannel !== "") {
 			ControlAction.click(6, 27, 480, 120, 20);
@@ -217,7 +154,7 @@ MainSwitch:
 			break;
 		}
 
-		if (ingame) {
+		if (Starter.inGame) {
 			if (AutoMule.outOfGameCheck() || TorchSystem.outOfGameCheck() || Gambling.outOfGameCheck() || CraftingSystem.outOfGameCheck()) {
 				break;
 			}
@@ -226,16 +163,16 @@ MainSwitch:
 			D2Bot.updateRuns();
 
 			lastGameTick = getTickCount();
-			gameCount += 1;
-			lastGameStatus = "ready";
-			ingame = false;
+			Starter.gameCount += 1;
+			Starter.lastGameStatus = "ready";
+			Starter.inGame = false;
 		}
 
 		if (!ControlAction.click(6, 652, 469, 120, 20)) { // Join
 			break;
 		}
 
-		if (!locationTimeout(5000, location)) { // in case join button gets bugged
+		if (!Starter.locationTimeout(5000, location)) { // in case join button gets bugged
 			if (!ControlAction.click(6, 533, 469, 120, 20)) { // Create
 				break;
 			}
@@ -248,14 +185,14 @@ MainSwitch:
 		break;
 	case 2: // Waiting In Line
 		D2Bot.updateStatus("Waiting...");
-		locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location);
+		Starter.locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location);
 		ControlAction.click(6, 433, 433, 96, 32);
 
 		break;
 	case 3: // Lobby Chat
 		D2Bot.updateStatus("Lobby Chat");
 
-		if (ingame) {
+		if (Starter.ingame) {
 			if (AutoMule.outOfGameCheck() || TorchSystem.outOfGameCheck() || Gambling.outOfGameCheck() || CraftingSystem.outOfGameCheck()) {
 				break;
 			}
@@ -264,13 +201,13 @@ MainSwitch:
 			D2Bot.updateRuns();
 
 			lastGameTick = getTickCount();
-			gameCount += 1;
-			lastGameStatus = "ready";
-			ingame = false;
+			Starter.gameCount += 1;
+			Starter.lastGameStatus = "ready";
+			Starter.inGame = false;
 		}
 
-		if (!chatActionsDone) {
-			chatActionsDone = true;
+		if (!Starter.chatActionsDone) {
+			Starter.chatActionsDone = true;
 
 			ControlAction.timeoutDelay("Chat delay", StarterConfig.ChatActionsDelay * 1e3);
 			say("/j " + StarterConfig.JoinChannel);
@@ -286,7 +223,7 @@ MainSwitch:
 			break;
 		}
 
-		if (!locationTimeout(5000, location)) { // in case join button gets bugged
+		if (!Starter.locationTimeout(5000, location)) { // in case join button gets bugged
 			if (!ControlAction.click(6, 533, 469, 120, 20)) { // Create
 				break;
 			}
@@ -329,11 +266,11 @@ JoinLoop2:
 				D2Bot.requestGame(leader[j]);
 				delay(100);
 
-				if (joinInfo && joinInfo.gameName !== "" && (lastGame.indexOf(joinInfo.gameName) === -1 || lastGameStatus === "pending")) {
+				if (joinInfo && joinInfo.gameName !== "" && (lastGame.indexOf(joinInfo.gameName) === -1 || Starter.lastGameStatus === "pending")) {
 					ControlAction.setText(1, 606, 148, 155, 20, joinInfo.gamePass);
 					ControlAction.setText(1, 432, 148, 155, 20, joinInfo.gameName);
 
-					if (lastGameStatus === "pending" || (gameInfo.error && DataFile.getStats().gameName === joinInfo.gameName)) {
+					if (Starter.lastGameStatus === "pending" || (gameInfo.error && DataFile.getStats().gameName === joinInfo.gameName)) {
 						D2Bot.printToConsole("Failed to join game");
 						ControlAction.timeoutDelay("Join Delay", StarterConfig.JoinRetryDelay * 1000, joinCheck, leader[j]);
 						D2Bot.updateRuns();
@@ -341,7 +278,7 @@ JoinLoop2:
 						delay(200);
 
 						if (!joinInfo.inGame) {
-							lastGameStatus = "ready";
+							Starter.lastGameStatus = "ready";
 
 							break;
 						}
@@ -375,9 +312,9 @@ JoinLoop2:
 						lastGame.shift();
 					}
 
-					lastGameStatus = "pending";
+					Starter.lastGameStatus = "pending";
 
-					locationTimeout(15000, location);
+					Starter.locationTimeout(15000, location);
 
 					break JoinLoop2;
 				}
@@ -405,7 +342,7 @@ JoinLoop2:
 			break;
 		}
 
-		if (firstLogin && getLocation() === 9) { // multiple realm botting fix in case of R/D or disconnect
+		if (Starter.firstLogin && getLocation() === 9) { // multiple realm botting fix in case of R/D or disconnect
 			ControlAction.click(6, 33, 572, 128, 35);
 		}
 
@@ -557,7 +494,7 @@ JoinLoop2:
 			break;
 		}
 
-		updateCount();
+		Starter.updateCount();
 		ControlAction.timeoutDelay("Realm Down", StarterConfig.RealmDownDelay * 6e4);
 		D2Bot.CDKeyRD();
 
@@ -578,7 +515,7 @@ JoinLoop2:
 
 		break;
 	case 16: // Character Select - Please Wait popup
-		if (!locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
 			ControlAction.click(6, 351, 337, 96, 32);
 		}
 
@@ -604,7 +541,7 @@ JoinLoop2:
 	case 20: // Single Player - Select Difficulty
 		break;
 	case 21: // Main Menu - Connecting
-		if (!locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
 			ControlAction.click(6, 330, 416, 128, 35);
 		}
 
@@ -679,7 +616,7 @@ JoinLoop2:
 			}
 		}
 
-		if (!locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
 			ControlAction.click(6, 33, 572, 128, 35);
 
 			if (gameInfo.rdBlocker) {
@@ -691,7 +628,7 @@ JoinLoop2:
 	case 24: // Server Down - not much to do but wait..
 		break;
 	case 25: // Lobby - Please Wait
-		if (!locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
 			ControlAction.click(6, 351, 337, 96, 32);
 		}
 
@@ -713,10 +650,10 @@ JoinLoop2:
 				D2Bot.restart(true);
 			}
 		} else {
-			locationTimeout(StarterConfig.GameDoesNotExistTimeout * 1e3, location);
+			Starter.locationTimeout(StarterConfig.GameDoesNotExistTimeout * 1e3, location);
 		}
 
-		lastGameStatus = "ready";
+		Starter.lastGameStatus = "ready";
 
 		break;
 	case 38: // Game is full
@@ -724,7 +661,7 @@ JoinLoop2:
 		ControlAction.click(6, 652, 469, 120, 20);
 		lastGame.push(joinInfo.gameName);
 
-		lastGameStatus = "ready";
+		Starter.lastGameStatus = "ready";
 
 		break;
 	case 39: // Other Multiplayer
@@ -798,7 +735,7 @@ JoinLoop2:
 function main () {
 	debugLog(me.profile);
 	addEventListener('copydata', ReceiveCopyData);
-	addEventListener('scriptmsg', ScriptMsgEvent);
+	addEventListener('scriptmsg', Starter.scriptMsgEvent);
 
 	while (!handle) {
 		delay(100);
@@ -812,6 +749,8 @@ function main () {
 		D2Bot.requestGameInfo();
 		delay(500);
 	}
+
+	Starter.gameCount = (DataFile.getStats().runs + 1 || 1);
 
 	if (gameInfo.error) {
 		delay(200);
@@ -833,16 +772,16 @@ function main () {
 		while (me.ingame) {
 			// returns false when switching acts so we can't use while
 			if (me.gameReady) {
-				if (!ingame) {
+				if (!Starter.inGame) {
 					print("ÿc4Updating Status");
-					lastGameStatus = "ingame";
-					ingame = true;
-					gameStart = getTickCount();
+					Starter.lastGameStatus = "ingame";
+					Starter.inGame = true;
+					Starter.gameStart = getTickCount();
 
-					DataFile.updateStats("runs", gameCount);
+					DataFile.updateStats("runs", Starter.gameCount);
 				}
 
-				D2Bot.updateStatus("Game: " + me.gamename + timer(gameStart));
+				D2Bot.updateStatus("Game: " + me.gamename + Starter.timer(Starter.gameStart));
 			}
 
 			delay(1000);
