@@ -10,20 +10,9 @@ include("json2.js");
 include("NTItemParser.dbl");
 include("OOG.js");
 include("CraftingSystem.js");
-include("common/Attack.js");
-include("common/Cubing.js");
-include("common/CollMap.js");
-include("common/Config.js");
-include("common/Loader.js");
-include("common/misc.js");
 include("common/util.js");
-include("common/Pickit.js");
-include("common/Pather.js");
-include("common/Precast.js");
-include("common/Prototypes.js");
-include("common/Runewords.js");
-include("common/Storage.js");
-include("common/Town.js");
+
+includeCommonLibs();
 
 // MapMode
 include("manualplay/MapMode.js");
@@ -51,7 +40,7 @@ function main() {
 	addEventListener("itemaction", this.itemEvent);
 
 	while (true) {
-		for (ii = 0 ; ii < UIFlagList.length ; ii++) {
+		for (ii = 0; ii < UIFlagList.length; ii++) {
 			if (getUIFlag(UIFlagList[ii])) {
 				noPick = true;
 				break;

@@ -1,4 +1,10 @@
 /**
+ * @author Jaenster (I think), theBGuy (includeCommonLibs Function)
+ * @description utility functions for kolbot
+ *
+ */
+
+/**
  * @param args
  * @returns {Unit[]}
  */
@@ -37,3 +43,15 @@ const clickItemAndWait = (...args) => {
 	// return item if we didnt timeout
 	return !timedOut;
 };
+
+function includeCommonLibs () {
+	let files = dopen("libs/common/").getFiles();
+		
+	Array.isArray(files) && files
+		.filter(file => file.endsWith('.js') && !file.match("auto" ,"gi") && file !== "Util.js")
+		.forEach(function (x) {
+			if (!include("common/" + x)) {
+				throw new Error("Failed to include " + "common/" + x);
+			}
+		});
+}

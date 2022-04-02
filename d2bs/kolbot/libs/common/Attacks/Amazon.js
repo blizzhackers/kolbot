@@ -9,10 +9,18 @@ const ClassAttack = {
 	lightFuryTick: 0,
 
 	doAttack: function (unit, preattack) {
+		if (!unit) return 1;
+		let gid = unit.gid;
 		let needRepair = Town.needRepair();
 
 		if ((Config.MercWatch && Town.needMerc()) || needRepair.length > 0) {
-			Town.visitTown(!!needRepair.length);
+			print("towncheck");
+
+			if (Town.visitTown(!!needRepair.length)) {
+				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
+					return 1; // lost reference to the mob we were attacking
+				}
+			}
 		}
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.getState(121) || !Skill.isTimed(Config.AttackSkill[0]))) {
@@ -27,34 +35,25 @@ const ClassAttack = {
 			return 1;
 		}
 
-		let index, checkSkill, result,
+		let checkSkill,
 			mercRevive = 0,
 			timedSkill = -1,
 			untimedSkill = -1;
-
-		index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
+		let index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
 
 		// Get timed skill
-		if (Attack.getCustomAttack(unit)) {
-			checkSkill = Attack.getCustomAttack(unit)[0];
-		} else {
-			checkSkill = Config.AttackSkill[index];
-		}
+		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
 
-		if (Attack.checkResist(unit, checkSkill)) {
+		if (Attack.checkResist(unit, checkSkill) && ([56, 59].indexOf(checkSkill) === -1 || Attack.validSpot(unit.x, unit.y))) {
 			timedSkill = checkSkill;
 		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && ([56, 59].indexOf(Config.AttackSkill[5]) === -1 || Attack.validSpot(unit.x, unit.y))) {
 			timedSkill = Config.AttackSkill[5];
 		}
 
 		// Get untimed skill
-		if (Attack.getCustomAttack(unit)) {
-			checkSkill = Attack.getCustomAttack(unit)[1];
-		} else {
-			checkSkill = Config.AttackSkill[index + 1];
-		}
+		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[1] : Config.AttackSkill[index + 1];
 
-		if (Attack.checkResist(unit, checkSkill)) {
+		if (Attack.checkResist(unit, checkSkill) && ([56, 59].indexOf(checkSkill) === -1 || Attack.validSpot(unit.x, unit.y))) {
 			untimedSkill = checkSkill;
 		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && ([56, 59].indexOf(Config.AttackSkill[6]) === -1 || Attack.validSpot(unit.x, unit.y))) {
 			untimedSkill = Config.AttackSkill[6];
@@ -70,23 +69,39 @@ const ClassAttack = {
 			untimedSkill = Config.LowManaSkill[1];
 		}
 
-		result = this.doCast(unit, timedSkill, untimedSkill);
+		let result = this.doCast(unit, timedSkill, untimedSkill);
 
-		if (result === 2 && Config.TeleStomp && Attack.checkResist(unit, "physical") && !!me.getMerc()) {
-			while (Attack.checkMonster(unit)) {
+		if (result === 2 && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
+			let merc = me.getMerc();
+
+			while (unit.attackable) {
+				if (Misc.townCheck()) {
+					if (!unit || !copyUnit(unit).x) {
+						unit = Misc.poll(function () { return getUnit(1, -1, -1, gid); }, 1000, 80);
+					}
+				}
+
+				if (!unit) return 1;
+
 				if (Town.needMerc()) {
 					if (Config.MercWatch && mercRevive++ < 1) {
 						Town.visitTown();
 					} else {
 						return 2;
 					}
+
+					(merc === undefined || !merc) && (merc = me.getMerc());
 				}
 
-				if (getDistance(me, unit) > 3) {
+				if (!!merc && getDistance(merc, unit) > 5) {
 					Pather.moveToUnit(unit);
+
+					let spot = Attack.findSafeSpot(unit, 10, 5, 9);
+					!!spot && Pather.walkTo(spot.x, spot.y);
 				}
 
-				this.doCast(unit, Config.AttackSkill[1], Config.AttackSkill[2]);
+				let closeMob = Attack.getNearestMonster(true, true);
+				!!closeMob && closeMob.gid !== gid && this.doCast(closeMob, timedSkill, untimedSkill);
 			}
 
 			return 1;
