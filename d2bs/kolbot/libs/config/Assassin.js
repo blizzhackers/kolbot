@@ -217,11 +217,16 @@ function LoadConfig() {
 	
 	// ##### CONTROL SCRIPTS ##### //
 	Scripts.Follower = false; // Script that follows a manually played leader around like a merc. For a list of commands, see Follower.js
-	Scripts.Enchant = false;
-		Config.Enchant.Triggers = ["chant", "cows", "wps"]; // Chat commands for enchant, cow level and waypoint giving
-		Config.Enchant.GetLeg = false; // Get Wirt's Leg from Tristram. If set to false, it will check for the leg in town.
-		Config.Enchant.AutoChant = false; // Automatically enchant nearby players and their minions
-		Config.Enchant.GameLength = 20; // Game length in minutes
+	Scripts.ControlBot = false;
+		Config.ControlBot.Bo = true; // Bo player at waypoint
+		Config.ControlBot.Cows.MakeCows = true; // allow making cows if we can
+		Config.ControlBot.Cows.GetLeg = true; // Get Wirt's Leg from Tristram. If set to false, it will check for the leg in town.
+		Config.ControlBot.Chant.Enchant = true; // enchant player and their minions on command
+		Config.ControlBot.Chant.AutoEnchant = true; // Automatically enchant nearby players and their minions
+		Config.ControlBot.Wps.GiveWps = true; // Give wps on command
+		Config.ControlBot.Wps.SecurePortal = true; // Secure wp before making portal
+		Config.ControlBot.EndMessage = ""; // Message before quitting
+		Config.ControlBot.GameLength = 20; // Game length in minutes
 
 	// ##### ORG/TORCH ##### //
 	Scripts.GetKeys = false; // Hunt for T/H/D keys
@@ -369,6 +374,7 @@ function LoadConfig() {
 	/* ##### PICKIT SETTINGS ##### */
 	// ########################### //
 	// Default folder is kolbot/pickit.
+	// Item name and classids located in NTItemAlias.dbl or modules/sdk.js
 
 	//Config.PickitFiles.push("kolton.nip");
 	//Config.PickitFiles.push("LLD.nip");

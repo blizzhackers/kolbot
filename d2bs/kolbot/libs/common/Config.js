@@ -469,10 +469,21 @@ let Config = {
 		Mode: -1,
 		Wp: 35
 	},
-	Enchant: {
-		Triggers: ["chant", "cows", "wps"],
-		GetLeg: false,
-		AutoChant: false,
+	ControlBot: {
+		Bo: false,
+		Cows: {
+			MakeCows: false,
+			GetLeg: false,
+		},
+		Chant: {
+			Enchant: false,
+			AutoEnchant: false,
+		},
+		Wps: {
+			GiveWps: false,
+			SecurePortal: false,
+		},
+		EndMessage: "",
 		GameLength: 20
 	},
 	IPHunter: {
