@@ -96,7 +96,6 @@ const Runeword = {
 	Test: [624, 624, 624]
 };
 
-// eslint-disable-next-line no-redeclare
 const Runewords = {
 	needList: [],
 	pickitEntries: [],

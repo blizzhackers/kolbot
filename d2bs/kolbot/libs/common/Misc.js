@@ -4,7 +4,6 @@
 *	@desc		misc library containing Skill, Misc and Sort classes
 */
 
-// eslint-disable-next-line no-redeclare
 const Skill = {
 	usePvpRange: false,
 
@@ -108,19 +107,19 @@ const Skill = {
 		case 42: // Static Field
 			return Math.floor((me.getSkill(sdk.skills.StaticField, 1) + 3) * 2 / 3);
 		case 132: // Leap
-			{
-				let skLvl = me.getSkill(sdk.skills.Leap, 1);
-				return Math.floor(Math.min(4 + (26 * ((110 * skLvl / (skLvl + 6)) / 100)), 30) * (2 / 3));
-			}
+		{
+			let skLvl = me.getSkill(sdk.skills.Leap, 1);
+			return Math.floor(Math.min(4 + (26 * ((110 * skLvl / (skLvl + 6)) / 100)), 30) * (2 / 3));
+		}
 		case 230: // Arctic Blast
-			{
-				let skLvl = me.getSkill(sdk.skills.ArcticBlast, 1);
-				let range = Math.floor(((33 + (2 * skLvl)) / 4) * (2 / 3));
-				// Druid using this on physical immunes needs the monsters to be within range of hurricane
-				range > 6 && Config.AttackSkill[5] === sdk.skills.ArcticBlast && (range = 6);
+		{
+			let skLvl = me.getSkill(sdk.skills.ArcticBlast, 1);
+			let range = Math.floor(((33 + (2 * skLvl)) / 4) * (2 / 3));
+			// Druid using this on physical immunes needs the monsters to be within range of hurricane
+			range > 6 && Config.AttackSkill[5] === sdk.skills.ArcticBlast && (range = 6);
 		
-				return range;
-			}
+			return range;
+		}
 		case 49: // Lightning
 		case 84: // Bone Spear
 		case 93: // Bone Spirit
@@ -248,10 +247,13 @@ const Skill = {
 		// cant cast this in town
 		case me.inTown && !this.townSkill(skillId):
 		// dont have enough mana for this
+		// eslint-disable-next-line no-fallthrough
 		case !item && this.getManaCost(skillId) > me.mp:
 		// Dont have this skill
+		// eslint-disable-next-line no-fallthrough
 		case !item && !me.getSkill(skillId, 1):
 		// can't cast in wereform
+		// eslint-disable-next-line no-fallthrough
 		case !this.wereFormCheck(skillId):
 			return false;
 		case skillId === undefined:
@@ -373,7 +375,7 @@ const Skill = {
 
 	// Timed skills
 	isTimed: function (skillId) {
-		return [15, 25, 27, 51, 56, 59, 62, 64, 121, 225, 223, 228, 229, 234, 244, 247, 249, 250, 256, 268, 275, 277, 279].indexOf(skillId) > -1;
+		return [15, 25, 27, 51, 56, 59, 62, 64, 121, 225, 223, 228, 229, 234, 244, 247, 249, 250, 256, 268, 275, 277, 279].includes(skillId);
 	},
 
 	// Wereform skill check
@@ -383,17 +385,18 @@ const Skill = {
 		}
 
 		// Can be cast by both
-		if ([0, 1, 221, 222, 226, 227, 231, 236, 237, 239, 241, 242, 246, 247, 249].indexOf(skillId) > -1) {
+		if ([sdk.skills.Attack, sdk.skills.Kick, sdk.skills.Raven, sdk.skills.PoisonCreeper, sdk.skills.OakSage, sdk.skills.SpiritWolf, sdk.skills.CarrionVine,
+			sdk.skills.HeartofWolverine, sdk.skills.SummonDireWolf, sdk.skills.FireClaws, sdk.skills.SolarCreeper, sdk.skills.Hunger, sdk.skills.SpiritofBarbs, sdk.skills.SummonGrizzly, sdk.skills.Armageddon].includes(skillId)) {
 			return true;
 		}
 
 		// Can be cast by werewolf only
-		if (me.getState(139) && [223, 232, 238, 248].indexOf(skillId) > -1) {
+		if (me.getState(139) && [sdk.skills.Werewolf, sdk.skills.FeralRage, sdk.skills.Rabies, sdk.skills.Fury].includes(skillId)) {
 			return true;
 		}
 
 		// Can be cast by werebear only
-		if (me.getState(140) && [228, 233, 243].indexOf(skillId) > -1) {
+		if (me.getState(140) && [sdk.skills.Werebear, sdk.skills.Maul, sdk.skills.ShockWave].includes(skillId)) {
 			return true;
 		}
 
@@ -401,8 +404,11 @@ const Skill = {
 	},
 
 	// Skills that cn be cast in town
-	townSkill: function (skillId) {
-		return [32, 40, 43, 50, 52, 58, 60, 68, 75, 85, 94, 117, 221, 222, 226, 227, 235, 236, 237, 246, 247, 258, 267, 268, 277, 278, 279].indexOf(skillId) > -1;
+	townSkill: function (skillId = -1) {
+		return [sdk.skills.Valkyrie, sdk.skills.FrozenArmor, sdk.skills.Telekinesis, sdk.skills.ShiverArmor, sdk.skills.Enchant, sdk.skills.ThunderStorm, sdk.skills.EnergyShield, sdk.skills.ChillingArmor,
+			sdk.skills.BoneArmor, sdk.skills.CLayGolem, sdk.skills.BloodGolem, sdk.skills.FireGolem, sdk.skills.HolyShield, sdk.skills.Raven, sdk.skills.PoisonCreeper, sdk.skills.Werewolf, sdk.skills.Werebear,
+			sdk.skills.OakSage, sdk.skills.SpiritWolf, sdk.skills.CarrionVine, sdk.skills.CycloneArmor, sdk.skills.HeartofWolverine, sdk.skills.SummonDireWolf, sdk.skills.SolarCreeper,
+			sdk.skills.SpiritofBarbs, sdk.skills.SummonGrizzly, sdk.skills.BurstofSpeed, sdk.skills.Fade, sdk.skills.ShadowWarrior, sdk.skills.BladeShield, sdk.skills.Venom, sdk.skills.ShadowMaster].includes(skillId);
 	},
 
 	manaCostList: {},
@@ -440,7 +446,6 @@ const Skill = {
 	}
 };
 
-// eslint-disable-next-line no-redeclare
 const Item = {
 	hasTier: function (item) {
 		return Config.AutoEquip && NTIP.GetTier(item) > 0;
@@ -712,7 +717,6 @@ const Item = {
 	}
 };
 
-// eslint-disable-next-line no-redeclare
 const Misc = {
 	// Click something
 	click: function (button, shift, x, y) {
@@ -2056,7 +2060,6 @@ const Sort = {
 	}
 };
 
-// eslint-disable-next-line no-redeclare
 const Experience = {
 	totalExp: [0, 0, 500, 1500, 3750, 7875, 14175, 22680, 32886, 44396, 57715, 72144, 90180, 112725, 140906, 176132, 220165, 275207, 344008, 430010, 537513, 671891, 839864, 1049830, 1312287, 1640359, 2050449, 2563061, 3203826, 3902260, 4663553, 5493363, 6397855, 7383752, 8458379, 9629723, 10906488, 12298162, 13815086, 15468534, 17270791, 19235252, 21376515, 23710491, 26254525, 29027522, 32050088, 35344686, 38935798, 42850109, 47116709, 51767302, 56836449, 62361819, 68384473, 74949165, 82104680, 89904191, 98405658, 107672256, 117772849, 128782495, 140783010, 153863570, 168121381, 183662396, 200602101, 219066380, 239192444, 261129853, 285041630, 311105466, 339515048, 370481492, 404234916, 441026148, 481128591, 524840254, 572485967, 624419793, 681027665, 742730244, 809986056, 883294891, 963201521, 1050299747, 1145236814, 1248718217, 1361512946, 1484459201, 1618470619, 1764543065, 1923762030, 2097310703, 2286478756, 2492671933, 2717422497, 2962400612, 3229426756, 3520485254, 0, 0],
 	nextExp: [0, 500, 1000, 2250, 4125, 6300, 8505, 10206, 11510, 13319, 14429, 18036, 22545, 28181, 35226, 44033, 55042, 68801, 86002, 107503, 134378, 167973, 209966, 262457, 328072, 410090, 512612, 640765, 698434, 761293, 829810, 904492, 985897, 1074627, 1171344, 1276765, 1391674, 1516924, 1653448, 1802257, 1964461, 2141263, 2333976, 2544034, 2772997, 3022566, 3294598, 3591112, 3914311, 4266600, 4650593, 5069147, 5525370, 6022654, 6564692, 7155515, 7799511, 8501467, 9266598, 10100593, 11009646, 12000515, 13080560, 14257811, 15541015, 16939705, 18464279, 20126064, 21937409, 23911777, 26063836, 28409582, 30966444, 33753424, 36791232, 40102443, 43711663, 47645713, 51933826, 56607872, 61702579, 67255812, 73308835, 79906630, 87098226, 94937067, 103481403, 112794729, 122946255, 134011418, 146072446, 159218965, 173548673, 189168053, 206193177, 224750564, 244978115, 267026144, 291058498, 0, 0],
@@ -2157,7 +2160,6 @@ const Experience = {
 	}
 };
 
-// eslint-disable-next-line no-redeclare
 const Packet = {
 	openMenu: function (unit) {
 		if (unit.type !== 1) { throw new Error("openMenu: Must be used on NPCs."); }
@@ -2480,7 +2482,7 @@ Example (Spoof 'player move' packet to server):
 */
 
 function PacketBuilder () {
-	/* globals DataView ArrayBuffer */
+	// globals DataView ArrayBuffer
 	if (this.__proto__.constructor !== PacketBuilder) {
 		throw new Error("PacketBuilder must be called with 'new' operator!");
 	}

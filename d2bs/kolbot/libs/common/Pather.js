@@ -5,7 +5,6 @@
 */
 
 // Perform certain actions after moving to each node
-// eslint-disable-next-line no-redeclare
 const NodeAction = {
 	// Run all the functions within NodeAction (except for itself)
 	go: function (arg) {
@@ -63,7 +62,6 @@ const NodeAction = {
 	}
 };
 
-// eslint-disable-next-line no-redeclare
 const PathDebug = {
 	hooks: [],
 	enableHooks: false,
@@ -99,7 +97,6 @@ const PathDebug = {
 	}
 };
 
-// eslint-disable-next-line no-redeclare
 const Pather = {
 	teleport: true,
 	walkDistance: 5,
@@ -1087,7 +1084,7 @@ const Pather = {
 					this.moveToUnit(wp);
 				}
 
-				if (check || Config.WaypointMenu) {
+				if (check || Config.WaypointMenu || !getWaypoint(sdk.areas.RogueEncampment)) {
 					if ((!Skill.useTK(wp) || i > 3) && (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint))) {
 						this.moveToUnit(wp) && Misc.click(0, 0, wp);
 					}

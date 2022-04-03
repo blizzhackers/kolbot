@@ -105,7 +105,7 @@ const Precast = new function () {
 
 		me.weaponswitch !== 0 && Attack.weaponswitch(0);
 
-		let items = me.getItemsEx()
+		me.getItemsEx()
 			.filter(item => [4, 5, 11, 12].includes(item.bodylocation))
 			.forEach(function (item) {
 				if (item.bodylocation === 4 || item.bodylocation === 5) {
@@ -358,7 +358,7 @@ const Precast = new function () {
 	this.checkCTA = function () {
 		if (this.haveCTA > -1 || me.barbarian) return true;
 
-		let check = me.checkItem({name: sdk.locale.items.CalltoArms, equipped: true})
+		let check = me.checkItem({name: sdk.locale.items.CalltoArms, equipped: true});
 
 		if (check.have) {
 			switch (check.item.bodylocation) {

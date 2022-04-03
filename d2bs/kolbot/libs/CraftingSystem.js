@@ -7,7 +7,7 @@
 *				If you can't get it to work, leave it be.
 */
 
-var CraftingSystem = {};
+const CraftingSystem = {};
 
 CraftingSystem.Teams = {
 	"Team 1": {

@@ -4,7 +4,6 @@
 *	@desc		handle item pickup
 */
 
-// eslint-disable-next-line no-redeclare
 const Pickit = {
 	gidList: [],
 	beltSize: 1,

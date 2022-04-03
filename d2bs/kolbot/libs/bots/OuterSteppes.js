@@ -1,8 +1,17 @@
+/**
+*	@filename	Abaddon.js
+*	@author		probably kolton
+*	@desc		clear OuterSteppes
+*/
+
 function OuterSteppes() {
-	Town.goToTown(4);
+	if (!Town.goToTown(4)) {
+		throw new Error("Failed to go to act 4");
+	}
+
 	Town.doChores();
 
-	if (!Pather.moveToExit(104, true)) {
+	if (!Pather.journeyTo(sdk.areas.OuterSteppes)) {
 		throw new Error("Failed to move to Outer Steppes");
 	}
 

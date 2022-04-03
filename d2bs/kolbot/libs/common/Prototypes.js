@@ -33,7 +33,7 @@ let sdk = require('../modules/sdk');
 
 		return console;
 
-	})()
+	})();
 })([].filter.constructor('return this')(), print);
 
 (function (global, original) {
@@ -52,13 +52,13 @@ let sdk = require('../modules/sdk');
 		const ret = original.apply(this, args);
 
 		// deal with bug
-		if (first === 1 && typeof second === 'string' && ret 
+		if (first === 1 && typeof second === 'string' && ret
 			&& ((me.act === 1 && ret.classid === 149) || me.act === 2 && ret.classid === 268)) {
 			return null;
 		}
 
 		return original.apply(this, args);
-	}
+	};
 })([].filter.constructor('return this')(), getUnit);
 
 // Check if unit is idle
@@ -214,7 +214,7 @@ Unit.prototype.buy = function (shiftBuy, gamble) {
 	}
 
 	// Can we afford the item?
-	if (me.getStat(14) + me.getStat(15) < this.getItemCost(0)) { 
+	if (me.getStat(14) + me.getStat(15) < this.getItemCost(0)) {
 		return false;
 	}
 
@@ -269,7 +269,7 @@ Unit.prototype.sell = function () {
 	}
 
 	// Check if it's an item we want to buy
-	if (this.type !== 4) { 
+	if (this.type !== 4) {
 		throw new Error("Unit.sell: Must be used on items.");
 	}
 
@@ -470,7 +470,7 @@ Unit.prototype.checkItem = function (itemInfo) {
 				&& (itemObj.ethereal === null || (item.ethereal === itemObj.ethereal))
 				&& (itemObj.equipped === null || (typeof itemObj.equipped === "number" ? item.bodylocation === itemObj.equipped : item.isEquipped === itemObj.equipped))
 				&& (!itemObj.name || item.fname.toLowerCase().includes(itemObj.name.toLowerCase()))
-				);
+			);
 		});
 	if (items.length > 0) {
 		return {

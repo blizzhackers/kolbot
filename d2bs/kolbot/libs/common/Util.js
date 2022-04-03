@@ -48,7 +48,7 @@ function includeCommonLibs () {
 	let files = dopen("libs/common/").getFiles();
 		
 	Array.isArray(files) && files
-		.filter(file => file.endsWith('.js') && !file.match("auto" ,"gi") && file !== "Util.js")
+		.filter(file => file.endsWith('.js') && !file.match("auto", "gi") && file !== "Util.js")
 		.forEach(function (x) {
 			if (!include("common/" + x)) {
 				throw new Error("Failed to include " + "common/" + x);

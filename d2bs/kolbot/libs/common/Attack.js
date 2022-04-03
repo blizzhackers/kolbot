@@ -4,7 +4,6 @@
 *	@desc		handle player attacks
 */
 
-// eslint-disable-next-line no-redeclare
 const Attack = {
 	infinity: false,
 	auradin: false,
@@ -56,7 +55,7 @@ const Attack = {
 		return false;
 	},
 
-	 // check if slot has items
+	// check if slot has items
 	checkSlot: function (slot = me.weaponswitch) {
 		let item = me.getItem(-1, 1);
 
@@ -186,7 +185,7 @@ const Attack = {
 			.some(function (item) {
 				return [sdk.locale.items.Dragon, sdk.locale.items.Dream, sdk.locale.items.HandofJustice].includes(item.prefixnum);
 			});
-	    
+  
 		return this.auradin;
 	},
 
@@ -226,7 +225,7 @@ const Attack = {
 			Misc.townCheck();
 			
 			// Check if unit got invalidated, happens if necro raises a skeleton from the boss's corpse.
-			if (!target || !copyUnit(target).x) { 
+			if (!target || !copyUnit(target).x) {
 				target = getUnit(1, -1, -1, gid);
 				!target && (target = findTarget(gid, lastLoc));
 
@@ -285,7 +284,7 @@ const Attack = {
 
 		if (!target) {
 			console.warn("Attack.hurt: Target not found");
-			return false
+			return false;
 		}
 
 		let retry = 0, attackCount = 0;
@@ -794,7 +793,7 @@ const Attack = {
 		
 		if (Config.MFLeader && rooms.length > 0) {
 			Pather.makePortal();
-			 // tombs exception
+			// tombs exception
 			if (me.area > 65 && me.area < 73) {
 				say("clearlevel " + me.area);
 			} else {
@@ -1392,7 +1391,7 @@ const Attack = {
 	},
 
 	getLowerResistPercent: function () {
-		let calc = function (level) { return Math.floor(Math.min(25 + (45 * ((110 * level) / (level + 6)) / 100), 70))};
+		let calc = function (level) { return Math.floor(Math.min(25 + (45 * ((110 * level) / (level + 6)) / 100), 70));};
 		if (me.getSkill(sdk.skills.LowerResist, 1)) {
 			return calc(me.getSkill(sdk.skills.LowerResist, 1));
 		}
@@ -1400,7 +1399,7 @@ const Attack = {
 	},
 
 	getConvictionPercent: function () {
-		let calc = function (level) { return Math.floor(Math.min(25 + (5 * level), 150))};
+		let calc = function (level) { return Math.floor(Math.min(25 + (5 * level), 150));};
 		if (me.expansion && this.checkInfinity()) {
 			return calc(12);
 		}

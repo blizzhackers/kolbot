@@ -4,7 +4,6 @@
 *	@desc		do town chores like buying, selling and gambling
 */
 
-// eslint-disable-next-line no-redeclare
 const NPC = {
 	Akara: getLocaleString(2892).toLowerCase(),
 	Gheed: getLocaleString(2891).toLowerCase(),
@@ -39,7 +38,6 @@ const NPC = {
 	Cain: getLocaleString(2890).toLowerCase()
 };
 
-// eslint-disable-next-line no-redeclare
 const Town = {
 	telekinesis: true,
 	sellTimer: getTickCount(), // shop speedup test

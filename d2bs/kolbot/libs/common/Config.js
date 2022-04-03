@@ -6,7 +6,6 @@
 
 const Scripts = {};
 
-// eslint-disable-next-line no-redeclare
 let Config = {
 	init: function (notify) {
 		let configFilename = "",

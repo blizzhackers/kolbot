@@ -94,7 +94,7 @@ const Common = {
 				}
 
 				seal = Misc.poll(function () { return getUnit(sdk.unittype.Object, classid); }, 1000, 100);
-				if (!seal) { 
+				if (!seal) {
 					console.debug("Couldn't find seal: " + classid);
 					return false;
 				}
@@ -458,6 +458,7 @@ const Common = {
 						
 						break;
 					}
+				// eslint-disable-next-line no-fallthrough
 				case sdk.charclass.Druid:
 					if ([sdk.skills.Fissure, sdk.skills.Volcano].includes(Config.AttackSkill[3])) {
 						[15116, 5026].distance > 3 && Pather.moveTo(15116, 5026);
@@ -470,6 +471,7 @@ const Common = {
 						
 						break;
 					}
+				// eslint-disable-next-line no-fallthrough
 				case sdk.charclass.Barbarian:
 					[15112, 5062].distance > 3 && Pather.moveTo(15112, 5062);
 

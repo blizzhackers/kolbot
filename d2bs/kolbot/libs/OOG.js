@@ -1234,7 +1234,7 @@ const ControlAction = {
 		// start from beginning of the char list
 		sendKey(0x24);
 
-	MainLoop:
+		MainLoop:
 		// cycle until in lobby
 		while (getLocation() === 12) {
 			control = getControl(4, 37, 178, 200, 92);
@@ -1403,7 +1403,7 @@ const Starter = {
 		try {
 			login(me.profile);
 		} catch (e) {
-
+			return;
 		}
 
 		delay(1000);

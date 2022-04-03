@@ -95,7 +95,6 @@ const Recipe = {
 	}
 };
 
-// eslint-disable-next-line no-redeclare
 const Cubing = {
 	recipes: [],
 	gemList: [],
