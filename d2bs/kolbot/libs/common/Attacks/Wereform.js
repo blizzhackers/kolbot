@@ -5,12 +5,15 @@
 */
 
 const ClassAttack = {
+	feralBoost: 0,
+	baseLL: me.getStat(sdk.stats.LifeLeech),
+
 	doAttack: function (unit, preattack) {
 		if (!unit) return 1;
 		let gid = unit.gid;
 
 		if (Config.MercWatch && Town.needMerc()) {
-			print("mercwatch");
+			console.debug("mercwatch");
 
 			if (Town.visitTown()) {
 				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
@@ -19,9 +22,15 @@ const ClassAttack = {
 			}
 		}
 
-		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.getState(121) || !Skill.isTimed(Config.AttackSkill[0]))) {
+		if (!this.feralBoost && Config.AttackSkill.includes(sdk.skills.FeralRage)) {
+			this.feralBoost = ((Math.floor(me.getSkill(sdk.skills.FeralRage, 1) / 2) + 3) * 4) + this.baseLL; // amount of life leech with max rage
+		}
+
+		if (((Config.AttackSkill[0] === sdk.skills.FeralRage && (!me.getState(sdk.states.FeralRage) || me.getStat(sdk.stats.LifeLeech) < this.feralBoost))
+			|| (Config.AttackSkill[0] === sdk.skills.Maul && !me.getState(sdk.states.Maul))
+			|| (preattack && Config.AttackSkill[0] > 0)) && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0])) && (Skill.wereFormCheck(Config.AttackSkill[0]) || !me.shapeshifted)) {
 			if (Math.round(getDistance(me, unit)) > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4, true)) {
 					return 0;
 				}
 			}
@@ -29,6 +38,13 @@ const ClassAttack = {
 			Skill.cast(Config.AttackSkill[0], Skill.getHand(Config.AttackSkill[0]), unit);
 
 			return 1;
+		}
+
+		Misc.shapeShift(Config.Wereform);
+
+		// Rebuff Armageddon
+		if (me.getSkill(sdk.skills.Armageddon, 1) && !me.getState(sdk.states.Armageddon)) {
+			Skill.cast(sdk.skills.Armageddon, 0);
 		}
 
 		let checkSkill,
@@ -40,19 +56,41 @@ const ClassAttack = {
 		// Get timed skill
 		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
 
-		if (Attack.checkResist(unit, checkSkill) && ([56, 59].indexOf(checkSkill) === -1 || Attack.validSpot(unit.x, unit.y))) {
+		if (Attack.checkResist(unit, checkSkill) && Skill.wereFormCheck(checkSkill) && Attack.validSpot(unit.x, unit.y)) {
 			timedSkill = checkSkill;
-		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && ([56, 59].indexOf(Config.AttackSkill[5]) === -1 || Attack.validSpot(unit.x, unit.y))) {
+		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && Attack.validSpot(unit.x, unit.y)) {
 			timedSkill = Config.AttackSkill[5];
 		}
 
 		// Get untimed skill
 		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[1] : Config.AttackSkill[index + 1];
 
-		if (Attack.checkResist(unit, checkSkill) && ([56, 59].indexOf(checkSkill) === -1 || Attack.validSpot(unit.x, unit.y))) {
+		if (Attack.checkResist(unit, checkSkill) && Skill.wereFormCheck(checkSkill) && Attack.validSpot(unit.x, unit.y)) {
 			untimedSkill = checkSkill;
-		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && ([56, 59].indexOf(Config.AttackSkill[6]) === -1 || Attack.validSpot(unit.x, unit.y))) {
+		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && Attack.validSpot(unit.x, unit.y)) {
 			untimedSkill = Config.AttackSkill[6];
+		}
+
+		// eval skills
+		switch (true) {
+		case timedSkill === sdk.skills.Fury && untimedSkill === sdk.skills.FeralRage:
+			if (!me.getState(sdk.states.FeralRage) || me.getStat(sdk.stats.LifeLeech) < this.feralBoost) {
+				timedSkill = sdk.skills.FeralRage;
+			}
+
+			break;
+		case timedSkill === sdk.skills.Fury && untimedSkill === sdk.skills.Rabies:
+			if (!unit.getState(sdk.states.Rabies)) {
+				timedSkill = sdk.skills.Rabies;
+			}
+
+			break;
+		case timedSkill === sdk.skills.ShockWave && untimedSkill === sdk.skills.Maul:
+			if (!me.getState(sdk.states.Maul)) {
+				timedSkill = sdk.skills.Maul;
+			}
+
+			break;
 		}
 
 		// Low mana timed skill
@@ -65,7 +103,10 @@ const ClassAttack = {
 			untimedSkill = Config.LowManaSkill[1];
 		}
 
-		return this.doCast(unit, timedSkill, untimedSkill);
+		// use our secondary skill if we can't use our primary
+		let choosenSkill = (Skill.isTimed(timedSkill) && me.skillDelay && untimedSkill > -1 ? untimedSkill : timedSkill);
+
+		return this.doCast(unit, choosenSkill);
 	},
 
 	afterAttack: function () {
@@ -73,79 +114,25 @@ const ClassAttack = {
 	},
 
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
-	doCast: function (unit, timedSkill, untimedSkill) {
+	doCast: function (unit, skill) {
+		// unit reference no longer valid or it died
+		if (!unit || unit.dead) return 1;
 		// No valid skills can be found
-		if (timedSkill < 0 && untimedSkill < 0) return 2;
+		if (skill < 0) return 2;
 
-		if (timedSkill > -1 && (!me.getState(121) || !Skill.isTimed(timedSkill))) {
-			if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
+		if (Skill.getRange(skill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
+			return 0;
+		}
+
+		if (Math.round(getDistance(me, unit)) > Skill.getRange(skill) || checkCollision(me, unit, 0x4)) {
+			if (!Attack.getIntoPosition(unit, Skill.getRange(skill), 0x4, true)) {
 				return 0;
 			}
-
-			// Teleport closer
-			if (Math.ceil(getDistance(me, unit)) > 10) {
-				if (Pather.useTeleport()) {
-					Misc.unShift();
-				}
-
-				if (!Attack.getIntoPosition(unit, 10, 0x4)) {
-					return 0;
-				}
-			}
-
-			Misc.shapeShift(Config.Wereform);
-
-			if (Math.round(getDistance(me, unit)) > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4, true)) {
-					return 0;
-				}
-			}
-
-			if (!unit.dead) {
-				Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
-			}
-
-			return 1;
 		}
 
-		if (untimedSkill > -1) {
-			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
-				return 0;
-			}
+		!unit.dead && Skill.cast(skill, Skill.getHand(skill), unit);
 
-			// Teleport closer
-			if (Math.ceil(getDistance(me, unit)) > 10) {
-				if (Pather.useTeleport()) {
-					Misc.unShift();
-				}
-
-				if (!Attack.getIntoPosition(unit, 10, 0x4)) {
-					return 0;
-				}
-			}
-
-			Misc.shapeShift(Config.Wereform);
-
-			if (Math.round(getDistance(me, unit)) > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), 0x4, true)) {
-					return 0;
-				}
-			}
-
-			if (!unit.dead) {
-				Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
-			}
-
-			return 1;
-		}
-
-		for (let i = 0; i < 25; i += 1) {
-			if (!me.getState(121)) {
-				break;
-			}
-
-			delay(40);
-		}
+		Misc.poll(() => !me.skillDelay, 1000, 40);
 
 		return 1;
 	}
