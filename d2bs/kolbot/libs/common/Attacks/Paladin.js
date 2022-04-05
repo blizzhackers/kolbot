@@ -111,7 +111,7 @@ const ClassAttack = {
 				}
 
 				let closeMob = Attack.getNearestMonster(true, true);
-				!!closeMob && closeMob.gid !== gid && this.doCast(closeMob, timedSkill, untimedSkill);
+				!!closeMob && closeMob.gid !== gid && this.doCast(closeMob, attackSkill, aura);
 			}
 
 			return 1;

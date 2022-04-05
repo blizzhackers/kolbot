@@ -318,19 +318,19 @@ const Precast = new function () {
 
 			break;
 		case sdk.charclass.Assassin:
-			if (me.getSkill(sdk.skills.Fade, 0) && Config.UseFade && (!me.getState(sdk.states.Fade) || force)) {
+			if (Config.UseFade && me.getSkill(sdk.skills.Fade, 0) && (!me.getState(sdk.states.Fade) || force)) {
 				this.precastSkill(sdk.skills.Fade);
 			}
 
-			if (me.getSkill(sdk.skills.Venom, 0) && Config.UseVenom && (!me.getState(sdk.states.Venom) || force)) {
+			if (Config.UseVenom && me.getSkill(sdk.skills.Venom, 0) && Config.UseVenom && (!me.getState(sdk.states.Venom) || force)) {
 				this.precastSkill(sdk.skills.Venom);
 			}
 
-			if (me.getSkill(sdk.skills.BladeShield, 0) && (!me.getState(sdk.states.BladeShield) || force)) {
+			if (Config.UseBladeShield && me.getSkill(sdk.skills.BladeShield, 0) && (!me.getState(sdk.states.BladeShield) || force)) {
 				this.precastSkill(sdk.skills.BladeShield);
 			}
 
-			if (me.getSkill(sdk.skills.BurstofSpeed, 0) && !Config.UseFade && Config.UseBoS && (!me.getState(sdk.states.BurstofSpeed) || force)) {
+			if (!Config.UseFade && Config.UseBoS && me.getSkill(sdk.skills.BurstofSpeed, 0) && (!me.getState(sdk.states.BurstofSpeed) || force)) {
 				this.precastSkill(sdk.skills.BurstofSpeed);
 			}
 

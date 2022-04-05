@@ -6,6 +6,7 @@
 
 const Pickit = {
 	gidList: [],
+	useTelekinesis: (Config.UseTelekinesis && me.getSkill(sdk.skills.Telekinesis, 1)),
 	beltSize: 1,
 	ignoreLog: [4, 5, 6, 22, 41, 76, 77, 78, 79, 80, 81], // Ignored item types for item logging
 
@@ -114,7 +115,7 @@ const Pickit = {
 				// Check if the item should be picked
 				status = this.checkItem(pickList[0]);
 
-				if (status.result && this.canPick(pickList[0]) && Item.autoEquipCheck(pickList[0])) {
+				if (status.result && this.canPick(pickList[0])) {
 					// Override canFit for scrolls, potions and gold
 					canFit = Storage.Inventory.CanFit(pickList[0]) || [4, 22, 76, 77, 78].indexOf(pickList[0].itemType) > -1;
 
@@ -209,7 +210,7 @@ const Pickit = {
 			this.name = unit.name;
 			this.color = Pickit.itemColor(unit);
 			this.gold = unit.getStat(14);
-			this.useTk = Config.UseTelekinesis && me.classid === 1 && me.getSkill(43, 1) && (this.type === 4 || this.type === 22 || (this.type > 75 && this.type < 82)) &&
+			this.useTk = Pickit.useTelekinesis && (this.type === 4 || this.type === 22 || (this.type > 75 && this.type < 82)) &&
 						getDistance(me, unit) > 5 && getDistance(me, unit) < 20 && !checkCollision(me, unit, 0x4);
 			this.picked = false;
 		}
@@ -256,8 +257,7 @@ const Pickit = {
 
 			if (stats.useTk) {
 				if (Config.PacketCasting === 2) {
-					Skill.setSkill(43, 0);
-					Packet.unitCast(0, item);
+					Skill.setSkill(43, 0) && Packet.unitCast(0, item);
 				} else {
 					Skill.cast(43, 0, item);
 				}
@@ -396,22 +396,8 @@ const Pickit = {
 	canPick: function (unit) {
 		let tome, charm, i, potion, needPots, buffers, pottype, myKey, key;
 
-		switch (unit.classid) {
-		case 92: // Staff of Kings
-		case 173: // Khalim's Flail
-		case 521: // Viper Amulet
-		case 546: // Jade Figurine
-		case 549: // Cube
-		case 551: // Mephisto's Soulstone
-		case 552: // Book of Skill
-		case 553: // Khalim's Eye
-		case 554: // Khalim's Heart
-		case 555: // Khalim's Brain
-			if (me.getItem(unit.classid)) {
-				return false;
-			}
-
-			break;
+		if (unit.questItem && me.getItem(unit.classid)) {
+			return false;
 		}
 
 		switch (unit.itemType) {

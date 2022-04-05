@@ -329,6 +329,7 @@ let Config = {
 	UseFade: false,
 	UseBoS: false,
 	UseVenom: false,
+	UseBladeShield: false,
 	UseCloakofShadows: false,
 	AggressiveCloak: false,
 	SummonShadow: false,

@@ -606,7 +606,17 @@ const Pather = {
 			let unit = barrels.shift();
 
 			if (unit && !checkCollision(me, unit, 0x4)) {
-				Misc.click(0, 0, unit);
+				try {
+					for (let i = 0; i < 5; i++) {
+						i < 3 ? sendPacket(1, 0x13, 4, unit.type, 4, unit.gid) : Misc.click(0, 0, unit);
+
+						if (unit.mode) {
+							break;
+						}
+					}
+				} catch (e) {
+					continue;
+				}
 			}
 		}
 
