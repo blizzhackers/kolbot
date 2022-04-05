@@ -1,17 +1,12 @@
-const StarterConfig = {
-	MinGameTime: 0, // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
-	CreateGameDelay: 5, // Seconds to wait before creating a new game
-	SwitchKeyDelay: 0, // Seconds to wait before switching a used/banned key or after realm down
-	CrashDelay: 60, // Seconds to wait after a d2 window crash
-	RealmDownDelay: 2, // Minutes to wait after getting Realm Down message
-	UnableToConnectDelay: 5, // Minutes to wait after Unable To Connect message
-	TCPIPNoHostDelay: 5, // Seconds to wait after Cannot Connect To Server message
-	CDKeyInUseDelay: 5, // Minutes to wait before connecting again if CD-Key is in use. SwitchKeys overrides this!
-	ConnectingTimeout: 20, // Seconds to wait before cancelling the 'Connecting...' screen
-	PleaseWaitTimeout: 10, // Seconds to wait before cancelling the 'Please Wait...' screen
-	WaitInLineTimeout: 60 // Seconds to wait before cancelling the 'Waiting in Line...' screen
-};
+include("StarterConfig.js");
 
+// D2BotGameAction settings
+StarterConfig.MinGameTime = 0; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
+StarterConfig.CreateGameDelay = 5; // Seconds to wait before creating a new game
+StarterConfig.SwitchKeyDelay = 0; // Seconds to wait before switching a used/banned key or after realm down
+
+// Override default values for StarterConfig under here by following format
+// StarterConfig.ValueToChange = value; // Example: StarterConfig.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
 // No touchy!
 include("json2.js");

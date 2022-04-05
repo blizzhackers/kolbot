@@ -1,20 +1,12 @@
-var StarterConfig = {
-	MinGameTime: rand(150, 180), // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
-	CreateGameDelay: rand(5, 15), // Seconds to wait before creating a new game
+include("StarterConfig.js");
 
-	SwitchKeyDelay: 0, // Seconds to wait before switching a used/banned key or after realm down
+// D2BotMuleLog settings
+StarterConfig.MinGameTime = rand(150, 180); // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
+StarterConfig.CreateGameDelay = 5; // Seconds to wait before creating a new game
+StarterConfig.SwitchKeyDelay = 0; // Seconds to wait before switching a used/banned key or after realm down
 
-	CrashDelay: rand(60, 120), // Seconds to wait after a d2 window crash
-	RealmDownDelay: rand(3, 6), // Minutes to wait after getting Realm Down message
-	UnableToConnectDelay: rand(5, 8), // Minutes to wait after Unable To Connect message
-	TCPIPNoHostDelay: 5, // Seconds to wait after Cannot Connect To Server message
-	CDKeyInUseDelay: rand(5, 8), // Minutes to wait before connecting again if CD-Key is in use. SwitchKeys overrides this!
-	ConnectingTimeout: rand(20, 30), // Seconds to wait before cancelling the 'Connecting...' screen
-	PleaseWaitTimeout: rand(10, 20), // Seconds to wait before cancelling the 'Please Wait...' screen
-	WaitInLineTimeout: rand(30, 60) // Seconds to wait before cancelling the 'Waiting in Line...' screen
-};
-
-
+// Override default values for StarterConfig under here by following format
+// StarterConfig.ValueToChange = value; // Example: StarterConfig.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
 // No touchy!
 include("json2.js");
@@ -22,21 +14,18 @@ include("OOG.js");
 include("MuleLogger.js");
 include("common/misc.js");
 include("common/util.js");
+include("common/prototypes.js");
 
 if (!FileTools.exists("data/" + me.profile + ".json")) {
 	DataFile.create();
 }
 
-var handle, gameInfo, gameStart, ingame, connectFail, currAcc, charList,
-	lastGameStatus = "ready",
-	gameCount = DataFile.getStats().runs + 1,
+let handle, gameInfo, connectFail, currAcc, charList,
 	accounts = [],
 	chars = [];
 
 function parseInfo() {
-	var i;
-
-	for (i in MuleLogger.LogAccounts) {
+	for (let i in MuleLogger.LogAccounts) {
 		if (MuleLogger.LogAccounts.hasOwnProperty(i) && typeof i === "string") {
 			accounts.push(i);
 			chars.push(MuleLogger.LogAccounts[i]);
@@ -69,100 +58,8 @@ function ReceiveCopyData(mode, msg) {
 	}
 }
 
-function locationTimeout(time, location) {
-	var endtime = getTickCount() + time;
-
-	while (getLocation() === location && endtime > getTickCount()) {
-		delay(500);
-	}
-
-	return (getLocation() !== location);
-}
-
-function updateCount() {
-	D2Bot.updateCount();
-	delay(1000);
-	ControlAction.click(6, 264, 366, 272, 35);
-
-	try {
-		login(me.profile);
-	} catch (e) {
-
-	}
-
-	delay(1000);
-	ControlAction.click(6, 33, 572, 128, 35);
-}
-
-function timer (tick) {
-	return " (" + new Date(getTickCount() - tick).toISOString().slice(11, -5) + ")";
-}
-
-function main() {
-	addEventListener('copydata', ReceiveCopyData);
-
-	while (!handle) {
-		delay(100);
-	}
-
-	DataFile.updateStats("handle", handle);
-	D2Bot.init();
-	load("tools/heartbeat.js");
-
-	while (!gameInfo) {
-		D2Bot.requestGameInfo();
-		delay(500);
-	}
-
-	if (gameInfo.rdBlocker) {
-		D2Bot.printToConsole("You must disable RD Blocker for Mule Logger to work properly. Stopping.");
-		D2Bot.stop();
-
-		return;
-	}
-
-	parseInfo();
-
-	if (gameInfo.error) {
-		if (!!DataFile.getStats().debugInfo) {
-			gameInfo.crashInfo = DataFile.getStats().debugInfo;
-
-			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(gameInfo.crashInfo).currScript + " Area: " + JSON.parse(gameInfo.crashInfo).area, 10);
-		}
-
-		ControlAction.timeoutDelay("Crash Delay", StarterConfig.CrashDelay * 1e3);
-		D2Bot.updateRuns();
-	}
-
-	DataFile.updateStats("debugInfo", JSON.stringify({currScript: "none", area: "out of game"}));
-
-	while (true) {
-		while (me.ingame) { // returns true before actually in game so we can't only use this check
-			if (me.gameReady) { // returns false when switching acts so we can't use while
-				if (!ingame) {
-					print("Updating Status");
-					D2Bot.updateStatus("Game: " + me.gamename);
-
-					lastGameStatus = "ingame";
-					ingame = true;
-					gameStart = getTickCount();
-
-					DataFile.updateStats("runs", gameCount);
-				}
-
-				D2Bot.updateStatus("Game: " + me.gamename + timer(gameStart));
-			}
-
-			delay(1000);
-		}
-
-		locationAction(getLocation());
-		delay(1000);
-	}
-}
-
-function locationAction(location) {
-	var i, control, string, text, currChar,
+function locationAction (location) {
+	let i, control, string, text, currChar,
 		obj = {};
 
 MainSwitch:
@@ -175,39 +72,44 @@ MainSwitch:
 	case 3: // Lobby Chat
 		D2Bot.updateStatus("Lobby");
 
-		if (ingame) {
-			if (getTickCount() - gameStart < StarterConfig.MinGameTime * 1e3) {
-				ControlAction.timeoutDelay("Min game time wait", StarterConfig.MinGameTime * 1e3 + gameStart - getTickCount());
+		if (Starter.inGame) {
+			if (getTickCount() - Starter.gameStart < StarterConfig.MinGameTime * 1e3) {
+				ControlAction.timeoutDelay("Min game time wait", StarterConfig.MinGameTime * 1e3 + Starter.gameStart - getTickCount());
 			}
 
 			print("updating runs");
 			D2Bot.updateRuns();
 			delay(1000);
 
-			gameCount += 1;
-			lastGameStatus = "ready";
-			ingame = false;
+			Starter.gameCount += 1;
+			Starter.lastGameStatus = "ready";
+			Starter.inGame = false;
 
 			ControlAction.click(6, 693, 490, 80, 20); // Quit from Lobby
 
 			break;
 		}
 
-		if (!ControlAction.click(6, 533, 469, 120, 20)) { // Create
+		// Create
+		if (!ControlAction.click(6, 533, 469, 120, 20)) {
 			break;
 		}
 
-		if (getControl(6, 533, 469, 120, 20) && getControl(6, 533, 469, 120, 20).disabled === 4) { // dead HC character
+		// dead HC character
+		if (getControl(6, 533, 469, 120, 20) && getControl(6, 533, 469, 120, 20).disabled === 4) {
 			ControlAction.click(6, 693, 490, 80, 20); // Quit from Lobby
 			break;
 		}
 
-		if (!locationTimeout(5000, location)) { // in case join button gets bugged
-			if (!ControlAction.click(6, 652, 469, 120, 20)) { // Join
+		// in case join button gets bugged
+		if (!Starter.locationTimeout(5000, location)) {
+			// Join
+			if (!ControlAction.click(6, 652, 469, 120, 20)) {
 				break;
 			}
-
-			if (!ControlAction.click(6, 533, 469, 120, 20)) { // Create
+			
+			// Create
+			if (!ControlAction.click(6, 533, 469, 120, 20)) {
 				break;
 			}
 		}
@@ -215,7 +117,7 @@ MainSwitch:
 		break;
 	case 2: // Waiting In Line
 		D2Bot.updateStatus("Waiting...");
-		locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location);
+		Starter.locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location);
 		ControlAction.click(6, 433, 433, 96, 32);
 
 		break;
@@ -224,27 +126,31 @@ MainSwitch:
 
 		control = getControl(1, 657, 342, 27, 20);
 
-		if (control && control.disabled === 5) {
-			ControlAction.click(6, 431, 341, 15, 16); // remove level restriction
+		if (!!control && control.disabled === 5) {
+			// remove level restriction
+			ControlAction.click(6, 431, 341, 15, 16);
 		}
 
-		if (gameCount >= 99) {
-			gameCount = 1;
+		// Max number of players
+		control = getControl(1, 657, 308, 27, 20);
+		!!control && ControlAction.setText(1, 657, 308, 27, 20, "8");
 
-			DataFile.updateStats("runs", gameCount);
+		if (Starter.gameCount >= 99) {
+			Starter.gameCount = 1;
+
+			DataFile.updateStats("runs", Starter.gameCount);
 		}
 
-		if (lastGameStatus === "pending") {
+		if (Starter.lastGameStatus === "pending") {
 			D2Bot.printToConsole("Failed to create game");
 
-			gameCount += 1;
+			Starter.gameCount += 1;
 		}
 
 		ControlAction.timeoutDelay("Make Game Delay", StarterConfig.CreateGameDelay * 1e3);
-		createGame(MuleLogger.LogGame[0] + gameCount, MuleLogger.LogGame[1], 0);
-		locationTimeout(5000, location);
-
-		lastGameStatus = "pending";
+		createGame(MuleLogger.LogGame[0] + Starter.gameCount, MuleLogger.LogGame[1], 0);
+		Starter.locationTimeout(5000, location);
+		Starter.lastGameStatus = "pending";
 
 		break;
 	case 5: // Join Game
@@ -272,7 +178,6 @@ MainSwitch:
 					if (accounts[i].split("/")[0] === obj.currAcc) {
 						accounts.splice(0, i);
 						chars.splice(0, i);
-
 						i -= 1;
 
 						break;
@@ -287,10 +192,11 @@ MainSwitch:
 		obj.currAcc = currAcc[0];
 
 		print("ÿc4Mule Loggerÿc2: Login account: " + currAcc[0]);
-		FileTools.writeText("logs/MuleLog.json", JSON.stringify(obj));
 		MuleLogger.save(md5(currAcc[2].toLowerCase() + currAcc[0].toLowerCase()), currAcc[1]);
-		ControlAction.loginAccount({account: currAcc[0], password: currAcc[1], realm: currAcc[2]});
-		accounts.shift(); // remove current account from the list
+
+		if (ControlAction.loginAccount({account: currAcc[0], password: currAcc[1], realm: currAcc[2]})) {
+			accounts.shift(); // remove current account from the list
+		}
 
 		break;
 	case 10: // Login Error
@@ -413,17 +319,16 @@ MainSwitch:
 			break;
 		}
 
-		if (charList[0] === "all") {
-			charList = ControlAction.getCharacters();
-		}
+		charList[0] === "all" && (charList = ControlAction.getCharacters());
 
 		if (FileTools.exists("logs/MuleLog.json")) {
 			obj = JSON.parse(FileTools.readText("logs/MuleLog.json"));
-
+			
 			if (obj.currChar) {
 				for (i = 0; i < charList.length; i += 1) {
 					if (charList[i] === obj.currChar) {
-						charList.splice(0, i + 1); // Remove the previous currChar as well
+						// Remove the previous currChar as well
+						charList.splice(0, i + 1);
 
 						break;
 					}
@@ -433,6 +338,7 @@ MainSwitch:
 
 		// last char in acc = trigger next acc
 		if (!charList.length) {
+			print("No more characters");
 			accounts.shift(); // remove current account from the list
 			chars.shift();
 
@@ -455,7 +361,7 @@ MainSwitch:
 			break;
 		}
 
-		updateCount();
+		Starter.updateCount();
 		ControlAction.timeoutDelay("Realm Down", StarterConfig.RealmDownDelay * 6e4);
 
 		if (gameInfo.switchKeys) {
@@ -475,7 +381,7 @@ MainSwitch:
 	case 15: // New Character
 		break;
 	case 16: // Character Select - Please Wait popup
-		if (!locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
 			ControlAction.click(6, 351, 337, 96, 32);
 		}
 
@@ -500,7 +406,7 @@ MainSwitch:
 	case 20: // Single Player - Select Difficulty
 		break;
 	case 21: // Main Menu - Connecting
-		if (!locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
 			ControlAction.click(6, 330, 416, 128, 35);
 		}
 
@@ -548,7 +454,7 @@ MainSwitch:
 
 		break;
 	case 23: // Character Select - Connecting
-		if (!locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
 			ControlAction.click(6, 33, 572, 128, 35);
 		}
 
@@ -556,7 +462,7 @@ MainSwitch:
 	case 24: // Server Down - not much to do but wait..
 		break;
 	case 25: // Lobby - Please Wait
-		if (!locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
+		if (!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
 			ControlAction.click(6, 351, 337, 96, 32);
 		}
 
@@ -576,7 +482,7 @@ MainSwitch:
 	case 38: // Game is full
 		D2Bot.printToConsole("Game is full");
 
-		lastGameStatus = "ready";
+		Starter.lastGameStatus = "ready";
 
 		delay(500);
 		ControlAction.click(6, 652, 469, 120, 20);
@@ -610,7 +516,7 @@ MainSwitch:
 			}
 		}
 
-		if (!locationTimeout(5000, location)) {
+		if (!Starter.locationTimeout(5000, location)) {
 			accounts.shift(); // remove current account from the list
 			chars.shift();
 
@@ -656,5 +562,67 @@ MainSwitch:
 		}
 
 		break;
+	}
+}
+
+function main() {
+	addEventListener('copydata', ReceiveCopyData);
+
+	while (!handle) {
+		delay(100);
+	}
+
+	DataFile.updateStats("handle", handle);
+	D2Bot.init();
+	load("tools/heartbeat.js");
+
+	while (!gameInfo) {
+		D2Bot.requestGameInfo();
+		delay(500);
+	}
+
+	if (gameInfo.rdBlocker) {
+		D2Bot.printToConsole("You must disable RD Blocker for Mule Logger to work properly. Stopping.");
+		D2Bot.stop();
+
+		return;
+	}
+
+	parseInfo();
+
+	if (gameInfo.error) {
+		if (!!DataFile.getStats().debugInfo) {
+			gameInfo.crashInfo = DataFile.getStats().debugInfo;
+
+			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(gameInfo.crashInfo).currScript + " Area: " + JSON.parse(gameInfo.crashInfo).area, 10);
+		}
+
+		ControlAction.timeoutDelay("Crash Delay", StarterConfig.CrashDelay * 1e3);
+		D2Bot.updateRuns();
+	}
+
+	DataFile.updateStats("debugInfo", JSON.stringify({currScript: "none", area: "out of game"}));
+
+	while (true) {
+		// returns true before actually in game so we can't only use this check
+		while (me.ingame) {
+			// returns false when switching acts so we can't use while
+			if (me.gameReady) {
+				if (!Starter.inGame) {
+					print("Updating Status");
+					Starter.lastGameStatus = "ingame";
+					Starter.inGame = true;
+					Starter.gameStart = getTickCount();
+					DataFile.updateStats("runs", Starter.gameCount);
+				}
+
+				D2Bot.updateStatus("Game: " + me.gamename + Starter.timer(Starter.gameStart));
+			}
+
+			delay(1000);
+		}
+
+		locationAction(getLocation());
+		delay(1000);
 	}
 }

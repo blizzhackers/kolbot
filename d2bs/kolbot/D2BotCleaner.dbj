@@ -5,26 +5,22 @@
 *	@desc		The purpose of this entryscript is to clean/remove characters and/or files easily
 */
 
-const StarterConfig = {
-	// New Stuff - DataCleaner to delete old files associated with running kolbot or SoloPlay
-	// SaveFiles - to save important SoloPlay files to SoloPlay/Data/ for performance review
-	//***********************************************************************************************************************//
-	//	DataCleaner and SaveFiles can both be used for cleaning/saving files without having to delete associated characters  //
-	//***********************************************************************************************************************//
-	DataCleaner:		true,	// Always run this when re-using a profile with Kolbot-SoloPlay
-	SaveFiles:			false,	// NOTE: Only works on SoloPlay profiles, Highly recommened to run this if using the peformance tracking system and wish to review them later
-	
-	// Old Stuff
-	DelayBetweenAccounts: 	rand(10,25), //Seconds to wait before cleaning next account, if doing 10+ accounts recommended to increase this delay to rand(30, 60) prevent R/D
-	SwitchKeyDelay: 		rand(10,25), // Seconds to wait before switching a used/banned key or after realm down
-	CrashDelay: 			rand(60, 120), // Seconds to wait after a d2 window crash
-	RealmDownDelay: 		rand(3, 6), // Minutes to wait after getting Realm Down message
-	UnableToConnectDelay: 	rand(5, 8), // Minutes to wait after Unable To Connect message
-	CDKeyInUseDelay: 		rand(5, 8), // Minutes to wait before connecting again if CD-Key is in use. SwitchKeys overrides this!
-	ConnectingTimeout: 		rand(30, 60), // Seconds to wait before cancelling the 'Connecting...' screen
-	PleaseWaitTimeout: 		rand(30, 60), // Seconds to wait before cancelling the 'Please Wait...' screen
-	WaitInLineTimeout: 		rand(30, 60) // Seconds to wait before cancelling the 'Waiting in Line...' screen
-};
+include("StarterConfig.js");
+
+// D2BotCleaner settings
+// New Stuff - DataCleaner to delete old files associated with running kolbot or SoloPlay
+// SaveFiles - to save important SoloPlay files to SoloPlay/Data/ for performance review
+//***********************************************************************************************************************//
+//	DataCleaner and SaveFiles can both be used for cleaning/saving files without having to delete associated characters  //
+//***********************************************************************************************************************//
+StarterConfig.DataCleaner = true; // Always run this when re-using a profile with Kolbot-SoloPlay
+StarterConfig.SaveFiles = false; // NOTE: Only works on SoloPlay profiles, Highly recommened to run this if using the peformance tracking system and wish to review them later
+
+// Old Stuff
+StarterConfig.DelayBetweenAccounts = rand(15, 30); //Seconds to wait before cleaning next account, if doing 10+ accounts recommended to increase this delay to rand(30, 60) prevent R/D
+
+// Override default values for StarterConfig under here by following format
+// StarterConfig.ValueToChange = value; // Example: StarterConfig.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
 const AccountsToClean = {
 	/* Format:
