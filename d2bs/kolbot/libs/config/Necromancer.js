@@ -380,7 +380,9 @@ function LoadConfig() {
 	//Config.PickitFiles.push("LLD.nip");
 	Config.PickRange = 40; // Pick radius
 	Config.FastPick = false; // Check and pick items between attacks
-	Config.OpenChests = false; // Open chests. Controls key buying.
+	Config.OpenChests.Enabled = false; // Open chests. Controls key buying.
+	Config.OpenChests.Range = 15; // radius to scan for chests while pathing
+	Config.OpenChests.Types = ["chest", "chest3", "armorstand", "weaponrack"]; // which chests to open, use "all" to open all chests. See sdk/chests.txt for full list of chest names
 
 	// ########################### //
 	/* ##### PUBLIC SETTINGS ##### */

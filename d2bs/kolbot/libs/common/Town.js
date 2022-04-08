@@ -1139,7 +1139,7 @@ const Town = {
 	},
 
 	checkKeys: function () {
-		if (!Config.OpenChests || me.classid === 6 || me.gold < 540 || (!me.getItem("key") && !Storage.Inventory.CanFit({sizex: 1, sizey: 1}))) {
+		if (!Config.OpenChests.Enabled || me.assassin || me.gold < 540 || (!me.getItem("key") && !Storage.Inventory.CanFit({sizex: 1, sizey: 1}))) {
 			return 12;
 		}
 
@@ -1935,7 +1935,7 @@ const Town = {
 			try {
 				console.log("clearInventory dropped: " + el.name);
 				Misc.itemLogger("Dropped", el, "clearInventory");
-				el.drop();				
+				el.drop();
 			} catch (e) {
 				console.debug(e);
 			}

@@ -33,8 +33,8 @@ const ClassAttack = {
 			&& Attack.checkResist(unit, Config.AttackSkill[0])
 			&& (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))
 			&& (Skill.wereFormCheck(Config.AttackSkill[0]) || !me.shapeshifted)) {
-			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x1 | 0x4)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x1 & 0x4, true)) {
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x5)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x5, true)) {
 					return 0;
 				}
 			}
@@ -128,13 +128,13 @@ const ClassAttack = {
 			return 0;
 		}
 
-		if (unit.distance > Skill.getRange(skill) || checkCollision(me, unit, 0x1 | 0x4)) {
-			if (!Attack.getIntoPosition(unit, Skill.getRange(skill), 0x1 & 0x4, true)) {
+		if (unit.distance > Skill.getRange(skill) || checkCollision(me, unit, 0x5)) {
+			if (!Attack.getIntoPosition(unit, Skill.getRange(skill), 0x5, true)) {
 				return 0;
 			}
 		}
 
-		!unit.dead && Skill.cast(skill, Skill.getHand(skill), unit);
+		unit.attackable && Skill.cast(skill, Skill.getHand(skill), unit);
 
 		Misc.poll(() => !me.skillDelay, 1000, 40);
 

@@ -168,7 +168,7 @@ function Mephisto() {
 
 	Pickit.pickItems();
 
-	if (Config.OpenChests) {
+	if (Config.OpenChests.Enabled) {
 		Pather.moveTo(17572, 8011);
 		Attack.openChests(5);
 		Pather.moveTo(17572, 8125);

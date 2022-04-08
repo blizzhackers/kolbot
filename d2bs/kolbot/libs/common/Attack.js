@@ -885,15 +885,10 @@ const Attack = {
 		}
 
 		// Put monsters under Attract curse at the end of the list - They are helping us
-		if (unitA.getState(sdk.states.Attract)) {
-			return 1;
-		}
+		if (unitA.getState(sdk.states.Attract)) return 1;
+		if (unitB.getState(sdk.states.Attract)) return -1;
 
-		if (unitB.getState(sdk.states.Attract)) {
-			return -1;
-		}
-
-		let ids = [312, 58, 59, 60, 61, 62, 101, 102, 103, 104, 105, 278, 279, 280, 281, 282, 298, 299, 300, 645, 646, 647, 662, 663, 664, 667, 668, 669, 670, 675, 676];
+		let ids = [312, 58, 59, 60, 61, 62, 101, 102, 103, 104, 105, sdk.monsters.BloodRaven, 278, 279, 280, 281, 282, 298, 299, 300, 645, 646, 647, 662, 663, 664, 667, 668, 669, 670, 675, 676];
 
 		if (me.area !== sdk.areas.ClawViperTempleLvl2 && ids.includes(unitA.classid) && ids.includes(unitB.classid)) {
 			// Kill "scary" uniques first (like Bishibosh)
@@ -901,49 +896,33 @@ const Attack = {
 				return getDistance(me, unitA) - getDistance(me, unitB);
 			}
 
-			if (unitA.spectype & 0x04) {
-				return -1;
-			}
-
-			if (unitB.spectype & 0x04) {
-				return 1;
-			}
+			if (unitA.spectype & 0x04) return -1;
+			if (unitB.spectype & 0x04) return 1;
 
 			return getDistance(me, unitA) - getDistance(me, unitB);
 		}
 
-		if (ids.indexOf(unitA.classid) > -1) {
-			return -1;
-		}
-
-		if (ids.indexOf(unitB.classid) > -1) {
-			return 1;
-		}
+		if (ids.includes(unitA.classid)) return -1;
+		if (ids.includes(unitB.classid)) return 1;
 
 		if (Config.BossPriority) {
 			if ((unitA.spectype & 0x5) && (unitB.spectype & 0x5)) {
 				return getDistance(me, unitA) - getDistance(me, unitB);
 			}
 
-			if (unitA.spectype & 0x5) {
-				return -1;
-			}
-
-			if (unitB.spectype & 0x5) {
-				return 1;
-			}
+			if (unitA.spectype & 0x5) return -1;
+			if (unitB.spectype & 0x5) return 1;
 		}
 
 		return getDistance(me, unitA) - getDistance(me, unitB);
 	},
 
 	// Check if a set of coords is valid/accessable
-	validSpot: function (x, y) {
-		let result;
+	validSpot: function (x, y, skillId = -1) {
+		// Just in case
+		if (!me.area || !x || !y) return false;
 
-		if (!me.area || !x || !y) { // Just in case
-			return false;
-		}
+		let result;
 
 		try { // Treat thrown errors as invalid spot
 			result = getCollision(me.area, x, y);
@@ -961,19 +940,18 @@ const Attack = {
 
 	// Open chests when clearing
 	openChests: function (range, x, y) {
-		if (!Config.OpenChests) return false;
+		if (!Config.OpenChests.Enabled) return false;
 		x === undefined && (x = me.x);
 		y === undefined && (y = me.y);
 
-		let unit,
-			list = [],
+		let list = [],
 			ids = ["chest", "chest3", "weaponrack", "armorstand"];
 
-		unit = getUnit(2);
+		let unit = getUnit(2);
 
 		if (unit) {
 			do {
-				if (unit.name && getDistance(unit, x, y) <= range && ids.indexOf(unit.name.toLowerCase()) > -1) {
+				if (unit.name && getDistance(unit, x, y) <= range && ids.includes(unit.name.toLowerCase())) {
 					list.push(copyUnit(unit));
 				}
 			} while (unit.getNext());

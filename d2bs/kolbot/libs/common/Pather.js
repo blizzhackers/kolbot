@@ -1,9 +1,10 @@
 /**
 *	@filename	Pather.js
-*	@author		kolton
+*	@author		kolton, theBGuy
 *	@desc		handle player movement
 */
 
+// TODO: this needs to be re-worked
 // Perform certain actions after moving to each node
 const NodeAction = {
 	// Run all the functions within NodeAction (except for itself)
@@ -17,14 +18,9 @@ const NodeAction = {
 
 	// Kill monsters while pathing
 	killMonsters: function (arg) {
-		let monList;
-
-		if (Config.Countess.KillGhosts && [21, 22, 23, 24, 25].indexOf(me.area) > -1) {
-			monList = Attack.getMob(38, 0, 30);
-
-			if (monList) {
-				Attack.clearList(monList);
-			}
+		if (Config.Countess.KillGhosts && [21, 22, 23, 24, 25].includes(me.area)) {
+			let monList = (Attack.getMob(38, 0, 30) || []);
+			monList.length > 0 && Attack.clearList(monList);
 		}
 
 		if ((typeof Config.ClearPath === "number" || typeof Config.ClearPath === "object") && arg.clearPath === false) {
@@ -34,7 +30,7 @@ const NodeAction = {
 
 				break;
 			case "object":
-				if (!Config.ClearPath.hasOwnProperty("Areas") || Config.ClearPath.Areas.length === 0 || Config.ClearPath.Areas.indexOf(me.area) > -1) {
+				if (!Config.ClearPath.hasOwnProperty("Areas") || !Config.ClearPath.Areas.length || Config.ClearPath.Areas.includes(me.area)) {
 					Attack.clear(Config.ClearPath.Range, Config.ClearPath.Spectype);
 				}
 
@@ -42,23 +38,17 @@ const NodeAction = {
 			}
 		}
 
-		if (arg.clearPath !== false) {
-			Attack.clear(15, typeof arg.clearPath === "number" ? arg.clearPath : 0);
-		}
+		arg.clearPath !== false && Attack.clear(15, typeof arg.clearPath === "number" ? arg.clearPath : 0);
 	},
 
 	// Open chests while pathing
 	popChests: function () {
-		if (!!Config.OpenChests) {
-			Misc.openChests(20);
-		}
+		Config.OpenChests.Enabled && Misc.openChests(Config.OpenChests.Range);
 	},
 
 	// Scan shrines while pathing
 	getShrines: function () {
-		if (!!Config.ScanShrines && Config.ScanShrines.length > 0) {
-			Misc.scanShrines();
-		}
+		Config.ScanShrines.length > 0 && Misc.scanShrines();
 	}
 };
 
@@ -383,6 +373,7 @@ const Pather = {
 		x - the x coord to teleport to
 		y - the y coord to teleport to
 	*/
+	// does this need a validLocation check?
 	teleportTo: function (x, y, maxRange) {
 		maxRange === undefined && (maxRange = 5);
 
@@ -508,9 +499,7 @@ const Pather = {
 				delay(10);
 			}
 
-			if (attemptCount > 1) {
-				this.kickBarrels(x, y);
-			}
+			attemptCount > 1 && this.kickBarrels(x, y);
 
 			// Wait until we're done walking - idle or dead
 			while (getDistance(me.x, me.y, x, y) > minDist && me.mode !== 1 && me.mode !== 5 && !me.dead) {
@@ -739,29 +728,26 @@ const Pather = {
 		clearPath - kill monsters while moving
 	*/
 	moveToExit: function (targetArea, use, clearPath) {
-		let area, exits, targetRoom, dest, currExit,
-			areas = [];
+		if (targetArea === undefined) return false;
 
-		if (targetArea instanceof Array) {
-			areas = targetArea;
-		} else {
-			areas.push(targetArea);
-		}
+		let areas = Array.isArray(targetArea) ? targetArea : [targetArea];
+		let finalDest = areas.last();
 
 		for (let i = 0; i < areas.length; i += 1) {
+			let currExit;
 			let checkExits = [];
 
 			while (!me.gameReady) {
 				delay(250 + me.ping);
 			}
 			
-			area = getArea();
+			let area = getArea();
 
 			if (!area) {
 				throw new Error("moveToExit: error in getArea()");
 			}
 
-			exits = area.exits;
+			let exits = area.exits;
 
 			if (!exits || !exits.length) {
 				return false;
@@ -783,50 +769,50 @@ const Pather = {
 
 			if (checkExits.length > 0) {
 				// if there are multiple exits to the same location find the closest one
-				checkExits.length > 1 && (checkExits = checkExits.sort((a, b) => getDistance(me, a.x, a.y) - getDistance(me, b.x, b.y)));
-				for (let k = 0; k < checkExits.length; k++) {
-					currExit = checkExits[k];
-					dest = this.getNearestWalkable(currExit.x, currExit.y, 5, 1);
+				currExit = checkExits.length > 1 ? checkExits.sort((a, b) => getDistance(me.x, me.y, a.x, a.y) - getDistance(me.x, me.y, b.x, b.y)).first() : checkExits[0];
+				let dest = this.getNearestWalkable(currExit.x, currExit.y, 5, 1);
 
-					if (!dest || !this.moveTo(dest[0], dest[1], 3, clearPath)) {
-						return false;
+				if (!dest) return false;
+
+				for (let retry = 0; retry < 3; retry++) {
+					if (this.moveTo(dest[0], dest[1], 3, clearPath)) {
+						break;
 					}
 
-					/* i < areas.length - 1 is for crossing multiple areas.
-						In that case we must use the exit before the last area.
-					*/
-					if (use || i < areas.length - 1) {
-						switch (currExit.type) {
-						case 1: // walk through
-							targetRoom = this.getNearestRoom(areas[i]);
-
-							if (targetRoom) {
-								this.moveTo(targetRoom[0], targetRoom[1]);
-							} else {
-								// might need adjustments
-								return false;
-							}
-
-							break;
-						case 2: // stairs
-							if (!this.openExit(areas[i]) && !this.useUnit(5, currExit.tileid, areas[i])) {
-								return false;
-							}
-
-							break;
-						}
-					}
-
-					break;
+					delay(200 + me.ping);
+					Misc.poll(() => me.gameReady && !!me.area, 1000, 200);
 				}
+
+				/* i < areas.length - 1 is for crossing multiple areas.
+					In that case we must use the exit before the last area.
+				*/
+				if (use || i < areas.length - 1) {
+					switch (currExit.type) {
+					case 1: // walk through
+						let targetRoom = this.getNearestRoom(areas[i]);
+
+						if (targetRoom) {
+							this.moveTo(targetRoom[0], targetRoom[1]);
+						} else {
+							// might need adjustments
+							return false;
+						}
+
+						break;
+					case 2: // stairs
+						if (!this.openExit(areas[i]) && !this.useUnit(5, currExit.tileid, areas[i])) {
+							return false;
+						}
+
+						break;
+					}
+				}
+			} else {
+				// journey there?
 			}
 		}
 
-		if (use) {
-			return typeof targetArea === "object" ? me.area === targetArea[targetArea.length - 1] : me.area === targetArea;
-		}
-
-		return true;
+		return (use && finalDest ? me.area === finalDest : true);
 	},
 
 	/*
@@ -834,19 +820,9 @@ const Pather = {
 		area - the id of area to search for the room nearest to the player character
 	*/
 	getNearestRoom: function (area) {
-		let x, y, room,
-			minDist = 10000;
+		let x, y, minDist = 10000;
 
-		for (let i = 0; i < 5; i += 1) {
-			room = getRoom(area);
-
-			if (room) {
-				break;
-			}
-
-			delay(200);
-		}
-
+		let room = Misc.poll(() => getRoom(area), 1000, 200);
 		if (!room) return false;
 
 		do {
@@ -915,18 +891,7 @@ const Pather = {
 		id - id of the unit to open
 	*/
 	openUnit: function (type, id) {
-		let unit;
-
-		for (let i = 0; i < 5; i += 1) {
-			unit = getUnit(type, id);
-
-			if (unit) {
-				break;
-			}
-
-			delay(200);
-		}
-
+		let unit = Misc.poll(() => getUnit(type, id), 1000, 200);
 		if (!unit) { throw new Error("openUnit: Unit not found. ID: " + unit); }
 		if (unit.mode !== 0) return true;
 
@@ -962,17 +927,8 @@ const Pather = {
 		targetArea - area id of where the unit leads to
 	*/
 	useUnit: function (type, id, targetArea) {
-		let unit, preArea = me.area;
-
-		for (let i = 0; i < 10; i += 1) {
-			unit = getUnit(type, id);
-
-			if (unit) {
-				break;
-			}
-
-			delay(200);
-		}
+		let unit = Misc.poll(() => getUnit(type, id), 2000, 200),
+			preArea = me.area;
 
 		if (!unit) {
 			throw new Error("useUnit: Unit not found. TYPE: " + type + " ID: " + id + " MyArea: " + this.getAreaName(me.area) + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));

@@ -30,7 +30,7 @@ function Countess() {
 
 	Attack.clear(20, 0, getLocaleString(2875)); // The Countess
 
-	if (Config.OpenChests) {
+	if (Config.OpenChests.Enabled) {
 		Misc.openChestsInArea();
 	}
 

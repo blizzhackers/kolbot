@@ -11,7 +11,7 @@
 let sdk = require('../modules/sdk');
 
 (function (global, print) {
-	global['console'] = global['console'] || (function () {
+	global.console = global.console || (function () {
 		const console = {};
 		const argMap = el => typeof el === 'object' && el /*not null */ && JSON.stringify(el) || el;
 
@@ -38,7 +38,8 @@ let sdk = require('../modules/sdk');
 
 (function (global, original) {
 	let firstRun = true;
-	global['getUnit'] = function (...args) {
+	global.getUnit = function (...args) {
+		// eslint-disable-next-line no-unused-vars
 		const test = original(1);
 		// Stupid reference thing
 
@@ -1438,13 +1439,15 @@ Unit.prototype.getRes = function (type, difficulty) {
 
 {
 	let __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-	    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-	        if (ar || !(i in from)) {
-	            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-	            ar[i] = from[i];
-	        }
-	    }
-	    return to.concat(ar || Array.prototype.slice.call(from));
+		if (pack || arguments.length === 2) {
+			for (var i = 0, l = from.length, ar; i < l; i++) {
+				if (ar || !(i in from)) {
+					if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+					ar[i] = from[i];
+				}
+			}
+		}
+		return to.concat(ar || Array.prototype.slice.call(from));
 	};
 
 	let coords = function () {
@@ -1645,10 +1648,11 @@ Object.defineProperties(Unit.prototype, {
 	questItem: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.itemType === sdk.itemtype.Quest ||
-                [sdk.items.quest.HoradricMalus, sdk.items.quest.WirtsLeg, sdk.items.quest.HoradricStaff, sdk.items.quest.ShaftoftheHoradricStaff,
-                	sdk.items.quest.ViperAmulet, sdk.items.quest.DecoyGidbinn, sdk.items.quest.TheGidbinn, sdk.items.quest.KhalimsFlail,
-                	sdk.items.quest.KhalimsWill, sdk.items.quest.HellForgeHammer, sdk.items.quest.StandardofHeroes].includes(this.classid);
+			return this.itemType === sdk.itemtype.Quest
+			|| [sdk.items.quest.HoradricMalus, sdk.items.quest.WirtsLeg, sdk.items.quest.HoradricStaff, sdk.items.quest.ShaftoftheHoradricStaff,
+				sdk.items.quest.ViperAmulet, sdk.items.quest.DecoyGidbinn, sdk.items.quest.TheGidbinn, sdk.items.quest.KhalimsFlail,
+				sdk.items.quest.KhalimsWill, sdk.items.quest.HellForgeHammer, sdk.items.quest.StandardofHeroes
+			].includes(this.classid);
 		}
 	},
 	sellable: {

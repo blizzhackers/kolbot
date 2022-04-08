@@ -81,7 +81,7 @@ function LoadConfig() {
 
 	// General config
 	Config.TeleSwitch = false; // Switch to secondary (non-primary) slot when teleporting more than 5 nodes.
-	Config.OpenChests = false; // Open chests. Controls key buying.
+	Config.OpenChests.Enabled = false; // Open chests. Controls key buying.
 	Config.PingQuit = [{Ping: 0, Duration: 0}]; // Quit if ping is over the given value for over the given time period in seconds.
 
 	// Shrine Scanner - scan for shrines while moving.

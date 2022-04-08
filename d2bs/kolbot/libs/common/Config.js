@@ -189,7 +189,11 @@ let Config = {
 	ClearInvOnStart: true,
 	FastPick: false,
 	ManualPlayPick: false,
-	OpenChests: false,
+	OpenChests: {
+		Enabled: false,
+		Range: 15,
+		Types: ["chest", "chest3", "armorstand", "weaponrack"]
+	},
 	PickitFiles: [],
 	BeltColumn: [],
 	MinColumn: [],
