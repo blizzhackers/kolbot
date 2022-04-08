@@ -111,16 +111,12 @@ const ClassAttack = {
 	},
 
 	afterAttack: function () {
-		let needRepair;
-
-		Misc.unShift();
 		Precast.doPrecast(false);
 
-		needRepair = Town.needRepair();
+		let needRepair = (Town.needRepair() || []);
 
-		if (needRepair && needRepair.length > 0) { // Repair check, mainly to restock arrows
-			Town.visitTown(true);
-		}
+		// Repair check, mainly to restock arrows
+		needRepair.length > 0 && Town.visitTown(true);
 
 		this.lightFuryTick = 0;
 	},
@@ -213,13 +209,7 @@ const ClassAttack = {
 			return 1;
 		}
 
-		for (i = 0; i < 25; i += 1) {
-			if (!me.getState(121)) {
-				break;
-			}
-
-			delay(40);
-		}
+		Misc.poll(() => !me.skillDelay, 1000, 40);
 
 		// Wait for Lightning Fury timeout
 		while (this.lightFuryTick && getTickCount() - this.lightFuryTick < Config.LightningFuryDelay * 1000) {

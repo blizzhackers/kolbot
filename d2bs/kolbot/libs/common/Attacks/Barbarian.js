@@ -55,10 +55,10 @@ const ClassAttack = {
 	afterAttack: function (pickit) {
 		Precast.doPrecast(false);
 
-		let needRepair = Town.needRepair();
+		let needRepair = (Town.needRepair() || []);
 
 		// Repair check
-		needRepair && needRepair.length > 0 && Town.visitTown(true);
+		needRepair.length > 0 && Town.visitTown(true);
 		pickit && this.findItem(me.area === 83 ? 60 : 20);
 	},
 
@@ -104,39 +104,28 @@ const ClassAttack = {
 	},
 
 	whirlwind: function (unit) {
-		if (!Attack.checkMonster(unit)) {
-			return true;
-		}
+		if (!unit.attackable) return true;
 
-		let i, coords, angle,
-			angles = [180, 175, -175, 170, -170, 165, -165, 150, -150, 135, -135, 45, -45, 90, -90];
+		let angles = [180, 175, -175, 170, -170, 165, -165, 150, -150, 135, -135, 45, -45, 90, -90];
 
-		if (unit.spectype & 0x7) {
-			angles.unshift(120);
-		}
+		unit.isSpecial && angles.unshift(120);
 
-		//me.runwalk = 0;
-		angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
+		let angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
 
-		for (i = 0; i < angles.length; i += 1) { // get a better spot
-			coords = [Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * 4 + unit.x), Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * 4 + unit.y)];
+		// get a better spot
+		for (let i = 0; i < angles.length; i += 1) {
+			let coords = [Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * 4 + unit.x), Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * 4 + unit.y)];
 
 			if (!CollMap.checkColl(me, {x: coords[0], y: coords[1]}, 0x1, 1)) {
 				return Skill.cast(151, Skill.getHand(151), coords[0], coords[1]);
 			}
 		}
 
-		if (!Attack.validSpot(unit.x, unit.y)) {
-			return false;
-		}
-
-		return Skill.cast(151, Skill.getHand(151), me.x, me.y);
+		return (Attack.validSpot(unit.x, unit.y) && Skill.cast(151, Skill.getHand(151), me.x, me.y));
 	},
 
-	checkCloseMonsters: function (range) {
-		let monster;
-
-		monster = getUnit(1);
+	checkCloseMonsters: function (range = 10) {
+		let monster = getUnit(1);
 
 		if (monster) {
 			do {
@@ -151,7 +140,7 @@ const ClassAttack = {
 		return false;
 	},
 
-	findItem: function (range) {
+	findItem: function (range = 10) {
 		if (!Config.FindItem || !me.getSkill(142, 1)) {
 			return false;
 		}

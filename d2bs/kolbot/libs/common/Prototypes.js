@@ -1436,26 +1436,38 @@ Unit.prototype.getRes = function (type, difficulty) {
 	return this.getStat(type) - modifier;
 };
 
-let coords = function () {
-	if (Array.isArray(this) && this.length > 1) {
-		return [this[0], this[1]];
-	}
+{
+	let __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+	    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+	        if (ar || !(i in from)) {
+	            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+	            ar[i] = from[i];
+	        }
+	    }
+	    return to.concat(ar || Array.prototype.slice.call(from));
+	};
 
-	if (typeof this.x !== 'undefined' && typeof this.y !== 'undefined') {
-		return this instanceof PresetUnit && [this.roomx * 5 + this.x, this.roomy * 5 + this.y] || [this.x, this.y];
-	}
+	let coords = function () {
+		if (Array.isArray(this) && this.length > 1) {
+			return [this[0], this[1]];
+		}
 
-	return [undefined, undefined];
-};
+		if (typeof this.x !== 'undefined' && typeof this.y !== 'undefined') {
+			return this instanceof PresetUnit && [this.roomx * 5 + this.x, this.roomy * 5 + this.y] || [this.x, this.y];
+		}
 
-Object.defineProperties(Object.prototype, {
-	distance: {
-		get: function () {
-			return !me.gameReady ? NaN : Math.round(getDistance.apply(null, [me, ...coords.apply(this)]));
+		return [undefined, undefined];
+	};
+
+	Object.defineProperties(Object.prototype, {
+		distance: {
+			get: function () {
+				return !me.gameReady ? NaN : Math.round(getDistance.apply(null, __spreadArray([me], coords.apply(this))));
+			},
+			enumerable: false,
 		},
-		enumerable: false,
-	},
-});
+	});
+}
 
 Object.defineProperties(Unit.prototype, {
 	isChampion: {
@@ -2052,3 +2064,12 @@ Unit.prototype.__defineGetter__('curseable', function () {
 Unit.prototype.__defineGetter__('scareable', function () {
 	return this.curseable && !(this.spectype & 0x7) && this.classid !== sdk.monsters.ListerTheTormentor;
 });
+
+Unit.prototype.getMobCount = function (range = 10, coll = 0, type = 0, noSpecialMobs = false) {
+	if (this === undefined) return 0;
+	const _this = this;
+	return getUnits(sdk.unittype.Monster)
+		.filter(function (mon) {
+			return mon.attackable && getDistance(_this, mon) < range && (!type || ((type & mon.spectype) && !noSpecialMobs)) && (!coll || !checkCollision(_this, mon, coll));
+		}).length;
+};

@@ -272,9 +272,10 @@ const Pather = {
 
 		let useTeleport = this.useTeleport();
 		let tpMana = Skill.getManaCost(sdk.skills.Teleport);
+		let annoyingArea = [sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.MaggotLairLvl3].includes(me.area);
 		!clearPath && !useTeleport && !Config.ClearPath && (clearPath = {Range: 10, Spectype: 0}); // walking characters need to clear in front of them
-		retry === undefined && (retry = useTeleport ? 5 : 15);
-		path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? ([62, 63, 64].indexOf(me.area) > -1 ? 30 : this.teleDistance) : this.walkDistance);
+		(!retry || (retry <= 3 && !useTeleport)) && (retry = useTeleport ? 5 : 15);
+		path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? (annoyingArea ? 30 : this.teleDistance) : this.walkDistance);
 
 		if (!path) { throw new Error("moveTo: Failed to generate path."); }
 
@@ -298,7 +299,7 @@ const Pather = {
 			*/
 			if (getDistance(me, node) > 2) {
 				// Make life in Maggot Lair easier
-				if ([62, 63, 64].indexOf(me.area) > -1) {
+				if (annoyingArea) {
 					adjustedNode = this.getNearestWalkable(node.x, node.y, 15, 3, 0x1 | 0x4 | 0x800 | 0x1000);
 
 					if (adjustedNode) {
@@ -306,7 +307,7 @@ const Pather = {
 						node.y = adjustedNode[1];
 					}
 
-					retry === 3 && !useTeleport && (retry = 15);
+					retry <= 3 && !useTeleport && (retry = 15);
 				}
 
 				if (useTeleport && tpMana <= me.mp ? this.teleportTo(node.x, node.y) : this.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
@@ -316,6 +317,8 @@ const Pather = {
 
 							NodeAction.go({clearPath: clearPath});
 
+							// TODO: check whether we are closer to the next node than we are the node we were orignally moving to
+							// and if so move to next node to prevent back tracking for no reason
 							if (getDistance(me, node.x, node.y) > 5) {
 								this.moveTo(node.x, node.y);
 							}
@@ -326,19 +329,23 @@ const Pather = {
 						Misc.townCheck();
 					}
 				} else {
-					if (fail > 0 && (!useTeleport || tpMana > me.mp) && !me.inTown) {
-						this.kickBarrels(node.x, node.y);
-						this.openDoors(node.x, node.y);
-						// Don't go berserk on longer paths
-						if (!cleared) {
-							Attack.clear(5) && Misc.openChests(2);
-							cleared = true;
+					if (!me.inTown) { 
+						if ((me.getMobCount() > 0 && Attack.clear(8)) || this.kickBarrels(node.x, node.y) || this.openDoors(node.x, node.y)) {
+							continue;
 						}
 
-						// Only do this once
-						if (fail > 1 && me.getSkill(sdk.skills.LeapAttack, 1) && !leaped) {
-							Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y);
-							leaped = true;
+						if (fail > 0 && (!useTeleport || tpMana > me.mp)) {
+							// Don't go berserk on longer paths
+							if (!cleared && me.getMobCount(5) > 0 && Attack.clear(5)) {
+								cleared = true;
+								continue;
+							}
+
+							// Only do this once
+							if (fail > 1 && !leaped && me.getSkill(sdk.skills.LeapAttack, 1) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
+								leaped = true;
+								continue;
+							}
 						}
 					}
 
@@ -346,20 +353,19 @@ const Pather = {
 					path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? rand(25, 35) : rand(10, 15));
 					if (!path) { throw new Error("moveNear: Failed to generate path."); }
 
-					fail += 1;
 					path.reverse();
 					PathDebug.drawPath(path);
 					pop && path.pop();
-					print("move retry " + fail);
 
 					if (fail > 0) {
+						console.debug("move retry " + fail);
 						Packet.flash(me.gid);
-						!me.inTown && Attack.clear(5) && Misc.openChests(2);
 
 						if (fail >= retry) {
 							break;
 						}
 					}
+					fail++;
 				}
 			}
 
@@ -456,6 +462,10 @@ const Pather = {
 				return true;
 			}
 
+			if (CollMap.checkColl(me, {x: x, y: y}, 0x1 | 0x800)) {
+				this.openDoors(me.x, me.y);
+			}
+
 			Misc.click(0, 0, x, y);
 
 			attemptCount += 1;
@@ -536,7 +546,6 @@ const Pather = {
 
 						while (getTickCount() - tick < 1000) {
 							if (door.mode === 2) {
-								me.overhead("Opened a door!");
 								return true;
 							}
 
@@ -600,17 +609,19 @@ const Pather = {
 				return (el.name && el.mode === 0 && ["barrel", "largeurn", "jar3", "jar2", "jar1", "urn", "jug"].includes(el.name.toLowerCase())
 				&& ((getDistance(el, x, y) < 4 && el.distance < 9) || el.distance < 4));
 			});
+		let brokeABarrel = false;
 
 		while (barrels.length > 0) {
 			barrels.sort(Sort.units);
 			let unit = barrels.shift();
 
-			if (unit && !checkCollision(me, unit, 0x4)) {
+			if (unit && !checkCollision(me, unit, 0x1 | 0x4)) {
 				try {
 					for (let i = 0; i < 5; i++) {
 						i < 3 ? sendPacket(1, 0x13, 4, unit.type, 4, unit.gid) : Misc.click(0, 0, unit);
 
 						if (unit.mode) {
+							brokeABarrel = true;
 							break;
 						}
 					}
@@ -620,7 +631,7 @@ const Pather = {
 			}
 		}
 
-		return false;
+		return brokeABarrel;
 	},
 
 	/*
@@ -1282,9 +1293,8 @@ const Pather = {
 			if (portal) {
 				if (portal.area === me.area) {
 					if (Skill.useTK(portal) && i < 3) {
-						if (getDistance(me, portal) > 13) {
-							Attack.getIntoPosition(portal, 13, 0x4);
-						}
+						portal.distance > 21 && Pather.moveNearUnit(portal, 20);
+						checkCollision(me, portal, 0x4) && Attack.getIntoPosition(portal, 20, 0x4);
 
 						Skill.cast(sdk.skills.Telekinesis, 0, portal);
 					} else {
@@ -1336,10 +1346,6 @@ const Pather = {
 			}
 
 			delay(200 + me.ping);
-		}
-
-		if (!!unit && me.area === preArea && unit.classid === 42 && !unit.getParent()) {
-			sendPacket(1, 0x13, 4, 0x2, 4, unit.gid);
 		}
 
 		return targetArea ? me.area === targetArea : me.area !== preArea;

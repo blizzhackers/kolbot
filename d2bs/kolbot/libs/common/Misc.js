@@ -1136,9 +1136,8 @@ const Misc = {
 
 		for (let i = 0; i < 3; i++) {
 			if (Skill.useTK(unit) && i < 2) {
-				if (getDistance(me, unit) > 13) {
-					Attack.getIntoPosition(unit, 13, 0x4);
-				}
+				unit.distance > 21 && Pather.moveNearUnit(unit, 20);
+				checkCollision(me, unit, 0x4) && Attack.getIntoPosition(unit, 20, 0x4);
 				
 				Skill.cast(sdk.skills.Telekinesis, 0, unit);
 			} else {

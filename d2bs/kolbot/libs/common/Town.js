@@ -1130,7 +1130,7 @@ const Town = {
 		try {
 			key.buy(true);
 		} catch (e) {
-			print(e.message);
+			console.warn(e.message);
 
 			return false;
 		}
@@ -1143,12 +1143,11 @@ const Town = {
 			return 12;
 		}
 
-		let i,
-			count = 0,
+		let count = 0,
 			key = me.findItems(543, 0, 3);
 
 		if (key) {
-			for (i = 0; i < key.length; i += 1) {
+			for (let i = 0; i < key.length; i += 1) {
 				count += key[i].getStat(70);
 			}
 		}
@@ -1234,12 +1233,10 @@ const Town = {
 	},
 
 	cubeRepairItem: function (item) {
+		if (item.mode !== 1) return false;
+
 		let i, rune, cubeItems,
 			bodyLoc = item.bodylocation;
-
-		if (item.mode !== 1) {
-			return false;
-		}
 
 		switch (item.itemType) {
 		case 2:
@@ -1505,10 +1502,9 @@ const Town = {
 	},
 
 	needMerc: function () {
-		if (me.classic || !Config.UseMerc || me.gold < me.mercrevivecost) {
-			return false;
-		}
+		if (me.classic || !Config.UseMerc || me.gold < me.mercrevivecost) return false;
 
+		Misc.poll(() => me.gameReady && !me.getState(sdk.states.JustPortaled), 1000, 100);
 		// me.getMerc() might return null if called right after taking a portal, that's why there's retry attempts
 		for (let i = 0; i < 3; i += 1) {
 			let merc = me.getMerc();
@@ -1525,9 +1521,10 @@ const Town = {
 	},
 
 	canStash: function (item) {
-		let ignoredClassids = [91, 174]; // Some quest items that have to be in inventory or equipped
+		// Some quest items that have to be in inventory or equipped
+		let questClassids = [sdk.items.quest.HoradricStaff, sdk.items.quest.KhalimsWill];
 
-		if (this.ignoredItemTypes.indexOf(item.itemType) > -1 || ignoredClassids.indexOf(item.classid) > -1 || !Storage.Stash.CanFit(item)) {
+		if (this.ignoredItemTypes.includes(item.itemType) || questClassids.includes(item.classid) || !Storage.Stash.CanFit(item)) {
 			return false;
 		}
 
@@ -1535,32 +1532,32 @@ const Town = {
 	},
 
 	stash: function (stashGold = true) {
-		if (!this.needStash()) {
-			return true;
-		}
+		if (!this.needStash()) return true;
 
-		me.cancel();
+		me.cancelUIFlags();
 
-		let result, tier,
-			items = Storage.Inventory.Compare(Config.Inventory);
+		let items = Storage.Inventory.Compare(Config.Inventory);
 
 		if (items) {
 			for (let i = 0; i < items.length; i += 1) {
 				if (this.canStash(items[i])) {
-					result = (Pickit.checkItem(items[i]).result > 0 && Pickit.checkItem(items[i]).result < 4) || Cubing.keepItem(items[i]) || Runewords.keepItem(items[i]) || CraftingSystem.keepItem(items[i]);
+					let result = false;
+					let pickResult = Pickit.checkItem(items[i]).result;
+					
+					switch (true) {
+					case pickResult > 0 && pickResult < 4:
+					case Cubing.keepItem(items[i]):
+					case Runewords.keepItem(items[i]):
+					case CraftingSystem.keepItem(items[i]):
+						result = true;
 
-					// Don't stash low tier autoequip items.
-					if (Config.AutoEquip && Pickit.checkItem(items[i]).result === 1) {
-						tier = NTIP.GetTier(items[i]);
-
-						if (tier > 0 && tier < 100) {
-							result = false;
-						}
+						break;
+					default:
+						break;
 					}
 
 					if (result) {
-						Misc.itemLogger("Stashed", items[i]);
-						Storage.Stash.MoveTo(items[i]);
+						Storage.Stash.MoveTo(items[i]) && Misc.itemLogger("Stashed", items[i]);
 					}
 				}
 			}
@@ -1889,28 +1886,23 @@ const Town = {
 
 		// Any leftover items from a failed ID (crashed game, disconnect etc.)
 		items = Storage.Inventory.Compare(Config.Inventory);
+		let unsellables = [];
 
 		for (i = 0; !!items && i < items.length; i += 1) {
 			if ([18, 41, 76, 77, 78].indexOf(items[i].itemType) === -1 // Don't drop tomes, keys or potions
 					&& !items[i].questItem // Don't try to sell/drop quest-items
-					&& (items[i].code !== 529 || !!me.findItem(518, 0, 3)) // Don't throw scrolls if no tome is found (obsolete code?)
-					&& (items[i].code !== 530 || !!me.findItem(519, 0, 3)) // Don't throw scrolls if no tome is found (obsolete code?)
 					&& !Cubing.keepItem(items[i]) // Don't throw cubing ingredients
 					&& !Runewords.keepItem(items[i]) // Don't throw runeword ingredients
 					&& !CraftingSystem.keepItem(items[i]) // Don't throw crafting system ingredients
 			) {
 				result = Pickit.checkItem(items[i]).result;
 
-				if (!Item.autoEquipCheck(items[i])) {
-					result = 0;
-				}
-
 				switch (result) {
 				case 0: // Drop item
 					// Quest items and such
 					if ((getUIFlag(sdk.uiflags.Shop) || getUIFlag(sdk.uiflags.NPCMenu)) && (items[i].getItemCost(1) <= 1 || !items[i].isSellable)) {
-						me.cancel();
-						delay(200);
+						unsellables.push(items[i]);
+						continue;
 					}
 
 					// Might as well sell the item if already in shop
@@ -1938,6 +1930,16 @@ const Town = {
 				}
 			}
 		}
+
+		unsellables.length > 0 && unsellables.forEach(function (el) {
+			try {
+				console.log("clearInventory dropped: " + el.name);
+				Misc.itemLogger("Dropped", el, "clearInventory");
+				el.drop();				
+			} catch (e) {
+				console.debug(e);
+			}
+		});
 
 		return true;
 	},
@@ -2083,7 +2085,8 @@ const Town = {
 		this.telekinesis = !!(me.getSkill(sdk.skills.Telekinesis, 1));
 
 		let townSpot,
-			longRange = (this.telekinesis && ["stash", "portalspot"].includes(spot)) || (spot === "waypoint");
+			longRange = (!this.telekinesis && spot === "waypoint"),
+			tkRange = (this.telekinesis && ["stash", "portalspot", "waypoint"].includes(spot));
 
 		if (!this.act[me.act - 1].hasOwnProperty("spot") || !this.act[me.act - 1].spot.hasOwnProperty(spot)) {
 			return false;
@@ -2094,6 +2097,7 @@ const Town = {
 		} else {
 			return false;
 		}
+
 
 		if (longRange) {
 			let path = getPath(me.area, townSpot[0], townSpot[1], me.x, me.y, 1, 8);
@@ -2106,7 +2110,9 @@ const Town = {
 		for (let i = 0; i < townSpot.length; i += 2) {
 			//print("moveToSpot: " + spot + " from " + me.x + ", " + me.y);
 
-			if (getDistance(me, townSpot[i], townSpot[i + 1]) > 2) {
+			if (tkRange) {
+				Pather.moveNear(townSpot[0], townSpot[1], 20);
+			} else if (getDistance(me, townSpot[i], townSpot[i + 1]) > 2) {
 				Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, true);
 			}
 

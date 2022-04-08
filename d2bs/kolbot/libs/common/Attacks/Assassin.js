@@ -141,7 +141,7 @@ const ClassAttack = {
 
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, timedSkill, untimedSkill) {
-		let i, walk;
+		let walk;
 
 		// No valid skills can be found
 		if (timedSkill < 0 && untimedSkill < 0) {
@@ -205,13 +205,7 @@ const ClassAttack = {
 			return 1;
 		}
 
-		for (i = 0; i < 25; i += 1) {
-			if (!me.getState(121)) {
-				break;
-			}
-
-			delay(40);
-		}
+		Misc.poll(() => !me.skillDelay, 1000, 40);
 
 		return 1;
 	},

@@ -376,13 +376,7 @@ const ClassAttack = {
 			return 1;
 		}
 
-		for (let i = 0; i < 25; i += 1) {
-			if (!me.skillDelay) {
-				break;
-			}
-
-			delay(40);
-		}
+		Misc.poll(() => !me.skillDelay, 1000, 40);
 
 		// Delay for Poison Nova
 		while (this.novaTick && getTickCount() - this.novaTick < Config.PoisonNovaDelay * 1000) {

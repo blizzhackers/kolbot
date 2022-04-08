@@ -187,13 +187,7 @@ const ClassAttack = {
 			return 1;
 		}
 
-		for (let i = 0; i < 25; i += 1) {
-			if (!me.getState(121)) {
-				break;
-			}
-
-			delay(40);
-		}
+		Misc.poll(() => !me.skillDelay, 1000, 40);
 
 		return 1;
 	}

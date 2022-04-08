@@ -23,14 +23,18 @@ const ClassAttack = {
 		}
 
 		if (!this.feralBoost && Config.AttackSkill.includes(sdk.skills.FeralRage)) {
-			this.feralBoost = ((Math.floor(me.getSkill(sdk.skills.FeralRage, 1) / 2) + 3) * 4) + this.baseLL; // amount of life leech with max rage
+			// amount of life leech with max rage
+			this.feralBoost = ((Math.floor(me.getSkill(sdk.skills.FeralRage, 1) / 2) + 3) * 4) + this.baseLL;
 		}
 
 		if (((Config.AttackSkill[0] === sdk.skills.FeralRage && (!me.getState(sdk.states.FeralRage) || me.getStat(sdk.stats.LifeLeech) < this.feralBoost))
 			|| (Config.AttackSkill[0] === sdk.skills.Maul && !me.getState(sdk.states.Maul))
-			|| (preattack && Config.AttackSkill[0] > 0)) && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0])) && (Skill.wereFormCheck(Config.AttackSkill[0]) || !me.shapeshifted)) {
-			if (Math.round(getDistance(me, unit)) > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4, true)) {
+			|| (preattack && Config.AttackSkill[0] > 0))
+			&& Attack.checkResist(unit, Config.AttackSkill[0])
+			&& (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))
+			&& (Skill.wereFormCheck(Config.AttackSkill[0]) || !me.shapeshifted)) {
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x1 | 0x4)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x1 & 0x4, true)) {
 					return 0;
 				}
 			}
@@ -124,8 +128,8 @@ const ClassAttack = {
 			return 0;
 		}
 
-		if (Math.round(getDistance(me, unit)) > Skill.getRange(skill) || checkCollision(me, unit, 0x4)) {
-			if (!Attack.getIntoPosition(unit, Skill.getRange(skill), 0x4, true)) {
+		if (unit.distance > Skill.getRange(skill) || checkCollision(me, unit, 0x1 | 0x4)) {
+			if (!Attack.getIntoPosition(unit, Skill.getRange(skill), 0x1 & 0x4, true)) {
 				return 0;
 			}
 		}

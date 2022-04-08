@@ -223,13 +223,7 @@ const ClassAttack = {
 		// don't count as failed
 		if (noMana) return 3;
 
-		for (let i = 0; i < 25; i += 1) {
-			if (!me.getState(121)) {
-				break;
-			}
-
-			delay(40);
-		}
+		Misc.poll(() => !me.skillDelay, 1000, 40);
 
 		return 1;
 	}

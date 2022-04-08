@@ -123,7 +123,7 @@ const ClassAttack = {
 	afterAttack: function () {
 		Precast.doPrecast(false);
 
-		if (Config.Redemption instanceof Array && (me.hp * 100 / me.hpmax < Config.Redemption[0] || me.mp * 100 / me.mpmax < Config.Redemption[1]) && Skill.setSkill(124, 0)) {
+		if (Config.Redemption instanceof Array && (me.hpPercent < Config.Redemption[0] || me.mpPercent < Config.Redemption[1]) && Skill.setSkill(124, 0)) {
 			delay(1500);
 		}
 	},
@@ -248,24 +248,17 @@ const ClassAttack = {
 			return 1;
 		}
 
-		for (let i = 0; i < 25; i += 1) {
-			if (!me.getState(121)) {
-				break;
-			}
-
-			delay(40);
-		}
+		Misc.poll(() => !me.skillDelay, 1000, 40);
 
 		return 1;
 	},
 
 	dollAvoid: function (unit) {
-		let i, cx, cy,
-			distance = 14;
+		let distance = 14;
 
-		for (i = 0; i < 2 * Math.PI; i += Math.PI / 6) {
-			cx = Math.round(Math.cos(i) * distance);
-			cy = Math.round(Math.sin(i) * distance);
+		for (let i = 0; i < 2 * Math.PI; i += Math.PI / 6) {
+			let cx = Math.round(Math.cos(i) * distance);
+			let cy = Math.round(Math.sin(i) * distance);
 
 			if (Attack.validSpot(unit.x + cx, unit.y + cy)) {
 				return Pather.moveTo(unit.x + cx, unit.y + cy);
