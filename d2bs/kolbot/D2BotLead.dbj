@@ -167,7 +167,7 @@ MainSwitch:
 			}
 		}
 
-		if (Starter.ingame) {
+		if (Starter.inGame) {
 			if (AutoMule.outOfGameCheck() || TorchSystem.outOfGameCheck() || Gambling.outOfGameCheck() || CraftingSystem.outOfGameCheck()) {
 				break;
 			}
@@ -219,7 +219,7 @@ MainSwitch:
 			}
 		}
 
-		if (Starter.ingame) {
+		if (Starter.inGame) {
 			if (AutoMule.outOfGameCheck() || TorchSystem.outOfGameCheck() || Gambling.outOfGameCheck() || CraftingSystem.outOfGameCheck()) {
 				break;
 			}
@@ -364,7 +364,6 @@ MainSwitch:
 		ControlAction.createGame((gameInfo.gameName === "?" ? Starter.randomString(null,true) : gameInfo.gameName + Starter.gameCount), (gameInfo.gamePass === "?" ? Starter.randomString(null,true) : gameInfo.gamePass), gameInfo.difficulty, StarterConfig.CreateGameDelay * 1000);
 
 		Starter.lastGameStatus = "pending";
-
 		Starter.setNextGame(gameInfo);
 		Starter.locationTimeout(10000, location);
 

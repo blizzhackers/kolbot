@@ -190,7 +190,7 @@ MainSwitch:
 			}
 		}
 
-		if (Starter.ingame) {
+		if (Starter.inGame) {
 			D2Bot.store(JSON.stringify({currScript: "none", area: "out of game"}));
 
 			if (AutoMule.outOfGameCheck() || TorchSystem.outOfGameCheck() || Gambling.outOfGameCheck() || CraftingSystem.outOfGameCheck()) {

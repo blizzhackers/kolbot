@@ -65,7 +65,7 @@ MainSwitch:
 	case 3: // Lobby Chat
 		D2Bot.updateStatus("Lobby");
 
-		if (Starter.ingame) {
+		if (Starter.inGame) {
 			if (getTickCount() - Starter.gameStart < StarterConfig.MinGameTime * 1e3) {
 				ControlAction.timeoutDelay("Min game time wait", StarterConfig.MinGameTime * 1e3 + Starter.gameStart - getTickCount());
 			}

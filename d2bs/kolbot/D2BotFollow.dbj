@@ -181,7 +181,7 @@ MainSwitch:
 	case 3: // Lobby Chat
 		D2Bot.updateStatus("Lobby Chat");
 
-		if (Starter.ingame) {
+		if (Starter.inGame) {
 			if (AutoMule.outOfGameCheck() || TorchSystem.outOfGameCheck() || Gambling.outOfGameCheck() || CraftingSystem.outOfGameCheck()) {
 				break;
 			}
