@@ -1,8 +1,12 @@
 /**
 *	@filename	OOG.js
-*	@author		kolton, D3STROY3R
+*	@author		kolton, D3STROY3R, theBGuy
 *	@desc		handle out of game operations like creating characters/accounts, maintaining profile datafiles, d2bot# logging etc.
 */
+
+!isIncluded('Polyfill.js') && include('Polyfill.js');
+let Control_1 = require('./modules/Control');
+let sdk = require('./modules/sdk');
 
 const D2Bot = {
 	handle: 0,
@@ -536,30 +540,22 @@ const ControlAction = {
 	},
 
 	setText: function (type, x, y, xsize, ysize, text) {
-		if (!text) {
-			return false;
-		}
+		if (!text) return false;
 
-		let currText,
-			control = getControl(type, x, y, xsize, ysize);
+		let control = getControl(type, x, y, xsize, ysize);
 
-		if (!control) {
-			return false;
-		}
+		if (!control) return false;
 
-		currText = control.text;
+		let currText = control.text;
 
-		if (currText && currText === text) {
-			return true;
-		}
+		if (currText && currText === text) return true;
 
 		currText = control.getText();
 
-		if (currText && ((typeof currText === "string" && currText === text) || (typeof currText === "object" && currText.indexOf(text) > -1))) {
+		if (currText && ((typeof currText === "string" && currText === text) || (typeof currText === "object" && currText.includes(text)))) {
 			return true;
 		}
 
-		//delay(200);
 		control.setText(text);
 
 		return true;
@@ -568,11 +564,7 @@ const ControlAction = {
 	getText: function (type, x, y, xsize, ysize) {
 		let control = getControl(type, x, y, xsize, ysize);
 
-		if (!control) {
-			return false;
-		}
-
-		return control.getText();
+		return (!!control ? control.getText() : false);
 	},
 
 	joinChannel: function (channel) {
@@ -585,12 +577,12 @@ const ControlAction = {
 		MainLoop:
 		while (true) {
 			switch (getLocation()) {
-			case 1: // Lobby
-				this.click(6, 27, 480, 120, 20);
+			case sdk.game.locations.Lobby: // Lobby
+				Control_1.LobbyEnterChat.click();
 
 				break;
-			case 3: // Chat
-				currChan = this.getText(4, 28, 138, 354, 60); // returns array
+			case sdk.game.locations.LobbyChat: // Chat
+				currChan = Control_1.LobbyChannelName.getText(); // returns array
 
 				if (currChan) {
 					for (i = 0; i < currChan.length; i += 1) {
@@ -602,22 +594,18 @@ const ControlAction = {
 					}
 				}
 
-				if (!tick) {
-					this.click(6, 535, 490, 80, 20);
-
-					tick = getTickCount();
-				}
+				!tick && Control_1.LobbyChannel.click() && (tick = getTickCount());
 
 				break;
-			case 7: // Channel
-				this.setText(1, 432, 162, 155, 20, channel);
-				this.click(6, 671, 433, 96, 32);
+			case sdk.game.locations.ChannelList: // Channel
+				Control_1.LobbyChannelText.setText(channel);
+				Control_1.LobbyChannelOk.click();
 
 				break;
 			}
 
 			if (getTickCount() - tick >= timeout) {
-				break MainLoop;
+				break;
 			}
 
 			delay(100);
@@ -631,52 +619,46 @@ const ControlAction = {
 	createGame: function (name, pass, diff, delay) {
 		let control;
 
-		ControlAction.setText(1, 432, 162, 158, 20, name);
-		ControlAction.setText(1, 432, 217, 158, 20, pass);
+		Control_1.CreateGameName.setText(name);
+		Control_1.CreateGamePass.setText(pass);
 
 		switch (diff) {
 		case "Normal":
-			ControlAction.click(6, 430, 381, 16, 16);
+			Control_1.Normal.click();
 
 			break;
 		case "Nightmare":
-			ControlAction.click(6, 555, 381, 16, 16);
+			Control_1.Nightmare.click();
 
 			break;
 		case "Highest":
 			control = getControl(6, 698, 381, 16, 16);
 
-			if (control.disabled !== 4) {
-				ControlAction.click(6, 698, 381, 16, 16); // Click Hell
-
+			if (control.disabled !== 4 && Control_1.Hell.click()) {
 				break;
 			}
 
 			control = getControl(6, 555, 381, 16, 16);
 
-			if (control.disabled !== 4) {
-				ControlAction.click(6, 555, 381, 16, 16); // Click Nightmare
-
+			if (control.disabled !== 4 && Control_1.Nightmare.click()) {
 				break;
 			}
 
-			ControlAction.click(6, 430, 381, 16, 16); // Click Normal
+			Control_1.Normal.click();
 
 			break;
 		default:
-			ControlAction.click(6, 698, 381, 16, 16); // Click Hell
+			Control_1.Hell.click();
 
 			break;
 		}
 
-		if (delay) {
-			this.timeoutDelay("Make Game Delay", delay);
-		}
+		!!delay && this.timeoutDelay("Make Game Delay", delay);
 
 		me.blockMouse = true;
 
 		print("Creating Game: " + name);
-		ControlAction.click(6, 594, 433, 172, 32);
+		Control_1.CreateGame.click();
 
 		me.blockMouse = false;
 	},
@@ -693,7 +675,7 @@ const ControlAction = {
 		MainLoop:
 		while (true) {
 			switch (getLocation()) {
-			case 8:
+			case sdk.game.locations.MainMenu:
 				control = getControl(6, 264, 391, 272, 25);
 
 				if (control) {
@@ -721,12 +703,12 @@ const ControlAction = {
 					break MainLoop;
 				}
 
-				this.click(6, 264, 391, 272, 25);
+				Control_1.Gateway.click();
 
 				break;
-			case 27:
+			case sdk.game.locations.GatewaySelect:
 				this.click(4, 257, 500, 292, 160, 403, 350 + realm * 25);
-				this.click(6, 281, 538, 96, 32);
+				Control_1.GatewayOk.click();
 
 				break;
 			}
@@ -742,7 +724,7 @@ const ControlAction = {
 	loginAccount: function (info) {
 		me.blockMouse = true;
 
-		let tick, locTick,
+		let locTick,
 			realms = {
 				"uswest": 0,
 				"useast": 1,
@@ -750,53 +732,50 @@ const ControlAction = {
 				"europe": 3
 			};
 
-		tick = getTickCount();
+		let tick = getTickCount();
 
 		MainLoop:
 		while (true) {
 			switch (getLocation()) {
-			case 0:
+			case sdk.game.locations.PreSplash:
 				break;
-			case 8: // main menu
-				if (info.realm) {
-					ControlAction.clickRealm(realms[info.realm]);
-				}
-
-				this.click(6, 264, 366, 272, 35);
+			case sdk.game.locations.MainMenu: // main menu
+				info.realm && ControlAction.clickRealm(realms[info.realm]);
+				Control_1.BattleNet.click();
 
 				break;
-			case 9: // login screen
-				this.setText(1, 322, 342, 162, 19, info.account);
-				this.setText(1, 322, 396, 162, 19, info.password);
-				this.click(6, 264, 484, 272, 35); // log in
+			case sdk.game.locations.Login: // login screen
+				Control_1.LoginUsername.setText(info.account);
+				Control_1.LoginPassword.setText(info.password);
+				Control_1.Login.click();
 
 				break;
-			case 11:
-			case 13: // realm down
+			case sdk.game.locations.LoginUnableToConnect:
+			case sdk.game.locations.RealmDown: // realm down
 				// Unable to connect, let the caller handle it.
 				me.blockMouse = false;
 
 				return false;
-			case 12: // char screen - break
+			case sdk.game.locations.CharSelect: // char screen - break
 				break MainLoop;
-			case 18: // splash
-				this.click(2, 0, 599, 800, 600);
+			case sdk.game.locations.SplashScreen: // splash
+				Control_1.SplashScreen.click();
 
 				break;
-			case 16: // please wait
-			case 21: // connecting
-			case 23: // char screen connecting
+			case sdk.game.locations.CharSelectPleaseWait: // please wait
+			case sdk.game.locations.MainMenuConnecting: // connecting
+			case sdk.game.locations.CharSelectConnecting: // char screen connecting
 				break;
-			case 42: // empty char screen
+			case sdk.game.locations.CharSelectNoChars: // empty char screen
 				// make sure we're not on connecting screen
 				locTick = getTickCount();
 
-				while (getTickCount() - locTick < 3000 && getLocation() === 42) {
+				while (getTickCount() - locTick < 3000 && getLocation() === sdk.game.locations.CharSelectNoChars) {
 					delay(25);
 				}
 
 				// char screen connecting
-				if (getLocation() === 23) {
+				if (getLocation() === sdk.game.locations.CharSelectConnecting) {
 					break;
 				}
 
@@ -820,7 +799,7 @@ const ControlAction = {
 
 		me.blockMouse = false;
 
-		return getLocation() === 12 || getLocation() === 42;
+		return getLocation() === sdk.game.locations.CharSelect || getLocation() === sdk.game.locations.CharSelectNoChars;
 	},
 
 	makeAccount: function (info) {
@@ -833,45 +812,45 @@ const ControlAction = {
 			"europe": 3
 		};
 		// cycle until in empty char screen
-		while (getLocation() !== 42) {
+		while (getLocation() !== sdk.game.locations.CharSelectNoChars) {
 			switch (getLocation()) {
-			case 8: // main menu
+			case sdk.game.locations.MainMenu: // main menu
 				ControlAction.clickRealm(realms[info.realm]);
-				this.click(6, 264, 366, 272, 35);
+				Control_1.BattleNet.click();
 
 				break;
-			case 9: // login screen
-				this.click(6, 264, 572, 272, 35);
+			case sdk.game.locations.Login: // login screen
+				Control_1.CreateNewAccount.click();
 
 				break;
-			case 18: // splash
-				this.click(2, 0, 599, 800, 600);
+			case sdk.game.locations.SplashScreen: // splash
+				Control_1.SplashScreen.click();
 
 				break;
-			case 29: // Char create
-				this.click(6, 33, 572, 128, 35);
+			case sdk.game.locations.CharacterCreate: // Char create
+				Control_1.CharSelectExit.click();
 
 				break;
-			case 31: // ToU
-				this.click(6, 525, 513, 128, 35);
+			case sdk.game.locations.TermsOfUse: // ToU
+				Control_1.TermsOfUseAgree.click();
 
 				break;
-			case 32: // new account
-				this.setText(1, 322, 342, 162, 19, info.account);
-				this.setText(1, 322, 396, 162, 19, info.password);
-				this.setText(1, 322, 450, 162, 19, info.password);
-				this.click(6, 627, 572, 128, 35);
+			case sdk.game.locations.CreateNewAccount: // new account
+				Control_1.CreateNewAccountName.setText(info.account);
+				Control_1.CreateNewAccountPassword.setText(info.password);
+				Control_1.CreateNewAccountConfirmPassword.setText(info.password);
+				Control_1.CreateNewAccountOk.click();
 
 				break;
-			case 33: // please read
-				this.click(6, 525, 513, 128, 35);
+			case sdk.game.locations.PleaseRead: // please read
+				Control_1.PleaseReadOk.click();
 
 				break;
-			case 34: // e-mail
+			case sdk.game.locations.RegisterEmail: // e-mail
 				if (getControl(6, 415, 412, 128, 35)) {
-					this.click(6, 415, 412, 128, 35);
+					Control_1.EmailDontRegisterContinue.click();
 				} else {
-					this.click(6, 265, 572, 272, 35);
+					Control_1.EmailDontRegister.click();
 				}
 
 				break;
@@ -891,7 +870,7 @@ const ControlAction = {
 		let count = 0;
 		let tick = getTickCount();
 
-		while (getLocation() !== 12) {
+		while (getLocation() !== sdk.game.locations.CharSelect) {
 			if (getTickCount() - tick >= 5000) {
 				break;
 			}
@@ -902,8 +881,8 @@ const ControlAction = {
 		// start from beginning of the char list
 		sendKey(0x24);
 
-		while (getLocation() === 12 && count < 24) {
-			control = getControl(4, 37, 178, 200, 92);
+		while (getLocation() === sdk.game.locations.CharSelect && count < 24) {
+			let control = getControl(4, 37, 178, 200, 92);
 
 			if (control) {
 				do {
@@ -952,7 +931,7 @@ const ControlAction = {
 		// start from beginning of the char list
 		sendKey(0x24);
 
-		while (getLocation() === 12 && count < 24) {
+		while (getLocation() === sdk.game.locations.CharSelect && count < 24) {
 			control = getControl(4, 37, 178, 200, 92);
 
 			if (control) {
@@ -969,7 +948,8 @@ const ControlAction = {
 				} while (count < 24 && control.getNext());
 			}
 
-			if (count === 8 || count === 16) { // check for additional characters up to 24
+			// check for additional characters up to 24
+			if (count === 8 || count === 16) {
 				control = getControl(4, 237, 457, 72, 93);
 
 				if (control) {
@@ -983,7 +963,8 @@ const ControlAction = {
 
 					me.blockMouse = false;
 				}
-			} else { // no further check necessary
+			} else {
+				// no further check necessary
 				break;
 			}
 		}
@@ -999,7 +980,7 @@ const ControlAction = {
 		let control, text,
 			position = 0;
 
-		if (getLocation() === 12) {
+		if (getLocation() === sdk.game.locations.CharSelect) {
 			control = getControl(4, 37, 178, 200, 92);
 
 			if (control) {
@@ -1026,9 +1007,9 @@ const ControlAction = {
 
 		MainLoop:
 		// cycle until in lobby or in game
-		while (getLocation() !== 1) {
+		while (getLocation() !== sdk.game.locations.Lobby) {
 			switch (getLocation()) {
-			case 12: // character select
+			case sdk.game.locations.CharSelect: // character select
 				let control = getControl(4, 37, 178, 200, 92);
 
 				if (control) {
@@ -1040,7 +1021,7 @@ const ControlAction = {
 
 							if (text[1].toLowerCase() === info.charName.toLowerCase()) {
 								control.click();
-								this.click(6, 627, 572, 128, 35);
+								Control_1.CreateNewAccountOk.click();
 								me.blockMouse = false;
 
 								// select difficulty - single player
@@ -1062,7 +1043,8 @@ const ControlAction = {
 					} while (control.getNext());
 				}
 
-				if (count === 8 || count === 16) { // check for additional characters up to 24
+				// check for additional characters up to 24
+				if (count === 8 || count === 16) {
 					control = getControl(4, 237, 457, 72, 93);
 
 					if (control) {
@@ -1077,12 +1059,12 @@ const ControlAction = {
 				}
 
 				break;
-			case 42: // empty character select
-				this.click(6, 33, 572, 128, 35);
+			case sdk.game.locations.CharSelectNoChars: // empty character select
+				Control_1.CharSelectExit.click();
 
 				break;
-			case 14: // disconnected?
-			case 30: // player not found?
+			case sdk.game.locations.Disconnected: // disconnected?
+			case sdk.game.locations.OkCenteredErrorPopUp: // player not found?
 				break MainLoop;
 			default:
 				break;
@@ -1104,10 +1086,10 @@ const ControlAction = {
 			clickCoords = [];
 
 		// cycle until in lobby
-		while (getLocation() !== 1) {
+		while (getLocation() !== sdk.game.locations.Lobby) {
 			switch (getLocation()) {
-			case 12: // character select
-			case 42: // empty character select
+			case sdk.game.locations.CharSelect: // character select
+			case sdk.game.locations.CharSelectNoChars: // empty character select
 				control = getControl(6, 33, 528, 168, 60);
 
 				// Create Character greyed out
@@ -1117,10 +1099,10 @@ const ControlAction = {
 					return false;
 				}
 
-				this.click(6, 33, 528, 168, 60);
+				Control_1.CharSelectCreate.click();
 
 				break;
-			case 29: // select character
+			case sdk.game.locations.CharacterCreate: // select character
 				switch (info.charClass) {
 				case "barbarian":
 					clickCoords = [400, 280];
@@ -1165,24 +1147,24 @@ const ControlAction = {
 				delay(500);
 
 				break;
-			case 15: // new character
+			case sdk.game.locations.NewCharSelected: // new character
 				// hardcore char warning
 				if (getControl(6, 421, 337, 96, 32)) {
-					this.click(6, 421, 337, 96, 32);
+					Control_1.CharCreateHCWarningOk.click();
 				} else {
-					this.setText(1, 318, 510, 157, 16, info.charName);
+					Control_1.CharCreateCharName.setText(info.charName);
 
-					!info.expansion && this.click(6, 319, 540, 15, 16);
-					!info.ladder && this.click(6, 319, 580, 15, 16);
-					info.hardcore && this.click(6, 319, 560, 15, 16);
+					!info.expansion && Control_1.CharCreateExpansion.click();
+					!info.ladder && Control_1.CharCreateLadder.click();
+					info.hardcore && Control_1.CharCreateHardcore.click();
 
-					this.click(6, 627, 572, 128, 35);
+					Control_1.CreateNewAccountOk.click();
 				}
 
 				break;
-			case 30: // char name exists (text box 4, 268, 320, 264, 120)
-				ControlAction.click(6, 351, 337, 96, 32);
-				ControlAction.click(6, 33, 572, 128, 35);
+			case sdk.game.locations.OkCenteredErrorPopUp: // char name exists (text box 4, 268, 320, 264, 120)
+				Control_1.OkCentered.click();
+				Control_1.CharSelectExit.click();
 
 				me.blockMouse = false;
 
@@ -1206,14 +1188,12 @@ const ControlAction = {
 
 	// Test version - modified core only
 	getGameList: function () {
-		let i, text, gameList;
-
-		text = this.getText(4, 432, 393, 160, 173);
+		let text = Control_1.JoinGameList.getText();
 
 		if (text) {
-			gameList = [];
+			let gameList = [];
 
-			for (i = 0; i < text.length; i += 1) {
+			for (let i = 0; i < text.length; i += 1) {
 				gameList.push({
 					gameName: text[i][0],
 					players: text[i][1]
@@ -1229,19 +1209,17 @@ const ControlAction = {
 	deleteCharacter: function (info) {
 		me.blockMouse = true;
 
-		let control, text, count = 0;
-
 		// start from beginning of the char list
 		sendKey(0x24);
-
-		MainLoop:
+		
 		// cycle until in lobby
-		while (getLocation() === 12) {
-			control = getControl(4, 37, 178, 200, 92);
+		while (getLocation() === sdk.game.locations.CharSelect) {
+			let count = 0;
+			let control = getControl(4, 37, 178, 200, 92);
 
 			if (control) {
 				do {
-					text = control.getText();
+					let text = control.getText();
 
 					if (text instanceof Array && typeof text[1] === "string") {
 						count++;
@@ -1250,9 +1228,9 @@ const ControlAction = {
 							print("delete character " + info.charName);
 							
 							control.click();
-							ControlAction.click(6, 433, 528, 168, 60);
+							Control_1.CharSelectDelete.click();
 							delay(500);
-							ControlAction.click(6, 421, 337, 96, 32);
+							Control_1.CharDeleteYes.click();
 							delay(500);
 							me.blockMouse = false;
 							
@@ -1275,7 +1253,7 @@ const ControlAction = {
 				}
 			} else {
 				// no further check necessary
-				break MainLoop;
+				break;
 			}
 
 			delay(100);
@@ -1357,12 +1335,16 @@ const Starter = {
 	gameStart: 0,
 	gameCount: 0,
 	lastGameStatus: "ready",
+	handle: undefined,
 	chanInfo: {
 		joinChannel: "",
 		firstMsg: "",
 		afterMsg: "",
 		announce: false
 	},
+	gameInfo: {},
+	joinInfo: {},
+	profileInfo: {},
 
 	sayMsg: function (string) {
 		if (!this.useChat) return;
@@ -1398,7 +1380,7 @@ const Starter = {
 	updateCount: function () {
 		D2Bot.updateCount();
 		delay(1000);
-		ControlAction.click(6, 264, 366, 272, 35);
+		Control_1.BattleNet.click();
 
 		try {
 			login(me.profile);
@@ -1407,7 +1389,7 @@ const Starter = {
 		}
 
 		delay(1000);
-		ControlAction.click(6, 33, 572, 128, 35);
+		Control_1.CharSelectExit.click();
 	},
 
 	scriptMsgEvent: function (msg) {
@@ -1450,15 +1432,77 @@ const Starter = {
 		}
 	},
 
+	receiveCopyData: function (mode, msg) {
+		let obj;
+
+		msg === "Handle" && typeof mode === "number" && (Starter.handle = mode);
+
+		switch (mode) {
+		case 1: // JoinInfo
+			obj = JSON.parse(msg);
+			Object.assign(Starter.joinInfo, obj);
+
+			break;
+		case 2: // Game info
+			print("Recieved Game Info");
+			obj = JSON.parse(msg);
+			Object.assign(Starter.gameInfo, obj);
+
+			break;
+		case 3: // Game request
+			// Don't let others join mule/torch/key/gold drop game
+			if (AutoMule.inGame || Gambling.inGame || TorchSystem.inGame || CraftingSystem.inGame) {
+				break;
+			}
+
+			if (Object.keys(Starter.gameInfo).length) {
+				obj = JSON.parse(msg);
+
+				if ([4, 5].includes(Profile().type)) {
+					me.gameReady && D2Bot.joinMe(obj.profile, me.gameserverip.toString(), "", "", isUp);
+				} else {
+					if (me.gameReady) {
+						D2Bot.joinMe(obj.profile, me.gamename.toLowerCase(), "", me.gamepassword.toLowerCase(), isUp);
+					} else {
+						D2Bot.joinMe(obj.profile, Starter.gameInfo.gameName.toLowerCase(), Starter.gameCount, Starter.gameInfo.gamePass.toLowerCase(), isUp);
+					}
+				}
+			}
+
+			break;
+		case 4: // Heartbeat ping
+			msg === "pingreq" && sendCopyData(null, me.windowtitle, 4, "pingrep");
+
+			break;
+		case 61732: // Cached info retreival
+			msg !== "null" && (Starter.gameInfo.crashInfo = JSON.parse(msg));
+
+			break;
+		case 1638: // getProfile
+			try {
+				obj = JSON.parse(msg);
+				Starter.profileInfo.profile = me.profile;
+				Starter.profileInfo.account = obj.account;
+				Starter.profileInfo.charName = obj.Character;
+				obj.Realm = obj.Realm.toLowerCase();
+				Starter.profileInfo.realm = ["east", "west"].includes(obj.Realm) ? "us" + obj.Realm : obj.Realm;
+			} catch (e) {
+				print(e);
+			}
+
+			break;
+		}
+	},
+
 	randomString: function (len, useNumbers = false) {
 		len === undefined && (len = rand(5, 14));
 
 		let rval = "",
 			letters = useNumbers ? "abcdefghijklmnopqrstuvwxyz0123456789" : "abcdefghijklmnopqrstuvwxyz";
-
+		let strLen = letters.length;
 
 		for (let i = 0; i < len; i += 1) {
-			rval += letters[rand(0, letters.length - 1)];
+			rval += letters[rand(0, strLen)];
 		}
 
 		return rval;
