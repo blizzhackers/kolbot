@@ -62,7 +62,7 @@ if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 }
 
 function locationAction (location) {
-	let i, control, string, text;
+	let i, string, text;
 
 	MainSwitch:
 	switch (location) {
@@ -257,16 +257,11 @@ function locationAction (location) {
 	case sdk.game.locations.CreateGame:
 		D2Bot.updateStatus("Creating Game");
 
-		control = getControl(1, 657, 342, 27, 20);
-
-		// Set character difference - handle open bnet
-		if (Profile().type === 2 && !!control) {
-			if (typeof StarterConfig.CharacterDifference === "number") {
-				control.disabled === 4 && Control_1.CharacterDifferenceButton.click();
-				Control_1.CharacterDifference.setText(StarterConfig.CharacterDifference.toString());
-			} else if (!StarterConfig.CharacterDifference && control.disabled === 5) {
-				Control_1.CharacterDifferenceButton.click();
-			}
+		if (typeof StarterConfig.CharacterDifference === "number") {
+			Control_1.CharacterDifference.disabled === 4 && Control_1.CharacterDifferenceButton.click();
+			Control_1.CharacterDifference.setText(StarterConfig.CharacterDifference.toString());
+		} else if (!StarterConfig.CharacterDifference && Control_1.CharacterDifference.disabled === 5) {
+			Control_1.CharacterDifferenceButton.click();
 		}
 
 		typeof StarterConfig.MaxPlayerCount === "number" && Control_1.MaxPlayerCount.setText(StarterConfig.MaxPlayerCount.toString());

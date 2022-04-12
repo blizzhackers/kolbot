@@ -381,7 +381,7 @@ function foreverAlone () {
 }
 
 function locationAction (location) {
-	let i, obj, info, control, string, text, queue;
+	let i, obj, info, string, text, queue;
 
 	MainSwitch:
 	switch (location) {
@@ -406,7 +406,7 @@ function locationAction (location) {
 			break;
 		}
 
-		if (!Control_1.JoinGameWindow.click()) { // Join
+		if (!Control_1.JoinGameWindow.click()) {
 			break;
 		}
 
@@ -427,16 +427,11 @@ function locationAction (location) {
 	case sdk.game.locations.CreateGame: // Create Game
 		D2Bot.updateStatus("Creating Game");
 
-		control = getControl(1, 657, 342, 27, 20);
-
-		if (control && control.disabled === 5) {
-			// remove level restriction
-			Control_1.CharacterDifferenceButton.click();
-		}
+		// remove level restriction
+		Control_1.CharacterDifference.disabled === 5 && Control_1.CharacterDifferenceButton.click();
 
 		// Max number of players
-		control = getControl(1, 657, 308, 27, 20);
-		!!control && Control_1.MaxPlayerCount.setText("8");
+		Control_1.MaxPlayerCount.setText("8");
 
 		delay(2000);
 
@@ -1008,6 +1003,7 @@ function locationAction (location) {
 	}
 }
 
+// eslint-disable-next-line no-unused-vars
 function gameEvent (mode, param1, param2, name1, name2) {
 	if (!me.ingame || !me.gameReady || !me.name) {
 		return;

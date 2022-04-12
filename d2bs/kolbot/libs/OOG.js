@@ -617,8 +617,6 @@ const ControlAction = {
 	},
 
 	createGame: function (name, pass, diff, delay) {
-		let control;
-
 		Control_1.CreateGameName.setText(name);
 		Control_1.CreateGamePass.setText(pass);
 
@@ -632,15 +630,11 @@ const ControlAction = {
 
 			break;
 		case "Highest":
-			control = getControl(6, 698, 381, 16, 16);
-
-			if (control.disabled !== 4 && Control_1.Hell.click()) {
+			if (Control_1.Hell.disabled !== 4 && Control_1.Hell.click()) {
 				break;
 			}
 
-			control = getControl(6, 555, 381, 16, 16);
-
-			if (control.disabled !== 4 && Control_1.Nightmare.click()) {
+			if (Control_1.Nightmare.disabled !== 4 && Control_1.Nightmare.click()) {
 				break;
 			}
 
@@ -668,7 +662,7 @@ const ControlAction = {
 			throw new Error("clickRealm: Invalid realm!");
 		}
 
-		let control, currentRealm;
+		let currentRealm;
 
 		me.blockMouse = true;
 
@@ -676,27 +670,23 @@ const ControlAction = {
 		while (true) {
 			switch (getLocation()) {
 			case sdk.game.locations.MainMenu:
-				control = getControl(6, 264, 391, 272, 25);
+				switch (Control_1.Gateway.text.split(getLocaleString(11049).substring(0, getLocaleString(11049).length - 2))[1]) {
+				case "U.S. EAST":
+					currentRealm = 1;
 
-				if (control) {
-					switch (control.text.split(getLocaleString(11049).substring(0, getLocaleString(11049).length - 2))[1]) {
-					case "U.S. EAST":
-						currentRealm = 1;
+					break;
+				case "U.S. WEST":
+					currentRealm = 0;
 
-						break;
-					case "U.S. WEST":
-						currentRealm = 0;
+					break;
+				case "ASIA":
+					currentRealm = 2;
 
-						break;
-					case "ASIA":
-						currentRealm = 2;
+					break;
+				case "EUROPE":
+					currentRealm = 3;
 
-						break;
-					case "EUROPE":
-						currentRealm = 3;
-
-						break;
-					}
+					break;
 				}
 
 				if (currentRealm === realm) {
@@ -847,11 +837,7 @@ const ControlAction = {
 
 				break;
 			case sdk.game.locations.RegisterEmail: // e-mail
-				if (getControl(6, 415, 412, 128, 35)) {
-					Control_1.EmailDontRegisterContinue.click();
-				} else {
-					Control_1.EmailDontRegister.click();
-				}
+				Control_1.EmailDontRegisterContinue ? Control_1.EmailDontRegisterContinue.click() : Control_1.EmailDontRegister.click();
 
 				break;
 			default:
@@ -900,12 +886,9 @@ const ControlAction = {
 
 			// check for additional characters up to 24
 			if (count === 8 || count === 16) {
-				control = getControl(4, 237, 457, 72, 93);
-
-				if (control) {
+				if (Control_1.CharSelectChar6.click()) {
 					me.blockMouse = true;
 
-					control.click();
 					sendKey(0x28);
 					sendKey(0x28);
 					sendKey(0x28);
@@ -950,12 +933,8 @@ const ControlAction = {
 
 			// check for additional characters up to 24
 			if (count === 8 || count === 16) {
-				control = getControl(4, 237, 457, 72, 93);
-
-				if (control) {
+				if (Control_1.CharSelectChar6.click()) {
 					me.blockMouse = true;
-
-					control.click();
 					sendKey(0x28);
 					sendKey(0x28);
 					sendKey(0x28);
@@ -1025,7 +1004,7 @@ const ControlAction = {
 								me.blockMouse = false;
 
 								// select difficulty - single player
-								if (getLocation() === 20) {
+								if (getLocation() === sdk.game.locations.SelectDifficultySP) {
 									try {
 										login(info.profile);
 									} catch (err) {
@@ -1045,10 +1024,7 @@ const ControlAction = {
 
 				// check for additional characters up to 24
 				if (count === 8 || count === 16) {
-					control = getControl(4, 237, 457, 72, 93);
-
-					if (control) {
-						control.click();
+					if (Control_1.CharSelectChar6.click()) {
 						sendKey(0x28);
 						sendKey(0x28);
 						sendKey(0x28);
@@ -1082,18 +1058,15 @@ const ControlAction = {
 		me.blockMouse = true;
 		!info.charClass && (info.charClass = "barbarian");
 
-		let control,
-			clickCoords = [];
+		let clickCoords = [];
 
 		// cycle until in lobby
 		while (getLocation() !== sdk.game.locations.Lobby) {
 			switch (getLocation()) {
 			case sdk.game.locations.CharSelect: // character select
 			case sdk.game.locations.CharSelectNoChars: // empty character select
-				control = getControl(6, 33, 528, 168, 60);
-
 				// Create Character greyed out
-				if (control && control.disabled === 4) {
+				if (Control_1.CharSelectCreate.disabled === 4) {
 					me.blockMouse = false;
 
 					return false;
@@ -1149,7 +1122,7 @@ const ControlAction = {
 				break;
 			case sdk.game.locations.NewCharSelected: // new character
 				// hardcore char warning
-				if (getControl(6, 421, 337, 96, 32)) {
+				if (Control_1.CharCreateHCWarningOk) {
 					Control_1.CharCreateHCWarningOk.click();
 				} else {
 					Control_1.CharCreateCharName.setText(info.charName);
@@ -1242,10 +1215,7 @@ const ControlAction = {
 
 			// check for additional characters up to 24
 			if (count === 8 || count === 16) {
-				control = getControl(4, 237, 457, 72, 93);
-
-				if (control) {
-					control.click();
+				if (Control_1.CharSelectChar6.click()) {
 					sendKey(0x28);
 					sendKey(0x28);
 					sendKey(0x28);
