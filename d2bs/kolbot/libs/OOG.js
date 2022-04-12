@@ -658,11 +658,11 @@ const ControlAction = {
 	},
 
 	clickRealm: function (realm) {
-		if (realm < 0 || realm > 3) {
+		if (realm === undefined || typeof realm !== "number" || realm < 0 || realm > 3) {
 			throw new Error("clickRealm: Invalid realm!");
 		}
 
-		let currentRealm;
+		let currentRealm, retry = 0;
 
 		me.blockMouse = true;
 
@@ -670,7 +670,15 @@ const ControlAction = {
 		while (true) {
 			switch (getLocation()) {
 			case sdk.game.locations.MainMenu:
-				switch (Control_1.Gateway.text.split(getLocaleString(11049).substring(0, getLocaleString(11049).length - 2))[1]) {
+				let control = Control_1.Gateway.control;
+				if (!control) {
+					if (retry > 3) return false;
+					retry++;
+
+					break;
+				}
+
+				switch (control.text.split(getLocaleString(11049).substring(0, getLocaleString(11049).length - 2))[1]) {
 				case "U.S. EAST":
 					currentRealm = 1;
 
@@ -729,34 +737,34 @@ const ControlAction = {
 			switch (getLocation()) {
 			case sdk.game.locations.PreSplash:
 				break;
-			case sdk.game.locations.MainMenu: // main menu
+			case sdk.game.locations.MainMenu:
 				info.realm && ControlAction.clickRealm(realms[info.realm]);
 				Control_1.BattleNet.click();
 
 				break;
-			case sdk.game.locations.Login: // login screen
+			case sdk.game.locations.Login:
 				Control_1.LoginUsername.setText(info.account);
 				Control_1.LoginPassword.setText(info.password);
 				Control_1.Login.click();
 
 				break;
 			case sdk.game.locations.LoginUnableToConnect:
-			case sdk.game.locations.RealmDown: // realm down
+			case sdk.game.locations.RealmDown:
 				// Unable to connect, let the caller handle it.
 				me.blockMouse = false;
 
 				return false;
-			case sdk.game.locations.CharSelect: // char screen - break
+			case sdk.game.locations.CharSelect:
 				break MainLoop;
-			case sdk.game.locations.SplashScreen: // splash
+			case sdk.game.locations.SplashScreen:
 				Control_1.SplashScreen.click();
 
 				break;
-			case sdk.game.locations.CharSelectPleaseWait: // please wait
-			case sdk.game.locations.MainMenuConnecting: // connecting
-			case sdk.game.locations.CharSelectConnecting: // char screen connecting
+			case sdk.game.locations.CharSelectPleaseWait:
+			case sdk.game.locations.MainMenuConnecting:
+			case sdk.game.locations.CharSelectConnecting:
 				break;
-			case sdk.game.locations.CharSelectNoChars: // empty char screen
+			case sdk.game.locations.CharSelectNoChars:
 				// make sure we're not on connecting screen
 				locTick = getTickCount();
 
@@ -764,7 +772,6 @@ const ControlAction = {
 					delay(25);
 				}
 
-				// char screen connecting
 				if (getLocation() === sdk.game.locations.CharSelectConnecting) {
 					break;
 				}
@@ -804,40 +811,40 @@ const ControlAction = {
 		// cycle until in empty char screen
 		while (getLocation() !== sdk.game.locations.CharSelectNoChars) {
 			switch (getLocation()) {
-			case sdk.game.locations.MainMenu: // main menu
+			case sdk.game.locations.MainMenu:
 				ControlAction.clickRealm(realms[info.realm]);
 				Control_1.BattleNet.click();
 
 				break;
-			case sdk.game.locations.Login: // login screen
+			case sdk.game.locations.Login:
 				Control_1.CreateNewAccount.click();
 
 				break;
-			case sdk.game.locations.SplashScreen: // splash
+			case sdk.game.locations.SplashScreen:
 				Control_1.SplashScreen.click();
 
 				break;
-			case sdk.game.locations.CharacterCreate: // Char create
+			case sdk.game.locations.CharacterCreate:
 				Control_1.CharSelectExit.click();
 
 				break;
-			case sdk.game.locations.TermsOfUse: // ToU
+			case sdk.game.locations.TermsOfUse:
 				Control_1.TermsOfUseAgree.click();
 
 				break;
-			case sdk.game.locations.CreateNewAccount: // new account
+			case sdk.game.locations.CreateNewAccount:
 				Control_1.CreateNewAccountName.setText(info.account);
 				Control_1.CreateNewAccountPassword.setText(info.password);
 				Control_1.CreateNewAccountConfirmPassword.setText(info.password);
 				Control_1.CreateNewAccountOk.click();
 
 				break;
-			case sdk.game.locations.PleaseRead: // please read
+			case sdk.game.locations.PleaseRead:
 				Control_1.PleaseReadOk.click();
 
 				break;
-			case sdk.game.locations.RegisterEmail: // e-mail
-				Control_1.EmailDontRegisterContinue ? Control_1.EmailDontRegisterContinue.click() : Control_1.EmailDontRegister.click();
+			case sdk.game.locations.RegisterEmail:
+				Control_1.EmailDontRegisterContinue.control ? Control_1.EmailDontRegisterContinue.click() : Control_1.EmailDontRegister.click();
 
 				break;
 			default:
@@ -868,7 +875,7 @@ const ControlAction = {
 		sendKey(0x24);
 
 		while (getLocation() === sdk.game.locations.CharSelect && count < 24) {
-			let control = getControl(4, 37, 178, 200, 92);
+			let control = Control_1.CharSelectCharInfo0.control;
 
 			if (control) {
 				do {
@@ -907,19 +914,18 @@ const ControlAction = {
 
 	// get all characters
 	getCharacters: function () {
-		let control, text,
-			count = 0,
+		let count = 0,
 			list = [];
 
 		// start from beginning of the char list
 		sendKey(0x24);
 
 		while (getLocation() === sdk.game.locations.CharSelect && count < 24) {
-			control = getControl(4, 37, 178, 200, 92);
+			let control = Control_1.CharSelectCharInfo0.control;
 
 			if (control) {
 				do {
-					text = control.getText();
+					let text = control.getText();
 
 					if (text instanceof Array && typeof text[1] === "string") {
 						count++;
@@ -956,15 +962,14 @@ const ControlAction = {
 
 	// get character position
 	getPosition: function () {
-		let control, text,
-			position = 0;
+		let position = 0;
 
 		if (getLocation() === sdk.game.locations.CharSelect) {
-			control = getControl(4, 37, 178, 200, 92);
+			let control = Control_1.CharSelectCharInfo0.control;
 
 			if (control) {
 				do {
-					text = control.getText();
+					let text = control.getText();
 
 					if (text instanceof Array && typeof text[1] === "string") {
 						position += 1;
@@ -989,7 +994,7 @@ const ControlAction = {
 		while (getLocation() !== sdk.game.locations.Lobby) {
 			switch (getLocation()) {
 			case sdk.game.locations.CharSelect: // character select
-				let control = getControl(4, 37, 178, 200, 92);
+				let control = Control_1.CharSelectCharInfo0.control;
 
 				if (control) {
 					do {
@@ -1030,17 +1035,18 @@ const ControlAction = {
 						sendKey(0x28);
 						sendKey(0x28);
 					}
-				} else { // no further check necessary
+				} else {
+					// no further check necessary
 					break MainLoop;
 				}
 
 				break;
-			case sdk.game.locations.CharSelectNoChars: // empty character select
+			case sdk.game.locations.CharSelectNoChars:
 				Control_1.CharSelectExit.click();
 
 				break;
-			case sdk.game.locations.Disconnected: // disconnected?
-			case sdk.game.locations.OkCenteredErrorPopUp: // player not found?
+			case sdk.game.locations.Disconnected:
+			case sdk.game.locations.OkCenteredErrorPopUp:
 				break MainLoop;
 			default:
 				break;
@@ -1063,8 +1069,8 @@ const ControlAction = {
 		// cycle until in lobby
 		while (getLocation() !== sdk.game.locations.Lobby) {
 			switch (getLocation()) {
-			case sdk.game.locations.CharSelect: // character select
-			case sdk.game.locations.CharSelectNoChars: // empty character select
+			case sdk.game.locations.CharSelect:
+			case sdk.game.locations.CharSelectNoChars:
 				// Create Character greyed out
 				if (Control_1.CharSelectCreate.disabled === 4) {
 					me.blockMouse = false;
@@ -1075,7 +1081,7 @@ const ControlAction = {
 				Control_1.CharSelectCreate.click();
 
 				break;
-			case sdk.game.locations.CharacterCreate: // select character
+			case sdk.game.locations.CharacterCreate:
 				switch (info.charClass) {
 				case "barbarian":
 					clickCoords = [400, 280];
@@ -1120,9 +1126,9 @@ const ControlAction = {
 				delay(500);
 
 				break;
-			case sdk.game.locations.NewCharSelected: // new character
+			case sdk.game.locations.NewCharSelected:
 				// hardcore char warning
-				if (Control_1.CharCreateHCWarningOk) {
+				if (Control_1.CharCreateHCWarningOk.control) {
 					Control_1.CharCreateHCWarningOk.click();
 				} else {
 					Control_1.CharCreateCharName.setText(info.charName);
@@ -1135,7 +1141,8 @@ const ControlAction = {
 				}
 
 				break;
-			case sdk.game.locations.OkCenteredErrorPopUp: // char name exists (text box 4, 268, 320, 264, 120)
+			case sdk.game.locations.OkCenteredErrorPopUp:
+				// char name exists (text box 4, 268, 320, 264, 120)
 				Control_1.OkCentered.click();
 				Control_1.CharSelectExit.click();
 
@@ -1188,7 +1195,7 @@ const ControlAction = {
 		// cycle until in lobby
 		while (getLocation() === sdk.game.locations.CharSelect) {
 			let count = 0;
-			let control = getControl(4, 37, 178, 200, 92);
+			let control = Control_1.CharSelectCharInfo0.control;
 
 			if (control) {
 				do {

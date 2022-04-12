@@ -304,13 +304,6 @@ function locationAction (location) {
 		}
 	case sdk.game.locations.Login:
 	case sdk.game.locations.SplashScreen:
-		// Single Player screen fix
-		if (getLocation() === sdk.game.locations.CharSelect && !getControl(4, 626, 100, 151, 44)) {
-			Control_1.CharSelectExit.click();
-
-			break;
-		}
-
 		// Multiple realm botting fix in case of R/D or disconnect
 		Starter.firstLogin && getLocation() === sdk.game.locations.Login && Control_1.CharSelectExit.click();
 
@@ -502,7 +495,7 @@ function locationAction (location) {
 		if (Profile().type !== 2) {
 			print("Stuck on select difficulty screen. Exiting to main menu.");
 			sendKey(0x1B);
-			if (getLocation() === sdk.game.locations.CharSelect && !getControl(4, 626, 100, 151, 44)) {
+			if (getLocation() === sdk.game.locations.CharSelect && !Control_1.CharSelectCurrentRealm.control) {
 				Control_1.CharSelectExit.click();
 			}
 		}
@@ -563,6 +556,12 @@ function locationAction (location) {
 		}
 	case sdk.game.locations.CharSelect: // Character Select
 		hideConsole(); // seems to fix odd crash with single-player characters if the console is open to type in
+		// Single Player screen fix
+		if (Profile().type !== 2 && !Control_1.CharSelectCurrentRealm.control) {
+			Control_1.CharSelectExit.click();
+
+			break;
+		}
 	case sdk.game.locations.CharSelectConnecting: // Character Select - Connecting
 	case sdk.game.locations.CharSelectNoChars: // Empty character screen
 		string = "";

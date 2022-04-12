@@ -256,7 +256,7 @@ function locationAction (location) {
 	case sdk.game.locations.CharSelect: // Character Select
 	case sdk.game.locations.SplashScreen: // D2 Splash
 		// Single Player screen fix
-		if (getLocation() === sdk.game.locations.CharSelect && !getControl(4, 626, 100, 151, 44)) {
+		if (getLocation() === sdk.game.locations.CharSelect && !Control_1.CharSelectCurrentRealm.control) {
 			Control_1.CharSelectExit.click();
 
 			break;

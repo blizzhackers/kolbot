@@ -760,14 +760,14 @@ function locationAction (location) {
 
 		// Single Player screen fix
 		// TODO: see if this is still needed. d2bs doesn't load scripts twice anymore
-		if (getLocation() === sdk.game.locations.CharSelect && !getControl(4, 626, 100, 151, 44)) {
+		if (getLocation() === sdk.game.locations.CharSelect && !Control_1.CharSelectCurrentRealm.control) {
 			Control_1.CharSelectExit.click();
 
 			break;
 		}
 
 		// Can't create character, button greyed out = high likelyhood of realm down
-		if (getLocation() === sdk.game.locations.CharSelectNoChars && getControl(6, 33, 528, 168, 60).disabled === 4) {
+		if (getLocation() === sdk.game.locations.CharSelectNoChars && Control_1.CharSelectCreate.disabled === 4) {
 			D2Bot.updateStatus("Realm Down");
 			delay(1000);
 

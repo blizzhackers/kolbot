@@ -424,7 +424,7 @@ function locationAction (location) {
 	case sdk.game.locations.CharSelectNoChars: // Empty character select screen
 		// Single Player screen fix
 		if (currAcc.toLowerCase() !== "singleplayer") {
-			if (getLocation() === sdk.game.locations.CharSelect && !getControl(4, 626, 100, 151, 44)) {
+			if (getLocation() === sdk.game.locations.CharSelect && !Control_1.CharSelectCurrentRealm.control) {
 				Control_1.CharSelectExit.click();
 
 				break;

@@ -73,7 +73,7 @@ function locationAction (location) {
 		}
 
 		// dead HC character
-		if (getControl(6, 533, 469, 120, 20) && getControl(6, 533, 469, 120, 20).disabled === 4) {
+		if (Control_1.CreateGameWindow.control && Control_1.CreateGameWindow.disabled === 4) {
 			Control_1.LobbyQuit.click(); // Quit from Lobby
 			break;
 		}
@@ -279,7 +279,7 @@ function locationAction (location) {
 		break;
 	case sdk.game.locations.CharSelect: // Character Select
 		// Single Player screen fix
-		if (getLocation() === sdk.game.locations.CharSelect && !getControl(4, 626, 100, 151, 44)) {
+		if (getLocation() === sdk.game.locations.CharSelect && !Control_1.CharSelectCurrentRealm.control) {
 			Control_1.CharSelectExit.click();
 
 			break;

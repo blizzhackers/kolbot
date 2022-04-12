@@ -109,6 +109,7 @@
 	Control.CharSelectCharInfo0 = new Control(4, 37, 178, 200, 92);
 	Control.CharSelectChar4 = new Control(4, 237, 364, 72, 93);
 	Control.CharSelectChar6 = new Control(4, 237, 457, 72, 93);
+	Control.CharSelectCurrentRealm = new Control(4, 626, 100, 151, 44);
 
 	Control.CharCreateCharName = new Control(1, 318, 510, 157, 16);
 	Control.CharCreateExpansion = new Control(6, 319, 540, 15, 16);
