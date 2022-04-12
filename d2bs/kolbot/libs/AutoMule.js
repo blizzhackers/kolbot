@@ -76,30 +76,24 @@ const AutoMule = {
 
 	// *** Master functions ***
 	getInfo: function () {
-		let i, j, info;
+		let info;
 
-		for (i in this.Mules) {
+		for (let i in this.Mules) {
 			if (this.Mules.hasOwnProperty(i)) {
-				for (j = 0; j < this.Mules[i].enabledProfiles.length; j += 1) {
+				for (let j = 0; j < this.Mules[i].enabledProfiles.length; j += 1) {
 					if (this.Mules[i].enabledProfiles[j].toLowerCase() === me.profile.toLowerCase()) {
-						if (!info) {
-							info = {};
-						}
-
+						!info && (info = {});
 						info.muleInfo = this.Mules[i];
 					}
 				}
 			}
 		}
 
-		for (i in this.TorchAnniMules) {
+		for (let i in this.TorchAnniMules) {
 			if (this.TorchAnniMules.hasOwnProperty(i)) {
-				for (j = 0; j < this.TorchAnniMules[i].enabledProfiles.length; j += 1) {
+				for (let j = 0; j < this.TorchAnniMules[i].enabledProfiles.length; j += 1) {
 					if (this.TorchAnniMules[i].enabledProfiles[j].toLowerCase() === me.profile.toLowerCase()) {
-						if (!info) {
-							info = {};
-						}
-
+						!info && (info = {});
 						info.torchMuleInfo = this.TorchAnniMules[i];
 					}
 				}
@@ -110,11 +104,10 @@ const AutoMule = {
 	},
 
 	muleCheck: function () {
-		let i, items,
-			info = this.getInfo();
+		let info = this.getInfo();
 
 		if (info && info.hasOwnProperty("muleInfo")) {
-			items = this.getMuleItems();
+			let items = this.getMuleItems();
 
 			if (info.muleInfo.hasOwnProperty("usedStashTrigger") && info.muleInfo.hasOwnProperty("usedInventoryTrigger") &&
 					Storage.Inventory.UsedSpacePercent() >= info.muleInfo.usedInventoryTrigger && Storage.Stash.UsedSpacePercent() >= info.muleInfo.usedStashTrigger &&
@@ -124,7 +117,7 @@ const AutoMule = {
 				return true;
 			}
 
-			for (i = 0; i < items.length; i += 1) {
+			for (let i = 0; i < items.length; i += 1) {
 				if (this.matchItem(items[i], Config.AutoMule.Trigger)) {
 					D2Bot.printToConsole("MuleCheck triggered!", 7);
 					return true;
@@ -139,42 +132,30 @@ const AutoMule = {
 		let info = this.getInfo();
 
 		if (info) {
-			if (this.check && info.hasOwnProperty("muleInfo")) {
-				return info.muleInfo;
-			}
-
-			if (this.torchAnniCheck && info.hasOwnProperty("torchMuleInfo")) {
-				return info.torchMuleInfo;
-			}
+			if (this.check && info.hasOwnProperty("muleInfo")) return info.muleInfo;
+			if (this.torchAnniCheck && info.hasOwnProperty("torchMuleInfo")) return info.torchMuleInfo;
 		}
 
 		return false;
 	},
 
 	outOfGameCheck: function () {
-		if (!this.check && !this.torchAnniCheck) {
-			return false;
-		}
+		if (!this.check && !this.torchAnniCheck) return false;
 
-		let i, control, muleObj,
-			stopCheck = false,
+		let stopCheck = false,
 			muleInfo = {status: ""},
 			failCount = 0;
 
-		muleObj = this.getMule();
+		let muleObj = this.getMule();
 
-		if (!muleObj) {
-			return false;
-		}
+		if (!muleObj) return false;
 
-		function MuleCheckEvent(mode, msg) {
-			if (mode === 10) {
-				muleInfo = JSON.parse(msg);
-			}
+		function muleCheckEvent(mode, msg) {
+			mode === 10 && (muleInfo = JSON.parse(msg));
 		}
 
 		if (!muleObj.continuousMule || !muleObj.skipMuleResponse) {
-			addEventListener("copydata", MuleCheckEvent);
+			addEventListener("copydata", muleCheckEvent);
 		}
 
 		if (muleObj.continuousMule) {
@@ -221,7 +202,7 @@ const AutoMule = {
 
 				break MainLoop;
 			case "ready":
-				control = getControl(6, 652, 469, 120, 20);
+				let control = getControl(6, 652, 469, 120, 20);
 
 				if (control) {
 					delay(200);
@@ -242,7 +223,7 @@ const AutoMule = {
 				me.blockMouse = false;
 
 				// Untested change 11.Feb.14.
-				for (i = 0; i < 8; i += 1) {
+				for (let i = 0; i < 8; i += 1) {
 					delay(1000);
 
 					if (me.ingame && me.gameReady) {
@@ -271,7 +252,7 @@ const AutoMule = {
 		}
 
 		if (!muleObj.continuousMule || !muleObj.skipMuleResponse) {
-			removeEventListener("copydata", MuleCheckEvent);
+			removeEventListener("copydata", muleCheckEvent);
 		}
 
 		while (me.ingame) {
@@ -298,22 +279,18 @@ const AutoMule = {
 	},
 
 	inGameCheck: function () {
-		let muleObj, tick, info,
+		let muleObj, tick,
 			begin = false,
 			timeout = 150 * 1000, // Ingame mule timeout
 			status = "muling";
 
 		// Single player
-		if (!me.gamename) {
-			return false;
-		}
+		if (!me.gamename) return false;
 
-		info = this.getInfo();
+		let info = this.getInfo();
 
 		// Profile is not a part of AutoMule
-		if (!info) {
-			return false;
-		}
+		if (!info) return false;
 
 		// Profile is not in mule or torch mule game
 		if (!((info.hasOwnProperty("muleInfo") && me.gamename.toLowerCase() === info.muleInfo.muleGameName[0].toLowerCase()) ||
@@ -321,7 +298,7 @@ const AutoMule = {
 			return false;
 		}
 
-		function DropStatusEvent(mode, msg) {
+		function dropStatusEvent (mode, msg) {
 			if (mode === 10) {
 				switch (JSON.parse(msg).status) {
 				case "report": // reply to status request
@@ -336,7 +313,7 @@ const AutoMule = {
 			}
 		}
 
-		function MuleModeEvent(msg) {
+		function muleModeEvent (msg) {
 			switch (msg) {
 			case "2":
 				AutoMule.torchAnniCheck = 2;
@@ -353,7 +330,7 @@ const AutoMule = {
 			}
 		}
 
-		addEventListener("scriptmsg", MuleModeEvent);
+		addEventListener("scriptmsg", muleModeEvent);
 		scriptBroadcast("getMuleMode");
 		delay(500);
 
@@ -367,9 +344,7 @@ const AutoMule = {
 		muleObj = this.getMule();
 		me.maxgametime = 0;
 
-		if (!muleObj.continuousMule) {
-			addEventListener("copydata", DropStatusEvent);
-		}
+		!muleObj.continuousMule && addEventListener("copydata", dropStatusEvent);
 
 		if (!Town.goToTown(1)) {
 			print("Error - Failed to go to Act 1");
@@ -447,19 +422,13 @@ const AutoMule = {
 		}
 
 		if (!muleObj.continuousMule) {
-			removeEventListener("copydata", DropStatusEvent);
+			removeEventListener("copydata", dropStatusEvent);
 			D2Bot.stop(muleObj.muleProfile, true);
 			delay(1000);
-
-			if (muleObj.stopProfile) {
-				D2Bot.start(muleObj.stopProfile);
-			}
+			muleObj.stopProfile && D2Bot.start(muleObj.stopProfile);
 		}
 
-		if (getScript("AnniStarter.dbj")) {
-			scriptBroadcast("exit");
-		}
-
+		getScript("AnniStarter.dbj") && scriptBroadcast("exit");
 		delay(2000);
 		quit();
 
@@ -472,7 +441,8 @@ const AutoMule = {
 
 		if (item) {
 			do {
-				if (getDistance(me, item) < 20 && [3, 5].indexOf(item.mode) > -1 && Town.ignoredItemTypes.indexOf(item.itemType) === -1) { // exclude trash
+				// exclude trash
+				if (getDistance(me, item) < 20 && [3, 5].includes(item.mode) && Town.ignoredItemTypes.indexOf(item.itemType) === -1) {
 					return false;
 				}
 			} while (item.getNext());
@@ -483,13 +453,11 @@ const AutoMule = {
 
 	// make sure mule character is in game
 	verifyMulePrefix: function (mulePrefix) {
-		let player, regex;
-
 		try {
-			player = getParty();
+			let player = getParty();
 
 			if (player) {
-				regex = new RegExp(mulePrefix, "i");
+				let regex = new RegExp(mulePrefix, "i");
 
 				do {
 					// case insensitive matching
@@ -506,20 +474,15 @@ const AutoMule = {
 	},
 
 	dropStuff: function () {
-		if (!Town.openStash()) {
-			return false;
-		}
+		if (!Town.openStash()) return false;
 
-		let i,
-			items = this.getMuleItems();
+		let items = (this.getMuleItems() || []);
 
-		if (!items || items.length === 0) {
-			return false;
-		}
+		if (items.length === 0) return false;
 
 		D2Bot.printToConsole("AutoMule: Transfering items.", 7);
 
-		for (i = 0; i < items.length; i += 1) {
+		for (let i = 0; i < items.length; i += 1) {
 			items[i].drop();
 		}
 
@@ -530,40 +493,37 @@ const AutoMule = {
 	},
 
 	matchItem: function (item, list) {
-		let i, info, parsedLine,
-			parsedPickit = [], classIDs = [];
+		let parsedPickit = [], classIDs = [];
 
-		for (i = 0; i < list.length; i += 1) {
-			info = {
+		for (let i = 0; i < list.length; i += 1) {
+			let info = {
 				file: "Character Config",
 				line: list[i]
 			};
 
-			if (typeof list[i] === "number") { // classids
+			// classids
+			if (typeof list[i] === "number") {
 				classIDs.push(list[i]);
-			} else if (typeof list[i] === "string") { // pickit entries
-				parsedLine = NTIP.ParseLineInt(list[i], info);
-
-				if (parsedLine) {
-					parsedPickit.push(parsedLine);
-				}
+			} else if (typeof list[i] === "string") {
+				// pickit entries
+				let parsedLine = NTIP.ParseLineInt(list[i], info);
+				parsedLine && parsedPickit.push(parsedLine);
 			}
 		}
 
-		return (classIDs.indexOf(item.classid) > -1 || NTIP.CheckItem(item, parsedPickit));
+		return (classIDs.includes(item.classid) || NTIP.CheckItem(item, parsedPickit));
 	},
 
 	// get a list of items to mule
 	getMuleItems: function () {
-		let item, items,
-			info = this.getInfo();
+		let info = this.getInfo();
 
 		if (!info || !info.hasOwnProperty("muleInfo")) {
 			return false;
 		}
 
-		item = me.getItem(-1, 0);
-		items = [];
+		let item = me.getItem(-1, 0);
+		let items = [];
 
 		if (item) {
 			do {
@@ -586,11 +546,13 @@ const AutoMule = {
 	},
 
 	utilityIngredient: function (item) {
-		return CraftingSystem.validGids.indexOf(item.gid) > -1;
+		return (!!item && CraftingSystem.validGids.includes(item.gid));
 	},
 
 	// check if an item is a cubing ingredient
 	cubingIngredient: function (item) {
+		if (!item) return false;
+
 		for (let i = 0; i < Cubing.validIngredients.length; i += 1) {
 			if (item.gid === Cubing.validIngredients[i].gid) {
 				return true;
@@ -602,33 +564,23 @@ const AutoMule = {
 
 	// check if an item is a runeword ingrediend - rune, empty base or bad rolled base
 	runewordIngredient: function (item) {
-		if (Runewords.validGids.indexOf(item.gid) > -1) {
-			return true;
-		}
+		if (!item) return false;
+		if (Runewords.validGids.includes(item.gid)) return true;
 
 		if (!this.baseGids) {
 			this.baseGids = [];
 
 			for (let i = 0; i < Config.Runewords.length; i += 1) {
 				let base = Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0)) || Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0), true);
-
-				if (base) {
-					this.baseGids.push(base.gid);
-				}
+				base && this.baseGids.push(base.gid);
 			}
 		}
 
-		if (this.baseGids.indexOf(item.gid) > -1) {
-			return true;
-		}
-
-		return false;
+		return this.baseGids.includes(item.gid);
 	},
 
 	dropCharm: function (dropAnni) {
-		if (!Town.openStash()) {
-			return false;
-		}
+		if (!Town.openStash()) return false;
 
 		if (dropAnni) {
 			let item = me.findItem(603, 0, -1, 7);
@@ -645,7 +597,7 @@ const AutoMule = {
 			return false;
 		}
 
-		item = me.findItem(604, 0, -1, 7);
+		let item = me.findItem(604, 0, -1, 7);
 
 		if (item) {
 			D2Bot.printToConsole("AutoMule: Transfering Torch.", 7);
@@ -663,15 +615,13 @@ const AutoMule = {
 
 	// *** Mule functions ***
 	getMaster: function (info) {
-		let i, j, k, muleObj;
+		let muleObj = info.mode === 1 ? this.TorchAnniMules : this.Mules;
 
-		muleObj = info.mode === 1 ? this.TorchAnniMules : this.Mules;
-
-		for (i in muleObj) {
+		for (let i in muleObj) {
 			if (muleObj.hasOwnProperty(i)) {
-				for (j in muleObj[i]) {
+				for (let j in muleObj[i]) {
 					if (muleObj[i].hasOwnProperty(j) && j === "enabledProfiles") {
-						for (k = 0; k < muleObj[i][j].length; k += 1) {
+						for (let k = 0; k < muleObj[i][j].length; k += 1) {
 							if (muleObj[i][j][k].toLowerCase() === info.profile.toLowerCase()) {
 								return {
 									profile: muleObj[i][j][k],
@@ -688,15 +638,13 @@ const AutoMule = {
 	},
 
 	getMuleObject: function (mode, master, continuous = false) {
-		let i, mule;
-
 		mode = mode || 0;
-		mule = mode > 0 ? this.TorchAnniMules : this.Mules;
+		let mule = mode > 0 ? this.TorchAnniMules : this.Mules;
 
-		for (i in mule) {
+		for (let i in mule) {
 			if (mule.hasOwnProperty(i)) {
 				if (mule[i].muleProfile && mule[i].enabledProfiles &&
-						mule[i].muleProfile.toLowerCase() === me.profile.toLowerCase() && (continuous || mule[i].enabledProfiles.indexOf(master) > -1)) {
+						mule[i].muleProfile.toLowerCase() === me.profile.toLowerCase() && (continuous || mule[i].enabledProfiles.includes(master))) {
 					return mule[i];
 				}
 			}
@@ -706,23 +654,22 @@ const AutoMule = {
 	},
 
 	getMuleFilename: function (mode, master, continuous = false) {
-		let i, mule, jsonObj, jsonStr, file;
-
 		mode = mode || 0;
-		mule = mode > 0 ? this.TorchAnniMules : this.Mules;
+		let mule = mode > 0 ? this.TorchAnniMules : this.Mules;
+		let file;
 
 		// Iterate through mule object
-		for (i in mule) {
+		for (let i in mule) {
 			if (mule.hasOwnProperty(i)) {
 				// Mule profile matches config
-				if (mule[i].muleProfile && mule[i].muleProfile.toLowerCase() === me.profile.toLowerCase() && (continuous || mule[i].enabledProfiles.indexOf(master) > -1)) {
+				if (mule[i].muleProfile && mule[i].muleProfile.toLowerCase() === me.profile.toLowerCase() && (continuous || mule[i].enabledProfiles.includes(master))) {
 					file = mode === 0 ? "logs/AutoMule." + i + ".json" : "logs/TorchMule." + i + ".json";
 					
 					// If file exists check for valid info
 					if (FileTools.exists(file)) {
 						try {
-							jsonStr = FileTools.readText(file);
-							jsonObj = JSON.parse(jsonStr);
+							let jsonStr = FileTools.readText(file);
+							let jsonObj = JSON.parse(jsonStr);
 
 							// Return filename containing correct mule info
 							if (mule[i].accountPrefix && jsonObj.account && jsonObj.account.match(mule[i].accountPrefix)) {
@@ -745,9 +692,7 @@ const AutoMule = {
 	},
 
 	getMuleMode: function() {
-		let i;
-
-		for (i in this.Mules) {
+		for (let i in this.Mules) {
 			if (this.Mules.hasOwnProperty(i)) {
 				if (this.Mules[i].muleProfile && this.Mules[i].muleProfile.toLowerCase() === me.profile.toLowerCase()) {
 					return 0;
@@ -755,7 +700,7 @@ const AutoMule = {
 			}
 		}
 		
-		for (i in this.TorchAnniMules) {
+		for (let i in this.TorchAnniMules) {
 			if (this.TorchAnniMules.hasOwnProperty(i)) {
 				if (this.TorchAnniMules[i].muleProfile && this.TorchAnniMules[i].muleProfile.toLowerCase() === me.profile.toLowerCase()) {
 					return 1;
@@ -767,9 +712,7 @@ const AutoMule = {
 	},
 
 	isContinousMule: function () {
-		let i;
-
-		for (i in this.Mules) {
+		for (let i in this.Mules) {
 			if (this.Mules.hasOwnProperty(i)) {
 				if (this.Mules[i].muleProfile && this.Mules[i].muleProfile.toLowerCase() === me.profile.toLowerCase()) {
 					return this.Mules[i].continuousMule;
@@ -777,7 +720,7 @@ const AutoMule = {
 			}
 		}
 		
-		for (i in this.TorchAnniMules) {
+		for (let i in this.TorchAnniMules) {
 			if (this.TorchAnniMules.hasOwnProperty(i)) {
 				if (this.TorchAnniMules[i].muleProfile && this.TorchAnniMules[i].muleProfile.toLowerCase() === me.profile.toLowerCase()) {
 					return this.TorchAnniMules[i].continuousMule;
