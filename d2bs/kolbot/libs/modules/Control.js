@@ -20,7 +20,7 @@
 
 		return new Proxy(this, {
 			get: function (target, p) {
-				const passtroughFunc = ['click', 'setText', 'getText'];
+				const passthroughFunc = ['click', 'setText', 'getText'];
 
 				if (p === 'valueOf') {
 					return target;
@@ -32,7 +32,7 @@
 				}
 
 				// Relay on old ControlAction functions
-				if (passtroughFunc.indexOf(p) !== -1) {
+				if (passthroughFunc.indexOf(p) !== -1) {
 					return (...args) => ControlAction[p].apply(ControlAction, [target.type, target.x, target.y, target.xsize, target.ysize].concat(args));
 				}
 
@@ -106,6 +106,9 @@
 	Control.CharSelectDelete = new Control(6, 433, 528, 168, 60);
 	Control.CharDeleteYes = new Control(6, 421, 337, 96, 32);
 	Control.CharSelectError = new Control(4, 45, 318, 531, 140);
+	Control.CharSelectCharInfo0 = new Control(4, 37, 178, 200, 92);
+	Control.CharSelectChar4 = new Control(4, 237, 364, 72, 93);
+	Control.CharSelectChar6 = new Control(4, 237, 457, 72, 93);
 
 	Control.CharCreateCharName = new Control(1, 318, 510, 157, 16);
 	Control.CharCreateExpansion = new Control(6, 319, 540, 15, 16);
@@ -148,7 +151,6 @@
 	Control.LobbyChat = new Control(4, 28, 410, 354, 298);
 	Control.LobbyServerDown = new Control(4, 438, 300, 326, 150);
 
-	Control.Char4 = new Control(4, 237, 457, 72, 93);
 
 	Control.OkCentered = new Control(6, 351, 337, 96, 32);
 	Control.HellSP = new Control(-1, 264, 383, 272, 35);
