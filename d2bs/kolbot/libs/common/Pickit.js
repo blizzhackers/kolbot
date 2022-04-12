@@ -81,8 +81,7 @@ const Pickit = {
 	},
 
 	pickItems: function (range = Config.PickRange) {
-		let status, item, canFit,
-			needMule = false,
+		let needMule = false,
 			pickList = [];
 
 		Town.clearBelt();
@@ -93,7 +92,7 @@ const Pickit = {
 			delay(40);
 		}
 
-		item = getUnit(4);
+		let item = getUnit(4);
 
 		if (item) {
 			do {
@@ -113,11 +112,11 @@ const Pickit = {
 			if (copyUnit(pickList[0]).x !== undefined && (pickList[0].mode === 3 || pickList[0].mode === 5)
 					&& (Pather.useTeleport() || me.inTown || !checkCollision(me, pickList[0], 0x1))) {
 				// Check if the item should be picked
-				status = this.checkItem(pickList[0]);
+				let status = this.checkItem(pickList[0]);
 
 				if (status.result && this.canPick(pickList[0])) {
 					// Override canFit for scrolls, potions and gold
-					canFit = Storage.Inventory.CanFit(pickList[0]) || [4, 22, 76, 77, 78].indexOf(pickList[0].itemType) > -1;
+					let canFit = Storage.Inventory.CanFit(pickList[0]) || [4, 22, 76, 77, 78].includes(pickList[0].itemType);
 
 					// Field id when our used space is above a certain percent or if we are full try to make room with FieldID
 					if (Config.FieldID.Enabled && (!canFit || Storage.Inventory.UsedSpacePercent() > Config.FieldID.UsedSpace)) {
@@ -170,15 +169,12 @@ const Pickit = {
 
 	// Check if we can even free up the inventory
 	canMakeRoom: function () {
-		if (!Config.MakeRoom) {
-			return false;
-		}
+		if (!Config.MakeRoom) return false;
 
-		let i,
-			items = Storage.Inventory.Compare(Config.Inventory);
+		let items = Storage.Inventory.Compare(Config.Inventory);
 
 		if (items) {
-			for (i = 0; i < items.length; i += 1) {
+			for (let i = 0; i < items.length; i += 1) {
 				switch (this.checkItem(items[i]).result) {
 				case -1: // Item needs to be identified
 					// For low level chars that can't actually get id scrolls -> prevent an infinite loop
@@ -203,7 +199,7 @@ const Pickit = {
 	},
 
 	pickItem: function (unit, status, keptLine, retry = 3) {
-		function ItemStats(unit) {
+		function ItemStats (unit) {
 			this.ilvl = unit.ilvl;
 			this.type = unit.itemType;
 			this.classid = unit.classid;
@@ -215,20 +211,17 @@ const Pickit = {
 			this.picked = false;
 		}
 
-		let i, item, tick, gid, stats,
+		let gid = (unit.gid || -1),
 			cancelFlags = [0x01, 0x08, 0x14, 0x0c, 0x19, 0x1a],
 			itemCount = me.itemcount;
 
-		if (unit.gid) {
-			gid = unit.gid;
-			item = getUnit(4, -1, -1, gid);
-		}
+		let item = gid > -1 ? getUnit(4, -1, -1, gid) : false;
 
 		if (!item) {
 			return false;
 		}
 
-		for (i = 0; i < cancelFlags.length; i += 1) {
+		for (let i = 0; i < cancelFlags.length; i += 1) {
 			if (getUIFlag(cancelFlags[i])) {
 				delay(500);
 				me.cancel(0);
@@ -237,12 +230,12 @@ const Pickit = {
 			}
 		}
 
-		stats = new ItemStats(item);
+		let stats = new ItemStats(item);
 
 		MainLoop:
-		for (i = 0; i < retry; i += 1) {
+		for (let i = 0; i < retry; i += 1) {
 			if (!getUnit(4, -1, -1, gid)) {
-				break MainLoop;
+				break;
 			}
 
 			if (me.dead) return false;
@@ -252,7 +245,7 @@ const Pickit = {
 			}
 
 			if (item.mode !== 3 && item.mode !== 5) {
-				break MainLoop;
+				break;
 			}
 
 			if (stats.useTk) {
@@ -266,14 +259,14 @@ const Pickit = {
 					if (Pather.useTeleport()) {
 						Pather.moveToUnit(item);
 					} else if (!Pather.moveTo(item.x, item.y, 0)) {
-						continue MainLoop;
+						continue;
 					}
 				}
 
 				Config.FastPick ? sendPacket(1, 0x16, 4, 0x4, 4, item.gid, 4, 0) : Misc.click(0, 0, item);
 			}
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 1000) {
 				item = copyUnit(item);
@@ -416,7 +409,8 @@ const Pickit = {
 
 		switch (unit.itemType) {
 		case 4: // Gold
-			if (me.getStat(14) === me.getStat(12) * 10000) { // Check current gold vs max capacity (cLvl*10000)
+			// Check current gold vs max capacity (cLvl*10000)
+			if (me.getStat(14) === me.getStat(12) * 10000) {
 				return false; // Skip gold if full
 			}
 
@@ -426,7 +420,8 @@ const Pickit = {
 
 			if (tome) {
 				do {
-					if (tome.location === 3 && tome.getStat(70) === 20) { // In inventory, contains 20 scrolls
+					// In inventory, contains 20 scrolls
+					if (tome.location === 3 && tome.getStat(70) === 20) {
 						return false; // Skip a scroll if its tome is full
 					}
 				} while (tome.getNext());
@@ -436,7 +431,7 @@ const Pickit = {
 
 			break;
 		case 41: // Key (new 26.1.2013)
-			if (me.classid === 6) { // Assassins don't ever need keys
+			if (me.assassin) { // Assassins don't ever need keys
 				return false;
 			}
 
@@ -594,11 +589,10 @@ const Pickit = {
 	},
 
 	fastPick: function (retry = 3) {
-		let item, gid, status,
-			itemList = [];
+		let item, itemList = [];
 
 		while (this.gidList.length > 0) {
-			gid = this.gidList.shift();
+			let gid = this.gidList.shift();
 			item = getUnit(4, -1, -1, gid);
 
 			if (item && (item.mode === 3 || item.mode === 5) && (Town.ignoredItemTypes.indexOf(item.itemType) === -1 || (item.itemType >= 76 && item.itemType <= 78)) && item.itemType !== 4 && getDistance(me, item) <= Config.PickRange) {
@@ -608,19 +602,25 @@ const Pickit = {
 
 		while (itemList.length > 0) {
 			itemList.sort(this.sortFastPickItems);
-
 			item = copyUnit(itemList.shift());
 
 			// Check if the item unit is still valid
 			if (item.x !== undefined) {
-				status = this.checkItem(item);
+				let status = this.checkItem(item);
 
-				if (status.result && this.canPick(item) && (Storage.Inventory.CanFit(item) || [4, 22, 76, 77, 78].indexOf(item.itemType) > -1)) {
+				if (status.result && this.canPick(item) && (Storage.Inventory.CanFit(item) || [4, 22, 76, 77, 78].includes(item.itemType))) {
 					this.pickItem(item, status.result, status.line, retry);
 				}
 			}
 		}
 
 		return true;
+	},
+
+	// eslint-disable-next-line no-unused-vars
+	itemEvent: function (gid, mode, code, global) {
+		if (gid > 0 && mode === 0) {
+			Pickit.gidList.push(gid);
+		}
 	}
 };
