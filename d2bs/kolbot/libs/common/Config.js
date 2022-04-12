@@ -351,6 +351,9 @@ let Config = {
 		MakeCows: false,
 		KillKing: false
 	},
+	Tombs: {
+		KillDuriel: false,
+	},
 	Eldritch: {
 		OpenChest: false,
 		KillSharptooth: false,
@@ -525,7 +528,10 @@ let Config = {
 		UseSalvation: false,
 		GetFade: false,
 		MakeTorch: true,
-		AntidotesToChug: 0
+		PreGame: {
+			Thawing: {Drink: 0, At: []},
+			Antidote: {Drink: 0, At: []},
+		}
 	},
 	Synch: {
 		WaitFor: []

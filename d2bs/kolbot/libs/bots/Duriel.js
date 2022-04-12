@@ -6,28 +6,17 @@
 
 function Duriel () {
 	this.killDuriel = function () {
-		let i, target;
-
-		for (i = 0; i < 3; i += 1) {
-			target = getUnit(1, 211);
-
-			if (target) {
-				break;
-			}
-
-			delay(500);
-		}
+		let target = Misc.poll(() => getUnit(sdk.unittype.Monster, sdk.monsters.Duriel), 1000, 200);
 
 		if (!target) {
 			throw new Error("Duriel not found.");
 		}
 
-		if (Config.MFLeader) {
-			Pather.makePortal();
+		if (Config.MFLeader && Pather.makePortal()) {
 			say("kill " + 211);
 		}
 
-		for (i = 0; i < 300; i += 1) {
+		for (let i = 0; i < 300; i += 1) {
 			ClassAttack.doAttack(target);
 
 			if (target.dead) {
@@ -41,8 +30,6 @@ function Duriel () {
 
 		return target.dead;
 	};
-
-	let i, unit;
 
 	if (me.area !== 46) {
 		Town.doChores();
@@ -59,47 +46,33 @@ function Duriel () {
 		throw new Error("Failed to move to Orifice");
 	}
 
-	for (i = 0; i < 10; i += 1) {
-		if (getUnit(2, 100)) {
-			break;
-		}
-
-		delay(500);
-	}
-
-	if (me.gametype === 1 && me.classid !== 1) {
+	if (me.hardcore && !me.sorceress) {
 		Attack.clear(5);
 	}
 
-	unit = getUnit(2, 100);
+	let unit = getUnit(2, 100);
 
-	if (unit) {
-		for (i = 0; i < 3; i += 1) {
-			if (me.area === unit.area) {
-				Skill.cast(43, 0, unit);
-			}
+	if (Skill.useTK(unit)) {
+		Misc.poll(function () {
+			Skill.cast(sdk.skills.Telekinesis, 0, unit);
 
-			if (me.area === 73) {
-				break;
+			while (!me.gameReady) {
+				delay(100);
 			}
-		}
+			return me.area === sdk.areas.DurielsLair;
+		}, 1000, 200);
 	}
 
-	if (me.area !== 73 && !Pather.useUnit(2, 100, 73)) {
+	if (me.area !== sdk.areas.DurielsLair && !Pather.useUnit(2, 100, 73)) {
 		Attack.clear(10);
 		Pather.useUnit(2, 100, 73);
 	}
 
-	if (me.area !== 73) {
+	if (me.area !== sdk.areas.DurielsLair) {
 		throw new Error("Failed to move to Duriel");
 	}
 
-	if (me.classid === 1 && me.gametype === 0) {
-		this.killDuriel();
-	} else {
-		Attack.kill(211); // Duriel
-	}
-
+	me.sorceress && me.classic ? this.killDuriel() : Attack.kill(sdk.monsters.Duriel);
 	Pickit.pickItems();
 
 	return true;

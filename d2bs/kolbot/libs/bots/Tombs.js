@@ -1,29 +1,32 @@
 /**
 *	@filename	Tombs.js
-*	@author		kolton
-*	@desc		clear Tal Rasha's Tombs
+*	@author		kolton, theBGuy
+*	@desc		clear Tal Rasha's Tombs, optional kill duriel as well
 */
 
 function Tombs() {
-	let i;
-
 	Town.doChores();
 	Pather.useWaypoint(46);
 	Precast.doPrecast(true);
 
-	for (i = 66; i <= 72; i += 1) {
-		if (!Pather.moveToExit(i, true)) {
-			throw new Error("Failed to move to tomb");
-		}
-
-		Attack.clearLevel(Config.ClearType);
-
-		if (i === 69) {
-			Precast.doPrecast(true);
-		}
-
-		if (!Pather.moveToExit(46, true)) {
-			throw new Error("Failed to move to Canyon");
+	for (let i = 66; i <= 72; i += 1) {
+		try {
+			if (!Pather.journeyTo(i, true)) {
+				throw new Error("Failed to move to tomb");
+			}
+	
+			Attack.clearLevel(Config.ClearType);
+	
+			if (Config.Tombs.KillDuriel && me.area === getRoom().correcttomb) {
+				Pather.journeyTo(sdk.areas.DurielsLair) && Attack.kill(sdk.monsters.Duriel);
+				Pather.journeyTo(sdk.areas.CanyonofMagic);
+			}
+	
+			if (!Pather.moveToExit(46, true)) {
+				throw new Error("Failed to move to Canyon");
+			}
+		} catch (e) {
+			console.warn(e);
 		}
 	}
 

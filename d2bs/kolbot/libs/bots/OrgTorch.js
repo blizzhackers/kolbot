@@ -1,6 +1,6 @@
 /**
 *	@filename	OrgTorch.js
-*	@author		kolton
+*	@author		kolton, theBGuy
 *	@desc		Convert keys to organs and organs to torches. It can work with TorchSystem to get keys from other characters
 *	@notes		Search for the word "Start" and follow the comments if you want to know what this script does and when.
 */
@@ -10,30 +10,24 @@ function OrgTorch() {
 
 	// Identify & mule
 	this.checkTorch = function () {
-		if (me.area === 136) {
+		if (me.area === sdk.areas.UberTristram) {
 			Pather.moveTo(25105, 5140);
-			Pather.usePortal(109);
+			Pather.usePortal(sdk.areas.Harrogath);
 		}
 
 		Town.doChores();
 
-		if (!Config.OrgTorch.MakeTorch) {
-			return false;
-		}
+		if (!Config.OrgTorch.MakeTorch) return false;
 
-		let item = me.getItem("cm2");
+		let torch = me.checkItem({name: sdk.locale.items.HellfireTorch});
 
-		if (item) {
-			do {
-				if (item.quality === 7 && Pickit.checkItem(item).result === 1) {
-					if (AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
-						scriptBroadcast("muleTorch");
-						scriptBroadcast("quit");
-					}
+		if (torch.have && Pickit.checkItem(torch.item).result === 1) {
+			if (AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
+				scriptBroadcast("muleTorch");
+				scriptBroadcast("quit");
+			}
 
-					return true;
-				}
-			} while (item.getNext());
+			return true;
 		}
 
 		return false;
@@ -56,11 +50,10 @@ function OrgTorch() {
 
 	// Try to lure a monster - wait until it's close enough
 	this.lure = function (bossId) {
-		let tick,
-			unit = getUnit(1, bossId);
+		let unit = getUnit(1, bossId);
 
 		if (unit) {
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 2000) {
 				if (getDistance(me, unit) <= 10) {
@@ -92,24 +85,25 @@ function OrgTorch() {
 		return horns.length === brains.length && horns.length === eyes.length && brains.length === eyes.length;
 	};
 
-	// Get fade in River of Flames
+	// Get fade in River of Flames - only works if we are wearing an item with ctc Fade
 	this.getFade = function () {
-		if (Config.OrgTorch.GetFade && me.classid === 3) {
-			if (!me.getState(159)) {
-				print("Getting Fade");
-				Pather.useWaypoint(107);
+		if (Config.OrgTorch.GetFade && !me.getState(sdk.states.Fade)
+			&& (me.checkItem({name: sdk.locale.items.Treachery, equipped: true}).have
+			|| me.checkItem({name: sdk.locale.items.LastWish, equipped: true}).have
+			|| me.checkItem({name: sdk.locale.items.SpiritWard, equipped: true}).have)) {
+			if (!me.getState(sdk.states.Fade)) {
+				console.log(sdk.colors.Orange + "OrgTorch :: " + sdk.colors.White + "Getting Fade");
+				Pather.useWaypoint(sdk.states.RiverofFlame);
 				Precast.doPrecast(true);
 				Pather.moveTo(7811, 5872);
 
-				if (me.classid === 3 && me.getSkill(125, 1)) {
-					Skill.setSkill(125, 0);
-				}
+				me.paladin && me.getSkill(sdk.skills.Salvation, 1) && Skill.setSkill(sdk.skills.Salvation, 0);
 
-				while (!me.getState(159)) {
+				while (!me.getState(sdk.states.Fade)) {
 					delay(100);
 				}
 
-				print("Fade Achieved.");
+				console.log(sdk.colors.Orange + "OrgTorch :: " + sdk.colors.Green + "Fade Achieved");
 			}
 		}
 
@@ -144,7 +138,7 @@ function OrgTorch() {
 				do {
 					switch (mode) {
 					case 0:
-						if ([133, 134, 135].indexOf(portal.objtype) > -1 && this.doneAreas.indexOf(portal.objtype) === -1) {
+						if ([133, 134, 135].includes(portal.objtype) && this.doneAreas.indexOf(portal.objtype) === -1) {
 							this.doneAreas.push(portal.objtype);
 
 							return copyUnit(portal);
@@ -279,7 +273,7 @@ function OrgTorch() {
 	};
 
 	// Start
-	let i, portal, tkeys, hkeys, dkeys, brains, eyes, horns, timer, farmer, busy, busyTick, chugs,
+	let i, portal, tkeys, hkeys, dkeys, brains, eyes, horns, timer, farmer, busy, busyTick,
 		neededItems = {pk1: 0, pk2: 0, pk3: 0, rv: 0};
 
 	// Do town chores and quit if MakeTorch is true and we have a torch.
@@ -421,18 +415,13 @@ function OrgTorch() {
 			portal = this.openPortal(0);
 
 			if (portal) {
-				if (portal.objtype === 133 && Config.OrgTorch.AntidotesToChug) {
-					Town.buyPots(Config.OrgTorch.AntidotesToChug, "Antidote", true, true);
-					for (chugs = 0; chugs < Config.OrgTorch.AntidotesToChug; chugs++) {
-						delay(500);
-						print("glug glug");
-						let antidote = me.getItem(514);
-						if (antidote) {
-							antidote.interact();
-						}
-					}
-					Town.move("stash");
+				if (Config.OrgTorch.PreGame.Antidote.At.includes(portal.objtype) && Config.OrgTorch.PreGame.Antidote.Drink > 0) {
+					Town.buyPots(Config.OrgTorch.PreGame.Antidote.Drink, "Antidote", true, true);
 				}
+				if (Config.OrgTorch.PreGame.Thawing.At.includes(portal.objtype) && Config.OrgTorch.PreGame.Thawing.Drink > 0) {
+					Town.buyPots(Config.OrgTorch.PreGame.Thawing.Drink, "Thawing", true, true);
+				}
+				Town.move("stash");
 				Pather.usePortal(null, null, portal);
 			}
 
@@ -458,10 +447,7 @@ function OrgTorch() {
 
 		portal = this.openPortal(1);
 
-		if (portal) {
-			Pather.usePortal(null, null, portal);
-		}
-
+		!!portal && Pather.usePortal(null, null, portal);
 		this.pandemoniumRun();
 	}
 
