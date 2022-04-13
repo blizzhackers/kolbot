@@ -3513,6 +3513,13 @@
 		},
 
 		game: {
+			profiletype: {
+				SinglePlayer: 1,
+				Battlenet: 2,
+				OpenBattlenet: 3,
+				TcpIpHost: 4,
+				TcpIpJoin: 5
+			},
 			gametype: {
 				Classic: 0,
 				Expansion: 1,

@@ -129,31 +129,29 @@ function locationAction () {
 			Starter.inGame = false;
 		}
 
-		if (!Control_1.JoinGameWindow.click()) { // Join
+		if (!Control_1.JoinGameWindow.click()) {
 			break;
 		}
 
 		// in case join button gets bugged
 		if (!Starter.locationTimeout(5000, location)) {
-			// Create
 			if (!Control_1.CreateGameWindow.click()) {
 				break;
 			}
 
-			// Join
 			if (!Control_1.JoinGameWindow.click()) {
 				break;
 			}
 		}
 
 		break;
-	case sdk.game.locations.WaitingInLine: // Waiting In Line
-		D2Bot.updateStatus("Waiting...");
-		Starter.locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location);
+	case sdk.game.locations.WaitingInLine:
+	case sdk.game.locations.CreateGame:
 		Control_1.CancelCreateGame.click();
+		Control_1.JoinGameWindow.click();
 
 		break;
-	case sdk.game.locations.LobbyChat: // Lobby Chat
+	case sdk.game.locations.LobbyChat:
 		D2Bot.updateStatus("Lobby Chat");
 
 		if (Starter.inGame) {
@@ -183,27 +181,23 @@ function locationAction () {
 			}
 		}
 
-		if (!Control_1.JoinGameWindow.click()) { // Join
+		if (!Control_1.JoinGameWindow.click()) {
 			break;
 		}
 
 		// in case join button gets bugged
 		if (!Starter.locationTimeout(5000, location)) {
-			// Create
 			if (!Control_1.CreateGameWindow.click()) {
 				break;
 			}
 
-			// Join
 			if (!Control_1.JoinGameWindow.click()) {
 				break;
 			}
 		}
 
 		break;
-	case sdk.game.locations.CreateGame: // Create Game
-		break;
-	case sdk.game.locations.JoinGame: // Join Game
+	case sdk.game.locations.JoinGame:
 		D2Bot.updateStatus("Join Game");
 
 		if (!leader) {
@@ -289,25 +283,26 @@ function locationAction () {
 		}
 
 		break;
-	case sdk.game.locations.Ladder: // Ladder
+	case sdk.game.locations.Ladder:
 		break;
-	case sdk.game.locations.ChannelList: // Channel List
+	case sdk.game.locations.ChannelList:
 		break;
-	case sdk.game.locations.MainMenu: // Main Menu
-		if (Profile().type === 5) {
-			// Other Multiplayer
+	case sdk.game.locations.MainMenu:
+		if (Profile().type === sdk.game.profiletype.TcpIpJoin) {
 			Control_1.OtherMultiplayer.click();
 
 			break;
 		}
 	// eslint-disable-next-line no-fallthrough
-	case sdk.game.locations.Login: // Login
-	case sdk.game.locations.CharSelect: // Character Select
-	case sdk.game.locations.SplashScreen: // D2 Splash
-		// Single Player screen fix
-		if (getLocation() === sdk.game.locations.CharSelect && !Control_1.CharSelectCurrentRealm.control) {
+	case sdk.game.locations.Login:
+	case sdk.game.locations.CharSelect:
+	case sdk.game.locations.SplashScreen:
+		// Wrong char select screen fix
+		if (getLocation() === sdk.game.locations.CharSelect
+			&& (Profile().type === sdk.game.profiletype.Battlenet && !Control_1.CharSelectCurrentRealm.control)
+			|| ((Profile().type !== sdk.game.profiletype.Battlenet && Control_1.CharSelectCurrentRealm.control))) {
 			Control_1.CharSelectExit.click();
-
+			
 			break;
 		}
 
@@ -614,23 +609,22 @@ function locationAction () {
 		Starter.lastGameStatus = "ready";
 
 		break;
-	case sdk.game.locations.GameIsFull: // Game is full
+	case sdk.game.locations.GameIsFull:
 		D2Bot.printToConsole("Game is full");
 		Control_1.JoinGameWindow.click();
 		lastGame.push(Starter.joinInfo.gameName);
-
 		Starter.lastGameStatus = "ready";
 
 		break;
-	case sdk.game.locations.OtherMultiplayer: // Other Multiplayer
-		Profile().type === 5 ? Control_1.TcpIp.click() : Control_1.OtherMultiplayerCancel.click();
+	case sdk.game.locations.OtherMultiplayer:
+		Profile().type === sdk.game.profiletype.TcpIpJoin ? Control_1.TcpIp.click() : Control_1.OtherMultiplayerCancel.click();
 
 		break;
-	case sdk.game.locations.TcpIp: // TCP/IP Game
-		Profile().type === 5 ? Control_1.TcpIpJoin.click() : Control_1.TcpIpCancel.click();
+	case sdk.game.locations.TcpIp:
+		Profile().type === sdk.game.profiletype.TcpIpJoin ? Control_1.TcpIpJoin.click() : Control_1.TcpIpCancel.click();
 
 		break;
-	case sdk.game.locations.TcpIpEnterIp: // TCP/IP Game - Enter Host IP
+	case sdk.game.locations.TcpIpEnterIp: // Enter Host IP
 		try {
 			if (!leader) {
 				leader = [];
@@ -665,7 +659,7 @@ function locationAction () {
 		}
 
 		break;
-	case sdk.game.locations.TcpIpUnableToConnect: // Unable To Connect TCP/IP
+	case sdk.game.locations.TcpIpUnableToConnect:
 		D2Bot.updateStatus("Unable To Connect TCP/IP");
 
 		if (connectFail) {

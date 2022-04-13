@@ -381,7 +381,7 @@ function foreverAlone () {
 }
 
 function locationAction (location) {
-	let i, obj, info, string, text, queue;
+	let i, obj, info, string, text;
 
 	MainSwitch:
 	switch (location) {
@@ -424,7 +424,7 @@ function locationAction (location) {
 		}
 
 		break;
-	case sdk.game.locations.CreateGame: // Create Game
+	case sdk.game.locations.CreateGame:
 		D2Bot.updateStatus("Creating Game");
 
 		// remove level restriction
@@ -448,49 +448,49 @@ function locationAction (location) {
 		status = "pending";
 
 		break;
-	case sdk.game.locations.WaitingInLine: // Waiting In Line
-		string = "";
-		text = Control_1.CreateGameInLine.getText();
+	case sdk.game.locations.WaitingInLine:
+		let queue = ControlAction.getQueueTime();
 
-		if (text) {
-			string = text[3].split("c0")[1].replace(/\s+/g, '');
-			queue = parseInt(string);
+		if (queue > 0) {
+			switch (true) {
+			case (queue < 10000):
+				D2Bot.updateStatus("Waiting line... Queue: " + queue);
 
-			if (queue > 0) {
-				// Wait out short queue
-				if (queue < 2000) {
-					D2Bot.updateStatus("Waiting line... Queue: " + queue);
-					
-					// If stuck here for too long, game creation likely failed. Exit to char selection and try again.
-					if (queue < 10) {
-						if (!Starter.locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location)) {
-							print("Failed to create game");
-							Control_1.CancelCreateGame.click(); // Cancel creategame
-							Control_1.LobbyQuit.click(); // Quit from Lobby
-							delay(1000);
-						}
+				// If stuck here for too long, game creation likely failed. Exit to char selection and try again.
+				if (queue < 10) {
+					if (!Starter.locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location)) {
+						print("Failed to create game");
+						Control_1.CancelCreateGame.click();
+						Control_1.LobbyQuit.click();
+						delay(1000);
 					}
-				} else if (queue > 20000) { // stop bot if queue is too long
-					D2Bot.printToConsole("Restricted... Stopping bot. Queue: " + queue, 9);
-					D2Bot.stop(me.profile, true);
+				}
+
+				break;
+			case (queue > 10000):
+				if (StarterConfig.WaitOutQueueRestriction) {
+					D2Bot.updateStatus("Waiting out Queue restriction: " + queue);
 				} else {
 					print("Restricted... Queue: " + queue);
 					D2Bot.printToConsole("Restricted... Queue: " + queue, 9);
-					Control_1.CancelCreateGame.click(); // Cancel creategame
+					Control_1.CancelCreateGame.click();
 
-					if (StarterConfig.ExitToMenu) {
-						Control_1.LobbyQuit.click(); // Quit from Lobby
+					if (StarterConfig.WaitOutQueueExitToMenu) {
+						Control_1.LobbyQuit.click();
 						delay(1000);
-						Control_1.CharSelectExit.click(); // Quit from char selection
+						Control_1.CharSelectExit.click();
 					}
 
-					ControlAction.timeoutDelay("Restricted", (queue + 600) * 1000); // Wait out each queue as 1 sec and add extra 10 min
+					// Wait out each queue as 1 sec and add extra 10 min
+					ControlAction.timeoutDelay("Restricted", (queue + 600) * 1000);
 				}
+
+				break;
 			}
 		}
 
 		break;
-	case sdk.game.locations.JoinGame: // Join Game
+	case sdk.game.locations.JoinGame:
 		D2Bot.updateStatus("Join Game");
 
 		if (status === "pending") {

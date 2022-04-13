@@ -80,22 +80,56 @@ function locationAction (location) {
 
 		// in case join button gets bugged
 		if (!Starter.locationTimeout(5000, location)) {
-			// Join
 			if (!Control_1.JoinGameWindow.click()) {
 				break;
 			}
 			
-			// Create
 			if (!Control_1.CreateGameWindow.click()) {
 				break;
 			}
 		}
 
 		break;
-	case sdk.game.locations.WaitingInLine: // Waiting In Line
-		D2Bot.updateStatus("Waiting...");
-		Starter.locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location);
-		Control_1.CancelCreateGame.click();
+	case sdk.game.locations.WaitingInLine:
+		let queue = ControlAction.getQueueTime();
+
+		if (queue > 0) {
+			switch (true) {
+			case (queue < 10000):
+				D2Bot.updateStatus("Waiting line... Queue: " + queue);
+
+				// If stuck here for too long, game creation likely failed. Exit to char selection and try again.
+				if (queue < 10) {
+					if (!Starter.locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location)) {
+						print("Failed to create game");
+						Control_1.CancelCreateGame.click();
+						Control_1.LobbyQuit.click();
+						delay(1000);
+					}
+				}
+
+				break;
+			case (queue > 10000):
+				if (StarterConfig.WaitOutQueueRestriction) {
+					D2Bot.updateStatus("Waiting out Queue restriction: " + queue);
+				} else {
+					print("Restricted... Queue: " + queue);
+					D2Bot.printToConsole("Restricted... Queue: " + queue, 9);
+					Control_1.CancelCreateGame.click();
+
+					if (StarterConfig.WaitOutQueueExitToMenu) {
+						Control_1.LobbyQuit.click();
+						delay(1000);
+						Control_1.CharSelectExit.click();
+					}
+
+					// Wait out each queue as 1 sec and add extra 10 min
+					ControlAction.timeoutDelay("Restricted", (queue + 600) * 1000);
+				}
+
+				break;
+			}
+		}
 
 		break;
 	case sdk.game.locations.CreateGame: // Create Game

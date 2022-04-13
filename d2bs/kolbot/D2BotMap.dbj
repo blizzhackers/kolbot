@@ -17,7 +17,7 @@ function main () {
 
 	while (true) {
 		if (me.gameReady) {
-			Starter.isUp === "no" && (isUp = "yes");
+			Starter.isUp === "no" && (Starter.isUp = "yes");
 			me.ingame && D2Bot.updateStatus("(Char: " + me.charname + ") (Game: " + me.gamename + ") (Level: " + me.charlvl + ")");
 		} else {
 			D2Bot.updateStatus("Out of Game");

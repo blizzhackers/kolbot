@@ -94,23 +94,16 @@ function locationAction (location) {
 		ControlAction.click();
 
 		break;
-	case sdk.game.locations.Lobby:	// Lobby
+	case sdk.game.locations.Lobby:
 		D2Bot.updateStatus("Lobby");
 
 		me.blockKeys = false;
 		loginRetry = 0;
 		!Starter.firstLogin && (Starter.firstLogin = true);
-		
 		Control_1.LobbyEnterChat.click();
 
 		break;
-	case sdk.game.locations.WaitingInLine: // Waiting In Line
-		D2Bot.updateStatus("Waiting...");
-		Starter.locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location);
-		Control_1.CancelCreateGame.click();
-
-		break;
-	case sdk.game.locations.LobbyChat: // Lobby Chat
+	case sdk.game.locations.LobbyChat:
 		D2Bot.updateStatus("Lobby Chat");
 
 		if (Starter.inGame) {
@@ -257,7 +250,8 @@ function locationAction (location) {
 			joinInfo.gameName = fullText.match(regex);
 
 			if (joinInfo.gameName) {
-				joinInfo.gameName = joinInfo.gameName[joinInfo.gameName.length - 1].toString().replace(/^\W*/, ""); // use last match and trim it
+				// use last match and trim it
+				joinInfo.gameName = joinInfo.gameName[joinInfo.gameName.length - 1].toString().replace(/^\W*/, "");
 				joinInfo.gamePass = StarterConfig.Passwords[n] || "";
 
 				if (joinInfo.gameName && joinInfo.gameName !== joinInfo.oldGame && badGames.indexOf(joinInfo.gameName) === -1) {
@@ -269,11 +263,14 @@ function locationAction (location) {
 		}
 
 		break;
-	case sdk.game.locations.CreateGame: // Create Game
+	case sdk.game.locations.WaitingInLine:
+	case sdk.game.locations.CreateGame:
+		Control_1.CancelCreateGame.click();
+
 		break;
-	case sdk.game.locations.JoinGame: // Join Game
+	case sdk.game.locations.JoinGame:
 		if (joinInfo.oldGame === joinInfo.gameName || badGames.includes(joinInfo.gameName)) {
-			Control_1.CancelCreateGame.click();
+			Control_1.CancelJoinGame.click();
 		}
 
 		D2Bot.updateStatus("Join Game");
@@ -307,18 +304,20 @@ function locationAction (location) {
 		}
 
 		break;
-	case sdk.game.locations.Ladder: // Ladder
+	case sdk.game.locations.Ladder:
 		break;
-	case sdk.game.locations.ChannelList: // Channel List
+	case sdk.game.locations.ChannelList:
 		break;
-	case sdk.game.locations.MainMenu: // Main Menu
-	case sdk.game.locations.Login: // Login
-	case sdk.game.locations.CharSelect: // Character Select
-	case sdk.game.locations.SplashScreen: // D2 Splash
-		// Single Player screen fix
-		if (getLocation() === sdk.game.locations.CharSelect && !Control_1.CharSelectCurrentRealm.control) {
+	case sdk.game.locations.MainMenu:
+	case sdk.game.locations.Login:
+	case sdk.game.locations.CharSelect:
+	case sdk.game.locations.SplashScreen:
+		// Wrong char select screen fix
+		if (getLocation() === sdk.game.locations.CharSelect
+			&& (Profile().type === sdk.game.profiletype.Battlenet && !Control_1.CharSelectCurrentRealm.control)
+			|| ((Profile().type !== sdk.game.profiletype.Battlenet && Control_1.CharSelectCurrentRealm.control))) {
 			Control_1.CharSelectExit.click();
-
+			
 			break;
 		}
 

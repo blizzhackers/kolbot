@@ -993,7 +993,7 @@ const ControlAction = {
 		// cycle until in lobby or in game
 		while (getLocation() !== sdk.game.locations.Lobby) {
 			switch (getLocation()) {
-			case sdk.game.locations.CharSelect: // character select
+			case sdk.game.locations.CharSelect:
 				let control = Control_1.CharSelectCharInfo0.control;
 
 				if (control) {
@@ -1008,7 +1008,6 @@ const ControlAction = {
 								Control_1.CreateNewAccountOk.click();
 								me.blockMouse = false;
 
-								// select difficulty - single player
 								if (getLocation() === sdk.game.locations.SelectDifficultySP) {
 									try {
 										login(info.profile);
@@ -1127,7 +1126,6 @@ const ControlAction = {
 
 				break;
 			case sdk.game.locations.NewCharSelected:
-				// hardcore char warning
 				if (Control_1.CharCreateHCWarningOk.control) {
 					Control_1.CharCreateHCWarningOk.click();
 				} else {
@@ -1240,6 +1238,62 @@ const ControlAction = {
 
 		return false;
 	},
+
+	getQueueTime: function() {
+		// You are in line to create a game.,Try joining a game to avoid waiting.,,Your position in line is: ÿc02912
+		const text = Control_1.CreateGameInLine.getText();
+		if (text && text.indexOf(getLocaleString(11026)) !== -1) {
+			const result = /ÿc0(\d*)/gm.exec(text);
+			if (result && typeof result[1] === 'string') {
+				return parseInt(result[1]) || 0;
+			}
+		}
+
+		return 0; // You're in line 0, aka no queue
+	},
+
+	loginSinglePlayer: function () {
+		try {
+			login(me.profile);
+		} catch (e) {
+			while (!me.ingame) {
+				switch (getLocation()) {
+				case sdk.game.locations.CharSelect:
+					if (Control_1.CharSelectCurrentRealm.control) {
+						console.log("Not in single player character select screen");
+						Control_1.CharSelectExit.click();
+
+						break;
+					}
+
+					if (!ControlAction.findCharacter({charName: Profile().character})) {
+						console.warn("Unable to locate character");
+						D2Bot.stop();
+					}
+
+					break;
+				case sdk.game.locations.SelectDifficultySP:
+					if (Profile().difficulty === sdk.difficulty.Hell && Control_1.HellSP.disabled === 4) {
+						if (Control_1.NightmareSP.disabled !== 4 && Control_1.NightmareSP.click()) {
+							delay(1000);
+							return Misc.poll(() => me.ingame, 5000, 500);
+						} else {
+							return Control_1.NormalSP.click();
+						}
+					}
+					
+					break;
+				case sdk.game.locations.MainMenu:
+				case sdk.game.locations.SplashScreen:
+					Control_1.SinglePlayer.click();
+
+					break;
+				}
+			}
+		}
+
+		return me.ingame;
+	}
 };
 
 const ShitList = {
@@ -1435,7 +1489,7 @@ const Starter = {
 			if (Object.keys(Starter.gameInfo).length) {
 				obj = JSON.parse(msg);
 
-				if ([4, 5].includes(Profile().type)) {
+				if ([sdk.game.profiletype.TcpIpHost, sdk.game.profiletype.TcpIpJoin].includes(Profile().type)) {
 					me.gameReady && D2Bot.joinMe(obj.profile, me.gameserverip.toString(), "", "", isUp);
 				} else {
 					if (me.gameReady) {

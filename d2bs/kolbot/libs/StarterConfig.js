@@ -29,5 +29,7 @@ const StarterConfig = {
 	ConnectingTimeout: 60, // Seconds to wait before cancelling the 'Connecting...' screen
 	PleaseWaitTimeout: 60, // Seconds to wait before cancelling the 'Please Wait...' screen
 	WaitInLineTimeout: 3600, // Seconds to wait before cancelling the 'Waiting in Line...' screen
+	WaitOutQueueRestriction: true, // Wait out queue if we are restricted, queue time > 10000
+	WaitOutQueueExitToMenu: false, // Wait out queue restriction at D2 Splash screen if true, else wait out in lobby
 	GameDoesNotExistTimeout: 30 // Seconds to wait before cancelling the 'Game does not exist.' screen
 };

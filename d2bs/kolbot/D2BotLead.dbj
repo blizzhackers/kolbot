@@ -115,19 +115,16 @@ function locationAction (location) {
 			}
 		}
 
-		// Create
 		if (!Control_1.CreateGameWindow.click()) {
 			break;
 		}
 
 		// in case create button gets bugged
 		if (!Starter.locationTimeout(5000, location)) {
-			// Create
 			if (!Control_1.CreateGameWindow.click()) {
 				break;
 			}
 
-			// Join
 			if (!Control_1.JoinGameWindow.click()) {
 				break;
 			}
@@ -135,9 +132,45 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.WaitingInLine:
-		D2Bot.updateStatus("Waiting...");
-		Starter.locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location);
-		Control_1.CancelCreateGame.click();
+		let queue = ControlAction.getQueueTime();
+
+		if (queue > 0) {
+			switch (true) {
+			case (queue < 10000):
+				D2Bot.updateStatus("Waiting line... Queue: " + queue);
+
+				// If stuck here for too long, game creation likely failed. Exit to char selection and try again.
+				if (queue < 10) {
+					if (!Starter.locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location)) {
+						print("Failed to create game");
+						Control_1.CancelCreateGame.click();
+						Control_1.LobbyQuit.click();
+						delay(1000);
+					}
+				}
+
+				break;
+			case (queue > 10000):
+				if (StarterConfig.WaitOutQueueRestriction) {
+					D2Bot.updateStatus("Waiting out Queue restriction: " + queue);
+				} else {
+					print("Restricted... Queue: " + queue);
+					D2Bot.printToConsole("Restricted... Queue: " + queue, 9);
+					Control_1.CancelCreateGame.click();
+
+					if (StarterConfig.WaitOutQueueExitToMenu) {
+						Control_1.LobbyQuit.click();
+						delay(1000);
+						Control_1.CharSelectExit.click();
+					}
+
+					// Wait out each queue as 1 sec and add extra 10 min
+					ControlAction.timeoutDelay("Restricted", (queue + 600) * 1000);
+				}
+
+				break;
+			}
+		}
 
 		break;
 	case sdk.game.locations.LobbyChat:
@@ -235,19 +268,16 @@ function locationAction (location) {
 			Starter.sayMsg("Next game is " + gameInfo.gameName + Starter.gameCount + (gameInfo.gamePass === "" ? "" : "//" + gameInfo.gamePass));
 		}
 
-		// Create
 		if (!Control_1.CreateGameWindow.click()) {
 			break;
 		}
 
 		// in case create button gets bugged
 		if (!Starter.locationTimeout(5000, location)) {
-			// Create
 			if (!Control_1.CreateGameWindow.click()) {
 				break;
 			}
 
-			// Join
 			if (!Control_1.JoinGameWindow.click()) {
 				break;
 			}
@@ -297,18 +327,28 @@ function locationAction (location) {
 		break;
 	case sdk.game.locations.MainMenu:
 		Starter.inGame && (Starter.inGame = false);
-		if (Profile().type === 1 && firstRun) {
+		if (Profile().type === sdk.game.profiletype.SinglePlayer && firstRun) {
 			Control_1.SinglePlayer.click();
 
+			break;
+		}
+	case sdk.game.locations.CharSelect:
+		// Wrong char select screen fix
+		if (getLocation() === sdk.game.locations.CharSelect
+			&& (Profile().type === sdk.game.profiletype.Battlenet && !Control_1.CharSelectCurrentRealm.control)
+			|| ((Profile().type !== sdk.game.profiletype.Battlenet && Control_1.CharSelectCurrentRealm.control))) {
+			Control_1.CharSelectExit.click();
+			
 			break;
 		}
 	case sdk.game.locations.Login:
 	case sdk.game.locations.SplashScreen:
 		// Multiple realm botting fix in case of R/D or disconnect
 		Starter.firstLogin && getLocation() === sdk.game.locations.Login && Control_1.CharSelectExit.click();
-
+				
 		D2Bot.updateStatus("Logging In");
-
+		hideConsole(); // seems to fix odd crash with single-player characters if the console is open to type in
+				
 		try {
 			login(me.profile);
 		} catch (e) {
@@ -424,7 +464,7 @@ function locationAction (location) {
 		}
 
 		break;
-	case sdk.game.locations.UnableToConnect:
+	case sdk.game.locations.LoginUnableToConnect:
 		D2Bot.updateStatus("Unable To Connect");
 
 		if (connectFail) {
@@ -492,13 +532,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.SelectDifficultySP:
-		if (Profile().type !== 2) {
-			print("Stuck on select difficulty screen. Exiting to main menu.");
-			sendKey(0x1B);
-			if (getLocation() === sdk.game.locations.CharSelect && !Control_1.CharSelectCurrentRealm.control) {
-				Control_1.CharSelectExit.click();
-			}
-		}
+		ControlAction.loginSinglePlayer();
 
 		break;
 	case sdk.game.locations.MainMenuConnecting:
@@ -549,21 +583,8 @@ function locationAction (location) {
 		}
 
 		break;
-	case sdk.game.locations.CharacterCreate: // fix for unhandled location crashes at char creation
-		if (Profile().type !== 2 && firstRun) {
-			// click out of the screen
-			Control_1.CharSelectExit.click();
-		}
-	case sdk.game.locations.CharSelect: // Character Select
-		hideConsole(); // seems to fix odd crash with single-player characters if the console is open to type in
-		// Single Player screen fix
-		if (Profile().type !== 2 && !Control_1.CharSelectCurrentRealm.control) {
-			Control_1.CharSelectExit.click();
-
-			break;
-		}
-	case sdk.game.locations.CharSelectConnecting: // Character Select - Connecting
-	case sdk.game.locations.CharSelectNoChars: // Empty character screen
+	case sdk.game.locations.CharSelectConnecting:
+	case sdk.game.locations.CharSelectNoChars:
 		string = "";
 		text = Control_1.CharSelectError.getText();
 
@@ -576,7 +597,8 @@ function locationAction (location) {
 				}
 			}
 
-			if (string === getLocaleString(11161)) { // CDKey disabled from realm play
+			// CDKey disabled from realm play
+			if (string === getLocaleString(11161)) {
 				D2Bot.updateStatus("Realm Disabled CDKey");
 				D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, 6);
 				D2Bot.CDKeyDisabled();
@@ -596,26 +618,27 @@ function locationAction (location) {
 		}
 
 		break;
-	case sdk.game.locations.ServerDown: // Server Down - not much to do but wait..
+	case sdk.game.locations.ServerDown:
+		// not much to do but wait..
 		break;
-	case sdk.game.locations.LobbyPleaseWait: // Lobby - Please Wait
+	case sdk.game.locations.LobbyPleaseWait:
 		if (!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
 			Control_1.OkCentered.click();
 		}
 
 		break;
-	case sdk.game.locations.GameNameExists: // Lobby - Game Name Exists
+	case sdk.game.locations.GameNameExists:
 		Control_1.CreateGameWindow.click();
 
 		Starter.gameCount += 1;
 		Starter.lastGameStatus = "ready";
 
 		break;
-	case sdk.game.locations.GatewaySelect: // Gateway Select
+	case sdk.game.locations.GatewaySelect:
 		Control_1.GatewayCancel.click();
 
 		break;
-	case sdk.game.locations.GameDoesNotExist: // Lobby - Game Does Not Exist
+	case sdk.game.locations.GameDoesNotExist:
 		D2Bot.printToConsole("Game doesn't exist");
 
 		if (Starter.gameInfo.rdBlocker) {
@@ -632,18 +655,22 @@ function locationAction (location) {
 		Starter.lastGameStatus = "ready";
 
 		break;
-	case sdk.game.locations.GameIsFull: // Game is full
+	case sdk.game.locations.CharacterCreate:
+		Control_1.CharSelectExit.click();
+
+		break;
+	case sdk.game.locations.GameIsFull:
 		// doesn't happen when making
 		break;
-	case sdk.game.locations.OtherMultiplayer: // Other Multiplayer
+	case sdk.game.locations.OtherMultiplayer:
 		Control_1.OtherMultiplayerCancel.click();
 
 		break;
-	case sdk.game.locations.TcpIp: // TCP/IP Game
+	case sdk.game.locations.TcpIp:
 		Control_1.TcpIpCancel.click();
 
 		break;
-	case sdk.game.locations.TcpIpEnterIp: // TCP/IP Game - Enter Host IP
+	case sdk.game.locations.TcpIpEnterIp:
 		try {
 			login(me.profile);
 		} catch (e) {
@@ -651,7 +678,7 @@ function locationAction (location) {
 		}
 
 		break;
-	case sdk.game.locations.TcpIpUnableToConnect: // Unable To Connect TCP/IP
+	case sdk.game.locations.TcpIpUnableToConnect:
 		D2Bot.updateStatus("Unable To Connect TCP/IP");
 
 		if (connectFail) {

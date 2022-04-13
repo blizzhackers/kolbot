@@ -111,7 +111,7 @@ function locationAction (location) {
 		ControlAction.click();
 
 		break;
-	case sdk.game.locations.Lobby: // Lobby
+	case sdk.game.locations.Lobby:
 		D2Bot.updateStatus("Lobby");
 
 		me.blockKeys = false;
@@ -127,9 +127,7 @@ function locationAction (location) {
 		}
 
 		if (Starter.inGame || Starter.gameInfo.error) {
-			if (!Starter.gameStart) {
-				Starter.gameStart = DataFile.getStats().ingameTick;
-			}
+			!Starter.gameStart && (Starter.gameStart = DataFile.getStats().ingameTick);
 
 			if (getTickCount() - Starter.gameStart < StarterConfig.MinGameTime * 1e3) {
 				ControlAction.timeoutDelay("Min game time wait", StarterConfig.MinGameTime * 1e3 + Starter.gameStart - getTickCount());
@@ -137,8 +135,6 @@ function locationAction (location) {
 		}
 
 		if (Starter.inGame) {
-			D2Bot.store(JSON.stringify({currScript: "none", area: "out of game"}));
-
 			if (AutoMule.outOfGameCheck() || TorchSystem.outOfGameCheck() || Gambling.outOfGameCheck() || CraftingSystem.outOfGameCheck()) {
 				break;
 			}
@@ -153,33 +149,29 @@ function locationAction (location) {
 
 			if (StarterConfig.ResetCount && Starter.gameCount >= StarterConfig.ResetCount) {
 				Starter.gameCount = 1;
-
 				DataFile.updateStats("runs", Starter.gameCount);
 			}
 		}
 
-		if (!Control_1.JoinGameWindow.click()) { // Join
+		if (!Control_1.JoinGameWindow.click()) {
 			break;
 		}
 
 		// in case create button gets bugged
 		if (!Starter.locationTimeout(5000, location)) {
-			// Create
 			if (!Control_1.CreateGameWindow.click()) {
 				break;
 			}
 
-			// Join
 			if (!Control_1.JoinGameWindow.click()) {
 				break;
 			}
 		}
 
 		break;
-	case sdk.game.locations.WaitingInLine: // Waiting In Line
-		D2Bot.updateStatus("Waiting...");
-		Starter.locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location);
+	case sdk.game.locations.WaitingInLine:
 		Control_1.CancelCreateGame.click();
+		Control_1.JoinGameWindow.click();
 
 		break;
 	case sdk.game.locations.LobbyChat: // Lobby Chat
@@ -255,10 +247,12 @@ function locationAction (location) {
 	case sdk.game.locations.Login: // Login
 	case sdk.game.locations.CharSelect: // Character Select
 	case sdk.game.locations.SplashScreen: // D2 Splash
-		// Single Player screen fix
-		if (getLocation() === sdk.game.locations.CharSelect && !Control_1.CharSelectCurrentRealm.control) {
+		// Wrong char select screen fix
+		if (getLocation() === sdk.game.locations.CharSelect
+			&& (Profile().type === sdk.game.profiletype.Battlenet && !Control_1.CharSelectCurrentRealm.control)
+			|| ((Profile().type !== sdk.game.profiletype.Battlenet && Control_1.CharSelectCurrentRealm.control))) {
 			Control_1.CharSelectExit.click();
-
+			
 			break;
 		}
 

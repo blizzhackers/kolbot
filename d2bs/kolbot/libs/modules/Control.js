@@ -130,6 +130,7 @@
 	Control.JoinGameName = new Control(1, 432, 148, 155, 20);
 	Control.JoinGamePass = new Control(1, 606, 148, 155, 20);
 	Control.JoinGameList = new Control(4, 432, 393, 160, 173);
+	Control.CancelJoinGame = new Control(6, 433, 433, 96, 32);
 
 	Control.CreateGameWindow = new Control(6, 533, 469, 120, 20);
 	Control.CreateGame = new Control(6, 594, 433, 172, 32);
@@ -148,6 +149,7 @@
 	Control.LobbyChannelName = new Control(4, 28, 138, 354, 60);
 	Control.LobbyChannelText = new Control(1, 432, 162, 155, 20);
 	Control.LobbyChannelOk = new Control(6, 671, 433, 96, 32);
+	Control.LobbyChannelCancel = new Control(6, 433, 433, 96, 32);
 
 	Control.LobbyChat = new Control(4, 28, 410, 354, 298);
 	Control.LobbyServerDown = new Control(4, 438, 300, 326, 150);

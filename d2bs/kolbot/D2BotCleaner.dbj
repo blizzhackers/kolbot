@@ -244,26 +244,25 @@ function locationAction (location) {
 		ControlAction.click();
 
 		break;
-	case sdk.game.locations.Lobby:	// Lobby
-	case sdk.game.locations.LobbyChat: // Lobby Chat
-		break;
-	case sdk.game.locations.WaitingInLine: // Waiting In Line
-		D2Bot.updateStatus("Waiting...");
-		Starter.locationTimeout(StarterConfig.WaitInLineTimeout * 1e3, location);
+	case sdk.game.locations.WaitingInLine:
 		Control_1.CancelCreateGame.click();
 
 		break;
-	case sdk.game.locations.CreateGame: // Create Game
+	case sdk.game.locations.Lobby:
+	case sdk.game.locations.LobbyChat:
+	case sdk.game.locations.CreateGame:
+	case sdk.game.locations.JoinGame:
+	case sdk.game.locations.Ladder:
+	case sdk.game.locations.ChannelList:
+	case sdk.game.locations.GameNameExists:
+	case sdk.game.locations.GameDoesNotExist:
+	case sdk.game.locations.GameIsFull:
+		Control_1.LobbyQuit.click();
+
 		break;
-	case sdk.game.locations.JoinGame: // Join Game
-		break;
-	case sdk.game.locations.Ladder: // Ladder
-		break;
-	case sdk.game.locations.ChannelList: // Channel List
-		break;
-	case sdk.game.locations.MainMenu: // Main Menu
-	case sdk.game.locations.Login: // Login
-	case sdk.game.locations.SplashScreen: // D2 Splash
+	case sdk.game.locations.MainMenu:
+	case sdk.game.locations.Login:
+	case sdk.game.locations.SplashScreen:
 		if (!accounts.length) {
 			FileTools.remove("logs/D2BotCleaner.json");
 			D2Bot.printToConsole("D2BotCleaner: Done cleaning accounts!", 6);
@@ -312,7 +311,7 @@ function locationAction (location) {
 		}
 
 		break;
-	case sdk.game.locations.LoginError: // Login Error
+	case sdk.game.locations.LoginError:
 		string = "";
 		text = Control_1.LoginErrorText.getText();
 
@@ -404,7 +403,7 @@ function locationAction (location) {
 		}
 
 		break;
-	case sdk.game.locations.LoginUnableToConnect: // Unable To Connect
+	case sdk.game.locations.LoginUnableToConnect:
 		D2Bot.updateStatus("Unable To Connect");
 
 		if (connectFail) {
@@ -446,7 +445,8 @@ function locationAction (location) {
 				if (obj.currChar) {
 					for (i = 0; i < charList.length; i += 1) {
 						if (charList[i] === obj.currChar) {
-							charList.splice(0, i + 1); // Remove the previous currChar as well
+							// Remove the previous currChar as well
+							charList.splice(0, i + 1);
 
 							break;
 						}
@@ -492,21 +492,20 @@ function locationAction (location) {
 		}
 
 		break;
-	case sdk.game.locations.Disconnected: // Character Select / Main Menu - Disconnected
-		D2Bot.updateStatus("Disconnected");
-		delay(500);
-		Control_1.OkCentered.click();
-
-		break;
-	case sdk.game.locations.NewCharSelected: // New Character
+	case sdk.game.locations.CharacterCreate:
+	case sdk.game.locations.NewCharSelected:
+		Control_1.CharSelectExit.click();
+				
 		break;
 	case sdk.game.locations.CharSelectPleaseWait: // Character Select - Please Wait popup
 		if (!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
 			Control_1.OkCentered.click();
 		}
-
+		
 		break;
+	case sdk.game.locations.Disconnected: // Character Select / Main Menu - Disconnected
 	case sdk.game.locations.LobbyLostConnection: // Lobby - Lost Connection - just click okay, since we're toast anyway
+		location === sdk.game.locations.Disconnected && D2Bot.updateStatus("Disconnected");
 		delay(1000);
 		Control_1.OkCentered.click();
 
@@ -588,25 +587,8 @@ function locationAction (location) {
 		}
 
 		break;
-	case sdk.game.locations.GameNameExists: // Lobby - Game Name Exists
-		Control_1.CreateGameWindow.click();
-
-		break;
-	case sdk.game.locations.GatewaySelect: // Gateway Select
+	case sdk.game.locations.GatewaySelect:
 		Control_1.GatewayCancel.click();
-
-		break;
-	case sdk.game.locations.GameDoesNotExist: // Lobby - Game Does Not Exist
-		Control_1.CreateGameWindow.click();
-
-		break;
-	case sdk.game.locations.GameIsFull: // Game is full
-		D2Bot.printToConsole("Game is full");
-
-		Starter.lastGameStatus = "ready";
-
-		delay(500);
-		Control_1.JoinGameWindow.click();
 
 		break;
 	default:
