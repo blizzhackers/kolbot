@@ -3509,7 +3509,20 @@
 			},
 			dialog: {
 				youDoNotHaveEnoughGoldForThat: 3362
-			}
+			},
+
+			text: {
+				CdKeyDisabled: 5199,
+				CdKeyIntendedForAnotherProduct: 5202,
+				InvalidPassword: 5207,
+				AccountDoesNotExist: 5208,
+				Disconnected: 5347,
+				UnableToIndentifyVersion: 5245,
+				LoDKeyDisabled: 10913,
+				CdKeyInUseBy: 10914,
+				LoDKeyIntendedForAnotherProduct: 10915,
+				CdKeyDisabledFromRealm: 11161,
+			},
 		},
 
 		game: {
