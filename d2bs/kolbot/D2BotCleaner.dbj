@@ -188,12 +188,11 @@ include("common/misc.js");
 let Controls = require('./modules/Control');
 let sdk = require('./modules/sdk');
 
-if (!FileTools.exists("data/" + me.profile + ".json")) {
-	DataFile.create();
+if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
+	Starter.firstRun = true;
 }
 
-let connectFail,
-	currAcc, charList, realm,
+let currAcc, charList, realm,
 	firstAccount = true,
 	accounts = [],
 	chars = [];
@@ -235,10 +234,9 @@ function deleteAllCharacters () {
 }
 
 function locationAction (location) {
-	let i, string, text, currChar,
+	let i, currChar,
 		obj = {};
 
-	MainSwitch:
 	switch (location) {
 	case sdk.game.locations.PreSplash:
 		ControlAction.click();
@@ -312,115 +310,17 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.LoginError:
-		string = "";
-		text = Controls.LoginErrorText.getText();
-
-		if (text) {
-			for (i = 0; i < text.length; i += 1) {
-				string += text[i];
-
-				if (i !== text.length - 1) {
-					string += " ";
-				}
-			}
-
-			switch (string) {
-			case getLocaleString(5207):
-				D2Bot.updateStatus("Invalid Password");
-				D2Bot.printToConsole("Invalid Password");
-
-				break;
-			case getLocaleString(5208):
-				D2Bot.updateStatus("Invalid Account");
-				D2Bot.printToConsole("Invalid Account");
-
-				break;
-			case getLocaleString(5202): // cd key intended for another product
-			case getLocaleString(10915): // lod key intended for another product
-				D2Bot.updateStatus("Invalid CDKey");
-				D2Bot.printToConsole("Invalid CDKey: " + Starter.gameInfo.mpq, 6);
-				D2Bot.CDKeyDisabled();
-
-				if (Starter.gameInfo.switchKeys) {
-					ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
-					D2Bot.restart(true);
-				} else {
-					D2Bot.stop(me.profile, true);
-				}
-
-				break;
-			case getLocaleString(5199):
-				D2Bot.updateStatus("Disabled CDKey");
-				D2Bot.printToConsole("Disabled CDKey: " + Starter.gameInfo.mpq, 6);
-				D2Bot.CDKeyDisabled();
-
-				if (Starter.gameInfo.switchKeys) {
-					ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
-					D2Bot.restart(true);
-				} else {
-					D2Bot.stop(me.profile, true);
-				}
-
-				break;
-			case getLocaleString(10913):
-				D2Bot.updateStatus("Disabled LoD CDKey");
-				D2Bot.printToConsole("Disabled LoD CDKey: " + Starter.gameInfo.mpq, 6);
-				D2Bot.CDKeyDisabled();
-
-				if (Starter.gameInfo.switchKeys) {
-					ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
-					D2Bot.restart(true);
-				} else {
-					D2Bot.stop(me.profile, true);
-				}
-
-				break;
-			case getLocaleString(5347):
-				D2Bot.updateStatus("Disconnected");
-				D2Bot.printToConsole("Disconnected");
-				Controls.LoginErrorOk.click();
-
-				break MainSwitch;
-			default:
-				D2Bot.updateStatus("Login Error");
-				D2Bot.printToConsole("Login Error - " + string);
-
-				if (Starter.gameInfo.switchKeys) {
-					ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
-					D2Bot.restart(true);
-				} else {
-					D2Bot.stop(me.profile, true);
-				}
-
-				break;
-			}
-			
-			Controls.LoginErrorOk.click();
-	
-			while (true) {
-				delay(1000);
-			}
-		}
+	case sdk.game.locations.InvalidCdKey:
+	case sdk.game.locations.CdKeyInUse:
+		LocationEvents.loginError();
 
 		break;
 	case sdk.game.locations.LoginUnableToConnect:
-		D2Bot.updateStatus("Unable To Connect");
-
-		if (connectFail) {
-			ControlAction.timeoutDelay("Unable to Connect", StarterConfig.UnableToConnectDelay * 6e4);
-
-			connectFail = false;
-		}
-
-		if (!Controls.UnableToConnectOk.click()) {
-			break;
-		}
-
-		connectFail = true;
+		LocationEvents.unableToConnect();
 
 		break;
-	case sdk.game.locations.CharSelect: // Character Select
-	case sdk.game.locations.CharSelectNoChars: // Empty character select screen
+	case sdk.game.locations.CharSelect:
+	case sdk.game.locations.CharSelectNoChars:
 		// Single Player screen fix
 		if (currAcc.toLowerCase() !== "singleplayer") {
 			if (getLocation() === sdk.game.locations.CharSelect && !Controls.CharSelectCurrentRealm.control) {
@@ -472,24 +372,8 @@ function locationAction (location) {
 		FileTools.writeText("logs/D2BotCleaner.json", JSON.stringify(obj));
 
 		break;
-	case sdk.game.locations.RealmDown: // Realm Down - Character Select screen
-		D2Bot.updateStatus("Realm Down");
-		delay(1000);
-
-		if (!Controls.CharSelectExit.click()) {
-			break;
-		}
-
-		Starter.updateCount();
-		ControlAction.timeoutDelay("Realm Down", StarterConfig.RealmDownDelay * 6e4);
-
-		if (Starter.gameInfo.switchKeys) {
-			D2Bot.printToConsole("Realm Down - Changing CD-Key");
-			ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
-			D2Bot.restart(true);
-		} else {
-			D2Bot.restart();
-		}
+	case sdk.game.locations.RealmDown:
+		LocationEvents.realmDown();
 
 		break;
 	case sdk.game.locations.CharacterCreate:
@@ -497,94 +381,31 @@ function locationAction (location) {
 		Controls.CharSelectExit.click();
 				
 		break;
-	case sdk.game.locations.CharSelectPleaseWait: // Character Select - Please Wait popup
-		if (!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
-			Controls.OkCentered.click();
-		}
-		
+	case sdk.game.locations.CharSelectPleaseWait:
+		!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
+
 		break;
-	case sdk.game.locations.Disconnected: // Character Select / Main Menu - Disconnected
-	case sdk.game.locations.LobbyLostConnection: // Lobby - Lost Connection - just click okay, since we're toast anyway
-		location === sdk.game.locations.Disconnected && D2Bot.updateStatus("Disconnected");
+	case sdk.game.locations.Disconnected:
+	case sdk.game.locations.LobbyLostConnection:
+		D2Bot.updateStatus("Disconnected/LostConnection");
 		delay(1000);
 		Controls.OkCentered.click();
 
 		break;
-	case sdk.game.locations.CdKeyInUse: // Login - Cdkey In Use
-		D2Bot.printToConsole(Starter.gameInfo.mpq + " is in use by " + Controls.LoginCdKeyInUseBy.getText(), 6);
-		D2Bot.CDKeyInUse();
-
-		if (Starter.gameInfo.switchKeys) {
-			ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
-			D2Bot.restart(true);
-		} else {
-			Controls.UnableToConnectOk.click();
-			ControlAction.timeoutDelay("CD-Key in use", StarterConfig.CDKeyInUseDelay * 6e4);
-		}
-
-		break;
-	case sdk.game.locations.SelectDifficultySP: // Single Player - Select Difficulty
+	case sdk.game.locations.SelectDifficultySP:
 		break;
 	case sdk.game.locations.MainMenuConnecting: // Main Menu - Connecting
-		if (!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
-			Controls.LoginCancelWait.click();
-		}
+		!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location) && Controls.LoginCancelWait.click();
 
 		break;
-	case sdk.game.locations.InvalidCdKey: // Login - Invalid Cdkey (classic or xpac)
-		text = Controls.LoginInvalidCdKey.getText();
-		string = "";
-
-		if (text) {
-			for (i = 0; i < text.length; i += 1) {
-				string += text[i];
-
-				if (i !== text.length - 1) {
-					string += " ";
-				}
-			}
-		}
-
-		switch (string) {
-		case getLocaleString(10914):
-			D2Bot.printToConsole(Starter.gameInfo.mpq + " LoD key in use by " + Controls.LoginCdKeyInUseBy.getText(), 6);
-			D2Bot.CDKeyInUse();
-
-			if (Starter.gameInfo.switchKeys) {
-				ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
-				D2Bot.restart(true);
-			} else {
-				Controls.UnableToConnectOk.click();
-				ControlAction.timeoutDelay("LoD key in use", StarterConfig.CDKeyInUseDelay * 6e4);
-			}
-
-			break;
-		default:
-			if (Starter.gameInfo.switchKeys) {
-				D2Bot.printToConsole("Invalid CD-Key");
-				ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
-				D2Bot.restart(true);
-			} else {
-				Controls.UnableToConnectOk.click();
-				ControlAction.timeoutDelay("Invalid CD-Key", StarterConfig.CDKeyInUseDelay * 6e4);
-			}
-
-			break;
-		}
-
-		break;
-	case sdk.game.locations.CharSelectConnecting: // Character Select - Connecting
-		if (!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
-			Controls.CharSelectExit.click();
-		}
+	case sdk.game.locations.CharSelectConnecting:
+		LocationEvents.charSelectError();
 
 		break;
 	case sdk.game.locations.ServerDown: // Server Down - not much to do but wait..
 		break;
-	case sdk.game.locations.LobbyPleaseWait: // Lobby - Please Wait
-		if (!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
-			Controls.OkCentered.click();
-		}
+	case sdk.game.locations.LobbyPleaseWait:
+		!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
 
 		break;
 	case sdk.game.locations.GatewaySelect:
