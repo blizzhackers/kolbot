@@ -1530,10 +1530,9 @@ const Starter = {
 
 		let rval = "",
 			letters = useNumbers ? "abcdefghijklmnopqrstuvwxyz0123456789" : "abcdefghijklmnopqrstuvwxyz";
-		let strLen = letters.length;
 
 		for (let i = 0; i < len; i += 1) {
-			rval += letters[rand(0, strLen)];
+			rval += letters[rand(0, letters.length - 1)];
 		}
 
 		return rval;
