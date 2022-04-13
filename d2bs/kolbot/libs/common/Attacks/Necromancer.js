@@ -115,7 +115,7 @@ const ClassAttack = {
 			return false;
 		}
 
-		return unit.getState(state);
+		return !unit.getState(state);
 	},
 
 	getCustomCurse: function (unit) {
