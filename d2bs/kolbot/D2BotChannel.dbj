@@ -51,7 +51,7 @@ include("torchsystem.js");
 include("craftingsystem.js");
 include("common/misc.js");
 include("common/util.js");
-let Control_1 = require('./modules/Control');
+let Controls = require('./modules/Control');
 let sdk = require('./modules/sdk');
 
 let connectFail,
@@ -100,7 +100,7 @@ function locationAction (location) {
 		me.blockKeys = false;
 		loginRetry = 0;
 		!Starter.firstLogin && (Starter.firstLogin = true);
-		Control_1.LobbyEnterChat.click();
+		Controls.LobbyEnterChat.click();
 
 		break;
 	case sdk.game.locations.LobbyChat:
@@ -122,7 +122,7 @@ function locationAction (location) {
 
 		// Muted key handler
 		fullText = "";
-		lines = Control_1.LobbyChat.getText();
+		lines = Controls.LobbyChat.getText();
 
 		if (!lines) {
 			break;
@@ -184,7 +184,7 @@ function locationAction (location) {
 		switch (Starter.lastGameStatus) {
 		case "pending": // Most likely FTJ (can't detect it directly)
 			string = "";
-			text = Control_1.LobbyServerDown.getText();
+			text = Controls.LobbyServerDown.getText();
 
 			if (text) {
 				for (i = 0; i < text.length; i += 1) {
@@ -210,7 +210,7 @@ function locationAction (location) {
 			D2Bot.updateRuns();
 
 			if (retry < 3) {
-				Control_1.JoinGameWindow.click();
+				Controls.JoinGameWindow.click();
 
 				break MainSwitch;
 			}
@@ -236,7 +236,7 @@ function locationAction (location) {
 		}
 
 		fullText = "";
-		lines = Control_1.LobbyChat.getText();
+		lines = Controls.LobbyChat.getText();
 
 		if (!lines) {
 			break;
@@ -255,7 +255,7 @@ function locationAction (location) {
 				joinInfo.gamePass = StarterConfig.Passwords[n] || "";
 
 				if (joinInfo.gameName && joinInfo.gameName !== joinInfo.oldGame && badGames.indexOf(joinInfo.gameName) === -1) {
-					Control_1.JoinGameWindow.click();
+					Controls.JoinGameWindow.click();
 
 					break;
 				}
@@ -265,20 +265,20 @@ function locationAction (location) {
 		break;
 	case sdk.game.locations.WaitingInLine:
 	case sdk.game.locations.CreateGame:
-		Control_1.CancelCreateGame.click();
+		Controls.CancelCreateGame.click();
 
 		break;
 	case sdk.game.locations.JoinGame:
 		if (joinInfo.oldGame === joinInfo.gameName || badGames.includes(joinInfo.gameName)) {
-			Control_1.CancelJoinGame.click();
+			Controls.CancelJoinGame.click();
 		}
 
 		D2Bot.updateStatus("Join Game");
 
 		if (joinInfo.gameName !== "") {
 			print("ÿc2Joining ÿc0" + joinInfo.gameName);
-			Control_1.JoinGameName.setText(joinInfo.gameName);
-			Control_1.JoinGamePass.setText(joinInfo.gamePass);
+			Controls.JoinGameName.setText(joinInfo.gameName);
+			Controls.JoinGamePass.setText(joinInfo.gamePass);
 
 			if (typeof AdvancedConfig[me.profile] === "object" && typeof AdvancedConfig[me.profile].AnnounceGame === "boolean" && typeof AdvancedConfig[me.profile].AnnounceMessage === "string") {
 				Starter.sayMsg(AdvancedConfig[me.profile].AnnounceMessage + " " + joinInfo.gameName);
@@ -295,7 +295,7 @@ function locationAction (location) {
 
 			me.blockmouse = true;
 
-			Control_1.CreateGame.click();
+			Controls.CreateGame.click();
 
 			me.blockmouse = false;
 			Starter.lastGameStatus = "pending";
@@ -314,16 +314,16 @@ function locationAction (location) {
 	case sdk.game.locations.SplashScreen:
 		// Wrong char select screen fix
 		if (getLocation() === sdk.game.locations.CharSelect
-			&& (Profile().type === sdk.game.profiletype.Battlenet && !Control_1.CharSelectCurrentRealm.control)
-			|| ((Profile().type !== sdk.game.profiletype.Battlenet && Control_1.CharSelectCurrentRealm.control))) {
-			Control_1.CharSelectExit.click();
+			&& (Profile().type === sdk.game.profiletype.Battlenet && !Controls.CharSelectCurrentRealm.control)
+			|| ((Profile().type !== sdk.game.profiletype.Battlenet && Controls.CharSelectCurrentRealm.control))) {
+			Controls.CharSelectExit.click();
 			
 			break;
 		}
 
 		// multiple realm botting fix in case of R/D or disconnect
 		if (Starter.firstLogin && getLocation() === sdk.game.locations.Login) {
-			Control_1.CharSelectExit.click();
+			Controls.CharSelectExit.click();
 		}
 
 		D2Bot.updateStatus("Logging In");
@@ -336,7 +336,7 @@ function locationAction (location) {
 					// dead hardcore character on sp
 					if (getLocation() === sdk.game.locations.OkCenteredErrorPopUp) {
 						// Exit from that pop-up
-						Control_1.OkCentered.click();
+						Controls.OkCentered.click();
 						D2Bot.printToConsole("Character died", 9);
 						D2Bot.stop();
 					} else {
@@ -353,7 +353,7 @@ function locationAction (location) {
 		break;
 	case sdk.game.locations.LoginError: // Login Error
 		string = "";
-		text = Control_1.LoginErrorText.getText();
+		text = Controls.LoginErrorText.getText();
 
 		if (text) {
 			for (i = 0; i < text.length; i += 1) {
@@ -418,7 +418,7 @@ function locationAction (location) {
 			case getLocaleString(5347):
 				D2Bot.updateStatus("Disconnected");
 				D2Bot.printToConsole("Disconnected");
-				Control_1.LoginErrorOk.click();
+				Controls.LoginErrorOk.click();
 
 				break MainSwitch;
 			default:
@@ -435,7 +435,7 @@ function locationAction (location) {
 				break;
 			}
 
-			Control_1.LoginErrorOk.click();
+			Controls.LoginErrorOk.click();
 	
 			while (true) {
 				delay(1000);
@@ -454,14 +454,14 @@ function locationAction (location) {
 			connectFail = true;
 		}
 
-		Control_1.UnableToConnectOk.click();
+		Controls.UnableToConnectOk.click();
 
 		break;
 	case sdk.game.locations.RealmDown: // Realm Down - Character Select screen
 		D2Bot.updateStatus("Realm Down");
 		delay(1000);
 
-		if (!Control_1.CharSelectExit.click()) {
+		if (!Controls.CharSelectExit.click()) {
 			break;
 		}
 
@@ -479,27 +479,27 @@ function locationAction (location) {
 	case sdk.game.locations.Disconnected: // Character Select / Main Menu - Disconnected
 		D2Bot.updateStatus("Disconnected");
 		delay(500);
-		Control_1.OkCentered.click();
+		Controls.OkCentered.click();
 		break;
 	case sdk.game.locations.CharSelectPleaseWait: // Character Select - Please Wait popup
 		if (!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
-			Control_1.OkCentered.click();
+			Controls.OkCentered.click();
 		}
 
 		break;
 	case sdk.game.locations.LobbyLostConnection: // Lobby - Lost Connection - just click okay, since we're toast anyway
 		delay(1000);
-		Control_1.OkCentered.click();
+		Controls.OkCentered.click();
 		break;
 	case sdk.game.locations.CdKeyInUse: // Login - Cdkey In Use
-		D2Bot.printToConsole(Starter.gameInfo.mpq + " is in use by " + Control_1.LoginCdKeyInUseBy.getText(), 6);
+		D2Bot.printToConsole(Starter.gameInfo.mpq + " is in use by " + Controls.LoginCdKeyInUseBy.getText(), 6);
 		D2Bot.CDKeyInUse();
 
 		if (Starter.gameInfo.switchKeys) {
 			ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
 			D2Bot.restart(true);
 		} else {
-			Control_1.UnableToConnectOk.click();
+			Controls.UnableToConnectOk.click();
 			ControlAction.timeoutDelay("CD-Key in use", StarterConfig.CDKeyInUseDelay * 6e4);
 		}
 
@@ -508,12 +508,12 @@ function locationAction (location) {
 		break;
 	case sdk.game.locations.MainMenuConnecting: // Main Menu - Connecting
 		if (!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
-			Control_1.LoginCancelWait.click();
+			Controls.LoginCancelWait.click();
 		}
 
 		break;
 	case sdk.game.locations.InvalidCdKey: // Login - Invalid Cdkey (classic or xpac)
-		text = Control_1.LoginInvalidCdKey.getText();
+		text = Controls.LoginInvalidCdKey.getText();
 		string = "";
 
 		if (text) {
@@ -528,14 +528,14 @@ function locationAction (location) {
 
 		switch (string) {
 		case getLocaleString(10914):
-			D2Bot.printToConsole(Starter.gameInfo.mpq + " LoD key in use by " + Control_1.LoginCdKeyInUseBy.getText(), 6);
+			D2Bot.printToConsole(Starter.gameInfo.mpq + " LoD key in use by " + Controls.LoginCdKeyInUseBy.getText(), 6);
 			D2Bot.CDKeyInUse();
 
 			if (Starter.gameInfo.switchKeys) {
 				ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
 				D2Bot.restart(true);
 			} else {
-				Control_1.UnableToConnectOk.click();
+				Controls.UnableToConnectOk.click();
 				ControlAction.timeoutDelay("LoD key in use", StarterConfig.CDKeyInUseDelay * 6e4);
 			}
 
@@ -546,7 +546,7 @@ function locationAction (location) {
 				ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
 				D2Bot.restart(true);
 			} else {
-				Control_1.UnableToConnectOk.click();
+				Controls.UnableToConnectOk.click();
 				ControlAction.timeoutDelay("Invalid CD-Key", StarterConfig.CDKeyInUseDelay * 6e4);
 			}
 
@@ -557,7 +557,7 @@ function locationAction (location) {
 	case sdk.game.locations.CharSelectConnecting: // Character Select - Connecting
 	case sdk.game.locations.CharSelectNoChars: // Empty character screen
 		string = "";
-		text = Control_1.CharSelectError.getText();
+		text = Controls.CharSelectError.getText();
 
 		if (text) {
 			for (i = 0; i < text.length; i += 1) {
@@ -583,7 +583,7 @@ function locationAction (location) {
 		}
 
 		if (!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location)) {
-			Control_1.CharSelectExit.click();
+			Controls.CharSelectExit.click();
 			Starter.gameInfo.rdBlocker && D2Bot.restart();
 		}
 
@@ -592,19 +592,19 @@ function locationAction (location) {
 		break;
 	case sdk.game.locations.LobbyPleaseWait: // Lobby - Please Wait
 		if (!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location)) {
-			Control_1.OkCentered.click();
+			Controls.OkCentered.click();
 		}
 
 		break;
 	case sdk.game.locations.GameNameExists: // Lobby - Game Name Exists
 		break;
 	case sdk.game.locations.GatewaySelect: // Gateway Select
-		Control_1.GatewayCancel.click();
+		Controls.GatewayCancel.click();
 
 		break;
 	case sdk.game.locations.GameDoesNotExist: // Lobby - Game Does Not Exist
-		Control_1.JoinGameWindow.click();
-		Control_1.CancelCreateGame.click();
+		Controls.JoinGameWindow.click();
+		Controls.CancelCreateGame.click();
 		ControlAction.timeoutDelay("Game doesn't exist", StarterConfig.GameDoesNotExistTimeout * 1e3);
 
 		Starter.lastGameStatus = "DNE";
@@ -612,18 +612,18 @@ function locationAction (location) {
 		break;
 	case sdk.game.locations.GameIsFull: // Game is full
 		badGames.push(joinInfo.gameName);
-		Control_1.JoinGameWindow.click();
-		Control_1.CancelCreateGame.click();
+		Controls.JoinGameWindow.click();
+		Controls.CancelCreateGame.click();
 
 		Starter.lastGameStatus = "FULL";
 
 		break;
 	case sdk.game.locations.OtherMultiplayer: // Other Multiplayer
-		Control_1.OtherMultiplayerCancel.click();
+		Controls.OtherMultiplayerCancel.click();
 
 		break;
 	case sdk.game.locations.TcpIp: // TCP/IP Game
-		Control_1.TcpIpCancel.click();
+		Controls.TcpIpCancel.click();
 
 		break;
 	case sdk.game.locations.TcpIpEnterIp: // TCP/IP Game - Enter Host IP
@@ -645,7 +645,7 @@ function locationAction (location) {
 			connectFail = true;
 		}
 
-		Control_1.OkCentered.click();
+		Controls.OkCentered.click();
 
 		break;
 	default:
