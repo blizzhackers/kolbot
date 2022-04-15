@@ -102,30 +102,23 @@ const Runewords = {
 	validGids: [],
 
 	init: function () {
-		if (!Config.MakeRunewords) {
-			return;
-		}
-
-		let i, info, parsedLine;
+		if (!Config.MakeRunewords) return;
 
 		this.pickitEntries = [];
 
 		// initiate pickit entries
-		for (i = 0; i < Config.KeepRunewords.length; i += 1) {
-			info = {
+		for (let i = 0; i < Config.KeepRunewords.length; i += 1) {
+			let info = {
 				file: "Character Config",
 				line: Config.KeepRunewords[i]
 			};
 
-			parsedLine = NTIP.ParseLineInt(Config.KeepRunewords[i], info);
-
-			if (parsedLine) {
-				this.pickitEntries.push(NTIP.ParseLineInt(Config.KeepRunewords[i], info));
-			}
+			let parsedLine = NTIP.ParseLineInt(Config.KeepRunewords[i], info);
+			parsedLine && this.pickitEntries.push(NTIP.ParseLineInt(Config.KeepRunewords[i], info));
 		}
 
 		// change text to classid
-		for (i = 0; i < Config.Runewords.length; i += 1) {
+		for (let i = 0; i < Config.Runewords.length; i += 1) {
 			if (Config.Runewords[i][0] !== false) {
 				if (isNaN(Config.Runewords[i][1])) {
 					if (NTIPAliasClassID.hasOwnProperty(Config.Runewords[i][1].replace(/\s+/g, "").toLowerCase())) {
@@ -144,30 +137,25 @@ const Runewords = {
 	},
 
 	validItem: function (item) {
-		if (CraftingSystem.validGids.indexOf(item.gid) > -1) {
-			return false;
-		}
-
-		return true;
+		return CraftingSystem.validGids.indexOf(item.gid) === -1;
 	},
 
 	// build a list of needed runes. won't count runes until the base item is found for a given runeword
 	buildLists: function () {
-		let i, j, k, items, hel, baseCheck;
-
 		this.validGids = [];
 		this.needList = [];
-		items = me.findItems(-1, 0);
+		let baseCheck;
+		let items = me.findItems(-1, 0);
 
-		for (i = 0; i < Config.Runewords.length; i += 1) {
+		for (let i = 0; i < Config.Runewords.length; i += 1) {
 			if (!baseCheck) {
 				baseCheck = this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0)) || this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0), true);
 			}
 
 			if (this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0))) {
 				RuneLoop:
-				for (j = 0; j < Config.Runewords[i][0].length; j += 1) {
-					for (k = 0; k < items.length; k += 1) {
+				for (let j = 0; j < Config.Runewords[i][0].length; j += 1) {
+					for (let k = 0; k < items.length; k += 1) {
 						if (items[k].classid === Config.Runewords[i][0][j] && this.validItem(items[k])) {
 							this.validGids.push(items[k].gid);
 							items.splice(k, 1);
@@ -185,7 +173,7 @@ const Runewords = {
 
 		// hel rune for rerolling purposes
 		if (baseCheck) {
-			hel = me.getItem(624, 0);
+			let hel = me.getItem(624, 0);
 
 			if (hel) {
 				do {
@@ -202,9 +190,7 @@ const Runewords = {
 	},
 
 	update: function (classid, gid) {
-		let i;
-
-		for (i = 0; i < this.needList.length; i += 1) {
+		for (let i = 0; i < this.needList.length; i += 1) {
 			if (this.needList[i] === classid) {
 				this.needList.splice(i, 1);
 
@@ -219,20 +205,17 @@ const Runewords = {
 
 	// returns an array of items that make a runeword if found, false if we don't have enough items for any
 	checkRunewords: function () {
-		let i, j, k, items, base, itemList;
+		let items = me.findItems(-1, 0); // get items in inventory/stash
 
-		items = me.findItems(-1, 0); // get items in inventory/stash
-
-		for (i = 0; i < Config.Runewords.length; i += 1) {
-			itemList = []; // reset item list
-			base = this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0)); // check base
+		for (let i = 0; i < Config.Runewords.length; i += 1) {
+			let itemList = []; // reset item list
+			let base = this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0)); // check base
 
 			if (base) {
 				itemList.push(base); // push the base
 
-				RuneLoop:
-				for (j = 0; j < Config.Runewords[i][0].length; j += 1) {
-					for (k = 0; k < items.length; k += 1) {
+				for (let j = 0; j < Config.Runewords[i][0].length; j += 1) {
+					for (let k = 0; k < items.length; k += 1) {
 						if (items[k].classid === Config.Runewords[i][0][j]) { // rune matched
 							itemList.push(items[k]); // push into the item list
 							items.splice(k, 1); // remove from item list as to not count it twice
@@ -243,8 +226,9 @@ const Runewords = {
 						}
 					}
 
-					if (itemList.length !== j + 2) { // can't complete runeword - go to next one
-						break RuneLoop;
+					// can't complete runeword - go to next one
+					if (itemList.length !== j + 2) {
+						break;
 					}
 
 					if (itemList.length === Config.Runewords[i][0].length + 1) { // runes + base
@@ -257,20 +241,17 @@ const Runewords = {
 		return false;
 	},
 
-	checkItem: function (unit) { // for pickit
-		if (!Config.MakeRunewords) {
-			return false;
-		}
+	// for pickit
+	checkItem: function (unit) {
+		if (!Config.MakeRunewords) return false;
 
-		if (unit.itemType === 74 && this.needList.indexOf(unit.classid) > -1) { // rune
-			return true;
-		}
-
-		return false;
+		// rune
+		return (unit.itemType === 74 && this.needList.includes(unit.classid));
 	},
 
-	keepItem: function (unit) { // for clearInventory - don't drop runes that are a part of runeword recipe
-		return this.validGids.indexOf(unit.gid) > -1;
+	// for clearInventory - don't drop runes that are a part of runeword recipe
+	keepItem: function (unit) {
+		return this.validGids.includes(unit.gid);
 	},
 
 	/* get the base item based on classid and runeword recipe
@@ -278,13 +259,7 @@ const Runewords = {
 		rigged to accept item or classid as 2nd arg
 	*/
 	getBase: function (runeword, base, ethFlag, reroll) {
-		let item;
-
-		if (typeof base === "object") {
-			item = base;
-		} else {
-			item = me.getItem(base, 0);
-		}
+		let item = typeof base === "object" ? base : me.getItem(base, 0);
 
 		if (item) {
 			do {
@@ -305,17 +280,14 @@ const Runewords = {
 		return false;
 	},
 
-	socketItem: function (base, rune) { // args named this way to prevent confusion
-		let i, tick;
+	// args named this way to prevent confusion
+	socketItem: function (base, rune) {
+		if (!rune.toCursor()) return false;
 
-		if (!rune.toCursor()) {
-			return false;
-		}
-
-		for (i = 0; i < 3; i += 1) {
+		for (let i = 0; i < 3; i += 1) {
 			clickItem(0, base.x, base.y, base.location);
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 2000) {
 				if (!me.itemoncursor) {
@@ -332,24 +304,18 @@ const Runewords = {
 	},
 
 	getScroll: function () {
-		let i, scroll, npc;
+		let scroll = me.getItem(529, 0); // check if we already have the scroll
 
-		scroll = me.getItem(529, 0); // check if we already have the scroll
+		if (scroll) return scroll;
 
-		if (scroll) {
-			return scroll;
-		}
+		let npc = Town.initNPC("Shop");
 
-		npc = Town.initNPC("Shop");
-
-		if (!npc) {
-			return false;
-		}
+		if (!npc) return false;
 
 		scroll = npc.getItem(529);
 
 		if (scroll) {
-			for (i = 0; i < 3; i += 1) {
+			for (let i = 0; i < 3; i += 1) {
 				scroll.buy(true);
 
 				if (me.getItem(529)) {
@@ -364,26 +330,21 @@ const Runewords = {
 	},
 
 	makeRunewords: function () {
-		if (!Config.MakeRunewords) {
-			return false;
-		}
-
-		let i, items;
+		if (!Config.MakeRunewords) return false;
 
 		while (true) {
 			this.buildLists();
 
-			items = this.checkRunewords(); // get a runeword. format = [base, runes...]
+			let items = this.checkRunewords(); // get a runeword. format = [base, runes...]
 
-			if (!items) { // can't make runewords - exit loop
+			// can't make runewords - exit loop
+			if (!items) {
 				break;
 			}
 
-			if (!Town.openStash()) {
-				return false;
-			}
+			if (!Town.openStash()) return false;
 
-			for (i = 1; i < items.length; i += 1) {
+			for (let i = 1; i < items.length; i += 1) {
 				this.socketItem(items[0], items[i]);
 			}
 
@@ -404,42 +365,34 @@ const Runewords = {
 	},
 
 	rerollRunewords: function () {
-		let i, base, scroll, hel;
+		for (let i = 0; i < Config.Runewords.length; i += 1) {
+			let hel = me.getItem(624, 0);
 
-		for (i = 0; i < Config.Runewords.length; i += 1) {
-			hel = me.getItem(624, 0);
+			if (!hel) return false;
 
-			if (!hel) {
-				return false;
-			}
-
-			base = this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0), true); // get a bad runeword
+			let base = this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0), true); // get a bad runeword
 
 			if (base) {
-				scroll = this.getScroll();
+				let scroll = this.getScroll();
 
 				// failed to get scroll or open stash most likely means we're stuck somewhere in town, so it's better to return false
-				if (!scroll || !Town.openStash() || !Cubing.emptyCube()) {
-					return false;
-				}
+				if (!scroll || !Town.openStash() || !Cubing.emptyCube()) return false;
 
 				// not a fatal error, if the cube can't be emptied, the func will return false on next cycle
 				if (!Storage.Cube.MoveTo(base) || !Storage.Cube.MoveTo(hel) || !Storage.Cube.MoveTo(scroll)) {
 					continue;
 				}
 
-				if (!Cubing.openCube()) { // probably only happens on server crash
-					return false;
-				}
+				// probably only happens on server crash
+				if (!Cubing.openCube()) return false;
 
 				print("ÿc4Runewords: ÿc0Rerolling runeword: " + base.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, ""));
 				D2Bot.printToConsole("Rerolling runeword: " + base.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, ""), 5);
 				transmute();
 				delay(500);
 
-				if (!Cubing.emptyCube()) { // can't pull the item out = no space = fail
-					return false;
-				}
+				// can't pull the item out = no space = fail
+				if (!Cubing.emptyCube()) return false;
 			}
 		}
 

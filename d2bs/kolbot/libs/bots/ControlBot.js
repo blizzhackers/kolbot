@@ -439,7 +439,6 @@ function ControlBot() {
 			break;
 		}
 
-		MainLoop:
 		for (let i = 0; i < wpList.length; i++) {
 			if (this.checkHostiles()) {
 				break;
@@ -466,7 +465,7 @@ function ControlBot() {
 				if (timeout >= 20) {
 					say("Aborting wp giving.");
 
-					break MainLoop;
+					break;
 				}
 
 				delay(5000);
@@ -559,6 +558,7 @@ function ControlBot() {
 		command = [msg, nick];
 	}
 
+	// eslint-disable-next-line no-unused-vars
 	function gameEvent(mode, param1, param2, name1, name2) {
 		switch (mode) {
 		case 0x02:

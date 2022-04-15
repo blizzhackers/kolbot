@@ -25,9 +25,8 @@ function main () {
 
 	clearAllEvents(); // remove any event listeners from game crash
 
-	if (!getScript("tools/heartbeat.js")) {
-		load("tools/heartbeat.js");
-	}
+	// load heartbeat if it isn't already running
+	!getScript("tools/heartbeat.js") && load("tools/heartbeat.js");
 
 	if (getScript("d2botmap.dbj")) {
 		include("manualplay/MapMode.js");
@@ -48,40 +47,23 @@ function main () {
 		}
 	}
 	
-	if (getScript("D2BotShopDrop.dbj")) {
+	// MuleLogger handler / ShopDrop
+	if (MuleLogger.inGameCheck() || getScript("D2BotShopDrop.dbj")) {
 		return true;
 	}
 	
 	// don't load default for dropper/mules
 	if (getScript("D2BotDropper.dbj") || getScript("D2BotMule.dbj") || getScript("D2BotDrop.dbj")) {
+		load("tools/AreaWatcher.js");
+		
 		while (true) {
-			try {
-				if (me.gameReady && me.ingame && !me.inTown) {
-					D2Bot.printToConsole("Saved from suicide walk!");
-					D2Bot.restart();
-				}
-			} catch (e) {
-				D2Bot.restart();
-			}
 			delay(1000);
 		}
-		return true;
 	}
 
-	// MuleLogger handler
-	if (MuleLogger.inGameCheck()) {
-		return true;
-	}
-
-	let i, sojPause, stats, anni,
+	let sojPause,
 		sojCounter = 0,
 		startTime = getTickCount();
-
-	this.itemEvent = function (gid, mode, code, global) {
-		if (gid > 0 && mode === 0) {
-			Pickit.gidList.push(gid);
-		}
-	};
 
 	this.scriptEvent = function (msg) {
 		if (msg && typeof msg !== "string") return;
@@ -140,7 +122,7 @@ function main () {
 	}
 
 	me.maxgametime = Config.MaxGameTime * 1000;
-	stats = DataFile.getStats();
+	let stats = DataFile.getStats();
 
 	// Check for experience decrease -> log death. Skip report if life chicken is disabled.
 	if (stats.name === me.name && me.getStat(13) < stats.experience && Config.LifeChicken > 0) {
@@ -155,7 +137,7 @@ function main () {
 	// Load threads
 	load("tools/ToolsThread.js");
 	(Config.TownCheck || Config.TownHP > 0 || Config.TownMP > 0) && load("tools/TownChicken.js");
-	
+
 	if (Config.PublicMode) {
 		Config.PublicMode === true ? require('libs/modules/SimpleParty') : load("tools/Party.js");
 	}
@@ -164,7 +146,7 @@ function main () {
 
 	if (Config.FastPick) {
 		print("ÿc2Fast pickit active.");
-		addEventListener("itemaction", this.itemEvent);
+		addEventListener("itemaction", Pickit.itemEvent);
 	}
 
 	// One time maintenance - check cursor, get corpse, clear leftover items, pick items in case anything important was dropped
@@ -175,20 +157,14 @@ function main () {
 		Town.getCorpse();
 		Town.clearBelt();
 		Config.ClearInvOnStart && Town.clearInventory();
-
-		if (getDistance(me, orgx, orgy) > 3) {
-			Pather.moveTo(orgx, orgx);
-		}
-		
+		[orgx, orgy].distance > 3 && Pather.moveTo(orgx, orgx);
 		Pickit.pickItems();
 	}
 
 	me.automap = Config.AutoMap;
 
 	// Next game = drop keys
-	if (TorchSystem.keyCheck()) {
-		scriptBroadcast("torch");
-	}
+	TorchSystem.keyCheck() && scriptBroadcast("torch");
 
 	// Auto skill and stat
 	if (Config.AutoSkill.Enabled && include("common/AutoSkill.js")) {
@@ -200,9 +176,7 @@ function main () {
 	}
 
 	// offline
-	if (!me.realm) {
-		D2Bot.updateRuns();
-	}
+	!me.realm && D2Bot.updateRuns();
 
 	// Go
 	Loader.init();
@@ -224,9 +198,7 @@ function main () {
 
 	if (sojPause) {
 		try {
-			Town.goToTown();
 			Town.doChores();
-
 			me.maxgametime = 0;
 
 			while (sojCounter < Config.SoJWaitTime) {
@@ -247,7 +219,7 @@ function main () {
 
 			break;
 		case "object":
-			for (i = 0; i < Config.LastMessage.length; i += 1) {
+			for (let i = 0; i < Config.LastMessage.length; i += 1) {
 				say(Config.LastMessage[i].replace("$nextgame", DataFile.getStats().nextGame, "i"));
 			}
 
@@ -255,23 +227,15 @@ function main () {
 		}
 	}
 
-	if (AutoMule.muleCheck()) {
-		scriptBroadcast("mule");
-	}
+	AutoMule.muleCheck() && scriptBroadcast("mule");
+	CraftingSystem.checkFullSets() && scriptBroadcast("crafting");
+	TorchSystem.keyCheck() && scriptBroadcast("torch");
 
 	// Anni handler. Mule Anni if it's in unlocked space and profile is set to mule torch/anni.
-	anni = me.findItem(603, 0, -1, 7);
+	let anni = me.findItem(603, 0, -1, 7);
 
 	if (anni && !Storage.Inventory.IsLocked(anni, Config.Inventory) && AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
 		scriptBroadcast("muleAnni");
-	}
-
-	if (CraftingSystem.checkFullSets()) {
-		scriptBroadcast("crafting");
-	}
-
-	if (TorchSystem.keyCheck()) {
-		scriptBroadcast("torch");
 	}
 
 	scriptBroadcast("quit");

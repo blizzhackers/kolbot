@@ -539,7 +539,7 @@ const Attack = {
 
 			if (monster) {
 				do {
-					if (classid.indexOf(monster.classid) > -1 && getDistance(center.x, center.y, monster.x, monster.y) <= range
+					if (classid.includes(monster.classid) && getDistance(center.x, center.y, monster.x, monster.y) <= range
 						&& (!spectype || (monster.spectype & spectype)) && monster.attackable) {
 						monsterList.push(copyUnit(monster));
 					}
@@ -547,10 +547,6 @@ const Attack = {
 			}
 
 			break;
-		}
-
-		if (!monsterList.length) {
-			return false;
 		}
 
 		return monsterList;
@@ -681,7 +677,7 @@ const Attack = {
 		skipBlocked === true && (skipBlocked = 0x4);
 
 		while (true) {
-			getDistance(me, x, y) > 5 && Pather.moveTo(x, y);
+			[x, y].distance > 5 && Pather.moveTo(x, y);
 
 			let monster = getUnit(1);
 			let monList = [];
@@ -918,7 +914,7 @@ const Attack = {
 	},
 
 	// Check if a set of coords is valid/accessable
-	validSpot: function (x, y, skillId = -1) {
+	validSpot: function (x, y) {
 		// Just in case
 		if (!me.area || !x || !y) return false;
 
@@ -933,6 +929,39 @@ const Attack = {
 		// Avoid non-walkable spots, objects
 		if (result === undefined || (result & 0x1) || (result & 0x400)) {
 			return false;
+		}
+
+		return true;
+	},
+
+	validCastingLocation: function (x, y, skillId = -1) {
+		// Just in case
+		if (!me.area || !x || !y) return false;
+
+		let result;
+
+		try { // Treat thrown errors as invalid spot
+			result = getCollision(me.area, x, y);
+		} catch (e) {
+			return false;
+		}
+
+		if (result === undefined) return false;
+
+		if (skillId > -1) {
+			// probably going to need more checks, need to figure out any skills that don't do dmg if they aren't over a floor
+			// should this include 0x20 cast blocker? or 0x80E missle blocker?
+			switch (true) {
+			// not on the floor
+			case ([sdk.skills.Meteor, sdk.skills.Blizzard].includes(skillId)):
+				if (!!(result & 0x1000)) {
+					return false;
+				}
+				return !(result & 0x1);
+			// Avoid non-walkable spots, objects
+			case (Skill.getRange(skillId) < 10 && ((result & 0x1) || (result & 0x400))):
+				return false;
+			}
 		}
 
 		return true;
@@ -1492,13 +1521,9 @@ const Attack = {
 
 	// Find an optimal attack position and move or walk to it
 	getIntoPosition: function (unit, distance, coll, walk) {
-		if (!unit || !unit.x || !unit.y) {
-			return false;
-		}
+		if (!unit || !unit.x || !unit.y) return false;
 
-		if (walk === true) {
-			walk = 1;
-		}
+		walk === true && (walk = 1);
 
 		if (distance < 4 && (!unit.hasOwnProperty("mode") || (unit.mode !== 0 && unit.mode !== 12))) {
 			//me.overhead("Short range");
@@ -1553,7 +1578,7 @@ const Attack = {
 
 							break;
 						case 2:
-							if (getDistance(me, coords[i]) < 6 && !CollMap.checkColl(me, coords[i], 0x5)) {
+							if (coords[i].distance < 6 && !CollMap.checkColl(me, coords[i], 0x5)) {
 								Pather.walkTo(coords[i].x, coords[i].y, 2);
 							} else {
 								Pather.moveTo(coords[i].x, coords[i].y, 1);
@@ -1572,9 +1597,7 @@ const Attack = {
 			}
 		}
 
-		if (name) {
-			print("ÿc4Attackÿc0: No valid positions for: " + name);
-		}
+		!!name && print("ÿc4Attackÿc0: No valid positions for: " + name);
 
 		return false;
 	},

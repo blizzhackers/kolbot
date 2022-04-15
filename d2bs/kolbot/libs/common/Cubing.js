@@ -100,15 +100,11 @@ const Cubing = {
 	gemList: [],
 
 	init: function () {
-		if (!Config.Cubing) {
-			return;
-		}
+		if (!Config.Cubing) return;
 
 		//print("We have " + Config.Recipes.length + " cubing recipe(s).");
 
-		let i;
-
-		for (i = 0; i < Config.Recipes.length; i += 1) {
+		for (let i = 0; i < Config.Recipes.length; i += 1) {
 			if (Config.Recipes[i].length > 1 && isNaN(Config.Recipes[i][1])) {
 				if (NTIPAliasClassID.hasOwnProperty(Config.Recipes[i][1].replace(/\s+/g, "").toLowerCase())) {
 					Config.Recipes[i][1] = NTIPAliasClassID[Config.Recipes[i][1].replace(/\s+/g, "").toLowerCase()];
@@ -127,13 +123,13 @@ const Cubing = {
 	},
 
 	buildGemList: function () {
-		let i, j,
-			gemList = [561, 566, 571, 576, 581, 586, 601];
+		let gemList = [561, 566, 571, 576, 581, 586, 601];
 
-		for (i = 0; i < this.recipes.length; i += 1) {
-			if ([0, 49].indexOf(this.recipes[i].Index) === -1) { // Skip gems and other magic rerolling recipes
-				for (j = 0; j < this.recipes[i].Ingredients.length; j += 1) {
-					if (gemList.indexOf(this.recipes[i].Ingredients[j]) > -1) {
+		for (let i = 0; i < this.recipes.length; i += 1) {
+			// Skip gems and other magic rerolling recipes
+			if ([0, 49].indexOf(this.recipes[i].Index) === -1) {
+				for (let j = 0; j < this.recipes[i].Ingredients.length; j += 1) {
+					if (gemList.includes(this.recipes[i].Ingredients[j])) {
 						gemList.splice(gemList.indexOf(this.recipes[i].Ingredients[j]), 1);
 					}
 				}
@@ -151,48 +147,33 @@ const Cubing = {
 			return false;
 		}
 
-		let i, cube, chest;
+		let cube;
 
 		Pather.useWaypoint(57, true);
 		Precast.doPrecast(true);
 
 		if (Pather.moveToExit(60, true) && Pather.moveToPreset(me.area, 2, 354)) {
-			chest = getUnit(2, 354);
+			let chest = getUnit(2, 354);
 
 			if (chest) {
 				Misc.openChest(chest);
-
-				for (i = 0; i < 5; i += 1) {
+				Misc.poll(function () {
 					cube = getUnit(4, 549);
-
-					if (cube) {
-						Pickit.pickItem(cube);
-
-						break;
-					}
-
-					delay(200);
-				}
+					return !!cube && Pickit.pickItem(cube);
+				}, 1000, 2000);
 			}
 		}
 
 		Town.goToTown();
-
 		cube = me.getItem(549);
 
-		if (cube) {
-			return Storage.Stash.MoveTo(cube);
-		}
-
-		return false;
+		return (!!cube && Storage.Stash.MoveTo(cube));
 	},
 
 	buildRecipes: function () {
-		let i;
-
 		this.recipes = [];
 
-		for (i = 0; i < Config.Recipes.length; i += 1) {
+		for (let i = 0; i < Config.Recipes.length; i += 1) {
 			if (typeof Config.Recipes[i] !== "object" || (Config.Recipes[i].length > 2 && typeof Config.Recipes[i][2] !== "number") || Config.Recipes[i].length < 1) {
 				throw new Error("Cubing.buildRecipes: Invalid recipe format.");
 			}
@@ -578,21 +559,19 @@ const Cubing = {
 	subRecipes: [],
 
 	buildLists: function () {
-		let i, j, k, items;
-
 		CraftingSystem.checkSubrecipes();
 
 		this.validIngredients = [];
 		this.neededIngredients = [];
-		items = me.findItems(-1, 0);
+		let items = me.findItems(-1, 0);
 
-		for (i = 0; i < this.recipes.length; i += 1) {
+		for (let i = 0; i < this.recipes.length; i += 1) {
 			// Set default Enabled property - true if recipe is always enabled, false otherwise
 			this.recipes[i].Enabled = this.recipes[i].hasOwnProperty("AlwaysEnabled");
 
 			IngredientLoop:
-			for (j = 0; j < this.recipes[i].Ingredients.length; j += 1) {
-				for (k = 0; k < items.length; k += 1) {
+			for (let j = 0; j < this.recipes[i].Ingredients.length; j += 1) {
+				for (let k = 0; k < items.length; k += 1) {
 					if (((this.recipes[i].Ingredients[j] === "pgem" && this.gemList.indexOf(items[k].classid) > -1) ||
 						(this.recipes[i].Ingredients[j] === "cgem" && [557, 562, 567, 572, 577, 582, 597].indexOf(items[k].classid) > -1) ||
 						items[k].classid === this.recipes[i].Ingredients[j]) && this.validItem(items[k], this.recipes[i])) {
@@ -671,11 +650,9 @@ const Cubing = {
 
 	// Remove unneeded flawless gem recipes
 	clearSubRecipes: function () {
-		let i;
-
 		this.subRecipes = [];
 
-		for (i = 0; i < this.recipes.length; i += 1) {
+		for (let i = 0; i < this.recipes.length; i += 1) {
 			if (this.recipes[i].hasOwnProperty("MainRecipe")) {
 				this.recipes.splice(i, 1);
 
@@ -690,18 +667,17 @@ const Cubing = {
 	},
 
 	checkRecipe: function (recipe) {
-		let i, j, item,
-			usedGids = [],
+		let usedGids = [],
 			matchList = [];
 
-		for (i = 0; i < recipe.Ingredients.length; i += 1) {
-			for (j = 0; j < this.validIngredients.length; j += 1) {
+		for (let i = 0; i < recipe.Ingredients.length; i += 1) {
+			for (let j = 0; j < this.validIngredients.length; j += 1) {
 				if (usedGids.indexOf(this.validIngredients[j].gid) === -1 && (
 					this.validIngredients[j].classid === recipe.Ingredients[i] ||
-						(recipe.Ingredients[i] === "pgem" && this.gemList.indexOf(this.validIngredients[j].classid) > -1) ||
-						(recipe.Ingredients[i] === "cgem" && [557, 562, 567, 572, 577, 582, 597].indexOf(this.validIngredients[j].classid) > -1)
+						(recipe.Ingredients[i] === "pgem" && this.gemList.includes(this.validIngredients[j].classid)) ||
+						(recipe.Ingredients[i] === "cgem" && [557, 562, 567, 572, 577, 582, 597].includes(this.validIngredients[j].classid))
 				)) {
-					item = me.getItem(this.validIngredients[j].classid, -1, this.validIngredients[j].gid);
+					let item = me.getItem(this.validIngredients[j].classid, -1, this.validIngredients[j].gid);
 
 					if (item && this.validItem(item, recipe)) { // 26.11.2012. check if the item actually belongs to the given recipe
 						// don't repeat the same item
@@ -715,9 +691,7 @@ const Cubing = {
 			}
 
 			// no new items in the match list = not enough ingredients
-			if (matchList.length !== i + 1) {
-				return false;
-			}
+			if (matchList.length !== i + 1) return false;
 		}
 
 		// return the match list. these items go to cube
@@ -726,10 +700,9 @@ const Cubing = {
 
 	// debug function - get what each recipe needs
 	getRecipeNeeds: function (index) {
-		let i,
-			rval = " [";
+		let rval = " [";
 
-		for (i = 0; i < this.neededIngredients.length; i += 1) {
+		for (let i = 0; i < this.neededIngredients.length; i += 1) {
 			if (this.neededIngredients[i].recipe.Index === index) {
 				rval += this.neededIngredients[i].classid + (i === this.neededIngredients.length - 1 ? "" : " ");
 			}
@@ -740,21 +713,14 @@ const Cubing = {
 		return rval;
 	},
 
-	checkItem: function (unit) { // Check an item on ground for pickup
-		if (!Config.Cubing) {
-			return false;
-		}
+	// Check an item on ground for pickup
+	checkItem: function (unit) {
+		if (!Config.Cubing) return false;
+		if (this.keepItem(unit)) return true;
 
-		if (this.keepItem(unit)) {
-			return true;
-		}
-
-		let i;
-
-		for (i = 0; i < this.neededIngredients.length; i += 1) {
+		for (let i = 0; i < this.neededIngredients.length; i += 1) {
 			if (unit.classid === this.neededIngredients[i].classid && this.validItem(unit, this.neededIngredients[i].recipe)) {
 				//debugLog("Cubing: " + unit.name + " " + this.neededIngredients[i].recipe.Index + " " + (this.neededIngredients[i].recipe.hasOwnProperty("MainRecipe") ? this.neededIngredients[i].recipe.MainRecipe : "") + this.getRecipeNeeds(this.neededIngredients[i].recipe.Index));
-
 				return true;
 			}
 		}
@@ -762,14 +728,11 @@ const Cubing = {
 		return false;
 	},
 
-	keepItem: function (unit) { // Don't drop an item from inventory if it's a part of cubing recipe
-		if (!Config.Cubing) {
-			return false;
-		}
+	// Don't drop an item from inventory if it's a part of cubing recipe
+	keepItem: function (unit) {
+		if (!Config.Cubing) return false;
 
-		let i;
-
-		for (i = 0; i < this.validIngredients.length; i += 1) {
+		for (let i = 0; i < this.validIngredients.length; i += 1) {
 			if (unit.mode === 0 && unit.gid === this.validIngredients[i].gid) {
 				return true;
 			}
@@ -785,7 +748,7 @@ const Cubing = {
 		}
 
 		// Excluded items
-		if (Runewords.validGids.indexOf(unit.gid) > -1 || CraftingSystem.validGids.indexOf(unit.gid) > -1) {
+		if (Runewords.validGids.includes(unit.gid) || CraftingSystem.validGids.includes(unit.gid)) {
 			return false;
 		}
 
@@ -909,29 +872,20 @@ const Cubing = {
 	},
 
 	doCubing: function () {
-		if (!Config.Cubing) {
-			return false;
-		}
-
-		if (!me.getItem(549) && !this.getCube()) {
-			return false;
-		}
-
-		let i, j, items, string, result, tempArray;
+		if (!Config.Cubing) return false;
+		if (!me.getItem(sdk.items.quest.Cube) && !this.getCube()) return false;
 
 		this.update();
 		// Randomize the recipe array to prevent recipe blocking (multiple caster items etc.)
-		tempArray = this.recipes.slice().shuffle();
+		let tempArray = this.recipes.slice().shuffle();
 
-		for (i = 0; i < tempArray.length; i += 1) {
-			string = "Transmuting: ";
-			items = this.checkRecipe(tempArray[i]);
+		for (let i = 0; i < tempArray.length; i += 1) {
+			let string = "Transmuting: ";
+			let items = this.checkRecipe(tempArray[i]);
 
 			if (items) {
 				// If cube isn't open, attempt to open stash (the function returns true if stash is already open)
-				if ((!getUIFlag(0x1a) && !Town.openStash()) || !this.emptyCube()) {
-					return false;
-				}
+				if ((!getUIFlag(0x1a) && !Town.openStash()) || !this.emptyCube()) return false;
 
 				this.cursorCheck();
 
@@ -943,39 +897,33 @@ const Cubing = {
 					items.shift();
 				}
 
-				if (!this.openCube()) {
-					return false;
-				}
+				if (!this.openCube()) return false;
 
 				transmute();
 				delay(700 + me.ping);
 				print("ÿc4Cubing: " + string);
-
-				if (Config.ShowCubingInfo) {
-					D2Bot.printToConsole(string, 5);
-				}
-
+				Config.ShowCubingInfo && D2Bot.printToConsole(string, 5);
 				this.update();
 
-				items = me.findItems(-1, -1, 6);
+				let cubeItems = me.findItems(-1, -1, 6);
 
 				if (items) {
-					for (j = 0; j < items.length; j += 1) {
-						result = Pickit.checkItem(items[j]);
+					for (let j = 0; j < cubeItems.length; j += 1) {
+						let result = Pickit.checkItem(cubeItems[j]);
 
 						switch (result.result) {
 						case 0:
-							Misc.itemLogger("Dropped", items[j], "doCubing");
-							items[j].drop();
+							Misc.itemLogger("Dropped", cubeItems[j], "doCubing");
+							cubeItems[j].drop();
 
 							break;
 						case 1:
-							Misc.itemLogger("Cubing Kept", items[j]);
-							Misc.logItem("Cubing Kept", items[j], result.line);
+							Misc.itemLogger("Cubing Kept", cubeItems[j]);
+							Misc.logItem("Cubing Kept", cubeItems[j], result.line);
 
 							break;
 						case 5: // Crafting System
-							CraftingSystem.update(items[j]);
+							CraftingSystem.update(cubeItems[j]);
 
 							break;
 						}
@@ -1001,23 +949,15 @@ const Cubing = {
 	},
 
 	cursorCheck: function () {
-		let item;
-
 		if (me.itemoncursor) {
-			item = getUnit(100);
+			let item = getUnit(100);
 
 			if (item) {
-				if (Storage.Inventory.CanFit(item) && Storage.Inventory.MoveTo(item)) {
-					return true;
-				}
-
-				if (Storage.Stash.CanFit(item) && Storage.Stash.MoveTo(item)) {
-					return true;
-				}
-
-				Misc.itemLogger("Dropped", item, "cursorCheck");
+				if (Storage.Inventory.CanFit(item) && Storage.Inventory.MoveTo(item)) return true;
+				if (Storage.Stash.CanFit(item) && Storage.Stash.MoveTo(item)) return true;
 
 				if (item.drop()) {
+					Misc.itemLogger("Dropped", item, "cursorCheck");
 					return true;
 				}
 			}
@@ -1029,24 +969,15 @@ const Cubing = {
 	},
 
 	openCube: function () {
-		let i, tick,
-			cube = me.getItem(549);
+		let cube = me.getItem(549);
 
-		if (!cube) {
-			return false;
-		}
+		if (!cube) return false;
+		if (getUIFlag(0x1a)) return true;
+		if (cube.location === 7 && !Town.openStash()) return false;
 
-		if (getUIFlag(0x1a)) {
-			return true;
-		}
-
-		if (cube.location === 7 && !Town.openStash()) {
-			return false;
-		}
-
-		for (i = 0; i < 3; i += 1) {
+		for (let i = 0; i < 3; i += 1) {
 			cube.interact();
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 5000) {
 				if (getUIFlag(0x1a)) {
@@ -1063,15 +994,11 @@ const Cubing = {
 	},
 
 	closeCube: function () {
-		let i, tick;
+		if (!getUIFlag(0x1a)) return true;
 
-		if (!getUIFlag(0x1a)) {
-			return true;
-		}
-
-		for (i = 0; i < 5; i++) {
+		for (let i = 0; i < 5; i++) {
 			me.cancel();
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 3000) {
 				if (!getUIFlag(0x1a)) {
@@ -1090,13 +1017,8 @@ const Cubing = {
 		let cube = me.getItem(549),
 			items = me.findItems(-1, -1, 6);
 
-		if (!cube) {
-			return false;
-		}
-
-		if (!items) {
-			return true;
-		}
+		if (!cube) return false;
+		if (!items) return true;
 
 		while (items.length) {
 			if (!Storage.Stash.MoveTo(items[0]) && !Storage.Inventory.MoveTo(items[0])) {

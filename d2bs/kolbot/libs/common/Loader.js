@@ -1,6 +1,6 @@
 /**
 *	@filename	Loader.js
-*	@author		kolton
+*	@author		kolton, theBGuy
 *	@desc		script loader, based on mBot's Sequencer.js
 */
 
@@ -29,7 +29,7 @@ const Loader = {
 
 	// see http://stackoverflow.com/questions/728360/copying-an-object-in-javascript#answer-728694
 	clone: function (obj) {
-		let copy, attr;
+		let copy;
 
 		// Handle the 3 simple types, and null or undefined
 		if (null === obj || "object" !== typeof obj) {
@@ -59,7 +59,7 @@ const Loader = {
 		if (obj instanceof Object) {
 			copy = {};
 
-			for (attr in obj) {
+			for (let attr in obj) {
 				if (obj.hasOwnProperty(attr)) {
 					copy[attr] = this.clone(obj[attr]);
 				}
@@ -80,8 +80,7 @@ const Loader = {
 	},
 
 	loadScripts: function () {
-		let reconfiguration, s, script,
-			unmodifiedConfig = {};
+		let reconfiguration, unmodifiedConfig = {};
 
 		this.copy(Config, unmodifiedConfig);
 
@@ -91,20 +90,21 @@ const Loader = {
 			throw new Error("You don't have any valid scripts in bots folder.");
 		}
 
-		for (s in Scripts) {
+		for (let s in Scripts) {
 			if (Scripts.hasOwnProperty(s) && Scripts[s]) {
 				this.scriptList.push(s);
 			}
 		}
 
 		for (this.scriptIndex = 0; this.scriptIndex < this.scriptList.length; this.scriptIndex++) {
-			script = this.scriptList[this.scriptIndex];
+			let script = this.scriptList[this.scriptIndex];
 
-			if (this.fileList.indexOf(script) < 0) {
+			if (this.fileList.indexOf(script) === -1) {
 				if (FileTools.exists("bots/" + script + ".js")) {
-					print("ÿc1Something went wrong in loader, file exists in folder but didn't get included during init process. Lets ignore the error and continue to include the script by name instead");
+					console.warn("ÿc1Something went wrong in loader, file exists in folder but didn't get included during init process. Lets ignore the error and continue to include the script by name instead");
 				} else {
 					Misc.errorReport("ÿc1Script " + script + " doesn't exist.");
+
 					continue;
 				}
 			}
@@ -120,10 +120,9 @@ const Loader = {
 						throw new Error("Invalid script function name");
 					}
 
-					if (this.skipTown.indexOf(script) > -1 || Town.goToTown()) {
+					if (this.skipTown.includes(script) || Town.goToTown()) {
 						print("ÿc2Starting script: ÿc9" + script);
 						Messaging.sendToScript("tools/toolsthread.js", JSON.stringify({currScript: script}));
-
 						reconfiguration = typeof Scripts[script] === 'object';
 
 						if (reconfiguration) {
@@ -131,21 +130,24 @@ const Loader = {
 							this.copy(Scripts[script], Config);
 						}
 
-						global[script]();
+						let tick = getTickCount();
 
-						if (reconfiguration) {
-							print("ÿc2Reverting back unmodified config properties.");
-							this.copy(unmodifiedConfig, Config);
+						if (global[script]()) {
+							console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
 						}
 					}
 				} catch (error) {
 					Misc.errorReport(error, script);
 				} finally {
-
 					// Dont run for last script as that will clear everything anyway
 					if (this.scriptIndex < this.scriptList.length) {
 						// remove script function from global scope, so it can be cleared by GC
 						delete global[script];
+					}
+					
+					if (reconfiguration) {
+						print("ÿc2Reverting back unmodified config properties.");
+						this.copy(unmodifiedConfig, Config);
 					}
 				}
 			}
@@ -154,11 +156,13 @@ const Loader = {
 
 	runScript: function (script) {
 		let reconfiguration, unmodifiedConfig = {};
+		let failed = false;
 
 		this.copy(Config, unmodifiedConfig);
 
 		if (!include("bots/" + script + ".js")) {
 			Misc.errorReport("Failed to include script: " + script);
+
 			return false;
 		}
 
@@ -168,7 +172,7 @@ const Loader = {
 					throw new Error("Invalid script function name");
 				}
 
-				if (this.skipTown.indexOf(script) > -1 || Town.goToTown()) {
+				if (this.skipTown.includes(script) || Town.goToTown()) {
 					print("ÿc2Starting script: ÿc9" + script);
 					Messaging.sendToScript("tools/toolsthread.js", JSON.stringify({currScript: script}));
 
@@ -179,22 +183,30 @@ const Loader = {
 						this.copy(Scripts[script], Config);
 					}
 
-					global[script]();
+					let tick = getTickCount();
 
-					if (reconfiguration) {
-						print("ÿc2Reverting back unmodified config properties.");
-						this.copy(unmodifiedConfig, Config);
+					if (global[script]()) {
+						console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
 					}
-
-					return true;
 				}
 			} catch (error) {
 				Misc.errorReport(error, script);
-				return false;
+				failed = true;
+			} finally {
+				// Dont run for last script as that will clear everything anyway
+				if (this.scriptIndex < this.scriptList.length) {
+					// remove script function from global scope, so it can be cleared by GC
+					delete global[script];
+				}
+				
+				if (reconfiguration) {
+					print("ÿc2Reverting back unmodified config properties.");
+					this.copy(unmodifiedConfig, Config);
+				}
 			}
 		}
 
-		return false;
+		return !failed;
 	},
 
 	scriptName: function (offset = 0) {

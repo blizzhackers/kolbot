@@ -28,20 +28,14 @@ function main() {
 	Runewords.init();
 	Cubing.init();
 
-	let ii, noPick = false,
+	let noPick = false,
 		UIFlagList = [0x01, 0x02, 0x03, 0x04, 0x05, 0x09, 0x0B, 0x0E, 0x0F, 0x14, 0x16, 0x1A, 0x24];
 
-	this.itemEvent = function (gid, mode, code, global) {
-		if (gid > 0 && mode === 0) {
-			Pickit.gidList.push(gid);
-		}
-	};
-
-	addEventListener("itemaction", this.itemEvent);
+	addEventListener("itemaction", Pickit.itemEvent);
 
 	while (true) {
-		for (ii = 0; ii < UIFlagList.length; ii++) {
-			if (getUIFlag(UIFlagList[ii])) {
+		for (let i = 0; i < UIFlagList.length; i++) {
+			if (getUIFlag(UIFlagList[i])) {
 				noPick = true;
 				break;
 			}

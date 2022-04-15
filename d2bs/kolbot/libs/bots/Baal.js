@@ -97,7 +97,7 @@ function Baal() {
 		Precast.doPrecast(true);
 	}
 
-	if (!Common.Baal.clearWaves()) { 
+	if (!Common.Baal.clearWaves()) {
 		throw new Error("Couldn't clear baal waves");
 	}
 

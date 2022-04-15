@@ -78,10 +78,8 @@ function main() {
 
 	// Find hostile player Units
 	this.findPlayer = function () {
-		let i, player;
-
-		for (i = 0; i < hostiles.length; i += 1) {
-			player = getUnit(0, hostiles[i]);
+		for (let i = 0; i < hostiles.length; i += 1) {
+			let player = getUnit(0, hostiles[i]);
 
 			if (player) {
 				do {
@@ -97,15 +95,11 @@ function main() {
 
 	// Find a missile type
 	this.findMissile = function (owner, id, range) {
-		if (range === undefined) {
-			range = 999;
-		}
+		range === undefined && (range = 999);
 
 		let missile = getUnit(3, id);
 
-		if (!missile) {
-			return false;
-		}
+		if (!missile) return false;
 
 		do {
 			if (missile.owner === owner.gid && getDistance(owner, missile) < range) {
@@ -117,10 +111,9 @@ function main() {
 	};
 
 	this.checkSummons = function (player) {
-		let unit,
-			name = player.name;
-
-		unit = getUnit(1);
+		if (!player) return false;
+		let name = player.name;
+		let unit = getUnit(1);
 
 		if (unit) {
 			do {
@@ -144,26 +137,20 @@ function main() {
 	Skill.usePvpRange = true;
 
 	// Attack sequence adjustments - this only affects the AntiHostile thread
-	switch (me.classid) {
-	case 6: // Assassin - use Mind Blast with trapsins
-		if (me.getSkill(273, 1) && [251, 256].indexOf(Config.AttackSkill[1]) > -1) {
-			Config.AttackSkill[1] = 273; // Mind Blast
-			ClassAttack.trapRange = 40;
-		}
-
-		break;
+	if (me.getSkill(sdk.skills.MindBlast, 1) && [sdk.skills.FireBlast, sdk.skills.ShockWeb].includes(Config.AttackSkill[1])) {
+		Config.AttackSkill[1] = sdk.skills.MindBlast;
+		ClassAttack.trapRange = 40;
 	}
 
 	// A simple but fast player dodge function
 	this.moveAway = function (unit, range) {
-		let i, coordx, coordy,
-			angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
+		let angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
 			angles = [0, 45, -45, 90, -90, 135, -135, 180];
 
-		for (i = 0; i < angles.length; i += 1) {
+		for (let i = 0; i < angles.length; i += 1) {
 			// Avoid the position where the player actually tries to move to
-			coordx = Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * range + unit.x); // unit.targetx
-			coordy = Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * range + unit.y); // unit.targety
+			let coordx = Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * range + unit.x); // unit.targetx
+			let coordy = Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * range + unit.y); // unit.targety
 
 			if (Attack.validSpot(coordx, coordy)) {
 				return Pather.moveTo(coordx, coordy);
