@@ -3516,6 +3516,15 @@
 				CdKeyIntendedForAnotherProduct: 5202,
 				InvalidPassword: 5207,
 				AccountDoesNotExist: 5208,
+				AccountIsCorrupted: 5209,
+				AccountMustBeAtLeast: 5217,
+				AccountCantBeMoreThan: 5218,
+				PasswordMustBeAtLeast: 5219,
+				PasswordCantBeMoreThan: 5220,
+				UsernameMustBeAtLeast: 5231,
+				UsenameIncludedIllegalChars: 5232,
+				UsenameIncludedDisallowedwords: 5233,
+				UnableToCreateAccount: 5249,
 				Disconnected: 5347,
 				UnableToIndentifyVersion: 5245,
 				LoDKeyDisabled: 10913,
@@ -3533,10 +3542,16 @@
 				TcpIpHost: 4,
 				TcpIpJoin: 5
 			},
+
+			controls: {
+				Disabled: 4,
+			},
+
 			gametype: {
 				Classic: 0,
 				Expansion: 1,
 			},
+
 			// out of game locations
 			locations: {
 				PreSplash: 0,

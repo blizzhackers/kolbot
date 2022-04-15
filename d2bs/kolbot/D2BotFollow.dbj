@@ -291,7 +291,7 @@ function locationAction () {
 
 		break;
 	case sdk.game.locations.SelectDifficultySP:
-		ControlAction.loginSinglePlayer();
+		LocationEvents.selectDifficultySP();
 
 		break;
 	case sdk.game.locations.MainMenuConnecting:
@@ -361,9 +361,11 @@ function locationAction () {
 				}
 			}
 
-			Controls.IPAdress.setText(Object.keys(Starter.joinInfo).length ? Starter.joinInfo.gameName : "localhost");
-			Controls.IPAdressOk.click();
-			login(me.profile);
+			if (Controls.IPAdress.setText(Object.keys(Starter.joinInfo).length ? Starter.joinInfo.gameName : "localhost")
+				&& Controls.IPAdressOk.click()
+				&& Starter.locationTimeout(2e3, sdk.game.locations.TcpIpEnterIp)) {
+				getLocation() === sdk.game.locations.CharSelect && login(me.profile);
+			}
 		} catch (e) {
 			print(e);
 		}

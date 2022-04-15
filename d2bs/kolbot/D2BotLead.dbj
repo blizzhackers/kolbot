@@ -219,7 +219,7 @@ function locationAction (location) {
 		D2Bot.updateStatus("Creating Game");
 
 		if (typeof StarterConfig.CharacterDifference === "number") {
-			Controls.CharacterDifference.disabled === 4 && Controls.CharacterDifferenceButton.click();
+			Controls.CharacterDifference.disabled === sdk.game.controls.Disabled && Controls.CharacterDifferenceButton.click();
 			Controls.CharacterDifference.setText(StarterConfig.CharacterDifference.toString());
 		} else if (!StarterConfig.CharacterDifference && Controls.CharacterDifference.disabled === 5) {
 			Controls.CharacterDifferenceButton.click();
@@ -292,7 +292,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.SelectDifficultySP:
-		ControlAction.loginSinglePlayer();
+		LocationEvents.selectDifficultySP();
 
 		break;
 	case sdk.game.locations.MainMenuConnecting:
@@ -330,7 +330,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.OtherMultiplayer:
-		LocationEvents.otherMultiplayerLogin();
+		LocationEvents.otherMultiplayerSelect();
 
 		break;
 	case sdk.game.locations.TcpIp:

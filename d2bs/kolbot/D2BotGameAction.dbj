@@ -73,7 +73,10 @@ function locationAction (location) {
 				break;
 			}
 			
-			LocationEvents.openCreateGameWindow();
+			if (!LocationEvents.openCreateGameWindow()) {
+				break;
+			}
+			
 			LocationEvents.openJoinGameWindow();
 		} else {
 			if (++ftj > 5) {

@@ -220,7 +220,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.SelectDifficultySP:
-		ControlAction.loginSinglePlayer();
+		LocationEvents.selectDifficultySP();
 
 		break;
 	case sdk.game.locations.MainMenuConnecting:

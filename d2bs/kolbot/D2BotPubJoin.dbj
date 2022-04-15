@@ -296,7 +296,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.OtherMultiplayer:
-		LocationEvents.otherMultiplayerLogin();
+		LocationEvents.otherMultiplayerSelect();
 
 		break;
 	case sdk.game.locations.TcpIp:

@@ -556,7 +556,7 @@ function locationAction (location) {
 		}
 
 		// Can't create character, button greyed out = high likelyhood of realm down
-		if (getLocation() === sdk.game.locations.CharSelectNoChars && Controls.CharSelectCreate.disabled === 4) {
+		if (getLocation() === sdk.game.locations.CharSelectNoChars && Controls.CharSelectCreate.disabled === sdk.game.controls.Disabled) {
 			D2Bot.updateStatus("Realm Down");
 			delay(1000);
 
