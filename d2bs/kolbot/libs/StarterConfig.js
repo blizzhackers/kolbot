@@ -4,7 +4,9 @@
 *	@desc		Global settings for entry scripts
 */
 
-const StarterConfig = {
+!isIncluded("OOG.js") && include("OOG.js");
+
+Starter.Config = {
 	MinGameTime: 360, // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
 	PingQuitDelay: 30, // Time in seconds to wait in lobby after quitting due to high ping
 	CreateGameDelay: rand(5, 15), // Seconds to wait before creating a new game

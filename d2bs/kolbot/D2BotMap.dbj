@@ -1,9 +1,10 @@
-function main () {
-	include("json2.js");
-	include("OOG.js");
-	include("common/misc.js");
-	include("common/util.js");
+include("json2.js");
+include("polyfill.js");
+include("OOG.js");
+include("common/misc.js");
+include("common/util.js");
 
+function main () {
 	addEventListener('copydata', Starter.receiveCopyData);
 
 	while (!Starter.handle) {

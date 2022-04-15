@@ -1,10 +1,10 @@
 include("StarterConfig.js");
 
 // D2BotFollow settings
-StarterConfig.JoinRetryDelay = 5; // Time in seconds to wait before next join attempt
+Starter.Config.JoinRetryDelay = 5; // Time in seconds to wait before next join attempt
 
 // Override default values for StarterConfig under here by following format
-// StarterConfig.ValueToChange = value; // Example: StarterConfig.MinGameTime = 500; // changes MinGameTime to 500 seconds
+// Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
 /* Join game settings
 	Format: "leader's profile": ["leecher 1 profile", "leecher 2 profile", ...]
@@ -102,7 +102,7 @@ function locationAction (location) {
 		Starter.loginRetry = 0;
 		!Starter.firstLogin && (Starter.firstLogin = true);
 
-		if (StarterConfig.JoinChannel !== "") {
+		if (Starter.Config.JoinChannel !== "") {
 			Controls.LobbyEnterChat.click();
 
 			break;
@@ -122,7 +122,7 @@ function locationAction (location) {
 			Starter.inGame = false;
 		}
 
-		LocationEvents.openJoinGameWindow();
+		Starter.LocationEvents.openJoinGameWindow();
 
 		break;
 	case sdk.game.locations.WaitingInLine:
@@ -151,17 +151,17 @@ function locationAction (location) {
 		if (!Starter.chatActionsDone) {
 			Starter.chatActionsDone = true;
 
-			ControlAction.timeoutDelay("Chat delay", StarterConfig.ChatActionsDelay * 1e3);
-			say("/j " + StarterConfig.JoinChannel);
+			ControlAction.timeoutDelay("Chat delay", Starter.Config.ChatActionsDelay * 1e3);
+			say("/j " + Starter.Config.JoinChannel);
 			delay(1000);
 
-			if (StarterConfig.FirstJoinMessage !== "") {
-				say(StarterConfig.FirstJoinMessage);
+			if (Starter.Config.FirstJoinMessage !== "") {
+				say(Starter.Config.FirstJoinMessage);
 				delay(500);
 			}
 		}
 
-		LocationEvents.openJoinGameWindow();
+		Starter.LocationEvents.openJoinGameWindow();
 
 		break;
 	case sdk.game.locations.JoinGame:
@@ -202,7 +202,7 @@ function locationAction (location) {
 
 					if (Starter.lastGameStatus === "pending" || (Starter.gameInfo.error && DataFile.getStats().gameName === Starter.joinInfo.gameName)) {
 						D2Bot.printToConsole("Failed to join game");
-						ControlAction.timeoutDelay("Join Delay", StarterConfig.JoinRetryDelay * 1000, joinCheck, leader[j]);
+						ControlAction.timeoutDelay("Join Delay", Starter.Config.JoinRetryDelay * 1000, joinCheck, leader[j]);
 						D2Bot.updateRuns();
 						D2Bot.requestGame(leader[j]);
 						delay(200);
@@ -258,22 +258,22 @@ function locationAction (location) {
 	case sdk.game.locations.Login:
 	case sdk.game.locations.CharSelect:
 	case sdk.game.locations.SplashScreen:
-		LocationEvents.login();
+		Starter.LocationEvents.login();
 
 		break;
 	case sdk.game.locations.LoginError:
 	case sdk.game.locations.InvalidCdKey:
 	case sdk.game.locations.CdKeyInUse:
-		LocationEvents.loginError();
+		Starter.LocationEvents.loginError();
 
 		break;
 	case sdk.game.locations.LoginUnableToConnect:
 	case sdk.game.locations.TcpIpUnableToConnect:
-		LocationEvents.unableToConnect();
+		Starter.LocationEvents.unableToConnect();
 
 		break;
 	case sdk.game.locations.RealmDown:
-		LocationEvents.realmDown();
+		Starter.LocationEvents.realmDown();
 
 		break;
 	case sdk.game.locations.Disconnected:
@@ -284,26 +284,26 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.CharSelectPleaseWait:
-		!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
+		!Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
 
 		break;
 	case sdk.game.locations.SelectDifficultySP:
-		LocationEvents.selectDifficultySP();
+		Starter.LocationEvents.selectDifficultySP();
 
 		break;
 	case sdk.game.locations.MainMenuConnecting:
-		!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location) && Controls.LoginCancelWait.click();
+		!Starter.locationTimeout(Starter.Config.ConnectingTimeout * 1e3, location) && Controls.LoginCancelWait.click();
 
 		break;
 	case sdk.game.locations.CharSelectConnecting:
 	case sdk.game.locations.CharSelectNoChars:
-		LocationEvents.charSelectError();
+		Starter.LocationEvents.charSelectError();
 
 		break;
 	case sdk.game.locations.ServerDown:
 		break;
 	case sdk.game.locations.LobbyPleaseWait:
-		!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
+		!Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
 
 		break;
 	case sdk.game.locations.GameNameExists:
@@ -313,7 +313,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.GameDoesNotExist:
-		LocationEvents.gamneDoesNotExist();
+		Starter.LocationEvents.gamneDoesNotExist();
 
 		break;
 	case sdk.game.locations.GameIsFull:
@@ -408,7 +408,7 @@ function main () {
 			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, 10);
 		}
 
-		ControlAction.timeoutDelay("Crash Delay", StarterConfig.CrashDelay * 1e3);
+		ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);
 		D2Bot.updateRuns();
 	}
 

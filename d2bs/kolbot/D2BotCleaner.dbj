@@ -13,14 +13,14 @@ include("StarterConfig.js");
 //***********************************************************************************************************************//
 //	DataCleaner and SaveFiles can both be used for cleaning/saving files without having to delete associated characters  //
 //***********************************************************************************************************************//
-StarterConfig.DataCleaner = true; // Always run this when re-using a profile with Kolbot-SoloPlay
-StarterConfig.SaveFiles = false; // NOTE: Only works on SoloPlay profiles, Highly recommened to run this if using the peformance tracking system and wish to review them later
+Starter.Config.DataCleaner = true; // Always run this when re-using a profile with Kolbot-SoloPlay
+Starter.Config.SaveFiles = false; // NOTE: Only works on SoloPlay profiles, Highly recommened to run this if using the peformance tracking system and wish to review them later
 
 // Old Stuff
-StarterConfig.DelayBetweenAccounts = rand(15, 30); //Seconds to wait before cleaning next account, if doing 10+ accounts recommended to increase this delay to rand(30, 60) prevent R/D
+Starter.Config.DelayBetweenAccounts = rand(15, 30); //Seconds to wait before cleaning next account, if doing 10+ accounts recommended to increase this delay to rand(30, 60) prevent R/D
 
 // Override default values for StarterConfig under here by following format
-// StarterConfig.ValueToChange = value; // Example: StarterConfig.MinGameTime = 500; // changes MinGameTime to 500 seconds
+// Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
 const AccountsToClean = {
 	/* Format:
@@ -90,7 +90,7 @@ function dataCleaner () {
 			charClass = "undefined";
 		}
 
-		if (StarterConfig.SaveFiles && soloplayProfile) {
+		if (Starter.Config.SaveFiles && soloplayProfile) {
 			if (FileTools.exists(dataFP) || FileTools.exists(gameTimeFP) || FileTools.exists(charDataFP) || FileTools.exists(lvlPerfFP) || FileTools.exists(scrPerfFP)) {
 				// Create folder to copy files to
 				if (!FileTools.exists("libs/SoloPlay/Data/" + charType)) {
@@ -123,32 +123,32 @@ function dataCleaner () {
 		}
 				
 		if (FileTools.exists(dataFP)) {
-			StarterConfig.SaveFiles && FileTools.copy(dataFP, savePath + "Old.json");
+			Starter.Config.SaveFiles && FileTools.copy(dataFP, savePath + "Old.json");
 			FileTools.remove(dataFP);
 			profileExists = true;
 		}
 		
 		if (FileTools.exists(gameTimeFP)) {
-			StarterConfig.SaveFiles && FileTools.copy(gameTimeFP, savePath + "-GameTimeOld.json");
+			Starter.Config.SaveFiles && FileTools.copy(gameTimeFP, savePath + "-GameTimeOld.json");
 			FileTools.remove(gameTimeFP);
 		}
 
 		if (FileTools.exists(charDataFP)) {
-			StarterConfig.SaveFiles && FileTools.copy(charDataFP, savePath + "-CharDataOld.json");
+			Starter.Config.SaveFiles && FileTools.copy(charDataFP, savePath + "-CharDataOld.json");
 			FileTools.remove(charDataFP);
 		}
 		
 		if (FileTools.exists(lvlPerfFP)) {
-			StarterConfig.SaveFiles && FileTools.copy(lvlPerfFP, savePath + "-LevelingPerformanceOld.csv");
+			Starter.Config.SaveFiles && FileTools.copy(lvlPerfFP, savePath + "-LevelingPerformanceOld.csv");
 			FileTools.remove(lvlPerfFP);
 		}
 
 		if (FileTools.exists(scrPerfFP)) {
-			StarterConfig.SaveFiles && FileTools.copy(scrPerfFP, savePath + "-ScriptPerformanceOld.csv");
+			Starter.Config.SaveFiles && FileTools.copy(scrPerfFP, savePath + "-ScriptPerformanceOld.csv");
 			FileTools.remove(scrPerfFP);
 		}
 		
-		if (StarterConfig.SaveFiles && profileExists && soloplayProfile) {
+		if (Starter.Config.SaveFiles && profileExists && soloplayProfile) {
 			D2Bot.printToConsole("D2BotCleaner: Files saved to -> libs/SoloPlay/Data/" + charType + "/" + charClass + "/" + j, 6);
 		}
 
@@ -268,8 +268,8 @@ function locationAction (location) {
 		}
 		
 		if (!firstAccount) {
-			for (i = 0 ; i < StarterConfig.DelayBetweenAccounts; i += 1) {
-				D2Bot.updateStatus("Waiting " + (StarterConfig.DelayBetweenAccounts - i) + "s for next account");
+			for (i = 0 ; i < Starter.Config.DelayBetweenAccounts; i += 1) {
+				D2Bot.updateStatus("Waiting " + (Starter.Config.DelayBetweenAccounts - i) + "s for next account");
 				delay(1e3);
 			}
 		}
@@ -312,11 +312,11 @@ function locationAction (location) {
 	case sdk.game.locations.LoginError:
 	case sdk.game.locations.InvalidCdKey:
 	case sdk.game.locations.CdKeyInUse:
-		LocationEvents.loginError();
+		Starter.LocationEvents.loginError();
 
 		break;
 	case sdk.game.locations.LoginUnableToConnect:
-		LocationEvents.unableToConnect();
+		Starter.LocationEvents.unableToConnect();
 
 		break;
 	case sdk.game.locations.CharSelect:
@@ -373,7 +373,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.RealmDown:
-		LocationEvents.realmDown();
+		Starter.LocationEvents.realmDown();
 
 		break;
 	case sdk.game.locations.CharacterCreate:
@@ -382,7 +382,7 @@ function locationAction (location) {
 				
 		break;
 	case sdk.game.locations.CharSelectPleaseWait:
-		!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
+		!Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
 
 		break;
 	case sdk.game.locations.Disconnected:
@@ -395,17 +395,17 @@ function locationAction (location) {
 	case sdk.game.locations.SelectDifficultySP:
 		break;
 	case sdk.game.locations.MainMenuConnecting: // Main Menu - Connecting
-		!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location) && Controls.LoginCancelWait.click();
+		!Starter.locationTimeout(Starter.Config.ConnectingTimeout * 1e3, location) && Controls.LoginCancelWait.click();
 
 		break;
 	case sdk.game.locations.CharSelectConnecting:
-		LocationEvents.charSelectError();
+		Starter.LocationEvents.charSelectError();
 
 		break;
 	case sdk.game.locations.ServerDown: // Server Down - not much to do but wait..
 		break;
 	case sdk.game.locations.LobbyPleaseWait:
-		!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
+		!Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
 
 		break;
 	case sdk.game.locations.GatewaySelect:
@@ -445,13 +445,13 @@ function main () {
 			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, 10);
 		}
 
-		ControlAction.timeoutDelay("Crash Delay", StarterConfig.CrashDelay * 1e3);
+		ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);
 		D2Bot.updateRuns();
 	}
 
 	DataFile.updateStats("debugInfo", JSON.stringify({currScript: "none", area: "out of game"}));
 
-	StarterConfig.DataCleaner && dataCleaner();
+	Starter.Config.DataCleaner && dataCleaner();
 	!accounts.length && parseInfo();
 
 	while (true) {

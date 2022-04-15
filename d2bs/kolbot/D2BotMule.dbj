@@ -1,15 +1,15 @@
 include("StarterConfig.js");
 
 // D2BotMule settings
-StarterConfig.MinGameTime = 30; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
-StarterConfig.MaxGameTime = 60; // Maximum game length in minutes, only for continuous muling
-StarterConfig.CreateGameDelay = 5; // Seconds to wait before creating a new game
-StarterConfig.SwitchKeyDelay = 0; // Seconds to wait before switching a used/banned key or after realm down
-StarterConfig.ExitToMenu = false; // Set to true to wait out restriction in main menu or false to wait in lobby.
-StarterConfig.VersionErrorDelay = rand(15, 30); // Seconds to wait after 'unable to identify version' message
+Starter.Config.MinGameTime = 30; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
+Starter.Config.MaxGameTime = 60; // Maximum game length in minutes, only for continuous muling
+Starter.Config.CreateGameDelay = 5; // Seconds to wait before creating a new game
+Starter.Config.SwitchKeyDelay = 0; // Seconds to wait before switching a used/banned key or after realm down
+Starter.Config.ExitToMenu = false; // Set to true to wait out restriction in main menu or false to wait in lobby.
+Starter.Config.VersionErrorDelay = rand(15, 30); // Seconds to wait after 'unable to identify version' message
 
 // Override default values for StarterConfig under here by following format
-// StarterConfig.ValueToChange = value; // Example: StarterConfig.MinGameTime = 500; // changes MinGameTime to 500 seconds
+// Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
 // No touchy!
 include("json2.js");
@@ -401,7 +401,7 @@ function locationAction (location) {
 			break;
 		}
 
-		LocationEvents.openJoinGameWindow();
+		Starter.LocationEvents.openJoinGameWindow();
 
 		break;
 	case sdk.game.locations.CreateGame:
@@ -418,7 +418,7 @@ function locationAction (location) {
 		// FTJ handler
 		if (status === "pending") {
 			D2Bot.printToConsole("Failed to create game");
-			ControlAction.timeoutDelay("FTJ delay", StarterConfig.FTJDelay * 1e3);
+			ControlAction.timeoutDelay("FTJ delay", Starter.Config.FTJDelay * 1e3);
 			D2Bot.updateRuns();
 		}
 
@@ -429,7 +429,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.WaitingInLine:
-		LocationEvents.waitingInLine();
+		Starter.LocationEvents.waitingInLine();
 
 		break;
 	case sdk.game.locations.JoinGame:
@@ -437,7 +437,7 @@ function locationAction (location) {
 
 		if (status === "pending") {
 			D2Bot.printToConsole("Failed to join game");
-			ControlAction.timeoutDelay("Join Delay", StarterConfig.FTJDelay * 1000);
+			ControlAction.timeoutDelay("Join Delay", Starter.Config.FTJDelay * 1000);
 			D2Bot.updateRuns();
 		}
 
@@ -498,16 +498,16 @@ function locationAction (location) {
 	case sdk.game.locations.LoginError:
 	case sdk.game.locations.InvalidCdKey:
 	case sdk.game.locations.CdKeyInUse:
-		LocationEvents.loginError();
+		Starter.LocationEvents.loginError();
 
 		break;
 	case sdk.game.locations.LoginUnableToConnect:
 	case sdk.game.locations.TcpIpUnableToConnect:
-		LocationEvents.unableToConnect();
+		Starter.LocationEvents.unableToConnect();
 
 		break;
 	case sdk.game.locations.RealmDown:
-		LocationEvents.realmDown();
+		Starter.LocationEvents.realmDown();
 
 		break;
 	case sdk.game.locations.Disconnected:
@@ -539,7 +539,7 @@ function locationAction (location) {
 				D2Bot.CDKeyDisabled();
 
 				if (Starter.gameInfo.switchKeys) {
-					ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
+					ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
 					D2Bot.restart(true);
 				} else {
 					D2Bot.stop(me.profile, true);
@@ -565,12 +565,12 @@ function locationAction (location) {
 			}
 
 			Starter.updateCount();
-			ControlAction.timeoutDelay("Realm Down", StarterConfig.RealmDownDelay * 6e4);
+			ControlAction.timeoutDelay("Realm Down", Starter.Config.RealmDownDelay * 6e4);
 			D2Bot.CDKeyRD();
 
 			if (Starter.gameInfo.switchKeys) {
 				D2Bot.printToConsole("Realm Down - Changing CD-Key");
-				ControlAction.timeoutDelay("Key switch delay", StarterConfig.SwitchKeyDelay * 1000);
+				ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
 				D2Bot.restart(true);
 			} else {
 				D2Bot.restart();
@@ -635,21 +635,21 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.CharSelectPleaseWait:
-		!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
+		!Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
 
 		break;
 	case sdk.game.locations.SelectDifficultySP:
 		break;
 	case sdk.game.locations.MainMenuConnecting:
-		!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location) && Controls.LoginCancelWait.click();
+		!Starter.locationTimeout(Starter.Config.ConnectingTimeout * 1e3, location) && Controls.LoginCancelWait.click();
 
 		break;
 	case sdk.game.locations.CharSelectConnecting:
-		LocationEvents.charSelectError();
+		Starter.LocationEvents.charSelectError();
 
 		break;
 	case sdk.game.locations.LobbyPleaseWait:
-		!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
+		!Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
 
 		break;
 	case sdk.game.locations.GameNameExists:
@@ -872,9 +872,9 @@ function main () {
 						nextChar();
 						D2Bot.printToConsole("Mule full, getting next character.", 7);
 
-						if (StarterConfig.MinGameTime && getTickCount() - tick < StarterConfig.MinGameTime * 1000) {
-							while (getTickCount() - tick < StarterConfig.MinGameTime * 1000) {
-								me.overhead("Stalling for " + Math.round(((tick + (StarterConfig.MinGameTime * 1000)) - getTickCount()) / 1000) + " Seconds");
+						if (Starter.Config.MinGameTime && getTickCount() - tick < Starter.Config.MinGameTime * 1000) {
+							while (getTickCount() - tick < Starter.Config.MinGameTime * 1000) {
+								me.overhead("Stalling for " + Math.round(((tick + (Starter.Config.MinGameTime * 1000)) - getTickCount()) / 1000) + " Seconds");
 								delay(1000);
 							}
 						}
@@ -895,7 +895,7 @@ function main () {
 				}
 
 				if (continuousMule) {
-					if (StarterConfig.MaxGameTime > 0 && getTickCount() - me.gamestarttime > StarterConfig.MaxGameTime * 60 * 1000 && foreverAlone()) {
+					if (Starter.Config.MaxGameTime > 0 && getTickCount() - me.gamestarttime > Starter.Config.MaxGameTime * 60 * 1000 && foreverAlone()) {
 						print("MaxGameTime Reached");
 						cursorCheck();
 						quit();

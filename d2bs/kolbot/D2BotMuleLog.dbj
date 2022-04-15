@@ -1,12 +1,12 @@
 include("StarterConfig.js");
 
 // D2BotMuleLog settings
-StarterConfig.MinGameTime = rand(150, 180); // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
-StarterConfig.CreateGameDelay = 5; // Seconds to wait before creating a new game
-StarterConfig.SwitchKeyDelay = 0; // Seconds to wait before switching a used/banned key or after realm down
+Starter.Config.MinGameTime = rand(150, 180); // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
+Starter.Config.CreateGameDelay = 5; // Seconds to wait before creating a new game
+Starter.Config.SwitchKeyDelay = 0; // Seconds to wait before switching a used/banned key or after realm down
 
 // Override default values for StarterConfig under here by following format
-// StarterConfig.ValueToChange = value; // Example: StarterConfig.MinGameTime = 500; // changes MinGameTime to 500 seconds
+// Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
 // No touchy!
 include("json2.js");
@@ -49,8 +49,8 @@ function locationAction (location) {
 		D2Bot.updateStatus("Lobby");
 
 		if (Starter.inGame) {
-			if (getTickCount() - Starter.gameStart < StarterConfig.MinGameTime * 1e3) {
-				ControlAction.timeoutDelay("Min game time wait", StarterConfig.MinGameTime * 1e3 + Starter.gameStart - getTickCount());
+			if (getTickCount() - Starter.gameStart < Starter.Config.MinGameTime * 1e3) {
+				ControlAction.timeoutDelay("Min game time wait", Starter.Config.MinGameTime * 1e3 + Starter.gameStart - getTickCount());
 			}
 
 			print("updating runs");
@@ -65,11 +65,11 @@ function locationAction (location) {
 			break;
 		}
 
-		LocationEvents.openCreateGameWindow();
+		Starter.LocationEvents.openCreateGameWindow();
 
 		break;
 	case sdk.game.locations.WaitingInLine:
-		LocationEvents.waitingInLine();
+		Starter.LocationEvents.waitingInLine();
 
 		break;
 	case sdk.game.locations.CreateGame:
@@ -93,7 +93,7 @@ function locationAction (location) {
 			Starter.gameCount += 1;
 		}
 
-		ControlAction.timeoutDelay("Make Game Delay", StarterConfig.CreateGameDelay * 1e3);
+		ControlAction.timeoutDelay("Make Game Delay", Starter.Config.CreateGameDelay * 1e3);
 		createGame(MuleLogger.LogGame[0] + Starter.gameCount, MuleLogger.LogGame[1], 0);
 		Starter.locationTimeout(5000, location);
 		Starter.lastGameStatus = "pending";
@@ -102,7 +102,7 @@ function locationAction (location) {
 	case sdk.game.locations.JoinGame:
 	case sdk.game.locations.Ladder:
 	case sdk.game.locations.ChannelList:
-		LocationEvents.openCreateGameWindow();
+		Starter.LocationEvents.openCreateGameWindow();
 
 		break;
 	case sdk.game.locations.MainMenu:
@@ -148,12 +148,12 @@ function locationAction (location) {
 	case sdk.game.locations.LoginError:
 	case sdk.game.locations.InvalidCdKey:
 	case sdk.game.locations.CdKeyInUse:
-		LocationEvents.loginError();
+		Starter.LocationEvents.loginError();
 
 		break;
 	case sdk.game.locations.LoginUnableToConnect:
 	case sdk.game.locations.TcpIpUnableToConnect:
-		LocationEvents.unableToConnect();
+		Starter.LocationEvents.unableToConnect();
 
 		break;
 	case sdk.game.locations.CharSelect:
@@ -201,7 +201,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.RealmDown:
-		LocationEvents.realmDown();
+		Starter.LocationEvents.realmDown();
 
 		break;
 	case sdk.game.locations.Disconnected:
@@ -216,20 +216,20 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.CharSelectPleaseWait:
-		!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
+		!Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
 
 		break;
 	case sdk.game.locations.SelectDifficultySP:
-		LocationEvents.selectDifficultySP();
+		Starter.LocationEvents.selectDifficultySP();
 
 		break;
 	case sdk.game.locations.MainMenuConnecting:
-		!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location) && Controls.LoginCancelWait.click();
+		!Starter.locationTimeout(Starter.Config.ConnectingTimeout * 1e3, location) && Controls.LoginCancelWait.click();
 
 		break;
 	case sdk.game.locations.CharSelectConnecting:
 	case sdk.game.locations.CharSelectNoChars:
-		if (!LocationEvents.charSelectError()) {
+		if (!Starter.LocationEvents.charSelectError()) {
 			accounts.shift(); // remove current account from the list
 			chars.shift();
 		}
@@ -238,7 +238,7 @@ function locationAction (location) {
 	case sdk.game.locations.ServerDown:
 		break;
 	case sdk.game.locations.LobbyPleaseWait:
-		!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
+		!Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
 
 		break;
 	case sdk.game.locations.GameNameExists:
@@ -311,7 +311,7 @@ function main() {
 			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, 10);
 		}
 
-		ControlAction.timeoutDelay("Crash Delay", StarterConfig.CrashDelay * 1e3);
+		ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);
 		D2Bot.updateRuns();
 	}
 
