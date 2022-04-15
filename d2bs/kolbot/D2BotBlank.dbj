@@ -5,46 +5,13 @@ function main() {
 	include("common/misc.js");
 	include("common/util.js");
 
-	let handle,
-		isUp = "no";
+	addEventListener('copydata', Starter.receiveCopyData);
 
-	this.copyDataEvent = function (mode, msg) {
-		let obj;
-
-		switch (msg) {
-		case "Handle":
-			handle = mode;
-
-			break;
-		}
-
-		switch (mode) {
-		case 3: // request game
-			obj = JSON.parse(msg);
-
-			if (me.gameReady) {
-				D2Bot.joinMe(obj.profile, me.gamename.toLowerCase(), "", me.gamepassword.toLowerCase(), isUp);
-			}
-
-			break;
-		case 4:
-			// Heartbeat ping
-			if (msg === "pingreq") {
-				sendCopyData(null, me.windowtitle, 4, "pingrep");
-			}
-
-			break;
-		}
-	};
-
-
-	addEventListener('copydata', this.copyDataEvent);
-
-	while (!handle) {
+	while (!Starter.handle) {
 		delay(100);
 	}
 
-	DataFile.updateStats("handle", handle);
+	DataFile.updateStats("handle", Starter.handle);
 	delay(500);
 	D2Bot.init();
 	load("tools/heartbeat.js");
@@ -54,7 +21,7 @@ function main() {
 	}
 
 	while (true) {
-		isUp = me.ingame ? "yes" : "no";
+		Starter.isUp = me.ingame ? "yes" : "no";
 
 		delay(1000);
 	}
