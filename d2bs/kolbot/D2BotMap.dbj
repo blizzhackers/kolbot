@@ -54,6 +54,10 @@ function main () {
 			if (me.ingame) {
 				D2Bot.updateStatus("Game: " + me.gamename + " | Level: " + me.charlvl);
 			}
+
+			if (me.ingame) {
+				D2Bot.updateStatus("Game: " + me.gamename + " | Level: " + me.charlvl);
+			}
 		} else {
 			D2Bot.updateStatus("Lobby");
 			isUp = "no";
