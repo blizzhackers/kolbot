@@ -115,7 +115,7 @@ function locationAction (location) {
 		Starter.loginRetry = 0;
 		!Starter.firstLogin && (Starter.firstLogin = true);
 		Starter.lastGameStatus === "pending" && (Starter.gameCount += 1);
-		loginFail = 0;
+		Starter.loginFail = 0;
 
 		if (Starter.Config.PingQuitDelay && Starter.pingQuit) {
 			ControlAction.timeoutDelay("Ping Delay", Starter.Config.PingQuitDelay * 1e3);
@@ -184,10 +184,7 @@ function locationAction (location) {
 		if (gameList) {
 			doneGames = [];
 			gameToJoin = false;
-
-			if (FileTools.exists("logs/doneGames.json")) {
-				doneGames = JSON.parse(Misc.fileAction("logs/doneGames.json", 0));
-			}
+			FileTools.exists("logs/doneGames.json") && (doneGames = JSON.parse(Misc.fileAction("logs/doneGames.json", 0)));
 
 			gameList.sort(function (a, b) {
 				return b.players - a.players;
