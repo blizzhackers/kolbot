@@ -18,7 +18,7 @@ include("common/misc.js");
 include("common/util.js");
 let Controls = require('./modules/Control');
 let sdk = require('./modules/sdk');
-let Overrides = require('../modules/Override');
+let Overrides = require('./modules/Override');
 
 if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 	Starter.firstRun = true;
@@ -76,7 +76,7 @@ function locationAction (location) {
 			if (!LocationEvents.openCreateGameWindow()) {
 				break;
 			}
-			
+
 			LocationEvents.openJoinGameWindow();
 		} else {
 			if (++ftj > 5) {

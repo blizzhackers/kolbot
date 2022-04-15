@@ -53,7 +53,7 @@ include("common/misc.js");
 include("common/util.js");
 let Controls = require('./modules/Control');
 let sdk = require('./modules/sdk');
-let Overrides = require('../modules/Override');
+let Overrides = require('./modules/Override');
 
 let channelTick = getTickCount(),
 	loginRetry = 0,
