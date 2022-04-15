@@ -131,7 +131,11 @@ const Loader = {
 							this.copy(Scripts[script], Config);
 						}
 
-						global[script]();
+						let tick = getTickCount();
+
+						if (global[script]()) {
+							console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
+						}
 
 						if (reconfiguration) {
 							print("ÿc2Reverting back unmodified config properties.");
@@ -172,7 +176,11 @@ const Loader = {
 						this.copy(Scripts[script], Config);
 					}
 
-					global[script]();
+					let tick = getTickCount();
+
+					if (global[script]()) {
+						console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
+					}
 
 					if (reconfiguration) {
 						print("ÿc2Reverting back unmodified config properties.");

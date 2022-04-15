@@ -4,8 +4,8 @@
 *	@desc		kill seal bosses and Diablo
 */
 
-let Override_1 = require('../modules/Override');
-new Override_1.Override(Common.Diablo, Common.Diablo.openSeal, function(orignal, classid) {
+let Overrides = require('../modules/Override');
+new Overrides.Override(Common.Diablo, Common.Diablo.openSeal, function(orignal, classid) {
 	if (!orignal(classid)) {
 		throw new Error("Failed to open seal (id " + classid + ")");
 	}

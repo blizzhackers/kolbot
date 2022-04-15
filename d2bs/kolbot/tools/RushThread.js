@@ -17,7 +17,7 @@ include("common/util.js");
 
 includeCommonLibs();
 
-let Override_1 = require('../modules/Override');
+let Overrides = require('../modules/Override');
 
 let count = 0;
 let wpsToGive = Pather.wpAreas.slice(0).filter(function (area) {
@@ -76,7 +76,7 @@ function giveWP () {
 	return false;
 }
 
-new Override_1.Override(Pather, Pather.useWaypoint, function(orignal, targetArea, check) {
+new Overrides.Override(Pather, Pather.useWaypoint, function(orignal, targetArea, check) {
 	if (orignal(targetArea, check)) {
 		return (Config.Rusher.GiveWps && giveWP()) || true;
 	} else {

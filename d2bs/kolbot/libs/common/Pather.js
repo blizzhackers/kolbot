@@ -244,28 +244,25 @@ const Pather = {
 		// Abort if dead
 		if (me.dead) return false;
 
-		let path, adjustedNode, cleared,
-			leaped = false,
-			node = {x: x, y: y},
-			fail = 0;
+		if (!x || !y) { throw new Error("moveTo: Function must be called with at least 2 arguments."); }
+		if (typeof x !== "number" || typeof y !== "number") { throw new Error("moveTo: Coords must be numbers"); }
+		if ([x, y].distance < 2) return true;
 
 		for (let i = 0; i < this.cancelFlags.length; i += 1) {
 			getUIFlag(this.cancelFlags[i]) && me.cancel();
 		}
 
-		if (getDistance(me, x, y) < 2) {
-			return true;
-		}
-
-		if (!x || !y) { throw new Error("moveTo: Function must be called with at least 2 arguments."); }
-		if (typeof x !== "number" || typeof y !== "number") { throw new Error("moveTo: Coords must be numbers"); }
+		let cleared = false,
+			leaped = false,
+			node = {x: x, y: y},
+			fail = 0;
 
 		let useTeleport = this.useTeleport();
 		let tpMana = Skill.getManaCost(sdk.skills.Teleport);
 		let annoyingArea = [sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.MaggotLairLvl3].includes(me.area);
 		!clearPath && !useTeleport && !Config.ClearPath && (clearPath = {Range: 10, Spectype: 0}); // walking characters need to clear in front of them
 		(!retry || (retry <= 3 && !useTeleport)) && (retry = useTeleport ? 5 : 15);
-		path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? (annoyingArea ? 30 : this.teleDistance) : this.walkDistance);
+		let path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? (annoyingArea ? 30 : this.teleDistance) : this.walkDistance);
 
 		if (!path) { throw new Error("moveTo: Failed to generate path."); }
 
@@ -290,7 +287,7 @@ const Pather = {
 			if (getDistance(me, node) > 2) {
 				// Make life in Maggot Lair easier
 				if (annoyingArea) {
-					adjustedNode = this.getNearestWalkable(node.x, node.y, 15, 3, 0x1 | 0x4 | 0x800 | 0x1000);
+					let adjustedNode = this.getNearestWalkable(node.x, node.y, 15, 3, 0x1 | 0x4 | 0x800 | 0x1000);
 
 					if (adjustedNode) {
 						node.x = adjustedNode[0];
@@ -319,8 +316,8 @@ const Pather = {
 						Misc.townCheck();
 					}
 				} else {
-					if (!me.inTown) { 
-						if ((me.getMobCount() > 0 && Attack.clear(8)) || this.kickBarrels(node.x, node.y) || this.openDoors(node.x, node.y)) {
+					if (!me.inTown) {
+						if ((!useTeleport && me.getMobCount(10) > 0 && Attack.clear(8)) || this.kickBarrels(node.x, node.y) || this.openDoors(node.x, node.y)) {
 							continue;
 						}
 
@@ -328,13 +325,11 @@ const Pather = {
 							// Don't go berserk on longer paths
 							if (!cleared && me.getMobCount(5) > 0 && Attack.clear(5)) {
 								cleared = true;
-								continue;
 							}
 
 							// Only do this once
 							if (fail > 1 && !leaped && me.getSkill(sdk.skills.LeapAttack, 1) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
 								leaped = true;
-								continue;
 							}
 						}
 					}
@@ -378,16 +373,11 @@ const Pather = {
 		maxRange === undefined && (maxRange = 5);
 
 		for (let i = 0; i < 3; i += 1) {
-			if (Config.PacketCasting) {
-				Skill.setSkill(54, 0) && Packet.castSkill(0, x, y);
-			} else {
-				Skill.cast(54, 0, x, y);
-			}
-
+			Config.PacketCasting ? Skill.setSkill(sdk.skills.Teleport, 0) && Packet.castSkill(0, x, y) : Skill.cast(sdk.skills.Teleport, 0, x, y);
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < Math.max(500, me.ping * 2 + 200)) {
-				if (getDistance(me.x, me.y, x, y) < maxRange) {
+				if ([x, y].distance < maxRange) {
 					return true;
 				}
 
@@ -462,7 +452,6 @@ const Pather = {
 			attemptCount += 1;
 			nTimer = getTickCount();
 
-			ModeLoop:
 			while (me.mode !== 2 && me.mode !== 3 && me.mode !== 6) {
 				if (me.dead) return false;
 
@@ -493,7 +482,7 @@ const Pather = {
 						}
 					}
 
-					break ModeLoop;
+					break;
 				}
 
 				delay(10);
@@ -1000,7 +989,7 @@ const Pather = {
 		targetArea - id of the area to enter
 		check - force the waypoint menu
 	*/
-	useWaypoint: function useWaypoint(targetArea, check) {
+	useWaypoint: function useWaypoint(targetArea, check = false) {
 		switch (targetArea) {
 		case undefined:
 			throw new Error("useWaypoint: Invalid targetArea parameter: " + targetArea);
@@ -1024,7 +1013,6 @@ const Pather = {
 		this.broadcastIntent(targetArea);
 
 		let tick;
-		let startAct = me.act;
 
 		for (let i = 0; i < 12; i += 1) {
 			if (me.area === targetArea || me.dead) {
@@ -1122,7 +1110,6 @@ const Pather = {
 						let coord = CollMap.getRandCoordinate(me.x, -5 * retry, 5 * retry, me.y, -5 * retry, 5 * retry);
 						this.moveTo(coord.x, coord.y);
 						delay(200 + me.ping);
-
 						Packet.flash(me.gid);
 
 						continue;
@@ -1137,7 +1124,6 @@ const Pather = {
 					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
 						if (me.area === targetArea) {
 							delay(1000 + me.ping);
-
 							return true;
 						}
 
@@ -1155,12 +1141,14 @@ const Pather = {
 				Packet.flash(me.gid);
 			}
 
+			// We can't seem to get the wp maybe attempt portal to town instead and try to use that wp
+			i >= 10 && !me.inTown && Town.goToTown();
 			delay(200 + me.ping);
 		}
 
 		if (me.area === targetArea) {
 			// delay to allow act to init - helps with crashes
-			me.act !== startAct && delay(200 + me.ping);
+			delay(200 + me.ping);
 			return true;
 		}
 
@@ -1192,7 +1180,6 @@ const Pather = {
 			tpTool.interact();
 			let tick = getTickCount();
 
-			MainLoop:
 			while (getTickCount() - tick < Math.max(500 + i * 100, me.ping * 2 + 100)) {
 				let portal = getUnits(sdk.unittype.Object, "portal")
 					.filter(function (p) { return p.getParent() === me.name && p.gid !== oldGid; })
@@ -1203,7 +1190,7 @@ const Pather = {
 						if (this.usePortal(null, null, copyUnit(portal))) {
 							return true;
 						}
-						break MainLoop; // don't spam usePortal
+						break; // don't spam usePortal
 					} else {
 						return copyUnit(portal);
 					}
@@ -1500,7 +1487,7 @@ const Pather = {
 			this.wpAreas.indexOf(me.area) === -1 && (target.useWP = true);
 		}
 
-		print(target.course);
+		console.log(target.course);
 		area === sdk.areas.PandemoniumFortress && me.area === sdk.areas.DuranceofHateLvl3 && (target.useWP = false);
 		target.useWP && Town.goToTown();
 
@@ -1524,8 +1511,14 @@ const Pather = {
 		}
 
 		while (target.course.length) {
+			if (me.area === target.course[0] && target.course.shift()) {
+				continue;
+			}
+
 			let currArea = me.area;
 			let currAct = me.act;
+
+			console.log("ÿc7(journeyTo) :: ÿc0Moving from: " + Pather.getAreaName(me.area) + " to " + Pather.getAreaName(target.course[0]));
 
 			if (!me.inTown) {
 				Precast.doPrecast(false);
@@ -1588,7 +1581,7 @@ const Pather = {
 				// Canyon -> Duriels Lair
 				this.moveToExit(getRoom().correcttomb, true);
 				this.moveToPreset(me.area, 2, 152);
-				unit = Misc.poll(function () { return getUnit(2, 100); });
+				unit = Misc.poll(() => getUnit(2, 100));
 				unit && Pather.useUnit(2, 100, 73);
 			} else if (currArea === sdk.areas.DuranceofHateLvl3 && target.course[0] === sdk.areas.PandemoniumFortress) {
 				// Durance Lvl 3 -> Pandemonium Fortress
@@ -1647,8 +1640,7 @@ const Pather = {
 				retry = 0;
 			} else {
 				if (retry > 3) {
-					print(sdk.colors.Red + "Failed to journeyTo " + Pather.getAreaName(area) + " currentarea: " + Pather.getAreaName(me.area));
-					
+					console.log(sdk.colors.Red + "Failed to journeyTo " + Pather.getAreaName(area) + " currentarea: " + Pather.getAreaName(me.area));
 					return false;
 				}
 				retry++;
@@ -1893,7 +1885,7 @@ const Pather = {
 			"Throne Of Destruction",
 			"The Worldstone Chamber",
 			"Matron's Den",
-			"Fogotten Sands",
+			"Forgotten Sands",
 			"Furnace of Pain",
 			"Tristram"
 		],
@@ -1904,5 +1896,5 @@ const Pather = {
 	*/
 	getAreaName: function (area) {
 		return this.areaNames[area];
-	}
+	},
 };
