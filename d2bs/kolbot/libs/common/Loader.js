@@ -140,6 +140,13 @@ const Loader = {
 					}
 				} catch (error) {
 					Misc.errorReport(error, script);
+				} finally {
+
+					// Dont run for last script as that will clear everything anyway
+					if (this.scriptIndex < this.scriptList.length) {
+						// remove script function from global scope, so it can be cleared by GC
+						delete global[script];
+					}
 				}
 			}
 		}
