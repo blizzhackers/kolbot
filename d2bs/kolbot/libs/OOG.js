@@ -1402,6 +1402,7 @@ const Starter = {
 	inGame: false,
 	firstLogin: true,
 	firstRun: false,
+	loginRetry: 0,
 	deadCheck: false,
 	chatActionsDone: false,
 	gameStart: 0,
@@ -1895,11 +1896,11 @@ const LocationEvents = {
 		// dead HardCore character
 		if (Controls.CreateGameWindow.control && Controls.CreateGameWindow.disabled === sdk.game.controls.Disabled) {
 			if (StarterConfig.StopOnDeadHardcore) {
-				D2Bot.printToConsole(Profile().character + "has died. They shall be remembered...maybe. Shutting down, better luck next time", 6);
+				D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Shutting down, better luck next time", 6);
 				D2Bot.stop();
 			} else {
-				D2Bot.printToConsole(Profile().character + "has died. They shall be remembered...maybe. Better luck next time", 6);
-				D2Bot.updateStatus(Profile().character + "has died. They shall be remembered...maybe. Better luck next time");
+				D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Better luck next time", 6);
+				D2Bot.updateStatus(Profile().character + " has died. They shall be remembered...maybe. Better luck next time");
 				Starter.deadCheck = true;
 				Controls.LobbyQuit.click();
 			}
@@ -1973,7 +1974,7 @@ const LocationEvents = {
 		try {
 			login(me.profile);
 		} catch (e) {
-			if (getLocation() === sdk.game.locations.CharSelect && loginRetry < 2) {
+			if (getLocation() === sdk.game.locations.CharSelect && Starter.loginRetry < 2) {
 				if (!ControlAction.findCharacter(Starter.profileInfo)) {
 					// dead hardcore character on sp
 					if (getLocation() === sdk.game.locations.OkCenteredErrorPopUp) {
@@ -1982,7 +1983,7 @@ const LocationEvents = {
 						D2Bot.printToConsole("Character died", 9);
 						D2Bot.stop();
 					} else {
-						loginRetry++;
+						Starter.loginRetry++;
 					}
 				} else {
 					login(me.profile);

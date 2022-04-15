@@ -101,7 +101,7 @@ if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 let lastGameTick;
 
 function locationAction (location) {
-	let i, gameToJoin, doneGames, gameList;
+	let gameToJoin, doneGames, gameList;
 
 	switch (location) {
 	case sdk.game.locations.PreSplash:
@@ -112,7 +112,7 @@ function locationAction (location) {
 		D2Bot.updateStatus("Lobby");
 
 		me.blockKeys = false;
-		loginRetry = 0;
+		Starter.loginRetry = 0;
 		!Starter.firstLogin && (Starter.firstLogin = true);
 		Starter.lastGameStatus === "pending" && (Starter.gameCount += 1);
 		loginFail = 0;
@@ -171,7 +171,7 @@ function locationAction (location) {
 			ControlAction.timeoutDelay("Game Delay", (lastGameTick - getTickCount() + 5000));
 		}
 
-		for (i = 0; i < 5; i += 1) {
+		for (let i = 0; i < 5; i += 1) {
 			gameList = ControlAction.getGameList();
 
 			if (gameList && gameList.length > 0) {
@@ -193,10 +193,9 @@ function locationAction (location) {
 				return b.players - a.players;
 			});
 
-			for (i = 0; i < gameList.length; i += 1) {
+			for (let i = 0; i < gameList.length; i += 1) {
 				if (doneGames.indexOf(gameList[i].gameName) === -1 && includeCheck(gameList[i].gameName) && excludeCheck(gameList[i].gameName)) {
 					print("ÿc7Game: " + gameList[i].gameName + ", Players: " + gameList[i].players);
-
 					gameToJoin = gameList[i].gameName;
 
 					break;
@@ -204,10 +203,7 @@ function locationAction (location) {
 			}
 
 			if (gameToJoin) {
-				if (doneGames.length >= 20) {
-					doneGames.shift();
-				}
-
+				doneGames.length >= 20 && doneGames.shift();
 				doneGames.push(gameToJoin);
 				Misc.fileAction("logs/doneGames.json", 1, JSON.stringify(doneGames));
 
@@ -259,7 +255,7 @@ function locationAction (location) {
 		!Starter.locationTimeout(StarterConfig.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
 
 		break;
-	case sdk.game.locations.SelectDifficultySP: // Single Player - Select Difficulty
+	case sdk.game.locations.SelectDifficultySP:
 		break;
 	case sdk.game.locations.MainMenuConnecting:
 		!Starter.locationTimeout(StarterConfig.ConnectingTimeout * 1e3, location) && Controls.LoginCancelWait.click();

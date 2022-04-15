@@ -52,7 +52,7 @@ let Controls = require('./modules/Control');
 let sdk = require('./modules/sdk');
 let Overrides = require('./modules/Override');
 
-let j, lastGameTick, leader = "",
+let lastGameTick, leader = "",
 	announced = false,
 	lastGame = [];
 
@@ -85,13 +85,10 @@ function joinCheck (leader) {
 	return false;
 }
 
-function locationAction () {
-	if (me.ingame) {
+function locationAction (location) {
+	if (me.ingame || location === undefined) {
 		return;
 	}
-
-	let i;
-	let location = getLocation();
 
 	switch (location) {
 	case sdk.game.locations.PreSplash:
@@ -102,7 +99,7 @@ function locationAction () {
 		D2Bot.updateStatus("Lobby");
 
 		me.blockKeys = false;
-		loginRetry = 0;
+		Starter.loginRetry = 0;
 		!Starter.firstLogin && (Starter.firstLogin = true);
 
 		if (StarterConfig.JoinChannel !== "") {
@@ -173,9 +170,9 @@ function locationAction () {
 		if (!leader) {
 			leader = [];
 
-			for (i in JoinSettings) {
+			for (let i in JoinSettings) {
 				if (JoinSettings.hasOwnProperty(i) && typeof i === "string") {
-					for (j = 0; j < JoinSettings[i].length; j += 1) {
+					for (let j = 0; j < JoinSettings[i].length; j += 1) {
 						if (JoinSettings[i][j] === me.profile || JoinSettings[i][j] === "all") {
 							leader.push(i);
 						}
@@ -188,14 +185,14 @@ function locationAction () {
 			print("No leader");
 			D2Bot.printToConsole("No leader");
 			announced = true;
+
 			break;
 		}
 
 		JoinLoop2:
-		for (i = 0; i < 5; i += 1) {
-			for (j = 0; j < leader.length; j += 1) {
+		for (let i = 0; i < 5; i += 1) {
+			for (let j = 0; j < leader.length; j += 1) {
 				Starter.joinInfo = {};
-
 				D2Bot.requestGame(leader[j]);
 				delay(100);
 
@@ -242,7 +239,7 @@ function locationAction () {
 					lastGame.push(Starter.joinInfo.gameName);
 
 					// Might need a fixed number. Right now it stores 1 game per leader.
-					lastGame.length > leader.length && (lastGame.shift());
+					lastGame.length > leader.length && lastGame.shift();
 
 					Starter.lastGameStatus = "pending";
 					Starter.locationTimeout(15000, location);
@@ -339,9 +336,9 @@ function locationAction () {
 			if (!leader) {
 				leader = [];
 
-				for (i in JoinSettings) {
+				for (let i in JoinSettings) {
 					if (JoinSettings.hasOwnProperty(i) && typeof i === "string") {
-						for (j = 0; j < JoinSettings[i].length; j += 1) {
+						for (let j = 0; j < JoinSettings[i].length; j += 1) {
 							if (JoinSettings[i][j] === me.profile || JoinSettings[i][j] === "all") {
 								leader.push(i);
 							}
@@ -351,8 +348,8 @@ function locationAction () {
 			}
 
 			mainLoop:
-			for (i = 0; i < 3; i++) {
-				for (j = 0; j < leader.length; j++) {
+			for (let i = 0; i < 3; i++) {
+				for (let j = 0; j < leader.length; j++) {
 					D2Bot.requestGame(leader[j]);
 
 					if (Object.keys(Starter.joinInfo).length && Starter.joinInfo.gameName !== "") {
@@ -443,7 +440,7 @@ function main () {
 			delay(1000);
 		}
 
-		locationAction();
+		locationAction(getLocation());
 		delay(1000);
 	}
 }

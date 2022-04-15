@@ -56,7 +56,6 @@ let sdk = require('./modules/sdk');
 let Overrides = require('./modules/Override');
 
 let channelTick = getTickCount(),
-	loginRetry = 0,
 	fListTick = 0,
 	retry = 0,
 	badGames = [],
@@ -96,7 +95,7 @@ function locationAction (location) {
 		D2Bot.updateStatus("Lobby");
 
 		me.blockKeys = false;
-		loginRetry = 0;
+		Starter.loginRetry = 0;
 		!Starter.firstLogin && (Starter.firstLogin = true);
 		Controls.LobbyEnterChat.click();
 
