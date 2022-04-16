@@ -7,6 +7,7 @@ Starter.Config.CreateGameDelay = 5; // Seconds to wait before creating a new gam
 Starter.Config.SwitchKeyDelay = 0; // Seconds to wait before switching a used/banned key or after realm down
 Starter.Config.ExitToMenu = false; // Set to true to wait out restriction in main menu or false to wait in lobby.
 Starter.Config.VersionErrorDelay = rand(15, 30); // Seconds to wait after 'unable to identify version' message
+Starter.Config.MakeAccountOnFailure = true;
 
 // Override default values for StarterConfig under here by following format
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
@@ -31,8 +32,8 @@ include("common/collmap.js");
 let Controls = require('./modules/Control');
 let Overrides = require('./modules/Override');
 
-let master, makeAcc,
-	muleMode, muleFilename, muleObj, maxCharCount,
+let master, muleMode, muleFilename, muleObj, maxCharCount,
+	checkOnJoin = false,
 	clearedJunk = false,
 	continuousMule = false,
 	makeNext = false,
@@ -184,7 +185,8 @@ function pickItems () {
 	}
 
 	while (me.gameReady) {
-		if (masterStatus.status === "done" || continuousMule) {
+		if (masterStatus.status === "done" || continuousMule || checkOnJoin) {
+			checkOnJoin && (checkOnJoin = false);
 			item = getUnit(4);
 
 			if (item) {
@@ -454,7 +456,7 @@ function locationAction (location) {
 			joinGame(muleObj.muleGameName[0], muleObj.muleGameName[1]);
 		}
 
-		!firstLogin && (status = "pending");
+		!Starter.firstLogin && (status = "pending");
 
 		ingameTimeout(5000);
 		print("Ingame timeout done.");
@@ -472,7 +474,7 @@ function locationAction (location) {
 
 		obj = MuleData.read();
 
-		if (!obj.account || obj.account.indexOf(muleObj.accountPrefix) === -1) {
+		if (!obj.account || obj.account.indexOf(muleObj.accountPrefix) < 0) {
 			nextAccount();
 			obj = MuleData.read();
 		}
@@ -483,16 +485,16 @@ function locationAction (location) {
 			password: muleObj.accountPassword
 		};
 
-		if (makeAcc) {
+		if (Starter.makeAccount) {
 			ControlAction.makeAccount(info);
 			D2Bot.printToConsole("Made account: " + info.account, 7);
-			makeAcc = false;
+			Starter.makeAccount = false;
 
 			break;
 		}
 
 		MuleLogger.save(md5(info.realm.toLowerCase() + info.account.toLowerCase()), info.password);
-		ControlAction.loginAccount(info);
+		!ControlAction.loginAccount(info) && (Starter.makeAccount = true);
 
 		break;
 	case sdk.game.locations.LoginError:
@@ -606,7 +608,7 @@ function locationAction (location) {
 			charClass: "amazon"
 		};
 
-		if (muleMode > 0 && obj.torchChars.indexOf(info.charName) > -1) {
+		if (muleMode > 0 && obj.torchChars.includes(info.charName)) {
 			nextChar();
 
 			break;
@@ -774,7 +776,7 @@ function main () {
 		!FileTools.exists(muleFilename) && MuleData.create();
 
 		obj = MuleData.read();
-		obj.account && obj.account.indexOf(muleObj.accountPrefix) === -1 && MuleData.create();
+		obj.account && obj.account.indexOf(muleObj.accountPrefix) < 0 && MuleData.create();
 	} catch (e) {
 		print("Caught exception creating data files.");
 		print(e);
@@ -804,6 +806,7 @@ function main () {
 					Town.goToTown(1);
 					Town.move("stash");
 					Storage.Init();
+					checkOnJoin && (status = "begin");
 					idleTick = getTickCount() + rand(1200, 1500) * 1000;
 					Starter.inGame = true;
 
@@ -832,7 +835,7 @@ function main () {
 
 				!continuousMule && me.overhead("begin");
 
-				if (status === "begin" && foreverAlone()) {
+				if (status === "begin" && !checkOnJoin && foreverAlone()) {
 					status = "ready";
 					print("Error somewhere, no one is here but I was set to pick items");
 				}
@@ -861,6 +864,7 @@ function main () {
 						delay(500);
 
 						makeNext = true;
+						checkOnJoin = true;
 						obj = MuleData.read();
 
 						if (checkAnniTorch() && obj.torchChars.indexOf(me.name) === -1) {
