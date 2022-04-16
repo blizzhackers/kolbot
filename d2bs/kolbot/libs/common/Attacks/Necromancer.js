@@ -279,8 +279,8 @@ const ClassAttack = {
 
 				Config.ActiveSummon && this.raiseArmy();
 				this.explodeCorpses(unit);
-				let closeMob = Attack.getNearestMonster(true, true);
-				!!closeMob && closeMob.gid !== gid && this.doCast(closeMob, timedSkill, untimedSkill);
+				let closeMob = Attack.getNearestMonster({skipGid: gid});
+				!!closeMob && this.doCast(closeMob, timedSkill, untimedSkill);
 			}
 
 			return 1;

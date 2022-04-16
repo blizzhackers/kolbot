@@ -110,8 +110,8 @@ const ClassAttack = {
 					!!spot && Pather.walkTo(spot.x, spot.y);
 				}
 
-				let closeMob = Attack.getNearestMonster(true, true);
-				!!closeMob && closeMob.gid !== gid && this.doCast(closeMob, attackSkill, aura);
+				let closeMob = Attack.getNearestMonster({skipGid: gid});
+				!!closeMob && this.doCast(closeMob, attackSkill, aura);
 			}
 
 			return 1;

@@ -1602,19 +1602,26 @@ const Attack = {
 		return false;
 	},
 
-	getNearestMonster: function (skipBlocked = false, skipImmune = false) {
-		let gid, distance,
+	getNearestMonster: function (givenSettings = {}) {
+		let settings = Object.assign({}, {
+			skipBlocked: true,
+			skipImmune: true,
+			skipGid: -1,
+		}, givenSettings);
+
+		let gid,
 			monster = getUnit(1),
 			range = 30;
 
 		if (monster) {
 			do {
 				if (monster.attackable && !monster.getParent()) {
-					distance = getDistance(me, monster);
+					let distance = getDistance(me, monster);
 
 					if (distance < range
-						&& (!skipBlocked || (!checkCollision(me, monster, 0x4) || !checkCollision(me, monster, 0x1)))
-						&& (!skipImmune || Attack.canAttack(monster))) {
+						&& (settings.skipGid === -1 || monster.gid !== settings.skipGid)
+						&& (!settings.skipBlocked || !checkCollision(me, monster, 0x5))
+						&& (!settings.skipImmune || Attack.canAttack(monster))) {
 						range = distance;
 						gid = monster.gid;
 					}
