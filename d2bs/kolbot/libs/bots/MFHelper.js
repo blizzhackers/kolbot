@@ -11,11 +11,10 @@ function MFHelper() {
 
 	function chatEvent(name, msg) {
 		if (!player) {
-			let i,
-				match = ["kill", "clearlevel", "clear", "quit", "cows", "council", "goto"];
+			let match = ["kill", "clearlevel", "clear", "quit", "cows", "council", "goto"];
 
 			if (msg) {
-				for (i = 0; i < match.length; i += 1) {
+				for (let i = 0; i < match.length; i += 1) {
 					if (msg.match(match[i])) {
 						player = Misc.findPlayer(name);
 
@@ -35,8 +34,6 @@ function MFHelper() {
 	Town.move("portalspot");
 
 	if (Config.Leader) {
-		let i;
-
 		for (let i = 0; i < 30; i += 1) {
 			if (Misc.inMyParty(Config.Leader)) {
 				break;
@@ -67,7 +64,7 @@ function MFHelper() {
 
 	// START
 	while (true) {
-		if (!me.hardcore && me.mode === 17) {
+		if (me.softcore && me.mode === 17) {
 			while (!me.inTown) {
 				me.revive();
 				delay(1000);
@@ -78,13 +75,13 @@ function MFHelper() {
 		}
 
 		if (player) {
-			if (Config.LifeChicken > 0 && me.hp <= Math.floor(me.hpmax * Config.LifeChicken / 100)) {
+			if (Config.LifeChicken > 0 && me.hpPercent <= Config.LifeChicken) {
 				Town.heal();
 				Town.move("portalspot");
 			}
 
-			// Finish MFHelper script if leader is in Chaos or Throne
-			if ([108, 131].includes(player.area)) {
+			// Finish MFHelper script if leader is running Diablo or Baal
+			if ([sdk.areas.ChaosSanctuary, sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(player.area)) {
 				break;
 			}
 
@@ -120,7 +117,7 @@ function MFHelper() {
 						delay(500 + me.ping);
 					}
 
-					if (me.area === 39) {
+					if (me.area === sdk.areas.MooMooFarm) {
 						Precast.doPrecast(false);
 						Common.Cows.clearCowLevel();
 						delay(1000);

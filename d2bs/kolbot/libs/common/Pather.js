@@ -373,7 +373,7 @@ const Pather = {
 		maxRange === undefined && (maxRange = 5);
 
 		for (let i = 0; i < 3; i += 1) {
-			Config.PacketCasting ? Skill.setSkill(sdk.skills.Teleport, 0) && Packet.castSkill(0, x, y) : Skill.cast(sdk.skills.Teleport, 0, x, y);
+			Config.PacketCasting > 0 ? Skill.setSkill(sdk.skills.Teleport, 0) && Packet.castSkill(0, x, y) : Skill.cast(sdk.skills.Teleport, 0, x, y);
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < Math.max(500, me.ping * 2 + 200)) {
@@ -1619,7 +1619,7 @@ const Pather = {
 				currArea !== 1 && Town.goToTown(1);
 				Town.move("stash") && (unit = this.getPortal(target.course[0]));
 				unit && this.usePortal(null, null, unit);
-			} else if ([sdk.areas.MatronsDen, sdk.areas.FogottenSands, sdk.areas.FurnaceofPain, sdk.areas.UberTristram].includes(target.course[0])) {
+			} else if ([sdk.areas.MatronsDen, sdk.areas.ForgottenSands, sdk.areas.FurnaceofPain, sdk.areas.UberTristram].includes(target.course[0])) {
 				// Uber Portals
 				currArea !== sdk.areas.Harrogath && Town.goToTown(5);
 				Town.move("stash") && (unit = this.getPortal(target.course[0]));

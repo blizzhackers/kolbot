@@ -202,7 +202,7 @@
 
 			// Ubers
 			MatronsDen: 133,
-			FogottenSands: 134,
+			ForgottenSands: 134,
 			FurnaceofPain: 135,
 			UberTristram: 136,
 
