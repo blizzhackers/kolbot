@@ -103,10 +103,10 @@ const Precast = new function () {
 			return me.weaponswitch;
 		}
 
-		me.weaponswitch !== 0 && Attack.weaponswitch(0);
+		me.weaponswitch !== 0 && Attack.weaponSwitch(0);
 
 		me.getItemsEx()
-			.filter(item => [4, 5, 11, 12].includes(item.bodylocation))
+			.filter(item => item.isEquipped && [4, 5, 11, 12].includes(item.bodylocation))
 			.forEach(function (item) {
 				if (item.bodylocation === 4 || item.bodylocation === 5) {
 					sumCurr += (item.getStat(127) + item.getStat(83, classid) + item.getStat(188, skillTab) + item.getStat(107, skillId) + item.getStat(97, skillId));
@@ -133,6 +133,8 @@ const Precast = new function () {
 		return true;
 	};
 
+	// TODO: build list of our skills rather than check if we have a skill each time
+	// update the list if AutoBuild is enabled and we have had a level change or AutoSkill is enabled and we have applied a skill point
 	this.doPrecast = function (force) {
 		let buffSummons = false;
 

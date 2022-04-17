@@ -33,6 +33,7 @@ const Attack = {
 		}
 	},
 
+	// change this to use packets
 	weaponSwitch: function (slot) {
 		if (me.classic || me.weaponswitch === slot) return true;
 		slot === undefined && (slot = me.weaponswitch ^ 1);
@@ -108,9 +109,7 @@ const Attack = {
 
 	getCustomAttack: function (unit) {
 		// Check if unit got invalidated
-		if (!unit || !unit.name || !copyUnit(unit).x) {
-			return false;
-		}
+		if (!unit || !unit.name || !copyUnit(unit).x) return false;
 
 		for (let i in Config.CustomAttack) {
 			if (Config.CustomAttack.hasOwnProperty(i) && unit.name.toLowerCase() === i.toLowerCase()) {
@@ -167,7 +166,7 @@ const Attack = {
 
 	// Check if player or his merc are using Infinity, and adjust resistance checks based on that
 	checkInfinity: function () {
-		let merc = Misc.poll(function () { return me.getMerc(); }, 2000, (250 + me.ping));
+		let merc = Misc.poll(() => me.getMerc(), 2000, (250 + me.ping));
 
 		// Check merc infinity
 		!!merc && (this.infinity = merc.checkItem({name: sdk.locale.items.Infinity}).have);
@@ -280,7 +279,7 @@ const Attack = {
 
 	hurt: function (classId, percent) {
 		if (!classId || !percent) return false;
-		let target = (typeof classId === "object" ? classid : Misc.poll(function () { return getUnit(1, classId); }, 2000, 100));
+		let target = (typeof classId === "object" ? classid : Misc.poll(() => getUnit(1, classId), 2000, 100));
 
 		if (!target) {
 			console.warn("Attack.hurt: Target not found");
@@ -418,9 +417,7 @@ const Attack = {
 						monsterList.shift();
 
 						continue;
-					}
-
-					if (result === 3) {
+					} else if (result === 3) {
 						continue;
 					}
 
@@ -600,9 +597,7 @@ const Attack = {
 						monsterList.shift();
 
 						continue;
-					}
-
-					if (result === 3) {
+					} else if (result === 3) {
 						continue;
 					}
 

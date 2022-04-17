@@ -1439,10 +1439,11 @@ Unit.prototype.getRes = function (type, difficulty) {
 
 {
 	let __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+		let ar;
 		if (pack || arguments.length === 2) {
-			for (var i = 0, l = from.length, ar; i < l; i++) {
+			for (let i = 0, l = from.length; i < l; i++) {
 				if (ar || !(i in from)) {
-					if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+					!ar && (ar = Array.prototype.slice.call(from, 0, i));
 					ar[i] = from[i];
 				}
 			}
@@ -1658,6 +1659,7 @@ Object.defineProperties(Unit.prototype, {
 	sellable: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
+			if (this.getItemCost(1) <= 1) return false;
 			return !this.questItem &&
 				[sdk.items.quest.KeyofTerror, sdk.items.quest.KeyofHate, sdk.items.quest.KeyofDestruction, sdk.items.quest.DiablosHorn,
 					sdk.items.quest.BaalsEye, sdk.items.quest.MephistosBrain, sdk.items.quest.TokenofAbsolution, sdk.items.quest.TwistedEssenceofSuffering,
