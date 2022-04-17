@@ -36,20 +36,14 @@ function DiabloHelper() {
 		this.followPath(Common.Diablo.vizLayout === 1 ? this.starToVizA : this.starToVizB, Common.Diablo.sort);
 
 		if (Config.DiabloHelper.OpenSeals) {
-			if (!Common.Diablo.openSeal(395) || !Common.Diablo.openSeal(396)) {
-				throw new Error("Failed to open Vizier seals.");
-			}
+			if (!Common.Diablo.openSeal(395) || !Common.Diablo.openSeal(396)) throw new Error("Failed to open Vizier seals.");
 		}
 
 		Common.Diablo.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
 
-		if (!this.getBoss(getLocaleString(2851))) {
-			throw new Error("Failed to kill Vizier");
-		}
+		if (!this.getBoss(getLocaleString(2851))) throw new Error("Failed to kill Vizier");
 
-		if (Config.FieldID.Enabled) {
-			Town.fieldID();
-		}
+		Config.FieldID.Enabled && Town.fieldID();
 
 		return true;
 	};
@@ -58,20 +52,14 @@ function DiabloHelper() {
 		this.followPath(Common.Diablo.seisLayout === 1 ? this.starToSeisA : this.starToSeisB, Common.Diablo.sort);
 
 		if (Config.DiabloHelper.OpenSeals) {
-			if (!Common.Diablo.openSeal(394)) {
-				throw new Error("Failed to open de Seis seal.");
-			}
+			if (!Common.Diablo.openSeal(394)) throw new Error("Failed to open de Seis seal.");
 		}
 
 		Common.Diablo.seisLayout === 1 ? Pather.moveTo(7771, 5196) : Pather.moveTo(7798, 5186);
 
-		if (!this.getBoss(getLocaleString(2852))) {
-			throw new Error("Failed to kill de Seis");
-		}
+		if (!this.getBoss(getLocaleString(2852))) throw new Error("Failed to kill de Seis");
 
-		if (Config.FieldID.Enabled) {
-			Town.fieldID();
-		}
+		Config.FieldID.Enabled && Town.fieldID();
 
 		return true;
 	};
@@ -81,9 +69,7 @@ function DiabloHelper() {
 		this.followPath(Common.Diablo.infLayout === 1 ? this.starToInfA : this.starToInfB, Common.Diablo.sort);
 
 		if (Config.DiabloHelper.OpenSeals) {
-			if (!Common.Diablo.openSeal(392)) {
-				throw new Error("Failed to open Infector seals.");
-			}
+			if (!Common.Diablo.openSeal(392)) throw new Error("Failed to open Infector seals.");
 		}
 
 		if (Common.Diablo.infLayout === 1) {
@@ -97,19 +83,13 @@ function DiabloHelper() {
 			Pather.moveTo(7928, 5295);
 		}
 
-		if (!this.getBoss(getLocaleString(2853))) {
-			throw new Error("Failed to kill Infector");
-		}
+		if (!this.getBoss(getLocaleString(2853))) throw new Error("Failed to kill Infector");
 
 		if (Config.DiabloHelper.OpenSeals) {
-			if (!Common.Diablo.openSeal(393)) {
-				throw new Error("Failed to open Infector seals.");
-			}
+			if (!Common.Diablo.openSeal(393)) throw new Error("Failed to open Infector seals.");
 		}
 
-		if (Config.FieldID.Enabled) {
-			Town.fieldID();
-		}
+		Config.FieldID.Enabled && Town.fieldID();
 
 		return true;
 	};
@@ -133,27 +113,15 @@ function DiabloHelper() {
 
 		switch (id) {
 		case getLocaleString(2851):
-			if (Common.Diablo.vizLayout === 1) {
-				coords = [7676, 5295];
-			}
-
-			coords = [7684, 5318];
+			coords = Common.Diablo.vizLayout === 1 ? [7676, 5295] : [7684, 5318];
 
 			break;
 		case getLocaleString(2852):
-			if (Common.Diablo.seisLayout === 1) {
-				coords = [7778, 5216];
-			}
-
-			coords = [7775, 5208];
+			coords = Common.Diablo.seisLayout === 1 ? [7778, 5216] : [7775, 5208];
 
 			break;
 		case getLocaleString(2853):
-			if (Common.Diablo.infLayout === 1) {
-				coords = [7913, 5292];
-			}
-
-			coords = [7915, 5280];
+			coords = Common.Diablo.infLayout === 1 ? [7913, 5292] : [7915, 5280];
 
 			break;
 		}
@@ -192,9 +160,7 @@ function DiabloHelper() {
 
 	this.followPath = function (path) {
 		for (let i = 0; i < path.length; i += 2) {
-			if (this.cleared.length) {
-				this.clearStrays();
-			}
+			this.cleared.length && this.clearStrays();
 
 			Pather.moveTo(path[i], path[i + 1], 3, getDistance(me, path[i], path[i + 1]) > 50);
 			Attack.clear(30, 0, false, Common.Diablo.sort);
@@ -216,7 +182,7 @@ function DiabloHelper() {
 
 		if (monster) {
 			do {
-				if (Attack.checkMonster(monster)) {
+				if (monster.attackable) {
 					for (let i = 0; i < this.cleared.length; i += 1) {
 						if (getDistance(monster, this.cleared[i][0], this.cleared[i][1]) < 30 && Attack.validSpot(monster.x, monster.y)) {
 							me.overhead("we got a stray");
@@ -230,9 +196,7 @@ function DiabloHelper() {
 			} while (monster.getNext());
 		}
 
-		if (getDistance(me, oldPos.x, oldPos.y) > 5) {
-			Pather.moveTo(oldPos.x, oldPos.y);
-		}
+		getDistance(me, oldPos.x, oldPos.y) > 5 && Pather.moveTo(oldPos.x, oldPos.y);
 
 		return true;
 	};

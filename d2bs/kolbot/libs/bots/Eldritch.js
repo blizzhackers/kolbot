@@ -18,20 +18,15 @@ function Eldritch() {
 			Pather.moveToUnit(chest);
 
 			let superChest = getUnit(2, 455);
-
-			if (Misc.openChest(superChest)) {
-				Pickit.pickItems();
-			}
+			!!superChest && Misc.openChest(superChest) && Pickit.pickItems();
 		}
 	}
 
-	if (Config.Eldritch.KillShenk) {
-		Pather.moveTo(3876, 5130);
+	if (Config.Eldritch.KillShenk && Pather.moveTo(3876, 5130)) {
 		Attack.kill(getLocaleString(sdk.locale.monsters.ShenktheOverseer));
 	}
 
-	if (Config.Eldritch.KillDacFarren) {
-		Pather.moveTo(4478, 5108);
+	if (Config.Eldritch.KillDacFarren && Pather.moveTo(4478, 5108)) {
 		Attack.kill(getLocaleString(sdk.locale.monsters.DacFarren));
 	}
 

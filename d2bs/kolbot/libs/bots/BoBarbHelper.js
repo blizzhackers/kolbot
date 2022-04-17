@@ -6,13 +6,10 @@
 */
 
 const BoBarbHelper = () => {
-	if (me.classid !== 4 && Config.BoBarbHelper.Mode !== 0) {
-		return true;
-	}
+	if (!me.barbarian && Config.BoBarbHelper.Mode !== 0) return true;
 
 	const townNearbyMonster = true; // go to town if monsters nearby
 	const townLowMana = 20; // go refill mana if mana drops below this percent
-
 	const shouldHealMana = amount => me.mp < Math.floor(me.mpmax * amount / 100);
 
 	const healMana = () => {
@@ -71,10 +68,7 @@ const BoBarbHelper = () => {
 		Config.LifeChicken = 40;
 	}
 
-	if (shouldHealMana(townLowMana)) {
-		Town.initNPC("Heal", "heal");
-	}
-
+	shouldHealMana(townLowMana) && Town.initNPC("Heal", "heal");
 	Town.heal(); // in case our life is low as well
 	
 	try {
@@ -99,10 +93,7 @@ const BoBarbHelper = () => {
 			}
 		}
 
-		if (shouldHealMana(townLowMana)) {
-			healMana();
-		}
-
+		shouldHealMana(townLowMana) && healMana();
 		delay(25);
 	}
 

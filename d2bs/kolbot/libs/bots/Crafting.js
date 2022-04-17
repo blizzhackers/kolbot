@@ -111,8 +111,6 @@ function Crafting() {
 				} else {
 					break;
 				}
-
-				delay(1000);
 			}
 
 			gameRequest = false;

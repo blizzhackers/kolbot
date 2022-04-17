@@ -116,9 +116,7 @@ function Cows() {
 
 	// we can begin now
 	try {
-		if (!me.diffCompleted) {
-			throw new Error("Final quest incomplete.");
-		}
+		if (!me.diffCompleted) throw new Error("Final quest incomplete.");
 
 		Town.goToTown(1);
 		Town.doChores();
@@ -126,8 +124,8 @@ function Cows() {
 
 		// Check to see if portal is already open, if not get the ingredients
 		if (!Pather.getPortal(sdk.areas.MooMooFarm)) {
-			if (!me.tristram) { throw new Error("Cain quest incomplete"); }
-			if (me.cows) { throw new Error("Already killed the Cow King."); }
+			if (!me.tristram) throw new Error("Cain quest incomplete");
+			if (me.cows) throw new Error("Already killed the Cow King.");
 			
 			let leg = this.getLeg();
 			let tome = this.getTome();
@@ -139,22 +137,9 @@ function Cows() {
 		if (Misc.getPlayerCount() > 1) {
 			!me.inTown && Town.goToTown(1);
 			Town.move("stash");
-			print("ÿc9(Cows) :: ÿc0Waiting 1 minute to see if anyone else opens the cow portal");
+			console.log("ÿc9(Cows) :: ÿc0Waiting 1 minute to see if anyone else opens the cow portal");
 
-			let tick = getTickCount();
-			let found = false;
-			while (getTickCount() - tick > 60e3) {
-				found = Pather.getPortal(sdk.areas.MooMooFarm);
-
-				if (found) {
-					break;
-				}
-				delay(250);
-			}
-
-			if (!found) {
-				throw new Error("No cow portal");
-			}
+			if (!Misc.poll(() => Pather.getPortal(sdk.areas.MooMooFarm), 60e3, 2000)) throw new Error("No cow portal");
 		} else {
 			return false;
 		}

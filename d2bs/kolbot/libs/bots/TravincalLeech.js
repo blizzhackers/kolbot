@@ -5,17 +5,6 @@
 */
 
 function TravincalLeech() {
-	
-	this.findLeader = function (name) {
-		let party = getParty(name);
-
-		if (party) {
-			return party;
-		}
-
-		return false;
-	};
-	
 	Town.goToTown(3);
 	Town.doChores();
 	Town.move("portalspot");
@@ -24,7 +13,7 @@ function TravincalLeech() {
 		delay(500);
 	}
 	
-	let leader = this.findLeader(Config.Leader);
+	let leader = Misc.findPlayer(Config.Leader);
 
 	while (Misc.inMyParty(Config.Leader)) {
 		if (me.inTown && Pather.getPortal(83, Config.Leader)) {

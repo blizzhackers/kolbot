@@ -14,10 +14,7 @@ function Corpsefire() {
 	}
 
 	Attack.clear(15, 0, getLocaleString(3319)); // Corpsefire
-
-	if (Config.Corpsefire.ClearDen) {
-		Attack.clearLevel();
-	}
+	Config.Corpsefire.ClearDen && Attack.clearLevel();
 
 	return true;
 }

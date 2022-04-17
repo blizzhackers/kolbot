@@ -5,52 +5,12 @@
 */
 
 function Wakka() {
-	let i, safeTP, portal, vizClear, seisClear, infClear, tick, diablo,
-		timeout = Config.Wakka.Wait,
+	let safeTP, portal, vizClear, seisClear, infClear, tick, timeout = Config.Wakka.Wait,
 		minDist = 50,
 		maxDist = 80,
 		leaderUnit = null,
 		leaderPartyUnit = null,
 		leader = "";
-
-	// autoleader by Ethic
-	function autoLeaderDetect(destination) {
-		let solofail, suspect;
-
-		do {
-			solofail = 0;
-			suspect = getParty(); // get party object (players in game)
-
-			do {
-				// player isn't alone
-				suspect.name !== me.name && (solofail += 1);
-				
-				// first player not hostile found in destination area...
-				if (suspect.area === destination && !getPlayerFlag(me.gid, suspect.gid, 8)) {
-					leader = suspect.name; // ... is our leader
-
-					if (suspect.area === 131) {
-						return false;
-					}
-
-					print("ÿc4Wakka: ÿc0Autodetected " + leader);
-
-					return true;
-				}
-			} while (suspect.getNext());
-
-			// empty game, nothing left to do
-			if (solofail === 0) return false;
-
-			delay(500);
-
-			if (getTickCount() - me.gamestarttime >= timeout * 6e4) {
-				throw new Error("No leader found");
-			}
-		} while (!leader); // repeat until leader is found (or until game is empty)
-
-		return false;
-	}
 
 	this.checkMonsters = function (range, dodge) {
 		let monList = [],
@@ -191,7 +151,7 @@ function Wakka() {
 				leaderPartyUnit = getParty(leader);
 
 				if (leaderPartyUnit) {
-					 // leader went to town - don't move
+					// leader went to town - don't move
 					if (leaderPartyUnit.area !== me.area) {
 						delay(200);
 
@@ -230,21 +190,11 @@ function Wakka() {
 	Town.move("portalspot");
 
 	if (Config.Leader) {
-		let i;
 		leader = Config.Leader;
-
-		for (i = 0; i < 30; i += 1) {
-			if (Misc.inMyParty(leader)) {
-				break;
-			}
-
-			delay(1000);
-		}
-
-		if (i === 30) { throw new Error("Wakka: Leader not partied"); }
+		if (!Misc.poll(() => Misc.inMyParty(leader), 30e3, 1000)) throw new Error("Wakka: Leader not partied");
 	}
 
-	autoLeaderDetect(108);
+	!leader && (leader = Misc.autoLeaderDetect({destination: 108, quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area), timeout: timeout * 60e3}));
 	Town.doChores();
 
 	if (leader) {
@@ -254,7 +204,7 @@ function Wakka() {
 				return true;
 			}
 
-			if (Config.Wakka.SkipIfBaal && this.getLeaderUnitArea() === sdk.areas.ThroneofDestruction) return true;
+			if (Config.Wakka.SkipIfBaal && [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(this.getLeaderUnitArea())) return true;
 
 			switch (me.area) {
 			case sdk.areas.PandemoniumFortress:
@@ -348,7 +298,7 @@ function Wakka() {
 
 				Pather.moveTo(7767, 5263);
 
-				diablo = getUnit(1, 243);
+				let diablo = getUnit(1, 243);
 
 				if (diablo && (diablo.mode === 0 || diablo.mode === 12)) {
 					return true;
@@ -362,7 +312,7 @@ function Wakka() {
 			delay(200);
 		}
 	} else {
-		throw new Error("Empty game.");
+		throw new Error("No leader found");
 	}
 
 	return true;

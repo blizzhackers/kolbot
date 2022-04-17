@@ -897,6 +897,47 @@ const Misc = {
 		return count;
 	},
 
+	// autoleader by Ethic - refactored by theBGuy
+	autoLeaderDetect: function (givenSettings = {}) {
+		let settings = Object.assign({}, {
+			destination: -1,
+			quitIf: false,
+			timeout: Infinity
+		}, givenSettings);
+
+		let leader;
+		let startTick = getTickCount();
+		let check = typeof settings.quitIf === "function";
+		do {
+			let solofail = 0;
+			let suspect = getParty(); // get party object (players in game)
+
+			do {
+				// player isn't alone
+				suspect.name !== me.name && (solofail += 1);
+
+				if (check && settings.quitIf(suspect.area)) return false;
+
+				// first player not hostile found in destination area...
+				if (suspect.area === settings.destination && !getPlayerFlag(me.gid, suspect.gid, 8)) {
+					leader = suspect.name; // ... is our leader
+					console.log("ÿc4Autodetected " + leader);
+
+					return leader;
+				}
+			} while (suspect.getNext());
+
+			// empty game, nothing left to do. Or we exceeded our wait time
+			if (solofail === 0 || (getTickCount() - startTick > settings.timeout)) {
+				return false;
+			}
+
+			delay(500);
+		} while (!leader); // repeat until leader is found (or until game is empty)
+
+		return false;
+	},
+
 	// Open a chest Unit (takes chestID or unit)
 	openChest: function (unit) {
 		typeof unit === "number" && (unit = getUnit(2, unit));

@@ -11,9 +11,7 @@ function Tombs() {
 
 	for (let i = 66; i <= 72; i += 1) {
 		try {
-			if (!Pather.journeyTo(i, true)) {
-				throw new Error("Failed to move to tomb");
-			}
+			if (!Pather.journeyTo(i, true)) throw new Error("Failed to move to tomb");
 	
 			Attack.clearLevel(Config.ClearType);
 	
@@ -22,9 +20,7 @@ function Tombs() {
 				Pather.journeyTo(sdk.areas.CanyonofMagic);
 			}
 	
-			if (!Pather.moveToExit(46, true)) {
-				throw new Error("Failed to move to Canyon");
-			}
+			if (!Pather.moveToExit(46, true)) throw new Error("Failed to move to Canyon");
 		} catch (e) {
 			console.warn(e);
 		}

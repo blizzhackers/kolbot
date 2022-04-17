@@ -5,23 +5,7 @@
 */
 
 function TristramLeech() {
-
-	let leader, i, whereisleader;
-
-	// Get leader's Unit
-	this.getLeaderUnit = function (name) {
-		let player = getUnit(0, name);
-
-		if (player) {
-			do {
-				if (player.mode !== 0 && player.mode !== 17) {
-					return player;
-				}
-			} while (player.getNext());
-		}
-
-		return false;
-	};
+	let leader, whereisleader;
 
 	Town.doChores();
 	Pather.useWaypoint(1); // Back To Rouge
@@ -29,19 +13,11 @@ function TristramLeech() {
 	leader = Config.Leader;
 
 	// Check leader isn't in other zones, whilst waiting for portal.
-	for (i = 0; i < Config.TristramLeech.Wait; i += 1) {
+	for (let i = 0; i < Config.TristramLeech.Wait; i += 1) {
 		whereisleader = getParty(leader);
 
-		if (whereisleader) {
-			if (whereisleader.area === 83) {
-				return false;
-			}
-			if (whereisleader.area === 108) {
-				return false;
-			}
-			if (whereisleader.area === 131) {
-				return false;
-			}
+		if (whereisleader && [83, 108, 131].includes(whereisleader.area)) {
+			return false;
 		}
 
 		if (Pather.usePortal(38, leader)) {
@@ -51,14 +27,12 @@ function TristramLeech() {
 		delay(1000);
 	}
 
-	if (i === Config.TristramLeech.Wait) {
-		throw new Error("No portal found to Tristram.");
-	}
+	if (me.area !== sdk.areas.Tristram) throw new Error("No portal found to Tristram.");
 
 	Precast.doPrecast(true);
 	delay(3000);
 
-	for (i = 0; i < 30; i += 1) {
+	for (let i = 0; i < 30; i += 1) {
 		whereisleader = getParty(leader);
 
 		if (whereisleader) {
@@ -71,9 +45,8 @@ function TristramLeech() {
 	}
 
 	while (whereisleader.area === 38) {
-
 		whereisleader = getParty(leader);
-		let leaderUnit = this.getLeaderUnit(leader);
+		let leaderUnit = Misc.getPlayerUnit(leader);
 
 		if (whereisleader.area === me.area) {
 			try {
@@ -96,10 +69,6 @@ function TristramLeech() {
 
 		delay(100);
 	}
-
-	//if (partyleader.area === 38) {
-	//	Attack.clearLevel(0);
-	//}
 
 	return true;
 }

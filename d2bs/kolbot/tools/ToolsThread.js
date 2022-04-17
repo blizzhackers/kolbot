@@ -19,8 +19,7 @@ include("common/util.js");
 includeCommonLibs();
 
 function main() {
-	let mercHP, ironGolem, tick, merc,
-		debugInfo = {area: 0, currScript: "no entry"},
+	let ironGolem, tick, debugInfo = {area: 0, currScript: "no entry"},
 		pingTimer = [],
 		quitFlag = false,
 		quitListDelayTime,
@@ -182,8 +181,7 @@ function main() {
 	};
 
 	this.drinkPotion = function (type) {
-		let pottype, potion,
-			tNow = getTickCount();
+		let pottype, tNow = getTickCount();
 
 		switch (type) {
 		case 0:
@@ -236,7 +234,7 @@ function main() {
 			break;
 		}
 
-		potion = this.getPotion(pottype, type);
+		let potion = this.getPotion(pottype, type);
 
 		if (potion) {
 			if (me.mode === 0 || me.mode === 17) {
@@ -285,13 +283,12 @@ function main() {
 	};
 
 	this.checkVipers = function () {
-		let owner,
-			monster = getUnit(1, 597);
+		let monster = getUnit(1, 597);
 
 		if (monster) {
 			do {
 				if (monster.getState(96)) {
-					owner = monster.getParent();
+					let owner = monster.getParent();
 
 					if (owner && owner.name !== me.name) {
 						D2Bot.printToConsole("Revived Tomb Vipers found. Leaving game.", 9);
@@ -306,12 +303,11 @@ function main() {
 	};
 
 	this.getIronGolem = function () {
-		let owner,
-			golem = getUnit(1, 291);
+		let golem = getUnit(1, 291);
 
 		if (golem) {
 			do {
-				owner = golem.getParent();
+				let owner = golem.getParent();
 
 				if (owner && owner.name === me.name) {
 					return copyUnit(golem);
@@ -323,12 +319,11 @@ function main() {
 	};
 
 	this.getNearestPreset = function () {
-		let i, unit, dist, id;
+		let id;
+		let unit = getPresetUnits(me.area);
+		let dist = 99;
 
-		unit = getPresetUnits(me.area);
-		dist = 99;
-
-		for (i = 0; i < unit.length; i += 1) {
+		for (let i = 0; i < unit.length; i += 1) {
 			if (getDistance(me, unit[i].roomx * 5 + unit[i].x, unit[i].roomy * 5 + unit[i].y) < dist) {
 				dist = getDistance(me, unit[i].roomx * 5 + unit[i].x, unit[i].roomy * 5 + unit[i].y);
 				id = unit[i].type + " " + unit[i].id;
@@ -411,7 +406,7 @@ function main() {
 			showConsole();
 
 			print("ÿc8My stats :: " + this.getStatsString(me));
-			merc = me.getMerc();
+			let merc = me.getMerc();
 			!!merc && print("ÿc8Merc stats :: " + this.getStatsString(merc));
 
 			break;
@@ -636,19 +631,21 @@ function main() {
 				}
 
 				if (Config.UseMerc) {
-					mercHP = getMercHP();
-					merc = me.getMerc();
+					let merc = me.getMerc();
+					if (!!merc) {
+						let mercHP = getMercHP();
 
-					if (mercHP > 0 && merc && merc.mode !== 12) {
-						if (mercHP < Config.MercChicken) {
-							D2Bot.printToConsole("Merc Chicken in " + Pather.getAreaName(me.area), 9);
-							this.exit(true);
+						if (mercHP > 0 && merc.mode !== 12) {
+							if (mercHP < Config.MercChicken) {
+								D2Bot.printToConsole("Merc Chicken in " + Pather.getAreaName(me.area), 9);
+								this.exit(true);
 
-							break;
+								break;
+							}
+
+							mercHP < Config.UseMercHP && this.drinkPotion(3);
+							mercHP < Config.UseMercRejuv && this.drinkPotion(4);
 						}
-
-						mercHP < Config.UseMercHP && this.drinkPotion(3);
-						mercHP < Config.UseMercRejuv && this.drinkPotion(4);
 					}
 				}
 

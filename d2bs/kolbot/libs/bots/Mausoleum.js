@@ -9,9 +9,7 @@ function Mausoleum() {
 	Pather.useWaypoint(3);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToExit(17, true)) {
-		throw new Error("Failed to move to Burial Grounds");
-	}
+	if (!Pather.moveToExit(17, true)) throw new Error("Failed to move to Burial Grounds");
 
 	if (Config.Mausoleum.KillBloodRaven) {
 		Pather.moveToPreset(17, 1, 805);
@@ -19,9 +17,7 @@ function Mausoleum() {
 		Pickit.pickItems();
 	}
 
-	if (!Pather.moveToExit(19, true)) {
-		throw new Error("Failed to move to Mausoleum");
-	}
+	if (!Pather.moveToExit(19, true)) throw new Error("Failed to move to Mausoleum");
 
 	Attack.clearLevel(Config.ClearType);
 

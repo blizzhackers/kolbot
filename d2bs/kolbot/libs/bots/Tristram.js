@@ -5,7 +5,7 @@
 */
 
 function Tristram() {
-	let tree, scroll, akara, stones, gibbet;
+	let stones;
 
 	if (!me.getQuest(4, 4) && !me.getItem(525)) {
 		if (!me.getItem(524)) {
@@ -18,12 +18,12 @@ function Tristram() {
 				throw new Error("Failed to move to Tree of Inifuss");
 			}
 
-			tree = getUnit(2, 30);
+			let tree = getUnit(2, 30);
 
 			Misc.openChest(tree);
 			delay(300);
 
-			scroll = getUnit(4, 524);
+			let scroll = getUnit(4, 524);
 
 			Pickit.pickItem(scroll);
 			Town.goToTown();
@@ -31,8 +31,7 @@ function Tristram() {
 
 		// print("We need Key to the Cairn Stones");
 		Town.move(NPC.Akara);
-
-		akara = getUnit(1, NPC.Akara);
+		let akara = getUnit(1, NPC.Akara);
 
 		akara.openMenu();
 		me.cancel();
@@ -75,7 +74,7 @@ function Tristram() {
 		Pather.teleport = !Config.Tristram.WalkClear && Pather._teleport;
 	}
 
-	gibbet = getUnit(2, 26);
+	let gibbet = getUnit(2, 26);
 
 	if (!gibbet.mode) {
 		if (!Pather.moveToPreset(me.area, 2, 26, 0, 0, true, true)) {
@@ -85,11 +84,7 @@ function Tristram() {
 		Misc.openChest(gibbet);
 	}
 
-	if (Config.Tristram.PortalLeech) {
-		Attack.clearLevel(0);
-	} else {
-		Attack.clearLevel(Config.ClearType);
-	}
+	Config.Tristram.PortalLeech ? Attack.clearLevel(0) : Attack.clearLevel(Config.ClearType);
 
 	Pather.teleport = Pather._teleport;
 
