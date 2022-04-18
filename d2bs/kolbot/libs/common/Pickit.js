@@ -6,7 +6,7 @@
 
 const Pickit = {
 	gidList: [],
-	useTelekinesis: (Config.UseTelekinesis && me.getSkill(sdk.skills.Telekinesis, 1)),
+	useTelekinesis: false,
 	beltSize: 1,
 	ignoreLog: [4, 5, 6, 22, 41, 76, 77, 78, 79, 80, 81], // Ignored item types for item logging
 
@@ -17,6 +17,7 @@ const Pickit = {
 			NTIP.OpenFile(filename, notify);
 		}
 
+		this.useTelekinesis = (!!Config.UseTelekinesis && !!me.getSkill(sdk.skills.Telekinesis, 1));
 		this.beltSize = Storage.BeltSize();
 	},
 
