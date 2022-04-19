@@ -1062,6 +1062,12 @@ const ControlAction = {
 	makeCharacter: function (info) {
 		me.blockMouse = true;
 		!info.charClass && (info.charClass = "barbarian");
+		
+		if (info.charName.match(/\d+/g)) {
+			console.warn("Invalid character name, cannot contain numbers");
+
+			return false;
+		}
 
 		let clickCoords = [];
 
@@ -1412,6 +1418,7 @@ const Starter = {
 	handle: undefined,
 	connectFail: false,
 	connectFailRetry: 0,
+	makeAccount: false,
 	chanInfo: {
 		joinChannel: "",
 		firstMsg: "",
@@ -1639,6 +1646,17 @@ const Starter = {
 
 					break;
 				case getLocaleString(sdk.locale.text.AccountDoesNotExist):
+					if (!!Starter.Config.MakeAccountOnFailure) {
+						Starter.makeAccount = true;
+						Controls.LoginErrorOk.click();
+
+						return;
+					} else {
+						D2Bot.printToConsole(string);
+						D2Bot.updateStatus(string);
+					}
+
+					break;
 				case getLocaleString(sdk.locale.text.AccountIsCorrupted):
 				case getLocaleString(sdk.locale.text.UnableToCreateAccount):
 					D2Bot.printToConsole(string);
