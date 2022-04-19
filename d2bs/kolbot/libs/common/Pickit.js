@@ -21,7 +21,6 @@ const Pickit = {
 			NTIP.OpenFile(filename, notify);
 		}
 
-		this.useTelekinesis = (!!Config.UseTelekinesis && !!me.getSkill(sdk.skills.Telekinesis, 1));
 		this.beltSize = Storage.BeltSize();
 		// If MinColumn is set to be more than our current belt size, set it to be 1 less than the belt size 4x3 belt will give us Config.MinColumn = [2, 2, 2, 2]
 		Config.MinColumn.forEach((el, index) => {
