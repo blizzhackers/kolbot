@@ -296,7 +296,7 @@ function BaalAssistant() {
 							if (Helper) {
 								Attack.clear(40);
 							} else {
-								while (Attack.checkMonster(getUnit(1, 571)) || Attack.checkMonster(getUnit(1, 572)) || Attack.checkMonster(getUnit(1, 573))) {
+								while (getUnit(1, 571).attackable || getUnit(1, 572).attackable || getUnit(1, 573).attackable) {
 									delay(1000);
 								}
 								delay(1000);

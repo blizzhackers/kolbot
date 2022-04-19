@@ -64,16 +64,23 @@ const Town = {
 			delay(250 + me.ping);
 		}
 
+		console.log("ÿc8Start ÿc0:: ÿc8TownChores");
+		let tick = getTickCount();
+
 		!me.inTown && this.goToTown();
+
+		if (!Misc.poll(() => me.gameReady && me.inTown, 2000, 150 + me.ping)) {
+			throw new Error("Failed to go to town for chores");
+		}
 
 		let preAct = me.act;
 
 		// Burst of speed while in town
-		if (me.inTown && me.getSkill(sdk.skills.BurstofSpeed, 1) && !me.getState(sdk.states.BurstofSpeed)) {
+		if (me.inTown && Precast.precastables.BurstofSpeed && !me.getState(sdk.states.BurstofSpeed)) {
 			Skill.cast(sdk.skills.BurstofSpeed, 0);
 		}
 
-		Attack.weaponSwitch(Attack.getPrimarySlot());
+		me.switchWeapons(Attack.getPrimarySlot());
 
 		this.heal();
 		this.identify();
@@ -96,6 +103,8 @@ const Town = {
 		!me.barbarian && Precast.haveCTA === -1 && Precast.doPrecast(false);
 
 		delay(200 + me.ping * 2);
+
+		console.log("ÿc8Finish TownChores ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
 
 		return true;
 	},
@@ -168,56 +177,56 @@ const Town = {
 
 		let npc = getInteractedNPC();
 
-		if (npc && npc.name.toLowerCase() !== this.tasks[me.act - 1][task]) {
-			me.cancelUIFlags();
-			npc = null;
-		}
+		try {
+			if (!!npc && npc.name.toLowerCase() !== this.tasks[me.act - 1][task]) {
+				me.cancelUIFlags();
+				npc = null;
+			}
 
-		// Jamella gamble fix
-		if (task === "Gamble" && npc && npc.name.toLowerCase() === NPC.Jamella) {
-			me.cancelUIFlags();
-			npc = null;
-		}
-
-		if (!npc) {
-			npc = getUnit(1, this.tasks[me.act - 1][task]);
+			// Jamella gamble fix
+			if (task === "Gamble" && !!npc && npc.name.toLowerCase() === NPC.Jamella) {
+				me.cancelUIFlags();
+				npc = null;
+			}
 
 			if (!npc) {
-				this.move(this.tasks[me.act - 1][task]);
 				npc = getUnit(1, this.tasks[me.act - 1][task]);
-			}
-		}
 
-		if (!npc || npc.area !== me.area || (!getUIFlag(0x08) && !npc.openMenu())) {
+				if (!npc) {
+					this.move(this.tasks[me.act - 1][task]);
+					npc = getUnit(1, this.tasks[me.act - 1][task]);
+				}
+			}
+
+			if (!npc || npc.area !== me.area || (!getUIFlag(0x08) && !npc.openMenu())) throw new Error("Couldn't interact with npc");
+
+			switch (task) {
+			case "Shop":
+			case "Repair":
+			case "Gamble":
+				if (!getUIFlag(0x0C) && !npc.startTrade(task)) throw new Error("Failed to complete " + reason + " at " + npc.name);
+
+				break;
+			case "Key":
+				if (!getUIFlag(0x0C) && !npc.startTrade(me.act === 3 ? "Repair" : "Shop")) throw new Error("Failed to complete " + reason + " at " + npc.name);
+
+				break;
+			case "CainID":
+				Misc.useMenu(0x0FB4);
+				me.cancelUIFlags();
+
+				break;
+			case "Heal":
+				me.getState(sdk.states.Frozen) && Town.buyPots(2, "Thawing", true, true);
+
+				break;
+			}
+
+			console.log("Did " + reason + " at " + npc.name);
+		} catch (e) {
+			console.warn(e);
+
 			return false;
-		}
-
-		switch (task) {
-		case "Shop":
-		case "Repair":
-		case "Gamble":
-			if (!getUIFlag(0x0C) && !npc.startTrade(task)) {
-				return false;
-			}
-
-			break;
-		case "Key":
-			if (!getUIFlag(0x0C) && !npc.startTrade(me.act === 3 ? "Repair" : "Shop")) {
-				return false;
-			}
-
-			break;
-		case "CainID":
-			Misc.useMenu(0x0FB4);
-			me.cancel();
-
-			break;
-		case "Heal":
-			if (me.getState(sdk.states.Frozen)) {
-				Town.buyPots(2, "Thawing", true, true);
-			}
-
-			break;
 		}
 
 		return npc;
@@ -469,6 +478,8 @@ const Town = {
 	},
 
 	identify: function () {
+		me.cancelUIFlags();
+
 		if (this.cainID()) return true;
 		
 		let i;
@@ -957,14 +968,14 @@ const Town = {
 		if (type === "Thawing" && me.coldRes >= 75 && !force) {
 			return true;
 		} else if (type === "Thawing") {
-			print("ÿc9BuyPotsÿc0 :: Current cold resistance: " + me.coldRes);
+			console.log("ÿc9BuyPotsÿc0 :: Current cold resistance: " + me.coldRes);
 		}
 
 		// Don't buy if already at max res
 		if (type === "Antidote" && me.poisonRes >= 75 && !force) {
 			return true;
 		} else if (type === "Antidote") {
-			print("ÿc9BuyPotsÿc0 :: Current poison resistance: " + me.poisonRes);
+			console.log("ÿc9BuyPotsÿc0 :: Current poison resistance: " + me.poisonRes);
 		}
 
 		// Don't buy if teleport or vigor
@@ -1001,7 +1012,7 @@ const Town = {
 			break;
 		}
 
-		print('ÿc9BuyPotsÿc0 :: buying ' + quantity + ' ' + type + ' Potions');
+		console.log('ÿc9BuyPotsÿc0 :: buying ' + quantity + ' ' + type + ' Potions');
 
 		for (let pots = 0; pots < quantity; pots++) {
 			if (jugs && Storage.Inventory.CanFit(jugs)) {
@@ -1034,7 +1045,7 @@ const Town = {
 					}
 				});
 
-				name && print('ÿc9DrinkPotsÿc0 :: drank ' + quantity + " " + name + "s. Timer [" + (new Date(quantity * 30 * 1000).toISOString().slice(11, -5)) + "]");
+				name && console.log('ÿc9DrinkPotsÿc0 :: drank ' + quantity + " " + name + "s. Timer [" + (new Date(quantity * 30 * 1000).toISOString().slice(11, -5)) + "]");
 			}
 		}
 
@@ -1772,8 +1783,20 @@ const Town = {
 	},
 
 	clearInventory: function () {
+		console.log("ÿc8Start ÿc0:: ÿc8clearInventory");
+		let clearInvoTick = getTickCount();
 		this.checkQuestItems(); // only golden bird quest for now
 
+		// If we are at an npc already, open the window otherwise moving potions around fails
+		if (getUIFlag(sdk.uiflags.NPCMenu) && !getUIFlag(sdk.uiflags.Shop)) {
+			try {
+				!!getInteractedNPC() && Misc.useMenu(sdk.menu.Trade);
+			} catch (e) {
+				console.warn(e);
+				me.cancelUIFlags();
+			}
+		}
+		
 		// Remove potions in the wrong slot of our belt
 		this.clearBelt();
 
@@ -1783,6 +1806,7 @@ const Town = {
 			.filter((p) => p.isInInventory && [sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion].includes(p.itemType))
 			.sort((a, b) => a.itemType - b.itemType);
 
+		potsInInventory.length > 0 && console.debug("clearInventory: start pots clean-up");
 		// Start interating over all the pots we have in our inventory
 		potsInInventory.forEach(function (p) {
 			let moved = false;
@@ -1790,24 +1814,27 @@ const Town = {
 			let freeSpace = Town.checkColumns(beltSize);
 			for (let i = 0; i < 4 && !moved; i += 1) {
 				// checking that current potion matches what we want in our belt
-				if (p.code && p.code.startsWith(Config.BeltColumn[i]) && freeSpace[i] > 0) {
-					//console.log("Checking Config.BeltColumn[" + i + "], wanted [" + Config.BeltColumn[i] + "], currentPotToCheck :: " + p.code);
+				if (freeSpace[i] > 0 && p.code && p.code.startsWith(Config.BeltColumn[i])) {
+					console.log("Checking Config.BeltColumn[" + i + "], wanted [" + Config.BeltColumn[i] + "], currentPotToCheck :: " + p.code);
 					// Pick up the potion and put it in belt if the column is empty, and we don't have any other columns empty
 					// prevents shift-clicking potion into wrong column
 					if (freeSpace[i] === beltSize || freeSpace.some((spot) => spot === beltSize)) {
-						p.toCursor() && clickItem(sdk.clicktypes.click.Left, i, Math.max(0, (beltSize - freeSpace[i])), sdk.storage.Belt);
+						p.toCursor() && Misc.poll(() => me.itemoncursor, 1000, 100) && clickItem(sdk.clicktypes.click.Left, i, Math.max(0, (beltSize - freeSpace[i])), sdk.storage.Belt);
 					} else {
-						clickItem(sdk.clicktypes.click.ShiftLeft, p.x, p.y, p.location);
+						clickItemAndWait(sdk.clicktypes.click.ShiftLeft, p.x, p.y, p.location);
 					}
-					delay(me.ping + 200);
+					Misc.poll(() => !me.itemoncursor, 250 + me.ping, 80);
 					moved = Town.checkColumns(beltSize)[i] === freeSpace[i] - 1;
-					//console.log(p.code + " pot is now in " + Config.BeltColumn[p.x % 4] + " Row (" + (p.x % 4) + "), moved ? " + moved);
-					Cubing.cursorCheck();
+					console.log("Old freeSpace: ", freeSpace);
+					console.log("New freeSpace: ", Town.checkColumns(beltSize));
+					console.log(p.code + " moved ? " + moved);
 				}
+				Cubing.cursorCheck();
 			}
 		});
 
 		// Cleanup remaining potions
+		console.debug("clearInventory: start clean-up remaining pots");
 		let sellOrDrop = [];
 		potsInInventory = me.getItemsEx()
 			.filter((p) => p.isInInventory && [sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion].includes(p.itemType));
@@ -1850,6 +1877,7 @@ const Town = {
 		}
 
 		// Any leftover items from a failed ID (crashed game, disconnect etc.)
+		console.debug("clearInventory: start invo clean-up");
 		let items = (Storage.Inventory.Compare(Config.Inventory) || []);
 		items.length > 0 && (items = items.filter(function (item) {
 			return (!!item && ([18, 41, 76, 77, 78].indexOf(item.itemType) === -1 // Don't drop tomes, keys or potions
@@ -1901,6 +1929,8 @@ const Town = {
 
 			!!sold && delay(250 + me.ping);
 		});
+
+		console.log("ÿc8Exit clearInventory ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - clearInvoTick).toISOString().slice(11, -5)));
 
 		return true;
 	},
@@ -2043,11 +2073,9 @@ const Town = {
 	},
 
 	moveToSpot: function (spot) {
-		this.telekinesis = !!(me.getSkill(sdk.skills.Telekinesis, 1));
-
 		let townSpot,
-			longRange = (!this.telekinesis && spot === "waypoint"),
-			tkRange = (this.telekinesis && ["stash", "portalspot", "waypoint"].includes(spot));
+			longRange = (!Skill.haveTK && spot === "waypoint"),
+			tkRange = (Skill.haveTK && ["stash", "portalspot", "waypoint"].includes(spot));
 
 		if (!this.act[me.act - 1].hasOwnProperty("spot") || !this.act[me.act - 1].spot.hasOwnProperty(spot)) {
 			return false;
@@ -2068,10 +2096,10 @@ const Town = {
 		}
 
 		for (let i = 0; i < townSpot.length; i += 2) {
-			//print("moveToSpot: " + spot + " from " + me.x + ", " + me.y);
+			//console.debug("moveToSpot: " + spot + " from " + me.x + ", " + me.y);
 
 			if (tkRange) {
-				Pather.moveNear(townSpot[0], townSpot[1], 20);
+				Pather.moveNear(townSpot[0], townSpot[1], 19);
 			} else if (getDistance(me, townSpot[i], townSpot[i + 1]) > 2) {
 				Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, true);
 			}
@@ -2098,6 +2126,7 @@ const Town = {
 				break;
 			case "waypoint":
 				if (!!getUnit(2, "waypoint")) {
+					!Skill.haveTK && getUnit(2, "waypoint").distance > 5 && Pather.moveToUnit(getUnit(2, "waypoint"));
 					return true;
 				}
 
@@ -2118,17 +2147,24 @@ const Town = {
 		let towns = [1, 40, 75, 103, 109];
 
 		if (!me.inTown) {
-			if (!Pather.makePortal(true)) {
-				console.warn("Town.goToTown: Failed to make TP");
-			}
-
-			if (!me.inTown && !Pather.usePortal(null, me.name)) {
-				throw new Error("Town.goToTown: Failed to take TP");
+			if (!me.inTown) {
+				try {
+					if (!Pather.makePortal(true)) console.warn("Town.goToTown: Failed to make TP");
+					if (!me.inTown && !Pather.usePortal(null, me.name)) console.warn("Town.goToTown: Failed to take TP");
+					if (!me.inTown && !Pather.usePortal(sdk.areas.townOf(me.area))) throw new Error("Town.goToTown: Failed to take TP");
+				} catch (e) {
+					let tpTool = this.getTpTool();
+					if (!tpTool && Misc.getPlayerCount() <= 1) {
+						scriptBroadcast("quit");
+						Misc.errorReport(new Error("Town.goToTown: Failed to go to town and no tps available. Restart."));
+						scriptBroadcast("quit");
+					}
+				}
 			}
 		}
 
 		if (!act) return true;
-		if (act < 1 || act > 5) { throw new Error("Town.goToTown: Invalid act"); }
+		if (act < 1 || act > 5) throw new Error("Town.goToTown: Invalid act");
 		if (act > me.highestAct) return false;
 
 		if (act !== me.act) {
@@ -2143,6 +2179,7 @@ const Town = {
 	},
 
 	visitTown: function (repair = false) {
+		console.log("ÿc8Start ÿc0:: ÿc8visitTown");
 		if (me.inTown) {
 			this.doChores();
 			this.move("stash");
@@ -2176,6 +2213,7 @@ const Town = {
 		}
 
 		Config.PublicMode && Pather.makePortal();
+		console.log("ÿc8End ÿc0:: ÿc8visitTown - currentArea: " + Pather.getAreaName(me.area));
 
 		return true;
 	}

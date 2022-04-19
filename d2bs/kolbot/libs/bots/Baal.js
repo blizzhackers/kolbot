@@ -13,18 +13,10 @@ function Baal() {
 			count = 0;
 
 			do {
-				if (Attack.checkMonster(monster) && monster.y < 5094) {
-					if (getDistance(me, monster) <= 40) {
-						count += 1;
-					}
-
-					if (!souls && monster.classid === 641) {
-						souls = true;
-					}
-
-					if (!dolls && monster.classid === 691) {
-						dolls = true;
-					}
+				if (monster.attackable && monster.y < 5094) {
+					monster.distance <= 40 && (count += 1);
+					!souls && monster.classid === 641 && (souls = true);
+					!dolls && monster.classid === 691 && (dolls = true);
 				}
 			} while (monster.getNext());
 		}
@@ -43,11 +35,7 @@ function Baal() {
 
 		if (souls) {
 			string += " Souls ";
-
-			if (dolls) {
-				string += "and Dolls ";
-			}
-
+			dolls && (string += "and Dolls ");
 			string += "in area.";
 		} else if (dolls) {
 			string += " Dolls in area.";

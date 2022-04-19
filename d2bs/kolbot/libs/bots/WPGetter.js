@@ -35,7 +35,7 @@ function WPGetter() {
 	}
 
 	for (let i = 0; i < wpsToGet.length; i += 1) {
-		!getWaypoint(i) && Pather.getWP(wpsToGet[i]);
+		!getWaypoint(Pather.wpAreas.indexOf(wpsToGet[i])) && Pather.getWP(wpsToGet[i]);
 	}
 
 	return true;

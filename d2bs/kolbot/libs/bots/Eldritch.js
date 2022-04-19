@@ -11,22 +11,17 @@ function Eldritch() {
 	Pather.moveTo(3745, 5084);
 	Attack.kill(getLocaleString(sdk.locale.monsters.EldritchtheRectifier));
 
-	if (Config.Eldritch.OpenChest) {
-		let chest = getPresetUnit(me.area, 2, 455);
-
-		if (chest) {
-			Pather.moveToUnit(chest);
-
-			let superChest = getUnit(2, 455);
-			!!superChest && Misc.openChest(superChest) && Pickit.pickItems();
+	if (Config.Eldritch.OpenChest && !!getPresetUnit(me.area, 2, 455)) {
+		if (Pather.moveNearPreset(sdk.areas.FrigidHighlands, 2, 455, 10)) {
+			Misc.openChest(455) && Pickit.pickItems();
 		}
 	}
 
-	if (Config.Eldritch.KillShenk && Pather.moveTo(3876, 5130)) {
+	if (Config.Eldritch.KillShenk && Pather.moveToExit(sdk.areas.BloodyFoothills, true) && Pather.moveTo(3876, 5130)) {
 		Attack.kill(getLocaleString(sdk.locale.monsters.ShenktheOverseer));
 	}
 
-	if (Config.Eldritch.KillDacFarren && Pather.moveTo(4478, 5108)) {
+	if (Config.Eldritch.KillDacFarren && Pather.moveNearPreset(sdk.areas.BloodyFoothills, 1, sdk.monsters.preset.DacFarren, 10) && Pather.moveTo(4478, 5108)) {
 		Attack.kill(getLocaleString(sdk.locale.monsters.DacFarren));
 	}
 

@@ -19,7 +19,7 @@ include("common/util.js");
 includeCommonLibs();
 
 function main() {
-	let ironGolem, tick, debugInfo = {area: 0, currScript: "no entry"},
+	let ironGolem, debugInfo = {area: 0, currScript: "no entry"},
 		pingTimer = [],
 		quitFlag = false,
 		quitListDelayTime,
@@ -99,13 +99,11 @@ function main() {
 	};
 
 	this.getPotion = function (pottype, type) {
-		if (!pottype) return false;
+		if (!me.gameReady || !pottype) return false;
 
-		let items = me.getItemsEx().filter(function (item) { return item.itemType === pottype; });
+		let items = me.getItemsEx().filter((item) => item.itemType === pottype);
 
-		if (!items || items.length === 0) {
-			return false;
-		}
+		if (items.length === 0) return false;
 
 		// Get highest id = highest potion first
 		items.sort(function (a, b) {
@@ -113,13 +111,13 @@ function main() {
 		});
 
 		for (let i = 0; i < items.length; i += 1) {
-			if (type < 3 && items[i].mode === 0 && items[i].location === 3 && items[i].itemType === pottype) {
-				print("ÿc2Drinking potion from inventory.");
-
+			if (type < 3 && items[i].isInInventory && items[i].itemType === pottype) {
+				console.log("ÿc2Drinking potion from inventory.");
 				return copyUnit(items[i]);
 			}
 
 			if (items[i].mode === 2 && items[i].itemType === pottype) {
+				console.log("ÿc2Drinking potion from belt.");
 				return copyUnit(items[i]);
 			}
 		}
@@ -138,14 +136,14 @@ function main() {
 
 			if (script) {
 				if (script.running) {
-					scripts[i] === "default.dbj" && print("ÿc1Pausing.");
+					scripts[i] === "default.dbj" && console.log("ÿc1Pausing.");
 
 					// don't pause townchicken during clone walk
 					if (scripts[i] !== "tools/townchicken.js" || !cloneWalked) {
 						script.pause();
 					}
 				} else {
-					scripts[i] === "default.dbj" && print("ÿc2Resuming.");
+					scripts[i] === "default.dbj" && console.log("ÿc2Resuming.");
 					script.resume();
 				}
 			}
@@ -157,17 +155,12 @@ function main() {
 	this.stopDefault = function () {
 		let scripts = [
 			"default.dbj", "tools/townchicken.js", "tools/autobuildthread.js", "tools/antihostile.js",
-			"tools/party.js", "tools/rushthread.js"
+			"tools/party.js", "tools/rushthread.js", "libs//modules/guard.js"
 		];
 		
 		for (let i = 0; i < scripts.length; i++) {
 			let script = getScript(scripts[i]);
-
-			if (script) {
-				if (script.running) {
-					script.stop();
-				}
-			}
+			!!script && script.running && script.stop();
 		}
 
 		return true;
@@ -181,6 +174,7 @@ function main() {
 	};
 
 	this.drinkPotion = function (type) {
+		if (!me.gameReady || type === undefined) return false;
 		let pottype, tNow = getTickCount();
 
 		switch (type) {
@@ -214,9 +208,7 @@ function main() {
 		}
 
 		// mode 18 - can't drink while leaping/whirling etc.
-		if (me.mode === 0 || me.mode === 17 || me.mode === 18) {
-			return false;
-		}
+		if (me.mode === 0 || me.mode === 17 || me.mode === 18) return false;
 
 		switch (type) {
 		case 0:
@@ -236,19 +228,17 @@ function main() {
 
 		let potion = this.getPotion(pottype, type);
 
-		if (potion) {
-			if (me.mode === 0 || me.mode === 17) {
-				return false;
-			}
+		if (!!potion) {
+			if (me.mode === 0 || me.mode === 17 || me.mode === 18) return false;
 
-			if (type < 3) {
-				potion.interact();
-			} else {
-				try {
+			try {
+				if (type < 3) {
+					potion.interact();
+				} else {
 					clickItem(2, potion);
-				} catch (e) {
-					print("Couldn't give the potion to merc.");
 				}
+			} catch (e) {
+				console.warn(e);
 			}
 
 			timerLastDrink[type] = getTickCount();
@@ -266,7 +256,7 @@ function main() {
 
 		if (monster) {
 			do {
-				if (monster.hp > 0 && Attack.checkMonster(monster) && !monster.getParent()) {
+				if (monster.hp > 0 && monster.attackable && !monster.getParent()) {
 					distance = getDistance(me, monster);
 
 					if (distance < range) {
@@ -576,7 +566,7 @@ function main() {
 
 	// Cache variables to prevent a bug where d2bs loses the reference to Config object
 	Config = Misc.copy(Config);
-	tick = getTickCount();
+	let tick = getTickCount();
 
 	addEventListener("keyup", this.keyEvent);
 	addEventListener("gameevent", this.gameEvent);

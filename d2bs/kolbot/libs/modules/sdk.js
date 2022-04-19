@@ -1989,6 +1989,7 @@
 				TheCowKing: 773,
 				BloodRaven: 805,
 				Izual: 406,
+				DacFarren: 782,
 				// Unconfirmed
 				Bonebreak: 705,
 				Coldcrow: 706,
@@ -2023,7 +2024,6 @@
 				SiegeBoss: 746,
 				AxeDweller: 750,
 				BonesawBreaker: 751,
-				DacFarren: 752,
 				EldritchtheRectifier: 753,
 				EyebacktheUnleashed: 754,
 				ThreshSocket: 755,

@@ -1,11 +1,79 @@
 /**
 *	@filename	Misc.js
-*	@author		kolton
+*	@author		kolton, theBGuy
 *	@desc		misc library containing Skill, Misc and Sort classes
 */
 
 const Skill = {
 	usePvpRange: false,
+	haveTK: false,
+
+	// initialize our skill data
+	init: function () {
+		switch (me.classid) {
+		case sdk.charclass.Amazon:
+			Config.SummonValkyrie && !Precast.precastables.Valkyrie && (Precast.precastables.Valkyrie = !!me.getSkill(sdk.skills.Valkyrie, 0));
+
+			break;
+		case sdk.charclass.Sorceress:
+			!this.haveTK && (this.haveTK = !!me.getSkill(sdk.skills.Telekinesis, 0));
+			Config.UseEnergyShield && !Precast.precastables.EnergyShield && (Precast.precastables.EnergyShield = !!me.getSkill(sdk.skills.EnergyShield, 0));
+			!Precast.precastables.Enchant && (Precast.precastables.Enchant = !!me.getSkill(sdk.skills.Enchant, 0));
+			if (Config.UseColdArmor === true) {
+				Precast.precastables.coldArmor.best = (function () {
+					let coldArmor = [
+						{skillId: sdk.skills.ShiverArmor, level: me.getSkill(sdk.skills.ShiverArmor, 1)},
+						{skillId: sdk.skills.ChillingArmor, level: me.getSkill(sdk.skills.ChillingArmor, 1)},
+						{skillId: sdk.skills.FrozenArmor, level: me.getSkill(sdk.skills.FrozenArmor, 1)},
+					].filter(skill => !!skill.level && skill.level > 0).sort((a, b) => b.level - a.level).first();
+					return coldArmor !== undefined ? coldArmor.skillId : false;
+				})();
+			}
+
+			break;
+		case sdk.charclass.Necromancer:
+			!Precast.precastables.BoneArmor && (Precast.precastables.BoneArmor = !!me.getSkill(sdk.skills.BoneArmor, 0));
+			if (!!Config.Golem && Config.Golem !== "None") {
+				// todo: change Config.Golem to use skillid instead of 0, 1, 2, and 3
+			}
+			break;
+		case sdk.charclass.Paladin:
+			!Precast.precastables.HolyShield && (Precast.precastables.HolyShield = !!me.getSkill(sdk.skills.HolyShield, 0));
+
+			break;
+		case sdk.charclass.Barbarian:
+			!Precast.precastables.Shout && (Precast.precastables.Shout = !!me.getSkill(sdk.skills.Shout, 0));
+			!Precast.precastables.BattleOrders && (Precast.precastables.BattleOrders = !!me.getSkill(sdk.skills.BattleOrders, 0));
+			!Precast.precastables.BattleCommand && (Precast.precastables.BattleCommand = !!me.getSkill(sdk.skills.BattleCommand, 0));
+			// todo: durations of each
+			break;
+		case sdk.charclass.Druid:
+			if (!Config.Wereform) {
+				!Precast.precastables.CycloneArmor && (Precast.precastables.CycloneArmor = !!me.getSkill(sdk.skills.CycloneArmor, 0));
+				!Precast.precastables.Hurricane && (Precast.precastables.Hurricane = !!me.getSkill(sdk.skills.Hurricane, 0));
+			}
+			Config.SummonRaven && !Precast.precastables.Raven && (Precast.precastables.Raven = !!me.getSkill(sdk.skills.Raven, 0));
+			if (!!Config.SummonAnimal && Config.SummonAnimal !== "None") {
+				// todo: change Config.SummonAnimal to use skillid instead of 0, 1, 2, and 3
+			}
+			if (!!Config.SummonVine && Config.SummonVine !== "None") {
+				// todo: change Config.SummonVine to use skillid instead of 0, 1, 2, and 3
+			}
+			if (!!Config.SummonSpirit && Config.SummonSpirit !== "None") {
+				// todo: change Config.SummonSpirit to use skillid instead of 0, 1, 2, and 3
+			}
+			break;
+		case sdk.charclass.Assassin:
+			Config.UseFade && !Precast.precastables.Fade && (Precast.precastables.Fade = !!me.getSkill(sdk.skills.Fade, 0));
+			Config.UseVenom && !Precast.precastables.Venom && (Precast.precastables.Venom = !!me.getSkill(sdk.skills.Venom, 0));
+			Config.UseBladeShield && !Precast.precastables.BladeShield && (Precast.precastables.BladeShield = !!me.getSkill(sdk.skills.BladeShield, 0));
+			Config.UseBoS && !Precast.precastables.BurstofSpeed && (Precast.precastables.BurstofSpeed = !!me.getSkill(sdk.skills.BurstofSpeed, 0));
+			if (!!Config.SummonShadow) {
+				// todo: change Config.SummonShadow to use skillid instead of 0, 1, 2, and 3
+			}
+			break;
+		}
+	},
 
 	getRange: function (skillId) {
 		switch (skillId) {
@@ -352,25 +420,17 @@ const Skill = {
 	// Put a skill on desired slot
 	setSkill: function (skillId, hand, item) {
 		// Check if the skill is already set
-		if (me.getSkill(hand === 0 ? 2 : 3) === skillId) {
-			return true;
-		}
+		if (me.getSkill(hand === 0 ? 2 : 3) === skillId) return true;
 
-		if (!item && !me.getSkill(skillId, 1)) {
-			return false;
-		}
+		if (!item && !me.getSkill(skillId, 1)) return false;
 
 		// Charged skills must be cast from right hand
 		if (hand === undefined || hand === 3 || item) {
-			item && hand !== 0 && print('[ÿc9Warningÿc0] charged skills must be cast from right hand');
+			item && hand !== 0 && console.warn('[ÿc9Warningÿc0] charged skills must be cast from right hand');
 			hand = 0;
 		}
 
-		if (me.setSkill(skillId, hand, item)) {
-			return true;
-		}
-
-		return false;
+		return (me.setSkill(skillId, hand, item));
 	},
 
 	// Timed skills
@@ -380,9 +440,7 @@ const Skill = {
 
 	// Wereform skill check
 	wereFormCheck: function (skillId) {
-		if (!me.getState(139) && !me.getState(140)) {
-			return true;
-		}
+		if (!me.getState(139) && !me.getState(140)) return true;
 
 		// Can be cast by both
 		if ([sdk.skills.Attack, sdk.skills.Kick, sdk.skills.Raven, sdk.skills.PoisonCreeper, sdk.skills.OakSage, sdk.skills.SpiritWolf, sdk.skills.CarrionVine,
@@ -391,24 +449,20 @@ const Skill = {
 		}
 
 		// Can be cast by werewolf only
-		if (me.getState(139) && [sdk.skills.Werewolf, sdk.skills.FeralRage, sdk.skills.Rabies, sdk.skills.Fury].includes(skillId)) {
-			return true;
-		}
+		if (me.getState(139) && [sdk.skills.Werewolf, sdk.skills.FeralRage, sdk.skills.Rabies, sdk.skills.Fury].includes(skillId)) return true;
 
 		// Can be cast by werebear only
-		if (me.getState(140) && [sdk.skills.Werebear, sdk.skills.Maul, sdk.skills.ShockWave].includes(skillId)) {
-			return true;
-		}
+		if (me.getState(140) && [sdk.skills.Werebear, sdk.skills.Maul, sdk.skills.ShockWave].includes(skillId)) return true;
 
 		return false;
 	},
 
 	// Skills that cn be cast in town
 	townSkill: function (skillId = -1) {
-		return [sdk.skills.Valkyrie, sdk.skills.FrozenArmor, sdk.skills.Telekinesis, sdk.skills.ShiverArmor, sdk.skills.Enchant, sdk.skills.ThunderStorm, sdk.skills.EnergyShield, sdk.skills.ChillingArmor,
+		return ([sdk.skills.Valkyrie, sdk.skills.FrozenArmor, sdk.skills.Telekinesis, sdk.skills.ShiverArmor, sdk.skills.Enchant, sdk.skills.ThunderStorm, sdk.skills.EnergyShield, sdk.skills.ChillingArmor,
 			sdk.skills.BoneArmor, sdk.skills.ClayGolem, sdk.skills.BloodGolem, sdk.skills.FireGolem, sdk.skills.HolyShield, sdk.skills.Raven, sdk.skills.PoisonCreeper, sdk.skills.Werewolf, sdk.skills.Werebear,
 			sdk.skills.OakSage, sdk.skills.SpiritWolf, sdk.skills.CarrionVine, sdk.skills.CycloneArmor, sdk.skills.HeartofWolverine, sdk.skills.SummonDireWolf, sdk.skills.SolarCreeper,
-			sdk.skills.SpiritofBarbs, sdk.skills.SummonGrizzly, sdk.skills.BurstofSpeed, sdk.skills.Fade, sdk.skills.ShadowWarrior, sdk.skills.BladeShield, sdk.skills.Venom, sdk.skills.ShadowMaster].includes(skillId);
+			sdk.skills.SpiritofBarbs, sdk.skills.SummonGrizzly, sdk.skills.BurstofSpeed, sdk.skills.Fade, sdk.skills.ShadowWarrior, sdk.skills.BladeShield, sdk.skills.Venom, sdk.skills.ShadowMaster].includes(skillId));
 	},
 
 	manaCostList: {},
@@ -434,7 +488,7 @@ const Skill = {
 	},
 
 	useTK: function (unit = undefined) {
-		if (!unit || !me.getSkill(sdk.skills.Telekinesis, 1) || !Config.UseTelekinesis
+		if (!unit || !this.haveTK || !Config.UseTelekinesis
 			|| typeof unit !== 'object' || unit.type !== sdk.unittype.Object
 			|| unit.name.toLowerCase() === 'dummy'
 			|| (unit.name.toLowerCase() === 'portal' && !me.inTown && unit.classid !== 298)
@@ -446,56 +500,41 @@ const Skill = {
 	}
 };
 
+// whole section should be moved
 const Item = {
 	hasTier: function (item) {
 		return Config.AutoEquip && NTIP.GetTier(item) > 0;
 	},
 
 	canEquip: function (item) {
-		if (item.type !== 4) { // Not an item
-			return false;
-		}
+		// Not an item
+		if (item.type !== 4) return false;
 
-		if (!item.getFlag(0x10)) { // Unid item
-			return false;
-		}
+		// Unid item
+		if (!item.getFlag(0x10)) return false;
 
-		if (item.getStat(92) > me.getStat(12) || item.dexreq > me.getStat(2) || item.strreq > me.getStat(0)) { // Higher requirements
-			return false;
-		}
+		// Higher requirements
+		if (item.getStat(92) > me.getStat(12) || item.dexreq > me.getStat(2) || item.strreq > me.getStat(0)) return false;
 
 		return true;
 	},
 
 	// Equips an item and throws away the old equipped item
 	equip: function (item, bodyLoc) {
-		if (!this.canEquip(item)) {
-			return false;
-		}
+		if (!this.canEquip(item)) return false;
 
 		// Already equipped in the right slot
-		if (item.mode === 1 && item.bodylocation === bodyLoc) {
-			return true;
-		}
+		if (item.mode === 1 && item.bodylocation === bodyLoc) return true;
+		if (item.location === 7 && !Town.openStash()) return false;
 
-		let i, cursorItem;
-
-		if (item.location === 7) {
-			if (!Town.openStash()) {
-				return false;
-			}
-		}
-
-		for (i = 0; i < 3; i += 1) {
+		for (let i = 0; i < 3; i += 1) {
 			if (item.toCursor()) {
 				clickItemAndWait(0, bodyLoc);
 
 
 				if (item.bodylocation === bodyLoc) {
 					if (getCursorType() === 3) {
-						//Misc.click(0, 0, me);
-
-						cursorItem = getUnit(100);
+						let cursorItem = getUnit(100);
 
 						if (cursorItem) {
 							if (!Storage.Inventory.CanFit(cursorItem) || !Storage.Inventory.MoveTo(cursorItem)) {
@@ -615,16 +654,13 @@ const Item = {
 	},
 
 	autoEquipCheck: function (item) {
-		if (!Config.AutoEquip) {
-			return true;
-		}
+		if (!Config.AutoEquip) return true;
 
-		let i,
-			tier = NTIP.GetTier(item),
+		let tier = NTIP.GetTier(item),
 			bodyLoc = this.getBodyLoc(item);
 
 		if (tier > 0 && bodyLoc) {
-			for (i = 0; i < bodyLoc.length; i += 1) {
+			for (let i = 0; i < bodyLoc.length; i += 1) {
 				// Low tier items shouldn't be kept if they can't be equipped
 				if (tier > this.getEquippedItem(bodyLoc[i]).tier && (this.canEquip(item) || !item.getFlag(0x10))) {
 					return true;
@@ -633,34 +669,22 @@ const Item = {
 		}
 
 		// Sell/ignore low tier items, keep high tier
-		if (tier > 0 && tier < 100) {
-			return false;
-		}
+		if (tier > 0 && tier < 100) return false;
 
 		return true;
 	},
 
 	// returns true if the item should be kept+logged, false if not
 	autoEquip: function () {
-		if (!Config.AutoEquip) {
-			return true;
-		}
+		if (!Config.AutoEquip) return true;
 
-		let i, j, tier, bodyLoc, tome, gid,
-			items = me.findItems(-1, 0);
+		let items = me.findItems(-1, 0);
 
-		if (!items) {
-			return false;
-		}
+		if (!items) return false;
 
 		function sortEq(a, b) {
-			if (Item.canEquip(a)) {
-				return -1;
-			}
-
-			if (Item.canEquip(b)) {
-				return 1;
-			}
+			if (Item.canEquip(a)) return -1;
+			if (Item.canEquip(b)) return 1;
 
 			return 0;
 		}
@@ -668,7 +692,7 @@ const Item = {
 		me.cancel();
 
 		// Remove items without tier
-		for (i = 0; i < items.length; i += 1) {
+		for (let i = 0; i < items.length; i += 1) {
 			if (NTIP.GetTier(items[i]) === 0) {
 				items.splice(i, 1);
 
@@ -679,14 +703,15 @@ const Item = {
 		while (items.length > 0) {
 			items.sort(sortEq);
 
-			tier = NTIP.GetTier(items[0]);
-			bodyLoc = this.getBodyLoc(items[0]);
+			let tier = NTIP.GetTier(items[0]);
+			let bodyLoc = this.getBodyLoc(items[0]);
 
 			if (tier > 0 && bodyLoc) {
-				for (j = 0; j < bodyLoc.length; j += 1) {
-					if ([3, 7].indexOf(items[0].location) > -1 && tier > this.getEquippedItem(bodyLoc[j]).tier && this.getEquippedItem(bodyLoc[j]).classid !== 174) { // khalim's will adjustment
+				for (let j = 0; j < bodyLoc.length; j += 1) {
+					// khalim's will adjustment
+					if ([3, 7].indexOf(items[0].location) > -1 && tier > this.getEquippedItem(bodyLoc[j]).tier && this.getEquippedItem(bodyLoc[j]).classid !== 174) {
 						if (!items[0].getFlag(0x10)) { // unid
-							tome = me.findItem(519, 0, 3);
+							let tome = me.findItem(519, 0, 3);
 
 							if (tome && tome.getStat(70) > 0) {
 								if (items[0].location === 7) {
@@ -697,9 +722,8 @@ const Item = {
 							}
 						}
 
-						gid = items[0].gid;
-
-						print(items[0].name);
+						let gid = items[0].gid;
+						console.log(items[0].name);
 
 						if (this.equip(items[0], bodyLoc[j])) {
 							Misc.logItem("Equipped", me.getItem(-1, -1, gid));
@@ -720,9 +744,7 @@ const Item = {
 const Misc = {
 	// Click something
 	click: function (button, shift, x, y) {
-		if (arguments.length < 2) {
-			throw new Error("Misc.click: Needs at least 2 arguments.");
-		}
+		if (arguments.length < 2) throw new Error("Misc.click: Needs at least 2 arguments.");
 
 		while (!me.gameReady) {
 			delay(100);
@@ -738,9 +760,7 @@ const Misc = {
 
 			break;
 		case 3:
-			if (typeof (x) !== "object") {
-				throw new Error("Misc.click: Third arg must be a Unit.");
-			}
+			if (typeof (x) !== "object") throw new Error("Misc.click: Third arg must be a Unit.");
 
 			me.blockMouse = true;
 			clickMap(button, shift, x);
@@ -764,9 +784,7 @@ const Misc = {
 
 	// Check if a player is in your party
 	inMyParty: function (name) {
-		if (me.name === name) {
-			return true;
-		}
+		if (me.name === name) return true;
 
 		while (!me.gameReady) {
 			delay(100);
@@ -1155,20 +1173,15 @@ const Misc = {
 		for (let i = 0; i < 3; i++) {
 			if (Skill.useTK(unit) && i < 2) {
 				unit.distance > 21 && Pather.moveNearUnit(unit, 20);
-				checkCollision(me, unit, 0x4) && Attack.getIntoPosition(unit, 20, 0x4);
-				
-				Skill.cast(sdk.skills.Telekinesis, 0, unit);
+				!Skill.cast(sdk.skills.Telekinesis, 0, unit) && Attack.getIntoPosition(unit, 20, 0x5);
 			} else {
 				if (getDistance(me, unit) < 4 || Pather.moveToUnit(unit, 3, 0)) {
 					Misc.click(0, 0, unit);
 				}
 			}
 
-			let tick = getTickCount();
-
-			while (getTickCount() - tick < 1000) {
-				if (unit.mode) return true;
-				delay(10);
+			if (Misc.poll(() => unit.mode, 1000, 20 + me.ping)) {
+				return true;
 			}
 		}
 
@@ -1189,20 +1202,18 @@ const Misc = {
 			}
 		}
 
-		let usetk = (Config.UseTelekinesis && me.getSkill(sdk.skills.Telekinesis, 1));
-
 		while (shrineLocs.length > 0) {
 			shrineLocs.sort(Sort.points);
 			let coords = shrineLocs.shift();
 
-			usetk ? Pather.moveNear(coords[0], coords[1], 20) : Pather.moveTo(coords[0], coords[1], 2);
+			Skill.haveTK ? Pather.moveNear(coords[0], coords[1], 20) : Pather.moveTo(coords[0], coords[1], 2);
 
 			let shrine = getUnit(2, "shrine");
 
 			if (shrine) {
 				do {
 					if (shrine.objtype === type && shrine.mode === 0) {
-						(!usetk || !use) && Pather.moveTo(shrine.x - 2, shrine.y - 2);
+						(!Skill.haveTK || !use) && Pather.moveTo(shrine.x - 2, shrine.y - 2);
 
 						if (!use || this.getShrine(shrine)) {
 							return true;
@@ -1216,20 +1227,17 @@ const Misc = {
 	},
 
 	getItemDesc: function (unit) {
-		let i, desc, index,
-			stringColor = "";
+		let stringColor = "";
+		let desc = unit.description;
 
-		desc = unit.description;
-
-		if (!desc) {
-			return "";
-		}
+		if (!desc) return "";
 
 		desc = desc.split("\n");
 
 		// Lines are normally in reverse. Add color tags if needed and reverse order.
-		for (i = 0; i < desc.length; i += 1) {
-			if (desc[i].indexOf(getLocaleString(3331)) > -1) { // Remove sell value
+		for (let i = 0; i < desc.length; i += 1) {
+			// Remove sell value
+			if (desc[i].indexOf(getLocaleString(3331)) > -1) {
 				desc.splice(i, 1);
 
 				i -= 1;
@@ -1240,7 +1248,7 @@ const Misc = {
 				}
 
 				// Find and store new color info
-				index = desc[i].lastIndexOf("ÿc");
+				let index = desc[i].lastIndexOf("ÿc");
 
 				if (index > -1) {
 					stringColor = desc[i].substring(index, index + "ÿ".length + 2);
@@ -1329,9 +1337,7 @@ const Misc = {
 	useItemLog: true, // Might be a bit dirty
 
 	itemLogger: function (action, unit, text) {
-		if (!Config.ItemInfo || !this.useItemLog) {
-			return false;
-		}
+		if (!Config.ItemInfo || !this.useItemLog) return false;
 
 		let desc,
 			date = new Date(),
@@ -1371,59 +1377,28 @@ const Misc = {
 
 	// Log kept item stats in the manager.
 	logItem: function (action, unit, keptLine) {
-		if (!this.useItemLog) {
-			return false;
+		if (!this.useItemLog) return false;
+		if (!Config.LogKeys && ["pk1", "pk2", "pk3"].includes(unit.code)) return false;
+		if (!Config.LogOrgans && ["dhn", "bey", "mbr"].includes(unit.code)) return false;
+		if (!Config.LogLowRunes && ["r01", "r02", "r03", "r04", "r05", "r06", "r07", "r08", "r09", "r10", "r11", "r12", "r13", "r14"].includes(unit.code)) return false;
+		if (!Config.LogMiddleRunes && ["r15", "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23"].includes(unit.code)) return false;
+		if (!Config.LogHighRunes && ["r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31", "r32", "r33"].includes(unit.code)) return false;
+		if (!Config.LogLowGems && ["gcv", "gcy", "gcb", "gcg", "gcr", "gcw", "skc", "gfv", "gfy", "gfb", "gfg", "gfr", "gfw", "skf", "gsv", "gsy", "gsb", "gsg", "gsr", "gsw", "sku"].includes(unit.code)) return false;
+		if (!Config.LogHighGems && ["gzv", "gly", "glb", "glg", "glr", "glw", "skl", "gpv", "gpy", "gpb", "gpg", "gpr", "gpw", "skz"].includes(unit.code)) return false;
+
+		for (let i = 0; i < Config.SkipLogging.length; i++) {
+			if (Config.SkipLogging[i] === unit.classid || Config.SkipLogging[i] === unit.code) return false;
 		}
 
-		let i;
-
-		if (!Config.LogKeys && ["pk1", "pk2", "pk3"].indexOf(unit.code) > -1) {
-			return false;
-		}
-
-		if (!Config.LogOrgans && ["dhn", "bey", "mbr"].indexOf(unit.code) > -1) {
-			return false;
-		}
-
-		if (!Config.LogLowRunes && ["r01", "r02", "r03", "r04", "r05", "r06", "r07", "r08", "r09", "r10", "r11", "r12", "r13", "r14"].indexOf(unit.code) > -1) {
-			return false;
-		}
-
-		if (!Config.LogMiddleRunes && ["r15", "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23"].indexOf(unit.code) > -1) {
-			return false;
-		}
-
-		if (!Config.LogHighRunes && ["r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31", "r32", "r33"].indexOf(unit.code) > -1) {
-			return false;
-		}
-
-		if (!Config.LogLowGems && ["gcv", "gcy", "gcb", "gcg", "gcr", "gcw", "skc", "gfv", "gfy", "gfb", "gfg", "gfr", "gfw", "skf", "gsv", "gsy", "gsb", "gsg", "gsr", "gsw", "sku"].indexOf(unit.code) > -1) {
-			return false;
-		}
-
-		if (!Config.LogHighGems && ["gzv", "gly", "glb", "glg", "glr", "glw", "skl", "gpv", "gpy", "gpb", "gpg", "gpr", "gpw", "skz"].indexOf(unit.code) > -1) {
-			return false;
-		}
-
-		for (i = 0; i < Config.SkipLogging.length; i++) {
-			if (Config.SkipLogging[i] === unit.classid || Config.SkipLogging[i] === unit.code) {
-				return false;
-			}
-		}
-
-		let lastArea, code, desc, sock, itemObj,
-			color = -1,
+		let lastArea, code,
 			name = unit.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<:;.*]|\/|\\/g, "").trim();
 
-		desc = this.getItemDesc(unit);
-		color = unit.getColor();
+		let desc = this.getItemDesc(unit);
+		let color = (unit.getColor() || -1);
 
 		if (action.match("kept", "i")) {
 			lastArea = DataFile.getStats().lastArea;
-
-			if (lastArea) {
-				desc += ("\n\\xffc0Area: " + lastArea);
-			}
+			lastArea && (desc += ("\n\\xffc0Area: " + lastArea));
 		}
 
 		if (unit.getFlag(0x10)) {
@@ -1544,7 +1519,7 @@ const Misc = {
 
 				break;
 			case 7: // Unique
-				for (i = 0; i < 401; i += 1) {
+				for (let i = 0; i < 401; i += 1) {
 					if (unit.code === getBaseStat(17, i, 4).trim() && unit.fname.split("\n").reverse()[0].indexOf(getLocaleString(getBaseStat(17, i, 2))) > -1) {
 						code = getBaseStat(17, i, "invfile");
 
@@ -1570,7 +1545,7 @@ const Misc = {
 			}
 		}
 
-		sock = unit.getItem();
+		let sock = unit.getItem();
 
 		if (sock) {
 			do {
@@ -1581,13 +1556,10 @@ const Misc = {
 			} while (sock.getNext());
 		}
 
-		if (keptLine) {
-			desc += ("\n\\xffc0Line: " + keptLine);
-		}
-
+		keptLine && (desc += ("\n\\xffc0Line: " + keptLine));
 		desc += "$" + (unit.getFlag(0x400000) ? ":eth" : "");
 
-		itemObj = {
+		let itemObj = {
 			title: action + " " + name,
 			description: desc,
 			image: code,
@@ -1713,14 +1685,12 @@ const Misc = {
 
 	// Go to town when low on hp/mp or when out of potions. can be upgraded to check for curses etc.
 	townCheck: function () {
+		// Can't tp from uber trist or when dead
+		if (me.area === 136 || me.dead) return false;
+		
 		let potion, check,
 			needhp = true,
 			needmp = true;
-
-		// Can't tp from uber trist or when dead
-		if (me.area === 136 || me.dead) {
-			return false;
-		}
 
 		// check that townchicken is running - so we don't spam needing potions if it isn't
 		let townChick = getScript("tools/TownChicken.js");
@@ -1792,8 +1762,8 @@ const Misc = {
 
 	// Log someone's gear
 	spy: function (name) {
-		if (!isIncluded("oog.js")) { include("oog.js"); }
-		if (!isIncluded("common/prototypes.js")) { include("common/prototypes.js"); }
+		!isIncluded("oog.js") && include("oog.js");
+		!isIncluded("common/prototypes.js") && include("common/prototypes.js");
 
 		let unit = getUnit(-1, name);
 
@@ -2142,30 +2112,20 @@ const Experience = {
 		let rawMinutes = Math.floor((getTickCount() - me.gamestarttime) / 60000).toString(),
 			rawSeconds = (Math.floor((getTickCount() - me.gamestarttime) / 1000) % 60).toString();
 
-		if (rawMinutes <= 9) {
-			rawMinutes = "0" + rawMinutes;
-		}
+		rawMinutes <= 9 && (rawMinutes = "0" + rawMinutes);
+		rawSeconds <= 9 && (rawSeconds = "0" + rawSeconds);
 
-		if (rawSeconds <= 9) {
-			rawSeconds = "0" + rawSeconds;
-		}
-
-		//return rawMinutes + "m " + rawSeconds + "s";
 		return " (" + rawMinutes + ":" + rawSeconds + ")";
 	},
 
 	// Log to manager
 	log: function () {
-		let string,
-			gain = this.gain(),
+		let gain = this.gain(),
 			progress = this.progress(),
 			runsToLevel = this.runsToLevel(),
 			getGameTime = this.getGameTime();
-			//totalRunsToLevel = this.totalRunsToLevel(),
-			//timeToLevel = this.timeToLevel();
 
-		//string = "[Game: " + me.gamename + (me.gamepassword ? "//" + me.gamepassword : "") + getGameTime + "] [Level: " + me.getStat(12) + " (" + progress + "%)] [XP: " + gain + "] [Games ETA: " + runsToLevel + "] [Time ETA: " + timeToLevel + "]";
-		string = "[Game: " + me.gamename + (me.gamepassword ? "//" + me.gamepassword : "") + getGameTime + "] [Level: " + me.getStat(12) + " (" + progress + "%)] [XP: " + gain + "] [Games ETA: " + runsToLevel + "]";
+		let string = "[Game: " + me.gamename + (me.gamepassword ? "//" + me.gamepassword : "") + getGameTime + "] [Level: " + me.getStat(12) + " (" + progress + "%)] [XP: " + gain + "] [Games ETA: " + runsToLevel + "]";
 
 		if (gain) {
 			D2Bot.printToConsole(string, 4);
@@ -2179,7 +2139,7 @@ const Experience = {
 
 const Packet = {
 	openMenu: function (unit) {
-		if (unit.type !== 1) { throw new Error("openMenu: Must be used on NPCs."); }
+		if (unit.type !== 1) throw new Error("openMenu: Must be used on NPCs.");
 		if (getUIFlag(sdk.uiflags.NPCMenu)) return true;
 
 		for (let i = 0; i < 5; i += 1) {
@@ -2212,24 +2172,16 @@ const Packet = {
 	},
 
 	startTrade: function (unit, mode) {
-		if (unit.type !== 1) {
-			throw new Error("Unit.startTrade: Must be used on NPCs.");
-		}
+		if (unit.type !== 1) throw new Error("Unit.startTrade: Must be used on NPCs.");
+		if (getUIFlag(0x0C)) return true;
 
-		if (getUIFlag(0x0C)) {
-			return true;
-		}
-
-		let i,
-			gamble = mode === "Gamble";
+		let gamble = mode === "Gamble";
 
 		if (this.openMenu(unit)) {
-			for (i = 0; i < 10; i += 1) {
+			for (let i = 0; i < 10; i += 1) {
 				delay(200);
 
-				if (i % 2 === 0) {
-					sendPacket(1, 0x38, 4, gamble ? 2 : 1, 4, unit.gid, 4, 0);
-				}
+				i % 2 === 0 && sendPacket(1, 0x38, 4, gamble ? 2 : 1, 4, unit.gid, 4, 0);
 
 				if (unit.itemcount > 0) {
 					delay(200);
@@ -2243,32 +2195,23 @@ const Packet = {
 	},
 
 	buyItem: function (unit, shiftBuy, gamble) {
-		let i, tick,
-			oldGold = me.getStat(14) + me.getStat(15),
+		let oldGold = me.getStat(14) + me.getStat(15),
 			itemCount = me.itemcount,
 			npc = getInteractedNPC();
 
-		if (!npc) {
-			throw new Error("buyItem: No NPC menu open.");
-		}
+		if (!npc) throw new Error("buyItem: No NPC menu open.");
 
-		if (me.getStat(14) + me.getStat(15) < unit.getItemCost(0)) { // Can we afford the item?
-			return false;
-		}
+		// Can we afford the item?
+		if (oldGold < unit.getItemCost(0)) return false;
 
-		for (i = 0; i < 3; i += 1) {
+		for (let i = 0; i < 3; i += 1) {
 			sendPacket(1, 0x32, 4, npc.gid, 4, unit.gid, 4, shiftBuy ? 0x80000000 : gamble ? 0x2 : 0x0, 4, 0);
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < Math.max(2000, me.ping * 2 + 500)) {
-				if (shiftBuy && me.getStat(14) + me.getStat(15) < oldGold) {
-					return true;
-				}
-
-				if (itemCount !== me.itemcount) {
-					return true;
-				}
+				if (shiftBuy && me.getStat(14) + me.getStat(15) < oldGold) return true;
+				if (itemCount !== me.itemcount) return true;
 
 				delay(10);
 			}
@@ -2278,23 +2221,18 @@ const Packet = {
 	},
 
 	sellItem: function (unit) {
-		if (unit.type !== 4) { // Check if it's an item we want to buy
-			throw new Error("Unit.sell: Must be used on items.");
-		}
+		// Check if it's an item we want to buy
+		if (unit.type !== 4) throw new Error("Unit.sell: Must be used on items.");
 
-		let i, tick, npc,
-			itemCount = me.itemcount;
+		let itemCount = me.itemcount;
+		let npc = getInteractedNPC();
 
-		npc = getInteractedNPC();
+		if (!npc) return false;
 
-		if (!npc) {
-			return false;
-		}
-
-		for (i = 0; i < 5; i += 1) {
+		for (let i = 0; i < 5; i += 1) {
 			sendPacket(1, 0x33, 4, npc.gid, 4, unit.gid, 4, 0, 4, 0);
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 2000) {
 				if (me.itemcount !== itemCount) {
@@ -2309,17 +2247,13 @@ const Packet = {
 	},
 
 	identifyItem: function (unit, tome) {
-		let i, tick;
-
-		if (!unit || unit.getFlag(0x10)) {
-			return false;
-		}
+		if (!unit || unit.identified) return false;
 
 		CursorLoop:
-		for (i = 0; i < 3; i += 1) {
+		for (let i = 0; i < 3; i += 1) {
 			sendPacket(1, 0x27, 4, unit.gid, 4, tome.gid);
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 2000) {
 				if (getCursorType() === 6) {
@@ -2334,15 +2268,13 @@ const Packet = {
 			return false;
 		}
 
-		for (i = 0; i < 3; i += 1) {
-			if (getCursorType() === 6) {
-				sendPacket(1, 0x27, 4, unit.gid, 4, tome.gid);
-			}
+		for (let i = 0; i < 3; i += 1) {
+			getCursorType() === 6 && sendPacket(1, 0x27, 4, unit.gid, 4, tome.gid);
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 2000) {
-				if (unit.getFlag(0x10)) {
+				if (unit.identified) {
 					delay(50);
 
 					return true;
@@ -2356,24 +2288,20 @@ const Packet = {
 	},
 
 	itemToCursor: function (item) {
-		let i, tick;
-
-		if (me.itemoncursor) { // Something already on cursor
-			if (getUnit(100).gid === item.gid) { // Return true if the item is already on cursor
+		// Something already on cursor
+		if (me.itemoncursor) {
+			// Return true if the item is already on cursor
+			if (getUnit(100).gid === item.gid) {
 				return true;
 			}
-
 			this.dropItem(getUnit(100)); // If another item is on cursor, drop it
 		}
 
-		for (i = 0; i < 15; i += 1) {
-			if (item.mode === 1) { // equipped
-				sendPacket(1, 0x1c, 2, item.bodylocation);
-			} else {
-				sendPacket(1, 0x19, 4, item.gid);
-			}
+		for (let i = 0; i < 15; i += 1) {
+			// equipped
+			item.mode === 1 ? sendPacket(1, 0x1c, 2, item.bodylocation) : sendPacket(1, 0x19, 4, item.gid);
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < Math.max(500, me.ping * 2 + 200)) {
 				if (me.itemoncursor) {
@@ -2388,16 +2316,12 @@ const Packet = {
 	},
 
 	dropItem: function (item) {
-		let i, tick;
+		if (!this.itemToCursor(item)) return false;
 
-		if (!this.itemToCursor(item)) {
-			return false;
-		}
-
-		for (i = 0; i < 15; i += 1) {
+		for (let i = 0; i < 15; i += 1) {
 			sendPacket(1, 0x17, 4, item.gid);
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < Math.max(500, me.ping * 2 + 200)) {
 				if (!me.itemoncursor) {

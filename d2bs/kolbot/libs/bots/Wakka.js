@@ -18,7 +18,7 @@ function Wakka() {
 
 		if (monster) {
 			do {
-				if (monster.y < 5565 && Attack.checkMonster(monster) && getDistance(me, monster) <= range) {
+				if (monster.y < 5565 && monster.attackable && getDistance(me, monster) <= range) {
 					if (!dodge) return true;
 
 					monList.push(copyUnit(monster));

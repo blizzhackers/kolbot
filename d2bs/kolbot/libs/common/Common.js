@@ -35,14 +35,14 @@ const Common = {
 		},
 
 		clearCowLevel: function () {
+			function roomSort(a, b) {
+				return getDistance(myRoom[0], myRoom[1], a[0], a[1]) - getDistance(myRoom[0], myRoom[1], b[0], b[1]);
+			}
+
 			Config.MFLeader && Pather.makePortal() && say("cows");
 
 			let myRoom,
 				rooms = this.buildCowRooms();
-
-			function roomSort(a, b) {
-				return getDistance(myRoom[0], myRoom[1], a[0], a[1]) - getDistance(myRoom[0], myRoom[1], b[0], b[1]);
-			}
 
 			while (rooms.length > 0) {
 				// get the first room + initialize myRoom var
@@ -123,7 +123,7 @@ const Common = {
 		getLayout: function (seal, value) {
 			let sealPreset = getPresetUnit(108, 2, seal);
 
-			if (!seal) { throw new Error("Seal preset not found. Can't continue."); }
+			if (!seal) throw new Error("Seal preset not found. Can't continue.");
 
 			if (sealPreset.roomy * 5 + sealPreset.y === value || sealPreset.roomx * 5 + sealPreset.x === value) {
 				return 1;
@@ -143,27 +143,26 @@ const Common = {
 
 			for (let i = 0; i < 5; i++) {
 				seal.distance > 13 && Attack.getIntoPosition(seal, 13, 0x4);
-				Skill.cast(sdk.skills.Telekinesis, 0, seal);
-
-				if (seal.mode) {
+				
+				if (Skill.cast(sdk.skills.Telekinesis, 0, seal) && Misc.poll(() => seal.mode, 1000, 100)) {
 					break;
 				}
 			}
 
-			return seal.mode;
+			return !!seal.mode;
 		},
 
 		openSeal: function (classid) {
 			let warn = Config.PublicMode && [396, 394, 392].includes(classid) && Loader.scriptName() === "Diablo";
-			let usetk = !!(Config.UseTelekinesis && me.getSkill(sdk.skills.Telekinesis, 1));
+			let usetk = (Config.UseTelekinesis && Skill.haveTK && (classid !== 394 || this.seisLayout !== 1));
 			let seal;
 
 			for (let i = 0; i < 5; i++) {
 				if (!seal) {
 					usetk ? Pather.moveNearPreset(108, 2, classid, 15) : Pather.moveToPreset(108, 2, classid, classid === 394 ? 5 : 2, classid === 394 ? 5 : 0);
+					seal = Misc.poll(() => getUnit(sdk.unittype.Object, classid), 1000, 100);
 				}
 
-				seal = Misc.poll(function () { return getUnit(sdk.unittype.Object, classid); }, 1000, 100);
 				if (!seal) {
 					console.debug("Couldn't find seal: " + classid);
 					return false;
@@ -175,8 +174,8 @@ const Common = {
 				}
 
 				// Clear around Infector seal, Any leftover abyss knights casting decrep is bad news with Infector
-				if ([392, 393].includes(classid) || i > 1) {
-					Attack.clear(25);
+				if (([392, 393].includes(classid) || i > 1) && me.getMobCount() > 1) {
+					Attack.clear(15);
 					// Move back to seal
 					usetk ? Pather.moveNearUnit(seal, 15) : Pather.moveToUnit(seal, classid === 394 ? 5 : 2, classid === 394 ? 5 : 0);
 				}
@@ -184,41 +183,36 @@ const Common = {
 				if (usetk && this.tkSeal(seal)) {
 					return seal.mode;
 				} else {
-					usetk && i > 1 && (usetk = false);
-					console.debug("Failed to use tk: Attempt[" + i + "] Using tk again? " + usetk);
+					usetk && (usetk = false);
+
 					if (classid === 392 && me.assassin && this.infLayout === 1) {
 						if (Config.UseTraps) {
 							let check = ClassAttack.checkTraps({x: 7899, y: 5293});
-
-							if (check) {
-								ClassAttack.placeTraps({x: 7899, y: 5293}, check);
-							}
+							check && ClassAttack.placeTraps({x: 7899, y: 5293}, check);
 						}
 					}
 
+					classid === 394 ? Misc.poll(function () {
+						// stupid diablo shit, walk around the de-seis seal clicking it until we find "the spot"...sigh
+						if (!seal.mode) {
+							Pather.walkTo(seal.x + (rand(-1, 1)), seal.y + (rand(-1, 1)));
+							clickUnitAndWait(0, 0, seal) || seal.interact();
+						}
+						return !!seal.mode;
+					}, 3000, 60) : seal.interact();
+
 					// de seis optimization
 					if (classid === 394 && Attack.validSpot(seal.x + 15, seal.y)) {
-						Pather.moveTo(seal.x + 15, seal.y);
+						Pather.walkTo(seal.x + 15, seal.y);
 					} else {
-						Pather.moveTo(seal.x - 5, seal.y - 5);
+						Pather.walkTo(seal.x - 5, seal.y - 5);
 					}
-
-					classid === 394 ? Misc.click(0, 0, seal) : seal.interact();
 				}
 
 				delay(classid === 394 ? 1000 + me.ping : 500 + me.ping);
-
-				if (seal.mode) {
-					return true;
-				} else if (i === 4) {
-					console.log("Attempting portal trick");
-					D2Bot.printToConsole("Attempting portal trick");
-					Pather.makePortal(true) && delay(500);
-					me.inTown && Pather.usePortal(null, me.name);
-				}
 			}
 
-			return false;
+			return (!!seal && seal.mode);
 		},
 
 		chaosPreattack: function (name, amount) {

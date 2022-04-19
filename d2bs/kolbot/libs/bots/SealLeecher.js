@@ -75,7 +75,7 @@ function SealLeecher() {
 
 			if (monster) {
 				do {
-					if (Attack.checkMonster(monster) && getDistance(me, monster) < 20) {
+					if (monster.attackable && getDistance(me, monster) < 20) {
 						me.overhead("HOT");
 						Pather.usePortal(103, Config.Leader);
 					}

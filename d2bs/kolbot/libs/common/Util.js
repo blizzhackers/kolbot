@@ -1,5 +1,5 @@
 /**
- * @author Jaenster (I think), theBGuy (includeCommonLibs Function)
+ * @author Jaenster (I think), theBGuy
  * @description utility functions for kolbot
  *
  */
@@ -22,7 +22,6 @@ function getUnits(...args) {
 
 const clickItemAndWait = (...args) => {
 	let before,
-		itemEvent = false,
 		timeout = getTickCount(), timedOut;
 
 	before = !me.itemoncursor;
@@ -42,6 +41,39 @@ const clickItemAndWait = (...args) => {
 
 	// return item if we didnt timeout
 	return !timedOut;
+};
+
+/**
+ * @description clickMap doesn't return if we sucessfully clicked a unit just that a click was sent, this checks and returns that a units mode has changed
+ *		as a result of us clicking it.
+ * @returns boolean
+ */
+const clickUnitAndWait = (button, shift, unit) => {
+	if (typeof (unit) !== "object") throw new Error("clickUnitAndWait: Third arg must be a Unit.");
+
+	let before = unit.mode;
+
+	me.blockMouse = true;
+	clickMap(button, shift, unit);
+	delay(Math.max(me.ping * 2, 250));
+	clickMap(button + 2, shift, unit);
+	me.blockMouse = false;
+	
+	let waitTick = getTickCount();
+	let timeOut = Math.min(1000, 100 + (me.ping * 4));
+
+	while (getTickCount() - waitTick < timeOut) {
+		delay(30);
+		
+		// quit the loop if mode has changed
+		if (before !== unit.mode) {
+			break;
+		}
+	}
+
+	delay(Math.max(me.ping + 1, 50));
+
+	return (before !== unit.mode);
 };
 
 function includeCommonLibs () {

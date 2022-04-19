@@ -1,12 +1,11 @@
 /**
 *	@filename	Pickit.js
-*	@author		kolton
+*	@author		kolton, theBGuy
 *	@desc		handle item pickup
 */
 
 const Pickit = {
 	gidList: [],
-	useTelekinesis: false,
 	beltSize: 1,
 	// Ignored item types for item logging
 	ignoreLog: [
@@ -22,8 +21,22 @@ const Pickit = {
 			NTIP.OpenFile(filename, notify);
 		}
 
-		this.useTelekinesis = (Config.UseTelekinesis && me.getSkill(sdk.skills.Telekinesis, 1));
 		this.beltSize = Storage.BeltSize();
+		// If MinColumn is set to be more than our current belt size, set it to be 1 less than the belt size 4x3 belt will give us Config.MinColumn = [2, 2, 2, 2]
+		Config.MinColumn.forEach((el, index) => {
+			el >= this.beltSize && (Config.MinColumn[index] = Math.max(0, this.beltSize - 2));
+		});
+	},
+
+	result: {
+		UNID: -1,
+		UNWANTED: 0,
+		WANTED: 1,
+		CUBING: 2,
+		RUNEWORD: 3,
+		TRASH: 4,
+		CRAFTING: 5,
+		UTILITY: 6
 	},
 
 	// Returns:
@@ -38,28 +51,28 @@ const Pickit = {
 
 		if ((unit.classid === 617 || unit.classid === 618) && Town.repairIngredientCheck(unit)) {
 			return {
-				result: 6,
+				result: Pickit.result.UTILITY,
 				line: null
 			};
 		}
 
 		if (CraftingSystem.checkItem(unit)) {
 			return {
-				result: 5,
+				result: Pickit.result.CRAFTING,
 				line: null
 			};
 		}
 
 		if (Cubing.checkItem(unit)) {
 			return {
-				result: 2,
+				result: Pickit.result.CUBING,
 				line: null
 			};
 		}
 
 		if (Runewords.checkItem(unit)) {
 			return {
-				result: 3,
+				result: Pickit.result.RUNEWORD,
 				line: null
 			};
 		}
@@ -68,7 +81,7 @@ const Pickit = {
 		if (rval.result === 0 && !Town.ignoredItemTypes.includes(unit.itemType) && me.gold < Config.LowGold && !unit.questItem) {
 			if ((unit.getItemCost(1) / (unit.sizex * unit.sizey) >= 10) || unit.classid === sdk.items.Gold) {
 				return {
-					result: 4,
+					result: Pickit.result.TRASH,
 					line: null
 				};
 			}
@@ -78,7 +91,7 @@ const Pickit = {
 		if (rval.result === 0 && Config.PickitFiles.length === 0 && [sdk.itemtype.Gold, sdk.itemtype.Scroll, sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion].includes(unit.itemType)
 			&& this.canPick(unit)) {
 			return {
-				result: 1,
+				result: Pickit.result.WANTED,
 				line: null
 			};
 		}
@@ -212,15 +225,16 @@ const Pickit = {
 			this.name = unit.name;
 			this.color = Pickit.itemColor(unit);
 			this.gold = unit.getStat(14);
-			this.useTk = Pickit.useTelekinesis && (this.type === 4 || this.type === 22 || (this.type > 75 && this.type < 82)) &&
-						getDistance(me, unit) > 5 && getDistance(me, unit) < 20 && !checkCollision(me, unit, 0x4);
+			this.dist = (unit.distance || Infinity);
+			this.useTk = (Skill.haveTK && Config.UseTelekinesis
+				&& (this.type === 4 || this.type === 22 || (this.type > 75 && this.type < 82))
+				&& this.dist > 5 && this.dist < 20 && !checkCollision(me, unit, 0x5));
 			this.picked = false;
 		}
 
 		let gid = (unit.gid || -1),
 			cancelFlags = [0x01, 0x08, 0x14, 0x0c, 0x19, 0x1a],
 			itemCount = me.itemcount;
-
 		let item = gid > -1 ? getUnit(4, -1, -1, gid) : false;
 
 		if (!item) {
@@ -254,6 +268,9 @@ const Pickit = {
 				break;
 			}
 
+			// fastPick check? should only pick items if surrounding monsters have been cleared or if fastPick is active
+			// note: clear of surrounding monsters of the spectype we are set to clear
+			// should we unit cast by default?
 			if (stats.useTk) {
 				if (Config.PacketCasting === 2) {
 					Skill.setSkill(43, 0) && Packet.unitCast(0, item);
@@ -314,7 +331,7 @@ const Pickit = {
 			DataFile.updateStats("lastArea");
 
 			switch (status) {
-			case 1:
+			case Pickit.result.WANTED:
 				print("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + (keptLine ? ") (" + keptLine + ")" : ")"));
 
 				if (this.ignoreLog.indexOf(stats.type) === -1) {
@@ -323,19 +340,19 @@ const Pickit = {
 				}
 
 				break;
-			case 2:
+			case Pickit.result.CUBING:
 				print("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Cubing)");
 				Misc.itemLogger("Kept", item, "Cubing " + me.findItems(item.classid).length);
 				Cubing.update();
 
 				break;
-			case 3:
+			case Pickit.result.RUNEWORD:
 				print("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Runewords)");
 				Misc.itemLogger("Kept", item, "Runewords");
 				Runewords.update(stats.classid, gid);
 
 				break;
-			case 5: // Crafting System
+			case Pickit.result.CRAFTING: // Crafting System
 				print("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Crafting System)");
 				CraftingSystem.update(item);
 
@@ -357,9 +374,7 @@ const Pickit = {
 	},
 
 	itemColor: function (unit, type) {
-		if (type === undefined) {
-			type = true;
-		}
+		type === undefined && (type = true);
 
 		if (type) {
 			switch (unit.itemType) {
@@ -393,6 +408,8 @@ const Pickit = {
 	},
 
 	canPick: function (unit) {
+		if (!unit || !copyUnit(unit).x) return false;
+
 		let tome, charm, i, potion, needPots, buffers, pottype, myKey, key;
 
 		switch (unit.classid) {
@@ -437,9 +454,8 @@ const Pickit = {
 
 			break;
 		case 41: // Key (new 26.1.2013)
-			if (me.assassin) { // Assassins don't ever need keys
-				return false;
-			}
+			// Assassins don't ever need keys
+			if (me.assassin) return false;
 
 			myKey = me.getItem(543, 0);
 			key = getUnit(4, -1, -1, unit.gid); // Passed argument isn't an actual unit, we need to get it
@@ -511,9 +527,7 @@ const Pickit = {
 						}
 
 						if (unit.itemType === pottype) {
-							if (!Storage.Inventory.CanFit(unit)) {
-								return false;
-							}
+							if (!Storage.Inventory.CanFit(unit)) return false;
 
 							needPots = Config[buffers[i]];
 							potion = me.getItem(-1, 0);

@@ -66,7 +66,7 @@ function AutoBaal() {
 
 				if (monster) {
 					do {
-						if (Attack.checkMonster(monster) && getDistance(me, monster) < 50 && !checkCollision(me, monster, 0x4) &&
+						if (monster.attackable && getDistance(me, monster) < 50 && !checkCollision(me, monster, 0x4) &&
 								ClassAttack.isCursable(monster) && !(monster.spectype & 0x7) && !monster.getState(ClassAttack.curseState[1])) {
 							Skill.cast(Config.Curse[1], 0, monster);
 						}
@@ -98,7 +98,7 @@ function AutoBaal() {
 
 		if (monster) {
 			do {
-				if (Attack.checkMonster(monster) && getDistance(me, monster) < 50 && !checkCollision(me, monster, 0x4)) {
+				if (monster.attackable && getDistance(me, monster) < 50 && !checkCollision(me, monster, 0x4)) {
 					monList.push(copyUnit(monster));
 				}
 			} while (monster.getNext());
@@ -108,7 +108,7 @@ function AutoBaal() {
 			monList.sort(Sort.units);
 			monster = copyUnit(monList[0]);
 
-			if (monster && Attack.checkMonster(monster)) {
+			if (monster && monster.attackable) {
 				let index = monster.spectype & 0x7 ? 1 : 3;
 
 				if (Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[index]))) {

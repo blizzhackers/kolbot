@@ -10,28 +10,28 @@
 
 js_strict(true);
 
-if (!isIncluded("common/AutoSkill.js")) { include("common/AutoSkill.js"); }
-if (!isIncluded("common/AutoStat.js")) { include("common/AutoStat.js"); }
-if (!isIncluded("common/Config.js")) { include("common/Config.js"); }
-if (!isIncluded("common/Cubing.js")) { include("common/Cubing.js"); }
-if (!isIncluded("common/Prototypes.js")) { include("common/Prototypes.js"); }
-if (!isIncluded("common/Runewords.js")) { include("common/Runewords.js"); }
-if (!isIncluded("common/Town.js")) { include("common/Town.js"); }
+!isIncluded("common/AutoSkill.js") && include("common/AutoSkill.js");
+!isIncluded("common/AutoStat.js") && include("common/AutoStat.js");
+!isIncluded("common/Config.js") && include("common/Config.js");
+!isIncluded("common/Cubing.js") && include("common/Cubing.js");
+!isIncluded("common/Prototypes.js") && include("common/Prototypes.js");
+!isIncluded("common/Runewords.js") && include("common/Runewords.js");
+!isIncluded("common/Town.js") && include("common/Town.js");
 
 Config.init(); // includes libs/common/AutoBuild.js
 
 const debug = !!Config.AutoBuild.DebugMode;
-let	prevLevel = me.charlvl;
-const SPEND_POINTS 	= true;						// For testing, it actually allows skill and stat point spending.
+const SPEND_POINTS 	= true;		// For testing, it actually allows skill and stat point spending.
 const STAT_ID_TO_NAME =	[
 	getLocaleString(4060),		// Strength
 	getLocaleString(4069),		// Energy
 	getLocaleString(4062),		// Dexterity
-	getLocaleString(4066)];		// Vitality
+	getLocaleString(4066)		// Vitality
+];
+let	prevLevel = me.charlvl;
 
 // Will check if value exists in an Array
 Array.prototype.contains = function (val) { return this.indexOf(val) > -1; };
-
 
 function skillInValidRange (id) {
 	switch (me.classid) {
@@ -47,9 +47,7 @@ function skillInValidRange (id) {
 	return false;
 }
 
-
 function gainedLevels () { return me.charlvl - prevLevel; }
-
 
 function canSpendPoints () {
 	let unusedStatPoints = me.getStat(4);
@@ -59,7 +57,6 @@ function canSpendPoints () {
 	if (debug) { AutoBuild.print("Stat points:", unusedStatPoints, "     Skill points:", unusedSkillPoints); }
 	return haveUnusedStatpoints && haveUnusedSkillpoints;
 }
-
 
 function spendStatPoint (id) {
 	let unusedStatPoints = me.getStat(4);
@@ -72,7 +69,6 @@ function spendStatPoint (id) {
 	delay(100);											// TODO: How long should we wait... if at all?
 	return (unusedStatPoints - me.getStat(4) === 1);	// Check if we spent one point
 }
-
 
 // TODO: What do we do if it fails? report/ignore/continue?
 function spendStatPoints () {
@@ -119,7 +115,6 @@ function spendStatPoints () {
 	return spentEveryPoint;
 }
 
-
 function getTemplateFilename () {
 	let classname = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"][me.classid];
 	let buildType = Config.AutoBuild.Template;
@@ -127,9 +122,7 @@ function getTemplateFilename () {
 	return templateFilename;
 }
 
-
 function getRequiredSkills (id) {
-
 	function searchSkillTree (id) {
 		let results = [];
 		let skillTreeRight	= getBaseStat("skills", id, 181);
@@ -158,10 +151,9 @@ function getRequiredSkills (id) {
 	return requirements.sort(increasing);
 }
 
-
 function spendSkillPoint (id) {
 	let unusedSkillPoints = me.getStat(5);
-	let skillName = getSkillById(id) + " (" + id + ")";		// TODO: Use let ?
+	let skillName = getSkillById(id) + " (" + id + ")";
 	if (SPEND_POINTS) {
 		useSkillPoint(id);
 		AutoBuild.print("useSkillPoint(): " + skillName);
@@ -171,7 +163,6 @@ function spendSkillPoint (id) {
 	delay(200);											// TODO: How long should we wait... if at all?
 	return (unusedSkillPoints - me.getStat(5) === 1);	// Check if we spent one point
 }
-
 
 function spendSkillPoints () {
 	let skills = AutoBuildTemplate[me.charlvl].SkillPoints;
@@ -192,7 +183,7 @@ function spendSkillPoints () {
 
 	// We silently ignore skills set to -1
 	for (let i = 0; i < len; i++) {
-		let id = skills[i];								// TODO: Use let ?
+		let id = skills[i];
 
 		if (id === -1) {
 			continue;
@@ -200,7 +191,7 @@ function spendSkillPoints () {
 			throw new Error("Skill id " + id + " is not a skill for your character class" + errInvalidSkill);
 		}
 
-		let skillName = getSkillById(id) + " (" + id + ")";	// TODO: Use let ?
+		let skillName = getSkillById(id) + " (" + id + ")";
 		let requiredSkills = getRequiredSkills(id);
 		if (requiredSkills.length > 0) {
 			throw new Error("You need prerequisite skills " + requiredSkills.join(", ") + " before adding " + skillName + errInvalidSkill);
@@ -229,8 +220,6 @@ function spendSkillPoints () {
 	return spentEveryPoint;
 }
 
-
-
 /*
 *	TODO: determine if changes need to be made for
 *	the case of gaining multiple levels at once so as
@@ -249,21 +238,12 @@ function main () {
 				AutoBuild.print("Level up detected (", prevLevel, "-->", me.charlvl, ")");
 				spendSkillPoints();
 				spendStatPoints();
+				Config.AutoSkill.Enabled && AutoSkill.init(Config.AutoSkill.Build, Config.AutoSkill.Save);
+				Config.AutoStat.Enabled && AutoStat.init(Config.AutoStat.Build, Config.AutoStat.Save, Config.AutoStat.BlockChance, Config.AutoStat.UseBulk);
 				scriptBroadcast({event: "level up"});
 				AutoBuild.applyConfigUpdates(); // scriptBroadcast() won't trigger listener on this thread.
 
-				if (debug) {
-					AutoBuild.print("Incrementing cached character level to", prevLevel + 1);
-				}
-
-				if (Config.AutoSkill.Enabled) {
-					AutoSkill.init(Config.AutoSkill.Build, Config.AutoSkill.Save);
-				}
-
-				if (Config.AutoStat.Enabled) {
-					AutoStat.init(Config.AutoStat.Build, Config.AutoStat.Save, Config.AutoStat.BlockChance, Config.AutoStat.UseBulk);
-				}
-
+				debug && AutoBuild.print("Incrementing cached character level to", prevLevel + 1);
 				// prevLevel doesn't get set to me.charlvl because
 				// we may have gained multiple levels at once
 				prevLevel += 1;

@@ -42,7 +42,7 @@ const BoBarbHelper = () => {
 
 		if (unit) {
 			do {
-				if (Attack.checkMonster(unit) && getDistance(me, unit) < 20) {
+				if (unit.attackable && getDistance(me, unit) < 20) {
 					return true;
 				}
 			} while (unit.getNext());

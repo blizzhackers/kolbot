@@ -77,9 +77,7 @@ const ClassAttack = {
 				}
 			}
 
-			if (!unit.dead) {
-				this.whirlwind(unit);
-			}
+			!unit.dead && Attack.whirlwind(unit);
 
 			return 1;
 		default:
@@ -103,33 +101,12 @@ const ClassAttack = {
 		}
 	},
 
-	whirlwind: function (unit) {
-		if (!unit.attackable) return true;
-
-		let angles = [180, 175, -175, 170, -170, 165, -165, 150, -150, 135, -135, 45, -45, 90, -90];
-
-		unit.isSpecial && angles.unshift(120);
-
-		let angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
-
-		// get a better spot
-		for (let i = 0; i < angles.length; i += 1) {
-			let coords = [Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * 4 + unit.x), Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * 4 + unit.y)];
-
-			if (!CollMap.checkColl(me, {x: coords[0], y: coords[1]}, 0x1, 1)) {
-				return Skill.cast(151, Skill.getHand(151), coords[0], coords[1]);
-			}
-		}
-
-		return (Attack.validSpot(unit.x, unit.y) && Skill.cast(151, Skill.getHand(151), me.x, me.y));
-	},
-
 	checkCloseMonsters: function (range = 10) {
 		let monster = getUnit(1);
 
 		if (monster) {
 			do {
-				if (getDistance(me, monster) <= range && Attack.checkMonster(monster) && !checkCollision(me, monster, 0x4) &&
+				if (getDistance(me, monster) <= range && monster.attackable && !checkCollision(me, monster, 0x4) &&
 						(Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[(monster.spectype & 0x7) ? 1 : 3])) ||
 						(Config.AttackSkill[3] > -1 && Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[3]))))) {
 					return true;
@@ -166,7 +143,7 @@ const ClassAttack = {
 			while (corpseList.length > 0) {
 				if (this.checkCloseMonsters(5)) {
 					if (Config.FindItemSwitch) {
-						Attack.weaponSwitch(Attack.getPrimarySlot());
+						me.switchWeapons(Attack.getPrimarySlot());
 					}
 
 					Attack.clear(10, false, false, false, false);
@@ -186,7 +163,7 @@ const ClassAttack = {
 					}
 
 					if (Config.FindItemSwitch) {
-						Attack.weaponSwitch(Attack.getPrimarySlot() ^ 1);
+						me.switchWeapons(Attack.getPrimarySlot() ^ 1);
 					}
 
 					CorpseLoop:
@@ -214,7 +191,7 @@ const ClassAttack = {
 		}
 
 		if (Config.FindItemSwitch) {
-			Attack.weaponSwitch(Attack.getPrimarySlot());
+			me.switchWeapons(Attack.getPrimarySlot());
 		}
 
 		Pickit.pickItems();
@@ -233,9 +210,9 @@ const ClassAttack = {
 
 		let states = [
 			sdk.states.FrozenSolid, sdk.states.Revive, sdk.states.Redeemed,
-	        sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
-	    ];
+			sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
+		];
 
-		return !!(getDistance(me, unit) <= 25 && !checkCollision(me, unit, 0x4) && states.every(state => !unit.getState(state)))
+		return !!(getDistance(me, unit) <= 25 && !checkCollision(me, unit, 0x4) && states.every(state => !unit.getState(state)));
 	}
 };

@@ -27,9 +27,7 @@ function Pindleskin() {
 			}
 		}
 
-		if (!Pather.usePortal(121)) {
-			throw new Error("Failed to use portal.");
-		}
+		if (!Pather.usePortal(121)) throw new Error("Failed to use portal.");
 
 		Precast.doPrecast(true);
 	}
@@ -43,21 +41,17 @@ function Pindleskin() {
 	}
 
 	if (Config.Pindleskin.KillNihlathak) {
-		if (!Pather.moveToExit([122, 123, 124], true)) {
-			throw new Error("Failed to move to Halls of Vaught");
-		}
+		if (!Pather.moveToExit([122, 123, 124], true)) throw new Error("Failed to move to Halls of Vaught");
 
 		Pather.moveToPreset(me.area, 2, 462, 10, 10);
 
 		if (Config.Pindleskin.ViperQuit && getUnit(1, 597)) {
-			print("Tomb Vipers found.");
+			console.log("Tomb Vipers found.");
 
 			return true;
 		}
 
-		if (Config.Pindleskin.ClearVipers) {
-			Attack.clearList(Attack.getMob(597, 0, 20));
-		}
+		Config.Pindleskin.ClearVipers && Attack.clearList(Attack.getMob(597, 0, 20));
 
 		Attack.kill(526); // Nihlathak
 		Pickit.pickItems();

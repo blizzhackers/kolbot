@@ -10,27 +10,72 @@ const Precast = new function () {
 	this.BOTick = 0;
 	this.bestSlot = {};
 
-	this.precastCTA = function (force) {
-		if (this.haveCTA === -1 || me.classic || me.barbarian || me.inTown || me.shapeshifted) {
-			return false;
-		}
+	// TODO: build better method of keeping track of duration based skills so we can reduce resource usage
+	// build obj -> figure out which skills we have -> calc duration -> assign tick of last casted -> track tick (background worker maybe?)
+	// would reduce checking have skill and state calls, just let tick = getTickCount(); -> obj.some((el) => tick - el.lastTick > el.duration) -> true then cast
+	// would probably make sense to just re-cast everything (except summons) if one of our skills is about to run out rather than do this process again 3 seconds later
+	this.precastables = {
+		// Amazon
+		Valkyrie: false,
+		// Sorceress
+		ThunderStorm: false,
+		EnergyShield: false,
+		// Not sure how I want to handle cold armors
+		coldArmor: {
+			best: false,
+			duration: 0
+		},
+		Enchant: false,
+		// Necromancer
+		BoneArmor: false,
+		ClayGolem: false,
+		BloodGolem: false,
+		FireGolem: false,
+		// Paladin
+		HolyShield: false,
+		// Barbarian
+		Shout: false,
+		BattleOrders: false,
+		BattleCommand: false,
+		// Druid
+		CycloneArmor: false,
+		Hurricane: false,
+		Raven: false,
+		SpiritWolf: false,
+		DireWolf: false,
+		Grizzly: false,
+		PoisonCreeper: false,
+		CarrionVine: false,
+		SolarCreeper: false,
+		OakSage: false,
+		HeartofWolverine: false,
+		SpiritofBarbs: false,
+		// Assassin
+		Fade: false,
+		Venom: false,
+		BladeShield: false,
+		BurstofSpeed: false,
+		ShadowWarrior: false,
+		ShadowMaster: false
+	};
 
-		if (!force && me.getState(32)) {
-			return true;
-		}
+	this.precastCTA = function (force) {
+		if (this.haveCTA === -1 || me.classic || me.barbarian || me.inTown || me.shapeshifted) return false;
+		if (!force && me.getState(32)) return true;
 
 		if (this.haveCTA > -1) {
 			let slot = me.weaponswitch;
 
-			Attack.weaponSwitch(this.haveCTA);
-			Skill.cast(sdk.skills.BattleCommand, 0); // Battle Command
-			Skill.cast(sdk.skills.BattleCommand, 0); // Battle Command
-			Skill.cast(sdk.skills.BattleOrders, 0); // Battle Orders
+			me.switchWeapons(this.haveCTA);
+			Skill.cast(sdk.skills.BattleCommand, 0);
+			Skill.cast(sdk.skills.BattleCommand, 0);
+			Skill.cast(sdk.skills.BattleOrders, 0);
 
-			this.BODuration = (20 + me.getSkill(sdk.skills.BattleOrders, 1) * 10 + (me.getSkill(sdk.skills.Shout, 0) + me.getSkill(sdk.skills.BattleCommand, 0)) * 5) * 1000;
 			this.BOTick = getTickCount();
+			// does this need to be re-calculated everytime? if no autobuild should really just be done when we initialize
+			this.BODuration = (20 + me.getSkill(sdk.skills.BattleOrders, 1) * 10 + (me.getSkill(sdk.skills.Shout, 0) + me.getSkill(sdk.skills.BattleCommand, 0)) * 5) * 1000;
 
-			Attack.weaponSwitch(slot);
+			me.switchWeapons(slot);
 
 			return true;
 		}
@@ -38,6 +83,7 @@ const Precast = new function () {
 		return false;
 	};
 
+	// should be done in init function?
 	this.getBetterSlot = function (skillId) {
 		if (this.bestSlot[skillId] !== undefined) {
 			return this.bestSlot[skillId];
@@ -103,17 +149,19 @@ const Precast = new function () {
 			return me.weaponswitch;
 		}
 
-		me.weaponswitch !== 0 && Attack.weaponSwitch(0);
+		me.weaponswitch !== 0 && me.switchWeapons(0);
 
 		me.getItemsEx()
 			.filter(item => item.isEquipped && [4, 5, 11, 12].includes(item.bodylocation))
 			.forEach(function (item) {
 				if (item.bodylocation === 4 || item.bodylocation === 5) {
 					sumCurr += (item.getStat(127) + item.getStat(83, classid) + item.getStat(188, skillTab) + item.getStat(107, skillId) + item.getStat(97, skillId));
+					return;
 				}
 
 				if (item.bodylocation === 11 || item.bodylocation === 12) {
 					sumSwap += (item.getStat(127) + item.getStat(83, classid) + item.getStat(188, skillTab) + item.getStat(107, skillId) + item.getStat(97, skillId));
+					return;
 				}
 			});
 
@@ -126,49 +174,44 @@ const Precast = new function () {
 
 		let swap = me.weaponswitch;
 
-		Attack.weaponSwitch(this.getBetterSlot(skillId));
+		me.switchWeapons(this.getBetterSlot(skillId));
 		Skill.cast(skillId, 0);
-		Attack.weaponSwitch(swap);
+		me.switchWeapons(swap);
 
 		return true;
 	};
 
 	// TODO: build list of our skills rather than check if we have a skill each time
 	// update the list if AutoBuild is enabled and we have had a level change or AutoSkill is enabled and we have applied a skill point
-	this.doPrecast = function (force) {
+	this.doPrecast = function (force = false) {
+		while (!me.gameReady) {
+			delay(250 + me.ping);
+		}
+
 		let buffSummons = false;
 
 		// Force BO 30 seconds before it expires
-		if (this.haveCTA > -1) {
-			this.precastCTA(!me.getState(sdk.states.BattleCommand) || force || (getTickCount() - this.BOTick >= this.BODuration - 30000));
-		}
+		this.haveCTA > -1 && this.precastCTA(!me.getState(sdk.states.BattleCommand) || force || (getTickCount() - this.BOTick >= this.BODuration - 30000));
 
 		switch (me.classid) {
 		case sdk.charclass.Amazon:
-			Config.SummonValkyrie && (buffSummons = this.summon(sdk.skills.Valkyrie, sdk.minions.Valkyrie));
+			Config.SummonValkyrie && Precast.precastables.Valkyrie && (buffSummons = this.summon(sdk.skills.Valkyrie, sdk.minions.Valkyrie));
 			buffSummons && this.precastCTA(force);
 
 			break;
 		case sdk.charclass.Sorceress:
-			if (me.getSkill(sdk.skills.ThunderStorm, 1) && (!me.getState(sdk.states.ThunderStorm) || force)) {
+			if (Precast.precastables.ThunderStorm && (!me.getState(sdk.states.ThunderStorm) || force)) {
 				this.precastSkill(sdk.skills.ThunderStorm);
 			}
 
-			if (Config.UseEnergyShield && me.getSkill(sdk.skills.EnergyShield, 0) && (!me.getState(sdk.states.EnergyShield) || force)) {
+			if (Config.UseEnergyShield && Precast.precastables.EnergyShield && (!me.getState(sdk.states.EnergyShield) || force)) {
 				this.precastSkill(sdk.skills.EnergyShield);
 			}
 
 			if (Config.UseColdArmor) {
 				let choosenSkill = (typeof Config.UseColdArmor === "number" && me.getSkill(Config.UseColdArmor, 1)
 					? Config.UseColdArmor
-					: (function () {
-						let coldArmor = [
-							{skillId: sdk.skills.ShiverArmor, level: me.getSkill(sdk.skills.ShiverArmor, 1)},
-							{skillId: sdk.skills.ChillingArmor, level: me.getSkill(sdk.skills.ChillingArmor, 1)},
-							{skillId: sdk.skills.FrozenArmor, level: me.getSkill(sdk.skills.FrozenArmor, 1)},
-						].filter(skill => skill.level > 0).sort((a, b) => b.level - a.level).first();
-						return coldArmor !== undefined ? coldArmor.skillId : false;
-					})());
+					: (Precast.precastables.coldArmor.best || -1));
 				switch (choosenSkill) {
 				case sdk.skills.FrozenArmor:
 					if (!me.getState(sdk.states.FrozenArmor) || force) {
@@ -188,16 +231,18 @@ const Precast = new function () {
 					}
 
 					break;
+				default:
+					break;
 				}
 			}
 
-			if (me.getSkill(sdk.skills.Enchant, 1) && (!me.getState(sdk.states.Enchant) || force)) {
+			if (Precast.precastables.Enchant && (!me.getState(sdk.states.Enchant) || force)) {
 				this.enchant();
 			}
 
 			break;
 		case sdk.charclass.Necromancer:
-			if (me.getSkill(sdk.skills.BoneArmor, 1) && (!me.getState(sdk.states.BoneArmor) || force)) {
+			if (Precast.precastables.BoneArmor && (!me.getState(sdk.states.BoneArmor) || force)) {
 				this.precastSkill(sdk.skills.BoneArmor);
 			}
 
@@ -224,39 +269,39 @@ const Precast = new function () {
 
 			break;
 		case sdk.charclass.Paladin:
-			if (me.getSkill(sdk.skills.HolyShield, 1) && (!me.getState(sdk.states.HolyShield) || force)) {
+			if (Precast.precastables.HolyShield && (!me.getState(sdk.states.HolyShield) || force)) {
 				this.precastSkill(sdk.skills.HolyShield);
 			}
 
 			break;
-		case sdk.charclass.Barbarian: // - TODO: BO duration
-			if (((!me.getState(sdk.states.Shout) || force) && me.getSkill(sdk.skills.Shout, 1))
-				|| ((!me.getState(sdk.states.BattleOrders) || force) && me.getSkill(sdk.skills.BattleOrders, 1))
-				|| ((!me.getState(sdk.states.BattleCommand) || force) && me.getSkill(sdk.skills.BattleCommand, 1))) {
+		case sdk.charclass.Barbarian: // - TODO: durations
+			if ((Precast.precastables.Shout && (!me.getState(sdk.states.Shout) || force))
+				|| (Precast.precastables.BattleOrders && (!me.getState(sdk.states.BattleOrders) || force))
+				|| (Precast.precastables.BattleCommand && (!me.getState(sdk.states.BattleCommand) || force))) {
 				let swap = me.weaponswitch;
 
-				if (!me.getState(sdk.states.BattleCommand) || force) {
+				if (Precast.precastables.BattleCommand && (!me.getState(sdk.states.BattleCommand) || force)) {
 					this.precastSkill(sdk.skills.BattleCommand, 0);
 				}
 
-				if (!me.getState(sdk.states.BattleOrders) || force) {
+				if (Precast.precastables.BattleOrders && (!me.getState(sdk.states.BattleOrders) || force)) {
 					this.precastSkill(sdk.skills.BattleOrders, 0);
 				}
 
-				if (!me.getState(sdk.states.Shout) || force) {
+				if (Precast.precastables.Shout && (!me.getState(sdk.states.Shout) || force)) {
 					this.precastSkill(sdk.skills.Shout, 0);
 				}
 
-				Attack.weaponSwitch(swap);
+				me.switchWeapons(swap);
 			}
 
 			break;
 		case sdk.charclass.Druid:
-			if (me.getSkill(sdk.skills.CycloneArmor, 1) && (!me.getState(sdk.states.CycloneArmor) || force)) {
+			if (Precast.precastables.CycloneArmor && (!me.getState(sdk.states.CycloneArmor) || force)) {
 				this.precastSkill(sdk.skills.CycloneArmor);
 			}
 
-			Config.SummonRaven && this.summon(sdk.skills.Raven, sdk.minions.Raven);
+			Config.SummonRaven && Precast.precastables.Raven && this.summon(sdk.skills.Raven, sdk.minions.Raven);
 
 			switch (Config.SummonAnimal) {
 			case 1:
@@ -312,7 +357,7 @@ const Precast = new function () {
 				break;
 			}
 
-			if (me.getSkill(sdk.skills.Hurricane, 1) && (!me.getState(sdk.states.Hurricane) || force)) {
+			if (Precast.precastables.Hurricane && (!me.getState(sdk.states.Hurricane) || force)) {
 				this.precastSkill(sdk.skills.Hurricane);
 			}
 
@@ -320,19 +365,19 @@ const Precast = new function () {
 
 			break;
 		case sdk.charclass.Assassin:
-			if (Config.UseFade && me.getSkill(sdk.skills.Fade, 0) && (!me.getState(sdk.states.Fade) || force)) {
+			if (Config.UseFade && Precast.precastables.Fade && (!me.getState(sdk.states.Fade) || force)) {
 				this.precastSkill(sdk.skills.Fade);
 			}
 
-			if (Config.UseVenom && me.getSkill(sdk.skills.Venom, 0) && Config.UseVenom && (!me.getState(sdk.states.Venom) || force)) {
+			if (Config.UseVenom && Precast.precastables.Venom && Config.UseVenom && (!me.getState(sdk.states.Venom) || force)) {
 				this.precastSkill(sdk.skills.Venom);
 			}
 
-			if (Config.UseBladeShield && me.getSkill(sdk.skills.BladeShield, 0) && (!me.getState(sdk.states.BladeShield) || force)) {
+			if (Config.UseBladeShield && Precast.precastables.BladeShield && (!me.getState(sdk.states.BladeShield) || force)) {
 				this.precastSkill(sdk.skills.BladeShield);
 			}
 
-			if (!Config.UseFade && Config.UseBoS && me.getSkill(sdk.skills.BurstofSpeed, 0) && (!me.getState(sdk.states.BurstofSpeed) || force)) {
+			if (!Config.UseFade && Config.UseBoS && Precast.precastables.BurstofSpeed && (!me.getState(sdk.states.BurstofSpeed) || force)) {
 				this.precastSkill(sdk.skills.BurstofSpeed);
 			}
 
@@ -354,7 +399,7 @@ const Precast = new function () {
 			break;
 		}
 
-		Attack.weaponSwitch(Attack.getPrimarySlot());
+		me.switchWeapons(Attack.getPrimarySlot());
 	};
 
 	this.checkCTA = function () {
@@ -381,10 +426,6 @@ const Precast = new function () {
 	};
 
 	this.summon = function (skillId, minionType) {
-		if (!me.getSkill(skillId, 1)) {
-			return false;
-		}
-
 		if (!me.getSkill(skillId, 1)) return false;
 
 		let rv, retry = 0, count = 1;
@@ -411,7 +452,7 @@ const Precast = new function () {
 				if (me.inTown) {
 					if (Town.heal()) {
 						delay(100 + me.ping);
-						me.cancel();
+						me.cancelUIFlags();
 					}
 					
 					Town.move("portalspot");
@@ -420,7 +461,7 @@ const Precast = new function () {
 					coord = CollMap.getRandCoordinate(me.x, -6, 6, me.y, -6, 6);
 
 					// Keep bots from getting stuck trying to summon
-					if (coord && Attack.validSpot(coord.x, coord.y)) {
+					if (!!coord && Attack.validSpot(coord.x, coord.y)) {
 						Pather.moveTo(coord.x, coord.y);
 						Skill.cast(skillId, 0, me.x, me.y);
 					}
@@ -429,7 +470,8 @@ const Precast = new function () {
 				if (me.getMinionCount(minionType) === count) {
 					return true;
 				} else {
-					print("(Precast) :: Failed to summon minion " + skillId);
+					console.debug("(Precast) :: Failed to summon minion " + skillId);
+
 					return false;
 				}
 			}
@@ -442,7 +484,7 @@ const Precast = new function () {
 
 			let coord = CollMap.getRandCoordinate(me.x, -4, 4, me.y, -4, 4);
 
-			if (coord && Attack.validSpot(coord.x, coord.y)) {
+			if (!!coord && Attack.validSpot(coord.x, coord.y)) {
 				Skill.cast(skillId, 0, coord.x, coord.y);
 
 				if (me.getMinionCount(minionType) === count) {
@@ -461,7 +503,7 @@ const Precast = new function () {
 	this.enchant = function () {
 		let unit, slot = me.weaponswitch, chanted = [];
 
-		Attack.weaponSwitch(this.getBetterSlot(52));
+		me.switchWeapons(this.getBetterSlot(52));
 
 		// Player
 		unit = getUnit(0);
@@ -486,7 +528,7 @@ const Precast = new function () {
 			} while (unit.getNext());
 		}
 
-		Attack.weaponSwitch(slot);
+		me.switchWeapons(slot);
 
 		return true;
 	};

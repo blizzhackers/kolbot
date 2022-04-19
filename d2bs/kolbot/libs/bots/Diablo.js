@@ -178,7 +178,7 @@ function Diablo() {
 	Precast.doPrecast(true);
 	me.area !== sdk.areas.RiverofFlame && Pather.useWaypoint(sdk.areas.RiverofFlame);
 
-	if (!Pather.moveTo(7790, 5544)) throw new Error("Failed to move to Chaos Sanctuary");
+	if (!Pather.moveToExit(sdk.areas.ChaosSanctuary, true) && !Pather.moveTo(7790, 5544)) throw new Error("Failed to move to Chaos Sanctuary");
 
 	Common.Diablo.initLayout();
 

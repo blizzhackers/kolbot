@@ -159,6 +159,7 @@ function main () {
 		Config.ClearInvOnStart && Town.clearInventory();
 		[orgx, orgy].distance > 3 && Pather.moveTo(orgx, orgx);
 		Pickit.pickItems();
+		Pather.init(); // initialize wp data
 	}
 
 	me.automap = Config.AutoMap;
