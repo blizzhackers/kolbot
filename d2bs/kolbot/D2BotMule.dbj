@@ -48,13 +48,13 @@ new Overrides.Override (Starter, Starter.receiveCopyData, function (orignal, mod
 	// master/mule communication function
 	switch (mode) {
 	case 10: // mule request
-		obj = JSON.parse(msg);
+		let obj = JSON.parse(msg);
 
 		if (continuousMule && me.ingame) {
 			sendCopyData(null, obj.profile, 10, JSON.stringify({status: "ready"}));
 		} else {
 			if (!master) {
-				masterInfo = AutoMule.getMaster(obj);
+				let masterInfo = AutoMule.getMaster(obj);
 
 				if (masterInfo) {
 					master = masterInfo.profile;
@@ -78,8 +78,11 @@ new Overrides.Override (Starter, Starter.receiveCopyData, function (orignal, mod
 		masterStatus = JSON.parse(msg);
 
 		break;
+	default:
+		orignal(mode, msg);
+
+		break;
 	}
-	orignal(mode, msg);
 }).apply();
 
 // Mule Data object manipulates external mule datafile

@@ -264,11 +264,7 @@ const Common = {
 					switch (me.classid) {
 					case sdk.charclass.Sorceress:
 						if ([sdk.skills.Meteor, sdk.skills.Blizzard, sdk.skills.FrozenOrb, sdk.skills.FireWall].includes(Config.AttackSkill[1])) {
-							if (me.getState(sdk.states.SkillDelay)) {
-								delay(50);
-							} else {
-								Skill.cast(Config.AttackSkill[1], 0, 7793 + rand(-1, 1), 5293);
-							}
+							Skill.cast(Config.AttackSkill[1], 0, 7793 + rand(-1, 1), 5293);
 						}
 
 						delay(500);

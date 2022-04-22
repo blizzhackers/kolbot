@@ -272,21 +272,16 @@ const Pickit = {
 			// note: clear of surrounding monsters of the spectype we are set to clear
 			// should we unit cast by default?
 			if (stats.useTk) {
-				if (Config.PacketCasting === 2) {
-					Skill.setSkill(43, 0) && Packet.unitCast(0, item);
-				} else {
-					Skill.cast(43, 0, item);
-				}
+				Skill.setSkill(sdk.skills.Telekinesis, 0) && Packet.unitCast(0, item);
 			} else {
 				if (getDistance(me, item) > (Config.FastPick && i < 1 ? 6 : 4) || checkCollision(me, item, 0x1)) {
-					if (Pather.useTeleport()) {
-						Pather.moveToUnit(item);
-					} else if (!Pather.moveTo(item.x, item.y, 0)) {
+					if ((Pather.useTeleport() && !Pather.moveToUnit(item)) || !Pather.moveTo(item.x, item.y, 0)) {
 						continue;
 					}
 				}
 
-				Config.FastPick ? sendPacket(1, 0x16, 4, 0x4, 4, item.gid, 4, 0) : Misc.click(0, 0, item);
+				// use packet first, if we fail and not using fast pick use click
+				Config.FastPick || i < 1 ? sendPacket(1, 0x16, 4, 0x4, 4, item.gid, 4, 0) : Misc.click(0, 0, item);
 			}
 
 			let tick = getTickCount();
@@ -332,7 +327,7 @@ const Pickit = {
 
 			switch (status) {
 			case Pickit.result.WANTED:
-				print("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + (keptLine ? ") (" + keptLine + ")" : ")"));
+				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + (keptLine ? ") (" + keptLine + ")" : ")"));
 
 				if (this.ignoreLog.indexOf(stats.type) === -1) {
 					Misc.itemLogger("Kept", item);
@@ -341,24 +336,24 @@ const Pickit = {
 
 				break;
 			case Pickit.result.CUBING:
-				print("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Cubing)");
+				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Cubing)");
 				Misc.itemLogger("Kept", item, "Cubing " + me.findItems(item.classid).length);
 				Cubing.update();
 
 				break;
 			case Pickit.result.RUNEWORD:
-				print("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Runewords)");
+				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Runewords)");
 				Misc.itemLogger("Kept", item, "Runewords");
 				Runewords.update(stats.classid, gid);
 
 				break;
-			case Pickit.result.CRAFTING: // Crafting System
-				print("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Crafting System)");
+			case Pickit.result.CRAFTING:
+				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Crafting System)");
 				CraftingSystem.update(item);
 
 				break;
 			default:
-				print("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + (keptLine ? ") (" + keptLine + ")" : ")"));
+				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + (keptLine ? ") (" + keptLine + ")" : ")"));
 
 				break;
 			}
@@ -369,7 +364,6 @@ const Pickit = {
 
 	itemQualityToName: function (quality) {
 		let qualNames = ["", "lowquality", "normal", "superior", "magic", "set", "rare", "unique", "crafted"];
-
 		return qualNames[quality];
 	},
 
@@ -408,7 +402,7 @@ const Pickit = {
 	},
 
 	canPick: function (unit) {
-		if (!unit || !copyUnit(unit).x) return false;
+		if (!unit) return false;
 
 		let tome, charm, i, potion, needPots, buffers, pottype, myKey, key;
 

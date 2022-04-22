@@ -47,23 +47,23 @@ const ClassAttack = {
 		let gid = unit.gid;
 
 		if (Config.MercWatch && Town.needMerc()) {
-			print("mercwatch");
-
 			if (Town.visitTown()) {
+				print("mercwatch");
+				
 				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
 					console.debug("Lost reference to unit");
-					return 1; // lost reference to the mob we were attacking
+					return 1;
 				}
 			}
 		}
 
 		// Keep Energy Shield active
-		if (Config.UseEnergyShield && !me.getState(sdk.states.EnergyShield) && me.getSkill(sdk.skills.EnergyShield, 1)) {
+		if (Config.UseEnergyShield && Precast.precastables.EnergyShield && !me.getState(sdk.states.EnergyShield) && me.getSkill(sdk.skills.EnergyShield, 1)) {
 			Skill.cast(sdk.skills.EnergyShield, 0);
 		}
 
 		// Keep Thunder-Storm active
-		if (!me.getState(sdk.states.ThunderStorm) && me.getSkill(sdk.skills.ThunderStorm, 1)) {
+		if (Precast.precastables.ThunderStorm && !me.getState(sdk.states.ThunderStorm) && me.getSkill(sdk.skills.ThunderStorm, 1)) {
 			Skill.cast(sdk.skills.ThunderStorm, 0);
 		}
 

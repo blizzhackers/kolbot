@@ -419,7 +419,7 @@ me.cancelUIFlags = function () {
 
 	for (let i = 0; i < flags.length; i++) {
 		if (getUIFlag(flags[i]) && me.cancel()) {
-			delay(500 + me.ping);
+			delay(250);
 			i = 0; // Reset
 		}
 	}
@@ -480,7 +480,7 @@ me.switchWeapons = function (slot) {
  */
 Unit.prototype.checkItem = function (itemInfo) {
 	if (typeof itemInfo !== "object") {
-		return { have: false, item: null};
+		return {have: false, item: null};
 	}
 
 	let itemObj = Object.assign({}, {
@@ -2022,28 +2022,21 @@ Object.defineProperties(me, {
 	},
 });
 
+// something in here is causing demon imps in barricade towers to be skipped - todo: figure out what
 Unit.prototype.__defineGetter__('attackable', function () {
 	if (this === undefined || !copyUnit(this).x) return false;
 	if (this.type > 1) return false;
-	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) {
-		return true;
-	}
+	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) return true;
 	// Dead monster
-	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) {
-		return false;
-	}
+	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) return false;
 	// Friendly monster/NPC
 	if (this.getStat(172) === 2) return false;
-
 	// catapults were returning a level of 0 and hanging up clear scripts
 	if (this.charlvl < 1) return false;
-
 	// neverCount base stat - hydras, traps etc.
 	if (getBaseStat("monstats", this.classid, "neverCount")) return false;
-
 	// Monsters that are in flight
 	if ([110, 111, 112, 113, 144, 608].includes(this.classid) && this.mode === 8) return false;
-
 	// Monsters that are Burrowed/Submerged
 	if ([68, 69, 70, 71, 72, 258, 258, 259, 260, 261, 262, 263].includes(this.classid) && this.mode === 14) return false;
 
@@ -2053,29 +2046,19 @@ Unit.prototype.__defineGetter__('attackable', function () {
 Unit.prototype.__defineGetter__('curseable', function () {
 	// must be player or monster
 	if (this === undefined || !copyUnit(this).x || this.type > 1) return false;
-
 	// attract can't be overridden
 	if (this.getState(sdk.states.Attract)) return false;
-
 	// "Possessed"
 	if (!!this.name && !!this.name.includes(getLocaleString(11086))) return false;
-
-	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) {
-		return true;
-	}
+	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) return true;
 	// Dead monster
-	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) {
-		return false;
-	}
+	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) return false;
 	// Friendly monster/NPC
 	if (this.getStat(172) === 2) return false;
-    
 	// catapults were returning a level of 0 and hanging up clear scripts
 	if (this.charlvl < 1) return false;
-
 	// Monsters that are in flight
 	if ([110, 111, 112, 113, 144, 608].includes(this.classid) && this.mode === 8) return false;
-
 	// Monsters that are Burrowed/Submerged
 	if ([68, 69, 70, 71, 72, 258, 258, 259, 260, 261, 262, 263].includes(this.classid) && this.mode === 14) return false;
 

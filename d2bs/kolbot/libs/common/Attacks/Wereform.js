@@ -52,7 +52,6 @@ const ClassAttack = {
 		}
 
 		let checkSkill,
-			mercRevive = 0,
 			timedSkill = -1,
 			untimedSkill = -1;
 		let index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;

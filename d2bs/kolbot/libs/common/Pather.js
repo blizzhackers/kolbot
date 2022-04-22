@@ -9,10 +9,6 @@
 const NodeAction = {
 	// Run all the functions within NodeAction (except for itself)
 	go: function (arg) {
-		while (!me.gameReady) {
-			delay(250 + me.ping);
-		}
-
 		for (let i in this) {
 			if (this.hasOwnProperty(i) && typeof this[i] === "function" && i !== "go") {
 				this[i](arg);
@@ -139,11 +135,10 @@ const Pather = {
 		area === undefined && (area = me.area);
 		let nodes = getPath(area, me.x, me.y, spot.x, spot.y, 2, 5);
 		
-		if (!nodes) {
-			return returnSpotOnError ? spot : { x: me.x, y: me.y };
-		}
+		if (!nodes || !nodes.length) return returnSpotOnError ? spot : { x: me.x, y: me.y };
 
-		return nodes.find(function (node) { return getDistance(spot, node) < distance && Attack.validSpot(node.x, node.y); }) || (returnSpotOnError ? spot : { x: me.x, y: me.y });
+		return (nodes.find((node) => getDistance(spot.x, spot.y, node.x, node.y) < distance && Pather.checkSpot(node.x, node.y, 0x1 | 0x4 | 0x800 | 0x1000))
+			|| (returnSpotOnError ? spot : { x: me.x, y: me.y }));
 	},
 
 	moveNear: function (x, y, minDist, givenSettings = {}) {
@@ -162,6 +157,7 @@ const Pather = {
 
 		let cleared = false,
 			leaped = false,
+			invalidCheck = false,
 			node = {x: x, y: y},
 			fail = 0;
 
@@ -169,7 +165,7 @@ const Pather = {
 			getUIFlag(this.cancelFlags[i]) && me.cancel();
 		}
 
-		if (!x || !y) return false; // I don't think this is a fatal error so just return false
+		if (x === undefined || y === undefined) return false; // I don't think this is a fatal error so just return false
 		if (typeof x !== "number" || typeof y !== "number") throw new Error("moveNear: Coords must be numbers");
 
 		let useTele = this.useTeleport() && settings.allowTeleport;
@@ -200,12 +196,14 @@ const Pather = {
 			node = path.shift();
 
 			if (node.distance > 2) {
-				if (annoyingArea) {
+				fail >= 3 && fail % 3 === 0 && !Attack.validSpot(node.x, node.y) && (invalidCheck = true);
+				if (annoyingArea || invalidCheck) {
 					let adjustedNode = this.getNearestWalkable(node.x, node.y, 15, 3, 0x1 | 0x4 | 0x800 | 0x1000);
 
 					if (adjustedNode) {
 						node.x = adjustedNode[0];
 						node.y = adjustedNode[1];
+						invalidCheck && (invalidCheck = false);
 					}
 					
 					settings.clearSettings.range = 5;
@@ -227,7 +225,7 @@ const Pather = {
 					}
 				} else {
 					if (!me.inTown) {
-						if ((!useTele && me.getMobCount(10) > 0 && Attack.clear(8)) || this.kickBarrels(node.x, node.y) || this.openDoors(node.x, node.y)) {
+						if (!useTele && ((me.getMobCount(10) > 0 && Attack.clear(8)) || this.kickBarrels(node.x, node.y) || this.openDoors(node.x, node.y))) {
 							continue;
 						}
 
@@ -286,7 +284,7 @@ const Pather = {
 		// Abort if dead
 		if (me.dead) return false;
 
-		if (!x || !y) throw new Error("moveTo: Function must be called with at least 2 arguments.");
+		if (x === undefined || y === undefined) throw new Error("moveTo: Function must be called with at least 2 arguments.");
 		if (typeof x !== "number" || typeof y !== "number") throw new Error("moveTo: Coords must be numbers");
 		if ([x, y].distance < 2) return true;
 
@@ -297,7 +295,6 @@ const Pather = {
 		let cleared = false,
 			leaped = false,
 			invalidCheck = false,
-			wasInTown = {lastLoc: false, skipCount: 0},
 			node = {x: x, y: y},
 			fail = 0;
 
@@ -352,35 +349,27 @@ const Pather = {
 					retry <= 3 && !useTeleport && (retry = 15);
 				}
 
-				if (useTeleport && tpMana <= me.mp ? this.teleportTo(node.x, node.y) : this.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
+				if (useTeleport && tpMana < me.mp ? this.teleportTo(node.x, node.y) : this.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
 					if (!me.inTown) {
-						if (!wasInTown.lastLoc || wasInTown.skipCount++ > 2) {
-							wasInTown.lastLoc = false;
-							wasInTown.skipCount = 0;
+						if (this.recursion) {
+							this.recursion = false;
 
-							if (this.recursion) {
-								this.recursion = false;
+							NodeAction.go(clearSettings);
 
-								NodeAction.go(clearSettings);
-
-								// TODO: check whether we are closer to the next node than we are the node we were orignally moving to
-								// and if so move to next node to prevent back tracking for no reason
-								if (getDistance(me, node.x, node.y) > 5) {
-									this.moveTo(node.x, node.y);
-								}
-
-								this.recursion = true;
+							// TODO: check whether we are closer to the next node than we are the node we were orignally moving to
+							// and if so move to next node to prevent back tracking for no reason
+							if (getDistance(me, node.x, node.y) > 5) {
+								this.moveTo(node.x, node.y);
 							}
 
-							Misc.townCheck();
+							this.recursion = true;
 						}
-					} else {
-						wasInTown.lastLoc = true;
-						wasInTown.skipCount = 0;
+
+						Misc.townCheck();
 					}
 				} else {
 					if (!me.inTown) {
-						if ((!useTeleport && me.getMobCount(10) > 0 && Attack.clear(8)) || this.kickBarrels(node.x, node.y) || this.openDoors(node.x, node.y)) {
+						if (!useTeleport && ((me.getMobCount(10) > 0 && Attack.clear(8)) || this.kickBarrels(node.x, node.y) || this.openDoors(node.x, node.y))) {
 							continue;
 						}
 
@@ -432,9 +421,7 @@ const Pather = {
 		y - the y coord to teleport to
 	*/
 	// does this need a validLocation check?
-	teleportTo: function (x, y, maxRange) {
-		maxRange === undefined && (maxRange = 5);
-
+	teleportTo: function (x, y, maxRange = 5) {
 		for (let i = 0; i < 3; i += 1) {
 			Config.PacketCasting > 0 ? Skill.setSkill(sdk.skills.Teleport, 0) && Packet.castSkill(0, x, y) : Skill.cast(sdk.skills.Teleport, 0, x, y);
 			let tick = getTickCount();
@@ -462,7 +449,7 @@ const Pather = {
 			delay(100);
 		}
 
-		if (!x || !y) return false;
+		if (x === undefined || y === undefined) return false;
 		minDist === undefined && (minDist = me.inTown ? 2 : 4);
 
 		let angle, angles, nTimer, whereToClick,
@@ -765,7 +752,7 @@ const Pather = {
 		use - enter target area or last area in the array
 		clearPath - kill monsters while moving
 	*/
-	moveToExit: function (targetArea, use, clearPath) {
+	moveToExit: function (targetArea, use = false, clearPath = false) {
 		if (targetArea === undefined) return false;
 
 		let tick = getTickCount();
@@ -775,23 +762,20 @@ const Pather = {
 
 		for (let i = 0; i < areas.length; i += 1) {
 			console.log("ÿc7(moveToExit) :: ÿc0Moving from: " + Pather.getAreaName(me.area) + " to " + Pather.getAreaName(areas[i]));
-			let currExit;
-			let checkExits = [];
-
-			while (!me.gameReady) {
-				delay(250 + me.ping);
-			}
 			
-			let area = getArea();
+			let area = Misc.poll(() => getArea());
 
 			if (!area) throw new Error("moveToExit: error in getArea()");
 
+			let currTarget = areas[i];
 			let exits = area.exits;
+			let checkExits = [];
 
 			if (!exits || !exits.length) return false;
 
 			for (let j = 0; j < exits.length; j += 1) {
-				currExit = {
+				if (!exits[j].hasOwnProperty("target") || exits[j].target !== currTarget) continue;
+				let currCheckExit = {
 					x: exits[j].x,
 					y: exits[j].y,
 					type: exits[j].type,
@@ -799,14 +783,27 @@ const Pather = {
 					tileid: exits[j].tileid
 				};
 
-				if (currExit.target === areas[i]) {
-					checkExits.push(currExit);
-				}
+				currCheckExit.target === currTarget && checkExits.push(currCheckExit);
 			}
 
 			if (checkExits.length > 0) {
 				// if there are multiple exits to the same location find the closest one
-				currExit = checkExits.length > 1 ? checkExits.sort((a, b) => getDistance(me.x, me.y, a.x, a.y) - getDistance(me.x, me.y, b.x, b.y)).first() : checkExits[0];
+				let currExit = checkExits.length > 1
+					? (() => {
+						let useExit = checkExits.shift(); // assign the first exit as a possible result
+						let dist = getDistance(me.x, me.y, useExit.x, useExit.y);
+						while (checkExits.length > 0) {
+							let exitDist = getDistance(me.x, me.y, checkExits[0].x, checkExits[0].y);
+							if (exitDist < dist) {
+								useExit = checkExits[0];
+								dist = exitDist;
+							}
+							checkExits.shift();
+						}
+						return useExit;
+						//checkExits.sort((a, b) => getDistance(me.x, me.y, a.x, a.y) - getDistance(me.x, me.y, b.x, b.y)).first()
+					})()
+					: checkExits[0];
 				let dest = this.getNearestWalkable(currExit.x, currExit.y, 5, 1);
 
 				if (!dest) return false;
@@ -816,8 +813,9 @@ const Pather = {
 						break;
 					}
 
-					delay(200 + me.ping);
-					Misc.poll(() => me.gameReady && !!me.area, 1000, 200);
+					delay(200);
+					console.log("ÿc7(moveToExit) :: ÿc0Retry: " + (retry + 1));
+					Misc.poll(() => me.gameReady, 1000, 200);
 				}
 
 				/* i < areas.length - 1 is for crossing multiple areas.
@@ -846,11 +844,13 @@ const Pather = {
 				}
 			} else {
 				// journey there?
+				console.warn("Something broke");
 			}
 		}
 
 		console.log("ÿc7End ÿc8(moveToExit) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(finalDest) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
-
+		delay(300);
+		
 		return (use && finalDest ? me.area === finalDest : true);
 	},
 
@@ -859,6 +859,7 @@ const Pather = {
 		area - the id of area to search for the room nearest to the player character
 	*/
 	getNearestRoom: function (area) {
+		let startTick = getTickCount();
 		let x, y, minDist = 10000;
 
 		let room = Misc.poll(() => getRoom(area), 1000, 200);
@@ -875,13 +876,16 @@ const Pather = {
 		} while (room.getNext());
 
 		room = getRoom(area, x, y);
+		!!Config.DebugMode && console.log(room);
 
 		if (room) {
 			CollMap.addRoom(room);
 
+			!!Config.DebugMode && console.log("ÿc7End ÿc8(getNearestOld) ÿc0 - ÿc7Duration: ÿc0" + (getTickCount() - startTick));
 			return this.getNearestWalkable(x, y, 20, 4);
 		}
 
+		!!Config.DebugMode && console.log("ÿc7End ÿc8(getNearestOld) ÿc0 - ÿc7Duration: ÿc0" + (getTickCount() - startTick));
 		return [x, y];
 	},
 
@@ -928,14 +932,14 @@ const Pather = {
 			delay(300);
 			sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
 
-			if (Misc.poll(() => me.gameReady && unit.mode !== 0, 2000, 60 + me.ping)) {
-				delay(100 + me.ping);
+			if (Misc.poll(() => unit.mode !== 0, 2000, 60)) {
+				delay(100);
 
 				return true;
 			}
 
 			let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 3);
-			this.moveTo(coord.x, coord.y);
+			!!coord && this.moveTo(coord.x, coord.y);
 		}
 
 		return false;
@@ -978,18 +982,15 @@ const Pather = {
 			}
 
 			delay(300);
-
 			type === 5 ? Misc.click(0, 0, unit) : usetk && unit.distance > 5 ? Skill.cast(sdk.skills.Telekinesis, 0, unit) : sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
-			
+			delay(300);
+
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 3000) {
 				if ((!targetArea && me.area !== preArea) || me.area === targetArea) {
-					delay(200 + me.ping);
-
-					while (!me.gameReady) {
-						delay(100);
-					}
+					delay(200);
+					//Packet.flash(me.gid);
 
 					return true;
 				}
@@ -999,7 +1000,7 @@ const Pather = {
 
 			i > 2 && Packet.flash(me.gid);
 			let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 3);
-			coord && this.moveTo(coord.x, coord.y);
+			!!coord && this.moveTo(coord.x, coord.y);
 		}
 
 		return targetArea ? me.area === targetArea : me.area !== preArea;
@@ -1237,9 +1238,7 @@ const Pather = {
 		unit - use existing portal unit
 	*/
 	usePortal: function (targetArea, owner, unit) {
-		if (targetArea && me.area === targetArea) {
-			return true;
-		}
+		if (targetArea && me.area === targetArea) return true;
 
 		me.cancelUIFlags();
 
@@ -1257,6 +1256,8 @@ const Pather = {
 			let portal = unit ? copyUnit(unit) : this.getPortal(targetArea, owner);
 
 			if (portal) {
+				let redPortal = portal.classid === 60;
+
 				if (portal.area === me.area) {
 					if (Skill.useTK(portal) && i < 3) {
 						portal.distance > 21 && Pather.moveNearUnit(portal, 20);
@@ -1266,6 +1267,7 @@ const Pather = {
 
 						if (getTickCount() - this.lastPortalTick > 2500) {
 							i < 2 ? sendPacket(1, 0x13, 4, 0x2, 4, portal.gid) : Misc.click(0, 0, portal);
+							!!redPortal && delay(150);
 						} else {
 							delay(300 + me.ping);
 							
@@ -1277,7 +1279,7 @@ const Pather = {
 				// Portal to/from Arcane
 				if (portal.classid === 298 && portal.mode !== 2) {
 					Misc.click(0, 0, portal);
-					tick = getTickCount();
+					let tick = getTickCount();
 
 					while (getTickCount() - tick < 2000) {
 						if (portal.mode === 2 || me.area === sdk.areas.ArcaneSanctuary) {
@@ -1311,7 +1313,7 @@ const Pather = {
 			delay(200 + me.ping);
 		}
 
-		return targetArea ? me.area === targetArea : me.area !== preArea;
+		return (targetArea ? me.area === targetArea : me.area !== preArea);
 	},
 
 	/*
@@ -1464,18 +1466,26 @@ const Pather = {
 
 				if (wp) {
 					for (let j = 0; j < 10; j++) {
-						if (wp.distance > 5 && Skill.useTK(wp) && j < 3) {
-							wp.distance > 21 && Attack.getIntoPosition(wp, 20, 0x4);
-							Skill.cast(sdk.skills.Telekinesis, 0, wp);
-						} else if (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint)) {
-							this.moveToUnit(wp) && Misc.click(0, 0, wp);
+						if (!getUIFlag(sdk.uiflags.Waypoint)) {
+							if (wp.distance > 5 && Skill.useTK(wp) && j < 3) {
+								wp.distance > 21 && Attack.getIntoPosition(wp, 20, 0x4);
+								Skill.cast(sdk.skills.Telekinesis, 0, wp);
+							} else if (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint)) {
+								this.moveToUnit(wp) && Misc.click(0, 0, wp);
+							}
 						}
 
-						if (Misc.poll(() => me.gameReady && getUIFlag(sdk.uiflags.Waypoint), 1000, (150 + me.ping))) {
-							delay(500 + me.ping);
+						if (Misc.poll(() => me.gameReady && getUIFlag(sdk.uiflags.Waypoint), 1000, 150)) {
+							delay(500);
 							me.cancelUIFlags();
 
 							return true;
+						}
+
+						// handle getUnit bug
+						if (!getUIFlag(sdk.uiflags.Waypoint) && wp.name.toLowerCase() === "dummy" && me.inTown) {
+							Town.getDistance("waypoint") > 5 && Town.move("waypoint");
+							Misc.click(0, 0, wp);
 						}
 
 						delay(500);
@@ -1532,9 +1542,8 @@ const Pather = {
 			}
 
 			let currArea = me.area;
-			let currAct = me.act;
 
-			console.log("ÿc7(journeyTo) :: ÿc0Moving from: " + Pather.getAreaName(me.area) + " to " + Pather.getAreaName(target.course[0]));
+			console.log("ÿc7(journeyTo) :: ÿc0Moving from: " + Pather.getAreaName(currArea) + " to " + Pather.getAreaName(target.course[0]));
 
 			if (!me.inTown) {
 				Precast.doPrecast(false);
@@ -1637,12 +1646,8 @@ const Pather = {
 				this.moveToExit(target.course[0], true);
 			}
 
-			if (currAct !== me.act) {
-				// give time for act to load, increases stabilty of changing acts
-				while (!me.gameReady) {
-					delay(100 + me.ping);
-				}
-			}
+			// give time for act to load, increases stabilty of changing acts
+			delay(500);
 
 			if (me.area === target.course[0]) {
 				target.course.shift();

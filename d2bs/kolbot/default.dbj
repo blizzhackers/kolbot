@@ -47,13 +47,11 @@ function main () {
 		}
 	}
 	
-	// MuleLogger handler / ShopDrop
-	if (MuleLogger.inGameCheck() || getScript("D2BotShopDrop.dbj")) {
-		return true;
-	}
+	// MuleLogger handler
+	if (MuleLogger.inGameCheck()) return true;
 	
 	// don't load default for dropper/mules
-	if (getScript("D2BotDropper.dbj") || getScript("D2BotMule.dbj") || getScript("D2BotDrop.dbj")) {
+	if (getScript("D2BotDropper.dbj") || getScript("D2BotMule.dbj")) {
 		load("tools/AreaWatcher.js");
 		
 		while (true) {
@@ -66,13 +64,9 @@ function main () {
 		startTime = getTickCount();
 
 	this.scriptEvent = function (msg) {
-		if (msg && typeof msg !== "string") return;
-		switch (msg) {
-		case "soj":
+		if (typeof msg === "string" && msg === "soj") {
 			sojPause = true;
 			sojCounter = 0;
-
-			break;
 		}
 	};
 
@@ -160,6 +154,18 @@ function main () {
 		[orgx, orgy].distance > 3 && Pather.moveTo(orgx, orgx);
 		Pickit.pickItems();
 		Pather.init(); // initialize wp data
+
+		if (Config.DebugMode) {
+			// log our current running threads, useful for traceing stack-walk
+			delay(2000);
+			let script = getScript();
+
+			if (script) {
+				do {
+					console.log(script);
+				} while (script.getNext());
+			}
+		}
 	}
 
 	me.automap = Config.AutoMap;

@@ -17,7 +17,7 @@ function Eldritch() {
 		}
 	}
 
-	if (Config.Eldritch.KillShenk && Pather.moveToExit(sdk.areas.BloodyFoothills, true) && Pather.moveTo(3876, 5130)) {
+	if (Config.Eldritch.KillShenk && Pather.moveToExit(sdk.areas.BloodyFoothills, false) && Pather.moveTo(3876, 5130)) {
 		Attack.kill(getLocaleString(sdk.locale.monsters.ShenktheOverseer));
 	}
 

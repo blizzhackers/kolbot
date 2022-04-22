@@ -9,7 +9,7 @@ const AutoMule = {
 			expansion: true,
 			ladder: true,
 			hardcore: false,
-			charsPerAcc: 8, // Maximum number of mules to create per account (between 1 to 18)
+			charsPerAcc: 18, // Maximum number of mules to create per account (between 1 to 18)
 
 			// Game name and password of the mule game. Never use the same game name as for mule logger.
 			muleGameName: ["", ""], // ["gamename", "password"]
@@ -428,7 +428,6 @@ const AutoMule = {
 			muleObj.stopProfile && D2Bot.start(muleObj.stopProfile);
 		}
 
-		getScript("AnniStarter.dbj") && scriptBroadcast("exit");
 		delay(2000);
 		quit();
 

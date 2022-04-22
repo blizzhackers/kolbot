@@ -6,36 +6,16 @@
 
 function WPGetter() {
 	Town.doChores();
-	Town.goToTown(1);
+	Town.goToTown();
 	Pather.getWP(me.area);
 
-	let wpsToGet = [];
-
-	switch (me.highestAct) {
-	case 5:
-		wpsToGet = Pather.wpAreas.filter((wp) => !sdk.areas.Towns.includes(wp) && wp !== 123);
-
-		break;
-	case 4:
-		wpsToGet = Pather.wpAreas.filter((wp) => wp < 109 && !sdk.areas.Towns.includes(wp));
-
-		break;
-	case 3:
-		wpsToGet = Pather.wpAreas.filter((wp) => wp < 103 && !sdk.areas.Towns.includes(wp));
-
-		break;
-	case 2:
-		wpsToGet = Pather.wpAreas.filter((wp) => wp < 75 && !sdk.areas.Towns.includes(wp));
-
-		break;
-	case 1:
-		wpsToGet = Pather.wpAreas.filter((wp) => wp < 40 && !sdk.areas.Towns.includes(wp));
-
-		break;
-	}
+	let lastWP = [40, 75, 103, 109, 129][me.highestAct - 1];
+	let wpsToGet = Pather.nonTownWpAreas.filter((wp) => wp < lastWP && wp !== 123 && !getWaypoint(Pather.wpAreas.indexOf(wp)));
 
 	for (let i = 0; i < wpsToGet.length; i += 1) {
 		!getWaypoint(Pather.wpAreas.indexOf(wpsToGet[i])) && Pather.getWP(wpsToGet[i]);
+		delay(500);
+		Town.checkScrolls(sdk.items.TomeofTownPortal) < 10 && Town.doChores();
 	}
 
 	return true;

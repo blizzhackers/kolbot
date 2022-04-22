@@ -48,7 +48,7 @@ function main() {
 	addEventListener("scriptmsg",
 		function (msg) {
 			if (typeof msg !== "string") return;
-			if (msg === "townCheck" && Town.canTpToTown()) {
+			if (msg === "townCheck") {
 				townCheck = true;
 			}
 		});
@@ -69,7 +69,14 @@ function main() {
 
 	while (true) {
 		if (!me.inTown && (townCheck
-			|| ((checkHP && me.hpPercent < Config.TownHP) || (checkMP && me.mpPercent < Config.TownMP)) && Town.canTpToTown())) {
+			// should TownHP/MP check be in toolsthread?
+			// We would then be able to remove all game interaction checks until we get a townCheck msg
+			|| ((checkHP && me.hpPercent < Config.TownHP) || (checkMP && me.mpPercent < Config.TownMP)))) {
+			if (!Town.canTpToTown()) {
+				townCheck = false;
+
+				continue;
+			}
 			this.togglePause();
 
 			while (!me.gameReady) {

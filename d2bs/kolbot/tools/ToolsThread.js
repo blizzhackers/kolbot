@@ -99,10 +99,9 @@ function main() {
 	};
 
 	this.getPotion = function (pottype, type) {
-		if (!me.gameReady || !pottype) return false;
+		if (!pottype) return false;
 
 		let items = me.getItemsEx().filter((item) => item.itemType === pottype);
-
 		if (items.length === 0) return false;
 
 		// Get highest id = highest potion first
@@ -117,7 +116,7 @@ function main() {
 			}
 
 			if (items[i].mode === 2 && items[i].itemType === pottype) {
-				console.log("ÿc2Drinking potion from belt.");
+				console.log("ÿc2" + (type > 2 ? "Giving Merc" : "Drinking") + " potion from belt.");
 				return copyUnit(items[i]);
 			}
 		}
@@ -174,7 +173,7 @@ function main() {
 	};
 
 	this.drinkPotion = function (type) {
-		if (!me.gameReady || type === undefined) return false;
+		if (type === undefined) return false;
 		let pottype, tNow = getTickCount();
 
 		switch (type) {
@@ -235,7 +234,7 @@ function main() {
 				if (type < 3) {
 					potion.interact();
 				} else {
-					clickItem(2, potion);
+					sendPacket(1, 0x26, 4, potion.gid, 4, 1, 4, 0);
 				}
 			} catch (e) {
 				console.warn(e);
@@ -528,7 +527,7 @@ function main() {
 	};
 
 	this.scriptEvent = function (msg) {
-		if (msg && typeof msg === "string") {
+		if (!!msg && typeof msg === "string") {
 			switch (msg) {
 			case "toggleQuitlist":
 				canQuit = !canQuit;
@@ -538,28 +537,38 @@ function main() {
 				quitFlag = true;
 
 				break;
-			default:
+			// ignore common scriptBroadcast messages that aren't relevent to this thread
+			case "mule":
+			case "muleTorch":
+			case "muleAnni":
+			case "torch":
+			case "crafting":
+			case "getMuleMode":
+			case "pingquit":
+			case "townCheck":
 				break;
-			}
-		} else if (msg && typeof msg === "object") {
-			let obj;
+			default:
+				let obj;
 
-			try {
-				obj = JSON.parse(msg);
-			} catch (e) {
-				return;
-			}
-
-			if (obj) {
-				if (obj.hasOwnProperty("currScript")) {
-					debugInfo.currScript = obj.currScript;
+				try {
+					obj = JSON.parse(msg);
+				} catch (e) {
+					return;
 				}
 
-				if (obj.hasOwnProperty("lastAction")) {
-					debugInfo.lastAction = obj.lastAction;
+				if (obj) {
+					if (obj.hasOwnProperty("currScript")) {
+						debugInfo.currScript = obj.currScript;
+					}
+
+					if (obj.hasOwnProperty("lastAction")) {
+						debugInfo.lastAction = obj.lastAction;
+					}
+
+					DataFile.updateStats("debugInfo", JSON.stringify(debugInfo));
 				}
 
-				DataFile.updateStats("debugInfo", JSON.stringify(debugInfo));
+				break;
 			}
 		}
 	};
@@ -588,10 +597,13 @@ function main() {
 				Config.UseRejuvHP > 0 && me.hpPercent < Config.UseRejuvHP && this.drinkPotion(2);
 
 				if (Config.LifeChicken > 0 && me.hpPercent <= Config.LifeChicken) {
-					D2Bot.printToConsole("Life Chicken (" + me.hp + "/" + me.hpmax + ")" + this.getNearestMonster() + " in " + Pather.getAreaName(me.area) + ". Ping: " + me.ping, 9);
-					this.exit(true);
+					// takes a moment sometimes for townchicken to actually get to town so re-check that we aren't in town before quitting
+					if (!me.inTown) {
+						D2Bot.printToConsole("Life Chicken (" + me.hp + "/" + me.hpmax + ")" + this.getNearestMonster() + " in " + Pather.getAreaName(me.area) + ". Ping: " + me.ping, 9);
+						this.exit(true);
 
-					break;
+						break;
+					}
 				}
 
 				Config.UseMP > 0 && me.mpPercent < Config.UseMP && this.drinkPotion(1);
@@ -667,7 +679,7 @@ function main() {
 		}
 
 		if (quitFlag && canQuit && (typeof quitListDelayTime === "undefined" || getTickCount() >= quitListDelayTime)) {
-			print("ÿc8Run duration ÿc2" + ((getTickCount() - me.gamestarttime) / 1000));
+			print("ÿc8Run duration ÿc2" + (new Date(getTickCount() - me.gamestarttime).toISOString().slice(11, -5)));
 			this.checkPing(false); // In case of quitlist triggering first
 			this.exit();
 

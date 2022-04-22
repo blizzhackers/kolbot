@@ -60,16 +60,14 @@ const Town = {
 
 	// Do town chores
 	doChores: function (repair = false) {
-		while (!me.gameReady) {
-			delay(250 + me.ping);
-		}
+		delay(250);
 
 		console.log("ÿc8Start ÿc0:: ÿc8TownChores");
 		let tick = getTickCount();
 
 		!me.inTown && this.goToTown();
 
-		if (!Misc.poll(() => me.gameReady && me.inTown, 2000, 150 + me.ping)) {
+		if (!Misc.poll(() => me.gameReady && me.inTown, 2000, 250)) {
 			throw new Error("Failed to go to town for chores");
 		}
 
@@ -217,7 +215,7 @@ const Town = {
 
 				break;
 			case "Heal":
-				me.getState(sdk.states.Frozen) && Town.buyPots(2, "Thawing", true, true);
+				me.getState(sdk.states.Frozen) && this.buyPots(2, "Thawing", true, true);
 
 				break;
 			}
@@ -959,42 +957,47 @@ const Town = {
 		return false;
 	},
 
+	// should type be classid instead?
 	buyPots: function (quantity = 0, type = "", drink = false, force = false) {
 		if (!quantity || !type) return false;
-		type = type[0].toUpperCase() + type.substring(1).toLowerCase();
-		let npc, jugs, potDealer = ["Akara", "Lysander", "Alkor", "Jamella", "Malah"][me.act - 1];
+		type = type[0].capitalize(true);
+		let jugs, potDealer = ["Akara", "Lysander", "Alkor", "Jamella", "Malah"][me.act - 1];
 
 		// Don't buy if already at max res
-		if (type === "Thawing" && me.coldRes >= 75 && !force) {
+		if (!force && type === "Thawing" && me.coldRes >= 75) {
 			return true;
 		} else if (type === "Thawing") {
 			console.log("ÿc9BuyPotsÿc0 :: Current cold resistance: " + me.coldRes);
 		}
 
 		// Don't buy if already at max res
-		if (type === "Antidote" && me.poisonRes >= 75 && !force) {
+		if (!force && type === "Antidote" && me.poisonRes >= 75) {
 			return true;
 		} else if (type === "Antidote") {
 			console.log("ÿc9BuyPotsÿc0 :: Current poison resistance: " + me.poisonRes);
 		}
 
 		// Don't buy if teleport or vigor
-		if (type === "Stamina" && (Config.Vigor && me.getSkill(sdk.skills.Vigor, 0) || Pather.canTeleport()) && !force) return true;
+		if (!force && type === "Stamina" && (Config.Vigor && me.getSkill(sdk.skills.Vigor, 0) || Pather.canTeleport())) return true;
 
-		npc = getInteractedNPC();
+		let npc = getInteractedNPC();
 
-		if (npc && npc.name.toLowerCase() === NPC[potDealer] && getUIFlag(sdk.uiflags.NPCMenu)) {
-			!getUIFlag(sdk.uiflags.Shop) && Misc.useMenu(sdk.menu.Trade);
-		} else {
-			me.cancel();
-			npc = null;
+		try {
+			if (!!npc && npc.name.toLowerCase() === NPC[potDealer] && !getUIFlag(sdk.uiflags.Shop)) {
+				if (!npc.startTrade("Shop")) throw new Error("Failed to open " + npc.name + " trade menu");
+			} else {
+				me.cancelUIFlags();
+				npc = null;
 
-			Town.move(NPC[potDealer]);
-			npc = getUnit(sdk.unittype.NPC, NPC[potDealer]);
+				Town.move(NPC[potDealer]);
+				npc = getUnit(sdk.unittype.NPC, NPC[potDealer]);
 
-			if (!npc || !npc.openMenu()) return false;
+				if (!npc || !npc.openMenu() || !npc.startTrade("Shop")) throw new Error("Failed to open " + npc.name + " trade menu");
+			}
+		} catch (e) {
+			console.warn(e);
 
-			Misc.useMenu(sdk.menu.Trade);
+			return false;
 		}
 
 		switch (type) {
@@ -1026,9 +1029,9 @@ const Town = {
 		return true;
 	},
 
-	drinkPots: function (type) {
+	drinkPots: function (type = "") {
 		let classIds = [sdk.items.StaminaPotion, sdk.items.AntidotePotion, sdk.items.ThawingPotion];
-		!!type && (classIds = classIds.filter(function (el) { return el === sdk.items[type + "Potion"]; }));
+		!!type && (classIds = classIds.filter((el) => el === sdk.items[type + "Potion"]));
 
 		for (let i = 0; i < classIds.length; i++) {
 			let name;
@@ -1686,10 +1689,6 @@ const Town = {
 	},
 
 	clearBelt: function () {
-		while (!me.gameReady) {
-			delay(100);
-		}
-
 		let item = me.getItem(-1, 2),
 			clearList = [];
 
@@ -2155,9 +2154,13 @@ const Town = {
 				} catch (e) {
 					let tpTool = this.getTpTool();
 					if (!tpTool && Misc.getPlayerCount() <= 1) {
-						scriptBroadcast("quit");
 						Misc.errorReport(new Error("Town.goToTown: Failed to go to town and no tps available. Restart."));
 						scriptBroadcast("quit");
+					} else {
+						let p = getUnit(2, "portal");
+						console.debug(p);
+						!!p && Misc.click(0, 0, p) && delay(100);
+						console.log("inTown? " + me.inTown);
 					}
 				}
 			}

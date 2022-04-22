@@ -922,6 +922,7 @@ const Attack = {
 		return true;
 	},
 
+	// need to fill this out, which skills require a floor?
 	validCastingLocation: function (x, y, skillId = -1) {
 		// Just in case
 		if (!me.area || !x || !y) return false;

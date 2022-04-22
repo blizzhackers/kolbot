@@ -42,10 +42,9 @@ const Skill = {
 
 			break;
 		case sdk.charclass.Barbarian:
-			!Precast.precastables.Shout && (Precast.precastables.Shout = !!me.getSkill(sdk.skills.Shout, 0));
-			!Precast.precastables.BattleOrders && (Precast.precastables.BattleOrders = !!me.getSkill(sdk.skills.BattleOrders, 0));
-			!Precast.precastables.BattleCommand && (Precast.precastables.BattleCommand = !!me.getSkill(sdk.skills.BattleCommand, 0));
-			// todo: durations of each
+			!Precast.precastables.Shout.have && (Precast.precastables.Shout.have = !!me.getSkill(sdk.skills.Shout, 0)) && (Precast.precastables.Shout.duration = this.getDuration(sdk.skills.Shout));
+			!Precast.precastables.BattleOrders && (Precast.precastables.BattleOrders = !!me.getSkill(sdk.skills.BattleOrders, 0)) && (Precast.precastables.Shout.BattleOrders = this.getDuration(sdk.skills.BattleOrders));
+			!Precast.precastables.BattleCommand && (Precast.precastables.BattleCommand = !!me.getSkill(sdk.skills.BattleCommand, 0)) && (Precast.precastables.Shout.BattleCommand = this.getDuration(sdk.skills.BattleCommand));
 			break;
 		case sdk.charclass.Druid:
 			if (!Config.Wereform) {
@@ -72,6 +71,44 @@ const Skill = {
 				// todo: change Config.SummonShadow to use skillid instead of 0, 1, 2, and 3
 			}
 			break;
+		}
+	},
+
+	getDuration: function (skillId = -1) {
+		switch (skillId) {
+		case sdk.skills.FrozenArmor:
+			return (((12 * me.getSkill(sdk.skills.FrozenArmor, 1) + 108) + ((me.getSkill(sdk.skills.ShiverArmor, 0) + me.getSkill(sdk.skills.ChillingArmor, 0)) * 10)) * 1000);
+		case sdk.skills.ShiverArmor:
+			return (((12 * me.getSkill(sdk.skills.ShiverArmor, 1) + 108) + ((me.getSkill(sdk.skills.FrozenArmor, 0) + me.getSkill(sdk.skills.ChillingArmor, 0)) * 10)) * 1000);
+		case sdk.skills.ChillingArmor:
+			return (((6 * me.getSkill(sdk.skills.ChillingArmor, 1) + 138) + ((me.getSkill(sdk.skills.FrozenArmor, 0) + me.getSkill(sdk.skills.ChillingArmor, 0)) * 10)) * 1000);
+		case sdk.skills.EnergyShield:
+			return (84 + (60 * me.getSkill(sdk.skills.EnergyShield, 1)) * 1000);
+		case sdk.skills.ThunderStorm:
+			return (24 + (8 * me.getSkill(sdk.skills.ThunderStorm, 1))) * 1000;
+		case sdk.skills.Shout:
+			return (((10 + me.getSkill(sdk.skills.Shout, 1) * 10) + ((me.getSkill(sdk.skills.BattleOrders, 0) + me.getSkill(sdk.skills.BattleCommand, 0)) * 5)) * 1000);
+		case sdk.skills.BattleOrders:
+			return (((20 + me.getSkill(sdk.skills.BattleOrders, 1) * 10) + ((me.getSkill(sdk.skills.Shout, 0) + me.getSkill(sdk.skills.BattleCommand, 0)) * 5)) * 1000);
+		case sdk.skills.BattleCommand:
+			return (((10 * me.getSkill(sdk.skills.BattleCommand, 1) - 5) + ((me.getSkill(sdk.skills.Shout, 0) + me.getSkill(sdk.skills.BattleOrders, 0)) * 5)) * 1000);
+		case sdk.skills.HolyShield:
+			return (5 + (25 * me.getSkill(sdk.skills.HolyShield, 1)) * 1000);
+		case sdk.skills.Hurricane:
+			return (10 + (2 * me.getSkill(sdk.skills.CycloneArmor, 0)) * 1000);
+		case sdk.skills.Werewolf:
+		case sdk.skills.Werebear:
+			return (40 + (20 * me.getSkill(sdk.skills.Lycanthropy, 1) + 20) * 1000);
+		case sdk.skills.BurstofSpeed:
+			return (108 + (12 * me.getSkill(sdk.skills.BurstofSpeed, 1)) * 1000);
+		case sdk.skills.Fade:
+			return (108 + (12 * me.getSkill(sdk.skills.Fade, 1)) * 1000);
+		case sdk.skills.Venom:
+			return (116 + (4 * me.getSkill(sdk.skills.Venom, 1)) * 1000);
+		case sdk.skills.BladeShield:
+			return (15 + (5 * me.getSkill(sdk.skills.BladeShield, 1)) * 1000);
+		default:
+			return 0;
 		}
 	},
 
@@ -421,7 +458,6 @@ const Skill = {
 	setSkill: function (skillId, hand, item) {
 		// Check if the skill is already set
 		if (me.getSkill(hand === 0 ? 2 : 3) === skillId) return true;
-
 		if (!item && !me.getSkill(skillId, 1)) return false;
 
 		// Charged skills must be cast from right hand
@@ -1687,14 +1723,11 @@ const Misc = {
 	townCheck: function () {
 		// Can't tp from uber trist or when dead
 		if (me.area === 136 || me.dead) return false;
+		let tTick = getTickCount();
 		
 		let potion, check,
 			needhp = true,
 			needmp = true;
-
-		// check that townchicken is running - so we don't spam needing potions if it isn't
-		let townChick = getScript("tools/TownChicken.js");
-		if (!townChick || townChick && !townChick.running) return false;
 
 		if (Config.TownCheck && !me.inTown) {
 			try {
@@ -1751,8 +1784,15 @@ const Misc = {
 		}
 
 		if (check) {
+			// check that townchicken is running - so we don't spam needing potions if it isn't
+			let townChick = getScript("tools/TownChicken.js");
+			if (!townChick || townChick && !townChick.running) {
+				return false;
+			}
+
 			townChick.send("townCheck");
-			delay(500);
+			console.log("townCheck check Duration: " + (getTickCount() - tTick));
+			delay(100);
 
 			return true;
 		}
@@ -1996,9 +2036,7 @@ const Misc = {
 
 	// returns array of UI flags that are set, or null if none are set
 	getUIFlags: function (excluded = []) {
-		if (!me.gameReady) {
-			return null;
-		}
+		if (!me.gameReady) return null;
 
 		const MAX_FLAG = 37; // anything over 37 crashes
 		let flags = [];
@@ -2329,6 +2367,30 @@ const Packet = {
 				}
 
 				delay(10);
+			}
+		}
+
+		return false;
+	},
+
+	givePotToMerc: function (item) {
+		if (!!item
+			&& [sdk.itemtype.HealingPotion, sdk.itemtype.RejuvPotion, sdk.itemtype.ThawingPotion, sdk.itemtype.AntidotePotion].includes(item.itemType)) {
+			switch (item.location) {
+			case sdk.storage.Belt:
+				sendPacket(1, 0x26, 4, item.gid, 4, 1, 4, 0);
+
+				return true;
+			case sdk.storage.Inventory:
+				if (this.itemToCursor(item)) {
+					sendPacket(1, 0x61, 2, 0);
+
+					return true;
+				}
+
+				break;
+			default:
+				break;
 			}
 		}
 

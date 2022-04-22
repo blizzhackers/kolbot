@@ -13,8 +13,9 @@ const ClassAttack = {
 			print("mercwatch");
 
 			if (Town.visitTown()) {
+				// lost reference to the mob we were attacking
 				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
-					return 1; // lost reference to the mob we were attacking
+					return 1;
 				}
 			}
 		}
@@ -207,6 +208,21 @@ const ClassAttack = {
 
 					return 1;
 				}
+			}
+
+			break;
+		case sdk.skills.Zeal:
+		case sdk.skills.Vengeance:
+			if (!Attack.validSpot(unit.x, unit.y)) return 0;
+			
+			// 3591 - wall/line of sight/ranged/items/objects/closeddoor 
+			if (unit.distance > 3 || checkCollision(me, unit, 0x5)) {
+				if (!Attack.getIntoPosition(unit, 3, 0x5, true)) return 0;
+			}
+
+			if (unit.attackable) {
+				aura > -1 && Skill.setSkill(aura, 0);
+				return (Skill.cast(attackSkill, 2, unit) ? 1 : 0);
 			}
 
 			break;
