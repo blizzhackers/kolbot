@@ -960,7 +960,7 @@ const Town = {
 	// should type be classid instead?
 	buyPots: function (quantity = 0, type = "", drink = false, force = false) {
 		if (!quantity || !type) return false;
-		type = type[0].capitalize(true);
+		type = type.capitalize(true);
 		let jugs, potDealer = ["Akara", "Lysander", "Alkor", "Jamella", "Malah"][me.act - 1];
 
 		// Don't buy if already at max res
