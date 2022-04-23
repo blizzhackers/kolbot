@@ -7,6 +7,10 @@
 const Attack = {
 	infinity: false,
 	auradin: false,
+	monsterObjects: [
+		sdk.monsters.BarricadeDoor1, sdk.monsters.BarricadeDoor2, sdk.monsters.BarricadeWall1, sdk.monsters.BarricadeWall2,
+		sdk.monsters.BarricadeTower, sdk.monsters.PrisonDoor
+	],
 
 	// Initialize attacks
 	init: function () {
@@ -25,34 +29,13 @@ const Attack = {
 		}
 
 		this.getPrimarySlot();
+		Skill.init();
 
 		if (me.expansion) {
 			Precast.checkCTA();
 			this.checkInfinity();
 			this.checkAuradin();
 		}
-	},
-
-	weaponSwitch: function (slot) {
-		if (me.classic || me.weaponswitch === slot) return true;
-		slot === undefined && (slot = me.weaponswitch ^ 1);
-
-		for (let i = 0; i < 5; i += 1) {
-			delay(100 + me.ping);
-			weaponSwitch();
-
-			let tick = getTickCount();
-
-			while (getTickCount() - tick < 2000 + me.ping) {
-				if (me.weaponswitch === slot) {
-					return true;
-				}
-
-				delay(10);
-			}
-		}
-
-		return false;
 	},
 
 	// check if slot has items
@@ -83,7 +66,7 @@ const Attack = {
 				Config.PrimarySlot = 0;
 			} else {
 				// Always start on main-hand
-				me.weaponswitch !== 0 && this.weaponSwitch(0);
+				me.weaponswitch !== 0 && me.switchWeapons(0);
 				// have cta
 				if ((Precast.haveCTA > -1) || Precast.checkCTA()) {
 					// have item on non-cta slot
@@ -108,9 +91,7 @@ const Attack = {
 
 	getCustomAttack: function (unit) {
 		// Check if unit got invalidated
-		if (!unit || !unit.name || !copyUnit(unit).x) {
-			return false;
-		}
+		if (!unit || !unit.name || !copyUnit(unit).x) return false;
 
 		for (let i in Config.CustomAttack) {
 			if (Config.CustomAttack.hasOwnProperty(i) && unit.name.toLowerCase() === i.toLowerCase()) {
@@ -167,7 +148,7 @@ const Attack = {
 
 	// Check if player or his merc are using Infinity, and adjust resistance checks based on that
 	checkInfinity: function () {
-		let merc = Misc.poll(function () { return me.getMerc(); }, 2000, (250 + me.ping));
+		let merc = Misc.poll(() => me.getMerc(), 2000, (250 + me.ping));
 
 		// Check merc infinity
 		!!merc && (this.infinity = merc.checkItem({name: sdk.locale.items.Infinity}).have);
@@ -192,7 +173,7 @@ const Attack = {
 	// Kill a monster based on its classId, can pass a unit as well
 	kill: function (classId) {
 		if (!classId || Config.AttackSkill[1] < 0) return false;
-		let target = (typeof classId === "object" ? classid : Misc.poll(function () { return getUnit(1, classId); }, 2000, 100));
+		let target = (typeof classId === "object" ? classid : Misc.poll(() => getUnit(1, classId), 2000, 100));
 
 		if (!target) {
 			console.warn("Attack.kill: Target not found");
@@ -219,6 +200,8 @@ const Attack = {
 		};
 
 		let lastLoc = {x: me.x, y: me.y};
+		let tick = getTickCount();
+		console.log("ÿc7Kill ÿc0:: " + (!!target.name ? target.name : classId));
 		Config.MFLeader && Pather.makePortal() && say("kill " + classId);
 
 		while (attackCount < Config.MaxAttackCount && target.attackable && this.skipCheck(target)) {
@@ -235,7 +218,7 @@ const Attack = {
 			}
 
 			Config.Dodge && me.hpPercent <= Config.DodgeHP && this.deploy(target, Config.DodgeRange, 5, 9);
-			Config.MFSwitchPercent && target.hpPercent < Config.MFSwitchPercent && this.weaponSwitch(this.getPrimarySlot() ^ 1);
+			Config.MFSwitchPercent && target.hpPercent < Config.MFSwitchPercent && me.switchWeapons(this.getPrimarySlot() ^ 1);
 
 			if (attackCount > 0 && attackCount % 15 === 0 && Skill.getRange(Config.AttackSkill[1]) < 4) {
 				Packet.flash(me.gid);
@@ -266,13 +249,14 @@ const Attack = {
 		}
 
 		attackCount === Config.MaxAttackCount && (errorInfo = " (attackCount exceeded: " + attackCount + ")");
-		Config.MFSwitchPercent && this.weaponSwitch(this.getPrimarySlot());
+		Config.MFSwitchPercent && me.switchWeapons(this.getPrimarySlot());
 		ClassAttack.afterAttack();
 		Pickit.pickItems();
 
-		if (target && target.attackable) {
+		if (!!target && target.attackable) {
 			console.warn("Failed to kill " + target.name + errorInfo);
-			return false;
+		} else {
+			console.log("ÿc7Killed ÿc0:: " + (!!target.name ? target.name : classId) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
 		}
 
 		return (!target || !copyUnit(target).x || target.dead || !target.attackable);
@@ -280,7 +264,7 @@ const Attack = {
 
 	hurt: function (classId, percent) {
 		if (!classId || !percent) return false;
-		let target = (typeof classId === "object" ? classid : Misc.poll(function () { return getUnit(1, classId); }, 2000, 100));
+		let target = (typeof classId === "object" ? classid : Misc.poll(() => getUnit(1, classId), 2000, 100));
 
 		if (!target) {
 			console.warn("Attack.hurt: Target not found");
@@ -357,7 +341,7 @@ const Attack = {
 		pickit === undefined && (pickit = true);
 		!sortfunc && (sortfunc = this.sortMonsters);
 
-		if (typeof (range) !== "number") { throw new Error("Attack.clear: range must be a number."); }
+		if (typeof (range) !== "number") throw new Error("Attack.clear: range must be a number.");
 
 		let i, boss, orgx, orgy, start, skillCheck,
 			retry = 0,
@@ -388,7 +372,7 @@ const Attack = {
 				if ((!spectype || (target.spectype & spectype)) && target.attackable && this.skipCheck(target)) {
 					// Speed optimization - don't go through monster list until there's at least one within clear range
 					if (!start && getDistance(target, orgx, orgy) <= range &&
-							(Pather.canTeleport() || !Scripts.Follower || !checkCollision(me, target, 0x1))) {
+							(Pather.canTeleport() || !checkCollision(me, target, 0x5))) {
 						start = true;
 					}
 
@@ -404,7 +388,7 @@ const Attack = {
 			monsterList.sort(sortfunc);
 			target = copyUnit(monsterList[0]);
 
-			if (target.x !== undefined && (getDistance(target, orgx, orgy) <= range || (this.getScarinessLevel(target) > 7 && getDistance(me, target) <= range)) && target.attackable) {
+			if (target.x !== undefined && (getDistance(target, orgx, orgy) <= range || (this.getScarinessLevel(target) > 7 && target.distance <= range)) && target.attackable) {
 				Config.Dodge && me.hpPercent <= Config.DodgeHP && this.deploy(target, Config.DodgeRange, 5, 9);
 				Misc.townCheck(true);
 				//me.overhead("attacking " + target.name + " spectype " + target.spectype + " id " + target.classid);
@@ -418,9 +402,7 @@ const Attack = {
 						monsterList.shift();
 
 						continue;
-					}
-
-					if (result === 3) {
+					} else if (result === 3) {
 						continue;
 					}
 
@@ -486,9 +468,13 @@ const Attack = {
 			}
 		}
 
-		ClassAttack.afterAttack(pickit);
-		this.openChests(range, orgx, orgy);
-		attackCount > 0 && pickit && Pickit.pickItems();
+		if (attackCount > 0) {
+			ClassAttack.afterAttack(pickit);
+			this.openChests(range, orgx, orgy);
+			pickit && Pickit.pickItems();
+		} else {
+			Precast.doPrecast(false); // we didn't attack anything but check if we need to precast. TODO: better method of keeping track of precast skills
+		}
 
 		return true;
 	},
@@ -539,7 +525,7 @@ const Attack = {
 
 			if (monster) {
 				do {
-					if (classid.indexOf(monster.classid) > -1 && getDistance(center.x, center.y, monster.x, monster.y) <= range
+					if (classid.includes(monster.classid) && getDistance(center.x, center.y, monster.x, monster.y) <= range
 						&& (!spectype || (monster.spectype & spectype)) && monster.attackable) {
 						monsterList.push(copyUnit(monster));
 					}
@@ -547,10 +533,6 @@ const Attack = {
 			}
 
 			break;
-		}
-
-		if (!monsterList.length) {
-			return false;
 		}
 
 		return monsterList;
@@ -604,9 +586,7 @@ const Attack = {
 						monsterList.shift();
 
 						continue;
-					}
-
-					if (result === 3) {
+					} else if (result === 3) {
 						continue;
 					}
 
@@ -665,9 +645,13 @@ const Attack = {
 			}
 		}
 
-		ClassAttack.afterAttack(true);
-		this.openChests(30);
-		attackCount > 0 && Pickit.pickItems();
+		if (attackCount > 0) {
+			ClassAttack.afterAttack(true);
+			this.openChests(Config.OpenChests.Range);
+			Pickit.pickItems();
+		} else {
+			Precast.doPrecast(false); // we didn't attack anything but check if we need to precast. TODO: better method of keeping track of precast skills
+		}
 
 		return true;
 	},
@@ -681,7 +665,7 @@ const Attack = {
 		skipBlocked === true && (skipBlocked = 0x4);
 
 		while (true) {
-			getDistance(me, x, y) > 5 && Pather.moveTo(x, y);
+			[x, y].distance > 5 && Pather.moveTo(x, y);
 
 			let monster = getUnit(1);
 			let monList = [];
@@ -783,9 +767,13 @@ const Attack = {
 		let room = getRoom();
 		if (!room) return false;
 
+		let tick = getTickCount();
+		console.log("ÿc7Start ÿc8(clearLevel) ÿc0:: " + Pather.getAreaName(me.area));
+
 		let myRoom, previousArea;
 		let rooms = [];
 		let currentArea = getArea().id;
+		let breakClearLevelCheck = !!(Loader.scriptName() === "MFHelper" && Config.MFHelper.BreakClearLevel && Config.Leader !== "");
 
 		do {
 			rooms.push([room.x * 5 + room.xsize / 2, room.y * 5 + room.ysize / 2]);
@@ -805,7 +793,7 @@ const Attack = {
 			// get the first room + initialize myRoom var
 			!myRoom && (room = getRoom(me.x, me.y));
 
-			if (Loader.scriptName() === "MFHelper" && Config.MFHelper.BreakClearLevel && Config.Leader !== "") {
+			if (breakClearLevelCheck) {
 				let leader = Misc.findPlayer(Config.Leader);
 
 				if (leader && leader.area !== me.area && !leader.inTown) {
@@ -833,7 +821,6 @@ const Attack = {
 			if (result) {
 				Pather.moveTo(result[0], result[1], 3, spectype);
 				previousArea = result;
-				//this.countUniques();
 
 				if (!this.clear(40, spectype)) {
 					break;
@@ -845,6 +832,7 @@ const Attack = {
 		}
 
 		//this.storeStatistics(Pather.getAreaName(me.area));
+		console.log("ÿc7End ÿc8(clearLevel) ÿc0:: ÿc7" + Pather.getAreaName(currentArea) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
 
 		return true;
 	},
@@ -918,7 +906,7 @@ const Attack = {
 	},
 
 	// Check if a set of coords is valid/accessable
-	validSpot: function (x, y, skillId = -1) {
+	validSpot: function (x, y) {
 		// Just in case
 		if (!me.area || !x || !y) return false;
 
@@ -938,6 +926,40 @@ const Attack = {
 		return true;
 	},
 
+	// need to fill this out, which skills require a floor?
+	validCastingLocation: function (x, y, skillId = -1) {
+		// Just in case
+		if (!me.area || !x || !y) return false;
+
+		let result;
+
+		try { // Treat thrown errors as invalid spot
+			result = getCollision(me.area, x, y);
+		} catch (e) {
+			return false;
+		}
+
+		if (result === undefined) return false;
+
+		if (skillId > -1) {
+			// probably going to need more checks, need to figure out any skills that don't do dmg if they aren't over a floor
+			// should this include 0x20 cast blocker? or 0x80E missle blocker?
+			switch (true) {
+			// not on the floor
+			case ([sdk.skills.Meteor, sdk.skills.Blizzard].includes(skillId)):
+				if (!!(result & 0x1000)) {
+					return false;
+				}
+				return !(result & 0x1);
+			// Avoid non-walkable spots, objects
+			case (Skill.getRange(skillId) < 10 && ((result & 0x1) || (result & 0x400))):
+				return false;
+			}
+		}
+
+		return true;
+	},
+
 	// Open chests when clearing
 	openChests: function (range, x, y) {
 		if (!Config.OpenChests.Enabled) return false;
@@ -946,7 +968,6 @@ const Attack = {
 
 		let list = [],
 			ids = ["chest", "chest3", "weaponrack", "armorstand"];
-
 		let unit = getUnit(2);
 
 		if (unit) {
@@ -1080,85 +1101,11 @@ const Attack = {
 		return grid;
 	},
 
-	// Check if a monster is attackable
-	checkMonster: function (unit) {
-		if (!unit || !copyUnit(unit).x) {
-			return false;
-		}
-
-		if (unit.area !== me.area) {
-			return false;
-		}
-
-		if (unit.type === 0 && unit.mode !== 17) { // Player
-			return true;
-		}
-
-		if (unit.hp === 0 || unit.mode === 0 || unit.mode === 12) { // Dead monster
-			return false;
-		}
-
-		if (unit.getStat(172) === 2) {	// Friendly monster/NPC
-			return false;
-		}
-
-		if (unit.charlvl < 1) { // catapults were returning a level of 0 and hanging up clear scripts
-			return false;
-		}
-
-		if (getBaseStat("monstats", unit.classid, "neverCount")) { // neverCount base stat - hydras, traps etc.
-			return false;
-		}
-
-		switch (unit.classid) {
-		case 179: // An evil force - cow (lol)
-			return false;
-		case 543: // Baal in Throne
-			if (me.area === 131) {
-				return false;
-			}
-
-			break;
-		case 110: // Vultures
-		case 111:
-		case 112:
-		case 113:
-		case 114:
-		case 608:
-			if (unit.mode === 8) { // Flying
-				return false;
-			}
-
-			break;
-		case 68: // Sand Maggots
-		case 69:
-		case 70:
-		case 71:
-		case 72:
-		case 679:
-		case 258: // Water Watchers
-		case 259:
-		case 260:
-		case 261:
-		case 262:
-		case 263:
-			if (unit.mode === 14) { // Submerged/Burrowed
-				return false;
-			}
-
-			break;
-		}
-
-		return true;
-	},
-
 	skipCheck: function (unit) {
-		if (me.area === 131) {
-			return true;
-		}
+		if (me.area === sdk.areas.ThroneofDestruction) return true;
 
-		if ((unit.spectype & 0x7) && Config.SkipException && Config.SkipException.indexOf(unit.name) > -1) {
-			print("ÿc1Skip Exception: " + unit.name);
+		if (unit.isSpecial && Config.SkipException && Config.SkipException.includes(unit.name)) {
+			console.log("ÿc1Skip Exception: " + unit.name);
 			return true;
 		}
 
@@ -1450,8 +1397,9 @@ const Attack = {
 
 	// Check if we have valid skills to attack a monster
 	canAttack: function (unit) {
-		if (unit.type === 1) {
-			if (unit.spectype & 0x7) { // Unique/Champion
+		if (unit.type === sdk.unittype.Monster) {
+			// Unique/Champion
+			if (unit.isSpecial) {
 				if (Attack.checkResist(unit, this.getSkillElement(Config.AttackSkill[1])) || Attack.checkResist(unit, this.getSkillElement(Config.AttackSkill[2]))) {
 					return true;
 				}
@@ -1492,13 +1440,9 @@ const Attack = {
 
 	// Find an optimal attack position and move or walk to it
 	getIntoPosition: function (unit, distance, coll, walk) {
-		if (!unit || !unit.x || !unit.y) {
-			return false;
-		}
+		if (!unit || !unit.x || !unit.y) return false;
 
-		if (walk === true) {
-			walk = 1;
-		}
+		walk === true && (walk = 1);
 
 		if (distance < 4 && (!unit.hasOwnProperty("mode") || (unit.mode !== 0 && unit.mode !== 12))) {
 			//me.overhead("Short range");
@@ -1514,8 +1458,7 @@ const Attack = {
 			return !CollMap.checkColl(me, unit, coll);
 		}
 
-		let n, i, cx, cy,
-			coords = [],
+		let coords = [],
 			fullDistance = distance,
 			name = unit.hasOwnProperty("name") ? unit.name : "",
 			angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
@@ -1523,14 +1466,14 @@ const Attack = {
 
 		//let t = getTickCount();
 
-		for (n = 0; n < 3; n += 1) {
+		for (let n = 0; n < 3; n += 1) {
 			if (n > 0) {
 				distance -= Math.floor(fullDistance / 3 - 1);
 			}
 
-			for (i = 0; i < angles.length; i += 1) {
-				cx = Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * distance + unit.x);
-				cy = Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * distance + unit.y);
+			for (let i = 0; i < angles.length; i += 1) {
+				let cx = Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * distance + unit.x);
+				let cy = Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * distance + unit.y);
 
 				if (Pather.checkSpot(cx, cy, 0x1, false)) {
 					coords.push({x: cx, y: cy});
@@ -1542,7 +1485,7 @@ const Attack = {
 			if (coords.length > 0) {
 				coords.sort(Sort.units);
 
-				for (i = 0; i < coords.length; i += 1) {
+				for (let i = 0; i < coords.length; i += 1) {
 					// Valid position found
 					if (!CollMap.checkColl({x: coords[i].x, y: coords[i].y}, unit, coll, 1)) {
 						//print("ÿc9optimal pos build time: ÿc2" + (getTickCount() - t) + " ÿc9distance from target: ÿc2" + getDistance(cx, cy, unit.x, unit.y));
@@ -1553,7 +1496,7 @@ const Attack = {
 
 							break;
 						case 2:
-							if (getDistance(me, coords[i]) < 6 && !CollMap.checkColl(me, coords[i], 0x5)) {
+							if (coords[i].distance < 6 && !CollMap.checkColl(me, coords[i], 0x5)) {
 								Pather.walkTo(coords[i].x, coords[i].y, 2);
 							} else {
 								Pather.moveTo(coords[i].x, coords[i].y, 1);
@@ -1572,26 +1515,31 @@ const Attack = {
 			}
 		}
 
-		if (name) {
-			print("ÿc4Attackÿc0: No valid positions for: " + name);
-		}
+		!!name && print("ÿc4Attackÿc0: No valid positions for: " + name);
 
 		return false;
 	},
 
-	getNearestMonster: function (skipBlocked = false, skipImmune = false) {
-		let gid, distance,
+	getNearestMonster: function (givenSettings = {}) {
+		let settings = Object.assign({}, {
+			skipBlocked: true,
+			skipImmune: true,
+			skipGid: -1,
+		}, givenSettings);
+
+		let gid,
 			monster = getUnit(1),
 			range = 30;
 
 		if (monster) {
 			do {
 				if (monster.attackable && !monster.getParent()) {
-					distance = getDistance(me, monster);
+					let distance = getDistance(me, monster);
 
 					if (distance < range
-						&& (!skipBlocked || (!checkCollision(me, monster, 0x4) || !checkCollision(me, monster, 0x1)))
-						&& (!skipImmune || Attack.canAttack(monster))) {
+						&& (settings.skipGid === -1 || monster.gid !== settings.skipGid)
+						&& (!settings.skipBlocked || !checkCollision(me, monster, 0x5))
+						&& (!settings.skipImmune || Attack.canAttack(monster))) {
 						range = distance;
 						gid = monster.gid;
 					}
@@ -1600,5 +1548,43 @@ const Attack = {
 		}
 
 		return !!gid ? getUnit(sdk.unittype.Monster, -1, -1, gid) : false;
+	},
+
+	checkCorpse: function (unit) {
+		if (!unit || (unit.mode !== sdk.units.monsters.monstermode.Death && unit.mode !== sdk.units.monsters.monstermode.Dead)) return false;
+		if (unit.classid <= 575 && !getBaseStat("monstats2", unit.classid, "corpseSel")) return false;
+		return ([
+			sdk.states.FrozenSolid, sdk.states.Revive, sdk.states.Redeemed,
+			sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
+		].every(state => !unit.getState(state)));
+	},
+
+	checkNearCorpses: function (unit, range = 15) {
+		let corpses = getUnits(sdk.unittype.Monster).filter(function (corpse) {
+			return getDistance(corpse, unit) <= range && Attack.checkCorpse(corpse);
+		});
+		return corpses.length > 0 ? corpses : [];
+	},
+
+	whirlwind: function (unit) {
+		if (!unit.attackable) return true;
+
+		let angles = [180, 175, -175, 170, -170, 165, -165, 150, -150, 135, -135, 45, -45, 90, -90];
+
+		unit.isSpecial && angles.unshift(120);
+
+		me.runwalk = me.gametype;
+		let angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
+
+		// get a better spot
+		for (let i = 0; i < angles.length; i += 1) {
+			let coords = [Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * 4 + unit.x), Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * 4 + unit.y)];
+
+			if (!CollMap.checkColl(me, {x: coords[0], y: coords[1]}, 0x1, 1)) {
+				return Skill.cast(151, 0, coords[0], coords[1]);
+			}
+		}
+
+		return (Attack.validSpot(unit.x, unit.y) && Skill.cast(151, Skill.getHand(151), me.x, me.y));
 	}
 };

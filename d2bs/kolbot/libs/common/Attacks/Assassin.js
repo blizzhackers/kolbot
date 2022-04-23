@@ -102,7 +102,7 @@ const ClassAttack = {
 			while (unit.attackable) {
 				if (Misc.townCheck()) {
 					if (!unit || !copyUnit(unit).x) {
-						unit = Misc.poll(function () { return getUnit(1, -1, -1, gid); }, 1000, 80);
+						unit = Misc.poll(() => getUnit(1, -1, -1, gid), 1000, 80);
 					}
 				}
 
@@ -125,8 +125,8 @@ const ClassAttack = {
 					!!spot && Pather.walkTo(spot.x, spot.y);
 				}
 
-				let closeMob = Attack.getNearestMonster(true, true);
-				!!closeMob && closeMob.gid !== gid && this.doCast(closeMob, timedSkill, untimedSkill);
+				let closeMob = Attack.getNearestMonster({skipGid: gid});
+				!!closeMob && this.doCast(closeMob, timedSkill, untimedSkill);
 			}
 
 			return 1;
@@ -157,9 +157,7 @@ const ClassAttack = {
 					}
 				}
 
-				if (!unit.dead) {
-					this.whirlwind(unit);
-				}
+				!unit.dead && Attack.whirlwind(unit);
 
 				return 1;
 			default:
@@ -211,12 +209,12 @@ const ClassAttack = {
 	},
 
 	checkTraps: function (unit) {
-		if (!Config.UseTraps) {
-			return false;
-		}
+		if (!Config.UseTraps) return false;
 
 		// getDistance crashes when using an object with x, y props, that's why it's unit.x, unit.y and not unit
-		if (me.getMinionCount(17) === 0 || !this.lastTrapPos.hasOwnProperty("x") || getDistance(unit.x, unit.y, this.lastTrapPos.x, this.lastTrapPos.y) > 15) {
+		// is this still a thing ^^? todo: test it
+		if (me.getMinionCount(17) === 0 || !this.lastTrapPos.hasOwnProperty("x")
+			|| getDistance(unit.x, unit.y, this.lastTrapPos.x, this.lastTrapPos.y) > 15) {
 			return 5;
 		}
 
@@ -224,29 +222,24 @@ const ClassAttack = {
 	},
 
 	placeTraps: function (unit, amount) {
-		let i, j,
-			traps = 0;
-
+		let traps = 0;
 		this.lastTrapPos = {x: unit.x, y: unit.y};
 
-		for (i = -1; i <= 1; i += 1) {
-			for (j = -1; j <= 1; j += 1) {
+		for (let i = -1; i <= 1; i += 1) {
+			for (let j = -1; j <= 1; j += 1) {
 				if (Math.abs(i) === Math.abs(j)) { // used for X formation
 					// unit can be an object with x, y props too, that's why having "mode" prop is checked
 					if (traps >= amount || (unit.hasOwnProperty("mode") && (unit.mode === 0 || unit.mode === 12))) {
 						return true;
 					}
 
-					if ((unit.hasOwnProperty("classid") && [211, 242, 243, 544].indexOf(unit.classid) > -1) || (unit.hasOwnProperty("type") && unit.type === 0)) { // Duriel, Mephisto, Diablo, Baal, other players
-						if (traps >= Config.BossTraps.length) {
-							return true;
-						}
+					// Duriel, Mephisto, Diablo, Baal, other players
+					if ((unit.hasOwnProperty("classid") && [211, 242, 243, 544].indexOf(unit.classid) > -1) || (unit.hasOwnProperty("type") && unit.type === 0)) {
+						if (traps >= Config.BossTraps.length) return true;
 
 						Skill.cast(Config.BossTraps[traps], 0, unit.x + i, unit.y + j);
 					} else {
-						if (traps >= Config.Traps.length) {
-							return true;
-						}
+						if (traps >= Config.Traps.length) return true;
 
 						Skill.cast(Config.Traps[traps], 0, unit.x + i, unit.y + j);
 					}
@@ -258,34 +251,4 @@ const ClassAttack = {
 
 		return true;
 	},
-
-	whirlwind: function (unit) {
-		if (!Attack.checkMonster(unit)) {
-			return true;
-		}
-
-		let i, coords, angle,
-			angles = [180, 175, -175, 170, -170, 165, -165, 150, -150, 135, -135, 45, -45, 90, -90];
-
-		if (unit.spectype & 0x7) {
-			angles.unshift(120);
-		}
-
-		me.runwalk = me.gametype;
-		angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
-
-		for (i = 0; i < angles.length; i += 1) { // get a better spot
-			coords = [Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * 4 + unit.x), Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * 4 + unit.y)];
-
-			if (!CollMap.checkColl(me, {x: coords[0], y: coords[1]}, 0x1, 1)) {
-				return Skill.cast(151, 0, coords[0], coords[1]);
-			}
-		}
-
-		if (!Attack.validSpot(unit.x, unit.y)) {
-			return false;
-		}
-
-		return Skill.cast(151, 0, me.x, me.y);
-	}
 };

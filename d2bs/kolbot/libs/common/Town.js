@@ -1,6 +1,6 @@
 /**
 *	@filename	Town.js
-*	@author		kolton
+*	@author		kolton, theBGuy
 *	@desc		do town chores like buying, selling and gambling
 */
 
@@ -50,46 +50,43 @@ const Town = {
 		{Heal: NPC.Malah, Shop: NPC.Malah, Gamble: NPC.Anya, Repair: NPC.Larzuk, Merc: NPC.Qual_Kehk, Key: NPC.Malah, CainID: NPC.Cain}
 	],
 
-	ignoredItemTypes: [ // Items that won't be stashed
-		5, // Arrows
-		6, // Bolts
-		18, // Book (Tome)
-		22, // Scroll
-		38, // Missile Potion
-		41, // Key
-		76, // Healing Potion
-		77, // Mana Potion
-		78, // Rejuvenation Potion
-		79, // Stamina Potion
-		80, // Antidote Potion
-		81 // Thawing Potion
+	ignoredItemTypes: [
+		// Items that won't be stashed
+		sdk.itemtype.BowQuiver, sdk.itemtype.CrossbowQuiver, sdk.itemtype.Book,
+		sdk.itemtype.Scroll, sdk.itemtype.Key, sdk.itemtype.HealingPotion,
+		sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion, sdk.itemtype.StaminaPotion,
+		sdk.itemtype.AntidotePotion, sdk.itemtype.ThawingPotion
 	],
 
 	// Do town chores
 	doChores: function (repair = false) {
-		while (!me.gameReady) {
-			delay(250 + me.ping);
-		}
+		delay(250);
+
+		console.log("ÿc8Start ÿc0:: ÿc8TownChores");
+		let tick = getTickCount();
 
 		!me.inTown && this.goToTown();
+
+		if (!Misc.poll(() => me.gameReady && me.inTown, 2000, 250)) {
+			throw new Error("Failed to go to town for chores");
+		}
 
 		let preAct = me.act;
 
 		// Burst of speed while in town
-		if (me.inTown && me.getSkill(sdk.skills.BurstofSpeed, 1) && !me.getState(sdk.states.BurstofSpeed)) {
+		if (me.inTown && Precast.precastables.BurstofSpeed && !me.getState(sdk.states.BurstofSpeed)) {
 			Skill.cast(sdk.skills.BurstofSpeed, 0);
 		}
 
-		Attack.weaponSwitch(Attack.getPrimarySlot());
+		me.switchWeapons(Attack.getPrimarySlot());
 
 		this.heal();
 		this.identify();
-		this.shopItems();
-		this.fillTome(518);
-		Config.FieldID.Enabled && this.fillTome(519);
-		this.buyPotions();
 		this.clearInventory();
-		Item.autoEquip();
+		this.fillTome(sdk.items.TomeofTownPortal);
+		this.buyPotions();
+		Config.FieldID.Enabled && this.fillTome(519);
+		this.shopItems();
 		this.buyKeys();
 		this.repair(repair);
 		this.gamble();
@@ -97,13 +94,15 @@ const Town = {
 		Cubing.doCubing();
 		Runewords.makeRunewords();
 		this.stash(true);
-		this.clearScrolls();
+		!!me.getItem(sdk.items.TomeofTownPortal) && this.clearScrolls();
 
 		me.act !== preAct && this.goToTown(preAct);
 		me.cancelUIFlags();
 		!me.barbarian && Precast.haveCTA === -1 && Precast.doPrecast(false);
 
 		delay(200 + me.ping * 2);
+
+		console.log("ÿc8Finish TownChores ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
 
 		return true;
 	},
@@ -150,24 +149,17 @@ const Town = {
 	},
 
 	getTpTool: function () {
-		let scroll = me.getItemsEx().filter(function (i) { return i.isInInventory && i.classid === sdk.items.ScrollofTownPortal; }).first();
-		let tome = me.getItemsEx().filter(function (i) { return i.isInInventory && i.classid === sdk.items.TomeofTownPortal; }).first();
-		if (scroll) {
-			return scroll;
-		}
-		if (tome && tome.getStat(sdk.stats.Quantity) > 0) {
-			return tome;
-		}
+		let items = me.getItemsEx().filter((item) => item.isInInventory && [sdk.items.ScrollofTownPortal, sdk.items.TomeofTownPortal].includes(item.classid));
+		let scroll = items.find((i) => i.isInInventory && i.classid === sdk.items.ScrollofTownPortal);
+		if (scroll) return scroll;
+		let tome = items.find((i) => i.isInInventory && i.classid === sdk.items.TomeofTownPortal);
+		if (tome && tome.getStat(sdk.stats.Quantity) > 0) return tome;
 		return null;
 	},
 
 	canTpToTown: function () {
-		// I'm dead or in town, no TP tome or scrolls, shouldn't tp from arreatsummit and can't tp from UberTristram
-		if (me.dead || me.inTown || !this.getTpTool() || [sdk.areas.ArreatSummit, sdk.areas.UberTristram].includes(me.area)) {
-			return false;
-		}
-
-		return true;
+		// If we are not dead or in town, no TP tome or scrolls, shouldn't tp from arreatsummit and can't tp from UberTristram
+		return !(me.dead || me.inTown || !this.getTpTool() || [sdk.areas.ArreatSummit, sdk.areas.UberTristram].includes(me.area));
 	},
 
 	// Start a task and return the NPC Unit
@@ -176,59 +168,56 @@ const Town = {
 
 		let npc = getInteractedNPC();
 
-		if (npc && npc.name.toLowerCase() !== this.tasks[me.act - 1][task]) {
-			me.cancel();
+		try {
+			if (!!npc && npc.name.toLowerCase() !== this.tasks[me.act - 1][task]) {
+				me.cancelUIFlags();
+				npc = null;
+			}
 
-			npc = null;
-		}
-
-		// Jamella gamble fix
-		if (task === "Gamble" && npc && npc.name.toLowerCase() === NPC.Jamella) {
-			me.cancel();
-
-			npc = null;
-		}
-
-		if (!npc) {
-			npc = getUnit(1, this.tasks[me.act - 1][task]);
+			// Jamella gamble fix
+			if (task === "Gamble" && !!npc && npc.name.toLowerCase() === NPC.Jamella) {
+				me.cancelUIFlags();
+				npc = null;
+			}
 
 			if (!npc) {
-				this.move(this.tasks[me.act - 1][task]);
-
 				npc = getUnit(1, this.tasks[me.act - 1][task]);
-			}
-		}
 
-		if (!npc || npc.area !== me.area || (!getUIFlag(0x08) && !npc.openMenu())) {
+				if (!npc) {
+					this.move(this.tasks[me.act - 1][task]);
+					npc = getUnit(1, this.tasks[me.act - 1][task]);
+				}
+			}
+
+			if (!npc || npc.area !== me.area || (!getUIFlag(0x08) && !npc.openMenu())) throw new Error("Couldn't interact with npc");
+
+			switch (task) {
+			case "Shop":
+			case "Repair":
+			case "Gamble":
+				if (!getUIFlag(0x0C) && !npc.startTrade(task)) throw new Error("Failed to complete " + reason + " at " + npc.name);
+
+				break;
+			case "Key":
+				if (!getUIFlag(0x0C) && !npc.startTrade(me.act === 3 ? "Repair" : "Shop")) throw new Error("Failed to complete " + reason + " at " + npc.name);
+
+				break;
+			case "CainID":
+				Misc.useMenu(0x0FB4);
+				me.cancelUIFlags();
+
+				break;
+			case "Heal":
+				me.getState(sdk.states.Frozen) && this.buyPots(2, "Thawing", true, true);
+
+				break;
+			}
+
+			console.log("Did " + reason + " at " + npc.name);
+		} catch (e) {
+			console.warn(e);
+
 			return false;
-		}
-
-		switch (task) {
-		case "Shop":
-		case "Repair":
-		case "Gamble":
-			if (!getUIFlag(0x0C) && !npc.startTrade(task)) {
-				return false;
-			}
-
-			break;
-		case "Key":
-			if (!getUIFlag(0x0C) && !npc.startTrade(me.act === 3 ? "Repair" : "Shop")) {
-				return false;
-			}
-
-			break;
-		case "CainID":
-			Misc.useMenu(0x0FB4);
-			me.cancel();
-
-			break;
-		case "Heal":
-			if (me.getState(sdk.states.Frozen)) {
-				Town.buyPots(2, "Thawing", true, true);
-			}
-
-			break;
 		}
 
 		return npc;
@@ -237,9 +226,7 @@ const Town = {
 	// Go to a town healer
 	heal: function () {
 		if (!this.needHealing()) return true;
-		if (!this.initNPC("Heal", "heal")) return false;
-
-		return true;
+		return !!(this.initNPC("Heal", "heal"));
 	},
 
 	// Check if healing is needed, based on character config
@@ -247,63 +234,60 @@ const Town = {
 		if (me.hpPercent <= Config.HealHP || me.mpPercent <= Config.HealMP) return true;
 
 		// Status effects
-		if (Config.HealStatus
-			&& [sdk.states.Poison, sdk.states.AmplifyDamage, sdk.states.Frozen, sdk.states.Weaken, sdk.states.Decrepify, sdk.states.LowerResist].some(function (state) { return me.getState(state); })) {
-			return true;
-		}
-
-		return false;
+		return (Config.HealStatus
+			&& [
+				sdk.states.Poison,
+				sdk.states.AmplifyDamage,
+				sdk.states.Frozen,
+				sdk.states.Weaken,
+				sdk.states.Decrepify,
+				sdk.states.LowerResist
+			].some((state) => me.getState(state)));
 	},
 
 	buyPotions: function () {
 		// Ain't got money fo' dat shyt
-		if (me.gold < 1000) {
-			return false;
-		}
+		if (me.gold < 1000) return false;
 
-		let i, j, npc, useShift, col, beltSize, pot,
-			needPots = false,
+		let needPots = false,
 			needBuffer = true,
 			buffer = {
 				hp: 0,
 				mp: 0
 			};
 
-		beltSize = Storage.BeltSize();
-		col = this.checkColumns(beltSize);
+		this.clearBelt();
+		let beltSize = Storage.BeltSize();
+		let col = this.checkColumns(beltSize);
 
 		// HP/MP Buffer
 		if (Config.HPBuffer > 0 || Config.MPBuffer > 0) {
-			pot = me.getItem(-1, 0);
+			me.getItemsEx().filter(function (p) {
+				return p.isInInventory && [sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion].includes(p.itemType);
+			}).forEach(function (p) {
+				switch (p.itemType) {
+				case sdk.itemtype.HealingPotion:
+					buffer.hp++;
 
-			if (pot) {
-				do {
-					if (pot.location === 3) {
-						switch (pot.itemType) {
-						case 76:
-							buffer.hp += 1;
+					break;
+				case sdk.itemtype.ManaPotion:
+					buffer.mp++;
 
-							break;
-						case 77:
-							buffer.mp += 1;
-
-							break;
-						}
-					}
-				} while (pot.getNext());
-			}
+					break;
+				}
+			});
 		}
 
 		// Check if we need to buy potions based on Config.MinColumn
-		for (i = 0; i < 4; i += 1) {
-			if (["hp", "mp"].indexOf(Config.BeltColumn[i]) > -1 && col[i] > (beltSize - Math.min(Config.MinColumn[i], beltSize))) {
+		for (let i = 0; i < 4; i += 1) {
+			if (["hp", "mp"].includes(Config.BeltColumn[i]) && col[i] > (beltSize - Math.min(Config.MinColumn[i], beltSize))) {
 				needPots = true;
 			}
 		}
 
 		// Check if we need any potions for buffers
 		if (buffer.mp < Config.MPBuffer || buffer.hp < Config.HPBuffer) {
-			for (i = 0; i < 4; i += 1) {
+			for (let i = 0; i < 4; i += 1) {
 				// We can't buy potions because they would go into belt instead
 				if (col[i] >= beltSize && (!needPots || Config.BeltColumn[i] === "rv")) {
 					needBuffer = false;
@@ -314,29 +298,21 @@ const Town = {
 		}
 
 		// We have enough potions in inventory
-		if (buffer.mp >= Config.MPBuffer && buffer.hp >= Config.HPBuffer) {
-			needBuffer = false;
-		}
+		(buffer.mp >= Config.MPBuffer && buffer.hp >= Config.HPBuffer) && (needBuffer = false);
 
 		// No columns to fill
-		if (!needPots && !needBuffer) {
-			return true;
-		}
+		if (!needPots && !needBuffer) return true;
 
-		if (me.normal && Pather.accessToAct(4) && me.act < 4) {
-			this.goToTown(4);
-		}
+		me.normal && me.act < me.highestAct && this.goToTown(me.highestAct);
 
-		npc = this.initNPC("Shop", "buyPotions");
+		let npc = this.initNPC("Shop", "buyPotions");
 
-		if (!npc) {
-			return false;
-		}
+		if (!npc) return false;
 
-		for (i = 0; i < 4; i += 1) {
+		for (let i = 0; i < 4; i += 1) {
 			if (col[i] > 0) {
-				useShift = this.shiftCheck(col, beltSize);
-				pot = this.getPotion(npc, Config.BeltColumn[i]);
+				let useShift = this.shiftCheck(col, beltSize);
+				let pot = this.getPotion(npc, Config.BeltColumn[i]);
 
 				if (pot) {
 					//print("ÿc2column ÿc0" + i + "ÿc2 needs ÿc0" + col[i] + " ÿc2potions");
@@ -345,7 +321,7 @@ const Town = {
 					if (useShift) {
 						pot.buy(true);
 					} else {
-						for (j = 0; j < col[i]; j += 1) {
+						for (let j = 0; j < col[i]; j += 1) {
 							pot.buy(false);
 						}
 					}
@@ -356,22 +332,16 @@ const Town = {
 		}
 
 		if (needBuffer && buffer.hp < Config.HPBuffer) {
-			for (i = 0; i < Config.HPBuffer - buffer.hp; i += 1) {
-				pot = this.getPotion(npc, "hp");
-
-				if (Storage.Inventory.CanFit(pot)) {
-					pot.buy(false);
-				}
+			for (let i = 0; i < Config.HPBuffer - buffer.hp; i += 1) {
+				let pot = this.getPotion(npc, "hp");
+				!!pot && Storage.Inventory.CanFit(pot) && pot.buy(false);
 			}
 		}
 
 		if (needBuffer && buffer.mp < Config.MPBuffer) {
-			for (i = 0; i < Config.MPBuffer - buffer.mp; i += 1) {
-				pot = this.getPotion(npc, "mp");
-
-				if (Storage.Inventory.CanFit(pot)) {
-					pot.buy(false);
-				}
+			for (let i = 0; i < Config.MPBuffer - buffer.mp; i += 1) {
+				let pot = this.getPotion(npc, "mp");
+				!!pot && Storage.Inventory.CanFit(pot) && pot.buy(false);
 			}
 		}
 
@@ -391,25 +361,13 @@ const Town = {
 			if (col[i] >= beltSize) {
 				switch (Config.BeltColumn[i]) {
 				case "hp":
-					// Set type based on empty column
-					if (!fillType) {
-						fillType = "hp";
-					}
-
-					// Can't shift+buy if we need to get differnt potion types
-					if (fillType !== "hp") {
-						return false;
-					}
+					!fillType && (fillType = "hp");
+					if (fillType !== "hp") return false;
 
 					break;
 				case "mp":
-					if (!fillType) {
-						fillType = "mp";
-					}
-
-					if (fillType !== "mp") {
-						return false;
-					}
+					!fillType && (fillType = "mp");
+					if (fillType !== "mp") return false;
 
 					break;
 				case "rv": // Empty rejuv column = can't shift-buy
@@ -426,9 +384,8 @@ const Town = {
 		let col = [beltSize, beltSize, beltSize, beltSize],
 			pot = me.getItem(-1, 2); // Mode 2 = in belt
 
-		if (!pot) { // No potions
-			return col;
-		}
+		// No potions
+		if (!pot) return col;
 
 		do {
 			col[pot.x % 4] -= 1;
@@ -472,7 +429,6 @@ const Town = {
 					tome.buy();
 				} catch (e1) {
 					print(e1);
-
 					// Couldn't buy the tome, don't spam the scrolls
 					return false;
 				}
@@ -513,44 +469,41 @@ const Town = {
 	},
 
 	identify: function () {
-		let i, item, tome, scroll, npc, list, timer, tpTome, result;
+		me.cancelUIFlags();
 
-		this.cainID();
+		if (this.cainID()) return true;
+		
+		let i;
+		let list = (Storage.Inventory.Compare(Config.Inventory) || []);
 
-		list = Storage.Inventory.Compare(Config.Inventory);
-
-		if (!list) return false;
+		if (list.length === 0) return false;
 
 		// Avoid unnecessary NPC visits
 		for (i = 0; i < list.length; i += 1) {
 			// Only unid items or sellable junk (low level) should trigger a NPC visit
-			if ((!list[i].getFlag(0x10) || Config.LowGold > 0) && ([-1, 4].indexOf(Pickit.checkItem(list[i]).result) > -1 || (!list[i].getFlag(0x10) && Item.hasTier(list[i])))) {
+			if ((!list[i].identified || Config.LowGold > 0)
+				&& ([-1, 4].includes(Pickit.checkItem(list[i]).result) || (!list[i].identified && Item.hasTier(list[i])))) {
 				break;
 			}
 		}
 
 		if (i === list.length) return false;
 
-		npc = this.initNPC("Shop", "identify");
+		let npc = this.initNPC("Shop", "identify");
 		if (!npc) return false;
 
-		tome = me.findItem(519, 0, 3);
-
-		if (tome && tome.getStat(70) < list.length) {
-			this.fillTome(519);
-		}
+		let tome = me.findItem(519, 0, 3);
+		!!tome && tome.getStat(70) < list.length && this.fillTome(519);
 
 		MainLoop:
 		while (list.length > 0) {
-			item = list.shift();
+			let item = list.shift();
 
-			if (!item.getFlag(0x10) && item.location === 3 && this.ignoredItemTypes.indexOf(item.itemType) === -1) {
-				result = Pickit.checkItem(item);
+			if (!item.identified && item.location === sdk.storage.Inventory && !this.ignoredItemTypes.includes(item.itemType)) {
+				let result = Pickit.checkItem(item);
 
 				// Force ID for unid items matching autoEquip criteria
-				if (result.result === 1 && !item.getFlag(0x10) && Item.hasTier(item)) {
-					result.result = -1;
-				}
+				result.result === 1 && !item.identified && Item.hasTier(item) && (result.result = -1);
 
 				switch (result.result) {
 				// Items for gold, will sell magics, etc. w/o id, but at low levels
@@ -564,11 +517,11 @@ const Town = {
 					if (tome) {
 						this.identifyItem(item, tome);
 					} else {
-						scroll = npc.getItem(530);
+						let scroll = npc.getItem(530);
 
 						if (scroll) {
 							if (!Storage.Inventory.CanFit(scroll)) {
-								tpTome = me.findItem(518, 0, 3);
+								let tpTome = me.findItem(518, 0, 3);
 
 								if (tpTome) {
 									tpTome.sell();
@@ -578,9 +531,7 @@ const Town = {
 
 							delay(500);
 
-							if (Storage.Inventory.CanFit(scroll)) {
-								scroll.buy();
-							}
+							Storage.Inventory.CanFit(scroll) && scroll.buy();
 						}
 
 						scroll = me.findItem(530, 0, 3);
@@ -594,9 +545,8 @@ const Town = {
 
 					result = Pickit.checkItem(item);
 
-					if (!Item.autoEquipCheck(item)) {
-						result.result = 0;
-					}
+					// should autoequip even be checked by default?
+					!Item.autoEquipCheck(item) && (result.result = 0);
 
 					switch (result.result) {
 					case 1:
@@ -627,7 +577,7 @@ const Town = {
 						Misc.itemLogger("Sold", item);
 						item.sell();
 
-						timer = getTickCount() - this.sellTimer; // shop speedup test
+						let timer = getTickCount() - this.sellTimer; // shop speedup test
 
 						if (timer > 0 && timer < 500) {
 							delay(timer);
@@ -659,7 +609,6 @@ const Town = {
 		// Check if we may use Cain - minimum gold
 		if (me.gold < Config.CainID.MinGold) {
 			//print("Can't use Cain - not enough gold.");
-
 			return false;
 		}
 
@@ -672,7 +621,6 @@ const Town = {
 			// Check if we may use Cain - number of unid items
 			if (unids.length < Config.CainID.MinUnids) {
 				//print("Can't use Cain - not enough unid items.");
-
 				return false;
 			}
 
@@ -680,7 +628,6 @@ const Town = {
 			for (let i = 0; i < unids.length; i += 1) {
 				if (Pickit.checkItem(unids[i]).result > 0) {
 					//print("Can't use Cain - can't id a valid item.");
-
 					return false;
 				}
 			}
@@ -782,7 +729,7 @@ const Town = {
 		if (!item) return false;
 
 		do {
-			if (item.location === 3 && !item.getFlag(0x10)) {
+			if (item.location === 3 && !item.identified) {
 				list.push(copyUnit(item));
 			}
 		} while (item.getNext());
@@ -792,14 +739,9 @@ const Town = {
 		return list;
 	},
 
-	identifyItem: function (unit, tome, packetID) {
-		if (Config.PacketShopping || packetID) {
-			return Packet.identifyItem(unit, tome);
-		}
-
-		let tick;
-
-		if (!unit || unit.getFlag(0x10)) return false;
+	identifyItem: function (unit, tome, packetID = false) {
+		if (Config.PacketShopping || packetID) return Packet.identifyItem(unit, tome);
+		if (!unit || unit.identified) return false;
 
 		this.sellTimer = getTickCount(); // shop speedup test
 
@@ -807,7 +749,7 @@ const Town = {
 		for (let i = 0; i < 3; i += 1) {
 			clickItem(1, tome);
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 500) {
 				if (getCursorType() === 6) {
@@ -827,7 +769,7 @@ const Town = {
 				clickItem(0, unit);
 			}
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 500) {
 				if (unit.getFlag(0x10)) {
@@ -847,28 +789,20 @@ const Town = {
 
 	shopItems: function () {
 		if (!Config.MiniShopBot) return true;
-
-		let items = [],
-			npc = getInteractedNPC();
+		let npc = getInteractedNPC();
 
 		if (!npc || !npc.itemcount) return false;
 
-		let item = npc.getItem();
+		let items = npc.getItemsEx().filter((item) => Town.ignoredItemTypes.indexOf(item.itemType) === -1);
 
-		if (!item) return false;
+		if (!items.length) return false;
 
 		print("ÿc4MiniShopBotÿc0: Scanning " + npc.itemcount + " items.");
-
-		do {
-			if (this.ignoredItemTypes.indexOf(item.itemType) === -1) {
-				items.push(copyUnit(item));
-			}
-		} while (item.getNext());
 
 		for (let i = 0; i < items.length; i += 1) {
 			let result = Pickit.checkItem(items[i]);
 
-			if (result.result === 1 && Item.autoEquipCheck(items[i])) {
+			if (result.result === 1/*  && Item.autoEquipCheck(items[i]) */) {
 				try {
 					if (Storage.Inventory.CanFit(items[i]) && me.getStat(14) + me.getStat(15) >= items[i].getItemCost(0)) {
 						Misc.itemLogger("Shopped", items[i]);
@@ -889,16 +823,10 @@ const Town = {
 	gambleIds: [],
 
 	gamble: function () {
-		if (!this.needGamble() || Config.GambleItems.length === 0) {
-			return true;
-		}
-
-		let i, item, items, npc, newItem, result,
-			list = [];
-
+		if (!this.needGamble() || Config.GambleItems.length === 0) return true;
 		if (this.gambleIds.length === 0) {
 			// change text to classid
-			for (i = 0; i < Config.GambleItems.length; i += 1) {
+			for (let i = 0; i < Config.GambleItems.length; i += 1) {
 				if (isNaN(Config.GambleItems[i])) {
 					if (NTIPAliasClassID.hasOwnProperty(Config.GambleItems[i].replace(/\s+/g, "").toLowerCase())) {
 						this.gambleIds.push(NTIPAliasClassID[Config.GambleItems[i].replace(/\s+/g, "").toLowerCase()]);
@@ -915,43 +843,41 @@ const Town = {
 
 		// avoid Alkor
 		me.act === 3 && this.goToTown(2);
-		npc = this.initNPC("Gamble", "gamble");
+		let npc = this.initNPC("Gamble", "gamble");
 
 		if (!npc) return false;
 
-		items = me.findItems(-1, 0, 3);
+		let list = [];
+		let items = me.findItems(-1, 0, 3);
 
 		while (items && items.length > 0) {
 			list.push(items.shift().gid);
 		}
 
 		while (me.gold >= Config.GambleGoldStop) {
-			if (!getInteractedNPC()) {
-				npc.startTrade("Gamble");
-			}
+			!getInteractedNPC() && npc.startTrade("Gamble");
 
-			item = npc.getItem();
+			let item = npc.getItem();
 			items = [];
 
 			if (item) {
 				do {
-					if (this.gambleIds.indexOf(item.classid) > -1) {
+					if (this.gambleIds.includes(item.classid)) {
 						items.push(copyUnit(item));
 					}
 				} while (item.getNext());
 
-				for (i = 0; i < items.length; i += 1) {
+				for (let i = 0; i < items.length; i += 1) {
 					if (!Storage.Inventory.CanFit(items[i])) {
 						return false;
 					}
 
 					//me.overhead("Buy: " + items[i].name);
 					items[i].buy(false, true);
-
-					newItem = this.getGambledItem(list);
+					let newItem = this.getGambledItem(list);
 
 					if (newItem) {
-						result = Pickit.checkItem(newItem);
+						let result = Pickit.checkItem(newItem);
 
 						if (!Item.autoEquipCheck(newItem)) {
 							result = 0;
@@ -1018,42 +944,47 @@ const Town = {
 		return false;
 	},
 
+	// should type be classid instead?
 	buyPots: function (quantity = 0, type = "", drink = false, force = false) {
 		if (!quantity || !type) return false;
-		type = type[0].toUpperCase() + type.substring(1).toLowerCase();
-		let npc, jugs, potDealer = ["Akara", "Lysander", "Alkor", "Jamella", "Malah"][me.act - 1];
+		type = type.capitalize(true);
+		let jugs, potDealer = ["Akara", "Lysander", "Alkor", "Jamella", "Malah"][me.act - 1];
 
 		// Don't buy if already at max res
-		if (type === "Thawing" && me.coldRes >= 75 && !force) {
+		if (!force && type === "Thawing" && me.coldRes >= 75) {
 			return true;
 		} else if (type === "Thawing") {
-			print("ÿc9BuyPotsÿc0 :: Current cold resistance: " + me.coldRes);
+			console.log("ÿc9BuyPotsÿc0 :: Current cold resistance: " + me.coldRes);
 		}
 
 		// Don't buy if already at max res
-		if (type === "Antidote" && me.poisonRes >= 75 && !force) {
+		if (!force && type === "Antidote" && me.poisonRes >= 75) {
 			return true;
 		} else if (type === "Antidote") {
-			print("ÿc9BuyPotsÿc0 :: Current poison resistance: " + me.poisonRes);
+			console.log("ÿc9BuyPotsÿc0 :: Current poison resistance: " + me.poisonRes);
 		}
 
 		// Don't buy if teleport or vigor
-		if (type === "Stamina" && (Config.Vigor && me.getSkill(sdk.skills.Vigor, 0) || Pather.canTeleport()) && !force) return true;
+		if (!force && type === "Stamina" && (Config.Vigor && me.getSkill(sdk.skills.Vigor, 0) || Pather.canTeleport())) return true;
 
-		npc = getInteractedNPC();
+		let npc = getInteractedNPC();
 
-		if (npc && npc.name.toLowerCase() === NPC[potDealer] && getUIFlag(sdk.uiflags.NPCMenu)) {
-			!getUIFlag(sdk.uiflags.Shop) && Misc.useMenu(sdk.menu.Trade);
-		} else {
-			me.cancel();
-			npc = null;
+		try {
+			if (!!npc && npc.name.toLowerCase() === NPC[potDealer] && !getUIFlag(sdk.uiflags.Shop)) {
+				if (!npc.startTrade("Shop")) throw new Error("Failed to open " + npc.name + " trade menu");
+			} else {
+				me.cancelUIFlags();
+				npc = null;
 
-			Town.move(NPC[potDealer]);
-			npc = getUnit(sdk.unittype.NPC, NPC[potDealer]);
+				Town.move(NPC[potDealer]);
+				npc = getUnit(sdk.unittype.NPC, NPC[potDealer]);
 
-			if (!npc || !npc.openMenu()) return false;
+				if (!npc || !npc.openMenu() || !npc.startTrade("Shop")) throw new Error("Failed to open " + npc.name + " trade menu");
+			}
+		} catch (e) {
+			console.warn(e);
 
-			Misc.useMenu(sdk.menu.Trade);
+			return false;
 		}
 
 		switch (type) {
@@ -1071,7 +1002,7 @@ const Town = {
 			break;
 		}
 
-		print('ÿc9BuyPotsÿc0 :: buying ' + quantity + ' ' + type + ' Potions');
+		console.log('ÿc9BuyPotsÿc0 :: buying ' + quantity + ' ' + type + ' Potions');
 
 		for (let pots = 0; pots < quantity; pots++) {
 			if (jugs && Storage.Inventory.CanFit(jugs)) {
@@ -1085,9 +1016,9 @@ const Town = {
 		return true;
 	},
 
-	drinkPots: function (type) {
+	drinkPots: function (type = "") {
 		let classIds = [sdk.items.StaminaPotion, sdk.items.AntidotePotion, sdk.items.ThawingPotion];
-		!!type && (classIds = classIds.filter(function (el) { return el === sdk.items[type + "Potion"]; }));
+		!!type && (classIds = classIds.filter((el) => el === sdk.items[type + "Potion"]));
 
 		for (let i = 0; i < classIds.length; i++) {
 			let name;
@@ -1104,9 +1035,7 @@ const Town = {
 					}
 				});
 
-				if (name) {
-					print('ÿc9DrinkPotsÿc0 :: drank ' + quantity + " " + name + "s. Timer [" + (new Date(quantity * 30 * 1000).toISOString().slice(11, -5)) + "]");
-				}
+				name && console.log('ÿc9DrinkPotsÿc0 :: drank ' + quantity + " " + name + "s. Timer [" + (new Date(quantity * 30 * 1000).toISOString().slice(11, -5)) + "]");
 			}
 		}
 
@@ -1164,9 +1093,7 @@ const Town = {
 	},
 
 	repairIngredientCheck: function (item) {
-		if (!Config.CubeRepair) {
-			return false;
-		}
+		if (!Config.CubeRepair) return false;
 
 		let needRal = 0,
 			needOrt = 0,
@@ -1198,15 +1125,11 @@ const Town = {
 
 		switch (item.classid) {
 		case 617:
-			if (needRal && (!me.findItems(617) || me.findItems(617) < needRal)) {
-				return true;
-			}
+			if (needRal && (!me.findItems(617) || me.findItems(617) < needRal)) return true;
 
 			break;
 		case 618:
-			if (needOrt && (!me.findItems(618) || me.findItems(618) < needOrt)) {
-				return true;
-			}
+			if (needOrt && (!me.findItems(618) || me.findItems(618) < needOrt)) return true;
 
 			break;
 		}
@@ -1215,9 +1138,7 @@ const Town = {
 	},
 
 	cubeRepair: function () {
-		if (!Config.CubeRepair || !me.getItem(549)) {
-			return false;
-		}
+		if (!Config.CubeRepair || !me.getItem(549)) return false;
 
 		let items = this.getItemsForRepair(Config.RepairPercent, false);
 
@@ -1235,7 +1156,7 @@ const Town = {
 	cubeRepairItem: function (item) {
 		if (item.mode !== 1) return false;
 
-		let i, rune, cubeItems,
+		let rune, cubeItems,
 			bodyLoc = item.bodylocation;
 
 		switch (item.itemType) {
@@ -1259,7 +1180,7 @@ const Town = {
 		}
 
 		if (rune && Town.openStash() && Cubing.openCube() && Cubing.emptyCube()) {
-			for (i = 0; i < 100; i += 1) {
+			for (let i = 0; i < 100; i += 1) {
 				if (!me.itemoncursor) {
 					if (Storage.Cube.MoveTo(item) && Storage.Cube.MoveTo(rune)) {
 						transmute();
@@ -1268,13 +1189,12 @@ const Town = {
 
 					cubeItems = me.findItems(-1, -1, 6); // Get cube contents
 
-					if (cubeItems.length === 1) { // We expect only one item in cube
-						cubeItems[0].toCursor();
-					}
+					// We expect only one item in cube
+					cubeItems.length === 1 && cubeItems[0].toCursor();
 				}
 
 				if (me.itemoncursor) {
-					for (i = 0; i < 3; i += 1) {
+					for (let i = 0; i < 3; i += 1) {
 						clickItem(0, bodyLoc);
 						delay(me.ping * 2 + 500);
 
@@ -1298,19 +1218,14 @@ const Town = {
 	},
 
 	repair: function (force = false) {
-		let quiver, myQuiver, npc, repairAction, bowCheck;
+		let npc;
 
-		this.cubeRepair();
+		if (this.cubeRepair()) return true;
 
-		repairAction = this.needRepair();
+		let repairAction = this.needRepair();
+		force && repairAction.indexOf("repair") === -1 && repairAction.push("repair");
 
-		if (force && repairAction.indexOf("repair") === -1) {
-			repairAction.push("repair");
-		}
-
-		if (!repairAction || !repairAction.length) {
-			return true;
-		}
+		if (!repairAction || !repairAction.length) return true;
 
 		for (let i = 0; i < repairAction.length; i += 1) {
 			switch (repairAction[i]) {
@@ -1322,11 +1237,11 @@ const Town = {
 
 				break;
 			case "buyQuiver":
-				bowCheck = Attack.usingBow();
+				let bowCheck = Attack.usingBow();
 
 				if (bowCheck) {
-					quiver = bowCheck === "bow" ? "aqv" : "cqv";
-					myQuiver = me.getItem(quiver, 1);
+					let quiver = bowCheck === "bow" ? "aqv" : "cqv";
+					let myQuiver = me.getItem(quiver, 1);
 					!!myQuiver && myQuiver.drop();
 					
 					npc = this.initNPC("Repair", "repair");
@@ -1346,12 +1261,11 @@ const Town = {
 	},
 
 	needRepair: function () {
-		let quiver, bowCheck, quantity,
-			repairAction = [],
+		let quiver, repairAction = [],
 			canAfford = me.gold >= me.getRepairCost();
 
 		// Arrow/Bolt check
-		bowCheck = Attack.usingBow();
+		let bowCheck = Attack.usingBow();
 
 		if (bowCheck) {
 			switch (bowCheck) {
@@ -1368,7 +1282,7 @@ const Town = {
 			if (!quiver) { // Out of arrows/bolts
 				repairAction.push("buyQuiver");
 			} else {
-				quantity = quiver.getStat(70);
+				let quantity = quiver.getStat(70);
 
 				if (typeof quantity === "number" && quantity * 100 / getBaseStat("items", quiver.classid, "maxstack") <= Config.RepairPercent) {
 					repairAction.push("buyQuiver");
@@ -1389,21 +1303,22 @@ const Town = {
 	},
 
 	getItemsForRepair: function (repairPercent, chargedItems) {
-		let i, charge, quantity, durability,
-			itemList = [],
+		let itemList = [],
 			item = me.getItem(-1, 1);
 
 		if (item) {
 			do {
-				if (!item.getFlag(0x400000)) { // Skip ethereal items
-					if (!item.getStat(152)) { // Skip indestructible items
+				// Skip ethereal items
+				if (!item.getFlag(0x400000)) {
+					// Skip indestructible items
+					if (!item.getStat(152)) {
 						switch (item.itemType) {
 						// Quantity check
 						case 42: // Throwing knives
 						case 43: // Throwing axes
 						case 44: // Javelins
 						case 87: // Amazon javelins
-							quantity = item.getStat(70);
+							let quantity = item.getStat(70);
 
 							if (typeof quantity === "number" && quantity * 100 / (getBaseStat("items", item.classid, "maxstack") + item.getStat(254)) <= repairPercent) { // Stat 254 = increased stack size
 								itemList.push(copyUnit(item));
@@ -1412,7 +1327,7 @@ const Town = {
 							break;
 						// Durability check
 						default:
-							durability = item.getStat(72);
+							let durability = item.getStat(72);
 
 							if (typeof durability === "number" && durability * 100 / item.getStat(73) <= repairPercent) {
 								itemList.push(copyUnit(item));
@@ -1424,11 +1339,11 @@ const Town = {
 
 					if (chargedItems) {
 						// Charged item check
-						charge = item.getStat(-2)[204];
+						let charge = item.getStat(-2)[204];
 
 						if (typeof (charge) === "object") {
 							if (charge instanceof Array) {
-								for (i = 0; i < charge.length; i += 1) {
+								for (let i = 0; i < charge.length; i += 1) {
 									if (charge[i] !== undefined && charge[i].hasOwnProperty("charges") && charge[i].charges * 100 / charge[i].maxcharges <= repairPercent) {
 										itemList.push(copyUnit(item));
 									}
@@ -1488,8 +1403,8 @@ const Town = {
 
 		if (!!me.getMerc()) {
 			// Cast BO on merc so he doesn't just die again. Only do this is you are a barb or actually have a cta. Otherwise its just a waste of time.
-			if (Config.MercWatch && (me.getSkill(sdk.skills.Shout, 1) || me.getSkill(sdk.skills.BattleOrders, 1) || Precast.checkCTA())) {
-				print("MercWatch precast");
+			if (Config.MercWatch && (Precast.precastables.Shout.have || Precast.precastables.BattleOrders.have || Precast.checkCTA())) {
+				console.log("MercWatch precast");
 				Pather.useWaypoint("random");
 				Precast.doPrecast(true);
 				Pather.useWaypoint(preArea);
@@ -1504,12 +1419,12 @@ const Town = {
 	needMerc: function () {
 		if (me.classic || !Config.UseMerc || me.gold < me.mercrevivecost) return false;
 
-		Misc.poll(() => me.gameReady && !me.getState(sdk.states.JustPortaled), 1000, 100);
+		Misc.poll(() => me.gameReady, 1000, 100);
 		// me.getMerc() might return null if called right after taking a portal, that's why there's retry attempts
 		for (let i = 0; i < 3; i += 1) {
 			let merc = me.getMerc();
 
-			if (merc && merc.mode !== 0 && merc.mode !== 12) {
+			if (!!merc && merc.mode !== 0 && merc.mode !== 12) {
 				return false;
 			}
 
@@ -1632,28 +1547,17 @@ const Town = {
 	},
 
 	getCorpse: function () {
-		let i, corpse, gid, coord,
-			corpseList = [],
+		let corpse, corpseList = [],
 			timer = getTickCount();
 
 		// No equipped items - high chance of dying in last game, force retries
 		if (!me.getItem(-1, 1)) {
-			for (i = 0; i < 5; i += 1) {
-				corpse = getUnit(0, me.name, 17);
-
-				if (corpse) {
-					break;
-				}
-
-				delay(500);
-			}
+			corpse = Misc.poll(() => getUnit(0, me.name, 17), 2500, 500);
 		} else {
 			corpse = getUnit(0, me.name, 17);
 		}
 
-		if (!corpse) {
-			return true;
-		}
+		if (!corpse) return true;
 
 		do {
 			if (corpse.dead && corpse.name === me.name && (getDistance(me.x, me.y, corpse.x, corpse.y) <= 20 || me.inTown)) {
@@ -1662,19 +1566,17 @@ const Town = {
 		} while (corpse.getNext());
 
 		while (corpseList.length > 0) {
-			if (me.dead) {
-				return false;
-			}
+			if (me.dead) return false;
 
-			gid = corpseList[0].gid;
+			let gid = corpseList[0].gid;
 
 			Pather.moveToUnit(corpseList[0]);
 			Misc.click(0, 0, corpseList[0]);
 			delay(500);
 
 			if (getTickCount() - timer > 3000) {
-				coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 4);
-				Pather.moveTo(coord.x, coord.y);
+				let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 4);
+				!!coord && Pather.moveTo(coord.x, coord.y);
 			}
 
 			if (getTickCount() - timer > 30000) {
@@ -1682,14 +1584,10 @@ const Town = {
 				D2Bot.stop();
 			}
 
-			if (!getUnit(0, -1, -1, gid)) {
-				corpseList.shift();
-			}
+			!getUnit(0, -1, -1, gid) && corpseList.shift();
 		}
 
-		if (me.gametype === 0) {
-			this.checkShard();
-		}
+		me.classic && this.checkShard();
 
 		return true;
 	},
@@ -1709,9 +1607,7 @@ const Town = {
 			} while (item.getNext());
 		}
 
-		if (!shard) {
-			return true;
-		}
+		if (!shard) return true;
 
 		item = me.getItem(-1, 1);
 
@@ -1747,10 +1643,6 @@ const Town = {
 	},
 
 	clearBelt: function () {
-		while (!me.gameReady) {
-			delay(100);
-		}
-
 		let item = me.getItem(-1, 2),
 			clearList = [];
 
@@ -1788,19 +1680,55 @@ const Town = {
 	},
 
 	clearScrolls: function () {
-		let items = me.getItemsEx();
+		let scrolls = me.getItemsEx().filter(function (scroll) { return scroll.isInInventory && scroll.itemType === sdk.itemtype.Scroll; });
+		let tpTome = scrolls.some(function (scroll) {
+			return scroll.classid === sdk.items.ScrollofTownPortal;
+		}) ? me.findItem(sdk.items.TomeofTownPortal, sdk.itemmode.inStorage, sdk.storage.Inventory) : false;
+		let idTome = scrolls.some(function (scroll) {
+			return scroll.classid === sdk.items.ScrollofIdentify;
+		}) ? me.findItem(sdk.items.TomeofIdentify, sdk.itemmode.inStorage, sdk.storage.Inventory) : false;
+		let currQuantity;
 
-		for (let i = 0; !!items && i < items.length; i += 1) {
-			if (items[i].location === 3 && items[i].mode === 0 && items[i].itemType === 22) {
-				// Might as well sell the item if already in shop
-				if (getUIFlag(0xC) || (Config.PacketShopping && getInteractedNPC() && getInteractedNPC().itemcount > 0)) {
-					print("clearInventory sell " + items[i].name);
-					Misc.itemLogger("Sold", items[i]);
-					items[i].sell();
-				} else {
-					Misc.itemLogger("Dropped", items[i], "clearScrolls");
-					items[i].drop();
+		for (let i = 0; !!scrolls && i < scrolls.length; i++) {
+			switch (scrolls[i].classid) {
+			case sdk.items.ScrollofTownPortal:
+				if (tpTome && tpTome.getStat(sdk.stats.Quantity) < 20) {
+					currQuantity = tpTome.getStat(sdk.stats.Quantity);
+					if (scrolls[i].toCursor()) {
+						clickItemAndWait(0, tpTome.x, tpTome.y, tpTome.location);
+
+						if (tpTome.getStat(sdk.stats.Quantity) > currQuantity) {
+							print('ÿc9clearScrollsÿc0 :: placed scroll in tp tome');
+							continue;
+						}
+					}
 				}
+
+				break;
+			case sdk.items.ScrollofIdentify:
+				if (idTome && idTome.getStat(sdk.stats.Quantity) < 20) {
+					currQuantity = idTome.getStat(sdk.stats.Quantity);
+					if (scrolls[i].toCursor()) {
+						clickItemAndWait(0, idTome.x, idTome.y, idTome.location);
+
+						if (idTome.getStat(sdk.stats.Quantity) > currQuantity) {
+							print('ÿc9clearScrollsÿc0 :: placed scroll in id tome');
+							continue;
+						}
+					}
+				}
+
+				break;
+			}
+
+			// Might as well sell the item if already in shop
+			if (getUIFlag(0xC) || (Config.PacketShopping && getInteractedNPC() && getInteractedNPC().itemcount > 0)) {
+				console.log("clearInventory sell " + scrolls[i].name);
+				Misc.itemLogger("Sold", scrolls[i]);
+				scrolls[i].sell();
+			} else {
+				Misc.itemLogger("Dropped", scrolls[i], "clearScrolls");
+				scrolls[i].drop();
 			}
 		}
 
@@ -1808,138 +1736,155 @@ const Town = {
 	},
 
 	clearInventory: function () {
-		let i, col, result, item, beltSize,
-			items = [];
-
+		console.log("ÿc8Start ÿc0:: ÿc8clearInventory");
+		let clearInvoTick = getTickCount();
 		this.checkQuestItems(); // only golden bird quest for now
 
-		// Return potions to belt
-		item = me.getItem(-1, 0);
-
-		if (item) {
-			do {
-				if (item.location === 3 && [76, 77, 78].indexOf(item.itemType) > -1) {
-					items.push(copyUnit(item));
-				}
-			} while (item.getNext());
-
-			beltSize = Storage.BeltSize();
-			col = this.checkColumns(beltSize);
-
-			// Sort from HP to RV
-			items.sort(function (a, b) {
-				return a.itemType - b.itemType;
-			});
-
-			while (items.length) {
-				item = items.shift();
-
-				for (i = 0; i < 4; i += 1) {
-					if (item.code.indexOf(Config.BeltColumn[i]) > -1 && col[i] > 0) {
-						if (col[i] === beltSize) { // Pick up the potion and put it in belt if the column is empty
-							if (item.toCursor()) {
-								clickItem(0, i, 0, 2);
-							}
-						} else {
-							clickItem(2, item.x, item.y, item.location); // Shift-click potion
-						}
-
-						delay(me.ping + 200);
-
-						col = this.checkColumns(beltSize);
-					}
-				}
+		// If we are at an npc already, open the window otherwise moving potions around fails
+		if (getUIFlag(sdk.uiflags.NPCMenu) && !getUIFlag(sdk.uiflags.Shop)) {
+			try {
+				!!getInteractedNPC() && Misc.useMenu(sdk.menu.Trade);
+			} catch (e) {
+				console.warn(e);
+				me.cancelUIFlags();
 			}
 		}
+		
+		// Remove potions in the wrong slot of our belt
+		this.clearBelt();
+
+		// Return potions from inventory to belt
+		let beltSize = Storage.BeltSize();
+		let potsInInventory = me.getItemsEx()
+			.filter((p) => p.isInInventory && [sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion].includes(p.itemType))
+			.sort((a, b) => a.itemType - b.itemType);
+
+		potsInInventory.length > 0 && console.debug("clearInventory: start pots clean-up");
+		// Start interating over all the pots we have in our inventory
+		potsInInventory.forEach(function (p) {
+			let moved = false;
+			// get free space in each slot of our belt
+			let freeSpace = Town.checkColumns(beltSize);
+			for (let i = 0; i < 4 && !moved; i += 1) {
+				// checking that current potion matches what we want in our belt
+				if (freeSpace[i] > 0 && p.code && p.code.startsWith(Config.BeltColumn[i])) {
+					console.log("Checking Config.BeltColumn[" + i + "], wanted [" + Config.BeltColumn[i] + "], currentPotToCheck :: " + p.code);
+					// Pick up the potion and put it in belt if the column is empty, and we don't have any other columns empty
+					// prevents shift-clicking potion into wrong column
+					// write this to use packets by default
+					if (freeSpace[i] === beltSize || freeSpace.some((spot) => spot === beltSize)) {
+						p.toCursor() && Misc.poll(() => me.itemoncursor, 1000, 100) && clickItem(sdk.clicktypes.click.Left, i, Math.max(0, (beltSize - freeSpace[i])), sdk.storage.Belt);
+					} else {
+						clickItemAndWait(sdk.clicktypes.click.ShiftLeft, p.x, p.y, p.location);
+					}
+					Misc.poll(() => !me.itemoncursor, 250 + me.ping, 80);
+					moved = Town.checkColumns(beltSize)[i] === freeSpace[i] - 1;
+					console.log("Old freeSpace: ", freeSpace);
+					console.log("New freeSpace: ", Town.checkColumns(beltSize));
+					console.log(p.code + " moved ? " + moved);
+				}
+				Cubing.cursorCheck();
+			}
+		});
 
 		// Cleanup remaining potions
-		item = me.getItem(-1, 0);
+		console.debug("clearInventory: start clean-up remaining pots");
+		let sellOrDrop = [];
+		potsInInventory = me.getItemsEx()
+			.filter((p) => p.isInInventory && [sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion].includes(p.itemType));
 
-		if (item) {
-			items = [
-				[], // array for hp
-				[] // array for mp
-			];
+		if (potsInInventory.length > 0) {
+			let hp = [], mp = [], rv = [];
+			potsInInventory.forEach(function (p) {
+				if (!p || p === undefined) return;
 
-			do {
-				if (item.itemType === 76) {
-					items[0].push(copyUnit(item));
+				switch (p.itemType) {
+				case sdk.itemtype.HealingPotion:
+					hp.push(copyUnit(p));
+
+					break;
+				case sdk.itemtype.ManaPotion:
+					mp.push(copyUnit(p));
+
+					break;
+				case sdk.itemtype.RejuvPotion:
+					rv.push(copyUnit(p));
+
+					break;
 				}
-
-				if (item.itemType === 77) {
-					items[1].push(copyUnit(item));
-				}
-			} while (item.getNext());
+			});
 
 			// Cleanup healing potions
-			while (items[0].length > Config.HPBuffer) {
-				items[0].shift().interact();
-				delay(200 + me.ping);
+			while (hp.length > Config.HPBuffer) {
+				sellOrDrop.push(hp.shift());
 			}
 
 			// Cleanup mana potions
-			while (items[1].length > Config.MPBuffer) {
-				items[1].shift().interact();
-				delay(200 + me.ping);
+			while (mp.length > Config.MPBuffer) {
+				sellOrDrop.push(mp.shift());
+			}
+
+			// Cleanup rejuv potions
+			while (rv.length > Config.RejuvBuffer) {
+				sellOrDrop.push(rv.shift());
 			}
 		}
 
 		// Any leftover items from a failed ID (crashed game, disconnect etc.)
-		items = Storage.Inventory.Compare(Config.Inventory);
-		let unsellables = [];
+		console.debug("clearInventory: start invo clean-up");
+		let items = (Storage.Inventory.Compare(Config.Inventory) || []);
+		items.length > 0 && (items = items.filter(function (item) {
+			return (!!item && ([18, 41, 76, 77, 78].indexOf(item.itemType) === -1 // Don't drop tomes, keys or potions
+					&& item.sellable // Don't try to sell/drop quest-items
+					&& !Cubing.keepItem(item) // Don't throw cubing ingredients
+					&& !Runewords.keepItem(item) // Don't throw runeword ingredients
+					&& !CraftingSystem.keepItem(item) // Don't throw crafting system ingredients
+			));
+		}));
 
-		for (i = 0; !!items && i < items.length; i += 1) {
-			if ([18, 41, 76, 77, 78].indexOf(items[i].itemType) === -1 // Don't drop tomes, keys or potions
-					&& !items[i].questItem // Don't try to sell/drop quest-items
-					&& !Cubing.keepItem(items[i]) // Don't throw cubing ingredients
-					&& !Runewords.keepItem(items[i]) // Don't throw runeword ingredients
-					&& !CraftingSystem.keepItem(items[i]) // Don't throw crafting system ingredients
-			) {
-				result = Pickit.checkItem(items[i]).result;
+		items = (items.length > 0 ? items.concat(sellOrDrop) : sellOrDrop.slice(0));
+		items.length > 0 && items.forEach(function (item) {
+			if (!item || item === undefined) return;
+			let result = Pickit.checkItem(item).result;
+			let sold = false;
+			
+			switch (result) {
+			case 0: // Drop item
+				// Quest items and such, just a double check
+				if (!item.sellable) return;
 
-				switch (result) {
-				case 0: // Drop item
-					// Quest items and such
-					if ((getUIFlag(sdk.uiflags.Shop) || getUIFlag(sdk.uiflags.NPCMenu)) && (items[i].getItemCost(1) <= 1 || !items[i].isSellable)) {
-						unsellables.push(items[i]);
-						continue;
-					}
-
+				try {
 					// Might as well sell the item if already in shop
 					if (getUIFlag(sdk.uiflags.Shop) || (Config.PacketShopping && getInteractedNPC() && getInteractedNPC().itemcount > 0)) {
-						print("clearInventory sell " + items[i].name);
-						Misc.itemLogger("Sold", items[i]);
-						items[i].sell();
+						console.log("clearInventory sell " + item.name);
+						Misc.itemLogger("Sold", item);
+						item.sell() && (sold = true);
 					} else {
-						Misc.itemLogger("Dropped", items[i], "clearInventory");
-						items[i].drop();
+						Misc.itemLogger("Dropped", item, "clearInventory");
+						item.drop();
 					}
-
-					break;
-				case 4: // Sell item
-					try {
-						print("LowGold sell " + items[i].name);
-						this.initNPC("Shop", "clearInventory");
-						Misc.itemLogger("Sold", items[i]);
-						items[i].sell();
-					} catch (e) {
-						print(e);
-					}
-
-					break;
+				} catch (e) {
+					console.warn(e);
 				}
-			}
-		}
 
-		unsellables.length > 0 && unsellables.forEach(function (el) {
-			try {
-				console.log("clearInventory dropped: " + el.name);
-				Misc.itemLogger("Dropped", el, "clearInventory");
-				el.drop();
-			} catch (e) {
-				console.debug(e);
+				break;
+			case 4: // Sell item
+				try {
+					console.log("LowGold sell " + item.name);
+					this.initNPC("Shop", "clearInventory");
+					Misc.itemLogger("Sold", item);
+					item.sell() && (sold = true);
+				} catch (e) {
+					console.warn(e);
+				}
+
+				break;
 			}
+
+			!!sold && delay(250 + me.ping);
 		});
+
+		console.log("ÿc8Exit clearInventory ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - clearInvoTick).toISOString().slice(11, -5)));
 
 		return true;
 	},
@@ -2082,11 +2027,9 @@ const Town = {
 	},
 
 	moveToSpot: function (spot) {
-		this.telekinesis = !!(me.getSkill(sdk.skills.Telekinesis, 1));
-
 		let townSpot,
-			longRange = (!this.telekinesis && spot === "waypoint"),
-			tkRange = (this.telekinesis && ["stash", "portalspot", "waypoint"].includes(spot));
+			longRange = (!Skill.haveTK && spot === "waypoint"),
+			tkRange = (Skill.haveTK && ["stash", "portalspot", "waypoint"].includes(spot));
 
 		if (!this.act[me.act - 1].hasOwnProperty("spot") || !this.act[me.act - 1].spot.hasOwnProperty(spot)) {
 			return false;
@@ -2098,7 +2041,6 @@ const Town = {
 			return false;
 		}
 
-
 		if (longRange) {
 			let path = getPath(me.area, townSpot[0], townSpot[1], me.x, me.y, 1, 8);
 
@@ -2108,10 +2050,10 @@ const Town = {
 		}
 
 		for (let i = 0; i < townSpot.length; i += 2) {
-			//print("moveToSpot: " + spot + " from " + me.x + ", " + me.y);
+			//console.debug("moveToSpot: " + spot + " from " + me.x + ", " + me.y);
 
 			if (tkRange) {
-				Pather.moveNear(townSpot[0], townSpot[1], 20);
+				Pather.moveNear(townSpot[0], townSpot[1], 19);
 			} else if (getDistance(me, townSpot[i], townSpot[i + 1]) > 2) {
 				Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, true);
 			}
@@ -2138,6 +2080,7 @@ const Town = {
 				break;
 			case "waypoint":
 				if (!!getUnit(2, "waypoint")) {
+					!Skill.haveTK && getUnit(2, "waypoint").distance > 5 && Pather.moveToUnit(getUnit(2, "waypoint"));
 					return true;
 				}
 
@@ -2158,17 +2101,28 @@ const Town = {
 		let towns = [1, 40, 75, 103, 109];
 
 		if (!me.inTown) {
-			if (!Pather.makePortal(true)) {
-				console.warn("Town.goToTown: Failed to make TP");
-			}
-
-			if (!me.inTown && !Pather.usePortal(null, me.name)) {
-				throw new Error("Town.goToTown: Failed to take TP");
+			if (!me.inTown) {
+				try {
+					if (!Pather.makePortal(true)) console.warn("Town.goToTown: Failed to make TP");
+					if (!me.inTown && !Pather.usePortal(null, me.name)) console.warn("Town.goToTown: Failed to take TP");
+					if (!me.inTown && !Pather.usePortal(sdk.areas.townOf(me.area))) throw new Error("Town.goToTown: Failed to take TP");
+				} catch (e) {
+					let tpTool = this.getTpTool();
+					if (!tpTool && Misc.getPlayerCount() <= 1) {
+						Misc.errorReport(new Error("Town.goToTown: Failed to go to town and no tps available. Restart."));
+						scriptBroadcast("quit");
+					} else {
+						let p = getUnit(2, "portal");
+						console.debug(p);
+						!!p && Misc.click(0, 0, p) && delay(100);
+						console.log("inTown? " + me.inTown);
+					}
+				}
 			}
 		}
 
 		if (!act) return true;
-		if (act < 1 || act > 5) { throw new Error("Town.goToTown: Invalid act"); }
+		if (act < 1 || act > 5) throw new Error("Town.goToTown: Invalid act");
 		if (act > me.highestAct) return false;
 
 		if (act !== me.act) {
@@ -2183,6 +2137,7 @@ const Town = {
 	},
 
 	visitTown: function (repair = false) {
+		console.log("ÿc8Start ÿc0:: ÿc8visitTown");
 		if (me.inTown) {
 			this.doChores();
 			this.move("stash");
@@ -2195,7 +2150,8 @@ const Town = {
 		let preArea = me.area,
 			preAct = me.act;
 
-		try { // not an essential function -> handle thrown errors
+		// not an essential function -> handle thrown errors
+		try {
 			this.goToTown();
 		} catch (e) {
 			return false;
@@ -2206,11 +2162,16 @@ const Town = {
 		me.act !== preAct && this.goToTown(preAct);
 		this.move("portalspot");
 
-		if (!Pather.usePortal(preArea, me.name)) { // this part is essential
-			throw new Error("Town.visitTown: Failed to go back from town");
+		if (!Pather.usePortal(null, me.name)) {
+			try {
+				Pather.usePortal(preArea, me.name);
+			} catch (e) {
+				throw new Error("Town.visitTown: Failed to go back from town");
+			}
 		}
 
 		Config.PublicMode && Pather.makePortal();
+		console.log("ÿc8End ÿc0:: ÿc8visitTown - currentArea: " + Pather.getAreaName(me.area));
 
 		return true;
 	}

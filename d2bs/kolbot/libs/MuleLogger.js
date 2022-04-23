@@ -17,68 +17,22 @@ const MuleLogger = {
 
 			Individual entries are separated with a comma.
 		*/
-		
 	},
 
 	LogGame: ["", ""], // ["gamename", "password"]
-	LogNames: true, // Put account/character name on the picture
+	LogNames: false, // Put account/character name on the picture
 	LogItemLevel: true, // Add item level to the picture
 	LogEquipped: false, // include equipped items
 	LogMerc: false, // include items merc has equipped (if alive)
 	SaveScreenShot: false, // Save pictures in jpg format (saved in 'Images' folder)
-	IngameTime: rand(180, 210), // (180, 210) to avoid RD, increase it to (7230, 7290) for mule perming
-
-	// don't edit
-	getItemDesc: function (unit, logIlvl) {
-		let i, desc, index,
-			stringColor = "";
-
-		if (logIlvl === undefined) {
-			logIlvl = this.LogItemLevel;
-		}
-
-		desc = unit.description.split("\n");
-
-		// Lines are normally in reverse. Add color tags if needed and reverse order.
-		for (i = 0; i < desc.length; i += 1) {
-			if (desc[i].indexOf(getLocaleString(3331)) > -1) { // Remove sell value
-				desc.splice(i, 1);
-
-				i -= 1;
-			} else {
-				// Add color info
-				if (!desc[i].match(/^(y|ÿ)c/)) {
-					desc[i] = stringColor + desc[i];
-				}
-
-				// Find and store new color info
-				index = desc[i].lastIndexOf("ÿc");
-
-				if (index > -1) {
-					stringColor = desc[i].substring(index, index + "ÿ".length + 2);
-				}
-			}
-
-			desc[i] = desc[i].replace(/(y|ÿ)c([0-9!"+<:;.*])/g, "\\xffc$2").replace("ÿ", "\\xff", "g");
-		}
-
-		if (logIlvl && desc[desc.length - 1]) {
-			desc[desc.length - 1] = desc[desc.length - 1].trim() + " (" + unit.ilvl + ")";
-		}
-
-		desc = desc.reverse().join("\\n");
-
-		return desc;
-	},
+	IngameTime: rand(60, 120), // (180, 210) to avoid RD, increase it to (7230, 7290) for mule perming
 
 	inGameCheck: function () {
-		let tick;
-
 		if (getScript("D2BotMuleLog.dbj") && this.LogGame[0] && me.gamename.match(this.LogGame[0], "i")) {
 			print("ÿc4MuleLoggerÿc0: Logging items on " + me.account + " - " + me.name + ".");
 			D2Bot.printToConsole("MuleLogger: Logging items on " + me.account + " - " + me.name + ".", 7);
 			this.logChar();
-			tick = getTickCount() + rand(1500, 1750) * 1000; // trigger anti-idle every ~30 minutes
+			let tick = getTickCount() + rand(1500, 1750) * 1000; // trigger anti-idle every ~30 minutes
 
 			while ((getTickCount() - me.gamestarttime) < this.IngameTime * 1000) {
 				me.overhead("ÿc2Log items done. ÿc4Stay in " + "ÿc4game more:ÿc0 " + Math.floor(this.IngameTime - (getTickCount() - me.gamestarttime) / 1000) + " sec");
@@ -102,9 +56,7 @@ const MuleLogger = {
 	load: function (hash) {
 		let filename = "data/secure/" + hash + ".txt";
 
-		if (!FileTools.exists(filename)) {
-			throw new Error("File " + filename + " does not exist!");
-		}
+		if (!FileTools.exists(filename)) throw new Error("File " + filename + " does not exist!");
 
 		return FileTools.readText(filename);
 	},
@@ -121,17 +73,14 @@ const MuleLogger = {
 			include("common/util.js");
 		}
 
-		if (logIlvl === undefined) {
-			logIlvl = this.LogItemLevel;
-		}
+		logIlvl === undefined && (logIlvl = this.LogItemLevel);
 
-		let i, code, desc, sock,
+		let code,
 			header = "",
-			color = -1,
 			name = unit.itemType + "_" + unit.fname.split("\n").reverse().join(" ").replace(/(y|ÿ)c[0-9!"+<:;.*]|\/|\\/g, "").trim();
 
-		desc = this.getItemDesc(unit, logIlvl) + "$" + unit.gid + ":" + unit.classid + ":" + unit.location + ":" + unit.x + ":" + unit.y + (unit.getFlag(0x400000) ? ":eth" : "");
-		color = unit.getColor();
+		let desc = this.getItemDesc(unit, logIlvl) + "$" + unit.gid + ":" + unit.classid + ":" + unit.location + ":" + unit.x + ":" + unit.y + (unit.getFlag(0x400000) ? ":eth" : "");
+		let color = unit.getColor();
 
 		switch (unit.quality) {
 		case 5: // Set
@@ -250,7 +199,7 @@ const MuleLogger = {
 
 			break;
 		case 7: // Unique
-			for (i = 0; i < 401; i += 1) {
+			for (let i = 0; i < 401; i += 1) {
 				if (unit.code === getBaseStat(17, i, 4).trim() && unit.fname.split("\n").reverse()[0].indexOf(getLocaleString(getBaseStat(17, i, 2))) > -1) {
 					code = getBaseStat(17, i, "invfile");
 
@@ -262,26 +211,19 @@ const MuleLogger = {
 		}
 
 		if (!code) {
-			if (["ci2", "ci3"].indexOf(unit.code) > -1) { // Tiara/Diadem
-				code = unit.code;
-			} else {
-				code = getBaseStat(0, unit.classid, 'normcode') || unit.code;
-			}
-
+			// Tiara/Diadem
+			code = ["ci2", "ci3"].includes(unit.code) ? unit.code : (getBaseStat(0, unit.classid, 'normcode') || unit.code);
 			code = code.replace(" ", "");
-
-			if ([10, 12, 58, 82, 83, 84].indexOf(unit.itemType) > -1) {
-				code += (unit.gfx + 1);
-			}
+			[10, 12, 58, 82, 83, 84].includes(unit.itemType) && (code += (unit.gfx + 1));
 		}
 
-		sock = unit.getItems();
+		let sock = unit.getItemsEx();
 
-		if (sock) {
-			for (i = 0; i < sock.length; i += 1) {
+		if (sock.length) {
+			for (let i = 0; i < sock.length; i += 1) {
 				if (sock[i].itemType === 58) {
 					desc += "\n\n";
-					desc += this.getItemDesc(sock[i]);
+					desc += Misc.getItemDesc(sock[i], logIlvl);
 				}
 			}
 		}
@@ -301,22 +243,15 @@ const MuleLogger = {
 			delay(100);
 		}
 
-		if (logIlvl === undefined) {
-			logIlvl = this.LogItemLevel;
-		}
+		let items = me.getItemsEx();
 
-		if (logName === undefined) {
-			logName = this.LogNames;
-		}
+		if (!items.length) return;
 
-		if (saveImg === undefined) {
-			saveImg = this.SaveScreenShot;
-		}
+		logIlvl === undefined && (logIlvl = this.LogItemLevel);
+		logName === undefined && (logName = this.LogNames);
+		saveImg === undefined && (saveImg = this.SaveScreenShot);
 
-		let i, folder, string, parsedItem,
-			items = me.getItems(),
-			realm = me.realm || "Single Player",
-			merc,
+		let folder, realm = me.realm || "Single Player",
 			finalString = "";
 
 		if (!FileTools.exists("mules/" + realm)) {
@@ -331,69 +266,39 @@ const MuleLogger = {
 			folder.create(me.account);
 		}
 
-		if (!items || !items.length) {
-			return;
-		}
+		items.sort((a, b) => b.itemType - a.itemType);
 
-		function itemSort(a, b) {
-			return b.itemType - a.itemType;
-		}
-
-		items.sort(itemSort);
-
-		for (i = 0; i < items.length; i += 1) {
+		for (let i = 0; i < items.length; i += 1) {
 			if ((this.LogEquipped || items[i].mode === 0) && (items[i].quality !== 2 || !Misc.skipItem(items[i].classid))) {
-				parsedItem = this.logItem(items[i], logIlvl);
+				let parsedItem = this.logItem(items[i], logIlvl);
 
 				// Log names to saved image
-				if (logName) {
-					parsedItem.header = (me.account || "Single Player") + " / " + me.name;
-				}
-
-				if (saveImg) {
-					D2Bot.saveItem(parsedItem);
-				}
-
+				logName && (parsedItem.header = (me.account || "Single Player") + " / " + me.name);
+				// Save image to kolbot/images/
+				saveImg && D2Bot.saveItem(parsedItem);
 				// Always put name on Char Viewer items
-				if (!parsedItem.header) {
-					parsedItem.header = (me.account || "Single Player") + " / " + me.name;
-				}
-
+				!parsedItem.header && (parsedItem.header = (me.account || "Single Player") + " / " + me.name);
 				// Remove itemtype_ prefix from the name
 				parsedItem.title = parsedItem.title.substr(parsedItem.title.indexOf("_") + 1);
+				items[i].mode === 1 && (parsedItem.title += " (equipped)");
 
-				if (items[i].mode === 1) {
-					parsedItem.title += " (equipped)";
-				}
-
-				string = JSON.stringify(parsedItem);
+				let string = JSON.stringify(parsedItem);
 				finalString += (string + "\n");
 			}
 		}
 
 		if (this.LogMerc) {
-			for (i = 0; i < 3; i += 1) {
-				merc = me.getMerc();
-
-				if (merc) {
-					break;
-				}
-
-				delay(50);
-			}
+			let merc = Misc.poll(() => me.getMerc(), 1000, 100);
 
 			if (merc) {
-				items = merc.getItems();
+				let mercItems = merc.getItemsEx();
 
-				for (i = 0; i < items.length; i += 1) {
-					parsedItem = this.logItem(items[i]);
+				for (let i = 0; i < mercItems.length; i += 1) {
+					let parsedItem = this.logItem(mercItems[i]);
 					parsedItem.title += " (merc)";
-					string = JSON.stringify(parsedItem);
+					let string = JSON.stringify(parsedItem);
 					finalString += (string + "\n");
-
-					if (this.SaveScreenShot) {
-						D2Bot.saveItem(parsedItem);
-					}
+					this.SaveScreenShot && D2Bot.saveItem(parsedItem);
 				}
 			}
 		}

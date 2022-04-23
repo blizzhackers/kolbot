@@ -8,8 +8,10 @@ function ClearAnyArea() {
 	Town.doChores();
 
 	for (let i = 0; i < Config.ClearAnyArea.AreaList.length; i += 1) {
-		if (Pather.journeyTo(Config.ClearAnyArea.AreaList[i])) {
-			Attack.clearLevel(Config.ClearType);
+		try {
+			Pather.journeyTo(Config.ClearAnyArea.AreaList[i]) && Attack.clearLevel(Config.ClearType);
+		} catch (e) {
+			console.warn(e);
 		}
 	}
 

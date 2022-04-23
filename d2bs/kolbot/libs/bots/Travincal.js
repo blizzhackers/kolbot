@@ -5,7 +5,7 @@
 */
 
 function Travincal() {
-	let i, orgX, orgY, coords;
+	let coords;
 
 	this.buildList = function (checkColl) {
 		let monsterList = [],
@@ -13,7 +13,7 @@ function Travincal() {
 
 		if (monster) {
 			do {
-				if ([345, 346, 347].indexOf(monster.classid) > -1 && Attack.checkMonster(monster) && (!checkColl || !checkCollision(me, monster, 0x1))) {
+				if ([345, 346, 347].includes(monster.classid) && monster.attackable && (!checkColl || !checkCollision(me, monster, 0x1))) {
 					monsterList.push(copyUnit(monster));
 				}
 			} while (monster.getNext());
@@ -26,8 +26,8 @@ function Travincal() {
 	Pather.useWaypoint(83);
 	Precast.doPrecast(true);
 
-	orgX = me.x;
-	orgY = me.y;
+	let orgX = me.x;
+	let orgY = me.y;
 
 	if (Config.Travincal.PortalLeech) {
 		Pather.moveTo(orgX + 85, orgY - 139);
@@ -43,7 +43,7 @@ function Travincal() {
 	if (me.getSkill(143, 0) && !me.getSkill(54, 0) && !me.getStat(97, 54)) {
 		coords = [60, -53, 64, -72, 78, -72, 74, -88];
 
-		for (i = 0; i < coords.length; i += 2) {
+		for (let i = 0; i < coords.length; i += 2) {
 			if (i % 4 === 0) {
 				Pather.moveTo(orgX + coords[i], orgY + coords[i + 1]);
 			} else {

@@ -117,13 +117,9 @@ Unit.prototype.__defineGetter__("attacking",
 
 // Open NPC menu
 Unit.prototype.openMenu = function (addDelay) {
-	if (Config.PacketShopping) {
-		return Packet.openMenu(this);
-	}
+	if (Config.PacketShopping) return Packet.openMenu(this);
 
-	if (this.type !== 1) {
-		throw new Error("Unit.openMenu: Must be used on NPCs.");
-	}
+	if (this.type !== 1) throw new Error("Unit.openMenu: Must be used on NPCs.");
 
 	addDelay === undefined && (addDelay = 0);
 
@@ -423,10 +419,49 @@ me.cancelUIFlags = function () {
 
 	for (let i = 0; i < flags.length; i++) {
 		if (getUIFlag(flags[i]) && me.cancel()) {
-			delay(500 + me.ping);
+			delay(250);
 			i = 0; // Reset
 		}
 	}
+};
+
+me.switchWeapons = function (slot) {
+	if (this.gametype === 0 || (slot !== undefined && this.weaponswitch === slot)) {
+		return true;
+	}
+
+	while (typeof me !== 'object') {
+		delay(10);
+	}
+
+	let originalSlot = this.weaponswitch;
+	let switched = false;
+	let packetHandler = (bytes) => bytes.length > 0 && bytes[0] === 0x97 && (switched = true) && false; // false to not block
+	addEventListener('gamepacket', packetHandler);
+	try {
+		for (let i = 0; i < 10; i += 1) {
+			for (let j = 10; --j && me.idle;) {
+				delay(3);
+			}
+
+			i > 0 && delay(Math.min(1 + (me.ping * 1.5), 10));
+			!switched && sendPacket(1, 0x60); // Swap weapons
+
+			let tick = getTickCount();
+			while (getTickCount() - tick < 250 + (me.ping * 5)) {
+				if (switched || originalSlot !== me.weaponswitch) {
+					return true;
+				}
+
+				delay(3);
+			}
+			// Retry
+		}
+	} finally {
+		removeEventListener('gamepacket', packetHandler);
+	}
+
+	return false;
 };
 
 /**
@@ -445,7 +480,7 @@ me.cancelUIFlags = function () {
  */
 Unit.prototype.checkItem = function (itemInfo) {
 	if (typeof itemInfo !== "object") {
-		return { have: false, item: null};
+		return {have: false, item: null};
 	}
 
 	let itemObj = Object.assign({}, {
@@ -1438,18 +1473,6 @@ Unit.prototype.getRes = function (type, difficulty) {
 };
 
 {
-	let __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-		if (pack || arguments.length === 2) {
-			for (var i = 0, l = from.length, ar; i < l; i++) {
-				if (ar || !(i in from)) {
-					if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-					ar[i] = from[i];
-				}
-			}
-		}
-		return to.concat(ar || Array.prototype.slice.call(from));
-	};
-
 	let coords = function () {
 		if (Array.isArray(this) && this.length > 1) {
 			return [this[0], this[1]];
@@ -1465,7 +1488,7 @@ Unit.prototype.getRes = function (type, difficulty) {
 	Object.defineProperties(Object.prototype, {
 		distance: {
 			get: function () {
-				return !me.gameReady ? NaN : Math.round(getDistance.apply(null, __spreadArray([me], coords.apply(this))));
+				return !me.gameReady ? NaN : Math.round(getDistance.apply(null, [me, ...coords.apply(this)]));
 			},
 			enumerable: false,
 		},
@@ -1658,6 +1681,7 @@ Object.defineProperties(Unit.prototype, {
 	sellable: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
+			if (this.getItemCost(1) <= 1) return false;
 			return !this.questItem &&
 				[sdk.items.quest.KeyofTerror, sdk.items.quest.KeyofHate, sdk.items.quest.KeyofDestruction, sdk.items.quest.DiablosHorn,
 					sdk.items.quest.BaalsEye, sdk.items.quest.MephistosBrain, sdk.items.quest.TokenofAbsolution, sdk.items.quest.TwistedEssenceofSuffering,
@@ -1998,28 +2022,24 @@ Object.defineProperties(me, {
 	},
 });
 
+// something in here is causing demon imps in barricade towers to be skipped - todo: figure out what
 Unit.prototype.__defineGetter__('attackable', function () {
 	if (this === undefined || !copyUnit(this).x) return false;
 	if (this.type > 1) return false;
-	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) {
-		return true;
-	}
+	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) return true;
 	// Dead monster
-	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) {
-		return false;
-	}
+	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) return false;
 	// Friendly monster/NPC
 	if (this.getStat(172) === 2) return false;
-
 	// catapults were returning a level of 0 and hanging up clear scripts
 	if (this.charlvl < 1) return false;
-
 	// neverCount base stat - hydras, traps etc.
-	if (getBaseStat("monstats", this.classid, "neverCount")) return false;
-
+	if (Attack.monsterObjects.indexOf(this.classid) === -1
+		&& getBaseStat("monstats", this.classid, "neverCount")) {
+		return false;
+	}
 	// Monsters that are in flight
 	if ([110, 111, 112, 113, 144, 608].includes(this.classid) && this.mode === 8) return false;
-
 	// Monsters that are Burrowed/Submerged
 	if ([68, 69, 70, 71, 72, 258, 258, 259, 260, 261, 262, 263].includes(this.classid) && this.mode === 14) return false;
 
@@ -2029,29 +2049,19 @@ Unit.prototype.__defineGetter__('attackable', function () {
 Unit.prototype.__defineGetter__('curseable', function () {
 	// must be player or monster
 	if (this === undefined || !copyUnit(this).x || this.type > 1) return false;
-
 	// attract can't be overridden
 	if (this.getState(sdk.states.Attract)) return false;
-
 	// "Possessed"
 	if (!!this.name && !!this.name.includes(getLocaleString(11086))) return false;
-
-	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) {
-		return true;
-	}
+	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) return true;
 	// Dead monster
-	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) {
-		return false;
-	}
+	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) return false;
 	// Friendly monster/NPC
 	if (this.getStat(172) === 2) return false;
-    
 	// catapults were returning a level of 0 and hanging up clear scripts
 	if (this.charlvl < 1) return false;
-
 	// Monsters that are in flight
 	if ([110, 111, 112, 113, 144, 608].includes(this.classid) && this.mode === 8) return false;
-
 	// Monsters that are Burrowed/Submerged
 	if ([68, 69, 70, 71, 72, 258, 258, 259, 260, 261, 262, 263].includes(this.classid) && this.mode === 14) return false;
 

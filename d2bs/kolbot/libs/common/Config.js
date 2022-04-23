@@ -111,6 +111,9 @@ let Config = {
 		}
 	},
 
+	// dev
+	DebugMode: false,
+
 	// Time
 	StartDelay: 0,
 	PickDelay: 0,

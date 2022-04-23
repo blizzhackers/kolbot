@@ -68,8 +68,9 @@ new Overrides.Override(Starter, Starter.receiveCopyData, function(orignal, mode,
 		}
 		Starter.gameInfo.gameName = (me.gamename || "");
 		Starter.gameInfo.gamePass = (me.gamepassword || "");
+	} else {
+		orignal(mode, msg);
 	}
-	orignal(mode, msg);
 }).apply();
 
 function joinCheck (leader) {
@@ -434,7 +435,7 @@ function main () {
 					DataFile.updateStats("runs", Starter.gameCount);
 				}
 
-				D2Bot.updateStatus("Game: " + me.gamename + Starter.timer(Starter.gameStart));
+				D2Bot.updateStatus(Starter.profileInfo.charName + " | Game: " + (me.gamename || "singleplayer") + Starter.timer(Starter.gameStart));
 			}
 
 			delay(1000);

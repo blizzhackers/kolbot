@@ -241,14 +241,14 @@ function DeveloperMode() {
 			userAddon = !userAddon;
 			me.overhead("userAddon set to " + userAddon);
 
-			break;		
+			break;
 		case "run":
 			if (msgList.length < 2) {
 				print("ÿc1Missing arguments");
 				break;
 			}
 
-			action =  msgList[1];
+			action = msgList[1];
 
 			break;
 		case "done":

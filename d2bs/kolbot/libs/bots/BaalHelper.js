@@ -5,28 +5,8 @@
 */
 
 function BaalHelper() {
-	if (Config.BaalHelper.KillNihlathak) {
-		include("bots/Nihlathak.js");
-
-		try {
-			Nihlathak.call();
-		} catch (e) {
-			print(e);
-		}
-	}
-
-	if (Config.BaalHelper.FastChaos) {
-		include("bots/FastDiablo.js");
-
-		try {
-			Town.goToTown();
-			FastDiablo.call();
-		} catch (e2) {
-			print(e2);
-		}
-	}
-
-	let i, party, entrance;
+	Config.BaalHelper.KillNihlathak && Loader.runScript("Nihlathak");
+	Config.BaalHelper.FastChaos && Loader.runScript("FastDiablo");
 
 	Town.goToTown(5);
 	Town.doChores();
@@ -34,17 +14,14 @@ function BaalHelper() {
 	Precast.doPrecast(true);
 
 	if (Config.BaalHelper.SkipTP) {
-		if (me.area !== 129) {
-			Pather.useWaypoint(129);
-		}
+		me.area !== 129 && Pather.useWaypoint(129);
 
-		if (!Pather.moveToExit([130, 131], false)) {
-			throw new Error("Failed to move to WSK3.");
-		}
+		if (!Pather.moveToExit([130, 131], false)) throw new Error("Failed to move to WSK3.");
 
+		let i;
 		WSKLoop:
 		for (i = 0; i < Config.BaalHelper.Wait; i += 1) {
-			party = getParty();
+			let party = getParty();
 
 			if (party) {
 				do {
@@ -57,38 +34,18 @@ function BaalHelper() {
 			delay(1000);
 		}
 
-		if (i === Config.BaalHelper.Wait) {
-			throw new Error("Player wait timed out (" + (Config.Leader ? "Leader not" : "No players") + " found in Throne)");
-		}
+		if (i === Config.BaalHelper.Wait) throw new Error("Player wait timed out (" + (Config.Leader ? "Leader not" : "No players") + " found in Throne)");
 
-		for (i = 0; i < 3; i += 1) {
-			entrance = getUnit(5, 82);
+		let entrance = Misc.poll(() => getUnit(5, 82), 1000, 200);
+		entrance && Pather.moveTo(entrance.x > me.x ? entrance.x - 5 : entrance.x + 5, entrance.y > me.y ? entrance.y - 5 : entrance.y + 5);
 
-			if (entrance) {
-				break;
-			}
-
-			delay(200);
-		}
-
-		if (entrance) {
-			Pather.moveTo(entrance.x > me.x ? entrance.x - 5 : entrance.x + 5, entrance.y > me.y ? entrance.y - 5 : entrance.y + 5);
-		}
-
-		if (!Pather.moveToExit([130, 131], false)) {
-			throw new Error("Failed to move to WSK3.");
-		}
-
-		if (!Pather.moveToExit(131, true)) {
-			throw new Error("Failed to move to Throne of Destruction.");
-		}
-
-		if (!Pather.moveTo(15113, 5040)) {
-			D2Bot.printToConsole("path fail");
-		}
+		if (!Pather.moveToExit([130, 131], false)) throw new Error("Failed to move to WSK3.");
+		if (!Pather.moveToExit(131, true)) throw new Error("Failed to move to Throne of Destruction.");
+		if (!Pather.moveTo(15113, 5040)) D2Bot.printToConsole("path fail");
 	} else {
 		Pather.useWaypoint(109);
 		Town.move("portalspot");
+		let i;
 
 		for (i = 0; i < Config.BaalHelper.Wait; i += 1) {
 			if (Pather.getPortal(131, Config.Leader || null) && Pather.usePortal(131, Config.Leader || null)) {
@@ -98,9 +55,7 @@ function BaalHelper() {
 			delay(1000);
 		}
 
-		if (i === Config.BaalHelper.Wait) {
-			throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
-		}
+		if (i === Config.BaalHelper.Wait) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
 	}
 
 	if (Config.BaalHelper.DollQuit && getUnit(1, 691)) {

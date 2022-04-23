@@ -8,25 +8,13 @@ function Andariel () {
 	this.killAndariel = function () {
 		let target = getUnit(1, 156);
 
-		if (!target) {
-			throw new Error("Andariel not found.");
-		}
+		if (!target) throw new Error("Andariel not found.");
 
-		if (Config.MFLeader) {
-			Pather.makePortal();
-			say("kill " + 156);
-		}
+		Config.MFLeader && Pather.makePortal() && say("kill " + 156);
 
-		for (let i = 0; i < 300; i += 1) {
+		for (let i = 0; i < 300 && target.attackable; i += 1) {
 			ClassAttack.doAttack(target);
-
-			if (target.dead) {
-				return true;
-			}
-
-			if (getDistance(me, target) <= 10) {
-				Pather.moveTo(me.x > 22548 ? 22535 : 22560, 9520);
-			}
+			target.distance <= 10 && Pather.moveTo(me.x > 22548 ? 22535 : 22560, 9520);
 		}
 
 		return target.dead;
@@ -36,9 +24,7 @@ function Andariel () {
 	Pather.useWaypoint(35);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToExit([36, 37], true)) {
-		throw new Error("Failed to move to Catacombs Level 4");
-	}
+	if (!Pather.moveToExit([36, 37], true)) throw new Error("Failed to move to Catacombs Level 4");
 
 	Pather.moveTo(22549, 9520);
 	me.sorceress && me.classic ? this.killAndariel() : Attack.kill(sdk.monsters.Andariel);

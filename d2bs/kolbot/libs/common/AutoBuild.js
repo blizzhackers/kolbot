@@ -20,25 +20,23 @@ if (!isIncluded("common/Prototypes.js")) { include("common/Prototypes.js"); }
 if (!isIncluded("common/Runewords.js")) { include("common/Runewords.js"); }
 
 const AutoBuild = new function AutoBuild () {
-
 	if (Config.AutoBuild.DebugMode) { Config.AutoBuild.Verbose = true; }
 
 	let debug = !!Config.AutoBuild.DebugMode,
 		verbose = !!Config.AutoBuild.Verbose,
 		configUpdateLevel = 0;
 
-
 	// Apply all Update functions from the build template in order from level 1 to me.charlvl.
 	// By reapplying all of the changes to the Config object, we preserve
 	// the state of the Config file without altering the saved char config.
 	function applyConfigUpdates () {
-		if (debug) { this.print("Updating Config from level " + configUpdateLevel + " to " + me.charlvl);}
+		debug && this.print("Updating Config from level " + configUpdateLevel + " to " + me.charlvl);
 		while (configUpdateLevel < me.charlvl) {
 			configUpdateLevel += 1;
+			Skill.init();
 			AutoBuildTemplate[configUpdateLevel].Update.apply(Config); // TODO: Make sure this works
 		}
 	}
-
 
 	function getBuildType () {
 		let build = Config.AutoBuild.Template;
@@ -49,11 +47,9 @@ const AutoBuild = new function AutoBuild () {
 		return build;
 	}
 
-
 	function getCurrentScript () {
 		return getScript(true).name.toLowerCase();
 	}
-
 
 	function getLogFilename () {
 		let d = new Date();
@@ -61,14 +57,12 @@ const AutoBuild = new function AutoBuild () {
 		return "logs/AutoBuild." + me.realm + "." + me.charname + "." + dateString + ".log";
 	}
 
-
 	function getTemplateFilename () {
 		let classname = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"][me.classid];
 		let build = getBuildType();
 		let template = "config/Builds/" + classname + "." + build + ".js";
 		return template.toLowerCase();
 	}
-
 
 	function initialize () {
 		let currentScript = getCurrentScript();
@@ -94,16 +88,13 @@ const AutoBuild = new function AutoBuild () {
 		applyConfigUpdates();
 	}
 
-
 	function levelUpHandler (obj) {
 		if (typeof obj === "object" && obj.hasOwnProperty("event") && obj.event === "level up") {
 			applyConfigUpdates();
 		}
 	}
 
-
 	function log (message) { FileTools.appendText(getLogFilename(), message + "\n"); }
-
 
 	// Only print to console from autobuildthread.js,
 	// but log from all scripts
@@ -114,7 +105,6 @@ const AutoBuild = new function AutoBuild () {
 		if (verbose) { print.call(this, result); }
 		if (debug) { log.call(this, result); }
 	}
-
 
 	this.print = myPrint;
 	this.initialize = initialize;

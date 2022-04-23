@@ -50,13 +50,11 @@ CraftingSystem.Teams = {
 
 // Get the Crafting System information for current profile
 CraftingSystem.getInfo = function () {
-	let i, j, info;
-
-	for (i in CraftingSystem.Teams) {
+	for (let i in CraftingSystem.Teams) {
 		if (CraftingSystem.Teams.hasOwnProperty(i)) {
-			for (j = 0; j < CraftingSystem.Teams[i].Collectors.length; j += 1) {
+			for (let j = 0; j < CraftingSystem.Teams[i].Collectors.length; j += 1) {
 				if (CraftingSystem.Teams[i].Collectors[j].toLowerCase() === me.profile.toLowerCase()) {
-					info = CraftingSystem.Teams[i];
+					let info = CraftingSystem.Teams[i];
 					info.collector = true;
 					info.worker = false;
 
@@ -64,9 +62,9 @@ CraftingSystem.getInfo = function () {
 				}
 			}
 
-			for (j = 0; j < CraftingSystem.Teams[i].Workers.length; j += 1) {
+			for (let j = 0; j < CraftingSystem.Teams[i].Workers.length; j += 1) {
 				if (CraftingSystem.Teams[i].Workers[j].toLowerCase() === me.profile.toLowerCase()) {
-					info = CraftingSystem.Teams[i];
+					let info = CraftingSystem.Teams[i];
 					info.collector = false;
 					info.worker = true;
 
@@ -87,12 +85,9 @@ CraftingSystem.check = false;
 CraftingSystem.inGame = false;
 
 CraftingSystem.outOfGameCheck = function () {
-	if (!CraftingSystem.check) {
-		return false;
-	}
+	if (!CraftingSystem.check) return false;
 
-	let worker,
-		info = CraftingSystem.getInfo();
+	let info = CraftingSystem.getInfo();
 
 	function scriptMsg(msg) {
 		let obj;
@@ -103,15 +98,13 @@ CraftingSystem.outOfGameCheck = function () {
 			return false;
 		}
 
-		if (obj.name === "RequestWorker") {
-			scriptBroadcast(JSON.stringify({name: "WorkerName", value: worker.name}));
-		}
+		obj.name === "RequestWorker" && scriptBroadcast(JSON.stringify({name: "WorkerName", value: worker.name}));
 
 		return true;
 	}
 
 	if (info && info.collector) {
-		worker = CraftingSystem.getWorker();
+		let worker = CraftingSystem.getWorker();
 
 		if (worker && worker.game) {
 			D2Bot.printToConsole("CraftingSystem: Transfering items.", 7);
@@ -145,18 +138,15 @@ CraftingSystem.outOfGameCheck = function () {
 };
 
 CraftingSystem.getWorker = function () {
-	let i,
-		rval = {
+	let rval = {
 			game: false,
 			name: false
 		},
 		info = CraftingSystem.getInfo();
 
-	function CheckEvent(mode, msg) {
-		let i;
-
+	function checkEvent(mode, msg) {
 		if (mode === 4) {
-			for (i = 0; i < info.CraftingGames.length; i += 1) {
+			for (let i = 0; i < info.CraftingGames.length; i += 1) {
 				if (info.CraftingGames[i] && msg.match(info.CraftingGames[i], "i")) {
 					rval.game = msg.split('/');
 
@@ -167,11 +157,11 @@ CraftingSystem.getWorker = function () {
 	}
 
 	if (info && info.collector) {
-		addEventListener('copydata', CheckEvent);
+		addEventListener('copydata', checkEvent);
 
 		rval.game = false;
 
-		for (i = 0; i < info.Workers.length; i += 1) {
+		for (let i = 0; i < info.Workers.length; i += 1) {
 			sendCopyData(null, info.Workers[i], 0, JSON.stringify({name: "GetGame", profile: me.profile}));
 			delay(100);
 
@@ -182,7 +172,7 @@ CraftingSystem.getWorker = function () {
 			}
 		}
 
-		removeEventListener('copydata', CheckEvent);
+		removeEventListener('copydata', checkEvent);
 
 		return rval;
 	}
@@ -195,11 +185,10 @@ CraftingSystem.getWorker = function () {
 // #############################################
 
 CraftingSystem.inGameCheck = function () {
-	let i,
-		info = CraftingSystem.getInfo();
+	let info = CraftingSystem.getInfo();
 
 	if (info && info.collector) {
-		for (i = 0; i < info.CraftingGames.length; i += 1) {
+		for (let i = 0; i < info.CraftingGames.length; i += 1) {
 			if (info.CraftingGames[i] && me.gamename.match(info.CraftingGames[i], "i")) {
 				CraftingSystem.dropItems();
 				me.cancel();
@@ -231,11 +220,10 @@ CraftingSystem.validItem = function (item) {
 
 // Check if the item should be picked for crafting
 CraftingSystem.checkItem = function (item) {
-	let i,
-		info = CraftingSystem.getInfo();
+	let info = CraftingSystem.getInfo();
 
 	if (info) {
-		for (i = 0; i < CraftingSystem.neededItems.length; i += 1) {
+		for (let i = 0; i < CraftingSystem.neededItems.length; i += 1) {
 			if (item.classid === CraftingSystem.neededItems[i] && CraftingSystem.validItem(item)) {
 				return true;
 			}
@@ -250,16 +238,11 @@ CraftingSystem.keepItem = function (item) {
 	let info = CraftingSystem.getInfo();
 
 	if (info) {
-		if (info.collector) {
-			return CraftingSystem.validGids.indexOf(item.gid) > -1;
-		}
+		if (info.collector) return CraftingSystem.validGids.includes(item.gid);
 
 		if (info.worker) {
-			if (item.quality === 8) { // Let pickit decide whether to keep crafted
-				return false;
-			}
-
-			return true;
+			// Let pickit decide whether to keep crafted
+			return item.quality === 8 ? false : true;
 		}
 	}
 
@@ -281,9 +264,7 @@ CraftingSystem.getSetInfoFromWorker = function (workerName) {
 				return false;
 			}
 
-			if (obj && obj.name === "SetInfo") {
-				setInfo = obj.value;
-			}
+			obj && obj.name === "SetInfo" && (setInfo = obj.value);
 		}
 
 		return true;
@@ -307,18 +288,17 @@ CraftingSystem.getSetInfoFromWorker = function (workerName) {
 };
 
 CraftingSystem.init = function (name) {
-	let i, setInfo,
-		info = CraftingSystem.getInfo();
+	let info = CraftingSystem.getInfo();
 
 	if (info && info.collector) {
-		for (i = 0; i < info.Sets.length; i += 1) {
+		for (let i = 0; i < info.Sets.length; i += 1) {
 			info.Sets[i].Enabled = false;
 		}
 
-		setInfo = CraftingSystem.getSetInfoFromWorker(name);
+		let setInfo = CraftingSystem.getSetInfoFromWorker(name);
 
 		if (setInfo) {
-			for (i = 0; i < setInfo.length; i += 1) {
+			for (let i = 0; i < setInfo.length; i += 1) {
 				if (setInfo[i] === 1 && info.Sets[i].Enabled === false) {
 					info.Sets[i].Enabled = true;
 				}
@@ -329,8 +309,7 @@ CraftingSystem.init = function (name) {
 
 // Build global lists of needed items and valid ingredients
 CraftingSystem.buildLists = function (onlyNeeded) {
-	let i,
-		info = CraftingSystem.getInfo();
+	let info = CraftingSystem.getInfo();
 
 	if (info && info.collector) {
 		CraftingSystem.neededItems = [];
@@ -338,7 +317,7 @@ CraftingSystem.buildLists = function (onlyNeeded) {
 		CraftingSystem.fullSets = [];
 		CraftingSystem.itemList = me.findItems(-1, 0);
 
-		for (i = 0; i < info.Sets.length; i += 1) {
+		for (let i = 0; i < info.Sets.length; i += 1) {
 			if (!onlyNeeded || info.Sets[i].Enabled) {
 				CraftingSystem.checkSet(info.Sets[i]);
 			}
@@ -352,21 +331,21 @@ CraftingSystem.buildLists = function (onlyNeeded) {
 
 // Check which ingredients a set needs and has
 CraftingSystem.checkSet = function (set) {
-	let i, j, amount,
-		rval = {},
+	let rval = {},
 		setNeeds = [],
 		setHas = [];
 
 	// Get what set needs
-	for (amount = 0; amount < set.SetAmount; amount += 1) { // Multiply by SetAmount
-		for (i = 0; i < set.Ingredients.length; i += 1) {
+	// Multiply by SetAmount
+	for (let amount = 0; amount < set.SetAmount; amount += 1) {
+		for (let i = 0; i < set.Ingredients.length; i += 1) {
 			setNeeds.push(set.Ingredients[i]);
 		}
 	}
 
 	// Remove what set already has
-	for (i = 0; i < setNeeds.length; i += 1) {
-		for (j = 0; j < CraftingSystem.itemList.length; j += 1) {
+	for (let i = 0; i < setNeeds.length; i += 1) {
+		for (let j = 0; j < CraftingSystem.itemList.length; j += 1) {
 			if (CraftingSystem.itemList[j].classid === setNeeds[i]) {
 				setHas.push(CraftingSystem.itemList[j].gid);
 				setNeeds.splice(i, 1);
@@ -379,9 +358,7 @@ CraftingSystem.checkSet = function (set) {
 	}
 
 	// The set is complete
-	if (setNeeds.length === 0) {
-		CraftingSystem.fullSets.push(setHas.slice());
-	}
+	setNeeds.length === 0 && CraftingSystem.fullSets.push(setHas.slice());
 
 	CraftingSystem.neededItems = CraftingSystem.neededItems.concat(setNeeds);
 	CraftingSystem.validGids = CraftingSystem.validGids.concat(setHas);
@@ -402,9 +379,7 @@ CraftingSystem.update = function (item) {
 
 // Cube flawless gems if the ingredient is a perfect gem
 CraftingSystem.checkSubrecipes = function () {
-	let i;
-
-	for (i = 0; i < CraftingSystem.neededItems.length; i += 1) {
+	for (let i = 0; i < CraftingSystem.neededItems.length; i += 1) {
 		switch (CraftingSystem.neededItems[i]) {
 		case 561: // Pgems
 		case 566:
@@ -432,11 +407,10 @@ CraftingSystem.checkSubrecipes = function () {
 
 // Check if there are any complete ingredient sets
 CraftingSystem.checkFullSets = function () {
-	let i,
-		info = CraftingSystem.getInfo();
+	let info = CraftingSystem.getInfo();
 
 	if (info && info.collector) {
-		for (i = 0; i < info.Workers.length; i += 1) {
+		for (let i = 0; i < info.Workers.length; i += 1) {
 			CraftingSystem.init(info.Workers[i]);
 			CraftingSystem.buildLists(true);
 
@@ -455,7 +429,7 @@ CraftingSystem.dropItems = function () {
 	Town.move("stash");
 	Town.openStash();
 
-	let gidList, item, worker;
+	let worker;
 
 	function scriptMsg(msg) {
 		let obj;
@@ -466,9 +440,7 @@ CraftingSystem.dropItems = function () {
 			return false;
 		}
 
-		if (obj.name === "WorkerName") {
-			worker = obj.value;
-		}
+		!!obj && obj.name === "WorkerName" && (worker = obj.value);
 
 		return true;
 	}
@@ -483,14 +455,11 @@ CraftingSystem.dropItems = function () {
 		removeEventListener("scriptmsg", scriptMsg);
 
 		while (CraftingSystem.fullSets.length) {
-			gidList = CraftingSystem.fullSets.shift();
+			let gidList = CraftingSystem.fullSets.shift();
 
 			while (gidList.length) {
-				item = me.getItem(-1, -1, gidList.shift());
-
-				if (item) {
-					item.drop();
-				}
+				let item = me.getItem(-1, -1, gidList.shift());
+				!!item && item.drop();
 			}
 		}
 

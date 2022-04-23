@@ -1,26 +1,21 @@
+/**
+*	@filename	WPGetter.js
+*	@author		kolton (probably), theBGuy
+*	@desc		Get wps we don't have
+*/
+
 function WPGetter() {
 	Town.doChores();
-	Town.goToTown(1);
+	Town.goToTown();
 	Pather.getWP(me.area);
 
-	let i, access;
+	let lastWP = [40, 75, 103, 109, 129][me.highestAct - 1];
+	let wpsToGet = Pather.nonTownWpAreas.filter((wp) => wp < lastWP && wp !== 123 && !getWaypoint(Pather.wpAreas.indexOf(wp)));
 
-	for (i = 0; i < Pather.wpAreas.length; i += 1) {
-		if (Pather.wpAreas[i] < 40) {
-			access = true;
-		} else if (Pather.wpAreas[i] >= 40 && Pather.wpAreas[i] < 75) {
-			access = Pather.accessToAct(2);
-		} else if (Pather.wpAreas[i] >= 75 && Pather.wpAreas[i] < 103) {
-			access = Pather.accessToAct(3);
-		} else if (Pather.wpAreas[i] >= 103 && Pather.wpAreas[i] < 109) {
-			access = Pather.accessToAct(4);
-		} else if (Pather.wpAreas[i] >= 109) {
-			access = Pather.accessToAct(5);
-		}
-
-		if (access && !getWaypoint(i) && Pather.wpAreas[i] !== 123) {
-			Pather.getWP(Pather.wpAreas[i]);
-		}
+	for (let i = 0; i < wpsToGet.length; i += 1) {
+		!getWaypoint(Pather.wpAreas.indexOf(wpsToGet[i])) && Pather.getWP(wpsToGet[i]);
+		delay(500);
+		Town.checkScrolls(sdk.items.TomeofTownPortal) < 10 && Town.doChores();
 	}
 
 	return true;

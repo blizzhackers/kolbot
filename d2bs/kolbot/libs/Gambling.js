@@ -46,15 +46,11 @@ const Gambling = {
 	inGame: false,
 
 	getInfo: function (profile) {
-		let i, j;
+		!profile && (profile = me.profile);
 
-		if (!profile) {
-			profile = me.profile;
-		}
-
-		for (i in this.Teams) {
+		for (let i in this.Teams) {
 			if (this.Teams.hasOwnProperty(i)) {
-				for (j = 0; j < this.Teams[i].goldFinders.length; j += 1) {
+				for (let j = 0; j < this.Teams[i].goldFinders.length; j += 1) {
 					if (this.Teams[i].goldFinders[j].toLowerCase() === profile.toLowerCase()) {
 						this.Teams[i].goldFinder = true;
 						this.Teams[i].gambler = false;
@@ -63,7 +59,7 @@ const Gambling = {
 					}
 				}
 
-				for (j = 0; j < this.Teams[i].gamblers.length; j += 1) {
+				for (let j = 0; j < this.Teams[i].gamblers.length; j += 1) {
 					if (this.Teams[i].gamblers[j].toLowerCase() === profile.toLowerCase()) {
 						this.Teams[i].goldFinder = false;
 						this.Teams[i].gambler = true;
@@ -78,17 +74,15 @@ const Gambling = {
 	},
 
 	inGameCheck: function () {
-		let i,
-			info = this.getInfo();
+		let info = this.getInfo();
 
 		if (info && info.goldFinder) {
-			for (i = 0; i < info.gambleGames.length; i += 1) {
+			for (let i = 0; i < info.gambleGames.length; i += 1) {
 				if (info.gambleGames[i] && me.gamename.match(info.gambleGames[i], "i")) {
 					this.dropGold();
 					DataFile.updateStats("gold");
 					delay(5000);
 					quit();
-					//delay(10000);
 
 					return true;
 				}
@@ -154,18 +148,16 @@ const Gambling = {
 	},
 
 	getGame: function () {
-		let i, game,
+		let game,
 			info = this.getInfo();
 
 		if (!info || !info.goldFinder) {
 			return false;
 		}
 
-		function CheckEvent(mode, msg) {
-			let i;
-
+		function checkEvent(mode, msg) {
 			if (mode === 4) {
-				for (i = 0; i < info.gambleGames.length; i += 1) {
+				for (let i = 0; i < info.gambleGames.length; i += 1) {
 					if (info.gambleGames[i] && msg.match(info.gambleGames[i], "i")) {
 						game = msg.split('/');
 
@@ -175,11 +167,11 @@ const Gambling = {
 			}
 		}
 
-		addEventListener('copydata', CheckEvent);
+		addEventListener('copydata', checkEvent);
 
 		game = null;
 
-		for (i = 0; i < info.gamblers.length; i += 1) {
+		for (let i = 0; i < info.gamblers.length; i += 1) {
 			sendCopyData(null, info.gamblers[i], 0, me.profile);
 			delay(100);
 
@@ -188,7 +180,7 @@ const Gambling = {
 			}
 		}
 
-		removeEventListener('copydata', CheckEvent);
+		removeEventListener('copydata', checkEvent);
 
 		return game;
 	}

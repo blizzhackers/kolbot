@@ -1,28 +1,12 @@
 /**
  *	@filename	BaalAssistant.js
- *	@author		kolton, modified by YGM
+ *	@author		kolton, modified by YGM, refactored by theBGuy
  *	@desc		Help or Leech Baal Runs.
  */
 
 function BaalAssistant() {
-
 	let Leader = Config.Leader, // Not entriely needed in the configs.
-		KillNihlathak = Config.BaalAssistant.KillNihlathak,
-		FastChaos = Config.BaalAssistant.FastChaos,
-		Wait = Config.BaalAssistant.Wait, // Not entriely needed in the configs.
 		Helper = Config.BaalAssistant.Helper,
-		GetShrine = Config.BaalAssistant.GetShrine,
-		GetShrineWaitForHotTP = Config.BaalAssistant.GetShrineWaitForHotTP,
-		RandomPrecast = Config.RandomPrecast, // Not entriely needed in the configs.
-		SkipTP = Config.BaalAssistant.SkipTP,
-		WaitForSafeTP = Config.BaalAssistant.WaitForSafeTP,
-		DollQuit = Config.BaalAssistant.DollQuit,
-		SoulQuit = Config.BaalAssistant.SoulQuit,
-		KillBaal = Config.BaalAssistant.KillBaal,
-		hotTPMessage = Config.BaalAssistant.HotTPMessage, // Not entriely needed in the configs.
-		safeTPMessage = Config.BaalAssistant.SafeTPMessage, // Not entriely needed in the configs.
-		baalMessage = Config.BaalAssistant.BaalMessage, // Doesn't need to be in configs.
-		nextGameMessage = Config.BaalAssistant.NextGameMessage, // Doesn't need to be in configs.
 		hotCheck = false,
 		safeCheck = false,
 		baalCheck = false,
@@ -30,35 +14,34 @@ function BaalAssistant() {
 		ShrineStatus = false,
 		secondAttempt = false,
 		throneStatus = false,
-		firstAttempt = true,
-		i, solofail, partymembers, baal, portal, tick, entrance;
+		firstAttempt = true;
 
 	addEventListener('chatmsg',
 		function (nick, msg) {
 			if (nick === Leader) {
-				for (i = 0; i < hotTPMessage.length; i += 1) {
-					if (msg.toLowerCase().indexOf(hotTPMessage[i].toLowerCase()) > -1) {
+				for (let i = 0; i < Config.BaalAssistant.HotTPMessage.length; i += 1) {
+					if (msg.toLowerCase().includes(Config.BaalAssistant.HotTPMessage[i].toLowerCase())) {
 						hotCheck = true;
 						break;
 					}
 				}
 
-				for (i = 0; i < safeTPMessage.length; i += 1) {
-					if (msg.toLowerCase().indexOf(safeTPMessage[i].toLowerCase()) > -1) {
+				for (let i = 0; i < Config.BaalAssistant.SafeTPMessage.length; i += 1) {
+					if (msg.toLowerCase().includes(Config.BaalAssistant.SafeTPMessage[i].toLowerCase())) {
 						safeCheck = true;
 						break;
 					}
 				}
 
-				for (i = 0; i < baalMessage.length; i += 1) {
-					if (msg.toLowerCase().indexOf(baalMessage[i].toLowerCase()) > -1) {
+				for (let i = 0; i < Config.BaalAssistant.BaalMessage.length; i += 1) {
+					if (msg.toLowerCase().includes(Config.BaalAssistant.BaalMessage[i].toLowerCase())) {
 						baalCheck = true;
 						break;
 					}
 				}
 
-				for (i = 0; i < nextGameMessage.length; i += 1) {
-					if (msg.toLowerCase().indexOf(nextGameMessage[i].toLowerCase()) > -1) {
+				for (let i = 0; i < Config.BaalAssistant.NextGameMessage.length; i += 1) {
+					if (msg.toLowerCase().includes(Config.BaalAssistant.NextGameMessage[i].toLowerCase())) {
 						ngCheck = true;
 						break;
 					}
@@ -66,38 +49,11 @@ function BaalAssistant() {
 			}
 		});
 
-	function autoLeaderDetect(destination) {
-		do {
-			solofail = 0;
-			partymembers = getParty();
-
-			do {
-				if (partymembers.name !== me.name) {
-					solofail += 1;
-				}
-
-				if (partymembers.area === destination) {
-					Leader = partymembers.name;
-					return true;
-				}
-			} while (partymembers.getNext());
-
-			if (solofail === 0) {
-				throw new Error("BaalHelper: You were alone!");
-			}
-
-			delay(500);
-
-		} while (!Leader);
-
-		return false;
-	}
-
 	this.checkThrone = function () {
 		let monster = getUnit(1);
 		if (monster) {
 			do {
-				if (Attack.checkMonster(monster) && monster.y < 5080) {
+				if (monster.attackable && monster.y < 5080) {
 					switch (monster.classid) {
 					case 23:
 					case 62:
@@ -112,10 +68,7 @@ function BaalAssistant() {
 					case 571:
 						return 5;
 					default:
-						if (Helper) {
-							Attack.getIntoPosition(monster, 10, 0x4);
-							Attack.clear(15);
-						}
+						Helper && Attack.getIntoPosition(monster, 10, 0x4) && Attack.clear(15);
 						return false;
 
 					}
@@ -126,24 +79,16 @@ function BaalAssistant() {
 	};
 
 	this.checkParty = function () {
-		let i, partycheck;
-		for (i = 0; i < Wait; i += 1) {
-			partycheck = getParty();
+		for (let i = 0; i < Config.BaalAssistant.Wait; i += 1) {
+			let partycheck = getParty();
 			if (partycheck) {
 				do {
-					if (partycheck.area === 131) {
-						return false;
-					}
-					if (partycheck.area === 107 || partycheck.area === 108) {
-						return true;
-					}
+					if (partycheck.area === 131) return false;
+					if (partycheck.area === 107 || partycheck.area === 108) return true;
 				} while (partycheck.getNext());
 			}
-			delay(1000);
-		}
 
-		if (i === Wait) {
-			throw new Error("No players in Throne of Destruction");
+			delay(1000);
 		}
 
 		return false;
@@ -151,49 +96,21 @@ function BaalAssistant() {
 
 	// Start
 	if (Leader) {
-		for (i = 0; i < 30; i += 1) {
-			if (Misc.inMyParty(Leader)) {
-				break;
-			}
-			delay(1000);
-		}
-
-		if (i === 30) {
-			throw new Error("BaalHelper: Leader not partied");
-		}
+		if (!Misc.poll(() => Misc.inMyParty(Leader), 30e3, 1000)) throw new Error("BaalAssistant: Leader not partied");
 	}
 
-	if (KillNihlathak) {
-		include("bots/Nihlathak.js");
-
-		try {
-			Nihlathak();
-		} catch (e) {
-			print(e);
-		}
-	}
-
-	if (FastChaos) {
-		include("bots/FastDiablo.js");
-
-		try {
-			Town.goToTown();
-			FastDiablo();
-		} catch (e2) {
-			print(e2);
-		}
-	}
+	!!Config.BaalAssistant.KillNihlathak && Loader.runScript("Nihlathak");
+	!!Config.BaalAssistant.FastChaos && Loader.runScript("FastDiablo");
 
 	Town.goToTown(5);
 	Town.doChores();
 
-	if (Leader || autoLeaderDetect(109) || autoLeaderDetect(130) || autoLeaderDetect(131)) {
+	if (Leader || (Leader = Misc.autoLeaderDetect(109)) || (Leader = Misc.autoLeaderDetect(130)) || (Leader = Misc.autoLeaderDetect(131))) {
 		print("ÿc<Leader: " + Leader);
 		while (Misc.inMyParty(Leader)) {
-			if (!secondAttempt && !safeCheck && !baalCheck && !ShrineStatus && GetShrine && me.area === 109 && me.area !== 131 && me.area !== 132) {
-
-				if (GetShrineWaitForHotTP) {
-					for (i = 0; i < Wait; i += 1) {
+			if (!secondAttempt && !safeCheck && !baalCheck && !ShrineStatus && !!Config.BaalAssistant.GetShrine && me.area === 109) {
+				if (!!Config.BaalAssistant.GetShrineWaitForHotTP) {
+					for (let i = 0; i < Config.BaalAssistant.Wait; i += 1) {
 						if (hotCheck) {
 							break;
 						}
@@ -204,12 +121,12 @@ function BaalAssistant() {
 						print("ÿc1" + "Leader didn't tell me to start hunting for an experience shrine.");
 						ShrineStatus = true;
 					}
-
 				}
 
 				if (!ShrineStatus) {
 					Pather.useWaypoint(4);
 					Precast.doPrecast(true);
+					let i;
 
 					for (i = 4; i > 1; i -= 1) {
 						if (safeCheck) {
@@ -242,59 +159,30 @@ function BaalAssistant() {
 			}
 
 			if (firstAttempt && !secondAttempt && !safeCheck && !baalCheck && me.area !== 131 && me.area !== 132) {
-				if (RandomPrecast) {
-					Pather.useWaypoint("random");
-					Precast.doPrecast(true);
-				} else {
-					Pather.useWaypoint(129);
-					Precast.doPrecast(true);
-				}
+				!!Config.RandomPrecast ? Pather.useWaypoint("random") && Precast.doPrecast(true) : Pather.useWaypoint(129) && Precast.doPrecast(true);
 			}
 
 			if (me.area !== 131 && me.area !== 132) {
-				if (SkipTP) {
+				if (Config.BaalAssistant.SkipTP) {
 					if (firstAttempt && !secondAttempt) {
-						if (me.area !== 129) {
-							Pather.useWaypoint(129);
-						}
-						if (!Pather.moveToExit([130, 131], false)) {
-							throw new Error("Failed to move to WSK3.");
-						}
+						me.area !== 129 && Pather.useWaypoint(129);
+						if (!Pather.moveToExit([130, 131], false)) throw new Error("Failed to move to WSK3.");
 
 						this.checkParty();
+						let entrance = Misc.poll(() => getUnit(5, 82), 1000, 200);
+						entrance && Pather.moveTo(entrance.x > me.x ? entrance.x - 5 : entrance.x + 5, entrance.y > me.y ? entrance.y - 5 : entrance.y + 5);
 
-						for (i = 0; i < 3; i += 1) {
-							entrance = getUnit(5, 82);
-
-							if (entrance) {
-								break;
-							}
-
-							delay(200);
-						}
-
-						if (entrance) {
-							Pather.moveTo(entrance.x > me.x ? entrance.x - 5 : entrance.x + 5, entrance.y > me.y ? entrance.y - 5 : entrance.y + 5);
-						}
-
-						if (!Pather.moveToExit(131, true) || !Pather.moveTo(15118, 5002)) {
-							throw new Error("Failed to move to Throne of Destruction.");
-						}
+						if (!Pather.moveToExit(131, true) || !Pather.moveTo(15118, 5002)) throw new Error("Failed to move to Throne of Destruction.");
 
 						Pather.moveTo(15095, 5029);
 
-						if ((SoulQuit && getUnit(1, 641)) || (DollQuit && getUnit(1, 691))) {
+						if ((Config.BaalAssistant.SoulQuit && getUnit(1, 641)) || (Config.BaalAssistant.DollQuit && getUnit(1, 691))) {
 							print("Burning Souls or Undead Soul Killers found, ending script.");
 							return true;
 						}
 
 						Pather.moveTo(15118, 5002);
-						if (Helper) {
-							Attack.clear(15);
-							Pather.moveTo(15118, 5002);
-						} else {
-							Pather.moveTo(15117, 5045);
-						}
+						Helper ? Attack.clear(15) && Pather.moveTo(15118, 5002) : Pather.moveTo(15117, 5045);
 
 						secondAttempt = true;
 						safeCheck = true;
@@ -302,39 +190,28 @@ function BaalAssistant() {
 						if (me.intown) {
 							Town.move("portalspot");
 							Pather.usePortal(131, null);
-							if (me.mode === 17) {
-								me.revive();
-							}
-							if (Helper) {
-								Attack.clear(15);
-								Pather.moveTo(15118, 5002);
-							} else {
-								Pather.moveTo(15117, 5045);
-							}
+							me.mode === 17 && me.revive();
+							Helper ? Attack.clear(15) && Pather.moveTo(15118, 5002) : Pather.moveTo(15117, 5045);
 						}
 					}
 				} else {
 					if (firstAttempt && !secondAttempt) {
-						if (me.area !== 109) {
-							Pather.useWaypoint(109);
-						}
-
+						me.area !== 109 && Pather.useWaypoint(109);
 						Town.move("portalspot");
+						let i;
 
-						if (WaitForSafeTP) {
-							for (i = 0; i < Wait; i += 1) {
+						if (Config.BaalAssistant.WaitForSafeTP) {
+							for (i = 0; i < Config.BaalAssistant.Wait; i += 1) {
 								if (safeCheck) {
 									break;
 								}
 								delay(1000);
 							}
 
-							if (i === Wait) {
-								throw new Error("No safe TP message.");
-							}
+							if (i === Config.BaalAssistant.Wait) throw new Error("No safe TP message.");
 						}
 
-						for (i = 0; i < Wait; i += 1) {
+						for (i = 0; i < Config.BaalAssistant.Wait; i += 1) {
 							if (Pather.usePortal(131, null)) {
 								break;
 							}
@@ -342,60 +219,46 @@ function BaalAssistant() {
 							delay(1000);
 						}
 
-						if (i === Wait) {
+						if (i === Config.BaalAssistant.Wait) {
 							throw new Error("No portals to Throne.");
 						}
 
-						if ((SoulQuit && getUnit(1, 641)) || (DollQuit && getUnit(1, 691))) {
+						if ((Config.BaalAssistant.SoulQuit && getUnit(1, 641)) || (Config.BaalAssistant.DollQuit && getUnit(1, 691))) {
 							print("Burning Souls or Undead Soul Killers found, ending script.");
 							return true;
 						}
 
-						if (Helper) {
-							Attack.clear(15);
-							Pather.moveTo(15118, 5002);
-						} else {
-							Pather.moveTo(15117, 5045);
-						}
-
+						Helper ? Attack.clear(15) && Pather.moveTo(15118, 5002) : Pather.moveTo(15117, 5045);
 						secondAttempt = true;
 						safeCheck = true;
 					} else {
 						if (me.intown) {
 							Town.move("portalspot");
 							Pather.usePortal(131, null);
-							if (me.mode === 17) {
-								me.revive();
-							}
-							if (Helper) {
-								Attack.clear(15);
-								Pather.moveTo(15118, 5002);
-							} else {
-								Pather.moveTo(15117, 5045);
-							}
+							me.mode === 17 && me.revive();
+							Helper ? Attack.clear(15) && Pather.moveTo(15118, 5002) : Pather.moveTo(15117, 5045);
 						}
 					}
 				}
 			}
 
-			for (i = 0; i < 5; i += 1) {
+			for (let i = 0; i < 5; i += 1) {
 				if (ngCheck) {
 					return true;
 				}
 				delay(100);
 			}
 
-			if (safeCheck && !baalCheck && me.area === 131 && me.area !== 132) {
+			if (safeCheck && !baalCheck && me.area === 131) {
 				if (!baalCheck && !throneStatus) {
 					if (Helper) {
 						Attack.clear(15);
 						Common.Baal.clearThrone();
-
 						Pather.moveTo(15094, me.classid === 3 ? 5029 : 5038);
 						Precast.doPrecast(true);
 					}
 
-					tick = getTickCount();
+					let tick = getTickCount();
 
 					MainLoop: while (true) {
 						if (Helper) {
@@ -405,37 +268,27 @@ function BaalAssistant() {
 						}
 
 						if (!getUnit(1, 543)) {
-							break MainLoop;
+							break;
 						}
 
 						switch (this.checkThrone()) {
 						case 1:
-							if (Helper) {
-								Attack.clear(40);
-							}
+							Helper && Attack.clear(40);
 							tick = getTickCount();
 
 							break;
 						case 2:
-							if (Helper) {
-								Attack.clear(40);
-							}
+							Helper && Attack.clear(40);
 							tick = getTickCount();
 
 							break;
 						case 4:
-							if (Helper) {
-								Attack.clear(40);
-							}
+							Helper && Attack.clear(40);
 							tick = getTickCount();
 
 							break;
 						case 3:
-							if (Helper) {
-								Attack.clear(40);
-								Common.Baal.checkHydra();
-							}
-
+							Helper && Attack.clear(40) && Common.Baal.checkHydra();
 							tick = getTickCount();
 
 							break;
@@ -443,7 +296,7 @@ function BaalAssistant() {
 							if (Helper) {
 								Attack.clear(40);
 							} else {
-								while (Attack.checkMonster(getUnit(1, 571)) || Attack.checkMonster(getUnit(1, 572)) || Attack.checkMonster(getUnit(1, 573))) {
+								while (getUnit(1, 571).attackable || getUnit(1, 572).attackable || getUnit(1, 573).attackable) {
 									delay(1000);
 								}
 								delay(1000);
@@ -452,9 +305,7 @@ function BaalAssistant() {
 							break MainLoop;
 						default:
 							if (getTickCount() - tick < 7e3) {
-								if (me.getState(2)) {
-									Skill.setSkill(109, 0);
-								}
+								me.getState(2) && Skill.setSkill(109, 0);
 
 								break;
 							}
@@ -474,14 +325,12 @@ function BaalAssistant() {
 				}
 			}
 
-			for (i = 0; i < 5; i += 1) {
-				if (ngCheck) {
-					return true;
-				}
+			for (let i = 0; i < 5; i += 1) {
+				if (ngCheck) return true;
 				delay(100);
 			}
 
-			if ((throneStatus || baalCheck) && KillBaal && me.area === 131) {
+			if ((throneStatus || baalCheck) && Config.BaalAssistant.KillBaal && me.area === 131) {
 				if (Helper) {
 					Pather.moveTo(15090, 5008);
 					delay(2000);
@@ -495,22 +344,17 @@ function BaalAssistant() {
 					delay(500);
 				}
 
-				portal = getUnit(2, 563);
+				let portal = getUnit(2, 563);
 
 				if (portal) {
-					if (Helper) {
-						delay(1000);
-					} else {
-						delay(4000);
-					}
+					Helper ? delay(1000) : delay(4000);
 					Pather.usePortal(null, null, portal);
 				} else {
 					throw new Error("Couldn't find portal.");
 				}
 
-				if (me.mode === 17) {
-					me.revive();
-				}
+				me.mode === 17 && me.revive();
+				let baal;
 
 				if (Helper) {
 					delay(1000);
@@ -518,32 +362,22 @@ function BaalAssistant() {
 					baal = getUnit(1, 544);
 					Attack.kill(544);
 					Pickit.pickItems();
-					if (ngCheck) {
-						return true;
-					}
-					if (baal && (baal.mode === 0 || baal.mode === 12)) {
-						return true;
-					}
+					if (ngCheck) return true;
+					if (!!baal && baal.dead) return true;
 				} else {
 					Pather.moveTo(15177, 5952);
 					baal = getUnit(1, 544);
 					while (baal) {
 						delay(1000);
-						if (ngCheck) {
-							return true;
-						}
-						if (baal && (baal.mode === 0 || baal.mode === 12)) {
-							return true;
-						}
+						if (ngCheck) return true;
+						if (!!baal && baal.dead) return true;
 					}
 					return true;
 				}
 
 			} else {
 				while (true) {
-					if (ngCheck) {
-						return true;
-					}
+					if (ngCheck) return true;
 					delay(500);
 				}
 			}

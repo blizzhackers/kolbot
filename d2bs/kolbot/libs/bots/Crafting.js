@@ -8,13 +8,9 @@ let info,
 	gameRequest = false;
 
 function Crafting() {
-	let i, npcName, num;
-
 	info = CraftingSystem.getInfo();
 
-	if (!info || !info.worker) {
-		throw new Error("Bad Crafting System config.");
-	}
+	if (!info || !info.worker) throw new Error("Bad Crafting System config.");
 
 	me.maxgametime = 0;
 	Town.goToTown(1);
@@ -25,7 +21,7 @@ function Crafting() {
 
 	addEventListener('copydata',
 		function (mode, msg) {
-			let i, obj, rval;
+			let obj, rval;
 
 			if (mode === 0) {
 				try {
@@ -37,7 +33,7 @@ function Crafting() {
 				if (obj) {
 					switch (obj.name) {
 					case "GetGame":
-						if (info.Collectors.indexOf(obj.profile) > -1) {
+						if (info.Collectors.includes(obj.profile)) {
 							print("GetGame: " + obj.profile);
 							sendCopyData(null, obj.profile, 4, me.gamename + "/" + me.gamepassword);
 
@@ -46,12 +42,12 @@ function Crafting() {
 
 						break;
 					case "GetSetInfo":
-						if (info.Collectors.indexOf(obj.profile) > -1) {
+						if (info.Collectors.includes(obj.profile)) {
 							print("GetSetInfo: " + obj.profile);
 
 							rval = [];
 
-							for (i = 0; i < info.Sets.length; i += 1) {
+							for (let i = 0; i < info.Sets.length; i += 1) {
 								rval.push(info.Sets[i].Enabled ? 1 : 0);
 							}
 
@@ -68,16 +64,16 @@ function Crafting() {
 			return true;
 		});
 
-	for (i = 0; i < Cubing.recipes.length; i += 1) {
+	for (let i = 0; i < Cubing.recipes.length; i += 1) {
 		Cubing.recipes[i].Level = 0;
 	}
 
 	while (true) {
-		for (i = 0; i < info.Sets.length; i += 1) {
+		for (let i = 0; i < info.Sets.length; i += 1) {
 			switch (info.Sets[i].Type) {
 			case "crafting":
-				num = 0;
-				npcName = getNPCName(info.Sets[i].BaseItems);
+				let num = 0;
+				let npcName = getNPCName(info.Sets[i].BaseItems);
 
 				if (npcName) {
 					num = countItems(info.Sets[i].BaseItems, 4);
@@ -95,15 +91,12 @@ function Crafting() {
 			}
 		}
 
-		if (me.act !== 1) {
-			Town.goToTown(1);
-			Town.move("stash");
-		}
+		me.act !== 1 && Town.goToTown(1) && Town.move("stash");
 
 		if (gameRequest) {
-			for (i = 0; i < 10; i += 1) {
-				if (othersInGame()) {
-					while (othersInGame()) {
+			for (let i = 0; i < 10; i += 1) {
+				if (Misc.getPlayerCount() > 1) {
+					while (Misc.getPlayerCount() > 1) {
 						delay(200);
 					}
 
@@ -111,8 +104,6 @@ function Crafting() {
 				} else {
 					break;
 				}
-
-				delay(1000);
 			}
 
 			gameRequest = false;
@@ -128,9 +119,7 @@ function Crafting() {
 }
 
 function getNPCName(idList) {
-	let i;
-
-	for (i = 0; i < idList.length; i += 1) {
+	for (let i = 0; i < idList.length; i += 1) {
 		switch (idList[i]) {
 		case 345: // Light Belt
 		case 391: // Sharkskin Belt
@@ -146,25 +135,9 @@ function getNPCName(idList) {
 	return false;
 }
 
-function othersInGame() {
-	let p = getParty();
-
-	if (p) {
-		do {
-			if (p.name !== me.name) {
-				return true;
-			}
-		} while (p.getNext());
-	}
-
-	return false;
-}
-
 function countItems(idList, quality) {
-	let item,
-		count = 0;
-
-	item = me.getItem(-1, 0);
+	let count = 0;
+	let item = me.getItem(-1, 0);
 
 	if (item) {
 		do {
@@ -178,12 +151,10 @@ function countItems(idList, quality) {
 }
 
 function updateInfo() {
-	let i, j, items;
-
 	if (info) {
-		items = me.findItems(-1, 0);
+		let items = me.findItems(-1, 0);
 
-		for (i = 0; i < info.Sets.length; i += 1) {
+		for (let i = 0; i < info.Sets.length; i += 1) {
 			MainSwitch:
 			switch (info.Sets[i].Type) {
 			// Always enable crafting because the base can be shopped
@@ -195,15 +166,13 @@ function updateInfo() {
 			// Enable only if we have a viable item to cube
 			// Currently the base needs to be added manually to the crafter
 			case "cubing":
-				if (!items) {
-					items = [];
-				}
+				!items && (items = []);
 
 				// Enable the recipe if we have an item that matches both bases list and Cubing list
 				// This is not a perfect check, it might not handle every case
-				for (j = 0; j < items.length; j += 1) {
-					if (info.Sets[i].BaseItems.indexOf(items[j].classid) > -1 && // Item is on the bases list
-							AutoMule.cubingIngredient(items[j])) { // Item is a valid Cubing ingredient
+				for (let j = 0; j < items.length; j += 1) {
+					if (info.Sets[i].BaseItems.includes(items[j].classid) // Item is on the bases list
+							&& AutoMule.cubingIngredient(items[j])) { // Item is a valid Cubing ingredient
 						print("Base found: " + items[j].classid);
 
 						info.Sets[i].Enabled = true;
@@ -218,15 +187,13 @@ function updateInfo() {
 			// Enable only if we have a viable runeword base
 			// Currently the base needs to be added manually to the crafter
 			case "runewords":
-				if (!items) {
-					items = [];
-				}
+				!items && (items = []);
 
 				// Enable the recipe if we have an item that matches both bases list and Cubing list
 				// This is not a perfect check, it might not handle every case
-				for (j = 0; j < items.length; j += 1) {
-					if (info.Sets[i].BaseItems.indexOf(items[j].classid) > -1 && // Item is on the bases list
-							runewordIngredient(items[j])) { // Item is a valid Runeword ingredient
+				for (let j = 0; j < items.length; j += 1) {
+					if (info.Sets[i].BaseItems.includes(items[j].classid) // Item is on the bases list
+							&& runewordIngredient(items[j])) { // Item is a valid Runeword ingredient
 						print("Base found: " + items[j].classid);
 
 						info.Sets[i].Enabled = true;
@@ -248,27 +215,18 @@ function updateInfo() {
 }
 
 function runewordIngredient(item) {
-	if (Runewords.validGids.indexOf(item.gid) > -1) {
-		return true;
+	if (Runewords.validGids.includes(item.gid)) return true;
+
+	let baseGids = [];
+
+	for (let i = 0; i < Config.Runewords.length; i += 1) {
+		let base = (Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0))
+			|| Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0), true));
+
+		base && baseGids.push(base.gid);
 	}
 
-	let i, base, baseGids;
-
-	baseGids = [];
-
-	for (i = 0; i < Config.Runewords.length; i += 1) {
-		base = Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0)) || Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0), true);
-
-		if (base) {
-			baseGids.push(base.gid);
-		}
-	}
-
-	if (baseGids.indexOf(item.gid) > -1) {
-		return true;
-	}
-
-	return false;
+	return baseGids.includes(item.gid);
 }
 
 function pickItems() {
@@ -298,36 +256,26 @@ function pickItems() {
 }
 
 function checkItem(item) {
-	let i;
-
-	for (i = 0; i < info.Sets.length; i += 1) {
+	for (let i = 0; i < info.Sets.length; i += 1) {
 		if (info.Sets[i].Enabled) {
 			switch (info.Sets[i].Type) {
 			case "crafting":
 				// Magic item
-				if (item.quality === 4 && info.Sets[i].BaseItems.indexOf(item.classid) > -1) {
-					return true; // Valid crafting base
-				}
+				// Valid crafting base
+				if (item.quality === 4 && info.Sets[i].BaseItems.includes(item.classid)) return true;
 
-				if (info.Sets[i].Ingredients.indexOf(item.classid) > -1) {
-					return true; // Valid crafting ingredient
-				}
+				// Valid crafting ingredient
+				if (info.Sets[i].Ingredients.includes(item.classid)) return true;
 
 				break;
 			case "cubing":
 				// There is no base check, item has to be put manually on the character
-
-				if (info.Sets[i].Ingredients.indexOf(item.classid) > -1) {
-					return true;
-				}
+				if (info.Sets[i].Ingredients.includes(item.classid)) return true;
 
 				break;
 			case "runewords":
 				// There is no base check, item has to be put manually on the character
-
-				if (info.Sets[i].Ingredients.indexOf(item.classid) > -1) {
-					return true;
-				}
+				if (info.Sets[i].Ingredients.includes(item.classid)) return true;
 
 				break;
 			}
@@ -340,16 +288,16 @@ function checkItem(item) {
 function shopStuff(npcId, classids, amount) {
 	print("shopStuff: " + npcId + " " + amount);
 
-	let wpArea, town, path, menuId, npc, tickCount,
+	let wpArea, town, path, menuId, npc,
 		leadTimeout = 30,
 		leadRetry = 3;
 
 	this.mover = function (npc, path) {
-		let i, j;
-
 		path = this.processPath(npc, path);
 
-		for (i = 0; i < path.length; i += 2) {
+		for (let i = 0; i < path.length; i += 2) {
+			let j;
+
 			Pather.moveTo(path[i] - 3, path[i + 1] - 3);
 			moveNPC(npc, path[i], path[i + 1]);
 
@@ -380,11 +328,10 @@ function shopStuff(npcId, classids, amount) {
 	};
 
 	this.processPath = function (npc, path) {
-		let i,
-			cutIndex = 0,
+		let cutIndex = 0,
 			dist = 100;
 
-		for (i = 0; i < path.length; i += 2) {
+		for (let i = 0; i < path.length; i += 2) {
 			if (getDistance(npc, path[i], path[i + 1]) < dist) {
 				cutIndex = i;
 				dist = getDistance(npc, path[i], path[i + 1]);
@@ -395,24 +342,22 @@ function shopStuff(npcId, classids, amount) {
 	};
 
 	this.shopItems = function (classids, amount) {
-		let i, items,
-			num = 0,
-			npc = getInteractedNPC();
+		let npc = getInteractedNPC();
 
 		if (npc) {
-			items = npc.getItemsEx();
+			let items = npc.getItemsEx();
 
 			if (items.length) {
-				for (i = 0; i < items.length; i += 1) {
-					if (Storage.Inventory.CanFit(items[i]) &&
-							Pickit.canPick(items[i]) &&
-							me.getStat(14) + me.getStat(15) >= items[i].getItemCost(0) &&
-							classids.indexOf(items[i].classid) > -1) {
+				for (let i = 0; i < items.length; i += 1) {
+					if (Storage.Inventory.CanFit(items[i])
+							&& Pickit.canPick(items[i])
+							&& me.gold >= items[i].getItemCost(0)
+							&& classids.includes(items[i].classid)) {
 
 						//print("Bought " + items[i].name);
 						items[i].buy();
 
-						num = countItems(classids, 4);
+						let num = countItems(classids, 4);
 
 						if (num >= amount) {
 							return true;
@@ -434,9 +379,7 @@ function shopStuff(npcId, classids, amount) {
 		path = [5112, 5094, 5092, 5096, 5078, 5098, 5070, 5085];
 		menuId = "Repair";
 
-		if (!Town.goToTown(2) || !Town.move(NPC.Fara)) {
-			throw new Error("Failed to get to NPC");
-		}
+		if (!Town.goToTown(2) || !Town.move(NPC.Fara)) throw new Error("Failed to get to NPC");
 
 		npc = getUnit(1, NPC.Fara);
 
@@ -448,10 +391,7 @@ function shopStuff(npcId, classids, amount) {
 		menuId = "Shop";
 
 		Town.goToTown(2);
-
-		if (!getUnit(1, NPC.Elzix)) {
-			Town.move(NPC.Elzix);
-		}
+		!getUnit(1, NPC.Elzix) && Town.move(NPC.Elzix);
 
 		npc = getUnit(1, NPC.Elzix);
 
@@ -462,9 +402,7 @@ function shopStuff(npcId, classids, amount) {
 		path = [5093, 5049, 5088, 5060, 5093, 5079, 5078, 5087, 5070, 5085];
 		menuId = "Shop";
 
-		if (!Town.goToTown(2) || !Town.move(NPC.Drognan)) {
-			throw new Error("Failed to get to NPC");
-		}
+		if (!Town.goToTown(2) || !Town.move(NPC.Drognan)) throw new Error("Failed to get to NPC");
 
 		npc = getUnit(1, NPC.Drognan);
 
@@ -475,9 +413,7 @@ function shopStuff(npcId, classids, amount) {
 		path = [5147, 5089, 5156, 5075, 5157, 5063, 5160, 5050];
 		menuId = "Shop";
 
-		if (!Town.goToTown(3) || !Town.move(NPC.Ormus)) {
-			throw new Error("Failed to get to NPC");
-		}
+		if (!Town.goToTown(3) || !Town.move(NPC.Ormus)) throw new Error("Failed to get to NPC");
 
 		npc = getUnit(1, NPC.Ormus);
 
@@ -488,9 +424,7 @@ function shopStuff(npcId, classids, amount) {
 		path = [5122, 5119, 5129, 5105, 5123, 5087, 5115, 5068];
 		menuId = "Shop";
 
-		if (!Town.goToTown(5) || !Town.move(NPC.Anya)) {
-			throw new Error("Failed to get to NPC");
-		}
+		if (!Town.goToTown(5) || !Town.move(NPC.Anya)) throw new Error("Failed to get to NPC");
 
 		npc = getUnit(1, NPC.Anya);
 
@@ -501,9 +435,7 @@ function shopStuff(npcId, classids, amount) {
 		path = [5077, 5032, 5089, 5025, 5100, 5021, 5106, 5051, 5116, 5071];
 		menuId = "Shop";
 
-		if (!Town.goToTown(5) || !Town.move(NPC.Malah)) {
-			throw new Error("Failed to get to NPC");
-		}
+		if (!Town.goToTown(5) || !Town.move(NPC.Malah)) throw new Error("Failed to get to NPC");
 
 		npc = getUnit(1, NPC.Malah);
 
@@ -512,36 +444,24 @@ function shopStuff(npcId, classids, amount) {
 		throw new Error("Invalid shopbot NPC.");
 	}
 
-	if (!npc) {
-		throw new Error("Failed to find NPC.");
-	}
-
-	if (!this.mover(npc, path)) {
-		throw new Error("Failed to move NPC");
-	}
+	if (!npc) throw new Error("Failed to find NPC.");
+	if (!this.mover(npc, path)) throw new Error("Failed to move NPC");
 
 	Town.move("waypoint");
 
-	tickCount = getTickCount();
+	let tickCount = getTickCount();
 
 	while (true) {
 		if (me.area === town) {
 			if (npc.startTrade(menuId)) {
-				if (this.shopItems(classids, amount)) {
-					return true;
-				}
+				if (this.shopItems(classids, amount)) return true;
 			}
 
 			me.cancel();
 		}
 
-		if (me.area === town) {
-			Pather.useWaypoint(wpArea);
-		}
-
-		if (me.area === wpArea) {
-			Pather.useWaypoint(town);
-		}
+		me.area === town && Pather.useWaypoint(wpArea);
+		me.area === wpArea && Pather.useWaypoint(town);
 
 		// end script 5 seconds before we need to exit
 		if (getTickCount() - tickCount > me.maxgametime - 5000) {

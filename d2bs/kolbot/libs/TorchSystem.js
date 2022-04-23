@@ -47,12 +47,11 @@ const TorchSystem = {
 	check: false,
 
 	getFarmers: function () {
-		let i, j,
-			list = [];
+		let list = [];
 
-		for (i in this.FarmerProfiles) {
+		for (let i in this.FarmerProfiles) {
 			if (this.FarmerProfiles.hasOwnProperty(i)) {
-				for (j = 0; j < this.FarmerProfiles[i].KeyFinderProfiles.length; j += 1) {
+				for (let j = 0; j < this.FarmerProfiles[i].KeyFinderProfiles.length; j += 1) {
 					if (this.FarmerProfiles[i].KeyFinderProfiles[j].toLowerCase() === me.profile.toLowerCase()) {
 						this.FarmerProfiles[i].profile = i;
 
@@ -62,11 +61,7 @@ const TorchSystem = {
 			}
 		}
 
-		if (list.length) {
-			return list;
-		}
-
-		return false;
+		return list.length > 0 ? list : false;
 	},
 
 	isFarmer: function () {
@@ -80,14 +75,11 @@ const TorchSystem = {
 	},
 
 	inGameCheck: function () {
-		let i, neededItems,
-			farmers = this.getFarmers();
+		let farmers = this.getFarmers();
 
-		if (!farmers) {
-			return false;
-		}
+		if (!farmers) return false;
 
-		for (i = 0; i < farmers.length; i += 1) {
+		for (let i = 0; i < farmers.length; i += 1) {
 			if (farmers[i].FarmGame.length > 0 && me.gamename.toLowerCase().match(farmers[i].FarmGame.toLowerCase())) {
 				print("ÿc4Torch Systemÿc0: In Farm game.");
 				D2Bot.printToConsole("Torch System: Transfering keys.", 7);
@@ -95,13 +87,13 @@ const TorchSystem = {
 				Town.goToTown(1);
 
 				if (Town.openStash()) {
-					neededItems = this.keyCheck();
+					let neededItems = this.keyCheck();
 
 					if (neededItems) {
-						for (i in neededItems) {
-							if (neededItems.hasOwnProperty(i)) {
-								while (neededItems[i].length) {
-									neededItems[i].shift().drop();
+						for (let n in neededItems) {
+							if (neededItems.hasOwnProperty(n)) {
+								while (neededItems[n].length) {
+									neededItems[n].shift().drop();
 								}
 							}
 						}
@@ -114,7 +106,6 @@ const TorchSystem = {
 
 				delay(5000);
 				quit();
-				//delay(10000);
 
 				return true;
 			}
@@ -124,22 +115,19 @@ const TorchSystem = {
 	},
 
 	keyCheck: function () {
-		let i,
-			neededItems = {},
+		let neededItems = {},
 			farmers = this.getFarmers();
 
-		if (!farmers) {
-			return false;
-		}
+		if (!farmers) return false;
 
 		function keyCheckEvent(mode, msg) {
-			let i, obj, item;
-
 			if (mode === 6) {
-				obj = JSON.parse(msg);
-
+				let obj = JSON.parse(msg);
+				
 				if (obj.name === "neededItems") {
-					for (i in obj.value) {
+					let item;
+
+					for (let i in obj.value) {
 						if (obj.value.hasOwnProperty(i) && obj.value[i] > 0) {
 							switch (i) {
 							case "pk1":
@@ -192,7 +180,7 @@ const TorchSystem = {
 		addEventListener("copydata", keyCheckEvent);
 
 		// TODO: one mfer for multiple farmers handling
-		for (i = 0; i < farmers.length; i += 1) {
+		for (let i = 0; i < farmers.length; i += 1) {
 			sendCopyData(null, farmers[i].profile, 6, JSON.stringify({name: "keyCheck", profile: me.profile}));
 			delay(250);
 
@@ -209,23 +197,19 @@ const TorchSystem = {
 	},
 
 	outOfGameCheck: function () {
-		if (!this.check) {
-			return false;
-		}
+		if (!this.check) return false;
 
+		let game;
 		this.check = false;
 
-		let i, game, farmers;
-
-		function CheckEvent(mode, msg) {
-			let i, obj,
-				farmers = TorchSystem.getFarmers();
+		function checkEvent(mode, msg) {
+			let farmers = TorchSystem.getFarmers();
 
 			if (mode === 6) {
-				obj = JSON.parse(msg);
+				let obj = JSON.parse(msg);
 
 				if (obj && obj.name === "gameName") {
-					for (i = 0; i < farmers.length; i += 1) {
+					for (let i = 0; i < farmers.length; i += 1) {
 						if (obj.value.gameName.toLowerCase().match(farmers[i].FarmGame.toLowerCase())) {
 							game = [obj.value.gameName, obj.value.password];
 						}
@@ -236,15 +220,13 @@ const TorchSystem = {
 			return true;
 		}
 
-		farmers = this.getFarmers();
+		let farmers = this.getFarmers();
 
-		if (!farmers) {
-			return false;
-		}
+		if (!farmers) return false;
 
-		addEventListener('copydata', CheckEvent);
+		addEventListener('copydata', checkEvent);
 
-		for (i = 0; i < farmers.length; i += 1) {
+		for (let i = 0; i < farmers.length; i += 1) {
 			sendCopyData(null, farmers[i].profile, 6, JSON.stringify({name: "gameCheck", profile: me.profile}));
 			delay(500);
 
@@ -253,10 +235,9 @@ const TorchSystem = {
 			}
 		}
 
-		removeEventListener('copydata', CheckEvent);
+		removeEventListener('copydata', checkEvent);
 
 		if (game) {
-			//D2Bot.printToConsole("Joining key drop game.", 7);
 			delay(2000);
 
 			this.inGame = true;

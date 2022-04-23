@@ -4,9 +4,9 @@
 *	@desc		Rushee script that works with Rusher
 */
 
-let Override_1 = require('../modules/Override');
+let Overrides = require('../modules/Override');
 
-new Override_1.Override(Town, Town.goToTown, function(orignal, act, wpmenu) {
+new Overrides.Override(Town, Town.goToTown, function(orignal, act, wpmenu) {
 	try {
 		orignal(act, wpmenu);
 

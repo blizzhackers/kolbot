@@ -5,28 +5,65 @@
 */
 
 const ClassAttack = {
+	decideSkill: function (unit) {
+		let skills = {timed: -1, untimed: -1};
+		if (!unit) return skills;
+
+		let index = (unit.isSpecial || unit.type === 0) ? 1 : 3;
+
+		// Get timed skill
+		let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
+
+		if (Attack.checkResist(unit, checkSkill) && ([56, 59].indexOf(checkSkill) === -1 || Attack.validSpot(unit.x, unit.y))) {
+			skills.timed = checkSkill;
+		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && ([56, 59].indexOf(Config.AttackSkill[5]) === -1 || Attack.validSpot(unit.x, unit.y))) {
+			skills.timed = Config.AttackSkill[5];
+		}
+
+		// Get untimed skill
+		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[1] : Config.AttackSkill[index + 1];
+
+		if (Attack.checkResist(unit, checkSkill) && ([56, 59].indexOf(checkSkill) === -1 || Attack.validSpot(unit.x, unit.y))) {
+			skills.untimed = checkSkill;
+		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && ([56, 59].indexOf(Config.AttackSkill[6]) === -1 || Attack.validSpot(unit.x, unit.y))) {
+			skills.untimed = Config.AttackSkill[6];
+		}
+
+		// Low mana timed skill
+		if (Config.LowManaSkill[0] > -1 && Skill.getManaCost(timedSkill) > me.mp && Attack.checkResist(unit, Config.LowManaSkill[0])) {
+			skills.timed = Config.LowManaSkill[0];
+		}
+
+		// Low mana untimed skill
+		if (Config.LowManaSkill[1] > -1 && Skill.getManaCost(untimedSkill) > me.mp && Attack.checkResist(unit, Config.LowManaSkill[1])) {
+			skills.untimed = Config.LowManaSkill[1];
+		}
+
+		return skills;
+	},
+
 	doAttack: function (unit, preattack) {
 		if (!unit) return 1;
 		let gid = unit.gid;
 
 		if (Config.MercWatch && Town.needMerc()) {
-			print("mercwatch");
-
 			if (Town.visitTown()) {
+				print("mercwatch");
+				
 				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
 					console.debug("Lost reference to unit");
-					return 1; // lost reference to the mob we were attacking
+					return 1;
 				}
 			}
 		}
 
 		// Keep Energy Shield active
-		if (Config.UseEnergyShield && !me.getState(sdk.states.EnergyShield) && me.getSkill(sdk.skills.EnergyShield, 1)) {
+		if (Config.UseEnergyShield && Precast.precastables.EnergyShield && !me.getState(sdk.states.EnergyShield) && me.getSkill(sdk.skills.EnergyShield, 1)) {
 			Skill.cast(sdk.skills.EnergyShield, 0);
 		}
 
 		// Keep Thunder-Storm active
-		if (!me.getState(sdk.states.ThunderStorm) && me.getSkill(sdk.skills.ThunderStorm, 1)) {
+		if (Precast.precastables.ThunderStorm && !me.getState(sdk.states.ThunderStorm) && me.getSkill(sdk.skills.ThunderStorm, 1)) {
 			Skill.cast(sdk.skills.ThunderStorm, 0);
 		}
 
@@ -42,10 +79,6 @@ const ClassAttack = {
 			return 1;
 		}
 
-		let checkSkill,
-			mercRevive = 0,
-			timedSkill = -1,
-			untimedSkill = -1;
 		let useStatic = (Config.StaticList.length > 0 && Config.CastStatic < 100 && me.getSkill(42, 1) && Attack.checkResist(unit, "lightning"));
 
 		// Static
@@ -91,46 +124,18 @@ const ClassAttack = {
 			if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) return 1; // lost reference to the mob we were attacking or its dead
 		}
 
-		let index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
-
-		// Get timed skill
-		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
-
-		if (Attack.checkResist(unit, checkSkill) && ([56, 59].indexOf(checkSkill) === -1 || Attack.validSpot(unit.x, unit.y))) {
-			timedSkill = checkSkill;
-		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && ([56, 59].indexOf(Config.AttackSkill[5]) === -1 || Attack.validSpot(unit.x, unit.y))) {
-			timedSkill = Config.AttackSkill[5];
-		}
-
-		// Get untimed skill
-		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[1] : Config.AttackSkill[index + 1];
-
-		if (Attack.checkResist(unit, checkSkill) && ([56, 59].indexOf(checkSkill) === -1 || Attack.validSpot(unit.x, unit.y))) {
-			untimedSkill = checkSkill;
-		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && ([56, 59].indexOf(Config.AttackSkill[6]) === -1 || Attack.validSpot(unit.x, unit.y))) {
-			untimedSkill = Config.AttackSkill[6];
-		}
-
-		// Low mana timed skill
-		if (Config.LowManaSkill[0] > -1 && Skill.getManaCost(timedSkill) > me.mp && Attack.checkResist(unit, Config.LowManaSkill[0])) {
-			timedSkill = Config.LowManaSkill[0];
-		}
-
-		// Low mana untimed skill
-		if (Config.LowManaSkill[1] > -1 && Skill.getManaCost(untimedSkill) > me.mp && Attack.checkResist(unit, Config.LowManaSkill[1])) {
-			untimedSkill = Config.LowManaSkill[1];
-		}
-
-		let result = this.doCast(unit, timedSkill, untimedSkill);
+		let skills = this.decideSkill(unit);
+		let result = this.doCast(unit, skills.timed, skills.untimed);
 
 		if (result === 2 && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
 			let merc = me.getMerc();
+			let mercRevive = 0;
 			let haveTK = !!(me.getSkill(sdk.skills.Telekinesis, 1));
 
 			while (unit.attackable) {
 				if (Misc.townCheck()) {
 					if (!unit || !copyUnit(unit).x) {
-						unit = Misc.poll(function () { return getUnit(1, -1, -1, gid); }, 1000, 80);
+						unit = Misc.poll(() => getUnit(1, -1, -1, gid), 1000, 80);
 					}
 				}
 
@@ -146,15 +151,19 @@ const ClassAttack = {
 					(merc === undefined || !merc) && (merc = me.getMerc());
 				}
 
-				if (!!merc && getDistance(merc, unit) > 5) {
+				if (!!merc && getDistance(merc, unit) > 7) {
 					Pather.moveToUnit(unit);
 
 					let spot = Attack.findSafeSpot(unit, 10, 5, 9);
 					!!spot && Pather.walkTo(spot.x, spot.y);
 				}
 
-				let closeMob = Attack.getNearestMonster(true, true);
-				!!closeMob && closeMob.gid !== gid ? this.doCast(closeMob, timedSkill, untimedSkill) : haveTK && Skill.cast(sdk.skills.Telekinesis, 0, unit);
+				let closeMob = Attack.getNearestMonster({skipGid: gid});
+				
+				if (!!closeMob) {
+					let findSkill = this.decideSkill(closeMob);
+					(this.doCast(closeMob, findSkill.timed, findSkill.untimed) === 1) || (haveTK && Skill.cast(sdk.skills.Telekinesis, 0, unit));
+				}
 			}
 
 			return 1;

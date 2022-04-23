@@ -4,8 +4,8 @@
 *	@desc		kill seal bosses and Diablo
 */
 
-let Override_1 = require('../modules/Override');
-new Override_1.Override(Common.Diablo, Common.Diablo.openSeal, function(orignal, classid) {
+let Overrides = require('../modules/Override');
+new Overrides.Override(Common.Diablo, Common.Diablo.openSeal, function(orignal, classid) {
 	if (!orignal(classid)) {
 		throw new Error("Failed to open seal (id " + classid + ")");
 	}
@@ -50,15 +50,11 @@ function FastDiablo() {
 	Common.Diablo.openSeal(396);
 
 	Common.Diablo.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
-	if (!this.getBoss(getLocaleString(2851))) {
-		throw new Error("Failed to kill Vizier");
-	}
+	if (!this.getBoss(getLocaleString(2851))) throw new Error("Failed to kill Vizier");
 
 	Common.Diablo.openSeal(394);
 	Common.Diablo.seisLayout === 1 ? Pather.moveTo(7771, 5196) : Pather.moveTo(7798, 5186);
-	if (!this.getBoss(getLocaleString(2852))) {
-		throw new Error("Failed to kill de Seis");
-	}
+	if (!this.getBoss(getLocaleString(2852))) throw new Error("Failed to kill de Seis");
 
 	Common.Diablo.openSeal(393);
 	Common.Diablo.openSeal(392);
@@ -74,9 +70,7 @@ function FastDiablo() {
 		Pather.moveTo(7928, 5295);
 	}
 
-	if (!this.getBoss(getLocaleString(2853))) {
-		throw new Error("Failed to kill Infector");
-	}
+	if (!this.getBoss(getLocaleString(2853))) throw new Error("Failed to kill Infector");
 
 	Pather.moveTo(7788, 5292);
 	Common.Diablo.diabloPrep();

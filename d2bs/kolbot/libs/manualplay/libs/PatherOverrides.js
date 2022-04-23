@@ -192,7 +192,6 @@ Pather.walkTo = function (x = undefined, y = undefined, minDist = undefined) {
 		attemptCount += 1;
 		nTimer = getTickCount();
 
-		ModeLoop:
 		while (me.mode !== 2 && me.mode !== 3 && me.mode !== 6) {
 			if (me.dead || Pather.stop) return false;
 
@@ -223,7 +222,7 @@ Pather.walkTo = function (x = undefined, y = undefined, minDist = undefined) {
 					}
 				}
 
-				break ModeLoop;
+				break;
 			}
 
 			delay(10);

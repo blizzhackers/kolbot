@@ -1,6 +1,6 @@
 /**
 *	@filename	Paladin.js
-*	@author		kolton
+*	@author		kolton, theBGuy
 *	@desc		Paladin attack sequence
 */
 
@@ -13,14 +13,15 @@ const ClassAttack = {
 			print("mercwatch");
 
 			if (Town.visitTown()) {
+				// lost reference to the mob we were attacking
 				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
-					return 1; // lost reference to the mob we were attacking
+					return 1;
 				}
 			}
 		}
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.getState(121) || !Skill.isTimed(Config.AttackSkill[0]))) {
-			if (getDistance(me, unit) > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
 					return 0;
 				}
@@ -87,7 +88,7 @@ const ClassAttack = {
 			while (unit.attackable) {
 				if (Misc.townCheck()) {
 					if (!unit || !copyUnit(unit).x) {
-						unit = Misc.poll(function () { return getUnit(1, -1, -1, gid); }, 1000, 80);
+						unit = Misc.poll(() => getUnit(1, -1, -1, gid), 1000, 80);
 					}
 				}
 
@@ -110,8 +111,8 @@ const ClassAttack = {
 					!!spot && Pather.walkTo(spot.x, spot.y);
 				}
 
-				let closeMob = Attack.getNearestMonster(true, true);
-				!!closeMob && closeMob.gid !== gid && this.doCast(closeMob, attackSkill, aura);
+				let closeMob = Attack.getNearestMonster({skipGid: gid});
+				!!closeMob && this.doCast(closeMob, attackSkill, aura);
 			}
 
 			return 1;
@@ -123,7 +124,9 @@ const ClassAttack = {
 	afterAttack: function () {
 		Precast.doPrecast(false);
 
-		if (Config.Redemption instanceof Array && (me.hpPercent < Config.Redemption[0] || me.mpPercent < Config.Redemption[1]) && Skill.setSkill(124, 0)) {
+		if (Config.Redemption instanceof Array
+			&& (me.hpPercent < Config.Redemption[0] || me.mpPercent < Config.Redemption[1])
+			&& Attack.checkNearCorpses(me) > 2 && Skill.setSkill(124, 0)) {
 			delay(1500);
 		}
 	},
@@ -132,26 +135,21 @@ const ClassAttack = {
 		let walk;
 
 		if (attackSkill < 0) {
+			console.debug("No attack skills");
 			return 2;
 		}
 
 		switch (attackSkill) {
 		case 112:
-			if (Config.AvoidDolls && [212, 213, 214, 215, 216, 690, 691].indexOf(unit.classid) > -1) {
+			if (Config.AvoidDolls && [212, 213, 214, 215, 216, 690, 691].includes(unit.classid)) {
 				this.dollAvoid(unit);
-
-				if (aura > -1) {
-					Skill.setSkill(aura, 0);
-				}
-
+				aura > -1 && Skill.setSkill(aura, 0);
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 
 				return 1;
 			}
 
 			if (!this.getHammerPosition(unit)) {
-				//print("Can't get to " + unit.name);
-
 				// Fallback to secondary skill if it exists
 				if (Config.AttackSkill[5] > -1 && Config.AttackSkill[5] !== 112 && Attack.checkResist(unit, Config.AttackSkill[5])) {
 					return this.doCast(unit, Config.AttackSkill[5], Config.AttackSkill[6]);
@@ -160,20 +158,14 @@ const ClassAttack = {
 				return 0;
 			}
 
-			if (getDistance(me, unit) > 9 || unit.dead) {
-				//print(getDistance(me, unit));
+			if (unit.distance > 9 || !unit.attackable) return 1;
 
-				return 1;
-			}
-
-			if (aura > -1) {
-				Skill.setSkill(aura, 0);
-			}
+			aura > -1 && Skill.setSkill(aura, 0);
 
 			for (let i = 0; i < 3; i += 1) {
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 
-				if (!Attack.checkMonster(unit) || getDistance(me, unit) > 9 || unit.type === 0) {
+				if (!unit.attackable || getDistance(me, unit) > 9 || unit.type === 0) {
 					break;
 				}
 			}
@@ -195,10 +187,7 @@ const ClassAttack = {
 			}
 
 			if (!unit.dead) {
-				if (aura > -1) {
-					Skill.setSkill(aura, 0);
-				}
-
+				aura > -1 && Skill.setSkill(aura, 0);
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 			}
 
@@ -223,6 +212,28 @@ const ClassAttack = {
 			}
 
 			break;
+		case sdk.skills.Zeal:
+		case sdk.skills.Vengeance:
+			if (!Attack.validSpot(unit.x, unit.y)) {
+				if (Attack.monsterObjects.indexOf(unit.classid) === -1) {
+					return 0;
+				}
+			}
+			
+			// 3591 - wall/line of sight/ranged/items/objects/closeddoor 
+			if (unit.distance > 3 || checkCollision(me, unit, 0x5)) {
+				if (!Attack.getIntoPosition(unit, 3, 0x5, true)) {
+					console.debug("Failed to get into position");
+					return 0;
+				}
+			}
+
+			if (unit.attackable) {
+				aura > -1 && Skill.setSkill(aura, 0);
+				return (Skill.cast(attackSkill, 2, unit) ? 1 : 0);
+			}
+
+			break;
 		default:
 			if (Skill.getRange(attackSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
 				return 0;
@@ -238,10 +249,7 @@ const ClassAttack = {
 			}
 
 			if (!unit.dead) {
-				if (aura > -1) {
-					Skill.setSkill(aura, 0);
-				}
-
+				aura > -1 && Skill.setSkill(aura, 0);
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 			}
 
@@ -269,8 +277,7 @@ const ClassAttack = {
 	},
 
 	getHammerPosition: function (unit) {
-		let x, y, positions, check,
-			baseId = getBaseStat("monstats", unit.classid, "baseid"),
+		let x, y, positions, baseId = getBaseStat("monstats", unit.classid, "baseid"),
 			size = getBaseStat("monstats2", baseId, "sizex");
 
 		// in case base stat returns something outrageous
@@ -284,8 +291,9 @@ const ClassAttack = {
 
 			break;
 		case 1: // Monster
-			x = (unit.mode === 2 || unit.mode === 15) && getDistance(me, unit) < 10 && getDistance(me, unit.targetx, unit.targety) > 5 ? unit.targetx : unit.x;
-			y = (unit.mode === 2 || unit.mode === 15) && getDistance(me, unit) < 10 && getDistance(me, unit.targetx, unit.targety) > 5 ? unit.targety : unit.y;
+			let commonCheck = ((unit.mode === 2 || unit.mode === 15) && unit.distance < 10);
+			x = commonCheck && getDistance(me, unit.targetx, unit.targety) > 5 ? unit.targetx : unit.x;
+			y = commonCheck && getDistance(me, unit.targetx, unit.targety) > 5 ? unit.targety : unit.y;
 			positions = [[x + 2, y + 1], [x, y + 3], [x + 2, y - 1], [x - 2, y + 2], [x - 5, y]];
 			size === 3 && positions.unshift([x + 2, y + 2]);
 
@@ -302,12 +310,12 @@ const ClassAttack = {
 		}
 
 		for (let i = 0; i < positions.length; i += 1) {
-			check = {
+			let check = {
 				x: positions[i][0],
 				y: positions[i][1]
 			};
 
-			if (Attack.validSpot(check.x, check.y) && !CollMap.checkColl(unit, check, 0x4, 0)) {
+			if (Attack.validSpot(check.x, check.y) && !CollMap.checkColl(unit, check, 0x5, 0)) {
 				if (this.reposition(positions[i][0], positions[i][1])) {
 					return true;
 				}

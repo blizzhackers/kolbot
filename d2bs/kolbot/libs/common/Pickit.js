@@ -1,14 +1,18 @@
 /**
 *	@filename	Pickit.js
-*	@author		kolton
+*	@author		kolton, theBGuy
 *	@desc		handle item pickup
 */
 
 const Pickit = {
 	gidList: [],
-	useTelekinesis: false,
 	beltSize: 1,
-	ignoreLog: [4, 5, 6, 22, 41, 76, 77, 78, 79, 80, 81], // Ignored item types for item logging
+	// Ignored item types for item logging
+	ignoreLog: [
+		sdk.itemtype.Gold, sdk.itemtype.BowQuiver, sdk.itemtype.CrossbowQuiver,
+		sdk.itemtype.Scroll, sdk.itemtype.Key, sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion,
+		sdk.itemtype.RejuvPotion, sdk.itemtype.StaminaPotion, sdk.itemtype.AntidotePotion, sdk.itemtype.ThawingPotion
+	],
 
 	init: function (notify) {
 		for (let i = 0; i < Config.PickitFiles.length; i += 1) {
@@ -17,8 +21,22 @@ const Pickit = {
 			NTIP.OpenFile(filename, notify);
 		}
 
-		this.useTelekinesis = (!!Config.UseTelekinesis && !!me.getSkill(sdk.skills.Telekinesis, 1));
 		this.beltSize = Storage.BeltSize();
+		// If MinColumn is set to be more than our current belt size, set it to be 1 less than the belt size 4x3 belt will give us Config.MinColumn = [2, 2, 2, 2]
+		Config.MinColumn.forEach((el, index) => {
+			el >= this.beltSize && (Config.MinColumn[index] = Math.max(0, this.beltSize - 2));
+		});
+	},
+
+	result: {
+		UNID: -1,
+		UNWANTED: 0,
+		WANTED: 1,
+		CUBING: 2,
+		RUNEWORD: 3,
+		TRASH: 4,
+		CRAFTING: 5,
+		UTILITY: 6
 	},
 
 	// Returns:
@@ -33,28 +51,28 @@ const Pickit = {
 
 		if ((unit.classid === 617 || unit.classid === 618) && Town.repairIngredientCheck(unit)) {
 			return {
-				result: 6,
+				result: Pickit.result.UTILITY,
 				line: null
 			};
 		}
 
 		if (CraftingSystem.checkItem(unit)) {
 			return {
-				result: 5,
+				result: Pickit.result.CRAFTING,
 				line: null
 			};
 		}
 
 		if (Cubing.checkItem(unit)) {
 			return {
-				result: 2,
+				result: Pickit.result.CUBING,
 				line: null
 			};
 		}
 
 		if (Runewords.checkItem(unit)) {
 			return {
-				result: 3,
+				result: Pickit.result.RUNEWORD,
 				line: null
 			};
 		}
@@ -63,7 +81,7 @@ const Pickit = {
 		if (rval.result === 0 && !Town.ignoredItemTypes.includes(unit.itemType) && me.gold < Config.LowGold && !unit.questItem) {
 			if ((unit.getItemCost(1) / (unit.sizex * unit.sizey) >= 10) || unit.classid === sdk.items.Gold) {
 				return {
-					result: 4,
+					result: Pickit.result.TRASH,
 					line: null
 				};
 			}
@@ -73,7 +91,7 @@ const Pickit = {
 		if (rval.result === 0 && Config.PickitFiles.length === 0 && [sdk.itemtype.Gold, sdk.itemtype.Scroll, sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion].includes(unit.itemType)
 			&& this.canPick(unit)) {
 			return {
-				result: 1,
+				result: Pickit.result.WANTED,
 				line: null
 			};
 		}
@@ -82,8 +100,7 @@ const Pickit = {
 	},
 
 	pickItems: function (range = Config.PickRange) {
-		let status, item, canFit,
-			needMule = false,
+		let needMule = false,
 			pickList = [];
 
 		Town.clearBelt();
@@ -94,7 +111,7 @@ const Pickit = {
 			delay(40);
 		}
 
-		item = getUnit(4);
+		let item = getUnit(4);
 
 		if (item) {
 			do {
@@ -114,11 +131,11 @@ const Pickit = {
 			if (copyUnit(pickList[0]).x !== undefined && (pickList[0].mode === 3 || pickList[0].mode === 5)
 					&& (Pather.useTeleport() || me.inTown || !checkCollision(me, pickList[0], 0x1))) {
 				// Check if the item should be picked
-				status = this.checkItem(pickList[0]);
+				let status = this.checkItem(pickList[0]);
 
 				if (status.result && this.canPick(pickList[0])) {
 					// Override canFit for scrolls, potions and gold
-					canFit = Storage.Inventory.CanFit(pickList[0]) || [4, 22, 76, 77, 78].indexOf(pickList[0].itemType) > -1;
+					let canFit = Storage.Inventory.CanFit(pickList[0]) || [4, 22, 76, 77, 78].includes(pickList[0].itemType);
 
 					// Field id when our used space is above a certain percent or if we are full try to make room with FieldID
 					if (Config.FieldID.Enabled && (!canFit || Storage.Inventory.UsedSpacePercent() > Config.FieldID.UsedSpace)) {
@@ -171,15 +188,12 @@ const Pickit = {
 
 	// Check if we can even free up the inventory
 	canMakeRoom: function () {
-		if (!Config.MakeRoom) {
-			return false;
-		}
+		if (!Config.MakeRoom) return false;
 
-		let i,
-			items = Storage.Inventory.Compare(Config.Inventory);
+		let items = Storage.Inventory.Compare(Config.Inventory);
 
 		if (items) {
-			for (i = 0; i < items.length; i += 1) {
+			for (let i = 0; i < items.length; i += 1) {
 				switch (this.checkItem(items[i]).result) {
 				case -1: // Item needs to be identified
 					// For low level chars that can't actually get id scrolls -> prevent an infinite loop
@@ -204,32 +218,30 @@ const Pickit = {
 	},
 
 	pickItem: function (unit, status, keptLine, retry = 3) {
-		function ItemStats(unit) {
+		function ItemStats (unit) {
 			this.ilvl = unit.ilvl;
 			this.type = unit.itemType;
 			this.classid = unit.classid;
 			this.name = unit.name;
 			this.color = Pickit.itemColor(unit);
 			this.gold = unit.getStat(14);
-			this.useTk = Pickit.useTelekinesis && (this.type === 4 || this.type === 22 || (this.type > 75 && this.type < 82)) &&
-						getDistance(me, unit) > 5 && getDistance(me, unit) < 20 && !checkCollision(me, unit, 0x4);
+			this.dist = (unit.distance || Infinity);
+			this.useTk = (Skill.haveTK && Config.UseTelekinesis
+				&& (this.type === 4 || this.type === 22 || (this.type > 75 && this.type < 82))
+				&& this.dist > 5 && this.dist < 20 && !checkCollision(me, unit, 0x5));
 			this.picked = false;
 		}
 
-		let i, item, tick, gid, stats,
+		let gid = (unit.gid || -1),
 			cancelFlags = [0x01, 0x08, 0x14, 0x0c, 0x19, 0x1a],
 			itemCount = me.itemcount;
-
-		if (unit.gid) {
-			gid = unit.gid;
-			item = getUnit(4, -1, -1, gid);
-		}
+		let item = gid > -1 ? getUnit(4, -1, -1, gid) : false;
 
 		if (!item) {
 			return false;
 		}
 
-		for (i = 0; i < cancelFlags.length; i += 1) {
+		for (let i = 0; i < cancelFlags.length; i += 1) {
 			if (getUIFlag(cancelFlags[i])) {
 				delay(500);
 				me.cancel(0);
@@ -238,12 +250,12 @@ const Pickit = {
 			}
 		}
 
-		stats = new ItemStats(item);
+		let stats = new ItemStats(item);
 
 		MainLoop:
-		for (i = 0; i < retry; i += 1) {
+		for (let i = 0; i < retry; i += 1) {
 			if (!getUnit(4, -1, -1, gid)) {
-				break MainLoop;
+				break;
 			}
 
 			if (me.dead) return false;
@@ -253,28 +265,26 @@ const Pickit = {
 			}
 
 			if (item.mode !== 3 && item.mode !== 5) {
-				break MainLoop;
+				break;
 			}
 
+			// fastPick check? should only pick items if surrounding monsters have been cleared or if fastPick is active
+			// note: clear of surrounding monsters of the spectype we are set to clear
+			// should we unit cast by default?
 			if (stats.useTk) {
-				if (Config.PacketCasting === 2) {
-					Skill.setSkill(43, 0) && Packet.unitCast(0, item);
-				} else {
-					Skill.cast(43, 0, item);
-				}
+				Skill.setSkill(sdk.skills.Telekinesis, 0) && Packet.unitCast(0, item);
 			} else {
 				if (getDistance(me, item) > (Config.FastPick && i < 1 ? 6 : 4) || checkCollision(me, item, 0x1)) {
-					if (Pather.useTeleport()) {
-						Pather.moveToUnit(item);
-					} else if (!Pather.moveTo(item.x, item.y, 0)) {
-						continue MainLoop;
+					if ((Pather.useTeleport() && !Pather.moveToUnit(item)) || !Pather.moveTo(item.x, item.y, 0)) {
+						continue;
 					}
 				}
 
-				Config.FastPick ? sendPacket(1, 0x16, 4, 0x4, 4, item.gid, 4, 0) : Misc.click(0, 0, item);
+				// use packet first, if we fail and not using fast pick use click
+				Config.FastPick || i < 1 ? sendPacket(1, 0x16, 4, 0x4, 4, item.gid, 4, 0) : Misc.click(0, 0, item);
 			}
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < 1000) {
 				item = copyUnit(item);
@@ -316,8 +326,8 @@ const Pickit = {
 			DataFile.updateStats("lastArea");
 
 			switch (status) {
-			case 1:
-				print("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + (keptLine ? ") (" + keptLine + ")" : ")"));
+			case Pickit.result.WANTED:
+				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + (keptLine ? ") (" + keptLine + ")" : ")"));
 
 				if (this.ignoreLog.indexOf(stats.type) === -1) {
 					Misc.itemLogger("Kept", item);
@@ -325,25 +335,25 @@ const Pickit = {
 				}
 
 				break;
-			case 2:
-				print("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Cubing)");
+			case Pickit.result.CUBING:
+				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Cubing)");
 				Misc.itemLogger("Kept", item, "Cubing " + me.findItems(item.classid).length);
 				Cubing.update();
 
 				break;
-			case 3:
-				print("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Runewords)");
+			case Pickit.result.RUNEWORD:
+				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Runewords)");
 				Misc.itemLogger("Kept", item, "Runewords");
 				Runewords.update(stats.classid, gid);
 
 				break;
-			case 5: // Crafting System
-				print("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Crafting System)");
+			case Pickit.result.CRAFTING:
+				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Crafting System)");
 				CraftingSystem.update(item);
 
 				break;
 			default:
-				print("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + (keptLine ? ") (" + keptLine + ")" : ")"));
+				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + (keptLine ? ") (" + keptLine + ")" : ")"));
 
 				break;
 			}
@@ -354,14 +364,11 @@ const Pickit = {
 
 	itemQualityToName: function (quality) {
 		let qualNames = ["", "lowquality", "normal", "superior", "magic", "set", "rare", "unique", "crafted"];
-
 		return qualNames[quality];
 	},
 
 	itemColor: function (unit, type) {
-		if (type === undefined) {
-			type = true;
-		}
+		type === undefined && (type = true);
 
 		if (type) {
 			switch (unit.itemType) {
@@ -395,6 +402,8 @@ const Pickit = {
 	},
 
 	canPick: function (unit) {
+		if (!unit) return false;
+
 		let tome, charm, i, potion, needPots, buffers, pottype, myKey, key;
 
 		switch (unit.classid) {
@@ -417,7 +426,8 @@ const Pickit = {
 
 		switch (unit.itemType) {
 		case 4: // Gold
-			if (me.getStat(14) === me.getStat(12) * 10000) { // Check current gold vs max capacity (cLvl*10000)
+			// Check current gold vs max capacity (cLvl*10000)
+			if (me.getStat(14) === me.getStat(12) * 10000) {
 				return false; // Skip gold if full
 			}
 
@@ -427,7 +437,8 @@ const Pickit = {
 
 			if (tome) {
 				do {
-					if (tome.location === 3 && tome.getStat(70) === 20) { // In inventory, contains 20 scrolls
+					// In inventory, contains 20 scrolls
+					if (tome.location === 3 && tome.getStat(70) === 20) {
 						return false; // Skip a scroll if its tome is full
 					}
 				} while (tome.getNext());
@@ -437,9 +448,8 @@ const Pickit = {
 
 			break;
 		case 41: // Key (new 26.1.2013)
-			if (me.classid === 6) { // Assassins don't ever need keys
-				return false;
-			}
+			// Assassins don't ever need keys
+			if (me.assassin) return false;
 
 			myKey = me.getItem(543, 0);
 			key = getUnit(4, -1, -1, unit.gid); // Passed argument isn't an actual unit, we need to get it
@@ -511,9 +521,7 @@ const Pickit = {
 						}
 
 						if (unit.itemType === pottype) {
-							if (!Storage.Inventory.CanFit(unit)) {
-								return false;
-							}
+							if (!Storage.Inventory.CanFit(unit)) return false;
 
 							needPots = Config[buffers[i]];
 							potion = me.getItem(-1, 0);
@@ -595,11 +603,10 @@ const Pickit = {
 	},
 
 	fastPick: function (retry = 3) {
-		let item, gid, status,
-			itemList = [];
+		let item, itemList = [];
 
 		while (this.gidList.length > 0) {
-			gid = this.gidList.shift();
+			let gid = this.gidList.shift();
 			item = getUnit(4, -1, -1, gid);
 
 			if (item && (item.mode === 3 || item.mode === 5) && (Town.ignoredItemTypes.indexOf(item.itemType) === -1 || (item.itemType >= 76 && item.itemType <= 78)) && item.itemType !== 4 && getDistance(me, item) <= Config.PickRange) {
@@ -609,19 +616,25 @@ const Pickit = {
 
 		while (itemList.length > 0) {
 			itemList.sort(this.sortFastPickItems);
-
 			item = copyUnit(itemList.shift());
 
 			// Check if the item unit is still valid
 			if (item.x !== undefined) {
-				status = this.checkItem(item);
+				let status = this.checkItem(item);
 
-				if (status.result && this.canPick(item) && (Storage.Inventory.CanFit(item) || [4, 22, 76, 77, 78].indexOf(item.itemType) > -1)) {
+				if (status.result && this.canPick(item) && (Storage.Inventory.CanFit(item) || [4, 22, 76, 77, 78].includes(item.itemType))) {
 					this.pickItem(item, status.result, status.line, retry);
 				}
 			}
 		}
 
 		return true;
+	},
+
+	// eslint-disable-next-line no-unused-vars
+	itemEvent: function (gid, mode, code, global) {
+		if (gid > 0 && mode === 0) {
+			Pickit.gidList.push(gid);
+		}
 	}
 };

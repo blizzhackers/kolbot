@@ -1,10 +1,13 @@
 function ShopBot() {
-	let i, tickCount,
+	let overlayText = {
+		title: new Text("kolbot shopbot", 50, 245, 2, 1),
+		cycles: new Text("Cycles in last minute:", 50, 260, 2, 1),
+		frequency: new Text("Valid item frequency:", 50, 275, 2, 1),
+		totalCycles: new Text("Total cycles:", 50, 290, 2, 1),
+	};
+
+	let tickCount,
 		cycles = 0,
-		cyclesText = new Text("Cycles in last minute:", 50, 260, 2, 1),
-		title = new Text("kolbot shopbot", 50, 245, 2, 1),
-		frequency = new Text("Valid item frequency:", 50, 275, 2, 1),
-		totalCyclesText = new Text("Total cycles:", 50, 290, 2, 1),
 		validItems = 0,
 		totalCycles = 0;
 
@@ -13,8 +16,7 @@ function ShopBot() {
 	this.npcs = {};
 
 	this.buildPickList = function () {
-		let i, nipfile, line, lines, info,
-			filepath = "pickit/shopbot.nip",
+		let nipfile, filepath = "pickit/shopbot.nip",
 			filename = filepath.substring(filepath.lastIndexOf("/") + 1, filepath.length);
 
 		if (!FileTools.exists(filepath)) {
@@ -28,58 +30,46 @@ function ShopBot() {
 			Misc.errorReport("ÿc1Failed to load NIP: ÿc0" + filename);
 		}
 
-		if (!nipfile) {
-			return false;
-		}
+		if (!nipfile) return false;
 
-		lines = nipfile.readAllLines();
+		let lines = nipfile.readAllLines();
 		nipfile.close();
 
-		for (i = 0; i < lines.length; i += 1) {
-			info = {
+		for (let i = 0; i < lines.length; i += 1) {
+			let info = {
 				line: i + 1,
 				file: filename,
 				string: lines[i]
 			};
 
-			line = NTIP.ParseLineInt(lines[i], info);
-
-			if (line) {
-				this.pickEntries.push(line);
-			}
+			let line = NTIP.ParseLineInt(lines[i], info);
+			line && this.pickEntries.push(line);
 		}
 
 		return true;
 	};
 
 	this.openMenu = function (npc) {
-		if (npc.type !== 1) {
-			throw new Error("Unit.openMenu: Must be used on NPCs.");
-		}
+		if (!npc || npc.type !== 1) throw new Error("Unit.openMenu: Must be used on NPCs.");
 
-		let i, tick,
-			interactedNPC = getInteractedNPC();
+		let interactedNPC = getInteractedNPC();
 
 		if (interactedNPC && interactedNPC.name !== npc.name) {
 			sendPacket(1, 0x30, 4, interactedNPC.type, 4, interactedNPC.gid);
 			me.cancel();
 		}
 
-		if (getUIFlag(0x08)) {
-			return true;
-		}
+		if (getUIFlag(0x08)) return true;
 
-		for (i = 0; i < 10; i += 1) {
-			if (getDistance(me.x, me.y, npc.x, npc.y) > 5) {
-				Pather.walkTo(npc.x, npc.y);
-			}
+		for (let i = 0; i < 10; i += 1) {
+			npc.distance > 5 && Pather.walkTo(npc.x, npc.y);
 
 			if (!getUIFlag(0x08)) {
 				sendPacket(1, 0x13, 4, 1, 4, npc.gid);
 				sendPacket(1, 0x2f, 4, 1, 4, npc.gid);
 			}
 
-			tick = getTickCount();
+			let tick = getTickCount();
 
 			while (getTickCount() - tick < Math.max(Math.round((i + 1) * 250 / (i / 3 + 1)), me.ping + 1)) {
 				if (getUIFlag(0x08)) {
@@ -96,7 +86,7 @@ function ShopBot() {
 	};
 
 	this.shopItems = function (npc, menuId) {
-		let i, item, items, bought;
+		let bought;
 
 		if (!Storage.Inventory.CanFit({sizex: 2, sizey: 4}) && AutoMule.getMuleItems().length > 0) {
 			D2Bot.printToConsole("Mule triggered");
@@ -105,43 +95,30 @@ function ShopBot() {
 			return true;
 		}
 
-		if (!npc) {
-			return false;
-		}
+		if (!npc) return false;
 
-		for (i = 0; i < 10; i += 1) {
+		for (let i = 0; i < 10; i += 1) {
 			delay(150);
 
-			if (i % 2 === 0) {
-				sendPacket(1, 0x38, 4, 1, 4, npc.gid, 4, 0);
-			}
+			i % 2 === 0 && sendPacket(1, 0x38, 4, 1, 4, npc.gid, 4, 0);
 
 			if (npc.itemcount > 0) {
-				//delay(200);
 				break;
 			}
 		}
 
-		item = npc.getItem();
+		let items = npc.getItemsEx().filter(function (item) {
+			return (Config.ShopBot.ScanIDs.includes(item.classid) || Config.ShopBot.ScanIDs.length === 0);
+		});
 
-		if (!item) {
-			return false;
-		}
-
-		items = [];
-
-		do {
-			if (Config.ShopBot.ScanIDs.indexOf(item.classid) > -1 || Config.ShopBot.ScanIDs.length === 0) {
-				items.push(copyUnit(item));
-			}
-		} while (item.getNext());
+		if (!items.length) return false;
 
 		me.overhead(npc.itemcount + " items, " + items.length + " valid");
 
 		validItems += items.length;
-		frequency.text = "Valid base items / cycle: " + ((validItems / totalCycles).toFixed(2).toString());
+		overlayText.frequency.text = "Valid base items / cycle: " + ((validItems / totalCycles).toFixed(2).toString());
 
-		for (i = 0; i < items.length; i += 1) {
+		for (let i = 0; i < items.length; i += 1) {
 			if (Storage.Inventory.CanFit(items[i]) && Pickit.canPick(items[i]) &&
 					me.gold >= items[i].getItemCost(0) &&
 					NTIP.CheckItem(items[i], this.pickEntries)
@@ -156,14 +133,12 @@ function ShopBot() {
 					bought = true;
 				}
 
-				if (Config.ShopBot.QuitOnMatch) {
-					scriptBroadcast("quit");
-				}
+				Config.ShopBot.QuitOnMatch && scriptBroadcast("quit");
 			}
 		}
 
 		if (bought) {
-			me.cancel();
+			me.cancelUIFlags();
 			Town.stash();
 		}
 
@@ -171,12 +146,12 @@ function ShopBot() {
 	};
 
 	this.shopAtNPC = function (name) {
-		let npc, wp,
-			menuId = "Shop";
+		let wp, menuId = "Shop";
 
 		switch (name) {
 		case NPC.Charsi:
 			menuId = "Repair";
+		// eslint-disable-next-line no-fallthrough
 		case NPC.Akara:
 		case NPC.Gheed:
 			wp = 1;
@@ -184,6 +159,7 @@ function ShopBot() {
 			break;
 		case NPC.Fara:
 			menuId = "Repair";
+		// eslint-disable-next-line no-fallthrough
 		case NPC.Elzix:
 		case NPC.Drognan:
 			wp = 40;
@@ -191,6 +167,7 @@ function ShopBot() {
 			break;
 		case NPC.Hratli:
 			menuId = "Repair";
+		// eslint-disable-next-line no-fallthrough
 		case NPC.Asheara:
 		case NPC.Ormus:
 			wp = 75;
@@ -198,12 +175,14 @@ function ShopBot() {
 			break;
 		case NPC.Halbu:
 			menuId = "Repair";
+		// eslint-disable-next-line no-fallthrough
 		case NPC.Jamella:
 			wp = 103;
 
 			break;
 		case NPC.Larzuk:
 			menuId = "Repair";
+		// eslint-disable-next-line no-fallthrough
 		case NPC.Malah:
 		case NPC.Anya:
 			wp = 109;
@@ -213,38 +192,26 @@ function ShopBot() {
 			throw new Error("Invalid NPC");
 		}
 
-		if (!Pather.useWaypoint(wp)) {
-			return false;
-		}
+		if (!Pather.useWaypoint(wp)) return false;
 
-		npc = this.npcs[name] || getUnit(1, name);
+		let npc = this.npcs[name] || getUnit(1, name);
 
-		if (!npc || getDistance(me, npc) > 5) {
+		if (!npc || npc.distance > 5) {
 			Town.move(name);
 			npc = getUnit(1, name);
 		}
 
-		if (!npc) {
-			return false;
-		}
+		if (!npc) return false;
 
-		if (!this.npcs[name]) {
-			this.npcs[name] = copyUnit(npc);
-		}
-
-		if (Config.ShopBot.CycleDelay) {
-			delay(Config.ShopBot.CycleDelay);
-		}
-
-		if (this.openMenu(npc)) {
-			this.shopItems(npc, menuId);
-		}
+		!this.npcs[name] && (this.npcs[name] = copyUnit(npc));
+		Config.ShopBot.CycleDelay && delay(Config.ShopBot.CycleDelay);
+		this.openMenu(npc) && this.shopItems(npc, menuId);
 
 		return true;
 	};
 
 	// START
-	for (i = 0; i < Config.ShopBot.ScanIDs.length; i += 1) {
+	for (let i = 0; i < Config.ShopBot.ScanIDs.length; i += 1) {
 		if (isNaN(Config.ShopBot.ScanIDs[i])) {
 			if (NTIPAliasClassID.hasOwnProperty(Config.ShopBot.ScanIDs[i].replace(/\s+/g, "").toLowerCase())) {
 				Config.ShopBot.ScanIDs[i] = NTIPAliasClassID[Config.ShopBot.ScanIDs[i].replace(/\s+/g, "").toLowerCase()];
@@ -256,17 +223,13 @@ function ShopBot() {
 		}
 	}
 
-	if (typeof Config.ShopBot.ShopNPC === "string") {
-		Config.ShopBot.ShopNPC = [Config.ShopBot.ShopNPC];
-	}
+	typeof Config.ShopBot.ShopNPC === "string" && (Config.ShopBot.ShopNPC = [Config.ShopBot.ShopNPC]);
 
-	for (i = 0; i < Config.ShopBot.ShopNPC.length; i += 1) {
+	for (let i = 0; i < Config.ShopBot.ShopNPC.length; i += 1) {
 		Config.ShopBot.ShopNPC[i] = Config.ShopBot.ShopNPC[i].toLowerCase();
 	}
 
-	if (Config.ShopBot.MinGold && me.getStat(14) + me.getStat(15) < Config.ShopBot.MinGold) {
-		return true;
-	}
+	if (Config.ShopBot.MinGold && me.getStat(14) + me.getStat(15) < Config.ShopBot.MinGold) return true;
 
 	this.buildPickList();
 	print("Shopbot: Pickit entries: " + this.pickEntries.length);
@@ -276,13 +239,13 @@ function ShopBot() {
 
 	while (!Config.ShopBot.Cycles || totalCycles < Config.ShopBot.Cycles) {
 		if (getTickCount() - tickCount >= 60 * 1000) {
-			cyclesText.text = "Cycles in last minute: " + cycles.toString();
-			totalCyclesText.text = "Total cycles: " + totalCycles.toString();
+			overlayText.cycles.text = "Cycles in last minute: " + cycles.toString();
+			overlayText.totalCycles.text = "Total cycles: " + totalCycles.toString();
 			cycles = 0;
 			tickCount = getTickCount();
 		}
 
-		for (i = 0; i < Config.ShopBot.ShopNPC.length; i += 1) {
+		for (let i = 0; i < Config.ShopBot.ShopNPC.length; i += 1) {
 			this.shopAtNPC(Config.ShopBot.ShopNPC[i]);
 		}
 
@@ -293,7 +256,7 @@ function ShopBot() {
 				wpY = wp.roomy * 5 + wp.y,
 				exit = area.exits[0];
 
-			for (i = 1; i < area.exits.length; i++) {
+			for (let i = 1; i < area.exits.length; i++) {
 				if (getDistance(me, exit) > getDistance(me, area.exits[i])) {
 					exit = area.exits[i];
 				}

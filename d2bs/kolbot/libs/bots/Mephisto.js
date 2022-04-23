@@ -6,8 +6,7 @@
 
 function Mephisto() {
 	this.killMephisto = function () {
-		let i, angle, angles,
-			pos = {},
+		let pos = {},
 			attackCount = 0,
 			meph = getUnit(1, 242);
 
@@ -15,20 +14,14 @@ function Mephisto() {
 			throw new Error("Mephisto not found!");
 		}
 
-		if (Config.MFLeader) {
-			Pather.makePortal();
-			say("kill " + meph.classid);
-		}
+		Config.MFLeader && Pather.makePortal() && say("kill " + meph.classid);
 
-		while (attackCount < 300 && Attack.checkMonster(meph)) {
-			//if (getUnit(3, 276)) {
+		while (attackCount < 300 && meph.attackable(meph)) {
 			if (meph.mode === 5) {
-				//if (attackCount % 2 === 0) {
-				angle = Math.round(Math.atan2(me.y - meph.y, me.x - meph.x) * 180 / Math.PI);
-				angles = me.y > meph.y ? [-30, -60, -90] : [30, 60, 90];
+				let angle = Math.round(Math.atan2(me.y - meph.y, me.x - meph.x) * 180 / Math.PI);
+				let angles = me.y > meph.y ? [-30, -60, -90] : [30, 60, 90];
 
-				for (i = 0; i < angles.length; i += 1) {
-					//pos.dist = Math.round(getDistance(me, meph));
+				for (let i = 0; i < angles.length; i += 1) {
 					pos.dist = 18;
 					pos.x = Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * pos.dist + meph.x);
 					pos.y = Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * pos.dist + meph.y);
@@ -53,14 +46,14 @@ function Mephisto() {
 	};
 
 	this.moat = function () {
-		let count, distance, mephisto;
+		let count;
 
 		count = 0;
 
 		delay(350);
 		Pather.moveTo(17563, 8072);
 
-		mephisto = getUnit(1, 242);
+		let mephisto = getUnit(1, 242);
 
 		if (!mephisto) {
 			throw new Error("Mephisto not found.");
@@ -78,7 +71,7 @@ function Mephisto() {
 		Attack.clear(10);
 		Pather.moveTo(17610, 8094);
 
-		distance = getDistance(me, mephisto);
+		let distance = getDistance(me, mephisto);
 
 		while (distance > 27) {
 			count += 1;
@@ -113,17 +106,10 @@ function Mephisto() {
 	};
 
 	this.killCouncil = function () {
-		let i,
-			coords = [17600, 8125, 17600, 8015, 17643, 8068];
+		let coords = [17600, 8125, 17600, 8015, 17643, 8068];
 
-		for (i = 0; i < coords.length; i += 2) {
+		for (let i = 0; i < coords.length; i += 2) {
 			Pather.moveTo(coords[i], coords[i + 1]);
-
-			if (Config.MFLeader) {
-				//Pather.makePortal();
-				//say("council " + i);
-			}
-
 			Attack.clearList(Attack.getMob([345, 346, 347], 0, 40));
 		}
 
@@ -138,9 +124,7 @@ function Mephisto() {
 		throw new Error("Failed to move to Durance Level 3");
 	}
 
-	if (Config.Mephisto.KillCouncil) {
-		this.killCouncil();
-	}
+	Config.Mephisto.KillCouncil && this.killCouncil();
 
 	if (Config.Mephisto.TakeRedPortal) {
 		Pather.moveTo(17590, 8068);
@@ -149,17 +133,13 @@ function Mephisto() {
 		Pather.moveTo(17566, 8069);
 	}
 
-	if (me.classid === 1) {
+	if (me.sorceress) {
 		if (Config.Mephisto.MoatTrick) {
 			this.moat();
-
 			Skill.usePvpRange = true;
-
 			Attack.kill(242); // Mephisto
-
 			Skill.usePvpRange = false;
 		} else {
-			//this.killMephisto();
 			Attack.kill(242); // Mephisto
 		}
 	} else {

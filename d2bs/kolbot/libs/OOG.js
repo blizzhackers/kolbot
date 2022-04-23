@@ -5,6 +5,7 @@
 */
 
 !isIncluded('Polyfill.js') && include('Polyfill.js');
+
 let Controls = require('./modules/Control');
 let sdk = require('./modules/sdk');
 

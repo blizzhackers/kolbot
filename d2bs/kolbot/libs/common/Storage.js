@@ -4,8 +4,8 @@
 *	@desc		manage inventory, belt, stash, cube
 */
 
-var Container = function (name, width, height, location) {
-	var h, w;
+let Container = function (name, width, height, location) {
+	let h, w;
 
 	this.name = name;
 	this.width = width;
@@ -28,7 +28,7 @@ var Container = function (name, width, height, location) {
 	 *	Marks the item in the buffer, and adds it to the item list.
 	 */
 	this.Mark = function (item) {
-		var x, y;
+		let x, y;
 
 		//Make sure it is in this container.
 		if (item.location !== this.location || (item.mode !== 0 && item.mode !== 2)) {
@@ -53,7 +53,7 @@ var Container = function (name, width, height, location) {
 	 *	Checks if the item is in a locked spot
 	 */
 	this.IsLocked = function (item, baseRef) {
-		var h, w, reference;
+		let h, w, reference;
 
 		reference = baseRef.slice(0);
 
@@ -89,7 +89,7 @@ var Container = function (name, width, height, location) {
 	};
 
 	this.Reset = function () {
-		var h, w;
+		let h, w;
 
 		for (h = 0; h < this.height; h += 1) {
 			for (w = 0; w < this.width; w += 1) {
@@ -113,7 +113,7 @@ var Container = function (name, width, height, location) {
 	 *	Finds a spot available in the buffer to place the item.
 	 */
 	this.FindSpot = function (item) {
-		var x, y, nx, ny;
+		let x, y, nx, ny;
 
 		//Make sure it's a valid item
 		if (!item) {
@@ -124,7 +124,7 @@ var Container = function (name, width, height, location) {
 
 		//Loop buffer looking for spot to place item.
 		for (y = 0; y < this.width - (item.sizex - 1); y += 1) {
-Loop:
+			Loop:
 			for (x = 0; x < this.height - (item.sizey - 1); x += 1) {
 				//Check if there is something in this spot.
 				if (this.buffer[x][y] > 0) {
@@ -151,7 +151,7 @@ Loop:
 	 *	Takes any item and moves it into given buffer.
 	 */
 	this.MoveTo = function (item) {
-		var nPos, n, nDelay, cItem, cube;
+		let nPos, n, nDelay, cItem, cube;
 
 		try {
 			//Can we even fit it in here?
@@ -228,7 +228,7 @@ Loop:
 	 *	Prints all known information about container.
 	 */
 	this.Dump = function () {
-		var x, y, string;
+		let x, y, string;
 
 		print(this.name + " has the width of " + this.width + " and the height of " + this.height);
 		print(this.name + " has " + this.itemList.length + " items inside, and has " + this.openPositions + " spots left.");
@@ -248,7 +248,7 @@ Loop:
 	 *	Returns percentage of the container used.
 	 */
 	this.UsedSpacePercent = function () {
-		var x, y,
+		let x, y,
 			usedSpace = 0,
 			totalSpace = this.height * this.width;
 
@@ -269,7 +269,7 @@ Loop:
 	 *	Compare given container versus the current one, return all new items in current buffer.
 	 */
 	this.Compare = function (baseRef) {
-		var h, w, n, item, itemList, reference;
+		let h, w, n, item, itemList, reference;
 
 		Storage.Reload();
 
@@ -283,7 +283,7 @@ Loop:
 			}
 
 			for (h = 0; h < this.height; h += 1) {
-Loop:
+				Loop:
 				for (w = 0; w < this.width; w += 1) {
 					item = this.itemList[this.buffer[h][w] - 1];
 
@@ -315,7 +315,7 @@ Loop:
 	};
 };
 
-var Storage = new function () {
+let Storage = new function () {
 	this.Init = function () {
 		this.StashY = me.gametype === 0 ? 4 : 8;
 		this.Inventory = new Container("Inventory", 10, 4, 3);
@@ -329,7 +329,7 @@ var Storage = new function () {
 	};
 
 	this.BeltSize = function () {
-		var item = me.getItem(-1, 1); // get equipped item
+		let item = me.getItem(-1, 1); // get equipped item
 
 		if (!item) { // nothing equipped
 			return 1;
@@ -360,7 +360,7 @@ var Storage = new function () {
 		this.Cube.Reset();
 		this.TradeScreen.Reset();
 
-		var item = me.getItem();
+		let item = me.getItem();
 
 		if (!item) {
 			return false;

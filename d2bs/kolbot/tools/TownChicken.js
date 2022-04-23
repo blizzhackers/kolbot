@@ -19,23 +19,20 @@ function main() {
 	let townCheck = false;
 
 	this.togglePause = function () {
-		let i,	script,
-			scripts = ["default.dbj", "tools/antihostile.js", "tools/rushthread.js", "tools/CloneKilla.js"];
+		let scripts = ["default.dbj", "tools/antihostile.js", "tools/rushthread.js", "tools/CloneKilla.js"];
 
-		for (i = 0; i < scripts.length; i += 1) {
-			script = getScript(scripts[i]);
+		for (let i = 0; i < scripts.length; i += 1) {
+			let script = getScript(scripts[i]);
 
 			if (script) {
 				if (script.running) {
-					if (i === 0) { // default.dbj
-						print("ÿc1Pausing.");
-					}
-
+					scripts[i] === "default.dbj" && print("ÿc1Pausing.");
 					script.pause();
 				} else {
-					if (i === 0) { // default.dbj
-						if (!getScript("tools/clonekilla.js")) { // resume only if clonekilla isn't running
-							print("ÿc2Resuming.");
+					if (scripts[i] === "default.dbj") {
+						// resume only if clonekilla isn't running
+						if (!getScript("tools/clonekilla.js")) {
+							console.log("ÿc2Resuming.");
 							script.resume();
 						}
 					} else {
@@ -51,7 +48,7 @@ function main() {
 	addEventListener("scriptmsg",
 		function (msg) {
 			if (typeof msg !== "string") return;
-			if (msg === "townCheck" && Town.canTpToTown()) {
+			if (msg === "townCheck") {
 				townCheck = true;
 			}
 		});
@@ -72,18 +69,24 @@ function main() {
 
 	while (true) {
 		if (!me.inTown && (townCheck
-			|| ((checkHP && me.hpPercent < Config.TownHP) || (checkMP && me.mpPercent < Config.TownMP)) && Town.canTpToTown())) {
+			// should TownHP/MP check be in toolsthread?
+			// We would then be able to remove all game interaction checks until we get a townCheck msg
+			|| ((checkHP && me.hpPercent < Config.TownHP) || (checkMP && me.mpPercent < Config.TownMP)))) {
+			if (!Town.canTpToTown()) {
+				townCheck = false;
+
+				continue;
+			}
 			this.togglePause();
 
 			while (!me.gameReady) {
-				if (me.dead) {
-					return;
-				}
+				if (me.dead) return;
 
 				delay(100);
 			}
 
 			try {
+				console.log("(TownChicken) :: Going to town");
 				me.overhead("Going to town");
 				Town.visitTown();
 			} catch (e) {

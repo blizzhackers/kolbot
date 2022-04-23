@@ -100,8 +100,8 @@ const ClassAttack = {
 					!!spot && Pather.walkTo(spot.x, spot.y);
 				}
 
-				let closeMob = Attack.getNearestMonster(true, true);
-				!!closeMob && closeMob.gid !== gid && this.doCast(closeMob, timedSkill, untimedSkill);
+				let closeMob = Attack.getNearestMonster({skipGid: gid});
+				!!closeMob && this.doCast(closeMob, timedSkill, untimedSkill);
 			}
 
 			return 1;
@@ -123,7 +123,7 @@ const ClassAttack = {
 
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, timedSkill, untimedSkill) {
-		let i, walk;
+		let walk;
 
 		// No valid skills can be found
 		if (timedSkill < 0 && untimedSkill < 0) {

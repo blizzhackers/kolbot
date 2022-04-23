@@ -34,7 +34,7 @@ function GhostBusters() {
 
 				if (monster) {
 					do {
-						if ([38, 39, 40, 41, 42, 631, 632, 633].indexOf(monster.classid) > -1 && getDistance(me, monster) <= 30 && Attack.checkMonster(monster)) {
+						if ([38, 39, 40, 41, 42, 631, 632, 633].indexOf(monster.classid) > -1 && getDistance(me, monster) <= 30 && monster.attackable) {
 							monList.push(copyUnit(monster));
 						}
 					} while (monster.getNext());

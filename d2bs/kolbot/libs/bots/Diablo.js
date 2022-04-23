@@ -58,15 +58,11 @@ function Diablo() {
 		print("Seis layout " + Common.Diablo.seisLayout);
 		this.followPath(Common.Diablo.seisLayout === 1 ? this.starToSeisA : this.starToSeisB);
 
-		if (!Common.Diablo.openSeal(394)) {
-			throw new Error("Failed to open de Seis seal.");
-		}
+		if (!Common.Diablo.openSeal(394)) throw new Error("Failed to open de Seis seal.");
 
 		Common.Diablo.seisLayout === 1 ? Pather.moveTo(7798, 5194) : Pather.moveTo(7796, 5155);
 
-		if (!this.getBoss(getLocaleString(2852))) {
-			throw new Error("Failed to kill de Seis");
-		}
+		if (!this.getBoss(getLocaleString(2852))) throw new Error("Failed to kill de Seis");
 
 		return true;
 	};
@@ -76,9 +72,7 @@ function Diablo() {
 		print("Inf layout " + Common.Diablo.infLayout);
 		this.followPath(Common.Diablo.infLayout === 1 ? this.starToInfA : this.starToInfB);
 
-		if (!Common.Diablo.openSeal(392)) {
-			throw new Error("Failed to open Infector seals.");
-		}
+		if (!Common.Diablo.openSeal(392)) throw new Error("Failed to open Infector seals.");
 
 		if (Common.Diablo.infLayout === 1) {
 			if (me.sorceress || me.assassin) {
@@ -91,13 +85,8 @@ function Diablo() {
 			Pather.moveTo(7928, 5295);
 		}
 
-		if (!this.getBoss(getLocaleString(2853))) {
-			throw new Error("Failed to kill Infector");
-		}
-
-		if (!Common.Diablo.openSeal(393)) {
-			throw new Error("Failed to open Infector seals.");
-		}
+		if (!this.getBoss(getLocaleString(2853))) throw new Error("Failed to kill Infector");
+		if (!Common.Diablo.openSeal(393)) throw new Error("Failed to open Infector seals.");
 
 		return true;
 	};
@@ -139,7 +128,7 @@ function Diablo() {
 
 		if (monster) {
 			do {
-				if (Attack.checkMonster(monster)) {
+				if (monster.attackable) {
 					for (let i = 0; i < this.cleared.length; i += 1) {
 						if (getDistance(monster, this.cleared[i][0], this.cleared[i][1]) < 30 && Attack.validSpot(monster.x, monster.y)) {
 							Pather.moveToUnit(monster);
@@ -152,9 +141,7 @@ function Diablo() {
 			} while (monster.getNext());
 		}
 
-		if (getDistance(me, oldPos.x, oldPos.y) > 5) {
-			Pather.moveTo(oldPos.x, oldPos.y);
-		}
+		getDistance(me, oldPos.x, oldPos.y) > 5 && Pather.moveTo(oldPos.x, oldPos.y);
 
 		return true;
 	};
@@ -180,9 +167,7 @@ function Diablo() {
 			} while (monster.getNext());
 		}
 
-		if (getDistance(me, oldPos.x, oldPos.y) > 5) {
-			Pather.moveTo(oldPos.x, oldPos.y);
-		}
+		getDistance(me, oldPos.x, oldPos.y) > 5 && Pather.moveTo(oldPos.x, oldPos.y);
 
 		return true;
 	};
@@ -193,9 +178,7 @@ function Diablo() {
 	Precast.doPrecast(true);
 	me.area !== sdk.areas.RiverofFlame && Pather.useWaypoint(sdk.areas.RiverofFlame);
 
-	if (!Pather.moveTo(7790, 5544)) {
-		throw new Error("Failed to move to Chaos Sanctuary");
-	}
+	if (!Pather.moveToExit(sdk.areas.ChaosSanctuary, true) && !Pather.moveTo(7790, 5544)) throw new Error("Failed to move to Chaos Sanctuary");
 
 	Common.Diablo.initLayout();
 

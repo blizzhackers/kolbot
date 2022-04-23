@@ -19,8 +19,7 @@ include("common/util.js");
 includeCommonLibs();
 
 function main() {
-	let mercHP, ironGolem, tick, merc,
-		debugInfo = {area: 0, currScript: "no entry"},
+	let ironGolem, debugInfo = {area: 0, currScript: "no entry"},
 		pingTimer = [],
 		quitFlag = false,
 		quitListDelayTime,
@@ -102,11 +101,8 @@ function main() {
 	this.getPotion = function (pottype, type) {
 		if (!pottype) return false;
 
-		let items = me.getItemsEx().filter(function (item) { return item.itemType === pottype; });
-
-		if (!items || items.length === 0) {
-			return false;
-		}
+		let items = me.getItemsEx().filter((item) => item.itemType === pottype);
+		if (items.length === 0) return false;
 
 		// Get highest id = highest potion first
 		items.sort(function (a, b) {
@@ -114,13 +110,13 @@ function main() {
 		});
 
 		for (let i = 0; i < items.length; i += 1) {
-			if (type < 3 && items[i].mode === 0 && items[i].location === 3 && items[i].itemType === pottype) {
-				print("ÿc2Drinking potion from inventory.");
-
+			if (type < 3 && items[i].isInInventory && items[i].itemType === pottype) {
+				console.log("ÿc2Drinking potion from inventory.");
 				return copyUnit(items[i]);
 			}
 
 			if (items[i].mode === 2 && items[i].itemType === pottype) {
+				console.log("ÿc2" + (type > 2 ? "Giving Merc" : "Drinking") + " potion from belt.");
 				return copyUnit(items[i]);
 			}
 		}
@@ -139,14 +135,14 @@ function main() {
 
 			if (script) {
 				if (script.running) {
-					scripts[i] === "default.dbj" && print("ÿc1Pausing.");
+					scripts[i] === "default.dbj" && console.log("ÿc1Pausing.");
 
 					// don't pause townchicken during clone walk
 					if (scripts[i] !== "tools/townchicken.js" || !cloneWalked) {
 						script.pause();
 					}
 				} else {
-					scripts[i] === "default.dbj" && print("ÿc2Resuming.");
+					scripts[i] === "default.dbj" && console.log("ÿc2Resuming.");
 					script.resume();
 				}
 			}
@@ -158,17 +154,12 @@ function main() {
 	this.stopDefault = function () {
 		let scripts = [
 			"default.dbj", "tools/townchicken.js", "tools/autobuildthread.js", "tools/antihostile.js",
-			"tools/party.js", "tools/rushthread.js"
+			"tools/party.js", "tools/rushthread.js", "libs//modules/guard.js"
 		];
 		
 		for (let i = 0; i < scripts.length; i++) {
 			let script = getScript(scripts[i]);
-
-			if (script) {
-				if (script.running) {
-					script.stop();
-				}
-			}
+			!!script && script.running && script.stop();
 		}
 
 		return true;
@@ -182,8 +173,8 @@ function main() {
 	};
 
 	this.drinkPotion = function (type) {
-		let pottype, potion,
-			tNow = getTickCount();
+		if (type === undefined) return false;
+		let pottype, tNow = getTickCount();
 
 		switch (type) {
 		case 0:
@@ -216,9 +207,7 @@ function main() {
 		}
 
 		// mode 18 - can't drink while leaping/whirling etc.
-		if (me.mode === 0 || me.mode === 17 || me.mode === 18) {
-			return false;
-		}
+		if (me.mode === 0 || me.mode === 17 || me.mode === 18) return false;
 
 		switch (type) {
 		case 0:
@@ -236,21 +225,19 @@ function main() {
 			break;
 		}
 
-		potion = this.getPotion(pottype, type);
+		let potion = this.getPotion(pottype, type);
 
-		if (potion) {
-			if (me.mode === 0 || me.mode === 17) {
-				return false;
-			}
+		if (!!potion) {
+			if (me.mode === 0 || me.mode === 17 || me.mode === 18) return false;
 
-			if (type < 3) {
-				potion.interact();
-			} else {
-				try {
-					clickItem(2, potion);
-				} catch (e) {
-					print("Couldn't give the potion to merc.");
+			try {
+				if (type < 3) {
+					potion.interact();
+				} else {
+					sendPacket(1, 0x26, 4, potion.gid, 4, 1, 4, 0);
 				}
+			} catch (e) {
+				console.warn(e);
 			}
 
 			timerLastDrink[type] = getTickCount();
@@ -268,7 +255,7 @@ function main() {
 
 		if (monster) {
 			do {
-				if (monster.hp > 0 && Attack.checkMonster(monster) && !monster.getParent()) {
+				if (monster.hp > 0 && monster.attackable && !monster.getParent()) {
 					distance = getDistance(me, monster);
 
 					if (distance < range) {
@@ -285,13 +272,12 @@ function main() {
 	};
 
 	this.checkVipers = function () {
-		let owner,
-			monster = getUnit(1, 597);
+		let monster = getUnit(1, 597);
 
 		if (monster) {
 			do {
 				if (monster.getState(96)) {
-					owner = monster.getParent();
+					let owner = monster.getParent();
 
 					if (owner && owner.name !== me.name) {
 						D2Bot.printToConsole("Revived Tomb Vipers found. Leaving game.", 9);
@@ -306,12 +292,11 @@ function main() {
 	};
 
 	this.getIronGolem = function () {
-		let owner,
-			golem = getUnit(1, 291);
+		let golem = getUnit(1, 291);
 
 		if (golem) {
 			do {
-				owner = golem.getParent();
+				let owner = golem.getParent();
 
 				if (owner && owner.name === me.name) {
 					return copyUnit(golem);
@@ -323,12 +308,11 @@ function main() {
 	};
 
 	this.getNearestPreset = function () {
-		let i, unit, dist, id;
+		let id;
+		let unit = getPresetUnits(me.area);
+		let dist = 99;
 
-		unit = getPresetUnits(me.area);
-		dist = 99;
-
-		for (i = 0; i < unit.length; i += 1) {
+		for (let i = 0; i < unit.length; i += 1) {
 			if (getDistance(me, unit[i].roomx * 5 + unit[i].x, unit[i].roomy * 5 + unit[i].y) < dist) {
 				dist = getDistance(me, unit[i].roomx * 5 + unit[i].x, unit[i].roomy * 5 + unit[i].y);
 				id = unit[i].type + " " + unit[i].id;
@@ -411,7 +395,7 @@ function main() {
 			showConsole();
 
 			print("ÿc8My stats :: " + this.getStatsString(me));
-			merc = me.getMerc();
+			let merc = me.getMerc();
 			!!merc && print("ÿc8Merc stats :: " + this.getStatsString(merc));
 
 			break;
@@ -506,7 +490,7 @@ function main() {
 			}
 
 			if (Config.SoJWaitTime && me.expansion) {
-				D2Bot.printToConsole(param1 + " Stones of Jordan Sold to Merchants on IP " + me.gameserverip.split(".")[3], 7);
+				!!me.gameserverip && D2Bot.printToConsole(param1 + " Stones of Jordan Sold to Merchants on IP " + me.gameserverip.split(".")[3], 7);
 				Messaging.sendToScript("default.dbj", "soj");
 			}
 
@@ -543,7 +527,7 @@ function main() {
 	};
 
 	this.scriptEvent = function (msg) {
-		if (msg && typeof msg === "string") {
+		if (!!msg && typeof msg === "string") {
 			switch (msg) {
 			case "toggleQuitlist":
 				canQuit = !canQuit;
@@ -553,35 +537,45 @@ function main() {
 				quitFlag = true;
 
 				break;
-			default:
+			// ignore common scriptBroadcast messages that aren't relevent to this thread
+			case "mule":
+			case "muleTorch":
+			case "muleAnni":
+			case "torch":
+			case "crafting":
+			case "getMuleMode":
+			case "pingquit":
+			case "townCheck":
 				break;
-			}
-		} else if (msg && typeof msg === "object") {
-			let obj;
+			default:
+				let obj;
 
-			try {
-				obj = JSON.parse(msg);
-			} catch (e) {
-				return;
-			}
-
-			if (obj) {
-				if (obj.hasOwnProperty("currScript")) {
-					debugInfo.currScript = obj.currScript;
+				try {
+					obj = JSON.parse(msg);
+				} catch (e) {
+					return;
 				}
 
-				if (obj.hasOwnProperty("lastAction")) {
-					debugInfo.lastAction = obj.lastAction;
+				if (obj) {
+					if (obj.hasOwnProperty("currScript")) {
+						debugInfo.currScript = obj.currScript;
+					}
+
+					if (obj.hasOwnProperty("lastAction")) {
+						debugInfo.lastAction = obj.lastAction;
+					}
+
+					DataFile.updateStats("debugInfo", JSON.stringify(debugInfo));
 				}
 
-				DataFile.updateStats("debugInfo", JSON.stringify(debugInfo));
+				break;
 			}
 		}
 	};
 
 	// Cache variables to prevent a bug where d2bs loses the reference to Config object
 	Config = Misc.copy(Config);
-	tick = getTickCount();
+	let tick = getTickCount();
 
 	addEventListener("keyup", this.keyEvent);
 	addEventListener("gameevent", this.gameEvent);
@@ -603,10 +597,13 @@ function main() {
 				Config.UseRejuvHP > 0 && me.hpPercent < Config.UseRejuvHP && this.drinkPotion(2);
 
 				if (Config.LifeChicken > 0 && me.hpPercent <= Config.LifeChicken) {
-					D2Bot.printToConsole("Life Chicken (" + me.hp + "/" + me.hpmax + ")" + this.getNearestMonster() + " in " + Pather.getAreaName(me.area) + ". Ping: " + me.ping, 9);
-					this.exit(true);
+					// takes a moment sometimes for townchicken to actually get to town so re-check that we aren't in town before quitting
+					if (!me.inTown) {
+						D2Bot.printToConsole("Life Chicken (" + me.hp + "/" + me.hpmax + ")" + this.getNearestMonster() + " in " + Pather.getAreaName(me.area) + ". Ping: " + me.ping, 9);
+						this.exit(true);
 
-					break;
+						break;
+					}
 				}
 
 				Config.UseMP > 0 && me.mpPercent < Config.UseMP && this.drinkPotion(1);
@@ -636,19 +633,21 @@ function main() {
 				}
 
 				if (Config.UseMerc) {
-					mercHP = getMercHP();
-					merc = me.getMerc();
+					let merc = me.getMerc();
+					if (!!merc) {
+						let mercHP = getMercHP();
 
-					if (mercHP > 0 && merc && merc.mode !== 12) {
-						if (mercHP < Config.MercChicken) {
-							D2Bot.printToConsole("Merc Chicken in " + Pather.getAreaName(me.area), 9);
-							this.exit(true);
+						if (mercHP > 0 && merc.mode !== 12) {
+							if (mercHP < Config.MercChicken) {
+								D2Bot.printToConsole("Merc Chicken in " + Pather.getAreaName(me.area), 9);
+								this.exit(true);
 
-							break;
+								break;
+							}
+
+							mercHP < Config.UseMercHP && this.drinkPotion(3);
+							mercHP < Config.UseMercRejuv && this.drinkPotion(4);
 						}
-
-						mercHP < Config.UseMercHP && this.drinkPotion(3);
-						mercHP < Config.UseMercRejuv && this.drinkPotion(4);
 					}
 				}
 
@@ -680,7 +679,7 @@ function main() {
 		}
 
 		if (quitFlag && canQuit && (typeof quitListDelayTime === "undefined" || getTickCount() >= quitListDelayTime)) {
-			print("ÿc8Run duration ÿc2" + ((getTickCount() - me.gamestarttime) / 1000));
+			print("ÿc8Run duration ÿc2" + (new Date(getTickCount() - me.gamestarttime).toISOString().slice(11, -5)));
 			this.checkPing(false); // In case of quitlist triggering first
 			this.exit();
 
