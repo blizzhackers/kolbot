@@ -371,7 +371,7 @@ function main() {
 					DataFile.updateStats("ingameTick");
 				}
 
-				D2Bot.updateStatus("Game: " + me.gamename + Starter.timer(Starter.gameStart));
+				D2Bot.updateStatus(Starter.profileInfo.charName + " | Game: " + (me.gamename || "singleplayer") + Starter.timer(Starter.gameStart));
 			}
 
 			delay(1000);
