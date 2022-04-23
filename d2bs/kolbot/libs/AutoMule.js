@@ -517,24 +517,22 @@ const AutoMule = {
 	getMuleItems: function () {
 		let info = this.getInfo();
 
-		if (!info || !info.hasOwnProperty("muleInfo")) {
-			return false;
-		}
+		if (!info || !info.hasOwnProperty("muleInfo")) return false;
 
 		let item = me.getItem(-1, 0);
 		let items = [];
 
 		if (item) {
 			do {
-				if (Town.ignoredItemTypes.indexOf(item.itemType) === -1 &&
-						(Pickit.checkItem(item).result > 0 || (item.location === 7 && info.muleInfo.hasOwnProperty("muleOrphans") && info.muleInfo.muleOrphans)) &&
-						item.classid !== 549 && // Don't drop Horadric Cube
-						(item.classid !== 603 || item.quality !== 7) && // Don't drop Annihilus
-						(item.classid !== 604 || item.quality !== 7) && // Don't drop Hellfire Torch
-						(item.location === 7 || (item.location === 3 && !Storage.Inventory.IsLocked(item, Config.Inventory))) && // Don't drop items in locked slots
-						((!TorchSystem.getFarmers() && !TorchSystem.isFarmer()) || [647, 648, 649].indexOf(item.classid) === -1)) { // Don't drop Keys if part of TorchSystem
-					if (this.matchItem(item, Config.AutoMule.Force.concat(Config.AutoMule.Trigger)) || // Always drop items on Force or Trigger list
-						(!this.matchItem(item, Config.AutoMule.Exclude) && (!this.cubingIngredient(item) && !this.runewordIngredient(item) && !this.utilityIngredient(item)))) { // Don't drop Excluded items or Runeword/Cubing/CraftingSystem ingredients
+				if (Town.ignoredItemTypes.indexOf(item.itemType) === -1
+						&& (Pickit.checkItem(item).result > 0 || (item.location === 7 && info.muleInfo.hasOwnProperty("muleOrphans") && info.muleInfo.muleOrphans))
+						&& item.classid !== 549 // Don't drop Horadric Cube
+						&& (item.classid !== 603 || item.quality !== 7) // Don't drop Annihilus
+						&& (item.classid !== 604 || item.quality !== 7) // Don't drop Hellfire Torch
+						&& (item.location === 7 || (item.location === 3 && !Storage.Inventory.IsLocked(item, Config.Inventory))) // Don't drop items in locked slots
+						&& ((!TorchSystem.getFarmers() && !TorchSystem.isFarmer()) || [647, 648, 649].indexOf(item.classid) === -1)) { // Don't drop Keys if part of TorchSystem
+					if (this.matchItem(item, Config.AutoMule.Force.concat(Config.AutoMule.Trigger)) // Always drop items on Force or Trigger list
+						|| (!this.matchItem(item, Config.AutoMule.Exclude) && (!this.cubingIngredient(item) && !this.runewordIngredient(item) && !this.utilityIngredient(item)))) { // Don't drop Excluded items or Runeword/Cubing/CraftingSystem ingredients
 						items.push(copyUnit(item));
 					}
 				}

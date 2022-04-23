@@ -20,48 +20,12 @@ const MuleLogger = {
 	},
 
 	LogGame: ["", ""], // ["gamename", "password"]
-	LogNames: true, // Put account/character name on the picture
+	LogNames: false, // Put account/character name on the picture
 	LogItemLevel: true, // Add item level to the picture
 	LogEquipped: false, // include equipped items
 	LogMerc: false, // include items merc has equipped (if alive)
 	SaveScreenShot: false, // Save pictures in jpg format (saved in 'Images' folder)
-	IngameTime: rand(180, 210), // (180, 210) to avoid RD, increase it to (7230, 7290) for mule perming
-
-	// don't edit
-	getItemDesc: function (unit, logIlvl) {
-		logIlvl === undefined && (logIlvl = this.LogItemLevel);
-		
-		let stringColor = "";
-		let desc = unit.description.split("\n");
-
-		// Lines are normally in reverse. Add color tags if needed and reverse order.
-		for (let i = 0; i < desc.length; i += 1) {
-			// Remove sell value
-			if (desc[i].includes(getLocaleString(3331))) {
-				desc.splice(i, 1);
-
-				i -= 1;
-			} else {
-				// Add color info
-				!desc[i].match(/^(y|ÿ)c/) && (desc[i] = stringColor + desc[i]);
-
-				// Find and store new color info
-				let index = desc[i].lastIndexOf("ÿc");
-
-				index > -1 && (stringColor = desc[i].substring(index, index + "ÿ".length + 2));
-			}
-
-			desc[i] = desc[i].replace(/(y|ÿ)c([0-9!"+<:;.*])/g, "\\xffc$2").replace("ÿ", "\\xff", "g");
-		}
-
-		if (logIlvl && desc[desc.length - 1]) {
-			desc[desc.length - 1] = desc[desc.length - 1].trim() + " (" + unit.ilvl + ")";
-		}
-
-		desc = desc.reverse().join("\\n");
-
-		return desc;
-	},
+	IngameTime: rand(60, 120), // (180, 210) to avoid RD, increase it to (7230, 7290) for mule perming
 
 	inGameCheck: function () {
 		if (getScript("D2BotMuleLog.dbj") && this.LogGame[0] && me.gamename.match(this.LogGame[0], "i")) {
@@ -92,9 +56,7 @@ const MuleLogger = {
 	load: function (hash) {
 		let filename = "data/secure/" + hash + ".txt";
 
-		if (!FileTools.exists(filename)) {
-			throw new Error("File " + filename + " does not exist!");
-		}
+		if (!FileTools.exists(filename)) throw new Error("File " + filename + " does not exist!");
 
 		return FileTools.readText(filename);
 	},
@@ -261,7 +223,7 @@ const MuleLogger = {
 			for (let i = 0; i < sock.length; i += 1) {
 				if (sock[i].itemType === 58) {
 					desc += "\n\n";
-					desc += this.getItemDesc(sock[i]);
+					desc += Misc.getItemDesc(sock[i], logIlvl);
 				}
 			}
 		}
@@ -329,10 +291,10 @@ const MuleLogger = {
 			let merc = Misc.poll(() => me.getMerc(), 1000, 100);
 
 			if (merc) {
-				let mercTtems = merc.getItemsEx();
+				let mercItems = merc.getItemsEx();
 
-				for (let i = 0; i < mercTtems.length; i += 1) {
-					let parsedItem = this.logItem(mercTtems[i]);
+				for (let i = 0; i < mercItems.length; i += 1) {
+					let parsedItem = this.logItem(mercItems[i]);
 					parsedItem.title += " (merc)";
 					let string = JSON.stringify(parsedItem);
 					finalString += (string + "\n");

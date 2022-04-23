@@ -1262,7 +1262,7 @@ const Misc = {
 		return false;
 	},
 
-	getItemDesc: function (unit) {
+	getItemDesc: function (unit, logILvl = true) {
 		let stringColor = "";
 		let desc = unit.description;
 
@@ -1294,7 +1294,7 @@ const Misc = {
 			desc[i] = desc[i].replace(/(y|ÿ)c([0-9!"+<:;.*])/g, "\\xffc$2");
 		}
 
-		if (desc[desc.length - 1]) {
+		if (logILvl && desc[desc.length - 1]) {
 			desc[desc.length - 1] = desc[desc.length - 1].trim() + " (" + unit.ilvl + ")";
 		}
 
@@ -1304,7 +1304,7 @@ const Misc = {
 	},
 
 	getItemSockets: function (unit) {
-		let i, code,
+		let code,
 			sockets = unit.getStat(194),
 			subItems = unit.getItemsEx(),
 			tempArray = [];
@@ -1353,11 +1353,11 @@ const Misc = {
 			}
 		}
 
-		for (i = 0; i < sockets; i += 1) {
+		for (let i = 0; i < sockets; i += 1) {
 			if (tempArray[i]) {
 				code = tempArray[i].code;
 
-				if ([10, 12, 58, 82, 83, 84].indexOf(tempArray[i].itemType) > -1) {
+				if ([10, 12, 58, 82, 83, 84].includes(tempArray[i].itemType)) {
 					code += (tempArray[i].gfx + 1);
 				}
 			} else {
