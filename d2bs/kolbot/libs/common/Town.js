@@ -149,24 +149,17 @@ const Town = {
 	},
 
 	getTpTool: function () {
-		let scroll = me.getItemsEx().filter(function (i) { return i.isInInventory && i.classid === sdk.items.ScrollofTownPortal; }).first();
-		let tome = me.getItemsEx().filter(function (i) { return i.isInInventory && i.classid === sdk.items.TomeofTownPortal; }).first();
-		if (scroll) {
-			return scroll;
-		}
-		if (tome && tome.getStat(sdk.stats.Quantity) > 0) {
-			return tome;
-		}
+		let items = me.getItemsEx().filter((item) => item.isInInventory && [sdk.items.ScrollofTownPortal, sdk.items.TomeofTownPortal].includes(item.classid));
+		let scroll = items.find((i) => i.isInInventory && i.classid === sdk.items.ScrollofTownPortal);
+		if (scroll) return scroll;
+		let tome = items.find((i) => i.isInInventory && i.classid === sdk.items.TomeofTownPortal);
+		if (tome && tome.getStat(sdk.stats.Quantity) > 0) return tome;
 		return null;
 	},
 
 	canTpToTown: function () {
-		// I'm dead or in town, no TP tome or scrolls, shouldn't tp from arreatsummit and can't tp from UberTristram
-		if (me.dead || me.inTown || !this.getTpTool() || [sdk.areas.ArreatSummit, sdk.areas.UberTristram].includes(me.area)) {
-			return false;
-		}
-
-		return true;
+		// If we are not dead or in town, no TP tome or scrolls, shouldn't tp from arreatsummit and can't tp from UberTristram
+		return !(me.dead || me.inTown || !this.getTpTool() || [sdk.areas.ArreatSummit, sdk.areas.UberTristram].includes(me.area));
 	},
 
 	// Start a task and return the NPC Unit
@@ -747,10 +740,7 @@ const Town = {
 	},
 
 	identifyItem: function (unit, tome, packetID = false) {
-		if (Config.PacketShopping || packetID) {
-			return Packet.identifyItem(unit, tome);
-		}
-
+		if (Config.PacketShopping || packetID) return Packet.identifyItem(unit, tome);
 		if (!unit || unit.identified) return false;
 
 		this.sellTimer = getTickCount(); // shop speedup test
@@ -833,10 +823,7 @@ const Town = {
 	gambleIds: [],
 
 	gamble: function () {
-		if (!this.needGamble() || Config.GambleItems.length === 0) {
-			return true;
-		}
-
+		if (!this.needGamble() || Config.GambleItems.length === 0) return true;
 		if (this.gambleIds.length === 0) {
 			// change text to classid
 			for (let i = 0; i < Config.GambleItems.length; i += 1) {
@@ -1106,9 +1093,7 @@ const Town = {
 	},
 
 	repairIngredientCheck: function (item) {
-		if (!Config.CubeRepair) {
-			return false;
-		}
+		if (!Config.CubeRepair) return false;
 
 		let needRal = 0,
 			needOrt = 0,
@@ -1140,15 +1125,11 @@ const Town = {
 
 		switch (item.classid) {
 		case 617:
-			if (needRal && (!me.findItems(617) || me.findItems(617) < needRal)) {
-				return true;
-			}
+			if (needRal && (!me.findItems(617) || me.findItems(617) < needRal)) return true;
 
 			break;
 		case 618:
-			if (needOrt && (!me.findItems(618) || me.findItems(618) < needOrt)) {
-				return true;
-			}
+			if (needOrt && (!me.findItems(618) || me.findItems(618) < needOrt)) return true;
 
 			break;
 		}
@@ -1157,9 +1138,7 @@ const Town = {
 	},
 
 	cubeRepair: function () {
-		if (!Config.CubeRepair || !me.getItem(549)) {
-			return false;
-		}
+		if (!Config.CubeRepair || !me.getItem(549)) return false;
 
 		let items = this.getItemsForRepair(Config.RepairPercent, false);
 
@@ -1177,7 +1156,7 @@ const Town = {
 	cubeRepairItem: function (item) {
 		if (item.mode !== 1) return false;
 
-		let i, rune, cubeItems,
+		let rune, cubeItems,
 			bodyLoc = item.bodylocation;
 
 		switch (item.itemType) {
@@ -1201,7 +1180,7 @@ const Town = {
 		}
 
 		if (rune && Town.openStash() && Cubing.openCube() && Cubing.emptyCube()) {
-			for (i = 0; i < 100; i += 1) {
+			for (let i = 0; i < 100; i += 1) {
 				if (!me.itemoncursor) {
 					if (Storage.Cube.MoveTo(item) && Storage.Cube.MoveTo(rune)) {
 						transmute();
@@ -1210,13 +1189,12 @@ const Town = {
 
 					cubeItems = me.findItems(-1, -1, 6); // Get cube contents
 
-					if (cubeItems.length === 1) { // We expect only one item in cube
-						cubeItems[0].toCursor();
-					}
+					// We expect only one item in cube
+					cubeItems.length === 1 && cubeItems[0].toCursor();
 				}
 
 				if (me.itemoncursor) {
-					for (i = 0; i < 3; i += 1) {
+					for (let i = 0; i < 3; i += 1) {
 						clickItem(0, bodyLoc);
 						delay(me.ping * 2 + 500);
 
@@ -1240,19 +1218,14 @@ const Town = {
 	},
 
 	repair: function (force = false) {
-		let quiver, myQuiver, npc, repairAction, bowCheck;
+		let npc;
 
-		this.cubeRepair();
+		if (this.cubeRepair()) return true;
 
-		repairAction = this.needRepair();
+		let repairAction = this.needRepair();
+		force && repairAction.indexOf("repair") === -1 && repairAction.push("repair");
 
-		if (force && repairAction.indexOf("repair") === -1) {
-			repairAction.push("repair");
-		}
-
-		if (!repairAction || !repairAction.length) {
-			return true;
-		}
+		if (!repairAction || !repairAction.length) return true;
 
 		for (let i = 0; i < repairAction.length; i += 1) {
 			switch (repairAction[i]) {
@@ -1264,11 +1237,11 @@ const Town = {
 
 				break;
 			case "buyQuiver":
-				bowCheck = Attack.usingBow();
+				let bowCheck = Attack.usingBow();
 
 				if (bowCheck) {
-					quiver = bowCheck === "bow" ? "aqv" : "cqv";
-					myQuiver = me.getItem(quiver, 1);
+					let quiver = bowCheck === "bow" ? "aqv" : "cqv";
+					let myQuiver = me.getItem(quiver, 1);
 					!!myQuiver && myQuiver.drop();
 					
 					npc = this.initNPC("Repair", "repair");
@@ -1288,12 +1261,11 @@ const Town = {
 	},
 
 	needRepair: function () {
-		let quiver, bowCheck, quantity,
-			repairAction = [],
+		let quiver, repairAction = [],
 			canAfford = me.gold >= me.getRepairCost();
 
 		// Arrow/Bolt check
-		bowCheck = Attack.usingBow();
+		let bowCheck = Attack.usingBow();
 
 		if (bowCheck) {
 			switch (bowCheck) {
@@ -1310,7 +1282,7 @@ const Town = {
 			if (!quiver) { // Out of arrows/bolts
 				repairAction.push("buyQuiver");
 			} else {
-				quantity = quiver.getStat(70);
+				let quantity = quiver.getStat(70);
 
 				if (typeof quantity === "number" && quantity * 100 / getBaseStat("items", quiver.classid, "maxstack") <= Config.RepairPercent) {
 					repairAction.push("buyQuiver");
@@ -1331,21 +1303,22 @@ const Town = {
 	},
 
 	getItemsForRepair: function (repairPercent, chargedItems) {
-		let i, charge, quantity, durability,
-			itemList = [],
+		let itemList = [],
 			item = me.getItem(-1, 1);
 
 		if (item) {
 			do {
-				if (!item.getFlag(0x400000)) { // Skip ethereal items
-					if (!item.getStat(152)) { // Skip indestructible items
+				// Skip ethereal items
+				if (!item.getFlag(0x400000)) {
+					// Skip indestructible items
+					if (!item.getStat(152)) {
 						switch (item.itemType) {
 						// Quantity check
 						case 42: // Throwing knives
 						case 43: // Throwing axes
 						case 44: // Javelins
 						case 87: // Amazon javelins
-							quantity = item.getStat(70);
+							let quantity = item.getStat(70);
 
 							if (typeof quantity === "number" && quantity * 100 / (getBaseStat("items", item.classid, "maxstack") + item.getStat(254)) <= repairPercent) { // Stat 254 = increased stack size
 								itemList.push(copyUnit(item));
@@ -1354,7 +1327,7 @@ const Town = {
 							break;
 						// Durability check
 						default:
-							durability = item.getStat(72);
+							let durability = item.getStat(72);
 
 							if (typeof durability === "number" && durability * 100 / item.getStat(73) <= repairPercent) {
 								itemList.push(copyUnit(item));
@@ -1366,11 +1339,11 @@ const Town = {
 
 					if (chargedItems) {
 						// Charged item check
-						charge = item.getStat(-2)[204];
+						let charge = item.getStat(-2)[204];
 
 						if (typeof (charge) === "object") {
 							if (charge instanceof Array) {
-								for (i = 0; i < charge.length; i += 1) {
+								for (let i = 0; i < charge.length; i += 1) {
 									if (charge[i] !== undefined && charge[i].hasOwnProperty("charges") && charge[i].charges * 100 / charge[i].maxcharges <= repairPercent) {
 										itemList.push(copyUnit(item));
 									}
@@ -1430,8 +1403,8 @@ const Town = {
 
 		if (!!me.getMerc()) {
 			// Cast BO on merc so he doesn't just die again. Only do this is you are a barb or actually have a cta. Otherwise its just a waste of time.
-			if (Config.MercWatch && (me.getSkill(sdk.skills.Shout, 1) || me.getSkill(sdk.skills.BattleOrders, 1) || Precast.checkCTA())) {
-				print("MercWatch precast");
+			if (Config.MercWatch && (Precast.precastables.Shout.have || Precast.precastables.BattleOrders.have || Precast.checkCTA())) {
+				console.log("MercWatch precast");
 				Pather.useWaypoint("random");
 				Precast.doPrecast(true);
 				Pather.useWaypoint(preArea);
@@ -1574,28 +1547,17 @@ const Town = {
 	},
 
 	getCorpse: function () {
-		let i, corpse, gid, coord,
-			corpseList = [],
+		let corpse, corpseList = [],
 			timer = getTickCount();
 
 		// No equipped items - high chance of dying in last game, force retries
 		if (!me.getItem(-1, 1)) {
-			for (i = 0; i < 5; i += 1) {
-				corpse = getUnit(0, me.name, 17);
-
-				if (corpse) {
-					break;
-				}
-
-				delay(500);
-			}
+			corpse = Misc.poll(() => getUnit(0, me.name, 17), 2500, 500);
 		} else {
 			corpse = getUnit(0, me.name, 17);
 		}
 
-		if (!corpse) {
-			return true;
-		}
+		if (!corpse) return true;
 
 		do {
 			if (corpse.dead && corpse.name === me.name && (getDistance(me.x, me.y, corpse.x, corpse.y) <= 20 || me.inTown)) {
@@ -1604,19 +1566,17 @@ const Town = {
 		} while (corpse.getNext());
 
 		while (corpseList.length > 0) {
-			if (me.dead) {
-				return false;
-			}
+			if (me.dead) return false;
 
-			gid = corpseList[0].gid;
+			let gid = corpseList[0].gid;
 
 			Pather.moveToUnit(corpseList[0]);
 			Misc.click(0, 0, corpseList[0]);
 			delay(500);
 
 			if (getTickCount() - timer > 3000) {
-				coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 4);
-				Pather.moveTo(coord.x, coord.y);
+				let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 4);
+				!!coord && Pather.moveTo(coord.x, coord.y);
 			}
 
 			if (getTickCount() - timer > 30000) {
@@ -1624,14 +1584,10 @@ const Town = {
 				D2Bot.stop();
 			}
 
-			if (!getUnit(0, -1, -1, gid)) {
-				corpseList.shift();
-			}
+			!getUnit(0, -1, -1, gid) && corpseList.shift();
 		}
 
-		if (me.gametype === 0) {
-			this.checkShard();
-		}
+		me.classic && this.checkShard();
 
 		return true;
 	},
@@ -1651,9 +1607,7 @@ const Town = {
 			} while (item.getNext());
 		}
 
-		if (!shard) {
-			return true;
-		}
+		if (!shard) return true;
 
 		item = me.getItem(-1, 1);
 
@@ -1817,6 +1771,7 @@ const Town = {
 					console.log("Checking Config.BeltColumn[" + i + "], wanted [" + Config.BeltColumn[i] + "], currentPotToCheck :: " + p.code);
 					// Pick up the potion and put it in belt if the column is empty, and we don't have any other columns empty
 					// prevents shift-clicking potion into wrong column
+					// write this to use packets by default
 					if (freeSpace[i] === beltSize || freeSpace.some((spot) => spot === beltSize)) {
 						p.toCursor() && Misc.poll(() => me.itemoncursor, 1000, 100) && clickItem(sdk.clicktypes.click.Left, i, Math.max(0, (beltSize - freeSpace[i])), sdk.storage.Belt);
 					} else {
