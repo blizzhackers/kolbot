@@ -7,6 +7,10 @@
 const Attack = {
 	infinity: false,
 	auradin: false,
+	monsterObjects: [
+		sdk.monsters.BarricadeDoor1, sdk.monsters.BarricadeDoor2, sdk.monsters.BarricadeWall1, sdk.monsters.BarricadeWall2,
+		sdk.monsters.BarricadeTower, sdk.monsters.PrisonDoor
+	],
 
 	// Initialize attacks
 	init: function () {

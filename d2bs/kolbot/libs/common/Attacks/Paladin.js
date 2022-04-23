@@ -135,6 +135,7 @@ const ClassAttack = {
 		let walk;
 
 		if (attackSkill < 0) {
+			console.debug("No attack skills");
 			return 2;
 		}
 
@@ -213,11 +214,18 @@ const ClassAttack = {
 			break;
 		case sdk.skills.Zeal:
 		case sdk.skills.Vengeance:
-			if (!Attack.validSpot(unit.x, unit.y)) return 0;
+			if (!Attack.validSpot(unit.x, unit.y)) {
+				if (Attack.monsterObjects.indexOf(unit.classid) === -1) {
+					return 0;
+				}
+			}
 			
 			// 3591 - wall/line of sight/ranged/items/objects/closeddoor 
 			if (unit.distance > 3 || checkCollision(me, unit, 0x5)) {
-				if (!Attack.getIntoPosition(unit, 3, 0x5, true)) return 0;
+				if (!Attack.getIntoPosition(unit, 3, 0x5, true)) {
+					console.debug("Failed to get into position");
+					return 0;
+				}
 			}
 
 			if (unit.attackable) {

@@ -585,12 +585,10 @@ const Pather = {
 
 		if (monstadoor) {
 			do {
-				if ((getDistance(monstadoor, x, y) < 4 && monstadoor.distance < 9) || monstadoor.distance < 4) {
+				if (monstadoor.hp > 0 && (getDistance(monstadoor, x, y) < 4 && monstadoor.distance < 9) || monstadoor.distance < 4) {
 					for (let p = 0; p < 20 && monstadoor.hp; p++) {
 						Skill.cast(Config.AttackSkill[1], Skill.getHand(Config.AttackSkill[1]), monstadoor);
 					}
-
-					me.overhead("Broke a barricaded door!");
 				}
 			} while (monstadoor.getNext());
 		}
@@ -599,12 +597,10 @@ const Pather = {
 		
 		if (monstawall) {
 			do {
-				if ((getDistance(monstawall, x, y) < 4 && monstawall.distance < 9) || monstawall.distance < 4) {
+				if (monstawall.hp > 0 && (getDistance(monstawall, x, y) < 4 && monstawall.distance < 9) || monstawall.distance < 4) {
 					for (let p = 0; p < 20 && monstawall.hp; p++) {
 						Skill.cast(Config.AttackSkill[1], Skill.getHand(Config.AttackSkill[1]), monstawall);
 					}
-
-					me.overhead("Broke a barricaded wall!");
 				}
 			} while (monstawall.getNext());
 		}
@@ -850,7 +846,7 @@ const Pather = {
 
 		console.log("ÿc7End ÿc8(moveToExit) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(finalDest) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
 		delay(300);
-		
+
 		return (use && finalDest ? me.area === finalDest : true);
 	},
 
@@ -1039,6 +1035,7 @@ const Pather = {
 		}
 
 		this.broadcastIntent(targetArea);
+		console.log("ÿc7Start ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area));
 
 		for (let i = 0; i < 12; i += 1) {
 			if (me.area === targetArea || me.dead) {
@@ -1148,11 +1145,13 @@ const Pather = {
 
 					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
 						if (me.area === targetArea) {
-							delay(1000 + me.ping);
+							delay(1000);
+							console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
+
 							return true;
 						}
 
-						delay(10 + me.ping);
+						delay(20);
 					}
 
 					// In case lag causes the wp menu to stay open
@@ -1168,12 +1167,14 @@ const Pather = {
 
 			// We can't seem to get the wp maybe attempt portal to town instead and try to use that wp
 			i >= 10 && !me.inTown && Town.goToTown();
-			delay(200 + me.ping);
+			delay(200);
 		}
 
 		if (me.area === targetArea) {
 			// delay to allow act to init - helps with crashes
-			delay(200 + me.ping);
+			delay(500);
+			console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
+
 			return true;
 		}
 
@@ -1260,7 +1261,7 @@ const Pather = {
 
 				if (portal.area === me.area) {
 					if (Skill.useTK(portal) && i < 3) {
-						portal.distance > 21 && Pather.moveNearUnit(portal, 20);
+						portal.distance > 21 && (me.inTown && me.act === 5 ? Town.move("portalspot") : Pather.moveNearUnit(portal, 20));
 						Skill.cast(sdk.skills.Telekinesis, 0, portal);
 					} else {
 						portal.distance > 5 && this.moveToUnit(portal);
@@ -1440,7 +1441,7 @@ const Pather = {
 		case 4:
 			return me.getQuest(23, 0) === 1;
 		case 5:
-			return !me.classic && me.getQuest(28, 0) === 1;
+			return me.expansion && me.getQuest(28, 0) === 1;
 		default:
 			return false;
 		}

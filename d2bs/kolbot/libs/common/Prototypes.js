@@ -2034,7 +2034,10 @@ Unit.prototype.__defineGetter__('attackable', function () {
 	// catapults were returning a level of 0 and hanging up clear scripts
 	if (this.charlvl < 1) return false;
 	// neverCount base stat - hydras, traps etc.
-	if (getBaseStat("monstats", this.classid, "neverCount")) return false;
+	if (Attack.monsterObjects.indexOf(this.classid) === -1
+		&& getBaseStat("monstats", this.classid, "neverCount")) {
+		return false;
+	}
 	// Monsters that are in flight
 	if ([110, 111, 112, 113, 144, 608].includes(this.classid) && this.mode === 8) return false;
 	// Monsters that are Burrowed/Submerged

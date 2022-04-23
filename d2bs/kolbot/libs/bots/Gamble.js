@@ -1,17 +1,15 @@
 /**
 *	@filename	Gamble.js
-*	@author		kolton
+*	@author		kolton, theBGuy (added anti-idle)
 *	@desc		keep gambling while other players supply you with gold
 */
 
 function Gamble() {
-	let gold,
+	let idleTick = 0,
 		info = Gambling.getInfo(),
 		needGold = false;
 
-	if (!info) {
-		throw new Error("Bad Gambling System config.");
-	}
+	if (!info) throw new Error("Bad Gambling System config.");
 
 	me.maxgametime = 0;
 	Town.goToTown(1);
@@ -25,23 +23,17 @@ function Gamble() {
 		});
 
 	while (true) {
-		if (Town.needGamble()) {
-			Town.gamble();
-		} else {
-			needGold = true;
-		}
-
+		Town.needGamble() ? Town.gamble() : (needGold = true) && (idleTick = 0);
 		Town.move("stash");
 
 		while (needGold) {
+			// should there be a player count check before getting into this loop?
+			// Or maybe gamevent for player join/leave, or itemevent for gold dropping?
 			while (true) {
-				if (Town.needGamble()) {
-					needGold = false;
-				}
-
+				Town.needGamble() && (needGold = false);
 				Town.stash();
 
-				gold = getUnit(4, 523, 3);
+				let gold = getUnit(4, 523, 3);
 
 				if (!gold || !Pickit.canPick(gold)) {
 					break;
@@ -49,6 +41,12 @@ function Gamble() {
 
 				Pickit.pickItem(gold);
 				delay(500);
+
+			}
+
+			if (needGold && getTickCount() - idleTick > 0) {
+				sendPacket(1, 0x40);
+				idleTick += rand(1200, 1500) * 1000;
 			}
 
 			delay(500);
@@ -57,5 +55,6 @@ function Gamble() {
 		delay(1000);
 	}
 
+	// eslint-disable-next-line no-unreachable
 	return true;
 }

@@ -1,9 +1,13 @@
 function ShopBot() {
+	let overlayText = {
+		title: new Text("kolbot shopbot", 50, 245, 2, 1),
+		cycles: new Text("Cycles in last minute:", 50, 260, 2, 1),
+		frequency: new Text("Valid item frequency:", 50, 275, 2, 1),
+		totalCycles: new Text("Total cycles:", 50, 290, 2, 1),
+	};
+
 	let tickCount,
 		cycles = 0,
-		cyclesText = new Text("Cycles in last minute:", 50, 260, 2, 1),
-		frequency = new Text("Valid item frequency:", 50, 275, 2, 1),
-		totalCyclesText = new Text("Total cycles:", 50, 290, 2, 1),
 		validItems = 0,
 		totalCycles = 0;
 
@@ -112,7 +116,7 @@ function ShopBot() {
 		me.overhead(npc.itemcount + " items, " + items.length + " valid");
 
 		validItems += items.length;
-		frequency.text = "Valid base items / cycle: " + ((validItems / totalCycles).toFixed(2).toString());
+		overlayText.frequency.text = "Valid base items / cycle: " + ((validItems / totalCycles).toFixed(2).toString());
 
 		for (let i = 0; i < items.length; i += 1) {
 			if (Storage.Inventory.CanFit(items[i]) && Pickit.canPick(items[i]) &&
@@ -235,8 +239,8 @@ function ShopBot() {
 
 	while (!Config.ShopBot.Cycles || totalCycles < Config.ShopBot.Cycles) {
 		if (getTickCount() - tickCount >= 60 * 1000) {
-			cyclesText.text = "Cycles in last minute: " + cycles.toString();
-			totalCyclesText.text = "Total cycles: " + totalCycles.toString();
+			overlayText.cycles.text = "Cycles in last minute: " + cycles.toString();
+			overlayText.totalCycles.text = "Total cycles: " + totalCycles.toString();
 			cycles = 0;
 			tickCount = getTickCount();
 		}
