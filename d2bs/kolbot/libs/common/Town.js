@@ -302,8 +302,9 @@ const Town = {
 
 		// No columns to fill
 		if (!needPots && !needBuffer) return true;
-
-		me.normal && me.act < me.highestAct && this.goToTown(me.highestAct);
+		// todo: buy the cheaper potions if we are low on gold or don't need the higher ones i.e have low mana/health pool
+		// why buy potion that heals 225 (greater mana) if we only have sub 100 mana
+		me.normal && me.highestAct >= 4 && me.act < 4 && this.goToTown(4);
 
 		let npc = this.initNPC("Shop", "buyPotions");
 
@@ -1680,7 +1681,7 @@ const Town = {
 	},
 
 	clearScrolls: function () {
-		let scrolls = me.getItemsEx().filter(function (scroll) { return scroll.isInInventory && scroll.itemType === sdk.itemtype.Scroll; });
+		let scrolls = me.getItemsEx().filter((scroll) => scroll.isInInventory && scroll.itemType === sdk.itemtype.Scroll);
 		let tpTome = scrolls.some(function (scroll) {
 			return scroll.classid === sdk.items.ScrollofTownPortal;
 		}) ? me.findItem(sdk.items.TomeofTownPortal, sdk.itemmode.inStorage, sdk.storage.Inventory) : false;
@@ -1698,7 +1699,8 @@ const Town = {
 						clickItemAndWait(0, tpTome.x, tpTome.y, tpTome.location);
 
 						if (tpTome.getStat(sdk.stats.Quantity) > currQuantity) {
-							print('ÿc9clearScrollsÿc0 :: placed scroll in tp tome');
+							console.log('ÿc9clearScrollsÿc0 :: placed scroll in tp tome');
+
 							continue;
 						}
 					}
@@ -1712,7 +1714,8 @@ const Town = {
 						clickItemAndWait(0, idTome.x, idTome.y, idTome.location);
 
 						if (idTome.getStat(sdk.stats.Quantity) > currQuantity) {
-							print('ÿc9clearScrollsÿc0 :: placed scroll in id tome');
+							console.log('ÿc9clearScrollsÿc0 :: placed scroll in id tome');
+
 							continue;
 						}
 					}

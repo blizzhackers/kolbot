@@ -212,6 +212,7 @@ const ClassAttack = {
 			}
 
 			break;
+		case sdk.skills.Attack:
 		case sdk.skills.Zeal:
 		case sdk.skills.Vengeance:
 			if (!Attack.validSpot(unit.x, unit.y)) {
@@ -223,7 +224,6 @@ const ClassAttack = {
 			// 3591 - wall/line of sight/ranged/items/objects/closeddoor 
 			if (unit.distance > 3 || checkCollision(me, unit, 0x5)) {
 				if (!Attack.getIntoPosition(unit, 3, 0x5, true)) {
-					console.debug("Failed to get into position");
 					return 0;
 				}
 			}
@@ -235,17 +235,13 @@ const ClassAttack = {
 
 			break;
 		default:
-			if (Skill.getRange(attackSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
-				return 0;
-			}
+			if (Skill.getRange(attackSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) return 0;
 
-			if (Math.floor(getDistance(me, unit)) > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x4)) {
-				walk = attackSkill !== 97 && Skill.getRange(attackSkill) < 4 && getDistance(me, unit) < 10 && !checkCollision(me, unit, 0x1);
+			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x4)) {
+				walk = (attackSkill !== 97 && Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1));
 
 				// walk short distances instead of tele for melee attacks. teleport if failed to walk
-				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4, walk)) {
-					return 0;
-				}
+				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4, walk)) return 0;
 			}
 
 			if (!unit.dead) {
@@ -301,10 +297,9 @@ const ClassAttack = {
 		}
 
 		// If one of the valid positions is a position im at already
-		if (positions.some(pos => pos.distance < 1)) return true;
-
 		for (let i = 0; i < positions.length; i += 1) {
-			if (getDistance(me, positions[i][0], positions[i][1]) < 1) {
+			if (getDistance(me, positions[i][0], positions[i][1]) < 1
+				&& !CollMap.checkColl(unit, {x: positions[i][0], y: positions[i][1]}, 0x5 | 0x400 | 0x1000, 0)) {
 				return true;
 			}
 		}
@@ -315,10 +310,8 @@ const ClassAttack = {
 				y: positions[i][1]
 			};
 
-			if (Attack.validSpot(check.x, check.y) && !CollMap.checkColl(unit, check, 0x5, 0)) {
-				if (this.reposition(positions[i][0], positions[i][1])) {
-					return true;
-				}
+			if (Attack.validSpot(check.x, check.y) && !CollMap.checkColl(unit, check, 0x5 | 0x400 | 0x1000, 0)) {
+				if (this.reposition(positions[i][0], positions[i][1])) return true;
 			}
 		}
 

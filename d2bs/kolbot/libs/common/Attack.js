@@ -173,7 +173,7 @@ const Attack = {
 	// Kill a monster based on its classId, can pass a unit as well
 	kill: function (classId) {
 		if (!classId || Config.AttackSkill[1] < 0) return false;
-		let target = (typeof classId === "object" ? classid : Misc.poll(() => getUnit(1, classId), 2000, 100));
+		let target = (typeof classId === "object" ? classId : Misc.poll(() => getUnit(1, classId), 2000, 100));
 
 		if (!target) {
 			console.warn("Attack.kill: Target not found");

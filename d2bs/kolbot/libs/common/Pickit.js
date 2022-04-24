@@ -237,9 +237,7 @@ const Pickit = {
 			itemCount = me.itemcount;
 		let item = gid > -1 ? getUnit(4, -1, -1, gid) : false;
 
-		if (!item) {
-			return false;
-		}
+		if (!item) return false;
 
 		for (let i = 0; i < cancelFlags.length; i += 1) {
 			if (getUIFlag(cancelFlags[i])) {
@@ -591,13 +589,8 @@ const Pickit = {
 
 	// Prioritize runes and unique items for fast pick
 	sortFastPickItems: function (unitA, unitB) {
-		if (unitA.itemType === 74 || unitA.quality === 7) {
-			return -1;
-		}
-
-		if (unitB.itemType === 74 || unitB.quality === 7) {
-			return 1;
-		}
+		if (unitA.itemType === 74 || unitA.quality === 7) return -1;
+		if (unitB.itemType === 74 || unitB.quality === 7) return 1;
 
 		return getDistance(me, unitA) - getDistance(me, unitB);
 	},
@@ -609,7 +602,9 @@ const Pickit = {
 			let gid = this.gidList.shift();
 			item = getUnit(4, -1, -1, gid);
 
-			if (item && (item.mode === 3 || item.mode === 5) && (Town.ignoredItemTypes.indexOf(item.itemType) === -1 || (item.itemType >= 76 && item.itemType <= 78)) && item.itemType !== 4 && getDistance(me, item) <= Config.PickRange) {
+			if (item && (item.mode === 3 || item.mode === 5)
+				&& (Town.ignoredItemTypes.indexOf(item.itemType) === -1 || (item.itemType >= 76 && item.itemType <= 78))
+				&& item.itemType !== 4 && getDistance(me, item) <= Config.PickRange) {
 				itemList.push(copyUnit(item));
 			}
 		}

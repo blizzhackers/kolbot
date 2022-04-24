@@ -76,6 +76,8 @@ const Skill = {
 
 	getDuration: function (skillId = -1) {
 		switch (skillId) {
+		case sdk.skills.Decoy:
+			return ((10 + me.getSkill(sdk.skills.Decoy, 1) * 5) * 1000);
 		case sdk.skills.FrozenArmor:
 			return (((12 * me.getSkill(sdk.skills.FrozenArmor, 1) + 108) + ((me.getSkill(sdk.skills.ShiverArmor, 0) + me.getSkill(sdk.skills.ChillingArmor, 0)) * 10)) * 1000);
 		case sdk.skills.ShiverArmor:
@@ -247,7 +249,6 @@ const Skill = {
 		case 6: // Magic Arrow
 		case 7: // Fire Arrow
 		case 9: // Critical Strike
-		case 10: // Jab
 		case 11: // Cold Arrow
 		case 12: // Multiple Shot
 		case 13: // Dodge
@@ -289,7 +290,6 @@ const Skill = {
 		case 93: // Bone Spirit
 		case 101: // Holy Bolt
 		case 107: // Charge
-		case 111: // Vengeance
 		case 112: // Blessed Hammer
 		case 121: // Fist of the Heavens
 		case 132: // Leap
@@ -315,12 +315,14 @@ const Skill = {
 		case 275: // Dragon Flight
 			return 1;
 		case 0: // Normal Attack
+		case 10: // Jab
 		case 14: // Power Strike
 		case 24: // Charged Strike
 		case 34: // Lightning Strike
 		case 96: // Sacrifice
 		case 97: // Smite
 		case 106: // Zeal
+		case 111: // Vengeance
 		case 116: // Conversion
 		case 126: // Bash
 		case 133: // Double Swing
@@ -349,16 +351,9 @@ const Skill = {
 	// Cast a skill on self, Unit or coords
 	cast: function (skillId, hand, x, y, item) {
 		switch (true) {
-		// cant cast this in town
 		case me.inTown && !this.townSkill(skillId):
-		// dont have enough mana for this
-		// eslint-disable-next-line no-fallthrough
 		case !item && this.getManaCost(skillId) > me.mp:
-		// Dont have this skill
-		// eslint-disable-next-line no-fallthrough
 		case !item && !me.getSkill(skillId, 1):
-		// can't cast in wereform
-		// eslint-disable-next-line no-fallthrough
 		case !this.wereFormCheck(skillId):
 			return false;
 		case skillId === undefined:
@@ -506,10 +501,7 @@ const Skill = {
 	// Get mana cost of the skill (mBot)
 	getManaCost: function (skillId) {
 		if (skillId < 6) return 0;
-
-		if (this.manaCostList.hasOwnProperty(skillId)) {
-			return this.manaCostList[skillId];
-		}
+		if (this.manaCostList.hasOwnProperty(skillId)) return this.manaCostList[skillId];
 
 		let skillLvl = me.getSkill(skillId, 1),
 			effectiveShift = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024],
@@ -830,10 +822,7 @@ const Misc = {
 
 		try {
 			player = getParty();
-
-			if (!player) {
-				return false;
-			}
+			if (!player) return false;
 
 			myPartyId = player.partyid;
 			player = getParty(name); // May throw an error
@@ -1721,10 +1710,9 @@ const Misc = {
 
 	// Go to town when low on hp/mp or when out of potions. can be upgraded to check for curses etc.
 	townCheck: function () {
-		// Can't tp from uber trist or when dead
-		if (me.area === 136 || me.dead) return false;
+		if (!Town.canTpToTown()) return false;
+
 		let tTick = getTickCount();
-		
 		let potion, check,
 			needhp = true,
 			needmp = true;
@@ -1917,10 +1905,7 @@ const Misc = {
 	},
 
 	debugLog: function (msg) {
-		if (!Config.Debug) {
-			return;
-		}
-
+		if (!Config.Debug) return;
 		debugLog(me.profile + ": " + msg);
 	},
 
@@ -2237,22 +2222,26 @@ const Packet = {
 			itemCount = me.itemcount,
 			npc = getInteractedNPC();
 
-		if (!npc) throw new Error("buyItem: No NPC menu open.");
+		try {
+			if (!npc) throw new Error("buyItem: No NPC menu open.");
 
-		// Can we afford the item?
-		if (oldGold < unit.getItemCost(0)) return false;
+			// Can we afford the item?
+			if (oldGold < unit.getItemCost(0)) return false;
 
-		for (let i = 0; i < 3; i += 1) {
-			sendPacket(1, 0x32, 4, npc.gid, 4, unit.gid, 4, shiftBuy ? 0x80000000 : gamble ? 0x2 : 0x0, 4, 0);
+			for (let i = 0; i < 3; i += 1) {
+				sendPacket(1, 0x32, 4, npc.gid, 4, unit.gid, 4, shiftBuy ? 0x80000000 : gamble ? 0x2 : 0x0, 4, 0);
 
-			let tick = getTickCount();
+				let tick = getTickCount();
 
-			while (getTickCount() - tick < Math.max(2000, me.ping * 2 + 500)) {
-				if (shiftBuy && me.getStat(14) + me.getStat(15) < oldGold) return true;
-				if (itemCount !== me.itemcount) return true;
+				while (getTickCount() - tick < Math.max(2000, me.ping * 2 + 500)) {
+					if (shiftBuy && me.getStat(14) + me.getStat(15) < oldGold) return true;
+					if (itemCount !== me.itemcount) return true;
 
-				delay(10);
+					delay(10);
+				}
 			}
+		} catch (e) {
+			console.warn(e);
 		}
 
 		return false;
@@ -2411,19 +2400,11 @@ const Packet = {
 	// 	//sendPacket(1, 0x59, 4, npc.type, 4, npc.gid, 4, dwX, 4, dwY);
 	// },
 
-	teleWalk: function (x, y, maxDist) {
-		let i;
-
-		if (maxDist === undefined) {
-			maxDist = 5;
-		}
-
-		if (!this.telewalkTick) {
-			this.telewalkTick = 0;
-		}
+	teleWalk: function (x, y, maxDist = 5) {
+		!this.telewalkTick && (this.telewalkTick = 0);
 
 		if (getDistance(me, x, y) > 10 && getTickCount() - this.telewalkTick > 3000 && Attack.validSpot(x, y)) {
-			for (i = 0; i < 5; i += 1) {
+			for (let i = 0; i < 5; i += 1) {
 				sendPacket(1, 0x5f, 2, x + rand(-1, 1), 2, y + rand(-1, 1));
 				delay(me.ping + 1);
 				sendPacket(1, 0x4b, 4, me.type, 4, me.gid);
@@ -2456,7 +2437,8 @@ const Packet = {
 		}
 	},
 
-	addListener: function (packetType, callback) { // specialized wrapper for addEventListener
+	// specialized wrapper for addEventListener
+	addListener: function (packetType, callback) {
 		if (typeof packetType === 'number') {
 			packetType = [packetType];
 		}
@@ -2486,13 +2468,12 @@ Example (Spoof 'player move' packet to server):
 
 function PacketBuilder () {
 	// globals DataView ArrayBuffer
-	if (this.__proto__.constructor !== PacketBuilder) {
-		throw new Error("PacketBuilder must be called with 'new' operator!");
-	}
+	if (this.__proto__.constructor !== PacketBuilder) throw new Error("PacketBuilder must be called with 'new' operator!");
 
 	let queue = [], count = 0;
 
-	let enqueue = (type, size) => (...args) => { // accepts any number of arguments
+	// accepts any number of arguments
+	let enqueue = (type, size) => (...args) => {
 		args.forEach(arg => {
 			if (type === 'String') {
 				arg = stringToEUC(arg);
@@ -2565,9 +2546,7 @@ const LocalChat = new function () {
 	};
 
 	this.init = (cycle = false) => {
-		if (!Config.LocalChat.Enabled) {
-			return;
-		}
+		if (!Config.LocalChat.Enabled) return;
 
 		Config.LocalChat.Mode = (Config.LocalChat.Mode + cycle) % 3;
 		print("ÿc2LocalChat enabled. Mode: " + Config.LocalChat.Mode);
