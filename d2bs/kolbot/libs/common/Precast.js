@@ -611,4 +611,18 @@ const Precast = new function () {
 
 		return true;
 	};
+
+	this.doRandomPrecast = function (force = false, goToWhenDone = undefined) {
+		let returnTo = (goToWhenDone && typeof goToWhenDone === "number" ? goToWhenDone : me.area);
+
+		try {
+			Pather.useWaypoint("random") && Precast.doPrecast(force) && Pather.useWaypoint(returnTo);
+		} catch (e) {
+			console.warn(e);
+		} finally {
+			me.area !== returnTo && Pather.journeyTo(returnTo);
+		}
+
+		return (me.area === returnTo);
+	};
 };

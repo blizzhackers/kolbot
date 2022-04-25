@@ -15,12 +15,12 @@
 */
 js_strict(true);
 
-if (!isIncluded("common/Cubing.js")) { include("common/Cubing.js"); }
-if (!isIncluded("common/Prototypes.js")) { include("common/Prototypes.js"); }
-if (!isIncluded("common/Runewords.js")) { include("common/Runewords.js"); }
+!isIncluded("common/Cubing.js") && include("common/Cubing.js");
+!isIncluded("common/Prototypes.js") && include("common/Prototypes.js");
+!isIncluded("common/Runewords.js") && include("common/Runewords.js");
 
 const AutoBuild = new function AutoBuild () {
-	if (Config.AutoBuild.DebugMode) { Config.AutoBuild.Verbose = true; }
+	Config.AutoBuild.DebugMode && (Config.AutoBuild.Verbose = true);
 
 	let debug = !!Config.AutoBuild.DebugMode,
 		verbose = !!Config.AutoBuild.Verbose,
@@ -34,7 +34,7 @@ const AutoBuild = new function AutoBuild () {
 		while (configUpdateLevel < me.charlvl) {
 			configUpdateLevel += 1;
 			Skill.init();
-			AutoBuildTemplate[configUpdateLevel].Update.apply(Config); // TODO: Make sure this works
+			AutoBuildTemplate[configUpdateLevel].Update.apply(Config);
 		}
 	}
 
@@ -54,13 +54,12 @@ const AutoBuild = new function AutoBuild () {
 	function getLogFilename () {
 		let d = new Date();
 		let dateString = d.getMonth() + "_" + d.getDate() + "_" + d.getFullYear();
-		return "logs/AutoBuild." + me.realm + "." + me.charname + "." + dateString + ".log";
+		return ("logs/AutoBuild." + me.realm + "." + me.charname + "." + dateString + ".log");
 	}
 
 	function getTemplateFilename () {
-		let classname = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"][me.classid];
 		let build = getBuildType();
-		let template = "config/Builds/" + classname + "." + build + ".js";
+		let template = "config/Builds/" + sdk.charclass.nameOf(me.classid) + "." + build + ".js";
 		return template.toLowerCase();
 	}
 
@@ -68,9 +67,7 @@ const AutoBuild = new function AutoBuild () {
 		let currentScript = getCurrentScript();
 		let template = getTemplateFilename();
 		this.print("Including build template " + template + " into " + currentScript);
-		if (!include(template)) {
-			throw new Error("Failed to include template: " + template);
-		}
+		if (!include(template)) throw new Error("Failed to include template: " + template);
 
 		// Only load() helper thread from default.dbj if it isn't loaded
 		if (currentScript === "default.dbj" && !getScript("tools\\autobuildthread.js")) {
@@ -102,12 +99,11 @@ const AutoBuild = new function AutoBuild () {
 		let args = Array.prototype.slice.call(arguments);
 		args.unshift("AutoBuild:");
 		let result = args.join(" ");
-		if (verbose) { print.call(this, result); }
-		if (debug) { log.call(this, result); }
+		verbose && print.call(this, result);
+		debug && log.call(this, result);
 	}
 
 	this.print = myPrint;
 	this.initialize = initialize;
 	this.applyConfigUpdates = applyConfigUpdates;
-
 };

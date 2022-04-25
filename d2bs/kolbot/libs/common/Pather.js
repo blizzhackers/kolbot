@@ -1909,6 +1909,8 @@ const Pather = {
 		area - id of the area to get the name for
 	*/
 	getAreaName: function (area) {
+		if (["number", "string"].indexOf(typeof area) === -1) return "undefined";
+		if (typeof area === "string") return area;
 		return (this.areaNames[area] || "undefined");
 	},
 };

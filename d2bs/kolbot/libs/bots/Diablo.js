@@ -174,8 +174,7 @@ function Diablo() {
 
 	// start
 	Town.doChores();
-	Pather.useWaypoint(Config.RandomPrecast ? "random" : sdk.areas.RiverofFlame);
-	Precast.doPrecast(true);
+	!!Config.RandomPrecast ? Precast.doRandomPrecast(true, sdk.areas.RiverofFlame) : Pather.useWaypoint(sdk.areas.RiverofFlame) && Precast.doPrecast(true);
 	me.area !== sdk.areas.RiverofFlame && Pather.useWaypoint(sdk.areas.RiverofFlame);
 
 	if (!Pather.moveToExit(sdk.areas.ChaosSanctuary, true) && !Pather.moveTo(7790, 5544)) throw new Error("Failed to move to Chaos Sanctuary");
@@ -213,6 +212,7 @@ function Diablo() {
 
 	try {
 		openSeals();
+		// maybe instead of throwing error if we fail to open seal, add it to an array to re-check before diabloPrep then if that fails throw and error
 		Config.PublicMode && say(Config.Diablo.DiabloMsg);
 		print("Attempting to find Diablo");
 		Common.Diablo.diabloPrep();

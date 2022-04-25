@@ -45,9 +45,7 @@ function Baal() {
 	};
 
 	Town.doChores();
-	Pather.useWaypoint(Config.RandomPrecast ? "random" : sdk.areas.WorldstoneLvl2);
-	Precast.doPrecast(true);
-
+	!!Config.RandomPrecast ? Precast.doRandomPrecast(true, sdk.areas.WorldstoneLvl2) : Pather.useWaypoint(sdk.areas.WorldstoneLvl2) && Precast.doPrecast(true);
 	me.area !== sdk.areas.WorldstoneLvl2 && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
 
 	if (!Pather.moveToExit([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction], true)) {
