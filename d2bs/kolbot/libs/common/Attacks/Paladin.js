@@ -132,15 +132,11 @@ const ClassAttack = {
 	},
 
 	doCast: function (unit, attackSkill, aura) {
-		let walk;
-
-		if (attackSkill < 0) {
-			console.debug("No attack skills");
-			return 2;
-		}
-
+		if (attackSkill < 0) return 2;
+		
 		switch (attackSkill) {
-		case 112:
+		case sdk.skills.BlessedHammer:
+			// todo: add doll avoid to other classes
 			if (Config.AvoidDolls && [212, 213, 214, 215, 216, 690, 691].includes(unit.classid)) {
 				this.dollAvoid(unit);
 				aura > -1 && Skill.setSkill(aura, 0);
@@ -151,7 +147,7 @@ const ClassAttack = {
 
 			if (!this.getHammerPosition(unit)) {
 				// Fallback to secondary skill if it exists
-				if (Config.AttackSkill[5] > -1 && Config.AttackSkill[5] !== 112 && Attack.checkResist(unit, Config.AttackSkill[5])) {
+				if (Config.AttackSkill[5] > -1 && Config.AttackSkill[5] !== sdk.skills.BlessedHammer && Attack.checkResist(unit, Config.AttackSkill[5])) {
 					return this.doCast(unit, Config.AttackSkill[5], Config.AttackSkill[6]);
 				}
 
@@ -171,7 +167,7 @@ const ClassAttack = {
 			}
 
 			return 1;
-		case 101:
+		case sdk.skills.HolyBolt:
 			if (getDistance(me, unit) > Skill.getRange(attackSkill) + 3 || CollMap.checkColl(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4)) {
 					return 0;
@@ -192,7 +188,7 @@ const ClassAttack = {
 			}
 
 			return 1;
-		case 121: // FoH
+		case sdk.skills.FistoftheHeavens:
 			if (!me.getState(121)) {
 				if (getDistance(me, unit) > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, 0x2004, 2)) {
 					if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x2004, true)) {
@@ -213,6 +209,7 @@ const ClassAttack = {
 
 			break;
 		case sdk.skills.Attack:
+		case sdk.skills.Sacrifice:
 		case sdk.skills.Zeal:
 		case sdk.skills.Vengeance:
 			if (!Attack.validSpot(unit.x, unit.y)) {
@@ -238,7 +235,7 @@ const ClassAttack = {
 			if (Skill.getRange(attackSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) return 0;
 
 			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x4)) {
-				walk = (attackSkill !== 97 && Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1));
+				let walk = (attackSkill !== 97 && Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1));
 
 				// walk short distances instead of tele for melee attacks. teleport if failed to walk
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4, walk)) return 0;
@@ -323,7 +320,7 @@ const ClassAttack = {
 			if (Pather.useTeleport()) {
 				[x, y].distance > 40 ? Pather.moveTo(x, y) : Pather.teleportTo(x, y, 3);
 			} else {
-				Misc.click(0, 0, x, y);
+				[x, y].distance <= 4 ? Misc.click(0, 0, x, y) : Pather.walkTo(x, y);
 				delay(200);
 			}
 		}

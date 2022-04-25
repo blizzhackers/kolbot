@@ -14,18 +14,18 @@ const ClassAttack = {
 		// Get timed skill
 		let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
 
-		if (Attack.checkResist(unit, checkSkill) && ([56, 59].indexOf(checkSkill) === -1 || Attack.validSpot(unit.x, unit.y))) {
+		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
 			skills.timed = checkSkill;
-		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && ([56, 59].indexOf(Config.AttackSkill[5]) === -1 || Attack.validSpot(unit.x, unit.y))) {
+		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[5])) {
 			skills.timed = Config.AttackSkill[5];
 		}
 
 		// Get untimed skill
 		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[1] : Config.AttackSkill[index + 1];
 
-		if (Attack.checkResist(unit, checkSkill) && ([56, 59].indexOf(checkSkill) === -1 || Attack.validSpot(unit.x, unit.y))) {
+		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
 			skills.untimed = checkSkill;
-		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && ([56, 59].indexOf(Config.AttackSkill[6]) === -1 || Attack.validSpot(unit.x, unit.y))) {
+		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[6])) {
 			skills.untimed = Config.AttackSkill[6];
 		}
 
@@ -58,14 +58,10 @@ const ClassAttack = {
 		}
 
 		// Keep Energy Shield active
-		if (Config.UseEnergyShield && Precast.precastables.EnergyShield && !me.getState(sdk.states.EnergyShield) && me.getSkill(sdk.skills.EnergyShield, 1)) {
-			Skill.cast(sdk.skills.EnergyShield, 0);
-		}
+		Config.UseEnergyShield && Precast.precastables.EnergyShield && !me.getState(sdk.states.EnergyShield) && Skill.cast(sdk.skills.EnergyShield, 0);
 
 		// Keep Thunder-Storm active
-		if (Precast.precastables.ThunderStorm && !me.getState(sdk.states.ThunderStorm) && me.getSkill(sdk.skills.ThunderStorm, 1)) {
-			Skill.cast(sdk.skills.ThunderStorm, 0);
-		}
+		Precast.precastables.ThunderStorm && !me.getState(sdk.states.ThunderStorm) && Skill.cast(sdk.skills.ThunderStorm, 0);
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.getState(121) || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (Math.round(getDistance(me, unit)) > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
@@ -81,7 +77,7 @@ const ClassAttack = {
 
 		let useStatic = (Config.StaticList.length > 0 && Config.CastStatic < 100 && me.getSkill(42, 1) && Attack.checkResist(unit, "lightning"));
 
-		// Static
+		// Static - needs to be re-done
 		if (useStatic && Config.StaticList.some(
 			function (id) {
 				if (unit) {

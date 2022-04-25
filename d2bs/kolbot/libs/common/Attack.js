@@ -906,34 +906,18 @@ const Attack = {
 	},
 
 	// Check if a set of coords is valid/accessable
-	validSpot: function (x, y) {
+	// re-work this for more info
+	// casting skills can go over non-floors - excluding bliz/meteor - not sure if any others
+	// physical skills can't, need to exclude monster objects though
+	// splash skills can go through some objects, however some objects are cast blockers
+	validSpot: function (x, y, skill = -1) {
 		// Just in case
 		if (!me.area || !x || !y) return false;
 
 		let result;
 
-		try { // Treat thrown errors as invalid spot
-			result = getCollision(me.area, x, y);
-		} catch (e) {
-			return false;
-		}
-
-		// Avoid non-walkable spots, objects
-		if (result === undefined || (result & 0x1) || (result & 0x400)) {
-			return false;
-		}
-
-		return true;
-	},
-
-	// need to fill this out, which skills require a floor?
-	validCastingLocation: function (x, y, skillId = -1) {
-		// Just in case
-		if (!me.area || !x || !y) return false;
-
-		let result;
-
-		try { // Treat thrown errors as invalid spot
+		// Treat thrown errors as invalid spot
+		try {
 			result = getCollision(me.area, x, y);
 		} catch (e) {
 			return false;
@@ -941,20 +925,23 @@ const Attack = {
 
 		if (result === undefined) return false;
 
-		if (skillId > -1) {
-			// probably going to need more checks, need to figure out any skills that don't do dmg if they aren't over a floor
-			// should this include 0x20 cast blocker? or 0x80E missle blocker?
-			switch (true) {
-			// not on the floor
-			case ([sdk.skills.Meteor, sdk.skills.Blizzard].includes(skillId)):
-				if (!!(result & 0x1000)) {
-					return false;
-				}
-				return !(result & 0x1);
-			// Avoid non-walkable spots, objects
-			case (Skill.getRange(skillId) < 10 && ((result & 0x1) || (result & 0x400))):
+		switch (true) {
+		case Skill.needFloor.includes(skill):
+			let isFloor = !!(result & 0x1000);
+			// this spot is not on the floor (lava (river/chaos, space (arcane), ect))
+			if (!isFloor) {
 				return false;
 			}
+
+			break;
+		case Skill.missileSkills.includes(skill):
+			// for now this just returns true and we leave getting into position to the actual class attack files
+			return true;
+		default:
+			// Avoid non-walkable spots, objects - this preserves the orignal function and also physical attack skills will get here
+			if ((result & 0x1) || (result & 0x400)) return false;
+
+			break;
 		}
 
 		return true;
@@ -1005,9 +992,7 @@ const Attack = {
 	},
 
 	findSafeSpot: function (unit, distance, spread, range) {
-		if (arguments.length < 4) {
-			throw new Error("deploy: Not enough arguments supplied");
-		}
+		if (arguments.length < 4) throw new Error("deploy: Not enough arguments supplied");
 
 		let index,
 			monList = [],
