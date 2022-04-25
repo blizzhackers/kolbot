@@ -1,8 +1,10 @@
 /**
 *	@filename	MuleLogger.js
-*	@author		kolton
+*	@author		kolton, theBGuy
 *	@desc		Log items and perm configurable accounts/characters
 */
+
+!isIncluded("common/prototypes.js") && include("common/prototypes.js");
 
 const MuleLogger = {
 	LogAccounts: {
@@ -20,10 +22,10 @@ const MuleLogger = {
 	},
 
 	LogGame: ["", ""], // ["gamename", "password"]
-	LogNames: false, // Put account/character name on the picture
+	LogNames: true, // Put account/character name on the picture
 	LogItemLevel: true, // Add item level to the picture
-	LogEquipped: false, // include equipped items
-	LogMerc: false, // include items merc has equipped (if alive)
+	LogEquipped: true, // include equipped items
+	LogMerc: true, // include items merc has equipped (if alive)
 	SaveScreenShot: false, // Save pictures in jpg format (saved in 'Images' folder)
 	IngameTime: rand(60, 120), // (180, 210) to avoid RD, increase it to (7230, 7290) for mule perming
 
@@ -55,7 +57,6 @@ const MuleLogger = {
 
 	load: function (hash) {
 		let filename = "data/secure/" + hash + ".txt";
-
 		if (!FileTools.exists(filename)) throw new Error("File " + filename + " does not exist!");
 
 		return FileTools.readText(filename);
@@ -67,156 +68,18 @@ const MuleLogger = {
 	},
 
 	// Log kept item stats in the manager.
-	logItem: function (unit, logIlvl) {
+	logItem: function (unit, logIlvl = this.LogItemLevel) {
 		if (!isIncluded("common/misc.js")) {
 			include("common/misc.js");
 			include("common/util.js");
 		}
 
-		logIlvl === undefined && (logIlvl = this.LogItemLevel);
-
-		let code,
-			header = "",
+		let header = "",
 			name = unit.itemType + "_" + unit.fname.split("\n").reverse().join(" ").replace(/(y|ÿ)c[0-9!"+<:;.*]|\/|\\/g, "").trim();
 
-		let desc = this.getItemDesc(unit, logIlvl) + "$" + unit.gid + ":" + unit.classid + ":" + unit.location + ":" + unit.x + ":" + unit.y + (unit.getFlag(0x400000) ? ":eth" : "");
+		let desc = Misc.getItemDesc(unit, logIlvl) + "$" + unit.gid + ":" + unit.classid + ":" + unit.location + ":" + unit.x + ":" + unit.y + (unit.getFlag(0x400000) ? ":eth" : "");
 		let color = unit.getColor();
-
-		switch (unit.quality) {
-		case 5: // Set
-			switch (unit.classid) {
-			case 27: // Angelic sabre
-				code = "inv9sbu";
-
-				break;
-			case 74: // Arctic short war bow
-				code = "invswbu";
-
-				break;
-			case 308: // Berserker's helm
-				code = "invhlmu";
-
-				break;
-			case 330: // Civerb's large shield
-				code = "invlrgu";
-
-				break;
-			case 31: // Cleglaw's long sword
-			case 227: // Szabi's cryptic sword
-				code = "invlsdu";
-
-				break;
-			case 329: // Cleglaw's small shield
-				code = "invsmlu";
-
-				break;
-			case 328: // Hsaru's buckler
-				code = "invbucu";
-
-				break;
-			case 306: // Infernal cap / Sander's cap
-				code = "invcapu";
-
-				break;
-			case 30: // Isenhart's broad sword
-				code = "invbsdu";
-
-				break;
-			case 309: // Isenhart's full helm
-				code = "invfhlu";
-
-				break;
-			case 333: // Isenhart's gothic shield
-				code = "invgtsu";
-
-				break;
-			case 326: // Milabrega's ancient armor
-			case 442: // Immortal King's sacred armor
-				code = "invaaru";
-
-				break;
-			case 331: // Milabrega's kite shield
-				code = "invkitu";
-
-				break;
-			case 332: // Sigon's tower shield
-				code = "invtowu";
-
-				break;
-			case 325: // Tancred's full plate mail
-				code = "invfulu";
-
-				break;
-			case 3: // Tancred's military pick
-				code = "invmpiu";
-
-				break;
-			case 113: // Aldur's jagged star
-				code = "invmstu";
-
-				break;
-			case 234: // Bul-Kathos' colossus blade
-				code = "invgsdu";
-
-				break;
-			case 372: // Grizwold's ornate plate
-				code = "invxaru";
-
-				break;
-			case 366: // Heaven's cuirass
-			case 215: // Heaven's reinforced mace
-			case 449: // Heaven's ward
-			case 426: // Heaven's spired helm
-				code = "inv" + unit.code + "s";
-
-				break;
-			case 357: // Hwanin's grand crown
-				code = "invxrnu";
-
-				break;
-			case 195: // Nalya's scissors suwayyah
-				code = "invskru";
-
-				break;
-			case 395: // Nalya's grim helm
-			case 465: // Trang-Oul's bone visage
-				code = "invbhmu";
-
-				break;
-			case 261: // Naj's elder staff
-				code = "invcstu";
-
-				break;
-			case 375: // Orphan's round shield
-				code = "invxmlu";
-
-				break;
-			case 12: // Sander's bone wand
-				code = "invbwnu";
-
-				break;
-			}
-
-			break;
-		case 7: // Unique
-			for (let i = 0; i < 401; i += 1) {
-				if (unit.code === getBaseStat(17, i, 4).trim() && unit.fname.split("\n").reverse()[0].indexOf(getLocaleString(getBaseStat(17, i, 2))) > -1) {
-					code = getBaseStat(17, i, "invfile");
-
-					break;
-				}
-			}
-
-			break;
-		}
-
-		if (!code) {
-			// Tiara/Diadem
-			code = ["ci2", "ci3"].includes(unit.code) ? unit.code : (getBaseStat(0, unit.classid, 'normcode') || unit.code);
-			code = code.replace(" ", "");
-			[10, 12, 58, 82, 83, 84].includes(unit.itemType) && (code += (unit.gfx + 1));
-		}
-
+		let code = Misc.getItemCode(unit);
 		let sock = unit.getItemsEx();
 
 		if (sock.length) {
@@ -238,18 +101,13 @@ const MuleLogger = {
 		};
 	},
 
-	logChar: function (logIlvl, logName, saveImg) {
+	logChar: function (logIlvl = this.LogItemLevel, logName = this.LogNames, saveImg = this.SaveScreenShot) {
 		while (!me.gameReady) {
 			delay(100);
 		}
 
 		let items = me.getItemsEx();
-
 		if (!items.length) return;
-
-		logIlvl === undefined && (logIlvl = this.LogItemLevel);
-		logName === undefined && (logName = this.LogNames);
-		saveImg === undefined && (saveImg = this.SaveScreenShot);
 
 		let folder, realm = me.realm || "Single Player",
 			finalString = "";
@@ -266,10 +124,17 @@ const MuleLogger = {
 			folder.create(me.account);
 		}
 
-		items.sort((a, b) => b.itemType - a.itemType);
+		// from bottom up: merc, equipped, inventory, stash, cube
+		items.sort(function (a, b) {
+			if (a.mode < b.mode) return -1;
+			if (a.mode > b.mode) return 1;
+			if (a.location === sdk.storage.Cube) return -1;
+			if (b.location === sdk.storage.Cube) return 1;
+			return b.location - a.location;
+		});
 
 		for (let i = 0; i < items.length; i += 1) {
-			if ((this.LogEquipped || items[i].mode === 0) && (items[i].quality !== 2 || !Misc.skipItem(items[i].classid))) {
+			if ((this.LogEquipped || items[i].isInStorage) && (items[i].quality !== 2 || !Misc.skipItem(items[i].classid))) {
 				let parsedItem = this.logItem(items[i], logIlvl);
 
 				// Log names to saved image
@@ -280,7 +145,11 @@ const MuleLogger = {
 				!parsedItem.header && (parsedItem.header = (me.account || "Single Player") + " / " + me.name);
 				// Remove itemtype_ prefix from the name
 				parsedItem.title = parsedItem.title.substr(parsedItem.title.indexOf("_") + 1);
-				items[i].mode === 1 && (parsedItem.title += " (equipped)");
+
+				items[i].isEquipped && (parsedItem.title += (items[i].isOnSwap ? " (secondary equipped)" : " (equipped)"));
+				items[i].isInInventory && (parsedItem.title += " (inventory)");
+				items[i].isInStash && (parsedItem.title += " (stash)");
+				items[i].isInCube && (parsedItem.title += " (cube)");
 
 				let string = JSON.stringify(parsedItem);
 				finalString += (string + "\n");
@@ -298,7 +167,7 @@ const MuleLogger = {
 					parsedItem.title += " (merc)";
 					let string = JSON.stringify(parsedItem);
 					finalString += (string + "\n");
-					this.SaveScreenShot && D2Bot.saveItem(parsedItem);
+					saveImg && D2Bot.saveItem(parsedItem);
 				}
 			}
 		}
