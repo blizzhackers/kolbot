@@ -296,15 +296,14 @@ Unit.prototype.sell = function () {
 	return false;
 };
 
-Unit.prototype.toCursor = function () {
-	if (this.type !== 4) {
-		throw new Error("Unit.toCursor: Must be used with items.");
-	}
-
+Unit.prototype.toCursor = function (usePacket = false) {
+	if (this.type !== 4) throw new Error("Unit.toCursor: Must be used with items.");
 	if (me.itemoncursor && this.mode === 4) return true;
 
 	this.location === 7 && Town.openStash();
 	this.location === 6 && Cubing.openCube();
+
+	if (usePacket) return Packet.itemToCursor(this);
 
 	for (let i = 0; i < 3; i += 1) {
 		try {
@@ -1638,7 +1637,8 @@ Object.defineProperties(Unit.prototype, {
 	isOnSwap: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.location === sdk.storage.Equipped && (me.weaponswitch === 0 && [11, 12].includes(this.bodylocation)) || (me.weaponswitch === 1 && [4, 5].includes(this.bodylocation));
+			return (this.location === sdk.storage.Equipped
+				&& (me.weaponswitch === 0 && [11, 12].includes(this.bodylocation)) || (me.weaponswitch === 1 && [4, 5].includes(this.bodylocation)));
 		}
 	},
 	identified: {

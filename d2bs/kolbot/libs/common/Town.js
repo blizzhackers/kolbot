@@ -1050,11 +1050,9 @@ const Town = {
 		me.act === 3 && this.goToTown(Pather.accessToAct(4) ? 4 : 2);
 
 		let npc = this.initNPC("Key", "buyKeys");
-
 		if (!npc) return false;
 
 		let key = npc.getItem("key");
-
 		if (!key) return false;
 
 		try {
@@ -1406,9 +1404,7 @@ const Town = {
 			// Cast BO on merc so he doesn't just die again. Only do this is you are a barb or actually have a cta. Otherwise its just a waste of time.
 			if (Config.MercWatch && (Precast.precastables.Shout.have || Precast.precastables.BattleOrders.have || Precast.checkCTA())) {
 				console.log("MercWatch precast");
-				Pather.useWaypoint("random");
-				Precast.doPrecast(true);
-				Pather.useWaypoint(preArea);
+				Precast.doRandomPrecast(true, preArea);
 			}
 
 			return true;
@@ -1439,12 +1435,7 @@ const Town = {
 	canStash: function (item) {
 		// Some quest items that have to be in inventory or equipped
 		let questClassids = [sdk.items.quest.HoradricStaff, sdk.items.quest.KhalimsWill];
-
-		if (this.ignoredItemTypes.includes(item.itemType) || questClassids.includes(item.classid) || !Storage.Stash.CanFit(item)) {
-			return false;
-		}
-
-		return true;
+		return !(this.ignoredItemTypes.includes(item.itemType) || questClassids.includes(item.classid) || !Storage.Stash.CanFit(item));
 	},
 
 	stash: function (stashGold = true) {
@@ -1762,7 +1753,7 @@ const Town = {
 			.filter((p) => p.isInInventory && [sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion].includes(p.itemType))
 			.sort((a, b) => a.itemType - b.itemType);
 
-		potsInInventory.length > 0 && console.debug("clearInventory: start pots clean-up");
+		Config.DebugMode && potsInInventory.length > 0 && console.debug("clearInventory: start pots clean-up");
 		// Start interating over all the pots we have in our inventory
 		potsInInventory.forEach(function (p) {
 			let moved = false;
@@ -1771,27 +1762,22 @@ const Town = {
 			for (let i = 0; i < 4 && !moved; i += 1) {
 				// checking that current potion matches what we want in our belt
 				if (freeSpace[i] > 0 && p.code && p.code.startsWith(Config.BeltColumn[i])) {
-					console.log("Checking Config.BeltColumn[" + i + "], wanted [" + Config.BeltColumn[i] + "], currentPotToCheck :: " + p.code);
 					// Pick up the potion and put it in belt if the column is empty, and we don't have any other columns empty
 					// prevents shift-clicking potion into wrong column
-					// write this to use packets by default
 					if (freeSpace[i] === beltSize || freeSpace.some((spot) => spot === beltSize)) {
-						p.toCursor() && Misc.poll(() => me.itemoncursor, 1000, 100) && clickItem(sdk.clicktypes.click.Left, i, Math.max(0, (beltSize - freeSpace[i])), sdk.storage.Belt);
+						p.toCursor(true) && new PacketBuilder().byte(0x23).dword(p.gid).dword(Math.max(0, (beltSize - freeSpace[i]))).send();
 					} else {
 						clickItemAndWait(sdk.clicktypes.click.ShiftLeft, p.x, p.y, p.location);
 					}
-					Misc.poll(() => !me.itemoncursor, 250 + me.ping, 80);
+					Misc.poll(() => !me.itemoncursor, 300, 30);
 					moved = Town.checkColumns(beltSize)[i] === freeSpace[i] - 1;
-					console.log("Old freeSpace: ", freeSpace);
-					console.log("New freeSpace: ", Town.checkColumns(beltSize));
-					console.log(p.code + " moved ? " + moved);
 				}
 				Cubing.cursorCheck();
 			}
 		});
 
 		// Cleanup remaining potions
-		console.debug("clearInventory: start clean-up remaining pots");
+		Config.DebugMode && console.debug("clearInventory: start clean-up remaining pots");
 		let sellOrDrop = [];
 		potsInInventory = me.getItemsEx()
 			.filter((p) => p.isInInventory && [sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion].includes(p.itemType));
@@ -1834,15 +1820,16 @@ const Town = {
 		}
 
 		// Any leftover items from a failed ID (crashed game, disconnect etc.)
-		console.debug("clearInventory: start invo clean-up");
+		Config.DebugMode && console.debug("clearInventory: start invo clean-up");
 		let items = (Storage.Inventory.Compare(Config.Inventory) || []);
 		items.length > 0 && (items = items.filter(function (item) {
-			return (!!item && ([18, 41, 76, 77, 78].indexOf(item.itemType) === -1 // Don't drop tomes, keys or potions
+			return (!!item
+					&& ([18, 41, 76, 77, 78].indexOf(item.itemType) === -1 // Don't drop tomes, keys or potions
 					&& item.sellable // Don't try to sell/drop quest-items
 					&& !Cubing.keepItem(item) // Don't throw cubing ingredients
 					&& !Runewords.keepItem(item) // Don't throw runeword ingredients
 					&& !CraftingSystem.keepItem(item) // Don't throw crafting system ingredients
-			));
+					));
 		}));
 
 		items = (items.length > 0 ? items.concat(sellOrDrop) : sellOrDrop.slice(0));
