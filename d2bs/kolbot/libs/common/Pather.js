@@ -131,14 +131,20 @@ const Pather = {
 		return !me.inTown && !Config.NoTele && !me.shapeshifted && this.canTeleport() && numberOfTeleport > 2;
 	},
 
-	spotOnDistance: function (spot, distance, area, returnSpotOnError = true) {
-		area === undefined && (area = me.area);
-		let nodes = getPath(area, me.x, me.y, spot.x, spot.y, 2, 5);
-		
-		if (!nodes || !nodes.length) return returnSpotOnError ? spot : { x: me.x, y: me.y };
+	spotOnDistance: function (spot, distance, givenSettings = {}) {
+		let settings = Object.assign({}, {
+			area: me.area,
+			reductionType: 2,
+			coll: (0x1 | 0x4 | 0x800 | 0x1000),
+			returnSpotOnError: true
+		}, givenSettings);
 
-		return (nodes.find((node) => getDistance(spot.x, spot.y, node.x, node.y) < distance && Pather.checkSpot(node.x, node.y, 0x1 | 0x4 | 0x800 | 0x1000))
-			|| (returnSpotOnError ? spot : { x: me.x, y: me.y }));
+		let nodes = getPath(settings.area, me.x, me.y, spot.x, spot.y, settings.reductionType, 5);
+		
+		if (!nodes || !nodes.length) return (settings.returnSpotOnError ? spot : { x: me.x, y: me.y });
+
+		return (nodes.find((node) => getDistance(spot.x, spot.y, node.x, node.y) < distance && Pather.checkSpot(node.x, node.y, settings.coll))
+			|| (settings.returnSpotOnError ? spot : { x: me.x, y: me.y }));
 	},
 
 	moveNear: function (x, y, minDist, givenSettings = {}) {
@@ -171,7 +177,7 @@ const Pather = {
 		let useTele = this.useTeleport() && settings.allowTeleport;
 		let tpMana = Skill.getManaCost(sdk.skills.Teleport);
 		minDist === undefined && (minDist = me.inTown ? 2 : 5);
-		({x, y} = this.spotOnDistance(node, minDist, me.area, settings.returnSpotOnError));
+		({x, y} = this.spotOnDistance(node, minDist, {returnSpotOnError: settings.returnSpotOnError, reductionType: (me.inTown ? 0 : 2)}));
 		if ([x, y].distance < 2) return true;
 		let annoyingArea = [sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.MaggotLairLvl3].includes(me.area);
 		let path = getPath(me.area, x, y, me.x, me.y, useTele ? 1 : 0, useTele ? (annoyingArea ? 30 : this.teleDistance) : this.walkDistance);
@@ -1036,6 +1042,7 @@ const Pather = {
 
 		this.broadcastIntent(targetArea);
 		console.log("ÿc7Start ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area));
+		let wpTick = getTickCount();
 
 		for (let i = 0; i < 12; i += 1) {
 			if (me.area === targetArea || me.dead) {
@@ -1146,7 +1153,7 @@ const Pather = {
 					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
 						if (me.area === targetArea) {
 							delay(1000);
-							console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
+							console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - wpTick).toISOString().slice(11, -5)));
 
 							return true;
 						}
@@ -1173,7 +1180,7 @@ const Pather = {
 		if (me.area === targetArea) {
 			// delay to allow act to init - helps with crashes
 			delay(500);
-			console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
+			console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - wpTick).toISOString().slice(11, -5)));
 
 			return true;
 		}

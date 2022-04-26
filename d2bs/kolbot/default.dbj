@@ -153,6 +153,7 @@ function main () {
 		Config.ClearInvOnStart && Town.clearInventory();
 		[orgx, orgy].distance > 3 && Pather.moveTo(orgx, orgx);
 		Pickit.pickItems();
+		me.hpPercent <= 10 && Town.heal() && me.cancelUIFlags();
 		Pather.init(); // initialize wp data
 
 		if (Config.DebugMode) {
