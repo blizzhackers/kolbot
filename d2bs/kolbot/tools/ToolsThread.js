@@ -18,6 +18,13 @@ include("common/util.js");
 
 includeCommonLibs();
 
+let Overrides = require('../modules/Override');
+
+new Overrides.Override(Attack, Attack.getNearestMonster, function (orignal) {
+	let monster = orignal({skipBlocked: false, skipImmune: false});
+	return (monster ? " to " + monster.name : "");
+}).apply();
+
 function main() {
 	let ironGolem, debugInfo = {area: 0, currScript: "no entry"},
 		pingTimer = [],
@@ -246,29 +253,6 @@ function main() {
 		}
 
 		return false;
-	};
-
-	this.getNearestMonster = function () {
-		let gid, distance,
-			monster = getUnit(1),
-			range = 30;
-
-		if (monster) {
-			do {
-				if (monster.hp > 0 && monster.attackable && !monster.getParent()) {
-					distance = getDistance(me, monster);
-
-					if (distance < range) {
-						range = distance;
-						gid = monster.gid;
-					}
-				}
-			} while (monster.getNext());
-		}
-
-		monster = gid ? getUnit(1, -1, -1, gid) : false;
-
-		return monster ? " to " + monster.name : "";
 	};
 
 	this.checkVipers = function () {
@@ -599,7 +583,7 @@ function main() {
 				if (Config.LifeChicken > 0 && me.hpPercent <= Config.LifeChicken) {
 					// takes a moment sometimes for townchicken to actually get to town so re-check that we aren't in town before quitting
 					if (!me.inTown) {
-						D2Bot.printToConsole("Life Chicken (" + me.hp + "/" + me.hpmax + ")" + this.getNearestMonster() + " in " + Pather.getAreaName(me.area) + ". Ping: " + me.ping, 9);
+						D2Bot.printToConsole("Life Chicken (" + me.hp + "/" + me.hpmax + ")" + Attack.getNearestMonster() + " in " + Pather.getAreaName(me.area) + ". Ping: " + me.ping, 9);
 						this.exit(true);
 
 						break;
