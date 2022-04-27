@@ -350,7 +350,14 @@ const Attack = {
 
 		if (bossId) {
 			boss = Misc.poll(function () {
-				return ((typeof bossId === "number" && bossId > 999) ? getUnit(1, -1, -1, bossId) : getUnit(1, bossId));
+				switch (true) {
+				case typeof bossId === "object":
+					return bossId;
+				case ((typeof bossId === "number" && bossId > 999)):
+					return getUnit(1, -1, -1, bossId);
+				default:
+					return getUnit(1, bossId);
+				}
 			}, 2000, 100);
 
 			if (!boss) {
