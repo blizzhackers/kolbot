@@ -536,7 +536,8 @@ const Pather = {
 						Packet.flash(me.gid);
 
 						if (fail > 1 && !settings.clearSettings.allowClearing) {
-							settings.clearSettings.allowClearing = true; // override if we are failing to move
+							// override if we are failing to move
+							settings.clearSettings.allowClearing = true;
 						}
 
 						if (fail >= settings.retry) {
@@ -1046,7 +1047,7 @@ const Pather = {
 			return this.useUnit(sdk.unittype.Object, "stair", targetArea);
 		case targetArea === sdk.areas.DuranceOfHateLvl1 && me.area === sdk.areas.Travincal:
 			return this.useUnit(sdk.unittype.Object, sdk.units.DuranceEntryStairs, targetArea);
-		case targetArea === sdk.areas.WorldstoneLvl1 && me.area === sdk.areas.AncientsWay:
+		case targetArea === sdk.areas.WorldstoneLvl1 && me.area === sdk.areas.ArreatSummit:
 			return this.useUnit(sdk.unittype.Object, sdk.units.AncientsDoor, targetArea);
 		}
 
