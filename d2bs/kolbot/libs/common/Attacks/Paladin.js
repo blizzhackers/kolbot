@@ -145,6 +145,8 @@ const ClassAttack = {
 				return 1;
 			}
 
+			// todo: maybe if we are currently surrounded and no tele to just attack from where we are
+			// hammers cut a pretty wide arc so likely this would be enough to clear our path
 			if (!this.getHammerPosition(unit)) {
 				// Fallback to secondary skill if it exists
 				if (Config.AttackSkill[5] > -1 && Config.AttackSkill[5] !== sdk.skills.BlessedHammer && Attack.checkResist(unit, Config.AttackSkill[5])) {
@@ -262,7 +264,9 @@ const ClassAttack = {
 			let cy = Math.round(Math.sin(i) * distance);
 
 			if (Attack.validSpot(unit.x + cx, unit.y + cy)) {
-				return Pather.moveTo(unit.x + cx, unit.y + cy);
+				// don't clear while trying to reposition
+				//Pather.moveTo(unit.x + cx, unit.y + cy);
+				return Pather.moveToEx(unit.x + cx, unit.y + cy, {clearSettings: {allowClearing: false}});
 			}
 		}
 
@@ -294,9 +298,11 @@ const ClassAttack = {
 		}
 
 		// If one of the valid positions is a position im at already
+		// todo: if the position is < 3 and no blocking collisions (walls, objects, invalid floor) or if we are mobbed don't try to move but probably needs a tele check?
 		for (let i = 0; i < positions.length; i += 1) {
-			if (getDistance(me, positions[i][0], positions[i][1]) < 1
-				&& !CollMap.checkColl(unit, {x: positions[i][0], y: positions[i][1]}, 0x5 | 0x400 | 0x1000, 0)) {
+			if ((getDistance(me, positions[i][0], positions[i][1]) < 1
+				&& !CollMap.checkColl(unit, {x: positions[i][0], y: positions[i][1]}, 0x5 | 0x400 | 0x1000, 0))
+				|| (getDistance(me, positions[i][0], positions[i][1]) <= 4 && me.getMobCount(6) > 2)) {
 				return true;
 			}
 		}
@@ -316,11 +322,19 @@ const ClassAttack = {
 	},
 
 	reposition: function (x, y) {
-		if (Math.round(getDistance(me, x, y) > 0)) {
+		if ([x, y].distance > 0) {
 			if (Pather.useTeleport()) {
-				[x, y].distance > 40 ? Pather.moveTo(x, y) : Pather.teleportTo(x, y, 3);
+				[x, y].distance > 30 ? Pather.moveTo(x, y) : Pather.teleportTo(x, y, 3);
 			} else {
-				[x, y].distance <= 4 ? Misc.click(0, 0, x, y) : Pather.walkTo(x, y);
+				if ([x, y].distance <= 4) {
+					Misc.click(0, 0, x, y);
+				} else if (!CollMap.checkColl(me, {x: x, y: y}, 0x5 | 0x400 | 0x1000, 3)) {
+					Pather.walkTo(x, y);
+				} else {
+					// don't clear while trying to reposition
+					Pather.moveToEx(x, y, {clearSettings: {allowClearing: false}});
+				}
+
 				delay(200);
 			}
 		}

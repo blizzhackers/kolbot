@@ -513,7 +513,7 @@ const Attack = {
 			if (monster) {
 				do {
 					if (getDistance(center.x, center.y, monster.x, monster.y) <= range
-						&& (!spectype || (monster.spectype & spectype)) && monster.attackable) {
+							&& (!spectype || (monster.spectype & spectype)) && monster.attackable) {
 						monsterList.push(copyUnit(monster));
 					}
 				} while (monster.getNext());
@@ -526,7 +526,7 @@ const Attack = {
 			if (monster) {
 				do {
 					if (classid.includes(monster.classid) && getDistance(center.x, center.y, monster.x, monster.y) <= range
-						&& (!spectype || (monster.spectype & spectype)) && monster.attackable) {
+							&& (!spectype || (monster.spectype & spectype)) && monster.attackable) {
 						monsterList.push(copyUnit(monster));
 					}
 				} while (monster.getNext());
@@ -927,13 +927,13 @@ const Attack = {
 
 		switch (true) {
 		case Skill.needFloor.includes(skill):
-			let isFloor = !!(result & 0x1000);
+			let isFloor = !!(result & (0 | 0x1000));
 			// this spot is not on the floor (lava (river/chaos, space (arcane), ect))
 			if (!isFloor) {
 				return false;
 			}
 
-			break;
+			return !(result & 0x1); // outside lava area in abaddon returns coll 1
 		case Skill.missileSkills.includes(skill):
 			// for now this just returns true and we leave getting into position to the actual class attack files
 			return true;

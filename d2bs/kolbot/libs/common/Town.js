@@ -547,7 +547,7 @@ const Town = {
 					result = Pickit.checkItem(item);
 
 					// should autoequip even be checked by default?
-					!Item.autoEquipCheck(item) && (result.result = 0);
+					//!Item.autoEquipCheck(item) && (result.result = 0);
 
 					switch (result.result) {
 					case 1:
@@ -672,7 +672,7 @@ const Town = {
 				delay(me.ping + 1);
 				result = Pickit.checkItem(item);
 
-				!Item.autoEquipCheck(item) && (result.result = 0);
+				//!Item.autoEquipCheck(item) && (result.result = 0);
 
 				switch (result.result) {
 				case 0:
@@ -927,7 +927,6 @@ const Town = {
 		return false;
 	},
 
-	// should type be classid instead?
 	buyPots: function (quantity = 0, type = undefined, drink = false, force = false) {
 		if (!quantity || !type) return false;
 		
@@ -994,30 +993,34 @@ const Town = {
 		return true;
 	},
 
-	drinkPots: function (type = undefined) {
+	drinkPots: function (type = undefined, log = true) {
 		// convert to classid if isn't one
 		typeof type === "string" && (type = (sdk.items[type.capitalize(true) + "Potion"] || false));
 
-		let name;
+		let name = "";
 		let quantity = 0;
 		let chugs = me.getItemsEx(type).filter(pot => pot.isInInventory);
 
 		if (chugs.length > 0) {
+			name = chugs.first().name;
+
 			chugs.forEach(function (pot) {
 				if (!!pot) {
-					name === undefined && (name = pot.name);
 					pot.interact();
 					quantity++;
-					delay(10 + me.ping);
+					delay(30);
 				}
 			});
 
-			name && console.log('ÿc9DrinkPotsÿc0 :: drank ' + quantity + " " + name + "s. Timer [" + (new Date(quantity * 30 * 1000).toISOString().slice(11, -5)) + "]");
+			log && name && console.log('ÿc9DrinkPotsÿc0 :: drank ' + quantity + " " + name + "s. Timer [" + (new Date(quantity * 30 * 1000).toISOString().slice(11, -5)) + "]");
 		} else {
 			console.log("ÿc9DrinkPotsÿc0 :: couldn't find my pots");
 		}
 
-		return true;
+		return {
+			potName: name,
+			quantity: quantity
+		};
 	},
 
 	buyKeys: function () {

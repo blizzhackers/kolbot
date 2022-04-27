@@ -616,11 +616,14 @@ const Precast = new function () {
 		let returnTo = (goToWhenDone && typeof goToWhenDone === "number" ? goToWhenDone : me.area);
 
 		try {
-			Pather.useWaypoint("random") && Precast.doPrecast(force) && Pather.useWaypoint(returnTo);
+			Pather.useWaypoint("random") && Precast.doPrecast(force);
+			Pather.useWaypoint(returnTo);
 		} catch (e) {
 			console.warn(e);
 		} finally {
-			me.area !== returnTo && Pather.journeyTo(returnTo);
+			if (me.area !== returnTo && (!Pather.useWaypoint(returnTo) || !Pather.useWaypoint(sdk.areas.townOf(me.area)))) {
+				Pather.journeyTo(returnTo);
+			}
 		}
 
 		return (me.area === returnTo);

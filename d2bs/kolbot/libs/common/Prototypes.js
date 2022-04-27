@@ -2049,13 +2049,13 @@ Unit.prototype.__defineGetter__('attackable', function () {
 Unit.prototype.__defineGetter__('curseable', function () {
 	// must be player or monster
 	if (this === undefined || !copyUnit(this).x || this.type > 1) return false;
+	// Dead monster
+	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) return false;
 	// attract can't be overridden
 	if (this.getState(sdk.states.Attract)) return false;
 	// "Possessed"
 	if (!!this.name && !!this.name.includes(getLocaleString(11086))) return false;
 	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) return true;
-	// Dead monster
-	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) return false;
 	// Friendly monster/NPC
 	if (this.getStat(172) === 2) return false;
 	// catapults were returning a level of 0 and hanging up clear scripts
