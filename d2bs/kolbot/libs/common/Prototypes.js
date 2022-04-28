@@ -2026,6 +2026,9 @@ Object.defineProperties(me, {
 Unit.prototype.__defineGetter__('attackable', function () {
 	if (this === undefined || !copyUnit(this).x) return false;
 	if (this.type > 1) return false;
+	// must be in same area
+	if (this.area !== me.area) return false;
+	// player and they are hostile
 	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) return true;
 	// Dead monster
 	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) return false;
