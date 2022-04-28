@@ -296,15 +296,14 @@ Unit.prototype.sell = function () {
 	return false;
 };
 
-Unit.prototype.toCursor = function () {
-	if (this.type !== 4) {
-		throw new Error("Unit.toCursor: Must be used with items.");
-	}
-
+Unit.prototype.toCursor = function (usePacket = false) {
+	if (this.type !== 4) throw new Error("Unit.toCursor: Must be used with items.");
 	if (me.itemoncursor && this.mode === 4) return true;
 
 	this.location === 7 && Town.openStash();
 	this.location === 6 && Cubing.openCube();
+
+	if (usePacket) return Packet.itemToCursor(this);
 
 	for (let i = 0; i < 3; i += 1) {
 		try {
@@ -1638,7 +1637,8 @@ Object.defineProperties(Unit.prototype, {
 	isOnSwap: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.location === sdk.storage.Equipped && (me.weaponswitch === 0 && [11, 12].includes(this.bodylocation)) || (me.weaponswitch === 1 && [4, 5].includes(this.bodylocation));
+			return (this.location === sdk.storage.Equipped
+				&& (me.weaponswitch === 0 && [11, 12].includes(this.bodylocation)) || (me.weaponswitch === 1 && [4, 5].includes(this.bodylocation)));
 		}
 	},
 	identified: {
@@ -2026,6 +2026,9 @@ Object.defineProperties(me, {
 Unit.prototype.__defineGetter__('attackable', function () {
 	if (this === undefined || !copyUnit(this).x) return false;
 	if (this.type > 1) return false;
+	// must be in same area
+	if (this.area !== me.area) return false;
+	// player and they are hostile
 	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) return true;
 	// Dead monster
 	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) return false;
@@ -2049,13 +2052,13 @@ Unit.prototype.__defineGetter__('attackable', function () {
 Unit.prototype.__defineGetter__('curseable', function () {
 	// must be player or monster
 	if (this === undefined || !copyUnit(this).x || this.type > 1) return false;
+	// Dead monster
+	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) return false;
 	// attract can't be overridden
 	if (this.getState(sdk.states.Attract)) return false;
 	// "Possessed"
 	if (!!this.name && !!this.name.includes(getLocaleString(11086))) return false;
 	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) return true;
-	// Dead monster
-	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) return false;
 	// Friendly monster/NPC
 	if (this.getStat(172) === 2) return false;
 	// catapults were returning a level of 0 and hanging up clear scripts

@@ -132,15 +132,11 @@ const ClassAttack = {
 	},
 
 	doCast: function (unit, attackSkill, aura) {
-		let walk;
-
-		if (attackSkill < 0) {
-			console.debug("No attack skills");
-			return 2;
-		}
-
+		if (attackSkill < 0) return 2;
+		
 		switch (attackSkill) {
-		case 112:
+		case sdk.skills.BlessedHammer:
+			// todo: add doll avoid to other classes
 			if (Config.AvoidDolls && [212, 213, 214, 215, 216, 690, 691].includes(unit.classid)) {
 				this.dollAvoid(unit);
 				aura > -1 && Skill.setSkill(aura, 0);
@@ -149,9 +145,11 @@ const ClassAttack = {
 				return 1;
 			}
 
+			// todo: maybe if we are currently surrounded and no tele to just attack from where we are
+			// hammers cut a pretty wide arc so likely this would be enough to clear our path
 			if (!this.getHammerPosition(unit)) {
 				// Fallback to secondary skill if it exists
-				if (Config.AttackSkill[5] > -1 && Config.AttackSkill[5] !== 112 && Attack.checkResist(unit, Config.AttackSkill[5])) {
+				if (Config.AttackSkill[5] > -1 && Config.AttackSkill[5] !== sdk.skills.BlessedHammer && Attack.checkResist(unit, Config.AttackSkill[5])) {
 					return this.doCast(unit, Config.AttackSkill[5], Config.AttackSkill[6]);
 				}
 
@@ -171,7 +169,7 @@ const ClassAttack = {
 			}
 
 			return 1;
-		case 101:
+		case sdk.skills.HolyBolt:
 			if (getDistance(me, unit) > Skill.getRange(attackSkill) + 3 || CollMap.checkColl(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4)) {
 					return 0;
@@ -192,7 +190,7 @@ const ClassAttack = {
 			}
 
 			return 1;
-		case 121: // FoH
+		case sdk.skills.FistoftheHeavens:
 			if (!me.getState(121)) {
 				if (getDistance(me, unit) > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, 0x2004, 2)) {
 					if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x2004, true)) {
@@ -213,6 +211,7 @@ const ClassAttack = {
 
 			break;
 		case sdk.skills.Attack:
+		case sdk.skills.Sacrifice:
 		case sdk.skills.Zeal:
 		case sdk.skills.Vengeance:
 			if (!Attack.validSpot(unit.x, unit.y)) {
@@ -238,7 +237,7 @@ const ClassAttack = {
 			if (Skill.getRange(attackSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) return 0;
 
 			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x4)) {
-				walk = (attackSkill !== 97 && Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1));
+				let walk = (attackSkill !== 97 && Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1));
 
 				// walk short distances instead of tele for melee attacks. teleport if failed to walk
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4, walk)) return 0;
@@ -265,7 +264,8 @@ const ClassAttack = {
 			let cy = Math.round(Math.sin(i) * distance);
 
 			if (Attack.validSpot(unit.x + cx, unit.y + cy)) {
-				return Pather.moveTo(unit.x + cx, unit.y + cy);
+				// don't clear while trying to reposition
+				return Pather.moveToEx(unit.x + cx, unit.y + cy, {clearSettings: {allowClearing: false}});
 			}
 		}
 
@@ -298,8 +298,9 @@ const ClassAttack = {
 
 		// If one of the valid positions is a position im at already
 		for (let i = 0; i < positions.length; i += 1) {
-			if (getDistance(me, positions[i][0], positions[i][1]) < 1
-				&& !CollMap.checkColl(unit, {x: positions[i][0], y: positions[i][1]}, 0x5 | 0x400 | 0x1000, 0)) {
+			if ((getDistance(me, positions[i][0], positions[i][1]) < 1
+				&& !CollMap.checkColl(unit, {x: positions[i][0], y: positions[i][1]}, 0x5 | 0x400 | 0x1000, 0))
+				|| (getDistance(me, positions[i][0], positions[i][1]) <= 4 && me.getMobCount(6) > 2)) {
 				return true;
 			}
 		}
@@ -319,11 +320,19 @@ const ClassAttack = {
 	},
 
 	reposition: function (x, y) {
-		if (Math.round(getDistance(me, x, y) > 0)) {
+		if ([x, y].distance > 0) {
 			if (Pather.useTeleport()) {
-				[x, y].distance > 40 ? Pather.moveTo(x, y) : Pather.teleportTo(x, y, 3);
+				[x, y].distance > 30 ? Pather.moveTo(x, y) : Pather.teleportTo(x, y, 3);
 			} else {
-				Misc.click(0, 0, x, y);
+				if ([x, y].distance <= 4) {
+					Misc.click(0, 0, x, y);
+				} else if (!CollMap.checkColl(me, {x: x, y: y}, 0x5 | 0x400 | 0x1000, 3)) {
+					Pather.walkTo(x, y);
+				} else {
+					// don't clear while trying to reposition
+					Pather.moveToEx(x, y, {clearSettings: {allowClearing: false}});
+				}
+
 				delay(200);
 			}
 		}

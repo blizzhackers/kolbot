@@ -288,7 +288,7 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
 	PathDebug.drawPath(path);
 
 	if (useTeleport && Config.TeleSwitch && path.length > 5) {
-		Attack.weaponSwitch(Attack.getPrimarySlot() ^ 1);
+		me.switchWeapons(Attack.getPrimarySlot() ^ 1);
 	}
 
 	while (path.length > 0) {
@@ -383,7 +383,7 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
 		delay(5);
 	}
 
-	useTeleport && Config.TeleSwitch && Attack.weaponSwitch(Attack.getPrimarySlot());
+	useTeleport && Config.TeleSwitch && me.switchWeapons(Attack.getPrimarySlot());
 	me.getSkill(2) !== preSkill && Skill.setSkill(preSkill, 0);
 	PathDebug.removeHooks();
 

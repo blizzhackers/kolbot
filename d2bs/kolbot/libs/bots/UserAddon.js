@@ -8,16 +8,15 @@
 */
 
 function UserAddon() {
-	let i, unit, title, dummy, command = "",
+	let i, title, dummy, command = "",
 		info = new UnitInfo(),
-		classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"],
 		flags = [0x1, 0x2, 0x3, 0x4, 0x5, 0xf, 0x18, 0x19, 0xc, 0x9];
 
 	this.keyEvent = function (key) {
 		switch (key) {
 		case 32:
-			FileTools.copy("libs/config/" + classes[me.classid] + ".js", "libs/config/" + classes[me.classid] + "." + me.name + ".js");
-			D2Bot.printToConsole("libs/config/" + classes[me.classid] + "." + me.name + ".js has been created.");
+			FileTools.copy("libs/config/" + sdk.charclass.nameOf(me.classid) + ".js", "libs/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js");
+			D2Bot.printToConsole("libs/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created.");
 			D2Bot.printToConsole("Please configure your bot and start it again.");
 			D2Bot.stop();
 
@@ -49,10 +48,10 @@ function UserAddon() {
 	};
 
 	// Make sure the item event is loaded
-	!Config.FastPick && addEventListener("itemaction", this.itemEvent);
+	!Config.FastPick && addEventListener("itemaction", Pickit.itemEvent);
 	addEventListener("gamepacketsent", this.packetSent);
 
-	if (!FileTools.exists("libs/config/" + classes[me.classid] + "." + me.name + ".js")) {
+	if (!FileTools.exists("libs/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js")) {
 		showConsole();
 		print("ÿc4UserAddonÿc0: Press HOME and then press SPACE if you want to create character config.");
 		addEventListener("keyup", this.keyEvent);
@@ -81,7 +80,7 @@ function UserAddon() {
 		if (command && command.toLowerCase() === "done") {
 			print("ÿc4UserAddon ÿc1ended");
 			removeEventListener("keyup", this.keyEvent);
-			removeEventListener("itemaction", this.itemEvent);
+			removeEventListener("itemaction", Pickit.itemEvent);
 			removeEventListener("gamepacketsent", this.packetSent);
 
 			return;
@@ -92,13 +91,14 @@ function UserAddon() {
 
 		Pickit.fastPick();
 
-		unit = getUnit(101);
+		let unit = getUnit(101);
 
 		info.createInfo(unit);
 		delay(20);
 	}
 }
 
+// this is repeated here, developermode, and mapmode. Needs to be refactored
 function UnitInfo() {
 	this.x = 200;
 	this.y = 250;
