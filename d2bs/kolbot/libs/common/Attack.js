@@ -920,6 +920,8 @@ const Attack = {
 	validSpot: function (x, y, skill = -1) {
 		// Just in case
 		if (!me.area || !x || !y) return false;
+		// for now this just returns true and we leave getting into position to the actual class attack files
+		if (Skill.missileSkills.includes(skill)) return true;
 
 		let result;
 
@@ -941,9 +943,6 @@ const Attack = {
 			}
 
 			return !(result & 0x1); // outside lava area in abaddon returns coll 1
-		case Skill.missileSkills.includes(skill):
-			// for now this just returns true and we leave getting into position to the actual class attack files
-			return true;
 		default:
 			// Avoid non-walkable spots, objects - this preserves the orignal function and also physical attack skills will get here
 			if ((result & 0x1) || (result & 0x400)) return false;

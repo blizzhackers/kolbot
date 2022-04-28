@@ -1631,7 +1631,7 @@ const Pather = {
 						}
 
 						// handle getUnit bug
-						if (!getUIFlag(sdk.uiflags.Waypoint) && wp.name.toLowerCase() === "dummy" && me.inTown) {
+						if (!getUIFlag(sdk.uiflags.Waypoint) && me.inTown && wp.name.toLowerCase() === "dummy") {
 							Town.getDistance("waypoint") > 5 && Town.move("waypoint");
 							Misc.click(0, 0, wp);
 						}

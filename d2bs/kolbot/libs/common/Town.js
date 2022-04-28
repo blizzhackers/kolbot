@@ -307,7 +307,6 @@ const Town = {
 		me.normal && me.highestAct >= 4 && me.act < 4 && this.goToTown(4);
 
 		let npc = this.initNPC("Shop", "buyPotions");
-
 		if (!npc) return false;
 
 		for (let i = 0; i < 4; i += 1) {
@@ -1005,11 +1004,9 @@ const Town = {
 			name = chugs.first().name;
 
 			chugs.forEach(function (pot) {
-				if (!!pot) {
-					pot.interact();
-					quantity++;
-					delay(30);
-				}
+				pot.interact();
+				quantity++;
+				delay(50);
 			});
 
 			log && name && console.log('ÿc9DrinkPotsÿc0 :: drank ' + quantity + " " + name + "s. Timer [" + (new Date(quantity * 30 * 1000).toISOString().slice(11, -5)) + "]");
@@ -1760,27 +1757,30 @@ const Town = {
 		Config.DebugMode && console.debug("clearInventory: start clean-up remaining pots");
 		let sellOrDrop = [];
 		potsInInventory = me.getItemsEx()
-			.filter((p) => p.isInInventory && [sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion].includes(p.itemType));
+			.filter((p) => p.isInInventory && [
+				sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion,
+				sdk.itemtype.ThawingPotion, sdk.itemtype.AntidotePotion, sdk.itemtype.StaminaPotion
+			].includes(p.itemType));
 
 		if (potsInInventory.length > 0) {
-			let hp = [], mp = [], rv = [];
+			let hp = [], mp = [], rv = [], specials = [];
 			potsInInventory.forEach(function (p) {
-				if (!p || p === undefined) return;
+				if (!p || p === undefined) return false;
 
 				switch (p.itemType) {
 				case sdk.itemtype.HealingPotion:
-					hp.push(copyUnit(p));
-
-					break;
+					return (hp.push(copyUnit(p)));
 				case sdk.itemtype.ManaPotion:
-					mp.push(copyUnit(p));
-
-					break;
+					return (mp.push(copyUnit(p)));
 				case sdk.itemtype.RejuvPotion:
-					rv.push(copyUnit(p));
-
-					break;
+					return (rv.push(copyUnit(p)));
+				case sdk.itemtype.ThawingPotion:
+				case sdk.itemtype.AntidotePotion:
+				case sdk.itemtype.StaminaPotion:
+					return (specials.push(copyUnit(p)));
 				}
+
+				return false;
 			});
 
 			// Cleanup healing potions
@@ -1796,6 +1796,12 @@ const Town = {
 			// Cleanup rejuv potions
 			while (rv.length > Config.RejuvBuffer) {
 				sellOrDrop.push(rv.shift());
+			}
+
+			// Clean up special pots
+			while (specials.length) {
+				specials.shift().interact();
+				delay(200);
 			}
 		}
 

@@ -265,7 +265,6 @@ const ClassAttack = {
 
 			if (Attack.validSpot(unit.x + cx, unit.y + cy)) {
 				// don't clear while trying to reposition
-				//Pather.moveTo(unit.x + cx, unit.y + cy);
 				return Pather.moveToEx(unit.x + cx, unit.y + cy, {clearSettings: {allowClearing: false}});
 			}
 		}
@@ -298,7 +297,6 @@ const ClassAttack = {
 		}
 
 		// If one of the valid positions is a position im at already
-		// todo: if the position is < 3 and no blocking collisions (walls, objects, invalid floor) or if we are mobbed don't try to move but probably needs a tele check?
 		for (let i = 0; i < positions.length; i += 1) {
 			if ((getDistance(me, positions[i][0], positions[i][1]) < 1
 				&& !CollMap.checkColl(unit, {x: positions[i][0], y: positions[i][1]}, 0x5 | 0x400 | 0x1000, 0))
