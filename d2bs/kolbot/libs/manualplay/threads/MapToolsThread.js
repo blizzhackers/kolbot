@@ -279,7 +279,7 @@ function main() {
 
 		if (monster) {
 			do {
-				if (monster.hp > 0 && Attack.checkMonster(monster) && !monster.getParent()) {
+				if (monster.hp > 0 && monster.attackable && !monster.getParent()) {
 					distance = getDistance(me, monster);
 
 					if (distance < range) {

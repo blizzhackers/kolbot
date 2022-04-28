@@ -88,7 +88,7 @@ function includeCommonLibs () {
 		});
 }
 
-// helper functions in case you find it annoying like me to write while (getTickCount() - tick > 3 * 60 * 1000) which is 5 minutes
+// helper functions in case you find it annoying like me to write while (getTickCount() - tick > 3 * 60 * 1000) which is 3 minutes
 // instead we can do while (getTickCount() - tick > minutes(5))
 function seconds (ms = 0) {
 	if (typeof ms !== "number") return 0;
