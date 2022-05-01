@@ -70,7 +70,7 @@ const Precast = new function () {
 
 	this.precastCTA = function (force) {
 		if (this.haveCTA === -1 || me.classic || me.barbarian || me.inTown || me.shapeshifted) return false;
-		if (!force && me.getState(32)) return true;
+		if (!force && me.getState(sdk.states.BattleOrders)) return true;
 
 		if (this.haveCTA > -1) {
 			let slot = me.weaponswitch;
@@ -205,15 +205,15 @@ const Precast = new function () {
 				switch (typeof x) {
 				case "number":
 					Packet.castSkill(0, x, y);
-					delay(250);
 
 					break;
 				case "object":
 					Packet.unitCast(0, x);
-					delay(250);
 
 					break;
 				}
+				// make sure we give enough time back so we don't fail our next cast
+				delay(1 + seconds(me.castingDuration(skillId)));
 			} else {
 				// Right hand + No Shift
 				let clickType = 3, shift = 0;
