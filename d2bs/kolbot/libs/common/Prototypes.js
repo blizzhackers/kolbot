@@ -159,14 +159,8 @@ Unit.prototype.openMenu = function (addDelay) {
 
 // mode = "Gamble", "Repair" or "Shop"
 Unit.prototype.startTrade = function (mode) {
-	if (Config.PacketShopping) {
-		return Packet.startTrade(this, mode);
-	}
-
-	if (this.type !== 1) {
-		throw new Error("Unit.startTrade: Must be used on NPCs.");
-	}
-
+	if (Config.PacketShopping) return Packet.startTrade(this, mode);
+	if (this.type !== 1) throw new Error("Unit.startTrade: Must be used on NPCs.");
 	if (getUIFlag(sdk.uiflags.Shop)) return true;
 
 	let menuId = mode === "Gamble" ? 0x0D46 : mode === "Repair" ? 0x0D06 : 0x0D44;
@@ -196,14 +190,10 @@ Unit.prototype.startTrade = function (mode) {
 };
 
 Unit.prototype.buy = function (shiftBuy, gamble) {
-	if (Config.PacketShopping) {
-		return Packet.buyItem(this, shiftBuy, gamble);
-	}
+	if (Config.PacketShopping) return Packet.buyItem(this, shiftBuy, gamble);
 
 	// Check if it's an item we want to buy
-	if (this.type !== 4) {
-		throw new Error("Unit.buy: Must be used on items.");
-	}
+	if (this.type !== 4) throw new Error("Unit.buy: Must be used on items.");
 
 	// Check if it's an item belonging to a NPC
 	if (!getUIFlag(sdk.uiflags.Shop) || (this.getParent() && this.getParent().gid !== getInteractedNPC().gid)) {
@@ -211,9 +201,7 @@ Unit.prototype.buy = function (shiftBuy, gamble) {
 	}
 
 	// Can we afford the item?
-	if (me.getStat(14) + me.getStat(15) < this.getItemCost(0)) {
-		return false;
-	}
+	if (me.getStat(14) + me.getStat(15) < this.getItemCost(0)) return false;
 
 	let oldGold = me.getStat(14) + me.getStat(15),
 		itemCount = me.itemcount;
@@ -246,34 +234,22 @@ Unit.prototype.buy = function (shiftBuy, gamble) {
 // Item owner name
 Unit.prototype.__defineGetter__("parentName",
 	function () {
-		if (this.type !== 4) {
-			throw new Error("Unit.parentName: Must be used with item units.");
-		}
+		if (this.type !== 4) throw new Error("Unit.parentName: Must be used with item units.");
 
 		let parent = this.getParent();
 
-		if (parent) {
-			return parent.name;
-		}
-
-		return false;
+		return parent ? parent.name : false;
 	});
 
 // You MUST use a delay after Unit.sell() if using custom scripts. delay(500) works best, dynamic delay is used when identifying/selling (500 - item id time)
 Unit.prototype.sell = function () {
-	if (Config.PacketShopping) {
-		return Packet.sellItem(this);
-	}
+	if (Config.PacketShopping) return Packet.sellItem(this);
 
 	// Check if it's an item we want to buy
-	if (this.type !== 4) {
-		throw new Error("Unit.sell: Must be used on items.");
-	}
+	if (this.type !== 4) throw new Error("Unit.sell: Must be used on items.");
 
 	// Check if it's an item belonging to a NPC
-	if (!getUIFlag(sdk.uiflags.Shop)) {
-		throw new Error("Unit.sell: Must be used in shops.");
-	}
+	if (!getUIFlag(sdk.uiflags.Shop)) throw new Error("Unit.sell: Must be used in shops.");
 
 	let itemCount = me.itemcount;
 
@@ -334,10 +310,7 @@ Unit.prototype.toCursor = function (usePacket = false) {
 };
 
 Unit.prototype.drop = function () {
-	if (this.type !== 4) {
-		throw new Error("Unit.drop: Must be used with items. Unit Name: " + this.name);
-	}
-
+	if (this.type !== 4) throw new Error("Unit.drop: Must be used with items. Unit Name: " + this.name);
 	if (!this.toCursor()) return false;
 
 	let tick = getTickCount();
@@ -461,6 +434,34 @@ me.switchWeapons = function (slot) {
 	}
 
 	return false;
+};
+
+// Returns the number of frames needed to cast a given skill at a given FCR for a given char.
+me.castingFrames = function (skillId, fcr, charClass) {
+	if (skillId === undefined) return 0;
+
+	fcr === undefined && (fcr = me.FCR);
+	charClass === undefined && (charClass = this.classid);
+
+	// https://diablo.fandom.com/wiki/Faster_Cast_Rate
+	let effectiveFCR = Math.min(75, (fcr * 120 / (fcr + 120)) | 0);
+	let isLightning = skillId === sdk.skills.Lightning || skillId === sdk.skills.ChainLightning;
+	let baseCastRate = [20, isLightning ? 19 : 14, 16, 16, 14, 15, 17][charClass];
+	if (isLightning) {
+		return Math.round(256 * baseCastRate / (256 * (100 + effectiveFCR) / 100));
+	}
+	let animationSpeed = {
+		normal: 256,
+		human: 208,
+		wolf: 229,
+		bear: 228
+	}[charClass === sdk.charclass.Druid ? (me.getState(sdk.states.Wolf) || me.getState(sdk.states.Bear)) : "normal"];
+	return Math.ceil(256 * baseCastRate / Math.floor(animationSpeed * (100 + effectiveFCR) / 100)) - 1;
+};
+
+// Returns the duration in seconds needed to cast a given skill at a given FCR for a given char.
+me.castingDuration = function (skillId, fcr = me.FCR, charClass = me.classid) {
+	return (me.castingFrames(skillId, fcr, charClass) / 25);
 };
 
 /**
@@ -647,17 +648,9 @@ Unit.prototype.__defineGetter__("strreq",
 
 Unit.prototype.__defineGetter__('itemclass',
 	function () {
-		if (getBaseStat(0, this.classid, 'code') === undefined) {
-			return 0;
-		}
-
-		if (getBaseStat(0, this.classid, 'code') === getBaseStat(0, this.classid, 'ultracode')) {
-			return 2;
-		}
-
-		if (getBaseStat(0, this.classid, 'code') === getBaseStat(0, this.classid, 'ubercode')) {
-			return 1;
-		}
+		if (getBaseStat(0, this.classid, 'code') === undefined) return 0;
+		if (getBaseStat(0, this.classid, 'code') === getBaseStat(0, this.classid, 'ultracode')) return 2;
+		if (getBaseStat(0, this.classid, 'code') === getBaseStat(0, this.classid, 'ubercode')) return 1;
 
 		return 0;
 	});
@@ -1316,9 +1309,7 @@ Unit.prototype.castChargedSkill = function (...args) {
  * @description equip an item.
  */
 Unit.prototype.equip = function (destLocation = undefined) {
-	if (this.location === 1) {
-		return true; // Item is equiped
-	}
+	if (this.location === 1) return true; // Item is equiped
 
 	const findspot = function (item) {
 			let tempspot = Storage.Stash.FindSpot(item);
@@ -1329,31 +1320,24 @@ Unit.prototype.equip = function (destLocation = undefined) {
 
 			tempspot = Storage.Inventory.FindSpot(item);
 
-			if (tempspot) {
-				return {location: Storage.Inventory.location, coord: tempspot};
-			}
-
-			return false; // no spot found
+			return tempspot ? {location: Storage.Inventory.location, coord: tempspot} : false;
 		},
 		doubleHanded = [26, 27, 34, 35, 67, 85, 86];
 
 	// Not an item, or unidentified, or not enough stats
-	if (this.type !== 4 || !this.getFlag(0x10) || this.getStat(92) > me.getStat(12) || this.dexreq > me.getStat(2) || this.strreq > me.getStat(0)) {
+	if (this.type !== 4 || !this.getFlag(0x10)
+		|| this.getStat(92) > me.getStat(12)
+		|| this.dexreq > me.getStat(2)
+		|| this.strreq > me.getStat(0)) {
 		return false;
 	}
 
 	// If not a specific location is given, figure it out (can be useful to equip a double weapon)
-	if (!destLocation) {
-		destLocation = this.getBodyLoc();
-	}
-
+	!destLocation && (destLocation = this.getBodyLoc());
 	// If destLocation isnt an array, make it one
-	if (!Array.isArray(destLocation)) {
-		destLocation = [destLocation];
-	}
+	!Array.isArray(destLocation) && (destLocation = [destLocation]);
 
-	print('equiping ' + this.name);
-
+	console.log('equiping ' + this.name + " to bodylocation: " + destLocation.first());
 
 	let currentEquiped = me.getItemsEx(-1).filter(item =>
 		destLocation.indexOf(item.bodylocation) !== -1
@@ -1372,9 +1356,9 @@ Unit.prototype.equip = function (destLocation = undefined) {
 	if (!currentEquiped.length) {
 		clickItemAndWait(0, this);
 		clickItemAndWait(0, destLocation.first());
-	} else { // unequip / swap items
+	} else {
+		// unequip / swap items
 		currentEquiped.forEach((item, index) => {
-
 			// Last item, so swap instead of putting off first
 			if (index === (currentEquiped.length - 1)) {
 				print('swap ' + this.name + ' for ' + item.name);
@@ -1399,9 +1383,7 @@ Unit.prototype.equip = function (destLocation = undefined) {
 			// Incase multiple items are equipped
 			let spot = findspot(item); // Find a spot for the current item
 
-			if (!spot) {
-				throw Error('cant find spot for unequipped item');
-			}
+			if (!spot) throw Error('cant find spot for unequipped item');
 
 			clickItemAndWait(0, item.bodylocation);
 			clickItemAndWait(0, spot.coord.x, spot.coord.y, spot.location);
@@ -1517,22 +1499,22 @@ Object.defineProperties(Unit.prototype, {
 	},
 	isSpecial: {
 		get: function () {
-			return this.isChampion || this.isUnique || this.isSuperUnique;
+			return (this.isChampion || this.isUnique || this.isSuperUnique);
 		},
 	},
 	isWalking: {
 		get: function () {
-			return this.mode === sdk.units.monsters.monstermode.Walking && (this.targetx !== this.x || this.targety !== this.y);
+			return (this.mode === sdk.units.monsters.monstermode.Walking && (this.targetx !== this.x || this.targety !== this.y));
 		}
 	},
 	isRunning: {
 		get: function () {
-			return this.mode === sdk.units.monsters.monstermode.Running && (this.targetx !== this.x || this.targety !== this.y);
+			return (this.mode === sdk.units.monsters.monstermode.Running && (this.targetx !== this.x || this.targety !== this.y));
 		}
 	},
 	isMoving: {
 		get: function () {
-			return this.isWalking || this.isRunning;
+			return (this.isWalking || this.isRunning);
 		},
 	},
 	isFrozen: {
@@ -1671,22 +1653,25 @@ Object.defineProperties(Unit.prototype, {
 	questItem: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.itemType === sdk.itemtype.Quest
-			|| [sdk.items.quest.HoradricMalus, sdk.items.quest.WirtsLeg, sdk.items.quest.HoradricStaff, sdk.items.quest.ShaftoftheHoradricStaff,
+			return (this.itemType === sdk.itemtype.Quest
+			|| [
+				sdk.items.quest.HoradricMalus, sdk.items.quest.WirtsLeg, sdk.items.quest.HoradricStaff, sdk.items.quest.ShaftoftheHoradricStaff,
 				sdk.items.quest.ViperAmulet, sdk.items.quest.DecoyGidbinn, sdk.items.quest.TheGidbinn, sdk.items.quest.KhalimsFlail,
 				sdk.items.quest.KhalimsWill, sdk.items.quest.HellForgeHammer, sdk.items.quest.StandardofHeroes
-			].includes(this.classid);
+			].includes(this.classid));
 		}
 	},
 	sellable: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
 			if (this.getItemCost(1) <= 1) return false;
-			return !this.questItem &&
-				[sdk.items.quest.KeyofTerror, sdk.items.quest.KeyofHate, sdk.items.quest.KeyofDestruction, sdk.items.quest.DiablosHorn,
+			return (!this.questItem
+				&& [
+					sdk.items.quest.KeyofTerror, sdk.items.quest.KeyofHate, sdk.items.quest.KeyofDestruction, sdk.items.quest.DiablosHorn,
 					sdk.items.quest.BaalsEye, sdk.items.quest.MephistosBrain, sdk.items.quest.TokenofAbsolution, sdk.items.quest.TwistedEssenceofSuffering,
-					sdk.items.quest.ChargedEssenceofHatred, sdk.items.quest.BurningEssenceofTerror, sdk.items.quest.FesteringEssenceofDestruction].indexOf(this.classid) === -1 &&
-				!(this.quality === sdk.itemquality.Unique && [sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(this.itemType));
+					sdk.items.quest.ChargedEssenceofHatred, sdk.items.quest.BurningEssenceofTerror, sdk.items.quest.FesteringEssenceofDestruction
+				].indexOf(this.classid) === -1
+				&& !(this.quality === sdk.itemquality.Unique && [sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(this.itemType)));
 		}
 	},
 });
@@ -1922,7 +1907,7 @@ Object.defineProperties(me, {
 	},
 	eye: {
 		get: function () {
-			return !!me.getItem(553);
+			return (!!me.getItem(sdk.items.quest.KhalimsEye));
 		}
 	},
 	brain: {

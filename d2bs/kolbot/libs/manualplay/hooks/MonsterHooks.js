@@ -29,7 +29,7 @@ const MonsterHooks = {
 
 		if (unit) {
 			do {
-				if (Attack.checkMonster(unit)) {
+				if (unit.attackable) {
 					!this.getHook(unit) ? this.add(unit) : this.updateCoords(unit);
 				} else {
 					this.remove(unit);
