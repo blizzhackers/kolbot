@@ -20,8 +20,8 @@ includeCommonLibs();
 let Overrides = require('../modules/Override');
 
 let count = 0;
-let wpsToGive = Pather.wpAreas.slice(0).filter(function (area) {
-	if (sdk.areas.Towns.includes(area) || area === sdk.areas.HallsofPain) return false;
+let wpsToGive = Pather.nonTownWpAreas.slice(0).filter(function (area) {
+	if (area === sdk.areas.HallsofPain) return false;
 	if (me.classic && area >= sdk.areas.Harrogath) return false;
 	return true;
 });

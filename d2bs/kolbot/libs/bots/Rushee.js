@@ -194,13 +194,7 @@ function Rushee() {
 					break;
 				}
 
-				Town.move(NPC.Warriv);
-
-				npc = getUnit(1, NPC.Warriv);
-
-				if (!npc || !npc.openMenu()) {
-					return false;
-				}
+				if (!Town.npcInteract("Warriv", false)) return false;
 
 				Misc.useMenu(0x0D36);
 
@@ -213,13 +207,7 @@ function Rushee() {
 				// Non Quester needs to talk to Townsfolk to enable Harem TP
 				if (!Config.Rushee.Quester) {
 					// Talk to Atma
-					Town.move(NPC.Atma);
-
-					target = getUnit(1, 176); // Atma
-
-					if (target && target.openMenu()) {
-						me.cancel();
-					} else {
+					if (!Town.npcInteract("Atma")) {
 						break;
 					}
 				}
@@ -238,13 +226,8 @@ function Rushee() {
 				me.cancel();
 				Pather.moveToExit(50, true);
 				Pather.usePortal(40, Config.Leader);
-				Town.move(NPC.Meshif);
 
-				npc = getUnit(1, NPC.Meshif);
-
-				if (!npc || !npc.openMenu()) {
-					return false;
-				}
+				if (!Town.npcInteract("Meshif", false)) return false;
 
 				Misc.useMenu(0x0D38);
 
@@ -255,15 +238,7 @@ function Rushee() {
 				}
 
 				if (me.inTown) {
-					Town.move(NPC.Cain);
-
-					npc = getUnit(1, NPC.Cain);
-
-					if (!npc || !npc.openMenu()) {
-						return false;
-					}
-
-					me.cancel();
+					Town.npcInteract("Cain");
 					Pather.usePortal(102, Config.Leader);
 				} else {
 					delay(1500);
@@ -278,13 +253,7 @@ function Rushee() {
 					break;
 				}
 
-				Town.move(NPC.Tyrael);
-
-				npc = getUnit(1, NPC.Tyrael);
-
-				if (!npc || !npc.openMenu()) {
-					return false;
-				}
+				Town.npcInteract("Tyrael", false);
 
 				delay(me.ping + 1);
 
@@ -416,7 +385,7 @@ function Rushee() {
 					let myWps = Pather.wpAreas.slice(0).filter(function (area) {
 						if (sdk.areas.Towns.includes(area) || area === sdk.areas.HallsofPain) return false;
 						if (me.classic && area >= sdk.areas.Harrogath) return false;
-						if (getWaypoint(area)) return false;
+						if (getWaypoint(Pather.wpAreas.indexOf(area))) return false;
 						return true;
 					});
 
@@ -476,7 +445,7 @@ function Rushee() {
 
 						let stones = [getUnit(2, 17), getUnit(2, 18), getUnit(2, 19), getUnit(2, 20), getUnit(2, 21)];
 
-						while (stones.some(function (stone) { return !stone.mode; })) {
+						while (stones.some((stone) => !stone.mode)) {
 							for (let i = 0, stone = void 0; i < stones.length; i++) {
 								stone = stones[i];
 
@@ -510,13 +479,8 @@ function Rushee() {
 						this.getQuestItem(sdk.items.quest.ScrollofInifuss, 30);
 						delay(500);
 						Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader);
-						Town.move(NPC.Akara);
-
-						target = getUnit(1, NPC.Akara);
-
-						if (target && target.openMenu()) {
-							actions.shift();
-							me.cancel();
+						
+						if (Town.npcInteract("Akara")) {
 							this.log("Akara done", Config.LocalChat.Enabled);
 						}
 
@@ -534,16 +498,9 @@ function Rushee() {
 
 						if (gibbet && !gibbet.mode) {
 							Pather.moveTo(gibbet.x, gibbet.y);
-							if (Misc.poll(function () { return Misc.openChest(gibbet); }, 2000, 100)) {
+							if (Misc.poll(() => Misc.openChest(gibbet), 2000, 100)) {
 								Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader);
-								Town.move(NPC.Akara);
-
-								target = getUnit(1, NPC.Akara);
-
-								if (target && target.openMenu()) {
-									me.cancel();
-									this.log("Akara done", Config.LocalChat.Enabled);
-								}
+								Town.npcInteract("Akara") && this.log("Akara done", Config.LocalChat.Enabled);
 							}
 						}
 						Town.move("portalspot");
@@ -557,10 +514,7 @@ function Rushee() {
 						}
 
 						target = Pather.getPortal(null, Config.Leader);
-
-						if (target) {
-							Pather.walkTo(target.x, target.y);
-						}
+						target && Pather.walkTo(target.x, target.y);
 
 						actions.shift();
 
@@ -585,13 +539,9 @@ function Rushee() {
 						Pather.usePortal(61, Config.Leader);
 						this.getQuestItem(521, 149);
 						Pather.usePortal(40, Config.Leader);
-						Town.move(NPC.Drognan);
-
-						target = getUnit(1, NPC.Drognan);
-
-						if (target && target.openMenu()) {
+						
+						if (Town.npcInteract("Drognan")) {
 							actions.shift();
-							me.cancel();
 							say("drognan done", Config.LocalChat.Enabled);
 						}
 
@@ -653,25 +603,12 @@ function Rushee() {
 							break;
 						}
 
-						target = getUnit(2, 193);
-
-						Misc.openChest(target);
-						delay(300);
-
-						target = getUnit(4, 548);
-
-						Pickit.pickItem(target);
+						this.getQuestItem(548, 193);
 						Pather.usePortal(75, Config.Leader);
-						Town.move(NPC.Alkor);
-
-						target = getUnit(1, NPC.Alkor);
-
-						if (target && target.openMenu()) {
-							me.cancel();
-						}
-
+						Town.npcInteract("Alkor");
 						Town.move("portalspot");
 						actions.shift();
+
 
 						break;
 					case 102: // Durance of Hate level 3
@@ -712,13 +649,7 @@ function Rushee() {
 
 						break;
 					case 114: // Frozen River
-						Town.move(NPC.Malah);
-
-						target = getUnit(1, NPC.Malah);
-
-						if (target && target.openMenu()) {
-							me.cancel();
-						}
+						Town.npcInteract("Malah");
 
 						Pather.usePortal(114, Config.Leader);
 						delay(500);
@@ -748,25 +679,13 @@ function Rushee() {
 						// Non-questers can piggyback off quester out messages
 						case 110: // Shenk
 							if (me.act === 5) {
-								Town.move(NPC.Larzuk);
-
-								target = getUnit(1, NPC.Larzuk);
-
-								if (target && target.openMenu()) {
-									me.cancel();
-								}
+								Town.npcInteract("Larzuk");
 							}
 
 							break;
 						case 114: // Anya
 							if (me.act === 5) {
-								Town.move(NPC.Malah);
-
-								target = getUnit(1, NPC.Malah);
-
-								if (target && target.openMenu()) {
-									me.cancel();
-								}
+								Town.npcInteract("Malah");
 
 								if (me.getItem(646)) {
 									print("Using scroll of resistance");
@@ -778,13 +697,7 @@ function Rushee() {
 						case 104:
 						case 105:
 							if (me.act === 4 && Misc.checkQuest(25, 1)) {
-								Town.move(NPC.Tyrael);
-
-								target = getUnit(1, NPC.Tyrael);
-
-								if (target && target.openMenu()) {
-									me.cancel();
-								}
+								Town.npcInteract("Tyrael");
 							}
 
 							break;
@@ -795,10 +708,10 @@ function Rushee() {
 						break;
 					}
 
+					this.revive();
+
 					switch (me.area) {
 					case 37: // Catacombs level 4
-						this.revive();
-
 						// Go to town if not there, break if procedure fails
 						if (!me.inTown && !Pather.usePortal(1, Config.Leader)) {
 							break;
@@ -813,8 +726,6 @@ function Rushee() {
 
 						break;
 					case 49: // Sewers 3
-						this.revive();
-
 						if (!me.inTown && !Pather.usePortal(40, Config.Leader)) {
 							break;
 						}
@@ -823,21 +734,11 @@ function Rushee() {
 
 						break;
 					case 74: // Arcane Sanctuary
-						this.revive();
-
 						if (!me.inTown && !Pather.usePortal(40, Config.Leader)) {
 							break;
 						}
 
-						Town.move(NPC.Atma);
-
-						target = getUnit(1, 176); // Atma
-
-						if (target && target.openMenu()) {
-							me.cancel();
-						} else {
-							break;
-						}
+						Town.npcInteract("Atma");
 
 						if (!Misc.checkQuest(13, 0)) {
 							D2Bot.printToConsole("Summoner quest failed", 9);
@@ -849,21 +750,11 @@ function Rushee() {
 
 						break;
 					case 83: // Travincal
-						this.revive();
-
 						if (!me.inTown && !Pather.usePortal(75, Config.Leader)) {
 							break;
 						}
 
-						Town.move(NPC.Cain);
-
-						target = getUnit(1, NPC.Cain);
-
-						if (target && target.openMenu()) {
-							me.cancel();
-						} else {
-							break;
-						}
+						Town.npcInteract("Cain");
 
 						if (!Misc.checkQuest(21, 0)) {
 							D2Bot.printToConsole("Travincal quest failed", 9);
@@ -875,8 +766,6 @@ function Rushee() {
 
 						break;
 					case 102: // Durance 2
-						this.revive();
-
 						if (!Pather.usePortal(75, Config.Leader)) {
 							break;
 						}
@@ -886,21 +775,12 @@ function Rushee() {
 						break;
 					case 104:
 					case 105:
-						this.revive();
-
 						if (!me.inTown && !Pather.usePortal(103, Config.Leader)) {
 							break;
 						}
 
 						if (Misc.checkQuest(25, 1)) {
-							Town.move(NPC.Tyrael);
-
-							target = getUnit(1, NPC.Tyrael);
-
-							if (target && target.openMenu()) {
-								me.cancel();
-							}
-
+							Town.npcInteract("Tyrael");
 							Town.move("portalspot");
 						}
 
@@ -908,13 +788,7 @@ function Rushee() {
 
 						break;
 					case 108: // Chaos Sanctuary
-						this.revive();
-
-						if (me.gametype === 0) {
-							D2Bot.restart();
-
-							break;
-						}
+						me.classic && D2Bot.restart();
 
 						if (!me.inTown && !Pather.usePortal(103, Config.Leader)) {
 							break;
@@ -924,38 +798,21 @@ function Rushee() {
 
 						break;
 					case 110: // Bloody Foothils
-						this.revive();
-
 						if (!me.inTown && !Pather.usePortal(109, Config.Leader)) {
 							break;
 						}
 
-						Town.move(NPC.Larzuk);
-
-						target = getUnit(1, NPC.Larzuk);
-
-						if (target && target.openMenu()) {
-							me.cancel();
-						}
-
+						Town.npcInteract("Larzuk");
 						Town.move("portalspot");
 						actions.shift();
 
 						break;
 					case 114: // Frozen River
-						this.revive();
-
 						if (!me.inTown && !Pather.usePortal(109, Config.Leader)) {
 							break;
 						}
 
-						Town.move(NPC.Malah);
-
-						target = getUnit(1, NPC.Malah);
-
-						if (target && target.openMenu()) {
-							me.cancel();
-						}
+						Town.npcInteract("Malah");
 
 						if (me.getItem(646)) {
 							print("Using Scroll of Resistance");
@@ -1036,34 +893,13 @@ function Rushee() {
 
 					break;
 				case "a2":
-					if (!this.changeAct(2)) {
-						break;
-					}
-
-					Town.move("portalspot");
-					actions.shift();
-
-					break;
 				case "a3":
-					if (!this.changeAct(3)) {
-						break;
-					}
-
-					Town.move("portalspot");
-					actions.shift();
-
-					break;
 				case "a4":
-					if (!this.changeAct(4)) {
-						break;
-					}
-
-					Town.move("portalspot");
-					actions.shift();
-
-					break;
 				case "a5":
-					if (!this.changeAct(5)) {
+					act = actions[0].toString()[1];
+					!!act && (act = (parseInt(act, 10) || me.act + 1));
+
+					if (!this.changeAct(act)) {
 						break;
 					}
 
@@ -1073,7 +909,6 @@ function Rushee() {
 					break;
 				case me.name + " quest":
 					say("I am quester.");
-
 					Config.Rushee.Quester = true;
 
 					actions.shift();

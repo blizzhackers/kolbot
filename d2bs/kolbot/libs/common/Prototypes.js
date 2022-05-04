@@ -63,67 +63,62 @@ let sdk = require('../modules/sdk');
 })([].filter.constructor('return this')(), getUnit);
 
 // Check if unit is idle
-Unit.prototype.__defineGetter__("idle",
-	function () {
-		if (this.type > 0) {
-			throw new Error("Unit.idle: Must be used with player units.");
-		}
+Unit.prototype.__defineGetter__("idle", function () {
+	if (this.type > 0) {
+		throw new Error("Unit.idle: Must be used with player units.");
+	}
 
-		return (this.mode === 1 || this.mode === 5 || this.mode === 17); // Dead is pretty idle too
-	});
+	return (this.mode === 1 || this.mode === 5 || this.mode === 17); // Dead is pretty idle too
+});
 
-Unit.prototype.__defineGetter__("gold",
-	function () {
-		return this.getStat(14) + this.getStat(15);
-	});
+Unit.prototype.__defineGetter__("gold", function () {
+	return this.getStat(14) + this.getStat(15);
+});
 
 // Death check
-Unit.prototype.__defineGetter__("dead",
-	function () {
-		switch (this.type) {
-		case 0: // Player
-			return this.mode === 0 || this.mode === 17;
-		case 1: // Monster
-			return this.mode === 0 || this.mode === 12;
-		default:
-			return false;
-		}
-	});
+Unit.prototype.__defineGetter__("dead", function () {
+	switch (this.type) {
+	case 0: // Player
+		return this.mode === 0 || this.mode === 17;
+	case 1: // Monster
+		return this.mode === 0 || this.mode === 12;
+	default:
+		return false;
+	}
+});
 
 // Check if unit is in town
-Unit.prototype.__defineGetter__("inTown",
-	function () {
-		if (this.type > 0) {
-			throw new Error("Unit.inTown: Must be used with player units.");
-		}
+Unit.prototype.__defineGetter__("inTown", function () {
+	if (this.type > 0) throw new Error("Unit.inTown: Must be used with player units.");
 
-		return [1, 40, 75, 103, 109].indexOf(this.area) > -1;
-	});
+	return [1, 40, 75, 103, 109].includes(this.area);
+});
 
 // Check if party unit is in town
-Party.prototype.__defineGetter__("inTown",
-	function () {
-		return [1, 40, 75, 103, 109].indexOf(this.area) > -1;
-	});
+Party.prototype.__defineGetter__("inTown", function () {
+	return [1, 40, 75, 103, 109].includes(this.area);
+});
 
-Unit.prototype.__defineGetter__("attacking",
-	function () {
-		if (this.type > 0) {
-			throw new Error("Unit.attacking: Must be used with player units.");
-		}
+Unit.prototype.__defineGetter__("attacking", function () {
+	if (this.type > 0) throw new Error("Unit.attacking: Must be used with player units.");
 
-		return [7, 8, 10, 11, 12, 13, 14, 15, 16, 18].indexOf(this.mode) > -1;
-	});
+	return [7, 8, 10, 11, 12, 13, 14, 15, 16, 18].includes(this.mode);
+});
+
+Unit.prototype.__defineGetter__('durabilityPercent', function () {
+	if (this.type !== 4) throw new Error("Unit.durabilityPercent: Must be used on items.");
+	if (this.getStat(sdk.stats.Quantity) || !this.getStat(sdk.stats.MaxDurability)) return 100;
+
+	return Math.round(this.getStat(sdk.stats.Durability) * 100 / this.getStat(sdk.stats.MaxDurability));
+});
 
 // Open NPC menu
 Unit.prototype.openMenu = function (addDelay) {
 	if (Config.PacketShopping) return Packet.openMenu(this);
-
 	if (this.type !== 1) throw new Error("Unit.openMenu: Must be used on NPCs.");
+	if (getUIFlag(sdk.uiflags.NPCMenu)) return true;
 
 	addDelay === undefined && (addDelay = 0);
-
-	if (getUIFlag(sdk.uiflags.NPCMenu)) return true;
 
 	for (let i = 0; i < 5; i += 1) {
 		if (getDistance(me, this) > 4) {
@@ -347,6 +342,36 @@ Unit.prototype.drop = function () {
 	}
 
 	return false;
+};
+
+/**
+ * @description use consumable item, fixes issue with interact() returning false even if we used an item
+ * @returns boolean
+ */
+Unit.prototype.use = function () {
+	if (this.type !== 4) throw new Error("Unit.use: Must be used with items. Unit Name: " + this.name);
+	if (!getBaseStat("items", this.classid, "useable")) throw new Error("Unit.use: Must be used with consumable items. Unit Name: " + this.name);
+	
+	let gid = this.gid;
+
+	switch (this.location) {
+	case sdk.storage.Inventory:
+		// doesn't work, not sure why but it's missing something 
+		//new PacketBuilder().byte(0x20).dword(gid).dword(this.x).dword(this.y).send();
+		this.interact(); // use interact instead, was hoping to skip this since its really just doing the same thing over but oh well
+
+		break;
+	case sdk.storage.Belt:
+		new PacketBuilder().byte(0x26).dword(gid).dword(0).dword(0).send();
+
+		break;
+	default:
+		return false;
+	}
+
+	delay(Math.max(me.ping * 2, 200));
+
+	return !(getUnit(4, -1, -1, gid));
 };
 
 me.findItem = function (id = -1, mode = -1, loc = -1, quality = -1) {
@@ -1862,7 +1887,7 @@ Object.defineProperties(me, {
 	},
 	cube: {
 		get: function () {
-			return !!me.getItem(549);
+			return !!me.getItem(sdk.items.quest.Cube);
 		}
 	},
 	radament: {
@@ -2064,7 +2089,7 @@ Unit.prototype.__defineGetter__('curseable', function () {
 });
 
 Unit.prototype.__defineGetter__('scareable', function () {
-	return this.curseable && !(this.spectype & 0x7) && this.classid !== sdk.monsters.ListerTheTormentor;
+	return this.curseable && !(this.spectype & 0x7) && this.classid !== sdk.monsters.ListerTheTormenter;
 });
 
 Unit.prototype.getMobCount = function (range = 10, coll = 0, type = 0, noSpecialMobs = false) {
@@ -2072,6 +2097,8 @@ Unit.prototype.getMobCount = function (range = 10, coll = 0, type = 0, noSpecial
 	const _this = this;
 	return getUnits(sdk.unittype.Monster)
 		.filter(function (mon) {
-			return mon.attackable && getDistance(_this, mon) < range && (!type || ((type & mon.spectype) && !noSpecialMobs)) && (!coll || !checkCollision(_this, mon, coll));
+			return mon.attackable && getDistance(_this, mon) < range
+				&& (!type || ((type & mon.spectype) && !noSpecialMobs))
+				&& (!coll || !checkCollision(_this, mon, coll));
 		}).length;
 };

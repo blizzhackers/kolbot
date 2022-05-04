@@ -53,23 +53,7 @@ function Rusher() {
 			}
 		} while (party.getNext());
 
-		if (minArea <= 39) {
-			return 1;
-		}
-
-		if (minArea >= 40 && minArea <= 74) {
-			return 2;
-		}
-
-		if (minArea >= 75 && minArea <= 102) {
-			return 3;
-		}
-
-		if (minArea >= 103 && minArea <= 108) {
-			return 4;
-		}
-
-		return 5;
+		return sdk.areas.actOf(minArea);
 	};
 
 	this.chatEvent = function (nick, msg) {

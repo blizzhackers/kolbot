@@ -47,8 +47,7 @@ function main() {
 
 	addEventListener("scriptmsg",
 		function (msg) {
-			if (typeof msg !== "string") return;
-			if (msg === "townCheck") {
+			if (typeof msg === "string" && msg === "townCheck") {
 				townCheck = true;
 			}
 		});
@@ -72,6 +71,7 @@ function main() {
 			// should TownHP/MP check be in toolsthread?
 			// We would then be able to remove all game interaction checks until we get a townCheck msg
 			|| ((checkHP && me.hpPercent < Config.TownHP) || (checkMP && me.mpPercent < Config.TownMP)))) {
+			// canTpToTown should maybe be overrided here to quit if we can't tp to town but isn't just because we are in non-tp-able area
 			if (!Town.canTpToTown()) {
 				townCheck = false;
 
