@@ -547,6 +547,63 @@ Unit.prototype.checkItem = function (itemInfo) {
 };
 
 /**
+ * @description Returns first item given by itemInfo
+ * @param itemInfo array of objects -
+ * 	{
+ * 		classid: Number,
+ * 		itemtype: Number,
+ * 		quality: Number,
+ * 		runeword: Boolean,
+ * 		ethereal: Boolean,
+ * 		name: getLocaleString(id) || localeStringId,
+ * 		equipped: Boolean || Number (bodylocation)
+ * 	}
+ * @returns Unit[]
+ */
+Unit.prototype.findFirst = function (itemInfo = []) {
+	if (!Array.isArray(itemInfo) || typeof itemInfo[0] !== "object") return {have: false, item: null};
+
+	for (let i = 0; i < itemInfo.length; i++) {
+		let itemObj = Object.assign({}, {
+			classid: -1,
+			itemtype: -1,
+			quality: -1,
+			runeword: null,
+			ethereal: null,
+			equipped: null,
+			name: ""
+		}, itemInfo[i]);
+
+		// convert id into string
+		typeof itemObj.name === "number" && (itemObj.name = getLocaleString(itemObj.name));
+
+		let items = this.getItemsEx()
+			.filter(function (item) {
+				return (!item.questItem
+					&& (itemObj.classid === -1 || item.classid === itemObj.classid)
+					&& (itemObj.itemtype === -1 || item.itemType === itemObj.itemtype)
+					&& (itemObj.quality === -1 || item.quality === itemObj.quality)
+					&& (itemObj.runeword === null || (item.runeword === itemObj.runeword))
+					&& (itemObj.ethereal === null || (item.ethereal === itemObj.ethereal))
+					&& (itemObj.equipped === null || (typeof itemObj.equipped === "number" ? item.bodylocation === itemObj.equipped : item.isEquipped === itemObj.equipped))
+					&& (!itemObj.name || item.fname.toLowerCase().includes(itemObj.name.toLowerCase()))
+				);
+			});
+		if (items.length > 0) {
+			return {
+				have: true,
+				item: copyUnit(items.first())
+			};
+		}
+	}
+
+	return {
+		have: false,
+		item: null
+	};
+};
+
+/**
  * @description Return the items of a player, or an empty array
  * @param args
  * @returns Unit[]
