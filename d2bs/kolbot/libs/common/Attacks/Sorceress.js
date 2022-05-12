@@ -30,12 +30,12 @@ const ClassAttack = {
 		}
 
 		// Low mana timed skill
-		if (Config.LowManaSkill[0] > -1 && Skill.getManaCost(timedSkill) > me.mp && Attack.checkResist(unit, Config.LowManaSkill[0])) {
+		if (Config.LowManaSkill[0] > -1 && Skill.getManaCost(skills.timed) > me.mp && Attack.checkResist(unit, Config.LowManaSkill[0])) {
 			skills.timed = Config.LowManaSkill[0];
 		}
 
 		// Low mana untimed skill
-		if (Config.LowManaSkill[1] > -1 && Skill.getManaCost(untimedSkill) > me.mp && Attack.checkResist(unit, Config.LowManaSkill[1])) {
+		if (Config.LowManaSkill[1] > -1 && Skill.getManaCost(skills.untimed) > me.mp && Attack.checkResist(unit, Config.LowManaSkill[1])) {
 			skills.untimed = Config.LowManaSkill[1];
 		}
 

@@ -102,6 +102,7 @@ const Hooks = {
 function main() {
 	print("ÿc9Map Thread Loaded.");
 	Config.init(false);
+	Storage.Init();
 	Pickit.init(true);
 	Hooks.init();
 
