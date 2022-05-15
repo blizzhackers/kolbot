@@ -1756,6 +1756,36 @@ Object.defineProperties(Unit.prototype, {
 				&& !(this.quality === sdk.itemquality.Unique && [sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(this.itemType)));
 		}
 	},
+	magic: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.quality === sdk.itemquality.Magic;
+		},
+	},
+	set: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.quality === sdk.itemquality.Set;
+		},
+	},
+	rare: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.quality === sdk.itemquality.Rare;
+		},
+	},
+	unique: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.quality === sdk.itemquality.Unique;
+		},
+	},
+	crafted: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.quality === sdk.itemquality.Crafted;
+		},
+	},
 });
 
 Object.defineProperties(me, {

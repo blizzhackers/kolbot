@@ -5,6 +5,32 @@
 *   @naming style     sdk.objprop.objprop.ObjProp (excludes functions which use sdk.objprop.camelCase)
 */
 
+// todo: break this up to make more sense. Example
+/*
+item: {
+	mode: {
+
+	},
+	class: {
+
+	},
+	quality: {
+
+	},
+	type: {
+
+	},
+	classid: {
+
+	},
+	locale: {
+
+	},
+	body and storage? It onlys applies to items
+	or would it make more sense for player.body?
+}
+*/
+
 {
 	let sdk = {
 		waypoints: {
@@ -2899,6 +2925,15 @@
 		// locale strings
 		locale: {
 			monsters: {
+				// bosses
+				Andariel: 3021,
+				Duriel: 3054,
+				Mephisto: 3062,
+				Diablo: 3060,
+				Baal: 3061,
+				// Uniques
+				BloodRaven: 3111,
+				Corpsefire: 3319,
 				TheCowKing: 2850,
 				GrandVizierofChaos: 2851,
 				LordDeSeis: 2852,
@@ -2948,11 +2983,6 @@
 				DacFarren: 22501,
 				BonesawBreaker: 22502,
 				Frozenstein: 22504,
-				DeckardCain: 2890,
-				Gheed: 2891,
-				Akara: 2892,
-				Kashya: 2893,
-				Charsi: 2894,
 				Rogue: 2897,
 				StygianDoll: 2898,
 				SoulKiller: 2899,
@@ -3076,16 +3106,6 @@
 				Misshapen: 3018,
 				Tainted: 3019,
 				Afflicted: 3020,
-				Andariel: 3021,
-				Natalya: 3022,
-				Drognan: 3023,
-				Atma: 3024,
-				Fara: 3025,
-				Lysander: 3026,
-				Jerhyn: 3028,
-				Geglash: 3029,
-				Elzix: 3030,
-				Greiz: 3031,
 				Camel: 3033,
 				Cadaver: 3034,
 				PreservedDead: 3035,
@@ -3107,15 +3127,11 @@
 				RockWormEgg: 3051,
 				SandMaggotEgg: 3052,
 				Maggot: 3053,
-				Duriel: 3054,
 				BloodHawkNest: 3055,
 				FlyingScimitar: 3056,
 				CloudStalkerNest: 3057,
 				BlackRaptorNest: 3058,
 				FoulCrowNest: 3059,
-				Diablo: 3060,
-				Baal: 3061,
-				Mephisto: 3062,
 				Cantor: 3063,
 				Heirophant: 3064,
 				Sexton: 3065,
@@ -3164,10 +3180,6 @@
 				CorpseMage: 3108,
 				ReturnedMage: 3109,
 				GargoyleTrap: 3110,
-				BloodRaven: 3111,
-				Flavie: 3112,
-				Kaelan: 3113,
-				Meshif: 3114,
 				NightMarauder: 3121,
 				FireGolem: 3122,
 				IronGolem: 3123,
@@ -3276,6 +3288,23 @@
 				Lharhad: 1057,
 				Flux: 1058,
 				Scorch: 1059,
+				//Natalya: 3022, both 1012 and 3022 return Natalya?
+				DeckardCain: 2890,
+				Gheed: 2891,
+				Akara: 2892,
+				Kashya: 2893,
+				Charsi: 2894,
+				Drognan: 3023,
+				Atma: 3024,
+				Fara: 3025,
+				Lysander: 3026,
+				Jerhyn: 3028,
+				Geglash: 3029,
+				Elzix: 3030,
+				Greiz: 3031,
+				Flavie: 3112,
+				Kaelan: 3113,
+				Meshif: 3114,
 				Larzuk: 22476,
 				Anya: 22477,
 				Malah: 22478,
@@ -3308,22 +3337,167 @@
 				HoradricStaff: 2699,
 
 				// Sets
-				Civerbs: 2496,
-				Hsarus: 2497,
-				Cleglaws: 2498,
-				Irathas: 2499,
-				Isenharts: 2500,
-				Vidalas: 2501,
-				Milabregas: 2502,
-				Cathans: 2503,
-				TancredsB: 2504,
-				Sigons: 2505,
-				Infernal: 2506,
-				Berserkers: 2507,
-				Deaths: 2508,
-				Angelic: 2509,
-				Arctic: 2510,
-				Arcannas: 2511,
+				// Angelic Rainment
+				AngelicsSword: 10172,
+				AngelicsArmor: 10173,
+				AngelicsRing: 10174,
+				AngelicsAmulet: 10175,
+				// Arcannas Tricks
+				ArcannasAmulet: 10180,
+				ArcannasStaff: 10181,
+				ArcannasHelmet: 10182,
+				ArcannasArmor: 10183,
+				// Artic Gear
+				ArticsBow: 10176,
+				ArticsArmor: 10177,
+				ArticsBelt: 10178,
+				ArticsGloves: 10179,
+				// Berserkers Gear
+				BerserkersHelmet: 10166,
+				BerserkersAxe: 10167,
+				BerserkersArmor: 10168,
+				// Cathans Traps
+				CathansRing: 10147,
+				CathansAmulet: 10148,
+				CathansHelmet: 10149,
+				CathansArmor: 10150,
+				CathansStaff: 10151,
+				// Civerbs Gear
+				CiverbsShield: 10122,
+				CiverbsAmulet: 10123,
+				CiverbsScepter: 10124,
+				// Clegaws Brace
+				ClegawsSword: 10128,
+				ClegawsShield: 10129,
+				ClegawsGloves: 10130,
+				// Deaths Disguise
+				DeathsGloves: 10169,
+				DeathsBelt: 10170,
+				DeathsSword: 10171,
+				// Hsarus Defense
+				HsarusBoots: 10125,
+				HsarusShield: 10126,
+				HsarusBelt: 10127,
+				// Infernal Tools
+				InfernalsHelmet: 10163,
+				InfernalsWand: 10164,
+				InfernalsBelt: 10165,
+				// Irathas Finery
+				IrathasBelt: 10131,
+				IrathasHelmet: 10132,
+				IrathasGloves: 10133,
+				IrathasAmulet: 10134,
+				// Isenharts Armory
+				IsenhartsHelmet: 10135,
+				IsenhartsArmor: 10136,
+				IsenhartsShield: 10137,
+				IsenhartsSword: 10138,
+				// Milabrega Regalia
+				MilabregasArmor: 10143,
+				MilabregasHelmet: 10144,
+				MilabregasScepter: 10145,
+				MilabregasShield: 10146,
+				// Sigons
+				SigonsHelmet: 10157,
+				SigonsArmor: 10158,
+				SigonsGloves: 10159,
+				SigonsBoots: 10160,
+				SigonsBelt: 10161,
+				SigonsShield: 10162,
+				// Tancreds
+				TancredsPick: 10152,
+				TancredsArmor: 10153,
+				TancredsBoots: 10154,
+				TancredsAmulet: 10155,
+				TancredsHelmet: 10156,
+				// Vidalas
+				VidalasAmulet: 10139,
+				VidalasArmor: 10140,
+				VidalasBoots: 10141,
+				VidalasBow: 10142,
+
+				// LoD Sets
+				// Aldurs's Legacy
+				AldursHelmet: 21697,
+				AldursArmor: 21698,
+				AldursBoots: 21700,
+				AldursMace: 21847,
+				// Bul-Kathos's Children
+				BulKathosBlade: 21688,
+				BulKathoSword: 21689,
+				// Cow Kings's Leathers
+				CowKingsHelmet: 21723,
+				CowKingsArmor: 21724,
+				CowKingsBoots: 21725,
+				// Disciples
+				DisciplesAmulet: 21717,
+				DisciplesGloves: 21718,
+				DisciplesBoots: 21719,
+				DisciplesArmor: 21720,
+				DisciplesBelt: 21721,
+				// Griswolds's Legacy
+				GriswoldsScepter: 21673,
+				GriswoldsShield: 21674,
+				GriswoldsArmor: 21675,
+				GriswoldsHelmet: 21676,
+				// Heaven's Brethren
+				HeavensMace: 21823,
+				HeavensHelmet: 21824,
+				HeavensShield: 21825,
+				HeavensArmor: 21826,
+				// Hwanin's
+				HwaninsHelmet: 21712,
+				HwaninsPolearm: 21713,
+				HwaninsArmor: 21714,
+				HwaninsBelt: 21821,
+				// IK
+				ImmortalKingsMaul: 21840,
+				ImmortalKingsBoots: 21841,
+				ImmortalKingsGloves: 21842,
+				ImmortalKingsBelt: 21843,
+				ImmortalKingsArmor: 21844,
+				ImmortalKingsHelmet: 21845,
+				// M'avina's
+				MavinasHelmet: 21702,
+				MavinasArmor: 21703,
+				MavinasGloves: 21704,
+				MavinasBelt: 21705,
+				MavinasBow: 21706,
+				// Natalya's
+				NatalyasHelmet: 21668,
+				NatalyasClaw: 21669,
+				NatalyasArmor: 21670,
+				NatalyasBoots: 21671,
+				// Naj's
+				NajsStaff: 21640,
+				NajsArmor: 21831,
+				NajsHelmet: 21832,
+				// Orphan's
+				OrphansHelmet: 21731,
+				OrphansBelt: 21732,
+				OrphansGloves: 21733,
+				OrphansShield: 21734,
+				// Sanders's
+				SandersGloves: 21876,
+				SandersBoots: 21877,
+				SandersHelmet: 21878,
+				SandersWand: 21879,
+				// Sazabi's
+				SazabisSword: 21708,
+				SazabisArmor: 21709,
+				SazabisHelmet: 21710,
+				// Tal
+				TalRashasBelt: 21816,
+				TalRashasAmulet: 21817,
+				TalRashasArmor: 21818,
+				TalRashasOrb: 21819,
+				TalRashasHelmet: 21820,
+				// Trang-Ouls
+				TrangOulsHelmet: 21661,
+				TrangOulsShield: 21662,
+				TrangOulsArmor: 21664,
+				TrangOulsGloves: 21665,
+				TrangOulsBelt: 21666,
 
 				// Uniques
 				// Quest/Misc
@@ -3338,7 +3512,109 @@
 				Annihilus: 21743,
 
 				// Unique Items
+				TitansRevenge: 21735,
+				LycandersAim: 21737,
+				ArreatsFace: 21744,
+				Homunculus: 21755,
+				JalalsMane: 21750,
+				HeraldofZakarum: 21758,
+				BloodRavensCharge: 21508,
+				Gimmershred: 21637,
+				MedusasGaze: 21516,
+				Rockstopper: 21519,
+				CrownofThieves: 21522,
+				BlackhornsFace: 21523,
+				TheSpiritShroud: 21524,
+				SkinoftheFlayedOne: 21525,
+				IronPelt: 21526,
+				SpiritForge: 21527,
+				CrowCaw: 21528,
+				DurielsShell: 21529,
+				SkulldersIre: 21530,
+				Toothrow: 21531,
+				AtmasWail: 21532,
+				BlackHades: 21533,
+				Corpsemourn: 21534,
+				QueHegans: 21535,
+				QueHegansWisdom: 21535,
+				Mosers: 21536,
+				MosersBlessedCircle: 21536,
+				Stormchaser: 21537,
+				TiamatsRubuke: 21538,
+				GerkesSanctuary: 21539,
+				RadamentsSphere: 21540,
+				Gravepalm: 21541,
+				Ghoulhide: 21542,
+				Hellmouth: 21543,
+				Infernostride: 21544,
+				Waterwalk: 21545,
+				Silkweave: 21546,
+				WarTraveler: 21547,
+				Razortail: 21548,
+				GloomsTrap: 21549,
+				Snowclash: 21550,
+				ThundergodsVigor: 21551,
+				LidlessWall: 21552,
+				LanceGuard: 21553,
+				Boneflame: 21555,
+				SteelPillar: 21556,
+				NightwingsVeil: 21557,
+				CrownofAges: 21559,
+				AndarielsVisage: 21560,
+				Dragonscale: 21562,
+				SteelCarapace: 21563,
+				RainbowFacet: 21565,
+				Ravenlore: 21566,
+				Boneshade: 21567,
+				Flamebellow: 21570,
+				DeathsFathom: 21571,
+				Wolfhowl: 21572,
 				SpiritWard: 21573,
+				KirasGuardian: 21574,
+				OrmusRobe: 21575,
+				GheedsFortune: 21576,
+				HalberdsReign: 21579,
+				DraculsGrasp: 21583,
+				Frostwind: 21584,
+				TemplarsMight: 21585,
+				EschutasTemper: 21586, // also 21620?
+				FirelizardsTalons: 21587,
+				SandstormTrek: 21588,
+				Marrowwalk: 21589,
+				HeavensLight: 21590,
+				ArachnidMesh: 21592,
+				NosferatusCoil: 21593,
+				Verdungos: 21595,
+				VerdungosHeartyCord: 21595,
+				CarrionWind: 21597,
+				GiantSkull: 21598,
+				AstreonsIronWard: 21599,
+				SaracensChance: 21608,
+				HighlordsWrath: 21609,
+				Ravenfrost: 21610,
+				Dwarfstar: 21611,
+				AtmasScarab: 21612,
+				Maras: 21613,
+				MarasKaleidoscope: 21613,
+				CrescentMoonAmulet: 21614,
+				TheRisingSun: 21615,
+				TheCatsEye: 21616,
+				BulKathosWeddingBand: 21617,
+				Metalgrid: 21619,
+				Stormshield: 21621,
+				BlackoakShield: 21622,
+				ArkainesValor: 21624,
+				TheGladiatorsBane: 21625,
+				HarlequinsCrest: 21627,
+				GuardianAngel: 21632,
+				TheGrandfather: 21643,
+				Doombringer: 21644,
+				TyraelsMight: 21645,
+				Lightsabre: 21646,
+				TheCraniumBasher: 21647,
+				DeathsWeb: 21650,
+				TheAtlantean: 21654,
+				CarinShard: 21658,
 
 				// Runewords
 				AncientsPledge: 20507,
