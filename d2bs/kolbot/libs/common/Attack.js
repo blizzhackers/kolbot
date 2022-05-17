@@ -94,8 +94,24 @@ const Attack = {
 		if (!unit || !unit.name || !copyUnit(unit).x) return false;
 
 		for (let i in Config.CustomAttack) {
-			if (Config.CustomAttack.hasOwnProperty(i) && unit.name.toLowerCase() === i.toLowerCase()) {
-				return Config.CustomAttack[i];
+			if (Config.CustomAttack.hasOwnProperty(i)) {
+				// if it contains numbers but is a string, convert to an int
+				if (i.match(/\d+/g)) {
+					i = parseInt(i, 10);
+				}
+
+				switch (typeof i) {
+				case "string":
+					if (unit.name.toLowerCase() === i.toLowerCase()) {
+						return Config.CustomAttack[i];
+					}
+
+					break;
+				case "number":
+					if (unit.classid === i) {
+						return Config.CustomAttack[i];
+					}
+				}
 			}
 		}
 

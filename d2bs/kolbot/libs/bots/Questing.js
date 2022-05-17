@@ -1,6 +1,6 @@
 /**
 *	@filename	Questing.js
-*	@author		kolton
+*	@author		kolton, theBGuy
 *	@desc		Do quests, only most popular ones for now
 */
 
@@ -11,12 +11,13 @@ function Questing() {
 		[17, "lamEssen"],
 		[25, "killIzual"],
 		[35, "killShenk"],
+		// todo: free barbs
 		[37, "freeAnya"],
 		[39, "ancients"]
 	];
 
 	this.clearDen = function () {
-		print("starting den");
+		console.log("starting den");
 
 		if (!Town.goToTown(1) || !Pather.moveToExit([2, 8], true)) {
 			throw new Error();
@@ -25,12 +26,7 @@ function Questing() {
 		Precast.doPrecast(true);
 		Attack.clearLevel();
 		Town.goToTown();
-		Town.move(NPC.Akara);
-
-		let akara = getUnit(1, NPC.Akara);
-
-		akara.openMenu();
-		me.cancel();
+		Town.npcInteract("Akara");
 
 		return true;
 	};
@@ -61,12 +57,7 @@ function Questing() {
 		}
 
 		Town.goToTown();
-		Town.move(NPC.Atma);
-
-		let atma = getUnit(1, NPC.Atma);
-
-		atma.openMenu();
-		me.cancel();
+		Town.npcInteract("Atma");
 
 		return true;
 	};
@@ -88,12 +79,7 @@ function Questing() {
 
 		Attack.kill(256); // Izual
 		Town.goToTown();
-		Town.move(NPC.Tyrael);
-
-		let tyrael = getUnit(1, NPC.Tyrael);
-
-		tyrael.openMenu();
-		me.cancel();
+		Town.npcInteract("Tyrael");
 		getUnit(2, 566) && Pather.useUnit(2, 566, 109);
 
 		return true;
@@ -114,21 +100,12 @@ function Questing() {
 			throw new Error();
 		}
 
-		let stand = getUnit(2, 193);
-
-		Misc.openChest(stand);
-		delay(300);
-
-		let book = getUnit(4, 548);
+		Misc.openChest(193);
+		let book = Misc.poll(() => getUnit(4, 548), 1000, 100);
 
 		Pickit.pickItem(book);
 		Town.goToTown();
-		Town.move(NPC.Alkor);
-
-		let alkor = getUnit(1, NPC.Alkor);
-
-		alkor.openMenu();
-		me.cancel();
+		Town.npcInteract("Alkor");
 
 		return true;
 	};
@@ -151,6 +128,8 @@ function Questing() {
 		return true;
 	};
 
+	// save barbs?
+
 	this.freeAnya = function () {
 		if (!Pather.accessToAct(5)) return false;
 		if (Misc.checkQuest(37, 1)) return true;
@@ -171,30 +150,28 @@ function Questing() {
 
 		let anya = getUnit(2, 558);
 
+		// talk to anya, then cancel her boring speech
 		Pather.moveToUnit(anya);
 		sendPacket(1, 0x13, 4, 0x2, 4, anya.gid);
 		delay(300);
 		me.cancel();
+
+		// get pot from malah, then return to anya
 		Town.goToTown();
-		Town.move(NPC.Malah);
-
-		let malah = getUnit(1, NPC.Malah);
-
-		malah.openMenu();
-		me.cancel();
+		Town.npcInteract("Malah");
 		Town.move("portalspot");
 		Pather.usePortal(114, me.name);
+
+		// unfreeze her a$$, cancel her speech again
 		anya.interact();
 		delay(300);
 		me.cancel();
+
+		// get reward
 		Town.goToTown();
-		Town.move(NPC.Malah);
-		malah.openMenu();
-		me.cancel();
-		delay(500);
+		Town.npcInteract("Malah");
 
 		let scroll = me.getItem(646);
-
 		scroll && clickItem(1, scroll);
 
 		return true;

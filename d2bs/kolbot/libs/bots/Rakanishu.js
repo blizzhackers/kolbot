@@ -13,8 +13,8 @@ function Rakanishu() {
 
 	Attack.kill(getLocaleString(sdk.locale.monsters.Rakanishu));
 
-	if (Config.Rakanishu.KillGriswold && me.getQuest(4, 4)) {
-		if (!Pather.usePortal(38)) throw new Error("Failed to move to Tristram");
+	if (Config.Rakanishu.KillGriswold && Pather.getPortal(sdk.areas.Tristram)) {
+		if (!Pather.usePortal(sdk.areas.Tristram)) throw new Error("Failed to move to Tristram");
 
 		Pather.moveTo(25149, 5180);
 		Attack.clear(20, 0xF, 365); // Griswold

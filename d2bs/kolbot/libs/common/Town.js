@@ -85,7 +85,7 @@ const Town = {
 		this.clearInventory();
 		this.fillTome(sdk.items.TomeofTownPortal);
 		this.buyPotions();
-		Config.FieldID.Enabled && this.fillTome(519);
+		Config.FieldID.Enabled && this.fillTome(sdk.items.TomeofIdentify);
 		this.shopItems();
 		this.buyKeys();
 		this.repair(repair);
@@ -107,44 +107,92 @@ const Town = {
 		return true;
 	},
 
+	npcInteract: function (name, cancel = true) {
+		let npc;
+
+		!name.includes("_") && (name = name.capitalize(true));
+		name.includes("_") && (name = "Qual_Kehk");
+
+		!me.inTown && Town.goToTown();
+		me.cancelUIFlags();
+
+		switch (NPC[name]) {
+		case NPC.Jerhyn:
+			Town.move('palace');
+			break;
+		case NPC.Hratli:
+			if (!me.getQuest(sdk_1.default.quests.SpokeToHratli, 0)) {
+				Town.move(NPC.Meshif);
+				break;
+			}
+			// eslint-disable-next-line no-fallthrough
+		default:
+			Town.move(NPC[name]);
+		}
+
+		npc = getUnit(1, NPC[name]);
+
+		// In case Jerhyn is by Warriv
+		if (name === "Jerhyn" && !npc) {
+			me.cancel();
+			Pather.moveTo(5166, 5206);
+			npc = getUnit(1, NPC[name]);
+		}
+
+		Packet.flash(me.gid);
+		delay(1 + me.ping * 2);
+
+		if (npc && npc.openMenu()) {
+			cancel && me.cancel();
+
+			return npc;
+		}
+
+		return false;
+	},
+
+	// just consumables
 	checkQuestItems: function () {
-		let i, npc, item;
-
-		// golden bird stuff
-		if (me.getItem(546)) {
-			this.goToTown(3);
-			this.move(NPC.Meshif);
-
-			npc = getUnit(1, NPC.Meshif);
-
-			if (npc) {
-				npc.openMenu();
-				me.cancel();
-			}
+		// Radament skill book
+		let book = me.getItem(sdk.items.quest.BookofSkill);
+		if (book) {
+			book.isInStash && this.openStash() && delay(300 + me.ping);
+			book.use();
 		}
 
-		if (me.getItem(547)) {
-			this.goToTown(3);
-			this.move(NPC.Alkor);
-
-			npc = getUnit(1, NPC.Alkor);
-
-			if (npc) {
-				for (i = 0; i < 2; i += 1) {
-					npc.openMenu();
-					me.cancel();
-				}
-			}
+		// Act 3
+		// Figurine -> Golden Bird
+		if (me.getItem(sdk.items.quest.AJadeFigurine)) {
+			Town.goToTown(3);
+			Town.npcInteract("meshif");
 		}
 
-		if (me.getItem(545)) {
-			item = me.getItem(545);
+		// Golden Bird -> Ashes
+		if (me.getItem(sdk.items.quest.TheGoldenBird)) {
+			Town.goToTown(3);
+			Town.npcInteract("alkor");
+		}
 
-			if (item.location > 3) {
-				this.openStash();
-			}
+		// Potion of life
+		let pol = me.getItem(sdk.items.quest.PotofLife);
+		if (pol) {
+			pol.isInStash && this.openStash() && delay(300 + me.ping);
+			pol.use();
+		}
 
-			item.interact();
+		// LamEssen's Tome
+		let tome = me.getItem(sdk.items.quest.LamEsensTome);
+		if (tome) {
+			!me.inTown && Town.goToTown(3);
+			tome.isInStash && Town.openStash() && Storage.Inventory.MoveTo(tome);
+			Town.npcInteract("alkor");
+		}
+
+		// Scroll of resistance
+		let sor = me.getItem(sdk.items.quest.ScrollofResistance);
+		if (sor) {
+			sor.isInStash && this.openStash() && delay(300 + me.ping);
+			sor.use();
 		}
 	},
 
@@ -416,7 +464,6 @@ const Town = {
 		if (this.checkScrolls(code) >= 13) return true;
 
 		let npc = this.initNPC("Shop", "fillTome");
-
 		if (!npc) return false;
 
 		delay(500);
@@ -861,9 +908,7 @@ const Town = {
 					if (newItem) {
 						let result = Pickit.checkItem(newItem);
 
-						if (!Item.autoEquipCheck(newItem)) {
-							result = 0;
-						}
+						//!Item.autoEquipCheck(newItem) && (result = 0);
 
 						switch (result.result) {
 						case 1:
@@ -1004,9 +1049,10 @@ const Town = {
 			name = chugs.first().name;
 
 			chugs.forEach(function (pot) {
-				pot.interact();
-				quantity++;
-				delay(50);
+				if (pot.use()) {
+					quantity++;
+					delay(100 + me.ping);
+				}
 			});
 
 			log && name && console.log('ÿc9DrinkPotsÿc0 :: drank ' + quantity + " " + name + "s. Timer [" + (new Date(quantity * 30 * 1000).toISOString().slice(11, -5)) + "]");
@@ -1114,13 +1160,10 @@ const Town = {
 	},
 
 	cubeRepair: function () {
-		if (!Config.CubeRepair || !me.getItem(549)) return false;
+		if (!Config.CubeRepair || !me.cube) return false;
 
-		let items = this.getItemsForRepair(Config.RepairPercent, false);
-
-		items.sort(function (a, b) {
-			return a.getStat(72) * 100 / a.getStat(73) - b.getStat(72) * 100 / b.getStat(73);
-		});
+		let items = this.getItemsForRepair(Config.RepairPercent, false)
+			.sort((a, b) => a.durabilityPercent - b.durabilityPercent);
 
 		while (items.length > 0) {
 			this.cubeRepairItem(items.shift());
@@ -1194,10 +1237,9 @@ const Town = {
 	},
 
 	repair: function (force = false) {
-		let npc;
-
 		if (this.cubeRepair()) return true;
 
+		let npc;
 		let repairAction = this.needRepair();
 		force && repairAction.indexOf("repair") === -1 && repairAction.push("repair");
 
@@ -1296,16 +1338,15 @@ const Town = {
 						case 87: // Amazon javelins
 							let quantity = item.getStat(70);
 
-							if (typeof quantity === "number" && quantity * 100 / (getBaseStat("items", item.classid, "maxstack") + item.getStat(254)) <= repairPercent) { // Stat 254 = increased stack size
+							// Stat 254 = increased stack size
+							if (typeof quantity === "number" && quantity * 100 / (getBaseStat("items", item.classid, "maxstack") + item.getStat(254)) <= repairPercent) {
 								itemList.push(copyUnit(item));
 							}
 
 							break;
 						// Durability check
 						default:
-							let durability = item.getStat(72);
-
-							if (typeof durability === "number" && durability * 100 / item.getStat(73) <= repairPercent) {
+							if (item.durabilityPercent <= repairPercent) {
 								itemList.push(copyUnit(item));
 							}
 

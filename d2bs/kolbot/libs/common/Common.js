@@ -10,7 +10,7 @@ const Common = {
 			let finalRooms = [],
 				indexes = [];
 
-			let kingPreset = getPresetUnit(me.area, 1, 773);
+			let kingPreset = getPresetUnit(sdk.areas.MooMooFarm, sdk.unittype.Monster, sdk.monsters.preset.TheCowKing);
 			let badRooms = getRoom(kingPreset.roomx * 5 + kingPreset.x, kingPreset.roomy * 5 + kingPreset.y).getNearby();
 
 			for (let i = 0; i < badRooms.length; i += 1) {

@@ -259,5 +259,114 @@ const TorchSystem = {
 		}
 
 		return false;
-	}
+	},
+
+	waitForKeys: function () {
+		let timer = getTickCount();
+		let busy = false;
+		let busyTick;
+		let neededItems = {pk1: 0, pk2: 0, pk3: 0, rv: 0};
+
+		// Check whether the killer is alone in the game
+		this.aloneInGame = function () {
+			return (Misc.getPlayerCount() <= 1);
+		};
+
+		// Check if current character is the farmer
+		let farmer = TorchSystem.isFarmer();
+
+		this.torchSystemEvent = function (mode, msg) {
+			let obj, farmer;
+
+			if (mode === 6) {
+				farmer = TorchSystem.isFarmer();
+
+				if (farmer) {
+					obj = JSON.parse(msg);
+
+					if (obj) {
+						switch (obj.name) {
+						case "gameCheck":
+							if (busy) {
+								break;
+							}
+
+							if (farmer.KeyFinderProfiles.includes(obj.profile)) {
+								print("Got game request from: " + obj.profile);
+								sendCopyData(null, obj.profile, 6, JSON.stringify({name: "gameName", value: {gameName: me.gamename, password: me.gamepassword}}));
+
+								busy = true;
+								busyTick = getTickCount();
+							}
+
+							break;
+						case "keyCheck":
+							if (farmer.KeyFinderProfiles.includes(obj.profile)) {
+								print("Got key count request from: " + obj.profile);
+
+								// Get the number of needed keys
+								neededItems = {pk1: 3 - tkeys, pk2: 3 - hkeys, pk3: 3 - dkeys, rv: this.juvCheck()};
+								sendCopyData(null, obj.profile, 6, JSON.stringify({name: "neededItems", value: neededItems}));
+							}
+
+							break;
+						}
+					}
+				}
+			}
+		};
+
+		// Register event that will communicate with key hunters, go to Act 1 town and wait by stash
+		addEventListener('copydata', this.torchSystemEvent);
+		Town.goToTown(1);
+		Town.move("stash");
+
+		while (true) {
+			// Abort if the current character isn't a farmer
+			if (!farmer) {
+				break;
+			}
+
+			// Free up inventory
+			Town.needStash() && Town.stash();
+
+			// Get the number keys
+			tkeys = me.findItems("pk1", 0).length || 0;
+			hkeys = me.findItems("pk2", 0).length || 0;
+			dkeys = me.findItems("pk3", 0).length || 0;
+
+			// Stop the loop if we have enough keys or if wait time expired
+			if (((tkeys >= 3 && hkeys >= 3 && dkeys >= 3)
+				|| (Config.OrgTorch.WaitTimeout && (getTickCount() - timer > Config.OrgTorch.WaitTimeout * 1000 * 60)))
+				&& this.aloneInGame()) {
+				removeEventListener('copydata', this.torchSystemEvent);
+
+				break;
+			}
+
+			if (busy) {
+				while (getTickCount() - busyTick < 30000) {
+					if (!this.aloneInGame()) {
+						break;
+					}
+
+					delay(100);
+				}
+
+				if (getTickCount() - busyTick > 30000 || this.aloneInGame()) {
+					busy = false;
+				}
+			}
+
+			// Wait for other characters to leave
+			while (!this.aloneInGame()) {
+				delay(500);
+			}
+
+			delay(1000);
+
+			// Pick the keys after the hunters drop them and leave the game
+			Pickit.pickItems();
+		}
+	},
 };
