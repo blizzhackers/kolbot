@@ -1,6 +1,13 @@
+/**
+*  @filename    D2BotPubJoin.dbj
+*  @author      kolton, theBGuy
+*  @desc        Entry script for following public games
+*
+*/
 include("StarterConfig.js");
+// todo - allow joining chat and looking for games there too
 
-// D2BotPubJoin settings
+// D2BotPubJoin specific settings - for global settings see libs/StarterConfig.js
 Starter.Config.MinGameTime = 0; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
 Starter.Config.ResetCount = 0; // Reset game count back to 1 every X games.
 
@@ -281,7 +288,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.GameDoesNotExist:
-		Starter.LocationEvents.gamneDoesNotExist();
+		Starter.LocationEvents.gameDoesNotExist();
 
 		break;
 	case sdk.game.locations.CharacterCreate:

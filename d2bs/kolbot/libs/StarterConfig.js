@@ -36,5 +36,43 @@ Starter.Config = {
 	WaitInLineTimeout: 3600, // Seconds to wait before cancelling the 'Waiting in Line...' screen
 	WaitOutQueueRestriction: true, // Wait out queue if we are restricted, queue time > 10000
 	WaitOutQueueExitToMenu: false, // Wait out queue restriction at D2 Splash screen if true, else wait out in lobby
-	GameDoesNotExistTimeout: 30 // Seconds to wait before cancelling the 'Game does not exist.' screen
+	GameDoesNotExistTimeout: 30, // Seconds to wait before cancelling the 'Game does not exist.' screen
+};
+
+// Advanced config - you don't have to edit this unless you need some of the features provided
+const AdvancedConfig = {
+	/* Features:
+	Override channel for each profile, Override join delay for each profile
+	Override default values for JoinChannel, FirstJoinMessage, AnnounceGames and AfterGameMessage per profile
+
+	* Format *:
+		"Profile Name": {JoinDelay: number_of_seconds}
+	or
+		"Profile Name": {JoinChannel: "channel name"}
+	or
+		"Profile Name": {JoinChannel: "channel name", JoinDelay: number_of_seconds}
+
+	* Example * (don't edit this - it's just an example):
+
+		"MyProfile1": {JoinDelay: 3},
+		"MyProfile2": {JoinChannel: "some channel"},
+		"MyProfile3": {JoinChannel: "some other channel", JoinDelay: 11}
+		"MyProfile4": {AnnounceGames: true, AnnounceMessage: "Joining game"} // announce game you are joining
+
+		"Profile Name": {
+			JoinChannel: "channel name", -OR- ["channel 1", "channel 2"],
+			FirstJoinMessage: "first message", -OR- ["join msg 1", "join msg 2"],
+			AnnounceGames: true,
+			AfterGameMessage: "message after a finished run" -OR- ["msg 1", msg 2"]
+		}
+	*/
+	
+	// Put your lines under this one. Multiple entries are separated by commas. No comma after the last one.
+
+	"Test": {
+		JoinChannel: "op nnqry",
+		JoinDelay: 3,
+		AnnounceGames: true,
+		AnnounceMessage: "Joining game" // output: Joining game Baals-23
+	},
 };

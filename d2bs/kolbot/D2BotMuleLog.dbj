@@ -1,6 +1,12 @@
+/**
+*  @filename    D2BotMuleLogger.dbj
+*  @author      kolton, theBGuy
+*  @desc        Entry script for Mulelogger.js
+*
+*/
 include("StarterConfig.js");
 
-// D2BotMuleLog settings
+// D2BotMuleLog specific settings - for global settings see libs/StarterConfig.js
 Starter.Config.MinGameTime = rand(150, 180); // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
 Starter.Config.CreateGameDelay = 5; // Seconds to wait before creating a new game
 Starter.Config.SwitchKeyDelay = 0; // Seconds to wait before switching a used/banned key or after realm down
