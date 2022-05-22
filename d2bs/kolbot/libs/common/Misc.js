@@ -1,7 +1,8 @@
 /**
-*	@filename	Misc.js
-*	@author		kolton, theBGuy
-*	@desc		misc library containing Skill, Misc and Sort classes
+*  @filename    Misc.js
+*  @author      kolton, theBGuy
+*  @desc        misc library containing Skill, Misc and Sort classes
+*
 */
 
 const Skill = {
@@ -1004,7 +1005,7 @@ const Misc = {
 		// locked chest, no keys
 		if (!me.assassin && unit.islocked && !me.findItem(543, 0, 3)) return false;
 
-		let specialChest = [17, 18, 19, 20, 21, 30].includes(unit.classid);
+		let specialChest = sdk.quest.chests.includes(unit.classid);
 
 		for (let i = 0; i < 7; i++) {
 			if (Skill.useTK(unit) && i < 3) {

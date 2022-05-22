@@ -1,7 +1,8 @@
 /**
-*	@filename	Storage.js
-*	@author		McGod, kolton (small kolbot related edits)
-*	@desc		manage inventory, belt, stash, cube
+*  @filename    Storage.js
+*  @author      McGod, kolton (small kolbot related edits)
+*  @desc        manage inventory, belt, stash, cube
+*
 */
 
 let Container = function (name, width, height, location) {

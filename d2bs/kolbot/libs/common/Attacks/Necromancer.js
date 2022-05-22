@@ -1,7 +1,8 @@
 /**
-*	@filename	Necromancer.js
-*	@author		kolton, theBGuy
-*	@desc		Necromancer attack sequence
+*  @filename    Necromancer.js
+*  @author      kolton, theBGuy
+*  @desc        Necromancer attack sequence
+*
 */
 
 const ClassAttack = {

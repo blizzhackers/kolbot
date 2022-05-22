@@ -1,7 +1,8 @@
 /**
-*	@filename	Wereform.js
-*	@author		kolton, theBGuy
-*	@desc		Wereform attack sequence
+*  @filename    Wereform.js
+*  @author      kolton, theBGuy
+*  @desc        Wereform attack sequence
+*
 */
 
 const ClassAttack = {

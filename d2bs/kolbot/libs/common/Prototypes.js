@@ -1,8 +1,9 @@
 /**
-*	@filename	Prototypes.js
-*	@author		kolton, theBGuy
-* 	@credits 	Jaenster
-*	@desc		various 'Unit' and 'me' prototypes
+*  @filename    Prototypes.js
+*  @author      kolton, theBGuy
+*  @credit      Jaenster
+*  @desc        various 'Unit' and 'me' prototypes
+*
 */
 
 // Ensure these are in polyfill.js
@@ -469,19 +470,16 @@ me.castingFrames = function (skillId, fcr, charClass) {
 	charClass === undefined && (charClass = this.classid);
 
 	// https://diablo.fandom.com/wiki/Faster_Cast_Rate
-	let effectiveFCR = Math.min(75, (fcr * 120 / (fcr + 120)) | 0);
+	let effectiveFCR = Math.min(75, Math.floor(fcr * 120 / (fcr + 120)) | 0);
 	let isLightning = skillId === sdk.skills.Lightning || skillId === sdk.skills.ChainLightning;
 	let baseCastRate = [20, isLightning ? 19 : 14, 16, 16, 14, 15, 17][charClass];
-	if (isLightning) {
-		return Math.round(256 * baseCastRate / (256 * (100 + effectiveFCR) / 100));
-	}
 	let animationSpeed = {
 		normal: 256,
 		human: 208,
 		wolf: 229,
 		bear: 228
 	}[charClass === sdk.charclass.Druid ? (me.getState(sdk.states.Wolf) || me.getState(sdk.states.Bear)) : "normal"];
-	return Math.ceil(256 * baseCastRate / Math.floor(animationSpeed * (100 + effectiveFCR) / 100)) - 1;
+	return Math.ceil(256 * baseCastRate / Math.floor(animationSpeed * (100 + effectiveFCR) / 100) - (isLightning ? 0 : 1));
 };
 
 // Returns the duration in seconds needed to cast a given skill at a given FCR for a given char.
@@ -1792,23 +1790,23 @@ Object.defineProperties(me, {
 	highestAct: {
 		get: function () {
 			let acts = [true,
-				me.getQuest(sdk.quests.AbleToGotoActII, 0),
-				me.getQuest(sdk.quests.AbleToGotoActIII, 0),
-				me.getQuest(sdk.quests.AbleToGotoActIV, 0),
-				me.getQuest(sdk.quests.AbleToGotoActV, 0)];
+				me.getQuest(sdk.quest.id.AbleToGotoActII, 0),
+				me.getQuest(sdk.quest.id.AbleToGotoActIII, 0),
+				me.getQuest(sdk.quest.id.AbleToGotoActIV, 0),
+				me.getQuest(sdk.quest.id.AbleToGotoActV, 0)];
 			let index = acts.findIndex(function (i) { return !i; }); // find first false, returns between 1 and 5
 			return index === -1 ? 5 : index;
 		}
 	},
 	highestQuestDone: {
 		get: function () {
-			for (let i = sdk.quests.SecretCowLevel; i >= sdk.quests.SpokeToWarriv; i--) {
+			for (let i = sdk.quest.id.SecretCowLevel; i >= sdk.quest.id.SpokeToWarriv; i--) {
 				if (me.getQuest(i, 0)) {
 					return i;
 				}
 
 				// check if we've completed main part but not used our reward
-				if ([sdk.quests.RescueonMountArreat, sdk.quests.SiegeOnHarrogath, sdk.quests.ToolsoftheTrade].includes(i) && me.getQuest(i, 1)) {
+				if ([sdk.quest.id.RescueonMountArreat, sdk.quest.id.SiegeOnHarrogath, sdk.quest.id.ToolsoftheTrade].includes(i) && me.getQuest(i, 1)) {
 					return i;
 				}
 			}

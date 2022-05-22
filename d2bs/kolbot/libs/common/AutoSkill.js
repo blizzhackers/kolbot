@@ -1,7 +1,8 @@
 /**
-*	@filename	AutoSkill.js
-*	@author		Original work by Nad42, edited by IMBA
-*	@desc		Automatically allocate skill points and its pre-requisites if necessary
+*  @filename    AutoSkill.js
+*  @author      Original work by Nad42, edited by IMBA
+*  @desc        Automatically allocate skill points and its pre-requisites if necessary
+*
 */
 
 const AutoSkill = new function () {

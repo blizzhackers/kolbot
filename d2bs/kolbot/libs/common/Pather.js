@@ -1,7 +1,8 @@
 /**
-*	@filename	Pather.js
-*	@author		kolton, theBGuy
-*	@desc		handle player movement
+*  @filename    Pather.js
+*  @author      kolton, theBGuy
+*  @desc        handle player movement
+*
 */
 
 // TODO: this needs to be re-worked
@@ -764,7 +765,8 @@ const Pather = {
 		// anything small and annoying really
 		let barrels = getUnits(sdk.unittype.Object)
 			.filter(function (el) {
-				return (el.name && el.mode === 0 && ["barrel", "largeurn", "jar3", "jar2", "jar1", "urn", "jug"].includes(el.name.toLowerCase())
+				return (el.name && el.mode === 0
+				&& ["ratnest", "goo pile", "barrel", "basket", "largeurn", "jar3", "jar2", "jar1", "urn", "jug", "barrel wilderness", "cocoon"].includes(el.name.toLowerCase())
 				&& ((getDistance(el, x, y) < 4 && el.distance < 9) || el.distance < 4));
 			});
 		let brokeABarrel = false;

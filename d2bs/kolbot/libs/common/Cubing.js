@@ -1,7 +1,8 @@
 /**
-*	@filename	Cubing.js
-*	@author		kolton
-*	@desc		transmute Horadric Cube recipes
+*  @filename    Cubing.js
+*  @author      kolton
+*  @desc        transmute Horadric Cube recipes
+*
 */
 
 const Roll = {

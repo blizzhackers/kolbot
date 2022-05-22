@@ -1,7 +1,8 @@
 /**
-*	@filename	Config.js
-*	@author		kolton
-*	@desc		config loading and default config values storage
+*  @filename    Config.js
+*  @author      kolton
+*  @desc        config loading and default config values storage
+*
 */
 
 const Scripts = {};

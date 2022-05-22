@@ -1,7 +1,8 @@
 /**
-*	@filename	Amazon.js
-*	@author		kolton
-*	@desc		Amazon attack sequence
+*  @filename    Amazon.js
+*  @author      kolton
+*  @desc        Amazon attack sequence
+*
 */
 
 const ClassAttack = {

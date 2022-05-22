@@ -1,8 +1,9 @@
 /**
- * @author Jaenster (I think), theBGuy
- * @description utility functions for kolbot
- *
- */
+*  @filename    Util.js
+*  @author      Jaenster, theBGuy
+*  @desc        utility functions for kolbot
+*
+*/
 
 /**
  * @param args

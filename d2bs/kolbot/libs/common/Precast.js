@@ -1,7 +1,8 @@
 /**
-*	@filename	Precast.js
-*	@author		noah-, kolton, theBGuy
-*	@desc		handle player prebuff sequence
+*  @filename    Precast.js
+*  @author      noah-, kolton, theBGuy
+*  @desc        handle player prebuff sequence
+*
 */
 
 const Precast = new function () {

@@ -1,7 +1,8 @@
 /**
-*	@filename	Paladin.js
-*	@author		kolton, theBGuy
-*	@desc		Paladin attack sequence
+*  @filename    Paladin.js
+*  @author      kolton, theBGuy
+*  @desc        Paladin attack sequence
+*
 */
 
 const ClassAttack = {

@@ -1,7 +1,8 @@
 /**
-*	@filename	Town.js
-*	@author		kolton, theBGuy
-*	@desc		do town chores like buying, selling and gambling
+*  @filename    Town.js
+*  @author      kolton, theBGuy
+*  @desc        do town chores like buying, selling and gambling
+*
 */
 
 const NPC = {
@@ -1432,7 +1433,7 @@ const Town = {
 	},
 
 	needMerc: function () {
-		if (me.classic || !Config.UseMerc || me.gold < me.mercrevivecost) return false;
+		if (me.classic || !Config.UseMerc || me.gold < me.mercrevivecost || !me.mercrevivecost) return false;
 
 		Misc.poll(() => me.gameReady, 1000, 100);
 		// me.getMerc() might return null if called right after taking a portal, that's why there's retry attempts
@@ -1447,7 +1448,7 @@ const Town = {
 		}
 
 		// In case we never had a merc and Config.UseMerc is still set to true for some odd reason
-		return (!me.mercrevivecost ? false : true);
+		return true;
 	},
 
 	canStash: function (item) {

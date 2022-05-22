@@ -1,7 +1,8 @@
 /**
-*	@filename	Loader.js
-*	@author		kolton, theBGuy
-*	@desc		script loader, based on mBot's Sequencer.js
+*  @filename    Loader.js
+*  @author      kolton, theBGuy
+*  @desc        script loader, based on mBot's Sequencer.js
+*
 */
 
 let global = this;

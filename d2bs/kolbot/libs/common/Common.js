@@ -1,7 +1,8 @@
 /**
-*	@filename	Common.js
-*	@author		theBGuy
-*	@desc		collection of functions shared between muliple scripts
+*  @filename    Common.js
+*  @author      theBGuy
+*  @desc        collection of functions shared between muliple scripts
+*
 */
 
 const Common = {
@@ -394,9 +395,10 @@ const Common = {
 			}
 
 			let pos = [
-				{ x: 15097, y: 5054 }, { x: 15085, y: 5053 },
-				{ x: 15085, y: 5040 }, { x: 15098, y: 5040 },
-				{ x: 15099, y: 5022 }, { x: 15086, y: 5024 }
+				{ x: 15097, y: 5054 }, { x: 15079, y: 5014 },
+				{ x: 15085, y: 5053 }, { x: 15085, y: 5040 },
+				{ x: 15098, y: 5040 }, { x: 15099, y: 5022 },
+				{ x: 15086, y: 5024 }, { x: 15079, y: 5014 }
 			];
 			return pos.forEach((node) => {
 				Pather.moveTo(node.x, node.y);
@@ -527,7 +529,7 @@ const Common = {
 					}
 
 					if (Config.AttackSkill[3] === sdk.skills.Tornado) {
-						[15094, 5029].distance > 3 && Pather.moveTo(15094, 5029);
+						[15094, 5029].distance > 3 && Pather.moveTo(15106, 5041);
 						
 						break;
 					}

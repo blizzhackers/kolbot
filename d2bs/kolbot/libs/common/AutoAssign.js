@@ -1,3 +1,9 @@
+/**
+*  @filename    AutoAssign.js
+*  @author      ?
+*  @desc        ?
+*
+*/
 let answer = false;
 let request = false;
 

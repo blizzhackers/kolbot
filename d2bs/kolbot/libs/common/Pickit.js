@@ -1,7 +1,8 @@
 /**
-*	@filename	Pickit.js
-*	@author		kolton, theBGuy
-*	@desc		handle item pickup
+*  @filename    Pickit.js
+*  @author      kolton, theBGuy
+*  @desc        handle item pickup
+*
 */
 
 const Pickit = {

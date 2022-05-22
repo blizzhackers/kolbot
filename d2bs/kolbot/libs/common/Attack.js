@@ -1,7 +1,8 @@
 /**
-*	@filename	Attack.js
-*	@author		kolton, theBGuy
-*	@desc		handle player attacks
+*  @filename    Attack.js
+*  @author      kolton, theBGuy
+*  @desc        handle player attacks
+*
 */
 
 const Attack = {
@@ -164,7 +165,9 @@ const Attack = {
 
 	// Check if player or his merc are using Infinity, and adjust resistance checks based on that
 	checkInfinity: function () {
-		let merc = Misc.poll(() => me.getMerc(), 2000, (250 + me.ping));
+		let merc;
+		// check if we have a merc
+		!me.classic && Config.UseMerc || !!me.mercrevivecost && (merc = Misc.poll(() => me.getMerc(), 2000, (250 + me.ping)));
 
 		// Check merc infinity
 		!!merc && (this.infinity = merc.checkItem({name: sdk.locale.items.Infinity}).have);

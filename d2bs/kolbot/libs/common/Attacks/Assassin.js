@@ -1,7 +1,8 @@
 /**
-*	@filename	Assassin.js
-*	@author		kolton
-*	@desc		Assassin attack sequence
+*  @filename    Assassin.js
+*  @author      kolton
+*  @desc        Assassin attack sequence
+*
 */
 
 const ClassAttack = {

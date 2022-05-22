@@ -1,7 +1,8 @@
 /**
-*	@filename	Sorceress.js
-*	@author		kolton, theBGuy
-*	@desc		Sorceress attack sequence
+*  @filename    Sorceress.js
+*  @author      kolton, theBGuy
+*  @desc        Sorceress attack sequence
+*
 */
 
 const ClassAttack = {
