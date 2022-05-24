@@ -1,4 +1,9 @@
-// default.dbj gets executed upon gamejoin
+/**
+*  @filename    default.dbj
+*  @author      kolton
+*  @desc        gets executed upon gamejoin, main thread for bot
+*
+*/
 js_strict(true);
 
 include("json2.js");
