@@ -139,6 +139,20 @@ let Config = {
 	TownHP: 0,
 	TownMP: 0,
 
+	// special pots
+	StackThawingPots: {
+		enabled: false,
+		quantity: 12,
+	},
+	StackAntidotePots: {
+		enabled: false,
+		quantity: 12,
+	},
+	StackStaminaPots: {
+		enabled: false,
+		quantity: 12,
+	},
+
 	// General
 	AutoMap: false,
 	LastMessage: "",
