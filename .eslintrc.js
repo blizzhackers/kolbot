@@ -126,7 +126,8 @@ module.exports = {
 		"no-prototype-builtins": "off",
 		"quotes": "off",
 		"no-constant-condition": ["error", {"checkLoops": false}],
-		"no-labels": ["error", {"allowLoop": true}], // in the future no loops ;)
+		"no-extra-label": "error",
+		//"no-labels": ["error", {"allowLoop": true}], // in the future no loops ;)
 		"no-unused-vars": ["warn", {"vars": "local"}],
 		"no-fallthrough": ["error", {"commentPattern": "break[\\s\\w]*omitted"}],
 		"no-undef": ["off", "always"],

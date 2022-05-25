@@ -10,14 +10,17 @@ include("StarterConfig.js");
 Starter.Config.Games = [""]; // List of games to look for. Example: Games: ["some baal-", "chaos run-"],
 Starter.Config.Passwords = [""]; // List of game passwords. Each array in Games array should have a matching element in Passwords. Use "" for blank pw.
 Starter.Config.JoinDelay = 5; // Seconds to wait between announcement and clicking join
+Starter.Config.JoinRetry = 5; // Amount of times to re-attempt joining game
 Starter.Config.FriendListQuery = 0; // Seconds between "/f l" retries. 0 = disable. To prevent spamming when using set time rand(80, 160)
 Starter.Config.SkipMutedKey = true;
 Starter.Config.MutedKeyTrigger = "Your account has had all chat privileges suspended.";
-Starter.Config.JoinChannel = ""; // Default channel. Can be an array of channels - ["channel 1", "channel 2"]
 Starter.Config.Follow = []; // leader's in game character name, only use this if the leader is using announce in the chat, can be an array or names ["somename", "somename2"] 
 
 // Override default values for StarterConfig under here by following format
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds 
+// Starter.Config.JoinChannel = ""; // Default channel. Can be an array of channels - ["channel 1", "channel 2"]
+
+// todo: figure out a way to check if player who announced game is still in channel
 
 // No touchy!
 include("json2.js");
@@ -177,7 +180,7 @@ function locationAction (location) {
 				if (string === getLocaleString(5162)) {
 					print(string);
 
-					retry = 3;
+					retry = Starter.Config.JoinRetry;
 
 					break;
 				}
@@ -199,12 +202,12 @@ function locationAction (location) {
 
 			break;
 		case "FULL": // Game is full
-			retry = 3;
+			retry = Starter.Config.JoinRetry;
 
 			break;
 		}
 
-		if (retry >= 3) {
+		if (retry >= Starter.Config.JoinRetry) {
 			D2Bot.printToConsole("Failed to join " + joinInfo.gameName + ". Aborting.");
 			badGames.push(joinInfo.gameName);
 
@@ -223,16 +226,16 @@ function locationAction (location) {
 		fullText = lines.join(" ").replace(/\s+/g, " ");
 
 		if (lastText === fullText) {
+			if (joinInfo.gameName && joinInfo.gameName !== joinInfo.oldGame && badGames.indexOf(joinInfo.gameName) === -1) {
+				// we have a game and nothing else has changed since last announcement so go ahead and try joining again
+				Controls.JoinGameWindow.click();
+			}
 			// nothing has changed since our last check so break
 			break;
 		}
 
 		lastText = fullText;
 		let newLines = lines
-			.filter(line => {
-				if (line.match("you have joined channel", "gi") || line.match("last logon", "gi")) return false;
-				return true;
-			})
 			.map((line, index) => {
 			// eslint-disable-next-line no-useless-escape
 				if (index > 0 && !line.match(/\<.*\>/, "gi")) {

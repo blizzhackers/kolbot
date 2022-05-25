@@ -47,7 +47,7 @@ function locationAction (location) {
 			Starter.pingQuit = false;
 		}
 
-		if (Starter.Config.JoinChannel !== "" || (ChannelConfig[me.profile] && ChannelConfig[me.profile].JoinChannel !== "")) {
+		if (Starter.Config.JoinChannel !== "" || (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].JoinChannel !== "")) {
 			Controls.LobbyEnterChat.click();
 
 			break;
@@ -115,8 +115,8 @@ function locationAction (location) {
 				DataFile.updateStats("runs", Starter.gameCount);
 			}
 
-			if (ChannelConfig[me.profile] && ChannelConfig[me.profile].hasOwnProperty("AfterGameMessage")) {
-				Starter.chanInfo.afterMsg = ChannelConfig[me.profile].AfterGameMessage;
+			if (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].hasOwnProperty("AfterGameMessage")) {
+				Starter.chanInfo.afterMsg = AdvancedConfig[me.profile].AfterGameMessage;
 			} else {
 				Starter.chanInfo.afterMsg = Starter.Config.AfterGameMessage;
 			}
@@ -136,14 +136,14 @@ function locationAction (location) {
 		if (!Starter.chatActionsDone) {
 			Starter.chatActionsDone = true;
 
-			if (ChannelConfig[me.profile] && ChannelConfig[me.profile].hasOwnProperty("JoinChannel")) {
-				Starter.chanInfo.joinChannel = ChannelConfig[me.profile].JoinChannel;
+			if (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].hasOwnProperty("JoinChannel")) {
+				Starter.chanInfo.joinChannel = AdvancedConfig[me.profile].JoinChannel;
 			} else {
 				Starter.chanInfo.joinChannel = Starter.Config.JoinChannel;
 			}
 
-			if (ChannelConfig[me.profile] && ChannelConfig[me.profile].hasOwnProperty("FirstJoinMessage")) {
-				Starter.chanInfo.firstMsg = ChannelConfig[me.profile].FirstJoinMessage;
+			if (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].hasOwnProperty("FirstJoinMessage")) {
+				Starter.chanInfo.firstMsg = AdvancedConfig[me.profile].FirstJoinMessage;
 			} else {
 				Starter.chanInfo.firstMsg = Starter.Config.FirstJoinMessage;
 			}
@@ -171,8 +171,8 @@ function locationAction (location) {
 		}
 
 		// Announce game
-		if (ChannelConfig[me.profile] && ChannelConfig[me.profile].hasOwnProperty("AnnounceGames")) {
-			Starter.chanInfo.announce = ChannelConfig[me.profile].AnnounceGames;
+		if (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].hasOwnProperty("AnnounceGames")) {
+			Starter.chanInfo.announce = AdvancedConfig[me.profile].AnnounceGames;
 		} else {
 			Starter.chanInfo.announce = Starter.Config.AnnounceGames;
 		}
