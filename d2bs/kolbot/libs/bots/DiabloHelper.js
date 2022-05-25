@@ -1,18 +1,21 @@
 /**
-*	@filename	DiabloHelper.js
-*	@author		kolton
-*	@desc		help leading player in clearing Chaos Sanctuary and killing Diablo
+*  @filename    DiabloHelper.js
+*  @author      kolton
+*  @desc        help leading player in clearing Chaos Sanctuary and killing Diablo
+*
 */
 
 function DiabloHelper() {
 	// general functions
 	this.getBoss = function (name) {
+		let glow;
+
 		while (true) {
 			if (!this.preattack(name)) {
 				delay(500);
 			}
 
-			let glow = getUnit(2, 131);
+			glow = getUnit(2, 131);
 
 			if (glow) {
 				break;

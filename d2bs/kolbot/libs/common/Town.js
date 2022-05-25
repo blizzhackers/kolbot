@@ -1768,6 +1768,15 @@ const Town = {
 
 		// Return potions from inventory to belt
 		let beltSize = Storage.BeltSize();
+		// belt 4x4 locations
+		/**
+		 * 12 13 14 15
+		 * 8  9  10 11
+		 * 4  5  6  7
+		 * 0  1  2  3
+		 */
+		let beltMax = (beltSize * 4);
+		let beltCapRef = [(0 + beltMax), (1 + beltMax), (2 + beltMax), (3 + beltMax)];
 		let potsInInventory = me.getItemsEx()
 			.filter((p) => p.isInInventory && [sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion].includes(p.itemType))
 			.sort((a, b) => a.itemType - b.itemType);
@@ -1778,13 +1787,14 @@ const Town = {
 			let moved = false;
 			// get free space in each slot of our belt
 			let freeSpace = Town.checkColumns(beltSize);
-			for (let i = 0; i < 4 && !moved; i += 1) {
+			for (let i = 0; i < 4 && !moved; i++) {
 				// checking that current potion matches what we want in our belt
 				if (freeSpace[i] > 0 && p.code && p.code.startsWith(Config.BeltColumn[i])) {
 					// Pick up the potion and put it in belt if the column is empty, and we don't have any other columns empty
 					// prevents shift-clicking potion into wrong column
 					if (freeSpace[i] === beltSize || freeSpace.some((spot) => spot === beltSize)) {
-						p.toCursor(true) && new PacketBuilder().byte(0x23).dword(p.gid).dword(Math.max(0, (beltSize - freeSpace[i]))).send();
+						let x = freeSpace[i] === beltSize ? i : (beltCapRef[i] - (freeSpace[i] * 4));
+						p.toCursor(true) && new PacketBuilder().byte(0x23).dword(p.gid).dword(x).send();
 					} else {
 						clickItemAndWait(sdk.clicktypes.click.ShiftLeft, p.x, p.y, p.location);
 					}

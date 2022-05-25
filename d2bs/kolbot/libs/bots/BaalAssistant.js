@@ -1,8 +1,9 @@
 /**
- *	@filename	BaalAssistant.js
- *	@author		kolton, modified by YGM, refactored by theBGuy
- *	@desc		Help or Leech Baal Runs.
- */
+*  @filename    BaalAssistant.js
+*  @author      kolton, modified by YGM, refactored by theBGuy
+*  @desc        Help or Leech Baal Runs.
+*
+*/
 
 function BaalAssistant() {
 	let Leader = Config.Leader, // Not entriely needed in the configs.

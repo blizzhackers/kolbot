@@ -1,7 +1,8 @@
 /**
-*	@filename	Diablo.js
-*	@author		kolton, theBGuy
-*	@desc		clear Chaos Sanctuary and kill Diablo
+*  @filename    Diablo.js
+*  @author      kolton, theBGuy
+*  @desc        clear Chaos Sanctuary and kill Diablo
+*
 */
 
 function Diablo() {

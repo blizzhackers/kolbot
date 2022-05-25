@@ -1,7 +1,8 @@
 /**
-*	@filename	Rushee.js
-*	@author		kolton, theBGuy
-*	@desc		Rushee script that works with Rusher
+*  @filename    Rushee.js
+*  @author      kolton, theBGuy
+*  @desc        Rushee script that works with Rusher
+*
 */
 
 let Overrides = require('../modules/Override');

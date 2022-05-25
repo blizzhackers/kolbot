@@ -67,7 +67,7 @@ function BaalHelper() {
 	Precast.doPrecast(false);
 	Attack.clear(15);
 	Common.Baal.clearThrone();
-	if (!Common.Baal.clearWaves()) { throw new Error("Couldn't clear baal waves"); }
+	if (!Common.Baal.clearWaves()) throw new Error("Couldn't clear baal waves");
 
 	if (Config.BaalHelper.KillBaal) {
 		Pather.moveTo(15092, 5011);
