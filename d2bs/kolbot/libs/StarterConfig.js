@@ -1,9 +1,9 @@
-/*
-*	@filename	StarterConfig.js
-*	@author		theBGuy
-*	@desc		Global settings for entry scripts
+/**
+*  @filename    StarterConfig.js
+*  @author      theBGuy
+*  @desc        Global settings for entry scripts
+*
 */
-
 !isIncluded("OOG.js") && include("OOG.js");
 
 Starter.Config = {

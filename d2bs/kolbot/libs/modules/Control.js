@@ -122,6 +122,7 @@
 	Control.SinglePlayerNightmare = new Control(-1, 264, 340, 272, 35);
 	Control.SinglePlayerHell = new Control(-1, 264, 383, 272, 35);
 
+	Control.LobbyCharacterInfo = new Control(4, 143, 588, 230, 87);
 	Control.LobbyEnterChat = new Control(6, 27, 480, 120, 20);
 	Control.LobbyQuit = new Control(6, 693, 490, 80, 20);
 
@@ -150,10 +151,20 @@
 	Control.LobbyChannelText = new Control(1, 432, 162, 155, 20);
 	Control.LobbyChannelOk = new Control(6, 671, 433, 96, 32);
 	Control.LobbyChannelCancel = new Control(6, 433, 433, 96, 32);
+	Control.LobbyChannelChar0 = new Control(6, 40, 591, 60, 100);
+	Control.LobbyChannelChar1 = new Control(6, 100, 591, 60, 100);
+	Control.LobbyChannelChar2 = new Control(6, 160, 591, 60, 100);
+	Control.LobbyChannelChar3 = new Control(6, 220, 591, 60, 100);
+	Control.LobbyChannelChar4 = new Control(6, 280, 591, 60, 100);
+	Control.LobbyChannelChar5 = new Control(6, 340, 591, 60, 100);
+	Control.LobbyChannelChar6 = new Control(6, 400, 591, 60, 100);
+	Control.LobbyChannelChar7 = new Control(6, 460, 591, 60, 100);
+	Control.LobbyChannelChar8 = new Control(6, 520, 591, 60, 100);
+	Control.LobbyChannelChar9 = new Control(6, 580, 591, 60, 100);
+	Control.LobbyChannelChar10 = new Control(6, 640, 591, 60, 100);
 
 	Control.LobbyChat = new Control(4, 28, 410, 354, 298);
 	Control.LobbyServerDown = new Control(4, 438, 300, 326, 150);
-
 
 	Control.OkCentered = new Control(6, 351, 337, 96, 32);
 	Control.HellSP = new Control(-1, 264, 383, 272, 35);
@@ -161,5 +172,4 @@
 	Control.NormalSP = new Control(-1, 264, 297, 272, 35);
 
 	module.exports = Control;
-
 })(module);
