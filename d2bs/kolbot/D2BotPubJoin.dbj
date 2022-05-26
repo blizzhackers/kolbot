@@ -10,6 +10,9 @@ include("StarterConfig.js");
 // D2BotPubJoin specific settings - for global settings see libs/StarterConfig.js
 Starter.Config.MinGameTime = 0; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
 Starter.Config.ResetCount = 0; // Reset game count back to 1 every X games.
+Starter.Config.JoinDelay = 10; // Seconds to wait between join attempts
+Starter.Config.AttemptNextGame = true; // after joining a game, attempt incrementing game count and joining next game rather than looking for it in game list
+Starter.Config.AttemptNextGameRetrys = 5;
 
 // Override default values for StarterConfig under here by following format
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
@@ -98,14 +101,27 @@ include("craftingsystem.js");
 include("torchsystem.js");
 include("common/misc.js");
 include("common/util.js");
-let Controls = require('./modules/Control');
 let sdk = require('./modules/sdk');
+let Controls = require('./modules/Control');
+let Overrides = require('./modules/Override');
+
+new Overrides.Override(Starter, Starter.setNextGame, function (orignal, gameName) {
+	function incrementString (text) {
+		return text.replace(/(\d*)$/, (_, t) => (+t + 1).toString().padStart(t.length, 0));
+	}
+
+	let nextGame = (gameName || this.randomString(null, true));
+	nextGame = incrementString(nextGame);
+
+	DataFile.updateStats("nextGame", nextGame);
+}).apply();
 
 if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 	Starter.firstRun = true;
 }
 
-let lastGameTick;
+let lastGameTick, retry = 0;
+let retryTick = 0;
 
 function locationAction (location) {
 	let gameToJoin, doneGames, gameList;
@@ -172,10 +188,37 @@ function locationAction (location) {
 		Starter.LocationEvents.openJoinGameWindow();
 
 		break;
-	case sdk.game.locations.JoinGame: // Join Game
+	case sdk.game.locations.JoinGame:
 		// Don't join immediately after previous game to avoid FTJ
 		if (getTickCount() - lastGameTick < 5000) {
 			ControlAction.timeoutDelay("Game Delay", (lastGameTick - getTickCount() + 5000));
+		}
+
+		if (Starter.Config.AttemptNextGame && retry < Starter.Config.AttemptNextGameRetrys) {
+			let ng = DataFile.getStats().nextGame;
+
+			if (ng && (retry === 0 || (getTickCount() - retryTick > Starter.Config.JoinDelay * 1e3))) {
+				gameToJoin = ng;
+				console.debug(gameToJoin);
+
+				me.blockMouse = true;
+
+				try {
+					joinGame(gameToJoin, "");
+				} catch (joinErr) {
+					print(joinErr);
+				}
+
+				retry++;
+				retryTick = getTickCount();
+				me.blockMouse = false;
+
+				Starter.locationTimeout(5000, location);
+
+				if (getLocation() === sdk.game.locations.GameDoesNotExist) {
+					Starter.LocationEvents.openJoinGameWindow();
+				}
+			}
 		}
 
 		for (let i = 0; i < 5; i += 1) {
@@ -338,6 +381,7 @@ function main() {
 	}
 
 	Starter.gameCount = (DataFile.getStats().runs + 1 || 1);
+	DataFile.updateStats("nextGame", "");
 
 	if (Starter.gameInfo.error) {
 		D2Bot.retrieve();
@@ -373,9 +417,12 @@ function main() {
 
 					Starter.lastGameStatus = "ingame";
 					Starter.inGame = true;
+					retry = 0;
+					retryTick = 0;
 
 					DataFile.updateStats("runs", Starter.gameCount);
 					DataFile.updateStats("ingameTick");
+					Starter.setNextGame(me.gamename);
 				}
 
 				D2Bot.updateStatus(Starter.profileInfo.charName + " | Game: " + (me.gamename || "singleplayer") + Starter.timer(Starter.gameStart));
