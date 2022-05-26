@@ -9,7 +9,7 @@ include("StarterConfig.js");
 // D2BotChannel specific settings - for global settings see libs/StarterConfig.js
 Starter.Config.Games = [""]; // List of games to look for. Example: Games: ["some baal-", "chaos run-"],
 Starter.Config.Passwords = [""]; // List of game passwords. Each array in Games array should have a matching element in Passwords. Use "" for blank pw.
-Starter.Config.JoinDelay = 5; // Seconds to wait between announcement and clicking join
+Starter.Config.JoinDelay = 10; // Seconds to wait between announcement and clicking join
 Starter.Config.JoinRetry = 5; // Amount of times to re-attempt joining game
 Starter.Config.FriendListQuery = 0; // Seconds between "/f l" retries. 0 = disable. To prevent spamming when using set time rand(80, 160)
 Starter.Config.SkipMutedKey = true;
@@ -190,7 +190,7 @@ function locationAction (location) {
 
 			D2Bot.updateRuns();
 
-			if (retry < 3) {
+			if (retry < Starter.Config.JoinRetry) {
 				Controls.JoinGameWindow.click();
 
 				break MainSwitch;
