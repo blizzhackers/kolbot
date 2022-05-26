@@ -1,3 +1,9 @@
+/**
+*  @filename    D2BotMap.dbj
+*  @author      kolton, theBGuy
+*  @desc        Entry script for running map mode
+*
+*/
 include("json2.js");
 include("polyfill.js");
 include("OOG.js");
@@ -19,7 +25,7 @@ function main () {
 	while (true) {
 		if (me.gameReady) {
 			Starter.isUp === "no" && (Starter.isUp = "yes");
-			me.ingame && D2Bot.updateStatus("(Char: " + me.charname + ") (Game: " + me.gamename + ") (Level: " + me.charlvl + ")");
+			me.ingame && D2Bot.updateStatus("(Char: " + me.charname + ") (Game: " + (me.gamename || "singleplayer") + ") (Level: " + me.charlvl + ")");
 		} else {
 			D2Bot.updateStatus("Out of Game");
 			Starter.isUp = "no";

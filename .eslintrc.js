@@ -59,7 +59,6 @@ module.exports = {
 		"getLocation": true,
 		"login": true,
 		"sendCopyData": true,
-		"locationAction": true,
 		"getControl": true,
 		"debugLog": true,
 		"getCollision": true,
@@ -84,7 +83,6 @@ module.exports = {
 		"js_strict": true,
 		"handler": true,
 		"sendKey": true,
-		"global": true,
 		"md5": true,
 		"module": true,
 		"require": true,
@@ -128,7 +126,8 @@ module.exports = {
 		"no-prototype-builtins": "off",
 		"quotes": "off",
 		"no-constant-condition": ["error", {"checkLoops": false}],
-		"no-labels": ["error", {"allowLoop": true}], // in the future no loops ;)
+		"no-extra-label": "error",
+		//"no-labels": ["error", {"allowLoop": true}], // in the future no loops ;)
 		"no-unused-vars": ["warn", {"vars": "local"}],
 		"no-fallthrough": ["error", {"commentPattern": "break[\\s\\w]*omitted"}],
 		"no-undef": ["off", "always"],

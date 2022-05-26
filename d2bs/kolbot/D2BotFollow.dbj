@@ -1,6 +1,12 @@
+/**
+*  @filename    D2BotFollow.dbj
+*  @author      kolton, theBGuy
+*  @desc        Entry script for following bots running on the same pc
+*
+*/
 include("StarterConfig.js");
 
-// D2BotFollow settings
+// D2BotFollow specific settings - for global settings see libs/StarterConfig.js
 Starter.Config.JoinRetryDelay = 5; // Time in seconds to wait before next join attempt
 
 // Override default values for StarterConfig under here by following format
@@ -20,22 +26,6 @@ Starter.Config.JoinRetryDelay = 5; // Time in seconds to wait before next join a
 
 const JoinSettings = {
 	"Leader": ["Leecher"]
-};
-
-// Advanced config - you don't have to edit this unless you need some of the features provided
-const AdvancedConfig = {
-	/* Features: Override join delay for each profile
-
-	* Format *:
-		"Profile Name": {JoinDelay: number_of_seconds}
-
-	* Example * (don't edit this - it's just an example):
-		"MyProfile1": {JoinDelay: 3},
-		"MyProfile2": {JoinDelay: 6}
-	*/
-
-	// Put your lines under this one. Multiple entries are separated by commas. No comma after the last one.
-
 };
 
 // No touchy!
@@ -259,7 +249,7 @@ function locationAction (location) {
 	case sdk.game.locations.Login:
 	case sdk.game.locations.CharSelect:
 	case sdk.game.locations.SplashScreen:
-		Starter.LocationEvents.login();
+		Starter.LocationEvents.login(Profile().type === sdk.game.gametype.TcpIpJoin);
 
 		break;
 	case sdk.game.locations.LoginError:
@@ -314,7 +304,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.GameDoesNotExist:
-		Starter.LocationEvents.gamneDoesNotExist();
+		Starter.LocationEvents.gameDoesNotExist();
 
 		break;
 	case sdk.game.locations.GameIsFull:

@@ -1,9 +1,9 @@
 /**
-*	@filename	OOG.js
-*	@author		kolton, D3STROY3R, theBGuy
-*	@desc		handle out of game operations like creating characters/accounts, maintaining profile datafiles, d2bot# logging etc.
+*  @filename    OOG.js
+*  @author      kolton, D3STROY3R, theBGuy
+*  @desc        handle out of game operations like creating characters/accounts, maintaining profile datafiles, d2bot# logging etc.
+*
 */
-
 !isIncluded('Polyfill.js') && include('Polyfill.js');
 
 let Controls = require('./modules/Control');
@@ -1410,6 +1410,7 @@ const Starter = {
 	inGame: false,
 	firstLogin: true,
 	firstRun: false,
+	isUp: "no",
 	loginRetry: 0,
 	deadCheck: false,
 	chatActionsDone: false,
@@ -1586,6 +1587,19 @@ const Starter = {
 
 		for (let i = 0; i < len; i += 1) {
 			rval += letters[rand(0, letters.length - 1)];
+		}
+
+		return rval;
+	},
+
+	randomNumberString: function (len) {
+		len === undefined && (len = rand(2, 5));
+
+		let rval = "",
+			vals = "0123456789";
+
+		for (let i = 0; i < len; i += 1) {
+			rval += vals[rand(0, vals.length - 1)];
 		}
 
 		return rval;
@@ -1833,7 +1847,7 @@ const Starter = {
 
 		gameDoesNotExist: function () {
 			let currentLoc = getLocation();
-			D2Bot.printToConsole("Game doesn't exist");
+			console.log("Game doesn't exist");
 
 			if (Starter.gameInfo.rdBlocker) {
 				D2Bot.printToConsole(Starter.gameInfo.mpq + " is probably flagged.", 6);
