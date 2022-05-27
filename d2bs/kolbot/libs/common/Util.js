@@ -100,3 +100,53 @@ function minutes (ms = 0) {
 	return (ms * 60000);
 }
 
+(function (global, print) {
+	global.console = global.console || (function () {
+		const console = {};
+		const argMap = el => typeof el === 'object' && el /*not null */ && JSON.stringify(el) || el;
+
+		console.log = function (...args) {
+			// use call to avoid type errors
+			print.call(null, args.map(argMap).join(','));
+		};
+
+		console.printDebug = true;
+		console.debug = function (...args) {
+			if (console.printDebug) {
+				const stack = new Error().stack.match(/[^\r\n]+/g),
+					filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf('\\') + 1) || 'unknown:0';
+				this.log('ÿc:[ÿc:' + filenameAndLine + 'ÿc:]ÿc0 ' + args.map(argMap).join(','));
+			}
+		};
+
+		console.errorReport = function (error) {
+			let msg, source, stack;
+			
+			if (typeof error === "string") {
+				msg = error;
+			} else {
+				source = error.fileName.substring(error.fileName.lastIndexOf("\\") + 1, error.fileName.length);
+				msg = "ÿc1Error @ ÿc2[" + source + " line :: " + error.lineNumber + "ÿc2] ÿc1(" + error.message + ")";
+
+				if (error.hasOwnProperty("stack")) {
+					stack = error.stack;
+
+					if (stack) {
+						stack = stack.split("\n");
+
+						if (stack && typeof stack === "object") {
+							stack.reverse();
+						}
+					}
+				}
+			}
+
+			print(msg);
+		};
+
+		console.warn = console.debug;
+
+		return console;
+
+	})();
+})([].filter.constructor('return this')(), print);
