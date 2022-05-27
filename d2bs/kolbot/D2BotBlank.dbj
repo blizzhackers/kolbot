@@ -1,4 +1,9 @@
-// Blank starter used for testin
+/**
+*  @filename    D2BotBlank.dbj
+*  @author      kolton
+*  @desc        Entry script for testing
+*
+*/
 function main() {
 	include("json2.js");
 	include("OOG.js");

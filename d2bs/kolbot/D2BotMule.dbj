@@ -1,6 +1,12 @@
+/**
+*  @filename    D2BotMule.dbj
+*  @author      kolton, theBGuy
+*  @desc        Entry script for AutoMule.js
+*
+*/
 include("StarterConfig.js");
 
-// D2BotMule settings
+// D2BotMule specific settings - for global settings see libs/StarterConfig.js
 Starter.Config.MinGameTime = 30; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
 Starter.Config.MaxGameTime = 60; // Maximum game length in minutes, only for continuous muling
 Starter.Config.CreateGameDelay = 5; // Seconds to wait before creating a new game

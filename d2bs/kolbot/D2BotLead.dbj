@@ -1,44 +1,15 @@
 /* eslint-disable no-fallthrough */
+/**
+*  @filename    D2BotLead.dbj
+*  @author      kolton, theBGuy
+*  @desc        Entry script for leader
+*
+*/
 include("StarterConfig.js");
 
+// - for global settings see libs/StarterConfig.js
 // Override default values for StarterConfig under here by following format
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds 
-
-const ChannelConfig = {
-	/* Override default values for JoinChannel, FirstJoinMessage, AnnounceGames and AfterGameMessage per profile
-		It's possible to override any number of these options (you don't have to put all of them)
-
-		**** DO NOT EDIT ANYTHING INSIDE THIS COMMENT BLOCK ***
-
-		Format:
-
-		"Profile Name": {
-			JoinChannel: "channel name", -OR- ["channel 1", "channel 2"],
-			FirstJoinMessage: "first message", -OR- ["join msg 1", "join msg 2"],
-			AnnounceGames: true,
-			AfterGameMessage: "message after a finished run" -OR- ["msg 1", msg 2"]
-		}
-
-		Multiple entries are separated by a comma
-
-		Examples:
-
-		"Profile 1": {
-			JoinChannel: "my channel",
-			FirstJoinMessage: ".login",
-			AnnounceGames: true,
-			AfterGameMessage: "follow my runs or die"
-		},
-		"Profile 2": {
-			JoinChannel: ["channel 1", "channel 2"],
-			FirstJoinMessage: [".login", "^login"],
-			AfterGameMessage: ["follow my runs or die", "seriously, you'll die"]
-		}
-	*/
-
-	// Add your lines here
-
-};
 
 // No touchy!
 include("json2.js");
@@ -76,7 +47,7 @@ function locationAction (location) {
 			Starter.pingQuit = false;
 		}
 
-		if (Starter.Config.JoinChannel !== "" || (ChannelConfig[me.profile] && ChannelConfig[me.profile].JoinChannel !== "")) {
+		if (Starter.Config.JoinChannel !== "" || (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].JoinChannel !== "")) {
 			Controls.LobbyEnterChat.click();
 
 			break;
@@ -144,10 +115,18 @@ function locationAction (location) {
 				DataFile.updateStats("runs", Starter.gameCount);
 			}
 
-			if (ChannelConfig[me.profile] && ChannelConfig[me.profile].hasOwnProperty("AfterGameMessage")) {
-				Starter.chanInfo.afterMsg = ChannelConfig[me.profile].AfterGameMessage;
+			if (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].hasOwnProperty("AfterGameMessage")) {
+				Starter.chanInfo.afterMsg = AdvancedConfig[me.profile].AfterGameMessage;
 			} else {
 				Starter.chanInfo.afterMsg = Starter.Config.AfterGameMessage;
+			}
+
+			// check that we are in the channel we are supposed to be in
+			if (Starter.chanInfo.joinChannel.length) {
+				let chanName = Controls.LobbyChannelName.getText();
+				chanName && (chanName = chanName.toString());
+				chanName && (chanName = chanName.slice(0, chanName.indexOf("(") - 1));
+				Starter.chanInfo.joinChannel.indexOf(chanName) === -1 && (Starter.chatActionsDone = false);
 			}
 
 			if (Starter.chanInfo.afterMsg) {
@@ -165,14 +144,14 @@ function locationAction (location) {
 		if (!Starter.chatActionsDone) {
 			Starter.chatActionsDone = true;
 
-			if (ChannelConfig[me.profile] && ChannelConfig[me.profile].hasOwnProperty("JoinChannel")) {
-				Starter.chanInfo.joinChannel = ChannelConfig[me.profile].JoinChannel;
+			if (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].hasOwnProperty("JoinChannel")) {
+				Starter.chanInfo.joinChannel = AdvancedConfig[me.profile].JoinChannel;
 			} else {
 				Starter.chanInfo.joinChannel = Starter.Config.JoinChannel;
 			}
 
-			if (ChannelConfig[me.profile] && ChannelConfig[me.profile].hasOwnProperty("FirstJoinMessage")) {
-				Starter.chanInfo.firstMsg = ChannelConfig[me.profile].FirstJoinMessage;
+			if (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].hasOwnProperty("FirstJoinMessage")) {
+				Starter.chanInfo.firstMsg = AdvancedConfig[me.profile].FirstJoinMessage;
 			} else {
 				Starter.chanInfo.firstMsg = Starter.Config.FirstJoinMessage;
 			}
@@ -200,8 +179,8 @@ function locationAction (location) {
 		}
 
 		// Announce game
-		if (ChannelConfig[me.profile] && ChannelConfig[me.profile].hasOwnProperty("AnnounceGames")) {
-			Starter.chanInfo.announce = ChannelConfig[me.profile].AnnounceGames;
+		if (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].hasOwnProperty("AnnounceGames")) {
+			Starter.chanInfo.announce = AdvancedConfig[me.profile].AnnounceGames;
 		} else {
 			Starter.chanInfo.announce = Starter.Config.AnnounceGames;
 		}
@@ -319,7 +298,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.GameDoesNotExist:
-		Starter.LocationEvents.gamneDoesNotExist();
+		Starter.LocationEvents.gameDoesNotExist();
 
 		break;
 	case sdk.game.locations.CharacterCreate:
@@ -406,7 +385,7 @@ function main () {
 					DataFile.updateStats("ingameTick");
 				}
 
-				D2Bot.updateStatus("Game: " + me.gamename + Starter.timer(Starter.gameStart));
+				D2Bot.updateStatus(Starter.profileInfo.charName + " | Game: " + (me.gamename || "singleplayer") + Starter.timer(Starter.gameStart));
 			}
 
 			delay(1000);

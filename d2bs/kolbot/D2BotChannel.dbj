@@ -1,45 +1,26 @@
+/**
+*  @filename    D2BotChannel.dbj
+*  @author      kolton, theBGuy
+*  @desc        Entry script for following bots using channels
+*
+*/
 include("StarterConfig.js");
 
-// D2BotChannel settings
+// D2BotChannel specific settings - for global settings see libs/StarterConfig.js
 Starter.Config.Games = [""]; // List of games to look for. Example: Games: ["some baal-", "chaos run-"],
 Starter.Config.Passwords = [""]; // List of game passwords. Each array in Games array should have a matching element in Passwords. Use "" for blank pw.
-Starter.Config.JoinDelay = 5; // Seconds to wait between announcement and clicking join
-Starter.Config.FriendListQuery = 0; // Seconds between "/f l" retries. 0 = disable
+Starter.Config.JoinDelay = 10; // Seconds to wait between announcement and clicking join
+Starter.Config.JoinRetry = 5; // Amount of times to re-attempt joining game
+Starter.Config.FriendListQuery = 0; // Seconds between "/f l" retries. 0 = disable. To prevent spamming when using set time rand(80, 160)
 Starter.Config.SkipMutedKey = true;
 Starter.Config.MutedKeyTrigger = "Your account has had all chat privileges suspended.";
+Starter.Config.Follow = []; // leader's in game character name, only use this if the leader is using announce in the chat, can be an array or names ["somename", "somename2"] 
 
 // Override default values for StarterConfig under here by following format
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds 
+// Starter.Config.JoinChannel = ""; // Default channel. Can be an array of channels - ["channel 1", "channel 2"]
 
-// Advanced config - you don't have to edit this unless you need some of the features provided
-const AdvancedConfig = {
-	/* Features: Override channel for each profile, Override join delay for each profile
-
-	* Format *:
-		"Profile Name": {JoinDelay: number_of_seconds}
-	or
-		"Profile Name": {JoinChannel: "channel name"}
-	or
-		"Profile Name": {JoinChannel: "channel name", JoinDelay: number_of_seconds}
-
-	* Example * (don't edit this - it's just an example):
-
-		"MyProfile1": {JoinDelay: 3},
-		"MyProfile2": {JoinChannel: "some channel"},
-		"MyProfile3": {JoinChannel: "some other channel", JoinDelay: 11}
-		"MyProfile4": {AnnounceGames: true, AnnounceMessage: "Joining game"} // announce game you are joining
-	*/
-
-	// Put your lines under this one. Multiple entries are separated by commas. No comma after the last one.
-
-	"Test": {
-		JoinChannel: "op nnqry",
-		JoinDelay: 3,
-		AnnounceGames: true,
-		AnnounceMessage: "Joining game" // output: Joining game Baals-23
-	}
-};
-
+// todo: figure out a way to check if player who announced game is still in channel
 
 // No touchy!
 include("json2.js");
@@ -51,6 +32,7 @@ include("torchsystem.js");
 include("craftingsystem.js");
 include("common/misc.js");
 include("common/util.js");
+include("common/prototypes.js");
 let sdk = require('./modules/sdk');
 let Controls = require('./modules/Control');
 let Overrides = require('./modules/Override');
@@ -59,6 +41,7 @@ let channelTick = getTickCount(),
 	fListTick = 0,
 	retry = 0,
 	badGames = [],
+	lastText,
 	joinInfo = {
 		gameName: "",
 		gamePass: "",
@@ -70,7 +53,7 @@ if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 	Starter.firstRun = true;
 }
 
-new Overrides.Override(Starter, Starter.receiveCopyData, function(orignal, mode, msg) {
+new Overrides.Override(Starter, Starter.receiveCopyData, function (orignal, mode, msg) {
 	if (mode === 3) {
 		Starter.isUp = (me.gameReady ? "yes" : "no");
 		if (!me.gameReady) {
@@ -197,7 +180,7 @@ function locationAction (location) {
 				if (string === getLocaleString(5162)) {
 					print(string);
 
-					retry = 3;
+					retry = Starter.Config.JoinRetry;
 
 					break;
 				}
@@ -207,7 +190,7 @@ function locationAction (location) {
 
 			D2Bot.updateRuns();
 
-			if (retry < 3) {
+			if (retry < Starter.Config.JoinRetry) {
 				Controls.JoinGameWindow.click();
 
 				break MainSwitch;
@@ -219,12 +202,12 @@ function locationAction (location) {
 
 			break;
 		case "FULL": // Game is full
-			retry = 3;
+			retry = Starter.Config.JoinRetry;
 
 			break;
 		}
 
-		if (retry >= 3) {
+		if (retry >= Starter.Config.JoinRetry) {
 			D2Bot.printToConsole("Failed to join " + joinInfo.gameName + ". Aborting.");
 			badGames.push(joinInfo.gameName);
 
@@ -241,6 +224,65 @@ function locationAction (location) {
 		}
 
 		fullText = lines.join(" ").replace(/\s+/g, " ");
+
+		if (lastText === fullText) {
+			if (joinInfo.gameName && joinInfo.gameName !== joinInfo.oldGame && badGames.indexOf(joinInfo.gameName) === -1) {
+				// we have a game and nothing else has changed since last announcement so go ahead and try joining again
+				Controls.JoinGameWindow.click();
+			}
+			// nothing has changed since our last check so break
+			break;
+		}
+
+		lastText = fullText;
+		let newLines = lines
+			.map((line, index) => {
+			// eslint-disable-next-line no-useless-escape
+				if (index > 0 && !line.match(/\<.*\>/, "gi")) {
+					lines[index - 1] += line;
+					lines.splice(index, 1);
+					index--;
+					return lines[index];
+				}
+				return line;
+			})
+			.filter(line => line.match("Next game is", "gi"));
+
+		if (newLines.length === 0) {
+			break;
+		}
+
+		for (n = 0; n < Starter.Config.Follow.length; n++) {
+			let test = [];
+
+			newLines.forEach(element => {
+				if (element.includes(Starter.Config.Follow[n])) {
+					test.push(element);
+				}
+			});
+
+			if (test.length === 0) continue;
+			test.reverse();
+
+			for (let msg = 0; msg < test.length; msg++) {
+				let checkName = test[msg].toString();
+				let hasPass = checkName.indexOf("/") > -1;
+
+				let gName = (checkName.slice(checkName.indexOf("is ") + 3, (hasPass ? checkName.indexOf("/") : undefined)) || "").trim();
+				if (gName.length > 15) continue; // invalid game name
+				let gPass = (hasPass ? checkName.slice(checkName.lastIndexOf("/") + 1) : "");
+				if (gPass.length > 15) continue; // invalid game pass
+				joinInfo.gameName = gName;
+				joinInfo.gamePass = gPass;
+				console.debug(joinInfo.gameName + " " + joinInfo.gamePass);
+
+				if (joinInfo.gameName && joinInfo.gameName !== joinInfo.oldGame && badGames.indexOf(joinInfo.gameName) === -1) {
+					Controls.JoinGameWindow.click();
+
+					break;
+				}
+			}
+		}
 
 		for (n = 0; n < Starter.Config.Games.length; n += 1) {
 			if (Starter.Config.Games[n] === "") continue;
@@ -362,7 +404,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.GameDoesNotExist:
-		Starter.LocationEvents.gamneDoesNotExist();
+		Starter.LocationEvents.gameDoesNotExist();
 		Starter.lastGameStatus = "DNE";
 
 		break;

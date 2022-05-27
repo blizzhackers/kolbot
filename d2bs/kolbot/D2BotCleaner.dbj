@@ -1,10 +1,10 @@
 /**
-*	@filename	D2BotCleaner.dbj
-*	@author		theBGuy
-*	@credits 	Whoever did the original D2BotAccountCleaner.dbj
-*	@desc		The purpose of this entryscript is to clean/remove characters and/or files easily
+*  @filename    D2BotCleaner.dbj
+*  @author      theBGuy
+*  @credits     Whoever did the original D2BotAccountCleaner.dbj
+*  @desc        The purpose of this entryscript is to clean/remove characters and/or files easily
+*
 */
-
 include("StarterConfig.js");
 
 // D2BotCleaner settings

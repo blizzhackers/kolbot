@@ -53,6 +53,11 @@
 	}
 
 	Control.SplashScreen = new Control(2, 0, 599, 800, 600);
+	Control.D2SplashCopyright = new Control(4, 100, 580, 600, 80);
+	Control.MainMenuD2Version = new Control(4, 0, 599, 200, 40);
+	Control.MainMenuCredits = new Control(6, 264, 528, 135, 25);
+	Control.MainMenuCinematics = new Control(6, 402, 528, 135, 25);
+	Control.MainMenuExit = new Control(6, 264, 568, 272, 35);
 
 	Control.SinglePlayer = new Control(-1, 264, 324, 272, 35);
 	Control.BattleNet = new Control(-1, 264, 366, 272, 35);
@@ -60,6 +65,7 @@
 	Control.OtherMultiplayer = new Control(-1, 264, 433, 272, 35);
 
 	Control.Login = new Control(-1, 264, 484, 272, 35);
+	Control.LoginHeading = new Control(4, 200, 350, 400, 100);
 	Control.LoginUsername = new Control(-1, 322, 342, 162, 19);
 	Control.LoginPassword = new Control(-1, 322, 396, 162, 19);
 	Control.LoginErrorOk = new Control(6, 335, 412, 128, 35);
@@ -68,6 +74,8 @@
 	Control.LoginCdKeyInUseBy = new Control(4, 158, 310, 485, 40);
 	Control.LoginUnableToConnect = new Control(4, 158, 220, 485, 40);
 	Control.LoginErrorText = new Control(4, 199, 377, 402, 140);
+	Control.LoginAccountSettings = new Control(6, 264, 528, 272, 35);
+	Control.LoginExit = new Control(6, 33, 572, 128, 35);
 
 	Control.UnableToConnectOk = new Control(6, 335, 450, 128, 35);
     
@@ -104,6 +112,7 @@
 	Control.CharSelectCreate = new Control(6, 33, 528, 168, 60);
 	Control.CharSelectExit = new Control(6, 33, 572, 128, 35);
 	Control.CharSelectDelete = new Control(6, 433, 528, 168, 60);
+	Control.CharSelectConvert = new Control(6, 233, 528, 168, 60);
 	Control.CharDeleteYes = new Control(6, 421, 337, 96, 32);
 	Control.CharSelectError = new Control(4, 45, 318, 531, 140);
 	Control.CharSelectCharInfo0 = new Control(4, 37, 178, 200, 92);
@@ -122,7 +131,10 @@
 	Control.SinglePlayerNightmare = new Control(-1, 264, 340, 272, 35);
 	Control.SinglePlayerHell = new Control(-1, 264, 383, 272, 35);
 
+	Control.LobbyCharacterInfo = new Control(4, 143, 588, 230, 87);
 	Control.LobbyEnterChat = new Control(6, 27, 480, 120, 20);
+	Control.LobbyLadder = new Control(6, 614, 490, 80, 20);
+	Control.LobbyHelp = new Control(6, 146, 480, 120, 20);
 	Control.LobbyQuit = new Control(6, 693, 490, 80, 20);
 
 	Control.JoinGameWindow = new Control(6, 652, 469, 120, 20);
@@ -130,6 +142,7 @@
 	Control.JoinGameName = new Control(1, 432, 148, 155, 20);
 	Control.JoinGamePass = new Control(1, 606, 148, 155, 20);
 	Control.JoinGameList = new Control(4, 432, 393, 160, 173);
+	Control.JoinGameDetails = new Control(4, 609, 393, 143, 194);
 	Control.CancelJoinGame = new Control(6, 433, 433, 96, 32);
 
 	Control.CreateGameWindow = new Control(6, 533, 469, 120, 20);
@@ -150,10 +163,25 @@
 	Control.LobbyChannelText = new Control(1, 432, 162, 155, 20);
 	Control.LobbyChannelOk = new Control(6, 671, 433, 96, 32);
 	Control.LobbyChannelCancel = new Control(6, 433, 433, 96, 32);
+	Control.LobbyChannelSend = new Control(6, 27, 470, 80, 20);
+	Control.LobbyChannelWhisper = new Control(6, 107, 470, 80, 20);
+	Control.LobbyChannelSquelch = new Control(6, 27, 490, 72, 20);
+	Control.LobbyChannelUnsquelch = new Control(6, 99, 490, 96, 20);
+	Control.LobbyChannelEmote = new Control(6, 195, 490, 72, 20);
+	Control.LobbyChannelChar0 = new Control(6, 40, 591, 60, 100);
+	Control.LobbyChannelChar1 = new Control(6, 100, 591, 60, 100);
+	Control.LobbyChannelChar2 = new Control(6, 160, 591, 60, 100);
+	Control.LobbyChannelChar3 = new Control(6, 220, 591, 60, 100);
+	Control.LobbyChannelChar4 = new Control(6, 280, 591, 60, 100);
+	Control.LobbyChannelChar5 = new Control(6, 340, 591, 60, 100);
+	Control.LobbyChannelChar6 = new Control(6, 400, 591, 60, 100);
+	Control.LobbyChannelChar7 = new Control(6, 460, 591, 60, 100);
+	Control.LobbyChannelChar8 = new Control(6, 520, 591, 60, 100);
+	Control.LobbyChannelChar9 = new Control(6, 580, 591, 60, 100);
+	Control.LobbyChannelChar10 = new Control(6, 640, 591, 60, 100);
 
 	Control.LobbyChat = new Control(4, 28, 410, 354, 298);
 	Control.LobbyServerDown = new Control(4, 438, 300, 326, 150);
-
 
 	Control.OkCentered = new Control(6, 351, 337, 96, 32);
 	Control.HellSP = new Control(-1, 264, 383, 272, 35);
@@ -161,5 +189,4 @@
 	Control.NormalSP = new Control(-1, 264, 297, 272, 35);
 
 	module.exports = Control;
-
 })(module);
