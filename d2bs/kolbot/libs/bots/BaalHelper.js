@@ -1,7 +1,8 @@
 /**
-*	@filename	BaalHelper.js
-*	@author		kolton
-*	@desc		help the leading player in clearing Throne of Destruction and killing Baal
+*  @filename    BaalHelper.js
+*  @author      kolton
+*  @desc        help the leading player in clearing Throne of Destruction and killing Baal
+*
 */
 
 function BaalHelper() {
@@ -10,8 +11,7 @@ function BaalHelper() {
 
 	Town.goToTown(5);
 	Town.doChores();
-	Pather.useWaypoint(Config.RandomPrecast ? "random" : 129);
-	Precast.doPrecast(true);
+	Config.RandomPrecast && Precast.needOutOfTownCast() ? Precast.doRandomPrecast(true, sdk.areas.Harrogath) : Precast.doPrecast(true);
 
 	if (Config.BaalHelper.SkipTP) {
 		me.area !== 129 && Pather.useWaypoint(129);
@@ -73,7 +73,7 @@ function BaalHelper() {
 		Pather.moveTo(15092, 5011);
 		Precast.doPrecast(false);
 
-		while (getUnit(1, 543)) {
+		while (getUnit(sdk.unittype.Monster, sdk.monsters.ThroneBaal)) {
 			delay(500);
 		}
 

@@ -13,6 +13,9 @@ const Skill = {
 	init: function () {
 		switch (me.classid) {
 		case sdk.charclass.Amazon:
+			Config.UseInnerSight && !Precast.precastables.InnerSight && (Precast.precastables.InnerSight = !!me.getSkill(sdk.skills.InnerSight, 0));
+			Config.UseSlowMissiles && !Precast.precastables.SlowMissiles && (Precast.precastables.SlowMissiles = !!me.getSkill(sdk.skills.SlowMissiles, 0));
+			Config.UseDecoy && !Precast.precastables.Decoy && (Precast.precastables.Decoy = !!me.getSkill(sdk.skills.Decoy, 0));
 			Config.SummonValkyrie && !Precast.precastables.Valkyrie && (Precast.precastables.Valkyrie = !!me.getSkill(sdk.skills.Valkyrie, 0));
 
 			break;

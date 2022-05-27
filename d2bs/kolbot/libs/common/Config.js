@@ -306,6 +306,9 @@ let Config = {
 
 	// Amazon specific
 	LightningFuryDelay: 0,
+	UseInnerSight: false,
+	UseSlowMissiles: false,
+	UseDecoy: false,
 	SummonValkyrie: false,
 
 	// Sorceress specific

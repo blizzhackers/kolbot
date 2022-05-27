@@ -134,9 +134,9 @@ const Loader = {
 						let tick = getTickCount();
 
 						if (me.inTown) {
-							Config.StackThawingPots.enabled && Town.buyPots(Config.StackThawingPots.quantity, "Thawing", true);
-							Config.StackAntidotePots.enabled && Town.buyPots(Config.StackAntidotePots.quantity, "Antidote", true);
-							Config.StackStaminaPots.enabled && Town.buyPots(Config.StackStaminaPots.quantity, "Stamina", true);
+							Config.StackThawingPots.enabled && Town.buyPots(Config.StackThawingPots.quantity, sdk.items.ThawingPotion, true);
+							Config.StackAntidotePots.enabled && Town.buyPots(Config.StackAntidotePots.quantity, sdk.items.AntidotePotion, true);
+							Config.StackStaminaPots.enabled && Town.buyPots(Config.StackStaminaPots.quantity, sdk.items.StaminaPotion, true);
 						}
 
 						if (global[script]()) {

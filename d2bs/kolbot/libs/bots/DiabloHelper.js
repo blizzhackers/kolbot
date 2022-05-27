@@ -164,6 +164,11 @@ function DiabloHelper() {
 	this.followPath = function (path) {
 		for (let i = 0; i < path.length; i += 2) {
 			this.cleared.length && this.clearStrays();
+			
+			// no monsters at the next node, skip it
+			if ([path[i], path[i + 1]].distance < 40 && [path[i], path[i + 1]].mobCount({range: 35}) === 0) {
+				continue;
+			}
 
 			Pather.moveTo(path[i], path[i + 1], 3, getDistance(me, path[i], path[i + 1]) > 50);
 			Attack.clear(30, 0, false, Common.Diablo.sort);
@@ -220,6 +225,7 @@ function DiabloHelper() {
 	// start
 	Town.doChores();
 
+	// change this to run in background?
 	if (Config.DiabloHelper.SkipIfBaal) {
 		AreaInfoLoop:
 		while (true) {
@@ -254,11 +260,7 @@ function DiabloHelper() {
 			} while (party.getNext());
 		}
 	}
-
-	if (Config.DiabloHelper.SafePrecast) {
-		Pather.useWaypoint(Config.RandomPrecast ? "random" : sdk.areas.RiverofFlame);
-		Precast.doPrecast(true);
-	}
+	Config.DiabloHelper.SafePrecast && Precast.needOutOfTownCast() ? Precast.doRandomPrecast(true, sdk.areas.PandemoniumFortress) : Precast.doPrecast(true);
 
 	if (Config.DiabloHelper.SkipTP) {
 		me.area !== sdk.areas.RiverofFlame && Pather.useWaypoint(sdk.areas.RiverofFlame);

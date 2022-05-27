@@ -1,8 +1,9 @@
 /**
- *	@filename	Baal.js
- *	@author		kolton, YGM, theBGuy
- *	@desc		clear Throne of Destruction and kill Baal
- */
+*  @filename    Baal.js
+*  @author      kolton, YGM, theBGuy
+*  @desc        clear Throne of Destruction and kill Baal
+*
+*/
 
 function Baal() {
 	this.announce = function () {

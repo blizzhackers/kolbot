@@ -211,6 +211,10 @@ const Common = {
 				}
 
 				delay(classid === 394 ? 1000 + me.ping : 500 + me.ping);
+
+				if (seal.mode) {
+					break;
+				}
 			}
 
 			return (!!seal && seal.mode);
@@ -378,6 +382,8 @@ const Common = {
 		},
 
 		clearThrone: function () {
+			if (!getUnit(sdk.unittype.Monster, sdk.monsters.ThroneBaal)) return true;
+
 			let monList = [];
 
 			if (Config.AvoidDolls) {
@@ -401,6 +407,10 @@ const Common = {
 				{ x: 15086, y: 5024 }, { x: 15079, y: 5014 }
 			];
 			return pos.forEach((node) => {
+				// no mobs at that next, skip it
+				if ([node.x, node.y].distance < 35 && [node.x, node.y].mobCount({range: 30}) === 0) {
+					return;
+				}
 				Pather.moveTo(node.x, node.y);
 				Attack.clear(30);
 			});
@@ -463,7 +473,7 @@ const Common = {
 
 			MainLoop:
 			while (true) {
-				if (!getUnit(1, 543)) return true;
+				if (!getUnit(sdk.unittype.Monster, sdk.monsters.ThroneBaal)) return true;
 
 				switch (this.checkThrone()) {
 				case 1:

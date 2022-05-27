@@ -17,7 +17,10 @@ const Precast = new function () {
 	// would probably make sense to just re-cast everything (except summons) if one of our skills is about to run out rather than do this process again 3 seconds later
 	this.precastables = {
 		// Amazon
+		Decoy: false,
 		Valkyrie: false,
+		InnerSight: false,
+		SlowMissiles: false,
 		// Sorceress
 		ThunderStorm: false,
 		EnergyShield: false,
@@ -613,11 +616,20 @@ const Precast = new function () {
 		return true;
 	};
 
+	this.needOutOfTownCast = function () {
+		return Precast.precastables.Shout.have || Precast.precastables.BattleOrders.have || Precast.checkCTA();
+	};
+
 	this.doRandomPrecast = function (force = false, goToWhenDone = undefined) {
 		let returnTo = (goToWhenDone && typeof goToWhenDone === "number" ? goToWhenDone : me.area);
 
 		try {
-			Pather.useWaypoint("random") && Precast.doPrecast(force);
+			// Only do this is you are a barb or actually have a cta. Otherwise its just a waste of time and you can precast in town
+			if (Precast.needOutOfTownCast()) {
+				Pather.useWaypoint("random") && Precast.doPrecast(force);
+			} else {
+				Precast.doPrecast(force);
+			}
 			Pather.useWaypoint(returnTo);
 		} catch (e) {
 			console.warn(e);

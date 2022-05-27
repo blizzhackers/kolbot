@@ -264,7 +264,7 @@ const Town = {
 
 			console.log("Did " + reason + " at " + npc.name);
 		} catch (e) {
-			console.warn(e);
+			console.errorReport(e);
 
 			return false;
 		}
@@ -1421,7 +1421,7 @@ const Town = {
 
 		if (!!me.getMerc()) {
 			// Cast BO on merc so he doesn't just die again. Only do this is you are a barb or actually have a cta. Otherwise its just a waste of time.
-			if (Config.MercWatch && (Precast.precastables.Shout.have || Precast.precastables.BattleOrders.have || Precast.checkCTA())) {
+			if (Config.MercWatch && Precast.needOutOfTownCast()) {
 				console.log("MercWatch precast");
 				Precast.doRandomPrecast(true, preArea);
 			}

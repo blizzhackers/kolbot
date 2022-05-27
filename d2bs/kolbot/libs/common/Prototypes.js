@@ -2163,3 +2163,34 @@ Unit.prototype.getMobCount = function (range = 10, coll = 0, type = 0, noSpecial
 				&& (!coll || !checkCollision(_this, mon, coll));
 		}).length;
 };
+
+{
+	let coords = function () {
+		if (Array.isArray(this) && this.length > 1) {
+			return [this[0], this[1]];
+		}
+
+		if (typeof this.x !== 'undefined' && typeof this.y !== 'undefined') {
+			return this instanceof PresetUnit && [this.roomx * 5 + this.x, this.roomy * 5 + this.y] || [this.x, this.y];
+		}
+
+		return [undefined, undefined];
+	};
+
+	Object.prototype.mobCount = function (givenSettings = {}) {
+		let [x, y] = coords.apply(this);
+		let settings = Object.assign({}, {
+			range: 5,
+			coll: (0x1 | 2048 | 0x2),
+			type: 0,
+			ignoreClassids: [],
+		}, givenSettings);
+		return getUnits(sdk.unittype.Monster)
+			.filter(function (mon) {
+				return mon.attackable && getDistance(x, y, mon.x, mon.y) < settings.range
+					&& (!settings.type || (settings.type & mon.spectype))
+					&& (settings.ignoreClassids.indexOf(mon.classid) === -1)
+					&& !CollMap.checkColl({x: x, y: y}, mon, settings.coll, 1);
+			}).length;
+	};
+}
