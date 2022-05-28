@@ -1,10 +1,16 @@
 /**
-*	@filename	Questing.js
-*	@author		kolton, theBGuy
-*	@desc		Do quests, only most popular ones for now
+*  @filename    Questing.js
+*  @author      kolton, theBGuy
+*  @desc        Do quests, only most popular ones for now
+*
 */
 
 function Questing() {
+	const log = (msg = "", errorMsg = false) => {
+		me.overhead(msg);
+		console.log("ÿc9(Questing) :: " + (errorMsg ? "ÿc1" : "ÿc0") + msg);
+	};
+
 	let quests = [
 		[1, "clearDen"],
 		[9, "killRadament"],
@@ -17,9 +23,9 @@ function Questing() {
 	];
 
 	this.clearDen = function () {
-		console.log("starting den");
+		log("starting den");
 
-		if (!Town.goToTown(1) || !Pather.moveToExit([2, 8], true)) {
+		if (!Town.goToTown(1) || !Pather.moveToExit([sdk.areas.BloodMoor, sdk.areas.DenofEvil], true)) {
 			throw new Error();
 		}
 
@@ -34,21 +40,21 @@ function Questing() {
 	this.killRadament = function () {
 		if (!Pather.accessToAct(2)) return false;
 
-		print("starting radament");
+		log("starting radament");
 
-		if (!Town.goToTown() || !Pather.useWaypoint(48, true)) {
+		if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.A2SewersLvl2, true)) {
 			throw new Error();
 		}
 
 		Precast.doPrecast(true);
 
-		if (!Pather.moveToExit(49, true) || !Pather.moveToPreset(me.area, 2, 355)) {
+		if (!Pather.moveToExit(sdk.areas.A2SewersLvl3, true) || !Pather.moveToPreset(me.area, 2, 355)) {
 			throw new Error();
 		}
 
-		Attack.kill(229); // Radament
+		Attack.kill(sdk.monsters.Radament);
 
-		let book = getUnit(4, 552);
+		let book = item(sdk.quest.item.BookofSkill);
 
 		if (book) {
 			Pickit.pickItem(book);
@@ -65,22 +71,22 @@ function Questing() {
 	this.killIzual = function () {
 		if (!Pather.accessToAct(4)) return false;
 
-		print("starting izual");
+		log("starting izual");
 
-		if (!Town.goToTown() || !Pather.useWaypoint(106, true)) {
+		if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.CityoftheDamned, true)) {
 			throw new Error();
 		}
 
 		Precast.doPrecast(true);
 
-		if (!Pather.moveToPreset(105, 1, 256)) {
+		if (!Pather.moveToPreset(sdk.areas.PlainsofDespair, 1, sdk.monsters.Izual)) {
 			return false;
 		}
 
-		Attack.kill(256); // Izual
+		Attack.kill(sdk.monsters.Izual);
 		Town.goToTown();
 		Town.npcInteract("Tyrael");
-		getUnit(2, 566) && Pather.useUnit(2, 566, 109);
+		object(sdk.units.RedPortalToAct5) && Pather.useUnit(2, sdk.units.RedPortalToAct5, sdk.areas.Harrogath);
 
 		return true;
 	};
@@ -88,7 +94,7 @@ function Questing() {
 	this.lamEssen = function () {
 		if (!Pather.accessToAct(3)) return false;
 
-		print("starting lam essen");
+		log("starting lam essen");
 
 		if (!Town.goToTown() || !Pather.useWaypoint(80, true)) {
 			throw new Error();
@@ -101,7 +107,7 @@ function Questing() {
 		}
 
 		Misc.openChest(193);
-		let book = Misc.poll(() => getUnit(4, 548), 1000, 100);
+		let book = Misc.poll(() => item(sdk.quest.item.LamEsensTome), 1000, 100);
 
 		Pickit.pickItem(book);
 		Town.goToTown();
@@ -114,7 +120,7 @@ function Questing() {
 		if (!Pather.accessToAct(5)) return false;
 		if (Misc.checkQuest(35, 1)) return true;
 
-		print("starting shenk");
+		log("starting shenk");
 
 		if (!Town.goToTown() || !Pather.useWaypoint(111, true)) {
 			throw new Error();
@@ -122,7 +128,7 @@ function Questing() {
 
 		Precast.doPrecast(true);
 		Pather.moveTo(3883, 5113);
-		Attack.kill(getLocaleString(22435)); // Shenk the Overseer
+		Attack.kill(getLocaleString(sdk.locale.monsters.ShenktheOverseer));
 		Town.goToTown();
 
 		return true;
@@ -134,7 +140,7 @@ function Questing() {
 		if (!Pather.accessToAct(5)) return false;
 		if (Misc.checkQuest(37, 1)) return true;
 
-		print("starting anya");
+		log("starting anya");
 
 		if (!Town.goToTown() || !Pather.useWaypoint(113, true)) {
 			throw new Error();
@@ -148,7 +154,7 @@ function Questing() {
 
 		delay(1000);
 
-		let anya = getUnit(2, 558);
+		let anya = object(sdk.units.FrozenAnya);
 
 		// talk to anya, then cancel her boring speech
 		Pather.moveToUnit(anya);
@@ -162,7 +168,7 @@ function Questing() {
 		Town.move("portalspot");
 		Pather.usePortal(114, me.name);
 
-		// unfreeze her a$$, cancel her speech again
+		// unfreeze her, cancel her speech again
 		anya.interact();
 		delay(300);
 		me.cancel();
@@ -171,7 +177,7 @@ function Questing() {
 		Town.goToTown();
 		Town.npcInteract("Malah");
 
-		let scroll = me.getItem(646);
+		let scroll = me.scrollofresistance;
 		scroll && clickItem(1, scroll);
 
 		return true;
@@ -179,63 +185,8 @@ function Questing() {
 
 	// @theBGuy
 	this.ancients = function () {
-		// ancients resists
-		let canAncients = function () {
-			let ancient = getUnit(1);
-
-			if (ancient) {
-				do {
-					if (!ancient.getParent() && !Attack.canAttack(ancient)) {
-						return false;
-					}
-				} while (ancient.getNext());
-			}
-
-			return true;
-		};
-
-		// touch altar
-		let touchAltar = function () {
-			let tick = getTickCount();
-
-			while (getTickCount() - tick < 5000) {
-				if (getUnit(2, 546)) {
-					break;
-				}
-
-				delay(20 + me.ping);
-			}
-
-			let altar = getUnit(2, 546);
-
-			if (altar) {
-				while (altar.mode !== 2) {
-					Pather.moveToUnit(altar);
-					altar.interact();
-					delay(200 + me.ping);
-					me.cancel();
-				}
-
-				return true;
-			}
-
-			return false;
-		};
-
-		// ancients prep
-		let ancientsPrep = function () {
-			Town.goToTown();
-			Town.fillTome(sdk.items.TomeofTownPortal);
-			Town.buyPots(10, "Thawing", true);
-			Town.buyPots(10, "Antidote", true);
-			Town.buyPots(10, "Stamina", true);
-			Town.buyPotions();
-			Pather.usePortal(sdk.areas.ArreatSummit, me.name);
-		};
-
 		Town.doChores();
-		print('starting ancients');
-		me.overhead("ancients");
+		log('starting ancients');
 
 		Pather.useWaypoint(sdk.areas.AncientsWay);
 		Precast.doPrecast(true);
@@ -261,11 +212,12 @@ function Questing() {
 		Config.HPBuffer = 15;
 		Config.MPBuffer = 15;
 		Config.LifeChicken = 10;
-		me.overhead('updated settings');
+
+		log('updated settings');
 
 		Town.buyPotions();
 		if (!Pather.usePortal(sdk.areas.ArreatSummit, me.name)) {
-			print("ÿc8(Questing)ÿc1 :: Failed to take portal back to Arreat Summit");
+			log("Failed to take portal back to Arreat Summit", true);
 			Pather.journeyTo(sdk.areas.ArreatSummit); // enter Arreat Summit
 		}
 		
@@ -273,51 +225,24 @@ function Questing() {
 
 		// move to altar
 		if (!Pather.moveToPreset(sdk.areas.ArreatSummit, sdk.unittype.Object, 546)) {
-			print("ÿc8(Questing)ÿc1 :: Failed to move to ancients' altar");
+			log("Failed to move to ancients' altar", true);
 		}
 
-		touchAltar(); //activate altar
-
-		// wait for ancients to spawn
-		while (!getUnit(sdk.unittype.Monster, sdk.monsters.TalictheDefender)) {
-			delay(250 + me.ping);
-		}
-
-		// reroll ancients if unable to attack
-		while (!canAncients()) {
-			Pather.makePortal(true);
-			ancientsPrep();
-			Pather.usePortal(sdk.areas.ArreatSummit, me.name);
-			touchAltar();
-
-			while (!getUnit(sdk.unittype.Monster, sdk.monsters.TalictheDefender)) {
-				delay(10 + me.ping);
-			}
-		}
-
-		for (let i = 0; i < 3 && !me.ancients; i++) {
-			Attack.clearList([getUnit(2, sdk.monsters.KorlictheProtector), getUnit(2, sdk.monsters.TalictheDefender), getUnit(2, sdk.monsters.MadawctheGuardian)]);
-			Pather.moveTo(10048, 12628);
-
-			if (!Misc.checkQuest(39, 0)) {
-				me.overhead("Failed to kill anicents. Attempt: " + i);
-				touchAltar(); //activate altar
-			}
-		}
+		Common.Ancients.touchAltar(); //activate altar
+		Common.Ancients.startAncients(true);
 		
 		me.cancel();
 		Config = tempConfig;
-		me.overhead('restored settings');
+		log('restored settings');
 		Precast.doPrecast(true);
 
 		try {
 			if (Misc.checkQuest(39, 0)) {
-				Pather.clearToExit(sdk.areas.ArreatSummit, sdk.areas.WorldstoneLvl1, true);
-				Pather.clearToExit(sdk.areas.WorldstoneLvl1, sdk.areas.WorldstoneLvl2, true);
+				Pather.moveToExit([sdk.areas.WorldstoneLvl1, sdk.areas.WorldstoneLvl2], true);
 				Pather.getWP(sdk.areas.WorldstoneLvl2);
 			}
 		} catch (err) {
-			print('ÿc8(Questing)ÿc1 :: Cleared Ancients. Failed to get WSK Waypoint');
+			log('Cleared Ancients. Failed to get WSK Waypoint', true);
 		}
 
 		return true;
@@ -349,10 +274,10 @@ function Questing() {
 		D2Bot.printToConsole("All quests done. Stopping profile.", 5);
 		D2Bot.stop();
 	} else {
-		print("ÿc9(Questing) :: ÿc2Complete");
+		log("ÿc9(Questing) :: ÿc2Complete");
 		// reload town chicken in case we are doing others scripts after this one finishes
 		let townChick = getScript("tools/TownChicken.js");
-		(Config.TownHP > 0 || Config.TownMP > 0) && townChick && !townChick.running && load("tools/TownChicken.js");
+		(Config.TownHP > 0 || Config.TownMP > 0) && (townChick && !townChick.running || !townChick) && load("tools/TownChicken.js");
 	}
 
 	return true;

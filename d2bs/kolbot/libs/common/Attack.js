@@ -1119,14 +1119,14 @@ const Attack = {
 			return true;
 		}
 
-		let i, j, rval,
+		let rval,
 			tempArray = [];
 
 		// EnchantLoop: // Skip enchanted monsters
-		for (i = 0; i < Config.SkipEnchant.length; i += 1) {
+		for (let i = 0; i < Config.SkipEnchant.length; i += 1) {
 			tempArray = Config.SkipEnchant[i].toLowerCase().split(" and ");
 
-			for (j = 0; j < tempArray.length; j += 1) {
+			for (let j = 0; j < tempArray.length; j += 1) {
 				switch (tempArray[j]) {
 				case "extra strong":
 					tempArray[j] = 5;
@@ -1179,80 +1179,39 @@ const Attack = {
 				}
 			}
 
-			for (j = 0; j < tempArray.length; j += 1) {
-				if (!unit.getEnchant(tempArray[j])) {
-					break;
-				}
-			}
-
-			if (j === tempArray.length) {
+			if (!tempArray.some(enchant => unit.getEnchant(enchant))) {
 				//print("Skip Enchanted: " + unit.name);
-
 				return false;
 			}
 		}
 
 		// ImmuneLoop: // Skip immune monsters
-		for (i = 0; i < Config.SkipImmune.length; i += 1) {
+		for (let i = 0; i < Config.SkipImmune.length; i += 1) {
 			tempArray = Config.SkipImmune[i].toLowerCase().split(" and ");
 
-			for (j = 0; j < tempArray.length; j += 1) {
-				if (this.checkResist(unit, tempArray[j])) { // Infinity calculations are built-in
-					break;
-				}
-			}
-
-			if (j === tempArray.length) {
+			// Infinity calculations are built-in
+			if (!tempArray.some(immnue => this.checkResist(unit, immnue))) {
 				return false;
 			}
 		}
 
 		// AuraLoop: // Skip monsters with auras
-		for (i = 0; i < Config.SkipAura.length; i += 1) {
+		for (let i = 0; i < Config.SkipAura.length; i += 1) {
 			rval = true;
+			let aura = Config.SkipAura[i].toLowerCase();
 
-			switch (Config.SkipAura[i].toLowerCase()) {
-			case "fanaticism":
-				if (unit.getState(49)) {
-					rval = false;
-				}
-
-				break;
-			case "might":
-				if (unit.getState(33)) {
-					rval = false;
-				}
-
-				break;
-			case "holy fire":
-				if (unit.getState(35)) {
-					rval = false;
-				}
+			switch (true) {
+			case aura === "might" && unit.getState(sdk.states.Might):
+			case aura === "blessed aim" && unit.getState(sdk.states.BlessedAim):
+			case aura === "fanaticism" && unit.getState(sdk.states.Fanaticism):
+			case aura === "conviction" && unit.getState(sdk.states.Conviction):
+			case aura === "holy fire" && unit.getState(sdk.states.HolyFire):
+			case aura === "holy freeze" && unit.getState(sdk.states.HolyFreeze):
+			case aura === "holy shock" && unit.getState(sdk.states.HolyShock):
+				rval = false;
 
 				break;
-			case "blessed aim":
-				if (unit.getState(40)) {
-					rval = false;
-				}
-
-				break;
-			case "conviction":
-				if (unit.getState(28)) {
-					rval = false;
-				}
-
-				break;
-			case "holy freeze":
-				if (unit.getState(43)) {
-					rval = false;
-				}
-
-				break;
-			case "holy shock":
-				if (unit.getState(46)) {
-					rval = false;
-				}
-
+			default:
 				break;
 			}
 
@@ -1283,7 +1242,8 @@ const Attack = {
 		case 500: // Summoner
 			return "physical";
 		case sdk.skills.HolyBolt:
-			return "holybolt"; // no need to use this.elements array because it returns before going over the array
+			// no need to use this.elements array because it returns before going over the array
+			return "holybolt";
 		}
 
 		let eType = getBaseStat("skills", skillId, "etype");

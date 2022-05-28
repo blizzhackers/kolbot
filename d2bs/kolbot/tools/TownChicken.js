@@ -1,9 +1,9 @@
 /**
-*	@filename	TownChicken.js
-*	@author		kolton
-*	@desc		handle town chicken
+*  @filename    TownChicken.js
+*  @author      kolton
+*  @desc        handle town chicken
+*
 */
-
 js_strict(true);
 
 include("json2.js");

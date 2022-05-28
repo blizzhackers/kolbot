@@ -1,10 +1,10 @@
-/*
-*	@filename	MapThread.js
-*	@author		theBGuy
-*	@desc		MapThread used with D2BotMap.dbj
-*	@credits 	kolton for orginal MapThread, isid0re for the box/frame style, laz for gamepacketsent event handler
+/**
+*  @filename    MapThread.js
+*  @author      theBGuy
+*  @credits     kolton for orginal MapThread, isid0re for the box/frame style, laz for gamepacketsent event handler
+*  @desc        MapThread used with D2BotMap.dbj
+*
 */
-
 include("json2.js");
 include("NTItemParser.dbl");
 include("OOG.js");

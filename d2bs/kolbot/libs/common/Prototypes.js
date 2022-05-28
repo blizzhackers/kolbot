@@ -1916,6 +1916,68 @@ Object.defineProperties(me, {
 			return me.classid === 6;
 		}
 	},
+	// quest items
+	cube: {
+		get: function () {
+			return me.getItem(sdk.items.quest.Cube);
+		}
+	},
+	shaft: {
+		get: function () {
+			return me.getItem(sdk.quest.item.ShaftoftheHoradricStaff);
+		}
+	},
+	amulet: {
+		get: function () {
+			return me.getItem(sdk.quest.item.ViperAmulet);
+		}
+	},
+	staff: {
+		get: function () {
+			return me.getItem(sdk.quest.item.HoradricStaff);
+		}
+	},
+	completestaff: {
+		get: function () {
+			return me.getItem(sdk.quest.item.HoradricStaff);
+		}
+	},
+	eye: {
+		get: function () {
+			return me.getItem(sdk.items.quest.KhalimsEye);
+		}
+	},
+	brain: {
+		get: function () {
+			return me.getItem(sdk.quest.item.KhalimsBrain);
+		}
+	},
+	heart: {
+		get: function () {
+			return me.getItem(sdk.quest.item.KhalimsHeart);
+		}
+	},
+	khalimswill: {
+		get: function () {
+			return me.getItem(sdk.quest.item.KhalimsWill);
+		}
+	},
+	khalimsflail: {
+		get: function () {
+			return me.getItem(sdk.quest.item.KhalimsFlail);
+		}
+	},
+	malahspotion: {
+		get: function () {
+			return me.getItem(sdk.quest.item.MalahsPotion);
+		}
+	},
+	scrollofresistance: {
+		get: function () {
+			return me.getItem(sdk.quest.item.ScrollofResistance);
+		}
+	},
+	// quests
 	den: {
 		get: function () {
 			return me.getQuest(1, 0);
@@ -1946,29 +2008,9 @@ Object.defineProperties(me, {
 			return me.getQuest(7, 0);
 		}
 	},
-	cube: {
-		get: function () {
-			return !!me.getItem(sdk.items.quest.Cube);
-		}
-	},
 	radament: {
 		get: function () {
 			return me.getQuest(9, 0);
-		}
-	},
-	shaft: {
-		get: function () {
-			return !!me.getItem(92);
-		}
-	},
-	amulet: {
-		get: function () {
-			return !!me.getItem(521);
-		}
-	},
-	staff: {
-		get: function () {
-			return !!me.getItem(91);
 		}
 	},
 	horadricstaff: {
@@ -1989,26 +2031,6 @@ Object.defineProperties(me, {
 	goldenbird: {
 		get: function () {
 			return me.getQuest(20, 0);
-		}
-	},
-	eye: {
-		get: function () {
-			return (!!me.getItem(sdk.items.quest.KhalimsEye));
-		}
-	},
-	brain: {
-		get: function () {
-			return !!me.getItem(555);
-		}
-	},
-	heart: {
-		get: function () {
-			return !!me.getItem(554);
-		}
-	},
-	khalimswill: {
-		get: function () {
-			return !!me.getItem(174);
 		}
 	},
 	lamessen: {
@@ -2061,6 +2083,11 @@ Object.defineProperties(me, {
 			return me.getQuest(36, 0);
 		}
 	},
+	barbrescue: {
+		get: function () {
+			return me.getQuest(36, 0);
+		}
+	},
 	anya: {
 		get: function () {
 			return me.getQuest(37, 0);
@@ -2076,6 +2103,7 @@ Object.defineProperties(me, {
 			return me.getQuest(40, 0);
 		}
 	},
+	// Misc
 	cows: {
 		get: function () {
 			return me.getQuest(4, 10);
@@ -2194,3 +2222,7 @@ Unit.prototype.getMobCount = function (range = 10, coll = 0, type = 0, noSpecial
 			}).length;
 	};
 }
+
+const monster = (id) => getUnit(sdk.unittype.Monster, id);
+const object = (id) => getUnit(sdk.unittype.Object, id);
+const item = (id) => getUnit(sdk.unittype.Item, id);

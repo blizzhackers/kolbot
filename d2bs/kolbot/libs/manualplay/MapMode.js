@@ -1,7 +1,8 @@
-/*
-*	@filename	MapMode.js
-*	@author		theBGuy
-*	@desc		Global settings Map-Mode
+/**
+*  @filename    MapMode.js
+*  @author      theBGuy
+*  @desc        Global settings Map-Mode
+*
 */
 
 const MapMode = {

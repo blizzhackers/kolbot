@@ -1,11 +1,10 @@
-/*
-*	@filename	MapHelper.js
-*	@author		theBGuy
-*	@desc		MapHelper used in conjuction with MapThread.js
-*	@credits 	kolton for orginal MapHelper
+/**
+*  @filename    MapHelper.js
+*  @author      theBGuy
+*  @credits     kolton
+*  @desc        MapHelper used in conjuction with MapThread.js
+*
 */
-
-// Basic
 include("json2.js");
 include("NTItemParser.dbl");
 include("OOG.js");
@@ -28,18 +27,21 @@ function main() {
 		mapThread = getScript("libs/manualplay/threads/mapthread.js");
 
 	const portalMap = {
+		// Abaddon
 		125: {
 			14: [12638, 6373],
 			15: [12638, 6063],
 			20: [12708, 6063],
 			25: [12948, 6128],
 		},
+		// Pit of Acheron
 		126: {
 			14: [12638, 7873],
 			15: [12638, 7563],
 			20: [12708, 7563],
 			25: [12948, 7628],
 		},
+		// Infernal Pit
 		127: {
 			14: [12638, 9373],
 			20: [12708, 9063],
@@ -47,7 +49,7 @@ function main() {
 		},
 	};
 
-	print("ÿc9MapHelper loaded");
+	console.log("ÿc9MapHelper loaded");
 	Config.init();
 	Attack.init(true);
 	Pickit.init();
@@ -124,15 +126,15 @@ function main() {
 
 					switch (obj.type) {
 					case "area":
-						if (obj.dest === 120) {
+						if (obj.dest === sdk.areas.ArreatSummit) {
 							Pather.moveToExit(obj.dest, false);
-						} else if ([46, 47, 54, 103, 110].includes(obj.dest)) {
+						} else if ([sdk.areas.CanyonofMagic, sdk.areas.A2SewersLvl1, sdk.areas.PalaceCellarLvl3, sdk.areas.PandemoniumFortress, sdk.areas.BloodyFoothills].includes(obj.dest)) {
 							Pather.journeyTo(obj.dest);
-						} else if (obj.dest === 73) {
+						} else if (obj.dest === sdk.areas.DurielsLair) {
 							Pather.moveToPreset(me.area, 2, 152, -11, 3);
 
 							for (let i = 0; i < 3; i++) {
-								if (Pather.useUnit(2, 100, 73)) {
+								if (Pather.useUnit(2, 100, sdk.areas.DurielsLair)) {
 									break;
 								}
 							}
@@ -142,31 +144,28 @@ function main() {
 
 						break;
 					case "unit":
-						if (me.area === 39) {
-							break;
-						}
-
-						if (me.area === 73 && Misc.talkToTyrael()) {
+						if (me.area === sdk.areas.MooMooFarm
+							|| (me.area === sdk.areas.DurielsLair && Misc.talkToTyrael())) {
 							break;
 						}
 
 						Pather.moveToUnit(obj.dest, true);
 
 						switch (me.area) {
-						case 3: 	// Cold Plains -> Cave Level 1
-							Pather.moveToExit(9, true);
+						case sdk.areas.ColdPlains:
+							Pather.moveToExit(sdk.areas.CaveLvl1, true);
 
 							break;
-						case 6: 	// Black Marsh -> Hole Level 1
-							Pather.moveToExit(11, true);
+						case sdk.areas.BlackMarsh:
+							Pather.moveToExit(sdk.areas.HoleLvl1, true);
 
 							break;
-						case 40: 	// Lut Gholein -> Sewers Level  1
-							Pather.useUnit(5, 20, 47);
+						case sdk.areas.LutGholein:
+							Pather.useUnit(sdk.unittype.Stairs, 20, sdk.areas.A2SewersLvl1);
 
 							break;
-						case 80: 	// Kurast Bazaar -> A3 Sewers Level 1
-							Pather.useUnit(5, 57, 92);
+						case sdk.areas.KurastBazaar:
+							Pather.useUnit(sdk.unittype.Stairs, 57, sdk.areas.A3SewersLvl1);
 
 							break;
 						}
@@ -190,11 +189,11 @@ function main() {
 
 						break;
 					case "portal":
-						if (obj.dest === 132 && getUnit(1, 543)) {
+						if (obj.dest === sdk.areas.WorldstoneChamber && getUnit(1, sdk.monsters.ThroneBaal)) {
 							me.overhead("Can't enter Worldstone Chamber yet. Baal still in area");
 							
 							break;
-						} else if (obj.dest === 132 && !getUnit(1, 543)) {
+						} else if (obj.dest === sdk.areas.WorldstoneChamber && !getUnit(1, sdk.monsters.ThroneBaal)) {
 							redPortal = getUnit(2, 563);
 							redPortal && Pather.usePortal(null, null, redPortal);
 
@@ -202,7 +201,7 @@ function main() {
 						}
 
 						switch (obj.dest) {
-						case 1:
+						case sdk.areas.RogueEncampment:
 							king = getPresetUnit(me.area, 1, 773);
 
 							switch (king.x) {
@@ -213,28 +212,28 @@ function main() {
 							}
 
 							break;
-						case 4:
+						case sdk.areas.StonyField:
 							Pather.moveTo(25173, 5086);
 							redPortal = Pather.getPortal(4);
 
 							break;
-						case 39:
+						case sdk.areas.MooMooFarm:
 							redPortal = Pather.getPortal(39);
 
 							break;
-						case 74:
+						case sdk.areas.ArcaneSanctuary:
 							Pather.moveTo(12692, 5195);
 							redPortal = Pather.getPortal(74);
 							!redPortal && Pather.useWaypoint(74);
 
 							break;
-						case 109:
+						case sdk.areas.Harrogath:
 							Pather.moveTo(20193, 8693);
 
 							break;
-						case 111:
-						case 112:
-						case 117:
+						case sdk.areas.FrigidHighlands:
+						case sdk.areas.ArreatPlateau:
+						case sdk.areas.FrozenTundra:
 							chestLoc = getPresetUnit(me.area, 2, 397);
 
 							if (!chestLoc) {
@@ -247,14 +246,10 @@ function main() {
 							Pather.usePortal();
 
 							break;
-						// Matron's
-						case 133:
-						// Forgotten Sands
-						case 134:
-						// Furnace
-						case 135:
-						// Uber Tristram
-						case 136:
+						case sdk.areas.MatronsDen:
+						case sdk.areas.ForgottenSands:
+						case sdk.areas.FurnaceofPain:
+						case sdk.areas.UberTristram:
 							redPortal = Pather.getPortal(obj.dest);
 
 							break;

@@ -1,7 +1,8 @@
 /**
-*	@filename	HeartBeat.js
-*	@author		kolton
-*	@desc		Keep a link with d2bot#. If it's lost, the d2 window is killed
+*  @filename    HeartBeat.js
+*  @author      kolton
+*  @desc        Keep a link with d2bot#. If it's lost, the d2 window is killed
+*
 */
 
 function main() {

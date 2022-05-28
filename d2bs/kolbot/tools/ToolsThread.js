@@ -1,9 +1,9 @@
 /**
-*	@filename	ToolsThread.js
-*	@author		kolton
-*	@desc		several tools to help the player - potion use, chicken, Diablo clone stop, map reveal, quit with player
+*  @filename    ToolsThread.js
+*  @author      kolton
+*  @desc        several tools to help the player - potion use, chicken, Diablo clone stop, map reveal, quit with player
+*
 */
-
 js_strict(true);
 
 include("json2.js");
@@ -411,7 +411,7 @@ function main() {
 
 			break;
 		case 105: // numpad 9 - get nearest preset unit id
-			print(this.getNearestPreset());
+			console.log(this.getNearestPreset());
 
 			break;
 		case 106: // numpad * - precast
@@ -474,7 +474,7 @@ function main() {
 			}
 
 			if (Config.SoJWaitTime && me.expansion) {
-				!!me.gameserverip && D2Bot.printToConsole(param1 + " Stones of Jordan Sold to Merchants on IP " + me.gameserverip.split(".")[3], 7);
+				!!me.realm && D2Bot.printToConsole(param1 + " Stones of Jordan Sold to Merchants on IP " + me.gameserverip.split(".")[3], 7);
 				Messaging.sendToScript("default.dbj", "soj");
 			}
 

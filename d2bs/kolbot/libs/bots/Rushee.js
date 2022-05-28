@@ -28,6 +28,14 @@ function Rushee() {
 		sayMsg && say(msg);
 	};
 
+	this.useScrollOfRes = function () {
+		let scroll = me.scrollofresistance;
+		if (scroll) {
+			clickItem(1, scroll);
+			print("Using scroll of resistance");
+		}
+	};
+
 	this.revive = function () {
 		while (me.mode === 0) {
 			delay(40);
@@ -42,6 +50,7 @@ function Rushee() {
 		}
 	};
 
+	// todo - map the chest to classid so we only need to pass in one value
 	this.getQuestItem = function (classid, chestid) {
 		let tick = getTickCount();
 
@@ -101,10 +110,7 @@ function Rushee() {
 		if (!npc) return false;
 
 		for (let i = 0; i < 3; i += 1) {
-			if (getDistance(me, npc) > 3) {
-				Pather.moveToUnit(npc);
-			}
-
+			npc.distance > 3 && Pather.moveToUnit(npc);
 			npc.interact();
 			delay(1000 + me.ping);
 			me.cancel();
@@ -120,19 +126,19 @@ function Rushee() {
 	};
 
 	this.cubeStaff = function () {
-		let staff = me.getItem("vip"),
-			amulet = me.getItem("msf");
+		let shaft = me.shaft,
+			amulet = me.amulet;
 
-		if (!staff || !amulet) return false;
+		if (!shaft || !amulet) return false;
 
 		Storage.Cube.MoveTo(amulet);
-		Storage.Cube.MoveTo(staff);
+		Storage.Cube.MoveTo(shaft);
 		Cubing.openCube();
 		print("making staff");
 		transmute();
 		delay(750 + me.ping);
 
-		staff = me.getItem(91);
+		let staff = me.completestaff;
 
 		if (!staff) return false;
 
@@ -144,13 +150,13 @@ function Rushee() {
 
 	this.placeStaff = function () {
 		let tick = getTickCount(),
-			orifice = getUnit(2, 152);
+			orifice = object(sdk.quest.chest.HoradricStaffHolder);
 
 		if (!orifice) return false;
 
 		Misc.openChest(orifice);
 
-		let staff = me.getItem(91);
+		let staff = me.completestaff;
 
 		if (!staff) {
 			if (getTickCount() - tick < 500) {
@@ -258,9 +264,9 @@ function Rushee() {
 
 				delay(me.ping + 1);
 
-				if (getUnit(2, 566)) {
+				if (object(sdk.units.RedPortalToAct5)) {
 					me.cancel();
-					Pather.useUnit(2, 566, 109);
+					Pather.useUnit(2, sdk.units.RedPortalToAct5, 109);
 				} else {
 					Misc.useMenu(0x58D2);
 				}
@@ -330,13 +336,14 @@ function Rushee() {
 				switch (actions[0]) {
 				case "all in":
 					switch (leader.area) {
-					case 49: // Pick Book of Skill, use Book of Skill
+					case sdk.areas.A2SewersLvl3:
+						// Pick Book of Skill, use Book of Skill
 						Town.move("portalspot");
-						Pather.usePortal(49, Config.Leader);
+						Pather.usePortal(sdk.areas.A2SewersLvl3, Config.Leader);
 						delay(500);
 
 						while (true) {
-							target = getUnit(4, 552);
+							target = item(sdk.quest.item.BookofSkill);
 
 							if (!target) {
 								break;
@@ -344,10 +351,11 @@ function Rushee() {
 
 							Pickit.pickItem(target);
 							delay(250);
+							target = me.getItem(sdk.quest.item.BookofSkill);
 
-							if (me.getItem(552)) {
+							if (target) {
 								print("Using book of skill");
-								clickItem(1, me.getItem(552));
+								clickItem(1, target);
 
 								break;
 							}
@@ -383,8 +391,8 @@ function Rushee() {
 					// go activate wp if we don't know our wps yet
 					!getWaypoint(1) && Pather.getWP(me.area);
 
-					let myWps = Pather.wpAreas.slice(0).filter(function (area) {
-						if (sdk.areas.Towns.includes(area) || area === sdk.areas.HallsofPain) return false;
+					let myWps = Pather.nonTownWpAreas.slice(0).filter(function (area) {
+						if (area === sdk.areas.HallsofPain) return false;
 						if (me.classic && area >= sdk.areas.Harrogath) return false;
 						if (getWaypoint(Pather.wpAreas.indexOf(area))) return false;
 						return true;
@@ -444,10 +452,16 @@ function Rushee() {
 							break;
 						}
 
-						let stones = [getUnit(2, 17), getUnit(2, 18), getUnit(2, 19), getUnit(2, 20), getUnit(2, 21)];
+						let stones = [
+							object(sdk.quest.chest.StoneAlpha),
+							object(sdk.quest.chest.StoneBeta),
+							object(sdk.quest.chest.StoneGamma),
+							object(sdk.quest.chest.StoneDelta),
+							object(sdk.quest.chest.StoneLambda)
+						];
 
 						while (stones.some((stone) => !stone.mode)) {
-							for (let i = 0, stone = void 0; i < stones.length; i++) {
+							for (let i = 0; i < stones.length; i++) {
 								stone = stones[i];
 
 								if (Misc.openChest(stone)) {
@@ -460,7 +474,7 @@ function Rushee() {
 
 						let tick = getTickCount();
 						// wait up to two minutes
-						while (getTickCount() - tick < 60 * 1000 * 2) {
+						while (getTickCount() - tick < minutes(2)) {
 							if (Pather.getPortal(sdk.areas.Tristram)) {
 								Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader);
 								
@@ -495,7 +509,7 @@ function Rushee() {
 							break;
 						}
 
-						let gibbet = getUnit(2, 26);
+						let gibbet = object(sdk.quest.chest.CainsJail);
 
 						if (gibbet && !gibbet.mode) {
 							Pather.moveTo(gibbet.x, gibbet.y);
@@ -508,8 +522,8 @@ function Rushee() {
 						actions.shift();
 
 						break;
-					case 37: // Catacombs level 4
-						if (!Pather.usePortal(37, Config.Leader)) {
+					case sdk.areas.CatacombsLvl4:
+						if (!Pather.usePortal(sdk.areas.CatacombsLvl4, Config.Leader)) {
 							this.log("Failed to use portal to catacombs", Config.LocalChat.Enabled);
 							break;
 						}
@@ -520,26 +534,26 @@ function Rushee() {
 						actions.shift();
 
 						break;
-					case 49:
+					case sdk.areas.A2SewersLvl3:
 						Town.move("portalspot");
 
-						if (Pather.usePortal(49, Config.Leader)) {
+						if (Pather.usePortal(sdk.areas.A2SewersLvl3, Config.Leader)) {
 							actions.shift();
 						}
 
 						break;
-					case 60: // Halls of the Dead level 3
-						Pather.usePortal(60, Config.Leader);
+					case sdk.areas.HallsoftheDeadLvl3:
+						Pather.usePortal(sdk.areas.HallsoftheDeadLvl3, Config.Leader);
 						this.getQuestItem(549, 354);
-						Pather.usePortal(40, Config.Leader);
+						Pather.usePortal(sdk.areas.LutGholein, Config.Leader);
 
 						actions.shift();
 
 						break;
-					case 61: // Claw Viper Temple level 2
-						Pather.usePortal(61, Config.Leader);
+					case sdk.areas.ClawViperTempleLvl2:
+						Pather.usePortal(sdk.areas.ClawViperTempleLvl2, Config.Leader);
 						this.getQuestItem(521, 149);
-						Pather.usePortal(40, Config.Leader);
+						Pather.usePortal(sdk.areas.LutGholein, Config.Leader);
 						
 						if (Town.npcInteract("Drognan")) {
 							actions.shift();
@@ -549,46 +563,46 @@ function Rushee() {
 						Town.move("portalspot");
 
 						break;
-					case 64: // Maggot Lair level 3
-						Pather.usePortal(64, Config.Leader);
+					case sdk.areas.MaggotLairLvl3:
+						Pather.usePortal(sdk.areas.MaggotLairLvl3, Config.Leader);
 						this.getQuestItem(92, 356);
 						delay(500);
-						Pather.usePortal(40, Config.Leader);
+						Pather.usePortal(sdk.areas.LutGholein, Config.Leader);
 						this.cubeStaff();
 
 						actions.shift();
 
 						break;
-					case 74: // Arcane Sanctuary
-						if (!Pather.usePortal(74, Config.Leader)) {
+					case sdk.areas.ArcaneSanctuary:
+						if (!Pather.usePortal(sdk.areas.ArcaneSanctuary, Config.Leader)) {
 							break;
 						}
 
 						actions.shift();
 
 						break;
-					case 66: // Tal Rasha's Tombs
-					case 67:
-					case 68:
-					case 69:
-					case 70:
-					case 71:
-					case 72:
+					case sdk.areas.TalRashasTomb1:
+					case sdk.areas.TalRashasTomb2:
+					case sdk.areas.TalRashasTomb3:
+					case sdk.areas.TalRashasTomb4:
+					case sdk.areas.TalRashasTomb5:
+					case sdk.areas.TalRashasTomb6:
+					case sdk.areas.TalRashasTomb7:
 						Pather.usePortal(null, Config.Leader);
 						this.placeStaff();
-						Pather.usePortal(40, Config.Leader);
+						Pather.usePortal(sdk.areas.LutGholein, Config.Leader);
 						actions.shift();
 
 						break;
-					case 73: // Duriel's Lair
-						Pather.usePortal(73, Config.Leader);
+					case sdk.areas.DurielsLair:
+						Pather.usePortal(sdk.areas.DurielsLair, Config.Leader);
 						this.tyraelTalk();
 
 						actions.shift();
 
 						break;
-					case 83: // Travincal
-						if (!Pather.usePortal(83, Config.Leader)) {
+					case sdk.areas.Travincal:
+						if (!Pather.usePortal(sdk.areas.Travincal, Config.Leader)) {
 							me.cancel();
 
 							break;
@@ -597,7 +611,7 @@ function Rushee() {
 						actions.shift();
 
 						break;
-					case 94: // Ruined Temple
+					case sdk.areas.RuinedTemple:
 						if (!Pather.usePortal(94, Config.Leader)) {
 							me.cancel();
 
@@ -605,15 +619,15 @@ function Rushee() {
 						}
 
 						this.getQuestItem(548, 193);
-						Pather.usePortal(75, Config.Leader);
+						Pather.usePortal(sdk.areas.KurastDocktown, Config.Leader);
 						Town.npcInteract("Alkor");
 						Town.move("portalspot");
 						actions.shift();
 
 
 						break;
-					case 102: // Durance of Hate level 3
-						if (!Pather.usePortal(102, Config.Leader)) {
+					case sdk.areas.DuranceofHateLvl3:
+						if (!Pather.usePortal(sdk.areas.DuranceofHateLvl3, Config.Leader)) {
 							me.cancel();
 
 							break;
@@ -622,21 +636,21 @@ function Rushee() {
 						actions.shift();
 
 						break;
-					case 104: // sometimes the portal can be in city of the damned...
-					case 105:
+					case sdk.areas.OuterSteppes:
+					case sdk.areas.PlainsofDespair:
 						if (Pather.usePortal(null, Config.Leader)) {
 							actions.shift();
 						}
 
 						break;
-					case 108: // Chaos Sanctuary
-						Pather.usePortal(108, Config.Leader);
+					case sdk.areas.ChaosSanctuary:
+						Pather.usePortal(sdk.areas.ChaosSanctuary, Config.Leader);
 						Pather.moveTo(7762, 5268);
 						Packet.flash(me.gid);
 						delay(500);
 						Pather.walkTo(7763, 5267, 2);
 
-						while (!getUnit(1, 243)) {
+						while (!monster(sdk.monsters.Diablo)) {
 							delay(500);
 						}
 
@@ -644,22 +658,26 @@ function Rushee() {
 						actions.shift();
 
 						break;
-					case 110: // Bloody Foothils
-						Pather.usePortal(110, Config.Leader);
+					case sdk.areas.BloodyFoothills:
+						Pather.usePortal(sdk.areas.BloodyFoothills, Config.Leader);
 						actions.shift();
 
 						break;
-					case 114: // Frozen River
+					case sdk.areas.FrozenRiver:
 						Town.npcInteract("Malah");
 
-						Pather.usePortal(114, Config.Leader);
+						Pather.usePortal(sdk.areas.FrozenRiver, Config.Leader);
 						delay(500);
 
-						target = getUnit(2, 558);
+						target = object(sdk.units.FrozenAnya);
 
 						if (target) {
 							Pather.moveToUnit(target);
-							sendPacket(1, 0x13, 4, 0x2, 4, target.gid);
+							Misc.poll(() => {
+								sendPacket(1, 0x13, 4, 0x2, 4, target.gid);
+								delay(100);
+								return !object(sdk.units.FrozenAnya);
+							}, 1000, 200);
 							delay(1000);
 							me.cancel();
 						}
@@ -678,27 +696,19 @@ function Rushee() {
 					if (!Config.Rushee.Quester) {
 						switch (leader.area) {
 						// Non-questers can piggyback off quester out messages
-						case 110: // Shenk
-							if (me.act === 5) {
-								Town.npcInteract("Larzuk");
-							}
+						case sdk.areas.OuterSteppes:
+						case sdk.areas.PlainsofDespair:
+							me.act === 4 && Misc.checkQuest(25, 1) && Town.npcInteract("Tyrael");
 
 							break;
-						case 114: // Anya
+						case sdk.areas.BloodyFoothills:
+							me.act === 5 && Town.npcInteract("Larzuk");
+
+							break;
+						case sdk.areas.FrozenRiver:
 							if (me.act === 5) {
 								Town.npcInteract("Malah");
-
-								if (me.getItem(646)) {
-									print("Using scroll of resistance");
-									clickItem(1, me.getItem(646));
-								}
-							}
-
-							break;
-						case 104:
-						case 105:
-							if (me.act === 4 && Misc.checkQuest(25, 1)) {
-								Town.npcInteract("Tyrael");
+								this.useScrollOfRes();
 							}
 
 							break;
@@ -712,9 +722,9 @@ function Rushee() {
 					this.revive();
 
 					switch (me.area) {
-					case 37: // Catacombs level 4
+					case sdk.areas.CatacombsLvl4: // Catacombs level 4
 						// Go to town if not there, break if procedure fails
-						if (!me.inTown && !Pather.usePortal(1, Config.Leader)) {
+						if (!me.inTown && !Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader)) {
 							break;
 						}
 
@@ -726,16 +736,16 @@ function Rushee() {
 						actions.shift();
 
 						break;
-					case 49: // Sewers 3
-						if (!me.inTown && !Pather.usePortal(40, Config.Leader)) {
+					case sdk.areas.A2SewersLvl3:
+						if (!me.inTown && !Pather.usePortal(sdk.areas.LutGholein, Config.Leader)) {
 							break;
 						}
 
 						actions.shift();
 
 						break;
-					case 74: // Arcane Sanctuary
-						if (!me.inTown && !Pather.usePortal(40, Config.Leader)) {
+					case sdk.areas.ArcaneSanctuary:
+						if (!me.inTown && !Pather.usePortal(sdk.areas.LutGholein, Config.Leader)) {
 							break;
 						}
 
@@ -750,8 +760,8 @@ function Rushee() {
 						actions.shift();
 
 						break;
-					case 83: // Travincal
-						if (!me.inTown && !Pather.usePortal(75, Config.Leader)) {
+					case sdk.areas.Travincal:
+						if (!me.inTown && !Pather.usePortal(sdk.areas.KurastDocktown, Config.Leader)) {
 							break;
 						}
 
@@ -766,17 +776,17 @@ function Rushee() {
 						actions.shift();
 
 						break;
-					case 102: // Durance 2
-						if (!Pather.usePortal(75, Config.Leader)) {
+					case sdk.areas.DuranceofHateLvl3:
+						if (!Pather.usePortal(sdk.areas.KurastDocktown, Config.Leader)) {
 							break;
 						}
 
 						actions.shift();
 
 						break;
-					case 104:
-					case 105:
-						if (!me.inTown && !Pather.usePortal(103, Config.Leader)) {
+					case sdk.areas.OuterSteppes:
+					case sdk.areas.PlainsofDespair:
+						if (!me.inTown && !Pather.usePortal(sdk.areas.PandemoniumFortress, Config.Leader)) {
 							break;
 						}
 
@@ -788,18 +798,18 @@ function Rushee() {
 						actions.shift();
 
 						break;
-					case 108: // Chaos Sanctuary
+					case sdk.areas.ChaosSanctuary:
 						me.classic && D2Bot.restart();
 
-						if (!me.inTown && !Pather.usePortal(103, Config.Leader)) {
+						if (!me.inTown && !Pather.usePortal(sdk.areas.PandemoniumFortress, Config.Leader)) {
 							break;
 						}
 
 						actions.shift();
 
 						break;
-					case 110: // Bloody Foothils
-						if (!me.inTown && !Pather.usePortal(109, Config.Leader)) {
+					case sdk.areas.BloodyFoothills:
+						if (!me.inTown && !Pather.usePortal(sdk.areas.Harrogath, Config.Leader)) {
 							break;
 						}
 
@@ -808,19 +818,15 @@ function Rushee() {
 						actions.shift();
 
 						break;
-					case 114: // Frozen River
+					case sdk.areas.FrozenRiver:
 						if (!me.inTown && !Pather.usePortal(109, Config.Leader)) {
 							break;
 						}
 
 						Town.npcInteract("Malah");
-
-						if (me.getItem(646)) {
-							print("Using Scroll of Resistance");
-							clickItem(1, me.getItem(646));
-						}
-
+						this.useScrollOfRes();
 						Town.move("portalspot");
+
 						actions.shift();
 
 						break;
@@ -851,30 +857,30 @@ function Rushee() {
 					}
 
 					switch (leader.area) {
-					case 120: // Arreat Summit
-						if (!Pather.usePortal(120, Config.Leader)) {
+					case sdk.areas.ArreatSummit:
+						if (!Pather.usePortal(sdk.areas.ArreatSummit, Config.Leader)) {
 							break;
 						}
 
 						// Wait until portal is gone
-						while (Pather.getPortal(109, Config.Leader)) {
+						while (Pather.getPortal(sdk.areas.Harrogath, Config.Leader)) {
 							delay(500);
 						}
 
 						// Wait until portal is up again
-						while (!Pather.getPortal(109, Config.Leader)) {
+						while (!Pather.getPortal(sdk.areas.Harrogath, Config.Leader)) {
 							delay(500);
 						}
 
-						if (!Pather.usePortal(109, Config.Leader)) {
+						if (!Pather.usePortal(sdk.areas.Harrogath, Config.Leader)) {
 							break;
 						}
 
 						actions.shift();
 
 						break;
-					case 132: // Worldstone Chamber
-						if (!Pather.usePortal(132, Config.Leader)) {
+					case sdk.areas.WorldstoneChamber:
+						if (!Pather.usePortal(sdk.areas.WorldstoneChamber, Config.Leader)) {
 							break;
 						}
 

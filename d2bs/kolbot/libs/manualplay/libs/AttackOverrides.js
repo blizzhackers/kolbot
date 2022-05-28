@@ -1,10 +1,10 @@
-/*
-*	@filename	AttackOverrides.js
-*	@author		theBGuy
-*	@desc		Attack.js fixes to improve functionality for map mode
+/**
+*  @filename    AttackOverrides.js
+*  @author      kolton, theBGuy
+*  @desc        Attack.js fixes to improve functionality for map mode
+*
 */
-
-if (!isIncluded("common/Attack.js")) { include("common/Attack.js"); }
+!isIncluded("common/Attack.js") && include("common/Attack.js");
 
 Attack.init = function (notify = false) {
 	if (Config.Wereform) {
@@ -20,9 +20,13 @@ Attack.init = function (notify = false) {
 		notify && print("ÿc1Bad attack config. Don't expect your bot to attack.");
 	}
 
+	this.getPrimarySlot();
+	Skill.init();
+
 	if (me.expansion) {
+		Precast.checkCTA();
 		this.checkInfinity();
-		this.getPrimarySlot();
+		this.checkAuradin();
 	}
 };
 

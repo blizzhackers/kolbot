@@ -1,9 +1,9 @@
 /**
-*	@filename	RushThread.js
-*	@author		kolton, theBGuy
-*	@desc		Second half of the Rusher script
+*  @filename    RushThread.js
+*  @author      kolton, theBGuy
+*  @desc        Second half of the Rusher script
+*
 */
-
 js_strict(true);
 
 include("json2.js");
@@ -430,6 +430,7 @@ function main() {
 		return true;
 	};
 
+	// re-write to prevent fail to complete quest due to killing council from to far away
 	this.travincal = function () {
 		say("starting travincal");
 		Town.doChores();
@@ -462,8 +463,6 @@ function main() {
 	this.mephisto = function () {
 		say("starting mephisto");
 
-		let hydra;
-
 		Town.doChores();
 		Pather.useWaypoint(101, true);
 		Precast.doPrecast(true);
@@ -491,7 +490,7 @@ function main() {
 		Pather.moveTo(17591, 8070);
 		Attack.securePosition(me.x, me.y, 40, 3000);
 
-		hydra = getUnit(1, getLocaleString(3325));
+		let hydra = getUnit(1, getLocaleString(3325));
 
 		if (hydra) {
 			do {
@@ -553,15 +552,15 @@ function main() {
 		Pather.moveTo(7790, 5544);
 		
 		Common.Diablo.initLayout();
-		if (!Common.Diablo.openSeal(395) || !Common.Diablo.openSeal(396)) { throw new Error("Failed to open seals"); }
+		if (!Common.Diablo.openSeal(395) || !Common.Diablo.openSeal(396)) throw new Error("Failed to open seals");
 
 		Common.Diablo.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
-		if (!this.getBoss(getLocaleString(2851))) { throw new Error("Failed to kill Vizier"); }
-		if (!Common.Diablo.openSeal(394)) { throw new Error("Failed to open seals"); }
+		if (!this.getBoss(getLocaleString(2851))) throw new Error("Failed to kill Vizier");
+		if (!Common.Diablo.openSeal(394)) throw new Error("Failed to open seals");
 
 		Common.Diablo.seisLayout === 1 ? Pather.moveTo(7771, 5196) : Pather.moveTo(7798, 5186);
-		if (!this.getBoss(getLocaleString(2852))) { throw new Error("Failed to kill de Seis"); }
-		if (!Common.Diablo.openSeal(392) || !Common.Diablo.openSeal(393)) { throw new Error("Failed to open seals"); }
+		if (!this.getBoss(getLocaleString(2852))) throw new Error("Failed to kill de Seis");
+		if (!Common.Diablo.openSeal(392) || !Common.Diablo.openSeal(393)) throw new Error("Failed to open seals");
 
 		if (Common.Diablo.infLayout === 1) {
 			if (me.sorceress || me.assassin) {
@@ -573,7 +572,7 @@ function main() {
 			delay(1 + me.ping);
 			Pather.moveTo(7928, 5295);
 		}
-		if (!this.getBoss(getLocaleString(2853))) { throw new Error("Failed to kill Infector"); }
+		if (!this.getBoss(getLocaleString(2853))) throw new Error("Failed to kill Infector");
 
 		Pather.moveTo(7763, 5267);
 		Pather.makePortal();
@@ -635,8 +634,6 @@ function main() {
 
 		say("starting ancients");
 
-		let altar;
-
 		Town.doChores();
 		Pather.useWaypoint(118, true);
 		Precast.doPrecast(true);
@@ -654,23 +651,9 @@ function main() {
 		}
 
 		Pather.moveTo(10048, 12628);
+		Common.Ancients.touchAltar();
+		Common.Ancients.startAncients();
 
-		altar = getUnit(2, 546);
-
-		if (altar) {
-			while (altar.mode !== 2) {
-				Pather.moveToUnit(altar);
-				altar.interact();
-				delay(2000 + me.ping);
-				me.cancel();
-			}
-		}
-
-		while (!getUnit(1, 542)) {
-			delay(250);
-		}
-
-		Attack.clear(50);
 		Pather.moveTo(10089, 12622);
 		me.cancel();
 		Pather.makePortal();
@@ -783,7 +766,7 @@ function main() {
 			throw new Error("Failed to move to Tree of Inifuss");
 		}
 
-		let tree = getUnit(2, 30);
+		let tree = object(sdk.quest.chest.InifussTree);
 		!!tree && tree.distance > 5 && Pather.moveToUnit(tree);
 		Attack.securePosition(me.x, me.y, 40, 3000, true);
 		!!tree && tree.distance > 5 && Pather.moveToUnit(tree);
@@ -791,8 +774,7 @@ function main() {
 		say("1");
 		tick = getTickCount();
 
-		// wait up to two minutes
-		while (getTickCount() - tick < 60 * 1000 * 2) {
+		while (getTickCount() - tick < minutes(2)) {
 			if (tree.mode) {
 				break;
 			}
@@ -809,8 +791,8 @@ function main() {
 		say("1");
 
 		tick = getTickCount();
-		// wait up to two minutes
-		while (getTickCount() - tick < 60 * 1000 * 2) {
+
+		while (getTickCount() - tick < minutes(2)) {
 			if (Pather.usePortal(sdk.areas.Tristram)) {
 				break;
 			}
@@ -819,11 +801,11 @@ function main() {
 
 		if (me.area === sdk.areas.Tristram) {
 			Pather.moveTo(me.x, me.y + 6);
-			let gibbet = getUnit(2, 26);
+			let gibbet = object(sdk.quest.chest.CainsJail);
 
 			if (gibbet && !gibbet.mode) {
 				if (!Pather.moveToPreset(me.area, 2, 26, 0, 0, true, true)) {
-					throw new Error("Failed to move to Cain's Gibbet");
+					throw new Error("Failed to move to Cain's Jail");
 				}
 
 				Attack.securePosition(gibbet.x, gibbet.y, 20, 3000);
@@ -832,8 +814,7 @@ function main() {
 
 				tick = getTickCount();
 
-				// wait up to two minutes
-				while (getTickCount() - tick < 60 * 1000 * 2) {
+				while (getTickCount() - tick < minutes(2)) {
 					if (gibbet.mode) {
 						break;
 					}
@@ -850,60 +831,49 @@ function main() {
 
 		say("starting radament");
 
-		let i, radaCoords, rada, radaPreset, returnSpot,
-			moveIntoPos = function (unit, range) {
-				let i, coordx, coordy,
-					coords = [],
-					angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
-					angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 105, -105, 120, -120, 135, -135, 150, -150, 180];
+		let	moveIntoPos = function (unit, range) {
+			let coords = [],
+				angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
+				angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 105, -105, 120, -120, 135, -135, 150, -150, 180];
 
-				for (i = 0; i < angles.length; i += 1) {
-					coordx = Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * range + unit.x);
-					coordy = Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * range + unit.y);
+			for (let i = 0; i < angles.length; i += 1) {
+				let coordx = Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * range + unit.x);
+				let coordy = Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * range + unit.y);
 
-					try {
-						if (!(getCollision(unit.area, coordx, coordy) & 0x1)) {
-							coords.push({
-								x: coordx,
-								y: coordy
-							});
-						}
-					} catch (e) {
-						continue;
+				try {
+					if (!(getCollision(unit.area, coordx, coordy) & 0x1)) {
+						coords.push({
+							x: coordx,
+							y: coordy
+						});
 					}
+				} catch (e) {
+					continue;
 				}
+			}
 
-				if (coords.length > 0) {
-					coords.sort(Sort.units);
+			if (coords.length > 0) {
+				coords.sort(Sort.units);
 
-					return Pather.moveToUnit(coords[0]);
-				}
+				return Pather.moveToUnit(coords[0]);
+			}
 
-				return false;
-			};
+			return false;
+		};
 
 		Pather.useWaypoint(48, true);
 		Precast.doPrecast(false);
 		Pather.moveToExit(49, true);
 
-		radaPreset = getPresetUnit(49, 2, 355);
-		radaCoords = {
+		let radaPreset = getPresetUnit(49, 2, 355);
+		let radaCoords = {
 			area: 49,
 			x: radaPreset.roomx * 5 + radaPreset.x,
 			y: radaPreset.roomy * 5 + radaPreset.y
 		};
 
 		moveIntoPos(radaCoords, 50);
-
-		for (i = 0; i < 3; i += 1) {
-			rada = getUnit(1, 229);
-
-			if (rada) {
-				break;
-			}
-
-			delay(500);
-		}
+		let rada = Misc.poll(() => monster(sdk.monsters.Radament), 1500, 500);
 
 		rada ? moveIntoPos(rada, 60) : print("radament unit not found");
 		Attack.securePosition(me.x, me.y, 35, 3000);
@@ -914,9 +884,9 @@ function main() {
 			delay(200);
 		}
 
-		Attack.kill(229); // Radament
+		Attack.kill(sdk.monsters.Radament);
 
-		returnSpot = {
+		let returnSpot = {
 			x: me.x,
 			y: me.y
 		};
@@ -937,9 +907,7 @@ function main() {
 			delay(200);
 		}
 
-		while (getUnit(4, 552)) {
-			delay(1000);
-		}
+		Misc.poll(() => !item(sdk.quest.item.BookofSkill), 30000, 1000);
 
 		while (this.playerIn()) {
 			delay(200);
@@ -987,64 +955,53 @@ function main() {
 
 		say("starting izual");
 
-		let i, izualCoords, izual, izualPreset, returnSpot,
-			moveIntoPos = function (unit, range) {
-				let i, coordx, coordy,
-					coords = [],
-					angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
-					angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 105, -105, 120, -120, 135, -135, 150, -150, 180];
+		let	moveIntoPos = function (unit, range) {
+			let coords = [],
+				angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
+				angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 105, -105, 120, -120, 135, -135, 150, -150, 180];
 
-				for (i = 0; i < angles.length; i += 1) {
-					coordx = Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * range + unit.x);
-					coordy = Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * range + unit.y);
+			for (let i = 0; i < angles.length; i += 1) {
+				let coordx = Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * range + unit.x);
+				let coordy = Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * range + unit.y);
 
-					try {
-						if (!(getCollision(unit.area, coordx, coordy) & 0x1)) {
-							coords.push({
-								x: coordx,
-								y: coordy
-							});
-						}
-					} catch (e) {
-						continue;
+				try {
+					if (!(getCollision(unit.area, coordx, coordy) & 0x1)) {
+						coords.push({
+							x: coordx,
+							y: coordy
+						});
 					}
+				} catch (e) {
+					continue;
 				}
+			}
 
-				if (coords.length > 0) {
-					coords.sort(Sort.units);
+			if (coords.length > 0) {
+				coords.sort(Sort.units);
 
-					return Pather.moveToUnit(coords[0]);
-				}
+				return Pather.moveToUnit(coords[0]);
+			}
 
-				return false;
-			};
+			return false;
+		};
 
 		Pather.useWaypoint(106, true);
 		Precast.doPrecast(false);
 		Pather.moveToExit(105, true);
 
-		izualPreset = getPresetUnit(105, 1, 256);
-		izualCoords = {
+		let izualPreset = getPresetUnit(105, 1, 256);
+		let izualCoords = {
 			area: 105,
 			x: izualPreset.roomx * 5 + izualPreset.x,
 			y: izualPreset.roomy * 5 + izualPreset.y
 		};
 
 		moveIntoPos(izualCoords, 50);
-
-		for (i = 0; i < 3; i += 1) {
-			izual = getUnit(1, 256);
-
-			if (izual) {
-				break;
-			}
-
-			delay(500);
-		}
+		let izual = Misc.poll(() => monster(sdk.monsters.Izual), 1500, 500);
 
 		izual ? moveIntoPos(izual, 60) : print("izual unit not found");
 
-		returnSpot = {
+		let returnSpot = {
 			x: me.x,
 			y: me.y
 		};
@@ -1057,7 +1014,7 @@ function main() {
 			delay(200);
 		}
 
-		Attack.kill(256); // Izual
+		Attack.kill(sdk.monsters.Izual);
 		Pickit.pickItems();
 		say("2");
 		Pather.moveToUnit(returnSpot);
@@ -1087,7 +1044,7 @@ function main() {
 			delay(200);
 		}
 
-		Attack.kill(getLocaleString(22435)); // Shenk
+		Attack.kill(getLocaleString(sdk.locale.monsters.ShenktheOverseer));
 		Pickit.pickItems();
 		Pather.moveTo(3846, 5120);
 		say("2");
@@ -1120,7 +1077,7 @@ function main() {
 
 		Attack.securePosition(me.x, me.y, 30, 2000);
 
-		let anya = getUnit(2, 558);
+		let anya = object(sdk.units.FrozenAnya);
 
 		if (anya) {
 			Pather.moveToUnit(anya);
@@ -1136,9 +1093,7 @@ function main() {
 			delay(200);
 		}
 
-		while (getUnit(2, 558)) {
-			delay(1000);
-		}
+		Misc.poll(() => !object(sdk.units.FrozenAnya), 30000, 1000);
 
 		say("2"); // Mainly for non-questers to know when to get the scroll of resistance
 
@@ -1290,6 +1245,4 @@ function main() {
 
 		delay(100);
 	}
-
-	return true;
 }

@@ -1,10 +1,10 @@
 /**
-*	@filename	MapToolsThread.js
-*	@author		theBGuy
-* 	@credits	kolton
-*	@desc		several tools to help the player - potion use, chicken, Diablo clone stop, map reveal, quit with player
+*  @filename    MapToolsThread.js
+*  @author      theBGuy
+*  @credits     kolton
+*  @desc        several tools to help the player - potion use, chicken, Diablo clone stop, map reveal, quit with player
+*
 */
-
 js_strict(true);
 
 include("json2.js");
@@ -193,8 +193,7 @@ function main() {
 	};
 
 	this.drinkPotion = function (type) {
-		let pottype, potion,
-			tNow = getTickCount();
+		let pottype, tNow = getTickCount();
 
 		switch (type) {
 		case 0:
@@ -247,21 +246,19 @@ function main() {
 			break;
 		}
 
-		potion = this.getPotion(pottype, type);
+		let potion = this.getPotion(pottype, type);
 
-		if (potion) {
-			if (me.mode === 0 || me.mode === 17) {
-				return false;
-			}
+		if (!!potion) {
+			if (me.mode === 0 || me.mode === 17 || me.mode === 18) return false;
 
-			if (type < 3) {
-				potion.interact();
-			} else {
-				try {
-					clickItem(2, potion);
-				} catch (e) {
-					print("Couldn't give the potion to merc.");
+			try {
+				if (type < 3) {
+					potion.interact();
+				} else {
+					sendPacket(1, 0x26, 4, potion.gid, 4, 1, 4, 0);
 				}
+			} catch (e) {
+				console.warn(e);
 			}
 
 			timerLastDrink[type] = getTickCount();
