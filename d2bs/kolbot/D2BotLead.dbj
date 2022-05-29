@@ -121,6 +121,14 @@ function locationAction (location) {
 				Starter.chanInfo.afterMsg = Starter.Config.AfterGameMessage;
 			}
 
+			// check that we are in the channel we are supposed to be in
+			if (Starter.chanInfo.joinChannel.length) {
+				let chanName = Controls.LobbyChannelName.getText();
+				chanName && (chanName = chanName.toString());
+				chanName && (chanName = chanName.slice(0, chanName.indexOf("(") - 1));
+				Starter.chanInfo.joinChannel.indexOf(chanName) === -1 && (Starter.chatActionsDone = false);
+			}
+
 			if (Starter.chanInfo.afterMsg) {
 				if (typeof Starter.chanInfo.afterMsg === "string") {
 					Starter.chanInfo.afterMsg = [Starter.chanInfo.afterMsg];
