@@ -37,6 +37,10 @@ let sdk = require('./modules/sdk');
 let Controls = require('./modules/Control');
 let Overrides = require('./modules/Override');
 
+if (typeof AdvancedConfig[me.profile] === "object") {
+	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
+}
+
 let channelTick = getTickCount(),
 	fListTick = 0,
 	retry = 0,
@@ -145,6 +149,24 @@ function locationAction (location) {
 				}
 			}
 
+			if (Starter.Config.Follow.length > 0 && !Starter.channelNotify) {
+				Starter.sayMsg("/d2notify");
+				lines = Controls.LobbyChat.getText();
+
+				if (!lines) {
+					break;
+				}
+
+				if (lines.some(line => line.match("notifications are disabled"))) {
+					Starter.sayMsg("/d2notify");
+					lines = Controls.LobbyChat.getText();
+				}
+
+				if (lines.some(line => line.match("notifications are enabled"))) {
+					Starter.channelNotify = true;
+				}
+			}
+
 			// Added !chatActionsDone condition to prevent spam
 			if (Starter.Config.FirstJoinMessage !== "" && !Starter.chatActionsDone) {
 				ControlAction.timeoutDelay("Chat delay", Starter.Config.ChatActionsDelay * 1e3);
@@ -237,8 +259,11 @@ function locationAction (location) {
 		lastText = fullText;
 		let newLines = lines
 			.map((line, index) => {
-			// eslint-disable-next-line no-useless-escape
-				if (index > 0 && !line.match(/\<.*\>/, "gi")) {
+				if (index > 0
+					// eslint-disable-next-line no-useless-escape
+					&& !line.match(/\<.*\>/, "gi")
+					&& !line.match(" has left", "gi")
+					&& !line.match(" has joined", "gi")) {
 					lines[index - 1] += line;
 					lines.splice(index, 1);
 					index--;
@@ -277,6 +302,25 @@ function locationAction (location) {
 				console.debug(joinInfo.gameName + " " + joinInfo.gamePass);
 
 				if (joinInfo.gameName && joinInfo.gameName !== joinInfo.oldGame && badGames.indexOf(joinInfo.gameName) === -1) {
+					// wait until leader has left the channel
+					if (Starter.Config.JoinDelay && Starter.channelNotify) {
+						let wTick = getTickCount();
+
+						while (true) {
+							lines = Controls.LobbyChat.getText();
+
+							if (!lines || (getTickCount() - wTick > minutes(1))) {
+								break;
+							}
+
+							if (lines.some(line => line.match(Starter.Config.Follow[n] + " has left"))) {
+								break;
+							}
+
+							delay(2000);
+						}
+					}
+
 					Controls.JoinGameWindow.click();
 
 					break;

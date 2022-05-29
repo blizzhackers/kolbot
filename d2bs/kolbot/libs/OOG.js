@@ -1421,6 +1421,7 @@ const Starter = {
 	connectFail: false,
 	connectFailRetry: 0,
 	makeAccount: false,
+	channelNotify: false,
 	chanInfo: {
 		joinChannel: "",
 		firstMsg: "",
