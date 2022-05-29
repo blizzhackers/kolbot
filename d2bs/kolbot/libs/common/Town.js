@@ -1899,11 +1899,11 @@ const Town = {
 			case 4: // Sell item
 				try {
 					console.log("LowGold sell " + item.name);
-					this.initNPC("Shop", "clearInventory");
+					Town.initNPC("Shop", "clearInventory");
 					Misc.itemLogger("Sold", item);
 					item.sell() && (sold = true);
 				} catch (e) {
-					console.warn(e);
+					console.errorReport(e);
 				}
 
 				break;
