@@ -1558,6 +1558,23 @@ Object.defineProperties(Unit.prototype, {
 			return (this.isChampion || this.isUnique || this.isSuperUnique);
 		},
 	},
+	// todo - monster types
+	ghosts: {
+		get: function () {
+			return [
+				sdk.monsters.Ghost1, sdk.monsters.Wraith1, sdk.monsters.Specter1,
+				sdk.monsters.Apparition, sdk.monsters.DarkShape, sdk.monsters.Ghost2, sdk.monsters.Wraith2, sdk.monsters.Specter2
+			].includes(this.classid);
+		},
+	},
+	dolls: {
+		get: function () {
+			return [
+				sdk.monsters.BoneFetish1, sdk.monsters.BoneFetish2, sdk.monsters.BoneFetish3,
+				sdk.monsters.SoulKiller3, sdk.monsters.StygianDoll2, sdk.monsters.StygianDoll6, sdk.monsters.SoulKiller
+			].includes(this.classid);
+		},
+	},
 	isWalking: {
 		get: function () {
 			return (this.mode === sdk.units.monsters.monstermode.Walking && (this.targetx !== this.x || this.targety !== this.y));
@@ -1917,9 +1934,14 @@ Object.defineProperties(me, {
 		}
 	},
 	// quest items
+	wirtsleg: {
+		get: function () {
+			return me.getItem(sdk.quest.item.WirtsLeg);
+		}
+	},
 	cube: {
 		get: function () {
-			return me.getItem(sdk.items.quest.Cube);
+			return me.getItem(sdk.quest.item.Cube);
 		}
 	},
 	shaft: {

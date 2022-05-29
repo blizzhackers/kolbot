@@ -540,7 +540,7 @@ item: {
 				Defensive: 26,
 
 				// Barb
-				CombatBarb: 32,
+				BarbCombat: 32,
 				Masteries: 33,
 				Warcries: 34,
 
@@ -630,10 +630,11 @@ item: {
 				StoneGamma: 19,
 				StoneDelta: 20,
 				StoneLambda: 21,
-				StoneTheta: 22,
+				StoneTheta: 22, // ?
 				CainsJail: 26,
 				InifussTree: 30,
 				MalusHolder: 108,
+				Wirt: 268,
 
 				// act 2
 				ViperAmuletChest: 149,
@@ -652,6 +653,11 @@ item: {
 
 				// act 4
 				HellForge: 376,
+
+				// act 5
+				BarbCage: 434,
+				FrozenAnya: 558,
+				AncientsAltar: 546,
 			},
 			chests: [
 				// act 1
@@ -661,7 +667,9 @@ item: {
 				// act 3
 				81, 193, 405, 406, 407,
 				// act 4
-				376
+				376,
+				// act 5
+				434, 558, 546
 			],
 			id: {
 				SpokeToWarriv: 0,
@@ -1622,7 +1630,7 @@ item: {
 			FeederNest: 335,
 			Fenris: 421,
 			Fetish1: 142,
-			Fetish2: 213,
+			BoneFetish2: 213,
 			Fetish3: 397,
 			FetishShaman: 279,
 			Fiend1: 137,
@@ -1631,7 +1639,7 @@ item: {
 			FireTower: 372,
 			FlameSpider: 125,
 			Flayer1: 143,
-			Flayer2: 214,
+			BoneFetish3: 214,
 			Flayer3: 398,
 			Flayer4: 659,
 			Flayer5: 656,
@@ -1801,7 +1809,7 @@ item: {
 			QuillRat2: 605,
 			RatMan1: 141,
 			RatMan2: 396,
-			RatMan3: 212,
+			BoneFetish1: 212,
 			RatMan4: 407,
 			RatManShaman: 278,
 			RazorBeast: 316,

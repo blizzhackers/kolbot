@@ -1,7 +1,8 @@
 /**
-*	@filename	ChestMania.js
-*	@author		kolton
-*	@desc		Open chests in configured areas
+*  @filename    ChestMania.js
+*  @author      kolton
+*  @desc        Open chests in configured areas
+*
 */
 
 function ChestMania() {

@@ -1,46 +1,34 @@
 /**
-*	@filename	Cows.js
-*	@author		kolton
-*	@desc		clear the Moo Moo Farm without killing the Cow King
+*  @filename    Cows.js
+*  @author      kolton, theBGuy
+*  @desc        clear the Moo Moo Farm without killing the Cow King
+*
 */
 
 function Cows() {
 	this.getLeg = function () {
-		let portal;
-
-		if (me.getItem(sdk.items.quest.WirtsLeg)) {
-			return me.getItem(sdk.items.quest.WirtsLeg);
-		}
+		if (me.wirtsleg) return me.wirtsleg;
 
 		Pather.useWaypoint(sdk.areas.StonyField);
 		Precast.doPrecast(true);
 		Pather.moveToPreset(me.area, 1, 737, 8, 8);
 
-		for (let i = 0; i < 6; i += 1) {
-			portal = Pather.getPortal(sdk.areas.Tristram);
-
-			if (portal) {
-				Pather.usePortal(null, null, portal);
-
-				break;
-			}
-
-			delay(500);
-		}
-
-		if (!portal) {
+		if (Misc.poll(() => {
+			let p = Pather.getPortal(sdk.areas.Tristram);
+			return (p && Pather.usePortal(null, null, p));
+		}, seconds(3), 500)) {
 			throw new Error("Tristram portal not found");
 		}
 
 		Pather.moveTo(25048, 5177);
 
-		let wirt = getUnit(2, 268);
+		let wirt = object(sdk.quest.chest.Wirt);
 
 		for (let i = 0; i < 8; i += 1) {
 			wirt.interact();
 			delay(500);
 
-			let leg = getUnit(4, sdk.items.quest.WirtsLeg);
+			let leg = item(sdk.quest.item.WirtsLeg);
 
 			if (leg) {
 				let gid = leg.gid;
@@ -93,8 +81,8 @@ function Cows() {
 	};
 
 	this.openPortal = function (leg, tome) {
-		if (!Town.openStash()) { throw new Error("Failed to open stash"); }
-		if (!Cubing.emptyCube()) { throw new Error("Failed to empty cube"); }
+		if (!Town.openStash()) throw new Error("Failed to open stash");
+		if (!Cubing.emptyCube()) throw new Error("Failed to empty cube");
 		if (!Storage.Cube.MoveTo(leg) || !Storage.Cube.MoveTo(tome) || !Cubing.openCube()) {
 			throw new Error("Failed to cube leg and tome");
 		}

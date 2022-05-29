@@ -1,12 +1,13 @@
 /**
-*	@filename	Andariel.js
-*	@author		kolton
-*	@desc		kill Andariel
+*  @filename    Andariel.js
+*  @author      kolton
+*  @desc        kill Andariel
+*
 */
 
 function Andariel () {
 	this.killAndariel = function () {
-		let target = getUnit(1, 156);
+		let target = monster(sdk.monsters.Andariel);
 
 		if (!target) throw new Error("Andariel not found.");
 

@@ -1,7 +1,8 @@
 /**
-*	@filename	ClearAnyArea.js
-*	@author		kolton
-*	@desc		Clears any area
+*  @filename    ClearAnyArea.js
+*  @author      kolton
+*  @desc        Clears any area
+*
 */
 
 function ClearAnyArea() {
