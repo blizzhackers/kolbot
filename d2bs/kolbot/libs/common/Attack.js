@@ -936,6 +936,9 @@ const Attack = {
 	// casting skills can go over non-floors - excluding bliz/meteor - not sure if any others
 	// physical skills can't, need to exclude monster objects though
 	// splash skills can go through some objects, however some objects are cast blockers
+	// hotfix for now, bugged with flying mobs (specters, ghosts, ect) apparently underneath them doesn't register as ground? so it fails the needFloor test
+	// despite there being floor there. so for now check if its an area that doesn't have floor in some spots
+	// better fix would be passing unit directly in instead of x and y, but that is going to need more changes all over
 	validSpot: function (x, y, skill = -1) {
 		// Just in case
 		if (!me.area || !x || !y) return false;
@@ -943,6 +946,7 @@ const Attack = {
 		if (Skill.missileSkills.includes(skill)) return true;
 
 		let result;
+		let nonFloorAreas = [sdk.areas.ArcaneSanctuary, sdk.areas.RiverofFlame, sdk.areas.ChaosSanctuary, sdk.areas.Abaddon, sdk.areas.PitofAcheron, sdk.areas.InfernalPit];
 
 		// Treat thrown errors as invalid spot
 		try {
@@ -954,7 +958,7 @@ const Attack = {
 		if (result === undefined) return false;
 
 		switch (true) {
-		case Skill.needFloor.includes(skill):
+		case Skill.needFloor.includes(skill) && nonFloorAreas.includes(me.area):
 			let isFloor = !!(result & (0 | 0x1000));
 			// this spot is not on the floor (lava (river/chaos, space (arcane), ect))
 			if (!isFloor) {

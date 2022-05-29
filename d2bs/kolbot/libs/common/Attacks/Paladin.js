@@ -138,7 +138,7 @@ const ClassAttack = {
 		switch (attackSkill) {
 		case sdk.skills.BlessedHammer:
 			// todo: add doll avoid to other classes
-			if (Config.AvoidDolls && [212, 213, 214, 215, 216, 690, 691].includes(unit.classid)) {
+			if (Config.AvoidDolls && unit.dolls) {
 				this.dollAvoid(unit);
 				aura > -1 && Skill.setSkill(aura, 0);
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
