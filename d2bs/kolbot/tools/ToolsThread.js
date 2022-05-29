@@ -651,8 +651,8 @@ function main() {
 					if (getTickCount() - idleTick > 0) {
 						sendPacket(1, 0x40);
 						idleTick += rand(1200, 1500) * 1000;
-						me.overhead("Diablo Walks the Earth! - Next packet in: " (" (" + new Date(idleTick - getTickCount()).toISOString().slice(11, -5) + ")"));
-						print("Sent anti-idle packet, next refresh in: " + (" (" + new Date(idleTick - getTickCount()).toISOString().slice(11, -5) + ")"));
+						me.overhead("Diablo Walks the Earth! - Next packet in: (" + (new Date(idleTick - getTickCount()).toISOString().slice(11, -5)) + ")");
+						print("Sent anti-idle packet, next refresh in: (" + (new Date(idleTick - getTickCount()).toISOString().slice(11, -5)) + ")");
 					}
 				}
 			}
