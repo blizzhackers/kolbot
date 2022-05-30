@@ -19,36 +19,18 @@ function Diablo() {
 	Pather._teleport = Pather.teleport;
 	
 	// general functions
-	this.getBoss = function (name) {
-		let glow = getUnit(2, 131);
-
-		for (let i = 0; i < 16; i += 1) {
-			let boss = getUnit(1, name);
-
-			if (boss) {
-				Common.Diablo.chaosPreattack(name, 8);
-
-				return Attack.clear(40, 0, name, Common.Diablo.sort);
-			}
-
-			delay(250);
-		}
-
-		return !!glow;
-	};
-
 	this.vizierSeal = function () {
 		print("Viz layout " + Common.Diablo.vizLayout);
 		this.followPath(Common.Diablo.vizLayout === 1 ? this.starToVizA : this.starToVizB);
 
-		if (!Common.Diablo.openSeal(395) || !Common.Diablo.openSeal(396)) {
+		if (!Common.Diablo.openSeal(sdk.units.DiabloSealVizier2) || !Common.Diablo.openSeal(sdk.units.DiabloSealVizier)) {
 			throw new Error("Failed to open Vizier seals.");
 		}
 
 		delay(1 + me.ping);
 		Common.Diablo.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
 
-		if (!this.getBoss(getLocaleString(2851))) {
+		if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.GrandVizierofChaos))) {
 			throw new Error("Failed to kill Vizier");
 		}
 
@@ -59,11 +41,11 @@ function Diablo() {
 		print("Seis layout " + Common.Diablo.seisLayout);
 		this.followPath(Common.Diablo.seisLayout === 1 ? this.starToSeisA : this.starToSeisB);
 
-		if (!Common.Diablo.openSeal(394)) throw new Error("Failed to open de Seis seal.");
+		if (!Common.Diablo.openSeal(sdk.units.DiabloSealSeis)) throw new Error("Failed to open de Seis seal.");
 
 		Common.Diablo.seisLayout === 1 ? Pather.moveTo(7798, 5194) : Pather.moveTo(7796, 5155);
 
-		if (!this.getBoss(getLocaleString(2852))) throw new Error("Failed to kill de Seis");
+		if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.LordDeSeis))) throw new Error("Failed to kill de Seis");
 
 		return true;
 	};
@@ -73,7 +55,7 @@ function Diablo() {
 		print("Inf layout " + Common.Diablo.infLayout);
 		this.followPath(Common.Diablo.infLayout === 1 ? this.starToInfA : this.starToInfB);
 
-		if (!Common.Diablo.openSeal(392)) throw new Error("Failed to open Infector seals.");
+		if (!Common.Diablo.openSeal(sdk.units.DiabloSealInfector)) throw new Error("Failed to open Infector seals.");
 
 		if (Common.Diablo.infLayout === 1) {
 			if (me.sorceress || me.assassin) {
@@ -86,8 +68,8 @@ function Diablo() {
 			Pather.moveTo(7928, 5295);
 		}
 
-		if (!this.getBoss(getLocaleString(2853))) throw new Error("Failed to kill Infector");
-		if (!Common.Diablo.openSeal(393)) throw new Error("Failed to open Infector seals.");
+		if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.InfectorofSouls))) throw new Error("Failed to kill Infector");
+		if (!Common.Diablo.openSeal(sdk.units.DiabloSealInfector2)) throw new Error("Failed to open Infector seals.");
 
 		return true;
 	};

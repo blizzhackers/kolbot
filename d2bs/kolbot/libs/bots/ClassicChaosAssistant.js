@@ -1,8 +1,10 @@
 /**
- *	@filename	ClassicChaosAssistant.js
- *	@author		YGM
- *	@desc		Assistant to help sorcs in public chaos runs games on classic.
- */
+*  @filename    ClassicChaosAssistant.js
+*  @author      YGM
+*  @desc        Assistant to help sorcs in public chaos runs games on classic.
+*
+*/
+
 function Idle() {
 	let stargo, infgo, seisgo, vizgo, infseal, seisseal, vizseal, diablopickup, normalpickup = false;
 

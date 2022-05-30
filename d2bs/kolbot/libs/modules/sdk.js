@@ -260,6 +260,21 @@ item: {
 				default:
 					return sdk.areas.Harrogath;
 				}
+			},
+
+			townOfAct: function (act) {
+				switch (act) {
+				case 1:
+					return sdk.areas.RogueEncampment;
+				case 2:
+					return sdk.areas.LutGholein;
+				case 3:
+					return sdk.areas.KurastDocktown;
+				case 4:
+					return sdk.areas.PandemoniumFortress;
+				default:
+					return sdk.areas.Harrogath;
+				}
 			}
 		},
 
@@ -657,6 +672,8 @@ item: {
 				// act 5
 				BarbCage: 434,
 				FrozenAnya: 558,
+				FrozenAnyaPlatform: 460,
+				NihlathakPlatform: 462,
 				AncientsAltar: 546,
 			},
 			chests: [
@@ -1443,11 +1460,12 @@ item: {
 			RedPortalToAct4: 342,
 
 			// act 4
-			DiabloSealInfectorActive: 392,
-			DiabloSealInfectorInActive: 393,
-			DiabloSealSeizActive: 394,
-			DiabloSealVizierInactive: 395,
-			DiabloSealVizierActive: 396,
+			SealGlow: 131,
+			DiabloSealInfector: 392,
+			DiabloSealInfector2: 393,
+			DiabloSealSeis: 394,
+			DiabloSealVizier: 396,
+			DiabloSealVizier2: 395,
 			RedPortalToAct5: 566, // The one of tyreal
 
 			// act 5
@@ -1458,6 +1476,9 @@ item: {
 			AncientsDoor: 547,
 			FrozenAnya: 558,
 			RedPortalToChamber: 563, // Baal's red portal
+
+			FrigidHighlandsChest: 455,
+			IcyCellarChest: 397,
 
 			// misc
 			BubblingPoolofBlood: 82,
@@ -2017,6 +2038,7 @@ item: {
 			ListerTheTormenter: 571,
 			TheCowKing: 743,
 			ColdwormtheBurrower: 284,
+			Nihlathak: 526,
 
 			// Summons
 			ClayGolem: 289,
@@ -2130,6 +2152,8 @@ item: {
 				BloodRaven: 805,
 				Izual: 406,
 				DacFarren: 782,
+				EyebacktheUnleashed: 784,
+				SharpToothSayer: 790,
 				// Unconfirmed
 				Bonebreak: 705,
 				Coldcrow: 706,
@@ -2165,13 +2189,11 @@ item: {
 				AxeDweller: 750,
 				BonesawBreaker: 751,
 				EldritchtheRectifier: 753,
-				EyebacktheUnleashed: 754,
 				ThreshSocket: 755,
 				Pindleskin: 756,
 				SnapchipShatter: 757,
 				AnodizedElite: 758,
 				VinvearMolech: 759,
-				SharpToothSayer: 760,
 				MagmaTorquer: 761,
 				BlazeRipper: 762,
 				Frozenstein: 763,
@@ -3045,8 +3067,17 @@ item: {
 				Mephisto: 3062,
 				Diablo: 3060,
 				Baal: 3061,
-				// Uniques
+				// Mini bosses
 				BloodRaven: 3111,
+				TreeheadWoodFist: 2873,
+				TheCountess: 2875,
+				TheSmith: 2889,
+				Radament: 2879,
+				TheSummoner: 3099,
+				HephastoTheArmorer: 1067,
+				Izual: 1014,
+				ShenktheOverseer: 22435,
+				// Uniques
 				Corpsefire: 3319,
 				TheCowKing: 2850,
 				GrandVizierofChaos: 2851,
@@ -3071,13 +3102,10 @@ item: {
 				Bonebreaker: 2870,
 				Coldcrow: 2871,
 				Rakanishu: 2872,
-				TreeheadWoodFist: 2873,
 				Griswold: 2874,
-				TheCountess: 2875,
 				PitspawnFouldog: 2876,
 				FlamespiketheCrawler: 2877,
 				BoneAsh: 2878,
-				Radament: 2879,
 				BloodwitchtheWild: 2880,
 				Fangskin: 2881,
 				Beetleburst: 2882,
@@ -3086,8 +3114,6 @@ item: {
 				FireEye: 2885,
 				DarkElder: 2886,
 				AncientKaatheSoulless: 2888,
-				TheSmith: 2889,
-				ShenktheOverseer: 22435,
 				SharpToothSayer: 22493,
 				SnapchipShatter: 22496,
 				Pindleskin: 22497,
@@ -3282,7 +3308,6 @@ item: {
 				DarkRanger: 3096,
 				VileArcher: 3097,
 				DarkArcher: 3098,
-				TheSummoner: 3099,
 				StygianDollShaman: 3100,
 				SoulKillerShaman: 3101,
 				FlayerShaman: 3102,

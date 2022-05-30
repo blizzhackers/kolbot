@@ -1,7 +1,8 @@
 /**
-*	@filename	Wakka.js
-*	@author		kolton
-*	@desc		walking Chaos Sanctuary leecher
+*  @filename    Wakka.js
+*  @author      kolton
+*  @desc        walking Chaos Sanctuary leecher
+*
 */
 
 function Wakka() {

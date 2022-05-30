@@ -1,12 +1,11 @@
 /**
-*	@filename	Travincal.js
-*	@author		kolton
-*	@desc		kill Counncil members in Travincal
+*  @filename    Travincal.js
+*  @author      kolton
+*  @desc        kill Council members in Travincal
+*
 */
 
 function Travincal() {
-	let coords;
-
 	this.buildList = function (checkColl) {
 		let monsterList = [],
 			monster = getUnit(1);
@@ -23,7 +22,7 @@ function Travincal() {
 	};
 
 	Town.doChores();
-	Pather.useWaypoint(83);
+	Pather.useWaypoint(sdk.areas.Travincal);
 	Precast.doPrecast(true);
 
 	let orgX = me.x;
@@ -40,14 +39,14 @@ function Travincal() {
 		Precast.doPrecast(true);
 	}
 
-	if (me.getSkill(143, 0) && !me.getSkill(54, 0) && !me.getStat(97, 54)) {
-		coords = [60, -53, 64, -72, 78, -72, 74, -88];
+	if (me.getSkill(sdk.skills.LeapAttack, 0) && !Pather.canTeleport()) {
+		let coords = [60, -53, 64, -72, 78, -72, 74, -88];
 
 		for (let i = 0; i < coords.length; i += 2) {
 			if (i % 4 === 0) {
 				Pather.moveTo(orgX + coords[i], orgY + coords[i + 1]);
 			} else {
-				Skill.cast(143, 0, orgX + coords[i], orgY + coords[i + 1]);
+				Skill.cast(sdk.skills.LeapAttack, 0, orgX + coords[i], orgY + coords[i + 1]);
 				Attack.clearList(this.buildList(1));
 			}
 		}
@@ -57,8 +56,8 @@ function Travincal() {
 		Pather.moveTo(orgX + 101, orgY - 56);
 
 		// Stack Merc
-		if (me.classid === 4 && !me.getSkill(54, 1) && me.gametype === 1) {
-			Pather.moveToExit([100, 83], true);
+		if (me.barbarian && !Pather.canTeleport() && me.expansion) {
+			Pather.moveToExit([sdk.areas.DuranceofHateLvl1, sdk.areas.Travincal], true);
 		}
 
 		if (Config.MFLeader) {

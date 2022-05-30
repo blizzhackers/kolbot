@@ -1,7 +1,8 @@
 /**
-*	@filename	TravincalLeech.js
-*	@author		ToS/XxXGoD/YGM/azero
-*	@desc		Travincal Leech
+*  @filename    TravincalLeech.js
+*  @author      ToS/XxXGoD/YGM/azero
+*  @desc        Travincal Leech
+*
 */
 
 function TravincalLeech() {
@@ -16,12 +17,12 @@ function TravincalLeech() {
 	let leader = Misc.findPlayer(Config.Leader);
 
 	while (Misc.inMyParty(Config.Leader)) {
-		if (me.inTown && Pather.getPortal(83, Config.Leader)) {
-			Pather.usePortal(83, Config.Leader);
+		if (me.inTown && Pather.getPortal(sdk.areas.Travincal, Config.Leader)) {
+			Pather.usePortal(sdk.areas.Travincal, Config.Leader);
 			Town.getCorpse();
 		}
 		
-		if (me.area === 83 && leader.area !== 83 && leader.area !== 75) {
+		if (me.area === sdk.areas.Travincal && leader.area !== sdk.areas.Travincal && leader.area !== sdk.areas.KurastDocktown) {
 			break;
 		}
 		

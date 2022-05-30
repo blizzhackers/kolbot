@@ -1,19 +1,20 @@
 /**
-*	@filename	Vizier.js
-*	@author		kolton
-*	@desc		kill Grand Vizier of Chaos
+*  @filename    Vizier.js
+*  @author      kolton
+*  @desc        kill Grand Vizier of Chaos
+*
 */
 
 function Vizier() {
 	Town.doChores();
-	Pather.useWaypoint(107);
+	Pather.useWaypoint(sdk.areas.RiverofFlame);
 	Precast.doPrecast(true);
 
-	if (!Common.Diablo.openSeal(396) || !Common.Diablo.openSeal(395)) throw new Error("Failed to open seals");
+	if (!Common.Diablo.openSeal(sdk.units.DiabloSealVizier) || !Common.Diablo.openSeal(sdk.units.DiabloSealVizier2)) throw new Error("Failed to open seals");
 
-	Pather.moveToPreset(108, 2, 396, 4);
-	Misc.poll(() => getUnit(1, getLocaleString(2851), 2500, 250));
-	Attack.kill(getLocaleString(2851)); // Grand Vizier of Chaos
+	Pather.moveToPreset(sdk.areas.ChaosSanctuary, 2, sdk.units.DiabloSealVizier2, 4);
+	let viz = Misc.poll(() => monster(getLocaleString(sdk.locale.monsters.GrandVizierofChaos), 2500, 250));
+	Attack.kill(viz);
 	Pickit.pickItems();
 
 	return true;

@@ -1,15 +1,19 @@
 /**
-*	@filename	Countess.js
-*	@author		kolton
-*	@desc		kill The Countess and optionally kill Ghosts along the way
+*  @filename    Countess.js
+*  @author      kolton
+*  @desc        kill The Countess and optionally kill Ghosts along the way
+*
 */
 
 function Countess() {
 	Town.doChores();
-	Pather.useWaypoint(6);
+	Pather.useWaypoint(sdk.areas.BlackMarsh);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToExit([20, 21, 22, 23, 24, 25], true)) throw new Error("Failed to move to Countess");
+	if (!Pather.moveToExit([
+		sdk.areas.ForgottenTower, sdk.areas.TowerCellarLvl1, sdk.areas.TowerCellarLvl2,
+		sdk.areas.TowerCellarLvl3, sdk.areas.TowerCellarLvl4, sdk.areas.TowerCellarLvl5
+	], true)) throw new Error("Failed to move to Countess");
 
 	let poi = getPresetUnit(me.area, 2, 580);
 
@@ -24,7 +28,7 @@ function Countess() {
 		break;
 	}
 
-	Attack.clear(20, 0, getLocaleString(2875)); // The Countess
+	Attack.clear(20, 0, getLocaleString(sdk.locale.monsters.TheCountess));
 	Config.OpenChests.Enabled && Misc.openChestsInArea();
 
 	return true;

@@ -48,21 +48,12 @@ function Questing() {
 		if (Misc.checkQuest(3, 1)) return true;
 
 		log("starting smith");
+		if (!Loader.runScript("Smith")) throw new Error();
 
-		Town.doChores();
-		Pather.useWaypoint(sdk.areas.OuterCloister);
-		Precast.doPrecast(true);
-
-		if (!Pather.moveToPreset(sdk.areas.Barracks, sdk.unittype.Object, sdk.quest.chest.MalusHolder)) {
-			throw new Error("Failed to move to the Smith");
-		}
-
-		Attack.kill(getLocaleString(sdk.locale.monsters.TheSmith));
 		let malusChest = object(sdk.quest.chest.MalusHolder);
 		!!malusChest && malusChest.distance > 5 && Pather.moveToUnit(malusChest);
 		Misc.openChest(malusChest);
 		let malus = Misc.poll(() => item(sdk.quest.item.HoradricMalus), 1000, 100);
-
 		Pickit.pickItem(malus);
 		Town.goToTown();
 		Town.npcInteract("Charsi");
@@ -74,89 +65,9 @@ function Questing() {
 		log("starting cain");
 
 		Town.doChores();
+		Common.Questing.cain();
 
-		MainLoop:
-		while (true) {
-			switch (true) {
-			case !item(sdk.quest.item.ScrollofInifuss) && !item(sdk.quest.item.KeytotheCairnStones) && !Misc.checkQuest(4, 4):
-				Pather.useWaypoint(sdk.areas.DarkWood, true);
-				Precast.doPrecast(true);
-
-				if (!Pather.moveToPreset(sdk.areas.DarkWood, 2, 30, 5, 5)) {
-					throw new Error("Failed to move to Tree of Inifuss");
-				}
-
-				let tree = object(sdk.quest.chest.InifussTree);
-				!!tree && tree.distance > 5 && Pather.moveToUnit(tree);
-				Misc.openChest(tree);
-				let scroll = Misc.poll(() => item(sdk.quest.item.ScrollofInifuss), 1000, 100);
-
-				Pickit.pickItem(scroll);
-				Town.goToTown();
-				Town.npcInteract("Akara");
-				
-				break;
-			case item(sdk.quest.item.ScrollofInifuss):
-				Town.goToTown(1);
-				Town.npcInteract("Akara");
-
-				break;
-			case item(sdk.quest.item.KeytotheCairnStones) && me.area !== sdk.areas.StonyField:
-				Pather.journeyTo(sdk.areas.StonyField);
-				Precast.doPrecast(true);
-
-				break;
-			case item(sdk.quest.item.KeytotheCairnStones) && me.area === sdk.areas.StonyField:
-				Pather.moveToPreset(sdk.areas.StonyField, 1, 737, 10, 10, false, true);
-				Attack.securePosition(me.x, me.y, 40, 3000, true);
-				Pather.moveToPreset(sdk.areas.StonyField, 2, 17, null, null, true);
-				let stones = [
-					object(sdk.quest.chest.StoneAlpha),
-					object(sdk.quest.chest.StoneBeta),
-					object(sdk.quest.chest.StoneGamma),
-					object(sdk.quest.chest.StoneDelta),
-					object(sdk.quest.chest.StoneLambda)
-				];
-
-				while (stones.some((stone) => !stone.mode)) {
-					for (let i = 0; i < stones.length; i++) {
-						let stone = stones[i];
-
-						if (Misc.openChest(stone)) {
-							stones.splice(i, 1);
-							i--;
-						}
-						delay(10);
-					}
-				}
-
-				let tick = getTickCount();
-				// wait up to two minutes
-				while (getTickCount() - tick < minutes(2)) {
-					if (Pather.getPortal(sdk.areas.Tristram)) {
-						Pather.usePortal(sdk.areas.Tristram);
-								
-						break;
-					}
-				}
-
-				break;
-			case me.area === sdk.areas.Tristram && !Misc.checkQuest(4, 0):
-				let gibbet = object(sdk.quest.chest.CainsJail);
-
-				if (gibbet && !gibbet.mode) {
-					Pather.moveTo(gibbet.x, gibbet.y);
-					if (Misc.poll(() => Misc.openChest(gibbet), 2000, 100)) {
-						Town.goToTown(1);
-						Town.npcInteract("Akara") && log("Akara done");
-					}
-				}
-
-				break;
-			default:
-				break MainLoop;
-			}
-		}
+		return true;
 	};
 
 	this.andy = function () {
@@ -253,20 +164,9 @@ function Questing() {
 
 	this.izual = function () {
 		if (!Pather.accessToAct(4)) return false;
-
+		
 		log("starting izual");
-
-		if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.CityoftheDamned, true)) {
-			throw new Error();
-		}
-
-		Precast.doPrecast(true);
-
-		if (!Pather.moveToPreset(sdk.areas.PlainsofDespair, 1, sdk.monsters.Izual)) {
-			return false;
-		}
-
-		Attack.kill(sdk.monsters.Izual);
+		if (!Loader.runScript("Izual")) throw new Error();
 		Town.goToTown();
 		Town.npcInteract("Tyrael");
 
@@ -278,8 +178,7 @@ function Questing() {
 		if (Misc.checkQuest(26, 0)) return true;
 
 		log("starting diablo");
-		// just run diablo script? I mean why re-invent the wheel here
-		Loader.runScript("Diablo");
+		if (!Loader.runScript("Diablo")) throw new Error();
 		Town.goToTown(4);
 
 		object(sdk.units.RedPortalToAct5)
@@ -295,7 +194,7 @@ function Questing() {
 
 		log("starting shenk");
 
-		if (!Town.goToTown() || !Pather.useWaypoint(111, true)) {
+		if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.FrigidHighlands, true)) {
 			throw new Error();
 		}
 
@@ -333,8 +232,6 @@ function Questing() {
 				y: barbs[cage].roomy * 5 + barbs[cage].y
 			});
 		}
-
-		console.debug(coords);
 
 		for (let i = 0; i < coords.length; i += 1) {
 			log((i + 1) + "/" + coords.length);

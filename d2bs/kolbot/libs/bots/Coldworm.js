@@ -1,12 +1,13 @@
 /**
-*	@filename	Coldworm.js
-*	@author		kolton, edited by 13ack.Stab
-*	@desc		kill Coldworm; optionally kill Beetleburst and clear Maggot Lair
+*  @filename    Coldworm.js
+*  @author      kolton, edited by 13ack.Stab
+*  @desc        kill Coldworm; optionally kill Beetleburst and clear Maggot Lair
+*
 */
 
 function Coldworm() {
 	Town.doChores();
-	Pather.useWaypoint(43);
+	Pather.useWaypoint(sdk.areas.FarOasis);
 	Precast.doPrecast(true);
 
 	// Beetleburst, added by 13ack.Stab
@@ -19,7 +20,7 @@ function Coldworm() {
 		}
 	}
 
-	if (!Pather.moveToExit([62, 63, 64], true)) throw new Error("Failed to move to Coldworm");
+	if (!Pather.moveToExit([sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.MaggotLairLvl3], true)) throw new Error("Failed to move to Coldworm");
 
 	if (Config.Coldworm.ClearMaggotLair) {
 		Attack.clearLevel(Config.ClearType);

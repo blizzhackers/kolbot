@@ -1,11 +1,12 @@
 /**
-*	@filename	FastDiablo.js
-*	@author		kolton, theBGuy
-*	@desc		kill seal bosses and Diablo
+*  @filename    FastDiablo.js
+*  @author      kolton, theBGuy
+*  @desc        kill seal bosses and Diablo w/ speed
+*
 */
 
 let Overrides = require('../modules/Override');
-new Overrides.Override(Common.Diablo, Common.Diablo.openSeal, function(orignal, classid) {
+new Overrides.Override(Common.Diablo, Common.Diablo.openSeal, function (orignal, classid) {
 	if (!orignal(classid)) {
 		throw new Error("Failed to open seal (id " + classid + ")");
 	}
@@ -13,19 +14,14 @@ new Overrides.Override(Common.Diablo, Common.Diablo.openSeal, function(orignal, 
 
 function FastDiablo() {
 	this.getBoss = function (name) {
-		let glow = getUnit(2, 131);
+		let glow = object(sdk.units.SealGlow);
 
 		for (let i = 0; i < 24; i += 1) {
-			let boss = getUnit(1, name);
+			let boss = monster(name);
 
 			if (boss) {
 				Common.Diablo.chaosPreattack(name, 8);
-
-				try {
-					Attack.kill(name);
-				} catch (e) {
-					Attack.clear(10, 0, name);
-				}
+				Attack.kill(name);
 
 				if (!!boss && !boss.dead && !Attack.canAttack(boss)) {
 					throw new Error("Unable to kill seal boos");
@@ -46,18 +42,18 @@ function FastDiablo() {
 	Pather.useWaypoint(sdk.areas.RiverofFlame);
 	Precast.doPrecast(true);
 	Common.Diablo.initLayout();
-	Common.Diablo.openSeal(395);
-	Common.Diablo.openSeal(396);
+	Common.Diablo.openSeal(sdk.units.DiabloSealVizier2);
+	Common.Diablo.openSeal(sdk.units.DiabloSealVizier);
 
 	Common.Diablo.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
-	if (!this.getBoss(getLocaleString(2851))) throw new Error("Failed to kill Vizier");
+	if (!this.getBoss(getLocaleString(sdk.locale.monsters.GrandVizierofChaos))) throw new Error("Failed to kill Vizier");
 
-	Common.Diablo.openSeal(394);
+	Common.Diablo.openSeal(sdk.units.DiabloSealSeis);
 	Common.Diablo.seisLayout === 1 ? Pather.moveTo(7771, 5196) : Pather.moveTo(7798, 5186);
-	if (!this.getBoss(getLocaleString(2852))) throw new Error("Failed to kill de Seis");
+	if (!this.getBoss(getLocaleString(sdk.locale.monsters.LordDeSeis))) throw new Error("Failed to kill de Seis");
 
-	Common.Diablo.openSeal(393);
-	Common.Diablo.openSeal(392);
+	Common.Diablo.openSeal(sdk.units.DiabloSealInfector2);
+	Common.Diablo.openSeal(sdk.units.DiabloSealInfector);
 
 	if (Common.Diablo.infLayout === 1) {
 		if (me.sorceress || me.assassin) {
@@ -70,11 +66,11 @@ function FastDiablo() {
 		Pather.moveTo(7928, 5295);
 	}
 
-	if (!this.getBoss(getLocaleString(2853))) throw new Error("Failed to kill Infector");
+	if (!this.getBoss(getLocaleString(sdk.locale.monsters.InfectorofSouls))) throw new Error("Failed to kill Infector");
 
 	Pather.moveTo(7788, 5292);
 	Common.Diablo.diabloPrep();
-	Attack.kill(243); // Diablo
+	Attack.kill(sdk.monsters.Diablo);
 	Pickit.pickItems();
 
 	return true;

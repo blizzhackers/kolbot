@@ -1,7 +1,7 @@
 /**
 *  @filename    ControlBot.js
 *  @author      theBGuy
-*  @author      kolton
+*  @credits     kolton
 *  @desc        Chat controlled bot for other players. Can open cow portal, give waypoints on command, bo, or enchant
 *
 */

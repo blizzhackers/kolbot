@@ -1,7 +1,8 @@
 /**
-*	@filename	GetKeys.js
-*	@author		kolton
-*	@desc		get them keys
+*  @filename    GetKeys.js
+*  @author      kolton
+*  @desc        get them keys
+*
 */
 
 function GetKeys() {

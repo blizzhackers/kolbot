@@ -1,7 +1,8 @@
 /**
-*	@filename	WPGetter.js
-*	@author		kolton (probably), theBGuy
-*	@desc		Get wps we don't have
+*  @filename    WPGetter.js
+*  @author      kolton
+*  @desc        Get wps we don't have
+*
 */
 
 function WPGetter() {
@@ -9,7 +10,7 @@ function WPGetter() {
 	Town.goToTown();
 	Pather.getWP(me.area);
 
-	let lastWP = [40, 75, 103, 109, 129][me.highestAct - 1];
+	let lastWP = sdk.areas.townOfAct(me.highestAct);
 	let wpsToGet = Pather.nonTownWpAreas.filter((wp) => wp < lastWP && wp !== 123 && !getWaypoint(Pather.wpAreas.indexOf(wp)));
 
 	for (let i = 0; i < wpsToGet.length; i += 1) {

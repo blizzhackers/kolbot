@@ -1,15 +1,16 @@
 /**
-*	@filename	Frozenstein.js
-*	@author		kolton
-*	@desc		kill Frozensteinand optionally clear Frozen River
+*  @filename    Frozenstein.js
+*  @author      kolton
+*  @desc        kill Frozensteinand optionally clear Frozen River
+*
 */
 
 function Frozenstein() {
 	Town.doChores();
-	Pather.useWaypoint(113);
+	Pather.useWaypoint(sdk.areas.CrystalizedPassage);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToExit(114, true) || !Pather.moveToPreset(me.area, 2, 460, -5, -5)) {
+	if (!Pather.moveToExit(sdk.areas.FrozenRiver, true) || !Pather.moveToPreset(me.area, 2, sdk.units.FrozenAnyaPlatform, -5, -5)) {
 		throw new Error("Failed to move to Frozenstein");
 	}
 

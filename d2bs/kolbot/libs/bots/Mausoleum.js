@@ -1,29 +1,32 @@
 /**
-*	@filename	Mausoleum.js
-*	@author		kolton
-*	@desc		clear Mausoleum
+*  @filename    Mausoleum.js
+*  @author      kolton
+*  @desc        clear Mausoleum
+*
 */
 
 function Mausoleum() {
 	Town.doChores();
-	Pather.useWaypoint(3);
+	Pather.useWaypoint(sdk.areas.ColdPlains);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToExit(17, true)) throw new Error("Failed to move to Burial Grounds");
+	if (!Pather.moveToExit(sdk.areas.BurialGrounds, true)) throw new Error("Failed to move to Burial Grounds");
 
 	if (Config.Mausoleum.KillBloodRaven) {
-		Pather.moveToPreset(17, 1, 805);
-		Attack.kill(getLocaleString(3111)); // Blood Raven
+		Pather.moveToPreset(sdk.areas.BurialGrounds, 1, sdk.monsters.preset.BloodRaven);
+		Attack.kill(getLocaleString(sdk.locale.monsters.BloodRaven));
 		Pickit.pickItems();
 	}
 
-	if (!Pather.moveToExit(19, true)) throw new Error("Failed to move to Mausoleum");
-
-	Attack.clearLevel(Config.ClearType);
+	try {
+		Pather.moveToExit(sdk.areas.Mausoleum, true) && Attack.clearLevel(Config.ClearType);
+	} catch (e) {
+		console.errorReport(e);
+	}
 
 	if (Config.Mausoleum.ClearCrypt) {
 		// Crypt exit is... awkward
-		if (!(Pather.moveToExit(17, true) && Pather.moveToPreset(17, 5, 6) && Pather.moveToExit(18, true))) {
+		if (!(Pather.moveToExit(sdk.areas.BurialGrounds, true) && Pather.moveToPreset(sdk.areas.BurialGrounds, 5, 6) && Pather.moveToExit(sdk.areas.Crypt, true))) {
 			throw new Error("Failed to move to Crypt");
 		}
 

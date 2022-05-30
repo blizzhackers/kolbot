@@ -1,3 +1,10 @@
+/**
+*  @filename    ShopBot.js
+*  @author      kolton, theBGuy
+*  @desc        shop for items continually
+*
+*/
+
 function ShopBot() {
 	let overlayText = {
 		title: new Text("kolbot shopbot", 50, 245, 2, 1),
@@ -229,7 +236,7 @@ function ShopBot() {
 		Config.ShopBot.ShopNPC[i] = Config.ShopBot.ShopNPC[i].toLowerCase();
 	}
 
-	if (Config.ShopBot.MinGold && me.getStat(14) + me.getStat(15) < Config.ShopBot.MinGold) return true;
+	if (Config.ShopBot.MinGold && me.gold < Config.ShopBot.MinGold) return true;
 
 	this.buildPickList();
 	print("Shopbot: Pickit entries: " + this.pickEntries.length);
@@ -254,6 +261,7 @@ function ShopBot() {
 				wp = getPresetUnit(me.area, 2, [119, 156, 237, 398, 429][me.act - 1]),
 				wpX = wp.roomx * 5 + wp.x,
 				wpY = wp.roomy * 5 + wp.y,
+				redPortal = (getUnits(2, 60).sort((a, b) => a.distance - b.distance)).first(),
 				exit = area.exits[0];
 
 			for (let i = 1; i < area.exits.length; i++) {
@@ -262,9 +270,20 @@ function ShopBot() {
 				}
 			}
 
-			if (me.area === 109 && getDistance(me, 5117, 5119) < 20 && me.getQuest(37, 0) === 1 && me.getQuest(38, 0) !== 1 && Pather.usePortal(121)) {
+			if (me.area === sdk.areas.Harrogath && !!redPortal && getDistance(me, redPortal) < 20
+				&& Pather.usePortal(null, null, redPortal)) {
 				delay(3000);
-				Pather.usePortal(109);
+				Pather.usePortal(sdk.areas.Harrogath);
+
+				if (totalCycles === 0) {
+					delay(10000);
+				}
+
+				delay(1500);
+			} else if (me.area === sdk.areas.RogueEncampment && !!redPortal && getDistance(me, redPortal) < 20
+				&& Pather.usePortal(null, null, redPortal)) {
+				delay(3000);
+				Pather.usePortal(1);
 
 				if (totalCycles === 0) {
 					delay(10000);

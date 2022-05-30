@@ -1,7 +1,8 @@
 /**
-*	@filename	Gamble.js
-*	@author		kolton, theBGuy (added anti-idle)
-*	@desc		keep gambling while other players supply you with gold
+*  @filename    Gamble.js
+*  @author      kolton, theBGuy (added anti-idle)
+*  @desc        keep gambling while other players supply you with gold
+*
 */
 
 function Gamble() {

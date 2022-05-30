@@ -1,15 +1,16 @@
 /**
-*	@filename	Eyeback.js
-*	@author		kolton
-*	@desc		kill Eyeback the Unleashed
+*  @filename    Eyeback.js
+*  @author      kolton
+*  @desc        kill Eyeback the Unleashed
+*
 */
 
 function Eyeback() {
 	Town.doChores();
-	Pather.useWaypoint(112);
+	Pather.useWaypoint(sdk.areas.ArreatPlateau);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToPreset(111, 1, 784)) {
+	if (!Pather.moveToPreset(sdk.areas.FrigidHighlands, 1, sdk.monsters.preset.EyebacktheUnleashed)) {
 		throw new Error("Failed to move to Eyeback the Unleashed");
 	}
 

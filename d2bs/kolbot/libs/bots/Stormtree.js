@@ -1,7 +1,8 @@
 /**
-*	@filename	Stormtree.js
-*	@author		kolton
-*	@desc		kill Stormtree
+*  @filename    Stormtree.js
+*  @author      kolton
+*  @desc        kill Stormtree
+*
 */
 
 function Stormtree() {

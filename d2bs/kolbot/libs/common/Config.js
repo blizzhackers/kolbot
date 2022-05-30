@@ -387,7 +387,8 @@ let Config = {
 		ViperQuit: false
 	},
 	Nihlathak: {
-		ViperQuit: false
+		ViperQuit: false,
+		UseWaypoint: false,
 	},
 	Pit: {
 		ClearPath: false,

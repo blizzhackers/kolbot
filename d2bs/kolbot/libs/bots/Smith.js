@@ -17,7 +17,5 @@ function Smith() {
 	Attack.kill(getLocaleString(sdk.locale.monsters.TheSmith));
 	Pickit.pickItems();
 
-	// finish q if we hadn't already?
-
 	return true;
 }

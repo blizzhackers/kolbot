@@ -165,23 +165,17 @@ const ClassAttack = {
 
 		// Arrow/bolt check
 		if (this.bowCheck) {
-			switch (this.bowCheck) {
-			case "bow":
-				if (!me.getItem("aqv", 1)) {
-					Town.visitTown();
-				}
-
-				break;
-			case "crossbow":
-				if (!me.getItem("cqv", 1)) {
-					Town.visitTown();
-				}
+			switch (true) {
+			case this.bowCheck === "bow" && !me.getItem("aqv", 1):
+			case this.bowCheck === "crossbow" && !me.getItem("cqv", 1):
+				console.log("Bow check");
+				Town.visitTown();
 
 				break;
 			}
 		}
 
-		if (timedSkill > -1 && (!me.getState(121) || !Skill.isTimed(timedSkill))) {
+		if (timedSkill > -1 && (!me.skillDelay || !Skill.isTimed(timedSkill))) {
 			switch (timedSkill) {
 			case 35:
 				if (!this.lightFuryTick || getTickCount() - this.lightFuryTick > Config.LightningFuryDelay * 1000) {
@@ -213,9 +207,7 @@ const ClassAttack = {
 					}
 				}
 
-				if (!unit.dead) {
-					Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
-				}
+				!unit.dead && Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
 
 				return 1;
 			}
@@ -235,9 +227,7 @@ const ClassAttack = {
 				}
 			}
 
-			if (!unit.dead) {
-				Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
-			}
+			!unit.dead && Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
 
 			return 1;
 		}

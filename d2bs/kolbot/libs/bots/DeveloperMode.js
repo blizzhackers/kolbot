@@ -1,7 +1,8 @@
 /**
-*	@filename	Developermode.js
-*	@author		theBGuy
-*	@desc		developer mode made easy - run commands or scripts from chat commands
+*  @filename    Developermode.js
+*  @author      theBGuy
+*  @desc        developer mode made easy - run commands or scripts from chat commands. View packets. See unit info
+*
 */
 
 function UnitInfo() {

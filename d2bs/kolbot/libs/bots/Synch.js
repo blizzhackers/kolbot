@@ -1,3 +1,10 @@
+/**
+*  @filename    Synch.js
+*  @author      kolton
+*  @desc        sync script? It's unused but works with Synch2.js
+*
+*/
+
 let Synched = false;
 let uRdyMsg = "I'm rdy, u?";
 let rdyMsg = "rdy";

@@ -1,19 +1,20 @@
 /**
-*	@filename	Izual.js
-*	@author		kolton
-*	@desc		kill Izual
+*  @filename    Izual.js
+*  @author      kolton
+*  @desc        kill Izual
+*
 */
 
 function Izual() {
 	Town.doChores();
-	Pather.useWaypoint(106);
+	Pather.useWaypoint(sdk.areas.CityoftheDamned);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToPreset(105, 1, 256)) {
+	if (!Pather.moveToPreset(sdk.areas.PlainsofDespair, 1, sdk.monsters.Izual)) {
 		throw new Error("Failed to move to Izual.");
 	}
 
-	Attack.kill(256); // Izual
+	Attack.kill(sdk.monsters.Izual);
 	Pickit.pickItems();
 
 	return true;

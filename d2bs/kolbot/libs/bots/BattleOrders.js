@@ -1,12 +1,13 @@
 /**
-*	@filename	BattleOrders.js
-*	@author		kolton, jmichelsen
-*	@desc		give or receive Battle Orders buff
+*  @filename    BattleOrders.js
+*  @author      kolton, jmichelsen
+*  @desc        give or receive Battle Orders buff
+*
 */
 
 function BattleOrders () {
 	this.checkForPlayers = function () {
-		if (Misc.getPlayerCount() <= 1) throw new Error("Empty game"); // Alone in game
+		if (Misc.getPlayerCount() <= 1) throw new Error("Empty game");
 	};
 
 	this.amTardy = function () {

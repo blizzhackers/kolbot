@@ -1,15 +1,17 @@
 /**
-*	@filename	Endugu.js
-*	@author		kolton
-*	@desc		kill Witch Doctor Endugu
+*  @filename    Endugu.js
+*  @author      kolton
+*  @desc        kill Witch Doctor Endugu
+*
 */
 
 function Endugu() {
 	Town.doChores();
-	Pather.useWaypoint(78);
+	Pather.useWaypoint(sdk.areas.FlayerJungle);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToExit([88, 89, 91], true) || !Pather.moveToPreset(me.area, 2, 406)) {
+	if (!Pather.moveToExit([sdk.areas.FlayerDungeonLvl1, sdk.areas.FlayerDungeonLvl2, sdk.areas.FlayerDungeonLvl3], true)
+		|| !Pather.moveToPreset(me.area, 2, sdk.quest.chest.KhalimsBrainChest)) {
 		throw new Error("Failed to move to Endugu");
 	}
 

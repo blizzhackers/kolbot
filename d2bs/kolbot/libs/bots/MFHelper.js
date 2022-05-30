@@ -1,7 +1,8 @@
 /**
-*	@filename	MFHelper.js
-*	@author		kolton
-*	@desc		help another player kill bosses or clear areas
+*  @filename    MFHelper.js
+*  @author      kolton
+*  @desc        help another player kill bosses or clear areas
+*
 */
 
 function MFHelper() {
@@ -11,7 +12,9 @@ function MFHelper() {
 
 	function chatEvent(name, msg) {
 		if (!player) {
-			let match = ["kill", "clearlevel", "clear", "quit", "cows", "council", "goto"];
+			let match = [
+				"kill", "clearlevel", "clear", "quit", "cows", "council", "goto"
+			];
 
 			if (msg) {
 				for (let i = 0; i < match.length; i += 1) {
@@ -34,15 +37,7 @@ function MFHelper() {
 	Town.move("portalspot");
 
 	if (Config.Leader) {
-		for (let i = 0; i < 30; i += 1) {
-			if (Misc.inMyParty(Config.Leader)) {
-				break;
-			}
-
-			delay(1000);
-		}
-
-		if (i === 30) {
+		if (!Misc.poll(() => Misc.inMyParty(Config.Leader), 30e4, 1000)) {
 			throw new Error("MFHelper: Leader not partied");
 		}
 

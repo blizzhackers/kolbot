@@ -1,18 +1,17 @@
 /**
-*	@filename	Mephisto.js
-*	@author		kolton, njomnjomnjom
-*	@desc		kill Mephisto
+*  @filename    Mephisto.js
+*  @author      kolton, njomnjomnjom
+*  @desc        kill Mephisto
+*
 */
 
 function Mephisto() {
 	this.killMephisto = function () {
 		let pos = {},
 			attackCount = 0,
-			meph = getUnit(1, 242);
+			meph = monster(sdk.monsters.Mephisto);
 
-		if (!meph) {
-			throw new Error("Mephisto not found!");
-		}
+		if (!meph) throw new Error("Mephisto not found!");
 
 		Config.MFLeader && Pather.makePortal() && say("kill " + meph.classid);
 
@@ -42,32 +41,23 @@ function Mephisto() {
 			attackCount += 1;
 		}
 
-		return (meph.mode === 0 || meph.mode === 12);
+		return meph.dead;
 	};
 
 	this.moat = function () {
-		let count;
-
-		count = 0;
+		let count = 0;
 
 		delay(350);
 		Pather.moveTo(17563, 8072);
 
-		let mephisto = getUnit(1, 242);
-
-		if (!mephisto) {
-			throw new Error("Mephisto not found.");
-		}
+		let mephisto = monster(sdk.monsters.Mephisto);
+		if (!mephisto) throw new Error("Mephisto not found.");
 
 		delay(350);
-		Pather.moveTo(17575, 8086);
-		delay(350);
-		Pather.moveTo(17584, 8091);
-		delay(1200);
-		Pather.moveTo(17600, 8095);
-		delay(550);
-		Pather.moveTo(17610, 8094);
-		delay(2500);
+		Pather.moveTo(17575, 8086) && delay(350);
+		Pather.moveTo(17584, 8091) && delay(1200);
+		Pather.moveTo(17600, 8095) && delay(550);
+		Pather.moveTo(17610, 8094) && delay(2500);
 		Attack.clear(10);
 		Pather.moveTo(17610, 8094);
 
@@ -76,22 +66,14 @@ function Mephisto() {
 		while (distance > 27) {
 			count += 1;
 
-			Pather.moveTo(17600, 8095);
-			delay(150);
-			Pather.moveTo(17584, 8091);
-			delay(150);
-			Pather.moveTo(17575, 8086);
-			delay(150);
-			Pather.moveTo(17563, 8072);
-			delay(350);
-			Pather.moveTo(17575, 8086);
-			delay(350);
-			Pather.moveTo(17584, 8091);
-			delay(1200);
-			Pather.moveTo(17600, 8095);
-			delay(550);
-			Pather.moveTo(17610, 8094);
-			delay(2500);
+			Pather.moveTo(17600, 8095) && delay(150);
+			Pather.moveTo(17584, 8091) && delay(150);
+			Pather.moveTo(17575, 8086) && delay(150);
+			Pather.moveTo(17563, 8072) && delay(350);
+			Pather.moveTo(17575, 8086) && delay(350);
+			Pather.moveTo(17584, 8091) && delay(1200);
+			Pather.moveTo(17600, 8095) && delay(550);
+			Pather.moveTo(17610, 8094) && delay(2500);
 			Attack.clear(10);
 			Pather.moveTo(17610, 8094);
 
@@ -117,12 +99,10 @@ function Mephisto() {
 	};
 
 	Town.doChores();
-	Pather.useWaypoint(101);
+	Pather.useWaypoint(sdk.areas.DuranceofHateLvl2);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToExit(102, true)) {
-		throw new Error("Failed to move to Durance Level 3");
-	}
+	if (!Pather.moveToExit(sdk.areas.DuranceofHateLvl3, true)) throw new Error("Failed to move to Durance Level 3");
 
 	Config.Mephisto.KillCouncil && this.killCouncil();
 
@@ -133,28 +113,21 @@ function Mephisto() {
 		Pather.moveTo(17566, 8069);
 	}
 
-	if (me.sorceress) {
-		if (Config.Mephisto.MoatTrick) {
-			this.moat();
-			Skill.usePvpRange = true;
-			Attack.kill(242); // Mephisto
-			Skill.usePvpRange = false;
-		} else {
-			Attack.kill(242); // Mephisto
-		}
+	if (me.sorceress && Config.Mephisto.MoatTrick && Pather.canTeleport()) {
+		this.moat();
+		Skill.usePvpRange = true;
+		Attack.kill(sdk.monsters.Mephisto);
+		Skill.usePvpRange = false;
 	} else {
-		Attack.kill(242); // Mephisto
+		Attack.kill(sdk.monsters.Mephisto);
 	}
 
 	Pickit.pickItems();
 
 	if (Config.OpenChests.Enabled) {
-		Pather.moveTo(17572, 8011);
-		Attack.openChests(5);
-		Pather.moveTo(17572, 8125);
-		Attack.openChests(5);
-		Pather.moveTo(17515, 8061);
-		Attack.openChests(5);
+		Pather.moveTo(17572, 8011) && Attack.openChests(5);
+		Pather.moveTo(17572, 8125) && Attack.openChests(5);
+		Pather.moveTo(17515, 8061) && Attack.openChests(5);
 	}
 
 	if (Config.Mephisto.TakeRedPortal) {

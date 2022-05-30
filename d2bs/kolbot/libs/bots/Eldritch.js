@@ -1,12 +1,13 @@
 /**
-*	@filename	Eldritch.js
-*	@author		kolton
-*	@desc		kill Eldritch the Rectifier, optionally kill Shenk the Overseer, Dac Farren and open chest
+*  @filename    Eldritch.js
+*  @author      kolton
+*  @desc        kill Eldritch the Rectifier, optionally kill Shenk the Overseer, Dac Farren and open chest
+*
 */
 
 function Eldritch() {
 	Town.doChores();
-	Pather.useWaypoint(111);
+	Pather.useWaypoint(sdk.areas.FrigidHighlands);
 	Precast.doPrecast(true);
 	Pather.moveTo(3745, 5084);
 	Attack.kill(getLocaleString(sdk.locale.monsters.EldritchtheRectifier));
@@ -14,8 +15,8 @@ function Eldritch() {
 	try {
 		// FrigidHighlands returns invalid size with getBaseStat('leveldefs', 111, ['SizeX', 'SizeX(N)', 'SizeX(H)'][me.diff]);
 		// Could this be causing crashes here?
-		if (Config.Eldritch.OpenChest && Pather.moveNearPreset(sdk.areas.FrigidHighlands, 2, 455, 10)) {
-			Misc.openChest(455) && Pickit.pickItems();
+		if (Config.Eldritch.OpenChest && Pather.moveNearPreset(sdk.areas.FrigidHighlands, 2, sdk.units.FrigidHighlandsChest, 10)) {
+			Misc.openChest(sdk.units.FrigidHighlandsChest) && Pickit.pickItems();
 		}
 	} catch (e) {
 		console.warn("(Eldritch) :: Failed to open chest. " + e);

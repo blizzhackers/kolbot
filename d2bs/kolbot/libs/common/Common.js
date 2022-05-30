@@ -6,6 +6,110 @@
 */
 
 const Common = {
+	Questing: {
+		cain: function () {
+			MainLoop:
+			while (true) {
+				switch (true) {
+				case !item(sdk.quest.item.ScrollofInifuss) && !item(sdk.quest.item.KeytotheCairnStones) && !Misc.checkQuest(4, 4):
+					Pather.useWaypoint(sdk.areas.DarkWood, true);
+					Precast.doPrecast(true);
+
+					if (!Pather.moveToPreset(sdk.areas.DarkWood, 2, 30, 5, 5)) {
+						throw new Error("Failed to move to Tree of Inifuss");
+					}
+
+					let tree = object(sdk.quest.chest.InifussTree);
+					!!tree && tree.distance > 5 && Pather.moveToUnit(tree);
+					Misc.openChest(tree);
+					let scroll = Misc.poll(() => item(sdk.quest.item.ScrollofInifuss), 1000, 100);
+
+					Pickit.pickItem(scroll);
+					Town.goToTown();
+					Town.npcInteract("Akara");
+				
+					break;
+				case item(sdk.quest.item.ScrollofInifuss):
+					Town.goToTown(1);
+					Town.npcInteract("Akara");
+
+					break;
+				case item(sdk.quest.item.KeytotheCairnStones) && me.area !== sdk.areas.StonyField:
+					Pather.journeyTo(sdk.areas.StonyField);
+					Precast.doPrecast(true);
+
+					break;
+				case item(sdk.quest.item.KeytotheCairnStones) && me.area === sdk.areas.StonyField:
+					Pather.moveToPreset(sdk.areas.StonyField, 1, 737, 10, 10, false, true);
+					Attack.securePosition(me.x, me.y, 40, 3000, true);
+					Pather.moveToPreset(sdk.areas.StonyField, 2, 17, null, null, true);
+					let stones = [
+						object(sdk.quest.chest.StoneAlpha),
+						object(sdk.quest.chest.StoneBeta),
+						object(sdk.quest.chest.StoneGamma),
+						object(sdk.quest.chest.StoneDelta),
+						object(sdk.quest.chest.StoneLambda)
+					];
+
+					while (stones.some((stone) => !stone.mode)) {
+						for (let i = 0; i < stones.length; i++) {
+							let stone = stones[i];
+
+							if (Misc.openChest(stone)) {
+								stones.splice(i, 1);
+								i--;
+							}
+							delay(10);
+						}
+					}
+
+					let tick = getTickCount();
+					// wait up to two minutes
+					while (getTickCount() - tick < minutes(2)) {
+						if (Pather.getPortal(sdk.areas.Tristram)) {
+							Pather.usePortal(sdk.areas.Tristram);
+								
+							break;
+						}
+					}
+
+					break;
+				case me.area === sdk.areas.Tristram && !Misc.checkQuest(4, 0):
+					let gibbet = object(sdk.quest.chest.CainsJail);
+
+					if (gibbet && !gibbet.mode) {
+						Pather.moveTo(gibbet.x, gibbet.y);
+						if (Misc.poll(() => Misc.openChest(gibbet), 2000, 100)) {
+							Town.goToTown(1);
+							Town.npcInteract("Akara") && console.log("Akara done");
+						}
+					}
+
+					break;
+				default:
+					break MainLoop;
+				}
+			}
+
+			return true;
+		},
+
+		smith: function () {
+			if (!Pather.moveToPreset(sdk.areas.Barracks, sdk.unittype.Object, sdk.quest.chest.MalusHolder)) {
+				throw new Error("Failed to move to the Smith");
+			}
+
+			Attack.kill(getLocaleString(sdk.locale.monsters.TheSmith));
+			let malusChest = object(sdk.quest.chest.MalusHolder);
+			!!malusChest && malusChest.distance > 5 && Pather.moveToUnit(malusChest);
+			Misc.openChest(malusChest);
+			let malus = Misc.poll(() => item(sdk.quest.item.HoradricMalus), 1000, 100);
+			Pickit.pickItem(malus);
+			Town.goToTown();
+			Town.npcInteract("Charsi");
+		}
+	},
+	
 	Cows: {
 		buildCowRooms: function () {
 			let finalRooms = [],
@@ -242,6 +346,23 @@ const Common = {
 					}
 				}
 			}
+		},
+
+		getBoss: function (name) {
+			let glow = object(sdk.units.SealGlow);
+
+			for (let i = 0; i < 16; i += 1) {
+				let boss = monster(name);
+
+				if (boss) {
+					Common.Diablo.chaosPreattack(name, 8);
+					return Attack.clear(40, 0, name, this.sort);
+				}
+
+				delay(250);
+			}
+
+			return !!glow;
 		},
 
 		diabloPrep: function () {

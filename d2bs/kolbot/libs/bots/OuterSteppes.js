@@ -1,7 +1,8 @@
 /**
-*	@filename	Abaddon.js
-*	@author		probably kolton
-*	@desc		clear OuterSteppes
+*  @filename    OuterSteppes.js
+*  @author      kolton
+*  @desc        clear OuterSteppes
+*
 */
 
 function OuterSteppes() {

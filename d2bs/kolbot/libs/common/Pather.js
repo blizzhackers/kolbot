@@ -1091,6 +1091,7 @@ const Pather = {
 		id - id of the unit to use
 		targetArea - area id of where the unit leads to
 	*/
+	// should use an object as param, or be changed to able to take an already found unit as a param
 	useUnit: function (type, id, targetArea) {
 		let unit = Misc.poll(() => getUnit(type, id), 2000, 200),
 			preArea = me.area;
@@ -1098,6 +1099,84 @@ const Pather = {
 		if (!unit) {
 			throw new Error("useUnit: Unit not found. TYPE: " + type + " ID: " + id + " MyArea: " + this.getAreaName(me.area) + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 		}
+
+		for (let i = 0; i < 5; i += 1) {
+			let usetk = (i < 2 && Skill.useTK(unit));
+			
+			if (unit.distance > 5) {
+				usetk ? this.moveNearUnit(unit, 20) : this.moveToUnit(unit);
+				// try to activate it once
+				usetk && i === 0 && unit.mode === 0 && unit.distance < 21 && Skill.cast(sdk.skills.Telekinesis, 0, unit);
+			}
+
+			if (type === 2 && unit.mode === 0) {
+				if ((me.area === sdk.areas.Travincal && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(21, 0) !== 1)
+					|| (me.area === sdk.areas.ArreatSummit && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(39, 0) !== 1)) {
+					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
+				}
+
+				me.area === sdk.areas.A3SewersLvl1 ? this.openUnit(2, 367) : this.openUnit(2, id);
+			}
+
+			if (type === 2 && id === 342 && me.area === sdk.areas.DuranceofHateLvl3 && targetArea === sdk.areas.PandemoniumFortress && me.getQuest(22, 0) !== 1) {
+				throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
+			}
+
+			delay(300);
+			type === 5 ? Misc.click(0, 0, unit) : usetk && unit.distance > 5 ? Skill.cast(sdk.skills.Telekinesis, 0, unit) : sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
+			delay(300);
+
+			let tick = getTickCount();
+
+			while (getTickCount() - tick < 3000) {
+				if ((!targetArea && me.area !== preArea) || me.area === targetArea) {
+					delay(200);
+					//Packet.flash(me.gid);
+
+					return true;
+				}
+
+				delay(10);
+			}
+
+			i > 2 && Packet.flash(me.gid);
+			let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 3);
+			!!coord && this.moveTo(coord.x, coord.y);
+		}
+
+		return targetArea ? me.area === targetArea : me.area !== preArea;
+	},
+
+	/*
+		Pather.useUnitEx(givenSettings = {});
+		optional - use either or
+		    givenSettings.unit - defined unit thats been found
+		or
+		    givenSettings.type - type of the unit to use
+		    givenSettings.id - id of the unit to use
+		targetArea - area id of where the unit leads to
+	*/
+	useUnitEx: function (givenSettings = {}, targetArea = undefined) {
+		let settings = Object.assign({}, {
+			unit: undefined,
+			type: undefined,
+			id: undefined,
+		}, givenSettings);
+		let unit = settings.unit ? settings.unit : (settings.type || settings.id) ? Misc.poll(() => getUnit(settings.type, settings.id), 2000, 200) : null;
+
+		if (!unit) {
+			throw new Error(
+				"useUnit: Unit not found. TYPE: " + (settings.type ? settings.type : "")
+				+ " ID: " + (settings.id ? settings.id : "")
+				+ " MyArea: " + this.getAreaName(me.area) + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : "")
+			);
+		}
+
+		let	preArea = me.area;
+		let targetAreaCheck = (unit.objtype || 0);
+		targetArea === undefined && targetAreaCheck > 0 && (targetArea = targetAreaCheck);
+		let type = unit.type;
+		let id = unit.classid;
 
 		for (let i = 0; i < 5; i += 1) {
 			let usetk = (i < 2 && Skill.useTK(unit));

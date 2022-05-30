@@ -1,15 +1,16 @@
 /**
-*	@filename	Icehawk.js
-*	@author		kolton
-*	@desc		kill Icehawk Riftwing
+*  @filename    Icehawk.js
+*  @author      kolton
+*  @desc        kill Icehawk Riftwing
+*
 */
 
 function Icehawk() {
 	Town.doChores();
-	Pather.useWaypoint(80);
+	Pather.useWaypoint(sdk.areas.KurastBazaar);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToExit([92, 93], false)) {
+	if (!Pather.moveToExit([sdk.areas.A3SewersLvl1, sdk.areas.A3SewersLvl2], false)) {
 		throw new Error("Failed to move to Icehawk");
 	}
 

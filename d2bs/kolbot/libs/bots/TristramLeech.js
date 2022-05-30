@@ -1,26 +1,29 @@
 /**
-*	@filename	TristramLeech.js
-*	@author		ToS/XxXGoD/YGM
-*	@desc		Tristram Leech (Helper)
+*  @filename    TristramLeech.js
+*  @author      ToS/XxXGoD/YGM
+*  @desc        Tristram Leech (Helper)
+*
 */
+
+// todo: make clearing optional so this can be like wakka if desired
 
 function TristramLeech() {
 	let leader, whereisleader;
 
 	Town.doChores();
-	Pather.useWaypoint(1); // Back To Rouge
-	Town.move("portalspot"); // Portal Spot
+	Pather.useWaypoint(sdk.areas.RogueEncampment);
+	Town.move("portalspot");
 	leader = Config.Leader;
 
 	// Check leader isn't in other zones, whilst waiting for portal.
 	for (let i = 0; i < Config.TristramLeech.Wait; i += 1) {
 		whereisleader = getParty(leader);
 
-		if (whereisleader && [83, 108, 131].includes(whereisleader.area)) {
+		if (whereisleader && [sdk.areas.Travincal, sdk.areas.ChaosSanctuary, sdk.areas.ThroneofDestruction].includes(whereisleader.area)) {
 			return false;
 		}
 
-		if (Pather.usePortal(38, leader)) {
+		if (Pather.usePortal(sdk.areas.Tristram, leader)) {
 			break;
 		}
 
@@ -36,7 +39,7 @@ function TristramLeech() {
 		whereisleader = getParty(leader);
 
 		if (whereisleader) {
-			if (whereisleader.area === 38) {
+			if (whereisleader.area === sdk.areas.Tristram) {
 				break;
 			}
 		}
@@ -44,7 +47,7 @@ function TristramLeech() {
 		delay(1000);
 	}
 
-	while (whereisleader.area === 38) {
+	while (whereisleader.area === sdk.areas.Tristram) {
 		whereisleader = getParty(leader);
 		let leaderUnit = Misc.getPlayerUnit(leader);
 

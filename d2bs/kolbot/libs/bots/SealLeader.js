@@ -1,31 +1,13 @@
 /**
-*	@filename	SealLeader.js
-*	@author		probably kolton, theBGuy
-*	@desc		Clear a safe spot around seals and invite leechers in. Works in conjuction with SealLeecher script.
+*  @filename    SealLeader.js
+*  @author      probably kolton, theBGuy
+*  @desc        Clear a safe spot around seals and invite leechers in. Works in conjuction with SealLeecher script.
+*
 */
 
 function SealLeader() {
-	this.getBoss = function (name) {
-		let glow = getUnit(2, 131);
-
-		for (let i = 0; i < 16; i += 1) {
-			let boss = getUnit(1, name);
-
-			if (boss) {
-				Common.Diablo.chaosPreattack(name, 8);
-
-				return Attack.clear(40, 0, name);
-			}
-
-			delay(250);
-		}
-
-		return !!glow;
-	};
-
-	// START
 	Town.doChores();
-	Pather.useWaypoint(107);
+	Pather.useWaypoint(sdk.areas.RiverofFlame);
 	Precast.doPrecast(true);
 	Common.Diablo.initLayout();
 
@@ -33,13 +15,13 @@ function SealLeader() {
 	Attack.securePosition(me.x, me.y, 35, 3000, true);
 	Pather.makePortal();
 	say("in");
-	Common.Diablo.openSeal(395);
-	Common.Diablo.openSeal(396);
+	Common.Diablo.openSeal(sdk.units.DiabloSealVizier2);
+	Common.Diablo.openSeal(sdk.units.DiabloSealVizier);
 
 	Common.Diablo.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
 
 	// Kill Viz
-	if (!this.getBoss(getLocaleString(2851))) {
+	if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.LordDeSeis))) {
 		throw new Error("Failed to kill Vizier");
 	}
 
@@ -49,10 +31,10 @@ function SealLeader() {
 	Attack.securePosition(me.x, me.y, 35, 3000, true);
 	Pather.makePortal();
 	say("in");
-	Common.Diablo.openSeal(394);
+	Common.Diablo.openSeal(sdk.units.DiabloSealSeis);
 	Common.Diablo.seisLayout === 1 ? Pather.moveTo(7771, 5196) : Pather.moveTo(7798, 5186);
 
-	if (!this.getBoss(getLocaleString(2852))) {
+	if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.LordDeSeis))) {
 		throw new Error("Failed to kill de Seis");
 	}
 
@@ -62,7 +44,7 @@ function SealLeader() {
 	Attack.securePosition(me.x, me.y, 35, 3000, true);
 	Pather.makePortal();
 	say("in");
-	Common.Diablo.openSeal(392);
+	Common.Diablo.openSeal(sdk.units.DiabloSealInfector);
 
 	if (Common.Diablo.infLayout === 1) {
 		if (me.sorceress || me.assassin) {
@@ -75,18 +57,18 @@ function SealLeader() {
 		Pather.moveTo(7928, 5295);
 	}
 
-	if (!this.getBoss(getLocaleString(2853))) {
+	if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.InfectorofSouls))) {
 		throw new Error("Failed to kill Infector");
 	}
 
-	Common.Diablo.openSeal(393);
+	Common.Diablo.openSeal(sdk.units.DiabloSealInfector2);
 	say("out");
 	Pather.moveTo(7763, 5267);
 	Pather.makePortal();
 	Pather.moveTo(7788, 5292);
 	say("in");
 	Common.Diablo.diabloPrep();
-	Attack.kill(243); // Diablo
+	Attack.kill(sdk.monsters.Diablo);
 	say("done");
 	Pickit.pickItems();
 
