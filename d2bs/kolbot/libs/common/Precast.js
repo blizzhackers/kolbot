@@ -192,11 +192,11 @@ const Precast = new function () {
 
 		let swap = me.weaponswitch;
 		let success = true;
-		// don't use packet casting with summons
+		// don't use packet casting with summons - or boing
 		let usePacket = ([
-			sdk.skills.Valkyrie, sdk.skills.Decoy, sdk.skills.RaiseSkeleton, sdk.skills.ClayGolem, sdk.skills.RaiseSkeletalMage, sdk.skills.BloodGolem,
-			sdk.skills.IronGolem, sdk.skills.Revive, sdk.skills.Werewolf, sdk.skills.Werebear, sdk.skills.OakSage, sdk.skills.SpiritWolf, sdk.skills.PoisonCreeper,
-			sdk.skills.SummonDireWolf, sdk.skills.Grizzly, sdk.skills.HeartofWolverine, sdk.skills.SpiritofBarbs, sdk.skills.ShadowMaster, sdk.skills.ShadowWarrior
+			sdk.skills.Valkyrie, sdk.skills.Decoy, sdk.skills.RaiseSkeleton, sdk.skills.ClayGolem, sdk.skills.RaiseSkeletalMage, sdk.skills.BloodGolem, sdk.skills.Shout,
+			sdk.skills.IronGolem, sdk.skills.Revive, sdk.skills.Werewolf, sdk.skills.Werebear, sdk.skills.OakSage, sdk.skills.SpiritWolf, sdk.skills.PoisonCreeper, sdk.skills.BattleOrders,
+			sdk.skills.SummonDireWolf, sdk.skills.Grizzly, sdk.skills.HeartofWolverine, sdk.skills.SpiritofBarbs, sdk.skills.ShadowMaster, sdk.skills.ShadowWarrior, sdk.skills.BattleCommand,
 		].indexOf(skillId) === -1);
 		x === undefined && (x = me.x);
 		y === undefined && (y = me.y);
@@ -217,7 +217,7 @@ const Precast = new function () {
 					break;
 				}
 				// make sure we give enough time back so we don't fail our next cast
-				delay(1 + seconds(me.castingDuration(skillId)));
+				delay(250);
 			} else {
 				// Right hand + No Shift
 				let clickType = 3, shift = 0;
