@@ -185,10 +185,6 @@ function locationAction (location) {
 			Starter.chanInfo.announce = Starter.Config.AnnounceGames;
 		}
 
-		if (Starter.chanInfo.announce) {
-			Starter.sayMsg("Next game is " + Starter.gameInfo.gameName + Starter.gameCount + (Starter.gameInfo.gamePass === "" ? "" : "//" + Starter.gameInfo.gamePass));
-		}
-
 		Starter.LocationEvents.openCreateGameWindow();
 
 		break;

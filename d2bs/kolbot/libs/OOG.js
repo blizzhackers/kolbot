@@ -650,6 +650,10 @@ const ControlAction = {
 
 		!!delay && this.timeoutDelay("Make Game Delay", delay);
 
+		if (Starter.chanInfo.announce) {
+			Starter.sayMsg("Next game is " + name + (pass === "" ? "" : "//" + pass));
+		}
+
 		me.blockMouse = true;
 
 		print("Creating Game: " + name);
