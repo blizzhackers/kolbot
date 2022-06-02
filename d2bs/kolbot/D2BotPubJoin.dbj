@@ -105,6 +105,10 @@ let sdk = require('./modules/sdk');
 let Controls = require('./modules/Control');
 let Overrides = require('./modules/Override');
 
+if (typeof AdvancedConfig[me.profile] === "object") {
+	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
+}
+
 new Overrides.Override(Starter, Starter.setNextGame, function (orignal, gameName) {
 	function incrementString (text) {
 		return text.replace(/(\d*)$/, (_, t) => (+t + 1).toString().padStart(t.length, 0));

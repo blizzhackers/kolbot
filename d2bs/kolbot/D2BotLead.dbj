@@ -24,6 +24,10 @@ include("common/util.js");
 let Controls = require('./modules/Control');
 let sdk = require('./modules/sdk');
 
+if (typeof AdvancedConfig[me.profile] === "object") {
+	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
+}
+
 if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 	Starter.firstRun = true;
 }

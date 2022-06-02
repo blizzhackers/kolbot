@@ -264,10 +264,7 @@ function locationAction (location) {
 					&& !line.match(/\<.*\>/, "gi")
 					&& !line.match(" has left", "gi")
 					&& !line.match(" has joined", "gi")) {
-					lines[index - 1] += line;
-					lines.splice(index, 1);
-					index--;
-					return lines[index];
+					line = lines[index - 1] + line;
 				}
 				return line;
 			})
