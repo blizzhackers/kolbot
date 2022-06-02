@@ -181,9 +181,30 @@ const Common = {
 	},
 
 	Diablo: {
+		diabloSpawned: false,
+		done: false,
+		waitForGlow: false,
 		vizLayout: -1,
 		seisLayout: -1,
 		infLayout: -1,
+		entranceCoords: {x: 7790, y: 5544},
+		starCoords: {x: 7791, y: 5293},
+		// path coordinates
+		entranceToStar: [7794, 5517, 7791, 5491, 7768, 5459, 7775, 5424, 7817, 5458, 7777, 5408, 7769, 5379, 7777, 5357, 7809, 5359, 7805, 5330, 7780, 5317, 7791, 5293],
+		starToVizA: [7759, 5295, 7734, 5295, 7716, 5295, 7718, 5276, 7697, 5292, 7678, 5293, 7665, 5276, 7662, 5314],
+		starToVizB: [7759, 5295, 7734, 5295, 7716, 5295, 7701, 5315, 7666, 5313, 7653, 5284],
+		starToSeisA: [7781, 5259, 7805, 5258, 7802, 5237, 7776, 5228, 7775, 5205, 7804, 5193, 7814, 5169, 7788, 5153],
+		starToSeisB: [7781, 5259, 7805, 5258, 7802, 5237, 7776, 5228, 7811, 5218, 7807, 5194, 7779, 5193, 7774, 5160, 7803, 5154],
+		starToInfA: [7809, 5268, 7834, 5306, 7852, 5280, 7852, 5310, 7869, 5294, 7895, 5295, 7919, 5290],
+		starToInfB: [7809, 5268, 7834, 5306, 7852, 5280, 7852, 5310, 7869, 5294, 7895, 5274, 7927, 5275, 7932, 5297, 7923, 5313],
+		// check for strays array
+		cleared: [],
+
+		diabloLightsEvent: function (bytes) {
+			if (me.area === sdk.areas.ChaosSanctuary && bytes && bytes.length && bytes[0] === 0x89) {
+				Common.Diablo.diabloSpawned = true;
+			}
+		},
 
 		sort: function (a, b) {
 			if (Config.BossPriority) {
@@ -197,40 +218,28 @@ const Common = {
 
 			// Entrance to Star / De Seis
 			if (me.y > 5325 || me.y < 5260) {
-				if (a.y > b.y) {
-					return -1;
-				}
-
-				return 1;
+				return (a.y > b.y ? -1 : 1);
 			}
 
 			// Vizier
 			if (me.x < 7765) {
-				if (a.x > b.x) {
-					return -1;
-				}
-
-				return 1;
+				return (a.x > b.x ? -1 : 1);
 			}
 
 			// Infector
 			if (me.x > 7825) {
-				if (!checkCollision(me, a, 0x1) && a.x < b.x) {
-					return -1;
-				}
-
-				return 1;
+				return (!checkCollision(me, a, 0x1) && a.x < b.x ? -1 : 1);
 			}
 
 			return getDistance(me, a) - getDistance(me, b);
 		},
 
 		getLayout: function (seal, value) {
-			let sealPreset = getPresetUnit(108, 2, seal);
-
+			let sealPreset = getPresetUnit(sdk.areas.ChaosSanctuary, 2, seal);
 			if (!seal) throw new Error("Seal preset not found. Can't continue.");
 
-			if (sealPreset.roomy * 5 + sealPreset.y === value || sealPreset.roomx * 5 + sealPreset.x === value) {
+			if (sealPreset.roomy * 5 + sealPreset.y === value
+				|| sealPreset.roomx * 5 + sealPreset.x === value) {
 				return 1;
 			}
 
@@ -238,9 +247,72 @@ const Common = {
 		},
 
 		initLayout: function () {
-			this.vizLayout = this.getLayout(396, 5275); 	// 1 = "Y", 2 = "L"
-			this.seisLayout = this.getLayout(394, 7773);	// 1 = "2", 2 = "5"
-			this.infLayout = this.getLayout(392, 7893);		// 1 = "I", 2 = "J"
+			// 1 = "Y", 2 = "L"
+			this.vizLayout = this.getLayout(sdk.units.DiabloSealVizier, 5275);
+			// 1 = "2", 2 = "5"
+			this.seisLayout = this.getLayout(sdk.units.DiabloSealSeis, 7773);
+			// 1 = "I", 2 = "J"
+			this.infLayout = this.getLayout(sdk.units.DiabloSealInfector, 7893);
+		},
+
+		followPath: function (path) {
+			for (let i = 0; i < path.length; i += 2) {
+				this.cleared.length > 0 && this.clearStrays();
+
+				// no monsters at the next node, skip it
+				if ([path[i], path[i + 1]].distance < 40 && [path[i], path[i + 1]].mobCount({range: 35}) === 0) {
+					continue;
+				}
+
+				Pather.moveTo(path[i], path[i + 1], 3, getDistance(me, path[i], path[i + 1]) > 50);
+				Attack.clear(30, 0, false, Common.Diablo.sort);
+
+				// Push cleared positions so they can be checked for strays
+				this.cleared.push([path[i], path[i + 1]]);
+
+				// After 5 nodes go back 2 nodes to check for monsters
+				if (i === 10 && path.length > 16) {
+					path = path.slice(6);
+					i = 0;
+				}
+			}
+		},
+
+		clearStrays: function () {
+			let oldPos = {x: me.x, y: me.y},
+				monster = getUnit(1);
+
+			if (monster) {
+				do {
+					if (monster.attackable) {
+						for (let i = 0; i < this.cleared.length; i += 1) {
+							if (getDistance(monster, this.cleared[i][0], this.cleared[i][1]) < 30 && Attack.validSpot(monster.x, monster.y)) {
+								Pather.moveToUnit(monster);
+								Attack.clear(15, 0, false, Common.Diablo.sort);
+
+								break;
+							}
+						}
+					}
+				} while (monster.getNext());
+			}
+
+			getDistance(me, oldPos.x, oldPos.y) > 5 && Pather.moveTo(oldPos.x, oldPos.y);
+
+			return true;
+		},
+
+		runSeals: function (sealOrder, openSeals = true) {
+			print("seal order: " + sealOrder);
+			let seals = {
+				1: () => this.vizierSeal(openSeals),
+				2: () => this.seisSeal(openSeals),
+				3: () => this.infectorSeal(openSeals),
+				"vizier": () => this.vizierSeal(openSeals),
+				"seis": () => this.seisSeal(openSeals),
+				"infector": () => this.infectorSeal(openSeals),
+			};
+			sealOrder.forEach(seal => {seals[seal]();});
 		},
 
 		tkSeal: function (seal) {
@@ -324,7 +396,114 @@ const Common = {
 			return (!!seal && seal.mode);
 		},
 
-		chaosPreattack: function (name, amount) {
+		vizierSeal: function (openSeal = true) {
+			print("Viz layout " + Common.Diablo.vizLayout);
+			let path = (Common.Diablo.vizLayout === 1 ? this.starToVizA : this.starToVizB);
+			let distCheck = {
+				x: path[path.length - 2],
+				y: (path.last())
+			};
+
+			if (Config.Diablo.SealLeader || Config.Diablo.Fast) {
+				Common.Diablo.vizLayout === 1 ? Pather.moveTo(7708, 5269) : Pather.moveTo(7647, 5267);
+				Config.Diablo.SealLeader && Attack.securePosition(me.x, me.y, 35, 3000, true);
+				Config.Diablo.SealLeader && Pather.makePortal() && say("in");
+			}
+
+			distCheck.distance > 30 && this.followPath(Common.Diablo.vizLayout === 1 ? this.starToVizA : this.starToVizB);
+
+			if (openSeal && (!Common.Diablo.openSeal(sdk.units.DiabloSealVizier2) || !Common.Diablo.openSeal(sdk.units.DiabloSealVizier))) {
+				throw new Error("Failed to open Vizier seals.");
+			}
+
+			delay(1 + me.ping);
+			Common.Diablo.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
+
+			if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.GrandVizierofChaos))) {
+				throw new Error("Failed to kill Vizier");
+			}
+
+			Config.Diablo.SealLeader && say("out");
+
+			return true;
+		},
+
+		seisSeal: function (openSeal = true) {
+			print("Seis layout " + Common.Diablo.seisLayout);
+			let path = (Common.Diablo.seisLayout === 1 ? this.starToSeisA : this.starToSeisB);
+			let distCheck = {
+				x: path[path.length - 2],
+				y: (path.last())
+			};
+
+			if (Config.Diablo.SealLeader || Config.Diablo.Fast) {
+				Common.Diablo.seisLayout === 1 ? Pather.moveTo(7767, 5147) : Pather.moveTo(7820, 5147);
+				Config.Diablo.SealLeader && Attack.securePosition(me.x, me.y, 35, 3000, true);
+				Config.Diablo.SealLeader && Pather.makePortal() && say("in");
+			}
+
+			distCheck.distance > 30 && this.followPath(Common.Diablo.seisLayout === 1 ? this.starToSeisA : this.starToSeisB);
+
+			if (openSeal && !Common.Diablo.openSeal(sdk.units.DiabloSealSeis)) throw new Error("Failed to open de Seis seal.");
+			Common.Diablo.seisLayout === 1 ? Pather.moveTo(7798, 5194) : Pather.moveTo(7796, 5155);
+			if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.LordDeSeis))) throw new Error("Failed to kill de Seis");
+
+			Config.Diablo.SealLeader && say("out");
+
+			return true;
+		},
+
+		infectorSeal: function (openSeal = true) {
+			Precast.doPrecast(true);
+			print("Inf layout " + Common.Diablo.infLayout);
+			let path = (Common.Diablo.infLayout === 1 ? this.starToInfA : this.starToInfB);
+			let distCheck = {
+				x: path[path.length - 2],
+				y: (path.last())
+			};
+
+			if (Config.Diablo.SealLeader || Config.Diablo.Fast) {
+				Common.Diablo.infLayout === 1 ? Pather.moveTo(7860, 5314) : Pather.moveTo(7909, 5317);
+				Config.Diablo.SealLeader && Attack.securePosition(me.x, me.y, 35, 3000, true);
+				Config.Diablo.SealLeader && Pather.makePortal() && say("in");
+			}
+
+			distCheck.distance > 70 && this.followPath(Common.Diablo.infLayout === 1 ? this.starToInfA : this.starToInfB);
+			
+			if (Config.Diablo.Fast) {
+				if (openSeal && !Common.Diablo.openSeal(sdk.units.DiabloSealInfector2)) throw new Error("Failed to open Infector seals.");
+				if (openSeal && !Common.Diablo.openSeal(sdk.units.DiabloSealInfector)) throw new Error("Failed to open Infector seals.");
+
+				if (Common.Diablo.infLayout === 1) {
+					(me.sorceress || me.assassin) && Pather.moveTo(7876, 5296);
+					delay(1 + me.ping);
+				} else {
+					delay(1 + me.ping);
+					Pather.moveTo(7928, 5295);
+				}
+
+				if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.InfectorofSouls))) throw new Error("Failed to kill Infector");
+			} else {
+				if (openSeal && !Common.Diablo.openSeal(sdk.units.DiabloSealInfector)) throw new Error("Failed to open Infector seals.");
+
+				if (Common.Diablo.infLayout === 1) {
+					(me.sorceress || me.assassin) && Pather.moveTo(7876, 5296);
+					delay(1 + me.ping);
+				} else {
+					delay(1 + me.ping);
+					Pather.moveTo(7928, 5295);
+				}
+
+				if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.InfectorofSouls))) throw new Error("Failed to kill Infector");
+				if (openSeal && !Common.Diablo.openSeal(sdk.units.DiabloSealInfector2)) throw new Error("Failed to open Infector seals.");
+			}
+
+			Config.Diablo.SealLeader && say("out");
+
+			return true;
+		},
+
+		hammerdinPreAttack: function (name, amount) {
 			if (me.paladin && Config.AttackSkill[1] === sdk.skills.BlessedHammer) {
 				let target = getUnit(1, name);
 
@@ -348,14 +527,77 @@ const Common = {
 			}
 		},
 
+		preattack: function (id) {
+			let coords = [];
+
+			switch (id) {
+			case getLocaleString(2851):
+				coords = Common.Diablo.vizLayout === 1 ? [7676, 5295] : [7684, 5318];
+
+				break;
+			case getLocaleString(2852):
+				coords = Common.Diablo.seisLayout === 1 ? [7778, 5216] : [7775, 5208];
+
+				break;
+			case getLocaleString(2853):
+				coords = Common.Diablo.infLayout === 1 ? [7913, 5292] : [7915, 5280];
+
+				break;
+			}
+
+			switch (me.classid) {
+			case sdk.charclass.Sorceress:
+				if ([sdk.skills.Meteor, sdk.skills.Blizzard, sdk.skills.FrozenOrb, sdk.skills.FireWall].includes(Config.AttackSkill[1])) {
+					me.skillDelay && delay(500);
+					Skill.cast(Config.AttackSkill[1], 0, coords[0], coords[1]);
+
+					return true;
+				}
+
+				break;
+			case sdk.charclass.Paladin:
+				this.hammerdinPreAttack(id, 8);
+
+				break;
+			case sdk.charclass.Assassin:
+				if (Config.UseTraps) {
+					let trapCheck = ClassAttack.checkTraps({x: coords[0], y: coords[1]});
+
+					if (trapCheck) {
+						ClassAttack.placeTraps({x: coords[0], y: coords[1]}, 5);
+
+						return true;
+					}
+				}
+
+				break;
+			}
+
+			return false;
+		},
+
 		getBoss: function (name) {
 			let glow = object(sdk.units.SealGlow);
+
+			if (this.waitForGlow) {
+				while (true) {
+					if (!this.preattack(name)) {
+						delay(500);
+					}
+
+					glow = object(sdk.units.SealGlow);
+
+					if (glow) {
+						break;
+					}
+				}
+			}
 
 			for (let i = 0; i < 16; i += 1) {
 				let boss = monster(name);
 
 				if (boss) {
-					Common.Diablo.chaosPreattack(name, 8);
+					Common.Diablo.hammerdinPreAttack(name, 8);
 					return Attack.clear(40, 0, name, this.sort);
 				}
 
@@ -366,8 +608,13 @@ const Common = {
 		},
 
 		diabloPrep: function () {
-			let trapCheck,
-				tick = getTickCount();
+			if (Config.Diablo.SealLeader) {
+				Pather.moveTo(7763, 5267);
+				Pather.makePortal() && say("in");
+				Pather.moveTo(7788, 5292);
+			}
+
+			let trapCheck, tick = getTickCount();
 
 			switch (me.classid) {
 			case sdk.charclass.Amazon:

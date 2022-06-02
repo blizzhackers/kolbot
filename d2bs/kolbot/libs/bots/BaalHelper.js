@@ -14,48 +14,40 @@ function BaalHelper() {
 	Config.RandomPrecast && Precast.needOutOfTownCast() ? Precast.doRandomPrecast(true, sdk.areas.Harrogath) : Precast.doPrecast(true);
 
 	if (Config.BaalHelper.SkipTP) {
-		me.area !== 129 && Pather.useWaypoint(129);
+		me.area !== sdk.areas.WorldstoneLvl2 && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
 
-		if (!Pather.moveToExit([130, 131], false)) throw new Error("Failed to move to WSK3.");
-
-		let i;
-		WSKLoop:
-		for (i = 0; i < Config.BaalHelper.Wait; i += 1) {
+		if (!Pather.moveToExit([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction], false)) throw new Error("Failed to move to WSK3.");
+		if (!Misc.poll(() => {
 			let party = getParty();
 
 			if (party) {
 				do {
-					if ((!Config.Leader || party.name === Config.Leader) && party.area === 131) {
-						break WSKLoop;
+					if ((!Config.Leader || party.name === Config.Leader) && party.area === sdk.areas.ThroneofDestruction) {
+						return true;
 					}
 				} while (party.getNext());
 			}
 
-			delay(1000);
-		}
-
-		if (i === Config.BaalHelper.Wait) throw new Error("Player wait timed out (" + (Config.Leader ? "Leader not" : "No players") + " found in Throne)");
+			return false;
+		}, minutes(Config.BaalHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "Leader not" : "No players") + " found in Throne)");
 
 		let entrance = Misc.poll(() => getUnit(5, 82), 1000, 200);
 		entrance && Pather.moveTo(entrance.x > me.x ? entrance.x - 5 : entrance.x + 5, entrance.y > me.y ? entrance.y - 5 : entrance.y + 5);
 
-		if (!Pather.moveToExit([130, 131], false)) throw new Error("Failed to move to WSK3.");
-		if (!Pather.moveToExit(131, true)) throw new Error("Failed to move to Throne of Destruction.");
+		if (!Pather.moveToExit([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction], false)) throw new Error("Failed to move to WSK3.");
+		if (!Pather.moveToExit(sdk.areas.ThroneofDestruction, true)) throw new Error("Failed to move to Throne of Destruction.");
 		if (!Pather.moveTo(15113, 5040)) D2Bot.printToConsole("path fail");
 	} else {
-		Pather.useWaypoint(109);
+		Town.goToTown(5);
 		Town.move("portalspot");
-		let i;
 
-		for (i = 0; i < Config.BaalHelper.Wait; i += 1) {
-			if (Pather.getPortal(131, Config.Leader || null) && Pather.usePortal(131, Config.Leader || null)) {
-				break;
+		if (!Misc.poll(() => {
+			if (Pather.getPortal(sdk.areas.ThroneofDestruction, Config.Leader || null) && Pather.usePortal(sdk.areas.ThroneofDestruction, Config.Leader || null)) {
+				return true;
 			}
 
-			delay(1000);
-		}
-
-		if (i === Config.BaalHelper.Wait) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
+			return false;
+		}, minutes(Config.BaalHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
 	}
 
 	if (Config.BaalHelper.DollQuit && getUnit(1, 691)) {
@@ -76,23 +68,21 @@ function BaalHelper() {
 		Pather.moveTo(15092, 5011);
 		Precast.doPrecast(false);
 
-		while (getUnit(sdk.unittype.Monster, sdk.monsters.ThroneBaal)) {
+		while (monster(sdk.monsters.ThroneBaal)) {
 			delay(500);
 		}
 
 		delay(1000);
 		Pather.moveTo(15092, 5011);
 
-		let portal = getUnit(2, 563);
+		let portal = object(563);
 
-		if (portal) {
-			Pather.usePortal(null, null, portal);
-		} else {
+		if (!portal || !Pather.usePortal(null, null, portal)) {
 			throw new Error("Couldn't find portal.");
 		}
 
 		Pather.moveTo(15134, 5923);
-		Attack.kill(544); // Baal
+		Attack.kill(sdk.monsters.Baal);
 		Pickit.pickItems();
 	} else {
 		while (true) {

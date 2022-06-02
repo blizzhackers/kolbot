@@ -1016,7 +1016,7 @@ const Town = {
 				if (!npc || !npc.openMenu() || !npc.startTrade("Shop")) throw new Error("Failed to open " + npc.name + " trade menu");
 			}
 		} catch (e) {
-			console.warn(e);
+			console.errorReport(e);
 
 			return false;
 		}
@@ -1082,7 +1082,7 @@ const Town = {
 		try {
 			key.buy(true);
 		} catch (e) {
-			console.warn(e.message);
+			console.errorReport(e);
 
 			return false;
 		}
@@ -1758,7 +1758,7 @@ const Town = {
 			try {
 				!!getInteractedNPC() && Misc.useMenu(sdk.menu.Trade);
 			} catch (e) {
-				console.warn(e);
+				console.errorReport(e);
 				me.cancelUIFlags();
 			}
 		}
@@ -1892,7 +1892,7 @@ const Town = {
 						item.drop();
 					}
 				} catch (e) {
-					console.warn(e);
+					console.errorReport(e);
 				}
 
 				break;
@@ -2131,8 +2131,8 @@ const Town = {
 		if (!me.inTown) {
 			if (!me.inTown) {
 				try {
-					if (!Pather.makePortal(true)) console.warn("Town.goToTown: Failed to make TP");
-					if (!me.inTown && !Pather.usePortal(null, me.name)) console.warn("Town.goToTown: Failed to take TP");
+					if (!Pather.makePortal(true)) console.errorReport("Town.goToTown: Failed to make TP");
+					if (!me.inTown && !Pather.usePortal(null, me.name)) console.errorReport("Town.goToTown: Failed to take TP");
 					if (!me.inTown && !Pather.usePortal(sdk.areas.townOf(me.area))) throw new Error("Town.goToTown: Failed to take TP");
 				} catch (e) {
 					let tpTool = this.getTpTool();

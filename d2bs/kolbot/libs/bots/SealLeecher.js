@@ -1,7 +1,7 @@
 /**
 *  @filename    SealLeecher.js
 *  @author      probably kolton, theBGuy
-*  @desc       Leecher script. Works in conjuction with SealLeader script.
+*  @desc        Leecher script. Works in conjuction with SealLeader script.
 *
 */
 

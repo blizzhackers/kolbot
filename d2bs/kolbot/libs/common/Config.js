@@ -459,12 +459,15 @@ let Config = {
 		ClearType: false
 	},
 	Diablo: {
+		WalkClear: false,
 		Entrance: false,
+		JustViz: false,
+		SealLeader: false,
+		Fast: false,
 		SealWarning: "Leave the seals alone!",
 		EntranceTP: "Entrance TP up",
 		StarTP: "Star TP up",
 		DiabloMsg: "Diablo",
-		WalkClear: false,
 		SealOrder: ["vizier", "seis", "infector"]
 	},
 	DiabloHelper: {
