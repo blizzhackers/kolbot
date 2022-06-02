@@ -650,6 +650,10 @@ const ControlAction = {
 
 		!!delay && this.timeoutDelay("Make Game Delay", delay);
 
+		if (Starter.chanInfo.announce) {
+			Starter.sayMsg("Next game is " + name + (pass === "" ? "" : "//" + pass));
+		}
+
 		me.blockMouse = true;
 
 		print("Creating Game: " + name);
@@ -1421,6 +1425,7 @@ const Starter = {
 	connectFail: false,
 	connectFailRetry: 0,
 	makeAccount: false,
+	channelNotify: false,
 	chanInfo: {
 		joinChannel: "",
 		firstMsg: "",

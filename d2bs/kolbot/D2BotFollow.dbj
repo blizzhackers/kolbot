@@ -42,6 +42,10 @@ let Controls = require('./modules/Control');
 let sdk = require('./modules/sdk');
 let Overrides = require('./modules/Override');
 
+if (typeof AdvancedConfig[me.profile] === "object") {
+	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
+}
+
 let lastGameTick, leader = "",
 	announced = false,
 	lastGame = [];
