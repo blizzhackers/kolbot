@@ -1,9 +1,9 @@
 /**
-*	@filename	MuleLogger.js
-*	@author		kolton, theBGuy
-*	@desc		Log items and perm configurable accounts/characters
+*  @filename    MuleLogger.js
+*  @author      kolton, theBGuy
+*  @desc        Log items and perm configurable accounts/characters
+*
 */
-
 !isIncluded("common/prototypes.js") && include("common/prototypes.js");
 
 const MuleLogger = {
@@ -27,6 +27,7 @@ const MuleLogger = {
 	LogEquipped: true, // include equipped items
 	LogMerc: true, // include items merc has equipped (if alive)
 	SaveScreenShot: false, // Save pictures in jpg format (saved in 'Images' folder)
+	AutoPerm: true, // override InGameTime to perm character
 	IngameTime: rand(60, 120), // (180, 210) to avoid RD, increase it to (7230, 7290) for mule perming
 
 	inGameCheck: function () {
@@ -34,10 +35,23 @@ const MuleLogger = {
 			print("ÿc4MuleLoggerÿc0: Logging items on " + me.account + " - " + me.name + ".");
 			D2Bot.printToConsole("MuleLogger: Logging items on " + me.account + " - " + me.name + ".", 7);
 			this.logChar();
+			let stayInGame = this.IngameTime;
 			let tick = getTickCount() + rand(1500, 1750) * 1000; // trigger anti-idle every ~30 minutes
 
-			while ((getTickCount() - me.gamestarttime) < this.IngameTime * 1000) {
-				me.overhead("ÿc2Log items done. ÿc4Stay in " + "ÿc4game more:ÿc0 " + Math.floor(this.IngameTime - (getTickCount() - me.gamestarttime) / 1000) + " sec");
+			if (this.AutoPerm) {
+				let permInfo = this.loadPermedStatus();
+
+				if (permInfo.length) {
+					permInfo.forEach(char => {
+						if (char.charname === me.charname && !char.perm) {
+							stayInGame = rand(7230, 7290);
+						}
+					});
+				}
+			}
+
+			while ((getTickCount() - me.gamestarttime) < seconds(stayInGame)) {
+				me.overhead("ÿc2Log items done. ÿc4Stay in " + "ÿc4game more:ÿc0 " + Math.floor(stayInGame - (getTickCount() - me.gamestarttime) / 1000) + " sec");
 
 				delay(1000);
 
@@ -53,6 +67,57 @@ const MuleLogger = {
 		}
 
 		return false;
+	},
+
+	savePermedStatus: function (accPermInfo = []) {
+		FileTools.writeText("logs/MuleLogPermInfo.json", JSON.stringify(accPermInfo));
+	},
+
+	loadPermedStatus: function () {
+		if (!FileTools.exists("logs/MuleLogPermInfo.json")) throw new Error("File logs/MuleLogPermInfo.json does not exist!");
+		let info = (FileTools.readText("logs/MuleLogPermInfo.json"));
+		return info ? JSON.parse(info) : [];
+	},
+
+	// @laz
+	convertPermBuffer: function (buffer = []) {
+		let convertedArr = [];
+
+		if (buffer.length) {
+			let byteArray 	= buffer.shift();
+			let numchars 	= parseInt(byteArray[3]);
+			let time 		= Math.round(new Date().getTime() / 1000);
+			let bytes 		= byteArray.slice(9, byteArray.length);
+			
+			for (let i = 0; i < numchars; i++) {
+				let character = {};
+				
+				let t = bytes.slice(0, 4).reverse();
+				t = ((t[t.length - 1]) | (t[t.length - 2] << 8) | (t[t.length - 3] << 16) | (t[t.length - 4] << 24) >>> 0);
+				t = (t - time) / (60 * 60); // hours
+				
+				bytes = bytes.slice(4, bytes.length);
+				character.charname = "";
+				
+				while (bytes.length) {
+					let b = bytes.shift();
+					if (b === 0x00) break;
+					character.charname += String.fromCharCode(b);
+				}
+				
+				let flags 			= bytes[26];
+				character.expires 	= Math.round(t * 100) / 100; // round to 2 decimals
+				character.perm 		= character.expires > ((11 * 24) + 0.1);
+				character.refresh 	= character.expires < (15 * 24);
+				character.dead 		= (flags & 0x08) !== 0;
+				bytes = bytes.slice(34, bytes.length);
+				
+				console.log(character);
+				convertedArr.push(character);
+			}
+		}
+
+		this.savePermedStatus(convertedArr);
 	},
 
 	load: function (hash) {

@@ -107,7 +107,7 @@ function DiabloHelper() {
 			Pather.moveTo(7774, 5305);
 			Attack.clear(35, 0, false, Common.Diablo.sort);
 			Common.Diablo.runSeals(Config.DiabloHelper.SealOrder, Config.DiabloHelper.OpenSeals);
-			Misc.poll(() => Common.Diablo.diabloSpawned, seconds(15), 500);
+			Misc.poll(() => Common.Diablo.diabloSpawned, seconds(30), 500);
 		} catch (e) {
 			console.log((e.message ? e.message : e));
 		}
@@ -121,6 +121,7 @@ function DiabloHelper() {
 				try {
 					print("Rechecking seals");
 					Common.Diablo.runSeals(Config.DiabloHelper.SealOrder, Config.DiabloHelper.OpenSeals);
+					Misc.poll(() => Common.Diablo.diabloSpawned, seconds(30), 500);
 					Common.Diablo.diabloPrep();
 				} catch (e2) {
 					//

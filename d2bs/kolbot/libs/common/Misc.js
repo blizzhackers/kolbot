@@ -537,7 +537,7 @@ const Skill = {
 			|| typeof unit !== 'object' || unit.type !== sdk.unittype.Object
 			|| unit.name.toLowerCase() === 'dummy'
 			|| (unit.name.toLowerCase() === 'portal' && !me.inTown && unit.classid !== 298)
-			|| [sdk.units.RedPortalToAct4, sdk.units.RedPortalToChamber, sdk.units.RedPortal, sdk.units.RedPortalToAct5].includes(unit.classid)) {
+			|| [sdk.units.RedPortalToAct4, sdk.units.WorldstonePortal, sdk.units.RedPortal, sdk.units.RedPortalToAct5].includes(unit.classid)) {
 			return false;
 		}
 

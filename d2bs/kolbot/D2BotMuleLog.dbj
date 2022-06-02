@@ -29,6 +29,7 @@ if (!FileTools.exists("data/" + me.profile + ".json")) {
 }
 
 let currAcc, charList,
+	permStatusBuffer = [],
 	accounts = [],
 	chars = [];
 
@@ -286,6 +287,10 @@ function locationAction (location) {
 
 function main() {
 	addEventListener('copydata', Starter.receiveCopyData);
+	addEventListener("realmpacket", function (pBytes) {
+		if (pBytes[0] !== 0x19) return;
+		permStatusBuffer.push([].slice.call(pBytes));
+	});
 
 	while (!Starter.handle) {
 		delay(100);
@@ -324,6 +329,10 @@ function main() {
 	DataFile.updateStats("debugInfo", JSON.stringify({currScript: "none", area: "out of game"}));
 
 	while (true) {
+		if (permStatusBuffer.length) {
+			MuleLogger.convertPermBuffer(permStatusBuffer);
+			permStatusBuffer = [];
+		}
 		// returns true before actually in game so we can't only use this check
 		while (me.ingame) {
 			// returns false when switching acts so we can't use while

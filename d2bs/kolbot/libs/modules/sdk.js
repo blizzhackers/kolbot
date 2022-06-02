@@ -1,8 +1,9 @@
-/*
-*   @filename   sdk.js
-*   @author     jaenster, theBGuy
-*   @desc       development tool for readability
-*   @naming style     sdk.objprop.objprop.ObjProp (excludes functions which use sdk.objprop.camelCase)
+/**
+*  @filename    sdk.js
+*  @author      jaenster, theBGuy
+*  @desc        development tool for readability
+*  @format      sdk.objprop.objprop.ObjProp (excludes functions which use sdk.objprop.camelCase)
+*
 */
 
 // todo: break this up to make more sense. Example
@@ -1475,7 +1476,7 @@ item: {
 			AncientsAltar: 546,
 			AncientsDoor: 547,
 			FrozenAnya: 558,
-			RedPortalToChamber: 563, // Baal's red portal
+			WorldstonePortal: 563,
 
 			FrigidHighlandsChest: 455,
 			IcyCellarChest: 397,
@@ -4142,6 +4143,18 @@ item: {
 				Gray: 10
 			}
 		},
+
+		keys: {
+			Numpad1: 97,
+			Numpad2: 98,
+			Numpad3: 99,
+			Numpad4: 100,
+			Numpad5: 101,
+			Numpad6: 102,
+			Numpad7: 103,
+			Numpad8: 104,
+			Numpad9: 105,
+		}
 	};
 
 	// Need to be set after its loaded

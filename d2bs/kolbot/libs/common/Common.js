@@ -184,6 +184,7 @@ const Common = {
 		diabloSpawned: false,
 		done: false,
 		waitForGlow: false,
+		sealOrder: [],
 		vizLayout: -1,
 		seisLayout: -1,
 		infLayout: -1,
@@ -304,6 +305,7 @@ const Common = {
 
 		runSeals: function (sealOrder, openSeals = true) {
 			print("seal order: " + sealOrder);
+			this.sealOrder = sealOrder;
 			let seals = {
 				1: () => this.vizierSeal(openSeals),
 				2: () => this.seisSeal(openSeals),
@@ -496,6 +498,16 @@ const Common = {
 
 				if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.InfectorofSouls))) throw new Error("Failed to kill Infector");
 				if (openSeal && !Common.Diablo.openSeal(sdk.units.DiabloSealInfector2)) throw new Error("Failed to open Infector seals.");
+				// wait until seal has been popped to avoid missing diablo due to wait time ending before he spawns, happens if leader does town chores after seal boss
+				!openSeal && [3, "infector"].includes(Common.Diablo.sealOrder.last()) && Misc.poll(() => {
+					if (Common.Diablo.diabloSpawned) return true;
+
+					let lastSeal = object(sdk.units.DiabloSealInfector2);
+					if (lastSeal && lastSeal.mode) {
+						return true;
+					}
+					return false;
+				}, minutes(3), 1000);
 			}
 
 			Config.Diablo.SealLeader && say("out");
@@ -1060,6 +1072,31 @@ const Common = {
 			this.clearThrone();
 
 			return true;
+		},
+
+		killBaal: function () {
+			if (me.area === sdk.areas.ThroneofDestruction) {
+				Config.PublicMode && Loader.scriptName() === "Baal" && say(Config.Baal.BaalMessage);
+				me.getMobCount(30) > 0 && this.clearWaves(); // ensure waves are actually done
+				Pather.moveTo(15090, 5008);
+				delay(5000);
+				Precast.doPrecast(true);
+				Misc.poll(() => !monster(sdk.monsters.ThroneBaal), minutes(3), 1000);
+
+				let portal = object(sdk.units.WorldstonePortal);
+
+				if (portal) {
+					Pather.usePortal(null, null, portal);
+				} else {
+					throw new Error("Couldn't find portal.");
+				}
+			}
+
+			if (me.area === sdk.areas.WorldstoneChamber) {
+				Pather.moveTo(15134, 5923);
+				Attack.kill(sdk.monsters.Baal);
+				Pickit.pickItems();
+			}
 		}
 	},
 };

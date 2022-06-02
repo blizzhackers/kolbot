@@ -88,28 +88,7 @@ function Baal() {
 		throw new Error("Couldn't clear baal waves");
 	}
 
-	if (Config.Baal.KillBaal) {
-		Config.PublicMode && say(Config.Baal.BaalMessage);
-		Pather.moveTo(15090, 5008);
-		delay(5000);
-		Precast.doPrecast(true);
-
-		while (getUnit(1, 543)) {
-			delay(500);
-		}
-
-		let portal = getUnit(2, 563);
-
-		if (portal) {
-			Pather.usePortal(null, null, portal);
-		} else {
-			throw new Error("Couldn't find portal.");
-		}
-
-		Pather.moveTo(15134, 5923);
-		Attack.kill(544); // Baal
-		Pickit.pickItems();
-	}
+	Config.Baal.KillBaal && Common.Baal.killBaal();
 
 	return true;
 }

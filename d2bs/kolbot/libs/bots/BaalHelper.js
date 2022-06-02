@@ -65,25 +65,7 @@ function BaalHelper() {
 	}
 
 	if (Config.BaalHelper.KillBaal) {
-		Pather.moveTo(15092, 5011);
-		Precast.doPrecast(false);
-
-		while (monster(sdk.monsters.ThroneBaal)) {
-			delay(500);
-		}
-
-		delay(1000);
-		Pather.moveTo(15092, 5011);
-
-		let portal = object(563);
-
-		if (!portal || !Pather.usePortal(null, null, portal)) {
-			throw new Error("Couldn't find portal.");
-		}
-
-		Pather.moveTo(15134, 5923);
-		Attack.kill(sdk.monsters.Baal);
-		Pickit.pickItems();
+		Common.Baal.killBaal();
 	} else {
 		while (true) {
 			delay(500);
