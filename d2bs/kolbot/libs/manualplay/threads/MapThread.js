@@ -13,6 +13,7 @@ include("Gambling.js");
 include("CraftingSystem.js");
 include("TorchSystem.js");
 include("MuleLogger.js");
+include("UnitInfo.js");
 include("common/util.js");
 includeCommonLibs();
 
@@ -109,13 +110,13 @@ function main() {
 	const Worker = require('../../modules/Worker');
 
 	Worker.runInBackground.unitInfo = function () {
-		if (!Hooks.userAddon || (!UserAddon.cleared && !getUnit(101))) {
-			UserAddon.remove();
+		if (!Hooks.userAddon || (!UnitInfo.cleared && !getUnit(101))) {
+			UnitInfo.remove();
 			return true;
 		}
 
-		let unitInfo = getUnit(101);
-		!!unitInfo && UserAddon.createInfo(unitInfo);
+		let unit = getUnit(101);
+		!!unit && UnitInfo.createInfo(unit);
 
 		return true;
 	};
@@ -225,31 +226,17 @@ function main() {
 		return true;
 	};
 
-	// Sent packet handler
-	this.packetSent = function (pBytes) {
-		let ID = pBytes[0].toString(16);
+	let onChatInput = (speaker, msg) => {
+		if (msg.length && msg[0] === ".") {
+			this.runCommand(msg);
 
-		// Block all commands or irc chat from being sent to server
-		if (ID === "15") {
-			if (pBytes[3] === 46) {
-				let str = "";
-
-				for (let b = 3; b < pBytes.length - 3; b++) {
-					str += String.fromCharCode(pBytes[b]);
-				}
-
-				if (pBytes[3] === 46) {
-					this.runCommand(str);
-
-					return true;
-				}
-			}
+			return true;
 		}
 
 		return false;
 	};
 
-	addEventListener("gamepacketsent", this.packetSent);
+	addEventListener("chatinputblocker", onChatInput);
 	addEventListener("keyup", ActionHooks.event);
 
 	while (true) {

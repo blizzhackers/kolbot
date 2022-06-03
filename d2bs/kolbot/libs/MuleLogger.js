@@ -41,12 +41,10 @@ const MuleLogger = {
 			if (this.AutoPerm) {
 				let permInfo = this.loadPermedStatus();
 
-				if (permInfo.length) {
-					permInfo.forEach(char => {
-						if (char.charname === me.charname && !char.perm) {
-							stayInGame = rand(7230, 7290);
-						}
-					});
+				if (!!permInfo.charname) {
+					if (permInfo.charname === me.charname && !permInfo.perm) {
+						stayInGame = rand(7230, 7290);
+					}
 				}
 			}
 
@@ -69,55 +67,14 @@ const MuleLogger = {
 		return false;
 	},
 
-	savePermedStatus: function (accPermInfo = []) {
-		FileTools.writeText("logs/MuleLogPermInfo.json", JSON.stringify(accPermInfo));
+	savePermedStatus: function (charPermInfo = {}) {
+		FileTools.writeText("logs/MuleLogPermInfo.json", JSON.stringify(charPermInfo));
 	},
 
 	loadPermedStatus: function () {
 		if (!FileTools.exists("logs/MuleLogPermInfo.json")) throw new Error("File logs/MuleLogPermInfo.json does not exist!");
 		let info = (FileTools.readText("logs/MuleLogPermInfo.json"));
-		return info ? JSON.parse(info) : [];
-	},
-
-	// @laz
-	convertPermBuffer: function (buffer = []) {
-		let convertedArr = [];
-
-		if (buffer.length) {
-			let byteArray 	= buffer.shift();
-			let numchars 	= parseInt(byteArray[3]);
-			let time 		= Math.round(new Date().getTime() / 1000);
-			let bytes 		= byteArray.slice(9, byteArray.length);
-			
-			for (let i = 0; i < numchars; i++) {
-				let character = {};
-				
-				let t = bytes.slice(0, 4).reverse();
-				t = ((t[t.length - 1]) | (t[t.length - 2] << 8) | (t[t.length - 3] << 16) | (t[t.length - 4] << 24) >>> 0);
-				t = (t - time) / (60 * 60); // hours
-				
-				bytes = bytes.slice(4, bytes.length);
-				character.charname = "";
-				
-				while (bytes.length) {
-					let b = bytes.shift();
-					if (b === 0x00) break;
-					character.charname += String.fromCharCode(b);
-				}
-				
-				let flags 			= bytes[26];
-				character.expires 	= Math.round(t * 100) / 100; // round to 2 decimals
-				character.perm 		= character.expires > ((11 * 24) + 0.1);
-				character.refresh 	= character.expires < (15 * 24);
-				character.dead 		= (flags & 0x08) !== 0;
-				bytes = bytes.slice(34, bytes.length);
-				
-				console.log(character);
-				convertedArr.push(character);
-			}
-		}
-
-		this.savePermedStatus(convertedArr);
+		return info ? JSON.parse(info) : {};
 	},
 
 	load: function (hash) {
@@ -130,6 +87,11 @@ const MuleLogger = {
 	save: function (hash, data) {
 		let filename = "data/secure/" + hash + ".txt";
 		FileTools.writeText(filename, data);
+	},
+
+	remove: function () {
+		FileTools.remove("logs/MuleLog.json");
+		FileTools.remove("logs/MuleLogPermInfo.json");
 	},
 
 	// Log kept item stats in the manager.
@@ -169,6 +131,13 @@ const MuleLogger = {
 	logChar: function (logIlvl = this.LogItemLevel, logName = this.LogNames, saveImg = this.SaveScreenShot) {
 		while (!me.gameReady) {
 			delay(100);
+		}
+
+		// try again if db is locked!!
+		if (isIncluded("ItemDB.js") || include("ItemDB.js")) {
+			while (!ItemDB.init(false)) {
+				delay(1000);
+			}
 		}
 
 		let items = me.getItemsEx();

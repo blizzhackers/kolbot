@@ -1,14 +1,17 @@
-/*
-*	@filename	UserAddon.js
-*	@author		theBGuy
-*	@desc		UserAddon mode for MapThread
+/**
+*  @filename    UnitInfo.js
+*  @author      kolton, theBGuy
+*  @desc        Display unit info
+*
 */
+include("common/prototypes.js");
 
-const UserAddon = new function() {
+const UnitInfo = new function () {
 	this.x = 200;
 	this.y = 250;
 	this.hooks = [];
 	this.cleared = true;
+	this.resfix = {x: (me.screensize ? 0 : -160), y: (me.screensize ? 0 : -120)};
 
 	this.createInfo = function (unit) {
 		if (typeof unit === "undefined") {
@@ -39,14 +42,12 @@ const UserAddon = new function() {
 	};
 
 	this.playerInfo = function (unit) {
-		let i, items, string,
+		let string,
 			frameXsize = 0,
 			frameYsize = 20,
 			quality = ["ÿc0", "ÿc0", "ÿc0", "ÿc0", "ÿc3", "ÿc2", "ÿc9", "ÿc4", "ÿc8"];
 
-		if (!this.currentGid) {
-			this.currentGid = unit.gid;
-		}
+		!this.currentGid && (this.currentGid = unit.gid);
 
 		if (this.currentGid === unit.gid && !this.cleared) {
 			return;
@@ -59,13 +60,13 @@ const UserAddon = new function() {
 
 		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, this.x, this.y, 4, 13, 2));
 
-		items = unit.getItems();
+		let items = unit.getItemsEx();
 
-		if (items) {
+		if (items.length) {
 			this.hooks.push(new Text("Equipped items:", this.x, this.y + 15, 4, 13, 2));
 			frameYsize += 15;
 
-			for (i = 0; i < items.length; i += 1) {
+			for (let i = 0; i < items.length; i += 1) {
 				if (items[i].getFlag(0x4000000)) {
 					string = items[i].fname.split("\n")[1] + "ÿc0 " + items[i].fname.split("\n")[0];
 				} else {
@@ -73,11 +74,7 @@ const UserAddon = new function() {
 				}
 
 				this.hooks.push(new Text(string, this.x, this.y + (i + 2) * 15, 0, 13, 2));
-
-				if (string.length > frameXsize) {
-					frameXsize = string.length;
-				}
-
+				string.length > frameXsize && (frameXsize = string.length);
 				frameYsize += 15;
 			}
 		}
@@ -86,7 +83,6 @@ const UserAddon = new function() {
 
 		this.hooks.push(new Box(this.x + 2, this.y - 15, Math.round(frameXsize * 7.5) - 4, frameYsize, 0x0, 1, 2));
 		this.hooks.push(new Frame(this.x, this.y - 15, Math.round(frameXsize * 7.5), frameYsize, 2));
-
 		this.hooks[this.hooks.length - 2].zorder = 0;
 	};
 
@@ -112,18 +108,17 @@ const UserAddon = new function() {
 		this.hooks.push(new Text("Poison resist: ÿc0" + unit.getStat(45), this.x, this.y + 75, 4, 13, 2));
 		this.hooks.push(new Text("Physical resist: ÿc0" + unit.getStat(36), this.x, this.y + 90, 4, 13, 2));
 		this.hooks.push(new Text("Magic resist: ÿc0" + unit.getStat(37), this.x, this.y + 105, 4, 13, 2));
-		this.hooks.push(new Text("Ranged: ÿc0" + getBaseStat('monstats', unit.classid, 'RangedType'), this.x, this.y + 120, 4, 13, 2));
 
 		this.cleared = false;
 
 		this.hooks.push(new Box(this.x + 2, this.y - 15, 136, frameYsize, 0x0, 1, 2));
 		this.hooks.push(new Frame(this.x, this.y - 15, 140, frameYsize, 2));
-
 		this.hooks[this.hooks.length - 2].zorder = 0;
 	};
 
 	this.itemInfo = function (unit) {
-		let i = 0, xpos = 60, ypos = (me.getMerc() ? 80 : 20) + (-1 * Hooks.resfix.y),
+		let xpos = 60,
+			ypos = (me.getMerc() ? 80 : 20) + (-1 * this.resfix.y),
 			frameYsize = 50;
 
 		!this.currentGid && (this.currentGid = unit.gid);
@@ -149,7 +144,7 @@ const UserAddon = new function() {
 			this.hooks.push(new Text("Socketed with:", xpos, ypos + 60, 4, 13, 2));
 			frameYsize += 30;
 
-			for (i = 0; i < this.socketedItems.length; i += 1) {
+			for (let i = 0; i < this.socketedItems.length; i += 1) {
 				this.hooks.push(new Text(this.socketedItems[i].fname.split("\n").reverse().join(" "), xpos, ypos + (i + 5) * 15, 0, 13, 2));
 
 				frameYsize += 15;
@@ -171,7 +166,6 @@ const UserAddon = new function() {
 
 		this.hooks.push(new Box(xpos + 2, ypos - 15, 116, frameYsize, 0x0, 1, 2));
 		this.hooks.push(new Frame(xpos, ypos - 15, 120, frameYsize, 2));
-
 		this.hooks[this.hooks.length - 2].zorder = 0;
 	};
 
@@ -202,7 +196,6 @@ const UserAddon = new function() {
 
 		this.hooks.push(new Box(this.x + 2, this.y - 15, 116, frameYsize, 0x0, 1, 2));
 		this.hooks.push(new Frame(this.x, this.y - 15, 120, frameYsize, 2));
-
 		this.hooks[this.hooks.length - 2].zorder = 0;
 	};
 

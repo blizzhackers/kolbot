@@ -19,6 +19,7 @@ include("json2.js");
 include('polyfill.js');
 include("OOG.js");
 include("MuleLogger.js");
+include("DropperSetup.js");
 include("common/misc.js");
 include("common/util.js");
 include("common/prototypes.js");
@@ -28,12 +29,15 @@ if (!FileTools.exists("data/" + me.profile + ".json")) {
 	DataFile.create();
 }
 
-let currAcc, charList,
-	permStatusBuffer = [],
+let currAcc,
+	usingDroper = isIncluded("DropperSetup.js"),
+	charList = [],
 	accounts = [],
 	chars = [];
 
 function parseInfo() {
+	usingDroper && parseDropperAccounts(accounts, chars);
+	
 	for (let i in MuleLogger.LogAccounts) {
 		if (MuleLogger.LogAccounts.hasOwnProperty(i) && typeof i === "string") {
 			accounts.push(i);
@@ -116,7 +120,7 @@ function locationAction (location) {
 	case sdk.game.locations.Login:
 	case sdk.game.locations.SplashScreen:
 		if (!accounts.length) {
-			FileTools.remove("logs/MuleLog.json");
+			MuleLogger.remove();
 			D2Bot.printToConsole("Done logging mules!");
 			D2Bot.stop();
 
@@ -204,6 +208,15 @@ function locationAction (location) {
 
 		print("ÿc4Mule Loggerÿc2: Login character: " + currChar);
 		FileTools.writeText("logs/MuleLog.json", JSON.stringify(obj));
+
+		if (MuleLogger.AutoPerm) {
+			let characterStatus = {
+				charname: currChar,
+				perm: ControlAction.getPermStatus({charName: currChar})
+			};
+			MuleLogger.savePermedStatus(characterStatus);
+		}
+
 		ControlAction.loginCharacter({charName: currChar});
 
 		break;
@@ -287,10 +300,6 @@ function locationAction (location) {
 
 function main() {
 	addEventListener('copydata', Starter.receiveCopyData);
-	addEventListener("realmpacket", function (pBytes) {
-		if (pBytes[0] !== 0x19) return;
-		permStatusBuffer.push([].slice.call(pBytes));
-	});
 
 	while (!Starter.handle) {
 		delay(100);
@@ -329,10 +338,6 @@ function main() {
 	DataFile.updateStats("debugInfo", JSON.stringify({currScript: "none", area: "out of game"}));
 
 	while (true) {
-		if (permStatusBuffer.length) {
-			MuleLogger.convertPermBuffer(permStatusBuffer);
-			permStatusBuffer = [];
-		}
 		// returns true before actually in game so we can't only use this check
 		while (me.ingame) {
 			// returns false when switching acts so we can't use while
