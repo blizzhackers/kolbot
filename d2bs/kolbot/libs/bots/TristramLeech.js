@@ -1,76 +1,126 @@
 /**
 *  @filename    TristramLeech.js
-*  @author      ToS/XxXGoD/YGM
+*  @author      ToS/XxXGoD/YGM, theBGuy
 *  @desc        Tristram Leech (Helper)
 *
 */
 
-// todo: make clearing optional so this can be like wakka if desired
-
 function TristramLeech() {
-	let leader, whereisleader;
+	let whereisleader, leader;
 
 	Town.doChores();
-	Pather.useWaypoint(sdk.areas.RogueEncampment);
+	Town.goToTown(1);
 	Town.move("portalspot");
-	leader = Config.Leader;
 
-	// Check leader isn't in other zones, whilst waiting for portal.
-	for (let i = 0; i < Config.TristramLeech.Wait; i += 1) {
-		whereisleader = getParty(leader);
-
-		if (whereisleader && [sdk.areas.Travincal, sdk.areas.ChaosSanctuary, sdk.areas.ThroneofDestruction].includes(whereisleader.area)) {
-			return false;
-		}
-
-		if (Pather.usePortal(sdk.areas.Tristram, leader)) {
-			break;
-		}
-
-		delay(1000);
+	if (Config.Leader) {
+		leader = (Config.Leader || Config.TristramLeech.Leader);
+		if (!Misc.poll(() => Misc.inMyParty(leader), 30e3, 1000)) throw new Error("TristramLeech: Leader not partied");
 	}
 
-	if (me.area !== sdk.areas.Tristram) throw new Error("No portal found to Tristram.");
+	!leader && (leader = Misc.autoLeaderDetect({
+		destination: sdk.areas.Tristram,
+		quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area),
+		timeout: minutes(5)
+	}));
 
-	Precast.doPrecast(true);
-	delay(3000);
+	if (leader) {
+		const Worker = require('../modules/Worker');
 
-	for (let i = 0; i < 30; i += 1) {
-		whereisleader = getParty(leader);
+		let leadTick = getTickCount();
+		let killLeaderTracker = false;
 
-		if (whereisleader) {
-			if (whereisleader.area === sdk.areas.Tristram) {
-				break;
-			}
-		}
+		Worker.runInBackground.leaderTracker = function () {
+			if (killLeaderTracker) return false;
+			// check every 3 seconds
+			if (getTickCount() - leadTick < 3000) return true;
+			leadTick = getTickCount();
 
-		delay(1000);
-	}
+			// check again in another 3 seconds if game wasn't ready
+			if (!me.gameReady) return true;
+			if (Misc.getPlayerCount() <= 1) throw new Error("Empty game");
 
-	while (whereisleader.area === sdk.areas.Tristram) {
-		whereisleader = getParty(leader);
-		let leaderUnit = Misc.getPlayerUnit(leader);
+			let party = getParty(leader);
 
-		if (whereisleader.area === me.area) {
-			try {
-				if (copyUnit(leaderUnit).x) {
-					if (getDistance(me, leaderUnit) > 4) {
-						Pather.moveToUnit(leaderUnit);
-						Attack.clear(10);
+			if (party) {
+				// Player is in Throne of Destruction or Worldstone Chamber
+				if ([sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(party.area)) {
+					if (Loader.scriptName() === "TristramLeech") {
+						killLeaderTracker = true;
+						throw new Error('Party leader is running baal');
+					} else {
+						// kill process
+						return false;
 					}
-				} else {
-					Pather.moveTo(copyUnit(leaderUnit).x, copyUnit(leaderUnit).y);
-					Attack.clear(10);
-				}
-			} catch (err) {
-				if (whereisleader.area === me.area) {
-					Pather.moveTo(whereisleader.x, whereisleader.y);
-					Attack.clear(10);
 				}
 			}
-		}
 
-		delay(100);
+			return true;
+		};
+
+		try {
+			if (!Misc.poll(() => {
+				if (Pather.getPortal(sdk.areas.Tristram, Config.Leader || null) && Pather.usePortal(sdk.areas.Tristram, Config.Leader || null)) {
+					return true;
+				}
+
+				return false;
+			}, minutes(5), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
+
+			Precast.doPrecast(true);
+			delay(3000);
+
+			whereisleader = Misc.poll(() => {
+				let lead = getParty(leader);
+
+				if (lead.area === sdk.areas.Tristram) {
+					return lead;
+				}
+
+				return false;
+			}, minutes(3), 1000);
+			
+			while (true) {
+				whereisleader = getParty(leader);
+				let leaderUnit = Misc.getPlayerUnit(leader);
+
+				if (whereisleader.area !== sdk.areas.Tristram && !Misc.poll(() => {
+					let lead = getParty(leader);
+
+					if (lead.area === sdk.areas.Tristram) {
+						return true;
+					}
+
+					return false;
+				}, minutes(3), 1000)) {
+					console.log("Leader wasn't in tristram for longer than 3 minutes, End script");
+
+					break;
+				}
+
+				if (whereisleader.area === me.area) {
+					try {
+						if (copyUnit(leaderUnit).x) {
+							Config.TristramLeech.Helper && leaderUnit.distance > 4 && Pather.moveToUnit(leaderUnit) && Attack.clear(10);
+							!Config.TristramLeech.Helper && leaderUnit.distance > 20 && Pather.moveNearUnit(leaderUnit, 15);
+						} else {
+							Config.TristramLeech.Helper && Pather.moveTo(copyUnit(leaderUnit).x, copyUnit(leaderUnit).y) && Attack.clear(10);
+							!Config.TristramLeech.Helper && Pather.moveNear(copyUnit(leaderUnit).x, copyUnit(leaderUnit).y, 15);
+						}
+					} catch (err) {
+						if (whereisleader.area === me.area) {
+							Config.TristramLeech.Helper && Pather.moveTo(whereisleader.x, whereisleader.y) && Attack.clear(10);
+							!Config.TristramLeech.Helper && Pather.moveNear(whereisleader.x, whereisleader.y, 15);
+						}
+					}
+				}
+
+				delay(100);
+			}
+		} catch (e) {
+			console.errorReport(e);
+		} finally {
+			killLeaderTracker = true;
+		}
 	}
 
 	return true;

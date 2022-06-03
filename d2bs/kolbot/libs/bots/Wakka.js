@@ -167,7 +167,6 @@ function Wakka() {
 	!leader && (leader = Misc.autoLeaderDetect({destination: 108, quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area), timeout: timeout * 60e3}));
 	Town.doChores();
 
-
 	if (leader) {
 		const Worker = require('../modules/Worker');
 

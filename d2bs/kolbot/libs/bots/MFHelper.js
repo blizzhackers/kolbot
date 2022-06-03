@@ -10,7 +10,7 @@ function MFHelper() {
 		oldCommand = "",
 		command = "";
 
-	function chatEvent(name, msg) {
+	function chatEvent (name, msg) {
 		if (!player) {
 			let match = [
 				"kill", "clearlevel", "clear", "quit", "cows", "council", "goto"
@@ -27,9 +27,7 @@ function MFHelper() {
 			}
 		}
 
-		if (player && name === player.name) {
-			command = msg;
-		}
+		player && name === player.name && (command = msg);
 	}
 
 	addEventListener("chatmsg", chatEvent);

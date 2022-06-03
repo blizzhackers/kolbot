@@ -563,12 +563,13 @@ let Config = {
 	},
 	TristramLeech: {
 		Leader: "",
-		Wait: 120
+		Helper: false,
+		Wait: 5
 	},
 	TravincalLeech: {
 		Leader: "",
 		Helper: false,
-		Wait: 120
+		Wait: 5
 	},
 	Tristram: {
 		PortalLeech: false,

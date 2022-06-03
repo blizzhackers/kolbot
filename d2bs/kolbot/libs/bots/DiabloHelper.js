@@ -77,7 +77,7 @@ function DiabloHelper() {
 				}
 
 				return false;
-			}, minutes(Config.BaalHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
+			}, minutes(Config.DiabloHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
 		}
 
 		Common.Diablo.initLayout();

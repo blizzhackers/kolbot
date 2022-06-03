@@ -65,7 +65,7 @@ function UserAddon () {
 			dummy = new Text("`", 1, 1); // Prevents crash
 		}
 
-		!UserAddon.cleared && !getUnit(101) && UserAddon.remove();
+		!UnitInfo.cleared && !getUnit(101) && UnitInfo.remove();
 
 		if (command && command.toLowerCase() === "done") {
 			print("ÿc4UserAddon ÿc1ended");
