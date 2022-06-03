@@ -24,6 +24,10 @@ include("common/util.js");
 let Controls = require('./modules/Control');
 let sdk = require('./modules/sdk');
 
+if (typeof AdvancedConfig[me.profile] === "object") {
+	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
+}
+
 if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 	Starter.firstRun = true;
 }
@@ -183,10 +187,6 @@ function locationAction (location) {
 			Starter.chanInfo.announce = AdvancedConfig[me.profile].AnnounceGames;
 		} else {
 			Starter.chanInfo.announce = Starter.Config.AnnounceGames;
-		}
-
-		if (Starter.chanInfo.announce) {
-			Starter.sayMsg("Next game is " + Starter.gameInfo.gameName + Starter.gameCount + (Starter.gameInfo.gamePass === "" ? "" : "//" + Starter.gameInfo.gamePass));
 		}
 
 		Starter.LocationEvents.openCreateGameWindow();
