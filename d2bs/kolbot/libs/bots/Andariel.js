@@ -1,12 +1,13 @@
 /**
-*	@filename	Andariel.js
-*	@author		kolton
-*	@desc		kill Andariel
+*  @filename    Andariel.js
+*  @author      kolton
+*  @desc        kill Andariel
+*
 */
 
 function Andariel () {
 	this.killAndariel = function () {
-		let target = getUnit(1, 156);
+		let target = monster(sdk.monsters.Andariel);
 
 		if (!target) throw new Error("Andariel not found.");
 
@@ -21,10 +22,10 @@ function Andariel () {
 	};
 
 	Town.doChores();
-	Pather.useWaypoint(35);
+	Pather.useWaypoint(sdk.areas.CatacombsLvl2);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToExit([36, 37], true)) throw new Error("Failed to move to Catacombs Level 4");
+	if (!Pather.moveToExit([sdk.areas.CatacombsLvl3, sdk.areas.CatacombsLvl4], true)) throw new Error("Failed to move to Catacombs Level 4");
 
 	Pather.moveTo(22549, 9520);
 	me.sorceress && me.classic ? this.killAndariel() : Attack.kill(sdk.monsters.Andariel);

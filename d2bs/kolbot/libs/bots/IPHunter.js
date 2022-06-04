@@ -1,8 +1,9 @@
 /**
-*	@filename	IPHunter.js
-*	@author		kolton, Mercoory
-*	@desc		search for a "hot" IP and stop if the correct server is found
-*	@changes	2020.01 - more beeps and movements (anti drop measure) when IP is found; overhead messages with countdown timer; logs to D2Bot console
+*  @filename    IPHunter.js
+*  @author      kolton, Mercoory
+*  @desc        search for a "hot" IP and stop if the correct server is found
+*  @changes     2020.01 - more beeps and movements (anti drop measure) when IP is found; overhead messages with countdown timer; logs to D2Bot console
+*
 */
 
 function IPHunter() {

@@ -1,7 +1,8 @@
 /**
-*	@filename	Loader.js
-*	@author		kolton, theBGuy
-*	@desc		script loader, based on mBot's Sequencer.js
+*  @filename    Loader.js
+*  @author      kolton, theBGuy
+*  @desc        script loader, based on mBot's Sequencer.js
+*
 */
 
 let global = this;
@@ -131,6 +132,12 @@ const Loader = {
 						}
 
 						let tick = getTickCount();
+
+						if (me.inTown) {
+							Config.StackThawingPots.enabled && Town.buyPots(Config.StackThawingPots.quantity, sdk.items.ThawingPotion, true);
+							Config.StackAntidotePots.enabled && Town.buyPots(Config.StackAntidotePots.quantity, sdk.items.AntidotePotion, true);
+							Config.StackStaminaPots.enabled && Town.buyPots(Config.StackStaminaPots.quantity, sdk.items.StaminaPotion, true);
+						}
 
 						if (global[script]()) {
 							console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));

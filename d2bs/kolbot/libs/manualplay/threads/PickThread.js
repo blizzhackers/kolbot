@@ -1,9 +1,9 @@
 /**
-*	@filename	PickThread.js
-*	@author		stffdtiger
-*	@desc		a loop that runs Pickit.FastPick() intended to be used with D2BotMap entry script
+*  @filename    PickThread.js
+*  @author      stffdtiger
+*  @desc        a loop that runs Pickit.FastPick() intended to be used with D2BotMap entry script
+*
 */
-
 js_strict(true);
 
 include("json2.js");

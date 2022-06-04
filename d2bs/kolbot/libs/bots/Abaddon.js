@@ -1,15 +1,16 @@
 /**
-*	@filename	Abaddon.js
-*	@author		kolton
-*	@desc		clear Abaddon
+*  @filename    Abaddon.js
+*  @author      kolton
+*  @desc        clear Abaddon
+*
 */
 
 function Abaddon() {
 	Town.doChores();
-	Pather.useWaypoint(111);
+	Pather.useWaypoint(sdk.areas.FrigidHighlands);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToPreset(111, 2, 60) || !Pather.usePortal(125)) {
+	if (!Pather.moveToPreset(sdk.areas.FrigidHighlands, 2, sdk.units.RedPortal) || !Pather.usePortal(sdk.areas.Abaddon)) {
 		throw new Error("Failed to move to Abaddon");
 	}
 

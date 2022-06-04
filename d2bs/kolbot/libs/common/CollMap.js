@@ -1,7 +1,8 @@
 /**
-*	@filename	CollMap.js
-*	@author		kolton
-*	@desc		manipulate map collision data
+*  @filename    CollMap.js
+*  @author      kolton
+*  @desc        manipulate map collision data
+*
 */
 
 const CollMap = new function () {

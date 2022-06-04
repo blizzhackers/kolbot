@@ -1,7 +1,8 @@
 /**
-*	@filename	Party.js
-*	@author		kolton
-*	@desc		handle party procedure ingame
+*  @filename    Party.js
+*  @author      kolton
+*  @desc        handle party procedure ingame
+*
 */
 
 function main() {

@@ -1,8 +1,9 @@
 /**
-*	@filename	Prototypes.js
-*	@author		kolton, theBGuy
-* 	@credits 	Jaenster
-*	@desc		various 'Unit' and 'me' prototypes
+*  @filename    Prototypes.js
+*  @author      kolton, theBGuy
+*  @credit      Jaenster
+*  @desc        various 'Unit' and 'me' prototypes
+*
 */
 
 // Ensure these are in polyfill.js
@@ -445,19 +446,16 @@ me.castingFrames = function (skillId, fcr, charClass) {
 	charClass === undefined && (charClass = this.classid);
 
 	// https://diablo.fandom.com/wiki/Faster_Cast_Rate
-	let effectiveFCR = Math.min(75, (fcr * 120 / (fcr + 120)) | 0);
+	let effectiveFCR = Math.min(75, Math.floor(fcr * 120 / (fcr + 120)) | 0);
 	let isLightning = skillId === sdk.skills.Lightning || skillId === sdk.skills.ChainLightning;
 	let baseCastRate = [20, isLightning ? 19 : 14, 16, 16, 14, 15, 17][charClass];
-	if (isLightning) {
-		return Math.round(256 * baseCastRate / (256 * (100 + effectiveFCR) / 100));
-	}
 	let animationSpeed = {
 		normal: 256,
 		human: 208,
 		wolf: 229,
 		bear: 228
 	}[charClass === sdk.charclass.Druid ? (me.getState(sdk.states.Wolf) || me.getState(sdk.states.Bear)) : "normal"];
-	return Math.ceil(256 * baseCastRate / Math.floor(animationSpeed * (100 + effectiveFCR) / 100)) - 1;
+	return Math.ceil(256 * baseCastRate / Math.floor(animationSpeed * (100 + effectiveFCR) / 100) - (isLightning ? 0 : 1));
 };
 
 // Returns the duration in seconds needed to cast a given skill at a given FCR for a given char.
@@ -1560,6 +1558,23 @@ Object.defineProperties(Unit.prototype, {
 			return (this.isChampion || this.isUnique || this.isSuperUnique);
 		},
 	},
+	// todo - monster types
+	ghosts: {
+		get: function () {
+			return [
+				sdk.monsters.Ghost1, sdk.monsters.Wraith1, sdk.monsters.Specter1,
+				sdk.monsters.Apparition, sdk.monsters.DarkShape, sdk.monsters.Ghost2, sdk.monsters.Wraith2, sdk.monsters.Specter2
+			].includes(this.classid);
+		},
+	},
+	dolls: {
+		get: function () {
+			return [
+				sdk.monsters.BoneFetish1, sdk.monsters.BoneFetish2, sdk.monsters.BoneFetish3,
+				sdk.monsters.SoulKiller3, sdk.monsters.StygianDoll2, sdk.monsters.StygianDoll6, sdk.monsters.SoulKiller
+			].includes(this.classid);
+		},
+	},
 	isWalking: {
 		get: function () {
 			return (this.mode === sdk.units.monsters.monstermode.Walking && (this.targetx !== this.x || this.targety !== this.y));
@@ -1768,23 +1783,23 @@ Object.defineProperties(me, {
 	highestAct: {
 		get: function () {
 			let acts = [true,
-				me.getQuest(sdk.quests.AbleToGotoActII, 0),
-				me.getQuest(sdk.quests.AbleToGotoActIII, 0),
-				me.getQuest(sdk.quests.AbleToGotoActIV, 0),
-				me.getQuest(sdk.quests.AbleToGotoActV, 0)];
+				me.getQuest(sdk.quest.id.AbleToGotoActII, 0),
+				me.getQuest(sdk.quest.id.AbleToGotoActIII, 0),
+				me.getQuest(sdk.quest.id.AbleToGotoActIV, 0),
+				me.getQuest(sdk.quest.id.AbleToGotoActV, 0)];
 			let index = acts.findIndex(function (i) { return !i; }); // find first false, returns between 1 and 5
 			return index === -1 ? 5 : index;
 		}
 	},
 	highestQuestDone: {
 		get: function () {
-			for (let i = sdk.quests.SecretCowLevel; i >= sdk.quests.SpokeToWarriv; i--) {
+			for (let i = sdk.quest.id.SecretCowLevel; i >= sdk.quest.id.SpokeToWarriv; i--) {
 				if (me.getQuest(i, 0)) {
 					return i;
 				}
 
 				// check if we've completed main part but not used our reward
-				if ([sdk.quests.RescueonMountArreat, sdk.quests.SiegeOnHarrogath, sdk.quests.ToolsoftheTrade].includes(i) && me.getQuest(i, 1)) {
+				if ([sdk.quest.id.RescueonMountArreat, sdk.quest.id.SiegeOnHarrogath, sdk.quest.id.ToolsoftheTrade].includes(i) && me.getQuest(i, 1)) {
 					return i;
 				}
 			}
@@ -1918,6 +1933,73 @@ Object.defineProperties(me, {
 			return me.classid === 6;
 		}
 	},
+	// quest items
+	wirtsleg: {
+		get: function () {
+			return me.getItem(sdk.quest.item.WirtsLeg);
+		}
+	},
+	cube: {
+		get: function () {
+			return me.getItem(sdk.quest.item.Cube);
+		}
+	},
+	shaft: {
+		get: function () {
+			return me.getItem(sdk.quest.item.ShaftoftheHoradricStaff);
+		}
+	},
+	amulet: {
+		get: function () {
+			return me.getItem(sdk.quest.item.ViperAmulet);
+		}
+	},
+	staff: {
+		get: function () {
+			return me.getItem(sdk.quest.item.HoradricStaff);
+		}
+	},
+	completestaff: {
+		get: function () {
+			return me.getItem(sdk.quest.item.HoradricStaff);
+		}
+	},
+	eye: {
+		get: function () {
+			return me.getItem(sdk.items.quest.KhalimsEye);
+		}
+	},
+	brain: {
+		get: function () {
+			return me.getItem(sdk.quest.item.KhalimsBrain);
+		}
+	},
+	heart: {
+		get: function () {
+			return me.getItem(sdk.quest.item.KhalimsHeart);
+		}
+	},
+	khalimswill: {
+		get: function () {
+			return me.getItem(sdk.quest.item.KhalimsWill);
+		}
+	},
+	khalimsflail: {
+		get: function () {
+			return me.getItem(sdk.quest.item.KhalimsFlail);
+		}
+	},
+	malahspotion: {
+		get: function () {
+			return me.getItem(sdk.quest.item.MalahsPotion);
+		}
+	},
+	scrollofresistance: {
+		get: function () {
+			return me.getItem(sdk.quest.item.ScrollofResistance);
+		}
+	},
+	// quests
 	den: {
 		get: function () {
 			return me.getQuest(1, 0);
@@ -1948,29 +2030,9 @@ Object.defineProperties(me, {
 			return me.getQuest(7, 0);
 		}
 	},
-	cube: {
-		get: function () {
-			return !!me.getItem(sdk.items.quest.Cube);
-		}
-	},
 	radament: {
 		get: function () {
 			return me.getQuest(9, 0);
-		}
-	},
-	shaft: {
-		get: function () {
-			return !!me.getItem(92);
-		}
-	},
-	amulet: {
-		get: function () {
-			return !!me.getItem(521);
-		}
-	},
-	staff: {
-		get: function () {
-			return !!me.getItem(91);
 		}
 	},
 	horadricstaff: {
@@ -1991,26 +2053,6 @@ Object.defineProperties(me, {
 	goldenbird: {
 		get: function () {
 			return me.getQuest(20, 0);
-		}
-	},
-	eye: {
-		get: function () {
-			return (!!me.getItem(sdk.items.quest.KhalimsEye));
-		}
-	},
-	brain: {
-		get: function () {
-			return !!me.getItem(555);
-		}
-	},
-	heart: {
-		get: function () {
-			return !!me.getItem(554);
-		}
-	},
-	khalimswill: {
-		get: function () {
-			return !!me.getItem(174);
 		}
 	},
 	lamessen: {
@@ -2063,6 +2105,11 @@ Object.defineProperties(me, {
 			return me.getQuest(36, 0);
 		}
 	},
+	barbrescue: {
+		get: function () {
+			return me.getQuest(36, 0);
+		}
+	},
 	anya: {
 		get: function () {
 			return me.getQuest(37, 0);
@@ -2078,6 +2125,7 @@ Object.defineProperties(me, {
 			return me.getQuest(40, 0);
 		}
 	},
+	// Misc
 	cows: {
 		get: function () {
 			return me.getQuest(4, 10);
@@ -2165,3 +2213,38 @@ Unit.prototype.getMobCount = function (range = 10, coll = 0, type = 0, noSpecial
 				&& (!coll || !checkCollision(_this, mon, coll));
 		}).length;
 };
+
+{
+	let coords = function () {
+		if (Array.isArray(this) && this.length > 1) {
+			return [this[0], this[1]];
+		}
+
+		if (typeof this.x !== 'undefined' && typeof this.y !== 'undefined') {
+			return this instanceof PresetUnit && [this.roomx * 5 + this.x, this.roomy * 5 + this.y] || [this.x, this.y];
+		}
+
+		return [undefined, undefined];
+	};
+
+	Object.prototype.mobCount = function (givenSettings = {}) {
+		let [x, y] = coords.apply(this);
+		let settings = Object.assign({}, {
+			range: 5,
+			coll: (0x1 | 2048 | 0x2),
+			type: 0,
+			ignoreClassids: [],
+		}, givenSettings);
+		return getUnits(sdk.unittype.Monster)
+			.filter(function (mon) {
+				return mon.attackable && getDistance(x, y, mon.x, mon.y) < settings.range
+					&& (!settings.type || (settings.type & mon.spectype))
+					&& (settings.ignoreClassids.indexOf(mon.classid) === -1)
+					&& !CollMap.checkColl({x: x, y: y}, mon, settings.coll, 1);
+			}).length;
+	};
+}
+
+const monster = (id) => getUnit(sdk.unittype.Monster, id);
+const object = (id) => getUnit(sdk.unittype.Object, id);
+const item = (id) => getUnit(sdk.unittype.Item, id);

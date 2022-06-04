@@ -1,20 +1,16 @@
 /**
-*	@filename	GhostBusters.js
-*	@author		kolton
-*	@desc		who you gonna call?
+*  @filename    GhostBusters.js
+*  @author      kolton
+*  @desc        who you gonna call?
+*
 */
 
 function GhostBusters() {
 	this.clearGhosts = function () {
-		let room, result, rooms, monster, monList;
+		let room = getRoom();
+		if (!room) return false;
 
-		room = getRoom();
-
-		if (!room) {
-			return false;
-		}
-
-		rooms = [];
+		let rooms = [];
 
 		do {
 			rooms.push([room.x * 5 + room.xsize / 2, room.y * 5 + room.ysize / 2]);
@@ -24,17 +20,17 @@ function GhostBusters() {
 			rooms.sort(Sort.points);
 			room = rooms.shift();
 
-			result = Pather.getNearestWalkable(room[0], room[1], 15, 2);
+			let result = Pather.getNearestWalkable(room[0], room[1], 15, 2);
 
 			if (result) {
 				Pather.moveTo(result[0], result[1], 3);
 
-				monList = [];
-				monster = getUnit(1);
+				let monList = [];
+				let monster = getUnit(1);
 
 				if (monster) {
 					do {
-						if ([38, 39, 40, 41, 42, 631, 632, 633].indexOf(monster.classid) > -1 && getDistance(me, monster) <= 30 && monster.attackable) {
+						if (monster.ghost && monster.distance <= 30 && monster.attackable) {
 							monList.push(copyUnit(monster));
 						}
 					} while (monster.getNext());
@@ -49,36 +45,31 @@ function GhostBusters() {
 		return true;
 	};
 
-	this.cellar = function () { // black marsh wp
-		let i;
-
-		Pather.useWaypoint(6);
+	this.cellar = function () {
+		Pather.useWaypoint(sdk.areas.BlackMarsh);
 		Precast.doPrecast(true);
 
-		for (i = 20; i <= 25; i += 1) {
-			Pather.moveToExit(i, true);
-			this.clearGhosts();
+		for (let i = 20; i <= 25; i += 1) {
+			Pather.moveToExit(i, true) && this.clearGhosts();
 		}
 
 		return true;
 	};
 
-	this.jail = function () { // gonna use inner cloister wp and travel backwards
-		let i;
-
-		Pather.useWaypoint(32);
+	this.jail = function () {
+		// gonna use inner cloister wp and travel backwards
+		Pather.useWaypoint(sdk.areas.InnerCloister);
 		Precast.doPrecast(true);
 
-		for (i = 31; i >= 29; i -= 1) {
-			Pather.moveToExit(i, true);
-			this.clearGhosts();
+		for (let i = 31; i >= 29; i -= 1) {
+			Pather.moveToExit(i, true) && this.clearGhosts();
 		}
 
 		return true;
 	};
 
-	this.cathedral = function () { // inner cloister wp
-		Pather.useWaypoint(32);
+	this.cathedral = function () {
+		Pather.useWaypoint(sdk.areas.InnerCloister);
 		Precast.doPrecast(true);
 		Pather.moveToExit(33, true);
 		this.clearGhosts();
@@ -86,68 +77,60 @@ function GhostBusters() {
 		return true;
 	};
 
-	this.tombs = function () { // canyon wp
-		let i;
-
-		Pather.useWaypoint(46);
+	this.tombs = function () {
+		Pather.useWaypoint(sdk.areas.CanyonofMagic);
 		Precast.doPrecast(true);
 
-		for (i = 66; i <= 72; i += 1) {
-			Pather.moveToExit(i, true);
-			this.clearGhosts();
-			Pather.moveToExit(46, true);
+		for (let i = 66; i <= 72; i += 1) {
+			Pather.moveToExit(i, true) && this.clearGhosts();
+			Pather.moveToExit(sdk.areas.CanyonofMagic, true);
 		}
 
 		return true;
 	};
 
-	this.flayerDungeon = function () { // flayer jungle wp
-		let areas = [88, 89, 91];
+	this.flayerDungeon = function () {
+		let areas = [sdk.areas.FlayerDungeonLvl1, sdk.areas.FlayerDungeonLvl2, sdk.areas.FlayerDungeonLvl3];
 
-		Pather.useWaypoint(78);
+		Pather.useWaypoint(sdk.areas.FlayerJungle);
 		Precast.doPrecast(true);
 
 		while (areas.length) {
-			Pather.moveToExit(areas.shift(), true);
-			this.clearGhosts();
+			Pather.moveToExit(areas.shift(), true) && this.clearGhosts();
 		}
 
 		return true;
 	};
 
-	this.crystalinePassage = function () { // crystaline passage wp
-		Pather.useWaypoint(113);
+	this.crystalinePassage = function () {
+		Pather.useWaypoint(sdk.areas.CrystalizedPassage);
 		Precast.doPrecast(true);
 		this.clearGhosts();
-		Pather.moveToExit(114, true); // frozen river
-		this.clearGhosts();
+		Pather.moveToExit(sdk.areas.FrozenRiver, true) && this.clearGhosts();
 
 		return true;
 	};
 
-	this.glacialTrail = function () { // glacial trail wp
-		Pather.useWaypoint(115);
+	this.glacialTrail = function () {
+		Pather.useWaypoint(sdk.areas.GlacialTrail);
 		Precast.doPrecast(true);
 		this.clearGhosts();
-		Pather.moveToExit(116, true); // drifter
-		this.clearGhosts();
+		Pather.moveToExit(sdk.areas.DrifterCavern, true) && this.clearGhosts();
 
 		return true;
 	};
 
-	this.icyCellar = function () { // glacial trail wp
-		Pather.useWaypoint(118);
+	this.icyCellar = function () {
+		Pather.useWaypoint(sdk.areas.AncientsWay);
 		Precast.doPrecast(true);
-		Pather.moveToExit(119, true); // drifter
-		this.clearGhosts();
+		Pather.moveToExit(sdk.areas.IcyCellar, true) && this.clearGhosts();
 
 		return true;
 	};
 
-	let i,
-		sequence = ["cellar", "jail", "cathedral", "tombs", "flayerDungeon", "crystalinePassage", "glacialTrail", "icyCellar"];
+	let sequence = ["cellar", "jail", "cathedral", "tombs", "flayerDungeon", "crystalinePassage", "glacialTrail", "icyCellar"];
 
-	for (i = 0; i < sequence.length; i += 1) {
+	for (let i = 0; i < sequence.length; i += 1) {
 		Town.doChores();
 
 		try {

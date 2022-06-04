@@ -1,7 +1,8 @@
 /**
-*	@filename	Town.js
-*	@author		kolton, theBGuy
-*	@desc		do town chores like buying, selling and gambling
+*  @filename    Town.js
+*  @author      kolton, theBGuy
+*  @desc        do town chores like buying, selling and gambling
+*
 */
 
 const NPC = {
@@ -263,7 +264,7 @@ const Town = {
 
 			console.log("Did " + reason + " at " + npc.name);
 		} catch (e) {
-			console.warn(e);
+			console.errorReport(e);
 
 			return false;
 		}
@@ -1015,7 +1016,7 @@ const Town = {
 				if (!npc || !npc.openMenu() || !npc.startTrade("Shop")) throw new Error("Failed to open " + npc.name + " trade menu");
 			}
 		} catch (e) {
-			console.warn(e);
+			console.errorReport(e);
 
 			return false;
 		}
@@ -1081,7 +1082,7 @@ const Town = {
 		try {
 			key.buy(true);
 		} catch (e) {
-			console.warn(e.message);
+			console.errorReport(e);
 
 			return false;
 		}
@@ -1420,7 +1421,7 @@ const Town = {
 
 		if (!!me.getMerc()) {
 			// Cast BO on merc so he doesn't just die again. Only do this is you are a barb or actually have a cta. Otherwise its just a waste of time.
-			if (Config.MercWatch && (Precast.precastables.Shout.have || Precast.precastables.BattleOrders.have || Precast.checkCTA())) {
+			if (Config.MercWatch && Precast.needOutOfTownCast()) {
 				console.log("MercWatch precast");
 				Precast.doRandomPrecast(true, preArea);
 			}
@@ -1432,7 +1433,7 @@ const Town = {
 	},
 
 	needMerc: function () {
-		if (me.classic || !Config.UseMerc || me.gold < me.mercrevivecost) return false;
+		if (me.classic || !Config.UseMerc || me.gold < me.mercrevivecost || !me.mercrevivecost) return false;
 
 		Misc.poll(() => me.gameReady, 1000, 100);
 		// me.getMerc() might return null if called right after taking a portal, that's why there's retry attempts
@@ -1447,7 +1448,7 @@ const Town = {
 		}
 
 		// In case we never had a merc and Config.UseMerc is still set to true for some odd reason
-		return (!me.mercrevivecost ? false : true);
+		return true;
 	},
 
 	canStash: function (item) {
@@ -1757,7 +1758,7 @@ const Town = {
 			try {
 				!!getInteractedNPC() && Misc.useMenu(sdk.menu.Trade);
 			} catch (e) {
-				console.warn(e);
+				console.errorReport(e);
 				me.cancelUIFlags();
 			}
 		}
@@ -1767,6 +1768,15 @@ const Town = {
 
 		// Return potions from inventory to belt
 		let beltSize = Storage.BeltSize();
+		// belt 4x4 locations
+		/**
+		 * 12 13 14 15
+		 * 8  9  10 11
+		 * 4  5  6  7
+		 * 0  1  2  3
+		 */
+		let beltMax = (beltSize * 4);
+		let beltCapRef = [(0 + beltMax), (1 + beltMax), (2 + beltMax), (3 + beltMax)];
 		let potsInInventory = me.getItemsEx()
 			.filter((p) => p.isInInventory && [sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion].includes(p.itemType))
 			.sort((a, b) => a.itemType - b.itemType);
@@ -1777,13 +1787,14 @@ const Town = {
 			let moved = false;
 			// get free space in each slot of our belt
 			let freeSpace = Town.checkColumns(beltSize);
-			for (let i = 0; i < 4 && !moved; i += 1) {
+			for (let i = 0; i < 4 && !moved; i++) {
 				// checking that current potion matches what we want in our belt
 				if (freeSpace[i] > 0 && p.code && p.code.startsWith(Config.BeltColumn[i])) {
 					// Pick up the potion and put it in belt if the column is empty, and we don't have any other columns empty
 					// prevents shift-clicking potion into wrong column
 					if (freeSpace[i] === beltSize || freeSpace.some((spot) => spot === beltSize)) {
-						p.toCursor(true) && new PacketBuilder().byte(0x23).dword(p.gid).dword(Math.max(0, (beltSize - freeSpace[i]))).send();
+						let x = freeSpace[i] === beltSize ? i : (beltCapRef[i] - (freeSpace[i] * 4));
+						p.toCursor(true) && new PacketBuilder().byte(0x23).dword(p.gid).dword(x).send();
 					} else {
 						clickItemAndWait(sdk.clicktypes.click.ShiftLeft, p.x, p.y, p.location);
 					}
@@ -1881,18 +1892,18 @@ const Town = {
 						item.drop();
 					}
 				} catch (e) {
-					console.warn(e);
+					console.errorReport(e);
 				}
 
 				break;
 			case 4: // Sell item
 				try {
 					console.log("LowGold sell " + item.name);
-					this.initNPC("Shop", "clearInventory");
+					Town.initNPC("Shop", "clearInventory");
 					Misc.itemLogger("Sold", item);
 					item.sell() && (sold = true);
 				} catch (e) {
-					console.warn(e);
+					console.errorReport(e);
 				}
 
 				break;
@@ -2120,8 +2131,8 @@ const Town = {
 		if (!me.inTown) {
 			if (!me.inTown) {
 				try {
-					if (!Pather.makePortal(true)) console.warn("Town.goToTown: Failed to make TP");
-					if (!me.inTown && !Pather.usePortal(null, me.name)) console.warn("Town.goToTown: Failed to take TP");
+					if (!Pather.makePortal(true)) console.errorReport("Town.goToTown: Failed to make TP");
+					if (!me.inTown && !Pather.usePortal(null, me.name)) console.errorReport("Town.goToTown: Failed to take TP");
 					if (!me.inTown && !Pather.usePortal(sdk.areas.townOf(me.area))) throw new Error("Town.goToTown: Failed to take TP");
 				} catch (e) {
 					let tpTool = this.getTpTool();

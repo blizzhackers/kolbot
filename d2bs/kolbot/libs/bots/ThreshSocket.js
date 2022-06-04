@@ -1,7 +1,8 @@
 /**
-*	@filename	ThreshSocket.js
-*	@author		kolton
-*	@desc		kill Thresh Socket
+*  @filename    ThreshSocket.js
+*  @author      kolton
+*  @desc        kill Thresh Socket
+*
 */
 
 function ThreshSocket() {

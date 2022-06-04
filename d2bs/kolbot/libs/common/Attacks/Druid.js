@@ -1,7 +1,8 @@
 /**
-*	@filename	Druid.js
-*	@author		kolton
-*	@desc		Druid attack sequence
+*  @filename    Druid.js
+*  @author      kolton
+*  @desc        Druid attack sequence
+*
 */
 
 const ClassAttack = {

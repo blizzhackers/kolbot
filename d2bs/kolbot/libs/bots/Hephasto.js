@@ -1,18 +1,19 @@
 /**
-*	@filename	Hephasto.js
-*	@author		kolton
-*	@desc		kill Hephasto the Armorer
+*  @filename    Hephasto.js
+*  @author      kolton
+*  @desc        kill Hephasto the Armorer - optionally clear river
+*
 */
 
 function Hephasto() {
 	Town.doChores();
-	Pather.useWaypoint(107);
+	Pather.useWaypoint(sdk.areas.RiverofFlame);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToPreset(me.area, 2, 376)) throw new Error("Failed to move to Hephasto");
+	if (!Pather.moveToPreset(me.area, 2, sdk.quest.chest.HellForge)) throw new Error("Failed to move to Hephasto");
 
 	try {
-		Attack.kill(getLocaleString(1067)); // Hephasto The Armorer
+		Attack.kill(getLocaleString(sdk.locale.monsters.HephastoTheArmorer));
 	} catch (e) {
 		print("Heph not found. Carry on");
 	}

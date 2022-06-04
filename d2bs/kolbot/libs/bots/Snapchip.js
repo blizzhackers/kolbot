@@ -1,7 +1,8 @@
 /**
-*	@filename	Snapchip.js
-*	@author		kolton
-*	@desc		kill Snapchip and optionally clear Icy Cellar
+*  @filename    Snapchip.js
+*  @author      kolton
+*  @desc        kill Snapchip and optionally clear Icy Cellar
+*
 */
 
 function Snapchip() {
@@ -9,7 +10,7 @@ function Snapchip() {
 	Pather.useWaypoint(sdk.areas.AncientsWay);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToExit(sdk.areas.IcyCellar, true) || !Pather.moveToPreset(me.area, 2, 397)) {
+	if (!Pather.moveToExit(sdk.areas.IcyCellar, true) || !Pather.moveToPreset(me.area, 2, sdk.units.IcyCellarChest)) {
 		throw new Error("Failed to move to Snapchip Shatter");
 	}
 

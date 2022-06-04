@@ -1,13 +1,9 @@
 /**
-*	@title	:	AutoBuildThread.js
+*  @filename    AutoBuildThread.js
+*  @author      alogwe
+*  @desc        Helper thread for AutoBuild.js that monitors changes in character level
 *
-*	@author	:	alogwe
-*
-*	@desc	:	A script that will automatically allocate skill and stat points based on a configurable
-*				character build table. Point spending occurs on level up. Additional skill and stat points
-*				rewarded by quests are currently not used by this script.
 */
-
 js_strict(true);
 
 !isIncluded("common/AutoSkill.js") && include("common/AutoSkill.js");
@@ -54,7 +50,7 @@ function canSpendPoints () {
 	let haveUnusedStatpoints = unusedStatPoints >= 5;	// We spend 5 stat points per level up
 	let unusedSkillPoints = me.getStat(5);
 	let haveUnusedSkillpoints = unusedSkillPoints >= 1;	// We spend 1 skill point per level up
-	if (debug) { AutoBuild.print("Stat points:", unusedStatPoints, "     Skill points:", unusedSkillPoints); }
+	debug && AutoBuild.print("Stat points:", unusedStatPoints, "     Skill points:", unusedSkillPoints);
 	return haveUnusedStatpoints && haveUnusedSkillpoints;
 }
 

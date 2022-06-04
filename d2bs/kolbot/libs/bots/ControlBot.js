@@ -1,8 +1,9 @@
 /**
-*	@filename	ControlBot.js
-*	@author		theBGuy
-* 	@credits	kolton
-*	@desc		Chat controlled bot for other players. Can open cow portal, give waypoints on command, bo, or enchant
+*  @filename    ControlBot.js
+*  @author      theBGuy
+*  @credits     kolton
+*  @desc        Chat controlled bot for other players. Can open cow portal, give waypoints on command, bo, or enchant
+*
 */
 
 function ControlBot() {
@@ -599,12 +600,12 @@ function ControlBot() {
 
 			switch (command[0].toLowerCase()) {
 			case "help":
-				say("Commands:");
 				let str = "";
-				controlCommands.forEach(function (cmd) {
+				controlCommands.forEach((cmd) => {
 					str += (cmd + " (" + commandDesc[cmd] + "), ");
 				});
 
+				say("Commands:");
 				say(str);
 
 				break;

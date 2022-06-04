@@ -1,9 +1,9 @@
 /**
-*	@filename	AntiHostile.js
-*	@author		kolton
-*	@desc		handle hostile threats
+*  @filename    AntiHostile.js
+*  @author      kolton
+*  @desc        handle hostile threats
+*
 */
-
 js_strict(true);
 
 include("json2.js");

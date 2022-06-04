@@ -1,12 +1,13 @@
 /**
-*	@filename	AreaWatcher.js
-*	@author		dzik, theBGuy
+*  @filename    AreaWatcher.js
+*  @author      dzik, theBGuy
+*  @desc        suicide walk prevention
+*
 */
+include("OOG.js");
+include("common/Prototypes.js");
 
 function main() {
-	include("OOG.js");
-	include("common/Prototypes.js");
-
 	let _default = getScript("default.dbj");
 	print("ÿc3Start AreaWatcher");
 	

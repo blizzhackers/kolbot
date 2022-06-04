@@ -1,8 +1,9 @@
 /**
-*	@filename	BoBarbHelper.js
-*	@author		nag0k
-*	@desc		give Battle Orders buff modded for hardcore, with barbarian waiting whole game on Catacombs 2 wp by default
-*				get the required lines for character config files from ...\libs\config\_BaseConfigFile.js
+*  @filename    Baal.js
+*  @author      nag0k
+*  @desc        give Battle Orders buff modded for hardcore, with barbarian waiting whole game on Catacombs 2 wp by default
+*               get the required lines for character config files from ...\libs\config\_BaseConfigFile.js
+*
 */
 
 const BoBarbHelper = () => {

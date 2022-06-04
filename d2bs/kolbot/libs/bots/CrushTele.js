@@ -1,8 +1,8 @@
 /**
-*	@filename	CrushTele.js
-*	@author		kolton
-*	@desc		Auto tele for classic rush only
-*				Hit the "-" numpad in strategic areas.
+*  @filename    CrushTele.js
+*  @author      kolton
+*  @desc        Auto tele for classic rush only. Hit the "-" numpad in strategic areas.
+*
 */
 
 function CrushTele() {

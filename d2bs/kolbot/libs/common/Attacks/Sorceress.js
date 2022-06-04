@@ -1,7 +1,8 @@
 /**
-*	@filename	Sorceress.js
-*	@author		kolton, theBGuy
-*	@desc		Sorceress attack sequence
+*  @filename    Sorceress.js
+*  @author      kolton, theBGuy
+*  @desc        Sorceress attack sequence
+*
 */
 
 const ClassAttack = {
@@ -76,33 +77,25 @@ const ClassAttack = {
 		}
 
 		let useStatic = (Config.StaticList.length > 0 && Config.CastStatic < 100 && me.getSkill(42, 1) && Attack.checkResist(unit, "lightning"));
-
-		// Static - needs to be re-done
-		if (useStatic && Config.StaticList.some(
-			function (id) {
-				if (unit) {
-					switch (typeof id) {
-					case "number":
-						if (unit.classid && unit.classid === id) {
-							return 1;
-						}
-
-						break;
-					case "string":
-						if (unit.name && unit.name.toLowerCase() === id.toLowerCase()) {
-							return 1;
-						}
-
-						break;
-					default:
-						throw new Error("Bad Config.StaticList settings.");
-					}
+		let idCheck = function (id) {
+			if (unit) {
+				switch (true) {
+				case typeof id === "number" && unit.classid && unit.classid === id:
+				case typeof id === "string" && unit.name && unit.name.toLowerCase() === id.toLowerCase():
+				case typeof id === "function" && id(unit):
+					return true;
+				default:
+					return false;
 				}
-
-				return 0;
 			}
-		) && unit.hpPercent > Config.CastStatic) {
-			let staticRange = Math.floor((me.getSkill(42, 1) + 4) * 2 / 3);
+
+			return false;
+		};
+ 
+		// Static - needs to be re-done
+		if (useStatic && Config.StaticList.some(id => idCheck(id)) && unit.hpPercent > Config.CastStatic) {
+			let staticRange = Skill.getRange(sdk.skills.StaticField);
+			let casts = 0;
 
 			while (!me.dead && unit.hpPercent > Config.CastStatic && unit.attackable) {
 				if (unit.distance > staticRange || checkCollision(me, unit, 0x4)) {
@@ -111,13 +104,19 @@ const ClassAttack = {
 					}
 				}
 
-				if (!Skill.cast(42, 0)) {
+				// if we fail to cast or we've casted 3 or more times - do something else
+				if (!Skill.cast(sdk.skills.StaticField, 0) || casts >= 3) {
 					break;
+				} else {
+					casts++;
 				}
 			}
 
 			// re-check mob after static
-			if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) return 1; // lost reference to the mob we were attacking or its dead
+			if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
+				console.debug("Lost reference to unit");
+				return 1;
+			}
 		}
 
 		let skills = this.decideSkill(unit);

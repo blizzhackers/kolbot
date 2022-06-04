@@ -1,11 +1,13 @@
 /**
-*	@filename	Pickit.js
-*	@author		kolton, theBGuy
-*	@desc		handle item pickup
+*  @filename    Pickit.js
+*  @author      kolton, theBGuy
+*  @desc        handle item pickup
+*
 */
 
 const Pickit = {
 	gidList: [],
+	invoLocked: true,
 	beltSize: 1,
 	// Ignored item types for item logging
 	ignoreLog: [
@@ -21,6 +23,8 @@ const Pickit = {
 			NTIP.OpenFile(filename, notify);
 		}
 
+		// check if we can pick up items, only do this is our inventory slots aren't completly locked
+		this.invoLocked = !Config.Inventory.some(row => row.some(el => el > 0));
 		this.beltSize = Storage.BeltSize();
 		// If MinColumn is set to be more than our current belt size, set it to be 1 less than the belt size 4x3 belt will give us Config.MinColumn = [2, 2, 2, 2]
 		Config.MinColumn.forEach((el, index) => {
@@ -77,13 +81,32 @@ const Pickit = {
 			};
 		}
 
-		// If total gold is less than low gold setting pick up anything worth 10 gold per square to sell in town.
-		if (rval.result === 0 && !Town.ignoredItemTypes.includes(unit.itemType) && me.gold < Config.LowGold && !unit.questItem) {
-			if ((unit.getItemCost(1) / (unit.sizex * unit.sizey) >= 10) || unit.classid === sdk.items.Gold) {
+		if (rval.result === 0 && !getBaseStat("items", unit.classid, "quest") && !Town.ignoredItemTypes.includes(unit.itemType)
+			&& !unit.questItem && (unit.isInInventory || (me.gold < Config.LowGold || me.gold < 500000))) {
+			// Gold doesn't take up room, just pick it up
+			if (unit.classid === sdk.items.Gold) {
 				return {
-					result: Pickit.result.TRASH,
+					result: 4,
 					line: null
 				};
+			}
+
+			if (!this.invoLocked) {
+				let itemValuePerSquare = unit.getItemCost(1) / (unit.sizex * unit.sizey);
+
+				if (itemValuePerSquare >= 2000) {
+					// If total gold is less than 500k pick up anything worth 2k gold per square to sell in town.
+					return {
+						result: 4,
+						line: "Valuable Item: " + unit.getItemCost(1)
+					};
+				} else if (itemValuePerSquare >= 10) {
+					// If total gold is less than LowGold setting pick up anything worth 10 gold per square to sell in town.
+					return {
+						result: 4,
+						line: "LowGold Item: " + unit.getItemCost(1)
+					};
+				}
 			}
 		}
 
@@ -272,14 +295,14 @@ const Pickit = {
 			if (stats.useTk) {
 				Skill.setSkill(sdk.skills.Telekinesis, 0) && Packet.unitCast(0, item);
 			} else {
-				if (getDistance(me, item) > (Config.FastPick && i < 1 ? 6 : 4) || checkCollision(me, item, 0x1)) {
-					if ((Pather.useTeleport() && !Pather.moveToUnit(item)) || !Pather.moveTo(item.x, item.y, 0)) {
+				if (item.distance > (Config.FastPick && i < 1 ? 6 : 4) || checkCollision(me, item, 0x1)) {
+					if ((Pather.useTeleport() && !Pather.moveToUnit(item)) || !Pather.moveToUnit(item)) {
 						continue;
 					}
 				}
 
 				// use packet first, if we fail and not using fast pick use click
-				Config.FastPick || i < 1 ? sendPacket(1, 0x16, 4, 0x4, 4, item.gid, 4, 0) : Misc.click(0, 0, item);
+				(Config.FastPick || i < 1) ? sendPacket(1, 0x16, 4, 0x4, 4, item.gid, 4, 0) : Misc.click(0, 0, item);
 			}
 
 			let tick = getTickCount();

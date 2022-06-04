@@ -1,7 +1,8 @@
 /**
-*	@filename	Precast.js
-*	@author		noah-, kolton, theBGuy
-*	@desc		handle player prebuff sequence
+*  @filename    Precast.js
+*  @author      noah-, kolton, theBGuy
+*  @desc        handle player prebuff sequence
+*
 */
 
 const Precast = new function () {
@@ -16,7 +17,10 @@ const Precast = new function () {
 	// would probably make sense to just re-cast everything (except summons) if one of our skills is about to run out rather than do this process again 3 seconds later
 	this.precastables = {
 		// Amazon
+		Decoy: false,
 		Valkyrie: false,
+		InnerSight: false,
+		SlowMissiles: false,
 		// Sorceress
 		ThunderStorm: false,
 		EnergyShield: false,
@@ -68,7 +72,7 @@ const Precast = new function () {
 		ShadowMaster: false
 	};
 
-	this.precastCTA = function (force) {
+	this.precastCTA = function (force = false) {
 		if (this.haveCTA === -1 || me.classic || me.barbarian || me.inTown || me.shapeshifted) return false;
 		if (!force && me.getState(sdk.states.BattleOrders)) return true;
 
@@ -212,7 +216,6 @@ const Precast = new function () {
 
 					break;
 				}
-				// make sure we give enough time back so we don't fail our next cast
 				delay(250);
 			} else {
 				// Right hand + No Shift
@@ -266,14 +269,17 @@ const Precast = new function () {
 		}
 
 		let buffSummons = false;
+		let forceBo = false;
 
 		// Force BO 30 seconds before it expires
-		this.haveCTA > -1 && this.precastCTA(!me.getState(sdk.states.BattleCommand) || force || (getTickCount() - this.BOTick >= this.BODuration - 30000));
+		if (this.haveCTA > -1) {
+			forceBo = (force || (getTickCount() - this.BOTick >= this.BODuration - 30000) || !me.getState(sdk.states.BattleCommand));
+			forceBo && this.precastCTA(forceBo);
+		}
 
 		switch (me.classid) {
 		case sdk.charclass.Amazon:
 			Config.SummonValkyrie && Precast.precastables.Valkyrie && (buffSummons = this.summon(sdk.skills.Valkyrie, sdk.minions.Valkyrie));
-			buffSummons && this.precastCTA(force);
 
 			break;
 		case sdk.charclass.Sorceress:
@@ -438,8 +444,6 @@ const Precast = new function () {
 				this.precastSkill(sdk.skills.Hurricane);
 			}
 
-			buffSummons && this.precastCTA(force);
-
 			break;
 		case sdk.charclass.Assassin:
 			if (Config.UseFade && Precast.precastables.Fade && (!me.getState(sdk.states.Fade) || force)) {
@@ -471,11 +475,10 @@ const Precast = new function () {
 				break;
 			}
 
-			buffSummons && this.precastCTA(force);
-
 			break;
 		}
 
+		buffSummons && this.haveCTA > -1 && this.precastCTA(force);
 		me.switchWeapons(Attack.getPrimarySlot());
 
 		return true;
@@ -612,11 +615,20 @@ const Precast = new function () {
 		return true;
 	};
 
+	this.needOutOfTownCast = function () {
+		return Precast.precastables.Shout.have || Precast.precastables.BattleOrders.have || Precast.checkCTA();
+	};
+
 	this.doRandomPrecast = function (force = false, goToWhenDone = undefined) {
 		let returnTo = (goToWhenDone && typeof goToWhenDone === "number" ? goToWhenDone : me.area);
 
 		try {
-			Pather.useWaypoint("random") && Precast.doPrecast(force);
+			// Only do this is you are a barb or actually have a cta. Otherwise its just a waste of time and you can precast in town
+			if (Precast.needOutOfTownCast()) {
+				Pather.useWaypoint("random") && Precast.doPrecast(force);
+			} else {
+				Precast.doPrecast(force);
+			}
 			Pather.useWaypoint(returnTo);
 		} catch (e) {
 			console.warn(e);

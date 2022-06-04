@@ -1,12 +1,50 @@
 /**
-*	@filename	Amazon.js
-*	@author		kolton
-*	@desc		Amazon attack sequence
+*  @filename    Amazon.js
+*  @author      kolton, theBGuy
+*  @desc        Amazon attack sequence
+*
 */
 
 const ClassAttack = {
 	bowCheck: false,
 	lightFuryTick: 0,
+
+	decideSkill: function (unit) {
+		let skills = {timed: -1, untimed: -1};
+		if (!unit) return skills;
+
+		let index = (unit.isSpecial || unit.type === 0) ? 1 : 3;
+
+		// Get timed skill
+		let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
+
+		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
+			skills.timed = checkSkill;
+		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[5])) {
+			skills.timed = Config.AttackSkill[5];
+		}
+
+		// Get untimed skill
+		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[1] : Config.AttackSkill[index + 1];
+
+		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
+			skills.untimed = checkSkill;
+		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[6])) {
+			skills.untimed = Config.AttackSkill[6];
+		}
+
+		// Low mana timed skill
+		if (Config.LowManaSkill[0] > -1 && Skill.getManaCost(skills.untimed) > me.mp && Attack.checkResist(unit, Config.LowManaSkill[0])) {
+			skills.timed = Config.LowManaSkill[0];
+		}
+
+		// Low mana untimed skill
+		if (Config.LowManaSkill[1] > -1 && Skill.getManaCost(skills.untimed) > me.mp && Attack.checkResist(unit, Config.LowManaSkill[1])) {
+			skills.untimed = Config.LowManaSkill[1];
+		}
+
+		return skills;
+	},
 
 	doAttack: function (unit, preattack) {
 		if (!unit) return 1;
@@ -36,41 +74,31 @@ const ClassAttack = {
 			return 1;
 		}
 
-		let checkSkill,
-			mercRevive = 0,
-			timedSkill = -1,
-			untimedSkill = -1;
-		let index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
-
-		// Get timed skill
-		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
-
-		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
-			timedSkill = checkSkill;
-		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && ([56, 59].indexOf(Config.AttackSkill[5]) === -1 || Attack.validSpot(unit.x, unit.y))) {
-			timedSkill = Config.AttackSkill[5];
+		if (Config.UseInnerSight && Precast.precastables.InnerSight) {
+			if (!unit.getState(sdk.states.InnerSight) && unit.distance > 3 && unit.distance < 13 && !checkCollision(me, unit, 0x4)) {
+				Skill.cast(sdk.skills.InnerSight, 0, unit);
+			}
 		}
 
-		// Get untimed skill
-		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[1] : Config.AttackSkill[index + 1];
-
-		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
-			untimedSkill = checkSkill;
-		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && ([56, 59].indexOf(Config.AttackSkill[6]) === -1 || Attack.validSpot(unit.x, unit.y))) {
-			untimedSkill = Config.AttackSkill[6];
+		if (Config.UseSlowMissiles && Precast.precastables.SlowMissiles) {
+			if (!unit.getState(sdk.states.SlowMissiles)) {
+				if ((unit.distance > 3 || unit.getEnchant(sdk.enchant.LightningEnchanted)) && unit.distance < 13 && !checkCollision(me, unit, 0x4)) {
+					// Act Bosses and mini-bosses are immune to Slow Missles and pointless to use on lister or Cows, Use Inner-Sight instead
+					if ([156, 211, 242, 243, 544, 571, 391, 365, 267, 229].includes(unit.classid)) {
+						// Check if already in this state
+						if (!unit.getState(sdk.states.InnerSight) && Config.UseInnerSight && Precast.precastables.InnerSight) {
+							Skill.cast(sdk.skills.InnerSight, 0, unit);
+						}
+					} else {
+						Skill.cast(sdk.skills.SlowMissiles, 0, unit);
+					}
+				}
+			}
 		}
 
-		// Low mana timed skill
-		if (Config.LowManaSkill[0] > -1 && Skill.getManaCost(timedSkill) > me.mp && Attack.checkResist(unit, Config.LowManaSkill[0])) {
-			timedSkill = Config.LowManaSkill[0];
-		}
-
-		// Low mana untimed skill
-		if (Config.LowManaSkill[1] > -1 && Skill.getManaCost(untimedSkill) > me.mp && Attack.checkResist(unit, Config.LowManaSkill[1])) {
-			untimedSkill = Config.LowManaSkill[1];
-		}
-
-		let result = this.doCast(unit, timedSkill, untimedSkill);
+		let mercRevive = 0;
+		let skills = this.decideSkill(unit);
+		let result = this.doCast(unit, skills.timed, skills.untimed);
 
 		if (result === 2 && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
 			let merc = me.getMerc();
@@ -78,7 +106,7 @@ const ClassAttack = {
 			while (unit.attackable) {
 				if (Misc.townCheck()) {
 					if (!unit || !copyUnit(unit).x) {
-						unit = Misc.poll(function () { return getUnit(1, -1, -1, gid); }, 1000, 80);
+						unit = Misc.poll(() => getUnit(1, -1, -1, gid), 1000, 80);
 					}
 				}
 
@@ -102,7 +130,11 @@ const ClassAttack = {
 				}
 
 				let closeMob = Attack.getNearestMonster({skipGid: gid});
-				!!closeMob && this.doCast(closeMob, timedSkill, untimedSkill);
+				
+				if (!!closeMob) {
+					let findSkill = this.decideSkill(closeMob);
+					(this.doCast(closeMob, findSkill.timed, findSkill.untimed) === 1) || (Config.UseDecoy && Precast.precastables.Decoy && Skill.cast(sdk.skills.Decoy, 0, unit));
+				}
 			}
 
 			return 1;
@@ -133,23 +165,17 @@ const ClassAttack = {
 
 		// Arrow/bolt check
 		if (this.bowCheck) {
-			switch (this.bowCheck) {
-			case "bow":
-				if (!me.getItem("aqv", 1)) {
-					Town.visitTown();
-				}
-
-				break;
-			case "crossbow":
-				if (!me.getItem("cqv", 1)) {
-					Town.visitTown();
-				}
+			switch (true) {
+			case this.bowCheck === "bow" && !me.getItem("aqv", 1):
+			case this.bowCheck === "crossbow" && !me.getItem("cqv", 1):
+				console.log("Bow check");
+				Town.visitTown();
 
 				break;
 			}
 		}
 
-		if (timedSkill > -1 && (!me.getState(121) || !Skill.isTimed(timedSkill))) {
+		if (timedSkill > -1 && (!me.skillDelay || !Skill.isTimed(timedSkill))) {
 			switch (timedSkill) {
 			case 35:
 				if (!this.lightFuryTick || getTickCount() - this.lightFuryTick > Config.LightningFuryDelay * 1000) {
@@ -181,9 +207,7 @@ const ClassAttack = {
 					}
 				}
 
-				if (!unit.dead) {
-					Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
-				}
+				!unit.dead && Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
 
 				return 1;
 			}
@@ -203,9 +227,7 @@ const ClassAttack = {
 				}
 			}
 
-			if (!unit.dead) {
-				Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
-			}
+			!unit.dead && Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
 
 			return 1;
 		}

@@ -1,15 +1,17 @@
 /**
-*	@filename	Rusher.js
-*	@author		kolton
-*	@desc		Rusher script.
-*				Chat commands:
-*				master - assigns player as master and listens to his commands
-*				release - resets master
-*				pause - pause the rusher
-*				resume - resume the rusher
-*				do sequence - stop current action and start the given sequence.
-*				supported sequences are: andariel, cube, amulet, staff, summoner, duriel, travincal, mephisto, diablo
-*				example: do travincal
+*  @filename    Rusher.js
+*  @author      kolton, theBGuy
+*  @desc        Rusher script.
+*
+*  @Commands
+*    master - assigns player as master and listens to his commands
+*    release - resets master
+*    pause - pause the rusher
+*    resume - resume the rusher
+*    do sequence - stop current action and start the given sequence.
+*    supported sequences are: andariel, cube, amulet, staff, summoner, duriel, travincal, mephisto, diablo
+*    Example: do travincal
+*
 */
 
 function Rusher() {
@@ -215,5 +217,6 @@ function Rusher() {
 		delay(100);
 	}
 
+	// eslint-disable-next-line no-unreachable
 	return true;
 }

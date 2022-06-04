@@ -1,17 +1,14 @@
 /**
-*	@title	:	AutoBuild.js
+*  @filename    AutoBuild.js
+*  @author      alogwe
+*  @desc        This script is included when any script includes libs/common/Config.js and calls Config.init().
+*               If enabled, loads a threaded helper script that will monitor changes in character level and
+*               upon level up detection, it will spend skill and stat points based on a configurable
+*               character build template file located in libs/config/Builds/*.
 *
-*	@author	:	alogwe
+*               Any skill and stat points obtained as quest rewards are currently
+*               invisible to this script and must be spent manually.
 *
-*	@desc	:	This script is included when any script includes libs/common/Config.js and calls Config.init().
-*				If enabled, loads a threaded helper script that will monitor changes in character level and
-*				upon level up detection, it will spend skill and stat points based on a configurable
-*				character build template file located in libs/config/Builds/*.
-*
-*				Any skill and stat points obtained as quest rewards are currently
-*				invisible to this script and must be spent manually.
-*
-*	@todo	:	Make this file "libs/config/Builds/README.txt"
 */
 js_strict(true);
 

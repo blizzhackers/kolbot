@@ -1,10 +1,9 @@
 /**
-*	@filename	CloneKilla.js
-*	@author		kolton
-*	@desc		Kill Diablo Clone when he walks in game. Uses Fire Eye location.
+*  @filename    CloneKilla.js
+*  @author      kolton
+*  @desc        Kill Diablo Clone when he walks in game. Uses Fire Eye location.
+*
 */
-
-
 include("json2.js");
 include("NTItemParser.dbl");
 include("OOG.js");

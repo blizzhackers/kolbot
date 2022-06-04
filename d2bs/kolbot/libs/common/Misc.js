@@ -1,7 +1,8 @@
 /**
-*	@filename	Misc.js
-*	@author		kolton, theBGuy
-*	@desc		misc library containing Skill, Misc and Sort classes
+*  @filename    Misc.js
+*  @author      kolton, theBGuy
+*  @desc        misc library containing Skill, Misc and Sort classes
+*
 */
 
 const Skill = {
@@ -12,6 +13,9 @@ const Skill = {
 	init: function () {
 		switch (me.classid) {
 		case sdk.charclass.Amazon:
+			Config.UseInnerSight && !Precast.precastables.InnerSight && (Precast.precastables.InnerSight = !!me.getSkill(sdk.skills.InnerSight, 0));
+			Config.UseSlowMissiles && !Precast.precastables.SlowMissiles && (Precast.precastables.SlowMissiles = !!me.getSkill(sdk.skills.SlowMissiles, 0));
+			Config.UseDecoy && !Precast.precastables.Decoy && (Precast.precastables.Decoy = !!me.getSkill(sdk.skills.Decoy, 0));
 			Config.SummonValkyrie && !Precast.precastables.Valkyrie && (Precast.precastables.Valkyrie = !!me.getSkill(sdk.skills.Valkyrie, 0));
 
 			break;
@@ -533,7 +537,7 @@ const Skill = {
 			|| typeof unit !== 'object' || unit.type !== sdk.unittype.Object
 			|| unit.name.toLowerCase() === 'dummy'
 			|| (unit.name.toLowerCase() === 'portal' && !me.inTown && unit.classid !== 298)
-			|| [sdk.units.RedPortalToAct4, sdk.units.RedPortalToChamber, sdk.units.RedPortal, sdk.units.RedPortalToAct5].includes(unit.classid)) {
+			|| [sdk.units.RedPortalToAct4, sdk.units.WorldstonePortal, sdk.units.RedPortal, sdk.units.RedPortalToAct5].includes(unit.classid)) {
 			return false;
 		}
 
@@ -1004,7 +1008,7 @@ const Misc = {
 		// locked chest, no keys
 		if (!me.assassin && unit.islocked && !me.findItem(543, 0, 3)) return false;
 
-		let specialChest = [17, 18, 19, 20, 21, 30].includes(unit.classid);
+		let specialChest = sdk.quest.chests.includes(unit.classid);
 
 		for (let i = 0; i < 7; i++) {
 			if (Skill.useTK(unit) && i < 3) {

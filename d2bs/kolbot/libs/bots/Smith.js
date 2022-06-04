@@ -1,7 +1,8 @@
 /**
-*	@filename	Smith.js
-*	@author		kolton
-*	@desc		kill the Smith
+*  @filename    Smith.js
+*  @author      kolton
+*  @desc        kill the Smith
+*
 */
 
 function Smith() {
@@ -9,7 +10,7 @@ function Smith() {
 	Pather.useWaypoint(sdk.areas.OuterCloister);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToPreset(sdk.areas.Barracks, 2, 108)) {
+	if (!Pather.moveToPreset(sdk.areas.Barracks, sdk.unittype.Object, sdk.quest.chest.MalusHolder)) {
 		throw new Error("Failed to move to the Smith");
 	}
 

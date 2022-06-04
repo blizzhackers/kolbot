@@ -95,17 +95,17 @@ function LoadConfig() {
 	Scripts.Hephasto = false;
 		Config.Hephasto.ClearRiver = false; // Clear river after killing Hephasto
 		Config.Hephasto.ClearType = 0xF; // 0xF = skip normal, 0x7 = champions/bosses, 0 = all
-	Scripts.Vizier = false; // Intended for classic sorc, kills Vizier only.
-	Scripts.FastDiablo = false;
 	Scripts.Diablo = false;
 		Config.Diablo.WalkClear = false; // Disable teleport while clearing to protect leechers
 		Config.Diablo.Entrance = true; // Start from entrance
+		Config.Diablo.JustViz = false; // Intended for classic sorc, kills Vizier only.
+		Config.Diablo.SealLeader = false; // Clear a safe spot around seals and invite leechers in. Leechers should run SealLeecher script.
+		Config.Diablo.Fast = false; // Intended for classic sorc, kills Vizier only.
 		Config.Diablo.SealWarning = "Leave the seals alone!";
 		Config.Diablo.EntranceTP = "Entrance TP up";
 		Config.Diablo.StarTP = "Star TP up";
 		Config.Diablo.DiabloMsg = "Diablo";
 		Config.Diablo.SealOrder = ["vizier", "seis", "infector"]; // the order in which to clear the seals. If seals are excluded, they won't be checked unless diablo fails to appear
-	Scripts.SealLeader = false; // Clear a safe spot around seals and invite leechers in. Leechers should run SealLeecher script. Don't run with Diablo or FastDiablo.
 
 	// *** act 5 ***
 	Scripts.Pindleskin = false;
@@ -114,6 +114,7 @@ function LoadConfig() {
 		Config.Pindleskin.ViperQuit = false; // End script if Tomb Vipers are found.
 	Scripts.Nihlathak = false;
 		Config.Nihlathak.ViperQuit = false; // End script if Tomb Vipers are found.
+		Config.Nihlathak.UseWaypoint = false; // Use waypoint to Nith, if false uses anya portal
 	Scripts.Eldritch = false;
 		Config.Eldritch.OpenChest = true;
 		Config.Eldritch.KillShenk = true;
@@ -154,6 +155,7 @@ function LoadConfig() {
 	/* ##### LEECHING SCRIPTS ##### */
 	// ############################ //
 	Scripts.TristramLeech = false; // Enters Tristram, attempts to stay close to the leader and will try and help kill.
+		Config.TristramLeech.Helper = false; // If set to true the character will help attack.
 	Scripts.TravincalLeech = false; // Enters portal at back of Travincal.
 		Config.TravincalLeech.Helper = true; // If set to true the character will teleport to the stairs and help attack.
 	
@@ -168,7 +170,7 @@ function LoadConfig() {
 		Config.SkipIfBaal = true; // end script it leader is in throne of destruction
 	Scripts.SealLeecher = false; // Enter safe portals to Chaos. Leader should run SealLeader.
 	Scripts.DiabloHelper = false; // Chaos helper, kills monsters and doesn't open seals on its own.
-		Config.DiabloHelper.Wait = 120; // Seconds to wait for a runner to be in Chaos. If Config.Leader is set, it will wait only for the leader.
+		Config.DiabloHelper.Wait = 5; // minutes to wait for a runner to be in Chaos. If Config.Leader is set, it will wait only for the leader.
 		Config.DiabloHelper.Entrance = true; // Start from entrance. Set to false to start from star.
 		Config.DiabloHelper.SkipTP = false; // Don't wait for town portal and directly head to chaos. It will clear monsters around chaos entrance and wait for the runner.
 		Config.DiabloHelper.SkipIfBaal = false; // End script if there are party members in a Baal run.
@@ -181,7 +183,7 @@ function LoadConfig() {
 		Config.AutoBaal.LeechSpot = [15115, 5050]; // X, Y coords of Throne Room leech spot
 		Config.AutoBaal.LongRangeSupport = false; // Cast long distance skills from a safe spot
 	Scripts.BaalHelper = false;
-		Config.BaalHelper.Wait = 120; // Seconds to wait for a runner to be in Throne
+		Config.BaalHelper.Wait = 5; // minutes to wait for a runner to be in Throne
 		Config.BaalHelper.KillNihlathak = false; // Kill Nihlathak before going to Throne
 		Config.BaalHelper.FastChaos = false; // Kill Diablo before going to Throne
 		Config.BaalHelper.DollQuit = false; // End script if Dolls (Undead Soul Killers) are found.
@@ -368,10 +370,10 @@ function LoadConfig() {
 	 * 1 = item is unlocked and will be dropped, stashed or sold.
 	 * If you don't change the default values, the bot won't stash items.
 	 */
-	Config.Inventory[0] = [0,0,0,0,0,0,0,0,0,0];
-	Config.Inventory[1] = [0,0,0,0,0,0,0,0,0,0];
-	Config.Inventory[2] = [0,0,0,0,0,0,0,0,0,0];
-	Config.Inventory[3] = [0,0,0,0,0,0,0,0,0,0];
+	Config.Inventory[0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	Config.Inventory[1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	Config.Inventory[2] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	Config.Inventory[3] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 	// ########################### //
 	/* ##### PICKIT SETTINGS ##### */

@@ -1,8 +1,9 @@
 /* eslint-disable no-labels */
 /**
-*	@filename	AutoStat.js
-*	@author		IMBA
-*	@desc		Automatically allocate stat points
+*  @filename    AutoStat.js
+*  @author      IMBA
+*  @desc        Automatically allocate stat points
+*
 */
 
 const AutoStat = new function () {

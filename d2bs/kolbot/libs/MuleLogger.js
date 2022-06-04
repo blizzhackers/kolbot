@@ -1,9 +1,9 @@
 /**
-*	@filename	MuleLogger.js
-*	@author		kolton, theBGuy
-*	@desc		Log items and perm configurable accounts/characters
+*  @filename    MuleLogger.js
+*  @author      kolton, theBGuy
+*  @desc        Log items and perm configurable accounts/characters
+*
 */
-
 !isIncluded("common/prototypes.js") && include("common/prototypes.js");
 
 const MuleLogger = {
@@ -27,6 +27,7 @@ const MuleLogger = {
 	LogEquipped: true, // include equipped items
 	LogMerc: true, // include items merc has equipped (if alive)
 	SaveScreenShot: false, // Save pictures in jpg format (saved in 'Images' folder)
+	AutoPerm: true, // override InGameTime to perm character
 	IngameTime: rand(60, 120), // (180, 210) to avoid RD, increase it to (7230, 7290) for mule perming
 
 	inGameCheck: function () {
@@ -34,10 +35,21 @@ const MuleLogger = {
 			print("ÿc4MuleLoggerÿc0: Logging items on " + me.account + " - " + me.name + ".");
 			D2Bot.printToConsole("MuleLogger: Logging items on " + me.account + " - " + me.name + ".", 7);
 			this.logChar();
+			let stayInGame = this.IngameTime;
 			let tick = getTickCount() + rand(1500, 1750) * 1000; // trigger anti-idle every ~30 minutes
 
-			while ((getTickCount() - me.gamestarttime) < this.IngameTime * 1000) {
-				me.overhead("ÿc2Log items done. ÿc4Stay in " + "ÿc4game more:ÿc0 " + Math.floor(this.IngameTime - (getTickCount() - me.gamestarttime) / 1000) + " sec");
+			if (this.AutoPerm) {
+				let permInfo = this.loadPermedStatus();
+
+				if (!!permInfo.charname) {
+					if (permInfo.charname === me.charname && !permInfo.perm) {
+						stayInGame = rand(7230, 7290);
+					}
+				}
+			}
+
+			while ((getTickCount() - me.gamestarttime) < seconds(stayInGame)) {
+				me.overhead("ÿc2Log items done. ÿc4Stay in " + "ÿc4game more:ÿc0 " + Math.floor(stayInGame - (getTickCount() - me.gamestarttime) / 1000) + " sec");
 
 				delay(1000);
 
@@ -55,6 +67,16 @@ const MuleLogger = {
 		return false;
 	},
 
+	savePermedStatus: function (charPermInfo = {}) {
+		FileTools.writeText("logs/MuleLogPermInfo.json", JSON.stringify(charPermInfo));
+	},
+
+	loadPermedStatus: function () {
+		if (!FileTools.exists("logs/MuleLogPermInfo.json")) throw new Error("File logs/MuleLogPermInfo.json does not exist!");
+		let info = (FileTools.readText("logs/MuleLogPermInfo.json"));
+		return info ? JSON.parse(info) : {};
+	},
+
 	load: function (hash) {
 		let filename = "data/secure/" + hash + ".txt";
 		if (!FileTools.exists(filename)) throw new Error("File " + filename + " does not exist!");
@@ -65,6 +87,11 @@ const MuleLogger = {
 	save: function (hash, data) {
 		let filename = "data/secure/" + hash + ".txt";
 		FileTools.writeText(filename, data);
+	},
+
+	remove: function () {
+		FileTools.remove("logs/MuleLog.json");
+		FileTools.remove("logs/MuleLogPermInfo.json");
 	},
 
 	// Log kept item stats in the manager.
@@ -104,6 +131,13 @@ const MuleLogger = {
 	logChar: function (logIlvl = this.LogItemLevel, logName = this.LogNames, saveImg = this.SaveScreenShot) {
 		while (!me.gameReady) {
 			delay(100);
+		}
+
+		// try again if db is locked!!
+		if (isIncluded("ItemDB.js") || include("ItemDB.js")) {
+			while (!ItemDB.init(false)) {
+				delay(1000);
+			}
 		}
 
 		let items = me.getItemsEx();

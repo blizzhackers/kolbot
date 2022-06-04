@@ -1,7 +1,8 @@
 /**
-*	@filename	Config.js
-*	@author		kolton
-*	@desc		config loading and default config values storage
+*  @filename    Config.js
+*  @author      kolton
+*  @desc        config loading and default config values storage
+*
 */
 
 const Scripts = {};
@@ -137,6 +138,20 @@ let Config = {
 	HealStatus: false,
 	TownHP: 0,
 	TownMP: 0,
+
+	// special pots
+	StackThawingPots: {
+		enabled: false,
+		quantity: 12,
+	},
+	StackAntidotePots: {
+		enabled: false,
+		quantity: 12,
+	},
+	StackStaminaPots: {
+		enabled: false,
+		quantity: 12,
+	},
 
 	// General
 	AutoMap: false,
@@ -291,6 +306,9 @@ let Config = {
 
 	// Amazon specific
 	LightningFuryDelay: 0,
+	UseInnerSight: false,
+	UseSlowMissiles: false,
+	UseDecoy: false,
 	SummonValkyrie: false,
 
 	// Sorceress specific
@@ -369,7 +387,8 @@ let Config = {
 		ViperQuit: false
 	},
 	Nihlathak: {
-		ViperQuit: false
+		ViperQuit: false,
+		UseWaypoint: false,
 	},
 	Pit: {
 		ClearPath: false,
@@ -440,12 +459,15 @@ let Config = {
 		ClearType: false
 	},
 	Diablo: {
+		WalkClear: false,
 		Entrance: false,
+		JustViz: false,
+		SealLeader: false,
+		Fast: false,
 		SealWarning: "Leave the seals alone!",
 		EntranceTP: "Entrance TP up",
 		StarTP: "Star TP up",
 		DiabloMsg: "Diablo",
-		WalkClear: false,
 		SealOrder: ["vizier", "seis", "infector"]
 	},
 	DiabloHelper: {
@@ -541,12 +563,13 @@ let Config = {
 	},
 	TristramLeech: {
 		Leader: "",
-		Wait: 120
+		Helper: false,
+		Wait: 5
 	},
 	TravincalLeech: {
 		Leader: "",
 		Helper: false,
-		Wait: 120
+		Wait: 5
 	},
 	Tristram: {
 		PortalLeech: false,

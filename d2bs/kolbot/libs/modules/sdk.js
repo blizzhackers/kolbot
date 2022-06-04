@@ -1,8 +1,9 @@
-/*
-*   @filename   sdk.js
-*   @author     jaenster, theBGuy
-*   @desc       development tool for readability
-*   @naming style     sdk.objprop.objprop.ObjProp (excludes functions which use sdk.objprop.camelCase)
+/**
+*  @filename    sdk.js
+*  @author      jaenster, theBGuy
+*  @desc        development tool for readability
+*  @format      sdk.objprop.objprop.ObjProp (excludes functions which use sdk.objprop.camelCase)
+*
 */
 
 // todo: break this up to make more sense. Example
@@ -256,6 +257,21 @@ item: {
 				case area < sdk.areas.PandemoniumFortress:
 					return sdk.areas.KurastDocktown;
 				case area < sdk.areas.Harrogath:
+					return sdk.areas.PandemoniumFortress;
+				default:
+					return sdk.areas.Harrogath;
+				}
+			},
+
+			townOfAct: function (act) {
+				switch (act) {
+				case 1:
+					return sdk.areas.RogueEncampment;
+				case 2:
+					return sdk.areas.LutGholein;
+				case 3:
+					return sdk.areas.KurastDocktown;
+				case 4:
 					return sdk.areas.PandemoniumFortress;
 				default:
 					return sdk.areas.Harrogath;
@@ -540,7 +556,7 @@ item: {
 				Defensive: 26,
 
 				// Barb
-				CombatBarb: 32,
+				BarbCombat: 32,
 				Masteries: 33,
 				Warcries: 34,
 
@@ -557,47 +573,163 @@ item: {
 		},
 		skillTabs: undefined,
 
-		// in game data
-		// quest id's
-		quests: {
-			SpokeToWarriv: 0,
-			DenofEvil: 1,
-			SistersBurialGrounds: 2,
-			TheSearchForCain: 4,
-			ForgottenTower: 5,
-			ToolsoftheTrade: 3,
-			SistersToTheSlaughter: 6,
-			AbleToGotoActII: 7,
-			SpokeToJerhyn: 8,
-			RadamentsLair: 9,
-			TheHoradricStaff: 10,
-			TheTaintedSun: 11,
-			TheArcaneSanctuary: 12,
-			TheSummoner: 13,
-			TheSevenTombs: 14,
-			AbleToGotoActIII: 15,
-			SpokeToHratli: 16,
-			TheGoldenBird: 20,
-			BladeoftheOldReligion: 19,
-			KhalimsWill: 18,
-			LamEsensTome: 17,
-			TheBlackenedTemple: 21,
-			TheGuardian: 22,
-			AbleToGotoActIV: 23,
-			SpokeToTyrael: 24,
-			TheFallenAngel: 25,
-			HellsForge: 27,
-			TerrorsEnd: 26,
-			AbleToGotoActV: 28,
-			SiegeOnHarrogath: 35,
-			RescueonMountArreat: 36,
-			PrisonofIce: 37,
-			BetrayalofHaggorath: 38,
-			RiteofPassage: 39,
-			EveofDestruction: 40,
-			SecretCowLevel: 41,
+		quest: {
+			item: {
+				// Act 1
+				WirtsLeg: 88,
+				HoradricMalus: 89,
+				ScrollofInifuss: 524,
+				KeytotheCairnStones: 525,
+				// Act 2
+				FinishedStaff: 91,
+				"HoradricStaff": 91,
+				IncompleteStaff: 92,
+				"ShaftoftheHoradricStaff": 92,
+				ViperAmulet: 521,
+				"TopoftheHoradricStaff": 521,
+				Cube: 549,
+				BookofSkill: 552,
+				// Act 3
+				"DecoyGidbinn": 86,
+				"TheGidbinn": 87,
+				KhalimsFlail: 173,
+				KhalimsWill: 174,
+				PotofLife: 545,
+				"AJadeFigurine": 546,
+				JadeFigurine: 546,
+				TheGoldenBird: 547,
+				LamEsensTome: 548,
+				KhalimsEye: 553,
+				KhalimsHeart: 554,
+				KhalimsBrain: 555,
+				// Act 4
+				HellForgeHammer: 90,
+				Soulstone: 551,
+				"MephistosSoulstone": 551,
+				// Act 5
+				MalahsPotion: 644,
+				"ScrollofKnowledge": 645,
+				ScrollofResistance: 646,
+				// Pandemonium Event
+				KeyofTerror: 647,
+				KeyofHate: 648,
+				KeyofDestruction: 649,
+				DiablosHorn: 650,
+				BaalsEye: 651,
+				MephistosBrain: 652,
+				StandardofHeroes: 658,
+				// Essences/Token
+				TokenofAbsolution: 653,
+				TwistedEssenceofSuffering: 654,
+				ChargedEssenceofHatred: 655,
+				BurningEssenceofTerror: 656,
+				FesteringEssenceofDestruction: 657,
+				// Misc
+				"TheBlackTowerKey": 544,
+			},
+			items: [
+				// act 1
+				88, 89, 524, 525,
+				// act 2
+				91, 92, 521, 549, 552,
+				// act 3
+				86, 87, 173, 174, 545, 546, 547, 548, 553, 554, 555,
+				// act 4
+				90, 551,
+				// act 5
+				644, 645, 646,
+			],
+			chest: {
+				// act1
+				StoneAlpha: 17,
+				StoneBeta: 18,
+				StoneGamma: 19,
+				StoneDelta: 20,
+				StoneLambda: 21,
+				StoneTheta: 22, // ?
+				CainsJail: 26,
+				InifussTree: 30,
+				MalusHolder: 108,
+				Wirt: 268,
+
+				// act 2
+				ViperAmuletChest: 149,
+				HoradricStaffHolder: 152,
+				HoradricCubeChest: 354,
+				HoradricScrollChest: 355,
+				ShaftoftheHoradricStaffChest: 356,
+				Journal: 357,
+
+				// act 3
+				ForestAltar: 81,
+				LamEsensTome: 193,
+				KhalimsHeartChest: 405,
+				KhalimsBrainChest: 406,
+				KhalimsEyeChest: 407,
+
+				// act 4
+				HellForge: 376,
+
+				// act 5
+				BarbCage: 434,
+				FrozenAnya: 558,
+				FrozenAnyaPlatform: 460,
+				NihlathakPlatform: 462,
+				AncientsAltar: 546,
+			},
+			chests: [
+				// act 1
+				17, 18, 19, 20, 21, 22, 26, 30, 108,
+				// act 2
+				149, 152, 354, 355, 356, 357,
+				// act 3
+				81, 193, 405, 406, 407,
+				// act 4
+				376,
+				// act 5
+				434, 558, 546
+			],
+			id: {
+				SpokeToWarriv: 0,
+				DenofEvil: 1,
+				SistersBurialGrounds: 2,
+				TheSearchForCain: 4,
+				ForgottenTower: 5,
+				ToolsoftheTrade: 3,
+				SistersToTheSlaughter: 6,
+				AbleToGotoActII: 7,
+				SpokeToJerhyn: 8,
+				RadamentsLair: 9,
+				TheHoradricStaff: 10,
+				TheTaintedSun: 11,
+				TheArcaneSanctuary: 12,
+				TheSummoner: 13,
+				TheSevenTombs: 14,
+				AbleToGotoActIII: 15,
+				SpokeToHratli: 16,
+				TheGoldenBird: 20,
+				BladeoftheOldReligion: 19,
+				KhalimsWill: 18,
+				LamEsensTome: 17,
+				TheBlackenedTemple: 21,
+				TheGuardian: 22,
+				AbleToGotoActIV: 23,
+				SpokeToTyrael: 24,
+				TheFallenAngel: 25,
+				HellsForge: 27,
+				TerrorsEnd: 26,
+				AbleToGotoActV: 28,
+				SiegeOnHarrogath: 35,
+				RescueonMountArreat: 36,
+				PrisonofIce: 37,
+				BetrayalofHaggorath: 38,
+				RiteofPassage: 39,
+				EveofDestruction: 40,
+				SecretCowLevel: 41,
+			}
 		},
 
+		// in game data
 		uiflags: {
 			Inventory: 0x01,
 			StatsWindow: 0x02,
@@ -1329,11 +1461,12 @@ item: {
 			RedPortalToAct4: 342,
 
 			// act 4
-			DiabloSealInfectorActive: 392,
-			DiabloSealInfectorInActive: 393,
-			DiabloSealSeizActive: 394,
-			DiabloSealVizierInactive: 395,
-			DiabloSealVizierActive: 396,
+			SealGlow: 131,
+			DiabloSealInfector: 392,
+			DiabloSealInfector2: 393,
+			DiabloSealSeis: 394,
+			DiabloSealVizier: 396,
+			DiabloSealVizier2: 395,
 			RedPortalToAct5: 566, // The one of tyreal
 
 			// act 5
@@ -1343,7 +1476,10 @@ item: {
 			AncientsAltar: 546,
 			AncientsDoor: 547,
 			FrozenAnya: 558,
-			RedPortalToChamber: 563, // Baal's red portal
+			WorldstonePortal: 563,
+
+			FrigidHighlandsChest: 455,
+			IcyCellarChest: 397,
 
 			// misc
 			BubblingPoolofBlood: 82,
@@ -1516,7 +1652,7 @@ item: {
 			FeederNest: 335,
 			Fenris: 421,
 			Fetish1: 142,
-			Fetish2: 213,
+			BoneFetish2: 213,
 			Fetish3: 397,
 			FetishShaman: 279,
 			Fiend1: 137,
@@ -1525,7 +1661,7 @@ item: {
 			FireTower: 372,
 			FlameSpider: 125,
 			Flayer1: 143,
-			Flayer2: 214,
+			BoneFetish3: 214,
 			Flayer3: 398,
 			Flayer4: 659,
 			Flayer5: 656,
@@ -1695,7 +1831,7 @@ item: {
 			QuillRat2: 605,
 			RatMan1: 141,
 			RatMan2: 396,
-			RatMan3: 212,
+			BoneFetish1: 212,
 			RatMan4: 407,
 			RatManShaman: 278,
 			RazorBeast: 316,
@@ -1903,6 +2039,7 @@ item: {
 			ListerTheTormenter: 571,
 			TheCowKing: 743,
 			ColdwormtheBurrower: 284,
+			Nihlathak: 526,
 
 			// Summons
 			ClayGolem: 289,
@@ -2016,6 +2153,8 @@ item: {
 				BloodRaven: 805,
 				Izual: 406,
 				DacFarren: 782,
+				EyebacktheUnleashed: 784,
+				SharpToothSayer: 790,
 				// Unconfirmed
 				Bonebreak: 705,
 				Coldcrow: 706,
@@ -2051,13 +2190,11 @@ item: {
 				AxeDweller: 750,
 				BonesawBreaker: 751,
 				EldritchtheRectifier: 753,
-				EyebacktheUnleashed: 754,
 				ThreshSocket: 755,
 				Pindleskin: 756,
 				SnapchipShatter: 757,
 				AnodizedElite: 758,
 				VinvearMolech: 759,
-				SharpToothSayer: 760,
 				MagmaTorquer: 761,
 				BlazeRipper: 762,
 				Frozenstein: 763,
@@ -2931,8 +3068,17 @@ item: {
 				Mephisto: 3062,
 				Diablo: 3060,
 				Baal: 3061,
-				// Uniques
+				// Mini bosses
 				BloodRaven: 3111,
+				TreeheadWoodFist: 2873,
+				TheCountess: 2875,
+				TheSmith: 2889,
+				Radament: 2879,
+				TheSummoner: 3099,
+				HephastoTheArmorer: 1067,
+				Izual: 1014,
+				ShenktheOverseer: 22435,
+				// Uniques
 				Corpsefire: 3319,
 				TheCowKing: 2850,
 				GrandVizierofChaos: 2851,
@@ -2957,13 +3103,10 @@ item: {
 				Bonebreaker: 2870,
 				Coldcrow: 2871,
 				Rakanishu: 2872,
-				TreeheadWoodFist: 2873,
 				Griswold: 2874,
-				TheCountess: 2875,
 				PitspawnFouldog: 2876,
 				FlamespiketheCrawler: 2877,
 				BoneAsh: 2878,
-				Radament: 2879,
 				BloodwitchtheWild: 2880,
 				Fangskin: 2881,
 				Beetleburst: 2882,
@@ -2972,8 +3115,6 @@ item: {
 				FireEye: 2885,
 				DarkElder: 2886,
 				AncientKaatheSoulless: 2888,
-				TheSmith: 2889,
-				ShenktheOverseer: 22435,
 				SharpToothSayer: 22493,
 				SnapchipShatter: 22496,
 				Pindleskin: 22497,
@@ -3168,7 +3309,6 @@ item: {
 				DarkRanger: 3096,
 				VileArcher: 3097,
 				DarkArcher: 3098,
-				TheSummoner: 3099,
 				StygianDollShaman: 3100,
 				SoulKillerShaman: 3101,
 				FlayerShaman: 3102,
@@ -3512,6 +3652,7 @@ item: {
 				Annihilus: 21743,
 
 				// Unique Items
+				WitchwildString: 10911,
 				TitansRevenge: 21735,
 				LycandersAim: 21737,
 				ArreatsFace: 21744,
@@ -3615,6 +3756,104 @@ item: {
 				DeathsWeb: 21650,
 				TheAtlantean: 21654,
 				CarinShard: 21658,
+				Coldkill: 21286,
+				ButchersCleaver: 21287,
+				Islestrike: 21289,
+				GuardianNaga: 21291,
+				SpellSteel: 21293,
+				SuicideBranch: 21297,
+				ArmofKingLeoric: 21299,
+				BlackhandKey: 21300,
+				DarkClanCrusher: 21301,
+				TheFetidSprinkler: 21304,
+				HandofBlessedLight: 21305,
+				Fleshrender: 21306,
+				SureshrillFrost: 21307,
+				Moonfall: 21308,
+				BaezilsVortex: 21309,
+				Earthshaker: 21310,
+				TheGavelofPain: 21312,
+				Bloodletter: 21313,
+				ColdstealEye: 21314,
+				Hexfire: 21315,
+				BladeofAliBaba: 21316,
+				Riftslash: 21317,
+				Headstriker: 21318,
+				PlagueBearer: 21319,
+				//TheAtlantean: 21320,
+				CrainteVomir: 21321,
+				BingSzWang: 21322,
+				TheVileHusk: 21323,
+				Cloudcrack: 21324,
+				TodesfaelleFlamme: 21325,
+				Swordguard: 21326,
+				Spineripper: 21327,
+				HeartCarver: 21328,
+				BlackbogsSharp: 21329,
+				Stormspike: 21330,
+				TheImpaler: 21331,
+				HoneSudan: 21334,
+				SpireofHonor: 21335,
+				TheMeatScraper: 21336,
+				BlackleachBlade: 21337,
+				AthenasWrath: 21338,
+				PierreTombaleCouant: 21339,
+				GrimsBurningDead: 21341,
+				Ribcracker: 21342,
+				ChromaticIre: 21343,
+				Warspear: 21344,
+				SkullCollector: 21345,
+				Skystrike: 21346,
+				//WitchwildString: 21349,
+				GoldstrikeArch: 21350,
+				PusSpitter: 21352,
+				VampireGaze: 21354,
+				StringofEars: 21355,
+				GoreRider: 21356,
+				LavaGout: 21357,
+				VenomGrip: 21358,
+				Visceratuant: 21359,
+				//GuardianAngel: 21360,
+				Shaftstop: 21361,
+				SkinofVipermagi: 21362,
+				Blackhorn: 21363,
+				ValkyrieWing: 21364,
+				PeasantCrown: 21365,
+				DemonMachine: 21366,
+				Riphook: 21369,
+				Razorswitch: 21370,
+				OndalsWisdom: 21375,
+				Deathbit: 21379,
+				Warshrike: 21380,
+				DemonLimb: 21387,
+				SteelShade: 21388,
+				TombReaver: 21389,
+				//DeathsWeb: 21390,
+				AngelsSong: 21393,
+				TheRedeemer: 21394,
+				Bonehew: 21398,
+				Steelrend: 21399,
+				AriocsNeedle: 21402,
+				SoulDrainer: 21407,
+				RuneMaster: 21408,
+				DeathCleaver: 21409,
+				ExecutionersJustice: 21410,
+				Leviathan: 21412,
+				WispProjector: 21417,
+				Lacerator: 21419,
+				MangSongsLesson: 21420,
+				Viperfork: 21421,
+				TheReapersToll: 21427,
+				SpiritKeeper: 21428,
+				Hellrack: 21429,
+				AlmaNegra: 21430,
+				DarkforceSpawn: 21431,
+				Ghostflame: 21438,
+				ShadowKiller: 21439,
+				GriffonsEye: 21442,
+				Thunderstroke: 21445,
+				DemonsArch: 21447,
+				DjinnSlayer: 21450,
 
 				// Runewords
 				AncientsPledge: 20507,
@@ -3904,6 +4143,18 @@ item: {
 				Gray: 10
 			}
 		},
+
+		keys: {
+			Numpad1: 97,
+			Numpad2: 98,
+			Numpad3: 99,
+			Numpad4: 100,
+			Numpad5: 101,
+			Numpad6: 102,
+			Numpad7: 103,
+			Numpad8: 104,
+			Numpad9: 105,
+		}
 	};
 
 	// Need to be set after its loaded

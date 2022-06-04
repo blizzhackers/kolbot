@@ -1,19 +1,19 @@
 /**
-*	@filename	KillDclone.js
-*	@author		kolton
-*	@desc		Got to Palace Cellar level 3 and kill Diablo Clone.
+*  @filename    KillDclone.js
+*  @author      kolton
+*  @desc        Go to Palace Cellar level 3 and kill Diablo Clone.
+*
 */
 
 function KillDclone() {
-	//Town.doChores();
-	Pather.useWaypoint(74);
+	Pather.useWaypoint(sdk.areas.ArcaneSanctuary);
 	Precast.doPrecast(true);
 
 	if (!Pather.usePortal(null)) {
 		throw new Error("Failed to move to Palace Cellar");
 	}
 
-	Attack.kill(333);
+	Attack.kill(sdk.monsters.DiabloClone);
 	Pickit.pickItems();
 
 	if (AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {

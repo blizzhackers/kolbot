@@ -1,7 +1,8 @@
 /**
-*	@filename	Attack.js
-*	@author		kolton, theBGuy
-*	@desc		handle player attacks
+*  @filename    Attack.js
+*  @author      kolton, theBGuy
+*  @desc        handle player attacks
+*
 */
 
 const Attack = {
@@ -164,7 +165,9 @@ const Attack = {
 
 	// Check if player or his merc are using Infinity, and adjust resistance checks based on that
 	checkInfinity: function () {
-		let merc = Misc.poll(() => me.getMerc(), 2000, (250 + me.ping));
+		let merc;
+		// check if we have a merc
+		!me.classic && Config.UseMerc || !!me.mercrevivecost && (merc = Misc.poll(() => me.getMerc(), 2000, (250 + me.ping)));
 
 		// Check merc infinity
 		!!merc && (this.infinity = merc.checkItem({name: sdk.locale.items.Infinity}).have);
@@ -933,6 +936,9 @@ const Attack = {
 	// casting skills can go over non-floors - excluding bliz/meteor - not sure if any others
 	// physical skills can't, need to exclude monster objects though
 	// splash skills can go through some objects, however some objects are cast blockers
+	// hotfix for now, bugged with flying mobs (specters, ghosts, ect) apparently underneath them doesn't register as ground? so it fails the needFloor test
+	// despite there being floor there. so for now check if its an area that doesn't have floor in some spots
+	// better fix would be passing unit directly in instead of x and y, but that is going to need more changes all over
 	validSpot: function (x, y, skill = -1) {
 		// Just in case
 		if (!me.area || !x || !y) return false;
@@ -940,6 +946,7 @@ const Attack = {
 		if (Skill.missileSkills.includes(skill)) return true;
 
 		let result;
+		let nonFloorAreas = [sdk.areas.ArcaneSanctuary, sdk.areas.RiverofFlame, sdk.areas.ChaosSanctuary, sdk.areas.Abaddon, sdk.areas.PitofAcheron, sdk.areas.InfernalPit];
 
 		// Treat thrown errors as invalid spot
 		try {
@@ -951,7 +958,7 @@ const Attack = {
 		if (result === undefined) return false;
 
 		switch (true) {
-		case Skill.needFloor.includes(skill):
+		case Skill.needFloor.includes(skill) && nonFloorAreas.includes(me.area):
 			let isFloor = !!(result & (0 | 0x1000));
 			// this spot is not on the floor (lava (river/chaos, space (arcane), ect))
 			if (!isFloor) {
@@ -1116,14 +1123,14 @@ const Attack = {
 			return true;
 		}
 
-		let i, j, rval,
+		let rval,
 			tempArray = [];
 
 		// EnchantLoop: // Skip enchanted monsters
-		for (i = 0; i < Config.SkipEnchant.length; i += 1) {
+		for (let i = 0; i < Config.SkipEnchant.length; i += 1) {
 			tempArray = Config.SkipEnchant[i].toLowerCase().split(" and ");
 
-			for (j = 0; j < tempArray.length; j += 1) {
+			for (let j = 0; j < tempArray.length; j += 1) {
 				switch (tempArray[j]) {
 				case "extra strong":
 					tempArray[j] = 5;
@@ -1176,80 +1183,39 @@ const Attack = {
 				}
 			}
 
-			for (j = 0; j < tempArray.length; j += 1) {
-				if (!unit.getEnchant(tempArray[j])) {
-					break;
-				}
-			}
-
-			if (j === tempArray.length) {
+			if (!tempArray.some(enchant => unit.getEnchant(enchant))) {
 				//print("Skip Enchanted: " + unit.name);
-
 				return false;
 			}
 		}
 
 		// ImmuneLoop: // Skip immune monsters
-		for (i = 0; i < Config.SkipImmune.length; i += 1) {
+		for (let i = 0; i < Config.SkipImmune.length; i += 1) {
 			tempArray = Config.SkipImmune[i].toLowerCase().split(" and ");
 
-			for (j = 0; j < tempArray.length; j += 1) {
-				if (this.checkResist(unit, tempArray[j])) { // Infinity calculations are built-in
-					break;
-				}
-			}
-
-			if (j === tempArray.length) {
+			// Infinity calculations are built-in
+			if (!tempArray.some(immnue => this.checkResist(unit, immnue))) {
 				return false;
 			}
 		}
 
 		// AuraLoop: // Skip monsters with auras
-		for (i = 0; i < Config.SkipAura.length; i += 1) {
+		for (let i = 0; i < Config.SkipAura.length; i += 1) {
 			rval = true;
+			let aura = Config.SkipAura[i].toLowerCase();
 
-			switch (Config.SkipAura[i].toLowerCase()) {
-			case "fanaticism":
-				if (unit.getState(49)) {
-					rval = false;
-				}
-
-				break;
-			case "might":
-				if (unit.getState(33)) {
-					rval = false;
-				}
-
-				break;
-			case "holy fire":
-				if (unit.getState(35)) {
-					rval = false;
-				}
+			switch (true) {
+			case aura === "might" && unit.getState(sdk.states.Might):
+			case aura === "blessed aim" && unit.getState(sdk.states.BlessedAim):
+			case aura === "fanaticism" && unit.getState(sdk.states.Fanaticism):
+			case aura === "conviction" && unit.getState(sdk.states.Conviction):
+			case aura === "holy fire" && unit.getState(sdk.states.HolyFire):
+			case aura === "holy freeze" && unit.getState(sdk.states.HolyFreeze):
+			case aura === "holy shock" && unit.getState(sdk.states.HolyShock):
+				rval = false;
 
 				break;
-			case "blessed aim":
-				if (unit.getState(40)) {
-					rval = false;
-				}
-
-				break;
-			case "conviction":
-				if (unit.getState(28)) {
-					rval = false;
-				}
-
-				break;
-			case "holy freeze":
-				if (unit.getState(43)) {
-					rval = false;
-				}
-
-				break;
-			case "holy shock":
-				if (unit.getState(46)) {
-					rval = false;
-				}
-
+			default:
 				break;
 			}
 
@@ -1280,7 +1246,8 @@ const Attack = {
 		case 500: // Summoner
 			return "physical";
 		case sdk.skills.HolyBolt:
-			return "holybolt"; // no need to use this.elements array because it returns before going over the array
+			// no need to use this.elements array because it returns before going over the array
+			return "holybolt";
 		}
 
 		let eType = getBaseStat("skills", skillId, "etype");

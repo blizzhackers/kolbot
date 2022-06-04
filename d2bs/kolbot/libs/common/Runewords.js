@@ -1,7 +1,8 @@
 /**
-*	@filename	Runewords.js
-*	@author		kolton
-*	@desc		make and reroll runewords
+*  @filename    Runewords.js
+*  @author      kolton
+*  @desc        make and reroll runewords
+*
 */
 
 // TODO: Config.Runewords[i][0] can be false, but array methods can be used on it

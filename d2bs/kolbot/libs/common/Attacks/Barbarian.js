@@ -1,7 +1,8 @@
 /**
-*	@filename	Barbarian.js
-*	@author		kolton
-*	@desc		Barbarian attack sequence
+*  @filename    Barbarian.js
+*  @author      kolton
+*  @desc        Barbarian attack sequence
+*
 */
 
 const ClassAttack = {

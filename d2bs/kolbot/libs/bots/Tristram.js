@@ -1,90 +1,56 @@
 /**
-*	@filename	Tristram.js
-*	@author		kolton, cuss
-*	@desc		clear Tristram
+*  @filename    Tristram.js
+*  @author      kolton, cuss, theBGuy
+*  @desc        clear Tristram
+*
 */
 
 function Tristram() {
-	let stones;
-
-	if (!me.getQuest(4, 4) && !me.getItem(525)) {
-		if (!me.getItem(524)) {
-			// print("We need Scroll of Inifuss");
-			Town.doChores();
-			Pather.useWaypoint(5);
-			Precast.doPrecast(true);
-
-			if (!Pather.moveToPreset(me.area, 2, 30, 5, 5)) {
-				throw new Error("Failed to move to Tree of Inifuss");
-			}
-
-			let tree = getUnit(2, 30);
-
-			Misc.openChest(tree);
-			delay(300);
-
-			let scroll = getUnit(4, 524);
-
-			Pickit.pickItem(scroll);
-			Town.goToTown();
-		}
-
-		// print("We need Key to the Cairn Stones");
-		Town.move(NPC.Akara);
-		let akara = getUnit(1, NPC.Akara);
-
-		akara.openMenu();
-		me.cancel();
-	}
-
 	Pather._teleport = Pather.teleport;
 
-	Town.doChores();
-	Pather.useWaypoint(4);
-	Precast.doPrecast(true);
-
-	if (!Pather.moveToPreset(me.area, 1, 737, 0, 0, false, true)) {
-		throw new Error("Failed to move to Rakanishu");
+	// complete quest if its not complete
+	if (!me.getQuest(4, 4) && !me.getQuest(4, 0)) {
+		Common.Questing.cain();
 	}
 
-	if (!me.getQuest(4, 4)) {
-		stones = [getUnit(2, 17), getUnit(2, 18), getUnit(2, 19), getUnit(2, 20), getUnit(2, 21)];
-	}
+	MainLoop:
+	while (true) {
+		switch (true) {
+		case me.inTown:
+			Town.doChores();
+			Pather.useWaypoint(sdk.areas.StonyField);
+			Precast.doPrecast(true);
 
-	Attack.clear(15, 0, getLocaleString(2872)); // Rakanishu
-
-	while (!me.getQuest(4, 4)) {
-		stones.forEach(function (stone) {
-			if (!stone.mode) {
-				Attack.securePosition(stone.x, stone.y, 10, me.ping * 2);
-				Misc.click(0, 0, stone);
+			break;
+		case me.area === sdk.areas.StonyField:
+			if (!Pather.moveToPreset(sdk.areas.StonyField, 1, 737, 0, 0, false, true)) {
+				throw new Error("Failed to move to Rakanishu");
 			}
-		});
-	}
 
-	while (!Pather.usePortal(38)) {
-		Attack.securePosition(me.x, me.y, 10, 1000);
-	}
+			Attack.clear(15, 0, getLocaleString(sdk.locale.monsters.Rakanishu));
 
-	Pather.moveTo(me.x, me.y + 6);
+			while (!Pather.usePortal(sdk.areas.Tristram)) {
+				Attack.securePosition(me.x, me.y, 10, 1000);
+			}
 
-	if (Config.Tristram.PortalLeech) {
-		Pather.makePortal();
-		delay(1000);
-		Pather.teleport = !Config.Tristram.WalkClear && Pather._teleport;
-	}
+			break;
+		case me.area === sdk.areas.Tristram:
+			let redPortal = object(sdk.units.RedPortal);
+			!!redPortal && Pather.moveTo(redPortal.x, redPortal.y + 6);
 
-	let gibbet = getUnit(2, 26);
+			if (Config.Tristram.PortalLeech) {
+				Pather.makePortal();
+				delay(1000);
+				Pather.teleport = !Config.Tristram.WalkClear && Pather._teleport;
+			}
 
-	if (!gibbet.mode) {
-		if (!Pather.moveToPreset(me.area, 2, 26, 0, 0, true, true)) {
-			throw new Error("Failed to move to Cain's Gibbet");
+			Config.Tristram.PortalLeech ? Attack.clearLevel(0) : Attack.clearLevel(Config.ClearType);
+
+			break MainLoop;
+		default:
+			break MainLoop;
 		}
-
-		Misc.openChest(gibbet);
 	}
-
-	Config.Tristram.PortalLeech ? Attack.clearLevel(0) : Attack.clearLevel(Config.ClearType);
 
 	Pather.teleport = Pather._teleport;
 

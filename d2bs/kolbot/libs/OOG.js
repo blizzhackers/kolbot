@@ -6,8 +6,8 @@
 */
 !isIncluded('Polyfill.js') && include('Polyfill.js');
 
-let Controls = require('./modules/Control');
 let sdk = require('./modules/sdk');
+let Controls = require('./modules/Control');
 
 const D2Bot = {
 	handle: 0,
@@ -963,6 +963,61 @@ const ControlAction = {
 		sendKey(0x24);
 
 		return list;
+	},
+
+	getPermStatus: function (info) {
+		let count = 0;
+		let tick = getTickCount();
+		let expireStr = getLocaleString(11133);
+		expireStr = expireStr.slice(0, expireStr.indexOf("%")).trim();
+
+		while (getLocation() !== sdk.game.locations.CharSelect) {
+			if (getTickCount() - tick >= 5000) {
+				break;
+			}
+
+			delay(25);
+		}
+
+		// start from beginning of the char list
+		sendKey(0x24);
+
+		while (getLocation() === sdk.game.locations.CharSelect && count < 24) {
+			let control = Controls.CharSelectCharInfo0.control;
+
+			if (control) {
+				do {
+					let text = control.getText();
+
+					if (text instanceof Array && typeof text[1] === "string") {
+						count++;
+
+						if (text[1].toLowerCase() === info.charName.toLowerCase()) {
+							return !text.some(el => el.includes(expireStr));
+						}
+					}
+				} while (count < 24 && control.getNext());
+			}
+
+			// check for additional characters up to 24
+			if (count === 8 || count === 16) {
+				if (Controls.CharSelectChar6.click()) {
+					me.blockMouse = true;
+
+					sendKey(0x28);
+					sendKey(0x28);
+					sendKey(0x28);
+					sendKey(0x28);
+
+					me.blockMouse = false;
+				}
+			} else {
+				// no further check necessary
+				break;
+			}
+		}
+
+		return false;
 	},
 
 	// get character position
