@@ -662,7 +662,7 @@ item: {
 
 				// act 3
 				ForestAltar: 81,
-				LamEsensTome: 193,
+				LamEsensTomeHolder: 193,
 				KhalimsHeartChest: 405,
 				KhalimsBrainChest: 406,
 				KhalimsEyeChest: 407,

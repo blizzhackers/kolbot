@@ -103,7 +103,7 @@ const Town = {
 
 		delay(200 + me.ping * 2);
 
-		console.log("ÿc8Finish TownChores ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
+		console.log("ÿc8Finish TownChores ÿc0- ÿc7Duration: ÿc0" + formatTime(getTickCount() - tick));
 
 		return true;
 	},
@@ -1056,7 +1056,7 @@ const Town = {
 				}
 			});
 
-			log && name && console.log('ÿc9DrinkPotsÿc0 :: drank ' + quantity + " " + name + "s. Timer [" + (new Date(quantity * 30 * 1000).toISOString().slice(11, -5)) + "]");
+			log && name && console.log('ÿc9DrinkPotsÿc0 :: drank ' + quantity + " " + name + "s. Timer [" + formatTime(quantity * 30 * 1000) + "]");
 		} else {
 			console.log("ÿc9DrinkPotsÿc0 :: couldn't find my pots");
 		}
@@ -1912,7 +1912,7 @@ const Town = {
 			!!sold && delay(250 + me.ping);
 		});
 
-		console.log("ÿc8Exit clearInventory ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - clearInvoTick).toISOString().slice(11, -5)));
+		console.log("ÿc8Exit clearInventory ÿc0- ÿc7Duration: ÿc0" + formatTime(getTickCount() - clearInvoTick));
 
 		return true;
 	},

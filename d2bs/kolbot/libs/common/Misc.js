@@ -2062,6 +2062,22 @@ const Misc = {
 		delay(500 + me.ping);
 
 		return me.getQuest(id, state);
+	},
+
+	getQuestStates: function (questID) {
+		if (!me.gameReady) return [];
+		const MAX_STATE = 16;
+		let questStates = [];
+
+		for (let i = 0; i < MAX_STATE; i++) {
+			if (me.getQuest(questID, i)) {
+				questStates.push(i);
+			}
+
+			delay(50);
+		}
+
+		return questStates;
 	}
 };
 

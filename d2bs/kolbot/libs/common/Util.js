@@ -101,6 +101,10 @@ function minutes (ms = 0) {
 	return (ms * 60000);
 }
 
+function formatTime (ms = 0) {
+	return (new Date(ms).toISOString().slice(11, -5));
+}
+
 (function (global, print) {
 	global.console = global.console || (function () {
 		const console = {};

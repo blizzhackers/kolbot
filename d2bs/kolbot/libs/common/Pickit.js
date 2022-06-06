@@ -302,7 +302,7 @@ const Pickit = {
 				}
 
 				// use packet first, if we fail and not using fast pick use click
-				(Config.FastPick || i < 1) ? sendPacket(1, 0x16, 4, 0x4, 4, item.gid, 4, 0) : Misc.click(0, 0, item);
+				(Config.FastPick || i < 1) ? sendPacket(1, 0x16, 4, 0x4, 4, gid, 4, 0) : Misc.click(0, 0, item);
 			}
 
 			let tick = getTickCount();

@@ -10,7 +10,7 @@ const ClassAttack = {
 		let skills = {timed: -1, untimed: -1};
 		if (!unit) return skills;
 
-		let index = (unit.isSpecial || unit.type === 0) ? 1 : 3;
+		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 
 		// Get timed skill
 		let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
@@ -64,7 +64,7 @@ const ClassAttack = {
 		// Keep Thunder-Storm active
 		Precast.precastables.ThunderStorm && !me.getState(sdk.states.ThunderStorm) && Skill.cast(sdk.skills.ThunderStorm, 0);
 
-		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.getState(121) || !Skill.isTimed(Config.AttackSkill[0]))) {
+		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (Math.round(getDistance(me, unit)) > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
 					return 0;
@@ -172,29 +172,27 @@ const ClassAttack = {
 	},
 
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
-	doCast: function (unit, timedSkill, untimedSkill) {
+	doCast: function (unit, timedSkill = -1, untimedSkill = -1) {
 		let walk, noMana = false;
 
 		// No valid skills can be found
 		if (timedSkill < 0 && untimedSkill < 0) return 2;
 
-		if (timedSkill > -1 && (!me.getState(121) || !Skill.isTimed(timedSkill)) && Skill.getManaCost(timedSkill) < me.mp) {
+		if (timedSkill > -1 && (!me.skillDelay || !Skill.isTimed(timedSkill)) && Skill.getManaCost(timedSkill) < me.mp) {
 			if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
 				return 0;
 			}
 
-			if (Math.round(getDistance(me, unit)) > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
 				// Allow short-distance walking for melee skills
-				walk = Skill.getRange(timedSkill) < 4 && getDistance(me, unit) < 10 && !checkCollision(me, unit, 0x1);
+				walk = Skill.getRange(timedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4, walk)) {
 					return 0;
 				}
 			}
 
-			if (!unit.dead && !checkCollision(me, unit, 0x4)) {
-				Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
-			}
+			!unit.dead && !checkCollision(me, unit, 0x4) && Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
 
 			return 1;
 		} else {
@@ -206,18 +204,16 @@ const ClassAttack = {
 				return 0;
 			}
 
-			if (Math.round(getDistance(me, unit)) > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
 				// Allow short-distance walking for melee skills
-				walk = Skill.getRange(untimedSkill) < 4 && getDistance(me, unit) < 10 && !checkCollision(me, unit, 0x1);
+				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), 0x4, walk)) {
 					return 0;
 				}
 			}
 
-			if (!unit.dead) {
-				Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
-			}
+			!unit.dead && Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
 
 			return 1;
 		} else {

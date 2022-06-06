@@ -140,7 +140,7 @@ const Loader = {
 						}
 
 						if (global[script]()) {
-							console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
+							console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (formatTime(getTickCount() - tick)));
 						}
 					}
 				} catch (error) {
@@ -193,7 +193,7 @@ const Loader = {
 					let tick = getTickCount();
 
 					if (global[script]()) {
-						console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
+						console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (formatTime(getTickCount() - tick)));
 					}
 				}
 			} catch (error) {

@@ -1558,7 +1558,33 @@ Object.defineProperties(Unit.prototype, {
 			return (this.isChampion || this.isUnique || this.isSuperUnique);
 		},
 	},
+	isPlayer: {
+		get: function () {
+			return this.type === 0;
+		},
+	},
 	// todo - monster types
+	primeEvils: {
+		get: function () {
+			return [
+				sdk.monsters.Andariel, sdk.monsters.Duriel, sdk.monsters.Mephisto, sdk.monsters.Diablo,
+				sdk.monsters.Baal, sdk.monsters.BaalClone, sdk.monsters.UberDuriel, sdk.monsters.UberIzual,
+				sdk.monsters.UberMephisto, sdk.monsters.UberDiablo, sdk.monsters.UberBaal, sdk.monsters.Lilith, sdk.monsters.DiabloClone
+			].includes(this.classid);
+		},
+	},
+	boss: {
+		get: function () {
+			return this.primeEvils
+				||
+				[
+					sdk.monsters.TheSmith, sdk.monsters.BloodRaven, sdk.monsters.Radament, sdk.monsters.Griswold,
+					sdk.monsters.TheSummoner, sdk.monsters.Izual, sdk.monsters.Hephasto, sdk.monsters.KorlictheProtector,
+					sdk.monsters.TalictheDefender, sdk.monsters.MadawctheGuardian, sdk.monsters.ListerTheTormenter,
+					sdk.monsters.TheCowKing, sdk.monsters.ColdwormtheBurrower, sdk.monsters.Nihlathak
+				].includes(this.classid);
+		},
+	},
 	ghosts: {
 		get: function () {
 			return [
@@ -1746,6 +1772,24 @@ Object.defineProperties(Unit.prototype, {
 				].indexOf(this.classid) === -1
 				&& !(this.quality === sdk.itemquality.Unique && [sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(this.itemType)));
 		}
+	},
+	lowquality: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.quality === sdk.itemquality.LowQuality;
+		},
+	},
+	normal: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.quality === sdk.itemquality.Normal;
+		},
+	},
+	superior: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.quality === sdk.itemquality.Superior;
+		},
 	},
 	magic: {
 		get: function () {

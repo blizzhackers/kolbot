@@ -1,6 +1,6 @@
 /**
 *  @filename    Assassin.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        Assassin attack sequence
 *
 */
@@ -8,6 +8,16 @@
 const ClassAttack = {
 	lastTrapPos: {},
 	trapRange: 20,
+	canCloak: false,
+	
+	checkCanCloak: function () {
+		if (this.canCloak) return true;
+		if (!Config.UseCloakofShadows) return false;
+		this.canCloak = me.getSkill(sdk.skills.CloakofShadows, 0);
+		// check if we have hard points in the skill, if we do then we won't need the skill check again
+		// if not, check if any items are giving us the skill.
+		return (this.canCloak || me.getSkill(sdk.skills.CloakofShadows, 1));
+	},
 
 	doAttack: function (unit, preattack) {
 		if (!unit) return 1;
@@ -23,8 +33,8 @@ const ClassAttack = {
 			}
 		}
 
-		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.getState(121) || !Skill.isTimed(Config.AttackSkill[0]))) {
-			if (Math.round(getDistance(me, unit)) > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
+		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
 					return 0;
 				}
@@ -35,16 +45,15 @@ const ClassAttack = {
 			return 1;
 		}
 
-		let checkSkill,
-			mercRevive = 0,
-			timedSkill = -1,
-			untimedSkill = -1;
-		let index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
+		let mercRevive = 0;
+		let timedSkill = -1;
+		let untimedSkill = -1;
+		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 
 		// Cloak of Shadows (Aggressive) - can't be cast again until previous one runs out and next to useless if cast in precast sequence (won't blind anyone)
-		if (Config.AggressiveCloak && Config.UseCloakofShadows && me.getSkill(264, 1) && !me.getState(121) && !me.getState(153)) {
-			if (getDistance(me, unit) < 20) {
-				Skill.cast(264, 0);
+		if (Config.AggressiveCloak && this.checkCanCloak() && !me.skillDelay && !me.getState(sdk.states.CloakofShadows)) {
+			if (unit.distance < 20) {
+				Skill.cast(sdk.skills.CloakofShadows, 0);
 			} else if (!Attack.getIntoPosition(unit, 20, 0x4)) {
 				return 0;
 			}
@@ -53,7 +62,7 @@ const ClassAttack = {
 		let checkTraps = this.checkTraps(unit);
 
 		if (checkTraps) {
-			if (Math.round(getDistance(me, unit)) > this.trapRange || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > this.trapRange || checkCollision(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, this.trapRange, 0x4) || (checkCollision(me, unit, 0x1) && (getCollision(me.area, unit.x, unit.y) & 0x1))) {
 					return 0;
 				}
@@ -63,16 +72,16 @@ const ClassAttack = {
 		}
 
 		// Cloak of Shadows (Defensive; default) - can't be cast again until previous one runs out and next to useless if cast in precast sequence (won't blind anyone)
-		if (!Config.AggressiveCloak && Config.UseCloakofShadows && me.getSkill(264, 1) && getDistance(me, unit) < 20 && !me.getState(121) && !me.getState(153)) {
-			Skill.cast(264, 0);
+		if (!Config.AggressiveCloak && this.checkCanCloak() && unit.distance < 20 && !me.skillDelay && !me.getState(sdk.states.CloakofShadows)) {
+			Skill.cast(sdk.skills.CloakofShadows, 0);
 		}
 
 		// Get timed skill
-		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
+		let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
 
 		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
 			timedSkill = checkSkill;
-		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && ([sdk.skills.Meteor, sdk.skills.Blizzard].indexOf(Config.AttackSkill[5]) === -1 || Attack.validSpot(unit.x, unit.y))) {
+		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[5])) {
 			timedSkill = Config.AttackSkill[5];
 		}
 
@@ -81,7 +90,7 @@ const ClassAttack = {
 
 		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
 			untimedSkill = checkSkill;
-		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && ([sdk.skills.Meteor, sdk.skills.Blizzard].indexOf(Config.AttackSkill[6]) === -1 || Attack.validSpot(unit.x, unit.y))) {
+		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[6])) {
 			untimedSkill = Config.AttackSkill[6];
 		}
 
@@ -149,10 +158,10 @@ const ClassAttack = {
 			return 2;
 		}
 
-		if (timedSkill > -1 && (!me.getState(121) || !Skill.isTimed(timedSkill))) {
+		if (timedSkill > -1 && (!me.skillDelay || !Skill.isTimed(timedSkill))) {
 			switch (timedSkill) {
-			case 151: // Whirlwind
-				if (Math.round(getDistance(me, unit)) > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x1)) {
+			case sdk.skills.Whirlwind:
+				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x1)) {
 					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x1)) {
 						return 0;
 					}
@@ -166,7 +175,7 @@ const ClassAttack = {
 					return 0;
 				}
 
-				if (Math.round(getDistance(me, unit)) > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
+				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
 					// Allow short-distance walking for melee skills
 					walk = Skill.getRange(timedSkill) < 4 && getDistance(me, unit) < 10 && !checkCollision(me, unit, 0x1);
 
@@ -175,9 +184,7 @@ const ClassAttack = {
 					}
 				}
 
-				if (!unit.dead) {
-					Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
-				}
+				!unit.dead && Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
 
 				return 1;
 			}
@@ -197,9 +204,7 @@ const ClassAttack = {
 				}
 			}
 
-			if (!unit.dead) {
-				Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
-			}
+			!unit.dead && Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
 
 			return 1;
 		}
@@ -214,28 +219,31 @@ const ClassAttack = {
 
 		// getDistance crashes when using an object with x, y props, that's why it's unit.x, unit.y and not unit
 		// is this still a thing ^^? todo: test it
-		if (me.getMinionCount(17) === 0 || !this.lastTrapPos.hasOwnProperty("x")
+		if (me.getMinionCount(sdk.minions.AssassinTrap) === 0 || !this.lastTrapPos.hasOwnProperty("x")
 			|| getDistance(unit.x, unit.y, this.lastTrapPos.x, this.lastTrapPos.y) > 15) {
 			return 5;
 		}
 
-		return 5 - me.getMinionCount(17);
+		return 5 - me.getMinionCount(sdk.minions.AssassinTrap);
 	},
 
+	// todo - either import soloplays immune to trap check or add config option for immune to traps
+	// since this is the base file probably better to leave the option available rather than hard code it
 	placeTraps: function (unit, amount) {
 		let traps = 0;
 		this.lastTrapPos = {x: unit.x, y: unit.y};
 
 		for (let i = -1; i <= 1; i += 1) {
 			for (let j = -1; j <= 1; j += 1) {
-				if (Math.abs(i) === Math.abs(j)) { // used for X formation
+				// used for X formation
+				if (Math.abs(i) === Math.abs(j)) {
 					// unit can be an object with x, y props too, that's why having "mode" prop is checked
 					if (traps >= amount || (unit.hasOwnProperty("mode") && (unit.mode === 0 || unit.mode === 12))) {
 						return true;
 					}
 
-					// Duriel, Mephisto, Diablo, Baal, other players
-					if ((unit.hasOwnProperty("classid") && [211, 242, 243, 544].indexOf(unit.classid) > -1) || (unit.hasOwnProperty("type") && unit.type === 0)) {
+					// Duriel, Mephisto, Diablo, Baal, other players - why not andy?
+					if ((unit.hasOwnProperty("classid") && [211, 242, 243, 544].includes(unit.classid)) || (unit.hasOwnProperty("type") && unit.type === 0)) {
 						if (traps >= Config.BossTraps.length) return true;
 
 						Skill.cast(Config.BossTraps[traps], 0, unit.x + i, unit.y + j);
