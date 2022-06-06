@@ -91,7 +91,7 @@
 		Config.Diablo.Entrance = true; // Start from entrance
 		Config.Diablo.JustViz = false; // Intended for classic sorc, kills Vizier only.
 		Config.Diablo.SealLeader = false; // Clear a safe spot around seals and invite leechers in. Leechers should run SealLeecher script.
-		Config.Diablo.Fast = false; // Intended for classic sorc, kills Vizier only.
+		Config.Diablo.Fast = false; // Runs diablo fast, focuses on clearing seal bosses rather than clearing path
 		Config.Diablo.SealWarning = "Leave the seals alone!";
 		Config.Diablo.EntranceTP = "Entrance TP up";
 		Config.Diablo.StarTP = "Star TP up";
