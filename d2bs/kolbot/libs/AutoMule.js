@@ -1,3 +1,10 @@
+/**
+*  @filename    AutoMule.js
+*  @author      kolton, theBGuy
+*  @desc        Configuration file for Mule system
+*
+*/
+
 const AutoMule = {
 	Mules: {
 		"Mule1": {

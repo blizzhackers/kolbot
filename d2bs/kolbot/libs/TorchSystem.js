@@ -1,7 +1,8 @@
 /**
-*	@filename	TorchSystem.js
-*	@author		kolton
-*	@desc		Works in conjunction with OrgTorch script. Allows the uber killer to get keys from other profiles.
+*  @filename    TorchSystem.js
+*  @author      kolton
+*  @desc        Works in conjunction with OrgTorch script. Allows the uber killer to get keys from other profiles.
+*
 */
 
 const TorchSystem = {

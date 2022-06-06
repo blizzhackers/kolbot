@@ -1,10 +1,10 @@
 /* eslint-disable dot-notation */
 /**
-*	@filename	GameAction.js
-*	@author		noah-@github.com
-*	@desc		Perform task based actions specified by Profile Tag
+*  @filename    GameAction.js
+*  @author      noah-@github.com
+*  @desc        Perform task based actions specified by Profile Tag
+*
 */
-
 include("MuleLogger.js");
 
 const GameAction = {

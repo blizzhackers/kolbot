@@ -1,27 +1,28 @@
-/*
-
-[Item-parser Syntax Information]
-
-1. [Keyword] separates into two groups
-   - [Property Keywords] : [Type], [Name], [Class], [Quality], [Flag], [Level], [Prefix], [Suffix]
-   - [Stat Keywords] : [Number or Alias]
-
-2. [Keyword] must be surrounded by '[' and ']'
-
-3. [Property Keywords] must be placed first
-
-4. Insert '#' symbol between [Property Keywords] and [Stat Keywords]
-
-5. Use '+', '-', '*', '/', '(', ')', '&&', '||', '>', '>=', '<', '<=', '==', '!=' symbols for comparison
-
-6. Use '//' symbol for comment
-
+/**
+*  @filename    NTItemParser.dbl
+*  @author      kolton
+*  @credit      d2nt
+*  @desc        nip file parser for kolbots pickit system
+*
+*  @Item-parser Syntax Information
+*    1. [Keyword] separates into two groups
+*      - [Property Keywords] : [Type], [Name], [Class], [Quality], [Flag], [Level], [Prefix], [Suffix]
+*      - [Stat Keywords] : [Number or Alias]
+*    2. [Keyword] must be surrounded by '[' and ']'
+*    3. [Property Keywords] must be placed first
+*    4. Insert '#' symbol between [Property Keywords] and [Stat Keywords]
+*    5. Use '+', '-', '*', '/', '(', ')', '&&', '||', '>', '>=', '<', '<=', '==', '!=' symbols for comparison
+*    6. Use '//' symbol for comment
+*
+*   @Example: [name] == ring && [quality] == unique # [dexterity] == 20 && [tohit] == 250 // Perfect Raven Frost
+*
 */
 
 include("NTItemAlias.dbl");
 
-var NTIP = {},
+let NTIP = {},
 	NTIP_CheckList = [],
+	NTIP_CheckListNoTier = [],
 	stringArray = [];
 
 NTIP.OpenFile = function (filepath, notify) {
@@ -33,7 +34,7 @@ NTIP.OpenFile = function (filepath, notify) {
 		return false;
 	}
 
-	var i, nipfile, line, lines, info, item,
+	let nipfile, lines, item,
 		tick = getTickCount(),
 		filename = filepath.substring(filepath.lastIndexOf("/") + 1, filepath.length),
 		entries = 0;
@@ -51,22 +52,26 @@ NTIP.OpenFile = function (filepath, notify) {
 	}
 
 	lines = nipfile.readAllLines();
-
 	nipfile.close();
 
-	for (i = 0; i < lines.length; i += 1) {
-		info = {
+	for (let i = 0; i < lines.length; i += 1) {
+		let info = {
 			line: i + 1,
 			file: filename,
 			string: lines[i]
 		};
 
-		line = NTIP.ParseLineInt(lines[i], info);
+		let line = NTIP.ParseLineInt(lines[i], info);
 
 		if (line) {
 			entries += 1;
 
 			NTIP_CheckList.push(line);
+
+			if (!lines[i].toLowerCase().match("tier")) {
+				NTIP_CheckListNoTier.push(line);
+			}
+			
 			stringArray.push(info);
 		}
 	}
@@ -78,48 +83,12 @@ NTIP.OpenFile = function (filepath, notify) {
 	return true;
 };
 
-/*NTIP.Minify = function (filepath) {
-	var i, nipfile, lines, hash, fileList,
-		filename = filepath.substring(filepath.lastIndexOf("/") + 1, filepath.length);
-
-	try {
-		nipfile = File.open(filepath, 0);
-	} catch (fileError) {
-
-	}
-
-	if (!nipfile) {
-		return false;
-	}
-
-	hash = md5_file(filepath);
-	lines = nipfile.readAllLines();
-
-	nipfile.close();
-
-	for (i = 0; i < lines.length; i += 1) {
-		lines[i] = lines[i].replace(/\s+/g, "").toLowerCase();
-	}
-
-	Misc.fileAction("pickit/minified/" + hash + "." + filename, 1, lines.join("\n"));
-
-	fileList = dopen("pickit/minified/").getFiles();
-
-	for (i = 0; i < fileList.length; i += 1) {
-		if (fileList[i].indexOf(filename) > -1 && fileList[i].indexOf(hash) === -1) {
-			FileTools.remove("pickit/minified/" + fileList[i]);
-		}
-	}
-
-	return true;
-};*/
-
 NTIP.CheckQuantityOwned = function (item_type, item_stats) {
-	var i, item,
+	let i, item,
 		num = 0,
-		items = me.getItems();
+		items = me.getItemsEx();
 
-	if (!items) {
+	if (!items.length) {
 		print("I can't find my items!");
 
 		return 0;

@@ -1,7 +1,8 @@
 /**
-*	@filename  GameData.js
-*	@author    Nishimura-Katsuo
-*	@desc      game data library
+*  @filename    GameData.js
+*  @author      Nishimura-Katsuo
+*  @desc        game data library
+*
 */
 
 const MONSTER_INDEX_COUNT = 734;

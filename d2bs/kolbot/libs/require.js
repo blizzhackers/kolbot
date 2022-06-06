@@ -1,9 +1,10 @@
 /* eslint-disable dot-notation */
 /**
- * @description A node like require function.
- * @author Jaenster
- */
-
+*  @filename    require.js
+*  @author      Jaenster
+*  @desc        A node like require function.
+*
+*/
 !isIncluded('polyfill.js') && include('polyfill.js');
 
 // noinspection ThisExpressionReferencesGlobalObjectJS <-- definition of global here

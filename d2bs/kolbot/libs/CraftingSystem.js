@@ -1,10 +1,10 @@
 /**
-*	@filename	CraftingSystem.js
-*	@author		kolton
-*	@desc		Multi-profile crafting system
+*  @filename    CraftingSystem.js
+*  @author      kolton
+*  @desc        Multi-profile crafting system
+*  @notes       This system is experimental, there will be no support offered for it.
+*               If you can't get it to work, leave it be.
 *
-*	@notes		This system is experimental, there will be no support offered for it.
-*				If you can't get it to work, leave it be.
 */
 
 const CraftingSystem = {};

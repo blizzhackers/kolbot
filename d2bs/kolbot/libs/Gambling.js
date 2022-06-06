@@ -1,7 +1,8 @@
 /**
-*	@filename	Gambling.js
-*	@author		kolton
-*	@desc		multi-profile gambling system
+*  @filename    Gambling.js
+*  @author      kolton
+*  @desc        multi-profile gambling system
+*
 */
 
 const Gambling = {

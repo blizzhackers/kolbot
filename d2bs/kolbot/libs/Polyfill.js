@@ -1,6 +1,9 @@
 /**
- * Some polyfills since we run an old spidermonkey
- */
+*  @filename    Polyfill.js
+*  @author      Jaenster (probably)
+*  @desc        Some polyfills since we run an old spidermonkey
+*
+*/
 
 String.prototype.lcsGraph = function (compareToThis) {
 	if (!this.length || !compareToThis || !compareToThis.length) {
@@ -134,8 +137,8 @@ if (!Array.prototype.findIndex) {
 // basic remove prototype
 if (!Array.prototype.remove) {
 	Array.prototype.remove = function (val) {
-		if (this === undefined || !this.length) { throw new Error("No Array defined"); }
-		if (val === undefined || !val) { throw new Error("Cannot remove and element if there is no element defined"); }
+		if (this === undefined || !this.length) throw new Error("No Array defined");
+		if (val === undefined || !val) throw new Error("Cannot remove and element if there is no element defined");
 		let index = this.indexOf(val);
 		index >= 0 && this.splice(index, 1);
 		return this;
@@ -485,7 +488,7 @@ String.prototype.repeat = function(count) {
 	}
 	let str = '' + this;
 	count = +count;
-	if (count != count) {
+	if (count !== count) {
 		count = 0;
 	}
 	if (count < 0) {
