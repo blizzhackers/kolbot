@@ -88,6 +88,7 @@ const ClassAttack = {
 
 			break;
 		case timedSkill === sdk.skills.Fury && untimedSkill === sdk.skills.Rabies:
+		case timedSkill === sdk.skills.FireClaws && untimedSkill === sdk.skills.Rabies:
 			if (!unit.getState(sdk.states.Rabies)) {
 				timedSkill = sdk.skills.Rabies;
 			}

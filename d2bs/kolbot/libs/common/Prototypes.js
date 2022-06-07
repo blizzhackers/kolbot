@@ -478,9 +478,7 @@ me.castingDuration = function (skillId, fcr = me.FCR, charClass = me.classid) {
  * @returns Unit[]
  */
 Unit.prototype.checkItem = function (itemInfo) {
-	if (typeof itemInfo !== "object") {
-		return {have: false, item: null};
-	}
+	if (this === undefined || this.type > 1 || typeof itemInfo !== "object") return {have: false, item: null};
 
 	let itemObj = Object.assign({}, {
 		classid: -1,
@@ -535,7 +533,9 @@ Unit.prototype.checkItem = function (itemInfo) {
  * @returns Unit[]
  */
 Unit.prototype.findFirst = function (itemInfo = []) {
+	if (this === undefined || this.type > 1) return {have: false, item: null};
 	if (!Array.isArray(itemInfo) || typeof itemInfo[0] !== "object") return {have: false, item: null};
+	let itemList = this.getItemsEx();
 
 	for (let i = 0; i < itemInfo.length; i++) {
 		let itemObj = Object.assign({}, {
@@ -551,7 +551,7 @@ Unit.prototype.findFirst = function (itemInfo = []) {
 		// convert id into string
 		typeof itemObj.name === "number" && (itemObj.name = getLocaleString(itemObj.name));
 
-		let items = this.getItemsEx()
+		let items = itemList
 			.filter(function (item) {
 				return (!item.questItem
 					&& (itemObj.classid === -1 || item.classid === itemObj.classid)
@@ -575,6 +575,72 @@ Unit.prototype.findFirst = function (itemInfo = []) {
 		have: false,
 		item: null
 	};
+};
+
+/**
+ * @description Returns boolean if we have all the items given by itemInfo
+ * @param itemInfo array of objects -
+ * 	{
+ * 		classid: Number,
+ * 		itemtype: Number,
+ * 		quality: Number,
+ * 		runeword: Boolean,
+ * 		ethereal: Boolean,
+ * 		name: getLocaleString(id) || localeStringId,
+ * 		equipped: Boolean || Number (bodylocation)
+ * 	}
+ * @returns Boolean
+ */
+Unit.prototype.haveAll = function (itemInfo = [], returnIfSome = false) {
+	if (this === undefined || this.type > 1) return false;
+	// if an object but not an array convert to array
+	!Array.isArray(itemInfo) && typeof itemInfo === "object" && (itemInfo = [itemInfo]);
+	if (!Array.isArray(itemInfo) || typeof itemInfo[0] !== "object") return false;
+	let itemList = this.getItemsEx();
+	let haveAll = false;
+	let checkedGids = [];
+
+	for (let i = 0; i < itemInfo.length; i++) {
+		let itemObj = Object.assign({}, {
+			classid: -1,
+			itemtype: -1,
+			quality: -1,
+			runeword: null,
+			ethereal: null,
+			equipped: null,
+			name: ""
+		}, itemInfo[i]);
+
+		// convert id into string
+		typeof itemObj.name === "number" && (itemObj.name = getLocaleString(itemObj.name));
+
+		let items = itemList
+			.filter(function (item) {
+				return (!item.questItem
+					&& (checkedGids.indexOf(item.gid) === -1)
+					&& (itemObj.classid === -1 || item.classid === itemObj.classid)
+					&& (itemObj.itemtype === -1 || item.itemType === itemObj.itemtype)
+					&& (itemObj.quality === -1 || item.quality === itemObj.quality)
+					&& (itemObj.runeword === null || (item.runeword === itemObj.runeword))
+					&& (itemObj.ethereal === null || (item.ethereal === itemObj.ethereal))
+					&& (itemObj.equipped === null || (typeof itemObj.equipped === "number" ? item.bodylocation === itemObj.equipped : item.isEquipped === itemObj.equipped))
+					&& (!itemObj.name.length || item.fname.toLowerCase().includes(itemObj.name.toLowerCase()))
+				);
+			});
+		if (items.length > 0) {
+			if (returnIfSome) return true;
+			checkedGids.push(items.first().gid);
+			haveAll = true;
+		} else {
+			return false;
+		}
+	}
+
+	return haveAll;
+};
+
+Unit.prototype.haveSome = function (itemInfo = []) {
+	return this.haveAll(itemInfo, true);
 };
 
 /**
