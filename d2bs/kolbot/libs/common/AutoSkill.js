@@ -98,7 +98,7 @@ const AutoSkill = new function () {
 			let addTo = this.skillToAdd(this.skillBuildOrder);
 
 			if (addTo) {
-				print("AutoSkill: Using skill point in Skill ID: " + addTo);
+				print("AutoSkill: Using skill point in Skill: " + getSkillById(addTo) + " ID: " + addTo);
 				delay(100);
 				useSkillPoint(addTo, 1);
 			}
