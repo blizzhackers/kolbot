@@ -1011,7 +1011,7 @@ function main () {
 		Precast.doPrecast(false);
 
 		if (!Pather.moveToExit(sdk.areas.FrozenRiver, true)
-			|| !Pather.moveToPreset(me.area, 2, sdk.quest.chest.FrozenAnyaPlatform)) {
+			|| !Pather.moveToPreset(me.area, 2, sdk.unit.FrozenAnyasPlatforn)) {
 			throw new Error("Anya quest failed");
 		}
 
