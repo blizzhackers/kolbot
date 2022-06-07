@@ -101,7 +101,7 @@ function BaalAssistant() {
 	}
 
 	!!Config.BaalAssistant.KillNihlathak && Loader.runScript("Nihlathak");
-	!!Config.BaalAssistant.FastChaos && Loader.runScript("FastDiablo");
+	!!Config.BaalAssistant.FastChaos && Loader.runScript("Diablo", () => Config.Diablo.Fast = true);
 
 	Town.goToTown(5);
 	Town.doChores();

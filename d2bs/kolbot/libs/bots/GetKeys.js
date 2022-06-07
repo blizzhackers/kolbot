@@ -18,7 +18,7 @@ function GetKeys() {
 
 	if (!me.findItems("pk2") || me.findItems("pk2").length < 3) {
 		try {
-			Loader.runScript("Summoner");
+			Loader.runScript("Summoner", () => Config.Summoner.FireEye = false);
 		} catch (summonerError) {
 			print("ÿc1Summoner failed");
 		}
@@ -31,4 +31,6 @@ function GetKeys() {
 			print("ÿc1Nihlathak failed");
 		}
 	}
+
+	return true;
 }

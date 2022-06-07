@@ -1476,6 +1476,8 @@ item: {
 			AncientsAltar: 546,
 			AncientsDoor: 547,
 			FrozenAnya: 558,
+			FrozenAnyasPlatform: 460,
+			NihlathaksPlatform: 462,
 			WorldstonePortal: 563,
 
 			FrigidHighlandsChest: 455,
