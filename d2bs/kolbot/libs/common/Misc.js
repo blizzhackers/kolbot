@@ -9,7 +9,7 @@ const Skill = {
 	usePvpRange: false,
 	haveTK: false,
 
-	// initialize our skill data
+	// initialize our skill data - todo: change precastables to be an object of Skill instead - map all skills to it
 	init: function () {
 		switch (me.classid) {
 		case sdk.charclass.Amazon:
@@ -47,8 +47,8 @@ const Skill = {
 			break;
 		case sdk.charclass.Barbarian:
 			!Precast.precastables.Shout.have && (Precast.precastables.Shout.have = !!me.getSkill(sdk.skills.Shout, 0)) && (Precast.precastables.Shout.duration = this.getDuration(sdk.skills.Shout));
-			!Precast.precastables.BattleOrders && (Precast.precastables.BattleOrders = !!me.getSkill(sdk.skills.BattleOrders, 0)) && (Precast.precastables.Shout.BattleOrders = this.getDuration(sdk.skills.BattleOrders));
-			!Precast.precastables.BattleCommand && (Precast.precastables.BattleCommand = !!me.getSkill(sdk.skills.BattleCommand, 0)) && (Precast.precastables.Shout.BattleCommand = this.getDuration(sdk.skills.BattleCommand));
+			!Precast.precastables.BattleOrders.have && (Precast.precastables.BattleOrders.have = !!me.getSkill(sdk.skills.BattleOrders, 0)) && (Precast.precastables.BattleOrders.duration = this.getDuration(sdk.skills.BattleOrders));
+			!Precast.precastables.BattleCommand.have && (Precast.precastables.BattleCommand.have = !!me.getSkill(sdk.skills.BattleCommand, 0)) && (Precast.precastables.BattleCommand.duration = this.getDuration(sdk.skills.BattleCommand));
 			break;
 		case sdk.charclass.Druid:
 			if (!Config.Wereform) {
@@ -116,6 +116,41 @@ const Skill = {
 		default:
 			return 0;
 		}
+	},
+
+	getMaxSummonCount: function (skillId) {
+		let skillNum = 0;
+
+		switch (skillId) {
+		case sdk.skills.Raven:
+			return Math.min(me.getSkill(skillId, 1), 5);
+		case sdk.skills.SummonSpiritWolf:
+			return Math.min(me.getSkill(skillId, 1), 5);
+		case sdk.skills.SummonDireWolf:
+			return Math.min(me.getSkill(skillId, 1), 3);
+		case sdk.skills.RaiseSkeleton:
+		case sdk.skills.RaiseSkeletalMage:
+			skillNum = me.getSkill(skillId, 1);
+			return skillNum < 4 ? skillNum : (Math.floor(skillNum / 3) + 2);
+		case sdk.skills.Revive:
+			return me.getSkill(sdk.skills.Revive, 1);
+		case sdk.skills.ShadowWarrior:
+		case sdk.skills.ShadowMaster:
+		case sdk.skills.PoisonCreeper:
+		case sdk.skills.CarrionVine:
+		case sdk.skills.SolarCreeper:
+		case sdk.skills.OakSage:
+		case sdk.skills.HeartofWolverine:
+		case sdk.skills.SpiritofBarbs:
+		case sdk.skills.SummonGrizzly:
+		case sdk.skills.ClayGolem:
+		case sdk.skills.BloodGolem:
+		case sdk.skills.FireGolem:
+		case sdk.skills.Valkyrie:
+			return 1;
+		}
+
+		return 0;
 	},
 
 	getRange: function (skillId) {

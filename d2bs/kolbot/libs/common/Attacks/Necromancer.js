@@ -12,28 +12,9 @@ const ClassAttack = {
 	maxRevives: 0,
 
 	setArmySize: function () {
-		let skillNum;
-		
-		if (Config.Skeletons === "max") {
-			skillNum = me.getSkill(sdk.skills.RaiseSkeleton, 1);
-			this.maxSkeletons = skillNum < 4 ? skillNum : (Math.floor(skillNum / 3) + 2);
-		} else {
-			this.maxSkeletons = Config.Skeletons;
-		}
-
-		if (Config.SkeletonMages === "max") {
-			skillNum = me.getSkill(sdk.skills.RaiseSkeletalMage, 1);
-			this.maxMages = skillNum < 4 ? skillNum : (Math.floor(skillNum / 3) + 2);
-		} else {
-			this.maxMages = Config.SkeletonMages;
-		}
-
-		if (Config.Revives === "max") {
-			skillNum = me.getSkill(sdk.skills.Revive, 1);
-			this.maxRevives = skillNum;
-		} else {
-			this.maxRevives = Config.Revives;
-		}
+		this.maxSkeletons = Config.Skeletons === "max" ? Skill.getMaxSummonCount(sdk.skills.RaiseSkeleton) : Config.Skeletons;
+		this.SkeletonMages = Config.SkeletonMages === "max" ? Skill.getMaxSummonCount(sdk.skills.RaiseSkeletalMage) : Config.SkeletonMages;
+		this.maxRevives = Config.Revives === "max" ? Skill.getMaxSummonCount(sdk.skills.Revive) : Config.Revives;
 	},
 
 	// Returns: true - doesn't use summons or has all he can summon, false - not full of summons yet

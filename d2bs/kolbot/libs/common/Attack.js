@@ -70,12 +70,12 @@ const Attack = {
 				me.weaponswitch !== 0 && me.switchWeapons(0);
 				// have cta
 				if ((Precast.haveCTA > -1) || Precast.checkCTA()) {
-					// have item on non-cta slot
+					// have item on non-cta slot - set non-cta slot as primary
 					if (this.checkSlot(Precast.haveCTA ^ 1)) {
-						Config.PrimarySlot = Precast.haveCTA ^ 1; // set non-cta slot as primary
+						Config.PrimarySlot = Precast.haveCTA ^ 1;
 					} else {
-						// other slot is empty
-						Config.PrimarySlot = Precast.haveCTA; // set cta as primary slot
+						// other slot is empty - set cta as primary slot
+						Config.PrimarySlot = Precast.haveCTA;
 					}
 				} else if (!this.checkSlot(0) && this.checkSlot(1)) {
 					// only slot II has items
