@@ -632,6 +632,7 @@ Unit.prototype.haveAll = function (itemInfo = [], returnIfSome = false) {
 			checkedGids.push(items.first().gid);
 			haveAll = true;
 		} else {
+			if (returnIfSome) continue;
 			return false;
 		}
 	}

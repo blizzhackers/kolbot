@@ -179,12 +179,11 @@ const Attack = {
 	},
 
 	checkAuradin: function () {
-		// Check player Dragon, Dream, or HoJ
-		this.auradin = me.getItemsEx(-1, sdk.itemmode.Equipped)
-			.filter(item => item.runeword)
-			.some(function (item) {
-				return [sdk.locale.items.Dragon, sdk.locale.items.Dream, sdk.locale.items.HandofJustice].includes(item.prefixnum);
-			});
+		// Check player Dragon, Dream, HoJ, or Ice
+		this.auradin = me.haveSome([
+			{name: sdk.locale.items.Dragon, equipped: true}, {name: sdk.locale.items.Dream, equipped: true},
+			{name: sdk.locale.items.HandofJustice, equipped: true}, {name: sdk.locale.items.Ice, equipped: true},
+		]);
   
 		return this.auradin;
 	},
@@ -1352,6 +1351,11 @@ const Attack = {
 			// check unit's light resistance but only if the above check failed
 			if (me.getState(sdk.states.HolyShock) && !valid) {
 				valid = this.getResist(unit, "lightning") < maxres;
+			}
+
+			// check unit's cold resistance but only if the above checks failed - we might be using an Ice Bow
+			if (me.getState(sdk.states.HolyFreeze) && !valid) {
+				valid = this.getResist(unit, "cold") < maxres;
 			}
 
 			// TODO: maybe if still invalid at this point check physical resistance? Although if we are an auradin our physcial dps is low

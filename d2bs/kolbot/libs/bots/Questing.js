@@ -97,7 +97,7 @@ function Questing() {
 					break;
 				}
 
-				Pather.moveTo(coords.x, coords.y);
+				Pather.moveToUnit(coords[0]);
 				Attack.clearClassids(61);
 				coords.shift();
 			}
