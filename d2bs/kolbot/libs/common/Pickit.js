@@ -272,6 +272,7 @@ const Pickit = {
 		}
 
 		let stats = new ItemStats(item);
+		let tkMana = stats.useTk ? Skill.getManaCost(sdk.skills.Telekinesis) * 2 : Infinity;
 
 		MainLoop:
 		for (let i = 0; i < retry; i += 1) {
@@ -291,7 +292,7 @@ const Pickit = {
 
 			// fastPick check? should only pick items if surrounding monsters have been cleared or if fastPick is active
 			// note: clear of surrounding monsters of the spectype we are set to clear
-			if (stats.useTk && me.mp > Skill.getManaCost(sdk.skills.Telekinesis)) {
+			if (stats.useTk && me.mp > tkMana) {
 				Skill.setSkill(sdk.skills.Telekinesis, 0) && Packet.unitCast(0, item);
 			} else {
 				if (item.distance > (Config.FastPick || i < 1 ? 6 : 4) || checkCollision(me, item, 0x1)) {

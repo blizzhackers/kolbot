@@ -1627,7 +1627,7 @@ Object.defineProperties(Unit.prototype, {
 	},
 	isPlayer: {
 		get: function () {
-			return this.type === 0;
+			return this.type === sdk.unittype.Player;
 		},
 	},
 	// todo - monster types
