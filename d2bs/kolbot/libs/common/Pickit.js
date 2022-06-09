@@ -123,8 +123,8 @@ const Pickit = {
 	},
 
 	pickItems: function (range = Config.PickRange) {
-		let needMule = false,
-			pickList = [];
+		let needMule = false;
+		let pickList = [];
 
 		Town.clearBelt();
 
@@ -255,9 +255,9 @@ const Pickit = {
 			this.picked = false;
 		}
 
-		let gid = (unit.gid || -1),
-			cancelFlags = [0x01, 0x08, 0x14, 0x0c, 0x19, 0x1a],
-			itemCount = me.itemcount;
+		let gid = (unit.gid || -1);
+		let cancelFlags = [0x01, 0x08, 0x14, 0x0c, 0x19, 0x1a];
+		let itemCount = me.itemcount;
 		let item = gid > -1 ? getUnit(4, -1, -1, gid) : false;
 
 		if (!item) return false;
@@ -291,12 +291,11 @@ const Pickit = {
 
 			// fastPick check? should only pick items if surrounding monsters have been cleared or if fastPick is active
 			// note: clear of surrounding monsters of the spectype we are set to clear
-			// should we unit cast by default?
-			if (stats.useTk) {
+			if (stats.useTk && me.mp > Skill.getManaCost(sdk.skills.Telekinesis)) {
 				Skill.setSkill(sdk.skills.Telekinesis, 0) && Packet.unitCast(0, item);
 			} else {
-				if (item.distance > (Config.FastPick && i < 1 ? 6 : 4) || checkCollision(me, item, 0x1)) {
-					if ((Pather.useTeleport() && !Pather.moveToUnit(item)) || !Pather.moveToUnit(item)) {
+				if (item.distance > (Config.FastPick || i < 1 ? 6 : 4) || checkCollision(me, item, 0x1)) {
+					if (!Pather.moveToUnit(item)) {
 						continue;
 					}
 				}
