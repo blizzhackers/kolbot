@@ -793,7 +793,7 @@ const Item = {
 						if (!items[0].getFlag(0x10)) { // unid
 							let tome = me.findItem(519, 0, 3);
 
-							if (tome && tome.getStat(70) > 0) {
+							if (tome && tome.getStat(sdk.stats.Quantity) > 0) {
 								if (items[0].location === 7) {
 									Town.openStash();
 								}

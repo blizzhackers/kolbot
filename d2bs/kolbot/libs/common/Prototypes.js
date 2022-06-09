@@ -366,8 +366,8 @@ me.findItem = function (id = -1, mode = -1, loc = -1, quality = -1) {
 };
 
 me.findItems = function (id = -1, mode = -1, loc = false) {
-	let list = [],
-		item = me.getItem(id, mode);
+	let list = [];
+	let item = me.getItem(id, mode);
 
 	if (item) {
 		do {
@@ -1286,7 +1286,7 @@ Unit.prototype.getColor = function () {
 		} else {
 			return Color.lightyellow; // Unidentified set item
 		}
-	} else if (this.quality === 7) { // Unique
+	} else if (this.unique) { // Unique
 		for (i = 0; i < 401; i += 1) {
 			if (this.code === getBaseStat(17, i, 4).replace(/^\s+|\s+$/g, "") && this.fname.split("\n").reverse()[0].indexOf(getLocaleString(getBaseStat(17, i, 2))) > -1) {
 				return getBaseStat(17, i, 13) > 20 ? -1 : getBaseStat(17, i, 13);

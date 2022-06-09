@@ -778,7 +778,7 @@ const Cubing = {
 
 		if (recipe.Index >= Recipe.Unique.Weapon.ToExceptional && recipe.Index <= Recipe.Unique.Armor.ToElite) {
 			// Unique item matching pickit entry
-			if (unit.quality === 7 && NTIP.CheckItem(unit) === 1) {
+			if (unit.unique && NTIP.CheckItem(unit) === 1) {
 				switch (recipe.Ethereal) {
 				case 0:
 				case undefined:

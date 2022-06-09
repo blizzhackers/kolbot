@@ -1260,7 +1260,7 @@ item: {
 			AbsorbCrushPercent: 266,
 			AbsorbThrustPercent: 267,
 			Slow: 150,
-			Indesctructible: 152,
+			Indestructible: 152,
 			CannotbeFrozen: 153,
 			StaminaDrainPct: 154,
 			Reanimate: 155,
