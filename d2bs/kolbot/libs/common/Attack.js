@@ -70,12 +70,12 @@ const Attack = {
 				me.weaponswitch !== 0 && me.switchWeapons(0);
 				// have cta
 				if ((Precast.haveCTA > -1) || Precast.checkCTA()) {
-					// have item on non-cta slot
+					// have item on non-cta slot - set non-cta slot as primary
 					if (this.checkSlot(Precast.haveCTA ^ 1)) {
-						Config.PrimarySlot = Precast.haveCTA ^ 1; // set non-cta slot as primary
+						Config.PrimarySlot = Precast.haveCTA ^ 1;
 					} else {
-						// other slot is empty
-						Config.PrimarySlot = Precast.haveCTA; // set cta as primary slot
+						// other slot is empty - set cta as primary slot
+						Config.PrimarySlot = Precast.haveCTA;
 					}
 				} else if (!this.checkSlot(0) && this.checkSlot(1)) {
 					// only slot II has items
@@ -179,12 +179,11 @@ const Attack = {
 	},
 
 	checkAuradin: function () {
-		// Check player Dragon, Dream, or HoJ
-		this.auradin = me.getItemsEx(-1, sdk.itemmode.Equipped)
-			.filter(item => item.runeword)
-			.some(function (item) {
-				return [sdk.locale.items.Dragon, sdk.locale.items.Dream, sdk.locale.items.HandofJustice].includes(item.prefixnum);
-			});
+		// Check player Dragon, Dream, HoJ, or Ice
+		this.auradin = me.haveSome([
+			{name: sdk.locale.items.Dragon, equipped: true}, {name: sdk.locale.items.Dream, equipped: true},
+			{name: sdk.locale.items.HandofJustice, equipped: true}, {name: sdk.locale.items.Ice, equipped: true},
+		]);
   
 		return this.auradin;
 	},
@@ -223,7 +222,7 @@ const Attack = {
 		console.log("ÿc7Kill ÿc0:: " + (!!target.name ? target.name : classId));
 		Config.MFLeader && Pather.makePortal() && say("kill " + classId);
 
-		while (attackCount < Config.MaxAttackCount && target.attackable && this.skipCheck(target)) {
+		while (attackCount < Config.MaxAttackCount && target.attackable && !this.skipCheck(target)) {
 			Misc.townCheck();
 			
 			// Check if unit got invalidated, happens if necro raises a skeleton from the boss's corpse.
@@ -236,6 +235,7 @@ const Attack = {
 				}
 			}
 
+			// todo - dodge boss missiles
 			Config.Dodge && me.hpPercent <= Config.DodgeHP && this.deploy(target, Config.DodgeRange, 5, 9);
 			Config.MFSwitchPercent && target.hpPercent < Config.MFSwitchPercent && me.switchWeapons(this.getPrimarySlot() ^ 1);
 
@@ -275,7 +275,7 @@ const Attack = {
 		if (!!target && target.attackable) {
 			console.warn("Failed to kill " + target.name + errorInfo);
 		} else {
-			console.log("ÿc7Killed ÿc0:: " + (!!target.name ? target.name : classId) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
+			console.log("ÿc7Killed ÿc0:: " + (!!target.name ? target.name : classId) + "ÿc0 - ÿc7Duration: ÿc0" + formatTime(getTickCount() - tick));
 		}
 
 		return (!target || !copyUnit(target).x || target.dead || !target.attackable);
@@ -292,7 +292,7 @@ const Attack = {
 
 		let retry = 0, attackCount = 0;
 
-		while (attackCount < Config.MaxAttackCount && target.attackable && Attack.skipCheck(target)) {
+		while (attackCount < Config.MaxAttackCount && target.attackable && !Attack.skipCheck(target)) {
 			let result = ClassAttack.doAttack(target, attackCount % 15 === 0);
 
 			if (result === 0) {
@@ -395,7 +395,7 @@ const Attack = {
 
 		if (target) {
 			do {
-				if ((!spectype || (target.spectype & spectype)) && target.attackable && this.skipCheck(target)) {
+				if ((!spectype || (target.spectype & spectype)) && target.attackable && !this.skipCheck(target)) {
 					// Speed optimization - don't go through monster list until there's at least one within clear range
 					if (!start && getDistance(target, orgx, orgy) <= range &&
 							(Pather.canTeleport() || !checkCollision(me, target, 0x5))) {
@@ -858,7 +858,7 @@ const Attack = {
 		}
 
 		//this.storeStatistics(Pather.getAreaName(me.area));
-		console.log("ÿc7End ÿc8(clearLevel) ÿc0:: ÿc7" + Pather.getAreaName(currentArea) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
+		console.log("ÿc7End ÿc8(clearLevel) ÿc0:: ÿc7" + Pather.getAreaName(currentArea) + "ÿc0 - ÿc7Duration: ÿc0" + (formatTime(getTickCount() - tick)));
 
 		return true;
 	},
@@ -982,8 +982,8 @@ const Attack = {
 		x === undefined && (x = me.x);
 		y === undefined && (y = me.y);
 
-		let list = [],
-			ids = ["chest", "chest3", "weaponrack", "armorstand"];
+		let list = [];
+		let ids = ["chest", "chest3", "weaponrack", "armorstand"];
 		let unit = getUnit(2);
 
 		if (unit) {
@@ -1023,9 +1023,9 @@ const Attack = {
 	findSafeSpot: function (unit, distance, spread, range) {
 		if (arguments.length < 4) throw new Error("deploy: Not enough arguments supplied");
 
-		let index,
-			monList = [],
-			count = 999;
+		let index;
+		let monList = [];
+		let count = 999;
 
 		monList = this.buildMonsterList();
 		monList.sort(Sort.units);
@@ -1073,8 +1073,8 @@ const Attack = {
 	},
 
 	getMonsterCount: function (x, y, range, list) {
-		let count = 0,
-			ignored = [243];
+		let count = 0;
+		let ignored = [sdk.monsters.Diablo]; // why is diablo ignored?
 
 		for (let i = 0; i < list.length; i += 1) {
 			if (ignored.indexOf(list[i].classid) === -1 && list[i].attackable && getDistance(x, y, list[i].x, list[i].y) <= range) {
@@ -1082,6 +1082,7 @@ const Attack = {
 			}
 		}
 
+		// missile check?
 		let fire = getUnit(2, "fire");
 
 		if (fire) {
@@ -1115,16 +1116,19 @@ const Attack = {
 		return grid;
 	},
 
+	/**
+	* @param unit
+	* @desc checks if we should skip a monster
+	* @returns {Boolean}
+	*/
 	skipCheck: function (unit) {
-		if (me.area === sdk.areas.ThroneofDestruction) return true;
-
+		if (me.area === sdk.areas.ThroneofDestruction) return false;
 		if (unit.isSpecial && Config.SkipException && Config.SkipException.includes(unit.name)) {
 			console.log("ÿc1Skip Exception: " + unit.name);
-			return true;
+			return false;
 		}
 
-		let rval,
-			tempArray = [];
+		let tempArray = [];
 
 		// EnchantLoop: // Skip enchanted monsters
 		for (let i = 0; i < Config.SkipEnchant.length; i += 1) {
@@ -1133,59 +1137,58 @@ const Attack = {
 			for (let j = 0; j < tempArray.length; j += 1) {
 				switch (tempArray[j]) {
 				case "extra strong":
-					tempArray[j] = 5;
+					tempArray[j] = sdk.enchant.ExtraStrong;
 
 					break;
 				case "extra fast":
-					tempArray[j] = 6;
+					tempArray[j] = sdk.enchant.ExtraFast;
 
 					break;
 				case "cursed":
-					tempArray[j] = 7;
+					tempArray[j] = sdk.enchant.Cursed;
 
 					break;
 				case "magic resistant":
-					tempArray[j] = 8;
+					tempArray[j] = sdk.enchant.MagicResistant;
 
 					break;
 				case "fire enchanted":
-					tempArray[j] = 9;
+					tempArray[j] = sdk.enchant.FireEnchanted;
 
 					break;
 				case "lightning enchanted":
-					tempArray[j] = 17;
+					tempArray[j] = sdk.enchant.LightningEnchanted;
 
 					break;
 				case "cold enchanted":
-					tempArray[j] = 18;
+					tempArray[j] = sdk.enchant.ColdEnchanted;
 
 					break;
 				case "mana burn":
-					tempArray[j] = 25;
+					tempArray[j] = sdk.enchant.ManaBurn;
 
 					break;
 				case "teleportation":
-					tempArray[j] = 26;
+					tempArray[j] = sdk.enchant.Teleportation;
 
 					break;
 				case "spectral hit":
-					tempArray[j] = 27;
+					tempArray[j] = sdk.enchant.SpectralHit;
 
 					break;
 				case "stone skin":
-					tempArray[j] = 28;
+					tempArray[j] = sdk.enchant.StoneSkin;
 
 					break;
 				case "multiple shots":
-					tempArray[j] = 29;
+					tempArray[j] = sdk.enchant.MultipleShots;
 
 					break;
 				}
 			}
 
-			if (!tempArray.some(enchant => unit.getEnchant(enchant))) {
-				//print("Skip Enchanted: " + unit.name);
-				return false;
+			if (tempArray.every(enchant => unit.getEnchant(enchant))) {
+				return true;
 			}
 		}
 
@@ -1194,14 +1197,13 @@ const Attack = {
 			tempArray = Config.SkipImmune[i].toLowerCase().split(" and ");
 
 			// Infinity calculations are built-in
-			if (!tempArray.some(immnue => this.checkResist(unit, immnue))) {
-				return false;
+			if (tempArray.every(immnue => !Attack.checkResist(unit, immnue))) {
+				return true;
 			}
 		}
 
 		// AuraLoop: // Skip monsters with auras
 		for (let i = 0; i < Config.SkipAura.length; i += 1) {
-			rval = true;
 			let aura = Config.SkipAura[i].toLowerCase();
 
 			switch (true) {
@@ -1212,19 +1214,13 @@ const Attack = {
 			case aura === "holy fire" && unit.getState(sdk.states.HolyFire):
 			case aura === "holy freeze" && unit.getState(sdk.states.HolyFreeze):
 			case aura === "holy shock" && unit.getState(sdk.states.HolyShock):
-				rval = false;
-
-				break;
+				return true;
 			default:
 				break;
 			}
-
-			if (!rval) {
-				return false;
-			}
 		}
 
-		return true;
+		return false;
 	},
 
 	// Get element by skill number
@@ -1259,23 +1255,21 @@ const Attack = {
 	getResist: function (unit, type) {
 		// some scripts pass empty units in throne room
 		if (!unit || !unit.getStat) return 100;
-		
-		// player
-		if (unit.type === sdk.unittype.Player) return 0;
+		if (unit.isPlayer) return 0;
 
 		switch (type) {
 		case "physical":
-			return unit.getStat(36);
+			return unit.getStat(sdk.stats.DamageResist);
 		case "fire":
-			return unit.getStat(39);
+			return unit.getStat(sdk.stats.FireResist);
 		case "lightning":
-			return unit.getStat(41);
+			return unit.getStat(sdk.stats.LightningResist);
 		case "magic":
-			return unit.getStat(37);
+			return unit.getStat(sdk.stats.MagicResist);
 		case "cold":
-			return unit.getStat(43);
+			return unit.getStat(sdk.stats.ColdResist);
 		case "poison":
-			return unit.getStat(45);
+			return unit.getStat(sdk.stats.PoisonResist);
 		case "none":
 			return 0;
 		case "holybolt": // check if a monster is undead
@@ -1352,6 +1346,11 @@ const Attack = {
 			// check unit's light resistance but only if the above check failed
 			if (me.getState(sdk.states.HolyShock) && !valid) {
 				valid = this.getResist(unit, "lightning") < maxres;
+			}
+
+			// check unit's cold resistance but only if the above checks failed - we might be using an Ice Bow
+			if (me.getState(sdk.states.HolyFreeze) && !valid) {
+				valid = this.getResist(unit, "cold") < maxres;
 			}
 
 			// TODO: maybe if still invalid at this point check physical resistance? Although if we are an auradin our physcial dps is low

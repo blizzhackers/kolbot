@@ -140,7 +140,7 @@ const Loader = {
 						}
 
 						if (global[script]()) {
-							console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
+							console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (formatTime(getTickCount() - tick)));
 						}
 					}
 				} catch (error) {
@@ -161,9 +161,22 @@ const Loader = {
 		}
 	},
 
-	runScript: function (script) {
+	tempList: [],
+
+	runScript: function (script, configOverride) {
 		let reconfiguration, unmodifiedConfig = {};
 		let failed = false;
+		let mainScript = this.scriptName();
+		
+		function buildScriptMsg () {
+			let str = "ÿc9" + mainScript + " ÿc0:: ";
+
+			if (Loader.tempList.length && Loader.tempList[0] !== mainScript) {
+				Loader.tempList.forEach(s => str += "ÿc9" + s + " ÿc0:: ");
+			}
+			
+			return str;
+		}
 
 		this.copy(Config, unmodifiedConfig);
 
@@ -180,7 +193,9 @@ const Loader = {
 				}
 
 				if (this.skipTown.includes(script) || Town.goToTown()) {
-					print("ÿc2Starting script: ÿc9" + script);
+					let mainScriptStr = (mainScript !== script ? buildScriptMsg() : "");
+					this.tempList.push(script);
+					print(mainScriptStr + "ÿc2Starting script: ÿc9" + script);
 					Messaging.sendToScript("tools/toolsthread.js", JSON.stringify({currScript: script}));
 
 					reconfiguration = typeof Scripts[script] === 'object';
@@ -190,10 +205,15 @@ const Loader = {
 						this.copy(Scripts[script], Config);
 					}
 
+					if (typeof configOverride === "function") {
+						reconfiguration = true;
+						configOverride();
+					}
+
 					let tick = getTickCount();
 
 					if (global[script]()) {
-						console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
+						console.log(mainScriptStr + "ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (formatTime(getTickCount() - tick)));
 					}
 				}
 			} catch (error) {
@@ -204,7 +224,11 @@ const Loader = {
 				if (this.scriptIndex < this.scriptList.length) {
 					// remove script function from global scope, so it can be cleared by GC
 					delete global[script];
+				} else if (this.tempList.length) {
+					delete global[script];
 				}
+
+				this.tempList.pop();
 				
 				if (reconfiguration) {
 					print("ÿc2Reverting back unmodified config properties.");

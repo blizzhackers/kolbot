@@ -366,8 +366,8 @@ me.findItem = function (id = -1, mode = -1, loc = -1, quality = -1) {
 };
 
 me.findItems = function (id = -1, mode = -1, loc = false) {
-	let list = [],
-		item = me.getItem(id, mode);
+	let list = [];
+	let item = me.getItem(id, mode);
 
 	if (item) {
 		do {
@@ -478,9 +478,7 @@ me.castingDuration = function (skillId, fcr = me.FCR, charClass = me.classid) {
  * @returns Unit[]
  */
 Unit.prototype.checkItem = function (itemInfo) {
-	if (typeof itemInfo !== "object") {
-		return {have: false, item: null};
-	}
+	if (this === undefined || this.type > 1 || typeof itemInfo !== "object") return {have: false, item: null};
 
 	let itemObj = Object.assign({}, {
 		classid: -1,
@@ -535,7 +533,9 @@ Unit.prototype.checkItem = function (itemInfo) {
  * @returns Unit[]
  */
 Unit.prototype.findFirst = function (itemInfo = []) {
+	if (this === undefined || this.type > 1) return {have: false, item: null};
 	if (!Array.isArray(itemInfo) || typeof itemInfo[0] !== "object") return {have: false, item: null};
+	let itemList = this.getItemsEx();
 
 	for (let i = 0; i < itemInfo.length; i++) {
 		let itemObj = Object.assign({}, {
@@ -551,7 +551,7 @@ Unit.prototype.findFirst = function (itemInfo = []) {
 		// convert id into string
 		typeof itemObj.name === "number" && (itemObj.name = getLocaleString(itemObj.name));
 
-		let items = this.getItemsEx()
+		let items = itemList
 			.filter(function (item) {
 				return (!item.questItem
 					&& (itemObj.classid === -1 || item.classid === itemObj.classid)
@@ -575,6 +575,73 @@ Unit.prototype.findFirst = function (itemInfo = []) {
 		have: false,
 		item: null
 	};
+};
+
+/**
+ * @description Returns boolean if we have all the items given by itemInfo
+ * @param itemInfo array of objects -
+ * 	{
+ * 		classid: Number,
+ * 		itemtype: Number,
+ * 		quality: Number,
+ * 		runeword: Boolean,
+ * 		ethereal: Boolean,
+ * 		name: getLocaleString(id) || localeStringId,
+ * 		equipped: Boolean || Number (bodylocation)
+ * 	}
+ * @returns Boolean
+ */
+Unit.prototype.haveAll = function (itemInfo = [], returnIfSome = false) {
+	if (this === undefined || this.type > 1) return false;
+	// if an object but not an array convert to array
+	!Array.isArray(itemInfo) && typeof itemInfo === "object" && (itemInfo = [itemInfo]);
+	if (!Array.isArray(itemInfo) || typeof itemInfo[0] !== "object") return false;
+	let itemList = this.getItemsEx();
+	let haveAll = false;
+	let checkedGids = [];
+
+	for (let i = 0; i < itemInfo.length; i++) {
+		let itemObj = Object.assign({}, {
+			classid: -1,
+			itemtype: -1,
+			quality: -1,
+			runeword: null,
+			ethereal: null,
+			equipped: null,
+			name: ""
+		}, itemInfo[i]);
+
+		// convert id into string
+		typeof itemObj.name === "number" && (itemObj.name = getLocaleString(itemObj.name));
+
+		let items = itemList
+			.filter(function (item) {
+				return (!item.questItem
+					&& (checkedGids.indexOf(item.gid) === -1)
+					&& (itemObj.classid === -1 || item.classid === itemObj.classid)
+					&& (itemObj.itemtype === -1 || item.itemType === itemObj.itemtype)
+					&& (itemObj.quality === -1 || item.quality === itemObj.quality)
+					&& (itemObj.runeword === null || (item.runeword === itemObj.runeword))
+					&& (itemObj.ethereal === null || (item.ethereal === itemObj.ethereal))
+					&& (itemObj.equipped === null || (typeof itemObj.equipped === "number" ? item.bodylocation === itemObj.equipped : item.isEquipped === itemObj.equipped))
+					&& (!itemObj.name.length || item.fname.toLowerCase().includes(itemObj.name.toLowerCase()))
+				);
+			});
+		if (items.length > 0) {
+			if (returnIfSome) return true;
+			checkedGids.push(items.first().gid);
+			haveAll = true;
+		} else {
+			if (returnIfSome) continue;
+			return false;
+		}
+	}
+
+	return haveAll;
+};
+
+Unit.prototype.haveSome = function (itemInfo = []) {
+	return this.haveAll(itemInfo, true);
 };
 
 /**
@@ -1219,7 +1286,7 @@ Unit.prototype.getColor = function () {
 		} else {
 			return Color.lightyellow; // Unidentified set item
 		}
-	} else if (this.quality === 7) { // Unique
+	} else if (this.unique) { // Unique
 		for (i = 0; i < 401; i += 1) {
 			if (this.code === getBaseStat(17, i, 4).replace(/^\s+|\s+$/g, "") && this.fname.split("\n").reverse()[0].indexOf(getLocaleString(getBaseStat(17, i, 2))) > -1) {
 				return getBaseStat(17, i, 13) > 20 ? -1 : getBaseStat(17, i, 13);
@@ -1558,7 +1625,33 @@ Object.defineProperties(Unit.prototype, {
 			return (this.isChampion || this.isUnique || this.isSuperUnique);
 		},
 	},
+	isPlayer: {
+		get: function () {
+			return this.type === sdk.unittype.Player;
+		},
+	},
 	// todo - monster types
+	primeEvils: {
+		get: function () {
+			return [
+				sdk.monsters.Andariel, sdk.monsters.Duriel, sdk.monsters.Mephisto, sdk.monsters.Diablo,
+				sdk.monsters.Baal, sdk.monsters.BaalClone, sdk.monsters.UberDuriel, sdk.monsters.UberIzual,
+				sdk.monsters.UberMephisto, sdk.monsters.UberDiablo, sdk.monsters.UberBaal, sdk.monsters.Lilith, sdk.monsters.DiabloClone
+			].includes(this.classid);
+		},
+	},
+	boss: {
+		get: function () {
+			return this.primeEvils
+				||
+				[
+					sdk.monsters.TheSmith, sdk.monsters.BloodRaven, sdk.monsters.Radament, sdk.monsters.Griswold,
+					sdk.monsters.TheSummoner, sdk.monsters.Izual, sdk.monsters.Hephasto, sdk.monsters.KorlictheProtector,
+					sdk.monsters.TalictheDefender, sdk.monsters.MadawctheGuardian, sdk.monsters.ListerTheTormenter,
+					sdk.monsters.TheCowKing, sdk.monsters.ColdwormtheBurrower, sdk.monsters.Nihlathak
+				].includes(this.classid);
+		},
+	},
 	ghosts: {
 		get: function () {
 			return [
@@ -1746,6 +1839,24 @@ Object.defineProperties(Unit.prototype, {
 				].indexOf(this.classid) === -1
 				&& !(this.quality === sdk.itemquality.Unique && [sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(this.itemType)));
 		}
+	},
+	lowquality: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.quality === sdk.itemquality.LowQuality;
+		},
+	},
+	normal: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.quality === sdk.itemquality.Normal;
+		},
+	},
+	superior: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.quality === sdk.itemquality.Superior;
+		},
 	},
 	magic: {
 		get: function () {

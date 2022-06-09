@@ -97,7 +97,7 @@ function Questing() {
 					break;
 				}
 
-				Pather.moveTo(coords.x, coords.y);
+				Pather.moveToUnit(coords[0]);
 				Attack.clearClassids(61);
 				coords.shift();
 			}
@@ -122,8 +122,9 @@ function Questing() {
 
 		Precast.doPrecast(true);
 
-		if (!Pather.moveToExit(sdk.areas.A2SewersLvl3, true) || !Pather.moveToPreset(me.area, 2, 355)) {
-			throw new Error();
+		if (!Pather.moveToExit(sdk.areas.HallsoftheDeadLvl3, true)
+			|| !Pather.moveToPreset(me.area, 2, sdk.quest.chest.HoradricCubeChest)) {
+			throw new Error("cube failed");
 		}
 
 		Attack.kill(sdk.monsters.Radament);
@@ -142,17 +143,18 @@ function Questing() {
 
 		log("starting lam essen");
 
-		if (!Town.goToTown() || !Pather.useWaypoint(80, true)) {
-			throw new Error();
+		if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.KurastBazaar, true)) {
+			throw new Error("Lam Essen quest failed");
 		}
 
 		Precast.doPrecast(true);
 
-		if (!Pather.moveToExit(94, true) || !Pather.moveToPreset(me.area, 2, 193)) {
-			throw new Error();
+		if (!Pather.moveToExit(sdk.areas.RuinedTemple, true)
+			|| !Pather.moveToPreset(me.area, 2, sdk.quest.chest.LamEsensTomeHolder)) {
+			throw new Error("Lam Essen quest failed");
 		}
 
-		Misc.openChest(193);
+		Misc.openChest(sdk.quest.chest.LamEsensTomeHolder);
 		let book = Misc.poll(() => item(sdk.quest.item.LamEsensTome), 1000, 100);
 
 		Pickit.pickItem(book);
@@ -215,7 +217,6 @@ function Questing() {
 		Precast.doPrecast(true);
 
 		let barbs = (getPresetUnits(me.area, 2, 473) || []);
-		console.debug(barbs);
 
 		if (!barbs.length) {
 			log("Couldn't find the barbs");
@@ -263,8 +264,9 @@ function Questing() {
 
 		Precast.doPrecast(true);
 
-		if (!Pather.moveToExit(114, true) || !Pather.moveToPreset(me.area, 2, 460)) {
-			throw new Error();
+		if (!Pather.moveToExit(sdk.areas.FrozenRiver, true)
+			|| !Pather.moveToPreset(me.area, 2, sdk.unit.FrozenAnyasPlatforn)) {
+			throw new Error("Anya quest failed");
 		}
 
 		delay(1000);
@@ -340,7 +342,7 @@ function Questing() {
 		Precast.doPrecast(true);
 
 		// move to altar
-		if (!Pather.moveToPreset(sdk.areas.ArreatSummit, sdk.unittype.Object, 546)) {
+		if (!Pather.moveToPreset(sdk.areas.ArreatSummit, sdk.unittype.Object, sdk.quest.chest.AncientsAltar)) {
 			log("Failed to move to ancients' altar", true);
 		}
 

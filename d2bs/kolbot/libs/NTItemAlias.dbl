@@ -1,3 +1,11 @@
+/**
+*  @filename    NTItemAlias.dbl
+*  @author      kolton
+*  @credit      d2nt
+*  @desc        Item alias's to work with NTItemParser for kolbots pickit system
+*
+*/
+
 var NTIPAliasType = {};
 NTIPAliasType["shield"] = 2;
 NTIPAliasType["armor"] = 3;

@@ -244,7 +244,7 @@ function main() {
 					sendPacket(1, 0x26, 4, potion.gid, 4, 1, 4, 0);
 				}
 			} catch (e) {
-				console.warn(e);
+				console.errorReport(e);
 			}
 
 			timerLastDrink[type] = getTickCount();
@@ -433,6 +433,8 @@ function main() {
 		case 0x00: // "%Name1(%Name2) dropped due to time out."
 		case 0x01: // "%Name1(%Name2) dropped due to errors."
 		case 0x03: // "%Name1(%Name2) left our world. Diablo's minions weaken."
+			Config.DebugMode && mode === 0 && D2Bot.printToConsole(name1 + " timed out, check their logs");
+
 			if ((typeof Config.QuitList === "string" && Config.QuitList.toLowerCase() === "any") ||
 					(Config.QuitList instanceof Array && Config.QuitList.indexOf(name1) > -1)) {
 				print(name1 + (mode === 0 ? " timed out" : " left"));
@@ -651,8 +653,9 @@ function main() {
 					if (getTickCount() - idleTick > 0) {
 						sendPacket(1, 0x40);
 						idleTick += rand(1200, 1500) * 1000;
-						me.overhead("Diablo Walks the Earth! - Next packet in: (" + (new Date(idleTick - getTickCount()).toISOString().slice(11, -5)) + ")");
-						print("Sent anti-idle packet, next refresh in: (" + (new Date(idleTick - getTickCount()).toISOString().slice(11, -5)) + ")");
+						let timeStr = formatTime(idleTick - getTickCount());
+						me.overhead("Diablo Walks the Earth! - Next packet in: (" + timeStr + ")");
+						print("Sent anti-idle packet, next refresh in: (" + timeStr + ")");
 					}
 				}
 			}
@@ -663,7 +666,7 @@ function main() {
 		}
 
 		if (quitFlag && canQuit && (typeof quitListDelayTime === "undefined" || getTickCount() >= quitListDelayTime)) {
-			print("ÿc8Run duration ÿc2" + (new Date(getTickCount() - me.gamestarttime).toISOString().slice(11, -5)));
+			print("ÿc8Run duration ÿc2" + (formatTime(getTickCount() - me.gamestarttime)));
 			this.checkPing(false); // In case of quitlist triggering first
 			this.exit();
 

@@ -1,9 +1,11 @@
 /**
 *  @filename    Barbarian.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        Barbarian attack sequence
 *
 */
+
+// todo - add howl
 
 const ClassAttack = {
 	doAttack: function (unit, preattack) {
@@ -21,8 +23,8 @@ const ClassAttack = {
 			}
 		}
 
-		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Attack.getSkillElement(Config.AttackSkill[0])) && (!me.getState(121) || !Skill.isTimed(Config.AttackSkill[0]))) {
-			if (Math.round(getDistance(me, unit)) > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
+		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Attack.getSkillElement(Config.AttackSkill[0])) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
 					return 0;
 				}
@@ -33,7 +35,7 @@ const ClassAttack = {
 			return 1;
 		}
 
-		let index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
+		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 		let attackSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
 
 		if (!Attack.checkResist(unit, attackSkill)) {
@@ -60,19 +62,15 @@ const ClassAttack = {
 
 		// Repair check
 		needRepair.length > 0 && Town.visitTown(true);
-		pickit && this.findItem(me.area === 83 ? 60 : 20);
+		pickit && this.findItem(me.area === sdk.areas.Travincal ? 60 : 20);
 	},
 
-	doCast: function (unit, attackSkill) {
-		let walk;
-
-		if (attackSkill < 0) {
-			return 2;
-		}
-
+	doCast: function (unit, attackSkill = -1) {
+		if (attackSkill < 0) return 2;
+		
 		switch (attackSkill) {
-		case 151:
-			if (Math.ceil(getDistance(me, unit)) > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x1)) {
+		case sdk.skills.Whirlwind:
+			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x1)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x1, 2)) {
 					return 0;
 				}
@@ -86,17 +84,15 @@ const ClassAttack = {
 				return 0;
 			}
 
-			if (Math.round(getDistance(me, unit)) > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x4)) {
-				walk = Skill.getRange(attackSkill) < 4 && getDistance(me, unit) < 10 && !checkCollision(me, unit, 0x1);
+			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x4)) {
+				let walk = Skill.getRange(attackSkill) < 4 && getDistance(me, unit) < 10 && !checkCollision(me, unit, 0x1);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4, walk)) {
 					return 0;
 				}
 			}
 
-			if (!unit.dead) {
-				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
-			}
+			!unit.dead && Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 
 			return 1;
 		}
@@ -107,8 +103,8 @@ const ClassAttack = {
 
 		if (monster) {
 			do {
-				if (getDistance(me, monster) <= range && monster.attackable && !checkCollision(me, monster, 0x4) &&
-						(Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[(monster.spectype & 0x7) ? 1 : 3])) ||
+				if (monster.distance <= range && monster.attackable && !checkCollision(me, monster, 0x4) &&
+						(Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[monster.isSpecial ? 1 : 3])) ||
 						(Config.AttackSkill[3] > -1 && Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[3]))))) {
 					return true;
 				}
@@ -119,19 +115,16 @@ const ClassAttack = {
 	},
 
 	findItem: function (range = 10) {
-		if (!Config.FindItem || !me.getSkill(142, 1)) {
-			return false;
-		}
+		if (!Config.FindItem || !me.getSkill(sdk.skills.FindItem, 1)) return false;
 
-		let i, j, tick, corpse, orgX, orgY, retry,
-			corpseList = [];
-
-		orgX = me.x;
-		orgY = me.y;
+		let retry = false;
+		let corpseList = [];
+		let orgX = me.x;
+		let orgY = me.y;
 
 		MainLoop:
-		for (i = 0; i < 3; i += 1) {
-			corpse = getUnit(1);
+		for (let i = 0; i < 3; i += 1) {
+			let corpse = getUnit(1);
 
 			if (corpse) {
 				do {
@@ -143,38 +136,28 @@ const ClassAttack = {
 
 			while (corpseList.length > 0) {
 				if (this.checkCloseMonsters(5)) {
-					if (Config.FindItemSwitch) {
-						me.switchWeapons(Attack.getPrimarySlot());
-					}
-
+					Config.FindItemSwitch && me.switchWeapons(Attack.getPrimarySlot());
 					Attack.clear(10, false, false, false, false);
-
 					retry = true;
 
 					break MainLoop;
 				}
 
 				corpseList.sort(Sort.units);
-
 				corpse = corpseList.shift();
 
 				if (this.checkCorpse(corpse)) {
-					if (getDistance(me, corpse) > 30 || checkCollision(me, corpse, 0x1)) {
-						Pather.moveToUnit(corpse);
-					}
-
-					if (Config.FindItemSwitch) {
-						me.switchWeapons(Attack.getPrimarySlot() ^ 1);
-					}
+					(corpse.distance > 30 || checkCollision(me, corpse, 0x1)) && Pather.moveToUnit(corpse);
+					Config.FindItemSwitch && me.switchWeapons(Attack.getPrimarySlot() ^ 1);
 
 					CorpseLoop:
-					for (j = 0; j < 3; j += 1) {
-						Skill.cast(142, 0, corpse);
+					for (let j = 0; j < 3; j += 1) {
+						Skill.cast(sdk.skills.FindItem, 0, corpse);
 
-						tick = getTickCount();
+						let tick = getTickCount();
 
 						while (getTickCount() - tick < 1000) {
-							if (corpse.getState(118)) {
+							if (corpse.getState(sdk.states.CorpseNoSelect)) {
 								Pickit.fastPick();
 
 								break CorpseLoop;
@@ -188,13 +171,10 @@ const ClassAttack = {
 		}
 
 		if (retry) {
-			return this.findItem(me.area === 83 ? 60 : 20);
+			return this.findItem(me.area === sdk.areas.Travincal ? 60 : 20);
 		}
 
-		if (Config.FindItemSwitch) {
-			me.switchWeapons(Attack.getPrimarySlot());
-		}
-
+		Config.FindItemSwitch && me.switchWeapons(Attack.getPrimarySlot());
 		Pickit.pickItems();
 
 		return true;
@@ -214,6 +194,6 @@ const ClassAttack = {
 			sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
 		];
 
-		return !!(getDistance(me, unit) <= 25 && !checkCollision(me, unit, 0x4) && states.every(state => !unit.getState(state)));
+		return !!(unit.distance <= 25 && !checkCollision(me, unit, 0x4) && states.every(state => !unit.getState(state)));
 	}
 };

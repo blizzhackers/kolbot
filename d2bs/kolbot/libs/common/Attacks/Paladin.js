@@ -21,7 +21,7 @@ const ClassAttack = {
 			}
 		}
 
-		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.getState(121) || !Skill.isTimed(Config.AttackSkill[0]))) {
+		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
 					return 0;
@@ -33,10 +33,10 @@ const ClassAttack = {
 			return 1;
 		}
 
-		let mercRevive = 0,
-			attackSkill = -1,
-			aura = -1;
-		let index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
+		let mercRevive = 0;
+		let attackSkill = -1;
+		let aura = -1;
+		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 
 		if (Attack.getCustomAttack(unit)) {
 			attackSkill = Attack.getCustomAttack(unit)[0];
@@ -127,7 +127,7 @@ const ClassAttack = {
 
 		if (Config.Redemption instanceof Array
 			&& (me.hpPercent < Config.Redemption[0] || me.mpPercent < Config.Redemption[1])
-			&& Attack.checkNearCorpses(me) > 2 && Skill.setSkill(124, 0)) {
+			&& Attack.checkNearCorpses(me) > 2 && Skill.setSkill(sdk.skills.Redemption, 0)) {
 			delay(1500);
 		}
 	},
@@ -164,14 +164,14 @@ const ClassAttack = {
 			for (let i = 0; i < 3; i += 1) {
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 
-				if (!unit.attackable || getDistance(me, unit) > 9 || unit.type === 0) {
+				if (!unit.attackable || unit.distance > 9 || unit.isPlayer) {
 					break;
 				}
 			}
 
 			return 1;
 		case sdk.skills.HolyBolt:
-			if (getDistance(me, unit) > Skill.getRange(attackSkill) + 3 || CollMap.checkColl(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(attackSkill) + 3 || CollMap.checkColl(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4)) {
 					return 0;
 				}
@@ -179,7 +179,7 @@ const ClassAttack = {
 
 			CollMap.reset();
 
-			if (getDistance(me, unit) > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, 0x2004, 2)) {
+			if (unit.distance > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, 0x2004, 2)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x2004, true)) {
 					return 0;
 				}
@@ -192,18 +192,15 @@ const ClassAttack = {
 
 			return 1;
 		case sdk.skills.FistoftheHeavens:
-			if (!me.getState(121)) {
-				if (getDistance(me, unit) > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, 0x2004, 2)) {
+			if (!me.skillDelay) {
+				if (unit.distance > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, 0x2004, 2)) {
 					if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x2004, true)) {
 						return 0;
 					}
 				}
 
 				if (!unit.dead) {
-					if (aura > -1) {
-						Skill.setSkill(aura, 0);
-					}
-
+					aura > -1 && Skill.setSkill(aura, 0);
 					Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 
 					return 1;
@@ -274,20 +271,20 @@ const ClassAttack = {
 	},
 
 	getHammerPosition: function (unit) {
-		let x, y, positions, baseId = getBaseStat("monstats", unit.classid, "baseid"),
-			size = getBaseStat("monstats2", baseId, "sizex");
+		let x, y, positions, baseId = getBaseStat("monstats", unit.classid, "baseid");
+		let	size = getBaseStat("monstats2", baseId, "sizex");
 
 		// in case base stat returns something outrageous
 		(typeof size !== "number" || size < 1 || size > 3) && (size = 3);
 
 		switch (unit.type) {
-		case 0: // Player
+		case sdk.unittype.Player:
 			x = unit.x;
 			y = unit.y;
 			positions = [[x + 2, y], [x + 2, y + 1]];
 
 			break;
-		case 1: // Monster
+		case sdk.unittype.Monster:
 			let commonCheck = ((unit.mode === 2 || unit.mode === 15) && unit.distance < 10);
 			x = commonCheck && getDistance(me, unit.targetx, unit.targety) > 5 ? unit.targetx : unit.x;
 			y = commonCheck && getDistance(me, unit.targetx, unit.targety) > 5 ? unit.targety : unit.y;

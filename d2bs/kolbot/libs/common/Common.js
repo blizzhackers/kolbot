@@ -902,7 +902,7 @@ const Common = {
 
 				if (monster) {
 					do {
-						if (monster.x >= 15072 && monster.x <= 15118 && monster.y >= 5002 && monster.y <= 5079 && monster.attackable && Attack.skipCheck(monster)) {
+						if (monster.x >= 15072 && monster.x <= 15118 && monster.y >= 5002 && monster.y <= 5079 && monster.attackable && !Attack.skipCheck(monster)) {
 							monList.push(copyUnit(monster));
 						}
 					} while (monster.getNext());

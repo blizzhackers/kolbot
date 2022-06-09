@@ -116,7 +116,7 @@ const Pather = {
 	init: function () {
 		if (!this.initialized) {
 			!getWaypoint(1) && this.getWP(me.area);
-			me.classic && (this.nonTownWpAreas = this.nonTownWpAreas.filter((wp) => wp < 109));
+			me.classic && (this.nonTownWpAreas = this.nonTownWpAreas.filter((wp) => wp < sdk.areas.Harrogath));
 			me.cancelUIFlags();
 			this.initialized = true;
 		}
@@ -162,11 +162,11 @@ const Pather = {
 			returnSpotOnError: true
 		}, givenSettings);
 
-		let cleared = false,
-			leaped = false,
-			invalidCheck = false,
-			node = {x: x, y: y},
-			fail = 0;
+		let cleared = false;
+		let leaped = false;
+		let invalidCheck = false;
+		let node = {x: x, y: y};
+		let fail = 0;
 
 		for (let i = 0; i < this.cancelFlags.length; i += 1) {
 			getUIFlag(this.cancelFlags[i]) && me.cancel();
@@ -299,11 +299,11 @@ const Pather = {
 			getUIFlag(this.cancelFlags[i]) && me.cancel();
 		}
 
-		let cleared = false,
-			leaped = false,
-			invalidCheck = false,
-			node = {x: x, y: y},
-			fail = 0;
+		let cleared = false;
+		let leaped = false;
+		let invalidCheck = false;
+		let node = {x: x, y: y};
+		let fail = 0;
 
 		let useTeleport = this.useTeleport();
 		let tpMana = Skill.getManaCost(sdk.skills.Teleport);
@@ -437,11 +437,11 @@ const Pather = {
 			retry: 15
 		}, givenSettings);
 
-		let cleared = false,
-			leaped = false,
-			invalidCheck = false,
-			node = {x: x, y: y},
-			fail = 0;
+		let cleared = false;
+		let leaped = false;
+		let invalidCheck = false;
+		let node = {x: x, y: y};
+		let fail = 0;
 
 		for (let i = 0; i < this.cancelFlags.length; i += 1) {
 			getUIFlag(this.cancelFlags[i]) && me.cancel();
@@ -595,9 +595,9 @@ const Pather = {
 		if (x === undefined || y === undefined) return false;
 		minDist === undefined && (minDist = me.inTown ? 2 : 4);
 
-		let angle, angles, nTimer, whereToClick,
-			nFail = 0,
-			attemptCount = 0;
+		let angle, angles, nTimer, whereToClick;
+		let nFail = 0;
+		let attemptCount = 0;
 
 		// credit @Jaenster
 		// Stamina handler and Charge
@@ -701,8 +701,8 @@ const Pather = {
 	openDoors: function (x, y) {
 		if (me.inTown) return false;
 
-		x === undefined && (x = me.x);
-		y === undefined && (y = me.y);
+		typeof x !== "number" && (x = me.x);
+		typeof y !== "number" && (y = me.y);
 
 		// Regular doors
 		let door = getUnit(sdk.unittype.Object, "door", 0);
@@ -759,8 +759,8 @@ const Pather = {
 	kickBarrels: function (x, y) {
 		if (me.inTown) return false;
 
-		x === undefined && (x = me.x);
-		y === undefined && (y = me.y);
+		typeof x !== "number" && (x = me.x);
+		typeof y !== "number" && (y = me.y);
 
 		// anything small and annoying really
 		let barrels = getUnits(sdk.unittype.Object)
@@ -988,7 +988,7 @@ const Pather = {
 			}
 		}
 
-		console.log("ÿc7End ÿc8(moveToExit) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(finalDest) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - tick).toISOString().slice(11, -5)));
+		console.log("ÿc7End ÿc8(moveToExit) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(finalDest) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (formatTime(getTickCount() - tick)));
 		delay(300);
 
 		return (use && finalDest ? me.area === finalDest : true);
@@ -1093,8 +1093,8 @@ const Pather = {
 	*/
 	// should use an object as param, or be changed to able to take an already found unit as a param
 	useUnit: function (type, id, targetArea) {
-		let unit = Misc.poll(() => getUnit(type, id), 2000, 200),
-			preArea = me.area;
+		let unit = Misc.poll(() => getUnit(type, id), 2000, 200);
+		let preArea = me.area;
 
 		if (!unit) {
 			throw new Error("useUnit: Unit not found. TYPE: " + type + " ID: " + id + " MyArea: " + this.getAreaName(me.area) + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
@@ -1370,7 +1370,7 @@ const Pather = {
 					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
 						if (me.area === targetArea) {
 							delay(1000);
-							console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - wpTick).toISOString().slice(11, -5)));
+							console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (formatTime(getTickCount() - wpTick)));
 
 							return true;
 						}
@@ -1397,7 +1397,7 @@ const Pather = {
 		if (me.area === targetArea) {
 			// delay to allow act to init - helps with crashes
 			delay(500);
-			console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (new Date(getTickCount() - wpTick).toISOString().slice(11, -5)));
+			console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (formatTime(getTickCount() - wpTick)));
 
 			return true;
 		}
@@ -1595,8 +1595,8 @@ const Pather = {
 		!step && (step = 1);
 		coll === undefined && (coll = 0x1);
 
-		let distance = 1,
-			result = false;
+		let distance = 1;
+		let result = false;
 
 		// Check if the original spot is valid
 		if (this.checkSpot(x, y, coll, false, size)) {
@@ -1905,17 +1905,17 @@ const Pather = {
 		src - starting area id
 	*/
 	plotCourse: function (dest, src) {
-		let node, prevArea,
-			useWP = false,
-			arr = [],
-			previousAreas = [
-				0, 0, 1, 2, 3, 10, 5, 6, 2, 3, 4, 6, 7, 9, 10, 11, 12, 3, 17, 17, 6, 20, 21, 22, 23, 24, 7, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 4, 1,
-				1, 40, 41, 42, 43, 44, 74, 40, 47, 48, 40, 50, 51, 52, 53, 41, 42, 56, 45, 55, 57, 58, 43, 62, 63, 44, 46, 46, 46, 46, 46, 46, 46, 1, 54, 1,
-				75, 76, 76, 78, 79, 80, 81, 82, 76, 76, 78, 86, 78, 88, 87, 89, 80, 92, 80, 80, 81, 81, 82, 82, 83, 100, 101, 1, 103, 104, 105, 106, 107, 1,
-				109, 110, 111, 112, 113, 113, 115, 115, 117, 118, 118, 109, 121, 122, 123, 111, 112, 117, 120, 128, 129, 130, 131, 109, 109, 109, 109
-			],
-			visitedNodes = [],
-			toVisitNodes = [{from: dest, to: null}];
+		let node, prevArea;
+		let useWP = false;
+		let arr = [];
+		let previousAreas = [
+			0, 0, 1, 2, 3, 10, 5, 6, 2, 3, 4, 6, 7, 9, 10, 11, 12, 3, 17, 17, 6, 20, 21, 22, 23, 24, 7, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 4, 1,
+			1, 40, 41, 42, 43, 44, 74, 40, 47, 48, 40, 50, 51, 52, 53, 41, 42, 56, 45, 55, 57, 58, 43, 62, 63, 44, 46, 46, 46, 46, 46, 46, 46, 1, 54, 1,
+			75, 76, 76, 78, 79, 80, 81, 82, 76, 76, 78, 86, 78, 88, 87, 89, 80, 92, 80, 80, 81, 81, 82, 82, 83, 100, 101, 1, 103, 104, 105, 106, 107, 1,
+			109, 110, 111, 112, 113, 113, 115, 115, 117, 118, 118, 109, 121, 122, 123, 111, 112, 117, 120, 128, 129, 130, 131, 109, 109, 109, 109
+		];
+		let visitedNodes = [];
+		let toVisitNodes = [{from: dest, to: null}];
 
 		!src && (src = me.area);
 
@@ -1989,7 +1989,7 @@ const Pather = {
 		src - starting area id
 	*/
 	areasConnected: function (src, dest) {
-		if (src === 46 && dest === 74) {
+		if (src === sdk.areas.CanyonofMagic && dest === sdk.areas.ArcaneSanctuary) {
 			return false;
 		}
 

@@ -216,11 +216,11 @@ function pickItems () {
 
 			// pick large items first by sorting items by size in descending order and move gheed's charm to the end of the list
 			list.sort(function(a, b) {
-				if (a.classid === 605 && a.quality === 7 && !Pickit.canPick(a)) {
+				if (a.classid === 605 && a.unique && !Pickit.canPick(a)) {
 					return 1;
 				}
 
-				if (b.classid === 605 && b.quality === 7 && !Pickit.canPick(b)) {
+				if (b.classid === 605 && b.unique && !Pickit.canPick(b)) {
 					return -1;
 				}
 
@@ -232,21 +232,21 @@ function pickItems () {
 				canFit = Storage.Inventory.CanFit(item);
 
 				// Torch handling
-				if (muleMode > 0 && item.classid === 604 && item.quality === 7 && !Pickit.canPick(item)) {
+				if (muleMode > 0 && item.classid === 604 && item.unique && !Pickit.canPick(item)) {
 					D2Bot.printToConsole("Mule already has a Torch.", 7);
 
 					rval = "next";
 				}
 
 				// Anni handling
-				if (muleMode > 0 && item.classid === 603 && item.quality === 7 && !Pickit.canPick(item)) {
+				if (muleMode > 0 && item.classid === 603 && item.unique && !Pickit.canPick(item)) {
 					D2Bot.printToConsole("Mule already has an Anni.", 7);
 
 					rval = "next";
 				}
 
 				// Gheed's Fortune handling
-				if (item.classid === 605 && item.quality === 7 && !Pickit.canPick(item)) {
+				if (item.classid === 605 && item.unique && !Pickit.canPick(item)) {
 					D2Bot.printToConsole("Mule already has Gheed's.", 7);
 
 					rval = "next";
@@ -261,7 +261,7 @@ function pickItems () {
 				if (canFit) {
 					Pickit.pickItem(item);
 
-					if (muleMode > 0 && continuousMule && item.quality === 7 && (item.classid === 603 || item.classid === 604 || item.classid === 605)) {
+					if (muleMode > 0 && continuousMule && item.unique && (item.classid === 603 || item.classid === 604 || item.classid === 605)) {
 						rval = "next";
 					}
 				} else {
@@ -935,7 +935,7 @@ function main () {
 				if (getTickCount() - idleTick > 0) {
 					sendPacket(1, 0x40);
 					idleTick += rand(1200, 1500) * 1000;
-					print("Sent anti-idle packet, next refresh in: " + (" (" + new Date(idleTick - getTickCount()).toISOString().slice(11, -5) + ")"));
+					print("Sent anti-idle packet, next refresh in: (" + formatTime(idleTick - getTickCount()) + ")");
 				}
 
 				D2Bot.updateStatus(statusString + Starter.timer(me.gamestarttime));

@@ -1,11 +1,26 @@
 /**
 *  @filename    Druid.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        Druid attack sequence
 *
 */
 
 const ClassAttack = {
+	useHurricane: false,
+	useCyclone: false,
+
+	canUseHurricane: function () {
+		if (this.useHurricane) return true;
+		this.useHurricane = Precast.precastables.Hurricane;
+		return (this.useHurricane || me.getSkill(sdk.skills.Hurricane, 1));
+	},
+
+	canUseCyclone: function () {
+		if (this.useCyclone) return true;
+		this.canUseCyclone = Precast.precastables.CycloneArmor;
+		return (this.useCyclone || me.getSkill(sdk.skills.CycloneArmor, 1));
+	},
+	
 	doAttack: function (unit, preattack) {
 		if (!unit) return 1;
 		let gid = unit.gid;
@@ -21,17 +36,12 @@ const ClassAttack = {
 		}
 
 		// Rebuff Hurricane
-		if (me.getSkill(sdk.skills.Hurricane, 1) && !me.getState(sdk.states.Hurricane)) {
-			Skill.cast(sdk.skills.Hurricane, 0);
-		}
-
+		this.canUseHurricane() && !me.getState(sdk.states.Hurricane) && Skill.cast(sdk.skills.Hurricane, 0);
 		// Rebuff Cyclone Armor
-		if (me.getSkill(sdk.skills.CycloneArmor, 1) && !me.getState(sdk.states.CycloneArmor)) {
-			Skill.cast(sdk.skills.CycloneArmor, 0);
-		}
+		this.canUseCyclone() && !me.getState(sdk.states.CycloneArmor) && Skill.cast(sdk.skills.CycloneArmor, 0);
 
-		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.getState(121) || !Skill.isTimed(Config.AttackSkill[0]))) {
-			if (Math.round(getDistance(me, unit)) > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
+		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
 					return 0;
 				}
@@ -42,18 +52,17 @@ const ClassAttack = {
 			return 1;
 		}
 
-		let checkSkill,
-			mercRevive = 0,
-			timedSkill = -1,
-			untimedSkill = -1;
-		let index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
+		let mercRevive = 0;
+		let timedSkill = -1;
+		let untimedSkill = -1;
+		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 
 		// Get timed skill
-		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
+		let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
 
 		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
 			timedSkill = checkSkill;
-		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && ([56, 59].indexOf(Config.AttackSkill[5]) === -1 || Attack.validSpot(unit.x, unit.y))) {
+		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[5])) {
 			timedSkill = Config.AttackSkill[5];
 		}
 
@@ -62,7 +71,7 @@ const ClassAttack = {
 
 		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
 			untimedSkill = checkSkill;
-		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && ([56, 59].indexOf(Config.AttackSkill[6]) === -1 || Attack.validSpot(unit.x, unit.y))) {
+		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[6])) {
 			untimedSkill = Config.AttackSkill[6];
 		}
 
@@ -84,7 +93,7 @@ const ClassAttack = {
 			while (unit.attackable) {
 				if (Misc.townCheck()) {
 					if (!unit || !copyUnit(unit).x) {
-						unit = Misc.poll(function () { return getUnit(1, -1, -1, gid); }, 1000, 80);
+						unit = Misc.poll(() => getUnit(1, -1, -1, gid), 1000, 80);
 					}
 				}
 
@@ -123,26 +132,22 @@ const ClassAttack = {
 
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, timedSkill, untimedSkill) {
+		// No valid skills can be found
+		if (timedSkill < 0 && untimedSkill < 0) return 2;
+		
 		let walk;
 
-		// No valid skills can be found
-		if (timedSkill < 0 && untimedSkill < 0) {
-			return 2;
-		}
-
-		if (timedSkill > -1 && (!me.getState(121) || !Skill.isTimed(timedSkill))) {
+		if (timedSkill > -1 && (!me.skillDelay || !Skill.isTimed(timedSkill))) {
 			switch (timedSkill) {
-			case 245: // Tornado
-				if (Math.round(getDistance(me, unit)) > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
+			case sdk.skills.Tornado:
+				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
 					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4)) {
 						return 0;
 					}
 				}
 
 				// Randomized x coord changes tornado path and prevents constant missing
-				if (!unit.dead) {
-					Skill.cast(timedSkill, Skill.getHand(timedSkill), unit.x + rand(-2, 2), unit.y);
-				}
+				!unit.dead && Skill.cast(timedSkill, Skill.getHand(timedSkill), unit.x + rand(-2, 2), unit.y);
 
 				return 1;
 			default:
@@ -150,7 +155,7 @@ const ClassAttack = {
 					return 0;
 				}
 
-				if (Math.round(getDistance(me, unit)) > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
+				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
 					// Allow short-distance walking for melee skills
 					walk = Skill.getRange(timedSkill) < 4 && getDistance(me, unit) < 10 && !checkCollision(me, unit, 0x1);
 
@@ -159,9 +164,7 @@ const ClassAttack = {
 					}
 				}
 
-				if (!unit.dead) {
-					Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
-				}
+				!unit.dead && Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
 
 				return 1;
 			}
@@ -172,7 +175,7 @@ const ClassAttack = {
 				return 0;
 			}
 
-			if (Math.round(getDistance(me, unit)) > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
 				// Allow short-distance walking for melee skills
 				walk = Skill.getRange(untimedSkill) < 4 && getDistance(me, unit) < 10 && !checkCollision(me, unit, 0x1);
 
@@ -181,9 +184,7 @@ const ClassAttack = {
 				}
 			}
 
-			if (!unit.dead) {
-				Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
-			}
+			!unit.dead && Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
 
 			return 1;
 		}

@@ -78,7 +78,7 @@ const Precast = new function () {
 
 		if (this.haveCTA > -1) {
 			let slot = me.weaponswitch;
-			let x = me.x, y = me.y;
+			let {x, y} = me;
 
 			me.switchWeapons(this.haveCTA);
 			this.precastSkill(sdk.skills.BattleCommand, x, y, true);
@@ -103,60 +103,60 @@ const Precast = new function () {
 			return this.bestSlot[skillId];
 		}
 
-		let classid, skillTab,
-			sumCurr = 0,
-			sumSwap = 0;
+		let classid, skillTab;
+		let sumCurr = 0;
+		let sumSwap = 0;
 
 		switch (skillId) {
-		case 40: // Frozen Armor
-		case 50: // Shiver Armor
-		case 60: // Chilling Armor
-			classid = 1;
-			skillTab = 10;
+		case sdk.skills.FrozenArmor:
+		case sdk.skills.ShiverArmor:
+		case sdk.skills.ChillingArmor:
+			classid = sdk.charclass.Sorceress;
+			skillTab = sdk.skills.tabs.Cold;
 
 			break;
-		case 52: // Enchant
-			classid = 1;
-			skillTab = 8;
+		case sdk.skills.Enchant:
+			classid = sdk.charclass.Sorceress;
+			skillTab = sdk.skills.tabs.Fire;
 
 			break;
-		case 57: // Thunder Storm
-		case 58: // Energy Shield
-			classid = 1;
-			skillTab = 9;
+		case sdk.skills.ThunderStorm:
+		case sdk.skills.EnergyShield:
+			classid = sdk.charclass.Sorceress;
+			skillTab = sdk.skills.tabs.Lightning;
 
 			break;
-		case 68: // Bone Armor
-			classid = 2;
-			skillTab = 17;
+		case sdk.skills.BoneArmor:
+			classid = sdk.charclass.Necromancer;
+			skillTab = sdk.skills.tabs.PoisonandBone;
 
 			break;
-		case 117: // Holy Shield
-			classid = 3;
-			skillTab = 24;
+		case sdk.skills.HolyShield:
+			classid = sdk.charclass.Paladin;
+			skillTab = sdk.skills.tabs.PalaCombat;
 
 			break;
-		case 138: // Shout
-		case 149: // Battle Orders
-		case 155: // Battle Command
-			classid = 4;
-			skillTab = 34;
+		case sdk.skills.Shout:
+		case sdk.skills.BattleOrders:
+		case sdk.skills.BattleCommand:
+			classid = sdk.charclass.Barbarian;
+			skillTab = sdk.skills.tabs.Warcries;
 
 			break;
-		case 235: // Cyclone Armor
-			classid = 5;
-			skillTab = 42;
+		case sdk.skills.CycloneArmor:
+			classid = sdk.charclass.Druid;
+			skillTab = sdk.skills.tabs.Elemental;
 
 			break;
-		case 258: // Burst of Speed
-		case 267: // Fade
-			classid = 6;
-			skillTab = 49;
+		case sdk.skills.BurstofSpeed:
+		case sdk.skills.Fade:
+			classid = sdk.charclass.Assassin;
+			skillTab = sdk.skills.tabs.ShadowDisciplines;
 
 			break;
-		case 277: // Blade Shield
-			classid = 6;
-			skillTab = 48;
+		case sdk.skills.BladeShield:
+			classid = sdk.charclass.Assassin;
+			skillTab = sdk.skills.tabs.MartialArts;
 
 			break;
 		default:
@@ -165,16 +165,22 @@ const Precast = new function () {
 
 		me.weaponswitch !== 0 && me.switchWeapons(0);
 
+		let sumStats = function (item) {
+			return (item.getStat(sdk.stats.AllSkills)
+				+ item.getStat(sdk.stats.AddClassSkills, classid) + item.getStat(sdk.stats.AddSkillTab, skillTab)
+				+ item.getStat(sdk.stats.SingleSkill, skillId) + item.getStat(sdk.stats.NonClassSkill, skillId));
+		};
+
 		me.getItemsEx()
 			.filter(item => item.isEquipped && [4, 5, 11, 12].includes(item.bodylocation))
 			.forEach(function (item) {
 				if (item.bodylocation === 4 || item.bodylocation === 5) {
-					sumCurr += (item.getStat(127) + item.getStat(83, classid) + item.getStat(188, skillTab) + item.getStat(107, skillId) + item.getStat(97, skillId));
+					sumCurr += sumStats(item);
 					return;
 				}
 
 				if (item.bodylocation === 11 || item.bodylocation === 12) {
-					sumSwap += (item.getStat(127) + item.getStat(83, classid) + item.getStat(188, skillTab) + item.getStat(107, skillId) + item.getStat(97, skillId));
+					sumSwap += sumStats(item);
 					return;
 				}
 			});
@@ -183,10 +189,7 @@ const Precast = new function () {
 		return this.bestSlot[skillId];
 	};
 
-	// re-wrote this, as we've already established
-	// - we have this skill and wereform check. If we call Skill.cast -> calling cast -> we do this again -> calling setSkill -> we do this again
-	// which is just a waste
-	this.precastSkill = function (skillId, x, y, dontSwitch = false) {
+	this.precastSkill = function (skillId, x = me.x, y = me.y, dontSwitch = false) {
 		if (!skillId || !Skill.wereFormCheck(skillId) || (me.inTown && !Skill.townSkill(skillId))) return false;
 		if (Skill.getManaCost(skillId) > me.mp) return false;
 
@@ -198,14 +201,16 @@ const Precast = new function () {
 			sdk.skills.IronGolem, sdk.skills.Revive, sdk.skills.Werewolf, sdk.skills.Werebear, sdk.skills.OakSage, sdk.skills.SpiritWolf, sdk.skills.PoisonCreeper, sdk.skills.BattleOrders,
 			sdk.skills.SummonDireWolf, sdk.skills.Grizzly, sdk.skills.HeartofWolverine, sdk.skills.SpiritofBarbs, sdk.skills.ShadowMaster, sdk.skills.ShadowWarrior, sdk.skills.BattleCommand,
 		].indexOf(skillId) === -1);
-		x === undefined && (x = me.x);
-		y === undefined && (y = me.y);
+		typeof x !== "number" && (x = me.x);
+		typeof y !== "number" && (y = me.y);
 
 		try {
 			!dontSwitch && me.switchWeapons(this.getBetterSlot(skillId));
 			if (me.getSkill(2) !== skillId && !me.setSkill(skillId, 0)) throw new Error("Failed to set skill on hand");
 
 			if (Config.PacketCasting > 1 || usePacket) {
+				console.debug("Packet casting: " + skillId);
+				
 				switch (typeof x) {
 				case "number":
 					Packet.castSkill(0, x, y);
@@ -252,7 +257,7 @@ const Precast = new function () {
 				}
 			}
 		} catch (e) {
-			console.warn(e);
+			console.errorReport(e);
 			success = false;
 		}
 
@@ -358,24 +363,20 @@ const Precast = new function () {
 
 			break;
 		case sdk.charclass.Barbarian: // - TODO: durations
-			if ((Precast.precastables.Shout.have && (!me.getState(sdk.states.Shout) || force))
-				|| (Precast.precastables.BattleOrders.have && (!me.getState(sdk.states.BattleOrders) || force))
-				|| (Precast.precastables.BattleCommand.have && (!me.getState(sdk.states.BattleCommand) || force))) {
-				let swap = me.weaponswitch;
+			let needShout = (Precast.precastables.Shout.have && (!me.getState(sdk.states.Shout) || force));
+			let needBo = (Precast.precastables.BattleOrders.have && (!me.getState(sdk.states.BattleOrders) || force));
+			let needBc = (Precast.precastables.Shout.have && (!me.getState(sdk.states.Shout) || force));
 
-				if (Precast.precastables.BattleCommand.have && (!me.getState(sdk.states.BattleCommand) || force)) {
-					this.precastSkill(sdk.skills.BattleCommand, 0);
-				}
+			if (needShout || needBo || needBc) {
+				let primary = Attack.getPrimarySlot();
+				let {x, y} = me;
+				(needBo || needBc) && me.switchWeapons(this.getBetterSlot(sdk.skills.BattleOrders));
 
-				if (Precast.precastables.BattleOrders.have && (!me.getState(sdk.states.BattleOrders) || force)) {
-					this.precastSkill(sdk.skills.BattleOrders, 0);
-				}
+				needBc && this.precastSkill(sdk.skills.BattleCommand, x, y, true);
+				needBo && this.precastSkill(sdk.skills.BattleOrders, x, y, true);
+				needShout && this.precastSkill(sdk.skills.Shout, x, y, true);
 
-				if (Precast.precastables.Shout.have && (!me.getState(sdk.states.Shout) || force)) {
-					this.precastSkill(sdk.skills.Shout, 0);
-				}
-
-				me.switchWeapons(swap);
+				me.weaponswitch !== primary && me.switchWeapons(primary);
 			}
 
 			break;
@@ -485,47 +486,26 @@ const Precast = new function () {
 	};
 
 	this.checkCTA = function () {
-		if (this.haveCTA > -1 || me.barbarian) return true;
+		if (this.haveCTA > -1) return true;
 
 		let check = me.checkItem({name: sdk.locale.items.CalltoArms, equipped: true});
 
 		if (check.have) {
-			switch (check.item.bodylocation) {
-			case 4:
-			case 5:
-				this.haveCTA = me.weaponswitch;
-
-				return true;
-			case 11:
-			case 12:
-				this.haveCTA = me.weaponswitch ^ 1;
-
-				return true;
+			if (check.item.isOnSwap) {
+				this.haveCTA = 1;
+			} else {
+				this.haveCTA = 0;
 			}
 		}
 
-		return false;
+		return this.haveCTA > -1;
 	};
 
 	this.summon = function (skillId, minionType) {
 		if (!me.getSkill(skillId, 1)) return false;
 
-		let rv, retry = 0, count = 1;
-
-		switch (skillId) {
-		case sdk.skills.Raven:
-			count = Math.min(me.getSkill(skillId, 1), 5);
-
-			break;
-		case sdk.skills.SummonSpiritWolf:
-			count = Math.min(me.getSkill(skillId, 1), 5);
-
-			break;
-		case sdk.skills.SummonDireWolf:
-			count = Math.min(me.getSkill(skillId, 1), 3);
-
-			break;
-		}
+		let rv, retry = 0;
+		let count = Skill.getMaxSummonCount(skillId);
 
 		while (me.getMinionCount(minionType) < count) {
 			rv = true;
@@ -585,15 +565,15 @@ const Precast = new function () {
 	this.enchant = function () {
 		let unit, slot = me.weaponswitch, chanted = [];
 
-		me.switchWeapons(this.getBetterSlot(52));
+		me.switchWeapons(this.getBetterSlot(sdk.skills.Enchant));
 
 		// Player
 		unit = getUnit(0);
 
 		if (unit) {
 			do {
-				if (!unit.dead && Misc.inMyParty(unit.name) && getDistance(me, unit) <= 40) {
-					Skill.cast(52, 0, unit);
+				if (!unit.dead && Misc.inMyParty(unit.name) && unit.distance <= 40) {
+					Skill.cast(sdk.skills.Enchant, 0, unit);
 					chanted.push(unit.name);
 				}
 			} while (unit.getNext());
@@ -604,8 +584,8 @@ const Precast = new function () {
 
 		if (unit) {
 			do {
-				if (unit.getParent() && chanted.indexOf(unit.getParent().name) > -1 && getDistance(me, unit) <= 40) {
-					Skill.cast(52, 0, unit);
+				if (unit.getParent() && chanted.indexOf(unit.getParent().name) > -1 && unit.distance <= 40) {
+					Skill.cast(sdk.skills.Enchant, 0, unit);
 				}
 			} while (unit.getNext());
 		}
@@ -631,7 +611,7 @@ const Precast = new function () {
 			}
 			Pather.useWaypoint(returnTo);
 		} catch (e) {
-			console.warn(e);
+			console.errorReport(e);
 		} finally {
 			if (me.area !== returnTo && (!Pather.useWaypoint(returnTo) || !Pather.useWaypoint(sdk.areas.townOf(me.area)))) {
 				Pather.journeyTo(returnTo);

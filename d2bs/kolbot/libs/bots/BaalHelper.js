@@ -1,13 +1,13 @@
 /**
 *  @filename    BaalHelper.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        help the leading player in clearing Throne of Destruction and killing Baal
 *
 */
 
 function BaalHelper() {
 	Config.BaalHelper.KillNihlathak && Loader.runScript("Nihlathak");
-	Config.BaalHelper.FastChaos && Loader.runScript("FastDiablo");
+	Config.BaalHelper.FastChaos && Loader.runScript("Diablo", () => Config.Diablo.Fast = true);
 
 	Town.goToTown(5);
 	Town.doChores();

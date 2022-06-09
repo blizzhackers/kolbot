@@ -8,6 +8,13 @@
 const ClassAttack = {
 	feralBoost: 0,
 	baseLL: me.getStat(sdk.stats.LifeLeech),
+	useArmageddon: false,
+
+	canUseArmageddon: function () {
+		if (this.useArmageddon) return true;
+		this.useArmageddon = me.getSkill(sdk.skills.Armageddon, 0);
+		return (this.useArmageddon || me.getSkill(sdk.skills.Armageddon, 1));
+	},
 
 	doAttack: function (unit, preattack) {
 		if (!unit) return 1;
@@ -48,17 +55,14 @@ const ClassAttack = {
 		Misc.shapeShift(Config.Wereform);
 
 		// Rebuff Armageddon
-		if (me.getSkill(sdk.skills.Armageddon, 1) && !me.getState(sdk.states.Armageddon)) {
-			Skill.cast(sdk.skills.Armageddon, 0);
-		}
+		this.canUseArmageddon() && !me.getState(sdk.states.Armageddon) && Skill.cast(sdk.skills.Armageddon, 0);
 
-		let checkSkill,
-			timedSkill = -1,
-			untimedSkill = -1;
+		let timedSkill = -1;
+		let untimedSkill = -1;
 		let index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
 
 		// Get timed skill
-		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
+		let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
 
 		if (Attack.checkResist(unit, checkSkill) && Skill.wereFormCheck(checkSkill) && Attack.validSpot(unit.x, unit.y)) {
 			timedSkill = checkSkill;
@@ -84,6 +88,7 @@ const ClassAttack = {
 
 			break;
 		case timedSkill === sdk.skills.Fury && untimedSkill === sdk.skills.Rabies:
+		case timedSkill === sdk.skills.FireClaws && untimedSkill === sdk.skills.Rabies:
 			if (!unit.getState(sdk.states.Rabies)) {
 				timedSkill = sdk.skills.Rabies;
 			}

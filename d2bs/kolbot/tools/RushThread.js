@@ -86,8 +86,27 @@ new Overrides.Override(Pather, Pather.useWaypoint, function(orignal, targetArea,
 	}
 }).apply();
 
-function main() {
+new Overrides.Override(Common.Diablo, Common.Diablo.diabloPrep, function(orignal) {
+	Pather.moveTo(7763, 5267) && Pather.makePortal();
+	Pather.moveTo(7727, 5267);
+	say("1");
+
+	while (!this.playerIn()) {
+		delay(250);
+	}
+
+	Pather.moveTo(7763, 5267);
+
+	orignal();
+}).apply();
+
+function main () {
 	let tick;
+
+	this.log = function (msg = "", sayMsg = true) {
+		console.log(msg);
+		sayMsg && say(msg);
+	};
 
 	this.playerIn = function (area) {
 		!area && (area = me.area);
@@ -133,13 +152,10 @@ function main() {
 	};
 
 	this.playersInAct = function (act) {
-		let area, party,
-			areas = [0, 1, 40, 75, 103, 109];
-
 		!act && (act = me.act);
 
-		area = areas[act];
-		party = getParty();
+		let area = sdk.areas.townOfAct(act);
+		let party = getParty();
 
 		if (party) {
 			do {
@@ -153,26 +169,26 @@ function main() {
 	};
 
 	this.andariel = function () {
-		say("starting andariel");
+		this.log("starting andariel");
 		Town.doChores();
-		Pather.useWaypoint(35, true);
-		Precast.doPrecast(true);
+		Pather.useWaypoint(sdk.areas.CatacombsLvl2, true) && Precast.doPrecast(true);
 
-		if (!Pather.moveToExit([36, 37], true) || !Pather.moveTo(22582, 9612)) {
+		if (!Pather.moveToExit([sdk.areas.CatacombsLvl3, sdk.areas.CatacombsLvl4], true)
+			|| !Pather.moveTo(22582, 9612)) {
 			throw new Error("andy failed");
 		}
 
 		Pather.makePortal();
 		Attack.securePosition(me.x, me.y, 40, 3000, true);
-		say("1");
+		this.log("1");
 
 		while (!this.playerIn()) {
 			Pather.moveTo(22582, 9612);
 			delay(250);
 		}
 
-		Attack.kill(156);
-		say("2");
+		Attack.kill(sdk.monsters.Andariel);
+		this.log("2");
 		Pather.moveTo(22582, 9612);
 
 		while (this.playerIn()) {
@@ -180,8 +196,8 @@ function main() {
 		}
 
 		Pather.usePortal(null, me.name);
-		say("a2");
-		Pather.useWaypoint(40, true);
+		this.log("a2");
+		Town.goToTown(2);
 
 		while (!this.playersInAct(2)) {
 			delay(250);
@@ -192,17 +208,18 @@ function main() {
 
 	this.cube = function () {
 		if (me.normal) {
-			say("starting cube");
-			Pather.useWaypoint(57, true);
+			this.log("starting cube");
+			Pather.useWaypoint(sdk.areas.HallsoftheDeadLvl2, true);
 			Precast.doPrecast(true);
 
-			if (!Pather.moveToExit(60, true) || !Pather.moveToPreset(me.area, 2, 354)) {
+			if (!Pather.moveToExit(sdk.areas.HallsoftheDeadLvl3, true)
+				|| !Pather.moveToPreset(me.area, 2, sdk.quest.chest.HoradricCubeChest)) {
 				throw new Error("cube failed");
 			}
 
 			Pather.makePortal();
 			Attack.securePosition(me.x, me.y, 30, 3000, true);
-			say("1");
+			this.log("1");
 
 			while (!this.playerIn()) {
 				delay(100);
@@ -219,24 +236,19 @@ function main() {
 	};
 
 	this.amulet = function () {
-		say("starting amulet");
+		this.log("starting amulet");
 		Town.doChores();
-		Pather.useWaypoint(44, true);
-		Precast.doPrecast(true);
+		Pather.useWaypoint(sdk.areas.LostCity, true) && Precast.doPrecast(true);
 
-		if (!Pather.moveToExit([45, 58, 61], true) || !Pather.moveTo(15044, 14045)) {
+		if (!Pather.moveToExit([sdk.areas.ValleyofSnakes, sdk.areas.ClawViperTempleLvl1, sdk.areas.ClawViperTempleLvl2], true)
+			|| !Pather.moveTo(15044, 14045)) {
 			throw new Error("amulet failed");
 		}
 
 		Pather.makePortal();
+		Attack.securePosition(me.x, me.y, 25, 3000, me.hell, me.hell);
 
-		if (me.diff < 2) {
-			Attack.securePosition(me.x, me.y, 25, 3000);
-		} else {
-			Attack.securePosition(me.x, me.y, 25, 3000, true, true);
-		}
-
-		say("1");
+		this.log("1");
 
 		while (!this.playerIn()) {
 			delay(100);
@@ -252,21 +264,20 @@ function main() {
 	};
 
 	this.staff = function () {
-		say("starting staff");
+		this.log("starting staff");
 		Town.doChores();
-		Pather.useWaypoint(43, true);
-		Precast.doPrecast(true);
+		Pather.useWaypoint(sdk.areas.FarOasis, true) && Precast.doPrecast(true);
 
-		if (!Pather.moveToExit([62, 63, 64], true) || !Pather.moveToPreset(me.area, 2, 356)) {
+		if (!Pather.moveToExit([sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.MaggotLairLvl3], true)
+			|| !Pather.moveToPreset(me.area, 2, sdk.quest.chest.ShaftoftheHoradricStaffChest)) {
 			throw new Error("staff failed");
 		}
 
 		Pather.makePortal();
 		Attack.securePosition(me.x, me.y, 30, 3000, true);
-		say("1");
+		this.log("1");
 
 		while (!this.playerIn()) {
-			//Pather.moveToPreset(me.area, 2, 356);
 			delay(100);
 		}
 
@@ -285,14 +296,12 @@ function main() {
 		// right down 25830 5447 (25866, 5431)
 		// left down 25447 5822 (25431, 5861)
 
-		say("starting summoner");
+		this.log("starting summoner");
 		Town.doChores();
-		Pather.useWaypoint(74, true);
-		Precast.doPrecast(true);
+		Pather.useWaypoint(sdk.areas.ArcaneSanctuary, true) && Precast.doPrecast(true);
 
-		let i, journal,
-			preset = getPresetUnit(me.area, 2, 357),
-			spot = {};
+		let preset = getPresetUnit(me.area, 2, sdk.quest.chest.Journal);
+		let spot = {};
 
 		switch (preset.roomx * 5 + preset.x) {
 		case 25011:
@@ -320,7 +329,7 @@ function main() {
 
 		Pather.makePortal();
 		Attack.securePosition(me.x, me.y, 25, 3000);
-		say("1");
+		this.log("1");
 
 		while (!this.playerIn()) {
 			Pather.moveToUnit(spot);
@@ -328,60 +337,59 @@ function main() {
 			delay(250);
 		}
 
-		Pather.moveToPreset(me.area, 2, 357);
-		Attack.kill(250);
-		say("2");
+		Pather.moveToPreset(me.area, 2, sdk.quest.chest.Journal);
+		Attack.kill(sdk.monsters.Summoner);
+		this.log("2");
 
 		while (this.playerIn()) {
 			delay(100);
 		}
 
 		Pickit.pickItems();
-		Pather.moveToPreset(me.area, 2, 357);
+		Pather.moveToPreset(me.area, 2, sdk.quest.chest.Journal);
 
-		journal = getUnit(2, 357);
+		let redPortal = object(sdk.units.RedPortal);
 
-		for (i = 0; i < 5; i += 1) {
-			journal.interact();
-			delay(1000);
-			me.cancel();
+		if (!redPortal || !this.usePortal(null, null, redPortal)) {
+			if (!Misc.poll(() => {
+				let journal = object(sdk.quest.chest.Journal);
 
-			if (Pather.getPortal(46)) {
-				break;
-			}
+				if (journal && journal.interact()) {
+					delay(1000);
+					me.cancel();
+				}
+
+				redPortal = Pather.getPortal(sdk.areas.CanyonofMagic);
+
+				return (redPortal && Pather.usePortal(null, null, redPortal));
+			})) throw new Error("summoner failed");
 		}
-
-		if (i === 5) {
-			throw new Error("summoner failed");
-		}
-
-		Pather.usePortal(46);
 
 		return true;
 	};
 
 	this.duriel = function () {
-		say("starting duriel");
+		this.log("starting duriel");
 
 		if (me.inTown) {
 			Town.doChores();
-			Pather.useWaypoint(46, true);
+			Pather.useWaypoint(sdk.areas.CanyonofMagic, true);
 		} else {
 			giveWP();
 		}
 
 		Precast.doPrecast(true);
 
-		if (!Pather.moveToExit(getRoom().correcttomb, true) || !Pather.moveToPreset(me.area, 2, 152)) {
+		if (!Pather.moveToExit(getRoom().correcttomb, true)
+			|| !Pather.moveToPreset(me.area, 2, sdk.quest.chest.HoradricStaffHolder)) {
 			throw new Error("duriel failed");
 		}
 
 		Pather.makePortal();
-		Attack.securePosition(me.x, me.y, 30, 3000, true, me.diff === 2);
-		say("1");
+		Attack.securePosition(me.x, me.y, 30, 3000, true, me.hell);
+		this.log("1");
 
 		while (!this.playerIn()) {
-			//Pather.moveToPreset(me.area, 2, 152, 0, -5);
 			delay(100);
 		}
 
@@ -389,12 +397,12 @@ function main() {
 			delay(100);
 		}
 
-		while (!getUnit(2, 100)) {
+		while (!object(sdk.units.PortaltoDurielsLair)) {
 			delay(500);
 		}
 
-		Pather.useUnit(2, 100, 73);
-		Attack.kill(211);
+		Pather.useUnit(2, sdk.units.PortaltoDurielsLair, sdk.areas.DurielsLair);
+		Attack.kill(sdk.monsters.Duriel);
 		Pickit.pickItems();
 
 		Pather.teleport = false;
@@ -406,7 +414,7 @@ function main() {
 		Pather.moveTo(22577, 15649, 10);
 		Pather.moveTo(22577, 15609, 10);
 		Pather.makePortal();
-		say("1");
+		this.log("1");
 
 		while (!this.playerIn()) {
 			delay(100);
@@ -416,10 +424,10 @@ function main() {
 			Town.goToTown();
 		}
 
-		Pather.useWaypoint(52);
-		Pather.moveToExit([51, 50], true);
+		Pather.useWaypoint(sdk.areas.PalaceCellarLvl1);
+		Pather.moveToExit([sdk.areas.HaremLvl2, sdk.areas.HaremLvl1], true);
 		Pather.moveTo(10022, 5047);
-		say("a3");
+		this.log("a3");
 		Town.goToTown(3);
 		Town.doChores();
 
@@ -432,17 +440,16 @@ function main() {
 
 	// re-write to prevent fail to complete quest due to killing council from to far away
 	this.travincal = function () {
-		say("starting travincal");
+		this.log("starting travincal");
 		Town.doChores();
-		Pather.useWaypoint(83, true);
-		Precast.doPrecast(true);
+		Pather.useWaypoint(sdk.areas.Travincal, true) && Precast.doPrecast(true);
 
 		let coords = [me.x, me.y];
 
 		Pather.moveTo(coords[0] + 23, coords[1] - 102);
 		Pather.makePortal();
 		Attack.securePosition(me.x, me.y, 40, 3000);
-		say("1");
+		this.log("1");
 
 		while (!this.playerIn()) {
 			delay(250);
@@ -453,7 +460,7 @@ function main() {
 		Pather.moveTo(coords[0] + 71, coords[1] - 94);
 		Attack.securePosition(me.x, me.y, 40, 3000);
 
-		say("2");
+		this.log("2");
 		Pather.moveTo(coords[0] + 23, coords[1] - 102);
 		Pather.usePortal(null, me.name);
 
@@ -461,36 +468,31 @@ function main() {
 	};
 
 	this.mephisto = function () {
-		say("starting mephisto");
+		this.log("starting mephisto");
 
 		Town.doChores();
-		Pather.useWaypoint(101, true);
-		Precast.doPrecast(true);
-		Pather.moveToExit(102, true);
-		Pather.moveTo(17692, 8023);
-		Pather.makePortal();
+		Pather.useWaypoint(sdk.areas.DuranceofHateLvl2, true) && Precast.doPrecast(true);
+		Pather.moveToExit(sdk.areas.DuranceofHateLvl3, true) && Pather.moveTo(17692, 8023) && Pather.makePortal();
 		delay(2000);
-		say("1");
+		this.log("1");
 
 		while (!this.playerIn()) {
 			delay(250);
 		}
 
 		Pather.moveTo(17591, 8070);
-		Attack.kill(242);
+		Attack.kill(sdk.monsters.Mephisto);
 		Pickit.pickItems();
-		Pather.moveTo(17692, 8023);
-		Pather.makePortal();
-		say("2");
+		Pather.moveTo(17692, 8023) && Pather.makePortal();
+		this.log("2");
 
 		while (this.playerIn()) {
 			delay(250);
 		}
 
-		Pather.moveTo(17591, 8070);
-		Attack.securePosition(me.x, me.y, 40, 3000);
+		Pather.moveTo(17591, 8070) && Attack.securePosition(me.x, me.y, 40, 3000);
 
-		let hydra = getUnit(1, getLocaleString(3325));
+		let hydra = monster(getLocaleString(3325));
 
 		if (hydra) {
 			do {
@@ -502,13 +504,13 @@ function main() {
 
 		Pather.makePortal();
 		Pather.moveTo(17581, 8070);
-		say("1");
+		this.log("1");
 
 		while (!this.playerIn()) {
 			delay(250);
 		}
 
-		say("a4");
+		this.log("a4");
 
 		while (!this.playersInAct(4)) {
 			delay(250);
@@ -521,79 +523,31 @@ function main() {
 	};
 
 	this.diablo = function () {
-		say("starting diablo");
-
-		this.getBoss = function (name) {
-			let glow = getUnit(2, 131);
-
-			for (let i = 0; i < (name === getLocaleString(2853) ? 14 : 12); i += 1) {
-				let boss = getUnit(1, name);
-
-				if (boss) {
-					if (name === getLocaleString(2852)) {
-						Common.Diablo.chaosPreattack(getLocaleString(2852), 8);
-					}
-
-					Attack.kill(name);
-					Pickit.pickItems();
-
-					return true;
-				}
-
-				delay(250);
-			}
-
-			return !!glow;
-		};
+		this.log("starting diablo");
 
 		Town.doChores();
-		Pather.useWaypoint(107, true);
+		Pather.useWaypoint(sdk.areas.RiverofFlame);
 		Precast.doPrecast(true);
-		Pather.moveTo(7790, 5544);
+		if (!Pather.moveToExit(sdk.areas.ChaosSanctuary, true) && !Pather.moveTo(7790, 5544)) throw new Error("Failed to move to Chaos Sanctuary");
 		
 		Common.Diablo.initLayout();
-		if (!Common.Diablo.openSeal(395) || !Common.Diablo.openSeal(396)) throw new Error("Failed to open seals");
-
-		Common.Diablo.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
-		if (!this.getBoss(getLocaleString(2851))) throw new Error("Failed to kill Vizier");
-		if (!Common.Diablo.openSeal(394)) throw new Error("Failed to open seals");
-
-		Common.Diablo.seisLayout === 1 ? Pather.moveTo(7771, 5196) : Pather.moveTo(7798, 5186);
-		if (!this.getBoss(getLocaleString(2852))) throw new Error("Failed to kill de Seis");
-		if (!Common.Diablo.openSeal(392) || !Common.Diablo.openSeal(393)) throw new Error("Failed to open seals");
-
-		if (Common.Diablo.infLayout === 1) {
-			if (me.sorceress || me.assassin) {
-				Pather.moveTo(7876, 5296);
-			}
-
-			delay(1 + me.ping);
-		} else {
-			delay(1 + me.ping);
-			Pather.moveTo(7928, 5295);
-		}
-		if (!this.getBoss(getLocaleString(2853))) throw new Error("Failed to kill Infector");
-
-		Pather.moveTo(7763, 5267);
-		Pather.makePortal();
-		Pather.moveTo(7727, 5267);
-		say("1");
-
-		while (!this.playerIn()) {
-			delay(250);
+		Config.Diablo.Fast = true;
+		
+		try {
+			Common.Diablo.runSeals(Config.Diablo.SealOrder);
+			print("Attempting to find Diablo");
+			Common.Diablo.diabloPrep();
+		} catch (error) {
+			print("Diablo wasn't found. Checking seals.");
+			Common.Diablo.runSeals(Config.Diablo.SealOrder);
+			Common.Diablo.diabloPrep();
 		}
 
-		Pather.moveTo(7763, 5267);
-
-		while (!getUnit(1, 243)) {
-			delay(500);
-		}
-
-		Attack.kill(243);
-		say("2");
+		Attack.kill(sdk.monsters.Diablo);
+		this.log("2");
 
 		if (me.expansion) {
-			say("a5");
+			this.log("a5");
 
 			while (!this.playersInAct(5)) {
 				delay(250);
@@ -601,10 +555,7 @@ function main() {
 		}
 
 		Pickit.pickItems();
-
-		if (!Pather.usePortal(null, me.name)) {
-			Town.goToTown();
-		}
+		!Pather.usePortal(null, me.name) && Town.goToTown();
 
 		return true;
 	};
@@ -612,8 +563,7 @@ function main() {
 	this.ancients = function () {
 		if (me.hell && !Config.Rusher.HellAncients) {
 			if (!Config.Rusher.GiveWps) {
-				say("Hell rush complete~");
-				print("Hell rush complete~");
+				this.log("Hell rush complete~");
 				delay(500);
 				quit();
 			}
@@ -623,8 +573,7 @@ function main() {
 
 		if (!this.bumperCheck()) {
 			if (!Config.Rusher.GiveWps) {
-				say("No eligible bumpers detected. Rush complete~");
-				print("No eligible bumpers detected. Rush complete~");
+				this.log("No eligible bumpers detected. Rush complete~");
 				delay(500);
 				quit();
 			}
@@ -632,19 +581,18 @@ function main() {
 			return false;
 		}
 
-		say("starting ancients");
+		this.log("starting ancients");
 
 		Town.doChores();
-		Pather.useWaypoint(118, true);
-		Precast.doPrecast(true);
+		Pather.useWaypoint(sdk.areas.AncientsWay, true) && Precast.doPrecast(true);
 
-		if (!Pather.moveToExit(120, true)) {
+		if (!Pather.moveToExit(sdk.areas.ArreatSummit, true)) {
 			throw new Error("Failed to go to Ancients way.");
 		}
 
 		Pather.moveTo(10089, 12622);
 		Pather.makePortal();
-		say("3");
+		this.log("3");
 
 		while (!this.playerIn()) {
 			delay(250);
@@ -662,9 +610,7 @@ function main() {
 			delay(100);
 		}
 
-		if (!Pather.usePortal(null, me.name)) {
-			Town.goToTown();
-		}
+		!Pather.usePortal(null, me.name) && Town.goToTown();
 
 		return true;
 	};
@@ -672,36 +618,33 @@ function main() {
 	this.baal = function () {
 		if (me.hell) {
 			if (!Config.Rusher.GiveWps) {
-				say("Hell rush complete~");
-				print("Baal not done in Hell. rush complete~");
+				this.log("Baal not done in Hell ~Hell rush complete~");
 				delay(500);
 				quit();
 			}
-			wpsToGive.remove(sdk.area.WorldstoneLvl2);
+			wpsToGive.remove(sdk.areas.WorldstoneLvl2);
 
 			return false;
 		}
 
 		if (!this.bumperCheck()) {
 			if (!Config.Rusher.GiveWps) {
-				say("No eligible bumpers detected. Rush complete~");
-				print("No eligible bumpers detected. Rush complete~");
+				this.log("No eligible bumpers detected. ~Rush complete~");
 				delay(500);
 				quit();
 			}
-			wpsToGive.remove(sdk.area.WorldstoneLvl2);
+			wpsToGive.remove(sdk.areas.WorldstoneLvl2);
 
 			return false;
 		}
 
-		say("starting baal");
+		this.log("starting baal");
 
 		if (me.inTown) {
 			Town.doChores();
-			Pather.useWaypoint(129, true);
-			Precast.doPrecast(true);
+			Pather.useWaypoint(sdk.areas.WorldstoneLvl2) && Precast.doPrecast(true);
 
-			if (!Pather.moveToExit([130, 131], true)) {
+			if (!Pather.moveToExit([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction], true)) {
 				throw new Error("Failed to move to Throne of Destruction.");
 			}
 		}
@@ -709,20 +652,19 @@ function main() {
 		Pather.moveTo(15113, 5040);
 		Attack.clear(15);
 		Common.Baal.clearThrone();
+
 		if (!Common.Baal.clearWaves()) {
 			throw new Error("Couldn't clear baal waves");
 		}
+
 		Common.Baal.clearThrone();
-		Pather.moveTo(15092, 5011);
+		me.getMobCount(30) > 0 && this.clearWaves(); // ensure waves are actually done
+		Pather.moveTo(15090, 5008);
+		delay(5000);
 		Precast.doPrecast(true);
+		Misc.poll(() => !monster(sdk.monsters.ThroneBaal), minutes(3), 1000);
 
-		while (getUnit(1, 543)) {
-			delay(500);
-		}
-
-		delay(1000);
-
-		let portal = getUnit(2, 563);
+		let portal = object(sdk.units.WorldstonePortal);
 
 		if (portal) {
 			Pather.usePortal(null, null, portal);
@@ -734,14 +676,14 @@ function main() {
 		Pather.makePortal();
 		Pather.moveTo(15170, 5950);
 		delay(1000);
-		say("3");
+		this.log("3");
 
 		while (!this.playerIn()) {
 			delay(250);
 		}
 
 		Pather.moveTo(15134, 5923);
-		Attack.kill(544); // Baal
+		Attack.kill(sdk.monsters.Baal);
 		Pickit.pickItems();
 
 		return true;
@@ -750,19 +692,18 @@ function main() {
 	this.clearArea = function (area) {
 		Pather.journeyTo(area);
 		Attack.clearLevel(0);
-		say("Done clearing area: " + area);
+		this.log("Done clearing area: " + area);
 	};
 
 	// Quests
 	this.cain = function () {
 		if (!Config.Rusher.Cain) return true;
 
-		say("starting cain");
+		this.log("starting cain");
 		Town.doChores();
-		Pather.useWaypoint(sdk.areas.DarkWood, true);
-		Precast.doPrecast(true);
+		Pather.useWaypoint(sdk.areas.DarkWood, true) && Precast.doPrecast(true);
 
-		if (!Pather.moveToPreset(sdk.areas.DarkWood, 2, 30, 5, 5)) {
+		if (!Pather.moveToPreset(sdk.areas.DarkWood, 2, sdk.quest.chest.InifussTree, 5, 5)) {
 			throw new Error("Failed to move to Tree of Inifuss");
 		}
 
@@ -771,7 +712,7 @@ function main() {
 		Attack.securePosition(me.x, me.y, 40, 3000, true);
 		!!tree && tree.distance > 5 && Pather.moveToUnit(tree);
 		Pather.makePortal();
-		say("1");
+		this.log("1");
 		tick = getTickCount();
 
 		while (getTickCount() - tick < minutes(2)) {
@@ -784,11 +725,11 @@ function main() {
 		Pather.usePortal(1) || Town.goToTown();
 		Pather.useWaypoint(sdk.areas.StonyField, true);
 		Precast.doPrecast(true);
-		Pather.moveToPreset(sdk.areas.StonyField, 1, 737, 10, 10, false, true);
+		Pather.moveToPreset(sdk.areas.StonyField, 1, sdk.monsters.preset.Rakanishu, 10, 10, false, true);
 		Attack.securePosition(me.x, me.y, 40, 3000, true);
-		Pather.moveToPreset(sdk.areas.StonyField, 2, 17, null, null, true);
+		Pather.moveToPreset(sdk.areas.StonyField, 2, sdk.quest.chest.StoneAlpha, null, null, true);
 		Pather.makePortal();
-		say("1");
+		this.log("1");
 
 		tick = getTickCount();
 
@@ -804,13 +745,13 @@ function main() {
 			let gibbet = object(sdk.quest.chest.CainsJail);
 
 			if (gibbet && !gibbet.mode) {
-				if (!Pather.moveToPreset(me.area, 2, 26, 0, 0, true, true)) {
+				if (!Pather.moveToPreset(me.area, 2, sdk.quest.chest.CainsJail, 0, 0, true, true)) {
 					throw new Error("Failed to move to Cain's Jail");
 				}
 
 				Attack.securePosition(gibbet.x, gibbet.y, 20, 3000);
 				Pather.makePortal();
-				say("1");
+				this.log("1");
 
 				tick = getTickCount();
 
@@ -829,7 +770,7 @@ function main() {
 	this.radament = function () {
 		if (!Config.Rusher.Radament) return false;
 
-		say("starting radament");
+		this.log("starting radament");
 
 		let	moveIntoPos = function (unit, range) {
 			let coords = [],
@@ -861,13 +802,12 @@ function main() {
 			return false;
 		};
 
-		Pather.useWaypoint(48, true);
-		Precast.doPrecast(false);
-		Pather.moveToExit(49, true);
+		Pather.useWaypoint(sdk.areas.A2SewersLvl2, true) && Precast.doPrecast(false);
+		Pather.moveToExit(sdk.areas.A2SewersLvl3, true);
 
-		let radaPreset = getPresetUnit(49, 2, 355);
+		let radaPreset = getPresetUnit(sdk.areas.A2SewersLvl3, 2, sdk.quest.chest.HoradricScrollChest);
 		let radaCoords = {
-			area: 49,
+			area: sdk.areas.A2SewersLvl3,
 			x: radaPreset.roomx * 5 + radaPreset.x,
 			y: radaPreset.roomy * 5 + radaPreset.y
 		};
@@ -878,7 +818,7 @@ function main() {
 		rada ? moveIntoPos(rada, 60) : print("radament unit not found");
 		Attack.securePosition(me.x, me.y, 35, 3000);
 		Pather.makePortal();
-		say("1");
+		this.log("1");
 
 		while (!this.playerIn()) {
 			delay(200);
@@ -891,7 +831,7 @@ function main() {
 			y: me.y
 		};
 
-		say("2");
+		this.log("2");
 		Pickit.pickItems();
 		Attack.securePosition(me.x, me.y, 30, 3000);
 
@@ -901,7 +841,7 @@ function main() {
 
 		Pather.moveToUnit(returnSpot);
 		Pather.makePortal();
-		say("all in");
+		this.log("all in");
 
 		while (!this.playerIn()) {
 			delay(200);
@@ -921,21 +861,22 @@ function main() {
 	this.lamesen = function () {
 		if (!Config.Rusher.LamEsen) return false;
 
-		say("starting lamesen");
+		this.log("starting lamesen");
 
-		if (!Town.goToTown() || !Pather.useWaypoint(80, true)) {
+		if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.KurastBazaar, true)) {
 			throw new Error("Lam Essen quest failed");
 		}
 
 		Precast.doPrecast(false);
 
-		if (!Pather.moveToExit(94, true) || !Pather.moveToPreset(me.area, 2, 193)) {
+		if (!Pather.moveToExit(sdk.areas.RuinedTemple, true)
+			|| !Pather.moveToPreset(me.area, 2, sdk.quest.chest.LamEsensTomeHolder)) {
 			throw new Error("Lam Essen quest failed");
 		}
 
 		Attack.securePosition(me.x, me.y, 30, 2000);
 		Pather.makePortal();
-		say("1");
+		this.log("1");
 
 		while (!this.playerIn()) {
 			delay(200);
@@ -953,7 +894,7 @@ function main() {
 	this.izual = function () {
 		if (!Config.Rusher.Izual) return false;
 
-		say("starting izual");
+		this.log("starting izual");
 
 		let	moveIntoPos = function (unit, range) {
 			let coords = [],
@@ -985,13 +926,12 @@ function main() {
 			return false;
 		};
 
-		Pather.useWaypoint(106, true);
-		Precast.doPrecast(false);
-		Pather.moveToExit(105, true);
+		Pather.useWaypoint(sdk.areas.CityoftheDamned, true) && Precast.doPrecast(false);
+		Pather.moveToExit(sdk.areas.PlainsofDespair, true);
 
-		let izualPreset = getPresetUnit(105, 1, 256);
+		let izualPreset = getPresetUnit(sdk.areas.PlainsofDespair, 1, sdk.monsters.Izual);
 		let izualCoords = {
-			area: 105,
+			area: sdk.areas.PlainsofDespair,
 			x: izualPreset.roomx * 5 + izualPreset.x,
 			y: izualPreset.roomy * 5 + izualPreset.y
 		};
@@ -1008,7 +948,7 @@ function main() {
 
 		Attack.securePosition(me.x, me.y, 30, 3000);
 		Pather.makePortal();
-		say("1");
+		this.log("1");
 
 		while (!this.playerIn()) {
 			delay(200);
@@ -1016,7 +956,7 @@ function main() {
 
 		Attack.kill(sdk.monsters.Izual);
 		Pickit.pickItems();
-		say("2");
+		this.log("2");
 		Pather.moveToUnit(returnSpot);
 
 		while (this.playerIn()) {
@@ -1031,14 +971,13 @@ function main() {
 	this.shenk = function () {
 		if (!Config.Rusher.Shenk) return false;
 
-		say("starting shenk");
+		this.log("starting shenk");
 
-		Pather.useWaypoint(111, true);
-		Precast.doPrecast(false);
+		Pather.useWaypoint(sdk.areas.FrigidHighlands, true) && Precast.doPrecast(false);
 		Pather.moveTo(3846, 5120);
 		Attack.securePosition(me.x, me.y, 30, 3000);
 		Pather.makePortal();
-		say("1");
+		this.log("1");
 
 		while (!this.playerIn()) {
 			delay(200);
@@ -1047,7 +986,7 @@ function main() {
 		Attack.kill(getLocaleString(sdk.locale.monsters.ShenktheOverseer));
 		Pickit.pickItems();
 		Pather.moveTo(3846, 5120);
-		say("2");
+		this.log("2");
 
 		while (this.playerIn()) {
 			delay(200);
@@ -1063,15 +1002,16 @@ function main() {
 
 		!me.inTown && Town.goToTown();
 
-		say("starting anya");
+		this.log("starting anya");
 
-		if (!Pather.useWaypoint(113, true)) {
+		if (!Pather.useWaypoint(sdk.areas.CrystalizedPassage, true)) {
 			throw new Error("Anya quest failed");
 		}
 
 		Precast.doPrecast(false);
 
-		if (!Pather.moveToExit(114, true) || !Pather.moveToPreset(me.area, 2, 460)) {
+		if (!Pather.moveToExit(sdk.areas.FrozenRiver, true)
+			|| !Pather.moveToPreset(me.area, 2, sdk.unit.FrozenAnyasPlatforn)) {
 			throw new Error("Anya quest failed");
 		}
 
@@ -1081,13 +1021,14 @@ function main() {
 
 		if (anya) {
 			Pather.moveToUnit(anya);
-			sendPacket(1, 0x13, 4, 0x2, 4, anya.gid); // Rusher should be able to interact so quester can get the potion without entering
+			// Rusher should be able to interact so quester can get the potion without entering
+			sendPacket(1, 0x13, 4, 0x2, 4, anya.gid);
 			delay(1000 + me.ping);
 			me.cancel();
 		}
 
 		Pather.makePortal();
-		say("1");
+		this.log("1");
 
 		while (!this.playerIn()) {
 			delay(200);
@@ -1095,7 +1036,7 @@ function main() {
 
 		Misc.poll(() => !object(sdk.units.FrozenAnya), 30000, 1000);
 
-		say("2"); // Mainly for non-questers to know when to get the scroll of resistance
+		this.log("2"); // Mainly for non-questers to know when to get the scroll of resistance
 
 		while (this.playerIn()) {
 			delay(200);
@@ -1155,8 +1096,7 @@ function main() {
 				// End run if entire sequence is done or if Config.Rusher.LastRun is done
 				if (current >= sequence.length || (Config.Rusher.LastRun && current > sequence.indexOf(Config.Rusher.LastRun))) {
 					delay(3000);
-					print("bye ~");
-					say("bye ~");
+					this.log("bye ~");
 					print("Current sequence length: " + current + " sequence length: " + sequence.length);
 
 					while (Misc.getPlayerCount() > 1) {
@@ -1173,8 +1113,8 @@ function main() {
 				try {
 					this[sequence[current]]();
 				} catch (sequenceError) {
-					say(sequenceError.message);
-					say("2");
+					this.log(sequenceError.message);
+					this.log("2");
 					Town.goToTown();
 				}
 
