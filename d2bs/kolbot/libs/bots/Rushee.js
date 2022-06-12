@@ -126,8 +126,8 @@ function Rushee() {
 	};
 
 	this.cubeStaff = function () {
-		let shaft = me.shaft,
-			amulet = me.amulet;
+		let shaft = me.shaft;
+		let amulet = me.amulet;
 
 		if (!shaft || !amulet) return false;
 
@@ -149,8 +149,8 @@ function Rushee() {
 	};
 
 	this.placeStaff = function () {
-		let tick = getTickCount(),
-			orifice = object(sdk.quest.chest.HoradricStaffHolder);
+		let tick = getTickCount();
+		let orifice = object(sdk.quest.chest.HoradricStaffHolder);
 
 		if (!orifice) return false;
 
@@ -181,8 +181,8 @@ function Rushee() {
 	};
 
 	this.changeAct = function (act) {
-		let npc,
-			preArea = me.area;
+		let npc;
+		let preArea = me.area;
 
 		if (me.mode === 17) {
 			me.revive();
@@ -462,7 +462,7 @@ function Rushee() {
 
 						while (stones.some((stone) => !stone.mode)) {
 							for (let i = 0; i < stones.length; i++) {
-								stone = stones[i];
+								let stone = stones[i];
 
 								if (Misc.openChest(stone)) {
 									stones.splice(i, 1);

@@ -280,8 +280,8 @@ const Common = {
 		},
 
 		clearStrays: function () {
-			let oldPos = {x: me.x, y: me.y},
-				monster = getUnit(1);
+			let oldPos = {x: me.x, y: me.y};
+			let monster = getUnit(1);
 
 			if (monster) {
 				do {
@@ -814,9 +814,7 @@ const Common = {
 		ancientsPrep: function () {
 			Town.goToTown();
 			Town.fillTome(sdk.items.TomeofTownPortal);
-			Town.buyPots(10, "Thawing", true);
-			Town.buyPots(10, "Antidote", true);
-			Town.buyPots(10, "Stamina", true);
+			[sdk.items.StaminaPotion, sdk.items.AntidotePotion, sdk.items.ThawingPotion].forEach(p => Town.buyPots(10, p, true));
 			Town.buyPotions();
 			Pather.usePortal(sdk.areas.ArreatSummit, me.name);
 		},

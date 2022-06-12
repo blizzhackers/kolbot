@@ -42,8 +42,11 @@ const ClassAttack = {
 			this.maulBoost = ((Math.floor(me.getSkill(sdk.skills.Maul, 1) / 2) + 3) * 20) + this.baseED;
 		}
 
+		Misc.shapeShift(Config.Wereform);
+
 		if (((Config.AttackSkill[0] === sdk.skills.FeralRage && (!me.getState(sdk.states.FeralRage) || me.getStat(sdk.stats.LifeLeech) < this.feralBoost))
 			|| (Config.AttackSkill[0] === sdk.skills.Maul && (!me.getState(sdk.states.Maul) || me.getStat(sdk.stats.DamagePercent) < this.maulBoost))
+			|| (Config.AttackSkill[0] === sdk.skills.ShockWave && !unit.isSpecial && !unit.getState(sdk.states.Stunned))
 			|| (preattack && Config.AttackSkill[0] > 0))
 			&& Attack.checkResist(unit, Config.AttackSkill[0])
 			&& (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))
@@ -58,8 +61,6 @@ const ClassAttack = {
 
 			return 1;
 		}
-
-		Misc.shapeShift(Config.Wereform);
 
 		// Rebuff Armageddon
 		this.canUseArmageddon() && !me.getState(sdk.states.Armageddon) && Skill.cast(sdk.skills.Armageddon, 0);

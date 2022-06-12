@@ -86,20 +86,6 @@ new Overrides.Override(Pather, Pather.useWaypoint, function(orignal, targetArea,
 	}
 }).apply();
 
-new Overrides.Override(Common.Diablo, Common.Diablo.diabloPrep, function(orignal) {
-	Pather.moveTo(7763, 5267) && Pather.makePortal();
-	Pather.moveTo(7727, 5267);
-	say("1");
-
-	while (!this.playerIn()) {
-		delay(250);
-	}
-
-	Pather.moveTo(7763, 5267);
-
-	orignal();
-}).apply();
-
 function main () {
 	let tick;
 
@@ -525,6 +511,18 @@ function main () {
 	this.diablo = function () {
 		this.log("starting diablo");
 
+		function inviteIn () {
+			Pather.moveTo(7763, 5267) && Pather.makePortal();
+			Pather.moveTo(7727, 5267);
+			this.log("1");
+
+			while (!this.playerIn()) {
+				delay(250);
+			}
+
+			return true;
+		}
+
 		Town.doChores();
 		Pather.useWaypoint(sdk.areas.RiverofFlame);
 		Precast.doPrecast(true);
@@ -532,15 +530,16 @@ function main () {
 		
 		Common.Diablo.initLayout();
 		Config.Diablo.Fast = true;
+		Config.Diablo.SealLeader = false;
 		
 		try {
 			Common.Diablo.runSeals(Config.Diablo.SealOrder);
 			print("Attempting to find Diablo");
-			Common.Diablo.diabloPrep();
+			inviteIn() && Common.Diablo.diabloPrep();
 		} catch (error) {
 			print("Diablo wasn't found. Checking seals.");
 			Common.Diablo.runSeals(Config.Diablo.SealOrder);
-			Common.Diablo.diabloPrep();
+			inviteIn() && Common.Diablo.diabloPrep();
 		}
 
 		Attack.kill(sdk.monsters.Diablo);
