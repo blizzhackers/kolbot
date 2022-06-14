@@ -613,6 +613,9 @@ let Config = {
 	Questing: {
 		StopProfile: false
 	},
+	FasterExp: {
+		Team: ""
+	},
 	AutoSkill: {
 		Enabled: false,
 		Build: [],
