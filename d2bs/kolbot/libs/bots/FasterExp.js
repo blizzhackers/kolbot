@@ -14,7 +14,7 @@ include("FasterExpConfig.js");
 // todo - remove all the while delays, initiate task list using the chat events to assign current task
 
 function FasterExp() {
-	const FastExpSettings = {
+	const Roles = {
 		leveler: "", // Char being leveled
 		diaLead: "", // Diablo lead char (should be hammerdin), opens boss seals, opens TP + summons leveler for seal boss kills, helps prep Diablo + kills baal
 		nithPrep: "", // Preps nith, then helps clear throne
@@ -25,7 +25,7 @@ function FasterExp() {
 	if (!FasterExpConfig[Config.FasterExp.Team]) {
 		throw new Error("Failed to locate team config file");
 	} else {
-		Object.assign(FastExpSettings, FasterExpConfig[Config.FasterExp.Team]);
+		Object.assign(Roles, FasterExpConfig[Config.FasterExp.Team]);
 	}
 
 	// Internal variables - don't touch
@@ -121,7 +121,7 @@ function FasterExp() {
 
 	addEventListener("chatmsg", this.messenger);
 
-	if (me.name === FastExpSettings.BOer) {
+	if (me.name === Roles.BOer) {
 		// only runs bo-er script - until told to leave
 		while (!done) {
 			try {
@@ -146,7 +146,7 @@ function FasterExp() {
 
 	Town.doChores();
 
-	if (me.name === FastExpSettings.nithPrep) {
+	if (me.name === Roles.nithPrep) {
 		Pather.useWaypoint(sdk.areas.HallsofPain);
 		Pather.moveToExit(sdk.areas.HallsofVaught, true);
 		Pather.moveToPreset(me.area, 2, sdk.units.NihlathaksPlatform, 10, 10);
@@ -156,13 +156,13 @@ function FasterExp() {
 		Town.move("portalspot");
 	}
 
-	if (me.name === FastExpSettings.shrineHunter) {
+	if (me.name === Roles.shrineHunter) {
 		let noShrine = true, i;
 
 		Pather.useWaypoint(sdk.areas.StonyField);
 		for (i = sdk.areas.StonyField; i > sdk.areas.RogueEncampment; i -= 1) {
 			if (Misc.getShrinesInArea(i, 15, false)) {
-				if (me.name === FastExpSettings.shrineHunter) {
+				if (me.name === Roles.shrineHunter) {
 					say(msgShrineY);
 					noShrine = false;
 				}
@@ -176,7 +176,7 @@ function FasterExp() {
 
 			for (i = sdk.areas.DarkWood; i < sdk.areas.DenofEvil; i += 1) {
 				if (Misc.getShrinesInArea(i, 15, false)) {
-					if (me.name === FastExpSettings.shrineHunter) {
+					if (me.name === Roles.shrineHunter) {
 						say(msgShrineY);
 						noShrine = false;
 					}
@@ -200,7 +200,7 @@ function FasterExp() {
 		Town.goToTown();
 	}
 
-	if (me.name === FastExpSettings.leveler) {
+	if (me.name === Roles.leveler) {
 		say(msgstartDia);
 		Pather.useWaypoint(sdk.areas.PandemoniumFortress);
 		Town.move("portalspot");
@@ -210,7 +210,7 @@ function FasterExp() {
 		}
 
 		if (canKill1 && !canKill2) {
-			Pather.usePortal(sdk.areas.ChaosSanctuary, FastExpSettings.diaLead);
+			Pather.usePortal(sdk.areas.ChaosSanctuary, Roles.diaLead);
 
 			try {
 				Attack.kill(id);
@@ -227,7 +227,7 @@ function FasterExp() {
 		}
 
 		if (canKill2 && !canKill3) {
-			Pather.usePortal(sdk.areas.ChaosSanctuary, FastExpSettings.diaLead);
+			Pather.usePortal(sdk.areas.ChaosSanctuary, Roles.diaLead);
 			try {
 				Attack.kill(id);
 			} catch (e) {
@@ -243,7 +243,7 @@ function FasterExp() {
 		}
 
 		if (canKill3 && !readyDia) {
-			Pather.usePortal(sdk.areas.ChaosSanctuary, FastExpSettings.diaLead);
+			Pather.usePortal(sdk.areas.ChaosSanctuary, Roles.diaLead);
 			try {
 				Attack.kill(id);
 			} catch (e) {
@@ -256,21 +256,21 @@ function FasterExp() {
 
 		Town.move("waypoint");
 		Pather.useWaypoint(sdk.areas.StonyField);
-		Town.goToTown(sdk.areas.RogueEncampment);
+		Town.goToTown(1);
 		
 		while (shrineWait) {
 			delay(100);
 		}
 
 		if (goForShrine) {
-			while (!Pather.usePortal(null, FastExpSettings.shrineHunter)) {
+			while (!Pather.usePortal(null, Roles.shrineHunter)) {
 				delay(100);
 			}
 
 			say(msgGoThrone);
 			Misc.getShrinesInArea(me.area, 15, true);
 			delay(300);
-			Pather.usePortal(null, FastExpSettings.shrineHunter);
+			Pather.usePortal(null, Roles.shrineHunter);
 			delay(300);
 			Pather.usePortal(null, me.name);
 			Pather.useWaypoint(sdk.areas.PandemoniumFortress, true);
@@ -288,7 +288,7 @@ function FasterExp() {
 			delay(100);
 		}
 
-		Pather.usePortal(sdk.areas.ChaosSanctuary, FastExpSettings.diaLead);
+		Pather.usePortal(sdk.areas.ChaosSanctuary, Roles.diaLead);
 
 		try {
 			Attack.kill(sdk.monsters.Diablo);
@@ -296,11 +296,10 @@ function FasterExp() {
 			say("Diablo not found");
 		} finally {
 			Pickit.pickItems();
-			Town.goToTown(sdk.areas.Harrogath);
-			Town.move("portalspot");
+			Town.goToTown(1) && Town.move("portalspot");
 		}
 
-		while (!Pather.usePortal(sdk.areas.WorldstoneChamber, FastExpSettings.shrineHunter)) {
+		while (!Pather.usePortal(sdk.areas.WorldstoneChamber, Roles.shrineHunter)) {
 			delay(100);
 		}
 
@@ -320,7 +319,7 @@ function FasterExp() {
 
 		try {
 			Pather.moveTo(15177, 5952);
-			player = Misc.findPlayer(FastExpSettings.diaLead);
+			player = Misc.findPlayer(Roles.diaLead);
 			
 			while (me.area === player.area) {
 				delay(100);
@@ -335,7 +334,7 @@ function FasterExp() {
 			delay(100);
 		}
 
-		Pather.usePortal(sdk.areas.HallsofVaught, FastExpSettings.nithPrep);
+		Pather.usePortal(sdk.areas.HallsofVaught, Roles.nithPrep);
 
 		try {
 			Attack.kill(sdk.monsters.Nihlathak);
@@ -348,35 +347,37 @@ function FasterExp() {
 		return true;
 	}
 
-	if ([FastExpSettings.leveler, FastExpSettings.shrineHunter, FastExpSettings.nithPrep].indexOf(me.name) === -1) {
+	if ([Roles.leveler, Roles.shrineHunter, Roles.nithPrep].indexOf(me.name) === -1) {
 		while (!startDia) {
 			delay(100);
 		}
 
 		if (me.area !== sdk.areas.RiverofFlame) Pather.useWaypoint(sdk.areas.RiverofFlame);
+		if (!Pather.moveToExit(sdk.areas.ChaosSanctuary, true) && !Pather.moveTo(7790, 5544)) throw new Error("Failed to move to Chaos Sanctuary");
 		Common.Diablo.initLayout();
+
 		Common.Diablo.openSeal(sdk.units.DiabloSealVizier2);
-		me.name === FastExpSettings.diaLead && Common.Diablo.openSeal(sdk.units.DiabloSealVizier);
+		me.name === Roles.diaLead && Common.Diablo.openSeal(sdk.units.DiabloSealVizier);
 		Common.Diablo.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
-		me.name === FastExpSettings.diaLead && Pather.makePortal() && say(msgSeal1);
+		me.name === Roles.diaLead && Pather.makePortal() && say(msgSeal1);
 
 		while (!Common.Diablo.getBoss(getLocaleString(2851))) {
 			delay(100);
 		}
 
-		me.name === FastExpSettings.diaLead && Common.Diablo.openSeal(sdk.units.DiabloSealSeis);
+		me.name === Roles.diaLead && Common.Diablo.openSeal(sdk.units.DiabloSealSeis);
 		Common.Diablo.seisLayout === 1 ? Pather.moveTo(7771, 5196) : Pather.moveTo(7798, 5186);
-		me.name === FastExpSettings.diaLead && Pather.makePortal() && say(msgSeal2);
+		me.name === Roles.diaLead && Pather.makePortal() && say(msgSeal2);
 
 		while (!Common.Diablo.getBoss(getLocaleString(2852))) {
 			delay(100);
 		}
 
 		Common.Diablo.openSeal(sdk.units.DiabloSealInfector);
-		me.name === FastExpSettings.diaLead && Common.Diablo.openSeal(sdk.units.DiabloSealInfector2);
+		me.name === Roles.diaLead && Common.Diablo.openSeal(sdk.units.DiabloSealInfector2);
 		Common.Diablo.infLayout === 1 ? delay(1) : Pather.moveTo(7928, 5295);
 
-		me.name === FastExpSettings.diaLead && Pather.makePortal() && say(msgSeal3);
+		me.name === Roles.diaLead && Pather.makePortal() && say(msgSeal3);
 
 		while (!Common.Diablo.getBoss(getLocaleString(2853))) {
 			delay(100);
@@ -385,7 +386,7 @@ function FasterExp() {
 		Pather.moveTo(7788, 5292);
 		Common.Diablo.diabloPrep();
 		Attack.hurt(sdk.monsters.Diablo, hurtDia);
-		Town.goToTown(sdk.areas.Harrogath);
+		Town.goToTown(5);
 		say(msgDia);
 		Town.move("portalspot");
 	}
@@ -394,11 +395,11 @@ function FasterExp() {
 		delay(100);
 	}
 
-	while (!Pather.usePortal(sdk.areas.ThroneofDestruction, FastExpSettings.shrineHunter)) {
+	while (!Pather.usePortal(sdk.areas.ThroneofDestruction, Roles.shrineHunter)) {
 		delay(100);
 	}
 
-	me.name === FastExpSettings.shrineHunter && Pather.makePortal();
+	me.name === Roles.shrineHunter && Pather.makePortal();
 
 	Common.Baal.clearThrone();
 	Pickit.pickItems();
@@ -407,7 +408,7 @@ function FasterExp() {
 	say(msgBeforeB);
 	Pather.moveTo(15090, 5008);
 
-	if (me.name === FastExpSettings.nithPrep) {
+	if (me.name === Roles.nithPrep) {
 		while (true) {
 			if (done) {
 				return true;
@@ -440,8 +441,8 @@ function FasterExp() {
 	Attack.hurt(sdk.monsters.Baal, hurtBaal);
 	say(msgBaal);
 
-	if (me.name === FastExpSettings.diaLead) {
-		player = Misc.findPlayer(FastExpSettings.leveler);
+	if (me.name === Roles.diaLead) {
+		player = Misc.findPlayer(Roles.leveler);
 		
 		while (me.area !== player.area) {
 			delay(100);
