@@ -186,7 +186,7 @@ function FasterExp() {
 		}
 
 		noShrine && say(msgShrineN);
-		Town.goToTown(sdk.areas.Harrogath);
+		Town.goToTown(5);
 		
 		while (!goThrone) {
 			delay(100);
@@ -348,7 +348,7 @@ function FasterExp() {
 		return true;
 	}
 
-	if (me.name !== FastExpSettings.leveler && me.name !== FastExpSettings.shrineHunter && me.name !== FastExpSettings.nithPrep) {
+	if ([FastExpSettings.leveler, FastExpSettings.shrineHunter, FastExpSettings.nithPrep].indexOf(me.name) === -1) {
 		while (!startDia) {
 			delay(100);
 		}
@@ -409,6 +409,10 @@ function FasterExp() {
 
 	if (me.name === FastExpSettings.nithPrep) {
 		while (true) {
+			if (done) {
+				return true;
+			}
+
 			delay(1000);
 		}
 	}

@@ -15,6 +15,11 @@
 		Config.BattleOrders.SkipIfTardy = true; // Proceed with scripts if other players already moved on from BO spot
 		Config.BattleOrders.Wait = 10; // Duration to wait for players to join game in seconds (default: 10)
 
+	// Fast exp script based on FastExp.js by dzik but heavily modified.
+	// Requires 5 chars minimum but ideally run with 7-8 chars.
+	Scripts.FasterExp = false;
+		Config.FasterExp.Team = ""; // name of team assigned in FasterExpConfig.js
+
  	Scripts.BoBarbHelper = false; // specific HC script with BoBarb on the Bo area during whole game | set it only in barbarian config
 		Config.BoBarbHelper.Mode = -1; // 0 = give BO, -1 = disabled
 		Config.BoBarbHelper.Wp = 35; // 35 = Catacombs level 2
