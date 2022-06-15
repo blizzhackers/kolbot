@@ -332,9 +332,9 @@ const TorchSystem = {
 			Town.needStash() && Town.stash();
 
 			// Get the number keys
-			tkeys = me.findItems("pk1", 0).length || 0;
-			hkeys = me.findItems("pk2", 0).length || 0;
-			dkeys = me.findItems("pk3", 0).length || 0;
+			let tkeys = me.findItems("pk1", 0).length || 0;
+			let hkeys = me.findItems("pk2", 0).length || 0;
+			let dkeys = me.findItems("pk3", 0).length || 0;
 
 			// Stop the loop if we have enough keys or if wait time expired
 			if (((tkeys >= 3 && hkeys >= 3 && dkeys >= 3)

@@ -96,9 +96,9 @@ function OrgTorch() {
 
 	// Check if we have complete sets of organs
 	this.completeSetCheck = function () {
-		let horns = me.findItems("dhn"),
-			brains = me.findItems("mbr"),
-			eyes = me.findItems("bey");
+		let horns = me.findItems("dhn");
+		let brains = me.findItems("mbr");
+		let eyes = me.findItems("bey");
 
 		if (!horns || !brains || !eyes) {
 			return false;
@@ -113,38 +113,36 @@ function OrgTorch() {
 	};
 
 	// Get fade in River of Flames - only works if we are wearing an item with ctc Fade
+	// todo - equipping an item from storage if we have it
 	this.getFade = function () {
 		if (Config.OrgTorch.GetFade && !me.getState(sdk.states.Fade)
-			&& (me.checkItem({name: sdk.locale.items.Treachery, equipped: true}).have
-			|| me.checkItem({name: sdk.locale.items.LastWish, equipped: true}).have
-			|| me.checkItem({name: sdk.locale.items.SpiritWard, equipped: true}).have)) {
-			if (!me.getState(sdk.states.Fade)) {
-				console.log(sdk.colors.Orange + "OrgTorch :: " + sdk.colors.White + "Getting Fade");
-				Pather.useWaypoint(sdk.areas.RiverofFlame);
-				Precast.doPrecast(true);
-				// check if item is on switch
-				let mainSlot;
-				let fadeItem = me.findFirst([
-					{name: sdk.locale.items.LastWish, equipped: true},
-					{name: sdk.locale.items.SpiritWard, equipped: true}]);
+			&& me.haveSome([{name: sdk.locale.items.Treachery, equipped: true},
+				{name: sdk.locale.items.LastWish, equipped: true}, {name: sdk.locale.items.SpiritWard, equipped: true}])) {
+			console.log(sdk.colors.Orange + "OrgTorch :: " + sdk.colors.White + "Getting Fade");
+			Pather.useWaypoint(sdk.areas.RiverofFlame);
+			Precast.doPrecast(true);
+			// check if item is on switch
+			let mainSlot;
+			let fadeItem = me.findFirst([
+				{name: sdk.locale.items.LastWish, equipped: true},
+				{name: sdk.locale.items.SpiritWard, equipped: true}]);
 
-				Pather.moveTo(7811, 5872);
+			Pather.moveTo(7811, 5872);
 				
-				if (fadeItem.have && fadeItem.item.isOnSwap && me.weaponswitch !== 1) {
-					mainSlot = me.weaponswitch;
-					me.switchWeapons(1);
-				}
-				
-				me.paladin && me.getSkill(sdk.skills.Salvation, 1) && Skill.setSkill(sdk.skills.Salvation, 0);
-
-				while (!me.getState(sdk.states.Fade)) {
-					delay(100);
-				}
-
-				mainSlot !== undefined && me.weaponswitch !== mainSlot && me.switchWeapons(mainSlot);
-
-				console.log(sdk.colors.Orange + "OrgTorch :: " + sdk.colors.Green + "Fade Achieved");
+			if (fadeItem.have && fadeItem.item.isOnSwap && me.weaponswitch !== 1) {
+				mainSlot = me.weaponswitch;
+				me.switchWeapons(1);
 			}
+
+			me.paladin && me.getSkill(sdk.skills.Salvation, 1) && Skill.setSkill(sdk.skills.Salvation, 0);
+
+			while (!me.getState(sdk.states.Fade)) {
+				delay(100);
+			}
+
+			mainSlot !== undefined && me.weaponswitch !== mainSlot && me.switchWeapons(mainSlot);
+
+			console.log(sdk.colors.Orange + "OrgTorch :: " + sdk.colors.Green + "Fade Achieved");
 		}
 
 		return true;
@@ -152,9 +150,9 @@ function OrgTorch() {
 
 	// Open a red portal. Mode 0 = mini ubers, mode 1 = Tristram
 	this.openPortal = function (mode) {
-		let item1 = mode === 0 ? me.findItem("pk1", 0) : me.findItem("dhn", 0),
-			item2 = mode === 0 ? me.findItem("pk2", 0) : me.findItem("bey", 0),
-			item3 = mode === 0 ? me.findItem("pk3", 0) : me.findItem("mbr", 0);
+		let item1 = mode === 0 ? me.findItem("pk1", 0) : me.findItem("dhn", 0);
+		let item2 = mode === 0 ? me.findItem("pk2", 0) : me.findItem("bey", 0);
+		let item3 = mode === 0 ? me.findItem("pk3", 0) : me.findItem("mbr", 0);
 
 		Town.goToTown(5);
 		Town.doChores();
@@ -176,7 +174,8 @@ function OrgTorch() {
 				do {
 					switch (mode) {
 					case 0:
-						if ([133, 134, 135].includes(portal.objtype) && this.doneAreas.indexOf(portal.objtype) === -1) {
+						if ([sdk.areas.MatronsDen, sdk.areas.ForgottenSands, sdk.areas.FurnaceofPain].includes(portal.objtype)
+							&& this.doneAreas.indexOf(portal.objtype) === -1) {
 							this.doneAreas.push(portal.objtype);
 
 							return copyUnit(portal);
@@ -184,7 +183,7 @@ function OrgTorch() {
 
 						break;
 					case 1:
-						if (portal.objtype === 136) {
+						if (portal.objtype === sdk.areas.UberTristram) {
 							return copyUnit(portal);
 						}
 
@@ -321,7 +320,7 @@ function OrgTorch() {
 
 		Attack.kill(sdk.monsters.UberBaal);
 		Pickit.pickItems();
-		currentGameInfo.doneAreas.push(portalId) && OrgTorchData.update(currentGameInfo);
+		currentGameInfo.doneAreas.push(sdk.areas.UberTristram) && OrgTorchData.update(currentGameInfo);
 		this.checkTorch();
 	};
 
@@ -369,8 +368,8 @@ function OrgTorch() {
 	};
 
 	this.juvCheck = function () {
-		let needJuvs = 0,
-			col = Town.checkColumns(Storage.BeltSize());
+		let needJuvs = 0;
+		let col = Town.checkColumns(Storage.BeltSize());
 
 		for (let i = 0; i < 4; i += 1) {
 			if (Config.BeltColumn[i] === "rv") {
@@ -402,13 +401,13 @@ function OrgTorch() {
 		currentGameInfo = OrgTorchData.create();
 	}
 
-	let portal,
-		tkeys = me.findItems("pk1", 0).length || 0,
-		hkeys = me.findItems("pk2", 0).length || 0,
-		dkeys = me.findItems("pk3", 0).length || 0,
-		brains = me.findItems("mbr", 0).length || 0,
-		eyes = me.findItems("bey", 0).length || 0,
-		horns = me.findItems("dhn", 0).length || 0;
+	let portal;
+	let tkeys = me.findItems("pk1", 0).length || 0;
+	let hkeys = me.findItems("pk2", 0).length || 0;
+	let dkeys = me.findItems("pk3", 0).length || 0;
+	let brains = me.findItems("mbr", 0).length || 0;
+	let eyes = me.findItems("bey", 0).length || 0;
+	let horns = me.findItems("dhn", 0).length || 0;
 
 	// Do town chores and quit if MakeTorch is true and we have a torch.
 	this.checkTorch();
@@ -454,6 +453,7 @@ function OrgTorch() {
 	// We have enough keys, do mini ubers
 	if (tkeys >= keySetsReq && hkeys >= keySetsReq && dkeys >= keySetsReq) {
 		this.getFade();
+		Town.goToTown(5);
 		console.log("Making organs.");
 		D2Bot.printToConsole("OrgTorch: Making organs.", 7);
 		Town.move("stash");
@@ -494,6 +494,7 @@ function OrgTorch() {
 	horns = me.findItems("dhn", 0).length || 0;
 
 	// We have enough organs, do Tristram - or trist is open we may have chickened and came back so check it
+	// if trist was already open when we joined should we run that first?
 	if ((brains && eyes && horns) || tristOpen) {
 		this.getFade();
 		Town.goToTown(5);
