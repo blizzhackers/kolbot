@@ -17,7 +17,7 @@ const ClassAttack = {
 
 	canUseCyclone: function () {
 		if (this.useCyclone) return true;
-		this.canUseCyclone = Precast.precastables.CycloneArmor;
+		this.useCyclone = Precast.precastables.CycloneArmor;
 		return (this.useCyclone || me.getSkill(sdk.skills.CycloneArmor, 1));
 	},
 	
