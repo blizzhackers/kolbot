@@ -13,10 +13,10 @@ function Cows() {
 		Precast.doPrecast(true);
 		Pather.moveToPreset(me.area, 1, 737, 8, 8);
 
-		if (Misc.poll(() => {
+		if (!Misc.poll(() => {
 			let p = Pather.getPortal(sdk.areas.Tristram);
-			return (p && Pather.usePortal(null, null, p));
-		}, seconds(3), 500)) {
+			return (p && Pather.usePortal(sdk.areas.Tristram, null, p));
+		}, minutes(1), 1000)) {
 			throw new Error("Tristram portal not found");
 		}
 
