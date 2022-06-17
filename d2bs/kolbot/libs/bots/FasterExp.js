@@ -6,12 +6,14 @@
 *               Chars not specified will help clear chaos, hurt diablo, help clear throne and hurt Baal.
 *               Route is seal bosses > xp shrine > kill diablo > leach waves > leach baal > kill nith (nith right after diablo is faster but you often lose XP shrine @ nith).
 *               To ensure Barb makes it to cata 2 on time he should be d2botlead, rest running d2botfollow.
-*               leveler must have diaLead, nithPrep and shrineHunter in quitlist, everryone else must have leveler in quitlist.
+*               leveler must have diaLead, nithPrep and shrineHunter in quitlist, everyone else must have leveler in quitlist.
 *
 */
 include("FasterExpConfig.js");
 
 // todo - remove all the while delays, initiate task list using the chat events to assign current task
+// todo - break up shrine hunter. shrine hunter should only hunt shrines. Maybe baalLead to handle throne
+// are any of the other bosses enough xp to be worth it?
 
 function FasterExp() {
 	const Roles = {
@@ -35,13 +37,15 @@ function FasterExp() {
 	const msgShrineY = "s yes";
 	const msgShrineN = "s no";
 	const msgNith = "nith ready";
+	const nithDone = "nith done";
 	const msgstartDia = "Start Diablo";
 	const msgSeal1 = "s1";
 	const msgSeal2 = "s2";
 	const msgSeal3 = "s3";
 	const msgDia = "dia up";
 	const msgGoThrone = "Throne";
-	const msgBeforeB = "town and wait";
+	const wavesReady = "Waves";
+	const msgBeforeBaal = "town and wait";
 	const msgBaal = "baal up";
 	const msgQuit = "we done";
 
@@ -49,6 +53,7 @@ function FasterExp() {
 	let shrineWait = true;
 	let goForShrine = false;
 	let readyNith = false;
+	let nithDead = false;
 	let startDia = false;
 	let canKill1 = false;
 	let canKill2 = false;
@@ -56,6 +61,7 @@ function FasterExp() {
 	let readyDia = false;
 	let goThrone = false;
 	let readyWaves = false;
+	let townForBaal = false;
 	let readyBaal = false;
 	let done = false;
 	let id = "";
@@ -73,6 +79,10 @@ function FasterExp() {
 			break;
 		case msgNith:
 			readyNith = true;
+
+			break;
+		case nithDone:
+			nithDead = true;
 
 			break;
 		case msgstartDia:
@@ -102,8 +112,12 @@ function FasterExp() {
 			goThrone = true;
 
 			break;
-		case msgBeforeB:
+		case wavesReady:
 			readyWaves = true;
+
+			break;
+		case msgBeforeBaal:
+			townForBaal = true;
 
 			break;
 		case msgBaal:
@@ -149,15 +163,17 @@ function FasterExp() {
 	if (me.name === Roles.nithPrep) {
 		Pather.useWaypoint(sdk.areas.HallsofPain);
 		Pather.moveToExit(sdk.areas.HallsofVaught, true);
-		Pather.moveToPreset(me.area, 2, sdk.units.NihlathaksPlatform, 10, 10);
+		Pather.moveToPreset(sdk.areas.HallsofVaught, 2, sdk.units.NihlathaksPlatform, 10, 10);
 		Attack.hurt(sdk.monsters.Nihlathak, hurtNith);
 		Town.doChores();
 		say(msgNith);
 		Town.move("portalspot");
 	}
 
+	// add more areas - looks and finds exp shrine - guards it until leveler comes and grabs it - then looks for another
 	if (me.name === Roles.shrineHunter) {
-		let noShrine = true, i;
+		let areas = [];
+		let i, noShrine = true;
 
 		Pather.useWaypoint(sdk.areas.StonyField);
 		for (i = sdk.areas.StonyField; i > sdk.areas.RogueEncampment; i -= 1) {
@@ -168,6 +184,7 @@ function FasterExp() {
 				}
 				break;
 			}
+			areas.push(i);
 		}
 
 		if (i === 1) {
@@ -182,6 +199,7 @@ function FasterExp() {
 					}
 					break;
 				}
+				areas.push(i);
 			}
 		}
 
@@ -200,6 +218,7 @@ function FasterExp() {
 		Town.goToTown();
 	}
 
+	// Leveler start
 	if (me.name === Roles.leveler) {
 		say(msgstartDia);
 		Pather.useWaypoint(sdk.areas.PandemoniumFortress);
@@ -228,6 +247,7 @@ function FasterExp() {
 
 		if (canKill2 && !canKill3) {
 			Pather.usePortal(sdk.areas.ChaosSanctuary, Roles.diaLead);
+
 			try {
 				Attack.kill(id);
 			} catch (e) {
@@ -244,6 +264,7 @@ function FasterExp() {
 
 		if (canKill3 && !readyDia) {
 			Pather.usePortal(sdk.areas.ChaosSanctuary, Roles.diaLead);
+
 			try {
 				Attack.kill(id);
 			} catch (e) {
@@ -254,12 +275,14 @@ function FasterExp() {
 			}
 		}
 
-		Town.move("waypoint");
-		Pather.useWaypoint(sdk.areas.StonyField);
-		Town.goToTown(1);
-		
-		while (shrineWait) {
-			delay(100);
+		if (Roles.shrineHunter) {
+			Town.move("waypoint");
+			Pather.useWaypoint(sdk.areas.StonyField);
+			Town.goToTown(1);
+			
+			while (shrineWait) {
+				delay(100);
+			}
 		}
 
 		if (goForShrine) {
@@ -296,15 +319,112 @@ function FasterExp() {
 			say("Diablo not found");
 		} finally {
 			Pickit.pickItems();
-			Town.goToTown(1) && Town.move("portalspot");
+			Town.goToTown(5) && Town.move("portalspot");
 		}
 
-		while (!Pather.usePortal(sdk.areas.WorldstoneChamber, Roles.shrineHunter)) {
+		while (!readyNith) {
 			delay(100);
 		}
 
+		Pather.usePortal(sdk.areas.HallsofVaught, Roles.nithPrep);
+
+		try {
+			Attack.kill(sdk.monsters.Nihlathak);
+		} catch (e) {
+			say("Nith not found");
+		} finally {
+			say(nithDone);
+			Pickit.pickItems();
+			Town.goToTown();
+
+		}
+
 		while (!readyWaves) {
-			Pather.moveTo(15117, 5045);
+			delay(100);
+		}
+
+		let longRangeSupport = function () {
+			switch (me.classid) {
+			case sdk.charclass.Necromancer:
+				ClassAttack.raiseArmy(50);
+
+				if (Config.Curse[1] > 0) {
+					let monster = getUnit(1);
+
+					if (monster) {
+						do {
+							if (monster.attackable && monster.distance < 50 && !checkCollision(me, monster, 0x4)
+								&& monster.curseable && !monster.isSpecial && !monster.getState(ClassAttack.curseState[1])) {
+								Skill.cast(Config.Curse[1], 0, monster);
+							}
+						} while (monster.getNext());
+					}
+				}
+
+				break;
+			case sdk.charclass.Assassin:
+				if (Config.UseTraps && ClassAttack.checkTraps({x: 15095, y: 5037})) {
+					ClassAttack.placeTraps({x: 15095, y: 5037}, 5);
+				}
+
+				break;
+			default:
+				break;
+			}
+
+			let skills = [
+				sdk.skills.ChargedStrike, sdk.skills.Lightning, sdk.skills.FireWall, sdk.skills.Meteor, sdk.skills.Blizzard,
+				sdk.skills.BoneSpear, sdk.skills.BoneSpirit, sdk.skills.DoubleThrow, sdk.skills.Volcano
+			];
+
+			if (!skills.some(skill => Config.AttackSkill[1] === skill || Config.AttackSkill[3] === skill)) {
+				return false;
+			}
+
+			let monster = getUnit(1);
+			let monList = [];
+
+			if (monster) {
+				do {
+					if (monster.attackable && monster.distance < 50 && !checkCollision(me, monster, 0x4)) {
+						monList.push(copyUnit(monster));
+					}
+				} while (monster.getNext());
+			}
+
+			while (monList.length) {
+				monList.sort(Sort.units);
+				monster = copyUnit(monList[0]);
+
+				if (monster && monster.attackable) {
+					let index = monster.isSpecial ? 1 : 3;
+
+					if (Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[index]))) {
+						if (Config.AttackSkill[index] > -1) {
+							ClassAttack.doCast(monster, Config.AttackSkill[index], Config.AttackSkill[index + 1]);
+						}
+					} else {
+						monList.shift();
+					}
+				} else {
+					monList.shift();
+				}
+
+				delay(5);
+			}
+
+			return true;
+		};
+		
+		Skill.usePvpRange = true;
+		Pather.usePortal(sdk.areas.ThroneofDestruction);
+
+		// long distance support?
+		while (!townForBaal) {
+			Pather.moveTo(15117, 5049);
+			longRangeSupport();
+
+			delay(50);
 		}
 
 		Town.goToTown();
@@ -328,20 +448,6 @@ function FasterExp() {
 			say("Baal not found");
 		} finally {
 			Town.goToTown();
-		}
-
-		while (!readyNith) {
-			delay(100);
-		}
-
-		Pather.usePortal(sdk.areas.HallsofVaught, Roles.nithPrep);
-
-		try {
-			Attack.kill(sdk.monsters.Nihlathak);
-		} catch (e) {
-			say("Nith not found");
-		} finally {
-			Pickit.pickItems();
 		}
 
 		return true;
@@ -395,8 +501,26 @@ function FasterExp() {
 		delay(100);
 	}
 
-	while (!Pather.usePortal(sdk.areas.ThroneofDestruction, Roles.shrineHunter)) {
-		delay(100);
+	if (me.name === Roles.nithPrep) {
+		while (!nithDead) {
+			if (done) {
+				return true;
+			}
+
+			delay(1000);
+		}
+	}
+
+	if (Roles.shrineHunter) {
+		while (!Pather.usePortal(sdk.areas.ThroneofDestruction, Roles.shrineHunter)) {
+			delay(100);
+		}
+	} else {
+		if (!Pather.usePortal(sdk.areas.ThroneofDestruction)) {
+			Pather.journeyTo(sdk.areas.ThroneofDestruction);
+			Pather.moveTo(15118, 5045);
+			Pather.makePortal();
+		}
 	}
 
 	me.name === Roles.shrineHunter && Pather.makePortal();
@@ -405,18 +529,8 @@ function FasterExp() {
 	Pickit.pickItems();
 	Common.Baal.clearWaves();
 
-	say(msgBeforeB);
+	me.name === Roles.diaLead && say(msgBeforeBaal);
 	Pather.moveTo(15090, 5008);
-
-	if (me.name === Roles.nithPrep) {
-		while (true) {
-			if (done) {
-				return true;
-			}
-
-			delay(1000);
-		}
-	}
 
 	delay(5000);
 	Precast.doPrecast(true);
@@ -442,6 +556,8 @@ function FasterExp() {
 	say(msgBaal);
 
 	if (me.name === Roles.diaLead) {
+		// move safe distance away from baal
+		Attack.deploy(monster(sdk.monsters.Baal), 20, 5, 9);
 		player = Misc.findPlayer(Roles.leveler);
 		
 		while (me.area !== player.area) {

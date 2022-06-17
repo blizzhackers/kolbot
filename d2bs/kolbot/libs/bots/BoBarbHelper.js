@@ -20,11 +20,12 @@ const BoBarbHelper = () => {
 	};
 
 	const shouldBuff = unit => (
-		Misc.inMyParty(unit) &&
-		getDistance(me, unit) < 10 &&
-		unit.name !== me.name &&
-		!unit.dead &&
-		!unit.inTown
+		Misc.inMyParty(unit)
+		&& getDistance(me, unit) < 10
+		&& !unit.getState(sdk.states.BattleOrders)
+		&& unit.name !== me.name
+		&& !unit.dead
+		&& !unit.inTown
 	);
 
 	const giveBuff = () => {
@@ -65,7 +66,7 @@ const BoBarbHelper = () => {
 		print('monsters can find their way to wps ...');
 		delay(2000);
 		hideConsole();
-		me.overhead('set LifeChiken to 40');
+		me.overhead('set LifeChicken to 40');
 		Config.LifeChicken = 40;
 	}
 
@@ -84,8 +85,15 @@ const BoBarbHelper = () => {
 	}
 
 	Pather.moveTo(me.x + 4, me.y + 4);
+	
+	let idleTick = 0;
 
 	while (true) {
+		if (getTickCount() - idleTick > 0) {
+			sendPacket(1, 0x40);
+			idleTick += rand(1200, 1500) * 1000;
+		}
+
 		giveBuff();
 
 		if (townNearbyMonster && monsterNear()) {
