@@ -1652,7 +1652,7 @@ Object.defineProperties(Unit.prototype, {
 				].includes(this.classid);
 		},
 	},
-	ghosts: {
+	isGhost: {
 		get: function () {
 			return [
 				sdk.monsters.Ghost1, sdk.monsters.Wraith1, sdk.monsters.Specter1,
@@ -1660,7 +1660,7 @@ Object.defineProperties(Unit.prototype, {
 			].includes(this.classid);
 		},
 	},
-	dolls: {
+	isDoll: {
 		get: function () {
 			return [
 				sdk.monsters.BoneFetish1, sdk.monsters.BoneFetish2, sdk.monsters.BoneFetish3,

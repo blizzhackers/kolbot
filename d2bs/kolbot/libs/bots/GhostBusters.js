@@ -30,7 +30,7 @@ function GhostBusters() {
 
 				if (monster) {
 					do {
-						if (monster.ghost && monster.distance <= 30 && monster.attackable) {
+						if (monster.isGhost && monster.distance <= 30 && monster.attackable) {
 							monList.push(copyUnit(monster));
 						}
 					} while (monster.getNext());
