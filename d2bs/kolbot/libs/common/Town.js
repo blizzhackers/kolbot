@@ -211,6 +211,8 @@ const Town = {
 	initNPC: function (task, reason) {
 		print("initNPC: " + reason);
 
+		delay(250);
+
 		let npc = getInteractedNPC();
 
 		try {
@@ -264,6 +266,8 @@ const Town = {
 
 			return false;
 		}
+
+		Misc.poll(() => me.gameReady, 2000, 250);
 
 		return npc;
 	},
@@ -502,7 +506,7 @@ const Town = {
 			switch (id) {
 			case sdk.items.TomeofIdentify:
 			case "ibk":
-				return 20; // Ignore missing ID tome
+				return Config.FieldID.Enabled ? 0 : 20; // Ignore missing ID tome if we aren't using field ID
 			case sdk.items.TomeofTownPortal:
 			case "tbk":
 				return 0; // Force TP tome check
@@ -1721,6 +1725,11 @@ const Town = {
 							continue;
 						}
 					}
+				}
+
+				if (Config.FieldID.Enabled && !idTome) {
+					// don't toss scrolls if we need them for field id but don't have a tome yet - low level chars
+					continue;
 				}
 
 				break;
