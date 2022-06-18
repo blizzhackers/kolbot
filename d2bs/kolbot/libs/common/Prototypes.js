@@ -1631,7 +1631,7 @@ Object.defineProperties(Unit.prototype, {
 		},
 	},
 	// todo - monster types
-	primeEvils: {
+	isPrimeEvil: {
 		get: function () {
 			return [
 				sdk.monsters.Andariel, sdk.monsters.Duriel, sdk.monsters.Mephisto, sdk.monsters.Diablo,
@@ -1640,9 +1640,9 @@ Object.defineProperties(Unit.prototype, {
 			].includes(this.classid);
 		},
 	},
-	boss: {
+	isBoss: {
 		get: function () {
-			return this.primeEvils
+			return this.isPrimeEvil
 				||
 				[
 					sdk.monsters.TheSmith, sdk.monsters.BloodRaven, sdk.monsters.Radament, sdk.monsters.Griswold,
