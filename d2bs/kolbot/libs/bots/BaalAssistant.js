@@ -1,9 +1,12 @@
 /**
 *  @filename    BaalAssistant.js
-*  @author      kolton, modified by YGM, refactored by theBGuy
+*  @author      kolton, YGM, theBGuy
 *  @desc        Help or Leech Baal Runs.
 *
 */
+
+// todo - combine autobaal, baalhelper, and baalassistant into one script
+// todo - track leaders area so we can do silent follow
 
 function BaalAssistant() {
 	let Leader = Config.Leader;
@@ -348,7 +351,9 @@ function BaalAssistant() {
 								if (Helper) {
 									Attack.clear(40);
 								} else {
-									while ([571, 572, 573].map((unitId) => monster(unitId)).filter(Boolean).some((unit) => unit.attackable)) {
+									while ([sdk.monsters.ListerTheTormenter, sdk.monsters.Minion1, sdk.monsters.Minion2]
+										.map((unitId) => monster(unitId))
+										.filter(Boolean).some((unit) => unit.attackable)) {
 										delay(1000);
 									}
 
@@ -358,15 +363,13 @@ function BaalAssistant() {
 								break MainLoop;
 							default:
 								if (getTickCount() - tick < 7e3) {
-									me.getState(2) && Skill.setSkill(109, 0);
-
-									break;
+									if (me.paladin && me.getState(sdk.states.Poison) && Skill.setSkill(sdk.skills.Cleansing, 0)) {
+										break;
+									}
 								}
 
-								if (Helper) {
-									if (!Common.Baal.preattack()) {
-										delay(100);
-									}
+								if (Helper && !Common.Baal.preattack()) {
+									delay(100);
 								}
 
 								break;
