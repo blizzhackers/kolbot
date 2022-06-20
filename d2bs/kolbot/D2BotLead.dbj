@@ -9,7 +9,7 @@ include("StarterConfig.js");
 
 // - for global settings see libs/StarterConfig.js
 // Override default values for StarterConfig under here by following format
-// Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds 
+// Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
 // No touchy!
 include("json2.js");
@@ -238,7 +238,7 @@ function locationAction (location) {
 	case sdk.game.locations.SplashScreen:
 	case sdk.game.locations.Login:
 	case sdk.game.locations.CharSelect:
-		Starter.LocationEvents.login();
+		Starter.LocationEvents.login([sdk.game.gametype.TcpIpHost, sdk.game.profiletype.OpenBattlenet].includes(Profile().type));
 
 		break;
 	case sdk.game.locations.LoginError:

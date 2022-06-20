@@ -1050,7 +1050,9 @@ const Misc = {
 				unit.distance > 13 && Attack.getIntoPosition(unit, 13, 0x4);
 				Skill.cast(sdk.skills.Telekinesis, 0, unit);
 			} else {
-				if (Pather.moveTo(unit.x + 1, unit.y + 2, 3) && getDistance(me.x, me.y, unit.x + 1, unit.y + 2) < 5) {
+				getDistance(me.x, me.y, unit.x + 1, unit.y + 2) > 5 && Pather.moveTo(unit.x + 1, unit.y + 2, 3);
+
+				if (getDistance(me.x, me.y, unit.x + 1, unit.y + 2) < 5) {
 					specialChest && i > 2 ? Misc.click(0, 0, unit) : sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
 				}
 			}

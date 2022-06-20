@@ -1337,9 +1337,15 @@ const ControlAction = {
 				Starter.LocationEvents.selectDifficultySP();
 				
 				break;
-			case sdk.game.locations.MainMenu:
 			case sdk.game.locations.SplashScreen:
+				ControlAction.click();
+
+				break;
+			case sdk.game.locations.MainMenu:
 				if (Profile().type === sdk.game.profiletype.OpenBattlenet) {
+					// check we are on the correct gateway
+					let realms = {"west": 0, "east": 1, "asia": 2, "europe": 3};
+					ControlAction.clickRealm(realms[Profile().gateway.toLowerCase()]);
 					try {
 						login(me.profile);
 					} catch (e) {

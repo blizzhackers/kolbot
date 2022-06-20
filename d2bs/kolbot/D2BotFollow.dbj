@@ -253,7 +253,7 @@ function locationAction (location) {
 	case sdk.game.locations.Login:
 	case sdk.game.locations.CharSelect:
 	case sdk.game.locations.SplashScreen:
-		Starter.LocationEvents.login(Profile().type === sdk.game.gametype.TcpIpJoin);
+		Starter.LocationEvents.login([sdk.game.gametype.TcpIpJoin, sdk.game.profiletype.OpenBattlenet].includes(Profile().type));
 
 		break;
 	case sdk.game.locations.LoginError:

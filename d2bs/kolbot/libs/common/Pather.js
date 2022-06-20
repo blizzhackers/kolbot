@@ -311,7 +311,7 @@ const Pather = {
 		let clearSettings = {
 			clearPath: (clearPath || !useTeleport), // walking characters need to clear in front of them
 			range: 10,
-			specType: 0,
+			specType: (typeof clearPath === "number" ? clearPath : 0),
 		};
 		(!retry || (retry <= 3 && !useTeleport)) && (retry = useTeleport ? 5 : 15);
 		let path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? (annoyingArea ? 30 : this.teleDistance) : this.walkDistance);

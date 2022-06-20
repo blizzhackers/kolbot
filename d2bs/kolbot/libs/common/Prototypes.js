@@ -487,6 +487,7 @@ Unit.prototype.checkItem = function (itemInfo) {
 		runeword: null,
 		ethereal: null,
 		equipped: null,
+		basetype: null,
 		name: ""
 	}, itemInfo);
 
@@ -502,6 +503,7 @@ Unit.prototype.checkItem = function (itemInfo) {
 				&& (itemObj.runeword === null || (item.runeword === itemObj.runeword))
 				&& (itemObj.ethereal === null || (item.ethereal === itemObj.ethereal))
 				&& (itemObj.equipped === null || (typeof itemObj.equipped === "number" ? item.bodylocation === itemObj.equipped : item.isEquipped === itemObj.equipped))
+				&& (itemObj.basetype === null || ((item.normal || item.superior) === itemObj.basetype))
 				&& (!itemObj.name || item.fname.toLowerCase().includes(itemObj.name.toLowerCase()))
 			);
 		});
@@ -1631,7 +1633,7 @@ Object.defineProperties(Unit.prototype, {
 		},
 	},
 	// todo - monster types
-	primeEvils: {
+	isPrimeEvil: {
 		get: function () {
 			return [
 				sdk.monsters.Andariel, sdk.monsters.Duriel, sdk.monsters.Mephisto, sdk.monsters.Diablo,
@@ -1640,9 +1642,9 @@ Object.defineProperties(Unit.prototype, {
 			].includes(this.classid);
 		},
 	},
-	boss: {
+	isBoss: {
 		get: function () {
-			return this.primeEvils
+			return this.isPrimeEvil
 				||
 				[
 					sdk.monsters.TheSmith, sdk.monsters.BloodRaven, sdk.monsters.Radament, sdk.monsters.Griswold,
@@ -1652,7 +1654,7 @@ Object.defineProperties(Unit.prototype, {
 				].includes(this.classid);
 		},
 	},
-	ghosts: {
+	isGhost: {
 		get: function () {
 			return [
 				sdk.monsters.Ghost1, sdk.monsters.Wraith1, sdk.monsters.Specter1,
@@ -1660,7 +1662,7 @@ Object.defineProperties(Unit.prototype, {
 			].includes(this.classid);
 		},
 	},
-	dolls: {
+	isDoll: {
 		get: function () {
 			return [
 				sdk.monsters.BoneFetish1, sdk.monsters.BoneFetish2, sdk.monsters.BoneFetish3,
@@ -1886,6 +1888,12 @@ Object.defineProperties(Unit.prototype, {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
 			return this.quality === sdk.itemquality.Crafted;
+		},
+	},
+	sockets: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.getStat(sdk.stats.NumSockets);
 		},
 	},
 });

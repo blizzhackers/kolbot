@@ -171,7 +171,7 @@ function dataCleaner () {
 	etc...
 */
 
-const AdvancedConfig = {
+const AdvancedCleanerConfig = {
 	generateAccounts: false,
 	accountPrefix: "account",
 	accountPassword: "password",
@@ -205,9 +205,9 @@ function parseInfo () {
 		}
 	}
 	
-	if (AdvancedConfig.generateAccounts) {
+	if (AdvancedCleanerConfig.generateAccounts) {
 		for (let index = rangeStart; index <= rangeStop ; index += 1) {
-			accounts.push(AdvancedConfig.accountPrefix + index + "/" + AdvancedConfig.accountPassword + "/" + AdvancedConfig.accountRealm);
+			accounts.push(AdvancedCleanerConfig.accountPrefix + index + "/" + AdvancedCleanerConfig.accountPassword + "/" + AdvancedCleanerConfig.accountRealm);
 			chars.push(["all"]);
 		}
 	}

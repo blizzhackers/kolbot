@@ -1,91 +1,86 @@
 /**
 *  @filename    BaalAssistant.js
-*  @author      kolton, modified by YGM, refactored by theBGuy
+*  @author      kolton, YGM, theBGuy
 *  @desc        Help or Leech Baal Runs.
 *
 */
 
+// todo - combine autobaal, baalhelper, and baalassistant into one script
+// todo - track leaders area so we can do silent follow
+
 function BaalAssistant() {
-	let Leader = Config.Leader, // Not entriely needed in the configs.
-		Helper = Config.BaalAssistant.Helper,
-		hotCheck = false,
-		safeCheck = false,
-		baalCheck = false,
-		ngCheck = false,
-		ShrineStatus = false,
-		secondAttempt = false,
-		throneStatus = false,
-		firstAttempt = true;
+	let Leader = Config.Leader;
+	let Helper = Config.BaalAssistant.Helper;
+	let hotCheck = false;
+	let safeCheck = false;
+	let baalCheck = false;
+	let ngCheck = false;
+	let ShrineStatus = false;
+	let secondAttempt = false;
+	let throneStatus = false;
+	let firstAttempt = true;
+	let killTracker = false;
+
+	// convert all messages to lowercase
+	Config.BaalAssistant.HotTPMessage.forEach((msg, i) => {
+		Config.BaalAssistant.HotTPMessage[i] = msg.toLowerCase();
+	});
+
+	Config.BaalAssistant.SafeTPMessage.forEach((msg, i) => {
+		Config.BaalAssistant.SafeTPMessage[i] = msg.toLowerCase();
+	});
+
+	Config.BaalAssistant.BaalMessage.forEach((msg, i) => {
+		Config.BaalAssistant.BaalMessage[i] = msg.toLowerCase();
+	});
+
+	Config.BaalAssistant.NextGameMessage.forEach((msg, i) => {
+		Config.BaalAssistant.NextGameMessage[i] = msg.toLowerCase();
+	});
 
 	addEventListener('chatmsg',
 		function (nick, msg) {
 			if (nick === Leader) {
+				msg = msg.toLowerCase();
+
 				for (let i = 0; i < Config.BaalAssistant.HotTPMessage.length; i += 1) {
-					if (msg.toLowerCase().includes(Config.BaalAssistant.HotTPMessage[i].toLowerCase())) {
+					if (msg.includes(Config.BaalAssistant.HotTPMessage[i])) {
 						hotCheck = true;
 						break;
 					}
 				}
 
 				for (let i = 0; i < Config.BaalAssistant.SafeTPMessage.length; i += 1) {
-					if (msg.toLowerCase().includes(Config.BaalAssistant.SafeTPMessage[i].toLowerCase())) {
+					if (msg.includes(Config.BaalAssistant.SafeTPMessage[i])) {
 						safeCheck = true;
 						break;
 					}
 				}
 
 				for (let i = 0; i < Config.BaalAssistant.BaalMessage.length; i += 1) {
-					if (msg.toLowerCase().includes(Config.BaalAssistant.BaalMessage[i].toLowerCase())) {
+					if (msg.includes(Config.BaalAssistant.BaalMessage[i])) {
 						baalCheck = true;
 						break;
 					}
 				}
 
 				for (let i = 0; i < Config.BaalAssistant.NextGameMessage.length; i += 1) {
-					if (msg.toLowerCase().includes(Config.BaalAssistant.NextGameMessage[i].toLowerCase())) {
+					if (msg.includes(Config.BaalAssistant.NextGameMessage[i])) {
 						ngCheck = true;
+						killTracker = true;
 						break;
 					}
 				}
 			}
 		});
 
-	this.checkThrone = function () {
-		let monster = getUnit(1);
-		if (monster) {
-			do {
-				if (monster.attackable && monster.y < 5080) {
-					switch (monster.classid) {
-					case 23:
-					case 62:
-						return 1;
-					case 105:
-					case 381:
-						return 2;
-					case 557:
-						return 3;
-					case 558:
-						return 4;
-					case 571:
-						return 5;
-					default:
-						Helper && Attack.getIntoPosition(monster, 10, 0x4) && Attack.clear(15);
-						return false;
-
-					}
-				}
-			} while (monster.getNext());
-		}
-		return false;
-	};
-
 	this.checkParty = function () {
 		for (let i = 0; i < Config.BaalAssistant.Wait; i += 1) {
 			let partycheck = getParty();
 			if (partycheck) {
 				do {
-					if (partycheck.area === 131) return false;
-					if (partycheck.area === 107 || partycheck.area === 108) return true;
+					if (partycheck.area === sdk.areas.ThroneofDestruction) return false;
+					if (partycheck.area === sdk.areas.RiverofFlame || partycheck.area === sdk.areas.ChaosSanctuary) return true;
 				} while (partycheck.getNext());
 			}
 
@@ -96,294 +91,339 @@ function BaalAssistant() {
 	};
 
 	// Start
+	const Worker = require('../modules/Worker');
+
 	if (Leader) {
 		if (!Misc.poll(() => Misc.inMyParty(Leader), 30e3, 1000)) throw new Error("BaalAssistant: Leader not partied");
 	}
 
-	!!Config.BaalAssistant.KillNihlathak && Loader.runScript("Nihlathak");
-	!!Config.BaalAssistant.FastChaos && Loader.runScript("Diablo", () => Config.Diablo.Fast = true);
+	let killLeaderTracker = false;
+	if (!Leader && (Config.BaalAssistant.KillNihlathak || Config.BaalAssistant.FastChaos)) {
+		// run background auto detect so we don't miss messages while running add ons
+		let leadTick = getTickCount();
+
+		Worker.runInBackground.leaderTracker = function () {
+			if (killLeaderTracker || killTracker) return false;
+			// check every 3 seconds
+			if (getTickCount() - leadTick < 3000) return true;
+			leadTick = getTickCount();
+
+			// check again in another 3 seconds if game wasn't ready
+			if (!me.gameReady) return true;
+			if (Misc.getPlayerCount() <= 1) return false;
+
+			let party = getParty();
+
+			if (party) {
+				do {
+					// Player is in Throne of Destruction or Worldstone Chamber
+					if ([sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(party.area)) {
+						Leader = party.name;
+						console.log(sdk.colors.DarkGold + "Autodected " + Leader);
+						return false;
+					}
+				} while (party.getNext());
+			}
+
+			return true;
+		};
+	}
+
+	Config.BaalAssistant.KillNihlathak && Loader.runScript("Nihlathak");
+	Config.BaalAssistant.FastChaos && Loader.runScript("Diablo", () => Config.Diablo.Fast = true);
 
 	Town.goToTown(5);
 	Town.doChores();
 
-	if (Leader || (Leader = Misc.autoLeaderDetect(109)) || (Leader = Misc.autoLeaderDetect(130)) || (Leader = Misc.autoLeaderDetect(131))) {
+	if (Leader
+		|| (Leader = Misc.autoLeaderDetect({destination: sdk.areas.WorldstoneLvl3, quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area)}))
+		|| (Leader = Misc.autoLeaderDetect({destination: sdk.areas.ThroneofDestruction, quitIf: (area) => [sdk.areas.WorldstoneChamber].includes(area)}))) {
 		print("ÿc<Leader: " + Leader);
-		while (Misc.inMyParty(Leader)) {
-			if (!secondAttempt && !safeCheck && !baalCheck && !ShrineStatus && !!Config.BaalAssistant.GetShrine && me.area === 109) {
-				if (!!Config.BaalAssistant.GetShrineWaitForHotTP) {
-					for (let i = 0; i < Config.BaalAssistant.Wait; i += 1) {
-						if (hotCheck) {
-							break;
-						}
-						delay(1000);
-					}
+		killLeaderTracker = true;
 
-					if (!hotCheck) {
-						print("ÿc1" + "Leader didn't tell me to start hunting for an experience shrine.");
-						ShrineStatus = true;
-					}
+		try {
+			let ngTick = getTickCount();
+
+			Worker.runInBackground.ngTracker = function () {
+				if (killTracker) return false;
+				// check every 3 seconds
+				if (getTickCount() - ngTick < 3000) return true;
+				ngTick = getTickCount();
+
+				// check again in another 3 seconds if game wasn't ready
+				if (!me.gameReady) return true;
+				if (Misc.getPlayerCount() <= 1) throw new Error("Empty game");
+				// sometimes worker seems to continue running for a bit even after script ends - so check that we are still in the right script
+				if (Loader.scriptName() !== "BaalAssistant") return false;
+				
+				if (ngCheck) {
+					killTracker = true;
+					throw "NG";
 				}
 
-				if (!ShrineStatus) {
-					Pather.useWaypoint(4);
-					Precast.doPrecast(true);
-					let i;
+				return true;
+			};
 
-					for (i = 4; i > 1; i -= 1) {
-						if (safeCheck) {
-							break;
-						}
-						if (Misc.getShrinesInArea(i, 15, true)) {
-							break;
-						}
-					}
+			if (Config.LifeChicken <= 0) {
+				let deadTick = getTickCount();
 
-					if (!safeCheck) {
-						if (i === 1) {
-							Town.goToTown();
-							Pather.useWaypoint(5);
-							Precast.doPrecast(true);
+				Worker.runInBackground.deathTracker = function () {
+					if (killTracker) return false;
+					// check every 3 seconds
+					if (getTickCount() - deadTick < 3000) return true;
+					deadTick = getTickCount();
 
-							for (i = 5; i < 8; i += 1) {
-								if (safeCheck) {
-									break;
-								}
-								if (Misc.getShrinesInArea(i, 15, true)) {
-									break;
-								}
-							}
-						}
-					}
-				}
-				Town.goToTown(5);
-				ShrineStatus = true;
-			}
+					// check again in another 3 seconds if game wasn't ready
+					if (!me.gameReady) return true;
+					
+					if (me.dead) {
+						console.log("I died");
+						me.revive();
+						delay(500);
 
-			if (firstAttempt && !secondAttempt && !safeCheck && !baalCheck && me.area !== 131 && me.area !== 132) {
-				!!Config.RandomPrecast ? Pather.useWaypoint("random") && Precast.doPrecast(true) : Pather.useWaypoint(129) && Precast.doPrecast(true);
-			}
-
-			if (me.area !== 131 && me.area !== 132) {
-				if (Config.BaalAssistant.SkipTP) {
-					if (firstAttempt && !secondAttempt) {
-						me.area !== 129 && Pather.useWaypoint(129);
-						if (!Pather.moveToExit([130, 131], false)) throw new Error("Failed to move to WSK3.");
-
-						this.checkParty();
-						let entrance = Misc.poll(() => getUnit(5, 82), 1000, 200);
-						entrance && Pather.moveTo(entrance.x > me.x ? entrance.x - 5 : entrance.x + 5, entrance.y > me.y ? entrance.y - 5 : entrance.y + 5);
-
-						if (!Pather.moveToExit(131, true) || !Pather.moveTo(15118, 5002)) throw new Error("Failed to move to Throne of Destruction.");
-
-						Pather.moveTo(15095, 5029);
-
-						if ((Config.BaalAssistant.SoulQuit && getUnit(1, 641)) || (Config.BaalAssistant.DollQuit && getUnit(1, 691))) {
-							print("Burning Souls or Undead Soul Killers found, ending script.");
-							return true;
-						}
-
-						Pather.moveTo(15118, 5002);
-						Helper ? Attack.clear(15) && Pather.moveTo(15118, 5002) : Pather.moveTo(15117, 5045);
-
-						secondAttempt = true;
-						safeCheck = true;
-					} else {
-						if (me.intown) {
+						if (me.inTown) {
 							Town.move("portalspot");
-							Pather.usePortal(131, null);
-							me.mode === 17 && me.revive();
-							Helper ? Attack.clear(15) && Pather.moveTo(15118, 5002) : Pather.moveTo(15117, 5045);
+							baalCheck ? Pather.usePortal(sdk.areas.WorldstoneChamber, null) : Pather.usePortal(sdk.areas.ThroneofDestruction, null);
 						}
 					}
-				} else {
-					if (firstAttempt && !secondAttempt) {
-						me.area !== 109 && Pather.useWaypoint(109);
-						Town.move("portalspot");
+
+					return true;
+				};
+			}
+
+			while (Misc.inMyParty(Leader)) {
+				if (!secondAttempt && !safeCheck && !baalCheck && !ShrineStatus && !!Config.BaalAssistant.GetShrine && me.area === sdk.areas.Harrogath) {
+					if (!!Config.BaalAssistant.GetShrineWaitForHotTP) {
+						Misc.poll(() => hotCheck, seconds(Config.BaalAssistant.Wait), 1000);
+
+						if (!hotCheck) {
+							print("ÿc1Leader didn't tell me to start hunting for an experience shrine.");
+							ShrineStatus = true;
+						}
+					}
+
+					// don't waste time looking for seal if party is already killing baal, he'll be dead by the time we find one
+					if (!ShrineStatus && !baalCheck) {
+						Pather.useWaypoint(sdk.areas.StonyField);
+						Precast.doPrecast(true);
 						let i;
 
-						if (Config.BaalAssistant.WaitForSafeTP) {
-							for (i = 0; i < Config.BaalAssistant.Wait; i += 1) {
-								if (safeCheck) {
-									break;
-								}
-								delay(1000);
+						for (i = sdk.areas.StonyField; i > sdk.areas.RogueEncampment; i -= 1) {
+							if (safeCheck) {
+								break;
 							}
-
-							if (i === Config.BaalAssistant.Wait) throw new Error("No safe TP message.");
+							if (Misc.getShrinesInArea(i, sdk.shrines.Experience, true)) {
+								break;
+							}
 						}
 
-						for (i = 0; i < Config.BaalAssistant.Wait; i += 1) {
-							if (Pather.usePortal(131, null)) {
+						if (!safeCheck) {
+							if (i === sdk.areas.RogueEncampment) {
+								Town.goToTown();
+								Pather.useWaypoint(sdk.areas.DarkWood);
+								Precast.doPrecast(true);
+
+								for (i = sdk.areas.DarkWood; i < sdk.areas.DenofEvil; i += 1) {
+									if (safeCheck) {
+										break;
+									}
+									if (Misc.getShrinesInArea(i, sdk.shrines.Experience, true)) {
+										break;
+									}
+								}
+							}
+						}
+					}
+
+					Town.goToTown(5);
+					ShrineStatus = true;
+				}
+
+				if (firstAttempt && !secondAttempt && !safeCheck && !baalCheck && me.area !== sdk.areas.ThroneofDestruction && me.area !== sdk.areas.WorldstoneChamber) {
+					!!Config.RandomPrecast ? Precast.doRandomPrecast(true, sdk.areas.WorldstoneLvl2) : Pather.useWaypoint(sdk.areas.WorldstoneLvl2) && Precast.doPrecast(true);
+				}
+
+				if (me.area !== sdk.areas.ThroneofDestruction && me.area !== sdk.areas.WorldstoneChamber) {
+					if (Config.BaalAssistant.SkipTP) {
+						if (firstAttempt && !secondAttempt) {
+							me.area !== sdk.areas.WorldstoneLvl2 && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
+							if (!Pather.moveToExit([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction], false)) throw new Error("Failed to move to WSK3.");
+
+							this.checkParty();
+							let entrance = Misc.poll(() => getUnit(5, 82), 1000, 200);
+							entrance && Pather.moveTo(entrance.x > me.x ? entrance.x - 5 : entrance.x + 5, entrance.y > me.y ? entrance.y - 5 : entrance.y + 5);
+
+							if (!Pather.moveToExit(sdk.areas.WorldstoneLvl3, true) || !Pather.moveTo(15118, 5002)) throw new Error("Failed to move to Throne of Destruction.");
+
+							Pather.moveTo(15095, 5029);
+
+							if ((Config.BaalAssistant.SoulQuit && monster(641)) || (Config.BaalAssistant.DollQuit && monster(691))) {
+								print("Burning Souls or Undead Soul Killers found, ending script.");
+								return true;
+							}
+
+							Pather.moveTo(15118, 5002);
+							Helper ? Attack.clear(15) && Pather.moveTo(15118, 5002) : Pather.moveTo(15117, 5045);
+
+							secondAttempt = true;
+							safeCheck = true;
+						} else {
+							if (me.inTown) {
+								Town.move("portalspot");
+								Pather.usePortal(sdk.areas.ThroneofDestruction, null);
+								Helper ? Attack.clear(15) && Pather.moveTo(15118, 5002) : Pather.moveTo(15117, 5045);
+							}
+						}
+					} else {
+						if (firstAttempt && !secondAttempt) {
+							me.area !== sdk.areas.Harrogath && Pather.useWaypoint(sdk.areas.Harrogath);
+							Town.move("portalspot");
+
+							if (Config.BaalAssistant.WaitForSafeTP && !Misc.poll(() => safeCheck, seconds(Config.BaalAssistant.Wait), 1000)) {
+								throw new Error("No safe TP message.");
+							}
+
+							if (!Misc.poll(() => Pather.usePortal(sdk.areas.ThroneofDestruction, null), seconds(Config.BaalAssistant.Wait), 1000)) {
+								throw new Error("No portals to Throne.");
+							}
+
+							if ((Config.BaalAssistant.SoulQuit && monster(641)) || (Config.BaalAssistant.DollQuit && monster(691))) {
+								throw new Error("Burning Souls or Undead Soul Killers found, ending script.");
+							}
+
+							Helper ? Attack.clear(15) && Pather.moveTo(15118, 5002) : Pather.moveTo(15117, 5045);
+							secondAttempt = true;
+							safeCheck = true;
+						} else {
+							if (me.inTown) {
+								Town.move("portalspot");
+								Pather.usePortal(sdk.areas.ThroneofDestruction, null);
+								Helper ? Attack.clear(15) && Pather.moveTo(15118, 5002) : Pather.moveTo(15117, 5045);
+							}
+						}
+					}
+				}
+
+				if (safeCheck && !baalCheck && me.area === sdk.areas.ThroneofDestruction) {
+					if (!baalCheck && !throneStatus) {
+						if (Helper) {
+							Attack.clear(15);
+							Common.Baal.clearThrone();
+							Pather.moveTo(15094, me.paladin ? 5029 : 5038);
+							Precast.doPrecast(true);
+						}
+
+						let tick = getTickCount();
+
+						MainLoop: while (true) {
+							if (Helper) {
+								if (getDistance(me, 15094, me.paladin ? 5029 : 5038) > 3) {
+									Pather.moveTo(15094, me.paladin ? 5029 : 5038);
+								}
+							}
+
+							if (!monster(sdk.monsters.ThroneBaal)) {
 								break;
 							}
 
-							delay(1000);
-						}
+							switch (Common.Baal.checkThrone(Helper)) {
+							case 1:
+								Helper && Attack.clear(40);
+								tick = getTickCount();
 
-						if (i === Config.BaalAssistant.Wait) {
-							throw new Error("No portals to Throne.");
-						}
+								break;
+							case 2:
+								Helper && Attack.clear(40);
+								tick = getTickCount();
 
-						if ((Config.BaalAssistant.SoulQuit && getUnit(1, 641)) || (Config.BaalAssistant.DollQuit && getUnit(1, 691))) {
-							print("Burning Souls or Undead Soul Killers found, ending script.");
-							return true;
-						}
+								break;
+							case 4:
+								Helper && Attack.clear(40);
+								tick = getTickCount();
 
-						Helper ? Attack.clear(15) && Pather.moveTo(15118, 5002) : Pather.moveTo(15117, 5045);
-						secondAttempt = true;
-						safeCheck = true;
-					} else {
-						if (me.intown) {
-							Town.move("portalspot");
-							Pather.usePortal(131, null);
-							me.mode === 17 && me.revive();
-							Helper ? Attack.clear(15) && Pather.moveTo(15118, 5002) : Pather.moveTo(15117, 5045);
-						}
-					}
-				}
-			}
+								break;
+							case 3:
+								Helper && Attack.clear(40) && Common.Baal.checkHydra();
+								tick = getTickCount();
 
-			for (let i = 0; i < 5; i += 1) {
-				if (ngCheck) {
-					return true;
-				}
-				delay(100);
-			}
+								break;
+							case 5:
+								if (Helper) {
+									Attack.clear(40);
+								} else {
+									while ([sdk.monsters.ListerTheTormenter, sdk.monsters.Minion1, sdk.monsters.Minion2]
+										.map((unitId) => monster(unitId))
+										.filter(Boolean).some((unit) => unit.attackable)) {
+										delay(1000);
+									}
 
-			if (safeCheck && !baalCheck && me.area === 131) {
-				if (!baalCheck && !throneStatus) {
-					if (Helper) {
-						Attack.clear(15);
-						Common.Baal.clearThrone();
-						Pather.moveTo(15094, me.classid === 3 ? 5029 : 5038);
-						Precast.doPrecast(true);
-					}
-
-					let tick = getTickCount();
-
-					MainLoop: while (true) {
-						if (Helper) {
-							if (getDistance(me, 15094, me.classid === 3 ? 5029 : 5038) > 3) {
-								Pather.moveTo(15094, me.classid === 3 ? 5029 : 5038);
-							}
-						}
-
-						if (!getUnit(1, 543)) {
-							break;
-						}
-
-						switch (this.checkThrone()) {
-						case 1:
-							Helper && Attack.clear(40);
-							tick = getTickCount();
-
-							break;
-						case 2:
-							Helper && Attack.clear(40);
-							tick = getTickCount();
-
-							break;
-						case 4:
-							Helper && Attack.clear(40);
-							tick = getTickCount();
-
-							break;
-						case 3:
-							Helper && Attack.clear(40) && Common.Baal.checkHydra();
-							tick = getTickCount();
-
-							break;
-						case 5:
-							if (Helper) {
-								Attack.clear(40);
-							} else {
-								while (getUnit(1, 571).attackable || getUnit(1, 572).attackable || getUnit(1, 573).attackable) {
 									delay(1000);
 								}
-								delay(1000);
-							}
 
-							break MainLoop;
-						default:
-							if (getTickCount() - tick < 7e3) {
-								me.getState(2) && Skill.setSkill(109, 0);
+								break MainLoop;
+							default:
+								if (getTickCount() - tick < 7e3) {
+									if (me.paladin && me.getState(sdk.states.Poison) && Skill.setSkill(sdk.skills.Cleansing, 0)) {
+										break;
+									}
+								}
+
+								if (Helper && !Common.Baal.preattack()) {
+									delay(100);
+								}
 
 								break;
 							}
-
-							if (Helper) {
-								if (!Common.Baal.preattack()) {
-									delay(100);
-								}
-							}
-
-							break;
+							delay(10);
 						}
-						delay(10);
+						throneStatus = true;
+						baalCheck = true;
 					}
-					throneStatus = true;
-					baalCheck = true;
 				}
-			}
 
-			for (let i = 0; i < 5; i += 1) {
-				if (ngCheck) return true;
-				delay(100);
-			}
-
-			if ((throneStatus || baalCheck) && Config.BaalAssistant.KillBaal && me.area === 131) {
-				if (Helper) {
-					Pather.moveTo(15090, 5008);
-					delay(2000);
+				if ((throneStatus || baalCheck) && Config.BaalAssistant.KillBaal && me.area === sdk.areas.ThroneofDestruction) {
+					Helper ? Pather.moveTo(15090, 5008) && delay(2000) : Pather.moveTo(15090, 5010);
 					Precast.doPrecast(true);
-				} else {
-					Pather.moveTo(15090, 5010);
-					Precast.doPrecast(true);
-				}
 
-				while (getUnit(1, 543)) {
-					delay(500);
-				}
+					while (monster(sdk.monsters.ThroneBaal)) {
+						delay(500);
+					}
 
-				let portal = getUnit(2, 563);
+					let portal = getUnit(2, 563);
 
-				if (portal) {
-					Helper ? delay(1000) : delay(4000);
-					Pather.usePortal(null, null, portal);
-				} else {
-					throw new Error("Couldn't find portal.");
-				}
+					if (portal) {
+						delay((Helper ? 1000 : 4000));
+						Pather.usePortal(null, null, portal);
+					} else {
+						throw new Error("Couldn't find portal.");
+					}
 
-				me.mode === 17 && me.revive();
-				let baal;
-
-				if (Helper) {
-					delay(1000);
-					Pather.moveTo(15134, 5923);
-					baal = getUnit(1, 544);
-					Attack.kill(544);
-					Pickit.pickItems();
-					if (ngCheck) return true;
-					if (!!baal && baal.dead) return true;
-				} else {
-					Pather.moveTo(15177, 5952);
-					baal = getUnit(1, 544);
-					while (baal) {
+					if (Helper) {
 						delay(1000);
-						if (ngCheck) return true;
-						if (!!baal && baal.dead) return true;
+						Pather.moveTo(15134, 5923);
+						Attack.kill(sdk.monsters.Baal);
+						Pickit.pickItems();
+					} else {
+						Pather.moveTo(15177, 5952);
+						let baal = monster(sdk.monsters.Baal);
+						
+						while (!!baal && baal.attackable) {
+							delay(1000);
+						}
 					}
-					return true;
+
+				} else {
+					while (!ngCheck) {
+						delay(500);
+					}
 				}
 
-			} else {
-				while (true) {
-					if (ngCheck) return true;
-					delay(500);
-				}
+				delay(500);
 			}
-
-			delay(500);
+		} catch (e) {
+			console.errorReport(e);
+		} finally {
+			killTracker = true;
 		}
 	} else {
 		throw new Error("Empty game.");
