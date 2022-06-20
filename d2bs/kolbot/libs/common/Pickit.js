@@ -83,7 +83,7 @@ const Pickit = {
 		}
 
 		if (rval.result === 0 && !getBaseStat("items", unit.classid, "quest") && !Town.ignoredItemTypes.includes(unit.itemType)
-			&& !unit.questItem && (unit.isInInventory || (me.gold < Config.LowGold || me.gold < 500000))) {
+			&& !unit.questItem && (unit.isInInventory || (me.gold < Config.LowGold || (me.gold < 500000 && Config.PickitFiles.length === 0)))) {
 			// Gold doesn't take up room, just pick it up
 			if (unit.classid === sdk.items.Gold) {
 				return {
