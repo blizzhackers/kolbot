@@ -858,7 +858,7 @@ const Common = {
 			return true;
 		},
 
-		checkThrone: function () {
+		checkThrone: function (clear = true) {
 			let monster = getUnit(1);
 
 			if (monster) {
@@ -878,8 +878,10 @@ const Common = {
 						case 571:
 							return 5;
 						default:
-							Attack.getIntoPosition(monster, 10, 0x4);
-							Attack.clear(15);
+							if (clear) {
+								Attack.getIntoPosition(monster, 10, 0x4);
+								Attack.clear(15);
+							}
 
 							return false;
 						}
