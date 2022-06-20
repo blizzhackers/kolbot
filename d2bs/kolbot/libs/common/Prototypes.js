@@ -487,6 +487,7 @@ Unit.prototype.checkItem = function (itemInfo) {
 		runeword: null,
 		ethereal: null,
 		equipped: null,
+		basetype: null,
 		name: ""
 	}, itemInfo);
 
@@ -502,6 +503,7 @@ Unit.prototype.checkItem = function (itemInfo) {
 				&& (itemObj.runeword === null || (item.runeword === itemObj.runeword))
 				&& (itemObj.ethereal === null || (item.ethereal === itemObj.ethereal))
 				&& (itemObj.equipped === null || (typeof itemObj.equipped === "number" ? item.bodylocation === itemObj.equipped : item.isEquipped === itemObj.equipped))
+				&& (itemObj.basetype === null || ((item.normal || item.superior) === itemObj.basetype))
 				&& (!itemObj.name || item.fname.toLowerCase().includes(itemObj.name.toLowerCase()))
 			);
 		});
@@ -1886,6 +1888,12 @@ Object.defineProperties(Unit.prototype, {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
 			return this.quality === sdk.itemquality.Crafted;
+		},
+	},
+	sockets: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.getStat(sdk.stats.NumSockets);
 		},
 	},
 });
