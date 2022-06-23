@@ -4005,14 +4005,17 @@ const Misc = {
 		// already in wanted state
 		if (me.getState(state)) return true;
 
+		let slot = Attack.getPrimarySlot();
+		me.switchWeapons(Precast.getBetterSlot(skill));
+
 		for (let i = 0; i < 3; i += 1) {
 			Skill.cast(skill, 0);
-
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 2000) {
 				if (me.getState(state)) {
 					delay(250);
+					me.weaponswitch !== slot && me.switchWeapons(slot);
 
 					return true;
 				}
@@ -4020,6 +4023,8 @@ const Misc = {
 				delay(10);
 			}
 		}
+
+		me.weaponswitch !== slot && me.switchWeapons(slot);
 
 		return false;
 	},

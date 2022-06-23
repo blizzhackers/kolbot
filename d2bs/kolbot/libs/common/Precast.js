@@ -59,6 +59,7 @@ const Precast = new function () {
 	};
 
 	// should be done in init function?
+	// should this be part of the skill class instead?
 	this.getBetterSlot = function (skillId) {
 		if (this.bestSlot[skillId] !== undefined) {
 			return this.bestSlot[skillId];
@@ -97,6 +98,10 @@ const Precast = new function () {
 			skillTab = sdk.skills.tabs.PalaCombat;
 
 			break;
+		case sdk.skills.Taunt:
+		case sdk.skills.FindItem:
+		case sdk.skills.BattleCry:
+		case sdk.skills.WarCry:
 		case sdk.skills.Shout:
 		case sdk.skills.BattleOrders:
 		case sdk.skills.BattleCommand:
@@ -108,6 +113,12 @@ const Precast = new function () {
 			classid = sdk.charclass.Druid;
 			skillTab = sdk.skills.tabs.Elemental;
 
+			break;
+		case sdk.skills.Werewolf:
+		case sdk.skills.Werebear:
+			classid = sdk.charclass.Druid;
+			skillTab = sdk.skills.tabs.ShapeShifting;
+			
 			break;
 		case sdk.skills.BurstofSpeed:
 		case sdk.skills.Fade:
