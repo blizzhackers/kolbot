@@ -54,6 +54,14 @@ const Pickit = {
 	checkItem: function (unit) {
 		let rval = NTIP.CheckItem(unit, false, true);
 
+		// make sure we have essentials - no pickit files loaded
+		if (rval.result === 0 && Config.PickitFiles.length === 0 && Pickit.essentials.includes(unit.itemType) && this.canPick(unit)) {
+			return {
+				result: Pickit.result.WANTED,
+				line: null
+			};
+		}
+
 		if ((unit.classid === sdk.items.runes.Ort || unit.classid === sdk.items.runes.Ral) && Town.repairIngredientCheck(unit)) {
 			return {
 				result: Pickit.result.UTILITY,
@@ -109,14 +117,6 @@ const Pickit = {
 					};
 				}
 			}
-		}
-
-		// make sure we have essentials - no pickit files loaded
-		if (rval.result === 0 && Config.PickitFiles.length === 0 && Pickit.essentials.includes(unit.itemType) && this.canPick(unit)) {
-			return {
-				result: Pickit.result.WANTED,
-				line: null
-			};
 		}
 
 		return rval;
@@ -245,7 +245,7 @@ const Pickit = {
 			this.color = Pickit.itemColor(unit);
 			this.gold = unit.getStat(14);
 			this.dist = (unit.distance || Infinity);
-			this.useTk = (Skill.haveTK && Config.UseTelekinesis
+			this.useTk = (Skill.haveTK
 				&& (this.type === 4 || this.type === 22 || (this.type > 75 && this.type < 82))
 				&& this.dist > 5 && this.dist < 20 && !checkCollision(me, unit, 0x5));
 			this.picked = false;

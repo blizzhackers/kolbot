@@ -2688,8 +2688,7 @@ const Skill = {
 	cast: function (skillId, hand, x, y, item) {
 		switch (true) {
 		case me.inTown && !this.townSkill(skillId):
-		case !item && this.getManaCost(skillId) > me.mp:
-		case !item && !this.canUse(skillId):
+		case !item && (this.getManaCost(skillId) > me.mp || !this.canUse(skillId)):
 		case !this.wereFormCheck(skillId):
 			return false;
 		case skillId === undefined:
@@ -2703,7 +2702,7 @@ const Skill = {
 		// Check mana cost, charged skills don't use mana
 		if (!item && this.getManaCost(skillId) > me.mp) {
 			// Maybe delay on ALL skills that we don't have enough mana for?
-			if (Config.AttackSkill.concat([42, 54]).concat(Config.LowManaSkill).indexOf(skillId) > -1) {
+			if (Config.AttackSkill.concat([sdk.skills.StaticField, sdk.skills.Teleport]).concat(Config.LowManaSkill).includes(skillId)) {
 				delay(300);
 			}
 
@@ -2807,6 +2806,8 @@ const Skill = {
 
 	// Wereform skill check
 	wereFormCheck: function (skillId) {
+		// we don't even have the skills to transform or we aren't transformed
+		if (!Skill.canUse(sdk.skills.Werewolf) && !Skill.canUse(sdk.skills.Werebear)) return true;
 		if (!me.getState(139) && !me.getState(140)) return true;
 
 		// Can be cast by both
@@ -2879,12 +2880,8 @@ const Item = {
 	},
 
 	canEquip: function (item) {
-		// Not an item
-		if (item.type !== 4) return false;
-
-		// Unid item
-		if (!item.getFlag(0x10)) return false;
-
+		// Not an item or unid
+		if (item.type !== 4 || !item.identified) return false;
 		// Higher requirements
 		if (item.getStat(92) > me.getStat(12) || item.dexreq > me.getStat(2) || item.strreq > me.getStat(0)) return false;
 
@@ -3028,8 +3025,8 @@ const Item = {
 	autoEquipCheck: function (item) {
 		if (!Config.AutoEquip) return true;
 
-		let tier = NTIP.GetTier(item),
-			bodyLoc = this.getBodyLoc(item);
+		let tier = NTIP.GetTier(item);
+		let bodyLoc = this.getBodyLoc(item);
 
 		if (tier > 0 && bodyLoc) {
 			for (let i = 0; i < bodyLoc.length; i += 1) {
@@ -3236,8 +3233,8 @@ const Misc = {
 
 	// Get number of players within getUnit distance
 	getNearbyPlayerCount: function () {
-		let count = 0,
-			player = getUnit(0);
+		let count = 0;
+		let player = getUnit(0);
 
 		if (player) {
 			do {
@@ -3252,8 +3249,8 @@ const Misc = {
 
 	// Get total number of players in game
 	getPlayerCount: function () {
-		let count = 0,
-			party = getParty();
+		let count = 0;
+		let party = getParty();
 
 		if (party) {
 			do {
@@ -3266,12 +3263,11 @@ const Misc = {
 
 	// Get total number of players in game and in my party
 	getPartyCount: function () {
-		let count = 0,
-			myPartyId = 0,
-			party = getParty();
+		let count = 0;
+		let party = getParty();
 
 		if (party) {
-			myPartyId = party.partyid;
+			let myPartyId = party.partyid;
 			
 			do {
 				if (party.partyid !== 65535 && party.partyid === myPartyId && party.name !== me.name) {
@@ -3903,9 +3899,8 @@ const Misc = {
 			if (Config.SkipLogging[i] === unit.classid || Config.SkipLogging[i] === unit.code) return false;
 		}
 
-		let lastArea,
-			name = unit.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<:;.*]|\/|\\/g, "").trim();
-
+		let lastArea;
+		let name = unit.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<:;.*]|\/|\\/g, "").trim();
 		let desc = this.getItemDesc(unit);
 		let color = (unit.getColor() || -1);
 
@@ -4005,9 +4000,10 @@ const Misc = {
 			throw new Error("shapeShift: Invalid parameter");
 		}
 
-		if (me.getState(state)) {
-			return true;
-		}
+		// don't have wanted skill
+		if (Skill.canUse(skill)) return false;
+		// already in wanted state
+		if (me.getState(state)) return true;
 
 		for (let i = 0; i < 3; i += 1) {
 			Skill.cast(skill, 0);
@@ -4058,9 +4054,9 @@ const Misc = {
 		if (!Town.canTpToTown()) return false;
 
 		let tTick = getTickCount();
-		let potion, check,
-			needhp = true,
-			needmp = true;
+		let potion, check;
+		let needhp = true;
+		let needmp = true;
 
 		if (Config.TownCheck && !me.inTown) {
 			try {
@@ -4192,11 +4188,11 @@ const Misc = {
 
 	// Report script errors to logs/ScriptErrorLog.txt
 	errorReport: function (error, script) {
-		let i, date, dateString, msg, oogmsg, filemsg, source, stack,
-			stackLog = "";
+		let msg, oogmsg, filemsg, source, stack;
+		let stackLog = "";
 
-		date = new Date();
-		dateString = "[" + new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, -5).replace(/-/g, '/').replace('T', ' ') + "]";
+		let date = new Date();
+		let dateString = "[" + new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, -5).replace(/-/g, '/').replace('T', ' ') + "]";
 
 		if (typeof error === "string") {
 			msg = error;
@@ -4218,7 +4214,7 @@ const Misc = {
 						stack.reverse();
 					}
 
-					for (i = 0; i < stack.length; i += 1) {
+					for (let i = 0; i < stack.length; i += 1) {
 						if (stack[i]) {
 							stackLog += stack[i].substr(0, stack[i].indexOf("@") + 1) + stack[i].substr(stack[i].lastIndexOf("\\") + 1, stack[i].length - 1);
 
@@ -4479,12 +4475,12 @@ const Experience = {
 
 	// Total time till next level
 	timeToLevel: function () {
-		let tTLrawSeconds = (Math.floor((getTickCount() - me.gamestarttime) / 1000)).toString(),
-			tTLrawtimeToLevel = this.runsToLevel() * tTLrawSeconds,
-			tTLDays = Math.floor(tTLrawtimeToLevel / 86400),
-			tTLHours = Math.floor((tTLrawtimeToLevel % 86400) / 3600),
-			tTLMinutes = Math.floor(((tTLrawtimeToLevel % 86400) % 3600) / 60);
-			//tTLSeconds = ((tTLrawtimeToLevel % 86400) % 3600) % 60;
+		let tTLrawSeconds = (Math.floor((getTickCount() - me.gamestarttime) / 1000)).toString();
+		let tTLrawtimeToLevel = this.runsToLevel() * tTLrawSeconds;
+		let tTLDays = Math.floor(tTLrawtimeToLevel / 86400);
+		let tTLHours = Math.floor((tTLrawtimeToLevel % 86400) / 3600);
+		let tTLMinutes = Math.floor(((tTLrawtimeToLevel % 86400) % 3600) / 60);
+		//let tTLSeconds = ((tTLrawtimeToLevel % 86400) % 3600) % 60;
 
 		//return tDays + "d " + tTLHours + "h " + tTLMinutes + "m " + tTLSeconds + "s";
 		//return tTLDays + "d " + tTLHours + "h " + tTLMinutes + "m";
@@ -4493,8 +4489,8 @@ const Experience = {
 
 	// Get Game Time
 	getGameTime: function () {
-		let rawMinutes = Math.floor((getTickCount() - me.gamestarttime) / 60000).toString(),
-			rawSeconds = (Math.floor((getTickCount() - me.gamestarttime) / 1000) % 60).toString();
+		let rawMinutes = Math.floor((getTickCount() - me.gamestarttime) / 60000).toString();
+		let rawSeconds = (Math.floor((getTickCount() - me.gamestarttime) / 1000) % 60).toString();
 
 		rawMinutes <= 9 && (rawMinutes = "0" + rawMinutes);
 		rawSeconds <= 9 && (rawSeconds = "0" + rawSeconds);
@@ -4504,11 +4500,10 @@ const Experience = {
 
 	// Log to manager
 	log: function () {
-		let gain = this.gain(),
-			progress = this.progress(),
-			runsToLevel = this.runsToLevel(),
-			getGameTime = this.getGameTime();
-
+		let gain = this.gain();
+		let progress = this.progress();
+		let runsToLevel = this.runsToLevel();
+		let getGameTime = this.getGameTime();
 		let string = "[Game: " + me.gamename + (me.gamepassword ? "//" + me.gamepassword : "") + getGameTime + "] [Level: " + me.getStat(12) + " (" + progress + "%)] [XP: " + gain + "] [Games ETA: " + runsToLevel + "]";
 
 		if (gain) {
@@ -4579,9 +4574,9 @@ const Packet = {
 	},
 
 	buyItem: function (unit, shiftBuy, gamble) {
-		let oldGold = me.getStat(14) + me.getStat(15),
-			itemCount = me.itemcount,
-			npc = getInteractedNPC();
+		let oldGold = me.getStat(14) + me.getStat(15);
+		let itemCount = me.itemcount;
+		let npc = getInteractedNPC();
 
 		try {
 			if (!npc) throw new Error("buyItem: No NPC menu open.");
@@ -4950,7 +4945,7 @@ const Messaging = {
 		return false;
 	},
 
-	sendToProfile: function (profileName, mode, message, getResponse) {
+	sendToProfile: function (profileName, mode, message, getResponse = false) {
 		let response;
 
 		function copyDataEvent(mode2, msg) {
@@ -4973,16 +4968,11 @@ const Messaging = {
 			return false;
 		}
 
-		if (getResponse) {
-			addEventListener("copydata", copyDataEvent);
-		}
+		getResponse && addEventListener("copydata", copyDataEvent);
 
 		if (!sendCopyData(null, profileName, mode, JSON.stringify({message: message, sender: me.profile}))) {
 			//print("sendToProfile: failed to get response from " + profileName);
-
-			if (getResponse) {
-				removeEventListener("copydata", copyDataEvent);
-			}
+			getResponse && removeEventListener("copydata", copyDataEvent);
 
 			return false;
 		}
