@@ -610,6 +610,7 @@ Unit.prototype.haveAll = function (itemInfo = [], returnIfSome = false) {
 			runeword: null,
 			ethereal: null,
 			equipped: null,
+			basetype: null,
 			name: ""
 		}, itemInfo[i]);
 
@@ -626,6 +627,7 @@ Unit.prototype.haveAll = function (itemInfo = [], returnIfSome = false) {
 					&& (itemObj.runeword === null || (item.runeword === itemObj.runeword))
 					&& (itemObj.ethereal === null || (item.ethereal === itemObj.ethereal))
 					&& (itemObj.equipped === null || (typeof itemObj.equipped === "number" ? item.bodylocation === itemObj.equipped : item.isEquipped === itemObj.equipped))
+					&& (itemObj.basetype === null || ((item.normal || item.superior) === itemObj.basetype))
 					&& (!itemObj.name.length || item.fname.toLowerCase().includes(itemObj.name.toLowerCase()))
 				);
 			});
@@ -665,8 +667,8 @@ Unit.prototype.getItems = function (...args) {
 };
 
 Unit.prototype.getItemsEx = function (...args) {
-	let items = [],
-		item = this.getItem.apply(this, args);
+	let items = [];
+	let item = this.getItem.apply(this, args);
 
 	if (item) {
 		do {
