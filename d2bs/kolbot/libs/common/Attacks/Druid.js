@@ -6,21 +6,6 @@
 */
 
 const ClassAttack = {
-	useHurricane: false,
-	useCyclone: false,
-
-	canUseHurricane: function () {
-		if (this.useHurricane) return true;
-		this.useHurricane = Precast.precastables.Hurricane;
-		return (this.useHurricane || me.getSkill(sdk.skills.Hurricane, 1));
-	},
-
-	canUseCyclone: function () {
-		if (this.useCyclone) return true;
-		this.useCyclone = Precast.precastables.CycloneArmor;
-		return (this.useCyclone || me.getSkill(sdk.skills.CycloneArmor, 1));
-	},
-	
 	doAttack: function (unit, preattack) {
 		if (!unit) return 1;
 		let gid = unit.gid;
@@ -36,9 +21,9 @@ const ClassAttack = {
 		}
 
 		// Rebuff Hurricane
-		this.canUseHurricane() && !me.getState(sdk.states.Hurricane) && Skill.cast(sdk.skills.Hurricane, 0);
+		Skill.canUse(sdk.skills.Hurricane) && !me.getState(sdk.states.Hurricane) && Skill.cast(sdk.skills.Hurricane, 0);
 		// Rebuff Cyclone Armor
-		this.canUseCyclone() && !me.getState(sdk.states.CycloneArmor) && Skill.cast(sdk.skills.CycloneArmor, 0);
+		Skill.canUse(sdk.skills.CycloneArmor) && !me.getState(sdk.states.CycloneArmor) && Skill.cast(sdk.skills.CycloneArmor, 0);
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {

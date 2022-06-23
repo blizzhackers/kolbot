@@ -175,8 +175,8 @@ Unit.prototype.buy = function (shiftBuy, gamble) {
 	// Can we afford the item?
 	if (me.getStat(14) + me.getStat(15) < this.getItemCost(0)) return false;
 
-	let oldGold = me.getStat(14) + me.getStat(15),
-		itemCount = me.itemcount;
+	let oldGold = me.getStat(14) + me.getStat(15);
+	let itemCount = me.itemcount;
 
 	for (let i = 0; i < 3; i += 1) {
 		this.shop(shiftBuy ? 6 : 2);
@@ -741,32 +741,20 @@ Unit.prototype.getSuffix = function (id) {
 
 Unit.prototype.__defineGetter__("dexreq",
 	function () {
-		let finalReq,
-			ethereal = this.getFlag(0x400000),
-			reqModifier = this.getStat(91),
-			baseReq = getBaseStat("items", this.classid, "reqdex");
-
-		finalReq = baseReq + Math.floor(baseReq * reqModifier / 100);
-
-		if (ethereal) {
-			finalReq -= 10;
-		}
+		let ethereal = this.getFlag(0x400000);
+		let reqModifier = this.getStat(91);
+		let baseReq = getBaseStat("items", this.classid, "reqdex");
+		let finalReq = baseReq + Math.floor(baseReq * reqModifier / 100) - (ethereal ? 10 : 0);
 
 		return Math.max(finalReq, 0);
 	});
 
 Unit.prototype.__defineGetter__("strreq",
 	function () {
-		let finalReq,
-			ethereal = this.getFlag(0x400000),
-			reqModifier = this.getStat(91),
-			baseReq = getBaseStat("items", this.classid, "reqstr");
-
-		finalReq = baseReq + Math.floor(baseReq * reqModifier / 100);
-
-		if (ethereal) {
-			finalReq -= 10;
-		}
+		let ethereal = this.getFlag(0x400000);
+		let reqModifier = this.getStat(91);
+		let baseReq = getBaseStat("items", this.classid, "reqstr");
+		let finalReq = baseReq + Math.floor(baseReq * reqModifier / 100) - (ethereal ? 10 : 0);
 
 		return Math.max(finalReq, 0);
 	});
@@ -1059,11 +1047,7 @@ Unit.prototype.getStatEx = function (id, subid) {
 		}
 	}
 
-	if (subid === undefined) {
-		return this.getStat(id);
-	}
-
-	return this.getStat(id, subid);
+	return (subid === undefined ? this.getStat(id) : this.getStat(id, subid));
 };
 
 /*
@@ -1086,25 +1070,25 @@ Unit.prototype.getStatEx = function (id, subid) {
 */
 
 Unit.prototype.getColor = function () {
-	let i, colors,
-		Color = {
-			black: 3,
-			lightblue: 4,
-			darkblue: 5,
-			crystalblue: 6,
-			lightred: 7,
-			darkred: 8,
-			crystalred: 9,
-			darkgreen: 11,
-			crystalgreen: 12,
-			lightyellow: 13,
-			darkyellow: 14,
-			lightgold: 15,
-			darkgold: 16,
-			lightpurple: 17,
-			orange: 19,
-			white: 20
-		};
+	let i, colors;
+	let Color = {
+		black: 3,
+		lightblue: 4,
+		darkblue: 5,
+		crystalblue: 6,
+		lightred: 7,
+		darkred: 8,
+		crystalred: 9,
+		darkgreen: 11,
+		crystalgreen: 12,
+		lightyellow: 13,
+		darkyellow: 14,
+		lightgold: 15,
+		darkgold: 16,
+		lightpurple: 17,
+		orange: 19,
+		white: 20
+	};
 
 	// check type
 	if ([2, 3, 15, 16, 19, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 42, 43, 44, 67, 68, 71, 72, 85, 86, 87, 88].indexOf(this.itemType) === -1) {
@@ -1320,11 +1304,11 @@ Unit.prototype.getColor = function () {
  * @throws Error
  */
 Unit.prototype.castChargedSkill = function (...args) {
-	let skillId, x, y, unit, chargedItem, charge,
-		chargedItems = [],
-		validCharge = function (itemCharge) {
-			return itemCharge.skill === skillId && itemCharge.charges;
-		};
+	let skillId, x, y, unit, chargedItem, charge;
+	let chargedItems = [];
+	let validCharge = function (itemCharge) {
+		return itemCharge.skill === skillId && itemCharge.charges;
+	};
 
 	switch (args.length) {
 	case 0: // item.castChargedSkill()

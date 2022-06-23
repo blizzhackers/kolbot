@@ -7,22 +7,2304 @@
 
 const Skill = {
 	usePvpRange: false,
-	haveTK: false,
+	skills: {
+		6: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.MagicArrow, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.MagicArrow, 1));
+			}
+		},
+		7: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FireArrow, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FireArrow, 1));
+			}
+		},
+		8: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (!Config.UseInnerSight) return false;
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.InnerSight, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.InnerSight, 1));
+			}
+		},
+		10: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Jab, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Jab, 1));
+			}
+		},
+		11: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ColdArrow, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ColdArrow, 1));
+			}
+		},
+		12: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.MultipleShot, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.MultipleShot, 1));
+			}
+		},
+		14: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.PowerStrike, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.PowerStrike, 1));
+			}
+		},
+		15: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.PoisonJavelin, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.PoisonJavelin, 1));
+			}
+		},
+		16: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ExplodingArrow, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ExplodingArrow, 1));
+			}
+		},
+		17: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (!Config.UseSlowMissiles) return false;
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.SlowMissiles, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.SlowMissiles, 1));
+			}
+		},
+		19: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Impale, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Impale, 1));
+			}
+		},
+		20: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.LightningBolt, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.LightningBolt, 1));
+			}
+		},
+		21: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.IceArrow, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.IceArrow, 1));
+			}
+		},
+		22: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.GuidedArrow, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.GuidedArrow, 1));
+			}
+		},
+		24: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ChargedStrike, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ChargedStrike, 1));
+			}
+		},
+		25: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.PlagueJavelin, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.PlagueJavelin, 1));
+			}
+		},
+		26: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Strafe, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Strafe, 1));
+			}
+		},
+		27: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ImmolationArrow, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ImmolationArrow, 1));
+			}
+		},
+		28: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (!Config.UseDecoy) return false;
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Decoy, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Decoy, 1));
+			}
+		},
+		30: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Fend, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Fend, 1));
+			}
+		},
+		31: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FreezingArrow, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FreezingArrow, 1));
+			}
+		},
+		32: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (!Config.SummonValkyrie) return false;
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Valkyrie, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Valkyrie, 1));
+			}
+		},
+		34: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.LightningStrike, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.LightningStrike, 1));
+			}
+		},
+		35: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.LightningFury, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.LightningFury, 1));
+			}
+		},
+		// sorceress skills start
+		36: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FireBolt, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FireBolt, 1));
+			}
+		},
+		// skip warmth
+		38: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ChargedBolt, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ChargedBolt, 1));
+			}
+		},
+		39: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.IceBolt, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.IceBolt, 1));
+			}
+		},
+		40: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FrozenArmor, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FrozenArmor, 1));
+			}
+		},
+		41: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Inferno, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Inferno, 1));
+			}
+		},
+		42: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.StaticField, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.StaticField, 1));
+			}
+		},
+		43: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (!Config.UseTelekinesis) return false;
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Telekinesis, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Telekinesis, 1));
+			}
+		},
+		44: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FrostNova, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FrostNova, 1));
+			}
+		},
+		45: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.IceBlast, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.IceBlast, 1));
+			}
+		},
+		46: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Blaze, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Blaze, 1));
+			}
+		},
+		47: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FireBall, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FireBall, 1));
+			}
+		},
+		48: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Nova, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Nova, 1));
+			}
+		},
+		49: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Lightning, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Lightning, 1));
+			}
+		},
+		50: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ShiverArmor, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ShiverArmor, 1));
+			}
+		},
+		51: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FireWall, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FireWall, 1));
+			}
+		},
+		52: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Enchant, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Enchant, 1));
+			}
+		},
+		53: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ChainLightning, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ChainLightning, 1));
+			}
+		},
+		54: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Teleport, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Teleport, 1));
+			}
+		},
+		55: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.GlacialSpike, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.GlacialSpike, 1));
+			}
+		},
+		56: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Meteor, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Meteor, 1));
+			}
+		},
+		57: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ThunderStorm, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ThunderStorm, 1));
+			}
+		},
+		58: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (!Config.UseEnergyShield) return false;
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.EnergyShield, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.EnergyShield, 1));
+			}
+		},
+		59: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Blizzard, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Blizzard, 1));
+			}
+		},
+		60: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ChillingArmor, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ChillingArmor, 1));
+			}
+		},
+		62: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Hydra, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Hydra, 1));
+			}
+		},
+		64: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FrozenOrb, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FrozenOrb, 1));
+			}
+		},
+		// necromancer skills start
+		66: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.AmplifyDamage, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.AmplifyDamage, 1));
+			}
+		},
+		67: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Teeth, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Teeth, 1));
+			}
+		},
+		68: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BoneArmor, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BoneArmor, 1));
+			}
+		},
+		70: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.RaiseSkeleton, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.RaiseSkeleton, 1));
+			}
+		},
+		71: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.DimVision, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.DimVision, 1));
+			}
+		},
+		72: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Weaken, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Weaken, 1));
+			}
+		},
+		73: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.PoisonDagger, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.PoisonDagger, 1));
+			}
+		},
+		74: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.CorpseExplosion, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.CorpseExplosion, 1));
+			}
+		},
+		75: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ClayGolem, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ClayGolem, 1));
+			}
+		},
+		76: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.IronMaiden, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.IronMaiden, 1));
+			}
+		},
+		77: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Terror, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Terror, 1));
+			}
+		},
+		78: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BoneWall, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BoneWall, 1));
+			}
+		},
+		80: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.RaiseSkeletalMage, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.RaiseSkeletalMage, 1));
+			}
+		},
+		81: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Confuse, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Confuse, 1));
+			}
+		},
+		82: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.LifeTap, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.LifeTap, 1));
+			}
+		},
+		83: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.PoisonExplosion, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.PoisonExplosion, 1));
+			}
+		},
+		84: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BoneSpear, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BoneSpear, 1));
+			}
+		},
+		85: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BloodGolem, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BloodGolem, 1));
+			}
+		},
+		86: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Attract, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Attract, 1));
+			}
+		},
+		87: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Decrepify, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Decrepify, 1));
+			}
+		},
+		88: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BonePrison, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BonePrison, 1));
+			}
+		},
+		90: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.IronGolem, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.IronGolem, 1));
+			}
+		},
+		91: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.LowerResist, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.LowerResist, 1));
+			}
+		},
+		92: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.PoisonNova, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.PoisonNova, 1));
+			}
+		},
+		93: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BoneSpirit, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BoneSpirit, 1));
+			}
+		},
+		94: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FireGolem, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FireGolem, 1));
+			}
+		},
+		95: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Revive, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Revive, 1));
+			}
+		},
+		// paladin skills start
+		96: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Sacrifice, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Sacrifice, 1));
+			}
+		},
+		97: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Smite, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Smite, 1));
+			}
+		},
+		98: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Might, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Might, 1));
+			}
+		},
+		99: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Prayer, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Prayer, 1));
+			}
+		},
+		100: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ResistFire, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ResistFire, 1));
+			}
+		},
+		101: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.HolyBolt, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.HolyBolt, 1));
+			}
+		},
+		102: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.HolyFire, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.HolyFire, 1));
+			}
+		},
+		103: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Thorns, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Thorns, 1));
+			}
+		},
+		104: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Defiance, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Defiance, 1));
+			}
+		},
+		105: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ResistCold, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ResistCold, 1));
+			}
+		},
+		106: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Zeal, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Zeal, 1));
+			}
+		},
+		107: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Charge, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Charge, 1));
+			}
+		},
+		108: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BlessedAim, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BlessedAim, 1));
+			}
+		},
+		109: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Cleansing, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Cleansing, 1));
+			}
+		},
+		110: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ResistLightning, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ResistLightning, 1));
+			}
+		},
+		111: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Vengeance, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Vengeance, 1));
+			}
+		},
+		112: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BlessedHammer, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BlessedHammer, 1));
+			}
+		},
+		113: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Concentration, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Concentration, 1));
+			}
+		},
+		114: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.HolyFreeze, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.HolyFreeze, 1));
+			}
+		},
+		115: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Vigor, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Vigor, 1));
+			}
+		},
+		116: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Conversion, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Conversion, 1));
+			}
+		},
+		117: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.HolyShield, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.HolyShield, 1));
+			}
+		},
+		118: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.HolyShock, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.HolyShock, 1));
+			}
+		},
+		119: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Sanctuary, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Sanctuary, 1));
+			}
+		},
+		120: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Meditation, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Meditation, 1));
+			}
+		},
+		121: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FistoftheHeavens, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FistoftheHeavens, 1));
+			}
+		},
+		122: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Fanaticism, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Fanaticism, 1));
+			}
+		},
+		123: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Conviction, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Conviction, 1));
+			}
+		},
+		124: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Redemption, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Redemption, 1));
+			}
+		},
+		125: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Salvation, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Salvation, 1));
+			}
+		},
+		// barbarian skills start
+		126: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Bash, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Bash, 1));
+			}
+		},
+		130: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Howl, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Howl, 1));
+			}
+		},
+		131: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FindPotion, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FindPotion, 1));
+			}
+		},
+		132: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Leap, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Leap, 1));
+			}
+		},
+		133: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.DoubleSwing, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.DoubleSwing, 1));
+			}
+		},
+		137: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Taunt, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Taunt, 1));
+			}
+		},
+		138: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Shout, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Shout, 1));
+			}
+		},
+		139: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Stun, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Stun, 1));
+			}
+		},
+		140: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.DoubleThrow, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.DoubleThrow, 1));
+			}
+		},
+		142: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FindItem, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FindItem, 1));
+			}
+		},
+		143: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.LeapAttack, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.LeapAttack, 1));
+			}
+		},
+		144: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Concentrate, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Concentrate, 1));
+			}
+		},
+		146: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BattleCry, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BattleCry, 1));
+			}
+		},
+		147: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Frenzy, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Frenzy, 1));
+			}
+		},
+		149: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BattleOrders, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BattleOrders, 1));
+			}
+		},
+		150: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.GrimWard, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.GrimWard, 1));
+			}
+		},
+		151: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Whirlwind, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Whirlwind, 1));
+			}
+		},
+		152: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Berserk, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Berserk, 1));
+			}
+		},
+		154: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.WarCry, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.WarCry, 1));
+			}
+		},
+		155: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BattleCommand, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BattleCommand, 1));
+			}
+		},
+		221: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (!Config.SummonRaven) return false;
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Raven, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Raven, 1));
+			}
+		},
+		222: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.PoisonCreeper, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.PoisonCreeper, 1));
+			}
+		},
+		223: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Werewolf, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Werewolf, 1));
+			}
+		},
+		225: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Firestorm, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Firestorm, 1));
+			}
+		},
+		226: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.OakSage, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.OakSage, 1));
+			}
+		},
+		227: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.SpiritWolf, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.SpiritWolf, 1));
+			}
+		},
+		228: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Werebear, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Werebear, 1));
+			}
+		},
+		229: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.MoltenBoulder, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.MoltenBoulder, 1));
+			}
+		},
+		230: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ArcticBlast, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ArcticBlast, 1));
+			}
+		},
+		231: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.CarrionVine, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.CarrionVine, 1));
+			}
+		},
+		232: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FeralRage, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FeralRage, 1));
+			}
+		},
+		233: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Maul, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Maul, 1));
+			}
+		},
+		234: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Fissure, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Fissure, 1));
+			}
+		},
+		235: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.CycloneArmor, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.CycloneArmor, 1));
+			}
+		},
+		236: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.HeartofWolverine, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.HeartofWolverine, 1));
+			}
+		},
+		237: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.SummonDireWolf, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.SummonDireWolf, 1));
+			}
+		},
+		238: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Rabies, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Rabies, 1));
+			}
+		},
+		239: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FireClaws, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FireClaws, 1));
+			}
+		},
+		240: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Twister, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Twister, 1));
+			}
+		},
+		241: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.SolarCreeper, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.SolarCreeper, 1));
+			}
+		},
+		242: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Hunger, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Hunger, 1));
+			}
+		},
+		243: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ShockWave, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ShockWave, 1));
+			}
+		},
+		244: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Volcano, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Volcano, 1));
+			}
+		},
+		245: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Tornado, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Tornado, 1));
+			}
+		},
+		246: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.SpiritofBarbs, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.SpiritofBarbs, 1));
+			}
+		},
+		247: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Grizzly, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Grizzly, 1));
+			}
+		},
+		248: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Fury, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Fury, 1));
+			}
+		},
+		249: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Armageddon, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Armageddon, 1));
+			}
+		},
+		250: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Hurricane, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Hurricane, 1));
+			}
+		},
+		// start of assassin
+		251: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FireBlast, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FireBlast, 1));
+			}
+		},
+		253: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.PsychicHammer, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.PsychicHammer, 1));
+			}
+		},
+		254: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.TigerStrike, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.TigerStrike, 1));
+			}
+		},
+		255: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.DragonTalon, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.DragonTalon, 1));
+			}
+		},
+		256: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ShockWeb, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ShockWeb, 1));
+			}
+		},
+		257: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BladeSentinel, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BladeSentinel, 1));
+			}
+		},
+		258: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (!Config.UseBoS && !me.inTown) return false;
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BurstofSpeed, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BurstofSpeed, 1));
+			}
+		},
+		259: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.FistsofFire, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.FistsofFire, 1));
+			}
+		},
+		260: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.DragonClaw, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.DragonClaw, 1));
+			}
+		},
+		261: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ChargedBoltSentry, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ChargedBoltSentry, 1));
+			}
+		},
+		262: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.WakeofFire, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.WakeofFire, 1));
+			}
+		},
+		264: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.CloakofShadows, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.CloakofShadows, 1));
+			}
+		},
+		265: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.CobraStrike, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.CobraStrike, 1));
+			}
+		},
+		266: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BladeFury, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BladeFury, 1));
+			}
+		},
+		267: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (!Config.UseFade) return false;
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Fade, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Fade, 1));
+			}
+		},
+		268: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ShadowWarrior, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ShadowWarrior, 1));
+			}
+		},
+		269: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ClawsofThunder, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ClawsofThunder, 1));
+			}
+		},
+		270: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.DragonTail, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.DragonTail, 1));
+			}
+		},
+		271: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.LightningSentry, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.LightningSentry, 1));
+			}
+		},
+		272: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.WakeofInferno, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.WakeofInferno, 1));
+			}
+		},
+		273: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.MindBlast, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.MindBlast, 1));
+			}
+		},
+		274: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BladesofIce, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BladesofIce, 1));
+			}
+		},
+		275: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.DragonFlight, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.DragonFlight, 1));
+			}
+		},
+		276: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.DeathSentry, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.DeathSentry, 1));
+			}
+		},
+		277: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (!Config.UseBladeShield) return false;
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.BladeShield, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.BladeShield, 1));
+			}
+		},
+		278: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (!Config.UseVenom) return false;
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.Venom, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.Venom, 1));
+			}
+		},
+		279: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.ShadowMaster, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.ShadowMaster, 1));
+			}
+		},
+		280: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.PhoenixStrike, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.PhoenixStrike, 1));
+			}
+		},
+		281: {
+			hardpoints: false,
+			checked: false,
+			have: function () {
+				if (this.hardpoints) return true;
+				if (!this.checked) {
+					this.hardpoints = !!me.getSkill(sdk.skills.WakeofDestructionSentry, 0);
+					this.checked = true;
+				}
+				return (this.hardpoints || me.getSkill(sdk.skills.WakeofDestructionSentry, 1));
+			}
+		},
+	},
 
 	// initialize our skill data - todo: change precastables to be an object of Skill instead - map all skills to it
 	init: function () {
+		// reset check values
+		let skKeys = Object.keys(Skill.skills);
+		let min = 0, max = 999;
+
 		switch (me.classid) {
 		case sdk.charclass.Amazon:
-			Config.UseInnerSight && !Precast.precastables.InnerSight && (Precast.precastables.InnerSight = !!me.getSkill(sdk.skills.InnerSight, 0));
-			Config.UseSlowMissiles && !Precast.precastables.SlowMissiles && (Precast.precastables.SlowMissiles = !!me.getSkill(sdk.skills.SlowMissiles, 0));
-			Config.UseDecoy && !Precast.precastables.Decoy && (Precast.precastables.Decoy = !!me.getSkill(sdk.skills.Decoy, 0));
-			Config.SummonValkyrie && !Precast.precastables.Valkyrie && (Precast.precastables.Valkyrie = !!me.getSkill(sdk.skills.Valkyrie, 0));
-
+			min = sdk.skills.MagicArrow;
+			max = sdk.skills.LightningFury;
+			
 			break;
 		case sdk.charclass.Sorceress:
-			!this.haveTK && (this.haveTK = !!me.getSkill(sdk.skills.Telekinesis, 0));
-			Config.UseEnergyShield && !Precast.precastables.EnergyShield && (Precast.precastables.EnergyShield = !!me.getSkill(sdk.skills.EnergyShield, 0));
-			!Precast.precastables.Enchant && (Precast.precastables.Enchant = !!me.getSkill(sdk.skills.Enchant, 0));
+			min = sdk.skills.FireBolt;
+			max = sdk.skills.ColdMastery;
+			
+			break;
+		case sdk.charclass.Necromancer:
+			min = sdk.skills.AmplifyDamage;
+			max = sdk.skills.Revive;
+			
+			break;
+		case sdk.charclass.Paladin:
+			min = sdk.skills.Sacrifice;
+			max = sdk.skills.Salvation;
+			
+			break;
+		case sdk.charclass.Barbarian:
+			min = sdk.skills.Bash;
+			max = sdk.skills.BattleCommand;
+			
+			break;
+		case sdk.charclass.Druid:
+			min = sdk.skills.Raven;
+			max = sdk.skills.Hurricane;
+			
+			break;
+		case sdk.charclass.Assassin:
+			min = sdk.skills.FireBlast;
+			max = sdk.skills.PhoenixStrike;
+			
+			break;
+		default:
+			break;
+		}
+
+		skKeys
+			.filter(k => (k >= min && k <= max))
+			.forEach(key => {
+				if (!Skill.skills[key].hardpoints) {
+					Skill.skills[key].checked = false;
+				}
+			});
+
+		switch (me.classid) {
+		case sdk.charclass.Amazon:
+			break;
+		case sdk.charclass.Sorceress:
 			if (Config.UseColdArmor === true) {
 				Precast.precastables.coldArmor.best = (function () {
 					let coldArmor = [
@@ -32,30 +2314,26 @@ const Skill = {
 					].filter(skill => !!skill.level && skill.level > 0).sort((a, b) => b.level - a.level).first();
 					return coldArmor !== undefined ? coldArmor.skillId : false;
 				})();
+				Precast.precastables.coldArmor.duration = this.getDuration(Precast.precastables.coldArmor.best);
+			} else {
+				Precast.precastables.coldArmor.duration = this.getDuration(Config.UseColdArmor);
 			}
 
 			break;
 		case sdk.charclass.Necromancer:
-			!Precast.precastables.BoneArmor && (Precast.precastables.BoneArmor = !!me.getSkill(sdk.skills.BoneArmor, 0));
 			if (!!Config.Golem && Config.Golem !== "None") {
 				// todo: change Config.Golem to use skillid instead of 0, 1, 2, and 3
 			}
 			break;
 		case sdk.charclass.Paladin:
-			!Precast.precastables.HolyShield && (Precast.precastables.HolyShield = !!me.getSkill(sdk.skills.HolyShield, 0));
-
 			break;
 		case sdk.charclass.Barbarian:
-			!Precast.precastables.Shout.have && (Precast.precastables.Shout.have = !!me.getSkill(sdk.skills.Shout, 0)) && (Precast.precastables.Shout.duration = this.getDuration(sdk.skills.Shout));
-			!Precast.precastables.BattleOrders.have && (Precast.precastables.BattleOrders.have = !!me.getSkill(sdk.skills.BattleOrders, 0)) && (Precast.precastables.BattleOrders.duration = this.getDuration(sdk.skills.BattleOrders));
-			!Precast.precastables.BattleCommand.have && (Precast.precastables.BattleCommand.have = !!me.getSkill(sdk.skills.BattleCommand, 0)) && (Precast.precastables.BattleCommand.duration = this.getDuration(sdk.skills.BattleCommand));
+			Skill.canUse(sdk.skills.Shout) && (Precast.precastables.Shout.duration = this.getDuration(sdk.skills.Shout));
+			Skill.canUse(sdk.skills.BattleOrders) && (Precast.precastables.BattleOrders.duration = this.getDuration(sdk.skills.BattleOrders));
+			Skill.canUse(sdk.skills.BattleCommand) && (Precast.precastables.BattleCommand.duration = this.getDuration(sdk.skills.BattleCommand));
+			
 			break;
 		case sdk.charclass.Druid:
-			if (!Config.Wereform) {
-				!Precast.precastables.CycloneArmor && (Precast.precastables.CycloneArmor = !!me.getSkill(sdk.skills.CycloneArmor, 0));
-				!Precast.precastables.Hurricane && (Precast.precastables.Hurricane = !!me.getSkill(sdk.skills.Hurricane, 0));
-			}
-			Config.SummonRaven && !Precast.precastables.Raven && (Precast.precastables.Raven = !!me.getSkill(sdk.skills.Raven, 0));
 			if (!!Config.SummonAnimal && Config.SummonAnimal !== "None") {
 				// todo: change Config.SummonAnimal to use skillid instead of 0, 1, 2, and 3
 			}
@@ -67,14 +2345,20 @@ const Skill = {
 			}
 			break;
 		case sdk.charclass.Assassin:
-			Config.UseFade && !Precast.precastables.Fade && (Precast.precastables.Fade = !!me.getSkill(sdk.skills.Fade, 0));
-			Config.UseVenom && !Precast.precastables.Venom && (Precast.precastables.Venom = !!me.getSkill(sdk.skills.Venom, 0));
-			Config.UseBladeShield && !Precast.precastables.BladeShield && (Precast.precastables.BladeShield = !!me.getSkill(sdk.skills.BladeShield, 0));
-			Config.UseBoS && !Precast.precastables.BurstofSpeed && (Precast.precastables.BurstofSpeed = !!me.getSkill(sdk.skills.BurstofSpeed, 0));
 			if (!!Config.SummonShadow) {
 				// todo: change Config.SummonShadow to use skillid instead of 0, 1, 2, and 3
 			}
 			break;
+		}
+	},
+
+	canUse: function (skillId = -1) {
+		try {
+			let valid = Skill.skills[skillId].have();
+			
+			return valid;
+		} catch (e) {
+			return false;
 		}
 	},
 
@@ -405,7 +2689,7 @@ const Skill = {
 		switch (true) {
 		case me.inTown && !this.townSkill(skillId):
 		case !item && this.getManaCost(skillId) > me.mp:
-		case !item && !me.getSkill(skillId, 1):
+		case !item && !this.canUse(skillId):
 		case !this.wereFormCheck(skillId):
 			return false;
 		case skillId === undefined:
@@ -505,7 +2789,7 @@ const Skill = {
 	setSkill: function (skillId, hand, item) {
 		// Check if the skill is already set
 		if (me.getSkill(hand === 0 ? 2 : 3) === skillId) return true;
-		if (!item && !me.getSkill(skillId, 1)) return false;
+		if (!item && !Skill.canUse(skillId)) return false;
 
 		// Charged skills must be cast from right hand
 		if (hand === undefined || hand === 3 || item) {
@@ -555,10 +2839,10 @@ const Skill = {
 		if (skillId < 6) return 0;
 		if (this.manaCostList.hasOwnProperty(skillId)) return this.manaCostList[skillId];
 
-		let skillLvl = me.getSkill(skillId, 1),
-			effectiveShift = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024],
-			lvlmana = getBaseStat(3, skillId, "lvlmana") === 65535 ? -1 : getBaseStat(3, skillId, "lvlmana"), // Correction for skills that need less mana with levels (kolton)
-			ret = Math.max((getBaseStat(3, skillId, "mana") + lvlmana * (skillLvl - 1)) * (effectiveShift[getBaseStat(3, skillId, "manashift")] / 256), getBaseStat(3, skillId, "minmana"));
+		let skillLvl = me.getSkill(skillId, 1);
+		let effectiveShift = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024];
+		let lvlmana = getBaseStat(3, skillId, "lvlmana") === 65535 ? -1 : getBaseStat(3, skillId, "lvlmana"); // Correction for skills that need less mana with levels (kolton)
+		let ret = Math.max((getBaseStat(3, skillId, "mana") + lvlmana * (skillLvl - 1)) * (effectiveShift[getBaseStat(3, skillId, "manashift")] / 256), getBaseStat(3, skillId, "minmana"));
 
 		if (!this.manaCostList.hasOwnProperty(skillId)) {
 			this.manaCostList[skillId] = ret;
@@ -568,7 +2852,7 @@ const Skill = {
 	},
 
 	useTK: function (unit = undefined) {
-		if (!unit || !this.haveTK || !Config.UseTelekinesis
+		if (!unit || !Skill.canUse(sdk.skills.Telekinesis)
 			|| typeof unit !== 'object' || unit.type !== sdk.unittype.Object
 			|| unit.name.toLowerCase() === 'dummy'
 			|| (unit.name.toLowerCase() === 'portal' && !me.inTown && unit.classid !== 298)
@@ -579,6 +2863,14 @@ const Skill = {
 		return me.inTown || (me.mpPercent > 25);
 	}
 };
+
+Object.defineProperties(Skill, {
+	haveTK: {
+		get: function () {
+			return Skill.canUse(sdk.skills.Telekinesis);
+		},
+	},
+});
 
 // whole section should be moved
 const Item = {
@@ -1269,9 +3561,9 @@ const Misc = {
 
 	// Check all shrines in area and get the first one of specified type
 	getShrinesInArea: function (area, type, use) {
-		let shrineLocs = [],
-			shrineIds = [2, 81, 83],
-			unit = getPresetUnits(area);
+		let shrineLocs = [];
+		let shrineIds = [2, 81, 83];
+		let unit = getPresetUnits(area);
 
 		if (unit) {
 			for (let i = 0; i < unit.length; i += 1) {
@@ -1490,7 +3782,7 @@ const Misc = {
 
 	getItemSockets: function (unit) {
 		let code,
-			sockets = unit.getStat(194),
+			sockets = unit.sockets,
 			subItems = unit.getItemsEx(),
 			tempArray = [];
 

@@ -257,6 +257,13 @@ const Common = {
 		},
 
 		followPath: function (path) {
+			if (Config.Diablo.Fast) {
+				let len = path.length;
+				let lastNode = {x: path[len - 2], y: path[len - 1]};
+				Pather.moveToUnit(lastNode);
+				return;
+			}
+			
 			for (let i = 0; i < path.length; i += 2) {
 				this.cleared.length > 0 && this.clearStrays();
 
@@ -333,7 +340,7 @@ const Common = {
 
 		openSeal: function (classid) {
 			let warn = Config.PublicMode && [396, 394, 392].includes(classid) && Loader.scriptName() === "Diablo";
-			let usetk = (Config.UseTelekinesis && Skill.haveTK && (classid !== 394 || this.seisLayout !== 1));
+			let usetk = (Skill.haveTK && (classid !== 394 || this.seisLayout !== 1));
 			let seal;
 
 			for (let i = 0; i < 5; i++) {
@@ -610,7 +617,7 @@ const Common = {
 
 				if (boss) {
 					Common.Diablo.hammerdinPreAttack(name, 8);
-					return Attack.clear(40, 0, name, this.sort);
+					return (Config.Diablo.Fast ? Attack.kill(name) : Attack.clear(40, 0, name, this.sort));
 				}
 
 				delay(250);
@@ -819,7 +826,7 @@ const Common = {
 			Pather.usePortal(sdk.areas.ArreatSummit, me.name);
 		},
 
-		startAncients: function (preTasks = false) {
+		startAncients: function (preTasks = false, checkQuest = false) {
 			let retry = 0;
 			Pather.moveToUnit(this.altarSpot);
 			this.touchAltar();
@@ -832,7 +839,7 @@ const Common = {
 				retry++;
 			}
 
-			this.killAncients();
+			this.killAncients(checkQuest);
 		},
 	},
 
@@ -1096,7 +1103,11 @@ const Common = {
 				Pather.moveTo(15134, 5923);
 				Attack.kill(sdk.monsters.Baal);
 				Pickit.pickItems();
+
+				return true;
 			}
+
+			return false;
 		}
 	},
 };

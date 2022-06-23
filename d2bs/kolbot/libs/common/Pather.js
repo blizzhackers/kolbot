@@ -123,7 +123,7 @@ const Pather = {
 	},
 
 	canTeleport: function () {
-		return this.teleport && (me.getSkill(sdk.skills.Teleport, 1) || me.getStat(sdk.stats.OSkill, sdk.skills.Teleport));
+		return this.teleport && (Skill.canUse(sdk.skills.Teleport) || me.getStat(sdk.stats.OSkill, sdk.skills.Teleport));
 	},
 
 	useTeleport: function () {
