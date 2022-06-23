@@ -76,7 +76,7 @@ const ClassAttack = {
 			return 1;
 		}
 
-		let useStatic = (Config.StaticList.length > 0 && Config.CastStatic < 100 && me.getSkill(42, 1) && Attack.checkResist(unit, "lightning"));
+		let useStatic = (Config.StaticList.length > 0 && Config.CastStatic < 100 && Skill.canUse(sdk.skills.StaticField) && Attack.checkResist(unit, "lightning"));
 		let idCheck = function (id) {
 			if (unit) {
 				switch (true) {
@@ -125,7 +125,6 @@ const ClassAttack = {
 		if (result === 2 && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
 			let merc = me.getMerc();
 			let mercRevive = 0;
-			let haveTK = !!(me.getSkill(sdk.skills.Telekinesis, 1));
 
 			while (unit.attackable) {
 				if (Misc.townCheck()) {
@@ -157,7 +156,7 @@ const ClassAttack = {
 				
 				if (!!closeMob) {
 					let findSkill = this.decideSkill(closeMob);
-					(this.doCast(closeMob, findSkill.timed, findSkill.untimed) === 1) || (haveTK && Skill.cast(sdk.skills.Telekinesis, 0, unit));
+					(this.doCast(closeMob, findSkill.timed, findSkill.untimed) === 1) || (Skill.haveTK && Skill.cast(sdk.skills.Telekinesis, 0, unit));
 				}
 			}
 

@@ -243,7 +243,7 @@ const Pather = {
 							}
 
 							// Only do this once
-							if (fail > 1 && !leaped && me.getSkill(sdk.skills.LeapAttack, 1) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
+							if (fail > 1 && !leaped && Skill.canUse(sdk.skills.LeapAttack) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
 								leaped = true;
 							}
 						}
@@ -387,7 +387,7 @@ const Pather = {
 							}
 
 							// Only do this once
-							if (fail > 1 && !leaped && me.getSkill(sdk.skills.LeapAttack, 1) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
+							if (fail > 1 && !leaped && Skill.canUse(sdk.skills.LeapAttack) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
 								leaped = true;
 							}
 						}
@@ -519,7 +519,7 @@ const Pather = {
 							}
 
 							// Only do this once
-							if (fail > 1 && !leaped && me.getSkill(sdk.skills.LeapAttack, 1) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
+							if (fail > 1 && !leaped && Skill.canUse(sdk.skills.LeapAttack) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
 								leaped = true;
 							}
 						}
@@ -614,7 +614,7 @@ const Pather = {
 			if (Config.Charge && me.paladin && me.mp >= 9 && getDistance(me.x, me.y, x, y) > 8 && Skill.setSkill(sdk.skills.Charge, 1)) {
 				if (Config.Vigor) {
 					Skill.setSkill(sdk.skills.Vigor, 0);
-				} else if (!Config.Vigor && !Attack.auradin && me.getSkill(sdk.skills.HolyFreeze, 1)) {
+				} else if (!Config.Vigor && !Attack.auradin && Skill.canUse(sdk.skills.HolyFreeze)) {
 					// Useful in classic to keep mobs cold while you rush them
 					Skill.setSkill(sdk.skills.HolyFreeze, 0);
 				}
