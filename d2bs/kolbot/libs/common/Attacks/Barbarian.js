@@ -115,7 +115,7 @@ const ClassAttack = {
 	},
 
 	findItem: function (range = 10) {
-		if (!Config.FindItem || !me.getSkill(sdk.skills.FindItem, 1)) return false;
+		if (!Skill.canUse(sdk.skills.FindItem)) return false;
 
 		let retry = false;
 		let corpseList = [];

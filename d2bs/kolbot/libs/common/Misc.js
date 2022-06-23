@@ -1415,6 +1415,7 @@ const Skill = {
 			hardpoints: false,
 			checked: false,
 			have: function () {
+				if (!Config.FindItem) return false;
 				if (this.hardpoints) return true;
 				if (!this.checked) {
 					this.hardpoints = !!me.getSkill(sdk.skills.FindItem, 0);

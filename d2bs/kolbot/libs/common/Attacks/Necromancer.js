@@ -39,7 +39,7 @@ const ClassAttack = {
 	},
 
 	canCurse: function (unit, curseID) {
-		if (unit === undefined || unit.dead || !me.getSkill(curseID, 1)) return false;
+		if (unit === undefined || unit.dead || !Skill.canUse(curseID)) return false;
 
 		let state = 0;
 

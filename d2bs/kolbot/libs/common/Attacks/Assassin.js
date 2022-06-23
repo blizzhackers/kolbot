@@ -8,16 +8,6 @@
 const ClassAttack = {
 	lastTrapPos: {},
 	trapRange: 20,
-	canCloak: false,
-	
-	checkCanCloak: function () {
-		if (this.canCloak) return true;
-		if (!Config.UseCloakofShadows) return false;
-		this.canCloak = me.getSkill(sdk.skills.CloakofShadows, 0);
-		// check if we have hard points in the skill, if we do then we won't need the skill check again
-		// if not, check if any items are giving us the skill.
-		return (this.canCloak || me.getSkill(sdk.skills.CloakofShadows, 1));
-	},
 
 	doAttack: function (unit, preattack) {
 		if (!unit) return 1;
@@ -51,7 +41,7 @@ const ClassAttack = {
 		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 
 		// Cloak of Shadows (Aggressive) - can't be cast again until previous one runs out and next to useless if cast in precast sequence (won't blind anyone)
-		if (Config.AggressiveCloak && this.checkCanCloak() && !me.skillDelay && !me.getState(sdk.states.CloakofShadows)) {
+		if (Config.AggressiveCloak && Skill.canUse(sdk.skills.CloakofShadows) && !me.skillDelay && !me.getState(sdk.states.CloakofShadows)) {
 			if (unit.distance < 20) {
 				Skill.cast(sdk.skills.CloakofShadows, 0);
 			} else if (!Attack.getIntoPosition(unit, 20, 0x4)) {
@@ -72,7 +62,7 @@ const ClassAttack = {
 		}
 
 		// Cloak of Shadows (Defensive; default) - can't be cast again until previous one runs out and next to useless if cast in precast sequence (won't blind anyone)
-		if (!Config.AggressiveCloak && this.checkCanCloak() && unit.distance < 20 && !me.skillDelay && !me.getState(sdk.states.CloakofShadows)) {
+		if (!Config.AggressiveCloak && Skill.canUse(sdk.skills.CloakofShadows) && unit.distance < 20 && !me.skillDelay && !me.getState(sdk.states.CloakofShadows)) {
 			Skill.cast(sdk.skills.CloakofShadows, 0);
 		}
 
