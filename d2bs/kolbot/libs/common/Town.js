@@ -75,7 +75,7 @@ const Town = {
 		let preAct = me.act;
 
 		// Burst of speed while in town
-		if (me.inTown && Precast.precastables.BurstofSpeed && !me.getState(sdk.states.BurstofSpeed)) {
+		if (me.inTown && Skill.canUse(sdk.skills.BurstofSpeed) && !me.getState(sdk.states.BurstofSpeed)) {
 			Skill.cast(sdk.skills.BurstofSpeed, 0);
 		}
 

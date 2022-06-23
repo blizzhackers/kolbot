@@ -74,19 +74,19 @@ const ClassAttack = {
 			return 1;
 		}
 
-		if (Config.UseInnerSight && Precast.precastables.InnerSight) {
+		if (Skill.canUse(sdk.skills.InnerSight)) {
 			if (!unit.getState(sdk.states.InnerSight) && unit.distance > 3 && unit.distance < 13 && !checkCollision(me, unit, 0x4)) {
 				Skill.cast(sdk.skills.InnerSight, 0, unit);
 			}
 		}
 
-		if (Config.UseSlowMissiles && Precast.precastables.SlowMissiles) {
+		if (Skill.canUse(sdk.skills.SlowMissiles)) {
 			if (!unit.getState(sdk.states.SlowMissiles)) {
 				if ((unit.distance > 3 || unit.getEnchant(sdk.enchant.LightningEnchanted)) && unit.distance < 13 && !checkCollision(me, unit, 0x4)) {
 					// Act Bosses and mini-bosses are immune to Slow Missles and pointless to use on lister or Cows, Use Inner-Sight instead
 					if ([sdk.monsters.HellBovine].includes(unit.classid) || unit.isBoss) {
 						// Check if already in this state
-						if (!unit.getState(sdk.states.InnerSight) && Config.UseInnerSight && Precast.precastables.InnerSight) {
+						if (!unit.getState(sdk.states.InnerSight) && Config.UseInnerSight && Skill.canUse(sdk.skills.InnerSight)) {
 							Skill.cast(sdk.skills.InnerSight, 0, unit);
 						}
 					} else {
@@ -133,7 +133,7 @@ const ClassAttack = {
 				
 				if (!!closeMob) {
 					let findSkill = this.decideSkill(closeMob);
-					(this.doCast(closeMob, findSkill.timed, findSkill.untimed) === 1) || (Config.UseDecoy && Precast.precastables.Decoy && Skill.cast(sdk.skills.Decoy, 0, unit));
+					(this.doCast(closeMob, findSkill.timed, findSkill.untimed) === 1) || (Skill.canUse(sdk.skills.Decoy) && Skill.cast(sdk.skills.Decoy, 0, unit));
 				}
 			}
 
