@@ -45,6 +45,8 @@ const AccountsToClean = {
 	// Enter your lines under here
 
 };
+
+const CharactersToExclude = [""];
 	
 // NEW STUFF - Please enter your profile name exactly as is
 const profiles = [
@@ -67,8 +69,8 @@ const profiles = [
 const AdvancedProfileCleanerConfig = [
 	// {
 	// 	profilePrefix: "scl-sorc-",
-	// 	profileSuffixStart: "010",
-	// 	end: "013"
+	// 	profileSuffixStart: "002",
+	// 	end: "009"
 	// },
 	// Your lines under here
 ];
@@ -258,6 +260,7 @@ function deleteAllCharacters () {
 	let characters = ControlAction.getCharacters();
 	for (let character of characters) {
 		let info = {charName: character};
+		if (CharactersToExclude.includes(character)) continue;
 		if (!ControlAction.deleteCharacter(info)) {
 			print("failed to delete character " + character);
 			return false;
@@ -389,7 +392,7 @@ function locationAction (location) {
 			}
 			
 			let charInfo = {charName: charList[0]};
-			ControlAction.deleteCharacter(charInfo);
+			CharactersToExclude.indexOf(charInfo) === -1 && ControlAction.deleteCharacter(charInfo);
 			delay(500);
 		}
 
