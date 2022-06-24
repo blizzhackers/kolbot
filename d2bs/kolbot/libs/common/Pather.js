@@ -851,6 +851,9 @@ const Pather = {
 			throw new Error("moveNearPreset: Couldn't find preset unit - id: " + unitId + " unitType: " + unitType + " in area: " + this.getAreaName(area));
 		}
 
+		delay(40);
+		Misc.poll(() => me.gameReady, 500, 100);
+
 		let unit = {x: presetUnit.roomx * 5 + presetUnit.x, y: presetUnit.roomy * 5 + presetUnit.y};
 
 		return this.moveNear(unit.x, unit.y, minDist, {clearSettings: {clearPath: clearPath}, pop: pop});
@@ -882,6 +885,9 @@ const Pather = {
 		if (!presetUnit) {
 			throw new Error("moveToPreset: Couldn't find preset unit - id: " + unitId + " unitType: " + unitType + " in area: " + this.getAreaName(area));
 		}
+
+		delay(40);
+		Misc.poll(() => me.gameReady, 500, 100);
 
 		return this.moveTo(presetUnit.roomx * 5 + presetUnit.x + offX, presetUnit.roomy * 5 + presetUnit.y + offY, 3, clearPath, pop);
 	},
