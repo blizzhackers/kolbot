@@ -2442,109 +2442,108 @@ const Skill = {
 
 	getRange: function (skillId) {
 		switch (skillId) {
-		case 0: // Normal Attack
+		case sdk.skills.Attack:
 			return Attack.usingBow() ? 20 : 3;
-		case 1: // Kick
-		case 5: // Left Hand Swing
-		case 10: // Jab
-		case 14: // Power Strike
-		case 19: // Impale
-		case 24: // Charged Strike
-		case 30: // Fend
-		case 34: // Lightning Strike
-		case 46: // Blaze
-		case 73: // Poison Dagger
-		case 96: // Sacrifice
-		case 97: // Smite
-		case 106: // Zeal
-		case 111: // Vengeance
-		case 112: // Blessed Hammer
-		case 116: // Conversion
-		case 126: // Bash
-		case 131: // Find Potion
-		case 133: // Double Swing
-		case 139: // Stun
-		case 142: // Find Item
-		case 144: // Concentrate
-		case 147: // Frenzy
-		case 150: // Grim Ward
-		case 152: // Berserk
-		case 232: // Feral Rage
-		case 233: // Maul
-		case 238: // Rabies
-		case 239: // Fire Claws
-		case 242: // Hunger
-		case 248: // Fury
-		case 255: // Dragon Talon
-		case 260: // Dragon Claw
-		case 270: // Dragon Tail
+		case sdk.skills.Kick:
+		case sdk.skills.LeftHandSwing:
+		case sdk.skills.Jab:
+		case sdk.skills.PowerStrike:
+		case sdk.skills.ChargedStrike:
+		case sdk.skills.LightningStrike:
+		case sdk.skills.Impale:
+		case sdk.skills.Fend:
+		case sdk.skills.Blaze:
+		case sdk.skills.PoisonDagger:
+		case sdk.skills.Sacrifice:
+		case sdk.skills.Smite:
+		case sdk.skills.Zeal:
+		case sdk.skills.Vengeance:
+		case sdk.skills.Conversion:
+		case sdk.skills.BlessedHammer:
+		case sdk.skills.FindPotion:
+		case sdk.skills.FindItem:
+		case sdk.skills.GrimWard:
+		case sdk.skills.Bash:
+		case sdk.skills.DoubleSwing:
+		case sdk.skills.Stun:
+		case sdk.skills.Concentrate:
+		case sdk.skills.Frenzy:
+		case sdk.skills.Berserk:
+		case sdk.skills.FeralRage:
+		case sdk.skills.Maul:
+		case sdk.skills.Rabies:
+		case sdk.skills.FireClaws:
+		case sdk.skills.Hunger:
+		case sdk.skills.Fury:
+		case sdk.skills.DragonTalon:
+		case sdk.skills.DragonClaw:
+		case sdk.skills.DragonTail:
 			return 3;
-		case 146: // Battle Cry
-		case 154: // War Cry
+		case sdk.skills.BattleCry:
+		case sdk.skills.WarCry:
 			return 4;
-		case 44: // Frost Nova
-		case 240: // Twister
-		case 245: // Tornado
+		case sdk.skills.FrostNova:
+		case sdk.skills.Twister:
+		case sdk.skills.Tornado:
 		case 500: // Summoner
 			return 5;
-		case 38: // Charged Bolt
+		case sdk.skills.ChargedBolt:
 			return 6;
-		case 48: // Nova
-		case 151: // Whirlwind
+		case sdk.skills.Nova:
+		case sdk.skills.Whirlwind:
 			return 7;
-		case 92: // Poison Nova
+		case sdk.skills.PoisonNova:
 			return 8;
-		case 249: // Armageddon
+		case sdk.skills.Armageddon:
 			return 9;
-		case 15: // Poison Javelin
-		case 25: // Plague Javelin
-		case 101: // Holy Bolt
-		case 107: // Charge
-		case 130: // Howl
-		case 225: // Firestorm
-		case 229: // Molten Boulder
-		case 243: // Shock Wave
+		case sdk.skills.PoisonJavelin:
+		case sdk.skills.PlagueJavelin:
+		case sdk.skills.HolyBolt:
+		case sdk.skills.Charge:
+		case sdk.skills.Howl:
+		case sdk.skills.Firestorm:
+		case sdk.skills.MoltenBoulder:
+		case sdk.skills.ShockWave:
 			return 10;
-		case 8: // Inner Sight
-		case 17: // Slow Missiles
+		case sdk.skills.InnerSight:
+		case sdk.skills.SlowMissiles:
 			return 13;
-		case 35: // Lightning Fury
-		case 64: // Frozen Orb
-		case 67: // Teeth
-		case 234: // Fissure
-		case 244: // Volcano
-		case 251: // Fire Blast
-		case 256: // Shock Web
-		case 257: // Blade Sentinel
-		case 266: // Blade Fury
+		case sdk.skills.LightningFury:
+		case sdk.skills.FrozenOrb:
+		case sdk.skills.Teeth:
+		case sdk.skills.Fissure:
+		case sdk.skills.Volcano:
+		case sdk.skills.FireBlast:
+		case sdk.skills.ShockWeb:
+		case sdk.skills.BladeSentinel:
+		case sdk.skills.BladeFury:
 			return 15;
-		case 7: // Fire Arrow
-		case 12: // Multiple Shot
-		case 16: // Exploding Arrow
-		case 22: // Guided Arrow
-		case 27: // Immolation Arrow
-		case 31: // Freezing Arrow
+		case sdk.skills.FireArrow:
+		case sdk.skills.MultipleShot:
+		case sdk.skills.ExplodingArrow:
+		case sdk.skills.GuidedArrow:
+		case sdk.skills.ImmolationArrow:
+		case sdk.skills.FreezingArrow:
 		case sdk.skills.IceBolt:
 		case sdk.skills.IceBlast:
 		case sdk.skills.FireBolt:
-		case sdk.skills.FireBall:
-		case 95: // Revive
-		case 121: // Fist of the Heavens
-		case 140: // Double Throw
-		case 253: // Psychic Hammer
-		case 275: // Dragon Flight
+		case sdk.skills.Revive:
+		case sdk.skills.FistoftheHeavens:
+		case sdk.skills.DoubleThrow:
+		case sdk.skills.PsychicHammer:
+		case sdk.skills.DragonFlight:
 			return 20;
-		case 91: // Lower Resist
+		case sdk.skills.LowerResist:
 			return 50;
 		// Variable range
-		case 42: // Static Field
+		case sdk.skills.StaticField:
 			return Math.floor((me.getSkill(sdk.skills.StaticField, 1) + 3) * 2 / 3);
-		case 132: // Leap
+		case sdk.skills.Leap:
 		{
 			let skLvl = me.getSkill(sdk.skills.Leap, 1);
 			return Math.floor(Math.min(4 + (26 * ((110 * skLvl / (skLvl + 6)) / 100)), 30) * (2 / 3));
 		}
-		case 230: // Arctic Blast
+		case sdk.skills.ArcticBlast:
 		{
 			let skLvl = me.getSkill(sdk.skills.ArcticBlast, 1);
 			let range = Math.floor(((33 + (2 * skLvl)) / 4) * (2 / 3));
@@ -2553,16 +2552,16 @@ const Skill = {
 		
 			return range;
 		}
-		case 49: // Lightning
-		case 84: // Bone Spear
-		case 93: // Bone Spirit
+		case sdk.skills.Lightning:
+		case sdk.skills.BoneSpear:
+		case sdk.skills.BoneSpirit:
 			return !!this.usePvpRange ? 35 : 15;
-		case 47: // Fire Ball
-		case 51: // Fire Wall
-		case 53: // Chain Lightning
-		case 56: // Meteor
-		case 59: // Blizzard
-		case 273: // Mind Blast
+		case sdk.skills.FireBall:
+		case sdk.skills.FireWall:
+		case sdk.skills.ChainLightning:
+		case sdk.skills.Meteor:
+		case sdk.skills.Blizzard:
+		case sdk.skills.MindBlast:
 			return !!this.usePvpRange ? 35 : 20;
 		}
 
@@ -2585,99 +2584,86 @@ const Skill = {
 
 	getHand: function (skillId) {
 		switch (skillId) {
-		case 6: // Magic Arrow
-		case 7: // Fire Arrow
-		case 9: // Critical Strike
-		case 11: // Cold Arrow
-		case 12: // Multiple Shot
-		case 13: // Dodge
-		case 15: // Poison Javelin
-		case 16: // Exploding Arrow
-		case 18: // Avoid
-		case 19: // Impale
-		case 20: // Lightning Bolt
-		case 21: // Ice Arrow
-		case 22: // Guided Arrow
-		case 23: // Penetrate
-		case 25: // Plague Javelin
-		case 26: // Strafe
-		case 27: // Immolation Arrow
-		case 29: // Evade
-		case 30: // Fend
-		case 31: // Freezing Arrow
-		case 33: // Pierce
-		case 35: // Lightning Fury
-		case 36: // Fire Bolt
-		case 37: // Warmth
-		case 38: // Charged Bolt
-		case 39: // Ice Bolt
-		case 41: // Inferno
-		case 45: // Ice Blast
-		case 47: // Fire Ball
-		case 49: // Lightning
-		case 53: // Chain Lightning
-		case 55: // Glacial Spike
-		case 61: // Fire Mastery
-		case 63: // Lightning Mastery
-		case 64: // Frozen Orb
-		case 65: // Cold Mastery
-		case 67: // Teeth
-		case 73: // Poison Dagger
-		case 79: // Golem Mastery
-		case 84: // Bone Spear
-		case 89: // Summon Resist
-		case 93: // Bone Spirit
-		case 101: // Holy Bolt
-		case 107: // Charge
-		case 112: // Blessed Hammer
-		case 121: // Fist of the Heavens
-		case 132: // Leap
-		case 140: // Double Throw
-		case 143: // Leap Attack
-		case 151: // Whirlwind
-		case 225: // Firestorm
-		case 229: // Molten Boulder
-		case 230: // Arctic Blast
-		case 240: // Twister
-		case 243: // Shock Wave
-		case 245: // Tornado
-		case 251: // Fire Trauma
-		case 254: // Tiger Strike
-		case 256: // Shock Field
-		case 257: // Blade Sentinel
-		case 259: // Fists of Fire
-		case 263: // Weapon Block
-		case 265: // Cobra Strike
-		case 266: // Blade Fury
-		case 269: // Claws of Thunder
-		case 274: // Blades of Ice
-		case 275: // Dragon Flight
+		case sdk.skills.MagicArrow:
+		case sdk.skills.FireArrow:
+		case sdk.skills.ColdArrow:
+		case sdk.skills.MultipleShot:
+		case sdk.skills.PoisonJavelin:
+		case sdk.skills.ExplodingArrow:
+		case sdk.skills.Impale:
+		case sdk.skills.LightningBolt:
+		case sdk.skills.IceArrow:
+		case sdk.skills.GuidedArrow:
+		case sdk.skills.PlagueJavelin:
+		case sdk.skills.Strafe:
+		case sdk.skills.ImmolationArrow:
+		case sdk.skills.Fend:
+		case sdk.skills.FreezingArrow: // Freezing Arrow
+		case sdk.skills.LightningFury: // Lightning Fury
+		case sdk.skills.FireBolt: // Fire Bolt
+		case sdk.skills.ChargedBolt: // Charged Bolt
+		case sdk.skills.IceBolt: // Ice Bolt
+		case sdk.skills.Inferno: // Inferno
+		case sdk.skills.IceBlast: // Ice Blast
+		case sdk.skills.FireBall: // Fire Ball
+		case sdk.skills.Lightning: // Lightning
+		case sdk.skills.ChainLightning: // Chain Lightning
+		case sdk.skills.GlacialSpike: // Glacial Spike
+		case sdk.skills.FrozenOrb: // Frozen Orb
+		case sdk.skills.Teeth: // Teeth
+		case sdk.skills.PoisonDagger: // Poison Dagger
+		case sdk.skills.BoneSpear: // Bone Spear
+		case sdk.skills.BoneSpirit: // Bone Spirit
+		case sdk.skills.HolyBolt: // Holy Bolt
+		case sdk.skills.Charge: // Charge
+		case sdk.skills.BlessedHammer: // Blessed Hammer
+		case sdk.skills.FistoftheHeavens: // Fist of the Heavens
+		case sdk.skills.Leap: // Leap
+		case sdk.skills.DoubleThrow: // Double Throw
+		case sdk.skills.LeapAttack: // Leap Attack
+		case sdk.skills.Whirlwind: // Whirlwind
+		case sdk.skills.Firestorm: // Firestorm
+		case sdk.skills.MoltenBoulder: // Molten Boulder
+		case sdk.skills.ArcticBlast: // Arctic Blast
+		case sdk.skills.Twister: // Twister
+		case sdk.skills.ShockWave: // Shock Wave
+		case sdk.skills.Tornado: // Tornado
+		case sdk.skills.FireBlast: // Fire Trauma
+		case sdk.skills.TigerStrike: // Tiger Strike
+		case sdk.skills.ShockWeb: // Shock Field
+		case sdk.skills.BladeSentinel: // Blade Sentinel
+		case sdk.skills.FistsofFire: // Fists of Fire
+		case sdk.skills.CobraStrike: // Cobra Strike
+		case sdk.skills.BladeFury: // Blade Fury
+		case sdk.skills.ClawsofThunder: // Claws of Thunder
+		case sdk.skills.BladesofIce: // Blades of Ice
+		case sdk.skills.DragonFlight: // Dragon Flight
 			return 1;
-		case 0: // Normal Attack
-		case 10: // Jab
-		case 14: // Power Strike
-		case 24: // Charged Strike
-		case 34: // Lightning Strike
-		case 96: // Sacrifice
-		case 97: // Smite
-		case 106: // Zeal
-		case 111: // Vengeance
-		case 116: // Conversion
-		case 126: // Bash
-		case 133: // Double Swing
-		case 139: // Stun
-		case 144: // Concentrate
-		case 147: // Frenzy
-		case 152: // Berserk
-		case 232: // Feral Rage
-		case 233: // Maul
-		case 238: // Rabies
-		case 239: // Fire Claws
-		case 242: // Hunger
-		case 248: // Fury
-		case 255: // Dragon Talon
-		case 260: // Dragon Claw
-		case 270: // Dragon Tail
+		case sdk.skills.Attack: // Normal Attack
+		case sdk.skills.Jab: // Jab
+		case sdk.skills.PowerStrike:
+		case sdk.skills.ChargedStrike:
+		case sdk.skills.LightningStrike:
+		case sdk.skills.Sacrifice:
+		case sdk.skills.Smite:
+		case sdk.skills.Zeal:
+		case sdk.skills.Vengeance:
+		case sdk.skills.Conversion:
+		case sdk.skills.Bash:
+		case sdk.skills.DoubleSwing:
+		case sdk.skills.Stun:
+		case sdk.skills.Concentrate:
+		case sdk.skills.Frenzy:
+		case sdk.skills.Berserk:
+		case sdk.skills.FeralRage:
+		case sdk.skills.Maul:
+		case sdk.skills.Rabies:
+		case sdk.skills.FireClaws:
+		case sdk.skills.Hunger:
+		case sdk.skills.Fury:
+		case sdk.skills.DragonTalon:
+		case sdk.skills.DragonClaw:
+		case sdk.skills.DragonTail:
 			return 2; // Shift bypass
 		}
 
@@ -2804,14 +2790,19 @@ const Skill = {
 
 	// Timed skills
 	isTimed: function (skillId) {
-		return [15, 25, 27, 51, 56, 59, 62, 64, 121, 225, 223, 228, 229, 234, 244, 247, 249, 250, 256, 268, 275, 277, 279].includes(skillId);
+		return [
+			sdk.skills.PoisonJavelin, sdk.skills.PlagueJavelin, sdk.skills.ImmolationArrow, sdk.skills.FireWall, sdk.skills.Meteor, sdk.skills.Blizzard,
+			sdk.skills.Hydra, sdk.skills.FrozenOrb, sdk.skills.FistoftheHeavens, sdk.skills.Firestorm, sdk.skills.Werewolf, sdk.skills.Werebear, sdk.skills.MoltenBoulder,
+			sdk.skills.Fissure, sdk.skills.Volcano, sdk.skills.Grizzly, sdk.skills.Armageddon, sdk.skills.Hurricane, sdk.skills.ShockWeb, sdk.skills.ShadowWarrior,
+			sdk.skills.DragonFlight, sdk.skills.BladeShield, sdk.skills.ShadowMaster
+		].includes(skillId);
 	},
 
 	// Wereform skill check
 	wereFormCheck: function (skillId) {
 		// we don't even have the skills to transform or we aren't transformed
 		if (!Skill.canUse(sdk.skills.Werewolf) && !Skill.canUse(sdk.skills.Werebear)) return true;
-		if (!me.getState(139) && !me.getState(140)) return true;
+		if (!me.getState(sdk.states.Wearwolf) && !me.getState(sdk.states.Wearbear)) return true;
 
 		// Can be cast by both
 		if ([sdk.skills.Attack, sdk.skills.Kick, sdk.skills.Raven, sdk.skills.PoisonCreeper, sdk.skills.OakSage, sdk.skills.SpiritWolf, sdk.skills.CarrionVine,
@@ -2820,20 +2811,22 @@ const Skill = {
 		}
 
 		// Can be cast by werewolf only
-		if (me.getState(139) && [sdk.skills.Werewolf, sdk.skills.FeralRage, sdk.skills.Rabies, sdk.skills.Fury].includes(skillId)) return true;
+		if (me.getState(sdk.states.Wearwolf) && [sdk.skills.Werewolf, sdk.skills.FeralRage, sdk.skills.Rabies, sdk.skills.Fury].includes(skillId)) return true;
 
 		// Can be cast by werebear only
-		if (me.getState(140) && [sdk.skills.Werebear, sdk.skills.Maul, sdk.skills.ShockWave].includes(skillId)) return true;
+		if (me.getState(sdk.states.Wearbear) && [sdk.skills.Werebear, sdk.skills.Maul, sdk.skills.ShockWave].includes(skillId)) return true;
 
 		return false;
 	},
 
 	// Skills that cn be cast in town
 	townSkill: function (skillId = -1) {
-		return ([sdk.skills.Valkyrie, sdk.skills.FrozenArmor, sdk.skills.Telekinesis, sdk.skills.ShiverArmor, sdk.skills.Enchant, sdk.skills.ThunderStorm, sdk.skills.EnergyShield, sdk.skills.ChillingArmor,
+		return [
+			sdk.skills.Valkyrie, sdk.skills.FrozenArmor, sdk.skills.Telekinesis, sdk.skills.ShiverArmor, sdk.skills.Enchant, sdk.skills.ThunderStorm, sdk.skills.EnergyShield, sdk.skills.ChillingArmor,
 			sdk.skills.BoneArmor, sdk.skills.ClayGolem, sdk.skills.BloodGolem, sdk.skills.FireGolem, sdk.skills.HolyShield, sdk.skills.Raven, sdk.skills.PoisonCreeper, sdk.skills.Werewolf, sdk.skills.Werebear,
 			sdk.skills.OakSage, sdk.skills.SpiritWolf, sdk.skills.CarrionVine, sdk.skills.CycloneArmor, sdk.skills.HeartofWolverine, sdk.skills.SummonDireWolf, sdk.skills.SolarCreeper,
-			sdk.skills.SpiritofBarbs, sdk.skills.SummonGrizzly, sdk.skills.BurstofSpeed, sdk.skills.Fade, sdk.skills.ShadowWarrior, sdk.skills.BladeShield, sdk.skills.Venom, sdk.skills.ShadowMaster].includes(skillId));
+			sdk.skills.SpiritofBarbs, sdk.skills.SummonGrizzly, sdk.skills.BurstofSpeed, sdk.skills.Fade, sdk.skills.ShadowWarrior, sdk.skills.BladeShield, sdk.skills.Venom, sdk.skills.ShadowMaster
+		].includes(skillId);
 	},
 
 	manaCostList: {},
@@ -3462,31 +3455,31 @@ const Misc = {
 			for (let i = 0; i < Config.ScanShrines.length; i += 1) {
 				switch (Config.ScanShrines[i]) {
 				case 0: // None
-				case 1: // Refilling
-				case 2: // Health
-				case 3: // Mana
-				case 4: // Health Exchange (doesn't exist)
-				case 5: // Mana Exchange (doesn't exist)
-				case 16: // Enirhs (doesn't exist)
-				case 17: // Portal
-				case 18: // Gem
-				case 19: // Fire
-				case 20: // Monster
-				case 21: // Exploding
-				case 22: // Poison
+				case sdk.shrines.Refilling:
+				case sdk.shrines.Health:
+				case sdk.shrines.Mana:
+				case sdk.shrines.HealthExchange: // (doesn't exist)
+				case sdk.shrines.ManaExchange: // (doesn't exist)
+				case sdk.shrines.Enirhs: // (doesn't exist)
+				case sdk.shrines.Portal:
+				case sdk.shrines.Gem:
+				case sdk.shrines.Fire:
+				case sdk.shrines.Monster:
+				case sdk.shrines.Exploding:
+				case sdk.shrines.Poison:
 					this.shrineStates[i] = 0; // no state
 
 					break;
-				case 6: // Armor
-				case 7: // Combat
-				case 8: // Resist Fire
-				case 9: // Resist Cold
-				case 10: // Resist Lightning
-				case 11: // Resist Poison
-				case 12: // Skill
-				case 13: // Mana recharge
-				case 14: // Stamina
-				case 15: // Experience
+				case sdk.shrines.Armor:
+				case sdk.shrines.Combat:
+				case sdk.shrines.ResistFire:
+				case sdk.shrines.ResistCold:
+				case sdk.shrines.ResistLightning:
+				case sdk.shrines.ResistPoison:
+				case sdk.shrines.Skill:
+				case sdk.shrines.ManaRecharge:
+				case sdk.shrines.Stamina:
+				case sdk.shrines.Experience:
 					// Both states and shrines are arranged in same order with armor shrine starting at 128
 					this.shrineStates[i] = Config.ScanShrines[i] + 122;
 
@@ -3524,7 +3517,7 @@ const Misc = {
 							this.getShrine(shrineList[j]);
 
 							// Gem shrine - pick gem
-							if (Config.ScanShrines[i] === 18) {
+							if (Config.ScanShrines[i] === sdk.shrines.Gem) {
 								Pickit.pickItems();
 							}
 						}
@@ -3780,10 +3773,10 @@ const Misc = {
 	},
 
 	getItemSockets: function (unit) {
-		let code,
-			sockets = unit.sockets,
-			subItems = unit.getItemsEx(),
-			tempArray = [];
+		let code;
+		let sockets = unit.sockets;
+		let subItems = unit.getItemsEx();
+		let tempArray = [];
 
 		if (subItems.length) {
 			switch (unit.sizex) {
@@ -3851,9 +3844,9 @@ const Misc = {
 	itemLogger: function (action, unit, text) {
 		if (!Config.ItemInfo || !this.useItemLog) return false;
 
-		let desc,
-			date = new Date(),
-			dateString = "[" + new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, -5).replace(/-/g, '/').replace('T', ' ') + "]";
+		let desc;
+		let date = new Date();
+		let dateString = "[" + new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, -5).replace(/-/g, '/').replace('T', ' ') + "]";
 
 		switch (action) {
 		case "Sold":
@@ -3946,34 +3939,34 @@ const Misc = {
 	skipItem: function (id) {
 		switch (id) {
 		//case 549: // horadric cube
-		case 0: // hand axe
-		case 10: // wand
-		case 14: // club
-		case 25: // shortsword
-		case 47: // javelin
-		case 63: // shortstaff
-		case 175: // katar
-		case 328: // buckler
-		case 513: // stamina potion
-		case 514: // antidote potion
-		case 515: // rejuvenationpotion
-		case 516: // fullrejuvenationpotion
-		case 517: // thawing potion
-		case 518: // tomeoftownportal
-		case 519: // tomeofidentify
-		case 529: // scrolloftownportal
-		case 530: // scrollofidentify
-		case 543: // key
-		case 587: // minorhealingpotion
-		case 588: // lighthealingpotion
-		case 589: // healingpotion
-		case 590: // greathealingpotion
-		case 591: // superhealingpotion
-		case 592: // minormanapotion
-		case 593: // lightmanapotion
-		case 594: // manapotion
-		case 595: // greatermanapotion
-		case 596: // supermanapotion
+		case sdk.items.HandAxe:
+		case sdk.items.Wand:
+		case sdk.items.Club:
+		case sdk.items.ShortSword:
+		case sdk.items.Javelin:
+		case sdk.items.ShortStaff:
+		case sdk.items.Katar:
+		case sdk.items.Buckler:
+		case sdk.items.StaminaPotion:
+		case sdk.items.AntidotePotion:
+		case sdk.items.RejuvenationPotion:
+		case sdk.items.FullRejuvenationPotion:
+		case sdk.items.ThawingPotion:
+		case sdk.items.TomeofTownPortal:
+		case sdk.items.TomeofIdentify:
+		case sdk.items.ScrollofIdentify:
+		case sdk.items.ScrollofTownPortal:
+		case sdk.items.Key:
+		case sdk.items.MinorHealingPotion:
+		case sdk.items.LightHealingPotion:
+		case sdk.items.HealingPotion:
+		case sdk.items.GreaterHealingPotion:
+		case sdk.items.SuperHealingPotion:
+		case sdk.items.MinorManaPotion:
+		case sdk.items.LightManaPotion:
+		case sdk.items.ManaPotion:
+		case sdk.items.GreaterManaPotion:
+		case sdk.items.SuperManaPotion:
 			return true;
 		}
 
@@ -3989,14 +3982,14 @@ const Misc = {
 			return false;
 		case "1":
 		case "werewolf":
-			state = 139;
-			skill = 223;
+			state = sdk.states.Wearwolf;
+			skill = sdk.skills.Werewolf;
 
 			break;
 		case "2":
 		case "werebear":
-			state = 140;
-			skill = 228;
+			state = sdk.states.Wearbear;
+			skill = sdk.skills.Werebear;
 
 			break;
 		default:
@@ -4034,14 +4027,14 @@ const Misc = {
 
 	// Change back to human shape
 	unShift: function () {
-		if (me.getState(139) || me.getState(140)) {
+		if (me.getState(sdk.states.Wearwolf) || me.getState(sdk.states.Wearbear)) {
 			for (let i = 0; i < 3; i += 1) {
-				Skill.cast(me.getState(139) ? 223 : 228);
+				Skill.cast(me.getState(sdk.states.Wearwolf) ? 223 : 228);
 
 				let tick = getTickCount();
 
 				while (getTickCount() - tick < 2000) {
-					if (!me.getState(139) && !me.getState(140)) {
+					if (!me.getState(sdk.states.Wearwolf) && !me.getState(sdk.states.Wearbear)) {
 						delay(250);
 
 						return true;
@@ -4069,13 +4062,14 @@ const Misc = {
 		if (Config.TownCheck && !me.inTown) {
 			try {
 				if (me.gold > 1000) {
+					// I think there is a better way to do this
 					for (let i = 0; i < 4; i += 1) {
 						if (Config.BeltColumn[i] === "hp" && Config.MinColumn[i] > 0) {
 							potion = me.getItem(-1, 2); // belt item
 
 							if (potion) {
 								do {
-									if (potion.code.indexOf("hp") > -1) {
+									if (potion.code.includes("hp")) {
 										needhp = false;
 
 										break;
@@ -4095,7 +4089,7 @@ const Misc = {
 
 							if (potion) {
 								do {
-									if (potion.code.indexOf("mp") > -1) {
+									if (potion.code.includes("mp")) {
 										needmp = false;
 
 										break;
@@ -4108,6 +4102,10 @@ const Misc = {
 
 								check = true;
 							}
+						}
+
+						if (check) {
+							break;
 						}
 					}
 				}
@@ -4129,7 +4127,6 @@ const Misc = {
 
 			townChick.send("townCheck");
 			console.log("townCheck check Duration: " + (getTickCount() - tTick));
-			delay(100);
 
 			return true;
 		}
