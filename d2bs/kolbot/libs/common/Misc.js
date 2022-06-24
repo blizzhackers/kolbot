@@ -2355,6 +2355,8 @@ const Skill = {
 
 	canUse: function (skillId = -1) {
 		try {
+			if (skillId === -1) return false;
+			if (skillId >= sdk.skills.Attack && skillId <= sdk.skills.LeftHandSwing) return true;
 			let valid = Skill.skills[skillId].have();
 			
 			return valid;
