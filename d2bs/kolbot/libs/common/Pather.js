@@ -901,6 +901,11 @@ const Pather = {
 		let finalDest = areas.last();
 
 		for (let i = 0; i < areas.length; i += 1) {
+			if (me.area === areas[i]) {
+				console.log("ÿc7(moveToExit) :: ÿc0Already in: " + Pather.getAreaName(areas[i]));
+				continue;
+			}
+
 			console.log("ÿc7(moveToExit) :: ÿc0Moving from: " + Pather.getAreaName(me.area) + " to " + Pather.getAreaName(areas[i]));
 			
 			let area = Misc.poll(() => getArea());

@@ -260,7 +260,7 @@ const Precast = new function () {
 
 			break;
 		case sdk.charclass.Sorceress:
-			if (Skill.canUse(sdk.skills.Valkyrie) && (force || !me.getState(sdk.states.ThunderStorm))) {
+			if (Skill.canUse(sdk.skills.ThunderStorm) && (force || !me.getState(sdk.states.ThunderStorm))) {
 				this.precastSkill(sdk.skills.ThunderStorm);
 			}
 
