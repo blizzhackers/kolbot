@@ -534,6 +534,7 @@ item: {
 			PhoenixStrike: 280, // External
 			RoyalStrike: 280, // Internal
 			WakeofDestructionSentry: 281, // Not used?
+			Summoner: 500, // special
 			tabs: {
 				// Ama
 				BowandCrossbow: 0,
@@ -4149,6 +4150,9 @@ item: {
 		},
 
 		keys: {
+			PauseBreak: 19,
+			End: 35,
+			Insert: 45,
 			Numpad1: 97,
 			Numpad2: 98,
 			Numpad3: 99,
@@ -4158,6 +4162,11 @@ item: {
 			Numpad7: 103,
 			Numpad8: 104,
 			Numpad9: 105,
+			NumpadStar: 106,
+			NumpadPlus: 107,
+			NumpadDash: 109,
+			NumpadDecimal: 110,
+			NumpadSlash: 111,
 		}
 	};
 
