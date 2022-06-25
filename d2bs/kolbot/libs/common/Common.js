@@ -1088,7 +1088,13 @@ const Common = {
 				Pather.moveTo(15090, 5008);
 				delay(5000);
 				Precast.doPrecast(true);
-				Misc.poll(() => !monster(sdk.monsters.ThroneBaal), minutes(3), 1000);
+				Misc.poll(() => {
+					if (me.mode === 4/*Getting hit*/) {
+						Attack.clear(30);
+						Pather.moveTo(15090, 5008);
+					}
+					return !monster(sdk.monsters.ThroneBaal);
+				}, minutes(3), 1000);
 
 				let portal = object(sdk.units.WorldstonePortal);
 

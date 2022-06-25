@@ -175,7 +175,7 @@ function main() {
 	this.exit = function (chickenExit = false) {
 		chickenExit && D2Bot.updateChickens();
 		Config.LogExperience && Experience.log();
-		print("ÿc8Run duration ÿc2" + (formatTime(getTickCount() - me.gamestarttime)));
+		console.log("ÿc8Run duration ÿc2" + (formatTime(getTickCount() - me.gamestarttime)));
 		this.stopDefault();
 		quit();
 	};
@@ -568,11 +568,11 @@ function main() {
 	addEventListener("gameevent", this.gameEvent);
 	addEventListener("scriptmsg", this.scriptEvent);
 
-	// Load Fastmod
-	Packet.changeStat(105, Config.FCR);
-	Packet.changeStat(99, Config.FHR);
-	Packet.changeStat(102, Config.FBR);
-	Packet.changeStat(93, Config.IAS);
+	// Load Fastmod - patched
+	// Packet.changeStat(105, Config.FCR);
+	// Packet.changeStat(99, Config.FHR);
+	// Packet.changeStat(102, Config.FBR);
+	// Packet.changeStat(93, Config.IAS);
 
 	Config.QuitListMode > 0 && this.initQuitList();
 
@@ -667,7 +667,6 @@ function main() {
 		}
 
 		if (quitFlag && canQuit && (typeof quitListDelayTime === "undefined" || getTickCount() >= quitListDelayTime)) {
-			print("ÿc8Run duration ÿc2" + (formatTime(getTickCount() - me.gamestarttime)));
 			this.checkPing(false); // In case of quitlist triggering first
 			this.exit();
 

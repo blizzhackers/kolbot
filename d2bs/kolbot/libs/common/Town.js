@@ -255,12 +255,18 @@ const Town = {
 
 				break;
 			case "Heal":
-				me.getState(sdk.states.Frozen) && this.buyPots(2, "Thawing", true, true);
-
 				break;
 			}
 
 			console.log("Did " + reason + " at " + npc.name);
+
+			if (task === "Heal") {
+				console.log("Checking if we are frozen");
+				if (me.getState(sdk.states.Frozen)) {
+					console.log("Yup, lets unfreeze real quick with some thawing pots");
+					this.buyPots(2, "Thawing", true, true, npc);
+				}
+			}
 		} catch (e) {
 			console.errorReport(e);
 
@@ -969,7 +975,7 @@ const Town = {
 		return false;
 	},
 
-	buyPots: function (quantity = 0, type = undefined, drink = false, force = false) {
+	buyPots: function (quantity = 0, type = undefined, drink = false, force = false, npc = null) {
 		if (!quantity || !type) return false;
 		
 		// convert to classid if isn't one
@@ -998,7 +1004,7 @@ const Town = {
 			break;
 		}
 
-		let npc = getInteractedNPC();
+		npc = !!npc ? npc : getInteractedNPC();
 
 		try {
 			if (!!npc && npc.name.toLowerCase() === NPC[potDealer] && !getUIFlag(sdk.uiflags.Shop)) {
@@ -2032,15 +2038,36 @@ const Town = {
 		!me.inTown && this.goToTown();
 		!this.act[me.act - 1].initialized && this.initialize();
 
-		// Act 5 wp->portalspot override - ActMap.cpp crash
-		if (me.act === 5 && spot === "portalspot" && getDistance(me.x, me.y, 5113, 5068) <= 8) {
-			let path = [5113, 5068, 5108, 5051, 5106, 5046, 5104, 5041, 5102, 5027, 5098, 5018];
-
-			for (let i = 0; i < path.length; i += 2) {
-				Pather.walkTo(path[i], path[i + 1]);
+		// act 5 static paths, ActMap.cpp seems to have issues with A5
+		if (me.act === 5) {
+			let path = [];
+			let returnWhenDone = false;
+			
+			// Act 5 wp->portalspot override - ActMap.cpp crash
+			if (spot === "portalspot" && getDistance(me.x, me.y, 5113, 5068) <= 8) {
+				path = [5113, 5068, 5108, 5051, 5106, 5046, 5104, 5041, 5102, 5027, 5098, 5018];
+				returnWhenDone = true;
 			}
 
-			return true;
+			if (["stash", "waypoint"].includes(spot)) {
+				// malah -> stash/wp
+				if (getDistance(me.x, me.y, 5081, 5031) <= 10) {
+					path = [5089, 5029, 5093, 5021, 5101, 5027, 5107, 5043, 5108, 5052];
+				} else if (getDistance(me.x, me.y, 5099, 5020) <= 13) {
+					// portalspot -> stash/wp
+					path = [5102, 5031, 5107, 5042, 5108, 5052];
+				}
+			}
+
+			if (path.length) {
+				for (let i = 0; i < path.length; i += 2) {
+					Pather.walkTo(path[i], path[i + 1]);
+				}
+
+				if (returnWhenDone) {
+					return true;
+				}
+			}
 		}
 
 		for (let i = 0; i < 3; i += 1) {

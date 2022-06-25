@@ -625,7 +625,7 @@ const Pickit = {
 			if (item.x !== undefined) {
 				let status = this.checkItem(item);
 
-				if (status.result && this.canPick(item) && (Storage.Inventory.CanFit(item) || Pickit.essentials.includes(unit.itemType))) {
+				if (status.result && this.canPick(item) && (Storage.Inventory.CanFit(item) || Pickit.essentials.includes(item.itemType))) {
 					this.pickItem(item, status.result, status.line, retry);
 				}
 			}

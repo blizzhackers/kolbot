@@ -119,22 +119,19 @@ const Attack = {
 		return false;
 	},
 
-	// Get items with charges
+	// Get items with charges - isn't used anywhere
 	getCharges: function () {
-		if (!Skill.charges) {
-			Skill.charges = [];
-		}
+		!Skill.charges && (Skill.charges = []);
 
-		let i, stats,
-			item = me.getItem(-1, 1);
+		let item = me.getItem(-1, 1);
 
 		if (item) {
 			do {
-				stats = item.getStat(-2);
+				let stats = item.getStat(-2);
 
 				if (stats.hasOwnProperty(204)) {
 					if (stats[204] instanceof Array) {
-						for (i = 0; i < stats[204].length; i += 1) {
+						for (let i = 0; i < stats[204].length; i += 1) {
 							if (stats[204][i] !== undefined) {
 								Skill.charges.push({
 									unit: copyUnit(item),
@@ -200,10 +197,10 @@ const Attack = {
 			return Attack.clear(10);
 		}
 
-		let retry = 0,
-			errorInfo = "",
-			attackCount = 0,
-			gid = target.gid;
+		let retry = 0;
+		let errorInfo = "";
+		let attackCount = 0;
+		let gid = target.gid;
 
 		let findTarget = function (gid, loc) {
 			let path = getPath(me.area, me.x, me.y, loc.x, loc.y, 1, 5);
@@ -527,8 +524,8 @@ const Attack = {
 
 	// Filter monsters based on classId, spectype and range
 	getMob: function (classid, spectype, range, center) {
-		let monsterList = [],
-			monster = getUnit(1);
+		let monsterList = [];
+		let monster = getUnit(1);
 
 		range === undefined && (range = 25);
 		!center && (center = me);
@@ -568,10 +565,10 @@ const Attack = {
 
 	// Clear an already formed array of monstas
 	clearList: function (mainArg, sortFunc, refresh) {
-		let i, target, monsterList,
-			retry = 0,
-			gidAttack = [],
-			attackCount = 0;
+		let i, target, monsterList;
+		let retry = 0;
+		let gidAttack = [];
+		let attackCount = 0;
 
 		switch (typeof mainArg) {
 		case "function":
