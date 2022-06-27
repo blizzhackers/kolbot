@@ -1305,7 +1305,7 @@ const Pather = {
 					this.moveToUnit(wp);
 				}
 
-				if (check || Config.WaypointMenu || !getWaypoint(0)) {
+				if (check || Config.WaypointMenu || !this.initialized) {
 					if (!useTK && (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint))) {
 						this.moveToUnit(wp) && Misc.click(0, 0, wp);
 					}
@@ -1446,7 +1446,7 @@ const Pather = {
 					.filter((p) => p.getParent() === me.name && p.gid !== oldGid)
 					.first();
 
-				if (portal) {
+				if (!!portal) {
 					if (use) {
 						if (this.usePortal(null, null, copyUnit(portal))) {
 							return true;
@@ -1501,7 +1501,20 @@ const Pather = {
 				if (portal.area === me.area) {
 					if (Skill.useTK(portal) && i < 3) {
 						portal.distance > 21 && (me.inTown && me.act === 5 ? Town.move("portalspot") : Pather.moveNearUnit(portal, 20));
-						Skill.cast(sdk.skills.Telekinesis, 0, portal);
+						if (Skill.cast(sdk.skills.Telekinesis, 0, portal)) {
+							if (Misc.poll(() => {
+								if (me.area !== preArea) {
+									Pather.lastPortalTick = getTickCount();
+									delay(100);
+
+									return true;
+								}
+
+								return false;
+							}, 500, 50)) {
+								return true;
+							}
+						}
 					} else {
 						portal.distance > 5 && this.moveToUnit(portal);
 
@@ -1543,14 +1556,12 @@ const Pather = {
 					delay(10);
 				}
 
-				if (i > 1) {
-					Packet.flash(me.gid);
-				}
+				i > 1 && Packet.flash(me.gid);
 			} else {
 				Packet.flash(me.gid);
 			}
 
-			delay(200 + me.ping);
+			delay(250);
 		}
 
 		return (targetArea ? me.area === targetArea : me.area !== preArea);

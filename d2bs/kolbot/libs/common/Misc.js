@@ -8,1382 +8,276 @@
 const Skill = {
 	usePvpRange: false,
 	skills: {
-		6: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.MagicArrow);
+		initialized: false,
+		all: [],
+		addSkills: function (skill, condition = () => true) {
+			this.all[skill] = {
+				hardpoints: false,
+				checked: false,
+				condition: condition,
+				have: function () {
+					if (!this.condition()) return false;
+					if (skill === undefined) return false;
+					if (this.hardpoints) return true;
+					if (!this.checked) {
+						this.hardpoints = !!me.getSkill(skill, 0);
+						this.checked = true;
+					}
+					return (this.hardpoints || me.getSkill(skill, 1));
+				}
+			};
+		},
+		init: function () {
+			this.addSkills(sdk.skills.MagicArrow);
+			this.addSkills(sdk.skills.FireArrow);
+			this.addSkills(sdk.skills.InnerSight, () => Config.UseInnerSight);
+			this.addSkills(sdk.skills.Jab);
+			this.addSkills(sdk.skills.ColdArrow);
+			this.addSkills(sdk.skills.MultipleShot);
+			this.addSkills(sdk.skills.PowerStrike);
+			this.addSkills(sdk.skills.PoisonJavelin);
+			this.addSkills(sdk.skills.ExplodingArrow);
+			this.addSkills(sdk.skills.SlowMissiles, () => Config.UseSlowMissiles);
+			this.addSkills(sdk.skills.LightningBolt);
+			this.addSkills(sdk.skills.IceArrow);
+			this.addSkills(sdk.skills.GuidedArrow);
+			this.addSkills(sdk.skills.ChargedStrike);
+			this.addSkills(sdk.skills.Strafe);
+			this.addSkills(sdk.skills.ImmolationArrow);
+			this.addSkills(sdk.skills.Decoy, () => Config.UseDecoy);
+			this.addSkills(sdk.skills.Fend);
+			this.addSkills(sdk.skills.FreezingArrow);
+			this.addSkills(sdk.skills.Valkyrie, () => Config.SummonValkyrie);
+			this.addSkills(sdk.skills.LightningStrike);
+			this.addSkills(sdk.skills.LightningFury);
+			// sorceress skills start
+			this.addSkills(sdk.skills.FireBolt);
+			this.addSkills(sdk.skills.ChargedBolt);
+			this.addSkills(sdk.skills.IceBolt);
+			this.addSkills(sdk.skills.FrozenArmor);
+			this.addSkills(sdk.skills.Inferno);
+			this.addSkills(sdk.skills.StaticField);
+			this.addSkills(sdk.skills.Telekinesis, () => Config.UseTelekinesis);
+			this.addSkills(sdk.skills.FrostNova);
+			this.addSkills(sdk.skills.IceBlast);
+			this.addSkills(sdk.skills.Blaze);
+			this.addSkills(sdk.skills.FireBall);
+			this.addSkills(sdk.skills.Nova);
+			this.addSkills(sdk.skills.Lightning);
+			this.addSkills(sdk.skills.ShiverArmor);
+			this.addSkills(sdk.skills.FireWall);
+			this.addSkills(sdk.skills.Enchant);
+			this.addSkills(sdk.skills.ChainLightning);
+			this.addSkills(sdk.skills.Teleport);
+			this.addSkills(sdk.skills.GlacialSpike);
+			this.addSkills(sdk.skills.Meteor);
+			this.addSkills(sdk.skills.ThunderStorm);
+			this.addSkills(sdk.skills.EnergyShield, () => Config.UseEnergyShield);
+			this.addSkills(sdk.skills.Blizzard);
+			this.addSkills(sdk.skills.ChillingArmor);
+			this.addSkills(sdk.skills.Hydra);
+			this.addSkills(sdk.skills.FrozenOrb);
+			// necromancer skills start
+			this.addSkills(sdk.skills.AmplifyDamage);
+			this.addSkills(sdk.skills.Teeth);
+			this.addSkills(sdk.skills.BoneArmor);
+			this.addSkills(sdk.skills.RaiseSkeleton);
+			this.addSkills(sdk.skills.DimVision);
+			this.addSkills(sdk.skills.Weaken);
+			this.addSkills(sdk.skills.PoisonDagger);
+			this.addSkills(sdk.skills.CorpseExplosion);
+			this.addSkills(sdk.skills.ClayGolem);
+			this.addSkills(sdk.skills.IronMaiden);
+			this.addSkills(sdk.skills.Terror);
+			this.addSkills(sdk.skills.BoneWall);
+			this.addSkills(sdk.skills.RaiseSkeletalMage);
+			this.addSkills(sdk.skills.Confuse);
+			this.addSkills(sdk.skills.LifeTap);
+			this.addSkills(sdk.skills.PoisonExplosion);
+			this.addSkills(sdk.skills.BoneSpear);
+			this.addSkills(sdk.skills.BloodGolem);
+			this.addSkills(sdk.skills.Attract);
+			this.addSkills(sdk.skills.Decrepify);
+			this.addSkills(sdk.skills.BonePrison);
+			this.addSkills(sdk.skills.IronGolem);
+			this.addSkills(sdk.skills.LowerResist);
+			this.addSkills(sdk.skills.PoisonNova);
+			this.addSkills(sdk.skills.BoneSpirit);
+			this.addSkills(sdk.skills.FireGolem);
+			this.addSkills(sdk.skills.Revive);
+			// paladin skills start
+			this.addSkills(sdk.skills.Sacrifice);
+			this.addSkills(sdk.skills.Smite);
+			this.addSkills(sdk.skills.Might);
+			this.addSkills(sdk.skills.Prayer);
+			this.addSkills(sdk.skills.ResistFire);
+			this.addSkills(sdk.skills.HolyBolt);
+			this.addSkills(sdk.skills.HolyFire);
+			this.addSkills(sdk.skills.Thorns);
+			this.addSkills(sdk.skills.Defiance);
+			this.addSkills(sdk.skills.ResistCold);
+			this.addSkills(sdk.skills.Zeal);
+			this.addSkills(sdk.skills.Charge, () => Config.Charge);
+			this.addSkills(sdk.skills.BlessedAim);
+			this.addSkills(sdk.skills.Cleansing);
+			this.addSkills(sdk.skills.ResistLightning);
+			this.addSkills(sdk.skills.Vengeance);
+			this.addSkills(sdk.skills.BlessedHammer);
+			this.addSkills(sdk.skills.Concentration);
+			this.addSkills(sdk.skills.HolyFreeze);
+			this.addSkills(sdk.skills.Vigor, () => Config.Vigor);
+			this.addSkills(sdk.skills.Conversion);
+			this.addSkills(sdk.skills.HolyShield);
+			this.addSkills(sdk.skills.HolyShock);
+			this.addSkills(sdk.skills.Sanctuary);
+			this.addSkills(sdk.skills.Meditation);
+			this.addSkills(sdk.skills.FistoftheHeavens);
+			this.addSkills(sdk.skills.Fanaticism);
+			this.addSkills(sdk.skills.Conviction);
+			this.addSkills(sdk.skills.Redemption);
+			this.addSkills(sdk.skills.Salvation);
+			// barbarian skills start
+			this.addSkills(sdk.skills.Bash);
+			this.addSkills(sdk.skills.Howl);
+			this.addSkills(sdk.skills.FindPotion);
+			this.addSkills(sdk.skills.Leap);
+			this.addSkills(sdk.skills.DoubleSwing);
+			this.addSkills(sdk.skills.Taunt);
+			this.addSkills(sdk.skills.Shout);
+			this.addSkills(sdk.skills.Stun);
+			this.addSkills(sdk.skills.DoubleThrow);
+			this.addSkills(sdk.skills.FindItem, () => Config.FindItem);
+			this.addSkills(sdk.skills.LeapAttack);
+			this.addSkills(sdk.skills.BattleCry);
+			this.addSkills(sdk.skills.Frenzy);
+			this.addSkills(sdk.skills.BattleOrders);
+			this.addSkills(sdk.skills.GrimWard);
+			this.addSkills(sdk.skills.Whirlwind);
+			this.addSkills(sdk.skills.Berserk);
+			this.addSkills(sdk.skills.WarCry);
+			this.addSkills(sdk.skills.BattleCommand);
+			// druid skills start
+			this.addSkills(sdk.skills.Raven, () => Config.SummonRaven);
+			this.addSkills(sdk.skills.PoisonCreeper);
+			this.addSkills(sdk.skills.Werewolf);
+			this.addSkills(sdk.skills.Firestorm);
+			this.addSkills(sdk.skills.OakSage);
+			this.addSkills(sdk.skills.SpiritWolf);
+			this.addSkills(sdk.skills.Werebear);
+			this.addSkills(sdk.skills.MoltenBoulder);
+			this.addSkills(sdk.skills.ArcticBlast);
+			this.addSkills(sdk.skills.CarrionVine);
+			this.addSkills(sdk.skills.FeralRage);
+			this.addSkills(sdk.skills.Maul);
+			this.addSkills(sdk.skills.Fissure);
+			this.addSkills(sdk.skills.CycloneArmor);
+			this.addSkills(sdk.skills.HeartofWolverine);
+			this.addSkills(sdk.skills.SummonDireWolf);
+			this.addSkills(sdk.skills.Rabies);
+			this.addSkills(sdk.skills.FireClaws);
+			this.addSkills(sdk.skills.Twister);
+			this.addSkills(sdk.skills.SolarCreeper);
+			this.addSkills(sdk.skills.Hunger);
+			this.addSkills(sdk.skills.ShockWave);
+			this.addSkills(sdk.skills.Volcano);
+			this.addSkills(sdk.skills.Tornado);
+			this.addSkills(sdk.skills.SpiritofBarbs);
+			this.addSkills(sdk.skills.Grizzly);
+			this.addSkills(sdk.skills.Fury);
+			this.addSkills(sdk.skills.Armageddon);
+			this.addSkills(sdk.skills.Hurricane);
+			// assassin skills start
+			this.addSkills(sdk.skills.FireBlast);
+			this.addSkills(sdk.skills.PsychicHammer);
+			this.addSkills(sdk.skills.TigerStrike);
+			this.addSkills(sdk.skills.DragonTalon);
+			this.addSkills(sdk.skills.ShockWeb);
+			this.addSkills(sdk.skills.BladeSentinel);
+			this.addSkills(sdk.skills.BurstofSpeed, () => !Config.UseBoS && !me.inTown);
+			this.addSkills(sdk.skills.FistsofFire);
+			this.addSkills(sdk.skills.DragonClaw);
+			this.addSkills(sdk.skills.ChargedBoltSentry);
+			this.addSkills(sdk.skills.WakeofFire);
+			this.addSkills(sdk.skills.CloakofShadows);
+			this.addSkills(sdk.skills.CobraStrike);
+			this.addSkills(sdk.skills.BladeFury);
+			this.addSkills(sdk.skills.Fade, () => Config.UseFade);
+			this.addSkills(sdk.skills.ShadowWarrior);
+			this.addSkills(sdk.skills.ClawsofThunder);
+			this.addSkills(sdk.skills.DragonTail);
+			this.addSkills(sdk.skills.LightningSentry);
+			this.addSkills(sdk.skills.WakeofInferno);
+			this.addSkills(sdk.skills.MindBlast);
+			this.addSkills(sdk.skills.BladesofIce);
+			this.addSkills(sdk.skills.DragonFlight);
+			this.addSkills(sdk.skills.DeathSentry);
+			this.addSkills(sdk.skills.BladeShield, () => Config.UseBladeShield);
+			this.addSkills(sdk.skills.Venom, () => Config.UseVenom);
+			this.addSkills(sdk.skills.ShadowMaster);
+			this.addSkills(sdk.skills.PhoenixStrike);
+			this.addSkills(sdk.skills.WakeofDestructionSentry);
+			this.initialized = true;
+		},
+		have: function (skill = 0) {
+			// ensure the values have been initialized
+			!this.initialized && this.init();
+			return typeof this.all[skill] !== 'undefined' && this.all[skill].have();
+		},
+		reset: function () {
+			let min = 0, max = 999;
+
+			switch (me.classid) {
+			case sdk.charclass.Amazon:
+				min = sdk.skills.MagicArrow;
+				max = sdk.skills.LightningFury;
+				
+				break;
+			case sdk.charclass.Sorceress:
+				min = sdk.skills.FireBolt;
+				max = sdk.skills.ColdMastery;
+				
+				break;
+			case sdk.charclass.Necromancer:
+				min = sdk.skills.AmplifyDamage;
+				max = sdk.skills.Revive;
+				
+				break;
+			case sdk.charclass.Paladin:
+				min = sdk.skills.Sacrifice;
+				max = sdk.skills.Salvation;
+				
+				break;
+			case sdk.charclass.Barbarian:
+				min = sdk.skills.Bash;
+				max = sdk.skills.BattleCommand;
+				
+				break;
+			case sdk.charclass.Druid:
+				min = sdk.skills.Raven;
+				max = sdk.skills.Hurricane;
+				
+				break;
+			case sdk.charclass.Assassin:
+				min = sdk.skills.FireBlast;
+				max = sdk.skills.PhoenixStrike;
+				
+				break;
+			default:
+				break;
+			}
+
+			for (let i = min; i <= max; i++) {
+				if (typeof this.test[i] !== "undefined" && !this.test[i].hardpoints) {
+					this.test[i].checked = false;
+				}
 			}
-		},
-		7: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FireArrow);
-			}
-		},
-		8: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				if (!Config.UseInnerSight) return false;
-				return Skill.skills.have(sdk.skills.InnerSight);
-			}
-		},
-		10: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Jab);
-			}
-		},
-		11: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ColdArrow);
-			}
-		},
-		12: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.MultipleShot);
-			}
-		},
-		14: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.PowerStrike);
-			}
-		},
-		15: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.PoisonJavelin);
-			}
-		},
-		16: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ExplodingArrow);
-			}
-		},
-		17: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				if (!Config.UseSlowMissiles) return false;
-				return Skill.skills.have(sdk.skills.SlowMissiles);
-			}
-		},
-		19: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Impale);
-			}
-		},
-		20: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.LightningBolt);
-			}
-		},
-		21: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.IceArrow);
-			}
-		},
-		22: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.GuidedArrow);
-			}
-		},
-		24: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ChargedStrike);
-			}
-		},
-		25: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.PlagueJavelin);
-			}
-		},
-		26: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Strafe);
-			}
-		},
-		27: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ImmolationArrow);
-			}
-		},
-		28: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				if (!Config.UseDecoy) return false;
-				return Skill.skills.have(sdk.skills.Decoy);
-			}
-		},
-		30: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Fend);
-			}
-		},
-		31: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FreezingArrow);
-			}
-		},
-		32: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				if (!Config.SummonValkyrie) return false;
-				return Skill.skills.have(sdk.skills.Valkyrie);
-			}
-		},
-		34: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.LightningStrike);
-			}
-		},
-		35: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.LightningFury);
-			}
-		},
-		// sorceress skills start
-		36: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FireBolt);
-			}
-		},
-		// skip warmth
-		38: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ChargedBolt);
-			}
-		},
-		39: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.IceBolt);
-			}
-		},
-		40: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FrozenArmor);
-			}
-		},
-		41: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Inferno);
-			}
-		},
-		42: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.StaticField);
-			}
-		},
-		43: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				if (!Config.UseTelekinesis) return false;
-				return Skill.skills.have(sdk.skills.Telekinesis);
-			}
-		},
-		44: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FrostNova);
-			}
-		},
-		45: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.IceBlast);
-			}
-		},
-		46: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Blaze);
-			}
-		},
-		47: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FireBall);
-			}
-		},
-		48: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Nova);
-			}
-		},
-		49: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Lightning);
-			}
-		},
-		50: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ShiverArmor);
-			}
-		},
-		51: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FireWall);
-			}
-		},
-		52: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Enchant);
-			}
-		},
-		53: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ChainLightning);
-			}
-		},
-		54: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Teleport);
-			}
-		},
-		55: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.GlacialSpike);
-			}
-		},
-		56: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Meteor);
-			}
-		},
-		57: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ThunderStorm);
-			}
-		},
-		58: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				if (!Config.UseEnergyShield) return false;
-				return Skill.skills.have(sdk.skills.EnergyShield);
-			}
-		},
-		59: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Blizzard);
-			}
-		},
-		60: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ChillingArmor);
-			}
-		},
-		62: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Hydra);
-			}
-		},
-		64: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FrozenOrb);
-			}
-		},
-		// necromancer skills start
-		66: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.AmplifyDamage);
-			}
-		},
-		67: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Teeth);
-			}
-		},
-		68: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.BoneArmor);
-			}
-		},
-		70: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.RaiseSkeleton);
-			}
-		},
-		71: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.DimVision);
-			}
-		},
-		72: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Weaken);
-			}
-		},
-		73: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.PoisonDagger);
-			}
-		},
-		74: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.CorpseExplosion);
-			}
-		},
-		75: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ClayGolem);
-			}
-		},
-		76: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.IronMaiden);
-			}
-		},
-		77: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Terror);
-			}
-		},
-		78: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.BoneWall);
-			}
-		},
-		80: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.RaiseSkeletalMage);
-			}
-		},
-		81: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Confuse);
-			}
-		},
-		82: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.LifeTap);
-			}
-		},
-		83: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.PoisonExplosion);
-			}
-		},
-		84: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.BoneSpear);
-			}
-		},
-		85: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.BloodGolem);
-			}
-		},
-		86: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Attract);
-			}
-		},
-		87: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Decrepify);
-			}
-		},
-		88: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.BonePrison);
-			}
-		},
-		90: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.IronGolem);
-			}
-		},
-		91: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.LowerResist);
-			}
-		},
-		92: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.PoisonNova);
-			}
-		},
-		93: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.BoneSpirit);
-			}
-		},
-		94: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FireGolem);
-			}
-		},
-		95: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Revive);
-			}
-		},
-		// paladin skills start
-		96: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Sacrifice);
-			}
-		},
-		97: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Smite);
-			}
-		},
-		98: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Might);
-			}
-		},
-		99: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Prayer);
-			}
-		},
-		100: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ResistFire);
-			}
-		},
-		101: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.HolyBolt);
-			}
-		},
-		102: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.HolyFire);
-			}
-		},
-		103: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Thorns);
-			}
-		},
-		104: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Defiance);
-			}
-		},
-		105: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ResistCold);
-			}
-		},
-		106: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Zeal);
-			}
-		},
-		107: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Charge);
-			}
-		},
-		108: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.BlessedAim);
-			}
-		},
-		109: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Cleansing);
-			}
-		},
-		110: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ResistLightning);
-			}
-		},
-		111: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Vengeance);
-			}
-		},
-		112: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.BlessedHammer);
-			}
-		},
-		113: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Concentration);
-			}
-		},
-		114: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.HolyFreeze);
-			}
-		},
-		115: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Vigor);
-			}
-		},
-		116: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Conversion);
-			}
-		},
-		117: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.HolyShield);
-			}
-		},
-		118: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.HolyShock);
-			}
-		},
-		119: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Sanctuary);
-			}
-		},
-		120: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Meditation);
-			}
-		},
-		121: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FistoftheHeavens);
-			}
-		},
-		122: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Fanaticism);
-			}
-		},
-		123: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Conviction);
-			}
-		},
-		124: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Redemption);
-			}
-		},
-		125: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Salvation);
-			}
-		},
-		// barbarian skills start
-		126: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Bash);
-			}
-		},
-		130: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Howl);
-			}
-		},
-		131: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FindPotion);
-			}
-		},
-		132: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Leap);
-			}
-		},
-		133: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.DoubleSwing);
-			}
-		},
-		137: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Taunt);
-			}
-		},
-		138: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Shout);
-			}
-		},
-		139: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Stun);
-			}
-		},
-		140: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.DoubleThrow);
-			}
-		},
-		142: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				if (!Config.FindItem) return false;
-				return Skill.skills.have(sdk.skills.FindItem);
-			}
-		},
-		143: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.LeapAttack);
-			}
-		},
-		144: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Concentrate);
-			}
-		},
-		146: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.BattleCry);
-			}
-		},
-		147: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Frenzy);
-			}
-		},
-		149: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.BattleOrders);
-			}
-		},
-		150: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.GrimWard);
-			}
-		},
-		151: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Whirlwind);
-			}
-		},
-		152: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Berserk);
-			}
-		},
-		154: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.WarCry);
-			}
-		},
-		155: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.BattleCommand);
-			}
-		},
-		221: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				if (!Config.SummonRaven) return false;
-				return Skill.skills.have(sdk.skills.Raven);
-			}
-		},
-		222: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.PoisonCreeper);
-			}
-		},
-		223: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Werewolf);
-			}
-		},
-		225: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Firestorm);
-			}
-		},
-		226: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.OakSage);
-			}
-		},
-		227: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.SpiritWolf);
-			}
-		},
-		228: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Werebear);
-			}
-		},
-		229: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.MoltenBoulder);
-			}
-		},
-		230: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ArcticBlast);
-			}
-		},
-		231: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.CarrionVine);
-			}
-		},
-		232: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FeralRage);
-			}
-		},
-		233: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Maul);
-			}
-		},
-		234: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Fissure);
-			}
-		},
-		235: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.CycloneArmor);
-			}
-		},
-		236: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.HeartofWolverine);
-			}
-		},
-		237: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.SummonDireWolf);
-			}
-		},
-		238: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Rabies);
-			}
-		},
-		239: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FireClaws);
-			}
-		},
-		240: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Twister);
-			}
-		},
-		241: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.SolarCreeper);
-			}
-		},
-		242: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Hunger);
-			}
-		},
-		243: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ShockWave);
-			}
-		},
-		244: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Volcano);
-			}
-		},
-		245: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Tornado);
-			}
-		},
-		246: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.SpiritofBarbs);
-			}
-		},
-		247: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Grizzly);
-			}
-		},
-		248: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Fury);
-			}
-		},
-		249: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Armageddon);
-			}
-		},
-		250: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.Hurricane);
-			}
-		},
-		// start of assassin
-		251: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FireBlast);
-			}
-		},
-		253: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.PsychicHammer);
-			}
-		},
-		254: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.TigerStrike);
-			}
-		},
-		255: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.DragonTalon);
-			}
-		},
-		256: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ShockWeb);
-			}
-		},
-		257: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.BladeSentinel);
-			}
-		},
-		258: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				if (!Config.UseBoS && !me.inTown) return false;
-				return Skill.skills.have(sdk.skills.BurstofSpeed);
-			}
-		},
-		259: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.FistsofFire);
-			}
-		},
-		260: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.DragonClaw);
-			}
-		},
-		261: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ChargedBoltSentry);
-			}
-		},
-		262: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.WakeofFire);
-			}
-		},
-		264: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.CloakofShadows);
-			}
-		},
-		265: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.CobraStrike);
-			}
-		},
-		266: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.BladeFury);
-			}
-		},
-		267: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				if (!Config.UseFade) return false;
-				return Skill.skills.have(sdk.skills.Fade);
-			}
-		},
-		268: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ShadowWarrior);
-			}
-		},
-		269: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ClawsofThunder);
-			}
-		},
-		270: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.DragonTail);
-			}
-		},
-		271: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.LightningSentry);
-			}
-		},
-		272: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.WakeofInferno);
-			}
-		},
-		273: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.MindBlast);
-			}
-		},
-		274: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.BladesofIce);
-			}
-		},
-		275: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.DragonFlight);
-			}
-		},
-		276: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.DeathSentry);
-			}
-		},
-		277: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				if (!Config.UseBladeShield) return false;
-				return Skill.skills.have(sdk.skills.BladeShield);
-			}
-		},
-		278: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				if (!Config.UseVenom) return false;
-				return Skill.skills.have(sdk.skills.Venom);
-			}
-		},
-		279: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.ShadowMaster);
-			}
-		},
-		280: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.PhoenixStrike);
-			}
-		},
-		281: {
-			hardpoints: false,
-			checked: false,
-			have: function () {
-				return Skill.skills.have(sdk.skills.WakeofDestructionSentry);
-			}
-		},
-		have: function (skillId) {
-			if (skillId === undefined) return false;
-			if (this[skillId].hardpoints) return true;
-			if (!this[skillId].checked) {
-				this[skillId].hardpoints = !!me.getSkill(skillId, 0);
-				this[skillId].checked = true;
-			}
-			return (this[skillId].hardpoints || me.getSkill(skillId, 1));
 		}
 	},
 
-	// initialize our skill data - todo: change precastables to be an object of Skill instead - map all skills to it
+	// initialize our skill data
 	init: function () {
 		// reset check values
-		let skKeys = Object.keys(Skill.skills);
-		let min = 0, max = 999;
-
-		switch (me.classid) {
-		case sdk.charclass.Amazon:
-			min = sdk.skills.MagicArrow;
-			max = sdk.skills.LightningFury;
-			
-			break;
-		case sdk.charclass.Sorceress:
-			min = sdk.skills.FireBolt;
-			max = sdk.skills.ColdMastery;
-			
-			break;
-		case sdk.charclass.Necromancer:
-			min = sdk.skills.AmplifyDamage;
-			max = sdk.skills.Revive;
-			
-			break;
-		case sdk.charclass.Paladin:
-			min = sdk.skills.Sacrifice;
-			max = sdk.skills.Salvation;
-			
-			break;
-		case sdk.charclass.Barbarian:
-			min = sdk.skills.Bash;
-			max = sdk.skills.BattleCommand;
-			
-			break;
-		case sdk.charclass.Druid:
-			min = sdk.skills.Raven;
-			max = sdk.skills.Hurricane;
-			
-			break;
-		case sdk.charclass.Assassin:
-			min = sdk.skills.FireBlast;
-			max = sdk.skills.PhoenixStrike;
-			
-			break;
-		default:
-			break;
-		}
-
-		skKeys.filter(k => (k >= min && k <= max))
-			.forEach(key => {
-				if (!Skill.skills[key].hardpoints) {
-					Skill.skills[key].checked = false;
-				}
-			});
+		Skill.skills.reset();
 
 		switch (me.classid) {
 		case sdk.charclass.Amazon:
@@ -1440,7 +334,7 @@ const Skill = {
 		try {
 			if (skillId === -1) return false;
 			if (skillId >= sdk.skills.Attack && skillId <= sdk.skills.LeftHandSwing) return true;
-			let valid = Skill.skills[skillId].have();
+			let valid = Skill.skills.have(skillId);
 			
 			return valid;
 		} catch (e) {
@@ -3608,6 +2502,7 @@ const Packet = {
 	openMenu: function (unit) {
 		if (unit.type !== 1) throw new Error("openMenu: Must be used on NPCs.");
 		if (getUIFlag(sdk.uiflags.NPCMenu)) return true;
+		let pingDelay = (me.gameReady ? me.ping : 125);
 
 		for (let i = 0; i < 5; i += 1) {
 			unit.distance > 4 && Pather.moveToUnit(unit);
@@ -3616,7 +2511,7 @@ const Packet = {
 
 			while (getTickCount() - tick < 5000) {
 				if (getUIFlag(sdk.uiflags.NPCMenu)) {
-					delay(Math.max(500, me.ping * 2));
+					delay(Math.max(500, pingDelay * 2));
 
 					return true;
 				}
@@ -3629,9 +2524,9 @@ const Packet = {
 			}
 
 			sendPacket(1, 0x2f, 4, 1, 4, unit.gid);
-			delay(me.ping + 1 * 2);
+			delay(pingDelay + 1 * 2);
 			sendPacket(1, 0x30, 4, 1, 4, unit.gid);
-			delay(me.ping + 1 * 2);
+			delay(pingDelay + 1 * 2);
 			this.flash(me.gid);
 		}
 
@@ -3643,6 +2538,7 @@ const Packet = {
 		if (getUIFlag(0x0C)) return true;
 
 		let gamble = mode === "Gamble";
+		console.log("Starting " + mode + " at " + unit.name);
 
 		if (this.openMenu(unit)) {
 			for (let i = 0; i < 10; i += 1) {
@@ -3652,6 +2548,7 @@ const Packet = {
 
 				if (unit.itemcount > 0) {
 					delay(200);
+					console.log("Successfully started " + mode + " at " + unit.name);
 
 					return true;
 				}

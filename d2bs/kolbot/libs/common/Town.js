@@ -194,22 +194,32 @@ const Town = {
 	},
 
 	getTpTool: function () {
-		let items = me.getItemsEx().filter((item) => item.isInInventory && [sdk.items.ScrollofTownPortal, sdk.items.TomeofTownPortal].includes(item.classid));
+		let items = me.getItemsEx(-1, sdk.itemmode.inStorage).filter((item) => item.isInInventory && [sdk.items.ScrollofTownPortal, sdk.items.TomeofTownPortal].includes(item.classid));
+		let tome = items.find((i) => i.isInInventory && i.classid === sdk.items.TomeofTownPortal);
+		if (!!tome && tome.getStat(sdk.stats.Quantity) > 0) return tome;
 		let scroll = items.find((i) => i.isInInventory && i.classid === sdk.items.ScrollofTownPortal);
 		if (scroll) return scroll;
-		let tome = items.find((i) => i.isInInventory && i.classid === sdk.items.TomeofTownPortal);
-		if (tome && tome.getStat(sdk.stats.Quantity) > 0) return tome;
 		return null;
 	},
 
 	canTpToTown: function () {
-		// If we are not dead or in town, no TP tome or scrolls, shouldn't tp from arreatsummit and can't tp from UberTristram
-		return !(me.dead || me.inTown || !this.getTpTool() || [sdk.areas.ArreatSummit, sdk.areas.UberTristram].includes(me.area));
+		// can't tp if dead
+		if (me.dead) return false;
+		let badAreas = [
+			sdk.areas.RogueEncampment, sdk.areas.LutGholein, sdk.areas.KurastDocktown,
+			sdk.areas.PandemoniumFortress, sdk.areas.Harrogath, sdk.areas.ArreatSummit, sdk.areas.UberTristram
+		];
+		let myArea = me.area;
+		// can't tp from town or Uber Trist, and shouldn't tp from arreat summit
+		if (badAreas.includes(myArea)) return false;
+		// If we made it this far, we can only tp if we even have a tp
+		return !!this.getTpTool();
 	},
 
 	// Start a task and return the NPC Unit
-	initNPC: function (task, reason) {
+	initNPC: function (task = "", reason = "undefined") {
 		print("initNPC: " + reason);
+		task = task.capitalize(false);
 
 		delay(250);
 
@@ -269,6 +279,17 @@ const Town = {
 			}
 		} catch (e) {
 			console.errorReport(e);
+
+			if (!!e.message && e.message === "Couldn't interact with npc") {
+				// getUnit bug probably, lets see if going to different act helps
+				let highestAct = me.highestAct;
+				if (highestAct === 1) return false; // can't go to any of the other acts
+				let myAct = me.act;
+				let potentialActs = [1, 2, 3, 4, 5].filter(a => a <= highestAct && a !== myAct);
+				let goTo = potentialActs[rand(0, potentialActs.length - 1)];
+				console.debug("Going to Act " + goTo + " to see if it fixes getUnit bug");
+				Town.goToTown(goTo);
+			}
 
 			return false;
 		}
@@ -2154,22 +2175,20 @@ const Town = {
 
 	goToTown: function (act, wpmenu) {
 		if (!me.inTown) {
-			if (!me.inTown) {
-				try {
-					if (!Pather.makePortal(true)) console.errorReport("Town.goToTown: Failed to make TP");
-					if (!me.inTown && !Pather.usePortal(null, me.name)) console.errorReport("Town.goToTown: Failed to take TP");
-					if (!me.inTown && !Pather.usePortal(sdk.areas.townOf(me.area))) throw new Error("Town.goToTown: Failed to take TP");
-				} catch (e) {
-					let tpTool = this.getTpTool();
-					if (!tpTool && Misc.getPlayerCount() <= 1) {
-						Misc.errorReport(new Error("Town.goToTown: Failed to go to town and no tps available. Restart."));
-						scriptBroadcast("quit");
-					} else {
-						let p = getUnit(2, "portal");
-						console.debug(p);
-						!!p && Misc.click(0, 0, p) && delay(100);
-						console.log("inTown? " + me.inTown);
-					}
+			try {
+				if (!Pather.makePortal(true)) console.errorReport("Town.goToTown: Failed to make TP");
+				if (!me.inTown && !Pather.usePortal(null, me.name)) console.errorReport("Town.goToTown: Failed to take TP");
+				if (!me.inTown && !Pather.usePortal(sdk.areas.townOf(me.area))) throw new Error("Town.goToTown: Failed to take TP");
+			} catch (e) {
+				let tpTool = this.getTpTool();
+				if (!tpTool && Misc.getPlayerCount() <= 1) {
+					Misc.errorReport(new Error("Town.goToTown: Failed to go to town and no tps available. Restart."));
+					scriptBroadcast("quit");
+				} else {
+					let p = getUnit(2, "portal");
+					console.debug(p);
+					!!p && Misc.click(0, 0, p) && delay(100);
+					console.log("inTown? " + me.inTown);
 				}
 			}
 		}

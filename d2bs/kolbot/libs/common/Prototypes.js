@@ -96,18 +96,17 @@ Unit.prototype.openMenu = function (addDelay) {
 	if (getUIFlag(sdk.uiflags.NPCMenu)) return true;
 
 	addDelay === undefined && (addDelay = 0);
+	let pingDelay = (me.gameReady ? me.ping : 125);
 
 	for (let i = 0; i < 5; i += 1) {
-		if (getDistance(me, this) > 4) {
-			Pather.moveToUnit(this);
-		}
+		getDistance(me, this) > 4 && Pather.moveToUnit(this);
 
 		Misc.click(0, 0, this);
 		let tick = getTickCount();
 
 		while (getTickCount() - tick < 5000) {
 			if (getUIFlag(sdk.uiflags.NPCMenu)) {
-				delay(Math.max(700 + me.ping, 500 + me.ping * 2 + addDelay * 500));
+				delay(Math.max(700 + pingDelay, 500 + pingDelay * 2 + addDelay * 500));
 
 				return true;
 			}
@@ -120,9 +119,9 @@ Unit.prototype.openMenu = function (addDelay) {
 		}
 
 		sendPacket(1, 0x2f, 4, 1, 4, this.gid);
-		delay(me.ping * 2 + 1);
+		delay(pingDelay * 2 + 1);
 		sendPacket(1, 0x30, 4, 1, 4, this.gid);
-		delay(me.ping * 2 + 1);
+		delay(pingDelay * 2 + 1);
 		Packet.flash(me.gid);
 	}
 
@@ -133,6 +132,7 @@ Unit.prototype.openMenu = function (addDelay) {
 Unit.prototype.startTrade = function (mode) {
 	if (Config.PacketShopping) return Packet.startTrade(this, mode);
 	if (this.type !== 1) throw new Error("Unit.startTrade: Must be used on NPCs.");
+	console.log("Starting " + mode + "at " + this.name);
 	if (getUIFlag(sdk.uiflags.Shop)) return true;
 
 	let menuId = mode === "Gamble" ? 0x0D46 : mode === "Repair" ? 0x0D06 : 0x0D44;
@@ -147,6 +147,7 @@ Unit.prototype.startTrade = function (mode) {
 			while (getTickCount() - tick < 1000) {
 				if (getUIFlag(0x0C) && this.itemcount > 0) {
 					delay(200);
+					console.log("Successfully started " + mode + "at " + this.name);
 
 					return true;
 				}
@@ -330,6 +331,7 @@ Unit.prototype.use = function () {
 	if (!getBaseStat("items", this.classid, "useable")) throw new Error("Unit.use: Must be used with consumable items. Unit Name: " + this.name);
 	
 	let gid = this.gid;
+	let pingDelay = me.gameReady ? me.ping : 200;
 
 	switch (this.location) {
 	case sdk.storage.Inventory:
@@ -346,7 +348,7 @@ Unit.prototype.use = function () {
 		return false;
 	}
 
-	delay(Math.max(me.ping * 2, 200));
+	delay(Math.max(pingDelay * 2, 200));
 
 	return !(getUnit(4, -1, -1, gid));
 };
@@ -422,7 +424,8 @@ me.switchWeapons = function (slot) {
 			!switched && sendPacket(1, 0x60); // Swap weapons
 
 			let tick = getTickCount();
-			while (getTickCount() - tick < 250 + (me.ping * 5)) {
+			let pingDelay = me.gameReady ? me.ping : 50;
+			while (getTickCount() - tick < 250 + (pingDelay * 5)) {
 				if (switched || originalSlot !== me.weaponswitch) {
 					return true;
 				}

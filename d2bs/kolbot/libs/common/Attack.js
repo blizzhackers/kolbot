@@ -1499,9 +1499,9 @@ const Attack = {
 			skipGid: -1,
 		}, givenSettings);
 
-		let gid,
-			monster = getUnit(1),
-			range = 30;
+		let gid;
+		let monster = getUnit(1);
+		let range = 30;
 
 		if (monster) {
 			do {
