@@ -267,8 +267,8 @@ const Skill = {
 			}
 
 			for (let i = min; i <= max; i++) {
-				if (typeof this.test[i] !== "undefined" && !this.test[i].hardpoints) {
-					this.test[i].checked = false;
+				if (typeof this.all[i] !== "undefined" && !this.all[i].hardpoints) {
+					this.all[i].checked = false;
 				}
 			}
 		}
