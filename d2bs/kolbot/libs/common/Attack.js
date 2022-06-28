@@ -1193,13 +1193,7 @@ const Attack = {
 		for (i = 0; i < Config.SkipImmune.length; i += 1) {
 			tempArray = Config.SkipImmune[i].toLowerCase().split(" and ");
 
-			for (j = 0; j < tempArray.length; j += 1) {
-				if (this.checkResist(unit, tempArray[j])) { // Infinity calculations are built-in
-					break;
-				}
-			}
-
-			if (j === tempArray.length) {
+			if (tempArray.every(res => this.checkResist(unit, res))) {
 				return false;
 			}
 		}
