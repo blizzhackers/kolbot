@@ -41,6 +41,7 @@ const NPC = {
 
 const Town = {
 	telekinesis: true,
+	lastInteractedNPC: null,
 	sellTimer: getTickCount(), // shop speedup test
 
 	tasks: [
@@ -108,7 +109,7 @@ const Town = {
 		return true;
 	},
 
-	npcInteract: function (name, cancel = true) {
+	npcInteract: function (name = "", cancel = true) {
 		!name.includes("_") && (name = name.capitalize(true));
 		name.includes("_") && (name = "Qual_Kehk");
 
@@ -143,7 +144,7 @@ const Town = {
 
 		if (npc && npc.openMenu()) {
 			cancel && me.cancel();
-
+			this.lastInteractedNPC = npc;
 			return npc;
 		}
 
@@ -195,9 +196,10 @@ const Town = {
 
 	getTpTool: function () {
 		let items = me.getItemsEx(-1, sdk.itemmode.inStorage).filter((item) => item.isInInventory && [sdk.items.ScrollofTownPortal, sdk.items.TomeofTownPortal].includes(item.classid));
-		let tome = items.find((i) => i.isInInventory && i.classid === sdk.items.TomeofTownPortal);
+		if (!items.length) return null;
+		let tome = items.find((i) => i.classid === sdk.items.TomeofTownPortal);
 		if (!!tome && tome.getStat(sdk.stats.Quantity) > 0) return tome;
-		let scroll = items.find((i) => i.isInInventory && i.classid === sdk.items.ScrollofTownPortal);
+		let scroll = items.find((i) => i.classid === sdk.items.ScrollofTownPortal);
 		if (scroll) return scroll;
 		return null;
 	},
@@ -223,7 +225,7 @@ const Town = {
 
 		delay(250);
 
-		let npc = getInteractedNPC();
+		let npc = !!this.lastInteractedNPC && !!this.lastInteractedNPC.name ? this.lastInteractedNPC : getInteractedNPC();
 
 		try {
 			if (!!npc && npc.name.toLowerCase() !== this.tasks[me.act - 1][task]) {
@@ -274,7 +276,7 @@ const Town = {
 				console.log("Checking if we are frozen");
 				if (me.getState(sdk.states.Frozen)) {
 					console.log("Yup, lets unfreeze real quick with some thawing pots");
-					this.buyPots(2, "Thawing", true, true, npc);
+					Town.buyPots(2, "Thawing", true, true, npc);
 				}
 			}
 		} catch (e) {
@@ -295,6 +297,7 @@ const Town = {
 		}
 
 		Misc.poll(() => me.gameReady, 2000, 250);
+		this.lastInteractedNPC = npc;
 
 		return npc;
 	},
@@ -1020,12 +1023,12 @@ const Town = {
 			break;
 		case sdk.items.StaminaPotion:
 			// Don't buy if teleport or vigor
-			if (!force && (Config.Vigor && me.getSkill(sdk.skills.Vigor, 0) || Pather.canTeleport())) return true;
+			if (!force && (Skill.canUse(sdk.skills.Vigor) || Pather.canTeleport())) return true;
 
 			break;
 		}
 
-		npc = !!npc ? npc : getInteractedNPC();
+		npc = !!npc ? npc : !!this.lastInteractedNPC && !!this.lastInteractedNPC.name ? this.lastInteractedNPC : getInteractedNPC();
 
 		try {
 			if (!!npc && npc.name.toLowerCase() === NPC[potDealer] && !getUIFlag(sdk.uiflags.Shop)) {

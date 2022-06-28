@@ -7,8 +7,6 @@
 
 const Precast = new function () {
 	this.haveCTA = -1;
-	this.BODuration = 0;
-	this.BOTick = 0;
 	this.bestSlot = {};
 
 	// TODO: build better method of keeping track of duration based skills so we can reduce resource usage
@@ -22,14 +20,21 @@ const Precast = new function () {
 			duration: 0,
 			tick: 0
 		},
+		HolyShield: {
+			duration: 0,
+			tick: 0
+		},
 		Shout: {
-			duration: 0
+			duration: 0,
+			tick: 0
 		},
 		BattleOrders: {
-			duration: 0
+			duration: 0,
+			tick: 0
 		},
 		BattleCommand: {
-			duration: 0
+			duration: 0,
+			tick: 0
 		},
 	};
 
@@ -46,9 +51,9 @@ const Precast = new function () {
 			this.precastSkill(sdk.skills.BattleCommand, x, y, true);
 			this.precastSkill(sdk.skills.BattleOrders, x, y, true);
 
-			this.BOTick = getTickCount();
+			this.precastables.BattleOrders.tick = getTickCount();
 			// does this need to be re-calculated everytime? if no autobuild should really just be done when we initialize
-			!this.BODuration && (this.BODuration = Skill.getDuration(sdk.skills.BattleOrders));
+			!this.precastables.BattleOrders.duration && (this.precastables.BattleOrders.duration = Skill.getDuration(sdk.skills.BattleOrders));
 
 			me.switchWeapons(slot);
 
@@ -250,7 +255,9 @@ const Precast = new function () {
 
 		// Force BO 30 seconds before it expires
 		if (this.haveCTA > -1) {
-			forceBo = (force || (getTickCount() - this.BOTick >= this.BODuration - 30000) || !me.getState(sdk.states.BattleCommand));
+			forceBo = (force
+				|| (getTickCount() - this.precastables.BattleOrders.tick >= this.precastables.BattleOrders.duration - 30000)
+				|| !me.getState(sdk.states.BattleCommand));
 			forceBo && this.precastCTA(forceBo);
 		}
 

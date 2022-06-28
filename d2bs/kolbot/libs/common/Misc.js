@@ -1520,7 +1520,7 @@ const Misc = {
 				}
 			}
 
-			if (Misc.poll(() => unit.mode, 1000, 20 + me.ping)) {
+			if (Misc.poll(() => unit.mode, 1000, 40)) {
 				return true;
 			}
 		}
@@ -2366,7 +2366,7 @@ const Misc = {
 
 	checkQuest: function (id, state) {
 		sendPacket(1, 0x40);
-		delay(500 + me.ping);
+		delay(500);
 
 		return me.getQuest(id, state);
 	},
