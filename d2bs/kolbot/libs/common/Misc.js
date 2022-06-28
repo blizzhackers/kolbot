@@ -2764,7 +2764,8 @@ const Packet = {
 		return false;
 	},
 
-	flash: function (gid, wait = 300 + 2 * me.ping) {
+	flash: function (gid, wait = 0) {
+		wait === 0 && (wait = 300 + (me.gameReady ? 2 * me.ping : 300));
 		sendPacket(1, 0x4b, 4, 0, 4, gid);
 
 		if (wait > 0) {

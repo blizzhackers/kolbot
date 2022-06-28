@@ -2176,12 +2176,16 @@ const Town = {
 		return false;
 	},
 
-	goToTown: function (act, wpmenu) {
+	goToTown: function (act = 0, wpmenu = false) {
 		if (!me.inTown) {
 			try {
-				if (!Pather.makePortal(true)) console.errorReport("Town.goToTown: Failed to make TP");
-				if (!me.inTown && !Pather.usePortal(null, me.name)) console.errorReport("Town.goToTown: Failed to take TP");
-				if (!me.inTown && !Pather.usePortal(sdk.areas.townOf(me.area))) throw new Error("Town.goToTown: Failed to take TP");
+				if (!Pather.makePortal(true)) {
+					console.errorReport("Town.goToTown: Failed to make TP");
+					if (!me.inTown && !Pather.usePortal(null, me.name)) {
+						console.errorReport("Town.goToTown: Failed to take TP");
+						if (!me.inTown && !Pather.usePortal(sdk.areas.townOf(me.area))) throw new Error("Town.goToTown: Failed to take TP");
+					}
+				}
 			} catch (e) {
 				let tpTool = this.getTpTool();
 				if (!tpTool && Misc.getPlayerCount() <= 1) {

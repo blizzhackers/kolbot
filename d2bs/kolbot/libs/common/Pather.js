@@ -1438,30 +1438,36 @@ const Pather = {
 				.first();
 
 			!!oldPortal && (oldGid = oldPortal.gid);
-			tpTool.interact();
-			let tick = getTickCount();
+			
+			if (tpTool.use()) {
+				let tick = getTickCount();
+				let pingDelay = me.gameReady ? me.ping : 350;
 
-			while (getTickCount() - tick < Math.max(500 + i * 100, me.ping * 2 + 100)) {
-				let portal = getUnits(sdk.unittype.Object, "portal")
-					.filter((p) => p.getParent() === me.name && p.gid !== oldGid)
-					.first();
+				while (getTickCount() - tick < Math.max(500 + i * 100, pingDelay * 2 + 100)) {
+					let portal = getUnits(sdk.unittype.Object, "portal")
+						.filter((p) => p.getParent() === me.name && p.gid !== oldGid)
+						.first();
 
-				if (!!portal) {
-					if (use) {
-						if (this.usePortal(null, null, copyUnit(portal))) {
-							return true;
+					if (!!portal) {
+						if (use) {
+							if (this.usePortal(null, null, copyUnit(portal))) {
+								return true;
+							}
+							break; // don't spam usePortal
+						} else {
+							return copyUnit(portal);
 						}
-						break; // don't spam usePortal
-					} else {
-						return copyUnit(portal);
 					}
-				}
 
-				delay(10);
+					delay(10);
+				}
+			} else {
+				console.log("Failed to use tp tool");
+				Packet.flash(me.gid, pingDelay);
+				delay(200 + pingDelay);
 			}
 
-			Packet.flash(me.gid);
-			delay(200 + me.ping);
+			delay(40);
 		}
 
 		return false;
@@ -1522,7 +1528,7 @@ const Pather = {
 							i < 2 ? sendPacket(1, 0x13, 4, 0x2, 4, portal.gid) : Misc.click(0, 0, portal);
 							!!redPortal && delay(150);
 						} else {
-							delay(300 + me.ping);
+							delay(300);
 							
 							continue;
 						}
@@ -1545,7 +1551,7 @@ const Pather = {
 
 				let tick = getTickCount();
 
-				while (getTickCount() - tick < 500 + me.ping) {
+				while (getTickCount() - tick < 500) {
 					if (me.area !== preArea) {
 						this.lastPortalTick = getTickCount();
 						delay(100);

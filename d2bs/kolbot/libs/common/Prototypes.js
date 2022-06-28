@@ -68,12 +68,12 @@ Unit.prototype.__defineGetter__("dead", function () {
 Unit.prototype.__defineGetter__("inTown", function () {
 	if (this.type > 0) throw new Error("Unit.inTown: Must be used with player units.");
 
-	return [1, 40, 75, 103, 109].includes(this.area);
+	return [sdk.areas.RogueEncampment, sdk.areas.LutGholein, sdk.areas.KurastDocktown, sdk.areas.PandemoniumFortress, sdk.areas.Harrogath].includes(this.area);
 });
 
 // Check if party unit is in town
 Party.prototype.__defineGetter__("inTown", function () {
-	return [1, 40, 75, 103, 109].includes(this.area);
+	return [sdk.areas.RogueEncampment, sdk.areas.LutGholein, sdk.areas.KurastDocktown, sdk.areas.PandemoniumFortress, sdk.areas.Harrogath].includes(this.area);
 });
 
 Unit.prototype.__defineGetter__("attacking", function () {
@@ -332,11 +332,16 @@ Unit.prototype.use = function () {
 	
 	let gid = this.gid;
 	let pingDelay = me.gameReady ? me.ping : 200;
+	let quantity = 0;
+	let iType = this.itemType;
+	let checkQuantity = false;
 
 	switch (this.location) {
 	case sdk.storage.Inventory:
 		// doesn't work, not sure why but it's missing something 
 		//new PacketBuilder().byte(0x20).dword(gid).dword(this.x).dword(this.y).send();
+		checkQuantity = iType === sdk.itemtype.Book;
+		checkQuantity && (quantity = this.getStat(sdk.stats.Quantity));
 		this.interact(); // use interact instead, was hoping to skip this since its really just doing the same thing over but oh well
 
 		break;
@@ -350,7 +355,11 @@ Unit.prototype.use = function () {
 
 	delay(Math.max(pingDelay * 2, 200));
 
-	return !(getUnit(4, -1, -1, gid));
+	if (checkQuantity) {
+		return this.getStat(sdk.stats.Quantity) < quantity;
+	} else {
+		return !(getUnit(4, -1, -1, gid));
+	}
 };
 
 me.findItem = function (id = -1, mode = -1, loc = -1, quality = -1) {
