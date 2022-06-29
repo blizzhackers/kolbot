@@ -41,7 +41,7 @@ const Attack = {
 
 	// check if slot has items
 	checkSlot: function (slot = me.weaponswitch) {
-		let item = me.getItem(-1, 1);
+		let item = me.getItem(-1, sdk.itemmode.Equipped);
 
 		if (item) {
 			do {
@@ -123,7 +123,7 @@ const Attack = {
 	getCharges: function () {
 		!Skill.charges && (Skill.charges = []);
 
-		let item = me.getItem(-1, 1);
+		let item = me.getItem(-1, sdk.itemmode.Equipped);
 
 		if (item) {
 			do {
@@ -323,20 +323,17 @@ const Attack = {
 	},
 
 	getScarinessLevel: function (unit) {
+		// todo - define summonertype prototype
 		let scariness = 0, ids = [58, 59, 60, 61, 62, 101, 102, 103, 104, 105, 278, 279, 280, 281, 282, 298, 299, 300, 645, 646, 647, 662, 663, 664, 667, 668, 669, 670, 675, 676];
 
 		// Only handling monsters for now
-		if (unit.type !== 1) return undefined;
-
+		if (!unit || unit.type !== 1) return undefined;
 		// Minion
 		(unit.spectype & 0x08) && (scariness += 1);
-
 		// Champion
 		(unit.spectype & 0x02) && (scariness += 2);
-
 		// Boss
 		(unit.spectype & 0x04) && (scariness += 4);
-
 		// Summoner or the like
 		ids.includes(unit.classid) && (scariness += 8);
 
@@ -345,7 +342,7 @@ const Attack = {
 
 	// Clear monsters in a section based on range and spectype or clear monsters around a boss monster
 	// probably going to change to passing an object
-	clear: function (range, spectype, bossId, sortfunc, pickit) {
+	clear: function (range, spectype, bossId, sortfunc, pickit = true) {
 		while (!me.gameReady) {
 			delay(40);
 		}
@@ -356,15 +353,14 @@ const Attack = {
 		spectype === undefined && (spectype = 0);
 		bossId === undefined && (bossId = false);
 		sortfunc === undefined && (sortfunc = false);
-		pickit === undefined && (pickit = true);
 		!sortfunc && (sortfunc = this.sortMonsters);
 
 		if (typeof (range) !== "number") throw new Error("Attack.clear: range must be a number.");
 
-		let i, boss, orgx, orgy, start, skillCheck,
-			retry = 0,
-			gidAttack = [],
-			attackCount = 0;
+		let i, boss, orgx, orgy, start, skillCheck;
+		let retry = 0;
+		let gidAttack = [];
+		let attackCount = 0;
 
 		if (bossId) {
 			boss = Misc.poll(function () {
@@ -396,8 +392,8 @@ const Attack = {
 			do {
 				if ((!spectype || (target.spectype & spectype)) && target.attackable && !this.skipCheck(target)) {
 					// Speed optimization - don't go through monster list until there's at least one within clear range
-					if (!start && getDistance(target, orgx, orgy) <= range &&
-							(Pather.canTeleport() || !checkCollision(me, target, 0x5))) {
+					if (!start && getDistance(target, orgx, orgy) <= range
+							&& (Pather.canTeleport() || !checkCollision(me, target, 0x5))) {
 						start = true;
 					}
 
@@ -413,7 +409,8 @@ const Attack = {
 			monsterList.sort(sortfunc);
 			target = copyUnit(monsterList[0]);
 
-			if (target.x !== undefined && (getDistance(target, orgx, orgy) <= range || (this.getScarinessLevel(target) > 7 && target.distance <= range)) && target.attackable) {
+			if (target.x !== undefined && (getDistance(target, orgx, orgy) <= range || (this.getScarinessLevel(target) > 7 && target.distance <= range))
+				&& target.attackable) {
 				Config.Dodge && me.hpPercent <= Config.DodgeHP && this.deploy(target, Config.DodgeRange, 5, 9);
 				Misc.townCheck(true);
 				//me.overhead("attacking " + target.name + " spectype " + target.spectype + " id " + target.classid);
@@ -626,12 +623,13 @@ const Attack = {
 					}
 
 					gidAttack[i].attacks += 1;
+					let special = target.isSpecial;
 
 					// Desync/bad position handler
-					switch (Config.AttackSkill[(target.spectype & 0x7) ? 1 : 3]) {
-					case 112:
+					switch (Config.AttackSkill[target.isSpecial ? 1 : 3]) {
+					case sdk.skills.BlessedHammer:
 						// Tele in random direction with Blessed Hammer
-						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % ((target.spectype & 0x7) ? 5 : 15) === 0) {
+						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % (special ? 5 : 15) === 0) {
 							let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 4);
 							Pather.moveTo(coord.x, coord.y);
 						}
@@ -639,7 +637,7 @@ const Attack = {
 						break;
 					default:
 						// Flash with melee skills
-						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % ((target.spectype & 0x7) ? 5 : 15) === 0 && Skill.getRange(Config.AttackSkill[(target.spectype & 0x7) ? 1 : 3]) < 4) {
+						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % (special ? 5 : 15) === 0 && Skill.getRange(Config.AttackSkill[special ? 1 : 3]) < 4) {
 							Packet.flash(me.gid);
 						}
 
@@ -647,7 +645,7 @@ const Attack = {
 					}
 
 					// Skip non-unique monsters after 15 attacks, except in Throne of Destruction
-					if (me.area !== 131 && !(target.spectype & 0x7) && gidAttack[i].attacks > 15) {
+					if (me.area !== 131 && !special && gidAttack[i].attacks > 15) {
 						print("ÿc1Skipping " + target.name + " " + target.gid + " " + gidAttack[i].attacks);
 						monsterList.shift();
 					}
@@ -681,12 +679,11 @@ const Attack = {
 		return true;
 	},
 
-	securePosition: function (x, y, range, timer, skipBlocked, special) {
+	securePosition: function (x, y, range = 15, timer = 3000, skipBlocked = true, special = false) {
 		let tick;
 
 		x === undefined && (x = me.x);
 		y === undefined && (y = me.y);
-		timer === undefined && (timer = 3000);
 		skipBlocked === true && (skipBlocked = 0x4);
 
 		while (true) {
@@ -697,9 +694,9 @@ const Attack = {
 
 			if (monster) {
 				do {
-					if (getDistance(monster, x, y) <= range && monster.attackable && this.canAttack(monster) &&
-							(!skipBlocked || !checkCollision(me, monster, skipBlocked)) &&
-							(Pather.canTeleport() || !checkCollision(me, monster, 0x1))) {
+					if (getDistance(monster, x, y) <= range && monster.attackable && this.canAttack(monster)
+							&& (!skipBlocked || !checkCollision(me, monster, skipBlocked))
+							&& (Pather.canTeleport() || !checkCollision(me, monster, 0x1))) {
 						monList.push(copyUnit(monster));
 					}
 				} while (monster.getNext());
@@ -782,12 +779,10 @@ const Attack = {
 	},
 
 	// Clear an entire area based on monster spectype
-	clearLevel: function (spectype) {
+	clearLevel: function (spectype = 0) {
 		function RoomSort(a, b) {
 			return getDistance(myRoom[0], myRoom[1], a[0], a[1]) - getDistance(myRoom[0], myRoom[1], b[0], b[1]);
 		}
-
-		spectype === undefined && (spectype = 0);
 
 		let room = getRoom();
 		if (!room) return false;
@@ -807,10 +802,10 @@ const Attack = {
 		if (Config.MFLeader && rooms.length > 0) {
 			Pather.makePortal();
 			// tombs exception
-			if (me.area > 65 && me.area < 73) {
+			if (me.area >= sdk.areas.TalRashasTomb1 && me.area <= sdk.areas.TalRashasTomb7) {
 				say("clearlevel " + me.area);
 			} else {
-				say("clearlevel " + getArea().name);
+				say("clearlevel " + Pather.getAreaName(currentArea));
 			}
 		}
 
@@ -938,11 +933,14 @@ const Attack = {
 	// hotfix for now, bugged with flying mobs (specters, ghosts, ect) apparently underneath them doesn't register as ground? so it fails the needFloor test
 	// despite there being floor there. so for now check if its an area that doesn't have floor in some spots
 	// better fix would be passing unit directly in instead of x and y, but that is going to need more changes all over
-	validSpot: function (x, y, skill = -1) {
+	validSpot: function (x, y, skill = -1, unitid = 0) {
 		// Just in case
 		if (!me.area || !x || !y) return false;
 		// for now this just returns true and we leave getting into position to the actual class attack files
-		if (Skill.missileSkills.includes(skill)) return true;
+		if (Skill.missileSkills.includes(skill)
+			|| ([sdk.skills.Blizzard, sdk.skills.Meteor].includes(skill) && unitid > 0 && !getBaseStat("monstats", unitid, "flying"))) {
+			return true;
+		}
 
 		let result;
 		let nonFloorAreas = [sdk.areas.ArcaneSanctuary, sdk.areas.RiverofFlame, sdk.areas.ChaosSanctuary, sdk.areas.Abaddon, sdk.areas.PitofAcheron, sdk.areas.InfernalPit];
@@ -965,6 +963,10 @@ const Attack = {
 			}
 
 			return !(result & 0x1); // outside lava area in abaddon returns coll 1
+		case Attack.monsterObjects.includes(unitid) && (!!(result & 0x1110) || !!(result & 0xFFFF)):
+			// kinda dumb - monster objects have a collision that causes them to not be attacked
+			// this should fix that
+			return true;
 		default:
 			// Avoid non-walkable spots, objects - this preserves the orignal function and also physical attack skills will get here
 			if ((result & 0x1) || (result & 0x400)) return false;

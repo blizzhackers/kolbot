@@ -2591,6 +2591,10 @@ const Packet = {
 	sellItem: function (unit) {
 		// Check if it's an item we want to buy
 		if (unit.type !== 4) throw new Error("Unit.sell: Must be used on items.");
+		if (!unit.sellable) {
+			console.errorReport((new Error("Item is unsellable")));
+			return false;
+		}
 
 		let itemCount = me.itemcount;
 		let npc = getInteractedNPC();

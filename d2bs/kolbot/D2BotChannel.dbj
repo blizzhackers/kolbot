@@ -18,7 +18,7 @@ Starter.Config.Follow = []; // leader's in game character name, only use this if
 
 // Override default values for StarterConfig under here by following format
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds 
-// Starter.Config.JoinChannel = ""; // Default channel. Can be an array of channels - ["channel 1", "channel 2"]
+// Starter.Config.JoinChannel = ""; // Default channel.
 
 // todo: figure out a way to check if player who announced game is still in channel
 

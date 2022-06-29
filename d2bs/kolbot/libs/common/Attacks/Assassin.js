@@ -39,6 +39,7 @@ const ClassAttack = {
 		let timedSkill = -1;
 		let untimedSkill = -1;
 		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
+		let classid = unit.classid;
 
 		// Cloak of Shadows (Aggressive) - can't be cast again until previous one runs out and next to useless if cast in precast sequence (won't blind anyone)
 		if (Config.AggressiveCloak && Skill.canUse(sdk.skills.CloakofShadows) && !me.skillDelay && !me.getState(sdk.states.CloakofShadows)) {
@@ -69,18 +70,18 @@ const ClassAttack = {
 		// Get timed skill
 		let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
 
-		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
+		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill, classid)) {
 			timedSkill = checkSkill;
-		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[5])) {
+		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[5], classid)) {
 			timedSkill = Config.AttackSkill[5];
 		}
 
 		// Get untimed skill
 		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[1] : Config.AttackSkill[index + 1];
 
-		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
+		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill, classid)) {
 			untimedSkill = checkSkill;
-		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[6])) {
+		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[6], classid)) {
 			untimedSkill = Config.AttackSkill[6];
 		}
 
@@ -140,13 +141,14 @@ const ClassAttack = {
 	},
 
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
-	doCast: function (unit, timedSkill, untimedSkill) {
-		let walk;
-
+	doCast: function (unit, timedSkill = -1, untimedSkill = -1) {
 		// No valid skills can be found
-		if (timedSkill < 0 && untimedSkill < 0) {
-			return 2;
-		}
+		if (timedSkill < 0 && untimedSkill < 0) return 2;
+		// unit became invalidated
+		if (!unit || !unit.attackable) return 1;
+		
+		let walk;
+		let classid = unit.classid;
 
 		if (timedSkill > -1 && (!me.skillDelay || !Skill.isTimed(timedSkill))) {
 			switch (timedSkill) {
@@ -161,7 +163,7 @@ const ClassAttack = {
 
 				return 1;
 			default:
-				if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
+				if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, timedSkill, classid)) {
 					return 0;
 				}
 
@@ -181,13 +183,13 @@ const ClassAttack = {
 		}
 
 		if (untimedSkill > -1) {
-			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
+			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, untimedSkill, classid)) {
 				return 0;
 			}
 
-			if (Math.round(getDistance(me, unit)) > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
 				// Allow short-distance walking for melee skills
-				walk = Skill.getRange(untimedSkill) < 4 && getDistance(me, unit) < 10 && !checkCollision(me, unit, 0x1);
+				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), 0x4, walk)) {
 					return 0;
@@ -205,7 +207,7 @@ const ClassAttack = {
 	},
 
 	checkTraps: function (unit) {
-		if (!Config.UseTraps) return false;
+		if (!Config.UseTraps || !unit) return false;
 
 		// getDistance crashes when using an object with x, y props, that's why it's unit.x, unit.y and not unit
 		// is this still a thing ^^? todo: test it
@@ -219,7 +221,8 @@ const ClassAttack = {
 
 	// todo - either import soloplays immune to trap check or add config option for immune to traps
 	// since this is the base file probably better to leave the option available rather than hard code it
-	placeTraps: function (unit, amount) {
+	// check if unit is still attackable after each cast?
+	placeTraps: function (unit, amount = 5) {
 		let traps = 0;
 		this.lastTrapPos = {x: unit.x, y: unit.y};
 

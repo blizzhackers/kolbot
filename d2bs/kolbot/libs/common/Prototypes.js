@@ -220,6 +220,10 @@ Unit.prototype.sell = function () {
 
 	// Check if it's an item we want to buy
 	if (this.type !== 4) throw new Error("Unit.sell: Must be used on items.");
+	if (!this.sellable) {
+		console.errorReport((new Error("Item is unsellable")));
+		return false;
+	}
 
 	// Check if it's an item belonging to a NPC
 	if (!getUIFlag(sdk.uiflags.Shop)) throw new Error("Unit.sell: Must be used in shops.");
