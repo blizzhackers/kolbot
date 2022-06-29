@@ -228,15 +228,14 @@ const Town = {
 		let npc = !!this.lastInteractedNPC && !!this.lastInteractedNPC.name ? this.lastInteractedNPC : getInteractedNPC();
 
 		try {
-			if (!!npc && npc.name.toLowerCase() !== this.tasks[me.act - 1][task]) {
-				me.cancelUIFlags();
-				npc = null;
-			}
-
-			// Jamella gamble fix
-			if (task === "Gamble" && !!npc && npc.name.toLowerCase() === NPC.Jamella) {
-				me.cancelUIFlags();
-				npc = null;
+			if (!!npc) {
+				if ((npc.name.toLowerCase() !== this.tasks[me.act - 1][task])
+					// Jamella gamble fix
+					|| (task === "Gamble" && npc.name.toLowerCase() === NPC.Jamella)) {
+					me.cancelUIFlags();
+					npc = null;
+					this.lastInteractedNPC = null;
+				}
 			}
 
 			if (!npc) {
@@ -254,11 +253,11 @@ const Town = {
 			case "Shop":
 			case "Repair":
 			case "Gamble":
-				if (!getUIFlag(0x0C) && !npc.startTrade(task)) throw new Error("Failed to complete " + reason + " at " + npc.name);
+				if (!getUIFlag(sdk.uiflags.Shop) && !npc.startTrade(task)) throw new Error("Failed to complete " + reason + " at " + npc.name);
 
 				break;
 			case "Key":
-				if (!getUIFlag(0x0C) && !npc.startTrade(me.act === 3 ? "Repair" : "Shop")) throw new Error("Failed to complete " + reason + " at " + npc.name);
+				if (!getUIFlag(sdk.uiflags.Shop) && !npc.startTrade(me.act === 3 ? "Repair" : "Shop")) throw new Error("Failed to complete " + reason + " at " + npc.name);
 
 				break;
 			case "CainID":
@@ -499,7 +498,7 @@ const Town = {
 
 		delay(500);
 
-		if (classid === sdk.items.TomeofTownPortal && !me.findItem(sdk.items.TomeofTownPortal, 0, 3)) {
+		if (classid === sdk.items.TomeofTownPortal && !me.findItem(sdk.items.TomeofTownPortal, sdk.itemmode.inStorage, sdk.storage.Inventory)) {
 			let tome = npc.getItem(sdk.items.TomeofTownPortal);
 
 			if (tome && Storage.Inventory.CanFit(tome)) {
@@ -612,7 +611,7 @@ const Town = {
 							Storage.Inventory.CanFit(scroll) && scroll.buy();
 						}
 
-						scroll = me.findItem(sdk.items.ScrollofIdentify, 0, 3);
+						scroll = me.findItem(sdk.items.ScrollofIdentify, sdk.itemmode.inStorage, sdk.storage.Inventory);
 
 						if (!scroll) {
 							break MainLoop;
@@ -730,7 +729,7 @@ const Town = {
 		let list = this.getUnids();
 		if (!list) return false;
 
-		let tome = me.findItem(sdk.items.TomeofIdentify, 0, 3);
+		let tome = me.findItem(sdk.items.TomeofIdentify, sdk.itemmode.inStorage, sdk.storage.Inventory);
 		if (!tome || tome.getStat(sdk.stats.Quantity) < list.length) return false;
 
 		while (list.length > 0) {
@@ -782,12 +781,12 @@ const Town = {
 
 	getUnids: function () {
 		let list = [];
-		let item = me.getItem(-1, 0);
+		let item = me.getItem(-1, sdk.itemmode.inStorage);
 
 		if (!item) return false;
 
 		do {
-			if (item.location === 3 && !item.identified) {
+			if (item.isInInventory && !item.identified) {
 				list.push(copyUnit(item));
 			}
 		} while (item.getNext());
@@ -830,7 +829,7 @@ const Town = {
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 500) {
-				if (unit.getFlag(0x10)) {
+				if (unit.identified) {
 					delay(50);
 
 					return true;
@@ -980,12 +979,12 @@ const Town = {
 	},
 
 	getGambledItem: function (list = []) {
-		let items = me.findItems(-1, 0, 3);
+		let items = me.findItems(-1, sdk.itemmode.inStorage, sdk.storage.Inventory);
 
 		for (let i = 0; i < items.length; i += 1) {
 			if (list.indexOf(items[i].gid) === -1) {
 				for (let j = 0; j < 3; j += 1) {
-					if (items[i].getFlag(0x10)) {
+					if (items[i].identified) {
 						break;
 					}
 
@@ -1036,11 +1035,13 @@ const Town = {
 			} else {
 				me.cancelUIFlags();
 				npc = null;
+				this.lastInteractedNPC = null;
 
 				Town.move(NPC[potDealer]);
 				npc = getUnit(sdk.unittype.NPC, NPC[potDealer]);
 
 				if (!npc || !npc.openMenu() || !npc.startTrade("Shop")) throw new Error("Failed to open " + npc.name + " trade menu");
+				this.lastInteractedNPC = npc;
 			}
 		} catch (e) {
 			console.errorReport(e);
@@ -1123,7 +1124,7 @@ const Town = {
 		}
 
 		let count = 0;
-		let key = me.findItems(543, 0, 3);
+		let key = me.findItems(sdk.items.Key, sdk.itemmode.inStorage, sdk.storage.Inventory);
 
 		if (key) {
 			for (let i = 0; i < key.length; i += 1) {
@@ -1315,11 +1316,11 @@ const Town = {
 		if (bowCheck) {
 			switch (bowCheck) {
 			case "bow":
-				quiver = me.getItem("aqv", 1); // Equipped arrow quiver
+				quiver = me.getItem("aqv", sdk.itemmode.Equipped); // Equipped arrow quiver
 
 				break;
 			case "crossbow":
-				quiver = me.getItem("cqv", 1); // Equipped bolt quiver
+				quiver = me.getItem("cqv", sdk.itemmode.Equipped); // Equipped bolt quiver
 
 				break;
 			}
@@ -1354,7 +1355,7 @@ const Town = {
 		if (item) {
 			do {
 				// Skip ethereal items
-				if (!item.getFlag(0x400000)) {
+				if (!item.ethereal) {
 					// Skip indestructible items
 					if (!item.getStat(sdk.stats.Indestructible)) {
 						switch (item.itemType) {
@@ -1517,8 +1518,8 @@ const Town = {
 
 		// Stash gold
 		if (stashGold) {
-			if (me.getStat(14) >= Config.StashGold && me.getStat(15) < 25e5 && this.openStash()) {
-				gold(me.getStat(14), 3);
+			if (me.getStat(sdk.stats.Gold) >= Config.StashGold && me.getStat(sdk.stats.GoldBank) < 25e5 && this.openStash()) {
+				gold(me.getStat(sdk.stats.Gold), 3);
 				delay(1000); // allow UI to initialize
 				me.cancel();
 			}
@@ -1528,7 +1529,7 @@ const Town = {
 	},
 
 	needStash: function () {
-		if (Config.StashGold && me.getStat(14) >= Config.StashGold && me.getStat(15) < 25e5) {
+		if (Config.StashGold && me.getStat(sdk.stats.Gold) >= Config.StashGold && me.getStat(sdk.stats.GoldBank) < 25e5) {
 			return true;
 		}
 
@@ -1632,11 +1633,11 @@ const Town = {
 	checkShard: function () {
 		let shard;
 		let check = {left: false, right: false};
-		let item = me.getItem("bld", 0);
+		let item = me.getItem("bld", sdk.itemmode.inStorage);
 
 		if (item) {
 			do {
-				if (item.location === 3 && item.unique) {
+				if (item.isInInventory && item.unique) {
 					shard = copyUnit(item);
 
 					break;
@@ -1680,7 +1681,7 @@ const Town = {
 	},
 
 	clearBelt: function () {
-		let item = me.getItem(-1, 2);
+		let item = me.getItem(-1, sdk.itemmode.inBelt);
 		let clearList = [];
 
 		if (item) {
@@ -1766,7 +1767,7 @@ const Town = {
 			}
 
 			// Might as well sell the item if already in shop
-			if (getUIFlag(0xC) || (Config.PacketShopping && getInteractedNPC() && getInteractedNPC().itemcount > 0)) {
+			if (getUIFlag(sdk.uiflags.Shop) || (Config.PacketShopping && getInteractedNPC() && getInteractedNPC().itemcount > 0)) {
 				console.log("clearInventory sell " + scrolls[i].name);
 				Misc.itemLogger("Sold", scrolls[i]);
 				scrolls[i].sell();
@@ -1891,15 +1892,20 @@ const Town = {
 		// Any leftover items from a failed ID (crashed game, disconnect etc.)
 		Config.DebugMode && console.debug("clearInventory: start invo clean-up");
 		let items = (Storage.Inventory.Compare(Config.Inventory) || []);
-		items.length > 0 && (items = items.filter(function (item) {
-			return (!!item
-					&& ([18, 41, 76, 77, 78].indexOf(item.itemType) === -1 // Don't drop tomes, keys or potions
-					&& item.sellable // Don't try to sell/drop quest-items
-					&& !Cubing.keepItem(item) // Don't throw cubing ingredients
-					&& !Runewords.keepItem(item) // Don't throw runeword ingredients
-					&& !CraftingSystem.keepItem(item) // Don't throw crafting system ingredients
-					));
-		}));
+		let ignoreTypes = [
+			sdk.itemtype.Book, sdk.itemtype.Key, sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion
+		];
+		if (items.length > 0) {
+			items = items.filter(function (item) {
+				return (!!item
+						&& (ignoreTypes.indexOf(item.itemType) === -1 // Don't drop tomes, keys or potions
+						&& item.sellable // Don't try to sell/drop quest-items
+						&& !Cubing.keepItem(item) // Don't throw cubing ingredients
+						&& !Runewords.keepItem(item) // Don't throw runeword ingredients
+						&& !CraftingSystem.keepItem(item) // Don't throw crafting system ingredients
+						));
+			});
+		}
 
 		items = (items.length > 0 ? items.concat(sellOrDrop) : sellOrDrop.slice(0));
 		items.length > 0 && items.forEach(function (item) {

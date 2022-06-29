@@ -106,10 +106,29 @@ const Pather = {
 	teleport: true,
 	walkDistance: 5,
 	teleDistance: 40,
-	cancelFlags: [0x01, 0x02, 0x04, 0x08, 0x14, 0x16, 0x0c, 0x0f, 0x17, 0x19, 0x1A],
-	wpAreas: [1, 3, 4, 5, 6, 27, 29, 32, 35, 40, 48, 42, 57, 43, 44, 52, 74, 46, 75, 76, 77, 78, 79, 80, 81, 83, 101, 103, 106, 107, 109, 111, 112, 113, 115, 123, 117, 118, 129],
-	nonTownWpAreas: [3, 4, 5, 6, 27, 29, 32, 35, 48, 42, 57, 43, 44, 52, 74, 46, 76, 77, 78, 79, 80, 81, 83, 101, 106, 107, 111, 112, 113, 115, 123, 117, 118, 129],
-	nextAreas: {1: 2, 40: 41, 75: 76, 103: 104, 109: 110},
+	cancelFlags: [
+		sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.SkillWindow, sdk.uiflags.NPCMenu, sdk.uiflags.Waypoint,
+		sdk.uiflags.Party, sdk.uiflags.Shop, sdk.uiflags.Quest, sdk.uiflags.TradePrompt, sdk.uiflags.Stash, sdk.uiflags.Cube
+	],
+	wpAreas: [
+		sdk.areas.RogueEncampment, sdk.areas.ColdPlains, sdk.areas.StonyField, sdk.areas.DarkWood, sdk.areas.BlackMarsh, sdk.areas.OuterCloister,
+		sdk.areas.JailLvl1, sdk.areas.InnerCloister, sdk.areas.CatacombsLvl2, sdk.areas.LutGholein, sdk.areas.A2SewersLvl2, sdk.areas.DryHills,
+		sdk.areas.HallsoftheDeadLvl2, sdk.areas.FarOasis, sdk.areas.LostCity, sdk.areas.PalaceCellarLvl1, sdk.areas.ArcaneSanctuary, sdk.areas.CanyonofMagic,
+		sdk.areas.KurastDocktown, sdk.areas.SpiderForest, sdk.areas.GreatMarsh, sdk.areas.FlayerJungle, sdk.areas.LowerKurast, sdk.areas.KurastBazaar,
+		sdk.areas.UpperKurast, sdk.areas.Travincal, sdk.areas.DuranceofHateLvl2, sdk.areas.PandemoniumFortress, sdk.areas.CityoftheDamned, sdk.areas.RiverofFlame,
+		sdk.areas.Harrogath, sdk.areas.FrigidHighlands, sdk.areas.ArreatPlateau, sdk.areas.CrystalizedPassage, sdk.areas.GlacialTrail, sdk.areas.HallsofPain,
+		sdk.areas.FrozenTundra, sdk.areas.AncientsWay, sdk.areas.WorldstoneLvl2
+	],
+	nonTownWpAreas: [
+		sdk.areas.ColdPlains, sdk.areas.StonyField, sdk.areas.DarkWood, sdk.areas.BlackMarsh, sdk.areas.OuterCloister,
+		sdk.areas.JailLvl1, sdk.areas.InnerCloister, sdk.areas.CatacombsLvl2, sdk.areas.A2SewersLvl2, sdk.areas.DryHills,
+		sdk.areas.HallsoftheDeadLvl2, sdk.areas.FarOasis, sdk.areas.LostCity, sdk.areas.PalaceCellarLvl1, sdk.areas.ArcaneSanctuary, sdk.areas.CanyonofMagic,
+		sdk.areas.SpiderForest, sdk.areas.GreatMarsh, sdk.areas.FlayerJungle, sdk.areas.LowerKurast, sdk.areas.KurastBazaar,
+		sdk.areas.UpperKurast, sdk.areas.Travincal, sdk.areas.DuranceofHateLvl2, sdk.areas.CityoftheDamned, sdk.areas.RiverofFlame,
+		sdk.areas.FrigidHighlands, sdk.areas.ArreatPlateau, sdk.areas.CrystalizedPassage, sdk.areas.GlacialTrail, sdk.areas.HallsofPain,
+		sdk.areas.FrozenTundra, sdk.areas.AncientsWay, sdk.areas.WorldstoneLvl2
+	],
+	nextAreas: {1: sdk.areas.ColdPlains, 40: sdk.areas.RockyWaste, 75: sdk.areas.SpiderForest, 103: sdk.areas.OuterSteppes, 109: sdk.areas.BloodyFoothills},
 	recursion: true,
 	lastPortalTick: 0,
 
@@ -1120,7 +1139,7 @@ const Pather = {
 				usetk && i === 0 && unit.mode === 0 && unit.distance < 21 && Skill.cast(sdk.skills.Telekinesis, 0, unit);
 			}
 
-			if (type === 2 && unit.mode === 0) {
+			if (type === sdk.unittype.Object && unit.mode === 0) {
 				if ((me.area === sdk.areas.Travincal && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(21, 0) !== 1)
 					|| (me.area === sdk.areas.ArreatSummit && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(39, 0) !== 1)) {
 					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
@@ -1129,12 +1148,15 @@ const Pather = {
 				me.area === sdk.areas.A3SewersLvl1 ? this.openUnit(2, 367) : this.openUnit(2, id);
 			}
 
-			if (type === 2 && id === 342 && me.area === sdk.areas.DuranceofHateLvl3 && targetArea === sdk.areas.PandemoniumFortress && me.getQuest(22, 0) !== 1) {
+			if (type === sdk.unittype.Object && id === sdk.units.RedPortalToAct4 && me.area === sdk.areas.DuranceofHateLvl3
+				&& targetArea === sdk.areas.PandemoniumFortress && me.getQuest(22, 0) !== 1) {
 				throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 			}
 
 			delay(300);
-			type === 5 ? Misc.click(0, 0, unit) : usetk && unit.distance > 5 ? Skill.cast(sdk.skills.Telekinesis, 0, unit) : sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
+			type === sdk.unittype.Stairs
+				? Misc.click(0, 0, unit)
+				: usetk && unit.distance > 5 ? Skill.cast(sdk.skills.Telekinesis, 0, unit) : sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
 			delay(300);
 
 			let tick = getTickCount();
@@ -1282,7 +1304,7 @@ const Pather = {
 
 				if (me.area === sdk.areas.LutGholein && !!npc && npc.distance < 50) {
 					if (npc && npc.openMenu()) {
-						Misc.useMenu(0x0D37);
+						Misc.useMenu(sdk.menu.GoWest);
 
 						if (!Misc.poll(() => me.gameReady && me.area === 1, 2000, 100)) {
 							throw new Error("Failed to go to act 1 using Warriv");
@@ -1502,7 +1524,7 @@ const Pather = {
 			let portal = unit ? copyUnit(unit) : this.getPortal(targetArea, owner);
 
 			if (portal) {
-				let redPortal = portal.classid === 60;
+				let redPortal = portal.classid === sdk.units.RedPortal;
 
 				if (portal.area === me.area) {
 					if (Skill.useTK(portal) && i < 3) {
@@ -1536,7 +1558,7 @@ const Pather = {
 				}
 
 				// Portal to/from Arcane
-				if (portal.classid === 298 && portal.mode !== 2) {
+				if (portal.classid === sdk.units.ArcaneSanctuaryPortal && portal.mode !== 2) {
 					Misc.click(0, 0, portal);
 					let tick = getTickCount();
 
@@ -1815,16 +1837,16 @@ const Pather = {
 				Precast.doPrecast(false);
 			} else if (currArea === sdk.areas.StonyField && target.course[0] === sdk.areas.Tristram) {
 				// Stony Field -> Tristram
-				this.moveToPreset(currArea, 1, 737, 0, 0, false, true);
+				this.moveToPreset(currArea, sdk.unittype.Monster, sdk.monsters.preset.Rakanishu, 0, 0, false, true);
 				Misc.poll(() => this.usePortal(sdk.areas.Tristram), 5000, 1000);
 			} else if (currArea === sdk.areas.LutGholein && target.course[0] === sdk.areas.A2SewersLvl1) {
 				// Lut Gholein -> Sewers Level 1 (use Trapdoor)
-				this.moveToPreset(currArea, 5, 19);
-				this.useUnit(2, 74, sdk.areas.A2SewersLvl1);
+				this.moveToPreset(currArea, sdk.unittype.Stairs, 19);
+				this.useUnit(sdk.unittype.Object, 74, sdk.areas.A2SewersLvl1);
 			} else if (currArea === sdk.areas.A2SewersLvl2 && target.course[0] === sdk.areas.A2SewersLvl1) {
 				// Sewers Level 2 -> Sewers Level 1
 				Pather.moveToExit(target.course[0], false);
-				this.useUnit(5, 22, 47);
+				this.useUnit(sdk.unittype.Stairs, 22, 47);
 			} else if (currArea === sdk.areas.PalaceCellarLvl3 && target.course[0] === sdk.areas.ArcaneSanctuary) {
 				// Palace -> Arcane
 				this.moveTo(10073, 8670);
@@ -1832,22 +1854,22 @@ const Pather = {
 			} else if (currArea === sdk.areas.ArcaneSanctuary && target.course[0] === sdk.areas.PalaceCellarLvl3) {
 				// Arcane Sanctuary -> Palace Cellar 3
 				Skill.haveTK ? this.moveNearPreset(currArea, 2, 298, 20) : this.moveToPreset(currArea, 2, 298);
-				unit = Misc.poll(() => getUnit(2, 298));
-				unit && Pather.useUnit(2, 298, 54);
+				unit = Misc.poll(() => getUnit(sdk.unittype.Object, 298));
+				unit && Pather.useUnit(sdk.unittype.Stairs, 298, 54);
 			} else if (currArea === sdk.areas.ArcaneSanctuary && target.course[0] === sdk.areas.CanyonofMagic) {
 				// Arcane Sanctuary -> Canyon of the Magic
-				this.moveToPreset(currArea, 2, 357);
-				unit = getUnit(2, 60);
+				this.moveToPreset(currArea, sdk.unittype.Object, 357);
+				unit = getUnit(sdk.unittype.Object, sdk.units.RedPortal);
 
 				if (!unit || !this.usePortal(null, null, unit)) {
 					for (let i = 0; i < 5; i++) {
-						unit = getUnit(2, 357);
+						unit = getUnit(sdk.unittype.Object, sdk.units.Journal);
 
 						Misc.click(0, 0, unit);
 						delay(1000);
 						me.cancel();
 
-						if (this.usePortal(46)) {
+						if (this.usePortal(sdk.areas.CanyonofMagic)) {
 							break;
 						}
 					}

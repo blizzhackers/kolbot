@@ -277,7 +277,7 @@ const Skill = {
 	// initialize our skill data
 	init: function () {
 		// reset check values
-		Skill.skills.reset();
+		!Skill.skills.initialized ? Skill.skills.init() : Skill.skills.reset();
 
 		switch (me.classid) {
 		case sdk.charclass.Amazon:
