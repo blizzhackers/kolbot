@@ -128,7 +128,7 @@ const Pather = {
 		sdk.areas.FrigidHighlands, sdk.areas.ArreatPlateau, sdk.areas.CrystalizedPassage, sdk.areas.GlacialTrail, sdk.areas.HallsofPain,
 		sdk.areas.FrozenTundra, sdk.areas.AncientsWay, sdk.areas.WorldstoneLvl2
 	],
-	nextAreas: {1: sdk.areas.ColdPlains, 40: sdk.areas.RockyWaste, 75: sdk.areas.SpiderForest, 103: sdk.areas.OuterSteppes, 109: sdk.areas.BloodyFoothills},
+	nextAreas: {1: sdk.areas.BloodMoor, 40: sdk.areas.RockyWaste, 75: sdk.areas.SpiderForest, 103: sdk.areas.OuterSteppes, 109: sdk.areas.BloodyFoothills},
 	recursion: true,
 	lastPortalTick: 0,
 
