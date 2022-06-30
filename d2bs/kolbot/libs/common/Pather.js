@@ -614,7 +614,7 @@ const Pather = {
 		if (x === undefined || y === undefined) return false;
 		minDist === undefined && (minDist = me.inTown ? 2 : 4);
 
-		let angle, angles, nTimer, whereToClick;
+		let nTimer;
 		let nFail = 0;
 		let attemptCount = 0;
 
@@ -624,14 +624,14 @@ const Pather = {
 			// Check if I have a stamina potion and use it if I do
 			if (me.staminaPercent <= 20) {
 				let stam = me.getItemsEx().filter((i) => i.classid === sdk.items.StaminaPotion && i.isInInventory).first();
-				!!stam && ![0, 17, 18].includes(me.mode) && stam.interact();
+				!!stam && ![0, 17, 18].includes(me.mode) && stam.use();
 			}
 			(me.runwalk === 1 && me.staminaPercent <= 15) && (me.runwalk = 0);
 			// the less stamina you have, the more you wait to recover
 			let recover = me.staminaMaxDuration < 30 ? 80 : 50;
 			(me.runwalk === 0 && me.staminaPercent >= recover) && (me.runwalk = 1);
-			if (Config.Charge && me.paladin && me.mp >= 9 && getDistance(me.x, me.y, x, y) > 8 && Skill.setSkill(sdk.skills.Charge, 1)) {
-				if (Config.Vigor) {
+			if (Skill.canUse(sdk.skills.Charge) && me.paladin && me.mp >= 9 && getDistance(me.x, me.y, x, y) > 8 && Skill.setSkill(sdk.skills.Charge, 1)) {
+				if (Skill.canUse(sdk.skills.Vigor)) {
 					Skill.setSkill(sdk.skills.Vigor, 0);
 				} else if (!Config.Vigor && !Attack.auradin && Skill.canUse(sdk.skills.HolyFreeze)) {
 					// Useful in classic to keep mobs cold while you rush them
@@ -647,8 +647,9 @@ const Pather = {
 		(me.inTown && me.runwalk === 0) && (me.runwalk = 1);
 
 		while (getDistance(me.x, me.y, x, y) > minDist && !me.dead) {
-			me.paladin && Config.Vigor && Skill.setSkill(sdk.skills.Vigor, 0);
-			me.paladin && !Config.Vigor && Skill.setSkill(Config.AttackSkill[2], 0);
+			if (me.paladin) {
+				Skill.canUse(sdk.skills.Vigor) ? Skill.setSkill(sdk.skills.Vigor, 0) : Skill.setSkill(Config.AttackSkill[2], 0);
+			}
 
 			if (this.openDoors(x, y) && getDistance(me.x, me.y, x, y) <= minDist) {
 				return true;
@@ -670,12 +671,12 @@ const Pather = {
 					if (nFail >= 3) return false;
 
 					nFail += 1;
-					angle = Math.atan2(me.y - y, me.x - x);
-					angles = [Math.PI / 2, -Math.PI / 2];
+					let angle = Math.atan2(me.y - y, me.x - x);
+					let angles = [Math.PI / 2, -Math.PI / 2];
 
 					for (let i = 0; i < angles.length; i += 1) {
 						// TODO: might need rework into getnearestwalkable
-						whereToClick = {
+						let whereToClick = {
 							x: Math.round(Math.cos(angle + angles[i]) * 5 + me.x),
 							y: Math.round(Math.sin(angle + angles[i]) * 5 + me.y)
 						};
@@ -720,8 +721,7 @@ const Pather = {
 	openDoors: function (x, y) {
 		if (me.inTown) return false;
 
-		typeof x !== "number" && (x = me.x);
-		typeof y !== "number" && (y = me.y);
+		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
 
 		// Regular doors
 		let door = getUnit(sdk.unittype.Object, "door", 0);
@@ -732,7 +732,7 @@ const Pather = {
 					for (let i = 0; i < 3; i++) {
 						Misc.click(0, 0, door);
 
-						if (Misc.poll(() => door.mode === 2, 1000, 10 + me.ping)) {
+						if (Misc.poll(() => door.mode === 2, 1000, 30)) {
 							return true;
 						}
 
@@ -778,8 +778,7 @@ const Pather = {
 	kickBarrels: function (x, y) {
 		if (me.inTown) return false;
 
-		typeof x !== "number" && (x = me.x);
-		typeof y !== "number" && (y = me.y);
+		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
 
 		// anything small and annoying really
 		let barrels = getUnits(sdk.unittype.Object)
@@ -1306,7 +1305,7 @@ const Pather = {
 					if (npc && npc.openMenu()) {
 						Misc.useMenu(sdk.menu.GoWest);
 
-						if (!Misc.poll(() => me.gameReady && me.area === 1, 2000, 100)) {
+						if (!Misc.poll(() => me.gameReady && me.area === sdk.areas.RogueEncampment, 2000, 100)) {
 							throw new Error("Failed to go to act 1 using Warriv");
 						}
 					}
@@ -1319,6 +1318,7 @@ const Pather = {
 
 			if (!!wp && wp.area === me.area) {
 				let useTK = (Skill.useTK(wp) && i < 3);
+				let pingDelay = me.getPingDelay();
 
 				if (useTK && !getUIFlag(sdk.uiflags.Waypoint)) {
 					wp.distance > 21 && Pather.moveNearUnit(wp, 20);
@@ -1340,7 +1340,7 @@ const Pather = {
 
 					let tick = getTickCount();
 
-					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
+					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), pingDelay * 2)) {
 						// Waypoint screen is open
 						if (getUIFlag(sdk.uiflags.Waypoint)) {
 							delay(500);
@@ -1388,19 +1388,19 @@ const Pather = {
 						let retry = Math.min(i + 1, 5);
 						let coord = CollMap.getRandCoordinate(me.x, -5 * retry, 5 * retry, me.y, -5 * retry, 5 * retry);
 						!!coord && this.moveTo(coord.x, coord.y);
-						delay(200 + me.ping);
-						Packet.flash(me.gid);
+						delay(200);
+						Packet.flash(me.gid, pingDelay);
 
 						continue;
 					}
 				}
 
 				if (!check || getUIFlag(sdk.uiflags.Waypoint)) {
-					delay(200 + me.ping);
+					delay(200);
 					wp.interact(targetArea);
 					let tick = getTickCount();
 
-					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
+					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), pingDelay * 2)) {
 						if (me.area === targetArea) {
 							delay(1000);
 							console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (formatTime(getTickCount() - wpTick)));
@@ -1415,11 +1415,11 @@ const Pather = {
 					Misc.poll(() => me.gameReady, 2000, 100) && getUIFlag(sdk.uiflags.Waypoint) && me.cancelUIFlags();
 				}
 
-				Packet.flash(me.gid);
+				Packet.flash(me.gid, pingDelay);
 				// Activate check if we fail direct interact twice
 				i > 1 && (check = true);
 			} else {
-				Packet.flash(me.gid);
+				Packet.flash(me.gid, pingDelay);
 			}
 
 			// We can't seem to get the wp maybe attempt portal to town instead and try to use that wp
@@ -1550,7 +1550,8 @@ const Pather = {
 							i < 2 ? sendPacket(1, 0x13, 4, 0x2, 4, portal.gid) : Misc.click(0, 0, portal);
 							!!redPortal && delay(150);
 						} else {
-							delay(300);
+							let timeTillNextPortal = Math.round(2500 - (getTickCount() - this.lastPortalTick));
+							delay(timeTillNextPortal);
 							
 							continue;
 						}
@@ -1958,6 +1959,7 @@ const Pather = {
 		let node, prevArea;
 		let useWP = false;
 		let arr = [];
+		// need to redo this...that's gonna be a pain
 		let previousAreas = [
 			0, 0, 1, 2, 3, 10, 5, 6, 2, 3, 4, 6, 7, 9, 10, 11, 12, 3, 17, 17, 6, 20, 21, 22, 23, 24, 7, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 4, 1,
 			1, 40, 41, 42, 43, 44, 74, 40, 47, 48, 40, 50, 51, 52, 53, 41, 42, 56, 45, 55, 57, 58, 43, 62, 63, 44, 46, 46, 46, 46, 46, 46, 46, 1, 54, 1,
@@ -1982,10 +1984,10 @@ const Pather = {
 
 				if (this.areasConnected(node.from, node.to)) {
 					// If we have this wp we can start from there
-					if ((me.inTown || // check wp in town
-							((src !== previousAreas[dest] && dest !== previousAreas[src]) && // check wp if areas aren't linked
-								previousAreas[src] !== previousAreas[dest])) && // check wp if areas aren't linked with a common area
-								Pather.wpAreas.indexOf(node.from) > 0 && getWaypoint(Pather.wpAreas.indexOf(node.from))
+					if ((me.inTown // check wp in town
+						|| ((src !== previousAreas[dest] && dest !== previousAreas[src]) // check wp if areas aren't linked
+							&& previousAreas[src] !== previousAreas[dest])) // check wp if areas aren't linked with a common area
+							&& Pather.wpAreas.indexOf(node.from) > 0 && getWaypoint(Pather.wpAreas.indexOf(node.from))
 					) {
 						if (node.from !== src) {
 							useWP = true;

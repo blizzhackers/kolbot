@@ -479,6 +479,14 @@ me.castingDuration = function (skillId, fcr = me.FCR, charClass = me.classid) {
 	return (me.castingFrames(skillId, fcr, charClass) / 25);
 };
 
+// calling me.ping can cause issues, use this instead to assign a value
+// might need work to be more accurate but works for now
+me.getPingDelay = function () {
+	let pingDelay = me.gameReady ? me.ping : 250;
+	pingDelay < 10 && (pingDelay = 45);
+	return pingDelay;
+};
+
 /**
  * @description Returns item given by itemInfo
  * @param itemInfo object -

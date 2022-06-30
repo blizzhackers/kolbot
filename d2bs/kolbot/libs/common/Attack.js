@@ -392,8 +392,7 @@ const Attack = {
 			do {
 				if ((!spectype || (target.spectype & spectype)) && target.attackable && !this.skipCheck(target)) {
 					// Speed optimization - don't go through monster list until there's at least one within clear range
-					if (!start && getDistance(target, orgx, orgy) <= range
-							&& (Pather.canTeleport() || !checkCollision(me, target, 0x5))) {
+					if (!start && getDistance(target, orgx, orgy) <= range && (Pather.canTeleport() || !checkCollision(me, target, 0x5))) {
 						start = true;
 					}
 
@@ -440,20 +439,21 @@ const Attack = {
 
 					gidAttack[i].attacks += 1;
 					attackCount += 1;
-					let secAttack = me.barbarian ? ((target.spectype & 0x7) ? 2 : 4) : 5;
+					let isSpecial = target.isSpecial;
+					let secAttack = me.barbarian ? (isSpecial ? 2 : 4) : 5;
 
-					if (Config.AttackSkill[secAttack] > -1 && (!Attack.checkResist(target, Config.AttackSkill[(target.spectype & 0x7) ? 1 : 3]) ||
-							(me.classid === 3 && Config.AttackSkill[(target.spectype & 0x7) ? 1 : 3] === 112 && !ClassAttack.getHammerPosition(target)))) {
+					if (Config.AttackSkill[secAttack] > -1 && (!Attack.checkResist(target, Config.AttackSkill[isSpecial ? 1 : 3])
+							|| (me.paladin && Config.AttackSkill[isSpecial ? 1 : 3] === sdk.skills.BlessedHammer && !ClassAttack.getHammerPosition(target)))) {
 						skillCheck = Config.AttackSkill[secAttack];
 					} else {
-						skillCheck = Config.AttackSkill[(target.spectype & 0x7) ? 1 : 3];
+						skillCheck = Config.AttackSkill[isSpecial ? 1 : 3];
 					}
 
 					// Desync/bad position handler
 					switch (skillCheck) {
-					case 112:
+					case sdk.skills.BlessedHammer:
 						// Tele in random direction with Blessed Hammer
-						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % ((target.spectype & 0x7) ? 4 : 2) === 0) {
+						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % (isSpecial ? 4 : 2) === 0) {
 							let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 5);
 							Pather.moveTo(coord.x, coord.y);
 						}
@@ -461,7 +461,7 @@ const Attack = {
 						break;
 					default:
 						// Flash with melee skills
-						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % ((target.spectype & 0x7) ? 15 : 5) === 0 && Skill.getRange(skillCheck) < 4) {
+						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % (isSpecial ? 15 : 5) === 0 && Skill.getRange(skillCheck) < 4) {
 							Packet.flash(me.gid);
 						}
 
@@ -469,7 +469,7 @@ const Attack = {
 					}
 
 					// Skip non-unique monsters after 15 attacks, except in Throne of Destruction
-					if (me.area !== 131 && !(target.spectype & 0x7) && gidAttack[i].attacks > 15) {
+					if (me.area !== sdk.areas.ThroneofDestruction && !isSpecial && gidAttack[i].attacks > 15) {
 						print("ÿc1Skipping " + target.name + " " + target.gid + " " + gidAttack[i].attacks);
 						monsterList.shift();
 					}
@@ -623,13 +623,13 @@ const Attack = {
 					}
 
 					gidAttack[i].attacks += 1;
-					let special = target.isSpecial;
+					let isSpecial = target.isSpecial;
 
 					// Desync/bad position handler
-					switch (Config.AttackSkill[target.isSpecial ? 1 : 3]) {
+					switch (Config.AttackSkill[isSpecial ? 1 : 3]) {
 					case sdk.skills.BlessedHammer:
 						// Tele in random direction with Blessed Hammer
-						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % (special ? 5 : 15) === 0) {
+						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % (isSpecial ? 5 : 15) === 0) {
 							let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 4);
 							Pather.moveTo(coord.x, coord.y);
 						}
@@ -637,7 +637,7 @@ const Attack = {
 						break;
 					default:
 						// Flash with melee skills
-						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % (special ? 5 : 15) === 0 && Skill.getRange(Config.AttackSkill[special ? 1 : 3]) < 4) {
+						if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % (isSpecial ? 5 : 15) === 0 && Skill.getRange(Config.AttackSkill[isSpecial ? 1 : 3]) < 4) {
 							Packet.flash(me.gid);
 						}
 
@@ -645,7 +645,7 @@ const Attack = {
 					}
 
 					// Skip non-unique monsters after 15 attacks, except in Throne of Destruction
-					if (me.area !== 131 && !special && gidAttack[i].attacks > 15) {
+					if (me.area !== sdk.areas.ThroneofDestruction && !isSpecial && gidAttack[i].attacks > 15) {
 						print("ÿc1Skipping " + target.name + " " + target.gid + " " + gidAttack[i].attacks);
 						monsterList.shift();
 					}
@@ -682,8 +682,7 @@ const Attack = {
 	securePosition: function (x, y, range = 15, timer = 3000, skipBlocked = true, special = false) {
 		let tick;
 
-		x === undefined && (x = me.x);
-		y === undefined && (y = me.y);
+		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
 		skipBlocked === true && (skipBlocked = 0x4);
 
 		while (true) {
@@ -717,8 +716,7 @@ const Attack = {
 			}
 
 			if (special) {
-				if (me.paladin && me.getSkill(sdk.skills.Redemption, 1)) {
-					Skill.setSkill(sdk.skills.Redemption, 0);
+				if (me.paladin && Skill.canUse(sdk.skills.Redemption) && Skill.setSkill(sdk.skills.Redemption, 0)) {
 					delay(1000);
 				}
 			}
@@ -930,9 +928,6 @@ const Attack = {
 	// casting skills can go over non-floors - excluding bliz/meteor - not sure if any others
 	// physical skills can't, need to exclude monster objects though
 	// splash skills can go through some objects, however some objects are cast blockers
-	// hotfix for now, bugged with flying mobs (specters, ghosts, ect) apparently underneath them doesn't register as ground? so it fails the needFloor test
-	// despite there being floor there. so for now check if its an area that doesn't have floor in some spots
-	// better fix would be passing unit directly in instead of x and y, but that is going to need more changes all over
 	validSpot: function (x, y, skill = -1, unitid = 0) {
 		// Just in case
 		if (!me.area || !x || !y) return false;
@@ -980,8 +975,8 @@ const Attack = {
 	// Open chests when clearing
 	openChests: function (range, x, y) {
 		if (!Config.OpenChests.Enabled) return false;
-		x === undefined && (x = me.x);
-		y === undefined && (y = me.y);
+		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
+		range === undefined && (range = 10);
 
 		let list = [];
 		let ids = ["chest", "chest3", "weaponrack", "armorstand"];
@@ -1120,7 +1115,7 @@ const Attack = {
 	/**
 	* @param unit
 	* @desc checks if we should skip a monster
-	* @returns {Boolean}
+	* @returns Boolean
 	*/
 	skipCheck: function (unit) {
 		if (me.area === sdk.areas.ThroneofDestruction) return false;
@@ -1393,16 +1388,16 @@ const Attack = {
 
 	// Detect use of bows/crossbows
 	usingBow: function () {
-		let item = me.getItem(-1, 1);
+		let item = me.getItem(-1, sdk.itemmode.Equipped);
 
 		if (item) {
 			do {
 				if (item.bodylocation === 4 || item.bodylocation === 5) {
 					switch (item.itemType) {
-					case 27: // Bows
-					case 85: // Amazon Bows
+					case sdk.itemtype.Bow:
+					case sdk.itemtype.AmazonBow:
 						return "bow";
-					case 35: // Crossbows
+					case sdk.itemtype.Crossbow:
 						return "crossbow";
 					}
 				}
@@ -1422,7 +1417,7 @@ const Attack = {
 			//me.overhead("Short range");
 
 			if (walk) {
-				if (getDistance(me, unit) > 8 || checkCollision(me, unit, coll)) {
+				if (unit.distance > 8 || checkCollision(me, unit, coll)) {
 					Pather.walkTo(unit.x, unit.y, 3);
 				}
 			} else {
@@ -1432,18 +1427,16 @@ const Attack = {
 			return !CollMap.checkColl(me, unit, coll);
 		}
 
-		let coords = [],
-			fullDistance = distance,
-			name = unit.hasOwnProperty("name") ? unit.name : "",
-			angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
-			angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 135, -135, 180];
+		let coords = [];
+		let fullDistance = distance;
+		let name = unit.hasOwnProperty("name") ? unit.name : "";
+		let angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
+		let angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 135, -135, 180];
 
 		//let t = getTickCount();
 
 		for (let n = 0; n < 3; n += 1) {
-			if (n > 0) {
-				distance -= Math.floor(fullDistance / 3 - 1);
-			}
+			n > 0 && (distance -= Math.floor(fullDistance / 3 - 1));
 
 			for (let i = 0; i < angles.length; i += 1) {
 				let cx = Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * distance + unit.x);

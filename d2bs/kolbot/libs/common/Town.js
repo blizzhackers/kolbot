@@ -460,7 +460,7 @@ const Town = {
 	// Return column status (needed potions in each column)
 	checkColumns: function (beltSize) {
 		let col = [beltSize, beltSize, beltSize, beltSize];
-		let pot = me.getItem(-1, 2); // Mode 2 = in belt
+		let pot = me.getItem(-1, sdk.itemmode.inBelt);
 
 		// No potions
 		if (!pot) return col;
@@ -529,7 +529,7 @@ const Town = {
 	},
 
 	checkScrolls: function (id) {
-		let tome = me.findItem(id, 0, 3);
+		let tome = me.findItem(id, sdk.itemmode.inStorage, sdk.storage.Inventory);
 
 		if (!tome) {
 			switch (id) {
@@ -860,7 +860,7 @@ const Town = {
 
 			if (result.result === Pickit.result.WANTED/*  && Item.autoEquipCheck(items[i]) */) {
 				try {
-					if (Storage.Inventory.CanFit(items[i]) && me.getStat(14) + me.getStat(15) >= items[i].getItemCost(0)) {
+					if (Storage.Inventory.CanFit(items[i]) && me.gold >= items[i].getItemCost(0)) {
 						Misc.itemLogger("Shopped", items[i]);
 						Misc.logItem("Shopped", items[i], result.line);
 						items[i].buy();
@@ -904,7 +904,7 @@ const Town = {
 		if (!npc) return false;
 
 		let list = [];
-		let items = me.findItems(-1, 0, 3);
+		let items = me.findItems(-1, sdk.itemmode.inStorage, sdk.storage.Inventory);
 
 		while (items && items.length > 0) {
 			list.push(items.shift().gid);
@@ -1076,11 +1076,12 @@ const Town = {
 
 		if (chugs.length > 0) {
 			name = chugs.first().name;
+			let pingDelay = me.getPingDelay();
 
 			chugs.forEach(function (pot) {
 				if (!!pot && pot.use()) {
 					quantity++;
-					delay(100 + me.ping);
+					delay(100 + pingDelay);
 				}
 			});
 
@@ -1555,6 +1556,8 @@ const Town = {
 				let stash = getUnit(2, 267);
 
 				if (stash) {
+					let pingDelay = me.getPingDelay();
+
 					if (Skill.useTK(stash)) {
 						// Fix for out of range telek
 						i > 0 && stash.distance > (23 - (i * 2)) && Pather.walkTo(stash.x, stash.y, (23 - (i * 2)));
@@ -1568,7 +1571,7 @@ const Town = {
 					while (getTickCount() - tick < 5000) {
 						if (getUIFlag(sdk.uiflags.Stash)) {
 							// allow UI to initialize
-							delay(100 + me.ping * 2);
+							delay(100 + pingDelay * 2);
 
 							return true;
 						}
@@ -1589,7 +1592,7 @@ const Town = {
 		let timer = getTickCount();
 
 		// No equipped items - high chance of dying in last game, force retries
-		if (!me.getItem(-1, 1)) {
+		if (!me.getItem(-1, sdk.itemmode.Equipped)) {
 			corpse = Misc.poll(() => getUnit(0, me.name, 17), 2500, 500);
 		} else {
 			corpse = getUnit(0, me.name, 17);
@@ -1946,7 +1949,7 @@ const Town = {
 				break;
 			}
 
-			!!sold && delay(250 + me.ping);
+			!!sold && delay(250);
 		});
 
 		console.log("ÿc8Exit clearInventory ÿc0- ÿc7Duration: ÿc0" + formatTime(getTickCount() - clearInvoTick));

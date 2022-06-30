@@ -178,8 +178,7 @@ const Precast = new function () {
 			sdk.skills.IronGolem, sdk.skills.Revive, sdk.skills.Werewolf, sdk.skills.Werebear, sdk.skills.OakSage, sdk.skills.SpiritWolf, sdk.skills.PoisonCreeper, sdk.skills.BattleOrders,
 			sdk.skills.SummonDireWolf, sdk.skills.Grizzly, sdk.skills.HeartofWolverine, sdk.skills.SpiritofBarbs, sdk.skills.ShadowMaster, sdk.skills.ShadowWarrior, sdk.skills.BattleCommand,
 		].indexOf(skillId) === -1);
-		typeof x !== "number" && (x = me.x);
-		typeof y !== "number" && (y = me.y);
+		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
 
 		try {
 			!dontSwitch && me.switchWeapons(this.getBetterSlot(skillId));
