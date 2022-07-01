@@ -334,7 +334,6 @@ const Pather = {
 		};
 		(!retry || (retry <= 3 && !useTeleport)) && (retry = useTeleport ? 5 : 15);
 		let path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? (annoyingArea ? 30 : this.teleDistance) : this.walkDistance);
-
 		if (!path) throw new Error("moveTo: Failed to generate path.");
 
 		path.reverse();
@@ -395,7 +394,7 @@ const Pather = {
 					}
 				} else {
 					if (!me.inTown) {
-						if (!useTeleport && ((me.getMobCount(10) > 0 && Attack.clear(8)) || this.kickBarrels(node.x, node.y) || this.openDoors(node.x, node.y))) {
+						if (!useTeleport && ((me.getMobCount(10) > 0 && Attack.clear(8)) || this.kickBarrels(node.x, node.y) || Pather.openDoors(node.x, node.y))) {
 							continue;
 						}
 
@@ -719,7 +718,7 @@ const Pather = {
 		y - the y coord of the node close to the door
 	*/
 	openDoors: function (x, y) {
-		if (me.inTown) return false;
+		if (me.inTown && me.act !== 5) return false;
 
 		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
 
@@ -740,6 +739,25 @@ const Pather = {
 					}
 				}
 			} while (door.getNext());
+		}
+
+		// handle act 5 gate
+		if ([sdk.areas.Harrogath, sdk.areas.BloodyFoothills].includes(me.area)) {
+			let gate = getUnit(sdk.unittype.Object, "gate", 0);
+
+			if (gate) {
+				if ((getDistance(gate, x, y) < 4 && gate.distance < 9) || gate.distance < 4) {
+					for (let i = 0; i < 3; i++) {
+						Misc.click(0, 0, gate);
+
+						if (Misc.poll(() => gate.mode === 2, 1000, 30)) {
+							return true;
+						}
+
+						i === 2 && Packet.flash(me.gid);
+					}
+				}
+			}
 		}
 
 		// Monsta doors (Barricaded)
@@ -932,15 +950,15 @@ const Pather = {
 
 			console.log("ÿc7(moveToExit) :: ÿc0Moving from: " + Pather.getAreaName(me.area) + " to " + Pather.getAreaName(areas[i]));
 			
-			let area = Misc.poll(() => getArea());
+			let area = Misc.poll(() => getArea(me.area));
 
 			if (!area) throw new Error("moveToExit: error in getArea()");
 
 			let currTarget = areas[i];
-			let exits = area.exits;
+			let exits = (area.exits || []);
 			let checkExits = [];
 
-			if (!exits || !exits.length) return false;
+			if (!exits.length) return false;
 
 			for (let j = 0; j < exits.length; j += 1) {
 				if (!exits[j].hasOwnProperty("target") || exits[j].target !== currTarget) continue;
@@ -1299,14 +1317,16 @@ const Pather = {
 			}
 
 			if (me.inTown) {
-				let npc = getUnit(1, NPC.Warriv);
+				if (me.area === sdk.areas.LutGholein) {
+					let npc = getUnit(sdk.unittype.NPC, NPC.Warriv);
 
-				if (me.area === sdk.areas.LutGholein && !!npc && npc.distance < 50) {
-					if (npc && npc.openMenu()) {
-						Misc.useMenu(sdk.menu.GoWest);
+					if (!!npc && npc.distance < 50) {
+						if (npc && npc.openMenu()) {
+							Misc.useMenu(sdk.menu.GoWest);
 
-						if (!Misc.poll(() => me.gameReady && me.area === sdk.areas.RogueEncampment, 2000, 100)) {
-							throw new Error("Failed to go to act 1 using Warriv");
+							if (!Misc.poll(() => me.gameReady && me.area === sdk.areas.RogueEncampment, 2000, 100)) {
+								throw new Error("Failed to go to act 1 using Warriv");
+							}
 						}
 					}
 				}
@@ -1333,7 +1353,7 @@ const Pather = {
 					}
 
 					// handle getUnit bug
-					if (!getUIFlag(sdk.uiflags.Waypoint) && wp.name.toLowerCase() === "dummy") {
+					if (me.inTown && !getUIFlag(sdk.uiflags.Waypoint) && wp.name.toLowerCase() === "dummy") {
 						Town.getDistance("waypoint") > 5 && Town.move("waypoint");
 						Misc.click(0, 0, wp);
 					}
@@ -1419,7 +1439,7 @@ const Pather = {
 				// Activate check if we fail direct interact twice
 				i > 1 && (check = true);
 			} else {
-				Packet.flash(me.gid, pingDelay);
+				Packet.flash(me.gid);
 			}
 
 			// We can't seem to get the wp maybe attempt portal to town instead and try to use that wp
@@ -1528,7 +1548,7 @@ const Pather = {
 
 				if (portal.area === me.area) {
 					if (Skill.useTK(portal) && i < 3) {
-						portal.distance > 21 && (me.inTown && me.act === 5 ? Town.move("portalspot") : Pather.moveNearUnit(portal, 20));
+						portal.distance > 21 && (me.area === sdk.areas.Harrogath ? Town.move("portalspot") : Pather.moveNearUnit(portal, 20));
 						if (Skill.cast(sdk.skills.Telekinesis, 0, portal)) {
 							if (Misc.poll(() => {
 								if (me.area !== preArea) {
@@ -1635,7 +1655,7 @@ const Pather = {
 	},
 
 	/*
-		Pather.moveTo(x, y, range, step, coll);
+		Pather.getNearestWalkable(x, y, range, step, coll, size);
 		x - the starting x coord
 		y - the starting y coord
 		range - maximum allowed range from the starting coords

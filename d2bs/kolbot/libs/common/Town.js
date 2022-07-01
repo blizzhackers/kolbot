@@ -1650,17 +1650,12 @@ const Town = {
 
 		if (!shard) return true;
 
-		item = me.getItem(-1, 1);
+		item = me.getItem(-1, sdk.itemmode.Equipped);
 
 		if (item) {
 			do {
-				if (item.bodylocation === 4) {
-					check.right = true;
-				}
-
-				if (item.bodylocation === 5) {
-					check.left = true;
-				}
+				item.bodylocation === 4 && (check.right = true);
+				item.bodylocation === 5 && (check.left = true);
 			} while (item.getNext());
 		}
 
@@ -2051,7 +2046,7 @@ const Town = {
 		return true;
 	},
 
-	getDistance: function (spot) {
+	getDistance: function (spot = "") {
 		!me.inTown && this.goToTown();
 		!this.act[me.act - 1].initialized && this.initialize();
 
@@ -2067,11 +2062,12 @@ const Town = {
 		}
 	},
 
-	move: function (spot) {
+	move: function (spot = "") {
 		!me.inTown && this.goToTown();
 		!this.act[me.act - 1].initialized && this.initialize();
 
 		// act 5 static paths, ActMap.cpp seems to have issues with A5
+		// should other towns have static paths?
 		if (me.act === 5) {
 			let path = [];
 			let returnWhenDone = false;
@@ -2114,7 +2110,7 @@ const Town = {
 		return false;
 	},
 
-	moveToSpot: function (spot) {
+	moveToSpot: function (spot = "") {
 		let townSpot;
 		let longRange = (!Skill.haveTK && spot === "waypoint");
 		let tkRange = (Skill.haveTK && ["stash", "portalspot", "waypoint"].includes(spot));
