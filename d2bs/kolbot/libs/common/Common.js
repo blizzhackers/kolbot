@@ -201,8 +201,8 @@ const Common = {
 		// check for strays array
 		cleared: [],
 
-		diabloLightsEvent: function (bytes) {
-			if (me.area === sdk.areas.ChaosSanctuary && bytes && bytes.length && bytes[0] === 0x89) {
+		diabloLightsEvent: function (bytes = []) {
+			if (me.area === sdk.areas.ChaosSanctuary && bytes && bytes.length === 2 && bytes[0] === 0x89 && bytes[1] === 0x0C) {
 				Common.Diablo.diabloSpawned = true;
 			}
 		},
