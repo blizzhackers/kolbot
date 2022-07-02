@@ -2094,7 +2094,7 @@ const Town = {
 		}
 	},
 
-	move: function (spot = "") {
+	move: function (spot = "", allowTK = true) {
 		!me.inTown && this.goToTown();
 		!this.act[me.act - 1].initialized && this.initialize();
 
@@ -2132,7 +2132,8 @@ const Town = {
 		}
 
 		for (let i = 0; i < 3; i += 1) {
-			if (this.moveToSpot(spot)) {
+			i === 2 && (allowTK = false);
+			if (this.moveToSpot(spot, allowTK)) {
 				return true;
 			}
 
@@ -2142,10 +2143,10 @@ const Town = {
 		return false;
 	},
 
-	moveToSpot: function (spot = "") {
+	moveToSpot: function (spot = "", allowTK = true) {
 		let townSpot;
 		let longRange = (!Skill.haveTK && spot === "waypoint");
-		let tkRange = (Skill.haveTK && ["stash", "portalspot", "waypoint"].includes(spot));
+		let tkRange = (Skill.haveTK && allowTK && ["stash", "portalspot", "waypoint"].includes(spot));
 
 		if (!this.act[me.act - 1].hasOwnProperty("spot") || !this.act[me.act - 1].spot.hasOwnProperty(spot)) {
 			return false;
@@ -2189,6 +2190,10 @@ const Town = {
 				break;
 			case "portalspot":
 			case "sewers":
+				if (tkRange && spot === "portalspot" && getDistance(me, townSpot[0], townSpot[1]) < 21) {
+					return true;
+				}
+
 				if (getDistance(me, townSpot[i], townSpot[i + 1]) < 10) {
 					return true;
 				}
