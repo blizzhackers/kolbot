@@ -1807,7 +1807,7 @@ item: {
 			Misshapen2: 582,
 			MoonClan1: 53,
 			MoonClan2: 585,
-			Mummy: 105,
+			BaalSubjectMummy: 105,
 			Navi: 266,
 			Flavie: 266,
 			NightClan1: 54,
@@ -3379,6 +3379,7 @@ item: {
 				BloodHookNest: 3173,
 				FeederNest: 3174,
 				SuckerNest: 3175,
+				Hydra: 3325,
 			},
 			npcs: {
 				Asheara: 1008,

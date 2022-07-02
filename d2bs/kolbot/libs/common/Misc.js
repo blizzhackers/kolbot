@@ -1307,9 +1307,13 @@ const Misc = {
 		let specialChest = sdk.quest.chests.includes(unit.classid);
 
 		for (let i = 0; i < 7; i++) {
-			if (Skill.useTK(unit) && i < 3) {
+			let useTK = Skill.useTK(unit) && i < 3;
+			if (useTK) {
 				unit.distance > 13 && Attack.getIntoPosition(unit, 13, 0x4);
-				Skill.cast(sdk.skills.Telekinesis, 0, unit);
+				if (!Skill.cast(sdk.skills.Telekinesis, 0, unit)) {
+					console.debug("Failed to tk: attempt: " + i);
+					continue;
+				}
 			} else {
 				getDistance(me.x, me.y, unit.x + 1, unit.y + 2) > 5 && Pather.moveTo(unit.x + 1, unit.y + 2, 3);
 
@@ -1489,6 +1493,8 @@ const Misc = {
 				for (let j = 0; j < shrineList.length; j += 1) {
 					// Get the shrine if we have no active state or to refresh current state or if the shrine has no state
 					// Don't override shrine state with a lesser priority shrine
+					// todo - check to make sure we can actually get the shrine for ones without states
+					// can't grab a health shrine if we are in perfect health, can't grab mana shrine if our mana is maxed
 					if (index === -1 || i <= index || this.shrineStates[i] === 0) {
 						if (shrineList[j].objtype === Config.ScanShrines[i] && (Pather.useTeleport() || !checkCollision(me, shrineList[j], 0x5))) {
 							this.getShrine(shrineList[j]);

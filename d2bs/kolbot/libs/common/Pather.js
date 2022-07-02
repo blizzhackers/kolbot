@@ -324,11 +324,11 @@ const Pather = {
 		let node = {x: x, y: y};
 		let fail = 0;
 
-		let useTeleport = this.useTeleport();
+		let useTeleport = Pather.useTeleport();
 		let tpMana = Skill.getManaCost(sdk.skills.Teleport);
 		let annoyingArea = [sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.MaggotLairLvl3].includes(me.area);
 		let clearSettings = {
-			clearPath: (clearPath || !useTeleport), // walking characters need to clear in front of them
+			clearPath: (!!clearPath || !useTeleport), // walking characters need to clear in front of them
 			range: 10,
 			specType: (typeof clearPath === "number" ? clearPath : 0),
 		};
@@ -374,7 +374,7 @@ const Pather = {
 					retry <= 3 && !useTeleport && (retry = 15);
 				}
 
-				if (useTeleport && tpMana < me.mp ? this.teleportTo(node.x, node.y) : this.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
+				if (useTeleport && tpMana < me.mp ? Pather.teleportTo(node.x, node.y) : Pather.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
 					if (!me.inTown) {
 						if (this.recursion) {
 							this.recursion = false;
@@ -384,7 +384,7 @@ const Pather = {
 							// TODO: check whether we are closer to the next node than we are the node we were orignally moving to
 							// and if so move to next node to prevent back tracking for no reason
 							if (getDistance(me, node.x, node.y) > 5) {
-								this.moveTo(node.x, node.y);
+								Pather.moveTo(node.x, node.y);
 							}
 
 							this.recursion = true;
@@ -394,7 +394,7 @@ const Pather = {
 					}
 				} else {
 					if (!me.inTown) {
-						if (!useTeleport && ((me.getMobCount(10) > 0 && Attack.clear(8)) || this.kickBarrels(node.x, node.y) || Pather.openDoors(node.x, node.y))) {
+						if (!useTeleport && ((me.getMobCount(10) > 0 && Attack.clear(8)) || Pather.kickBarrels(node.x, node.y) || Pather.openDoors(node.x, node.y))) {
 							continue;
 						}
 
@@ -507,7 +507,7 @@ const Pather = {
 					settings.clearSettings.range = 5;
 				}
 
-				if (useTele && tpMana <= me.mp ? this.teleportTo(node.x, node.y) : this.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
+				if (useTele && tpMana <= me.mp ? Pather.teleportTo(node.x, node.y) : Pather.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
 					if (!me.inTown) {
 						if (settings.clearSettings.allowClearing && this.recursion) {
 							this.recursion = false;
@@ -610,7 +610,7 @@ const Pather = {
 			delay(100);
 		}
 
-		if (x === undefined || y === undefined) return false;
+		if (x === undefined || y === undefined || me.dead) return false;
 		minDist === undefined && (minDist = me.inTown ? 2 : 4);
 
 		let nTimer;
@@ -619,10 +619,10 @@ const Pather = {
 
 		// credit @Jaenster
 		// Stamina handler and Charge
-		if (!me.inTown && !me.dead) {
+		if (!me.inTown) {
 			// Check if I have a stamina potion and use it if I do
 			if (me.staminaPercent <= 20) {
-				let stam = me.getItemsEx().filter((i) => i.classid === sdk.items.StaminaPotion && i.isInInventory).first();
+				let stam = me.getItemsEx(-1, sdk.itemmode.inStorage).filter((i) => i.classid === sdk.items.StaminaPotion && i.isInInventory).first();
 				!!stam && ![0, 17, 18].includes(me.mode) && stam.use();
 			}
 			(me.runwalk === 1 && me.staminaPercent <= 15) && (me.runwalk = 0);
@@ -641,9 +641,9 @@ const Pather = {
 					delay(40);
 				}
 			}
+		} else {
+			me.runwalk === 0 && (me.runwalk = 1);
 		}
-
-		(me.inTown && me.runwalk === 0) && (me.runwalk = 1);
 
 		while (getDistance(me.x, me.y, x, y) > minDist && !me.dead) {
 			if (me.paladin) {
@@ -654,7 +654,7 @@ const Pather = {
 				return true;
 			}
 
-			if (CollMap.checkColl(me, {x: x, y: y}, 0x1 | 0x800)) {
+			if (attemptCount > 1 && CollMap.checkColl(me, {x: x, y: y}, 0x1 | 0x800)) {
 				this.openDoors(me.x, me.y);
 			}
 
@@ -950,18 +950,24 @@ const Pather = {
 
 			console.log("ÿc7(moveToExit) :: ÿc0Moving from: " + Pather.getAreaName(me.area) + " to " + Pather.getAreaName(areas[i]));
 			
+			let t1 = getTickCount();
 			let area = Misc.poll(() => getArea(me.area));
+			Config.DebugMode && console.log("Took: " + (getTickCount() - t1) + " to find get area");
 
 			if (!area) throw new Error("moveToExit: error in getArea()");
 
+			let t2 = getTickCount();
 			let currTarget = areas[i];
 			let exits = (area.exits || []);
 			let checkExits = [];
 
 			if (!exits.length) return false;
+			Config.DebugMode && console.log("Took: " + (getTickCount() - t2) + " to assign vars");
 
+			let t3 = getTickCount();
 			for (let j = 0; j < exits.length; j += 1) {
 				if (!exits[j].hasOwnProperty("target") || exits[j].target !== currTarget) continue;
+				Config.DebugMode && console.debug(exits[j]);
 				let currCheckExit = {
 					x: exits[j].x,
 					y: exits[j].y,
@@ -972,8 +978,11 @@ const Pather = {
 
 				currCheckExit.target === currTarget && checkExits.push(currCheckExit);
 			}
+			Config.DebugMode && console.log("Took: " + (getTickCount() - t3) + " to find all exits");
 
 			if (checkExits.length > 0) {
+				Config.DebugMode && console.debug(checkExits);
+				let t4 = getTickCount();
 				// if there are multiple exits to the same location find the closest one
 				let currExit = checkExits.length > 1
 					? (() => {
@@ -991,7 +1000,10 @@ const Pather = {
 						//checkExits.sort((a, b) => getDistance(me.x, me.y, a.x, a.y) - getDistance(me.x, me.y, b.x, b.y)).first()
 					})()
 					: checkExits[0];
+				Config.DebugMode && console.log("Took: " + (getTickCount() - t4) + " to pick exit", currExit);
+				let t5 = getTickCount();
 				let dest = this.getNearestWalkable(currExit.x, currExit.y, 5, 1);
+				Config.DebugMode && console.log("Took: " + (getTickCount() - t5) + " to find nearest walkable");
 
 				if (!dest) return false;
 

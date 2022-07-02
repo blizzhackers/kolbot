@@ -13,7 +13,7 @@ const ClassAttack = {
 		let skills = {timed: -1, untimed: -1};
 		if (!unit) return skills;
 
-		let index = (unit.isSpecial || unit.type === 0) ? 1 : 3;
+		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 		let classid = unit.classid;
 
 		// Get timed skill

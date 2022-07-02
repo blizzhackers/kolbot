@@ -176,8 +176,8 @@ const ClassAttack = {
 		// No valid skills can be found
 		if (timedSkill < 0 && untimedSkill < 0) return 2;
 		// unit became invalidated
-		
 		if (!unit || !unit.attackable) return 1;
+		
 		let walk, noMana = false;
 		let classid = unit.classid;
 

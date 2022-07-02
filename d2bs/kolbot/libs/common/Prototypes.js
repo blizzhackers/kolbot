@@ -423,23 +423,28 @@ me.switchWeapons = function (slot) {
 		delay(10);
 	}
 
+	while (!me.gameReady) {
+		delay(10);
+	}
+
 	let originalSlot = this.weaponswitch;
 	let switched = false;
 	let packetHandler = (bytes) => bytes.length > 0 && bytes[0] === 0x97 && (switched = true) && false; // false to not block
 	addEventListener('gamepacket', packetHandler);
 	try {
+		let pingDelay = me.gameReady ? me.ping : 50;
 		for (let i = 0; i < 10; i += 1) {
 			for (let j = 10; --j && me.idle;) {
 				delay(3);
 			}
 
-			i > 0 && delay(Math.min(1 + (me.ping * 1.5), 10));
+			i > 0 && delay(Math.min(1 + (pingDelay * 1.5), 10));
 			!switched && sendPacket(1, 0x60); // Swap weapons
 
 			let tick = getTickCount();
-			let pingDelay = me.gameReady ? me.ping : 50;
 			while (getTickCount() - tick < 250 + (pingDelay * 5)) {
 				if (switched || originalSlot !== me.weaponswitch) {
+					delay(50);
 					return true;
 				}
 
@@ -1384,17 +1389,27 @@ Unit.prototype.castChargedSkill = function (...args) {
 
 		chargedItems = [];
 
-		this.getItemsEx(-1) // Item must be in inventory, or a charm in inventory
-			.filter(item => item && (item.location === 1 || (item.location === 3 && item.itemType === 82)))
+		// Item must be equipped, or a charm in inventory
+		this.getItemsEx(-1)
+			.filter(item => item && (item.isEquipped || (item.isInInventory && item.isCharm)))
 			.forEach(function (item) {
 				let stats = item.getStat(-2);
 
 				if (stats.hasOwnProperty(204)) {
-					stats = stats[204].filter(validCharge);
-					stats.length && chargedItems.push({
-						charge: stats.first(),
-						item: item
-					});
+					if (stats[204] instanceof Array) {
+						stats = stats[204].filter(validCharge);
+						stats.length && chargedItems.push({
+							charge: stats.first(),
+							item: item
+						});
+					} else {
+						if (stats[204].skill === skillId && stats[204].charges > 1) {
+							chargedItems.push({
+								charge: stats[204].charges,
+								item: item
+							});
+						}
+					}
 				}
 			});
 

@@ -41,8 +41,34 @@ const NPC = {
 
 const Town = {
 	telekinesis: true,
-	lastInteractedNPC: null,
 	sellTimer: getTickCount(), // shop speedup test
+	lastInteractedNPC: {
+		unit: null,
+		tick: 0,
+		set: function (npc) {
+			this.unit = npc;
+			this.tick = getTickCount();
+		},
+		get: function () {
+			try {
+				if (!!this.unit && getTickCount() - this.tick < seconds(15)
+					&& this.unit.name.toLowerCase() !== "an evil force" && this.unit.area === me.area) {
+					return this.unit;
+				} else {
+					this.reset();
+					return getInteractedNPC();
+				}
+			} catch (e) {
+				console.errorReport(e);
+				this.reset();
+				return getInteractedNPC();
+			}
+		},
+		reset: function () {
+			this.unit = null;
+			this.tick = 0;
+		}
+	},
 
 	tasks: [
 		{Heal: NPC.Akara, Shop: NPC.Akara, Gamble: NPC.Gheed, Repair: NPC.Charsi, Merc: NPC.Kashya, Key: NPC.Akara, CainID: NPC.Cain},
@@ -121,7 +147,7 @@ const Town = {
 			Town.move('palace');
 			break;
 		case NPC.Hratli:
-			if (!me.getQuest(sdk_1.default.quests.SpokeToHratli, 0)) {
+			if (!me.getQuest(sdk.quest.id.SpokeToHratli, 0)) {
 				Town.move(NPC.Meshif);
 				break;
 			}
@@ -140,11 +166,11 @@ const Town = {
 		}
 
 		Packet.flash(me.gid);
-		delay(1 + me.ping * 2);
+		delay(40);
 
 		if (npc && npc.openMenu()) {
 			cancel && me.cancel();
-			this.lastInteractedNPC = npc;
+			this.lastInteractedNPC.set(npc);
 			return npc;
 		}
 
@@ -225,7 +251,7 @@ const Town = {
 
 		delay(250);
 
-		let npc = !!this.lastInteractedNPC && !!this.lastInteractedNPC.name ? this.lastInteractedNPC : getInteractedNPC();
+		let npc = this.lastInteractedNPC.get();
 
 		try {
 			if (!!npc) {
@@ -234,7 +260,7 @@ const Town = {
 					|| (task === "Gamble" && npc.name.toLowerCase() === NPC.Jamella)) {
 					me.cancelUIFlags();
 					npc = null;
-					this.lastInteractedNPC = null;
+					this.lastInteractedNPC.reset();
 				}
 			}
 
@@ -247,18 +273,24 @@ const Town = {
 				}
 			}
 
-			if (!npc || npc.area !== me.area || (!getUIFlag(0x08) && !npc.openMenu())) throw new Error("Couldn't interact with npc");
+			if (!npc || npc.area !== me.area || (!getUIFlag(0x08) && !npc.openMenu())) {
+				throw new Error("Couldn't interact with npc");
+			}
+
+			delay(40);
 
 			switch (task) {
 			case "Shop":
 			case "Repair":
 			case "Gamble":
-				if (!getUIFlag(sdk.uiflags.Shop) && !npc.startTrade(task)) throw new Error("Failed to complete " + reason + " at " + npc.name);
-
+				if (!getUIFlag(sdk.uiflags.Shop) && !npc.startTrade(task)) {
+					throw new Error("Failed to complete " + reason + " at " + npc.name);
+				}
 				break;
 			case "Key":
-				if (!getUIFlag(sdk.uiflags.Shop) && !npc.startTrade(me.act === 3 ? "Repair" : "Shop")) throw new Error("Failed to complete " + reason + " at " + npc.name);
-
+				if (!getUIFlag(sdk.uiflags.Shop) && !npc.startTrade(me.act === 3 ? "Repair" : "Shop")) {
+					throw new Error("Failed to complete " + reason + " at " + npc.name);
+				}
 				break;
 			case "CainID":
 				Misc.useMenu(0x0FB4);
@@ -270,14 +302,6 @@ const Town = {
 			}
 
 			console.log("Did " + reason + " at " + npc.name);
-
-			if (task === "Heal") {
-				console.log("Checking if we are frozen");
-				if (me.getState(sdk.states.Frozen)) {
-					console.log("Yup, lets unfreeze real quick with some thawing pots");
-					Town.buyPots(2, "Thawing", true, true, npc);
-				}
-			}
 		} catch (e) {
 			console.errorReport(e);
 
@@ -296,7 +320,15 @@ const Town = {
 		}
 
 		Misc.poll(() => me.gameReady, 2000, 250);
-		this.lastInteractedNPC = npc;
+		this.lastInteractedNPC.set(npc);
+
+		if (task === "Heal") {
+			console.log("Checking if we are frozen");
+			if (me.getState(sdk.states.Frozen)) {
+				console.log("We are frozen, lets unfreeze real quick with some thawing pots");
+				Town.buyPots(2, "Thawing", true, true, npc);
+			}
+		}
 
 		return npc;
 	},
@@ -1027,7 +1059,7 @@ const Town = {
 			break;
 		}
 
-		npc = !!npc ? npc : !!this.lastInteractedNPC && !!this.lastInteractedNPC.name ? this.lastInteractedNPC : getInteractedNPC();
+		npc = !!npc ? npc : Town.lastInteractedNPC.get();
 
 		try {
 			if (!!npc && npc.name.toLowerCase() === NPC[potDealer] && !getUIFlag(sdk.uiflags.Shop)) {
@@ -1035,13 +1067,13 @@ const Town = {
 			} else {
 				me.cancelUIFlags();
 				npc = null;
-				this.lastInteractedNPC = null;
+				Town.lastInteractedNPC.reset();
 
 				Town.move(NPC[potDealer]);
 				npc = getUnit(sdk.unittype.NPC, NPC[potDealer]);
 
 				if (!npc || !npc.openMenu() || !npc.startTrade("Shop")) throw new Error("Failed to open " + npc.name + " trade menu");
-				this.lastInteractedNPC = npc;
+				Town.lastInteractedNPC.set(npc);
 			}
 		} catch (e) {
 			console.errorReport(e);
