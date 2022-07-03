@@ -10,21 +10,13 @@ const CollMap = new function () {
 	this.maps = [];
 
 	this.getNearbyRooms = function (x, y) {
-		let i, room, rooms;
+		let room = getRoom(x, y);
+		if (!room) return false;
 
-		room = getRoom(x, y);
+		let rooms = room.getNearby();
+		if (!rooms) return false;
 
-		if (!room) {
-			return false;
-		}
-
-		rooms = room.getNearby();
-
-		if (!rooms) {
-			return false;
-		}
-
-		for (i = 0; i < rooms.length; i += 1) {
+		for (let i = 0; i < rooms.length; i += 1) {
 			if (this.getRoomIndex(rooms[i].x * 5 + rooms[i].xsize / 2, rooms[i].y * 5 + rooms[i].ysize / 2, true) === undefined) {
 				this.addRoom(rooms[i]);
 			}
@@ -34,18 +26,14 @@ const CollMap = new function () {
 	};
 
 	this.addRoom = function (x, y) {
-		let room, coll;
-
-		room = x instanceof Room ? x : getRoom(x, y);
+		let room = x instanceof Room ? x : getRoom(x, y);
 
 		// Coords are not in the returned room.
 		if (arguments.length === 2 && !this.coordsInRoom(x, y, room)) {
 			return false;
 		}
 
-		if (room) {
-			coll = room.getCollision();
-		}
+		let coll = !!room ? room.getCollision() : null;
 
 		if (coll) {
 			this.rooms.push({x: room.x, y: room.y, xsize: room.xsize, ysize: room.ysize});
@@ -58,15 +46,14 @@ const CollMap = new function () {
 	};
 
 	this.getColl = function (x, y, cacheOnly) {
-		let i, j,
-			index = this.getRoomIndex(x, y, cacheOnly);
+		let index = this.getRoomIndex(x, y, cacheOnly);
 
 		if (index === undefined) {
 			return 5;
 		}
 
-		j = x - this.rooms[index].x * 5;
-		i = y - this.rooms[index].y * 5;
+		let j = x - this.rooms[index].x * 5;
+		let i = y - this.rooms[index].y * 5;
 
 		if (this.maps[index] !== undefined && this.maps[index][i] !== undefined && this.maps[index][i][j] !== undefined) {
 			return this.maps[index][i][j];
@@ -76,9 +63,7 @@ const CollMap = new function () {
 	};
 
 	this.getRoomIndex = function (x, y, cacheOnly) {
-		if (this.rooms.length > 25) {
-			this.reset();
-		}
+		this.rooms.length > 25 && this.reset();
 
 		let i;
 
@@ -111,20 +96,18 @@ const CollMap = new function () {
 	// Check collision between unitA and unitB. true = collision present, false = collision not present
 	// If checking for blocking collisions (0x1, 0x4), true means blocked, false means not blocked
 	this.checkColl = function (unitA, unitB, coll, thickness) {
-		if (thickness === undefined) {
-			thickness = 1;
-		}
+		thickness === undefined && (thickness = 1);
 
-		let i, k, l, cx, cy, angle, distance;
-
-		angle = Math.atan2(unitA.y - unitB.y, unitA.x - unitB.x);
-		distance = Math.round(getDistance(unitA, unitB));
+		let i, k, l, cx, cy;
+		let angle = Math.atan2(unitA.y - unitB.y, unitA.x - unitB.x);
+		let distance = Math.round(getDistance(unitA, unitB));
 
 		for (i = 1; i < distance; i += 1) {
 			cx = Math.round((Math.cos(angle)) * i + unitB.x);
 			cy = Math.round((Math.sin(angle)) * i + unitB.y);
 
-			for (k = cx - thickness; k <= cx + thickness; k += 1) { // check thicker line
+			// check thicker line
+			for (k = cx - thickness; k <= cx + thickness; k += 1) {
 				for (l = cy - thickness; l <= cy + thickness; l += 1) {
 					if (this.getColl(k, l, false) & coll) {
 						return true;
@@ -140,9 +123,7 @@ const CollMap = new function () {
 		// returns {x, y, distance} of a valid point with lowest distance from room center
 		// distance is from room center, handy for keeping bot from trying to teleport on walls
 
-		if (!room) {
-			throw new Error("Invalid room passed to getTelePoint");
-		}
+		if (!room) throw new Error("Invalid room passed to getTelePoint");
 
 		let roomx = room.x * 5, roomy = room.y * 5;
 
@@ -172,8 +153,8 @@ const CollMap = new function () {
 
 	this.getRandCoordinate = function (cX, xmin, xmax, cY, ymin, ymax, factor = 1) {
 		// returns randomized {x, y} object with valid coordinates
-		let coordX, coordY,
-			retry = 0;
+		let coordX, coordY;
+		let retry = 0;
 
 		do {
 			if (retry > 30) {

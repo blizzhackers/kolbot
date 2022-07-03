@@ -777,7 +777,7 @@ const Skill = {
 
 	// Wereform skill check
 	wereFormCheck: function (skillId) {
-		// we don't even have the skills to transform or we aren't transformed
+		// we don't even have the skills to transform or we aren't transformed - add handler for wereform given by an item that is on switch
 		if (!Skill.canUse(sdk.skills.Werewolf) && !Skill.canUse(sdk.skills.Werebear)) return true;
 		if (!me.getState(sdk.states.Wearwolf) && !me.getState(sdk.states.Wearbear)) return true;
 

@@ -148,6 +148,8 @@ const Cubing = {
 			return false;
 		}
 
+		console.log("Getting cube");
+		me.overhead("Getting cube");
 		let cube;
 
 		Pather.useWaypoint(57, true);
@@ -858,7 +860,7 @@ const Cubing = {
 		}
 
 		if (recipe.Index === Recipe.LowToNorm.Armor || recipe.Index === Recipe.LowToNorm.Weapon) {
-			if (unit.lowquality  && NTIP.CheckItem(unit) === 0) {
+			if (unit.lowquality && NTIP.CheckItem(unit) === 0) {
 				return true;
 			}
 

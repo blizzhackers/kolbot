@@ -27,9 +27,12 @@ const AutoSkill = new function () {
 		];
 	*/
 
-	this.needPreReq = function (skillid) {	//a function to return false if have all prereqs or a skill if not
-		for (let t = 183; t >= 181; t--) {		//a loop to go through each reqskill
-			let preReq = (getBaseStat('skills', skillid, t)); // Check ReqSkills
+	//a function to return false if have all prereqs or a skill if not
+	this.needPreReq = function (skillid) {
+		//a loop to go through each reqskill
+		for (let t = 183; t >= 181; t--) {
+			// Check ReqSkills
+			let preReq = (getBaseStat('skills', skillid, t));
 
 			if (preReq > 0 && preReq < 356 && !me.getSkill(preReq, 0)) {
 				return preReq;

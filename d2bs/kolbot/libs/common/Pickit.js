@@ -134,11 +134,11 @@ const Pickit = {
 			delay(40);
 		}
 
-		let item = getUnit(4);
+		let item = getUnit(sdk.unittype.Item);
 
 		if (item) {
 			do {
-				if ((item.mode === 3 || item.mode === 5) && getDistance(me, item) <= range) {
+				if ((item.mode === sdk.itemmode.onGround || item.mode === sdk.itemmode.Dropping) && getDistance(me, item) <= range) {
 					pickList.push(copyUnit(item));
 				}
 			} while (item.getNext());
@@ -151,7 +151,7 @@ const Pickit = {
 
 			// Check if the item unit is still valid and if it's on ground or being dropped
 			// Don't pick items behind walls/obstacles when walking
-			if (copyUnit(pickList[0]).x !== undefined && (pickList[0].mode === 3 || pickList[0].mode === 5)
+			if (copyUnit(pickList[0]).x !== undefined && (pickList[0].mode === sdk.itemmode.onGround || pickList[0].mode === sdk.itemmode.Dropping)
 					&& (Pather.useTeleport() || me.inTown || !checkCollision(me, pickList[0], 0x1))) {
 				// Check if the item should be picked
 				let status = this.checkItem(pickList[0]);
@@ -243,10 +243,10 @@ const Pickit = {
 			this.classid = unit.classid;
 			this.name = unit.name;
 			this.color = Pickit.itemColor(unit);
-			this.gold = unit.getStat(14);
+			this.gold = unit.getStat(sdk.stats.Gold);
 			this.dist = (unit.distance || Infinity);
 			this.useTk = (Skill.haveTK
-				&& (this.type === 4 || this.type === 22 || (this.type > 75 && this.type < 82))
+				&& (this.type === sdk.itemtype.Gold || this.type === sdk.itemtype.Scroll || (this.type >= sdk.itemtype.HealingPotion && this.type <= sdk.itemtype.ThawingPotion))
 				&& this.dist > 5 && this.dist < 20 && !checkCollision(me, unit, 0x5));
 			this.picked = false;
 		}
@@ -254,7 +254,7 @@ const Pickit = {
 		let gid = (unit.gid || -1);
 		let cancelFlags = [sdk.uiflags.Inventory, sdk.uiflags.NPCMenu, sdk.uiflags.Waypoint, sdk.uiflags.Shop, sdk.uiflags.Stash, sdk.uiflags.Cube];
 		let itemCount = me.itemcount;
-		let item = gid > -1 ? getUnit(4, -1, -1, gid) : false;
+		let item = gid > -1 ? getUnit(sdk.unittype.Item, -1, -1, gid) : false;
 
 		if (!item) return false;
 
@@ -272,7 +272,7 @@ const Pickit = {
 
 		MainLoop:
 		for (let i = 0; i < retry; i += 1) {
-			if (!getUnit(4, -1, -1, gid)) {
+			if (!getUnit(sdk.unittype.Item, -1, -1, gid)) {
 				break;
 			}
 
@@ -282,7 +282,7 @@ const Pickit = {
 				delay(40);
 			}
 
-			if (item.mode !== 3 && item.mode !== 5) {
+			if (item.mode !== sdk.itemmode.onGround && item.mode !== sdk.itemmode.Dropping) {
 				break;
 			}
 
@@ -307,14 +307,14 @@ const Pickit = {
 				item = copyUnit(item);
 
 				if (stats.classid === sdk.items.Gold) {
-					if (!item.getStat(14) || item.getStat(14) < stats.gold) {
-						print("ÿc7Picked up " + stats.color + (item.getStat(14) ? (item.getStat(14) - stats.gold) : stats.gold) + " " + stats.name);
+					if (!item.getStat(sdk.stats.Gold) || item.getStat(sdk.stats.Gold) < stats.gold) {
+						print("ÿc7Picked up " + stats.color + (item.getStat(sdk.stats.Gold) ? (item.getStat(sdk.stats.Gold) - stats.gold) : stats.gold) + " " + stats.name);
 
 						return true;
 					}
 				}
 
-				if (item.mode !== 3 && item.mode !== 5) {
+				if (item.mode !== sdk.itemmode.onGround && item.mode !== sdk.itemmode.Dropping) {
 					switch (stats.classid) {
 					case sdk.items.Key:
 						print("ÿc7Picked up " + stats.color + stats.name + " ÿc7(" + Town.checkKeys() + "/12)");
@@ -421,7 +421,7 @@ const Pickit = {
 	canPick: function (unit) {
 		if (!unit) return false;
 
-		let tome, charm, i, potion, needPots, buffers, pottype, myKey, key;
+		let tome, charm, potion, needPots, buffers, pottype, myKey, key;
 
 		if (sdk.quest.items.includes(unit.classid)) {
 			if (me.getItem(unit.classid)) {
@@ -432,18 +432,19 @@ const Pickit = {
 		switch (unit.itemType) {
 		case sdk.itemtype.Gold:
 			// Check current gold vs max capacity (cLvl*10000)
-			if (me.getStat(14) === me.getStat(12) * 10000) {
+			if (me.getStat(sdk.stats.Gold) === me.getStat(sdk.stats.Level) * 10000) {
 				return false; // Skip gold if full
 			}
 
 			break;
 		case sdk.itemtype.Scroll:
-			tome = me.getItem(unit.classid - 11, 0); // 518 - Tome of Town Portal or 519 - Tome of Identify, mode 0 - inventory/stash
+			// 518 - Tome of Town Portal or 519 - Tome of Identify
+			tome = me.getItem(unit.classid - 11, sdk.itemmode.inStorage);
 
 			if (tome) {
 				do {
 					// In inventory, contains 20 scrolls
-					if (tome.location === 3 && tome.getStat(sdk.stats.Quantity) === 20) {
+					if (tome.isInInventory && tome.getStat(sdk.stats.Quantity) === 20) {
 						return false; // Skip a scroll if its tome is full
 					}
 				} while (tome.getNext());
@@ -456,12 +457,12 @@ const Pickit = {
 			// Assassins don't ever need keys
 			if (me.assassin) return false;
 
-			myKey = me.getItem(543, 0);
-			key = getUnit(4, -1, -1, unit.gid); // Passed argument isn't an actual unit, we need to get it
+			myKey = me.getItem(sdk.items.Key, sdk.itemmode.inStorage);
+			key = getUnit(sdk.unittype.Item, -1, -1, unit.gid); // Passed argument isn't an actual unit, we need to get it
 
 			if (myKey && key) {
 				do {
-					if (myKey.location === 3 && myKey.getStat(sdk.stats.Quantity) + key.getStat(sdk.stats.Quantity) > 12) {
+					if (myKey.isInInventory && myKey.getStat(sdk.stats.Quantity) + key.getStat(sdk.stats.Quantity) > 12) {
 						return false;
 					}
 				} while (myKey.getNext());
@@ -490,13 +491,13 @@ const Pickit = {
 		case sdk.itemtype.RejuvPotion:
 			needPots = 0;
 
-			for (i = 0; i < 4; i += 1) {
-				if (typeof unit.code === "string" && unit.code.indexOf(Config.BeltColumn[i]) > -1) {
+			for (let i = 0; i < 4; i += 1) {
+				if (typeof unit.code === "string" && unit.code.includes(Config.BeltColumn[i])) {
 					needPots += this.beltSize;
 				}
 			}
 
-			potion = me.getItem(-1, 2);
+			potion = me.getItem(-1, sdk.itemmode.inBelt);
 
 			if (potion) {
 				do {
@@ -509,7 +510,7 @@ const Pickit = {
 			if (needPots < 1 && this.checkBelt()) {
 				buffers = ["HPBuffer", "MPBuffer", "RejuvBuffer"];
 
-				for (i = 0; i < buffers.length; i += 1) {
+				for (let i = 0; i < buffers.length; i += 1) {
 					if (Config[buffers[i]]) {
 						switch (buffers[i]) {
 						case "HPBuffer":
@@ -530,11 +531,11 @@ const Pickit = {
 							if (!Storage.Inventory.CanFit(unit)) return false;
 
 							needPots = Config[buffers[i]];
-							potion = me.getItem(-1, 0);
+							potion = me.getItem(-1, sdk.itemmode.inStorage);
 
 							if (potion) {
 								do {
-									if (potion.itemType === pottype && potion.location === 3) {
+									if (potion.itemType === pottype && potion.location === sdk.storage.Inventory) {
 										needPots -= 1;
 									}
 								} while (potion.getNext());
@@ -549,9 +550,9 @@ const Pickit = {
 
 				if (potion) {
 					do {
-						if (potion.itemType === unit.itemType && ((potion.mode === 0 && potion.location === 3) || potion.mode === 2)) {
+						if (potion.itemType === unit.itemType && (potion.isInInventory || potion.isInBelt)) {
 							if (potion.classid < unit.classid) {
-								potion.interact();
+								potion.use();
 								needPots += 1;
 
 								break;
@@ -577,7 +578,7 @@ const Pickit = {
 
 	checkBelt: function () {
 		let check = 0;
-		let item = me.getItem(-1, 2);
+		let item = me.getItem(-1, sdk.itemmode.inBelt);
 
 		if (item) {
 			do {
@@ -608,9 +609,9 @@ const Pickit = {
 
 		while (this.gidList.length > 0) {
 			let gid = this.gidList.shift();
-			item = getUnit(4, -1, -1, gid);
+			item = getUnit(sdk.unittype.Item, -1, -1, gid);
 
-			if (item && (item.mode === 3 || item.mode === 5)
+			if (item && (item.mode === sdk.itemmode.onGround || item.mode === sdk.itemmode.Dropping)
 				&& (Town.ignoredItemTypes.indexOf(item.itemType) === -1 || (item.itemType >= sdk.itemtype.HealingPotion && item.itemType <= sdk.itemtype.RejuvPotion))
 				&& item.itemType !== sdk.itemtype.Gold && getDistance(me, item) <= Config.PickRange) {
 				itemList.push(copyUnit(item));

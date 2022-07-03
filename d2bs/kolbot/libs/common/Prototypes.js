@@ -421,7 +421,7 @@ me.switchWeapons = function (slot) {
 	}
 
 	while (!me.gameReady) {
-		delay(10);
+		delay(25);
 	}
 
 	let originalSlot = this.weaponswitch;
