@@ -1302,12 +1302,13 @@ const Misc = {
 		if (!unit || unit.x === 12526 || unit.x === 12565 || unit.mode) return false;
 
 		// locked chest, no keys
-		if (!me.assassin && unit.islocked && !me.findItem(543, 0, 3)) return false;
+		if (!me.assassin && unit.islocked && !me.findItem(sdk.items.Key, sdk.itemmode.inStorage, sdk.storage.Inventory)) return false;
 
 		let specialChest = sdk.quest.chests.includes(unit.classid);
 
 		for (let i = 0; i < 7; i++) {
-			let useTK = Skill.useTK(unit) && i < 3;
+			// don't use tk if we are right next to it
+			let useTK = (unit.distance > 5 && Skill.useTK(unit) && i < 3);
 			if (useTK) {
 				unit.distance > 13 && Attack.getIntoPosition(unit, 13, 0x4);
 				if (!Skill.cast(sdk.skills.Telekinesis, 0, unit)) {
@@ -1315,11 +1316,8 @@ const Misc = {
 					continue;
 				}
 			} else {
-				getDistance(me.x, me.y, unit.x + 1, unit.y + 2) > 5 && Pather.moveTo(unit.x + 1, unit.y + 2, 3);
-
-				if (getDistance(me.x, me.y, unit.x + 1, unit.y + 2) < 5) {
-					specialChest && i > 2 ? Misc.click(0, 0, unit) : sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
-				}
+				[(unit.x + 1), (unit.y + 2)].distance > 5 && Pather.moveTo(unit.x + 1, unit.y + 2, 3);
+				(specialChest || i > 2) ? Misc.click(0, 0, unit) : sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
 			}
 
 			if (Misc.poll(() => unit.mode, 1000, 50)) {

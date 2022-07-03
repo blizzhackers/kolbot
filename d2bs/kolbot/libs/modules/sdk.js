@@ -672,10 +672,8 @@ item: {
 				HellForge: 376,
 
 				// act 5
-				BarbCage: 434,
+				BarbCage: 473,
 				FrozenAnya: 558,
-				FrozenAnyaPlatform: 460,
-				NihlathakPlatform: 462,
 				AncientsAltar: 546,
 			},
 			chests: [
@@ -725,8 +723,8 @@ item: {
 				PrisonofIce: 37,
 				BetrayalofHaggorath: 38,
 				RiteofPassage: 39,
-				EveofDestruction: 40,
-				SecretCowLevel: 41,
+				EyeofDestruction: 40,
+				Respec: 41,
 			}
 		},
 
@@ -1103,6 +1101,9 @@ item: {
 			Experience: 13,
 			Gold: 14,
 			GoldBank: 15,
+			ArmorPercent: 16,
+			MaxDamagePercent: 17,
+			MinDamagePercent: 18,
 			ToHit: 19,
 			ToBlock: 20,
 			MinDamage: 21,
@@ -1181,9 +1182,6 @@ item: {
 			PassiveSummonResist: 349,
 			PassiveMagMastery: 357,
 			PassiveMagPierce: 358,
-			ArmorPercent: 16,
-			MaxDamagePercent: 17,
-			MinDamagePercent: 18,
 			Quantity: 70,
 			Value: 71,
 			Durability: 72,
@@ -1381,6 +1379,9 @@ item: {
 			AcPercentVsMonster: 314,
 			ExtraCharges: 324,
 			QuestDifficulty: 356,
+
+			// doesn't exist but define for prototypes
+			AllRes: 555,
 		},
 
 		// unit info
