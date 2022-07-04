@@ -652,7 +652,6 @@ item: {
 				HoradricScrollChest: 355,
 				ShaftoftheHoradricStaffChest: 356,
 				// act 3
-				ForestAltar: 81,
 				LamEsensTomeHolder: 193,
 				KhalimsHeartChest: 405,
 				KhalimsBrainChest: 406,
@@ -1407,6 +1406,7 @@ item: {
 			},
 			objects: {
 				// act1
+				MoldyTome: 8,
 				StoneAlpha: 17,
 				StoneBeta: 18,
 				StoneGamma: 19,
@@ -1417,6 +1417,7 @@ item: {
 				// act 2
 				Journal: 357,
 				// act 3
+				ForestAltar: 81,
 				Gibinn: 252,
 				CompellingOrb: 404,
 				// act 4
