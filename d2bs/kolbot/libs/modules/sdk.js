@@ -708,7 +708,7 @@ item: {
 				BetrayalofHaggorath: 38,
 				RiteofPassage: 39,
 				EyeofDestruction: 40,
-				SecretCowLevel: 41,
+				Respec: 41,
 			}
 		},
 
