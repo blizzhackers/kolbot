@@ -111,30 +111,8 @@ function main () {
 	};
 
 	this.bumperCheck = function () {
-		let party = getParty();
-
-		if (party) {
-			do {
-				if (party.name !== me.name) {
-					switch (me.diff) {
-					case sdk.difficulty.Normal:
-						if (party.level >= 20) return true;
-
-						break;
-					case sdk.difficulty.Nightmare:
-						if (party.level >= 40) return true;
-
-						break;
-					case sdk.difficulty.Hell:
-						if (party.level >= 60) return true;
-
-						break;
-					}
-				}
-			} while (party.getNext());
-		}
-
-		return false;
+		let bumperLevelReq = [20, 40, 60][me.diff];
+		return Misc.checkPartyLevel(bumperLevelReq);
 	};
 
 	this.playersInAct = function (act) {

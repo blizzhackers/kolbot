@@ -1253,6 +1253,25 @@ const Misc = {
 		return count;
 	},
 
+	// check if any member of our party meets a certain level req
+	checkPartyLevel: function (levelCheck = 1) {
+		let party = getParty();
+
+		if (party) {
+			let myPartyId = party.partyid;
+
+			do {
+				if (party.partyid !== 65535 && party.partyid === myPartyId && party.name !== me.name) {
+					if (party.level >= levelCheck) {
+						return true;
+					}
+				}
+			} while (party.getNext());
+		}
+
+		return false;
+	},
+
 	// autoleader by Ethic - refactored by theBGuy
 	autoLeaderDetect: function (givenSettings = {}) {
 		let settings = Object.assign({}, {
