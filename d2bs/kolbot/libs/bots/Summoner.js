@@ -25,7 +25,7 @@ function Summoner () {
 	Attack.clear(15, 0, sdk.monsters.TheSummoner);
 
 	if (Loader.scriptName(1) === "Duriel") {
-		let journal = object(sdk.quest.chest.Journal);
+		let journal = Game.getObject(sdk.quest.chest.Journal);
 		if (!journal) return true;
 
 		Pather.moveToUnit(journal);

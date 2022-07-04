@@ -323,14 +323,14 @@ const ActionHooks = {
 				let currExits = getArea().exits
 					.filter(function (ex) { return ex.target !== correctTomb; })
 					.sort(function(a, b) {
-					return a.target - b.target;
-				}).reverse();
+						return a.target - b.target;
+					}).reverse();
 				
 				let curr;
 				for (let i = 8; i > 4; i--) {
 					curr = currExits.shift();
 					this.hooks.push({
-						name: "POI" + (i - 3), 
+						name: "POI" + (i - 3),
 						type: "area",
 						dest: curr.target,
 						hook: new Text("ÿc<Num " + i + ": " + Pather.getAreaName(curr.target), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)

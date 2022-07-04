@@ -50,11 +50,11 @@ function Wakka() {
 	};
 
 	this.checkBoss = function (name) {
-		let glow = object(sdk.units.SealGlow);
+		let glow = Game.getObject(sdk.units.SealGlow);
 
 		if (glow) {
 			for (let i = 0; i < 10; i += 1) {
-				let boss = monster(name);
+				let boss = Game.getMonster(name);
 
 				if (boss && boss.mode === 12) {
 					return true;

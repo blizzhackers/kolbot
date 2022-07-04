@@ -50,10 +50,10 @@ function Questing() {
 		log("starting smith");
 		if (!Loader.runScript("Smith")) throw new Error();
 
-		let malusChest = object(sdk.quest.chest.MalusHolder);
+		let malusChest = Game.getObject(sdk.quest.chest.MalusHolder);
 		!!malusChest && malusChest.distance > 5 && Pather.moveToUnit(malusChest);
 		Misc.openChest(malusChest);
-		let malus = Misc.poll(() => item(sdk.quest.item.HoradricMalus), 1000, 100);
+		let malus = Misc.poll(() => Game.getItem(sdk.quest.item.HoradricMalus), 1000, 100);
 		Pickit.pickItem(malus);
 		Town.goToTown();
 		Town.npcInteract("Charsi");
@@ -91,7 +91,7 @@ function Questing() {
 			Pather.moveTo(22571, 9590);
 		} else {
 			while (coords.length) {
-				let andy = monster(sdk.monsters.Andariel);
+				let andy = Game.getMonster(sdk.monsters.Andariel);
 
 				if (andy && andy.distance < 15) {
 					break;
@@ -129,7 +129,7 @@ function Questing() {
 
 		Attack.kill(sdk.monsters.Radament);
 
-		let book = item(sdk.quest.item.BookofSkill);
+		let book = Game.getItem(sdk.quest.item.BookofSkill);
 		book && Pickit.pickItem(book) && book.use();
 
 		Town.goToTown();
@@ -155,7 +155,7 @@ function Questing() {
 		}
 
 		Misc.openChest(sdk.quest.chest.LamEsensTomeHolder);
-		let book = Misc.poll(() => item(sdk.quest.item.LamEsensTome), 1000, 100);
+		let book = Misc.poll(() => Game.getItem(sdk.quest.item.LamEsensTome), 1000, 100);
 
 		Pickit.pickItem(book);
 		Town.goToTown();
@@ -183,7 +183,7 @@ function Questing() {
 		if (!Loader.runScript("Diablo")) throw new Error();
 		Town.goToTown(4);
 
-		object(sdk.units.RedPortalToAct5)
+		Game.getObject(sdk.units.RedPortalToAct5)
 			? Pather.useUnit(sdk.unittype.Object, sdk.units.RedPortalToAct5, sdk.areas.Harrogath)
 			: Town.npcInteract("Tyrael", false) && Misc.useMenu(sdk.menu.TravelToHarrogath);
 
@@ -237,7 +237,7 @@ function Questing() {
 		for (let i = 0; i < coords.length; i += 1) {
 			log((i + 1) + "/" + coords.length);
 			Pather.moveToUnit(coords[i], 2, 0);
-			let door = monster(sdk.quest.chest.BarbCage);
+			let door = Game.getMonster(sdk.quest.chest.BarbCage);
 
 			if (door) {
 				Pather.moveToUnit(door, 1, 0);
@@ -271,7 +271,7 @@ function Questing() {
 
 		delay(1000);
 
-		let anya = object(sdk.units.FrozenAnya);
+		let anya = Game.getObject(sdk.units.FrozenAnya);
 
 		// talk to anya, then cancel her boring speech
 		Pather.moveToUnit(anya);

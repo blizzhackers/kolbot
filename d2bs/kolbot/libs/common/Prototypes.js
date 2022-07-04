@@ -2476,7 +2476,3 @@ Unit.prototype.checkForMobs = function (givenSettings = {}) {
 			}).length;
 	};
 }
-
-const monster = (id) => getUnit(sdk.unittype.Monster, id);
-const object = (id) => getUnit(sdk.unittype.Object, id);
-const item = (id) => getUnit(sdk.unittype.Item, id);

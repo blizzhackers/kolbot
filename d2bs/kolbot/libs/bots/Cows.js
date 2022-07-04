@@ -22,13 +22,13 @@ function Cows() {
 
 		Pather.moveTo(25048, 5177);
 
-		let wirt = object(sdk.quest.chest.Wirt);
+		let wirt = Game.getObject(sdk.quest.chest.Wirt);
 
 		for (let i = 0; i < 8; i += 1) {
 			wirt.interact();
 			delay(500);
 
-			let leg = item(sdk.quest.item.WirtsLeg);
+			let leg = Game.getItem(sdk.quest.item.WirtsLeg);
 
 			if (leg) {
 				let gid = leg.gid;

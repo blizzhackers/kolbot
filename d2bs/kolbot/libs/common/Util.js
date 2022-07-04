@@ -22,10 +22,9 @@ function getUnits(...args) {
 }
 
 const clickItemAndWait = (...args) => {
-	let before,
-		timeout = getTickCount(), timedOut;
+	let timeout = getTickCount(), timedOut;
+	let before = !me.itemoncursor;
 
-	before = !me.itemoncursor;
 	clickItem.apply(undefined, args);
 	delay(Math.max(me.ping * 2, 250));
 
@@ -104,6 +103,36 @@ function minutes (ms = 0) {
 function formatTime (ms = 0) {
 	return (new Date(ms).toISOString().slice(11, -5));
 }
+
+const Game = {
+	getCursorUnit: function () {
+		return getUnit(100);
+	},
+	getSelectedUnit: function () {
+		return getUnit(101);
+	},
+	getPlayer: function (id, mode, gid) {
+		return getUnit(sdk.unittype.Player, id, mode, gid);
+	},
+	getMonster: function (id, mode, gid) {
+		return getUnit(sdk.unittype.Monster, id, mode, gid);
+	},
+	getNPC: function (id, mode, gid) {
+		return getUnit(sdk.unittype.NPC, id, mode, gid);
+	},
+	getObject: function (id, mode, gid) {
+		return getUnit(sdk.unittype.Object, id, mode, gid);
+	},
+	getMissile: function (id, mode, gid) {
+		return getUnit(sdk.unittype.Missile, id, mode, gid);
+	},
+	getItem: function (id, mode, gid) {
+		return getUnit(sdk.unittype.Item, id, mode, gid);
+	},
+	getStairs: function (id, mode, gid) {
+		return getUnit(sdk.unittype.Stairs, id, mode, gid);
+	},
+};
 
 (function (global, print) {
 	global.console = global.console || (function () {

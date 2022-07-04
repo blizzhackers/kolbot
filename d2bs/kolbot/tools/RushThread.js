@@ -312,11 +312,11 @@ function main () {
 		Pickit.pickItems();
 		Pather.moveToPreset(me.area, 2, sdk.quest.chest.Journal);
 
-		let redPortal = object(sdk.units.RedPortal);
+		let redPortal = Game.getObject(sdk.units.RedPortal);
 
 		if (!redPortal || !this.usePortal(null, null, redPortal)) {
 			if (!Misc.poll(() => {
-				let journal = object(sdk.quest.chest.Journal);
+				let journal = Game.getObject(sdk.quest.chest.Journal);
 
 				if (journal && journal.interact()) {
 					delay(1000);
@@ -361,7 +361,7 @@ function main () {
 			delay(100);
 		}
 
-		while (!object(sdk.units.PortaltoDurielsLair)) {
+		while (!Game.getObject(sdk.units.PortaltoDurielsLair)) {
 			delay(500);
 		}
 
@@ -456,7 +456,7 @@ function main () {
 
 		Pather.moveTo(17591, 8070) && Attack.securePosition(me.x, me.y, 40, 3000);
 
-		let hydra = monster(getLocaleString(3325));
+		let hydra = Game.getMonster(getLocaleString(3325));
 
 		if (hydra) {
 			do {
@@ -639,9 +639,9 @@ function main () {
 		Pather.moveTo(15090, 5008);
 		delay(5000);
 		Precast.doPrecast(true);
-		Misc.poll(() => !monster(sdk.monsters.ThroneBaal), minutes(3), 1000);
+		Misc.poll(() => !Game.getMonster(sdk.monsters.ThroneBaal), minutes(3), 1000);
 
-		let portal = object(sdk.units.WorldstonePortal);
+		let portal = Game.getObject(sdk.units.WorldstonePortal);
 
 		if (portal) {
 			Pather.usePortal(null, null, portal);
@@ -684,7 +684,7 @@ function main () {
 			throw new Error("Failed to move to Tree of Inifuss");
 		}
 
-		let tree = object(sdk.quest.chest.InifussTree);
+		let tree = Game.getObject(sdk.quest.chest.InifussTree);
 		!!tree && tree.distance > 5 && Pather.moveToUnit(tree);
 		Attack.securePosition(me.x, me.y, 40, 3000, true);
 		!!tree && tree.distance > 5 && Pather.moveToUnit(tree);
@@ -719,7 +719,7 @@ function main () {
 
 		if (me.area === sdk.areas.Tristram) {
 			Pather.moveTo(me.x, me.y + 6);
-			let gibbet = object(sdk.quest.chest.CainsJail);
+			let gibbet = Game.getObject(sdk.quest.chest.CainsJail);
 
 			if (gibbet && !gibbet.mode) {
 				if (!Pather.moveToPreset(me.area, 2, sdk.quest.chest.CainsJail, 0, 0, true, true)) {
@@ -790,7 +790,7 @@ function main () {
 		};
 
 		moveIntoPos(radaCoords, 50);
-		let rada = Misc.poll(() => monster(sdk.monsters.Radament), 1500, 500);
+		let rada = Misc.poll(() => Game.getMonster(sdk.monsters.Radament), 1500, 500);
 
 		rada ? moveIntoPos(rada, 60) : print("radament unit not found");
 		Attack.securePosition(me.x, me.y, 35, 3000);
@@ -824,7 +824,7 @@ function main () {
 			delay(200);
 		}
 
-		Misc.poll(() => !item(sdk.quest.item.BookofSkill), 30000, 1000);
+		Misc.poll(() => !Game.getItem(sdk.quest.item.BookofSkill), 30000, 1000);
 
 		while (this.playerIn()) {
 			delay(200);
@@ -914,7 +914,7 @@ function main () {
 		};
 
 		moveIntoPos(izualCoords, 50);
-		let izual = Misc.poll(() => monster(sdk.monsters.Izual), 1500, 500);
+		let izual = Misc.poll(() => Game.getMonster(sdk.monsters.Izual), 1500, 500);
 
 		izual ? moveIntoPos(izual, 60) : print("izual unit not found");
 
@@ -994,7 +994,7 @@ function main () {
 
 		Attack.securePosition(me.x, me.y, 30, 2000);
 
-		let anya = object(sdk.units.FrozenAnya);
+		let anya = Game.getObject(sdk.units.FrozenAnya);
 
 		if (anya) {
 			Pather.moveToUnit(anya);
@@ -1011,7 +1011,7 @@ function main () {
 			delay(200);
 		}
 
-		Misc.poll(() => !object(sdk.units.FrozenAnya), 30000, 1000);
+		Misc.poll(() => !Game.getObject(sdk.units.FrozenAnya), 30000, 1000);
 
 		this.log("2"); // Mainly for non-questers to know when to get the scroll of resistance
 

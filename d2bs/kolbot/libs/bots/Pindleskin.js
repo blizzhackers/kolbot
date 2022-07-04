@@ -41,7 +41,7 @@ function Pindleskin() {
 
 		Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.units.NihlathaksPlatform, 10, 10);
 
-		if (Config.Pindleskin.ViperQuit && monster(sdk.monsters.TombViper2)) {
+		if (Config.Pindleskin.ViperQuit && Game.getMonster(sdk.monsters.TombViper2)) {
 			console.log("Tomb Vipers found.");
 
 			return true;

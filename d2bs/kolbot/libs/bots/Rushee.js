@@ -150,7 +150,7 @@ function Rushee() {
 
 	this.placeStaff = function () {
 		let tick = getTickCount();
-		let orifice = object(sdk.quest.chest.HoradricStaffHolder);
+		let orifice = Game.getObject(sdk.quest.chest.HoradricStaffHolder);
 
 		if (!orifice) return false;
 
@@ -264,7 +264,7 @@ function Rushee() {
 
 				delay(me.ping + 1);
 
-				if (object(sdk.units.RedPortalToAct5)) {
+				if (Game.getObject(sdk.units.RedPortalToAct5)) {
 					me.cancel();
 					Pather.useUnit(2, sdk.units.RedPortalToAct5, 109);
 				} else {
@@ -356,7 +356,7 @@ function Rushee() {
 						delay(500);
 
 						while (true) {
-							target = item(sdk.quest.item.BookofSkill);
+							target = Game.getItem(sdk.quest.item.BookofSkill);
 
 							if (!target) {
 								break;
@@ -466,11 +466,11 @@ function Rushee() {
 						}
 
 						let stones = [
-							object(sdk.quest.chest.StoneAlpha),
-							object(sdk.quest.chest.StoneBeta),
-							object(sdk.quest.chest.StoneGamma),
-							object(sdk.quest.chest.StoneDelta),
-							object(sdk.quest.chest.StoneLambda)
+							Game.getObject(sdk.quest.chest.StoneAlpha),
+							Game.getObject(sdk.quest.chest.StoneBeta),
+							Game.getObject(sdk.quest.chest.StoneGamma),
+							Game.getObject(sdk.quest.chest.StoneDelta),
+							Game.getObject(sdk.quest.chest.StoneLambda)
 						];
 
 						while (stones.some((stone) => !stone.mode)) {
@@ -522,7 +522,7 @@ function Rushee() {
 							break;
 						}
 
-						let gibbet = object(sdk.quest.chest.CainsJail);
+						let gibbet = Game.getObject(sdk.quest.chest.CainsJail);
 
 						if (gibbet && !gibbet.mode) {
 							Pather.moveTo(gibbet.x, gibbet.y);
@@ -663,7 +663,7 @@ function Rushee() {
 						delay(500);
 						Pather.walkTo(7763, 5267, 2);
 
-						while (!monster(sdk.monsters.Diablo)) {
+						while (!Game.getMonster(sdk.monsters.Diablo)) {
 							delay(500);
 						}
 
@@ -682,14 +682,14 @@ function Rushee() {
 						Pather.usePortal(sdk.areas.FrozenRiver, Config.Leader);
 						delay(500);
 
-						target = object(sdk.units.FrozenAnya);
+						target = Game.getObject(sdk.units.FrozenAnya);
 
 						if (target) {
 							Pather.moveToUnit(target);
 							Misc.poll(() => {
 								sendPacket(1, 0x13, 4, 0x2, 4, target.gid);
 								delay(100);
-								return !object(sdk.units.FrozenAnya);
+								return !Game.getObject(sdk.units.FrozenAnya);
 							}, 1000, 200);
 							delay(1000);
 							me.cancel();

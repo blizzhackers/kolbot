@@ -188,11 +188,11 @@ function AutoBaal() {
 				Precast.doPrecast(false);
 
 				// wait for baal to go through the portal
-				while (monster(sdk.monsters.ThroneBaal)) {
+				while (Game.getMonster(sdk.monsters.ThroneBaal)) {
 					delay(500);
 				}
 
-				let portal = object(sdk.units.WorldstonePortal);
+				let portal = Game.getObject(sdk.units.WorldstonePortal);
 
 				delay(2000); // wait for others to enter first - helps with curses and tentacles from spawning around you
 				print("ÿc4AutoBaal: ÿc0Entering chamber.");
@@ -200,7 +200,7 @@ function AutoBaal() {
 				Town.getCorpse();
 			}
 
-			let baal = monster(sdk.monsters.Baal);
+			let baal = Game.getMonster(sdk.monsters.Baal);
 
 			if (baal) {
 				if (baal.mode === 0 || baal.mode === 12) {
