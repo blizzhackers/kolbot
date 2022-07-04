@@ -106,6 +106,9 @@
 	Control.PleaseReadOk = new Control(6, 525, 513, 128, 35);
 	Control.PleaseReadCancel = new Control(6, 133, 513, 128, 35);
 
+	Control.EmailSetEmail = new Control(1, 253, 342, 293, 19);
+	Control.EmailVerifyEmail = new Control(1, 253, 396, 293, 19);
+	Control.EmailRegister = new Control(6, 265, 527, 272, 35);
 	Control.EmailDontRegister = new Control(6, 265, 572, 272, 35);
 	Control.EmailDontRegisterContinue = new Control(6, 415, 412, 128, 35);
 

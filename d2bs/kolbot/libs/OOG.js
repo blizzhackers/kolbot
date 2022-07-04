@@ -508,8 +508,8 @@ const ControlAction = {
 	mutedKey: false,
 
 	timeoutDelay: function (text, time, stopfunc, arg) {
-		let currTime = 0,
-			endTime = getTickCount() + time;
+		let currTime = 0;
+		let endTime = getTickCount() + time;
 
 		while (getTickCount() < endTime) {
 			if (typeof stopfunc === "function" && stopfunc(arg)) {
@@ -544,11 +544,9 @@ const ControlAction = {
 		if (!text) return false;
 
 		let control = getControl(type, x, y, xsize, ysize);
-
 		if (!control) return false;
 
 		let currText = control.text;
-
 		if (currText && currText === text) return true;
 
 		currText = control.getText();
@@ -571,22 +569,22 @@ const ControlAction = {
 	joinChannel: function (channel) {
 		me.blockMouse = true;
 
-		let i, currChan, tick,
-			rval = false,
-			timeout = 5000;
+		let tick;
+		let rval = false;
+		let timeout = 5000;
 
 		MainLoop:
 		while (true) {
 			switch (getLocation()) {
-			case sdk.game.locations.Lobby: // Lobby
+			case sdk.game.locations.Lobby:
 				Controls.LobbyEnterChat.click();
 
 				break;
-			case sdk.game.locations.LobbyChat: // Chat
-				currChan = Controls.LobbyChannelName.getText(); // returns array
+			case sdk.game.locations.LobbyChat:
+				let currChan = Controls.LobbyChannelName.getText(); // returns array
 
 				if (currChan) {
-					for (i = 0; i < currChan.length; i += 1) {
+					for (let i = 0; i < currChan.length; i += 1) {
 						if (currChan[i].split(" (") && currChan[i].split(" (")[0].toLowerCase() === channel.toLowerCase()) {
 							rval = true;
 
@@ -727,13 +725,13 @@ const ControlAction = {
 	loginAccount: function (info) {
 		me.blockMouse = true;
 
-		let locTick,
-			realms = {
-				"uswest": 0,
-				"useast": 1,
-				"asia": 2,
-				"europe": 3
-			};
+		let locTick;
+		let realms = {
+			"uswest": 0,
+			"useast": 1,
+			"asia": 2,
+			"europe": 3
+		};
 
 		let tick = getTickCount();
 
@@ -802,6 +800,29 @@ const ControlAction = {
 		me.blockMouse = false;
 
 		return getLocation() === sdk.game.locations.CharSelect || getLocation() === sdk.game.locations.CharSelectNoChars;
+	},
+
+	setEmail: function (email = "", domain = "@email.com") {
+		if (getLocation() !== sdk.game.locations.RegisterEmail) return false;
+		!email && (email = Starter.randomString(null, true));
+		
+		while (getLocation() !== sdk.game.locations.CharSelect) {
+			switch (getLocation()) {
+			case sdk.game.locations.RegisterEmail:
+				if (Controls.EmailSetEmail.setText(email + domain) && Controls.EmailVerifyEmail.setText(email + domain)) {
+					Controls.EmailRegister.click();
+					delay(100);
+				}
+
+				break;
+			case sdk.game.locations.LoginError:
+				// todo test what conditions get here other than email not matching
+				D2Bot.printToConsole("Failed to set email");
+				Controls.LoginErrorOk.click();
+				
+				return;
+			}
+		}
 	},
 
 	makeAccount: function (info) {
@@ -919,8 +940,8 @@ const ControlAction = {
 
 	// get all characters
 	getCharacters: function () {
-		let count = 0,
-			list = [];
+		let count = 0;
+		let list = [];
 
 		// start from beginning of the char list
 		sendKey(0x24);
@@ -1409,12 +1430,11 @@ const ControlAction = {
 
 const ShitList = {
 	create: function () {
-		let string,
-			obj = {
-				shitlist: []
-			};
+		let obj = {
+			shitlist: []
+		};
 
-		string = JSON.stringify(obj);
+		let string = JSON.stringify(obj);
 
 		//FileTools.writeText("shitlist.json", string);
 		Misc.fileAction("shitlist.json", 1, string);
@@ -1423,9 +1443,9 @@ const ShitList = {
 	},
 
 	getObj: function () {
-		let obj,
-			//string = FileTools.readText("shitlist.json");
-			string = Misc.fileAction("shitlist.json", 0);
+		let obj;
+		let string = Misc.fileAction("shitlist.json", 0);
+		//string = FileTools.readText("shitlist.json");
 
 		try {
 			obj = JSON.parse(string);
@@ -1443,25 +1463,19 @@ const ShitList = {
 	},
 
 	read: function () {
-		let obj;
-
-		if (!FileTools.exists("shitlist.json")) {
-			this.create();
-		}
-
-		obj = this.getObj();
+		!FileTools.exists("shitlist.json") && this.create();
+		
+		let obj = this.getObj();
 
 		return obj.shitlist;
 	},
 
 	add: function (name) {
-		let obj, string;
-
-		obj = this.getObj();
+		let obj = this.getObj();
 
 		obj.shitlist.push(name);
 
-		string = JSON.stringify(obj);
+		let string = JSON.stringify(obj);
 
 		//FileTools.writeText("shitlist.json", string);
 		Misc.fileAction("shitlist.json", 1, string);
@@ -1648,8 +1662,8 @@ const Starter = {
 	randomString: function (len, useNumbers = false) {
 		len === undefined && (len = rand(5, 14));
 
-		let rval = "",
-			letters = useNumbers ? "abcdefghijklmnopqrstuvwxyz0123456789" : "abcdefghijklmnopqrstuvwxyz";
+		let rval = "";
+		let letters = useNumbers ? "abcdefghijklmnopqrstuvwxyz0123456789" : "abcdefghijklmnopqrstuvwxyz";
 
 		for (let i = 0; i < len; i += 1) {
 			rval += letters[rand(0, letters.length - 1)];
@@ -1661,8 +1675,8 @@ const Starter = {
 	randomNumberString: function (len) {
 		len === undefined && (len = rand(2, 5));
 
-		let rval = "",
-			vals = "0123456789";
+		let rval = "";
+		let vals = "0123456789";
 
 		for (let i = 0; i < len; i += 1) {
 			rval += vals[rand(0, vals.length - 1)];
