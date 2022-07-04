@@ -1437,9 +1437,6 @@ item: {
 				TalictheDefenderStatue: 475,
 				MadawctheGuardianStatue: 476,
 			},
-			items: {
-
-			},
 			exits: { // Todo: add all exits
 				// act 1
 				// act 2
