@@ -1974,7 +1974,7 @@ Object.defineProperties(me, {
 	},
 	highestQuestDone: {
 		get: function () {
-			for (let i = sdk.quest.id.SecretCowLevel; i >= sdk.quest.id.SpokeToWarriv; i--) {
+			for (let i = sdk.quest.id.Respec; i >= sdk.quest.id.SpokeToWarriv; i--) {
 				if (me.getQuest(i, 0)) {
 					return i;
 				}

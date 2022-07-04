@@ -331,14 +331,14 @@ function Rushee() {
 	Config.Rushee.Quester && this.log("Leader found", Config.LocalChat.Enabled);
 
 	// lets figure out if we either are the bumper or have a bumper so we know if we need to stop at the end of the rush
-	let nextGame = Config.Rushee.Bumper;
+	let bumperLevelReq = [20, 40, 60][me.diff];
+	// ensure we are the right level to go to next difficulty if not on classic
+	let nextGame = (Config.Rushee.Bumper && (me.classic || me.charlvl >= bumperLevelReq));
 	if (!nextGame) {
 		// we aren't the bumper, lets figure out if anyone else is a bumper
 		// hell is the end of a rush so always end profile after
 		if (Misc.getPlayerCount() > 2 && !me.hell) {
-			// there is more than just us and the rusher in game
-			// check party level
-			let bumperLevelReq = [20, 40, 60][me.diff];
+			// there is more than just us and the rusher in game - so check party level
 			nextGame = Misc.checkPartyLevel(bumperLevelReq);
 		}
 	}
