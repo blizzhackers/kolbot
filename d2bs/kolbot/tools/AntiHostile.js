@@ -17,9 +17,9 @@ includeCommonLibs();
 
 function main() {
 	// Variables and functions
-	let player, attackCount, prevPos, check, missile, outside,
-		charClass = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"],
-		hostiles = [];
+	let player, attackCount, prevPos, check, missile, outside;
+	let charClass = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"];
+	let hostiles = [];
 
 	// AntiHostile gets game event info from ToolsThread
 	this.scriptEvent = function (msg) {

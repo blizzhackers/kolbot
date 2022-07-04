@@ -106,10 +106,29 @@ const Pather = {
 	teleport: true,
 	walkDistance: 5,
 	teleDistance: 40,
-	cancelFlags: [0x01, 0x02, 0x04, 0x08, 0x14, 0x16, 0x0c, 0x0f, 0x17, 0x19, 0x1A],
-	wpAreas: [1, 3, 4, 5, 6, 27, 29, 32, 35, 40, 48, 42, 57, 43, 44, 52, 74, 46, 75, 76, 77, 78, 79, 80, 81, 83, 101, 103, 106, 107, 109, 111, 112, 113, 115, 123, 117, 118, 129],
-	nonTownWpAreas: [3, 4, 5, 6, 27, 29, 32, 35, 48, 42, 57, 43, 44, 52, 74, 46, 76, 77, 78, 79, 80, 81, 83, 101, 106, 107, 111, 112, 113, 115, 123, 117, 118, 129],
-	nextAreas: {1: 2, 40: 41, 75: 76, 103: 104, 109: 110},
+	cancelFlags: [
+		sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.SkillWindow, sdk.uiflags.NPCMenu, sdk.uiflags.Waypoint,
+		sdk.uiflags.Party, sdk.uiflags.Shop, sdk.uiflags.Quest, sdk.uiflags.TradePrompt, sdk.uiflags.Stash, sdk.uiflags.Cube
+	],
+	wpAreas: [
+		sdk.areas.RogueEncampment, sdk.areas.ColdPlains, sdk.areas.StonyField, sdk.areas.DarkWood, sdk.areas.BlackMarsh, sdk.areas.OuterCloister,
+		sdk.areas.JailLvl1, sdk.areas.InnerCloister, sdk.areas.CatacombsLvl2, sdk.areas.LutGholein, sdk.areas.A2SewersLvl2, sdk.areas.DryHills,
+		sdk.areas.HallsoftheDeadLvl2, sdk.areas.FarOasis, sdk.areas.LostCity, sdk.areas.PalaceCellarLvl1, sdk.areas.ArcaneSanctuary, sdk.areas.CanyonofMagic,
+		sdk.areas.KurastDocktown, sdk.areas.SpiderForest, sdk.areas.GreatMarsh, sdk.areas.FlayerJungle, sdk.areas.LowerKurast, sdk.areas.KurastBazaar,
+		sdk.areas.UpperKurast, sdk.areas.Travincal, sdk.areas.DuranceofHateLvl2, sdk.areas.PandemoniumFortress, sdk.areas.CityoftheDamned, sdk.areas.RiverofFlame,
+		sdk.areas.Harrogath, sdk.areas.FrigidHighlands, sdk.areas.ArreatPlateau, sdk.areas.CrystalizedPassage, sdk.areas.GlacialTrail, sdk.areas.HallsofPain,
+		sdk.areas.FrozenTundra, sdk.areas.AncientsWay, sdk.areas.WorldstoneLvl2
+	],
+	nonTownWpAreas: [
+		sdk.areas.ColdPlains, sdk.areas.StonyField, sdk.areas.DarkWood, sdk.areas.BlackMarsh, sdk.areas.OuterCloister,
+		sdk.areas.JailLvl1, sdk.areas.InnerCloister, sdk.areas.CatacombsLvl2, sdk.areas.A2SewersLvl2, sdk.areas.DryHills,
+		sdk.areas.HallsoftheDeadLvl2, sdk.areas.FarOasis, sdk.areas.LostCity, sdk.areas.PalaceCellarLvl1, sdk.areas.ArcaneSanctuary, sdk.areas.CanyonofMagic,
+		sdk.areas.SpiderForest, sdk.areas.GreatMarsh, sdk.areas.FlayerJungle, sdk.areas.LowerKurast, sdk.areas.KurastBazaar,
+		sdk.areas.UpperKurast, sdk.areas.Travincal, sdk.areas.DuranceofHateLvl2, sdk.areas.CityoftheDamned, sdk.areas.RiverofFlame,
+		sdk.areas.FrigidHighlands, sdk.areas.ArreatPlateau, sdk.areas.CrystalizedPassage, sdk.areas.GlacialTrail, sdk.areas.HallsofPain,
+		sdk.areas.FrozenTundra, sdk.areas.AncientsWay, sdk.areas.WorldstoneLvl2
+	],
+	nextAreas: {1: sdk.areas.BloodMoor, 40: sdk.areas.RockyWaste, 75: sdk.areas.SpiderForest, 103: sdk.areas.OuterSteppes, 109: sdk.areas.BloodyFoothills},
 	recursion: true,
 	lastPortalTick: 0,
 
@@ -123,7 +142,7 @@ const Pather = {
 	},
 
 	canTeleport: function () {
-		return this.teleport && (me.getSkill(sdk.skills.Teleport, 1) || me.getStat(sdk.stats.OSkill, sdk.skills.Teleport));
+		return this.teleport && (Skill.canUse(sdk.skills.Teleport) || me.getStat(sdk.stats.OSkill, sdk.skills.Teleport));
 	},
 
 	useTeleport: function () {
@@ -243,7 +262,7 @@ const Pather = {
 							}
 
 							// Only do this once
-							if (fail > 1 && !leaped && me.getSkill(sdk.skills.LeapAttack, 1) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
+							if (fail > 1 && !leaped && Skill.canUse(sdk.skills.LeapAttack) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
 								leaped = true;
 							}
 						}
@@ -305,17 +324,16 @@ const Pather = {
 		let node = {x: x, y: y};
 		let fail = 0;
 
-		let useTeleport = this.useTeleport();
+		let useTeleport = Pather.useTeleport();
 		let tpMana = Skill.getManaCost(sdk.skills.Teleport);
 		let annoyingArea = [sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.MaggotLairLvl3].includes(me.area);
 		let clearSettings = {
-			clearPath: (clearPath || !useTeleport), // walking characters need to clear in front of them
+			clearPath: (!!clearPath || !useTeleport), // walking characters need to clear in front of them
 			range: 10,
 			specType: (typeof clearPath === "number" ? clearPath : 0),
 		};
 		(!retry || (retry <= 3 && !useTeleport)) && (retry = useTeleport ? 5 : 15);
 		let path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? (annoyingArea ? 30 : this.teleDistance) : this.walkDistance);
-
 		if (!path) throw new Error("moveTo: Failed to generate path.");
 
 		path.reverse();
@@ -356,7 +374,7 @@ const Pather = {
 					retry <= 3 && !useTeleport && (retry = 15);
 				}
 
-				if (useTeleport && tpMana < me.mp ? this.teleportTo(node.x, node.y) : this.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
+				if (useTeleport && tpMana < me.mp ? Pather.teleportTo(node.x, node.y) : Pather.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
 					if (!me.inTown) {
 						if (this.recursion) {
 							this.recursion = false;
@@ -366,7 +384,7 @@ const Pather = {
 							// TODO: check whether we are closer to the next node than we are the node we were orignally moving to
 							// and if so move to next node to prevent back tracking for no reason
 							if (getDistance(me, node.x, node.y) > 5) {
-								this.moveTo(node.x, node.y);
+								Pather.moveTo(node.x, node.y);
 							}
 
 							this.recursion = true;
@@ -376,7 +394,7 @@ const Pather = {
 					}
 				} else {
 					if (!me.inTown) {
-						if (!useTeleport && ((me.getMobCount(10) > 0 && Attack.clear(8)) || this.kickBarrels(node.x, node.y) || this.openDoors(node.x, node.y))) {
+						if (!useTeleport && ((me.getMobCount(10) > 0 && Attack.clear(8)) || Pather.kickBarrels(node.x, node.y) || Pather.openDoors(node.x, node.y))) {
 							continue;
 						}
 
@@ -387,7 +405,7 @@ const Pather = {
 							}
 
 							// Only do this once
-							if (fail > 1 && !leaped && me.getSkill(sdk.skills.LeapAttack, 1) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
+							if (fail > 1 && !leaped && Skill.canUse(sdk.skills.LeapAttack) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
 								leaped = true;
 							}
 						}
@@ -489,7 +507,7 @@ const Pather = {
 					settings.clearSettings.range = 5;
 				}
 
-				if (useTele && tpMana <= me.mp ? this.teleportTo(node.x, node.y) : this.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
+				if (useTele && tpMana <= me.mp ? Pather.teleportTo(node.x, node.y) : Pather.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
 					if (!me.inTown) {
 						if (settings.clearSettings.allowClearing && this.recursion) {
 							this.recursion = false;
@@ -519,7 +537,7 @@ const Pather = {
 							}
 
 							// Only do this once
-							if (fail > 1 && !leaped && me.getSkill(sdk.skills.LeapAttack, 1) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
+							if (fail > 1 && !leaped && Skill.canUse(sdk.skills.LeapAttack) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
 								leaped = true;
 							}
 						}
@@ -592,29 +610,29 @@ const Pather = {
 			delay(100);
 		}
 
-		if (x === undefined || y === undefined) return false;
+		if (x === undefined || y === undefined || me.dead) return false;
 		minDist === undefined && (minDist = me.inTown ? 2 : 4);
 
-		let angle, angles, nTimer, whereToClick;
+		let nTimer;
 		let nFail = 0;
 		let attemptCount = 0;
 
 		// credit @Jaenster
 		// Stamina handler and Charge
-		if (!me.inTown && !me.dead) {
+		if (!me.inTown) {
 			// Check if I have a stamina potion and use it if I do
 			if (me.staminaPercent <= 20) {
-				let stam = me.getItemsEx().filter((i) => i.classid === sdk.items.StaminaPotion && i.isInInventory).first();
-				!!stam && ![0, 17, 18].includes(me.mode) && stam.interact();
+				let stam = me.getItemsEx(-1, sdk.itemmode.inStorage).filter((i) => i.classid === sdk.items.StaminaPotion && i.isInInventory).first();
+				!!stam && ![0, 17, 18].includes(me.mode) && stam.use();
 			}
 			(me.runwalk === 1 && me.staminaPercent <= 15) && (me.runwalk = 0);
 			// the less stamina you have, the more you wait to recover
 			let recover = me.staminaMaxDuration < 30 ? 80 : 50;
 			(me.runwalk === 0 && me.staminaPercent >= recover) && (me.runwalk = 1);
-			if (Config.Charge && me.paladin && me.mp >= 9 && getDistance(me.x, me.y, x, y) > 8 && Skill.setSkill(sdk.skills.Charge, 1)) {
-				if (Config.Vigor) {
+			if (Skill.canUse(sdk.skills.Charge) && me.paladin && me.mp >= 9 && getDistance(me.x, me.y, x, y) > 8 && Skill.setSkill(sdk.skills.Charge, 1)) {
+				if (Skill.canUse(sdk.skills.Vigor)) {
 					Skill.setSkill(sdk.skills.Vigor, 0);
-				} else if (!Config.Vigor && !Attack.auradin && me.getSkill(sdk.skills.HolyFreeze, 1)) {
+				} else if (!Config.Vigor && !Attack.auradin && Skill.canUse(sdk.skills.HolyFreeze)) {
 					// Useful in classic to keep mobs cold while you rush them
 					Skill.setSkill(sdk.skills.HolyFreeze, 0);
 				}
@@ -623,19 +641,20 @@ const Pather = {
 					delay(40);
 				}
 			}
+		} else {
+			me.runwalk === 0 && (me.runwalk = 1);
 		}
 
-		(me.inTown && me.runwalk === 0) && (me.runwalk = 1);
-
 		while (getDistance(me.x, me.y, x, y) > minDist && !me.dead) {
-			me.paladin && Config.Vigor && Skill.setSkill(sdk.skills.Vigor, 0);
-			me.paladin && !Config.Vigor && Skill.setSkill(Config.AttackSkill[2], 0);
+			if (me.paladin) {
+				Skill.canUse(sdk.skills.Vigor) ? Skill.setSkill(sdk.skills.Vigor, 0) : Skill.setSkill(Config.AttackSkill[2], 0);
+			}
 
 			if (this.openDoors(x, y) && getDistance(me.x, me.y, x, y) <= minDist) {
 				return true;
 			}
 
-			if (CollMap.checkColl(me, {x: x, y: y}, 0x1 | 0x800)) {
+			if (attemptCount > 1 && CollMap.checkColl(me, {x: x, y: y}, 0x1 | 0x800)) {
 				this.openDoors(me.x, me.y);
 			}
 
@@ -651,12 +670,12 @@ const Pather = {
 					if (nFail >= 3) return false;
 
 					nFail += 1;
-					angle = Math.atan2(me.y - y, me.x - x);
-					angles = [Math.PI / 2, -Math.PI / 2];
+					let angle = Math.atan2(me.y - y, me.x - x);
+					let angles = [Math.PI / 2, -Math.PI / 2];
 
 					for (let i = 0; i < angles.length; i += 1) {
 						// TODO: might need rework into getnearestwalkable
-						whereToClick = {
+						let whereToClick = {
 							x: Math.round(Math.cos(angle + angles[i]) * 5 + me.x),
 							y: Math.round(Math.sin(angle + angles[i]) * 5 + me.y)
 						};
@@ -699,10 +718,9 @@ const Pather = {
 		y - the y coord of the node close to the door
 	*/
 	openDoors: function (x, y) {
-		if (me.inTown) return false;
+		if (me.inTown && me.act !== 5) return false;
 
-		typeof x !== "number" && (x = me.x);
-		typeof y !== "number" && (y = me.y);
+		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
 
 		// Regular doors
 		let door = getUnit(sdk.unittype.Object, "door", 0);
@@ -713,7 +731,7 @@ const Pather = {
 					for (let i = 0; i < 3; i++) {
 						Misc.click(0, 0, door);
 
-						if (Misc.poll(() => door.mode === 2, 1000, 10 + me.ping)) {
+						if (Misc.poll(() => door.mode === 2, 1000, 30)) {
 							return true;
 						}
 
@@ -721,6 +739,25 @@ const Pather = {
 					}
 				}
 			} while (door.getNext());
+		}
+
+		// handle act 5 gate
+		if ([sdk.areas.Harrogath, sdk.areas.BloodyFoothills].includes(me.area)) {
+			let gate = getUnit(sdk.unittype.Object, "gate", 0);
+
+			if (gate) {
+				if ((getDistance(gate, x, y) < 4 && gate.distance < 9) || gate.distance < 4) {
+					for (let i = 0; i < 3; i++) {
+						Misc.click(0, 0, gate);
+
+						if (Misc.poll(() => gate.mode === 2, 1000, 30)) {
+							return true;
+						}
+
+						i === 2 && Packet.flash(me.gid);
+					}
+				}
+			}
 		}
 
 		// Monsta doors (Barricaded)
@@ -759,8 +796,7 @@ const Pather = {
 	kickBarrels: function (x, y) {
 		if (me.inTown) return false;
 
-		typeof x !== "number" && (x = me.x);
-		typeof y !== "number" && (y = me.y);
+		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
 
 		// anything small and annoying really
 		let barrels = getUnits(sdk.unittype.Object)
@@ -851,6 +887,9 @@ const Pather = {
 			throw new Error("moveNearPreset: Couldn't find preset unit - id: " + unitId + " unitType: " + unitType + " in area: " + this.getAreaName(area));
 		}
 
+		delay(40);
+		Misc.poll(() => me.gameReady, 500, 100);
+
 		let unit = {x: presetUnit.roomx * 5 + presetUnit.x, y: presetUnit.roomy * 5 + presetUnit.y};
 
 		return this.moveNear(unit.x, unit.y, minDist, {clearSettings: {clearPath: clearPath}, pop: pop});
@@ -883,6 +922,9 @@ const Pather = {
 			throw new Error("moveToPreset: Couldn't find preset unit - id: " + unitId + " unitType: " + unitType + " in area: " + this.getAreaName(area));
 		}
 
+		delay(40);
+		Misc.poll(() => me.gameReady, 500, 100);
+
 		return this.moveTo(presetUnit.roomx * 5 + presetUnit.x + offX, presetUnit.roomy * 5 + presetUnit.y + offY, 3, clearPath, pop);
 	},
 
@@ -901,20 +943,31 @@ const Pather = {
 		let finalDest = areas.last();
 
 		for (let i = 0; i < areas.length; i += 1) {
+			if (me.area === areas[i]) {
+				console.log("ÿc7(moveToExit) :: ÿc0Already in: " + Pather.getAreaName(areas[i]));
+				continue;
+			}
+
 			console.log("ÿc7(moveToExit) :: ÿc0Moving from: " + Pather.getAreaName(me.area) + " to " + Pather.getAreaName(areas[i]));
 			
-			let area = Misc.poll(() => getArea());
+			let t1 = getTickCount();
+			let area = Misc.poll(() => getArea(me.area));
+			Config.DebugMode && console.log("Took: " + (getTickCount() - t1) + " to find get area");
 
 			if (!area) throw new Error("moveToExit: error in getArea()");
 
+			let t2 = getTickCount();
 			let currTarget = areas[i];
-			let exits = area.exits;
+			let exits = (area.exits || []);
 			let checkExits = [];
 
-			if (!exits || !exits.length) return false;
+			if (!exits.length) return false;
+			Config.DebugMode && console.log("Took: " + (getTickCount() - t2) + " to assign vars");
 
+			let t3 = getTickCount();
 			for (let j = 0; j < exits.length; j += 1) {
 				if (!exits[j].hasOwnProperty("target") || exits[j].target !== currTarget) continue;
+				Config.DebugMode && console.debug(exits[j]);
 				let currCheckExit = {
 					x: exits[j].x,
 					y: exits[j].y,
@@ -925,8 +978,11 @@ const Pather = {
 
 				currCheckExit.target === currTarget && checkExits.push(currCheckExit);
 			}
+			Config.DebugMode && console.log("Took: " + (getTickCount() - t3) + " to find all exits");
 
 			if (checkExits.length > 0) {
+				Config.DebugMode && console.debug(checkExits);
+				let t4 = getTickCount();
 				// if there are multiple exits to the same location find the closest one
 				let currExit = checkExits.length > 1
 					? (() => {
@@ -944,7 +1000,10 @@ const Pather = {
 						//checkExits.sort((a, b) => getDistance(me.x, me.y, a.x, a.y) - getDistance(me.x, me.y, b.x, b.y)).first()
 					})()
 					: checkExits[0];
+				Config.DebugMode && console.log("Took: " + (getTickCount() - t4) + " to pick exit", currExit);
+				let t5 = getTickCount();
 				let dest = this.getNearestWalkable(currExit.x, currExit.y, 5, 1);
+				Config.DebugMode && console.log("Took: " + (getTickCount() - t5) + " to find nearest walkable");
 
 				if (!dest) return false;
 
@@ -1109,7 +1168,7 @@ const Pather = {
 				usetk && i === 0 && unit.mode === 0 && unit.distance < 21 && Skill.cast(sdk.skills.Telekinesis, 0, unit);
 			}
 
-			if (type === 2 && unit.mode === 0) {
+			if (type === sdk.unittype.Object && unit.mode === 0) {
 				if ((me.area === sdk.areas.Travincal && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(21, 0) !== 1)
 					|| (me.area === sdk.areas.ArreatSummit && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(39, 0) !== 1)) {
 					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
@@ -1118,12 +1177,15 @@ const Pather = {
 				me.area === sdk.areas.A3SewersLvl1 ? this.openUnit(2, 367) : this.openUnit(2, id);
 			}
 
-			if (type === 2 && id === 342 && me.area === sdk.areas.DuranceofHateLvl3 && targetArea === sdk.areas.PandemoniumFortress && me.getQuest(22, 0) !== 1) {
+			if (type === sdk.unittype.Object && id === sdk.units.RedPortalToAct4 && me.area === sdk.areas.DuranceofHateLvl3
+				&& targetArea === sdk.areas.PandemoniumFortress && me.getQuest(22, 0) !== 1) {
 				throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 			}
 
 			delay(300);
-			type === 5 ? Misc.click(0, 0, unit) : usetk && unit.distance > 5 ? Skill.cast(sdk.skills.Telekinesis, 0, unit) : sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
+			type === sdk.unittype.Stairs
+				? Misc.click(0, 0, unit)
+				: usetk && unit.distance > 5 ? Skill.cast(sdk.skills.Telekinesis, 0, unit) : sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
 			delay(300);
 
 			let tick = getTickCount();
@@ -1267,14 +1329,16 @@ const Pather = {
 			}
 
 			if (me.inTown) {
-				let npc = getUnit(1, NPC.Warriv);
+				if (me.area === sdk.areas.LutGholein) {
+					let npc = getUnit(sdk.unittype.NPC, NPC.Warriv);
 
-				if (me.area === sdk.areas.LutGholein && !!npc && npc.distance < 50) {
-					if (npc && npc.openMenu()) {
-						Misc.useMenu(0x0D37);
+					if (!!npc && npc.distance < 50) {
+						if (npc && npc.openMenu()) {
+							Misc.useMenu(sdk.menu.GoWest);
 
-						if (!Misc.poll(() => me.gameReady && me.area === 1, 2000, 100)) {
-							throw new Error("Failed to go to act 1 using Warriv");
+							if (!Misc.poll(() => me.gameReady && me.area === sdk.areas.RogueEncampment, 2000, 100)) {
+								throw new Error("Failed to go to act 1 using Warriv");
+							}
 						}
 					}
 				}
@@ -1286,6 +1350,7 @@ const Pather = {
 
 			if (!!wp && wp.area === me.area) {
 				let useTK = (Skill.useTK(wp) && i < 3);
+				let pingDelay = me.getPingDelay();
 
 				if (useTK && !getUIFlag(sdk.uiflags.Waypoint)) {
 					wp.distance > 21 && Pather.moveNearUnit(wp, 20);
@@ -1294,20 +1359,20 @@ const Pather = {
 					this.moveToUnit(wp);
 				}
 
-				if (check || Config.WaypointMenu || !getWaypoint(0)) {
+				if (check || Config.WaypointMenu || !this.initialized) {
 					if (!useTK && (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint))) {
 						this.moveToUnit(wp) && Misc.click(0, 0, wp);
 					}
 
 					// handle getUnit bug
-					if (!getUIFlag(sdk.uiflags.Waypoint) && wp.name.toLowerCase() === "dummy") {
+					if (me.inTown && !getUIFlag(sdk.uiflags.Waypoint) && wp.name.toLowerCase() === "dummy") {
 						Town.getDistance("waypoint") > 5 && Town.move("waypoint");
 						Misc.click(0, 0, wp);
 					}
 
 					let tick = getTickCount();
 
-					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
+					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), pingDelay * 2)) {
 						// Waypoint screen is open
 						if (getUIFlag(sdk.uiflags.Waypoint)) {
 							delay(500);
@@ -1355,19 +1420,19 @@ const Pather = {
 						let retry = Math.min(i + 1, 5);
 						let coord = CollMap.getRandCoordinate(me.x, -5 * retry, 5 * retry, me.y, -5 * retry, 5 * retry);
 						!!coord && this.moveTo(coord.x, coord.y);
-						delay(200 + me.ping);
-						Packet.flash(me.gid);
+						delay(200);
+						Packet.flash(me.gid, pingDelay);
 
 						continue;
 					}
 				}
 
 				if (!check || getUIFlag(sdk.uiflags.Waypoint)) {
-					delay(200 + me.ping);
+					delay(200);
 					wp.interact(targetArea);
 					let tick = getTickCount();
 
-					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), me.ping * 2)) {
+					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), pingDelay * 2)) {
 						if (me.area === targetArea) {
 							delay(1000);
 							console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (formatTime(getTickCount() - wpTick)));
@@ -1382,7 +1447,7 @@ const Pather = {
 					Misc.poll(() => me.gameReady, 2000, 100) && getUIFlag(sdk.uiflags.Waypoint) && me.cancelUIFlags();
 				}
 
-				Packet.flash(me.gid);
+				Packet.flash(me.gid, pingDelay);
 				// Activate check if we fail direct interact twice
 				i > 1 && (check = true);
 			} else {
@@ -1427,30 +1492,36 @@ const Pather = {
 				.first();
 
 			!!oldPortal && (oldGid = oldPortal.gid);
-			tpTool.interact();
-			let tick = getTickCount();
+			
+			if (tpTool.use()) {
+				let tick = getTickCount();
+				let pingDelay = me.gameReady ? me.ping : 350;
 
-			while (getTickCount() - tick < Math.max(500 + i * 100, me.ping * 2 + 100)) {
-				let portal = getUnits(sdk.unittype.Object, "portal")
-					.filter((p) => p.getParent() === me.name && p.gid !== oldGid)
-					.first();
+				while (getTickCount() - tick < Math.max(500 + i * 100, pingDelay * 2 + 100)) {
+					let portal = getUnits(sdk.unittype.Object, "portal")
+						.filter((p) => p.getParent() === me.name && p.gid !== oldGid)
+						.first();
 
-				if (portal) {
-					if (use) {
-						if (this.usePortal(null, null, copyUnit(portal))) {
-							return true;
+					if (!!portal) {
+						if (use) {
+							if (this.usePortal(null, null, copyUnit(portal))) {
+								return true;
+							}
+							break; // don't spam usePortal
+						} else {
+							return copyUnit(portal);
 						}
-						break; // don't spam usePortal
-					} else {
-						return copyUnit(portal);
 					}
-				}
 
-				delay(10);
+					delay(10);
+				}
+			} else {
+				console.log("Failed to use tp tool");
+				Packet.flash(me.gid, pingDelay);
+				delay(200 + pingDelay);
 			}
 
-			Packet.flash(me.gid);
-			delay(200 + me.ping);
+			delay(40);
 		}
 
 		return false;
@@ -1485,12 +1556,25 @@ const Pather = {
 			let portal = unit ? copyUnit(unit) : this.getPortal(targetArea, owner);
 
 			if (portal) {
-				let redPortal = portal.classid === 60;
+				let redPortal = portal.classid === sdk.units.RedPortal;
 
 				if (portal.area === me.area) {
 					if (Skill.useTK(portal) && i < 3) {
-						portal.distance > 21 && (me.inTown && me.act === 5 ? Town.move("portalspot") : Pather.moveNearUnit(portal, 20));
-						Skill.cast(sdk.skills.Telekinesis, 0, portal);
+						portal.distance > 21 && (me.area === sdk.areas.Harrogath ? Town.move("portalspot") : Pather.moveNearUnit(portal, 20));
+						if (Skill.cast(sdk.skills.Telekinesis, 0, portal)) {
+							if (Misc.poll(() => {
+								if (me.area !== preArea) {
+									Pather.lastPortalTick = getTickCount();
+									delay(100);
+
+									return true;
+								}
+
+								return false;
+							}, 500, 50)) {
+								return true;
+							}
+						}
 					} else {
 						portal.distance > 5 && this.moveToUnit(portal);
 
@@ -1498,7 +1582,8 @@ const Pather = {
 							i < 2 ? sendPacket(1, 0x13, 4, 0x2, 4, portal.gid) : Misc.click(0, 0, portal);
 							!!redPortal && delay(150);
 						} else {
-							delay(300 + me.ping);
+							let timeTillNextPortal = Math.round(2500 - (getTickCount() - this.lastPortalTick));
+							delay(timeTillNextPortal);
 							
 							continue;
 						}
@@ -1506,7 +1591,7 @@ const Pather = {
 				}
 
 				// Portal to/from Arcane
-				if (portal.classid === 298 && portal.mode !== 2) {
+				if (portal.classid === sdk.units.ArcaneSanctuaryPortal && portal.mode !== 2) {
 					Misc.click(0, 0, portal);
 					let tick = getTickCount();
 
@@ -1521,7 +1606,7 @@ const Pather = {
 
 				let tick = getTickCount();
 
-				while (getTickCount() - tick < 500 + me.ping) {
+				while (getTickCount() - tick < 500) {
 					if (me.area !== preArea) {
 						this.lastPortalTick = getTickCount();
 						delay(100);
@@ -1532,14 +1617,12 @@ const Pather = {
 					delay(10);
 				}
 
-				if (i > 1) {
-					Packet.flash(me.gid);
-				}
+				i > 1 && Packet.flash(me.gid);
 			} else {
 				Packet.flash(me.gid);
 			}
 
-			delay(200 + me.ping);
+			delay(250);
 		}
 
 		return (targetArea ? me.area === targetArea : me.area !== preArea);
@@ -1584,7 +1667,7 @@ const Pather = {
 	},
 
 	/*
-		Pather.moveTo(x, y, range, step, coll);
+		Pather.getNearestWalkable(x, y, range, step, coll, size);
 		x - the starting x coord
 		y - the starting y coord
 		range - maximum allowed range from the starting coords
@@ -1787,16 +1870,16 @@ const Pather = {
 				Precast.doPrecast(false);
 			} else if (currArea === sdk.areas.StonyField && target.course[0] === sdk.areas.Tristram) {
 				// Stony Field -> Tristram
-				this.moveToPreset(currArea, 1, 737, 0, 0, false, true);
+				this.moveToPreset(currArea, sdk.unittype.Monster, sdk.monsters.preset.Rakanishu, 0, 0, false, true);
 				Misc.poll(() => this.usePortal(sdk.areas.Tristram), 5000, 1000);
 			} else if (currArea === sdk.areas.LutGholein && target.course[0] === sdk.areas.A2SewersLvl1) {
 				// Lut Gholein -> Sewers Level 1 (use Trapdoor)
-				this.moveToPreset(currArea, 5, 19);
-				this.useUnit(2, 74, sdk.areas.A2SewersLvl1);
+				this.moveToPreset(currArea, sdk.unittype.Stairs, 19);
+				this.useUnit(sdk.unittype.Object, 74, sdk.areas.A2SewersLvl1);
 			} else if (currArea === sdk.areas.A2SewersLvl2 && target.course[0] === sdk.areas.A2SewersLvl1) {
 				// Sewers Level 2 -> Sewers Level 1
 				Pather.moveToExit(target.course[0], false);
-				this.useUnit(5, 22, 47);
+				this.useUnit(sdk.unittype.Stairs, 22, 47);
 			} else if (currArea === sdk.areas.PalaceCellarLvl3 && target.course[0] === sdk.areas.ArcaneSanctuary) {
 				// Palace -> Arcane
 				this.moveTo(10073, 8670);
@@ -1804,22 +1887,22 @@ const Pather = {
 			} else if (currArea === sdk.areas.ArcaneSanctuary && target.course[0] === sdk.areas.PalaceCellarLvl3) {
 				// Arcane Sanctuary -> Palace Cellar 3
 				Skill.haveTK ? this.moveNearPreset(currArea, 2, 298, 20) : this.moveToPreset(currArea, 2, 298);
-				unit = Misc.poll(() => getUnit(2, 298));
-				unit && Pather.useUnit(2, 298, 54);
+				unit = Misc.poll(() => getUnit(sdk.unittype.Object, 298));
+				unit && Pather.useUnit(sdk.unittype.Stairs, 298, 54);
 			} else if (currArea === sdk.areas.ArcaneSanctuary && target.course[0] === sdk.areas.CanyonofMagic) {
 				// Arcane Sanctuary -> Canyon of the Magic
-				this.moveToPreset(currArea, 2, 357);
-				unit = getUnit(2, 60);
+				this.moveToPreset(currArea, sdk.unittype.Object, 357);
+				unit = getUnit(sdk.unittype.Object, sdk.units.RedPortal);
 
 				if (!unit || !this.usePortal(null, null, unit)) {
 					for (let i = 0; i < 5; i++) {
-						unit = getUnit(2, 357);
+						unit = getUnit(sdk.unittype.Object, sdk.units.Journal);
 
 						Misc.click(0, 0, unit);
 						delay(1000);
 						me.cancel();
 
-						if (this.usePortal(46)) {
+						if (this.usePortal(sdk.areas.CanyonofMagic)) {
 							break;
 						}
 					}
@@ -1908,6 +1991,7 @@ const Pather = {
 		let node, prevArea;
 		let useWP = false;
 		let arr = [];
+		// need to redo this...that's gonna be a pain
 		let previousAreas = [
 			0, 0, 1, 2, 3, 10, 5, 6, 2, 3, 4, 6, 7, 9, 10, 11, 12, 3, 17, 17, 6, 20, 21, 22, 23, 24, 7, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 4, 1,
 			1, 40, 41, 42, 43, 44, 74, 40, 47, 48, 40, 50, 51, 52, 53, 41, 42, 56, 45, 55, 57, 58, 43, 62, 63, 44, 46, 46, 46, 46, 46, 46, 46, 1, 54, 1,
@@ -1932,10 +2016,10 @@ const Pather = {
 
 				if (this.areasConnected(node.from, node.to)) {
 					// If we have this wp we can start from there
-					if ((me.inTown || // check wp in town
-							((src !== previousAreas[dest] && dest !== previousAreas[src]) && // check wp if areas aren't linked
-								previousAreas[src] !== previousAreas[dest])) && // check wp if areas aren't linked with a common area
-								Pather.wpAreas.indexOf(node.from) > 0 && getWaypoint(Pather.wpAreas.indexOf(node.from))
+					if ((me.inTown // check wp in town
+						|| ((src !== previousAreas[dest] && dest !== previousAreas[src]) // check wp if areas aren't linked
+							&& previousAreas[src] !== previousAreas[dest])) // check wp if areas aren't linked with a common area
+							&& Pather.wpAreas.indexOf(node.from) > 0 && getWaypoint(Pather.wpAreas.indexOf(node.from))
 					) {
 						if (node.from !== src) {
 							useWP = true;

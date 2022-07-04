@@ -10,13 +10,6 @@ const ClassAttack = {
 	baseLL: me.getStat(sdk.stats.LifeLeech),
 	baseED: me.getStat(sdk.stats.DamagePercent),
 	maulBoost: 0,
-	useArmageddon: false,
-
-	canUseArmageddon: function () {
-		if (this.useArmageddon) return true;
-		this.useArmageddon = me.getSkill(sdk.skills.Armageddon, 0);
-		return (this.useArmageddon || me.getSkill(sdk.skills.Armageddon, 1));
-	},
 
 	doAttack: function (unit, preattack) {
 		if (!unit) return 1;
@@ -63,11 +56,11 @@ const ClassAttack = {
 		}
 
 		// Rebuff Armageddon
-		this.canUseArmageddon() && !me.getState(sdk.states.Armageddon) && Skill.cast(sdk.skills.Armageddon, 0);
+		Skill.canUse(sdk.skills.Armageddon) && !me.getState(sdk.states.Armageddon) && Skill.cast(sdk.skills.Armageddon, 0);
 
 		let timedSkill = -1;
 		let untimedSkill = -1;
-		let index = ((unit.spectype & 0x7) || unit.type === 0) ? 1 : 3;
+		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 
 		// Get timed skill
 		let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];

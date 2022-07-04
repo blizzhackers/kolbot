@@ -11,11 +11,11 @@ const Common = {
 			MainLoop:
 			while (true) {
 				switch (true) {
-				case !item(sdk.quest.item.ScrollofInifuss) && !item(sdk.quest.item.KeytotheCairnStones) && !Misc.checkQuest(4, 4):
+				case !item(sdk.quest.item.ScrollofInifuss) && !item(sdk.quest.item.KeytotheCairnStones) && !Misc.checkQuest(sdk.quest.id.TheSearchForCain, 4):
 					Pather.useWaypoint(sdk.areas.DarkWood, true);
 					Precast.doPrecast(true);
 
-					if (!Pather.moveToPreset(sdk.areas.DarkWood, 2, 30, 5, 5)) {
+					if (!Pather.moveToPreset(sdk.areas.DarkWood, sdk.unittype.Object, sdk.quest.chest.InifussTree, 5, 5)) {
 						throw new Error("Failed to move to Tree of Inifuss");
 					}
 
@@ -40,9 +40,9 @@ const Common = {
 
 					break;
 				case item(sdk.quest.item.KeytotheCairnStones) && me.area === sdk.areas.StonyField:
-					Pather.moveToPreset(sdk.areas.StonyField, 1, 737, 10, 10, false, true);
+					Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Monster, sdk.monsters.preset.Rakanishu, 10, 10, false, true);
 					Attack.securePosition(me.x, me.y, 40, 3000, true);
-					Pather.moveToPreset(sdk.areas.StonyField, 2, 17, null, null, true);
+					Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Object, sdk.quest.chest.StoneAlpha, null, null, true);
 					let stones = [
 						object(sdk.quest.chest.StoneAlpha),
 						object(sdk.quest.chest.StoneBeta),
@@ -74,7 +74,7 @@ const Common = {
 					}
 
 					break;
-				case me.area === sdk.areas.Tristram && !Misc.checkQuest(4, 0):
+				case me.area === sdk.areas.Tristram && !Misc.checkQuest(sdk.quest.id.TheSearchForCain, 0):
 					let gibbet = object(sdk.quest.chest.CainsJail);
 
 					if (gibbet && !gibbet.mode) {
@@ -112,8 +112,8 @@ const Common = {
 	
 	Cows: {
 		buildCowRooms: function () {
-			let finalRooms = [],
-				indexes = [];
+			let finalRooms = [];
+			let indexes = [];
 
 			let kingPreset = getPresetUnit(sdk.areas.MooMooFarm, sdk.unittype.Monster, sdk.monsters.preset.TheCowKing);
 			let badRooms = getRoom(kingPreset.roomx * 5 + kingPreset.x, kingPreset.roomy * 5 + kingPreset.y).getNearby();
@@ -146,8 +146,8 @@ const Common = {
 
 			Config.MFLeader && Pather.makePortal() && say("cows");
 
-			let myRoom,
-				rooms = this.buildCowRooms();
+			let myRoom;
+			let rooms = this.buildCowRooms();
 
 			while (rooms.length > 0) {
 				// get the first room + initialize myRoom var
@@ -201,8 +201,8 @@ const Common = {
 		// check for strays array
 		cleared: [],
 
-		diabloLightsEvent: function (bytes) {
-			if (me.area === sdk.areas.ChaosSanctuary && bytes && bytes.length && bytes[0] === 0x89) {
+		diabloLightsEvent: function (bytes = []) {
+			if (me.area === sdk.areas.ChaosSanctuary && bytes && bytes.length === 2 && bytes[0] === 0x89 && bytes[1] === 0x0C) {
 				Common.Diablo.diabloSpawned = true;
 			}
 		},
@@ -257,6 +257,13 @@ const Common = {
 		},
 
 		followPath: function (path) {
+			if (Config.Diablo.Fast) {
+				let len = path.length;
+				let lastNode = {x: path[len - 2], y: path[len - 1]};
+				Pather.moveToUnit(lastNode);
+				return;
+			}
+			
 			for (let i = 0; i < path.length; i += 2) {
 				this.cleared.length > 0 && this.clearStrays();
 
@@ -281,7 +288,7 @@ const Common = {
 
 		clearStrays: function () {
 			let oldPos = {x: me.x, y: me.y};
-			let monster = getUnit(1);
+			let monster = getUnit(sdk.unittype.Monster);
 
 			if (monster) {
 				do {
@@ -332,13 +339,16 @@ const Common = {
 		},
 
 		openSeal: function (classid) {
-			let warn = Config.PublicMode && [396, 394, 392].includes(classid) && Loader.scriptName() === "Diablo";
-			let usetk = (Config.UseTelekinesis && Skill.haveTK && (classid !== 394 || this.seisLayout !== 1));
+			let warn = Config.PublicMode && [sdk.units.DiabloSealVizier, sdk.units.DiabloSealSeis, sdk.units.DiabloSealInfector].includes(classid) && Loader.scriptName() === "Diablo";
+			let usetk = (Skill.haveTK && (classid !== sdk.units.DiabloSealSeis || this.seisLayout !== 1));
+			let seisSeal = classid === sdk.units.DiabloSealSeis;
 			let seal;
 
 			for (let i = 0; i < 5; i++) {
 				if (!seal) {
-					usetk ? Pather.moveNearPreset(108, 2, classid, 15) : Pather.moveToPreset(108, 2, classid, classid === 394 ? 5 : 2, classid === 394 ? 5 : 0);
+					usetk
+						? Pather.moveNearPreset(sdk.areas.ChaosSanctuary, sdk.unittype.Object, classid, 15)
+						: Pather.moveToPreset(sdk.areas.ChaosSanctuary, sdk.unittype.Object, classid, seisSeal ? 5 : 2, seisSeal ? 5 : 0);
 					seal = Misc.poll(() => getUnit(sdk.unittype.Object, classid), 1000, 100);
 				}
 
@@ -353,10 +363,10 @@ const Common = {
 				}
 
 				// Clear around Infector seal, Any leftover abyss knights casting decrep is bad news with Infector
-				if (([392, 393].includes(classid) || i > 1) && me.getMobCount() > 1) {
+				if (([sdk.units.DiabloSealInfector, sdk.units.DiabloSealInfector2].includes(classid) || i > 1) && me.getMobCount() > 1) {
 					Attack.clear(15);
 					// Move back to seal
-					usetk ? Pather.moveNearUnit(seal, 15) : Pather.moveToUnit(seal, classid === 394 ? 5 : 2, classid === 394 ? 5 : 0);
+					usetk ? Pather.moveNearUnit(seal, 15) : Pather.moveToUnit(seal, seisSeal ? 5 : 2, seisSeal ? 5 : 0);
 				}
 
 				if (usetk && this.tkSeal(seal)) {
@@ -364,14 +374,14 @@ const Common = {
 				} else {
 					usetk && (usetk = false);
 
-					if (classid === 392 && me.assassin && this.infLayout === 1) {
+					if (classid === sdk.units.DiabloSealInfector && me.assassin && this.infLayout === 1) {
 						if (Config.UseTraps) {
 							let check = ClassAttack.checkTraps({x: 7899, y: 5293});
 							check && ClassAttack.placeTraps({x: 7899, y: 5293}, check);
 						}
 					}
 
-					classid === 394 ? Misc.poll(function () {
+					seisSeal ? Misc.poll(function () {
 						// stupid diablo shit, walk around the de-seis seal clicking it until we find "the spot"...sigh
 						if (!seal.mode) {
 							Pather.walkTo(seal.x + (rand(-1, 1)), seal.y + (rand(-1, 1)));
@@ -381,14 +391,14 @@ const Common = {
 					}, 3000, 60) : seal.interact();
 
 					// de seis optimization
-					if (classid === 394 && Attack.validSpot(seal.x + 15, seal.y)) {
+					if (seisSeal && Attack.validSpot(seal.x + 15, seal.y)) {
 						Pather.walkTo(seal.x + 15, seal.y);
 					} else {
 						Pather.walkTo(seal.x - 5, seal.y - 5);
 					}
 				}
 
-				delay(classid === 394 ? 1000 + me.ping : 500 + me.ping);
+				delay(seisSeal ? 1000 + me.ping : 500 + me.ping);
 
 				if (seal.mode) {
 					break;
@@ -515,9 +525,9 @@ const Common = {
 			return true;
 		},
 
-		hammerdinPreAttack: function (name, amount) {
+		hammerdinPreAttack: function (name, amount = 5) {
 			if (me.paladin && Config.AttackSkill[1] === sdk.skills.BlessedHammer) {
-				let target = getUnit(1, name);
+				let target = monster(name);
 
 				if (!target) return;
 
@@ -543,15 +553,15 @@ const Common = {
 			let coords = [];
 
 			switch (id) {
-			case getLocaleString(2851):
+			case getLocaleString(sdk.locale.monsters.GrandVizierofChaos):
 				coords = Common.Diablo.vizLayout === 1 ? [7676, 5295] : [7684, 5318];
 
 				break;
-			case getLocaleString(2852):
+			case getLocaleString(sdk.locale.monsters.LordDeSeis):
 				coords = Common.Diablo.seisLayout === 1 ? [7778, 5216] : [7775, 5208];
 
 				break;
-			case getLocaleString(2853):
+			case getLocaleString(sdk.locale.monsters.InfectorofSouls):
 				coords = Common.Diablo.infLayout === 1 ? [7913, 5292] : [7915, 5280];
 
 				break;
@@ -610,7 +620,7 @@ const Common = {
 
 				if (boss) {
 					Common.Diablo.hammerdinPreAttack(name, 8);
-					return Attack.clear(40, 0, name, this.sort);
+					return (Config.Diablo.Fast ? Attack.kill(name) : Attack.clear(40, 0, name, this.sort));
 				}
 
 				delay(250);
@@ -626,7 +636,7 @@ const Common = {
 				Pather.moveTo(7788, 5292);
 			}
 
-			let trapCheck, tick = getTickCount();
+			let tick = getTickCount();
 
 			switch (me.classid) {
 			case sdk.charclass.Amazon:
@@ -657,10 +667,7 @@ const Common = {
 						break;
 					case sdk.charclass.Paladin:
 						Skill.setSkill(Config.AttackSkill[2]);
-
-						if (Config.AttackSkill[1] === sdk.skills.BlessedHammer) {
-							Skill.cast(Config.AttackSkill[1], 1);
-						}
+						Config.AttackSkill[1] === sdk.skills.BlessedHammer && Skill.cast(Config.AttackSkill[1], 1);
 
 						break;
 					case sdk.charclass.Druid:
@@ -675,16 +682,11 @@ const Common = {
 						break;
 					case sdk.charclass.Assassin:
 						if (Config.UseTraps) {
-							trapCheck = ClassAttack.checkTraps({x: 7793, y: 5293});
-
-							if (trapCheck) {
-								ClassAttack.placeTraps({x: 7793, y: 5293, classid: 243}, trapCheck);
-							}
+							let trapCheck = ClassAttack.checkTraps({x: 7793, y: 5293});
+							trapCheck && ClassAttack.placeTraps({x: 7793, y: 5293, classid: 243}, trapCheck);
 						}
 
-						if (Config.AttackSkill[1] === sdk.skills.ShockWeb) {
-							Skill.cast(Config.AttackSkill[3], 0, 7793, 5293);
-						}
+						Config.AttackSkill[1] === sdk.skills.ShockWeb && Skill.cast(Config.AttackSkill[1], 0, 7793, 5293);
 
 						delay(500);
 
@@ -698,7 +700,7 @@ const Common = {
 					delay(500);
 				}
 
-				if (getUnit(1, 243)) {
+				if (monster(sdk.monsters.Diablo)) {
 					return true;
 				}
 			}
@@ -711,7 +713,7 @@ const Common = {
 		altarSpot: {x: 10047, y: 12622},
 
 		canAttack: function () {
-			let ancient = getUnit(1);
+			let ancient = getUnit(sdk.unittype.Monster);
 
 			if (ancient) {
 				do {
@@ -729,14 +731,14 @@ const Common = {
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 5000) {
-				if (getUnit(2, sdk.units.AncientsAltar)) {
+				if (object(sdk.units.AncientsAltar)) {
 					break;
 				}
 
 				delay(20 + me.ping);
 			}
 
-			let altar = getUnit(2, sdk.units.AncientsAltar);
+			let altar = object(sdk.units.AncientsAltar);
 
 			if (altar) {
 				while (altar.mode !== 2) {
@@ -758,7 +760,9 @@ const Common = {
 		},
 
 		checkStatues: function () {
-			let statues = getUnits(2).filter(u => [474, 475, 476].includes(u.classid) && u.mode === 2);
+			let statues = getUnits(sdk.unittype.Object)
+				.filter(u => [sdk.units.KorlictheProtectorStatue, sdk.units.TalictheDefenderStatue, sdk.units.MadawctheGuardianStatue].includes(u.classid)
+					&& u.mode === 2);
 			return statues.length === 3;
 		},
 
@@ -799,7 +803,7 @@ const Common = {
 				delay(1000);
 
 				if (checkQuest) {
-					if (Misc.checkQuest(39, 0)) {
+					if (Misc.checkQuest(sdk.quest.id.RiteofPassage, 0)) {
 						break;
 					} else {
 						console.log("Failed to kill anicents. Attempt: " + retry);
@@ -819,7 +823,7 @@ const Common = {
 			Pather.usePortal(sdk.areas.ArreatSummit, me.name);
 		},
 
-		startAncients: function (preTasks = false) {
+		startAncients: function (preTasks = false, checkQuest = false) {
 			let retry = 0;
 			Pather.moveToUnit(this.altarSpot);
 			this.touchAltar();
@@ -832,16 +836,16 @@ const Common = {
 				retry++;
 			}
 
-			this.killAncients();
+			this.killAncients(checkQuest);
 		},
 	},
 
 	Baal: {
 		checkHydra: function () {
-			let hydra = getUnit(1, getLocaleString(3325));
+			let hydra = monster(getLocaleString(sdk.locale.monsters.Hydra));
 			if (hydra) {
 				do {
-					if (hydra.mode !== 12 && hydra.getStat(172) !== 2) {
+					if (hydra.mode !== 12 && hydra.getStat(sdk.stats.Alignment) !== 2) {
 						Pather.moveTo(15072, 5002);
 						while (hydra.mode !== 12) {
 							delay(500);
@@ -859,23 +863,23 @@ const Common = {
 		},
 
 		checkThrone: function (clear = true) {
-			let monster = getUnit(1);
+			let monster = getUnit(sdk.unittype.Monster);
 
 			if (monster) {
 				do {
 					if (monster.attackable && monster.y < 5080) {
 						switch (monster.classid) {
-						case 23:
-						case 62:
+						case sdk.monsters.WarpedFallen:
+						case sdk.monsters.WarpedShaman:
 							return 1;
-						case 105:
-						case 381:
+						case sdk.monsters.BaalSubjectMummy:
+						case sdk.monsters.BaalColdMage:
 							return 2;
-						case 557:
+						case sdk.monsters.Council4:
 							return 3;
-						case 558:
+						case sdk.monsters.VenomLord2:
 							return 4;
-						case 571:
+						case sdk.monsters.ListerTheTormenter:
 							return 5;
 						default:
 							if (clear) {
@@ -898,7 +902,7 @@ const Common = {
 			let monList = [];
 
 			if (Config.AvoidDolls) {
-				let monster = getUnit(1, 691);
+				let monster = monster(sdk.monsters.SoulKiller);
 
 				if (monster) {
 					do {
@@ -928,8 +932,6 @@ const Common = {
 		},
 
 		preattack: function () {
-			let check;
-
 			switch (me.classid) {
 			case sdk.charclass.Sorceress:
 				if ([sdk.skills.Meteor, sdk.skills.Blizzard, sdk.skills.FrozenOrb, sdk.skills.FireWall].includes(Config.AttackSkill[1])) {
@@ -959,7 +961,7 @@ const Common = {
 				break;
 			case sdk.charclass.Assassin:
 				if (Config.UseTraps) {
-					check = ClassAttack.checkTraps({x: 15094, y: 5028});
+					let check = ClassAttack.checkTraps({x: 15094, y: 5028});
 
 					if (check) {
 						return ClassAttack.placeTraps({x: 15094, y: 5028}, 5);
@@ -988,29 +990,29 @@ const Common = {
 
 				switch (this.checkThrone()) {
 				case 1:
-					Attack.clearClassids(23, 62) && (tick = getTickCount());
+					Attack.clearClassids(sdk.monsters.WarpedFallen, sdk.monsters.WarpedShaman) && (tick = getTickCount());
 
 					break;
 				case 2:
-					Attack.clearClassids(105, 381) && (tick = getTickCount());
+					Attack.clearClassids(sdk.monsters.BaalSubjectMummy, sdk.monsters.BaalColdMage) && (tick = getTickCount());
 
 					break;
 				case 3:
-					Attack.clearClassids(557) && (tick = getTickCount());
+					Attack.clearClassids(sdk.monsters.Council4) && (tick = getTickCount());
 					this.checkHydra() && (tick = getTickCount());
 
 					break;
 				case 4:
-					Attack.clearClassids(558) && (tick = getTickCount());
+					Attack.clearClassids(sdk.monsters.VenomLord2) && (tick = getTickCount());
 
 					break;
 				case 5:
-					Attack.clearClassids(571) && (tick = getTickCount());
+					Attack.clearClassids(sdk.monsters.ListerTheTormenter, sdk.monsters.Minion1, sdk.monsters.Minion2) && (tick = getTickCount());
 
 					break MainLoop;
 				default:
 					if (getTickCount() - tick < 7e3) {
-						if (me.paladin && me.getState(sdk.states.Poison)) {
+						if (Skill.canUse(sdk.skills.Cleansing) && me.getState(sdk.states.Poison)) {
 							Skill.setSkill(sdk.skills.Cleansing, 0);
 						}
 					}
@@ -1081,7 +1083,13 @@ const Common = {
 				Pather.moveTo(15090, 5008);
 				delay(5000);
 				Precast.doPrecast(true);
-				Misc.poll(() => !monster(sdk.monsters.ThroneBaal), minutes(3), 1000);
+				Misc.poll(() => {
+					if (me.mode === 4/*Getting hit*/) {
+						Attack.clear(30);
+						Pather.moveTo(15090, 5008);
+					}
+					return !monster(sdk.monsters.ThroneBaal);
+				}, minutes(3), 1000);
 
 				let portal = object(sdk.units.WorldstonePortal);
 
@@ -1096,7 +1104,11 @@ const Common = {
 				Pather.moveTo(15134, 5923);
 				Attack.kill(sdk.monsters.Baal);
 				Pickit.pickItems();
+
+				return true;
 			}
+
+			return false;
 		}
 	},
 };

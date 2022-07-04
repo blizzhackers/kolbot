@@ -26,15 +26,15 @@ new Overrides.Override(Attack, Attack.getNearestMonster, function (orignal) {
 }).apply();
 
 function main() {
-	let ironGolem, debugInfo = {area: 0, currScript: "no entry"},
-		pingTimer = [],
-		quitFlag = false,
-		quitListDelayTime,
-		cloneWalked = false,
-		antiIdle = false,
-		idleTick = 0,
-		canQuit = true,
-		timerLastDrink = [];
+	let ironGolem, debugInfo = {area: 0, currScript: "no entry"};
+	let pingTimer = [];
+	let quitFlag = false;
+	let quitListDelayTime;
+	let cloneWalked = false;
+	let antiIdle = false;
+	let idleTick = 0;
+	let canQuit = true;
+	let timerLastDrink = [];
 
 	print("ÿc3Start ToolsThread script");
 	D2Bot.init();
@@ -175,6 +175,7 @@ function main() {
 	this.exit = function (chickenExit = false) {
 		chickenExit && D2Bot.updateChickens();
 		Config.LogExperience && Experience.log();
+		console.log("ÿc8Run duration ÿc2" + (formatTime(getTickCount() - me.gamestarttime)));
 		this.stopDefault();
 		quit();
 	};
@@ -219,15 +220,15 @@ function main() {
 		switch (type) {
 		case 0:
 		case 3:
-			pottype = 76;
+			pottype = sdk.itemtype.HealingPotion;
 
 			break;
 		case 1:
-			pottype = 77;
+			pottype = sdk.itemtype.ManaPotion;
 
 			break;
 		default:
-			pottype = 78;
+			pottype = sdk.itemtype.RejuvPotion;
 
 			break;
 		}
@@ -359,23 +360,23 @@ function main() {
 	// Event functions
 	this.keyEvent = function (key) {
 		switch (key) {
-		case 19: // Pause/Break key
+		case sdk.keys.PauseBreak: // pause default.dbj
 			this.togglePause();
 
 			break;
-		case 35: // End key
+		case sdk.keys.End: // stop profile and log character
 			MuleLogger.logChar();
 			delay(rand(Config.QuitListDelay[0] * 1e3, Config.QuitListDelay[1] * 1e3));
 			D2Bot.printToConsole(me.profile + " - end run " + me.gamename);
 			D2Bot.stop(me.profile, true);
 
 			break;
-		case 45: // Ins key
+		case sdk.keys.Insert: // reveal level
 			me.overhead("Revealing " + Pather.getAreaName(me.area));
 			revealLevel(true);
 
 			break;
-		case 107: // Numpad +
+		case sdk.keys.NumpadPlus: // log stats
 			showConsole();
 
 			print("ÿc8My stats :: " + this.getStatsString(me));
@@ -383,7 +384,7 @@ function main() {
 			!!merc && print("ÿc8Merc stats :: " + this.getStatsString(merc));
 
 			break;
-		case 101: // numpad 5
+		case sdk.keys.Numpad5: // force automule check
 			if (AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("muleInfo")) {
 				if (AutoMule.getMuleItems().length > 0) {
 					print("ÿc2Mule triggered");
@@ -397,28 +398,28 @@ function main() {
 			}
 
 			break;
-		case 102: // Numpad 6
+		case sdk.keys.Numpad6: // log character to char viewer
 			MuleLogger.logChar();
 			me.overhead("Logged char: " + me.name);
 
 			break;
-		case 109: // Numpad -
+		case sdk.keys.NumpadDash: // log our items to item log ? should this try to get nearest player? Isn't that what it was meant for
 			Misc.spy(me.name);
 
 			break;
-		case 110: // decimal point
+		case sdk.keys.NumpadDecimal: // show fps info - built in d2 function - does this need force server if we are using localchat?
 			say("/fps");
 
 			break;
-		case 105: // numpad 9 - get nearest preset unit id
+		case sdk.keys.Numpad9: // get nearest preset unit id
 			console.log(this.getNearestPreset());
 
 			break;
-		case 106: // numpad * - precast
+		case sdk.keys.NumpadStar: // precast
 			Precast.doPrecast(true);
 
 			break;
-		case 111: // numpad / - re-load default
+		case sdk.keys.NumpadSlash: // re-load default
 			print("ÿc8ToolsThread :: " + sdk.colors.Red + "Stopping threads and waiting 5 seconds to restart");
 			this.stopDefault() && delay(5e3);
 			print('Starting default.dbj');
@@ -567,11 +568,11 @@ function main() {
 	addEventListener("gameevent", this.gameEvent);
 	addEventListener("scriptmsg", this.scriptEvent);
 
-	// Load Fastmod
-	Packet.changeStat(105, Config.FCR);
-	Packet.changeStat(99, Config.FHR);
-	Packet.changeStat(102, Config.FBR);
-	Packet.changeStat(93, Config.IAS);
+	// Load Fastmod - patched
+	// Packet.changeStat(105, Config.FCR);
+	// Packet.changeStat(99, Config.FHR);
+	// Packet.changeStat(102, Config.FBR);
+	// Packet.changeStat(93, Config.IAS);
 
 	Config.QuitListMode > 0 && this.initQuitList();
 
@@ -666,7 +667,6 @@ function main() {
 		}
 
 		if (quitFlag && canQuit && (typeof quitListDelayTime === "undefined" || getTickCount() >= quitListDelayTime)) {
-			print("ÿc8Run duration ÿc2" + (formatTime(getTickCount() - me.gamestarttime)));
 			this.checkPing(false); // In case of quitlist triggering first
 			this.exit();
 

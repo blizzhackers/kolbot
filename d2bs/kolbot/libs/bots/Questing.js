@@ -14,19 +14,19 @@ function Questing() {
 	};
 
 	let quests = [
-		[1, "den"],
-		[3, "smith"],
-		[4, "cain"],
-		[6, "andy"],
-		[9, "radament"],
-		[17, "lamEssen"],
-		[25, "izual"],
-		[26, "diablo"],
-		[35, "shenk"],
-		[36, "barbs"],
-		[37, "anya"],
-		[39, "ancients"],
-		[40, "baal"]
+		[sdk.quest.id.DenofEvil, "den"],
+		[sdk.quest.id.ToolsoftheTrade, "smith"],
+		[sdk.quest.id.TheSearchForCain, "cain"],
+		[sdk.quest.id.SistersToTheSlaughter, "andy"],
+		[sdk.quest.id.RadamentsLair, "radament"],
+		[sdk.quest.id.LamEsensTome, "lamEssen"],
+		[sdk.quest.id.TheFallenAngel, "izual"],
+		[sdk.quest.id.TerrorsEnd, "diablo"],
+		[sdk.quest.id.SiegeOnHarrogath, "shenk"],
+		[sdk.quest.id.RescueonMountArreat, "barbs"],
+		[sdk.quest.id.PrisonofIce, "anya"],
+		[sdk.quest.id.RiteofPassage, "ancients"],
+		[sdk.quest.id.EyeofDestruction, "baal"]
 	];
 
 	this.den = function () {
@@ -45,7 +45,7 @@ function Questing() {
 	};
 
 	this.smith = function () {
-		if (Misc.checkQuest(3, 1)) return true;
+		if (Misc.checkQuest(sdk.quest.id.ToolsoftheTrade, 1)) return true;
 
 		log("starting smith");
 		if (!Loader.runScript("Smith")) throw new Error();
@@ -58,7 +58,7 @@ function Questing() {
 		Town.goToTown();
 		Town.npcInteract("Charsi");
 
-		return !!Misc.checkQuest(3, 1);
+		return !!Misc.checkQuest(sdk.quest.id.ToolsoftheTrade, 1);
 	};
 
 	this.cain = function () {
@@ -98,7 +98,7 @@ function Questing() {
 				}
 
 				Pather.moveToUnit(coords[0]);
-				Attack.clearClassids(61);
+				Attack.clearClassids(sdk.monsters.DarkShaman1);
 				coords.shift();
 			}
 		}
@@ -123,7 +123,7 @@ function Questing() {
 		Precast.doPrecast(true);
 
 		if (!Pather.moveToExit(sdk.areas.HallsoftheDeadLvl3, true)
-			|| !Pather.moveToPreset(me.area, 2, sdk.quest.chest.HoradricCubeChest)) {
+			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricScrollChest)) {
 			throw new Error("cube failed");
 		}
 
@@ -150,7 +150,7 @@ function Questing() {
 		Precast.doPrecast(true);
 
 		if (!Pather.moveToExit(sdk.areas.RuinedTemple, true)
-			|| !Pather.moveToPreset(me.area, 2, sdk.quest.chest.LamEsensTomeHolder)) {
+			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.LamEsensTomeHolder)) {
 			throw new Error("Lam Essen quest failed");
 		}
 
@@ -177,14 +177,14 @@ function Questing() {
 
 	this.diablo = function () {
 		if (!Pather.accessToAct(4)) return false;
-		if (Misc.checkQuest(26, 0)) return true;
+		if (Misc.checkQuest(sdk.quest.id.TerrorsEnd, 0)) return true;
 
 		log("starting diablo");
 		if (!Loader.runScript("Diablo")) throw new Error();
 		Town.goToTown(4);
 
 		object(sdk.units.RedPortalToAct5)
-			? Pather.useUnit(2, sdk.units.RedPortalToAct5, sdk.areas.Harrogath)
+			? Pather.useUnit(sdk.unittype.Object, sdk.units.RedPortalToAct5, sdk.areas.Harrogath)
 			: Town.npcInteract("Tyrael", false) && Misc.useMenu(sdk.menu.TravelToHarrogath);
 
 		return true;
@@ -192,7 +192,7 @@ function Questing() {
 
 	this.shenk = function () {
 		if (!Pather.accessToAct(5)) return false;
-		if (Misc.checkQuest(35, 1)) return true;
+		if (Misc.checkQuest(sdk.quest.id.SiegeOnHarrogath, 1)) return true;
 
 		log("starting shenk");
 
@@ -216,7 +216,7 @@ function Questing() {
 		Pather.journeyTo(sdk.areas.FrigidHighlands);
 		Precast.doPrecast(true);
 
-		let barbs = (getPresetUnits(me.area, 2, 473) || []);
+		let barbs = (getPresetUnits(me.area, sdk.unittype.Object, sdk.units.BarbCage) || []);
 
 		if (!barbs.length) {
 			log("Couldn't find the barbs");
@@ -249,23 +249,23 @@ function Questing() {
 
 		Town.npcInteract("qual_kehk");
 
-		return !!Misc.checkQuest(36, 0);
+		return !!Misc.checkQuest(sdk.quest.id.RescueonMountArreat, 0);
 	};
 
 	this.anya = function () {
 		if (!Pather.accessToAct(5)) return false;
-		if (Misc.checkQuest(37, 1)) return true;
+		if (Misc.checkQuest(sdk.quest.id.PrisonofIce, 1)) return true;
 
 		log("starting anya");
 
-		if (!Town.goToTown() || !Pather.useWaypoint(113, true)) {
+		if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.CrystalizedPassage, true)) {
 			throw new Error();
 		}
 
 		Precast.doPrecast(true);
 
 		if (!Pather.moveToExit(sdk.areas.FrozenRiver, true)
-			|| !Pather.moveToPreset(me.area, 2, sdk.unit.FrozenAnyasPlatforn)) {
+			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.units.FrozenAnyasPlatform)) {
 			throw new Error("Anya quest failed");
 		}
 
@@ -283,7 +283,7 @@ function Questing() {
 		Town.goToTown();
 		Town.npcInteract("Malah");
 		Town.move("portalspot");
-		Pather.usePortal(114, me.name);
+		Pather.usePortal(sdk.areas.FrozenRiver, me.name);
 
 		// unfreeze her, cancel her speech again
 		anya.interact();
@@ -295,7 +295,7 @@ function Questing() {
 		Town.npcInteract("Malah");
 
 		let scroll = me.scrollofresistance;
-		scroll && clickItem(1, scroll);
+		!!scroll && scroll.use();
 
 		return true;
 	};
@@ -314,9 +314,7 @@ function Questing() {
 
 		// ancients prep
 		Town.doChores();
-		Town.buyPots(10, "Thawing", true);
-		Town.buyPots(10, "Antidote", true);
-		Town.buyPots(10, "Stamina", true);
+		[sdk.items.StaminaPotion, sdk.items.AntidotePotion, sdk.items.ThawingPotion].forEach(p => Town.buyPots(10, p, true));
 
 		let tempConfig = Misc.copy(Config); // save and update config settings
 		let townChicken = getScript("tools/townchicken.js");
@@ -359,7 +357,7 @@ function Questing() {
 		(Config.TownHP > 0 || Config.TownMP > 0) && (townChick && !townChick.running || !townChick) && load("tools/TownChicken.js");
 
 		try {
-			if (Misc.checkQuest(39, 0)) {
+			if (Misc.checkQuest(sdk.quest.id.RiteofPassage, 0)) {
 				Pather.moveToExit([sdk.areas.WorldstoneLvl1, sdk.areas.WorldstoneLvl2], true);
 				Pather.getWP(sdk.areas.WorldstoneLvl2);
 			}

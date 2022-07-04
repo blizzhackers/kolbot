@@ -264,7 +264,7 @@ const Runewords = {
 
 		if (item) {
 			do {
-				if (item && item.quality < 4 && item.getStat(194) === runeword.length) {
+				if (item && item.quality < 4 && item.sockets === runeword.length) {
 					/* check if item has items socketed in it
 						better check than getFlag(0x4000000) because randomly socketed items return false for it
 					*/

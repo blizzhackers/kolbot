@@ -39,7 +39,7 @@ const ClassAttack = {
 	},
 
 	canCurse: function (unit, curseID) {
-		if (unit === undefined || unit.dead || !me.getSkill(curseID, 1)) return false;
+		if (unit === undefined || unit.dead || !Skill.canUse(curseID)) return false;
 
 		let state = 0;
 
@@ -123,7 +123,7 @@ const ClassAttack = {
 		return false;
 	},
 
-	doAttack: function (unit, preattack) {
+	doAttack: function (unit, preattack = false) {
 		if (!unit || unit.dead) return 1;
 
 		let mercRevive = 0;
@@ -132,6 +132,7 @@ const ClassAttack = {
 		let customCurse = -1;
 		let gid = unit.gid;
 		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
+		let classid = unit.classid;
 
 		if (Config.MercWatch && Town.needMerc()) {
 			print("mercwatch");
@@ -183,7 +184,7 @@ const ClassAttack = {
 				}
 
 				if (Config.Curse[1] > 0 && !(unit.spectype & 0x7) && this.canCurse(unit, Config.Curse[1])) {
-					if (getDistance(me, unit) > 25 || checkCollision(me, unit, 0x4)) {
+					if (unit.distance > 25 || checkCollision(me, unit, 0x4)) {
 						if (!Attack.getIntoPosition(unit, 25, 0x4)) {
 							return 0;
 						}
@@ -199,18 +200,18 @@ const ClassAttack = {
 		// Get timed skill
 		let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
 
-		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
+		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill, classid)) {
 			timedSkill = checkSkill;
-		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[5])) {
+		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[5], classid)) {
 			timedSkill = Config.AttackSkill[5];
 		}
 
 		// Get untimed skill
 		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[1] : Config.AttackSkill[index + 1];
 
-		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
+		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill, classid)) {
 			untimedSkill = checkSkill;
-		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[6])) {
+		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[6], classid)) {
 			untimedSkill = Config.AttackSkill[6];
 		}
 
@@ -280,8 +281,11 @@ const ClassAttack = {
 	doCast: function (unit, timedSkill = -1, untimedSkill = -1) {
 		// No valid skills can be found
 		if (timedSkill < 0 && untimedSkill < 0) return 2;
+		// unit became invalidated
+		if (!unit || !unit.attackable) return 1;
 		
 		let walk;
+		let classid = unit.classid;
 
 		// Check for bodies to exploit for CorpseExplosion before committing to an attack for non-summoner type necros
 		this.isArmyFull() && this.checkCorpseNearMonster(unit) && this.explodeCorpses(unit);
@@ -313,7 +317,7 @@ const ClassAttack = {
 
 				break;
 			default:
-				if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) return 0;
+				if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, timedSkill, classid)) return 0;
 
 				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
 					// Allow short-distance walking for melee skills
@@ -331,7 +335,7 @@ const ClassAttack = {
 		}
 
 		if (untimedSkill > -1) {
-			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) return 0;
+			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, untimedSkill, classid)) return 0;
 
 			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
 				// Allow short-distance walking for melee skills
@@ -350,7 +354,7 @@ const ClassAttack = {
 		Misc.poll(() => !me.skillDelay, 1000, 40);
 
 		// Delay for Poison Nova
-		while (this.novaTick && getTickCount() - this.novaTick < Config.PoisonNovaDelay * 1000) {
+		while (timedSkill === sdk.skills.PoisonNova && this.novaTick && getTickCount() - this.novaTick < Config.PoisonNovaDelay * 1000) {
 			delay(40);
 		}
 
@@ -520,7 +524,7 @@ const ClassAttack = {
 			sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
 		];
 
-		if (revive && ((unit.spectype & 0x7) || badList.indexOf(baseId) > -1 || (Config.ReviveUnstackable && getBaseStat("monstats2", baseId, "sizex") === 3))) {
+		if (revive && ((unit.spectype & 0x7) || badList.includes(baseId) || (Config.ReviveUnstackable && getBaseStat("monstats2", baseId, "sizex") === 3))) {
 			return false;
 		}
 

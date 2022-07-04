@@ -18,10 +18,10 @@ function main() {
 
 	Config.init();
 
-	let i, myPartyId, player, shitList, currScript, scriptList,
-		classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"],
-		playerLevels = {},
-		partyTick = getTickCount();
+	let myPartyId, player, shitList, currScript, scriptList;
+	let classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"];
+	let playerLevels = {};
+	let partyTick = getTickCount();
 
 	addEventListener("gameevent",
 		function (mode, param1, param2, name1, name2) {
@@ -84,7 +84,7 @@ function main() {
 	if (Config.PartyAfterScript) {
 		scriptList = [];
 
-		for (i in Scripts) {
+		for (let i in Scripts) {
 			if (Scripts.hasOwnProperty(i) && !!Scripts[i]) {
 				scriptList.push(i);
 			}

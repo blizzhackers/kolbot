@@ -13,14 +13,15 @@ const ClassAttack = {
 		let skills = {timed: -1, untimed: -1};
 		if (!unit) return skills;
 
-		let index = (unit.isSpecial || unit.type === 0) ? 1 : 3;
+		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
+		let classid = unit.classid;
 
 		// Get timed skill
 		let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
 
-		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
+		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill, classid)) {
 			skills.timed = checkSkill;
-		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[5])) {
+		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[5], classid)) {
 			skills.timed = Config.AttackSkill[5];
 		}
 
@@ -29,7 +30,7 @@ const ClassAttack = {
 
 		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
 			skills.untimed = checkSkill;
-		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[6])) {
+		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[6], classid)) {
 			skills.untimed = Config.AttackSkill[6];
 		}
 
@@ -63,7 +64,7 @@ const ClassAttack = {
 		}
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
-			if (Math.round(getDistance(me, unit)) > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
 					return 0;
 				}
@@ -74,19 +75,19 @@ const ClassAttack = {
 			return 1;
 		}
 
-		if (Config.UseInnerSight && Precast.precastables.InnerSight) {
+		if (Skill.canUse(sdk.skills.InnerSight)) {
 			if (!unit.getState(sdk.states.InnerSight) && unit.distance > 3 && unit.distance < 13 && !checkCollision(me, unit, 0x4)) {
 				Skill.cast(sdk.skills.InnerSight, 0, unit);
 			}
 		}
 
-		if (Config.UseSlowMissiles && Precast.precastables.SlowMissiles) {
+		if (Skill.canUse(sdk.skills.SlowMissiles)) {
 			if (!unit.getState(sdk.states.SlowMissiles)) {
 				if ((unit.distance > 3 || unit.getEnchant(sdk.enchant.LightningEnchanted)) && unit.distance < 13 && !checkCollision(me, unit, 0x4)) {
 					// Act Bosses and mini-bosses are immune to Slow Missles and pointless to use on lister or Cows, Use Inner-Sight instead
 					if ([sdk.monsters.HellBovine].includes(unit.classid) || unit.isBoss) {
 						// Check if already in this state
-						if (!unit.getState(sdk.states.InnerSight) && Config.UseInnerSight && Precast.precastables.InnerSight) {
+						if (!unit.getState(sdk.states.InnerSight) && Config.UseInnerSight && Skill.canUse(sdk.skills.InnerSight)) {
 							Skill.cast(sdk.skills.InnerSight, 0, unit);
 						}
 					} else {
@@ -133,7 +134,7 @@ const ClassAttack = {
 				
 				if (!!closeMob) {
 					let findSkill = this.decideSkill(closeMob);
-					(this.doCast(closeMob, findSkill.timed, findSkill.untimed) === 1) || (Config.UseDecoy && Precast.precastables.Decoy && Skill.cast(sdk.skills.Decoy, 0, unit));
+					(this.doCast(closeMob, findSkill.timed, findSkill.untimed) === 1) || (Skill.canUse(sdk.skills.Decoy) && Skill.cast(sdk.skills.Decoy, 0, unit));
 				}
 			}
 
@@ -155,7 +156,7 @@ const ClassAttack = {
 	},
 
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
-	doCast: function (unit, timedSkill, untimedSkill) {
+	doCast: function (unit, timedSkill = -1, untimedSkill = -1) {
 		let walk;
 
 		// No valid skills can be found
@@ -194,7 +195,7 @@ const ClassAttack = {
 
 				break;
 			default:
-				if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
+				if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, timedSkill, unit.classid)) {
 					return 0;
 				}
 
@@ -214,7 +215,7 @@ const ClassAttack = {
 		}
 
 		if (untimedSkill > -1) {
-			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
+			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, untimedSkill, unit.classid)) {
 				return 0;
 			}
 
@@ -235,7 +236,7 @@ const ClassAttack = {
 		Misc.poll(() => !me.skillDelay, 1000, 40);
 
 		// Wait for Lightning Fury timeout
-		while (this.lightFuryTick && getTickCount() - this.lightFuryTick < Config.LightningFuryDelay * 1000) {
+		while (timedSkill === sdk.skills.LightningFury && this.lightFuryTick && getTickCount() - this.lightFuryTick < Config.LightningFuryDelay * 1000) {
 			delay(40);
 		}
 

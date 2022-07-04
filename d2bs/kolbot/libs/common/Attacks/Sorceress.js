@@ -8,25 +8,26 @@
 const ClassAttack = {
 	decideSkill: function (unit) {
 		let skills = {timed: -1, untimed: -1};
-		if (!unit) return skills;
+		if (!unit || !unit.attackable) return skills;
 
 		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
+		let classid = unit.classid;
 
 		// Get timed skill
 		let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
 
-		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
+		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill, classid)) {
 			skills.timed = checkSkill;
-		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[5])) {
+		} else if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[5], classid)) {
 			skills.timed = Config.AttackSkill[5];
 		}
 
 		// Get untimed skill
 		checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[1] : Config.AttackSkill[index + 1];
 
-		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill)) {
+		if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill, classid)) {
 			skills.untimed = checkSkill;
-		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[6])) {
+		} else if (Config.AttackSkill[6] > -1 && Attack.checkResist(unit, Config.AttackSkill[6]) && Attack.validSpot(unit.x, unit.y, Config.AttackSkill[6], classid)) {
 			skills.untimed = Config.AttackSkill[6];
 		}
 
@@ -43,7 +44,7 @@ const ClassAttack = {
 		return skills;
 	},
 
-	doAttack: function (unit, preattack) {
+	doAttack: function (unit, preattack = false) {
 		if (!unit) return 1;
 		let gid = unit.gid;
 
@@ -59,13 +60,13 @@ const ClassAttack = {
 		}
 
 		// Keep Energy Shield active
-		Config.UseEnergyShield && Precast.precastables.EnergyShield && !me.getState(sdk.states.EnergyShield) && Skill.cast(sdk.skills.EnergyShield, 0);
+		Skill.canUse(sdk.skills.EnergyShield) && !me.getState(sdk.states.EnergyShield) && Skill.cast(sdk.skills.EnergyShield, 0);
 
 		// Keep Thunder-Storm active
-		Precast.precastables.ThunderStorm && !me.getState(sdk.states.ThunderStorm) && Skill.cast(sdk.skills.ThunderStorm, 0);
+		Skill.canUse(sdk.skills.ThunderStorm) && !me.getState(sdk.states.ThunderStorm) && Skill.cast(sdk.skills.ThunderStorm, 0);
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
-			if (Math.round(getDistance(me, unit)) > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
 					return 0;
 				}
@@ -76,7 +77,7 @@ const ClassAttack = {
 			return 1;
 		}
 
-		let useStatic = (Config.StaticList.length > 0 && Config.CastStatic < 100 && me.getSkill(42, 1) && Attack.checkResist(unit, "lightning"));
+		let useStatic = (Config.StaticList.length > 0 && Config.CastStatic < 100 && Skill.canUse(sdk.skills.StaticField) && Attack.checkResist(unit, "lightning"));
 		let idCheck = function (id) {
 			if (unit) {
 				switch (true) {
@@ -125,7 +126,6 @@ const ClassAttack = {
 		if (result === 2 && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
 			let merc = me.getMerc();
 			let mercRevive = 0;
-			let haveTK = !!(me.getSkill(sdk.skills.Telekinesis, 1));
 
 			while (unit.attackable) {
 				if (Misc.townCheck()) {
@@ -157,7 +157,7 @@ const ClassAttack = {
 				
 				if (!!closeMob) {
 					let findSkill = this.decideSkill(closeMob);
-					(this.doCast(closeMob, findSkill.timed, findSkill.untimed) === 1) || (haveTK && Skill.cast(sdk.skills.Telekinesis, 0, unit));
+					(this.doCast(closeMob, findSkill.timed, findSkill.untimed) === 1) || (Skill.haveTK && Skill.cast(sdk.skills.Telekinesis, 0, unit));
 				}
 			}
 
@@ -173,13 +173,16 @@ const ClassAttack = {
 
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, timedSkill = -1, untimedSkill = -1) {
-		let walk, noMana = false;
-
 		// No valid skills can be found
 		if (timedSkill < 0 && untimedSkill < 0) return 2;
+		// unit became invalidated
+		if (!unit || !unit.attackable) return 1;
+		
+		let walk, noMana = false;
+		let classid = unit.classid;
 
 		if (timedSkill > -1 && (!me.skillDelay || !Skill.isTimed(timedSkill)) && Skill.getManaCost(timedSkill) < me.mp) {
-			if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
+			if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, timedSkill, classid)) {
 				return 0;
 			}
 
@@ -200,7 +203,7 @@ const ClassAttack = {
 		}
 
 		if (untimedSkill > -1 && Skill.getManaCost(untimedSkill) < me.mp) {
-			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
+			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, untimedSkill, classid)) {
 				return 0;
 			}
 

@@ -16,7 +16,7 @@ Starter.Config = {
 	StopOnDeadHardcore: true, // Stop profile character has died on hardcore mode
 
 	// ChannelConfig can override these options for individual profiles.
-	JoinChannel: "", // Default channel. Can be an array of channels - ["channel 1", "channel 2"]
+	JoinChannel: "", // Default channel.
 	FirstJoinMessage: "", // Default join message. Can be an array of messages
 	ChatActionsDelay: 2, // Seconds to wait in lobby before entering a channel
 	AnnounceGames: false, // Default value
@@ -60,7 +60,7 @@ const AdvancedConfig = {
 		"MyProfile4": {AnnounceGames: true, AnnounceMessage: "Joining game"} // announce game you are joining
 
 		"Profile Name": {
-			JoinChannel: "channel name", -OR- ["channel 1", "channel 2"],
+			JoinChannel: "channel name",
 			FirstJoinMessage: "first message", -OR- ["join msg 1", "join msg 2"],
 			AnnounceGames: true,
 			AfterGameMessage: "message after a finished run" -OR- ["msg 1", msg 2"]

@@ -49,15 +49,15 @@ Unit.prototype.__defineGetter__("idle", function () {
 });
 
 Unit.prototype.__defineGetter__("gold", function () {
-	return this.getStat(14) + this.getStat(15);
+	return this.getStat(sdk.stats.Gold) + this.getStat(sdk.stats.GoldBank);
 });
 
 // Death check
 Unit.prototype.__defineGetter__("dead", function () {
 	switch (this.type) {
-	case 0: // Player
+	case sdk.unittype.Player:
 		return this.mode === 0 || this.mode === 17;
-	case 1: // Monster
+	case sdk.unittype.Monster:
 		return this.mode === 0 || this.mode === 12;
 	default:
 		return false;
@@ -67,47 +67,43 @@ Unit.prototype.__defineGetter__("dead", function () {
 // Check if unit is in town
 Unit.prototype.__defineGetter__("inTown", function () {
 	if (this.type > 0) throw new Error("Unit.inTown: Must be used with player units.");
-
-	return [1, 40, 75, 103, 109].includes(this.area);
+	return [sdk.areas.RogueEncampment, sdk.areas.LutGholein, sdk.areas.KurastDocktown, sdk.areas.PandemoniumFortress, sdk.areas.Harrogath].includes(this.area);
 });
 
 // Check if party unit is in town
 Party.prototype.__defineGetter__("inTown", function () {
-	return [1, 40, 75, 103, 109].includes(this.area);
+	return [sdk.areas.RogueEncampment, sdk.areas.LutGholein, sdk.areas.KurastDocktown, sdk.areas.PandemoniumFortress, sdk.areas.Harrogath].includes(this.area);
 });
 
 Unit.prototype.__defineGetter__("attacking", function () {
 	if (this.type > 0) throw new Error("Unit.attacking: Must be used with player units.");
-
 	return [7, 8, 10, 11, 12, 13, 14, 15, 16, 18].includes(this.mode);
 });
 
 Unit.prototype.__defineGetter__('durabilityPercent', function () {
-	if (this.type !== 4) throw new Error("Unit.durabilityPercent: Must be used on items.");
+	if (this.type !== sdk.unittype.Item) throw new Error("Unit.durabilityPercent: Must be used on items.");
 	if (this.getStat(sdk.stats.Quantity) || !this.getStat(sdk.stats.MaxDurability)) return 100;
-
 	return Math.round(this.getStat(sdk.stats.Durability) * 100 / this.getStat(sdk.stats.MaxDurability));
 });
 
 // Open NPC menu
 Unit.prototype.openMenu = function (addDelay) {
 	if (Config.PacketShopping) return Packet.openMenu(this);
-	if (this.type !== 1) throw new Error("Unit.openMenu: Must be used on NPCs.");
+	if (this.type !== sdk.unittype.NPC) throw new Error("Unit.openMenu: Must be used on NPCs.");
 	if (getUIFlag(sdk.uiflags.NPCMenu)) return true;
 
 	addDelay === undefined && (addDelay = 0);
+	let pingDelay = (me.gameReady ? me.ping : 125);
 
 	for (let i = 0; i < 5; i += 1) {
-		if (getDistance(me, this) > 4) {
-			Pather.moveToUnit(this);
-		}
+		getDistance(me, this) > 4 && Pather.moveToUnit(this);
 
 		Misc.click(0, 0, this);
 		let tick = getTickCount();
 
 		while (getTickCount() - tick < 5000) {
 			if (getUIFlag(sdk.uiflags.NPCMenu)) {
-				delay(Math.max(700 + me.ping, 500 + me.ping * 2 + addDelay * 500));
+				delay(Math.max(700 + pingDelay, 500 + pingDelay * 2 + addDelay * 500));
 
 				return true;
 			}
@@ -120,9 +116,9 @@ Unit.prototype.openMenu = function (addDelay) {
 		}
 
 		sendPacket(1, 0x2f, 4, 1, 4, this.gid);
-		delay(me.ping * 2 + 1);
+		delay(pingDelay * 2 + 1);
 		sendPacket(1, 0x30, 4, 1, 4, this.gid);
-		delay(me.ping * 2 + 1);
+		delay(pingDelay * 2 + 1);
 		Packet.flash(me.gid);
 	}
 
@@ -132,10 +128,11 @@ Unit.prototype.openMenu = function (addDelay) {
 // mode = "Gamble", "Repair" or "Shop"
 Unit.prototype.startTrade = function (mode) {
 	if (Config.PacketShopping) return Packet.startTrade(this, mode);
-	if (this.type !== 1) throw new Error("Unit.startTrade: Must be used on NPCs.");
+	if (this.type !== sdk.unittype.NPC) throw new Error("Unit.startTrade: Must be used on NPCs.");
+	console.log("Starting " + mode + "at " + this.name);
 	if (getUIFlag(sdk.uiflags.Shop)) return true;
 
-	let menuId = mode === "Gamble" ? 0x0D46 : mode === "Repair" ? 0x0D06 : 0x0D44;
+	let menuId = mode === "Gamble" ? sdk.menu.Gamble : mode === "Repair" ? sdk.menu.TradeRepair : sdk.menu.Trade;
 
 	for (let i = 0; i < 3; i += 1) {
 		// Incremental delay on retries
@@ -147,6 +144,7 @@ Unit.prototype.startTrade = function (mode) {
 			while (getTickCount() - tick < 1000) {
 				if (getUIFlag(0x0C) && this.itemcount > 0) {
 					delay(200);
+					console.log("Successfully started " + mode + "at " + this.name);
 
 					return true;
 				}
@@ -165,7 +163,7 @@ Unit.prototype.buy = function (shiftBuy, gamble) {
 	if (Config.PacketShopping) return Packet.buyItem(this, shiftBuy, gamble);
 
 	// Check if it's an item we want to buy
-	if (this.type !== 4) throw new Error("Unit.buy: Must be used on items.");
+	if (this.type !== sdk.unittype.Item) throw new Error("Unit.buy: Must be used on items.");
 
 	// Check if it's an item belonging to a NPC
 	if (!getUIFlag(sdk.uiflags.Shop) || (this.getParent() && this.getParent().gid !== getInteractedNPC().gid)) {
@@ -173,10 +171,10 @@ Unit.prototype.buy = function (shiftBuy, gamble) {
 	}
 
 	// Can we afford the item?
-	if (me.getStat(14) + me.getStat(15) < this.getItemCost(0)) return false;
+	if (me.gold < this.getItemCost(0)) return false;
 
-	let oldGold = me.getStat(14) + me.getStat(15),
-		itemCount = me.itemcount;
+	let oldGold = me.gold;
+	let itemCount = me.itemcount;
 
 	for (let i = 0; i < 3; i += 1) {
 		this.shop(shiftBuy ? 6 : 2);
@@ -184,7 +182,7 @@ Unit.prototype.buy = function (shiftBuy, gamble) {
 		let tick = getTickCount();
 
 		while (getTickCount() - tick < Math.max(2000, me.ping * 2 + 500)) {
-			if (shiftBuy && me.getStat(14) + me.getStat(15) < oldGold) {
+			if (shiftBuy && me.gold < oldGold) {
 				delay(500);
 
 				return true;
@@ -206,7 +204,7 @@ Unit.prototype.buy = function (shiftBuy, gamble) {
 // Item owner name
 Unit.prototype.__defineGetter__("parentName",
 	function () {
-		if (this.type !== 4) throw new Error("Unit.parentName: Must be used with item units.");
+		if (this.type !== sdk.unittype.Item) throw new Error("Unit.parentName: Must be used with item units.");
 
 		let parent = this.getParent();
 
@@ -218,7 +216,11 @@ Unit.prototype.sell = function () {
 	if (Config.PacketShopping) return Packet.sellItem(this);
 
 	// Check if it's an item we want to buy
-	if (this.type !== 4) throw new Error("Unit.sell: Must be used on items.");
+	if (this.type !== sdk.unittype.Item) throw new Error("Unit.sell: Must be used on items.");
+	if (!this.sellable) {
+		console.errorReport((new Error("Item is unsellable")));
+		return false;
+	}
 
 	// Check if it's an item belonging to a NPC
 	if (!getUIFlag(sdk.uiflags.Shop)) throw new Error("Unit.sell: Must be used in shops.");
@@ -245,11 +247,11 @@ Unit.prototype.sell = function () {
 };
 
 Unit.prototype.toCursor = function (usePacket = false) {
-	if (this.type !== 4) throw new Error("Unit.toCursor: Must be used with items.");
+	if (this.type !== sdk.unittype.Item) throw new Error("Unit.toCursor: Must be used with items.");
 	if (me.itemoncursor && this.mode === 4) return true;
 
-	this.location === 7 && Town.openStash();
-	this.location === 6 && Cubing.openCube();
+	this.location === sdk.storage.Stash && Town.openStash();
+	this.location === sdk.storage.Cube && Cubing.openCube();
 
 	if (usePacket) return Packet.itemToCursor(this);
 
@@ -282,18 +284,18 @@ Unit.prototype.toCursor = function (usePacket = false) {
 };
 
 Unit.prototype.drop = function () {
-	if (this.type !== 4) throw new Error("Unit.drop: Must be used with items. Unit Name: " + this.name);
+	if (this.type !== sdk.unittype.Item) throw new Error("Unit.drop: Must be used with items. Unit Name: " + this.name);
 	if (!this.toCursor()) return false;
 
 	let tick = getTickCount();
 	let timeout = Math.max(1000, me.ping * 6);
 
-	while (getUIFlag(0x1a) || getUIFlag(0x19) || !me.gameReady) {
+	while (getUIFlag(sdk.uiflags.Cube) || getUIFlag(sdk.uiflags.Stash) || !me.gameReady) {
 		if (getTickCount() - tick > timeout) {
 			return false;
 		}
 
-		if (getUIFlag(0x1a) || getUIFlag(0x19)) {
+		if (getUIFlag(sdk.uiflags.Cube) || getUIFlag(sdk.uiflags.Stash)) {
 			me.cancel(0);
 		}
 
@@ -326,15 +328,21 @@ Unit.prototype.drop = function () {
  * @returns boolean
  */
 Unit.prototype.use = function () {
-	if (this.type !== 4) throw new Error("Unit.use: Must be used with items. Unit Name: " + this.name);
+	if (this.type !== sdk.unittype.Item) throw new Error("Unit.use: Must be used with items. Unit Name: " + this.name);
 	if (!getBaseStat("items", this.classid, "useable")) throw new Error("Unit.use: Must be used with consumable items. Unit Name: " + this.name);
 	
 	let gid = this.gid;
+	let pingDelay = me.gameReady ? me.ping : 200;
+	let quantity = 0;
+	let iType = this.itemType;
+	let checkQuantity = false;
 
 	switch (this.location) {
 	case sdk.storage.Inventory:
 		// doesn't work, not sure why but it's missing something 
 		//new PacketBuilder().byte(0x20).dword(gid).dword(this.x).dword(this.y).send();
+		checkQuantity = iType === sdk.itemtype.Book;
+		checkQuantity && (quantity = this.getStat(sdk.stats.Quantity));
 		this.interact(); // use interact instead, was hoping to skip this since its really just doing the same thing over but oh well
 
 		break;
@@ -346,9 +354,13 @@ Unit.prototype.use = function () {
 		return false;
 	}
 
-	delay(Math.max(me.ping * 2, 200));
+	delay(Math.max(pingDelay * 2, 200));
 
-	return !(getUnit(4, -1, -1, gid));
+	if (checkQuantity) {
+		return this.getStat(sdk.stats.Quantity) < quantity;
+	} else {
+		return !(getUnit(4, -1, -1, gid));
+	}
 };
 
 me.findItem = function (id = -1, mode = -1, loc = -1, quality = -1) {
@@ -400,7 +412,7 @@ me.cancelUIFlags = function () {
 };
 
 me.switchWeapons = function (slot) {
-	if (this.gametype === 0 || (slot !== undefined && this.weaponswitch === slot)) {
+	if (this.gametype === sdk.game.gametype.Classic || (slot !== undefined && this.weaponswitch === slot)) {
 		return true;
 	}
 
@@ -408,22 +420,28 @@ me.switchWeapons = function (slot) {
 		delay(10);
 	}
 
+	while (!me.gameReady) {
+		delay(25);
+	}
+
 	let originalSlot = this.weaponswitch;
 	let switched = false;
 	let packetHandler = (bytes) => bytes.length > 0 && bytes[0] === 0x97 && (switched = true) && false; // false to not block
 	addEventListener('gamepacket', packetHandler);
 	try {
+		let pingDelay = me.gameReady ? me.ping : 50;
 		for (let i = 0; i < 10; i += 1) {
 			for (let j = 10; --j && me.idle;) {
 				delay(3);
 			}
 
-			i > 0 && delay(Math.min(1 + (me.ping * 1.5), 10));
+			i > 0 && delay(Math.min(1 + (pingDelay * 1.5), 10));
 			!switched && sendPacket(1, 0x60); // Swap weapons
 
 			let tick = getTickCount();
-			while (getTickCount() - tick < 250 + (me.ping * 5)) {
+			while (getTickCount() - tick < 250 + (pingDelay * 5)) {
 				if (switched || originalSlot !== me.weaponswitch) {
+					delay(50);
 					return true;
 				}
 
@@ -461,6 +479,14 @@ me.castingFrames = function (skillId, fcr, charClass) {
 // Returns the duration in seconds needed to cast a given skill at a given FCR for a given char.
 me.castingDuration = function (skillId, fcr = me.FCR, charClass = me.classid) {
 	return (me.castingFrames(skillId, fcr, charClass) / 25);
+};
+
+// calling me.ping can cause issues, use this instead to assign a value
+// might need work to be more accurate but works for now
+me.getPingDelay = function () {
+	let pingDelay = me.gameReady ? me.ping : 250;
+	pingDelay < 10 && (pingDelay = 45);
+	return pingDelay;
 };
 
 /**
@@ -610,6 +636,7 @@ Unit.prototype.haveAll = function (itemInfo = [], returnIfSome = false) {
 			runeword: null,
 			ethereal: null,
 			equipped: null,
+			basetype: null,
 			name: ""
 		}, itemInfo[i]);
 
@@ -626,6 +653,7 @@ Unit.prototype.haveAll = function (itemInfo = [], returnIfSome = false) {
 					&& (itemObj.runeword === null || (item.runeword === itemObj.runeword))
 					&& (itemObj.ethereal === null || (item.ethereal === itemObj.ethereal))
 					&& (itemObj.equipped === null || (typeof itemObj.equipped === "number" ? item.bodylocation === itemObj.equipped : item.isEquipped === itemObj.equipped))
+					&& (itemObj.basetype === null || ((item.normal || item.superior) === itemObj.basetype))
 					&& (!itemObj.name.length || item.fname.toLowerCase().includes(itemObj.name.toLowerCase()))
 				);
 			});
@@ -665,8 +693,8 @@ Unit.prototype.getItems = function (...args) {
 };
 
 Unit.prototype.getItemsEx = function (...args) {
-	let items = [],
-		item = this.getItem.apply(this, args);
+	let items = [];
+	let item = this.getItem.apply(this, args);
 
 	if (item) {
 		do {
@@ -680,9 +708,7 @@ Unit.prototype.getItemsEx = function (...args) {
 Unit.prototype.getPrefix = function (id) {
 	switch (typeof id) {
 	case "number":
-		if (typeof this.prefixnums !== "object") {
-			return this.prefixnum === id;
-		}
+		if (typeof this.prefixnums !== "object") return this.prefixnum === id;
 
 		for (let i = 0; i < this.prefixnums.length; i += 1) {
 			if (id === this.prefixnums[i]) {
@@ -711,9 +737,7 @@ Unit.prototype.getPrefix = function (id) {
 Unit.prototype.getSuffix = function (id) {
 	switch (typeof id) {
 	case "number":
-		if (typeof this.suffixnums !== "object") {
-			return this.suffixnum === id;
-		}
+		if (typeof this.suffixnums !== "object") return this.suffixnum === id;
 
 		for (let i = 0; i < this.suffixnums.length; i += 1) {
 			if (id === this.suffixnums[i]) {
@@ -741,32 +765,20 @@ Unit.prototype.getSuffix = function (id) {
 
 Unit.prototype.__defineGetter__("dexreq",
 	function () {
-		let finalReq,
-			ethereal = this.getFlag(0x400000),
-			reqModifier = this.getStat(91),
-			baseReq = getBaseStat("items", this.classid, "reqdex");
-
-		finalReq = baseReq + Math.floor(baseReq * reqModifier / 100);
-
-		if (ethereal) {
-			finalReq -= 10;
-		}
+		let ethereal = this.getFlag(0x400000);
+		let reqModifier = this.getStat(sdk.stats.ReqPercent);
+		let baseReq = getBaseStat("items", this.classid, "reqdex");
+		let finalReq = baseReq + Math.floor(baseReq * reqModifier / 100) - (ethereal ? 10 : 0);
 
 		return Math.max(finalReq, 0);
 	});
 
 Unit.prototype.__defineGetter__("strreq",
 	function () {
-		let finalReq,
-			ethereal = this.getFlag(0x400000),
-			reqModifier = this.getStat(91),
-			baseReq = getBaseStat("items", this.classid, "reqstr");
-
-		finalReq = baseReq + Math.floor(baseReq * reqModifier / 100);
-
-		if (ethereal) {
-			finalReq -= 10;
-		}
+		let ethereal = this.getFlag(0x400000);
+		let reqModifier = this.getStat(sdk.stats.ReqPercent);
+		let baseReq = getBaseStat("items", this.classid, "reqstr");
+		let finalReq = baseReq + Math.floor(baseReq * reqModifier / 100) - (ethereal ? 10 : 0);
 
 		return Math.max(finalReq, 0);
 	});
@@ -781,13 +793,18 @@ Unit.prototype.__defineGetter__('itemclass',
 	});
 
 Unit.prototype.getStatEx = function (id, subid) {
-	let i, temp, rval, regex;
+	let temp, rval, regex;
 
 	switch (id) {
-	case 555: //calculates all res, doesnt exists trough
+	case sdk.stats.AllRes: //calculates all res, doesnt exists trough
 	{ // Block scope due to the variable declaration
 		// Get all res
-		let allres = [this.getStatEx(39), this.getStatEx(41), this.getStatEx(43), this.getStatEx(45)];
+		let allres = [
+			this.getStatEx(sdk.stats.FireResist),
+			this.getStatEx(sdk.stats.ColdResist),
+			this.getStatEx(sdk.stats.LightningResist),
+			this.getStatEx(sdk.stats.PoisonResist)
+		];
 
 		// What is the minimum of the 4?
 		let min = Math.min.apply(null, allres);
@@ -800,90 +817,90 @@ Unit.prototype.getStatEx = function (id, subid) {
 
 		return fire === cold && cold === light && light === psn ? min : 0;
 	}
-	case 20: // toblock
+	case sdk.stats.ToBlock:
 		switch (this.classid) {
-		case 328: // buckler
-			return this.getStat(20);
-		case 413: // preserved
-		case 483: // mummified
-		case 503: // minion
-			return this.getStat(20) - 3;
-		case 329: // small
-		case 414: // zombie
-		case 484: // fetish
-		case 504: // hellspawn
-			return this.getStat(20) - 5;
-		case 331: // kite
-		case 415: // unraveller
-		case 485: // sexton
-		case 505: // overseer
-			return this.getStat(20) - 8;
-		case 351: // spiked
-		case 374: // deefender
-		case 416: // gargoyle
-		case 486: // cantor
-		case 506: // succubus
-		case 408: // targe
-		case 478: // akaran t
-			return this.getStat(20) - 10;
-		case 330: // large
-		case 375: // round
-		case 417: // demon
-		case 487: // hierophant
-		case 507: // bloodlord
-			return this.getStat(20) - 12;
-		case 376: // scutum
-			return this.getStat(20) - 14;
-		case 409: // rondache
-		case 479: // akaran r
-			return this.getStat(20) - 15;
-		case 333: // goth
-		case 379: // ancient
-			return this.getStat(20) - 16;
-		case 397: // barbed
-			return this.getStat(20) - 17;
-		case 377: // dragon
-			return this.getStat(20) - 18;
-		case 502: // vortex
-			return this.getStat(20) - 19;
-		case 350: // bone
-		case 396: // grim
-		case 445: // luna
-		case 467: // blade barr
-		case 466: // troll
-		case 410: // heraldic
-		case 480: // protector
-			return this.getStat(20) - 20;
-		case 444: // heater
-		case 447: // monarch
-		case 411: // aerin
-		case 481: // gilded
-		case 501: // zakarum
-			return this.getStat(20) - 22;
-		case 332: // tower
-		case 378: // pavise
-		case 446: // hyperion
-		case 448: // aegis
-		case 449: // ward
-			return this.getStat(20) - 24;
-		case 412: // crown
-		case 482: // royal
-		case 500: // kurast
-			return this.getStat(20) - 25;
-		case 499: // sacred r
-			return this.getStat(20) - 28;
-		case 498: // sacred t
-			return this.getStat(20) - 30;
+		case sdk.items.Buckler:
+			return this.getStat(sdk.stats.ToBlock);
+		case sdk.items.PreservedHead:
+		case sdk.items.MummifiedTrophy:
+		case sdk.items.MinionSkull:
+			return this.getStat(sdk.stats.ToBlock) - 3;
+		case sdk.items.SmallShield:
+		case sdk.items.ZombieHead:
+		case sdk.items.FetishTrophy:
+		case sdk.items.HellspawnSkull:
+			return this.getStat(sdk.stats.ToBlock) - 5;
+		case sdk.items.KiteShield:
+		case sdk.items.UnravellerHead:
+		case sdk.items.SextonTrophy:
+		case sdk.items.OverseerSkull:
+			return this.getStat(sdk.stats.ToBlock) - 8;
+		case sdk.items.SpikedShield:
+		case sdk.items.Defender:
+		case sdk.items.GargoyleHead:
+		case sdk.items.CantorTrophy:
+		case sdk.items.SuccubusSkull:
+		case sdk.items.Targe:
+		case sdk.items.AkaranTarge:
+			return this.getStat(sdk.stats.ToBlock) - 10;
+		case sdk.items.LargeShield:
+		case sdk.items.RoundShield:
+		case sdk.items.DemonHead:
+		case sdk.items.HierophantTrophy:
+		case sdk.items.BloodlordSkull:
+			return this.getStat(sdk.stats.ToBlock) - 12;
+		case sdk.items.Scutum:
+			return this.getStat(sdk.stats.ToBlock) - 14;
+		case sdk.items.Rondache:
+		case sdk.items.AkaranRondache:
+			return this.getStat(sdk.stats.ToBlock) - 15;
+		case sdk.items.GothicShield:
+		case sdk.items.AncientShield:
+			return this.getStat(sdk.stats.ToBlock) - 16;
+		case sdk.items.BarbedShield:
+			return this.getStat(sdk.stats.ToBlock) - 17;
+		case sdk.items.DragonShield:
+			return this.getStat(sdk.stats.ToBlock) - 18;
+		case sdk.items.VortexShield:
+			return this.getStat(sdk.stats.ToBlock) - 19;
+		case sdk.items.BoneShield:
+		case sdk.items.GrimShield:
+		case sdk.items.Luna:
+		case sdk.items.BladeBarrier:
+		case sdk.items.TrollNest:
+		case sdk.items.HeraldicShield:
+		case sdk.items.ProtectorShield:
+			return this.getStat(sdk.stats.ToBlock) - 20;
+		case sdk.items.Heater:
+		case sdk.items.Monarch:
+		case sdk.items.AerinShield:
+		case sdk.items.GildedShield:
+		case sdk.items.ZakarumShield:
+			return this.getStat(sdk.stats.ToBlock) - 22;
+		case sdk.items.TowerShield:
+		case sdk.items.Pavise:
+		case sdk.items.Hyperion:
+		case sdk.items.Aegis:
+		case sdk.items.Ward:
+			return this.getStat(sdk.stats.ToBlock) - 24;
+		case sdk.items.CrownShield:
+		case sdk.items.RoyalShield:
+		case sdk.items.KurastShield:
+			return this.getStat(sdk.stats.ToBlock) - 25;
+		case sdk.items.SacredRondache:
+			return this.getStat(sdk.stats.ToBlock) - 28;
+		case sdk.items.SacredTarge:
+			return this.getStat(sdk.stats.ToBlock) - 30;
 		}
 
 		break;
-	case 21: // plusmindamage
-	case 22: // plusmaxdamage
+	case sdk.stats.MinDamage:
+	case sdk.stats.MaxDamage:
 		if (subid === 1) {
 			temp = this.getStat(-1);
 			rval = 0;
 
-			for (i = 0; i < temp.length; i += 1) {
+			for (let i = 0; i < temp.length; i += 1) {
 				switch (temp[i][0]) {
 				case id: // plus one handed dmg
 				case id + 2: // plus two handed dmg
@@ -906,31 +923,32 @@ Unit.prototype.getStatEx = function (id, subid) {
 		}
 
 		break;
-	case 31: // plusdefense
+	case sdk.stats.Defense:
 		if (subid === 0) {
 			if ([0, 1].indexOf(this.mode) < 0) {
 				break;
 			}
 
 			switch (this.itemType) {
-			case 58: // jewel
-			case 82: // charms
-			case 83:
-			case 84:
+			case sdk.itemtype.Jewel:
+			case sdk.itemtype.SmallCharm:
+			case sdk.itemtype.MediumCharm: // todo - fix this in sdk
+			case sdk.itemtype.LargeCharm:
 				// defense is the same as plusdefense for these items
-				return this.getStat(31);
+				return this.getStat(sdk.stats.Defense);
 			}
 
-			if (!this.desc) {
-				this.desc = this.description;
-			}
+			// can fail sometimes
+			!this.desc && (this.desc = this.description);
 
-			temp = this.desc.split("\n");
-			regex = new RegExp("\\+\\d+ " + getLocaleString(3481).replace(/^\s+|\s+$/g, ""));
+			if (this.desc) {
+				temp = this.desc.split("\n");
+				regex = new RegExp("\\+\\d+ " + getLocaleString(3481).replace(/^\s+|\s+$/g, ""));
 
-			for (i = 0; i < temp.length; i += 1) {
-				if (temp[i].match(regex, "i")) {
-					return parseInt(temp[i].replace(/ÿc[0-9!"+<;.*]/, ""), 10);
+				for (let i = 0; i < temp.length; i += 1) {
+					if (temp[i].match(regex, "i")) {
+						return parseInt(temp[i].replace(/ÿc[0-9!"+<;.*]/, ""), 10);
+					}
 				}
 			}
 
@@ -938,17 +956,18 @@ Unit.prototype.getStatEx = function (id, subid) {
 		}
 
 		break;
-	case 57:
+	case sdk.stats.PoisonMinDamage:
 		if (subid === 1) {
-			return Math.round(this.getStat(57) * this.getStat(59) / 256);
+			return Math.round(this.getStat(sdk.stats.PoisonMinDamage) * this.getStat(sdk.stats.PoisonLength) / 256);
 		}
 
 		break;
-	case 83: // itemaddclassskills
+	case sdk.stats.AddClassSkills:
 		if (subid === undefined) {
-			for (i = 0; i < 7; i += 1) {
-				if (this.getStat(83, i)) {
-					return this.getStat(83, i);
+			for (let i = 0; i < 7; i += 1) {
+				let cSkill = this.getStat(sdk.stats.AddClassSkills, i);
+				if (cSkill) {
+					return cSkill;
 				}
 			}
 
@@ -956,13 +975,14 @@ Unit.prototype.getStatEx = function (id, subid) {
 		}
 
 		break;
-	case 188: // itemaddskilltab
+	case sdk.stats.AddSkillTab:
 		if (subid === undefined) {
 			temp = [0, 1, 2, 8, 9, 10, 16, 17, 18, 24, 25, 26, 32, 33, 34, 40, 41, 42, 48, 49, 50];
 
-			for (i = 0; i < temp.length; i += 1) {
-				if (this.getStat(188, temp[i])) {
-					return this.getStat(188, temp[i]);
+			for (let i = 0; i < temp.length; i += 1) {
+				let sTab = this.getStat(sdk.stats.AddSkillTab, temp[i]);
+				if (sTab) {
+					return sTab;
 				}
 			}
 
@@ -970,19 +990,19 @@ Unit.prototype.getStatEx = function (id, subid) {
 		}
 
 		break;
-	case 195: // itemskillonattack
-	case 196: // itemskillonkill
-	case 197: // itemskillondeath
-	case 198: // itemskillonhit
-	case 199: // itemskillonlevelup
-	case 201: // itemskillongethit
-	case 204: // itemchargedskill
+	case sdk.stats.SkillOnAttack:
+	case sdk.stats.SkillOnKill:
+	case sdk.stats.SkillOnDeath:
+	case sdk.stats.SkillOnStrike:
+	case sdk.stats.SkillOnLevelUp:
+	case sdk.stats.SkillWhenStruck:
+	case sdk.stats.ChargedSkill:
 		if (subid === 1) {
 			temp = this.getStat(-2);
 
 			if (temp.hasOwnProperty(id)) {
 				if (temp[id] instanceof Array) {
-					for (i = 0; i < temp[id].length; i += 1) {
+					for (let i = 0; i < temp[id].length; i += 1) {
 						if (temp[id][i] !== undefined) {
 							return temp[id][i].skill;
 						}
@@ -1000,7 +1020,7 @@ Unit.prototype.getStatEx = function (id, subid) {
 
 			if (temp.hasOwnProperty(id)) {
 				if (temp[id] instanceof Array) {
-					for (i = 0; i < temp[id].length; i += 1) {
+					for (let i = 0; i < temp[id].length; i += 1) {
 						if (temp[id][i] !== undefined) {
 							return temp[id][i].level;
 						}
@@ -1014,26 +1034,26 @@ Unit.prototype.getStatEx = function (id, subid) {
 		}
 
 		break;
-	case 216: // itemhpperlevel (for example Fortitude with hp per lvl can be defined now with 1.5)
-		return this.getStat(216) / 2048;
+	case sdk.stats.PerLevelHp: // (for example Fortitude with hp per lvl can be defined now with 1.5)
+		return this.getStat(sdk.stats.PerLevelHp) / 2048;
 	}
 
 	if (this.getFlag(0x04000000)) { // Runeword
 		switch (id) {
-		case 16: // enhanceddefense
+		case sdk.stats.ArmorPercent:
 			if ([0, 1].indexOf(this.mode) < 0) {
 				break;
 			}
 
-			if (!this.desc) {
-				this.desc = this.description;
-			}
+			!this.desc && (this.desc = this.description);
 
-			temp = this.desc.split("\n");
+			if (this.desc) {
+				temp = this.desc.split("\n");
 
-			for (i = 0; i < temp.length; i += 1) {
-				if (temp[i].match(getLocaleString(3520).replace(/^\s+|\s+$/g, ""), "i")) {
-					return parseInt(temp[i].replace(/ÿc[0-9!"+<;.*]/, ""), 10);
+				for (let i = 0; i < temp.length; i += 1) {
+					if (temp[i].match(getLocaleString(3520).replace(/^\s+|\s+$/g, ""), "i")) {
+						return parseInt(temp[i].replace(/ÿc[0-9!"+<;.*]/, ""), 10);
+					}
 				}
 			}
 
@@ -1043,15 +1063,15 @@ Unit.prototype.getStatEx = function (id, subid) {
 				break;
 			}
 
-			if (!this.desc) {
-				this.desc = this.description;
-			}
+			!this.desc && (this.desc = this.description);
 
-			temp = this.desc.split("\n");
+			if (this.desc) {
+				temp = this.desc.split("\n");
 
-			for (i = 0; i < temp.length; i += 1) {
-				if (temp[i].match(getLocaleString(10038).replace(/^\s+|\s+$/g, ""), "i")) {
-					return parseInt(temp[i].replace(/ÿc[0-9!"+<;.*]/, ""), 10);
+				for (let i = 0; i < temp.length; i += 1) {
+					if (temp[i].match(getLocaleString(10038).replace(/^\s+|\s+$/g, ""), "i")) {
+						return parseInt(temp[i].replace(/ÿc[0-9!"+<;.*]/, ""), 10);
+					}
 				}
 			}
 
@@ -1059,11 +1079,7 @@ Unit.prototype.getStatEx = function (id, subid) {
 		}
 	}
 
-	if (subid === undefined) {
-		return this.getStat(id);
-	}
-
-	return this.getStat(id, subid);
+	return (subid === undefined ? this.getStat(id) : this.getStat(id, subid));
 };
 
 /*
@@ -1086,37 +1102,73 @@ Unit.prototype.getStatEx = function (id, subid) {
 */
 
 Unit.prototype.getColor = function () {
-	let i, colors,
-		Color = {
-			black: 3,
-			lightblue: 4,
-			darkblue: 5,
-			crystalblue: 6,
-			lightred: 7,
-			darkred: 8,
-			crystalred: 9,
-			darkgreen: 11,
-			crystalgreen: 12,
-			lightyellow: 13,
-			darkyellow: 14,
-			lightgold: 15,
-			darkgold: 16,
-			lightpurple: 17,
-			orange: 19,
-			white: 20
-		};
+	let colors;
+	let Color = {
+		black: 3,
+		lightblue: 4,
+		darkblue: 5,
+		crystalblue: 6,
+		lightred: 7,
+		darkred: 8,
+		crystalred: 9,
+		darkgreen: 11,
+		crystalgreen: 12,
+		lightyellow: 13,
+		darkyellow: 14,
+		lightgold: 15,
+		darkgold: 16,
+		lightpurple: 17,
+		orange: 19,
+		white: 20
+	};
 
 	// check type
-	if ([2, 3, 15, 16, 19, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 42, 43, 44, 67, 68, 71, 72, 85, 86, 87, 88].indexOf(this.itemType) === -1) {
+	switch (this.itemType) {
+	case sdk.itemtype.Shield:
+	case sdk.itemtype.Armor:
+	case sdk.itemtype.Boots:
+	case sdk.itemtype.Gloves:
+	case sdk.itemtype.Belt:
+	case sdk.itemtype.AuricShields:
+	case sdk.itemtype.VoodooHeads:
+	case sdk.itemtype.Helm:
+	case sdk.itemtype.PrimalHelm:
+	case sdk.itemtype.Circlet:
+	case sdk.itemtype.Pelt:
+	case sdk.itemtype.Scepter:
+	case sdk.itemtype.Wand:
+	case sdk.itemtype.Staff:
+	case sdk.itemtype.Bow:
+	case sdk.itemtype.Axe:
+	case sdk.itemtype.Club:
+	case sdk.itemtype.Sword:
+	case sdk.itemtype.Hammer:
+	case sdk.itemtype.Knife:
+	case sdk.itemtype.Spear:
+	case sdk.itemtype.Polearm:
+	case sdk.itemtype.Crossbow:
+	case sdk.itemtype.Mace:
+	case sdk.itemtype.ThrowingKnife:
+	case sdk.itemtype.ThrowingAxe:
+	case sdk.itemtype.Javelin:
+	case sdk.itemtype.Orb:
+	case sdk.itemtype.AmazonBow:
+	case sdk.itemtype.AmazonSpear:
+	case sdk.itemtype.AmazonJavelin:
+	case sdk.itemtype.MissilePotion:
+	case sdk.itemtype.HandtoHand:
+	case sdk.itemtype.AssassinClaw:
+		break;
+	default:
 		return -1;
 	}
 
 	// check quality
-	if ([4, 5, 6, 7].indexOf(this.quality) === -1) {
+	if ([sdk.itemquality.Magic, sdk.itemquality.Set, sdk.itemquality.Rare, sdk.itemquality.Unique].indexOf(this.quality) === -1) {
 		return -1;
 	}
 
-	if (this.quality === 4 || this.quality === 6) {
+	if (this.quality === sdk.itemquality.Magic || this.quality === sdk.itemquality.Rare) {
 		colors = {
 			"Screaming": Color.orange,
 			"Howling": Color.orange,
@@ -1266,11 +1318,11 @@ Unit.prototype.getColor = function () {
 		};
 
 		switch (this.itemType) {
-		case 15: // boots
+		case sdk.itemtype.Boots:
 			colors["of Precision"] = Color.darkgold;
 
 			break;
-		case 16: // gloves
+		case sdk.itemtype.Gloves:
 			colors["of Alacrity"] = Color.darkyellow;
 			colors["of the Leech"] = Color.crystalred;
 			colors["of the Bat"] = Color.crystalred;
@@ -1278,9 +1330,9 @@ Unit.prototype.getColor = function () {
 
 			break;
 		}
-	} else if (this.quality === 5) { // Set
-		if (this.getFlag(0x10)) {
-			for (i = 0; i < 127; i += 1) {
+	} else if (this.set) {
+		if (this.identified) {
+			for (let i = 0; i < 127; i += 1) {
 				if (this.fname.split("\n").reverse()[0].indexOf(getLocaleString(getBaseStat(16, i, 3))) > -1) {
 					return getBaseStat(16, i, 12) > 20 ? -1 : getBaseStat(16, i, 12);
 				}
@@ -1289,20 +1341,20 @@ Unit.prototype.getColor = function () {
 			return Color.lightyellow; // Unidentified set item
 		}
 	} else if (this.unique) { // Unique
-		for (i = 0; i < 401; i += 1) {
+		for (let i = 0; i < 401; i += 1) {
 			if (this.code === getBaseStat(17, i, 4).replace(/^\s+|\s+$/g, "") && this.fname.split("\n").reverse()[0].indexOf(getLocaleString(getBaseStat(17, i, 2))) > -1) {
 				return getBaseStat(17, i, 13) > 20 ? -1 : getBaseStat(17, i, 13);
 			}
 		}
 	}
 
-	for (i = 0; i < this.suffixes.length; i += 1) {
+	for (let i = 0; i < this.suffixes.length; i += 1) {
 		if (colors.hasOwnProperty(this.suffixes[i])) {
 			return colors[this.suffixes[i]];
 		}
 	}
 
-	for (i = 0; i < this.prefixes.length; i += 1) {
+	for (let i = 0; i < this.prefixes.length; i += 1) {
 		if (colors.hasOwnProperty(this.prefixes[i])) {
 			return colors[this.prefixes[i]];
 		}
@@ -1320,11 +1372,11 @@ Unit.prototype.getColor = function () {
  * @throws Error
  */
 Unit.prototype.castChargedSkill = function (...args) {
-	let skillId, x, y, unit, chargedItem, charge,
-		chargedItems = [],
-		validCharge = function (itemCharge) {
-			return itemCharge.skill === skillId && itemCharge.charges;
-		};
+	let skillId, x, y, unit, chargedItem, charge;
+	let chargedItems = [];
+	let validCharge = function (itemCharge) {
+		return itemCharge.skill === skillId && itemCharge.charges;
+	};
 
 	switch (args.length) {
 	case 0: // item.castChargedSkill()
@@ -1374,17 +1426,27 @@ Unit.prototype.castChargedSkill = function (...args) {
 
 		chargedItems = [];
 
-		this.getItemsEx(-1) // Item must be in inventory, or a charm in inventory
-			.filter(item => item && (item.location === 1 || (item.location === 3 && item.itemType === 82)))
+		// Item must be equipped, or a charm in inventory
+		this.getItemsEx(-1)
+			.filter(item => item && (item.isEquipped || (item.isInInventory && item.isCharm)))
 			.forEach(function (item) {
 				let stats = item.getStat(-2);
 
 				if (stats.hasOwnProperty(204)) {
-					stats = stats[204].filter(validCharge);
-					stats.length && chargedItems.push({
-						charge: stats.first(),
-						item: item
-					});
+					if (stats[204] instanceof Array) {
+						stats = stats[204].filter(validCharge);
+						stats.length && chargedItems.push({
+							charge: stats.first(),
+							item: item
+						});
+					} else {
+						if (stats[204].skill === skillId && stats[204].charges > 1) {
+							chargedItems.push({
+								charge: stats[204].charges,
+								item: item
+							});
+						}
+					}
 				}
 			});
 
@@ -1906,7 +1968,7 @@ Object.defineProperties(me, {
 				me.getQuest(sdk.quest.id.AbleToGotoActIII, 0),
 				me.getQuest(sdk.quest.id.AbleToGotoActIV, 0),
 				me.getQuest(sdk.quest.id.AbleToGotoActV, 0)];
-			let index = acts.findIndex(function (i) { return !i; }); // find first false, returns between 1 and 5
+			let index = acts.findIndex((i) => !i); // find first false, returns between 1 and 5
 			return index === -1 ? 5 : index;
 		}
 	},
@@ -1984,12 +2046,12 @@ Object.defineProperties(me, {
 	},
 	classic: {
 		get: function () {
-			return me.gametype === 0;
+			return me.gametype === sdk.game.gametype.Classic;
 		}
 	},
 	expansion: {
 		get: function () {
-			return me.gametype === 1;
+			return me.gametype === sdk.game.gametype.Expansion;
 		}
 	},
 	softcore: {
@@ -2004,52 +2066,52 @@ Object.defineProperties(me, {
 	},
 	normal: {
 		get: function () {
-			return me.diff === 0;
+			return me.diff === sdk.difficulty.Normal;
 		}
 	},
 	nightmare: {
 		get: function () {
-			return me.diff === 1;
+			return me.diff === sdk.difficulty.Nightmare;
 		}
 	},
 	hell: {
 		get: function () {
-			return me.diff === 2;
+			return me.diff === sdk.difficulty.Hell;
 		}
 	},
 	amazon: {
 		get: function () {
-			return me.classid === 0;
+			return me.classid === sdk.charclass.Amazon;
 		}
 	},
 	sorceress: {
 		get: function () {
-			return me.classid === 1;
+			return me.classid === sdk.charclass.Sorceress;
 		}
 	},
 	necromancer: {
 		get: function () {
-			return me.classid === 2;
+			return me.classid === sdk.charclass.Necromancer;
 		}
 	},
 	paladin: {
 		get: function () {
-			return me.classid === 3;
+			return me.classid === sdk.charclass.Paladin;
 		}
 	},
 	barbarian: {
 		get: function () {
-			return me.classid === 4;
+			return me.classid === sdk.charclass.Barbarian;
 		}
 	},
 	druid: {
 		get: function () {
-			return me.classid === 5;
+			return me.classid === sdk.charclass.Druid;
 		}
 	},
 	assassin: {
 		get: function () {
-			return me.classid === 6;
+			return me.classid === sdk.charclass.Assassin;
 		}
 	},
 	// quest items
@@ -2121,138 +2183,144 @@ Object.defineProperties(me, {
 	// quests
 	den: {
 		get: function () {
-			return me.getQuest(1, 0);
+			return me.getQuest(sdk.quest.id.DenofEvil, 0);
 		}
 	},
 	bloodraven: {
 		get: function () {
-			return me.getQuest(2, 0);
+			return me.getQuest(sdk.quest.id.SistersBurialGrounds, 0);
 		}
 	},
 	smith: {
 		get: function () {
-			return me.getQuest(3, 0);
+			return me.getQuest(sdk.quest.id.ToolsoftheTrade, 0);
+		}
+	},
+	cain: {
+		get: function () {
+			return me.getQuest(sdk.quest.id.TheSearchForCain, 0);
 		}
 	},
 	tristram: {
 		get: function () {
-			return me.getQuest(4, 0);
+			// update where this is used and change the state to be portal opened and me.cain to be quest completed
+			return me.getQuest(sdk.quest.id.TheSearchForCain, 0);
 		}
 	},
 	countess: {
 		get: function () {
-			return me.getQuest(5, 0);
+			return me.getQuest(sdk.quest.id.ForgottenTower, 0);
 		}
 	},
 	andariel: {
 		get: function () {
-			return me.getQuest(7, 0);
+			return me.getQuest(sdk.quest.id.AbleToGotoActII, 0);
 		}
 	},
 	radament: {
 		get: function () {
-			return me.getQuest(9, 0);
+			return me.getQuest(sdk.quest.id.RadamentsLair, 0);
 		}
 	},
 	horadricstaff: {
 		get: function () {
-			return me.getQuest(10, 0);
+			return me.getQuest(sdk.quest.id.TheHoradricStaff, 0);
 		}
 	},
 	summoner: {
 		get: function () {
-			return me.getQuest(13, 0);
+			return me.getQuest(sdk.quest.id.TheSummoner, 0);
 		}
 	},
 	duriel: {
 		get: function () {
-			return me.getQuest(15, 0);
+			return me.getQuest(sdk.quest.id.AbleToGotoActIII, 0);
 		}
 	},
 	goldenbird: {
 		get: function () {
-			return me.getQuest(20, 0);
+			return me.getQuest(sdk.quest.id.TheGoldenBird, 0);
 		}
 	},
 	lamessen: {
 		get: function () {
-			return me.getQuest(17, 0);
+			return me.getQuest(sdk.quest.id.LamEsensTome, 0);
 		}
 	},
 	gidbinn: {
 		get: function () {
-			return me.getQuest(19, 0);
+			return me.getQuest(sdk.quest.id.BladeoftheOldReligion, 0);
 		}
 	},
 	travincal: {
 		get: function () {
-			return me.getQuest(18, 0);
+			return me.getQuest(sdk.quest.id.KhalimsWill, 0);
 		}
 	},
 	mephisto: {
 		get: function () {
-			return me.getQuest(23, 0);
+			return me.getQuest(sdk.quest.id.AbleToGotoActIV, 0);
 		}
 	},
 	izual: {
 		get: function () {
-			return me.getQuest(25, 0);
+			return me.getQuest(sdk.quest.id.TheFallenAngel, 0);
 		}
 	},
 	hellforge: {
 		get: function () {
-			return me.getQuest(27, 0);
+			return me.getQuest(sdk.quest.id.HellsForge, 0);
 		}
 	},
 	diablo: {
 		get: function () {
-			return me.getQuest(26, 0);
+			return me.getQuest(sdk.quest.id.TerrorsEnd, 0);
 		}
 	},
 	shenk: {
 		get: function () {
-			return me.getQuest(35, 0);
+			return me.getQuest(sdk.quest.id.SiegeOnHarrogath, 0);
 		}
 	},
 	larzuk: {
 		get: function () {
-			return me.getQuest(35, 1);
+			return me.getQuest(sdk.quest.id.SiegeOnHarrogath, 1);
 		}
 	},
 	savebarby: {
 		get: function () {
-			return me.getQuest(36, 0);
+			return me.getQuest(sdk.quest.id.RescueonMountArreat, 0);
 		}
 	},
 	barbrescue: {
 		get: function () {
-			return me.getQuest(36, 0);
+			return me.getQuest(sdk.quest.id.RescueonMountArreat, 0);
 		}
 	},
 	anya: {
 		get: function () {
-			return me.getQuest(37, 0);
+			return me.getQuest(sdk.quest.id.PrisonofIce, 0);
 		}
 	},
 	ancients: {
 		get: function () {
-			return me.getQuest(39, 0);
+			return me.getQuest(sdk.quest.id.RiteofPassage, 0);
 		}
 	},
 	baal: {
 		get: function () {
-			return me.getQuest(40, 0);
+			return me.getQuest(sdk.quest.id.EyeofDestruction, 0);
 		}
 	},
 	// Misc
 	cows: {
 		get: function () {
-			return me.getQuest(4, 10);
+			return me.getQuest(sdk.quest.id.TheSearchForCain, 10);
 		}
 	},
 	respec: {
 		get: function () {
-			return me.getQuest(41, 0);
+			return me.getQuest(sdk.quest.id.Respec, 0);
 		}
 	},
 	diffCompleted: {
@@ -2265,7 +2333,7 @@ Object.defineProperties(me, {
 // something in here is causing demon imps in barricade towers to be skipped - todo: figure out what
 Unit.prototype.__defineGetter__('attackable', function () {
 	if (this === undefined || !copyUnit(this).x) return false;
-	if (this.type > 1) return false;
+	if (this.type > sdk.unittype.Monster) return false;
 	// must be in same area
 	if (this.area !== me.area) return false;
 	// player and they are hostile
@@ -2273,7 +2341,7 @@ Unit.prototype.__defineGetter__('attackable', function () {
 	// Dead monster
 	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) return false;
 	// Friendly monster/NPC
-	if (this.getStat(172) === 2) return false;
+	if (this.getStat(sdk.stats.Alignment) === 2) return false;
 	// catapults were returning a level of 0 and hanging up clear scripts
 	if (this.charlvl < 1) return false;
 	// neverCount base stat - hydras, traps etc.
@@ -2282,11 +2350,21 @@ Unit.prototype.__defineGetter__('attackable', function () {
 		return false;
 	}
 	// Monsters that are in flight
-	if ([110, 111, 112, 113, 144, 608].includes(this.classid) && this.mode === 8) return false;
+	if ([
+		sdk.monsters.CarrionBird1, sdk.monsters.UndeadScavenger, sdk.monsters.HellBuzzard,
+		sdk.monsters.WingedNightmare, sdk.monsters.SoulKiller2/*feel like this one is wrong*/,
+		sdk.monsters.CarrionBird2].includes(this.classid) && this.mode === 8) {
+		return false;
+	}
 	// Monsters that are Burrowed/Submerged
-	if ([68, 69, 70, 71, 72, 258, 258, 259, 260, 261, 262, 263].includes(this.classid) && this.mode === 14) return false;
+	if ([
+		sdk.monsters.SandMaggot, sdk.monsters.RockWorm, sdk.monsters.Devourer, sdk.monsters.GiantLamprey, sdk.monsters.WorldKiller2,
+		sdk.monsters.WaterWatcherLimb, sdk.monsters.RiverStalkerLimb, sdk.monsters.StygianWatcherLimb,
+		sdk.monsters.WaterWatcherHead, sdk.monsters.RiverStalkerHead, sdk.monsters.StygianWatcherHead].includes(this.classid) && this.mode === 14) {
+		return false;
+	}
 
-	return [sdk.monsters.ThroneBaal, 179].indexOf(this.classid) === -1;
+	return [sdk.monsters.ThroneBaal, sdk.monsters.Cow/*an evil force*/].indexOf(this.classid) === -1;
 });
 
 Unit.prototype.__defineGetter__('curseable', function () {
@@ -2300,7 +2378,7 @@ Unit.prototype.__defineGetter__('curseable', function () {
 	if (!!this.name && !!this.name.includes(getLocaleString(11086))) return false;
 	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) return true;
 	// Friendly monster/NPC
-	if (this.getStat(172) === 2) return false;
+	if (this.getStat(sdk.stats.Alignment) === 2) return false;
 	// catapults were returning a level of 0 and hanging up clear scripts
 	if (this.charlvl < 1) return false;
 	// Monsters that are in flight
@@ -2331,6 +2409,32 @@ Unit.prototype.getMobCount = function (range = 10, coll = 0, type = 0, noSpecial
 				&& (!type || ((type & mon.spectype) && !noSpecialMobs))
 				&& (!coll || !checkCollision(_this, mon, coll));
 		}).length;
+};
+
+Unit.prototype.checkForMobs = function (givenSettings = {}) {
+	if (this === undefined) return 0;
+	const _this = this;
+	let settings = Object.assign({
+		range: 10,
+		count: 1,
+		coll: 0,
+		spectype: 0
+	}, givenSettings);
+	let mob = getUnit(sdk.unittype.Monster);
+	let count = 0;
+	if (mob) {
+		do {
+			if (getDistance(_this, mob) < settings.range && mob.attackable
+				&& (!settings.spectype || ((settings.spectype & mob.spectype)))
+				&& (!settings.coll || !checkCollision(_this, mob, settings.coll))) {
+				count++;
+			}
+			if (count >= settings.count) {
+				return true;
+			}
+		} while (mob.getNext());
+	}
+	return false;
 };
 
 {

@@ -31,8 +31,8 @@ const AutoStat = new function () {
 	*/
 
 	this.getBlock = function () {
-		let shield = false,
-			item = me.getItem(-1, 1);
+		let shield = false;
+		let item = me.getItem(-1, 1);
 
 		// make sure character has shield equipped
 		if (item) {

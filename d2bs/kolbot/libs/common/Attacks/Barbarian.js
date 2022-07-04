@@ -8,7 +8,7 @@
 // todo - add howl
 
 const ClassAttack = {
-	doAttack: function (unit, preattack) {
+	doAttack: function (unit, preattack = false) {
 		if (!unit) return 1;
 		let gid = unit.gid;
 		let needRepair = Town.needRepair();
@@ -55,7 +55,7 @@ const ClassAttack = {
 		return this.doCast(unit, attackSkill);
 	},
 
-	afterAttack: function (pickit) {
+	afterAttack: function (pickit = true) {
 		Precast.doPrecast(false);
 
 		let needRepair = (Town.needRepair() || []);
@@ -67,6 +67,8 @@ const ClassAttack = {
 
 	doCast: function (unit, attackSkill = -1) {
 		if (attackSkill < 0) return 2;
+		// check if unit became invalidated
+		if (!unit || !unit.attackable) return 1;
 		
 		switch (attackSkill) {
 		case sdk.skills.Whirlwind:
@@ -80,12 +82,12 @@ const ClassAttack = {
 
 			return 1;
 		default:
-			if (Skill.getRange(attackSkill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
+			if (Skill.getRange(attackSkill) < 4 && !Attack.validSpot(unit.x, unit.y, attackSkill, unit.classid)) {
 				return 0;
 			}
 
 			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x4)) {
-				let walk = Skill.getRange(attackSkill) < 4 && getDistance(me, unit) < 10 && !checkCollision(me, unit, 0x1);
+				let walk = Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4, walk)) {
 					return 0;
@@ -103,9 +105,9 @@ const ClassAttack = {
 
 		if (monster) {
 			do {
-				if (monster.distance <= range && monster.attackable && !checkCollision(me, monster, 0x4) &&
-						(Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[monster.isSpecial ? 1 : 3])) ||
-						(Config.AttackSkill[3] > -1 && Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[3]))))) {
+				if (monster.distance <= range && monster.attackable && !checkCollision(me, monster, 0x4)
+						&& (Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[monster.isSpecial ? 1 : 3]))
+							|| (Config.AttackSkill[3] > -1 && Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[3]))))) {
 					return true;
 				}
 			} while (monster.getNext());
@@ -115,7 +117,7 @@ const ClassAttack = {
 	},
 
 	findItem: function (range = 10) {
-		if (!Config.FindItem || !me.getSkill(sdk.skills.FindItem, 1)) return false;
+		if (!Skill.canUse(sdk.skills.FindItem)) return false;
 
 		let retry = false;
 		let corpseList = [];

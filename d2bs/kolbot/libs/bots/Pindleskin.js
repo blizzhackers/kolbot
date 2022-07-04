@@ -1,6 +1,6 @@
 /**
 *  @filename    Pindleskin.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        kill Pindleskin and optionally Nihlathak
 *
 */
@@ -19,7 +19,7 @@ function Pindleskin() {
 	} else {
 		Town.move(NPC.Anya);
 
-		if (!Pather.getPortal(sdk.areas.NihlathaksTemple) && me.getQuest(37, 1)) {
+		if (!Pather.getPortal(sdk.areas.NihlathaksTemple) && me.getQuest(sdk.quest.id.PrisonofIce, 1)) {
 			Town.npcInteract("Anya");
 		}
 
@@ -39,7 +39,7 @@ function Pindleskin() {
 	if (Config.Pindleskin.KillNihlathak) {
 		if (!Pather.moveToExit([sdk.areas.HallsofAnguish, sdk.areas.HallsofPain, sdk.areas.HallsofVaught], true)) throw new Error("Failed to move to Halls of Vaught");
 
-		Pather.moveToPreset(me.area, 2, sdk.units.NihlathaksPlatform, 10, 10);
+		Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.units.NihlathaksPlatform, 10, 10);
 
 		if (Config.Pindleskin.ViperQuit && monster(sdk.monsters.TombViper2)) {
 			console.log("Tomb Vipers found.");
