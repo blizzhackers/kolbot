@@ -28,17 +28,17 @@ const D2Bot = {
 
 	printToConsole: function (msg, color, tooltip, trigger) {
 		let printObj = {
-				msg: msg,
-				color: color || 0,
-				tooltip: tooltip || "",
-				trigger: trigger || ""
-			},
+			msg: msg,
+			color: color || 0,
+			tooltip: tooltip || "",
+			trigger: trigger || ""
+		};
 
-			obj = {
-				profile: me.profile,
-				func: "printToConsole",
-				args: [JSON.stringify(printObj)]
-			};
+		let obj = {
+			profile: me.profile,
+			func: "printToConsole",
+			args: [JSON.stringify(printObj)]
+		};
 
 		sendCopyData(null, this.handle, 0, JSON.stringify(obj));
 	},
@@ -204,9 +204,7 @@ const D2Bot = {
 	},
 
 	stop: function (profile, release) {
-		if (!profile) {
-			profile = me.profile;
-		}
+		!profile && (profile = me.profile);
 
 		let obj = {
 			profile: me.profile,
@@ -381,9 +379,7 @@ const D2Bot = {
 
 const DataFile = {
 	create: function () {
-		let obj, string;
-
-		obj = {
+		let obj = {
 			runs: 0,
 			experience: 0,
 			deaths: 0,
@@ -397,23 +393,18 @@ const DataFile = {
 			nextGame: ""
 		};
 
-		string = JSON.stringify(obj);
+		let string = JSON.stringify(obj);
 
-		//FileTools.writeText("data/" + me.profile + ".json", string);
 		Misc.fileAction("data/" + me.profile + ".json", 1, string);
 
 		return obj;
 	},
 
 	getObj: function () {
-		let obj, string;
-
-		if (!FileTools.exists("data/" + me.profile + ".json")) {
-			DataFile.create();
-		}
-
-		//string = FileTools.readText("data/" + me.profile + ".json");
-		string = Misc.fileAction("data/" + me.profile + ".json", 0);
+		!FileTools.exists("data/" + me.profile + ".json") && DataFile.create();
+		
+		let obj;
+		let string = Misc.fileAction("data/" + me.profile + ".json", 0);
 
 		try {
 			obj = JSON.parse(string);
@@ -442,20 +433,14 @@ const DataFile = {
 			delay(100);
 		}
 
-		let i, obj, string,
-			statArr = [];
+		let statArr = [];
 
-		if (typeof arg === "object") {
-			statArr = arg.slice();
-		}
+		typeof arg === "object" && (statArr = arg.slice());
+		typeof arg === "string" && statArr.push(arg);
 
-		if (typeof arg === "string") {
-			statArr.push(arg);
-		}
+		let obj = this.getObj();
 
-		obj = this.getObj();
-
-		for (i = 0; i < statArr.length; i += 1) {
+		for (let i = 0; i < statArr.length; i += 1) {
 			switch (statArr[i]) {
 			case "experience":
 				obj.experience = me.getStat(13);
@@ -497,9 +482,8 @@ const DataFile = {
 			}
 		}
 
-		string = JSON.stringify(obj);
+		let string = JSON.stringify(obj);
 
-		//FileTools.writeText("data/" + me.profile + ".json", string);
 		Misc.fileAction("data/" + me.profile + ".json", 1, string);
 	}
 };
@@ -820,9 +804,11 @@ const ControlAction = {
 				D2Bot.printToConsole("Failed to set email");
 				Controls.LoginErrorOk.click();
 				
-				return;
+				return false;
 			}
 		}
+
+		return true;
 	},
 
 	makeAccount: function (info) {
@@ -1351,7 +1337,7 @@ const ControlAction = {
 					break;
 				}
 
-				Starter.LocationEvents.login(true);
+				Starter.LocationEvents.login(false);
 
 				break;
 			case sdk.game.locations.SelectDifficultySP:
@@ -2081,7 +2067,7 @@ const Starter = {
 
 			// Multiple realm botting fix in case of R/D or disconnect
 			Starter.firstLogin && getLocation() === sdk.game.locations.Login && Controls.CharSelectExit.click();
-					
+	
 			D2Bot.updateStatus("Logging In");
 					
 			try {
