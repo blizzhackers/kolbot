@@ -21,6 +21,7 @@ const Precast = new function () {
 			tick: 0
 		},
 		HolyShield: {
+			canUse: false,
 			duration: 0,
 			tick: 0
 		},
@@ -161,7 +162,6 @@ const Precast = new function () {
 					return;
 				}
 			});
-
 		this.bestSlot[skillId] = (sumSwap > sumCurr) ? me.weaponswitch ^ 1 : me.weaponswitch;
 		return this.bestSlot[skillId];
 	};
@@ -341,7 +341,7 @@ const Precast = new function () {
 
 			break;
 		case sdk.charclass.Paladin:
-			if (Skill.canUse(sdk.skills.HolyShield) && (force || !me.getState(sdk.states.HolyShield))) {
+			if (Skill.canUse(sdk.skills.HolyShield) && Precast.precastables.HolyShield.canUse && (force || !me.getState(sdk.states.HolyShield))) {
 				this.precastSkill(sdk.skills.HolyShield);
 			}
 

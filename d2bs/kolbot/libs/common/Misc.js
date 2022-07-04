@@ -304,6 +304,11 @@ const Skill = {
 			}
 			break;
 		case sdk.charclass.Paladin:
+			// how to handle if someone manually equips a shield during game play, don't want to build entire item list if we don't need to
+			// maybe store gid of shield, would still require doing me.getItem(-1, 1, gid) everytime we wanted to cast but that's still less involved
+			// than getting every item we have and finding shield, for now keeping this. Checks during init if we have a shield or not
+			Precast.precastables.HolyShield.canUse = me.usingShield();
+
 			break;
 		case sdk.charclass.Barbarian:
 			Skill.canUse(sdk.skills.Shout) && (Precast.precastables.Shout.duration = this.getDuration(sdk.skills.Shout));
@@ -514,7 +519,7 @@ const Skill = {
 			return 50;
 		// Variable range
 		case sdk.skills.StaticField:
-			return Math.floor((me.getSkill(sdk.skills.StaticField, 1) + 3) * 2 / 3);
+			return Math.floor((me.getSkill(sdk.skills.StaticField, 1) + 4) * 2 / 3);
 		case sdk.skills.Leap:
 		{
 			let skLvl = me.getSkill(sdk.skills.Leap, 1);

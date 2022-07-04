@@ -1960,6 +1960,15 @@ Object.defineProperties(Unit.prototype, {
 	},
 });
 
+Unit.prototype.usingShield = function () {
+	if (this.type > sdk.unittype.Monster) return false;
+	// always switch to main hand if we are checking ourselves
+	this === me && me.weaponswitch !== 0 && me.switchWeapons(0);
+	let shield = this.getItemsEx(-1, sdk.itemmode.Equipped)
+		.filter(s => [sdk.itemtype.Shield, sdk.itemtype.AuricShields, sdk.itemtype.VoodooHeads].includes(s.itemType)).first();
+	return !!shield;
+};
+
 Object.defineProperties(me, {
 	highestAct: {
 		get: function () {
