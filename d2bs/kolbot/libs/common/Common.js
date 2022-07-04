@@ -902,14 +902,14 @@ const Common = {
 			let monList = [];
 
 			if (Config.AvoidDolls) {
-				let monster = monster(sdk.monsters.SoulKiller);
+				let mon = monster(sdk.monsters.SoulKiller);
 
-				if (monster) {
+				if (mon) {
 					do {
-						if (monster.x >= 15072 && monster.x <= 15118 && monster.y >= 5002 && monster.y <= 5079 && monster.attackable && !Attack.skipCheck(monster)) {
-							monList.push(copyUnit(monster));
+						if (mon.x >= 15072 && mon.x <= 15118 && mon.y >= 5002 && mon.y <= 5079 && mon.attackable && !Attack.skipCheck(mon)) {
+							monList.push(copyUnit(mon));
 						}
-					} while (monster.getNext());
+					} while (mon.getNext());
 				}
 
 				return monList.length > 0 && Attack.clearList(monList);

@@ -34,7 +34,7 @@ function wpEvent(who, msg) {
 }
 
 function giveWP () {
-	let wp = getUnit(2, "waypoint");
+	let wp = getUnit(sdk.unittype.Object, "waypoint");
 	let success = false;
 	if (wp && !me.inTown && wpsToGive.includes(me.area)) {
 		try {
@@ -896,9 +896,9 @@ function main () {
 		this.log("starting izual");
 
 		let	moveIntoPos = function (unit, range) {
-			let coords = [],
-				angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
-				angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 105, -105, 120, -120, 135, -135, 150, -150, 180];
+			let coords = [];
+			let angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
+			let angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 105, -105, 120, -120, 135, -135, 150, -150, 180];
 
 			for (let i = 0; i < angles.length; i += 1) {
 				let coordx = Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * range + unit.x);
@@ -1010,7 +1010,7 @@ function main () {
 		Precast.doPrecast(false);
 
 		if (!Pather.moveToExit(sdk.areas.FrozenRiver, true)
-			|| !Pather.moveToPreset(me.area, 2, sdk.unit.FrozenAnyasPlatforn)) {
+			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.units.FrozenAnyasPlatform)) {
 			throw new Error("Anya quest failed");
 		}
 

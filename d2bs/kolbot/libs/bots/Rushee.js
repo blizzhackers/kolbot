@@ -20,8 +20,8 @@ new Overrides.Override(Town, Town.goToTown, function(orignal, act, wpmenu) {
 }).apply();
 
 function Rushee() {
-	let act, leader, target, done = false,
-		actions = [];
+	let act, leader, target, done = false;
+	let actions = [];
 
 	this.log = function (msg = "", sayMsg = false) {
 		print(msg);
@@ -61,7 +61,7 @@ function Rushee() {
 
 		if (me.inTown) return false;
 
-		let chest = getUnit(2, chestid);
+		let chest = getUnit(sdk.unittype.Object, chestid);
 
 		if (!chest) {
 			this.log("Couldn't find: " + chestid);
@@ -77,7 +77,7 @@ function Rushee() {
 			coord && Pather.moveTo(coord.x, coord.y);
 		}
 
-		let item = getUnit(4, classid);
+		let item = getUnit(sdk.unittype.Item, classid);
 
 		if (!item) {
 			if (getTickCount() - tick < 500) {
@@ -91,7 +91,7 @@ function Rushee() {
 	};
 
 	this.checkQuestMonster = function (classid) {
-		let monster = getUnit(1, classid);
+		let monster = getUnit(sdk.unittype.Monster, classid);
 
 		if (monster) {
 			while (monster.mode !== 12 && monster.mode !== 0) {
@@ -105,7 +105,7 @@ function Rushee() {
 	};
 
 	this.tyraelTalk = function () {
-		let npc = getUnit(1, NPC.Tyrael);
+		let npc = getUnit(sdk.unittype.NPC, NPC.Tyrael);
 
 		if (!npc) return false;
 
@@ -171,7 +171,7 @@ function Rushee() {
 		delay(750 + me.ping);
 
 		// unbug cursor
-		let item = me.findItem(-1, 0, 3);
+		let item = me.findItem(-1, sdk.unitmode.inStorage, sdk.storage.Inventory);
 
 		if (item && item.toCursor()) {
 			Storage.Inventory.MoveTo(item);
@@ -896,7 +896,12 @@ function Rushee() {
 					break;
 				case "exit":
 				case "bye ~":
-					D2Bot.restart();
+					if (me.hell) {
+						D2Bot.printToConsole("Rush Complete");
+						D2Bot.stop();
+					} else {
+						D2Bot.restart();
+					}
 
 					break;
 				case "a2":
