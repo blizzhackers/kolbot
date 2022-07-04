@@ -2365,6 +2365,59 @@ item: {
 		},
 
 		items: {
+			quest: {
+				// Act 1
+				WirtsLeg: 88,
+				HoradricMalus: 89,
+				ScrollofInifuss: 524,
+				KeytotheCairnStones: 525,
+				// Act 2
+				FinishedStaff: 91,
+				"HoradricStaff": 91,
+				IncompleteStaff: 92,
+				"ShaftoftheHoradricStaff": 92,
+				ViperAmulet: 521,
+				"TopoftheHoradricStaff": 521,
+				Cube: 549,
+				BookofSkill: 552,
+				// Act 3
+				"DecoyGidbinn": 86,
+				"TheGidbinn": 87,
+				KhalimsFlail: 173,
+				KhalimsWill: 174,
+				PotofLife: 545,
+				"AJadeFigurine": 546,
+				JadeFigurine: 546,
+				TheGoldenBird: 547,
+				LamEsensTome: 548,
+				KhalimsEye: 553,
+				KhalimsHeart: 554,
+				KhalimsBrain: 555,
+				// Act 4
+				HellForgeHammer: 90,
+				Soulstone: 551,
+				"MephistosSoulstone": 551,
+				// Act 5
+				MalahsPotion: 644,
+				"ScrollofKnowledge": 645,
+				ScrollofResistance: 646,
+				// Pandemonium Event
+				KeyofTerror: 647,
+				KeyofHate: 648,
+				KeyofDestruction: 649,
+				DiablosHorn: 650,
+				BaalsEye: 651,
+				MephistosBrain: 652,
+				StandardofHeroes: 658,
+				// Essences/Token
+				TokenofAbsolution: 653,
+				TwistedEssenceofSuffering: 654,
+				ChargedEssenceofHatred: 655,
+				BurningEssenceofTerror: 656,
+				FesteringEssenceofDestruction: 657,
+				// Misc
+				"TheBlackTowerKey": 544,
+			},
 			// Weapons
 			"HandAxe": 0,
 			"Axe": 1,
@@ -2915,60 +2968,7 @@ item: {
 			"SmallCharm": 603,
 			"LargeCharm": 604,
 			"GrandCharm": 605,
-
-			quest: {
-				// Act 1
-				WirtsLeg: 88,
-				HoradricMalus: 89,
-				ScrollofInifuss: 524,
-				KeytotheCairnStones: 525,
-				// Act 2
-				FinishedStaff: 91,
-				"HoradricStaff": 91,
-				IncompleteStaff: 92,
-				"ShaftoftheHoradricStaff": 92,
-				ViperAmulet: 521,
-				"TopoftheHoradricStaff": 521,
-				Cube: 549,
-				BookofSkill: 552,
-				// Act 3
-				"DecoyGidbinn": 86,
-				"TheGidbinn": 87,
-				KhalimsFlail: 173,
-				KhalimsWill: 174,
-				PotofLife: 545,
-				"AJadeFigurine": 546,
-				JadeFigurine: 546,
-				TheGoldenBird: 547,
-				LamEsensTome: 548,
-				KhalimsEye: 553,
-				KhalimsHeart: 554,
-				KhalimsBrain: 555,
-				// Act 4
-				HellForgeHammer: 90,
-				Soulstone: 551,
-				"MephistosSoulstone": 551,
-				// Act 5
-				MalahsPotion: 644,
-				"ScrollofKnowledge": 645,
-				ScrollofResistance: 646,
-				// Pandemonium Event
-				KeyofTerror: 647,
-				KeyofHate: 648,
-				KeyofDestruction: 649,
-				DiablosHorn: 650,
-				BaalsEye: 651,
-				MephistosBrain: 652,
-				StandardofHeroes: 658,
-				// Essences/Token
-				TokenofAbsolution: 653,
-				TwistedEssenceofSuffering: 654,
-				ChargedEssenceofHatred: 655,
-				BurningEssenceofTerror: 656,
-				FesteringEssenceofDestruction: 657,
-				// Misc
-				"TheBlackTowerKey": 544,
-			},
+			
 			runes: {
 				El: 610,
 				Eld: 611,
