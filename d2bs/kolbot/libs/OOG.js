@@ -1773,6 +1773,16 @@ const Starter = {
 					}
 
 					break;
+				case getLocaleString(sdk.locale.text.LoginError):
+				case getLocaleString(sdk.locale.text.OnlyOneInstanceAtATime):
+					Controls.LoginErrorOk.click();
+					Controls.LoginExit.click();
+					D2Bot.printToConsole(string);
+					ControlAction.timeoutDelay("Login Error Delay", 5 * 6e4);
+					D2Bot.printToConsole("Login Error - Restart");
+					D2Bot.restart();
+
+					break;
 				default:
 					D2Bot.updateStatus("Login Error");
 					D2Bot.printToConsole("Login Error - " + string);
