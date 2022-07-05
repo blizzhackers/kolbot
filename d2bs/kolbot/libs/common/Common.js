@@ -65,7 +65,7 @@ const Common = {
 
 					let tick = getTickCount();
 					// wait up to two minutes
-					while (getTickCount() - tick < minutes(2)) {
+					while (getTickCount() - tick < Time.minutes(2)) {
 						if (Pather.getPortal(sdk.areas.Tristram)) {
 							Pather.usePortal(sdk.areas.Tristram);
 								
@@ -517,7 +517,7 @@ const Common = {
 						return true;
 					}
 					return false;
-				}, minutes(3), 1000);
+				}, Time.minutes(3), 1000);
 			}
 
 			Config.Diablo.SealLeader && say("out");
@@ -1089,7 +1089,7 @@ const Common = {
 						Pather.moveTo(15090, 5008);
 					}
 					return !Game.getMonster(sdk.monsters.ThroneBaal);
-				}, minutes(3), 1000);
+				}, Time.minutes(3), 1000);
 
 				let portal = Game.getObject(sdk.units.WorldstonePortal);
 

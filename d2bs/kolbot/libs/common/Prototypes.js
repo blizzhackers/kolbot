@@ -1958,6 +1958,12 @@ Object.defineProperties(Unit.prototype, {
 			return this.getStat(sdk.stats.NumSockets);
 		},
 	},
+	onGroundOrDropping: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return (this.mode === sdk.itemmode.onGround && this.mode === sdk.itemmode.Dropping);
+		},
+	}
 });
 
 Unit.prototype.usingShield = function () {

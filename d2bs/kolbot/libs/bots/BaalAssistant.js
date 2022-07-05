@@ -194,7 +194,7 @@ function BaalAssistant() {
 			while (Misc.inMyParty(Leader)) {
 				if (!secondAttempt && !safeCheck && !baalCheck && !ShrineStatus && !!Config.BaalAssistant.GetShrine && me.area === sdk.areas.Harrogath) {
 					if (!!Config.BaalAssistant.GetShrineWaitForHotTP) {
-						Misc.poll(() => hotCheck, seconds(Config.BaalAssistant.Wait), 1000);
+						Misc.poll(() => hotCheck, Time.seconds(Config.BaalAssistant.Wait), 1000);
 
 						if (!hotCheck) {
 							print("ÿc1Leader didn't tell me to start hunting for an experience shrine.");
@@ -279,11 +279,11 @@ function BaalAssistant() {
 							me.area !== sdk.areas.Harrogath && Pather.useWaypoint(sdk.areas.Harrogath);
 							Town.move("portalspot");
 
-							if (Config.BaalAssistant.WaitForSafeTP && !Misc.poll(() => safeCheck, seconds(Config.BaalAssistant.Wait), 1000)) {
+							if (Config.BaalAssistant.WaitForSafeTP && !Misc.poll(() => safeCheck, Time.seconds(Config.BaalAssistant.Wait), 1000)) {
 								throw new Error("No safe TP message.");
 							}
 
-							if (!Misc.poll(() => Pather.usePortal(sdk.areas.ThroneofDestruction, null), seconds(Config.BaalAssistant.Wait), 1000)) {
+							if (!Misc.poll(() => Pather.usePortal(sdk.areas.ThroneofDestruction, null), Time.seconds(Config.BaalAssistant.Wait), 1000)) {
 								throw new Error("No portals to Throne.");
 							}
 

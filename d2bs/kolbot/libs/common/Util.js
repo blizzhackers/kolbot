@@ -89,20 +89,20 @@ function includeCommonLibs () {
 }
 
 // helper functions in case you find it annoying like me to write while (getTickCount() - tick > 3 * 60 * 1000) which is 3 minutes
-// instead we can do while (getTickCount() - tick > minutes(5))
-function seconds (ms = 0) {
-	if (typeof ms !== "number") return 0;
-	return (ms * 1000);
-}
-
-function minutes (ms = 0) {
-	if (typeof ms !== "number") return 0;
-	return (ms * 60000);
-}
-
-function formatTime (ms = 0) {
-	return (new Date(ms).toISOString().slice(11, -5));
-}
+// instead we can do while (getTickCount() - tick > Time.minutes(5))
+const Time = {
+	seconds: function (ms = 0) {
+		if (typeof ms !== "number") return 0;
+		return (ms * 60000);
+	},
+	minutes: function (ms = 0) {
+		if (typeof ms !== "number") return 0;
+		return (ms * 60000);
+	},
+	format: function (ms = 0) {
+		return (new Date(ms).toISOString().slice(11, -5));
+	}
+};
 
 const Game = {
 	getCursorUnit: function () {

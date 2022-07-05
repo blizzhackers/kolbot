@@ -140,7 +140,7 @@ const Loader = {
 						}
 
 						if (global[script]()) {
-							console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (formatTime(getTickCount() - tick)));
+							console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (Time.format(getTickCount() - tick)));
 						}
 					}
 				} catch (error) {
@@ -213,7 +213,7 @@ const Loader = {
 					let tick = getTickCount();
 
 					if (global[script]()) {
-						console.log(mainScriptStr + "ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (formatTime(getTickCount() - tick)));
+						console.log(mainScriptStr + "ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (Time.format(getTickCount() - tick)));
 					}
 				}
 			} catch (error) {

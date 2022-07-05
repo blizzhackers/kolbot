@@ -1047,7 +1047,7 @@ const Pather = {
 			}
 		}
 
-		console.log("ÿc7End ÿc8(moveToExit) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(finalDest) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (formatTime(getTickCount() - tick)));
+		console.log("ÿc7End ÿc8(moveToExit) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(finalDest) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (Time.format(getTickCount() - tick)));
 		delay(300);
 
 		return (use && finalDest ? me.area === finalDest : true);
@@ -1435,7 +1435,7 @@ const Pather = {
 					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), pingDelay * 2)) {
 						if (me.area === targetArea) {
 							delay(1000);
-							console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (formatTime(getTickCount() - wpTick)));
+							console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (Time.format(getTickCount() - wpTick)));
 
 							return true;
 						}
@@ -1462,7 +1462,7 @@ const Pather = {
 		if (me.area === targetArea) {
 			// delay to allow act to init - helps with crashes
 			delay(500);
-			console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (formatTime(getTickCount() - wpTick)));
+			console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (Time.format(getTickCount() - wpTick)));
 
 			return true;
 		}

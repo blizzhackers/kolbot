@@ -279,8 +279,8 @@ const Precast = new function () {
 					? Config.UseColdArmor
 					: (Precast.precastables.coldArmor.best || -1));
 				
-				if (Precast.precastables.coldArmor.tick > 0 && Precast.precastables.coldArmor.duration > seconds(45)) {
-					if (getTickCount() - Precast.precastables.coldArmor.tick >= Precast.precastables.coldArmor.duration - seconds(30)) {
+				if (Precast.precastables.coldArmor.tick > 0 && Precast.precastables.coldArmor.duration > Time.seconds(45)) {
+					if (getTickCount() - Precast.precastables.coldArmor.tick >= Precast.precastables.coldArmor.duration - Time.seconds(30)) {
 						force = true;
 					}
 				}

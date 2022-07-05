@@ -639,7 +639,7 @@ function main () {
 		Pather.moveTo(15090, 5008);
 		delay(5000);
 		Precast.doPrecast(true);
-		Misc.poll(() => !Game.getMonster(sdk.monsters.ThroneBaal), minutes(3), 1000);
+		Misc.poll(() => !Game.getMonster(sdk.monsters.ThroneBaal), Time.minutes(3), 1000);
 
 		let portal = Game.getObject(sdk.units.WorldstonePortal);
 
@@ -692,7 +692,7 @@ function main () {
 		this.log("1");
 		tick = getTickCount();
 
-		while (getTickCount() - tick < minutes(2)) {
+		while (getTickCount() - tick < Time.minutes(2)) {
 			if (tree.mode) {
 				break;
 			}
@@ -710,7 +710,7 @@ function main () {
 
 		tick = getTickCount();
 
-		while (getTickCount() - tick < minutes(2)) {
+		while (getTickCount() - tick < Time.minutes(2)) {
 			if (Pather.usePortal(sdk.areas.Tristram)) {
 				break;
 			}
@@ -732,7 +732,7 @@ function main () {
 
 				tick = getTickCount();
 
-				while (getTickCount() - tick < minutes(2)) {
+				while (getTickCount() - tick < Time.minutes(2)) {
 					if (gibbet.mode) {
 						break;
 					}

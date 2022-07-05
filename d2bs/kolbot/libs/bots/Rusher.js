@@ -147,7 +147,7 @@ function Rusher() {
 	say("questinfo");
 	while (!command) {
 		// wait up to 3 minutes
-		if (getTickCount() - tick > minutes(3)) {
+		if (getTickCount() - tick > Time.minutes(3)) {
 			break;
 		}
 	}

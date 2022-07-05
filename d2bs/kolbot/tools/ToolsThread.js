@@ -175,7 +175,7 @@ function main() {
 	this.exit = function (chickenExit = false) {
 		chickenExit && D2Bot.updateChickens();
 		Config.LogExperience && Experience.log();
-		console.log("ÿc8Run duration ÿc2" + (formatTime(getTickCount() - me.gamestarttime)));
+		console.log("ÿc8Run duration ÿc2" + (Time.format(getTickCount() - me.gamestarttime)));
 		this.stopDefault();
 		quit();
 	};
@@ -654,7 +654,7 @@ function main() {
 					if (getTickCount() - idleTick > 0) {
 						sendPacket(1, 0x40);
 						idleTick += rand(1200, 1500) * 1000;
-						let timeStr = formatTime(idleTick - getTickCount());
+						let timeStr = Time.format(idleTick - getTickCount());
 						me.overhead("Diablo Walks the Earth! - Next packet in: (" + timeStr + ")");
 						print("Sent anti-idle packet, next refresh in: (" + timeStr + ")");
 					}

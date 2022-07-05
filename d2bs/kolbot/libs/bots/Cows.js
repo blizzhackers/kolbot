@@ -16,7 +16,7 @@ function Cows() {
 		if (!Misc.poll(() => {
 			let p = Pather.getPortal(sdk.areas.Tristram);
 			return (p && Pather.usePortal(sdk.areas.Tristram, null, p));
-		}, minutes(1), 1000)) {
+		}, Time.minutes(1), 1000)) {
 			throw new Error("Tristram portal not found");
 		}
 

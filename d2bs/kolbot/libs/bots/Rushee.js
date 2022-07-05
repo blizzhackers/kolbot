@@ -487,7 +487,7 @@ function Rushee() {
 
 						let tick = getTickCount();
 						// wait up to two minutes
-						while (getTickCount() - tick < minutes(2)) {
+						while (getTickCount() - tick < Time.minutes(2)) {
 							if (Pather.getPortal(sdk.areas.Tristram)) {
 								Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader);
 								

@@ -20,7 +20,7 @@ function TristramLeech() {
 	!leader && (leader = Misc.autoLeaderDetect({
 		destination: sdk.areas.Tristram,
 		quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area),
-		timeout: minutes(5)
+		timeout: Time.minutes(5)
 	}));
 
 	if (leader) {
@@ -64,7 +64,7 @@ function TristramLeech() {
 				}
 
 				return false;
-			}, minutes(5), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
+			}, Time.minutes(5), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
 
 			Precast.doPrecast(true);
 			delay(3000);
@@ -77,7 +77,7 @@ function TristramLeech() {
 				}
 
 				return false;
-			}, minutes(3), 1000);
+			}, Time.minutes(3), 1000);
 			
 			while (true) {
 				whereisleader = getParty(leader);
@@ -91,7 +91,7 @@ function TristramLeech() {
 					}
 
 					return false;
-				}, minutes(3), 1000)) {
+				}, Time.minutes(3), 1000)) {
 					console.log("Leader wasn't in tristram for longer than 3 minutes, End script");
 
 					break;
