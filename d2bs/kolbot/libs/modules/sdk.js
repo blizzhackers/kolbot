@@ -1478,7 +1478,7 @@ item: {
 				RedPortal: 60,
 			},
 			summons: {
-				types: {
+				type: {
 					"Valkyrie": 2,
 					"Golem": 3,
 					"Skeleton": 4,
