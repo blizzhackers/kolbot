@@ -1582,7 +1582,7 @@ const Pather = {
 							i < 2 ? sendPacket(1, 0x13, 4, 0x2, 4, portal.gid) : Misc.click(0, 0, portal);
 							!!redPortal && delay(150);
 						} else {
-							let timeTillNextPortal = Math.round(2500 - (getTickCount() - this.lastPortalTick));
+							let timeTillNextPortal = Math.abs(Math.round(2500 - (getTickCount() - this.lastPortalTick)));
 							delay(timeTillNextPortal);
 							
 							continue;
