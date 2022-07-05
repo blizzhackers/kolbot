@@ -33,7 +33,7 @@ function Duriel () {
 
 	me.hardcore && !me.sorceress && Attack.clear(5);
 
-	let unit = object(sdk.units.PortaltoDurielsLair);
+	let unit = Game.getObject(sdk.units.PortaltoDurielsLair);
 
 	if (Skill.useTK(unit)) {
 		Misc.poll(function () {

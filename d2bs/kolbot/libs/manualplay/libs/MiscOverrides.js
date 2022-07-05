@@ -27,7 +27,7 @@ Misc.openRedPortal = function (portalID) {
 					delay(500);
 					tpTome = me.findItems(518, 0, 3);
 					tpTome.forEach(function (book) {
-						while (book.getStat(70) < 20) {
+						while (book.getStat(sdk.stats.Quantity) < 20) {
 							scroll = npc.getItem(529);
 							
 							if (!!scroll && scroll.getItemCost(0) < me.gold) {

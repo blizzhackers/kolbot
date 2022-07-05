@@ -20,8 +20,8 @@ new Overrides.Override(Town, Town.goToTown, function(orignal, act, wpmenu) {
 }).apply();
 
 function Rushee() {
-	let act, leader, target, done = false,
-		actions = [];
+	let act, leader, target, done = false;
+	let actions = [];
 
 	this.log = function (msg = "", sayMsg = false) {
 		print(msg);
@@ -61,7 +61,7 @@ function Rushee() {
 
 		if (me.inTown) return false;
 
-		let chest = getUnit(2, chestid);
+		let chest = getUnit(sdk.unittype.Object, chestid);
 
 		if (!chest) {
 			this.log("Couldn't find: " + chestid);
@@ -77,7 +77,7 @@ function Rushee() {
 			coord && Pather.moveTo(coord.x, coord.y);
 		}
 
-		let item = getUnit(4, classid);
+		let item = getUnit(sdk.unittype.Item, classid);
 
 		if (!item) {
 			if (getTickCount() - tick < 500) {
@@ -91,7 +91,7 @@ function Rushee() {
 	};
 
 	this.checkQuestMonster = function (classid) {
-		let monster = getUnit(1, classid);
+		let monster = getUnit(sdk.unittype.Monster, classid);
 
 		if (monster) {
 			while (monster.mode !== 12 && monster.mode !== 0) {
@@ -105,7 +105,7 @@ function Rushee() {
 	};
 
 	this.tyraelTalk = function () {
-		let npc = getUnit(1, NPC.Tyrael);
+		let npc = getUnit(sdk.unittype.NPC, NPC.Tyrael);
 
 		if (!npc) return false;
 
@@ -150,7 +150,7 @@ function Rushee() {
 
 	this.placeStaff = function () {
 		let tick = getTickCount();
-		let orifice = object(sdk.quest.chest.HoradricStaffHolder);
+		let orifice = Game.getObject(sdk.quest.chest.HoradricStaffHolder);
 
 		if (!orifice) return false;
 
@@ -171,7 +171,7 @@ function Rushee() {
 		delay(750 + me.ping);
 
 		// unbug cursor
-		let item = me.findItem(-1, 0, 3);
+		let item = me.findItem(-1, sdk.unitmode.inStorage, sdk.storage.Inventory);
 
 		if (item && item.toCursor()) {
 			Storage.Inventory.MoveTo(item);
@@ -264,7 +264,7 @@ function Rushee() {
 
 				delay(me.ping + 1);
 
-				if (object(sdk.units.RedPortalToAct5)) {
+				if (Game.getObject(sdk.units.RedPortalToAct5)) {
 					me.cancel();
 					Pather.useUnit(2, sdk.units.RedPortalToAct5, 109);
 				} else {
@@ -330,6 +330,19 @@ function Rushee() {
 
 	Config.Rushee.Quester && this.log("Leader found", Config.LocalChat.Enabled);
 
+	// lets figure out if we either are the bumper or have a bumper so we know if we need to stop at the end of the rush
+	let bumperLevelReq = [20, 40, 60][me.diff];
+	// ensure we are the right level to go to next difficulty if not on classic
+	let nextGame = (Config.Rushee.Bumper && (me.classic || me.charlvl >= bumperLevelReq));
+	if (!nextGame) {
+		// we aren't the bumper, lets figure out if anyone else is a bumper
+		// hell is the end of a rush so always end profile after
+		if (Misc.getPlayerCount() > 2 && !me.hell) {
+			// there is more than just us and the rusher in game - so check party level
+			nextGame = Misc.checkPartyLevel(bumperLevelReq);
+		}
+	}
+
 	while (true) {
 		try {
 			if (actions.length > 0) {
@@ -343,7 +356,7 @@ function Rushee() {
 						delay(500);
 
 						while (true) {
-							target = item(sdk.quest.item.BookofSkill);
+							target = Game.getItem(sdk.quest.item.BookofSkill);
 
 							if (!target) {
 								break;
@@ -453,11 +466,11 @@ function Rushee() {
 						}
 
 						let stones = [
-							object(sdk.quest.chest.StoneAlpha),
-							object(sdk.quest.chest.StoneBeta),
-							object(sdk.quest.chest.StoneGamma),
-							object(sdk.quest.chest.StoneDelta),
-							object(sdk.quest.chest.StoneLambda)
+							Game.getObject(sdk.quest.chest.StoneAlpha),
+							Game.getObject(sdk.quest.chest.StoneBeta),
+							Game.getObject(sdk.quest.chest.StoneGamma),
+							Game.getObject(sdk.quest.chest.StoneDelta),
+							Game.getObject(sdk.quest.chest.StoneLambda)
 						];
 
 						while (stones.some((stone) => !stone.mode)) {
@@ -474,7 +487,7 @@ function Rushee() {
 
 						let tick = getTickCount();
 						// wait up to two minutes
-						while (getTickCount() - tick < minutes(2)) {
+						while (getTickCount() - tick < Time.minutes(2)) {
 							if (Pather.getPortal(sdk.areas.Tristram)) {
 								Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader);
 								
@@ -509,7 +522,7 @@ function Rushee() {
 							break;
 						}
 
-						let gibbet = object(sdk.quest.chest.CainsJail);
+						let gibbet = Game.getObject(sdk.quest.chest.CainsJail);
 
 						if (gibbet && !gibbet.mode) {
 							Pather.moveTo(gibbet.x, gibbet.y);
@@ -650,7 +663,7 @@ function Rushee() {
 						delay(500);
 						Pather.walkTo(7763, 5267, 2);
 
-						while (!monster(sdk.monsters.Diablo)) {
+						while (!Game.getMonster(sdk.monsters.Diablo)) {
 							delay(500);
 						}
 
@@ -669,14 +682,14 @@ function Rushee() {
 						Pather.usePortal(sdk.areas.FrozenRiver, Config.Leader);
 						delay(500);
 
-						target = object(sdk.units.FrozenAnya);
+						target = Game.getObject(sdk.units.FrozenAnya);
 
 						if (target) {
 							Pather.moveToUnit(target);
 							Misc.poll(() => {
 								sendPacket(1, 0x13, 4, 0x2, 4, target.gid);
 								delay(100);
-								return !object(sdk.units.FrozenAnya);
+								return !Game.getObject(sdk.units.FrozenAnya);
 							}, 1000, 200);
 							delay(1000);
 							me.cancel();
@@ -896,7 +909,12 @@ function Rushee() {
 					break;
 				case "exit":
 				case "bye ~":
-					D2Bot.restart();
+					if (!nextGame) {
+						D2Bot.printToConsole("Rush Complete");
+						D2Bot.stop();
+					} else {
+						D2Bot.restart();
+					}
 
 					break;
 				case "a2":

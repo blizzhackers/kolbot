@@ -16,19 +16,19 @@ function Cows() {
 		if (!Misc.poll(() => {
 			let p = Pather.getPortal(sdk.areas.Tristram);
 			return (p && Pather.usePortal(sdk.areas.Tristram, null, p));
-		}, minutes(1), 1000)) {
+		}, Time.minutes(1), 1000)) {
 			throw new Error("Tristram portal not found");
 		}
 
 		Pather.moveTo(25048, 5177);
 
-		let wirt = object(sdk.quest.chest.Wirt);
+		let wirt = Game.getObject(sdk.quest.chest.Wirt);
 
 		for (let i = 0; i < 8; i += 1) {
 			wirt.interact();
 			delay(500);
 
-			let leg = item(sdk.quest.item.WirtsLeg);
+			let leg = Game.getItem(sdk.quest.item.WirtsLeg);
 
 			if (leg) {
 				let gid = leg.gid;

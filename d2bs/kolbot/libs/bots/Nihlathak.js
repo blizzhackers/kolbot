@@ -21,7 +21,7 @@ function Nihlathak() {
 
 	Pather.moveToPreset(me.area, 2, sdk.units.NihlathaksPlatform, 0, 0, false, true);
 
-	if (Config.Nihlathak.ViperQuit && monster(sdk.monsters.TombViper2)) {
+	if (Config.Nihlathak.ViperQuit && Game.getMonster(sdk.monsters.TombViper2)) {
 		print("Tomb Vipers found.");
 
 		return true;

@@ -7,7 +7,7 @@
 
 /**
  * @param args
- * @returns {Unit[]}
+ * @returns Unit[]
  */
 function getUnits(...args) {
 	let units = [], unit = getUnit.apply(null, args);
@@ -22,10 +22,9 @@ function getUnits(...args) {
 }
 
 const clickItemAndWait = (...args) => {
-	let before,
-		timeout = getTickCount(), timedOut;
+	let timeout = getTickCount(), timedOut;
+	let before = !me.itemoncursor;
 
-	before = !me.itemoncursor;
 	clickItem.apply(undefined, args);
 	delay(Math.max(me.ping * 2, 250));
 
@@ -90,20 +89,50 @@ function includeCommonLibs () {
 }
 
 // helper functions in case you find it annoying like me to write while (getTickCount() - tick > 3 * 60 * 1000) which is 3 minutes
-// instead we can do while (getTickCount() - tick > minutes(5))
-function seconds (ms = 0) {
-	if (typeof ms !== "number") return 0;
-	return (ms * 1000);
-}
+// instead we can do while (getTickCount() - tick > Time.minutes(5))
+const Time = {
+	seconds: function (ms = 0) {
+		if (typeof ms !== "number") return 0;
+		return (ms * 60000);
+	},
+	minutes: function (ms = 0) {
+		if (typeof ms !== "number") return 0;
+		return (ms * 60000);
+	},
+	format: function (ms = 0) {
+		return (new Date(ms).toISOString().slice(11, -5));
+	}
+};
 
-function minutes (ms = 0) {
-	if (typeof ms !== "number") return 0;
-	return (ms * 60000);
-}
-
-function formatTime (ms = 0) {
-	return (new Date(ms).toISOString().slice(11, -5));
-}
+const Game = {
+	getCursorUnit: function () {
+		return getUnit(100);
+	},
+	getSelectedUnit: function () {
+		return getUnit(101);
+	},
+	getPlayer: function (id, mode, gid) {
+		return getUnit(sdk.unittype.Player, id, mode, gid);
+	},
+	getMonster: function (id, mode, gid) {
+		return getUnit(sdk.unittype.Monster, id, mode, gid);
+	},
+	getNPC: function (id, mode, gid) {
+		return getUnit(sdk.unittype.NPC, id, mode, gid);
+	},
+	getObject: function (id, mode, gid) {
+		return getUnit(sdk.unittype.Object, id, mode, gid);
+	},
+	getMissile: function (id, mode, gid) {
+		return getUnit(sdk.unittype.Missile, id, mode, gid);
+	},
+	getItem: function (id, mode, gid) {
+		return getUnit(sdk.unittype.Item, id, mode, gid);
+	},
+	getStairs: function (id, mode, gid) {
+		return getUnit(sdk.unittype.Stairs, id, mode, gid);
+	},
+};
 
 (function (global, print) {
 	global.console = global.console || (function () {
@@ -118,10 +147,35 @@ function formatTime (ms = 0) {
 		console.printDebug = true;
 		console.debug = function (...args) {
 			if (console.printDebug) {
-				const stack = new Error().stack.match(/[^\r\n]+/g),
-					filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf('\\') + 1) || 'unknown:0';
+				const stack = new Error().stack.match(/[^\r\n]+/g);
+				let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf('\\') + 1) || 'unknown:0';
 				this.log('ÿc:[ÿc:' + filenameAndLine + 'ÿc:]ÿc0 ' + args.map(argMap).join(','));
 			}
+		};
+
+		console.error = function (error) {
+			let msg, source, stack;
+			
+			if (typeof error === "string") {
+				msg = error;
+			} else {
+				source = error.fileName.substring(error.fileName.lastIndexOf("\\") + 1, error.fileName.length);
+				msg = "ÿc1Error @ ÿc2[" + source + " line :: " + error.lineNumber + "ÿc2] ÿc1(" + error.message + ")";
+
+				if (error.hasOwnProperty("stack")) {
+					stack = error.stack;
+
+					if (stack) {
+						stack = stack.split("\n");
+
+						if (stack && typeof stack === "object") {
+							stack.reverse();
+						}
+					}
+				}
+			}
+
+			print(msg);
 		};
 
 		console.errorReport = function (error) {

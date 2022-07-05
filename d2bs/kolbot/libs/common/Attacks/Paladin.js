@@ -125,10 +125,12 @@ const ClassAttack = {
 	afterAttack: function () {
 		Precast.doPrecast(false);
 
-		if (Config.Redemption instanceof Array
-			&& (me.hpPercent < Config.Redemption[0] || me.mpPercent < Config.Redemption[1])
-			&& Attack.checkNearCorpses(me) > 2 && Skill.setSkill(sdk.skills.Redemption, 0)) {
-			delay(1500);
+		// only proceed with other checks if we can use redemption and the config values aren't 0
+		if (Skill.canUse(sdk.skills.Redemption) && Config.Redemption.some(v => v > 0)) {
+			if ((me.hpPercent < Config.Redemption[0] || me.mpPercent < Config.Redemption[1])
+				&& Attack.checkNearCorpses(me) > 2 && Skill.setSkill(sdk.skills.Redemption, 0)) {
+				delay(1500);
+			}
 		}
 	},
 

@@ -265,12 +265,12 @@ const ItemHooks = {
 				break;
 			default:
 				if (item.name) {
-					if (item.getStat(194) === 1) {
+					if (item.sockets === 1) {
 						break;
 					}
 
 					color = 0x20;
-					code = "ÿc0" + (item.getStat(194) > 0 ? "[" + item.getStat(194) + "]" : "");
+					code = "ÿc0" + (item.sockets > 0 ? "[" + item.sockets + "]" : "");
 					code += this.getName(item);
 					item.itemType === 70 && (code += "[R: " + item.getStat(39) + "]");
 					code += "(" + item.ilvl + ")";
@@ -306,7 +306,7 @@ const ItemHooks = {
 			if (item.name) {
 				({color, code} = this.itemColorCode[item.quality]);
 
-				code += (item.getStat(194) > 0 ? "[" + item.getStat(194) + "]" : "");
+				code += (item.sockets > 0 ? "[" + item.sockets + "]" : "");
 				code += this.getName(item);
 				code += "(" + item.ilvl + ")";
 			}

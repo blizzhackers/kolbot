@@ -29,7 +29,7 @@ function BaalHelper() {
 			}
 
 			return false;
-		}, minutes(Config.BaalHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "Leader not" : "No players") + " found in Throne)");
+		}, Time.minutes(Config.BaalHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "Leader not" : "No players") + " found in Throne)");
 
 		let entrance = Misc.poll(() => getUnit(5, 82), 1000, 200);
 		entrance && Pather.moveTo(entrance.x > me.x ? entrance.x - 5 : entrance.x + 5, entrance.y > me.y ? entrance.y - 5 : entrance.y + 5);
@@ -47,7 +47,7 @@ function BaalHelper() {
 			}
 
 			return false;
-		}, minutes(Config.BaalHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
+		}, Time.minutes(Config.BaalHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
 	}
 
 	if (Config.BaalHelper.DollQuit && getUnit(1, 691)) {

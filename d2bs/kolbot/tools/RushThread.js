@@ -34,7 +34,7 @@ function wpEvent(who, msg) {
 }
 
 function giveWP () {
-	let wp = getUnit(2, "waypoint");
+	let wp = getUnit(sdk.unittype.Object, "waypoint");
 	let success = false;
 	if (wp && !me.inTown && wpsToGive.includes(me.area)) {
 		try {
@@ -111,30 +111,8 @@ function main () {
 	};
 
 	this.bumperCheck = function () {
-		let party = getParty();
-
-		if (party) {
-			do {
-				if (party.name !== me.name) {
-					switch (me.diff) {
-					case sdk.difficulty.Normal:
-						if (party.level >= 20) return true;
-
-						break;
-					case sdk.difficulty.Nightmare:
-						if (party.level >= 40) return true;
-
-						break;
-					case sdk.difficulty.Hell:
-						if (party.level >= 60) return true;
-
-						break;
-					}
-				}
-			} while (party.getNext());
-		}
-
-		return false;
+		let bumperLevelReq = [20, 40, 60][me.diff];
+		return Misc.checkPartyLevel(bumperLevelReq);
 	};
 
 	this.playersInAct = function (act) {
@@ -334,11 +312,11 @@ function main () {
 		Pickit.pickItems();
 		Pather.moveToPreset(me.area, 2, sdk.quest.chest.Journal);
 
-		let redPortal = object(sdk.units.RedPortal);
+		let redPortal = Game.getObject(sdk.units.RedPortal);
 
 		if (!redPortal || !this.usePortal(null, null, redPortal)) {
 			if (!Misc.poll(() => {
-				let journal = object(sdk.quest.chest.Journal);
+				let journal = Game.getObject(sdk.quest.chest.Journal);
 
 				if (journal && journal.interact()) {
 					delay(1000);
@@ -383,7 +361,7 @@ function main () {
 			delay(100);
 		}
 
-		while (!object(sdk.units.PortaltoDurielsLair)) {
+		while (!Game.getObject(sdk.units.PortaltoDurielsLair)) {
 			delay(500);
 		}
 
@@ -478,7 +456,7 @@ function main () {
 
 		Pather.moveTo(17591, 8070) && Attack.securePosition(me.x, me.y, 40, 3000);
 
-		let hydra = monster(getLocaleString(3325));
+		let hydra = Game.getMonster(getLocaleString(3325));
 
 		if (hydra) {
 			do {
@@ -661,9 +639,9 @@ function main () {
 		Pather.moveTo(15090, 5008);
 		delay(5000);
 		Precast.doPrecast(true);
-		Misc.poll(() => !monster(sdk.monsters.ThroneBaal), minutes(3), 1000);
+		Misc.poll(() => !Game.getMonster(sdk.monsters.ThroneBaal), Time.minutes(3), 1000);
 
-		let portal = object(sdk.units.WorldstonePortal);
+		let portal = Game.getObject(sdk.units.WorldstonePortal);
 
 		if (portal) {
 			Pather.usePortal(null, null, portal);
@@ -706,7 +684,7 @@ function main () {
 			throw new Error("Failed to move to Tree of Inifuss");
 		}
 
-		let tree = object(sdk.quest.chest.InifussTree);
+		let tree = Game.getObject(sdk.quest.chest.InifussTree);
 		!!tree && tree.distance > 5 && Pather.moveToUnit(tree);
 		Attack.securePosition(me.x, me.y, 40, 3000, true);
 		!!tree && tree.distance > 5 && Pather.moveToUnit(tree);
@@ -714,7 +692,7 @@ function main () {
 		this.log("1");
 		tick = getTickCount();
 
-		while (getTickCount() - tick < minutes(2)) {
+		while (getTickCount() - tick < Time.minutes(2)) {
 			if (tree.mode) {
 				break;
 			}
@@ -732,7 +710,7 @@ function main () {
 
 		tick = getTickCount();
 
-		while (getTickCount() - tick < minutes(2)) {
+		while (getTickCount() - tick < Time.minutes(2)) {
 			if (Pather.usePortal(sdk.areas.Tristram)) {
 				break;
 			}
@@ -741,7 +719,7 @@ function main () {
 
 		if (me.area === sdk.areas.Tristram) {
 			Pather.moveTo(me.x, me.y + 6);
-			let gibbet = object(sdk.quest.chest.CainsJail);
+			let gibbet = Game.getObject(sdk.quest.chest.CainsJail);
 
 			if (gibbet && !gibbet.mode) {
 				if (!Pather.moveToPreset(me.area, 2, sdk.quest.chest.CainsJail, 0, 0, true, true)) {
@@ -754,7 +732,7 @@ function main () {
 
 				tick = getTickCount();
 
-				while (getTickCount() - tick < minutes(2)) {
+				while (getTickCount() - tick < Time.minutes(2)) {
 					if (gibbet.mode) {
 						break;
 					}
@@ -812,7 +790,7 @@ function main () {
 		};
 
 		moveIntoPos(radaCoords, 50);
-		let rada = Misc.poll(() => monster(sdk.monsters.Radament), 1500, 500);
+		let rada = Misc.poll(() => Game.getMonster(sdk.monsters.Radament), 1500, 500);
 
 		rada ? moveIntoPos(rada, 60) : print("radament unit not found");
 		Attack.securePosition(me.x, me.y, 35, 3000);
@@ -846,7 +824,7 @@ function main () {
 			delay(200);
 		}
 
-		Misc.poll(() => !item(sdk.quest.item.BookofSkill), 30000, 1000);
+		Misc.poll(() => !Game.getItem(sdk.quest.item.BookofSkill), 30000, 1000);
 
 		while (this.playerIn()) {
 			delay(200);
@@ -896,9 +874,9 @@ function main () {
 		this.log("starting izual");
 
 		let	moveIntoPos = function (unit, range) {
-			let coords = [],
-				angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
-				angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 105, -105, 120, -120, 135, -135, 150, -150, 180];
+			let coords = [];
+			let angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
+			let angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 105, -105, 120, -120, 135, -135, 150, -150, 180];
 
 			for (let i = 0; i < angles.length; i += 1) {
 				let coordx = Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * range + unit.x);
@@ -936,7 +914,7 @@ function main () {
 		};
 
 		moveIntoPos(izualCoords, 50);
-		let izual = Misc.poll(() => monster(sdk.monsters.Izual), 1500, 500);
+		let izual = Misc.poll(() => Game.getMonster(sdk.monsters.Izual), 1500, 500);
 
 		izual ? moveIntoPos(izual, 60) : print("izual unit not found");
 
@@ -1010,13 +988,13 @@ function main () {
 		Precast.doPrecast(false);
 
 		if (!Pather.moveToExit(sdk.areas.FrozenRiver, true)
-			|| !Pather.moveToPreset(me.area, 2, sdk.unit.FrozenAnyasPlatforn)) {
+			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.units.FrozenAnyasPlatform)) {
 			throw new Error("Anya quest failed");
 		}
 
 		Attack.securePosition(me.x, me.y, 30, 2000);
 
-		let anya = object(sdk.units.FrozenAnya);
+		let anya = Game.getObject(sdk.units.FrozenAnya);
 
 		if (anya) {
 			Pather.moveToUnit(anya);
@@ -1033,7 +1011,7 @@ function main () {
 			delay(200);
 		}
 
-		Misc.poll(() => !object(sdk.units.FrozenAnya), 30000, 1000);
+		Misc.poll(() => !Game.getObject(sdk.units.FrozenAnya), 30000, 1000);
 
 		this.log("2"); // Mainly for non-questers to know when to get the scroll of resistance
 

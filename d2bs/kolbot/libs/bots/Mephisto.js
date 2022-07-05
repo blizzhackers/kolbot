@@ -9,7 +9,7 @@ function Mephisto() {
 	this.killMephisto = function () {
 		let pos = {},
 			attackCount = 0,
-			meph = monster(sdk.monsters.Mephisto);
+			meph = Game.getMonster(sdk.monsters.Mephisto);
 
 		if (!meph) throw new Error("Mephisto not found!");
 
@@ -50,7 +50,7 @@ function Mephisto() {
 		delay(350);
 		Pather.moveTo(17563, 8072);
 
-		let mephisto = monster(sdk.monsters.Mephisto);
+		let mephisto = Game.getMonster(sdk.monsters.Mephisto);
 		if (!mephisto) throw new Error("Mephisto not found.");
 
 		delay(350);
