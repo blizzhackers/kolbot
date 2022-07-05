@@ -1485,6 +1485,7 @@ const Pather = {
 			}
 
 			let tpTool = Town.getTpTool();
+			let pingDelay = i === 0 ? 100 : me.gameReady ? (me.ping + 25) : 350;
 			if (!tpTool) return false;
 
 			let oldPortal = getUnits(sdk.unittype.Object, "portal")
@@ -1495,7 +1496,6 @@ const Pather = {
 			
 			if (tpTool.use()) {
 				let tick = getTickCount();
-				let pingDelay = me.gameReady ? me.ping : 350;
 
 				while (getTickCount() - tick < Math.max(500 + i * 100, pingDelay * 2 + 100)) {
 					let portal = getUnits(sdk.unittype.Object, "portal")
@@ -1518,7 +1518,7 @@ const Pather = {
 			} else {
 				console.log("Failed to use tp tool");
 				Packet.flash(me.gid, pingDelay);
-				delay(200 + pingDelay);
+				delay(200);
 			}
 
 			delay(40);

@@ -116,15 +116,14 @@ function Questing() {
 
 		log("starting radament");
 
-		if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.A2SewersLvl2, true)) {
+		if (!Pather.journeyTo(sdk.areas.A2SewersLvl3)) {
 			throw new Error();
 		}
 
 		Precast.doPrecast(true);
 
-		if (!Pather.moveToExit(sdk.areas.HallsoftheDeadLvl3, true)
-			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricScrollChest)) {
-			throw new Error("cube failed");
+		if (!Pather.moveToPreset(sdk.areas.A2SewersLvl3, sdk.unittype.Object, sdk.quest.chest.HoradricScrollChest)) {
+			throw new Error("radament failed");
 		}
 
 		Attack.kill(sdk.monsters.Radament);
@@ -143,14 +142,13 @@ function Questing() {
 
 		log("starting lam essen");
 
-		if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.KurastBazaar, true)) {
+		if (!Pather.journeyTo(sdk.areas.RuinedTemple)) {
 			throw new Error("Lam Essen quest failed");
 		}
 
 		Precast.doPrecast(true);
 
-		if (!Pather.moveToExit(sdk.areas.RuinedTemple, true)
-			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.LamEsensTomeHolder)) {
+		if (!Pather.moveToPreset(sdk.areas.RuinedTemple, sdk.unittype.Object, sdk.quest.chest.LamEsensTomeHolder)) {
 			throw new Error("Lam Essen quest failed");
 		}
 
@@ -216,7 +214,7 @@ function Questing() {
 		Pather.journeyTo(sdk.areas.FrigidHighlands);
 		Precast.doPrecast(true);
 
-		let barbs = (getPresetUnits(me.area, sdk.unittype.Object, sdk.units.BarbCage) || []);
+		let barbs = (getPresetUnits(me.area, sdk.unittype.Object, sdk.quest.chest.BarbCage) || []);
 
 		if (!barbs.length) {
 			log("Couldn't find the barbs");
@@ -237,7 +235,7 @@ function Questing() {
 		for (let i = 0; i < coords.length; i += 1) {
 			log((i + 1) + "/" + coords.length);
 			Pather.moveToUnit(coords[i], 2, 0);
-			let door = Game.getMonster(sdk.quest.chest.BarbCage);
+			let door = Game.getMonster(sdk.monsters.PrisonDoor);
 
 			if (door) {
 				Pather.moveToUnit(door, 1, 0);
@@ -258,14 +256,13 @@ function Questing() {
 
 		log("starting anya");
 
-		if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.CrystalizedPassage, true)) {
+		if (!Pather.journeyTo(sdk.areas.CrystalizedPassage)) {
 			throw new Error();
 		}
 
 		Precast.doPrecast(true);
 
-		if (!Pather.moveToExit(sdk.areas.FrozenRiver, true)
-			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.units.FrozenAnyasPlatform)) {
+		if (!Pather.moveToPreset(sdk.areas.FrozenRiver, sdk.unittype.Object, sdk.units.FrozenAnyasPlatform)) {
 			throw new Error("Anya quest failed");
 		}
 

@@ -7,7 +7,7 @@
 
 /**
  * @param args
- * @returns {Unit[]}
+ * @returns Unit[]
  */
 function getUnits(...args) {
 	let units = [], unit = getUnit.apply(null, args);
@@ -147,10 +147,35 @@ const Game = {
 		console.printDebug = true;
 		console.debug = function (...args) {
 			if (console.printDebug) {
-				const stack = new Error().stack.match(/[^\r\n]+/g),
-					filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf('\\') + 1) || 'unknown:0';
+				const stack = new Error().stack.match(/[^\r\n]+/g);
+				let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf('\\') + 1) || 'unknown:0';
 				this.log('ÿc:[ÿc:' + filenameAndLine + 'ÿc:]ÿc0 ' + args.map(argMap).join(','));
 			}
+		};
+
+		console.error = function (error) {
+			let msg, source, stack;
+			
+			if (typeof error === "string") {
+				msg = error;
+			} else {
+				source = error.fileName.substring(error.fileName.lastIndexOf("\\") + 1, error.fileName.length);
+				msg = "ÿc1Error @ ÿc2[" + source + " line :: " + error.lineNumber + "ÿc2] ÿc1(" + error.message + ")";
+
+				if (error.hasOwnProperty("stack")) {
+					stack = error.stack;
+
+					if (stack) {
+						stack = stack.split("\n");
+
+						if (stack && typeof stack === "object") {
+							stack.reverse();
+						}
+					}
+				}
+			}
+
+			print(msg);
 		};
 
 		console.errorReport = function (error) {
