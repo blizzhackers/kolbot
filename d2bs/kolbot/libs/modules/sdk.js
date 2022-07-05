@@ -4035,6 +4035,7 @@ item: {
 
 			text: {
 				CdKeyDisabled: 5199,
+				OnlyOneInstanceAtATime: 5201,
 				CdKeyIntendedForAnotherProduct: 5202,
 				InvalidPassword: 5207,
 				AccountDoesNotExist: 5208,
@@ -4043,6 +4044,7 @@ item: {
 				AccountCantBeMoreThan: 5218,
 				PasswordMustBeAtLeast: 5219,
 				PasswordCantBeMoreThan: 5220,
+				LoginError: 5224,
 				UsernameMustBeAtLeast: 5231,
 				UsenameIncludedIllegalChars: 5232,
 				UsenameIncludedDisallowedwords: 5233,
