@@ -12,6 +12,12 @@ const Attack = {
 		sdk.monsters.BarricadeDoor1, sdk.monsters.BarricadeDoor2, sdk.monsters.BarricadeWall1, sdk.monsters.BarricadeWall2,
 		sdk.monsters.BarricadeTower, sdk.monsters.PrisonDoor
 	],
+	result: {
+		Failed: 0,
+		Success: 1,
+		CantAttack: 2, // need to fix the ambiguity between this result and Failed
+		NeedMana: 3
+	},
 
 	// Initialize attacks
 	init: function () {
@@ -190,7 +196,7 @@ const Attack = {
 	// Kill a monster based on its classId, can pass a unit as well
 	kill: function (classId) {
 		if (!classId || Config.AttackSkill[1] < 0) return false;
-		let target = (typeof classId === "object" ? classId : Misc.poll(() => getUnit(1, classId), 2000, 100));
+		let target = (typeof classId === "object" ? classId : Misc.poll(() => Game.getMonster(classId), 2000, 100));
 
 		if (!target) {
 			console.warn("Attack.kill: Target not found");
@@ -208,9 +214,9 @@ const Attack = {
 
 			if (path.some(function (node) {
 				Pather.walkTo(node.x, node.y);
-				return getUnit(1, -1, -1, gid);
+				return Game.getMonster(-1, -1, gid);
 			})) {
-				return getUnit(1, -1, -1, gid);
+				return Game.getMonster(-1, -1, gid);
 			} else {
 				return false;
 			}
@@ -226,7 +232,7 @@ const Attack = {
 			
 			// Check if unit got invalidated, happens if necro raises a skeleton from the boss's corpse.
 			if (!target || !copyUnit(target).x) {
-				target = getUnit(1, -1, -1, gid);
+				target = Game.getMonster(-1, -1, gid);
 				!target && (target = findTarget(gid, lastLoc));
 
 				if (!target) {
@@ -244,7 +250,7 @@ const Attack = {
 
 			let result = ClassAttack.doAttack(target, attackCount % 15 === 0);
 
-			if (result === 0) {
+			if (result === this.result.Failed) {
 				if (retry++ > 3) {
 					errorInfo = " (doAttack failed)";
 
@@ -252,11 +258,11 @@ const Attack = {
 				}
 
 				Packet.flash(me.gid);
-			} else if (result === 2) {
+			} else if (result === this.result.CantAttack) {
 				errorInfo = " (No valid attack skills)";
 
 				break;
-			} else if (result === 3) {
+			} else if (result === this.result.NeedMana) {
 				continue;
 			} else {
 				retry = 0;
@@ -282,7 +288,7 @@ const Attack = {
 
 	hurt: function (classId, percent) {
 		if (!classId || !percent) return false;
-		let target = (typeof classId === "object" ? classid : Misc.poll(() => getUnit(1, classId), 2000, 100));
+		let target = (typeof classId === "object" ? classid : Misc.poll(() => Game.getMonster(classId), 2000, 100));
 
 		if (!target) {
 			console.warn("Attack.hurt: Target not found");
@@ -294,15 +300,15 @@ const Attack = {
 		while (attackCount < Config.MaxAttackCount && target.attackable && !Attack.skipCheck(target)) {
 			let result = ClassAttack.doAttack(target, attackCount % 15 === 0);
 
-			if (result === 0) {
+			if (result === this.result.Failed) {
 				if (retry++ > 3) {
 					break;
 				}
 
 				Packet.flash(me.gid);
-			} else if (result === 2) {
+			} else if (result === this.result.CantAttack) {
 				break;
-			} else if (result === 3) {
+			} else if (result === this.result.NeedMana) {
 				continue;
 			} else {
 				retry = 0;
@@ -358,6 +364,9 @@ const Attack = {
 		if (typeof (range) !== "number") throw new Error("Attack.clear: range must be a number.");
 
 		let i, boss, orgx, orgy, start, skillCheck;
+		let tick = getTickCount();
+		let killedBoss = false;
+		let logged = false;
 		let retry = 0;
 		let gidAttack = [];
 		let attackCount = 0;
@@ -368,9 +377,9 @@ const Attack = {
 				case typeof bossId === "object":
 					return bossId;
 				case ((typeof bossId === "number" && bossId > 999)):
-					return getUnit(1, -1, -1, bossId);
+					return Game.getMonster(-1, -1, bossId);
 				default:
-					return getUnit(1, bossId);
+					return Game.getMonster(bossId);
 				}
 			}, 2000, 100);
 
@@ -386,7 +395,7 @@ const Attack = {
 		}
 
 		let monsterList = [];
-		let target = getUnit(1);
+		let target = Game.getMonster();
 
 		if (target) {
 			do {
@@ -412,6 +421,12 @@ const Attack = {
 				&& target.attackable) {
 				Config.Dodge && me.hpPercent <= Config.DodgeHP && this.deploy(target, Config.DodgeRange, 5, 9);
 				Misc.townCheck(true);
+				tick = getTickCount();
+
+				if (!logged && boss && boss.gid === target.gid) {
+					logged = true;
+					console.log("ÿc7Clear ÿc0:: " + (!!target.name ? target.name : bossId));
+				}
 				//me.overhead("attacking " + target.name + " spectype " + target.spectype + " id " + target.classid);
 
 				let result = ClassAttack.doAttack(target, attackCount % 15 === 0);
@@ -419,11 +434,11 @@ const Attack = {
 				if (result) {
 					retry = 0;
 
-					if (result === 2) {
+					if (result === this.result.CantAttack) {
 						monsterList.shift();
 
 						continue;
-					} else if (result === 3) {
+					} else if (result === this.result.NeedMana) {
 						continue;
 					}
 
@@ -469,12 +484,16 @@ const Attack = {
 					}
 
 					// Skip non-unique monsters after 15 attacks, except in Throne of Destruction
-					if (me.area !== sdk.areas.ThroneofDestruction && !isSpecial && gidAttack[i].attacks > 15) {
+					if (!me.inArea(sdk.areas.ThroneofDestruction) && !isSpecial && gidAttack[i].attacks > 15) {
 						print("ÿc1Skipping " + target.name + " " + target.gid + " " + gidAttack[i].attacks);
 						monsterList.shift();
 					}
 
 					if (target.mode === 0 || target.mode === 12 || Config.FastPick === 2) {
+						if (boss && boss.gid === target.gid) {
+							killedBoss = true;
+							console.log("ÿc7Cleared ÿc0:: " + (!!target.name ? target.name : bossId) + "ÿc0 - ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
+						}
 						Pickit.fastPick();
 					}
 				} else {
@@ -498,11 +517,20 @@ const Attack = {
 			Precast.doPrecast(false); // we didn't attack anything but check if we need to precast. TODO: better method of keeping track of precast skills
 		}
 
+		if (boss && !killedBoss) {
+			// check if boss corpse is around
+			if (boss.dead) {
+				console.log("ÿc7Cleared ÿc0:: " + (!!boss.name ? boss.name : bossId) + "ÿc0 - ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
+			} else {
+				console.log("ÿc7Clear ÿc0:: ÿc2Failed to clear ÿc0:: " + (!!boss.name ? boss.name : bossId));
+			}
+		}
+
 		return true;
 	},
 
 	clearClassids: function (...ids) {
-		let monster = getUnit(1);
+		let monster = Game.getMonster();
 
 		if (monster) {
 			let list = [];
@@ -522,7 +550,7 @@ const Attack = {
 	// Filter monsters based on classId, spectype and range
 	getMob: function (classid, spectype, range, center) {
 		let monsterList = [];
-		let monster = getUnit(1);
+		let monster = Game.getMonster();
 
 		range === undefined && (range = 25);
 		!center && (center = me);
@@ -530,7 +558,7 @@ const Attack = {
 		switch (typeof classid) {
 		case "number":
 		case "string":
-			monster = getUnit(1, classid);
+			monster = Game.getMonster(classid);
 
 			if (monster) {
 				do {
@@ -543,7 +571,7 @@ const Attack = {
 
 			break;
 		case "object":
-			monster = getUnit(1);
+			monster = Game.getMonster();
 
 			if (monster) {
 				do {
@@ -604,11 +632,11 @@ const Attack = {
 				if (result) {
 					retry = 0;
 
-					if (result === 2) {
+					if (result === this.result.CantAttack) {
 						monsterList.shift();
 
 						continue;
-					} else if (result === 3) {
+					} else if (result === this.result.NeedMana) {
 						continue;
 					}
 
@@ -645,7 +673,7 @@ const Attack = {
 					}
 
 					// Skip non-unique monsters after 15 attacks, except in Throne of Destruction
-					if (me.area !== sdk.areas.ThroneofDestruction && !isSpecial && gidAttack[i].attacks > 15) {
+					if (!me.inArea(sdk.areas.ThroneofDestruction) && !isSpecial && gidAttack[i].attacks > 15) {
 						print("ÿc1Skipping " + target.name + " " + target.gid + " " + gidAttack[i].attacks);
 						monsterList.shift();
 					}
@@ -688,7 +716,7 @@ const Attack = {
 		while (true) {
 			[x, y].distance > 5 && Pather.moveTo(x, y);
 
-			let monster = getUnit(1);
+			let monster = Game.getMonster();
 			let monList = [];
 
 			if (monster) {
@@ -739,7 +767,7 @@ const Attack = {
 		!this.uniques && (this.uniques = 0);
 		!this.ignoredGids && (this.ignoredGids = []);
 
-		let monster = getUnit(1);
+		let monster = Game.getMonster();
 
 		if (monster) {
 			do {
@@ -865,17 +893,17 @@ const Attack = {
 
 		// sort main bosses first
 		// Andy
-		if (me.area === sdk.areas.CatacombsLvl4) {
+		if (me.inArea(sdk.areas.CatacombsLvl4)) {
 			if (unitA.distance < 5 && unitA.classid === sdk.monsters.Andariel && !checkCollision(me, unitA, 0x4)) return -1;
 		}
 
 		// Meph
-		if (me.area === sdk.areas.DuranceofHateLvl3) {
+		if (me.inArea(sdk.areas.DuranceofHateLvl3)) {
 			if (unitA.distance < 5 && unitA.classid === sdk.monsters.Mephisto && !checkCollision(me, unitA, 0x4)) return -1;
 		}
 
 		// Baal
-		if (me.area === sdk.areas.WorldstoneChamber) {
+		if (me.inArea(sdk.areas.WorldstoneChamber)) {
 			if (unitA.classid === sdk.monsters.Baal) return -1;
 		}
 
@@ -896,7 +924,7 @@ const Attack = {
 
 		let ids = [312, 58, 59, 60, 61, 62, 101, 102, 103, 104, 105, sdk.monsters.BloodRaven, 278, 279, 280, 281, 282, 298, 299, 300, 645, 646, 647, 662, 663, 664, 667, 668, 669, 670, 675, 676];
 
-		if (me.area !== sdk.areas.ClawViperTempleLvl2 && ids.includes(unitA.classid) && ids.includes(unitB.classid)) {
+		if (!me.inArea(sdk.areas.ClawViperTempleLvl2) && ids.includes(unitA.classid) && ids.includes(unitB.classid)) {
 			// Kill "scary" uniques first (like Bishibosh)
 			if ((unitA.spectype & 0x04) && (unitB.spectype & 0x04)) {
 				return getDistance(me, unitA) - getDistance(me, unitB);
@@ -980,7 +1008,7 @@ const Attack = {
 
 		let list = [];
 		let ids = ["chest", "chest3", "weaponrack", "armorstand"];
-		let unit = getUnit(2);
+		let unit = Game.getObject();
 
 		if (unit) {
 			do {
@@ -1003,7 +1031,7 @@ const Attack = {
 
 	buildMonsterList: function () {
 		let monList = [];
-		let monster = getUnit(1);
+		let monster = Game.getMonster();
 
 		if (monster) {
 			do {
@@ -1079,7 +1107,7 @@ const Attack = {
 		}
 
 		// missile check?
-		let fire = getUnit(2, "fire");
+		let fire = Game.getObject("fire");
 
 		if (fire) {
 			do {
@@ -1118,7 +1146,7 @@ const Attack = {
 	* @returns Boolean
 	*/
 	skipCheck: function (unit) {
-		if (me.area === sdk.areas.ThroneofDestruction) return false;
+		if (me.inArea(sdk.areas.ThroneofDestruction)) return false;
 		if (unit.isSpecial && Config.SkipException && Config.SkipException.includes(unit.name)) {
 			console.log("ÿc1Skip Exception: " + unit.name);
 			return false;
@@ -1280,7 +1308,7 @@ const Attack = {
 	},
 
 	getLowerResistPercent: function () {
-		let calc = function (level) { return Math.floor(Math.min(25 + (45 * ((110 * level) / (level + 6)) / 100), 70));};
+		let calc = function (level) { return Math.floor(Math.min(25 + (45 * ((110 * level) / (level + 6)) / 100), 70)); };
 		if (Skill.canUse(sdk.skills.LowerResist)) {
 			return calc(me.getSkill(sdk.skills.LowerResist, 1));
 		}
@@ -1288,7 +1316,7 @@ const Attack = {
 	},
 
 	getConvictionPercent: function () {
-		let calc = function (level) { return Math.floor(Math.min(25 + (5 * level), 150));};
+		let calc = function (level) { return Math.floor(Math.min(25 + (5 * level), 150)); };
 		if (me.expansion && this.checkInfinity()) {
 			return calc(12);
 		}
@@ -1495,7 +1523,7 @@ const Attack = {
 		}, givenSettings);
 
 		let gid;
-		let monster = getUnit(1);
+		let monster = Game.getMonster();
 		let range = 30;
 
 		if (monster) {
@@ -1514,7 +1542,7 @@ const Attack = {
 			} while (monster.getNext());
 		}
 
-		return !!gid ? getUnit(sdk.unittype.Monster, -1, -1, gid) : false;
+		return !!gid ? Game.getMonster(-1, -1, gid) : false;
 	},
 
 	checkCorpse: function (unit) {

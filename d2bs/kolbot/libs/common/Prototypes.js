@@ -2456,6 +2456,15 @@ Unit.prototype.checkForMobs = function (givenSettings = {}) {
 	return false;
 };
 
+/**
+ * @description check if unit is in an area
+ * @returns boolean
+ */
+Unit.prototype.inArea = function (area = 0) {
+	if (this === undefined) return false;
+	return this.area === area;
+};
+
 {
 	let coords = function () {
 		if (Array.isArray(this) && this.length > 1) {

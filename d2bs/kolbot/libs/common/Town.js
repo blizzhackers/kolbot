@@ -59,7 +59,7 @@ const Town = {
 					return getInteractedNPC();
 				}
 			} catch (e) {
-				console.errorReport(e);
+				//console.errorReport(e);
 				this.reset();
 				return getInteractedNPC();
 			}

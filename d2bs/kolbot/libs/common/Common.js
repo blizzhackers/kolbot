@@ -1084,8 +1084,8 @@ const Common = {
 				delay(5000);
 				Precast.doPrecast(true);
 				Misc.poll(() => {
-					if (me.mode === 4/*Getting hit*/) {
-						Attack.clear(30);
+					if (me.mode === 4/*Getting hit*/ || me.checkForMobs({range: 15})) {
+						Common.Baal.clearThrone();
 						Pather.moveTo(15090, 5008);
 					}
 					return !Game.getMonster(sdk.monsters.ThroneBaal);
