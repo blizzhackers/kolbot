@@ -11,7 +11,7 @@ const Common = {
 			MainLoop:
 			while (true) {
 				switch (true) {
-				case !item(sdk.quest.item.ScrollofInifuss) && !item(sdk.quest.item.KeytotheCairnStones) && !Misc.checkQuest(sdk.quest.id.TheSearchForCain, 4):
+				case !Game.getItem(sdk.quest.item.ScrollofInifuss) && !Game.getItem(sdk.quest.item.KeytotheCairnStones) && !Misc.checkQuest(sdk.quest.id.TheSearchForCain, 4):
 					Pather.useWaypoint(sdk.areas.DarkWood, true);
 					Precast.doPrecast(true);
 
@@ -19,36 +19,36 @@ const Common = {
 						throw new Error("Failed to move to Tree of Inifuss");
 					}
 
-					let tree = object(sdk.quest.chest.InifussTree);
+					let tree = Game.getObject(sdk.quest.chest.InifussTree);
 					!!tree && tree.distance > 5 && Pather.moveToUnit(tree);
 					Misc.openChest(tree);
-					let scroll = Misc.poll(() => item(sdk.quest.item.ScrollofInifuss), 1000, 100);
+					let scroll = Misc.poll(() => Game.getItem(sdk.quest.item.ScrollofInifuss), 1000, 100);
 
 					Pickit.pickItem(scroll);
 					Town.goToTown();
 					Town.npcInteract("Akara");
 				
 					break;
-				case item(sdk.quest.item.ScrollofInifuss):
+				case Game.getItem(sdk.quest.item.ScrollofInifuss):
 					Town.goToTown(1);
 					Town.npcInteract("Akara");
 
 					break;
-				case item(sdk.quest.item.KeytotheCairnStones) && me.area !== sdk.areas.StonyField:
+				case Game.getItem(sdk.quest.item.KeytotheCairnStones) && me.area !== sdk.areas.StonyField:
 					Pather.journeyTo(sdk.areas.StonyField);
 					Precast.doPrecast(true);
 
 					break;
-				case item(sdk.quest.item.KeytotheCairnStones) && me.area === sdk.areas.StonyField:
+				case Game.getItem(sdk.quest.item.KeytotheCairnStones) && me.area === sdk.areas.StonyField:
 					Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Monster, sdk.monsters.preset.Rakanishu, 10, 10, false, true);
 					Attack.securePosition(me.x, me.y, 40, 3000, true);
 					Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Object, sdk.quest.chest.StoneAlpha, null, null, true);
 					let stones = [
-						object(sdk.quest.chest.StoneAlpha),
-						object(sdk.quest.chest.StoneBeta),
-						object(sdk.quest.chest.StoneGamma),
-						object(sdk.quest.chest.StoneDelta),
-						object(sdk.quest.chest.StoneLambda)
+						Game.getObject(sdk.quest.chest.StoneAlpha),
+						Game.getObject(sdk.quest.chest.StoneBeta),
+						Game.getObject(sdk.quest.chest.StoneGamma),
+						Game.getObject(sdk.quest.chest.StoneDelta),
+						Game.getObject(sdk.quest.chest.StoneLambda)
 					];
 
 					while (stones.some((stone) => !stone.mode)) {
@@ -65,7 +65,7 @@ const Common = {
 
 					let tick = getTickCount();
 					// wait up to two minutes
-					while (getTickCount() - tick < minutes(2)) {
+					while (getTickCount() - tick < Time.minutes(2)) {
 						if (Pather.getPortal(sdk.areas.Tristram)) {
 							Pather.usePortal(sdk.areas.Tristram);
 								
@@ -75,7 +75,7 @@ const Common = {
 
 					break;
 				case me.area === sdk.areas.Tristram && !Misc.checkQuest(sdk.quest.id.TheSearchForCain, 0):
-					let gibbet = object(sdk.quest.chest.CainsJail);
+					let gibbet = Game.getObject(sdk.quest.chest.CainsJail);
 
 					if (gibbet && !gibbet.mode) {
 						Pather.moveTo(gibbet.x, gibbet.y);
@@ -100,10 +100,10 @@ const Common = {
 			}
 
 			Attack.kill(getLocaleString(sdk.locale.monsters.TheSmith));
-			let malusChest = object(sdk.quest.chest.MalusHolder);
+			let malusChest = Game.getObject(sdk.quest.chest.MalusHolder);
 			!!malusChest && malusChest.distance > 5 && Pather.moveToUnit(malusChest);
 			Misc.openChest(malusChest);
-			let malus = Misc.poll(() => item(sdk.quest.item.HoradricMalus), 1000, 100);
+			let malus = Misc.poll(() => Game.getItem(sdk.quest.item.HoradricMalus), 1000, 100);
 			Pickit.pickItem(malus);
 			Town.goToTown();
 			Town.npcInteract("Charsi");
@@ -512,12 +512,12 @@ const Common = {
 				!openSeal && [3, "infector"].includes(Common.Diablo.sealOrder.last()) && Misc.poll(() => {
 					if (Common.Diablo.diabloSpawned) return true;
 
-					let lastSeal = object(sdk.units.DiabloSealInfector2);
+					let lastSeal = Game.getObject(sdk.units.DiabloSealInfector2);
 					if (lastSeal && lastSeal.mode) {
 						return true;
 					}
 					return false;
-				}, minutes(3), 1000);
+				}, Time.minutes(3), 1000);
 			}
 
 			Config.Diablo.SealLeader && say("out");
@@ -527,7 +527,7 @@ const Common = {
 
 		hammerdinPreAttack: function (name, amount = 5) {
 			if (me.paladin && Config.AttackSkill[1] === sdk.skills.BlessedHammer) {
-				let target = monster(name);
+				let target = Game.getMonster(name);
 
 				if (!target) return;
 
@@ -599,7 +599,7 @@ const Common = {
 		},
 
 		getBoss: function (name) {
-			let glow = object(sdk.units.SealGlow);
+			let glow = Game.getObject(sdk.units.SealGlow);
 
 			if (this.waitForGlow) {
 				while (true) {
@@ -607,7 +607,7 @@ const Common = {
 						delay(500);
 					}
 
-					glow = object(sdk.units.SealGlow);
+					glow = Game.getObject(sdk.units.SealGlow);
 
 					if (glow) {
 						break;
@@ -616,7 +616,7 @@ const Common = {
 			}
 
 			for (let i = 0; i < 16; i += 1) {
-				let boss = monster(name);
+				let boss = Game.getMonster(name);
 
 				if (boss) {
 					Common.Diablo.hammerdinPreAttack(name, 8);
@@ -700,7 +700,7 @@ const Common = {
 					delay(500);
 				}
 
-				if (monster(sdk.monsters.Diablo)) {
+				if (Game.getMonster(sdk.monsters.Diablo)) {
 					return true;
 				}
 			}
@@ -731,14 +731,14 @@ const Common = {
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 5000) {
-				if (object(sdk.units.AncientsAltar)) {
+				if (Game.getObject(sdk.units.AncientsAltar)) {
 					break;
 				}
 
 				delay(20 + me.ping);
 			}
 
-			let altar = object(sdk.units.AncientsAltar);
+			let altar = Game.getObject(sdk.units.AncientsAltar);
 
 			if (altar) {
 				while (altar.mode !== 2) {
@@ -842,7 +842,7 @@ const Common = {
 
 	Baal: {
 		checkHydra: function () {
-			let hydra = monster(getLocaleString(sdk.locale.monsters.Hydra));
+			let hydra = Game.getMonster(getLocaleString(sdk.locale.monsters.Hydra));
 			if (hydra) {
 				do {
 					if (hydra.mode !== 12 && hydra.getStat(sdk.stats.Alignment) !== 2) {
@@ -902,14 +902,14 @@ const Common = {
 			let monList = [];
 
 			if (Config.AvoidDolls) {
-				let monster = monster(sdk.monsters.SoulKiller);
+				let mon = Game.getMonster(sdk.monsters.SoulKiller);
 
-				if (monster) {
+				if (mon) {
 					do {
-						if (monster.x >= 15072 && monster.x <= 15118 && monster.y >= 5002 && monster.y <= 5079 && monster.attackable && !Attack.skipCheck(monster)) {
-							monList.push(copyUnit(monster));
+						if (mon.x >= 15072 && mon.x <= 15118 && mon.y >= 5002 && mon.y <= 5079 && mon.attackable && !Attack.skipCheck(mon)) {
+							monList.push(copyUnit(mon));
 						}
-					} while (monster.getNext());
+					} while (mon.getNext());
 				}
 
 				return monList.length > 0 && Attack.clearList(monList);
@@ -1088,10 +1088,10 @@ const Common = {
 						Attack.clear(30);
 						Pather.moveTo(15090, 5008);
 					}
-					return !monster(sdk.monsters.ThroneBaal);
-				}, minutes(3), 1000);
+					return !Game.getMonster(sdk.monsters.ThroneBaal);
+				}, Time.minutes(3), 1000);
 
-				let portal = object(sdk.units.WorldstonePortal);
+				let portal = Game.getObject(sdk.units.WorldstonePortal);
 
 				if (portal) {
 					Pather.usePortal(null, null, portal);

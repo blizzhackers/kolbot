@@ -48,7 +48,7 @@ const MuleLogger = {
 				}
 			}
 
-			while ((getTickCount() - me.gamestarttime) < seconds(stayInGame)) {
+			while ((getTickCount() - me.gamestarttime) < Time.seconds(stayInGame)) {
 				me.overhead("ÿc2Log items done. ÿc4Stay in " + "ÿc4game more:ÿc0 " + Math.floor(stayInGame - (getTickCount() - me.gamestarttime) / 1000) + " sec");
 
 				delay(1000);

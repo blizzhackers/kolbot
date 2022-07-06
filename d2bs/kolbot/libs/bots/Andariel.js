@@ -7,7 +7,7 @@
 
 function Andariel () {
 	this.killAndariel = function () {
-		let target = monster(sdk.monsters.Andariel);
+		let target = Game.getMonster(sdk.monsters.Andariel);
 
 		if (!target) throw new Error("Andariel not found.");
 

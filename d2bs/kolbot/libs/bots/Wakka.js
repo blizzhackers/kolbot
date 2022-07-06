@@ -6,22 +6,21 @@
 */
 
 function Wakka() {
-	let safeTP, portal, vizClear, seisClear, infClear, tick, timeout = Config.Wakka.Wait,
-		minDist = 50,
-		maxDist = 80,
-		leaderUnit = null,
-		leaderPartyUnit = null,
-		leader = "";
+	let safeTP, portal, vizClear, seisClear, infClear, tick, timeout = Config.Wakka.Wait;
+	let minDist = 50;
+	let maxDist = 80;
+	let leaderUnit = null;
+	let leaderPartyUnit = null;
+	let leader = "";
 
 	this.checkMonsters = function (range, dodge) {
-		let monList = [],
-			monster = getUnit(1);
+		let monList = [];
+		let monster = getUnit(sdk.unittype.Monster);
 
 		if (monster) {
 			do {
 				if (monster.y < 5565 && monster.attackable && getDistance(me, monster) <= range) {
 					if (!dodge) return true;
-
 					monList.push(copyUnit(monster));
 				}
 			} while (monster.getNext());
@@ -51,11 +50,11 @@ function Wakka() {
 	};
 
 	this.checkBoss = function (name) {
-		let glow = object(sdk.units.SealGlow);
+		let glow = Game.getObject(sdk.units.SealGlow);
 
 		if (glow) {
 			for (let i = 0; i < 10; i += 1) {
-				let boss = monster(name);
+				let boss = Game.getMonster(name);
 
 				if (boss && boss.mode === 12) {
 					return true;
@@ -104,7 +103,6 @@ function Wakka() {
 				// monsters nearby - don't move
 				if (this.checkMonsters(45, true) && getDistance(me, leaderUnit) <= maxDist) {
 					path = getPath(me.area, me.x, me.y, dest[0], dest[1], 0, 15);
-
 					delay(200);
 
 					continue;
@@ -140,7 +138,8 @@ function Wakka() {
 			}
 
 			Pather.moveTo(path[0].x, path[0].y) && path.shift();
-			me.getMobCount(10) === 0 && Pickit.pickItems(5);
+			// no mobs around us, so it's safe to pick
+			!me.checkForMobs({range: 10, coll: (0x1 | 0x400 | 0x800)}) && Pickit.pickItems(5);
 			this.getCorpse();
 		}
 

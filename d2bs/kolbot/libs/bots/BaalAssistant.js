@@ -194,7 +194,7 @@ function BaalAssistant() {
 			while (Misc.inMyParty(Leader)) {
 				if (!secondAttempt && !safeCheck && !baalCheck && !ShrineStatus && !!Config.BaalAssistant.GetShrine && me.area === sdk.areas.Harrogath) {
 					if (!!Config.BaalAssistant.GetShrineWaitForHotTP) {
-						Misc.poll(() => hotCheck, seconds(Config.BaalAssistant.Wait), 1000);
+						Misc.poll(() => hotCheck, Time.seconds(Config.BaalAssistant.Wait), 1000);
 
 						if (!hotCheck) {
 							print("ÿc1Leader didn't tell me to start hunting for an experience shrine.");
@@ -257,7 +257,7 @@ function BaalAssistant() {
 
 							Pather.moveTo(15095, 5029);
 
-							if ((Config.BaalAssistant.SoulQuit && monster(641)) || (Config.BaalAssistant.DollQuit && monster(691))) {
+							if ((Config.BaalAssistant.SoulQuit && Game.getMonster(641)) || (Config.BaalAssistant.DollQuit && Game.getMonster(691))) {
 								print("Burning Souls or Undead Soul Killers found, ending script.");
 								return true;
 							}
@@ -279,15 +279,15 @@ function BaalAssistant() {
 							me.area !== sdk.areas.Harrogath && Pather.useWaypoint(sdk.areas.Harrogath);
 							Town.move("portalspot");
 
-							if (Config.BaalAssistant.WaitForSafeTP && !Misc.poll(() => safeCheck, seconds(Config.BaalAssistant.Wait), 1000)) {
+							if (Config.BaalAssistant.WaitForSafeTP && !Misc.poll(() => safeCheck, Time.seconds(Config.BaalAssistant.Wait), 1000)) {
 								throw new Error("No safe TP message.");
 							}
 
-							if (!Misc.poll(() => Pather.usePortal(sdk.areas.ThroneofDestruction, null), seconds(Config.BaalAssistant.Wait), 1000)) {
+							if (!Misc.poll(() => Pather.usePortal(sdk.areas.ThroneofDestruction, null), Time.seconds(Config.BaalAssistant.Wait), 1000)) {
 								throw new Error("No portals to Throne.");
 							}
 
-							if ((Config.BaalAssistant.SoulQuit && monster(641)) || (Config.BaalAssistant.DollQuit && monster(691))) {
+							if ((Config.BaalAssistant.SoulQuit && Game.getMonster(641)) || (Config.BaalAssistant.DollQuit && Game.getMonster(691))) {
 								throw new Error("Burning Souls or Undead Soul Killers found, ending script.");
 							}
 
@@ -322,7 +322,7 @@ function BaalAssistant() {
 								}
 							}
 
-							if (!monster(sdk.monsters.ThroneBaal)) {
+							if (!Game.getMonster(sdk.monsters.ThroneBaal)) {
 								break;
 							}
 
@@ -352,7 +352,7 @@ function BaalAssistant() {
 									Attack.clear(40);
 								} else {
 									while ([sdk.monsters.ListerTheTormenter, sdk.monsters.Minion1, sdk.monsters.Minion2]
-										.map((unitId) => monster(unitId))
+										.map((unitId) => Game.getMonster(unitId))
 										.filter(Boolean).some((unit) => unit.attackable)) {
 										delay(1000);
 									}
@@ -385,7 +385,7 @@ function BaalAssistant() {
 					Helper ? Pather.moveTo(15090, 5008) && delay(2000) : Pather.moveTo(15090, 5010);
 					Precast.doPrecast(true);
 
-					while (monster(sdk.monsters.ThroneBaal)) {
+					while (Game.getMonster(sdk.monsters.ThroneBaal)) {
 						delay(500);
 					}
 
@@ -405,7 +405,7 @@ function BaalAssistant() {
 						Pickit.pickItems();
 					} else {
 						Pather.moveTo(15177, 5952);
-						let baal = monster(sdk.monsters.Baal);
+						let baal = Game.getMonster(sdk.monsters.Baal);
 						
 						while (!!baal && baal.attackable) {
 							delay(1000);

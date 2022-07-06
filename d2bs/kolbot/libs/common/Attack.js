@@ -274,7 +274,7 @@ const Attack = {
 		if (!!target && target.attackable) {
 			console.warn("Failed to kill " + target.name + errorInfo);
 		} else {
-			console.log("ÿc7Killed ÿc0:: " + (!!target.name ? target.name : classId) + "ÿc0 - ÿc7Duration: ÿc0" + formatTime(getTickCount() - tick));
+			console.log("ÿc7Killed ÿc0:: " + (!!target.name ? target.name : classId) + "ÿc0 - ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
 		}
 
 		return (!target || !copyUnit(target).x || target.dead || !target.attackable);
@@ -850,7 +850,7 @@ const Attack = {
 		}
 
 		//this.storeStatistics(Pather.getAreaName(me.area));
-		console.log("ÿc7End ÿc8(clearLevel) ÿc0:: ÿc7" + Pather.getAreaName(currentArea) + "ÿc0 - ÿc7Duration: ÿc0" + (formatTime(getTickCount() - tick)));
+		console.log("ÿc7End ÿc8(clearLevel) ÿc0:: ÿc7" + Pather.getAreaName(currentArea) + "ÿc0 - ÿc7Duration: ÿc0" + (Time.format(getTickCount() - tick)));
 
 		return true;
 	},

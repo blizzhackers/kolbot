@@ -935,7 +935,7 @@ function main () {
 				if (getTickCount() - idleTick > 0) {
 					sendPacket(1, 0x40);
 					idleTick += rand(1200, 1500) * 1000;
-					print("Sent anti-idle packet, next refresh in: (" + formatTime(idleTick - getTickCount()) + ")");
+					print("Sent anti-idle packet, next refresh in: (" + Time.format(idleTick - getTickCount()) + ")");
 				}
 
 				D2Bot.updateStatus(statusString + Starter.timer(me.gamestarttime));

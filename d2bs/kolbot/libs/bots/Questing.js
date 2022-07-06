@@ -50,10 +50,10 @@ function Questing() {
 		log("starting smith");
 		if (!Loader.runScript("Smith")) throw new Error();
 
-		let malusChest = object(sdk.quest.chest.MalusHolder);
+		let malusChest = Game.getObject(sdk.quest.chest.MalusHolder);
 		!!malusChest && malusChest.distance > 5 && Pather.moveToUnit(malusChest);
 		Misc.openChest(malusChest);
-		let malus = Misc.poll(() => item(sdk.quest.item.HoradricMalus), 1000, 100);
+		let malus = Misc.poll(() => Game.getItem(sdk.quest.item.HoradricMalus), 1000, 100);
 		Pickit.pickItem(malus);
 		Town.goToTown();
 		Town.npcInteract("Charsi");
@@ -91,7 +91,7 @@ function Questing() {
 			Pather.moveTo(22571, 9590);
 		} else {
 			while (coords.length) {
-				let andy = monster(sdk.monsters.Andariel);
+				let andy = Game.getMonster(sdk.monsters.Andariel);
 
 				if (andy && andy.distance < 15) {
 					break;
@@ -116,20 +116,19 @@ function Questing() {
 
 		log("starting radament");
 
-		if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.A2SewersLvl2, true)) {
+		if (!Pather.journeyTo(sdk.areas.A2SewersLvl3)) {
 			throw new Error();
 		}
 
 		Precast.doPrecast(true);
 
-		if (!Pather.moveToExit(sdk.areas.HallsoftheDeadLvl3, true)
-			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricScrollChest)) {
-			throw new Error("cube failed");
+		if (!Pather.moveToPreset(sdk.areas.A2SewersLvl3, sdk.unittype.Object, sdk.quest.chest.HoradricScrollChest)) {
+			throw new Error("radament failed");
 		}
 
 		Attack.kill(sdk.monsters.Radament);
 
-		let book = item(sdk.quest.item.BookofSkill);
+		let book = Game.getItem(sdk.quest.item.BookofSkill);
 		book && Pickit.pickItem(book) && book.use();
 
 		Town.goToTown();
@@ -143,19 +142,18 @@ function Questing() {
 
 		log("starting lam essen");
 
-		if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.KurastBazaar, true)) {
+		if (!Pather.journeyTo(sdk.areas.RuinedTemple)) {
 			throw new Error("Lam Essen quest failed");
 		}
 
 		Precast.doPrecast(true);
 
-		if (!Pather.moveToExit(sdk.areas.RuinedTemple, true)
-			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.LamEsensTomeHolder)) {
+		if (!Pather.moveToPreset(sdk.areas.RuinedTemple, sdk.unittype.Object, sdk.quest.chest.LamEsensTomeHolder)) {
 			throw new Error("Lam Essen quest failed");
 		}
 
 		Misc.openChest(sdk.quest.chest.LamEsensTomeHolder);
-		let book = Misc.poll(() => item(sdk.quest.item.LamEsensTome), 1000, 100);
+		let book = Misc.poll(() => Game.getItem(sdk.quest.item.LamEsensTome), 1000, 100);
 
 		Pickit.pickItem(book);
 		Town.goToTown();
@@ -183,7 +181,7 @@ function Questing() {
 		if (!Loader.runScript("Diablo")) throw new Error();
 		Town.goToTown(4);
 
-		object(sdk.units.RedPortalToAct5)
+		Game.getObject(sdk.units.RedPortalToAct5)
 			? Pather.useUnit(sdk.unittype.Object, sdk.units.RedPortalToAct5, sdk.areas.Harrogath)
 			: Town.npcInteract("Tyrael", false) && Misc.useMenu(sdk.menu.TravelToHarrogath);
 
@@ -216,7 +214,7 @@ function Questing() {
 		Pather.journeyTo(sdk.areas.FrigidHighlands);
 		Precast.doPrecast(true);
 
-		let barbs = (getPresetUnits(me.area, sdk.unittype.Object, sdk.units.BarbCage) || []);
+		let barbs = (getPresetUnits(me.area, sdk.unittype.Object, sdk.quest.chest.BarbCage) || []);
 
 		if (!barbs.length) {
 			log("Couldn't find the barbs");
@@ -237,7 +235,7 @@ function Questing() {
 		for (let i = 0; i < coords.length; i += 1) {
 			log((i + 1) + "/" + coords.length);
 			Pather.moveToUnit(coords[i], 2, 0);
-			let door = monster(sdk.quest.chest.BarbCage);
+			let door = Game.getMonster(sdk.monsters.PrisonDoor);
 
 			if (door) {
 				Pather.moveToUnit(door, 1, 0);
@@ -258,20 +256,19 @@ function Questing() {
 
 		log("starting anya");
 
-		if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.CrystalizedPassage, true)) {
+		if (!Pather.journeyTo(sdk.areas.CrystalizedPassage)) {
 			throw new Error();
 		}
 
 		Precast.doPrecast(true);
 
-		if (!Pather.moveToExit(sdk.areas.FrozenRiver, true)
-			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.units.FrozenAnyasPlatform)) {
+		if (!Pather.moveToPreset(sdk.areas.FrozenRiver, sdk.unittype.Object, sdk.units.FrozenAnyasPlatform)) {
 			throw new Error("Anya quest failed");
 		}
 
 		delay(1000);
 
-		let anya = object(sdk.units.FrozenAnya);
+		let anya = Game.getObject(sdk.units.FrozenAnya);
 
 		// talk to anya, then cancel her boring speech
 		Pather.moveToUnit(anya);

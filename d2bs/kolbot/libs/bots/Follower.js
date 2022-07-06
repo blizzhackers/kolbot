@@ -468,7 +468,7 @@ function Follower() {
 	Config.TownHP = 0;
 	Config.TownMP = 0;
 	charClass = sdk.charclass.nameOf(me.classid).toLowerCase();
-	leader = Misc.poll(() => Misc.findPlayer(Config.Leader), seconds(20), seconds(1));
+	leader = Misc.poll(() => Misc.findPlayer(Config.Leader), Time.seconds(20), Time.seconds(1));
 
 	if (!leader) {
 		this.announce("Leader not found.");

@@ -429,17 +429,16 @@ me.switchWeapons = function (slot) {
 	let packetHandler = (bytes) => bytes.length > 0 && bytes[0] === 0x97 && (switched = true) && false; // false to not block
 	addEventListener('gamepacket', packetHandler);
 	try {
-		let pingDelay = me.gameReady ? me.ping : 50;
 		for (let i = 0; i < 10; i += 1) {
 			for (let j = 10; --j && me.idle;) {
 				delay(3);
 			}
 
-			i > 0 && delay(Math.min(1 + (pingDelay * 1.5), 10));
+			i > 0 && delay(10);
 			!switched && sendPacket(1, 0x60); // Swap weapons
 
 			let tick = getTickCount();
-			while (getTickCount() - tick < 250 + (pingDelay * 5)) {
+			while (getTickCount() - tick < 300) {
 				if (switched || originalSlot !== me.weaponswitch) {
 					delay(50);
 					return true;
@@ -1694,6 +1693,11 @@ Object.defineProperties(Unit.prototype, {
 			return this.type === sdk.unittype.Player;
 		},
 	},
+	isMonster: {
+		get: function () {
+			return this.type === sdk.unittype.Monster;
+		},
+	},
 	// todo - monster types
 	isPrimeEvil: {
 		get: function () {
@@ -1958,7 +1962,22 @@ Object.defineProperties(Unit.prototype, {
 			return this.getStat(sdk.stats.NumSockets);
 		},
 	},
+	onGroundOrDropping: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return (this.mode === sdk.itemmode.onGround && this.mode === sdk.itemmode.Dropping);
+		},
+	}
 });
+
+Unit.prototype.usingShield = function () {
+	if (this.type > sdk.unittype.Monster) return false;
+	// always switch to main hand if we are checking ourselves
+	this === me && me.weaponswitch !== 0 && me.switchWeapons(0);
+	let shield = this.getItemsEx(-1, sdk.itemmode.Equipped)
+		.filter(s => [sdk.itemtype.Shield, sdk.itemtype.AuricShields, sdk.itemtype.VoodooHeads].includes(s.itemType)).first();
+	return !!shield;
+};
 
 Object.defineProperties(me, {
 	highestAct: {
@@ -1974,7 +1993,7 @@ Object.defineProperties(me, {
 	},
 	highestQuestDone: {
 		get: function () {
-			for (let i = sdk.quest.id.SecretCowLevel; i >= sdk.quest.id.SpokeToWarriv; i--) {
+			for (let i = sdk.quest.id.Respec; i >= sdk.quest.id.SpokeToWarriv; i--) {
 				if (me.getQuest(i, 0)) {
 					return i;
 				}
@@ -2467,7 +2486,3 @@ Unit.prototype.checkForMobs = function (givenSettings = {}) {
 			}).length;
 	};
 }
-
-const monster = (id) => getUnit(sdk.unittype.Monster, id);
-const object = (id) => getUnit(sdk.unittype.Object, id);
-const item = (id) => getUnit(sdk.unittype.Item, id);

@@ -66,7 +66,7 @@ function DiabloHelper() {
 				Attack.clear(30, 0, false, Common.Diablo.sort);
 
 				return false;
-			}, minutes(Config.DiabloHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "Leader not" : "No players") + " found in Chaos)");
+			}, Time.minutes(Config.DiabloHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "Leader not" : "No players") + " found in Chaos)");
 		} else {
 			Town.goToTown(4);
 			Town.move("portalspot");
@@ -77,7 +77,7 @@ function DiabloHelper() {
 				}
 
 				return false;
-			}, minutes(Config.DiabloHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
+			}, Time.minutes(Config.DiabloHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
 		}
 
 		Common.Diablo.initLayout();
@@ -107,7 +107,7 @@ function DiabloHelper() {
 			Pather.moveTo(7774, 5305);
 			Attack.clear(35, 0, false, Common.Diablo.sort);
 			Common.Diablo.runSeals(Config.DiabloHelper.SealOrder, Config.DiabloHelper.OpenSeals);
-			Misc.poll(() => Common.Diablo.diabloSpawned, seconds(30), 500);
+			Misc.poll(() => Common.Diablo.diabloSpawned, Time.seconds(30), 500);
 		} catch (e) {
 			console.log((e.message ? e.message : e));
 		}
@@ -121,7 +121,7 @@ function DiabloHelper() {
 				try {
 					print("Rechecking seals");
 					Common.Diablo.runSeals(Config.DiabloHelper.SealOrder, Config.DiabloHelper.OpenSeals);
-					Misc.poll(() => Common.Diablo.diabloSpawned, seconds(30), 500);
+					Misc.poll(() => Common.Diablo.diabloSpawned, Time.seconds(30), 500);
 					Common.Diablo.diabloPrep();
 				} catch (e2) {
 					//

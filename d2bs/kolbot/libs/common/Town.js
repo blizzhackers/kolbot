@@ -51,7 +51,7 @@ const Town = {
 		},
 		get: function () {
 			try {
-				if (!!this.unit && getTickCount() - this.tick < seconds(15)
+				if (!!this.unit && getTickCount() - this.tick < Time.seconds(15)
 					&& this.unit.name.toLowerCase() !== "an evil force" && this.unit.area === me.area) {
 					return this.unit;
 				} else {
@@ -130,7 +130,7 @@ const Town = {
 
 		delay(200 + me.ping * 2);
 
-		console.log("ÿc8Finish TownChores ÿc0- ÿc7Duration: ÿc0" + formatTime(getTickCount() - tick));
+		console.log("ÿc8Finish TownChores ÿc0- ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
 
 		return true;
 	},
@@ -1117,7 +1117,7 @@ const Town = {
 				}
 			});
 
-			log && name && console.log('ÿc9DrinkPotsÿc0 :: drank ' + quantity + " " + name + "s. Timer [" + formatTime(quantity * 30 * 1000) + "]");
+			log && name && console.log('ÿc9DrinkPotsÿc0 :: drank ' + quantity + " " + name + "s. Timer [" + Time.format(quantity * 30 * 1000) + "]");
 		} else {
 			console.log("ÿc9DrinkPotsÿc0 :: couldn't find my pots");
 		}
@@ -1979,7 +1979,7 @@ const Town = {
 			!!sold && delay(250);
 		});
 
-		console.log("ÿc8Exit clearInventory ÿc0- ÿc7Duration: ÿc0" + formatTime(getTickCount() - clearInvoTick));
+		console.log("ÿc8Exit clearInventory ÿc0- ÿc7Duration: ÿc0" + Time.format(getTickCount() - clearInvoTick));
 
 		return true;
 	},

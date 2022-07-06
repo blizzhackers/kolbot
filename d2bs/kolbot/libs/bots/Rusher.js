@@ -18,13 +18,13 @@ function Rusher() {
 	load("tools/rushthread.js");
 	delay(500);
 
-	let i, rushThread, command, master, commandSplit0,
-		commands = [],
-		sequence = [
-			"cain", "andariel", "radament", "cube", "amulet", "staff", "summoner", "duriel", "lamesen",
-			"travincal", "mephisto", "izual", "diablo", "shenk", "anya", "ancients", "baal", "givewps"
-		];
-	rushThread = getScript("tools/rushthread.js");
+	let i, command, master, commandSplit0;
+	let commands = [];
+	let sequence = [
+		"cain", "andariel", "radament", "cube", "amulet", "staff", "summoner", "duriel", "lamesen",
+		"travincal", "mephisto", "izual", "diablo", "shenk", "anya", "ancients", "baal", "givewps"
+	];
+	let rushThread = getScript("tools/rushthread.js");
 
 	this.reloadThread = function () {
 		rushThread = getScript("tools/rushthread.js");
@@ -39,8 +39,8 @@ function Rusher() {
 	};
 
 	this.getPartyAct = function () {
-		let party = getParty(),
-			minArea = 999;
+		let party = getParty();
+		let minArea = 999;
 
 		do {
 			if (party.name !== me.name) {
@@ -147,7 +147,7 @@ function Rusher() {
 	say("questinfo");
 	while (!command) {
 		// wait up to 3 minutes
-		if (getTickCount() - tick > 3 * 60 * 1000) {
+		if (getTickCount() - tick > Time.minutes(3)) {
 			break;
 		}
 	}

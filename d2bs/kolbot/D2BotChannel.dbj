@@ -306,7 +306,7 @@ function locationAction (location) {
 						while (true) {
 							lines = Controls.LobbyChat.getText();
 
-							if (!lines || (getTickCount() - wTick > minutes(1))) {
+							if (!lines || (getTickCount() - wTick > Time.minutes(1))) {
 								break;
 							}
 

@@ -35,7 +35,7 @@ function Tristram() {
 
 			break;
 		case me.area === sdk.areas.Tristram:
-			let redPortal = object(sdk.units.RedPortal);
+			let redPortal = Game.getObject(sdk.units.RedPortal);
 			!!redPortal && Pather.moveTo(redPortal.x, redPortal.y + 6);
 
 			if (Config.Tristram.PortalLeech) {
