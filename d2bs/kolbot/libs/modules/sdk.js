@@ -981,6 +981,10 @@ item: {
 
 		// unit stats
 		stats: {
+			subindex: {
+				SkillID: 1,
+				Level: 2
+			},
 			StunLength: 66,
 			VelocityPercent: 67,
 			OtherAnimrate: 69,
