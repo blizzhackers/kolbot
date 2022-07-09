@@ -92,7 +92,8 @@ function BattleOrders () {
 		let tick = getTickCount();
 		
 		if (!BattleOrders.gaveBo) {
-			while ((nearPlayers = Misc.getNearbyPlayerCount()) !== Config.BattleOrders.Getters.length) {
+			nearPlayers = Misc.getNearbyPlayerCount();
+			while (nearPlayers !== Config.BattleOrders.Getters.length) {
 				if (getTickCount() - tick >= Time.seconds(30)) {
 					log("Begin");
 
@@ -108,7 +109,7 @@ function BattleOrders () {
 
 		let boed = false;
 		let playersToBo = getUnits(sdk.unittype.Player)
-			.filter(p => Config.BattleOrders.Getters.includes(p.name) && p.distance < 20);
+			.filter(p => Config.BattleOrders.Getters.includes(p.name.toLowerCase()) && p.distance < 20);
 		playersToBo.forEach(p => {
 			tick = getTickCount();
 
@@ -176,9 +177,10 @@ function BattleOrders () {
 		case boMode.Give:
 			// check if anyone is near us
 			nearPlayer = Game.getPlayer();
+			let nearPlayerName = nearPlayer ? nearPlayer.name.toLowerCase() : "";
 
 			// there is a player near us and they are in the list of players to bo and in my party
-			if (nearPlayer && Config.BattleOrders.Getters.includes(nearPlayer.name) && Misc.inMyParty(nearPlayer.name)) {
+			if (nearPlayer && Config.BattleOrders.Getters.includes(nearPlayerName) && Misc.inMyParty(nearPlayerName)) {
 				let result = giveBO();
 				if (result.success) {
 					if (result.count === Config.BattleOrders.Getters.length) {
