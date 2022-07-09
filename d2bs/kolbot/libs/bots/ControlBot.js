@@ -111,7 +111,7 @@ function ControlBot() {
 			say("I don't see you");
 		}
 
-		unit = getUnit(1);
+		unit = Game.getMonster();
 
 		if (unit) {
 			do {

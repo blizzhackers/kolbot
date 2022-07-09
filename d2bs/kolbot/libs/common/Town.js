@@ -53,14 +53,17 @@ const Town = {
 			try {
 				if (!!this.unit && getTickCount() - this.tick < Time.seconds(15)
 					&& this.unit.name.toLowerCase() !== "an evil force" && this.unit.area === me.area) {
+					Config.DebugMode && console.debug("used stored value");
 					return this.unit;
 				} else {
 					this.reset();
+					Config.DebugMode && console.debug("getting new npc");
 					return getInteractedNPC();
 				}
 			} catch (e) {
-				//console.errorReport(e);
+				Config.DebugMode && console.errorReport(e);
 				this.reset();
+				Config.DebugMode && console.debug("getting new npc");
 				return getInteractedNPC();
 			}
 		},
@@ -223,8 +226,8 @@ const Town = {
 	getTpTool: function () {
 		let items = me.getItemsEx(-1, sdk.itemmode.inStorage).filter((item) => item.isInInventory && [sdk.items.ScrollofTownPortal, sdk.items.TomeofTownPortal].includes(item.classid));
 		if (!items.length) return null;
-		let tome = items.find((i) => i.classid === sdk.items.TomeofTownPortal);
-		if (!!tome && tome.getStat(sdk.stats.Quantity) > 0) return tome;
+		let tome = items.find((i) => i.classid === sdk.items.TomeofTownPortal && i.getStat(sdk.stats.Quantity) > 0);
+		if (!!tome) return tome;
 		let scroll = items.find((i) => i.classid === sdk.items.ScrollofTownPortal);
 		if (scroll) return scroll;
 		return null;

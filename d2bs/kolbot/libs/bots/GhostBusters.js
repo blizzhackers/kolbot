@@ -26,7 +26,7 @@ function GhostBusters() {
 				Pather.moveTo(result[0], result[1], 3);
 
 				let monList = [];
-				let monster = getUnit(1);
+				let monster = Game.getMonster();
 
 				if (monster) {
 					do {

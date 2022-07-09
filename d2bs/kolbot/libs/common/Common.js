@@ -629,6 +629,22 @@ const Common = {
 			return !!glow;
 		},
 
+		moveToStar: function () {
+			switch (me.classid) {
+			case sdk.charclass.Amazon:
+			case sdk.charclass.Sorceress:
+			case sdk.charclass.Necromancer:
+			case sdk.charclass.Assassin:
+				return Pather.moveNear(7791, 5293, (me.sorceress ? 35 : 25), {returnSpotOnError: true});
+			case sdk.charclass.Paladin:
+			case sdk.charclass.Druid:
+			case sdk.charclass.Barbarian:
+				return Pather.moveTo(7788, 5292);
+			}
+
+			return false;
+		},
+
 		diabloPrep: function () {
 			if (Config.Diablo.SealLeader) {
 				Pather.moveTo(7763, 5267);
@@ -638,21 +654,7 @@ const Common = {
 
 			let tick = getTickCount();
 
-			switch (me.classid) {
-			case sdk.charclass.Amazon:
-			case sdk.charclass.Sorceress:
-			case sdk.charclass.Necromancer:
-			case sdk.charclass.Assassin:
-				Pather.moveNear(7791, 5293, (me.sorceress ? 35 : 25), {returnSpotOnError: true});
-
-				break;
-			case sdk.charclass.Paladin:
-			case sdk.charclass.Druid:
-			case sdk.charclass.Barbarian:
-				Pather.moveTo(7788, 5292);
-
-				break;
-			}
+			this.moveToStar();
 
 			while (getTickCount() - tick < 30000) {
 				if (getTickCount() - tick >= 8000) {
@@ -863,7 +865,7 @@ const Common = {
 		},
 
 		checkThrone: function (clear = true) {
-			let monster = getUnit(sdk.unittype.Monster);
+			let monster = Game.getMonster();
 
 			if (monster) {
 				do {
@@ -897,7 +899,7 @@ const Common = {
 		},
 
 		clearThrone: function () {
-			if (!getUnit(sdk.unittype.Monster, sdk.monsters.ThroneBaal)) return true;
+			if (!Game.getMonster(sdk.monsters.ThroneBaal)) return true;
 
 			let monList = [];
 
@@ -1011,13 +1013,13 @@ const Common = {
 
 					break MainLoop;
 				default:
-					if (getTickCount() - tick < 7e3) {
+					if (getTickCount() - tick < Time.seconds(7)) {
 						if (Skill.canUse(sdk.skills.Cleansing) && me.getState(sdk.states.Poison)) {
 							Skill.setSkill(sdk.skills.Cleansing, 0);
 						}
 					}
 
-					if (getTickCount() - tick > 20000) {
+					if (getTickCount() - tick > Time.seconds(20)) {
 						this.clearThrone();
 						tick = getTickCount();
 					}
@@ -1064,7 +1066,7 @@ const Common = {
 				}
 
 				// If we've been in the throne for 30 minutes that's way too long
-				if (getTickCount() - totalTick > 30 * 60000) {
+				if (getTickCount() - totalTick > Time.minutes(30)) {
 					return false;
 				}
 
@@ -1079,7 +1081,7 @@ const Common = {
 		killBaal: function () {
 			if (me.area === sdk.areas.ThroneofDestruction) {
 				Config.PublicMode && Loader.scriptName() === "Baal" && say(Config.Baal.BaalMessage);
-				me.getMobCount(30) > 0 && this.clearWaves(); // ensure waves are actually done
+				me.checkForMobs({range: 30}) && this.clearWaves(); // ensure waves are actually done
 				Pather.moveTo(15090, 5008);
 				delay(5000);
 				Precast.doPrecast(true);

@@ -25,7 +25,7 @@ const MonsterHooks = {
 			}
 		}
 
-		let unit = getUnit(1);
+		let unit = Game.getMonster();
 
 		if (unit) {
 			do {

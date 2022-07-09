@@ -26,11 +26,15 @@ const Pickit = {
 
 		// check if we can pick up items, only do this is our inventory slots aren't completly locked
 		this.invoLocked = !Config.Inventory.some(row => row.some(el => el > 0));
-		this.beltSize = Storage.BeltSize();
-		// If MinColumn is set to be more than our current belt size, set it to be 1 less than the belt size 4x3 belt will give us Config.MinColumn = [2, 2, 2, 2]
-		Config.MinColumn.forEach((el, index) => {
-			el >= this.beltSize && (Config.MinColumn[index] = Math.max(0, this.beltSize - 2));
-		});
+
+		// sometime Storage isn't loaded?
+		if (typeof Storage !== "undefined") {
+			this.beltSize = Storage.BeltSize();
+			// If MinColumn is set to be more than our current belt size, set it to be 1 less than the belt size 4x3 belt will give us Config.MinColumn = [2, 2, 2, 2]
+			Config.MinColumn.forEach((el, index) => {
+				el >= this.beltSize && (Config.MinColumn[index] = Math.max(0, this.beltSize - 1));
+			});
+		}
 	},
 
 	result: {

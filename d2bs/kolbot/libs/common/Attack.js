@@ -522,7 +522,7 @@ const Attack = {
 			if (boss.dead) {
 				console.log("ÿc7Cleared ÿc0:: " + (!!boss.name ? boss.name : bossId) + "ÿc0 - ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
 			} else {
-				console.log("ÿc7Clear ÿc0:: ÿc2Failed to clear ÿc0:: " + (!!boss.name ? boss.name : bossId));
+				console.log("ÿc7Clear ÿc0:: ÿc1Failed to clear ÿc0:: " + (!!boss.name ? boss.name : bossId));
 			}
 		}
 

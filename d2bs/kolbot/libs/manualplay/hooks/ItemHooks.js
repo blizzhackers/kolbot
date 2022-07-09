@@ -194,7 +194,7 @@ const ItemHooks = {
 			}
 		}
 
-		let item = getUnit(4);
+		let item = Game.getItem();
 
 		if (item) {
 			do {

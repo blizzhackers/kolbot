@@ -139,6 +139,11 @@ const Loader = {
 							Config.StackStaminaPots.enabled && Town.buyPots(Config.StackStaminaPots.quantity, sdk.items.StaminaPotion, true);
 						}
 
+						// kinda hacky, but faster for mfhelpers to stop
+						if (Config.MFLeader && Config.PublicMode && ["Diablo", "Baal"].includes(script)) {
+							say("nextup " + script);
+						}
+
 						if (global[script]()) {
 							console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (Time.format(getTickCount() - tick)));
 						}

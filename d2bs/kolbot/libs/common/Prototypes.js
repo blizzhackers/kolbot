@@ -129,7 +129,7 @@ Unit.prototype.openMenu = function (addDelay) {
 Unit.prototype.startTrade = function (mode) {
 	if (Config.PacketShopping) return Packet.startTrade(this, mode);
 	if (this.type !== sdk.unittype.NPC) throw new Error("Unit.startTrade: Must be used on NPCs.");
-	console.log("Starting " + mode + "at " + this.name);
+	console.log("Starting " + mode + " at " + this.name);
 	if (getUIFlag(sdk.uiflags.Shop)) return true;
 
 	let menuId = mode === "Gamble" ? sdk.menu.Gamble : mode === "Repair" ? sdk.menu.TradeRepair : sdk.menu.Trade;
@@ -144,7 +144,7 @@ Unit.prototype.startTrade = function (mode) {
 			while (getTickCount() - tick < 1000) {
 				if (getUIFlag(0x0C) && this.itemcount > 0) {
 					delay(200);
-					console.log("Successfully started " + mode + "at " + this.name);
+					console.log("Successfully started " + mode + " at " + this.name);
 
 					return true;
 				}

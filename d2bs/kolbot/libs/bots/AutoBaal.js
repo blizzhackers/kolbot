@@ -58,7 +58,7 @@ function AutoBaal() {
 			ClassAttack.raiseArmy(50);
 
 			if (Config.Curse[1] > 0) {
-				let monster = getUnit(1);
+				let monster = Game.getMonster();
 
 				if (monster) {
 					do {
@@ -90,7 +90,7 @@ function AutoBaal() {
 			return false;
 		}
 
-		let monster = getUnit(1);
+		let monster = Game.getMonster();
 		let monList = [];
 
 		if (monster) {
@@ -101,25 +101,36 @@ function AutoBaal() {
 			} while (monster.getNext());
 		}
 
-		while (monList.length) {
-			monList.sort(Sort.units);
-			monster = copyUnit(monList[0]);
+		if (me.area === sdk.areas.ThroneofDestruction) {
+			[15100, 5055].distance > 10 && Pather.moveTo(15100, 5055);
+		}
 
-			if (monster && monster.attackable) {
-				let index = monster.isSpecial ? 1 : 3;
+		let oldVal = Skill.usePvpRange;
+		Skill.usePvpRange = true;
 
-				if (Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[index]))) {
-					if (Config.AttackSkill[index] > -1) {
-						ClassAttack.doCast(monster, Config.AttackSkill[index], Config.AttackSkill[index + 1]);
+		try {
+			while (monList.length) {
+				monList.sort(Sort.units);
+				monster = copyUnit(monList[0]);
+
+				if (monster && monster.attackable) {
+					let index = monster.isSpecial ? 1 : 3;
+
+					if (Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[index]))) {
+						if (Config.AttackSkill[index] > -1) {
+							ClassAttack.doCast(monster, Config.AttackSkill[index], Config.AttackSkill[index + 1]);
+						}
+					} else {
+						monList.shift();
 					}
 				} else {
 					monList.shift();
 				}
-			} else {
-				monList.shift();
-			}
 
-			delay(5);
+				delay(5);
+			}
+		} finally {
+			Skill.usePvpRange = oldVal;
 		}
 
 		return true;
@@ -130,7 +141,7 @@ function AutoBaal() {
 
 	if (Config.Leader) {
 		leader = Config.Leader;
-		if (!Misc.poll(() => Misc.inMyParty(leader), 30e3, 1000)) throw new Error("AutoBaal: Leader not partied");
+		if (!Misc.poll(() => Misc.inMyParty(leader), Time.seconds(30), Time.seconds(1))) throw new Error("AutoBaal: Leader not partied");
 	}
 
 	Config.AutoBaal.FindShrine === 2 && (hotCheck = true);
@@ -138,8 +149,8 @@ function AutoBaal() {
 	Town.doChores();
 	Town.move("portalspot");
 
-	// find the first player in area 131 - throne of destruction
-	if (leader || (leader = Misc.autoLeaderDetect({destination: 131}))) {
+	// find the first player in throne of destruction
+	if (leader || (leader = Misc.autoLeaderDetect({destination: sdk.areas.ThroneofDestruction}))) {
 		// do our stuff while partied
 		while (Misc.inMyParty(leader)) {
 			if (hotCheck) {
@@ -170,7 +181,7 @@ function AutoBaal() {
 			}
 
 			// wait for throne signal - leader's safe message
-			if (throneCheck && me.area === sdk.areas.Harrogath) {
+			if ((throneCheck || baalCheck) && me.area === sdk.areas.Harrogath) {
 				print("ÿc4AutoBaal: ÿc0Trying to take TP to throne.");
 				Pather.usePortal(sdk.areas.ThroneofDestruction, null);
 				// move to a safe spot

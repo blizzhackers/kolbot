@@ -271,7 +271,7 @@ function main() {
 
 	this.getNearestMonster = function () {
 		let gid, distance,
-			monster = getUnit(1),
+			monster = Game.getMonster(),
 			range = 30;
 
 		if (monster) {

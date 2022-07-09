@@ -279,7 +279,7 @@ function Follower() {
 
 		let status,
 			pickList = [],
-			item = getUnit(4);
+			item = Game.getItem();
 
 		if (item) {
 			do {
@@ -512,7 +512,7 @@ function Follower() {
 			}
 
 			if (!leaderUnit) {
-				player = getUnit(0);
+				player = Game.getPlayer();
 
 				if (player) {
 					do {

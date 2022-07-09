@@ -101,6 +101,7 @@ const PathDebug = {
 	}
 };
 
+// todo - test path generating in a dedicated thread to prevent lagging main thread
 const Pather = {
 	initialized: false,
 	teleport: true,
@@ -1582,7 +1583,7 @@ const Pather = {
 							i < 2 ? sendPacket(1, 0x13, 4, 0x2, 4, portal.gid) : Misc.click(0, 0, portal);
 							!!redPortal && delay(150);
 						} else {
-							let timeTillNextPortal = Math.abs(Math.round(2500 - (getTickCount() - this.lastPortalTick)));
+							let timeTillNextPortal = Math.max(3, Math.round(2500 - (getTickCount() - this.lastPortalTick)));
 							delay(timeTillNextPortal);
 							
 							continue;

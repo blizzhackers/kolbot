@@ -1212,11 +1212,11 @@ const Misc = {
 	// Get number of players within getUnit distance
 	getNearbyPlayerCount: function () {
 		let count = 0;
-		let player = getUnit(0);
+		let player = Game.getPlayer();
 
 		if (player) {
 			do {
-				if (!player.dead) {
+				if (player.name !== me.name && !player.dead) {
 					count += 1;
 				}
 			} while (player.getNext());
@@ -1275,6 +1275,14 @@ const Misc = {
 		}
 
 		return false;
+	},
+
+	getPlayerArea: function (player) {
+		if (!player) return false;
+
+		let unit = (typeof player === "object" ? player : this.findPlayer(player));
+
+		return !!unit ? unit.area : 0;
 	},
 
 	// autoleader by Ethic - refactored by theBGuy
@@ -1420,7 +1428,7 @@ const Misc = {
 			containers = Config.OpenChests.Types;
 		}
 
-		let unit = getUnit(2);
+		let unit = Game.getObject();
 
 		if (unit) {
 			do {

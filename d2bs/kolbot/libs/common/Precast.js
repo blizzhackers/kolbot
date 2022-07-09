@@ -6,6 +6,7 @@
 */
 
 const Precast = new function () {
+	this.enabled = true;
 	this.haveCTA = -1;
 	this.bestSlot = {};
 
@@ -245,6 +246,8 @@ const Precast = new function () {
 	// should the config check still be included even though its part of Skill.init?
 	// todo: durations
 	this.doPrecast = function (force = false) {
+		if (!this.enabled) return false;
+
 		while (!me.gameReady) {
 			delay(40);
 		}
@@ -552,7 +555,7 @@ const Precast = new function () {
 		me.switchWeapons(this.getBetterSlot(sdk.skills.Enchant));
 
 		// Player
-		unit = getUnit(0);
+		unit = Game.getPlayer();
 
 		if (unit) {
 			do {
@@ -564,7 +567,7 @@ const Precast = new function () {
 		}
 
 		// Minion
-		unit = getUnit(1);
+		unit = Game.getMonster();
 
 		if (unit) {
 			do {

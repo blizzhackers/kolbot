@@ -78,7 +78,7 @@ function SealLeecher() {
 		}
 
 		if (!me.inTown) {
-			monster = getUnit(1);
+			monster = Game.getMonster();
 
 			if (monster) {
 				do {

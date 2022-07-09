@@ -9,8 +9,8 @@ const Scripts = {};
 
 let Config = {
 	init: function (notify) {
-		let configFilename = "",
-			classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"];
+		let configFilename = "";
+		let classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"];
 
 		for (let i = 0; i < 5; i++) {
 			switch (i) {

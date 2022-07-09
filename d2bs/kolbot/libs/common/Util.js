@@ -153,7 +153,7 @@ const Game = {
 			}
 		};
 
-		console.error = function (error) {
+		console.error = function (error = "") {
 			let msg, source, stack;
 			
 			if (typeof error === "string") {
@@ -178,7 +178,7 @@ const Game = {
 			print(msg);
 		};
 
-		console.errorReport = function (error) {
+		console.errorReport = function (error = "") {
 			let msg, source, stack;
 			
 			if (typeof error === "string") {

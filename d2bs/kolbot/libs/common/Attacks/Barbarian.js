@@ -101,7 +101,7 @@ const ClassAttack = {
 	},
 
 	checkCloseMonsters: function (range = 10) {
-		let monster = getUnit(1);
+		let monster = Game.getMonster();
 
 		if (monster) {
 			do {
@@ -126,7 +126,7 @@ const ClassAttack = {
 
 		MainLoop:
 		for (let i = 0; i < 3; i += 1) {
-			let corpse = getUnit(1);
+			let corpse = Game.getMonster();
 
 			if (corpse) {
 				do {

@@ -9,7 +9,7 @@ if (!isIncluded("common/Pickit.js")) { include("common/Pickit.js"); }
 Pickit.basicPickItems = function () {
 	let item, itemList = [];
 
-	item = getUnit(4);
+	item = Game.getItem();
 
 	if (item) {
 		do {

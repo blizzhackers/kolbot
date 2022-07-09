@@ -8,7 +8,7 @@
 function Baal() {
 	this.announce = function () {
 		let count, string, souls, dolls,
-			monster = getUnit(1);
+			monster = Game.getMonster();
 
 		if (monster) {
 			count = 0;

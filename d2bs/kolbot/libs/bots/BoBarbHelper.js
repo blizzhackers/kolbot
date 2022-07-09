@@ -28,7 +28,7 @@ const BoBarbHelper = () => {
 	);
 
 	const giveBuff = () => {
-		const unit = getUnit(0);
+		const unit = Game.getPlayer();
 
 		do {
 			if (shouldBuff(unit)) {
@@ -39,7 +39,7 @@ const BoBarbHelper = () => {
 	};
 
 	const monsterNear = () => {
-		const unit = getUnit(1);
+		const unit = Game.getMonster();
 
 		if (unit) {
 			do {

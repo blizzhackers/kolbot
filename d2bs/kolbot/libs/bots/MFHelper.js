@@ -6,14 +6,14 @@
 */
 
 function MFHelper() {
-	let player, playerAct, split,
-		oldCommand = "",
-		command = "";
+	let player, playerAct, split;
+	let oldCommand = "";
+	let command = "";
 
 	function chatEvent (name, msg) {
 		if (!player) {
 			let match = [
-				"kill", "clearlevel", "clear", "quit", "cows", "council", "goto"
+				"kill", "clearlevel", "clear", "quit", "cows", "council", "goto", "nextup"
 			];
 
 			if (msg) {
@@ -96,6 +96,14 @@ function MFHelper() {
 						Town.move("portalspot");
 					} catch (townerror) {
 						print(townerror);
+					}
+
+					delay(500 + me.ping);
+				} else if (command.includes("nextup")) {
+					split = command.split("nextup ")[1];
+
+					if (split && ["Diablo", "Baal"].includes(split)) {
+						break;
 					}
 
 					delay(500 + me.ping);
