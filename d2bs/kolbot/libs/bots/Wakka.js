@@ -110,7 +110,7 @@ function Wakka() {
 
 		while (path.length > 0) {
 			if (me.mode === 17 || me.inTown) return false;
-			!leaderUnit || !copyUnit(leaderUnit).x && (leaderUnit = Game.getPlayer(leader));
+			(!leaderUnit || !copyUnit(leaderUnit).x) && (leaderUnit = Game.getPlayer(leader));
 
 			if (leaderUnit) {
 				// monsters nearby - don't move
@@ -169,7 +169,7 @@ function Wakka() {
 	};
 
 	this.getLeaderUnitArea = function () {
-		!leaderUnit || !copyUnit(leaderUnit).x && (leaderUnit = Game.getPlayer(leader));
+		(!leaderUnit || !copyUnit(leaderUnit).x) && (leaderUnit = Game.getPlayer(leader));
 		return !!leaderUnit ? leaderUnit.area : getParty(leader).area;
 	};
 
@@ -303,18 +303,15 @@ function Wakka() {
 									break;
 								}
 
-								if (tick && getTickCount() - tick >= 5000) {
-									tick = 0;
-									internals.vizClear = true;
-
-									break;
-								}
-
 								if (this.checkBoss(getLocaleString(sdk.locale.monsters.GrandVizierofChaos))) {
-									!tick && (tick = getTickCount());
 									this.log("vizier dead");
 									internals.vizClear = true;
 									Precast.doPrecast(true);
+									tick = getTickCount();
+
+									while (getTickCount() - tick >= 5000) {
+										delay(100);
+									}
 								}
 
 								break;
@@ -325,19 +322,16 @@ function Wakka() {
 									console.debug("Failed to move to seis");
 									break;
 								}
-
-								if (tick && getTickCount() - tick >= 7000) {
-									tick = 0;
-									internals.seisClear = true;
-
-									break;
-								}
 								
 								if (this.checkBoss(getLocaleString(sdk.locale.monsters.LordDeSeis))) {
-									!tick && (tick = getTickCount());
 									this.log("seis dead");
 									internals.seisClear = true;
 									Precast.doPrecast(true);
+									tick = getTickCount();
+
+									while (getTickCount() - tick >= 7000) {
+										delay(100);
+									}
 								}
 
 								break;
@@ -349,23 +343,26 @@ function Wakka() {
 									break;
 								}
 
-								if (tick && getTickCount() - tick >= 2000) {
-									tick = 0;
-									internals.infClear = true;
-
-									break;
-								}
-
 								if (this.checkBoss(getLocaleString(sdk.locale.monsters.InfectorofSouls))) {
-									!tick && (tick = getTickCount());
 									this.log("infector dead");
 									internals.infClear = true;
 									Precast.doPrecast(true);
+									tick = getTickCount();
+
+									while (getTickCount() - tick >= 2000) {
+										delay(100);
+									}
 								}
 
 								break;
 							}
-							Misc.poll(() => Common.Diablo.diabloSpawned, Time.minutes(3), 500);
+
+							Pather.moveTo(7767, 5263);
+							Misc.poll(() => {
+								if (Common.Diablo.diabloSpawned) return true;
+								if (Game.getMonster(sdk.monsters.Diablo)) return true;
+								return false;
+							}, Time.minutes(2), 500);
 						} catch (e) {
 							console.log((e.message ? e.message : e));
 						}

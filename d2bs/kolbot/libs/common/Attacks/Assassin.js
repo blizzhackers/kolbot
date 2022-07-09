@@ -123,7 +123,7 @@ const ClassAttack = {
 					Pather.moveToUnit(unit);
 
 					let spot = Attack.findSafeSpot(unit, 10, 5, 9);
-					!!spot && Pather.walkTo(spot.x, spot.y);
+					!!spot && !!spot.x && Pather.walkTo(spot.x, spot.y);
 				}
 
 				let closeMob = Attack.getNearestMonster({skipGid: gid});

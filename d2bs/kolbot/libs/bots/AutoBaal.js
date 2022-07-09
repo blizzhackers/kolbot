@@ -102,7 +102,7 @@ function AutoBaal() {
 		}
 
 		if (me.area === sdk.areas.ThroneofDestruction) {
-			[15100, 5055].distance > 10 && Pather.moveTo(15100, 5055);
+			[15116, 5026].distance > 10 && Pather.moveTo(15116, 5026);
 		}
 
 		let oldVal = Skill.usePvpRange;

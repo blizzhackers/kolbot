@@ -7,8 +7,8 @@
 
 function Baal() {
 	this.announce = function () {
-		let count, string, souls, dolls,
-			monster = Game.getMonster();
+		let count, string, souls, dolls;
+		let monster = Game.getMonster();
 
 		if (monster) {
 			count = 0;
@@ -55,13 +55,13 @@ function Baal() {
 
 	Pather.moveTo(15095, 5029);
 
-	if (Config.Baal.DollQuit && getUnit(1, 691)) {
+	if (Config.Baal.DollQuit && Game.getMonster(691)) {
 		say("Dolls found! NG.");
 
 		return true;
 	}
 
-	if (Config.Baal.SoulQuit && getUnit(1, 641)) {
+	if (Config.Baal.SoulQuit && Game.getMonster(641)) {
 		say("Souls found! NG.");
 
 		return true;
