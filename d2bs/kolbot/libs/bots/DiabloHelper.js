@@ -113,7 +113,7 @@ function DiabloHelper() {
 			Misc.poll(() => {
 				if (Common.Diablo.diabloSpawned) return true;
 				if (Game.getMonster(sdk.monsters.Diablo)) return true;
-				if ([sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(Misc.getPlayerArea(DiabloHelper.Leader))) {
+				if ([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(Misc.getPlayerArea(DiabloHelper.Leader))) {
 					throw new Error("END");
 				}
 				return false;

@@ -26,8 +26,8 @@ const NodeAction = {
 			overrideConfig: false,
 		}, arg);
 
-		if (Config.Countess.KillGhosts && [21, 22, 23, 24, 25].includes(me.area)) {
-			let monList = (Attack.getMob(38, 0, 30) || []);
+		if (Config.Countess.KillGhosts && [sdk.areas.TowerCellarLvl1, sdk.areas.TowerCellarLvl2, sdk.areas.TowerCellarLvl3, sdk.areas.TowerCellarLvl4, sdk.areas.TowerCellarLvl5].includes(me.area)) {
+			let monList = (Attack.getMob(sdk.monsters.Ghost1, sdk.units.monsters.spectype.All, 30) || []);
 			monList.length > 0 && Attack.clearList(monList);
 		}
 
@@ -252,13 +252,13 @@ const Pather = {
 					}
 				} else {
 					if (!me.inTown) {
-						if (!useTele && ((me.getMobCount(10) > 0 && Attack.clear(8)) || this.kickBarrels(node.x, node.y) || this.openDoors(node.x, node.y))) {
+						if (!useTele && ((me.checkForMobs({range: 10}) && Attack.clear(8)) || this.kickBarrels(node.x, node.y) || this.openDoors(node.x, node.y))) {
 							continue;
 						}
 
 						if (fail > 0 && (!useTele || tpMana > me.mp)) {
 							// Don't go berserk on longer paths
-							if (!cleared && me.getMobCount(5) > 0 && Attack.clear(5)) {
+							if (!cleared && me.checkForMobs({range: 6}) && Attack.clear(5)) {
 								cleared = true;
 							}
 
@@ -395,13 +395,13 @@ const Pather = {
 					}
 				} else {
 					if (!me.inTown) {
-						if (!useTeleport && ((me.getMobCount(10) > 0 && Attack.clear(8)) || Pather.kickBarrels(node.x, node.y) || Pather.openDoors(node.x, node.y))) {
+						if (!useTeleport && ((me.checkForMobs({range: 10}) && Attack.clear(8)) || Pather.kickBarrels(node.x, node.y) || Pather.openDoors(node.x, node.y))) {
 							continue;
 						}
 
 						if (fail > 0 && (!useTeleport || tpMana > me.mp)) {
 							// Don't go berserk on longer paths
-							if (!cleared && me.getMobCount(5) > 0 && Attack.clear(5)) {
+							if (!cleared && me.checkForMobs({range: 6}) && Attack.clear(5)) {
 								cleared = true;
 							}
 
@@ -525,7 +525,7 @@ const Pather = {
 				} else {
 					if (!me.inTown) {
 						if (!useTele
-							&& ((settings.clearSettings.allowClearing && me.getMobCount(10) > 0 && Attack.clear(8))
+							&& ((settings.clearSettings.allowClearing && me.checkForMobs({range: 10}) && Attack.clear(8))
 							|| this.kickBarrels(node.x, node.y)
 							|| this.openDoors(node.x, node.y))) {
 							continue;
@@ -533,7 +533,7 @@ const Pather = {
 
 						if (fail > 0 && (!useTele || tpMana > me.mp)) {
 							// Don't go berserk on longer paths
-							if (!cleared && settings.clearSettings.allowClearing && me.getMobCount(5) > 0 && Attack.clear(5)) {
+							if (!cleared && settings.clearSettings.allowClearing && me.checkForMobs({range: 6}) && Attack.clear(5)) {
 								cleared = true;
 							}
 
@@ -1331,7 +1331,7 @@ const Pather = {
 
 			if (me.inTown) {
 				if (me.area === sdk.areas.LutGholein) {
-					let npc = getUnit(sdk.unittype.NPC, NPC.Warriv);
+					let npc = Game.getNPC(NPC.Warriv);
 
 					if (!!npc && npc.distance < 50) {
 						if (npc && npc.openMenu()) {
@@ -1344,10 +1344,10 @@ const Pather = {
 					}
 				}
 
-				!getUIFlag(sdk.uiflags.Waypoint) && Town.move("waypoint");
+				!getUIFlag(sdk.uiflags.Waypoint) && Town.getDistance("waypoint") > (Skill.haveTK ? 20 : 5) && Town.move("waypoint");
 			}
 
-			let wp = getUnit(2, "waypoint");
+			let wp = Game.getObject("waypoint");
 
 			if (!!wp && wp.area === me.area) {
 				let useTK = (Skill.useTK(wp) && i < 3);
@@ -1435,13 +1435,17 @@ const Pather = {
 
 					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), pingDelay * 2)) {
 						if (me.area === targetArea) {
-							delay(1000);
+							delay((1500 + (pingDelay * i)));
 							console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (Time.format(getTickCount() - wpTick)));
 
 							return true;
 						}
 
 						delay(20);
+					}
+
+					while (!me.gameReady) {
+						delay(1000);
 					}
 
 					// In case lag causes the wp menu to stay open
@@ -1635,7 +1639,7 @@ const Pather = {
 		owner - name of the portal's owner
 	*/
 	getPortal: function (targetArea, owner) {
-		let portal = getUnit(2, "portal");
+		let portal = Game.getObject("portal");
 
 		if (portal) {
 			do {
@@ -1747,13 +1751,13 @@ const Pather = {
 			return true;
 		// For the other acts, check the "Able to go to Act *" quests
 		case 2:
-			return me.getQuest(7, 0) === 1;
+			return me.getQuest(sdk.quest.id.AbleToGotoActII, 0) === 1;
 		case 3:
-			return me.getQuest(15, 0) === 1;
+			return me.getQuest(sdk.quest.id.AbleToGotoActIII, 0) === 1;
 		case 4:
-			return me.getQuest(23, 0) === 1;
+			return me.getQuest(sdk.quest.id.AbleToGotoActIV, 0) === 1;
 		case 5:
-			return me.expansion && me.getQuest(28, 0) === 1;
+			return me.expansion && me.getQuest(sdk.quest.id.AbleToGotoActV, 0) === 1;
 		default:
 			return false;
 		}
@@ -1770,12 +1774,12 @@ const Pather = {
 		area !== me.area && this.journeyTo(area);
 
 		for (let i = 0; i < wpIDs.length; i++) {
-			let preset = getPresetUnit(area, 2, wpIDs[i]);
+			let preset = getPresetUnit(area, sdk.unittype.Object, wpIDs[i]);
 
 			if (preset) {
 				Skill.haveTK ? this.moveNearUnit(preset, 20, {clearSettings: {clearPath: clearPath}}) : this.moveToUnit(preset, 0, 0, clearPath);
 
-				let wp = getUnit(2, "waypoint");
+				let wp = Game.getObject("waypoint");
 
 				if (wp) {
 					for (let j = 0; j < 10; j++) {
@@ -1876,28 +1880,28 @@ const Pather = {
 			} else if (currArea === sdk.areas.LutGholein && target.course[0] === sdk.areas.A2SewersLvl1) {
 				// Lut Gholein -> Sewers Level 1 (use Trapdoor)
 				this.moveToPreset(currArea, sdk.unittype.Stairs, 19);
-				this.useUnit(sdk.unittype.Object, 74, sdk.areas.A2SewersLvl1);
+				this.useUnit(sdk.unittype.Object, sdk.units.TrapDoorA2, sdk.areas.A2SewersLvl1);
 			} else if (currArea === sdk.areas.A2SewersLvl2 && target.course[0] === sdk.areas.A2SewersLvl1) {
 				// Sewers Level 2 -> Sewers Level 1
 				Pather.moveToExit(target.course[0], false);
-				this.useUnit(sdk.unittype.Stairs, 22, 47);
+				this.useUnit(sdk.unittype.Stairs, 22, sdk.areas.A2SewersLvl1);
 			} else if (currArea === sdk.areas.PalaceCellarLvl3 && target.course[0] === sdk.areas.ArcaneSanctuary) {
 				// Palace -> Arcane
 				this.moveTo(10073, 8670);
 				this.usePortal(null);
 			} else if (currArea === sdk.areas.ArcaneSanctuary && target.course[0] === sdk.areas.PalaceCellarLvl3) {
 				// Arcane Sanctuary -> Palace Cellar 3
-				Skill.haveTK ? this.moveNearPreset(currArea, 2, 298, 20) : this.moveToPreset(currArea, 2, 298);
-				unit = Misc.poll(() => getUnit(sdk.unittype.Object, 298));
-				unit && Pather.useUnit(sdk.unittype.Stairs, 298, 54);
+				Skill.haveTK ? this.moveNearPreset(currArea, sdk.unittype.Object, sdk.units.ArcaneSanctuaryPortal, 20) : this.moveToPreset(currArea, sdk.unittype.Object, sdk.units.ArcaneSanctuaryPortal);
+				unit = Misc.poll(() => Game.getObject(sdk.units.ArcaneSanctuaryPortal));
+				unit && Pather.useUnit(sdk.unittype.Object, sdk.units.ArcaneSanctuaryPortal, sdk.areas.PalaceCellarLvl3);
 			} else if (currArea === sdk.areas.ArcaneSanctuary && target.course[0] === sdk.areas.CanyonofMagic) {
 				// Arcane Sanctuary -> Canyon of the Magic
-				this.moveToPreset(currArea, sdk.unittype.Object, 357);
-				unit = getUnit(sdk.unittype.Object, sdk.units.RedPortal);
+				this.moveToPreset(currArea, sdk.unittype.Object, sdk.units.Journal);
+				unit = Game.getObject(sdk.units.RedPortal);
 
 				if (!unit || !this.usePortal(null, null, unit)) {
 					for (let i = 0; i < 5; i++) {
-						unit = getUnit(sdk.unittype.Object, sdk.units.Journal);
+						unit = Game.getObject(sdk.units.Journal);
 
 						Misc.click(0, 0, unit);
 						delay(1000);
@@ -1911,27 +1915,27 @@ const Pather = {
 			} else if (currArea === sdk.areas.CanyonofMagic && target.course[0] === sdk.areas.DurielsLair) {
 				// Canyon -> Duriels Lair
 				this.moveToExit(getRoom().correcttomb, true);
-				this.moveToPreset(me.area, 2, 152);
-				unit = Misc.poll(() => getUnit(2, 100));
-				unit && Pather.useUnit(2, 100, 73);
+				this.moveToPreset(me.area, sdk.unittype.Object, sdk.units.HoradricStaffHolder);
+				unit = Misc.poll(() => Game.getObject(sdk.units.PortaltoDurielsLair));
+				unit && Pather.useUnit(sdk.unittype.Object, sdk.units.PortaltoDurielsLair, sdk.areas.DurielsLair);
 			} else if (currArea === sdk.areas.Travincal && target.course[0] === sdk.areas.DuranceofHateLvl1) {
 				// Trav -> Durance Lvl 1
-				Pather.moveToPreset(me.area, 2, 386);
-				this.useUnit(2, 386, sdk.areas.DuranceofHateLvl1);
+				Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.units.DuranceEntryStairs);
+				this.useUnit(sdk.unittype.Object, sdk.units.DuranceEntryStairs, sdk.areas.DuranceofHateLvl1);
 			} else if (currArea === sdk.areas.DuranceofHateLvl3 && target.course[0] === sdk.areas.PandemoniumFortress) {
 				// Durance Lvl 3 -> Pandemonium Fortress
-				if (me.getQuest(22, 0) !== 1) {
+				if (me.getQuest(sdk.quest.id.TheGuardian, 0) !== 1) {
 					console.log(sdk.colors.Red + "(journeyTo) :: Incomplete Quest");
 					return false;
 				}
 
 				Pather.moveTo(17581, 8070);
 				delay(250 + me.ping * 2);
-				this.useUnit(2, 342, sdk.areas.PandemoniumFortress);
+				this.useUnit(sdk.unittype.Object, sdk.units.RedPortalToAct4, sdk.areas.PandemoniumFortress);
 			} else if (currArea === sdk.areas.Harrogath && target.course[0] === sdk.areas.BloodyFoothills) {
 				// Harrogath -> Bloody Foothills
 				this.moveTo(5026, 5095);
-				this.openUnit(2, 449);
+				this.openUnit(sdk.unittype.Object, 449);
 				this.moveToExit(target.course[0], true);
 			} else if (currArea === sdk.areas.Harrogath && target.course[0] === sdk.areas.NihlathaksTemple) {
 				// Harrogath -> Nihlathak's Temple
@@ -1939,15 +1943,15 @@ const Pather = {
 				this.usePortal(sdk.areas.NihlathaksTemple);
 			} else if (currArea === sdk.areas.FrigidHighlands && target.course[0] === sdk.areas.Abaddon) {
 				// Abaddon
-				this.moveToPreset(sdk.areas.FrigidHighlands, 2, 60);
+				this.moveToPreset(sdk.areas.FrigidHighlands, sdk.unittype.Object, sdk.units.RedPortal);
 				this.usePortal(sdk.areas.Abaddon);
 			} else if (currArea === sdk.areas.ArreatPlateau && target.course[0] === sdk.areas.PitofAcheron) {
 				// Pits of Archeon
-				this.moveToPreset(sdk.areas.ArreatPlateau, 2, 60);
+				this.moveToPreset(sdk.areas.ArreatPlateau, sdk.unittype.Object, sdk.units.RedPortal);
 				this.usePortal(sdk.areas.PitofAcheron);
 			} else if (currArea === sdk.areas.FrozenTundra && target.course[0] === sdk.areas.InfernalPit) {
 				// Infernal Pit
-				this.moveToPreset(sdk.areas.FrozenTundra, 2, 60);
+				this.moveToPreset(sdk.areas.FrozenTundra, sdk.unittype.Object, sdk.units.RedPortal);
 				this.usePortal(sdk.areas.InfernalPit);
 			} else if (target.course[0] === sdk.areas.MooMooFarm) {
 				// Moo Moo farm

@@ -78,6 +78,7 @@ const clickUnitAndWait = (button, shift, unit) => {
 
 function includeCommonLibs () {
 	let files = dopen("libs/common/").getFiles();
+	if (!files.length) throw new Error("Failed to find my files");
 		
 	Array.isArray(files) && files
 		.filter(file => file.endsWith('.js') && !file.match("auto", "gi") && file !== "Util.js")
