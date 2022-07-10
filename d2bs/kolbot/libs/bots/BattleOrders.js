@@ -13,7 +13,7 @@ function BattleOrders () {
 
 	const boMode = {
 		Give: 0,
-		Recieve: 1
+		Receive: 1
 	};
 
 	// convert all names in getter to lowercase
@@ -204,7 +204,7 @@ function BattleOrders () {
 			}
 
 			break;
-		case boMode.Recieve:
+		case boMode.Receive:
 			if (me.getState(sdk.states.BattleOrders)) {
 				log("Got bo-ed");
 				delay(1000);

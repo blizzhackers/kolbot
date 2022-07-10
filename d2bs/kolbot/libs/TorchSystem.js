@@ -266,6 +266,9 @@ const TorchSystem = {
 		let timer = getTickCount();
 		let busy = false;
 		let busyTick;
+		let tkeys = me.findItems("pk1", 0).length || 0;
+		let hkeys = me.findItems("pk2", 0).length || 0;
+		let dkeys = me.findItems("pk3", 0).length || 0;
 		let neededItems = {pk1: 0, pk2: 0, pk3: 0, rv: 0};
 
 		// Check whether the killer is alone in the game
@@ -332,9 +335,9 @@ const TorchSystem = {
 			Town.needStash() && Town.stash();
 
 			// Get the number keys
-			let tkeys = me.findItems("pk1", 0).length || 0;
-			let hkeys = me.findItems("pk2", 0).length || 0;
-			let dkeys = me.findItems("pk3", 0).length || 0;
+			tkeys = me.findItems("pk1", 0).length || 0;
+			hkeys = me.findItems("pk2", 0).length || 0;
+			dkeys = me.findItems("pk3", 0).length || 0;
 
 			// Stop the loop if we have enough keys or if wait time expired
 			if (((tkeys >= 3 && hkeys >= 3 && dkeys >= 3)

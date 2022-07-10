@@ -116,10 +116,8 @@ function AutoBaal() {
 				if (monster && monster.attackable) {
 					let index = monster.isSpecial ? 1 : 3;
 
-					if (Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[index]))) {
-						if (Config.AttackSkill[index] > -1) {
-							ClassAttack.doCast(monster, Config.AttackSkill[index], Config.AttackSkill[index + 1]);
-						}
+					if (Config.AttackSkill[index] > -1 && Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[index]))) {
+						ClassAttack.doCast(monster, Config.AttackSkill[index], Config.AttackSkill[index + 1]);
 					} else {
 						monList.shift();
 					}
