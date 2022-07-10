@@ -94,7 +94,7 @@ function includeCommonLibs () {
 const Time = {
 	seconds: function (ms = 0) {
 		if (typeof ms !== "number") return 0;
-		return (ms * 60000);
+		return (ms * 1000);
 	},
 	minutes: function (ms = 0) {
 		if (typeof ms !== "number") return 0;

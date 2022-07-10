@@ -1705,7 +1705,7 @@ Object.defineProperties(Unit.prototype, {
 				sdk.monsters.Andariel, sdk.monsters.Duriel, sdk.monsters.Mephisto, sdk.monsters.Diablo,
 				sdk.monsters.Baal, sdk.monsters.BaalClone, sdk.monsters.UberDuriel, sdk.monsters.UberIzual,
 				sdk.monsters.UberMephisto, sdk.monsters.UberDiablo, sdk.monsters.UberBaal, sdk.monsters.Lilith, sdk.monsters.DiabloClone
-			].includes(this.classid);
+			].includes(this.classid) || getBaseStat('monstats', this.classid, 'primeevil');
 		},
 	},
 	isBoss: {
@@ -1725,7 +1725,7 @@ Object.defineProperties(Unit.prototype, {
 			return [
 				sdk.monsters.Ghost1, sdk.monsters.Wraith1, sdk.monsters.Specter1,
 				sdk.monsters.Apparition, sdk.monsters.DarkShape, sdk.monsters.Ghost2, sdk.monsters.Wraith2, sdk.monsters.Specter2
-			].includes(this.classid);
+			].includes(this.classid) || getBaseStat('monstats', this.classid, 'MonType') === sdk.units.monsters.type.Wraith;
 		},
 	},
 	isDoll: {

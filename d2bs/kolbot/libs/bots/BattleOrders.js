@@ -10,6 +10,7 @@
 
 function BattleOrders () {
 	this.gaveBo = false;
+	this.totalBoed = [];
 
 	const boMode = {
 		Give: 0,
@@ -91,6 +92,7 @@ function BattleOrders () {
 		let nearPlayers = 0;
 		let tick = getTickCount();
 		
+		// if we haven't already given a bo, lets wait to see if more players show up
 		if (!BattleOrders.gaveBo) {
 			nearPlayers = Misc.getNearbyPlayerCount();
 			while (nearPlayers !== Config.BattleOrders.Getters.length) {
@@ -100,10 +102,9 @@ function BattleOrders () {
 					break;
 				}
 
-				me.overhead("Waiting for all players to show up");
+				me.overhead("Waiting " + Math.round(((tick + Time.seconds(30)) - getTickCount()) / 1000) + " for all players to show up");
 				nearPlayers = Misc.getNearbyPlayerCount();
 				delay(1000);
-				console.debug("Near Player count: " + nearPlayers + " getter count: " + Config.BattleOrders.Getters.length);
 			}
 		}
 
@@ -129,6 +130,7 @@ function BattleOrders () {
 					delay(1000);
 				}
 
+				this.totalBoed.indexOf(p.name.toLowerCase()) === -1 && this.totalBoed.push(p.name.toLowerCase());
 				console.debug("Bo-ed " + p.name);
 				boed = true;
 			}
@@ -177,21 +179,36 @@ function BattleOrders () {
 		case boMode.Give:
 			// check if anyone is near us
 			nearPlayer = Game.getPlayer();
-			let nearPlayerName = nearPlayer ? nearPlayer.name.toLowerCase() : "";
 
-			// there is a player near us and they are in the list of players to bo and in my party
-			if (nearPlayer && Config.BattleOrders.Getters.includes(nearPlayerName) && Misc.inMyParty(nearPlayerName)) {
-				let result = giveBO();
-				if (result.success) {
-					if (result.count === Config.BattleOrders.Getters.length) {
-						// we bo-ed everyone we are set to, don't wait around any longer
-						break MainLoop;
+			if (nearPlayer) {
+				do {
+					if (nearPlayer.name !== me.name) {
+						let nearPlayerName = nearPlayer.name.toLowerCase();
+						// there is a player near us and they are in the list of players to bo and in my party
+						if (Config.BattleOrders.Getters.includes(nearPlayerName) && !this.totalBoed.includes(nearPlayerName) && Misc.inMyParty(nearPlayerName)) {
+							let result = giveBO();
+							if (result.success) {
+								if (result.count === Config.BattleOrders.Getters.length || this.totalBoed.length === Config.BattleOrders.Getters.length) {
+									// we bo-ed everyone we are set to, don't wait around any longer
+									break MainLoop;
+								}
+								// reset fail tick
+								tick = getTickCount();
+								// shorten waiting time since we've already started giving out bo's
+								BattleOrders.gaveBo = true;
+							}
+						}
+					} else {
+						me.overhead("Waiting " + Math.round(((tick + failTimer) - getTickCount()) / 1000) + " Seconds for other players");
+
+						if (getTickCount() - tick >= failTimer) {
+							log("ÿc1Give BO timeout fail.");
+							Config.BattleOrders.QuitOnFailure && scriptBroadcast("quit");
+
+							break MainLoop;
+						}
 					}
-					// reset fail tick
-					tick = getTickCount();
-					// shorten waiting time since we've already started giving out bo's
-					BattleOrders.gaveBo = true;
-				}
+				} while (nearPlayer.getNext());
 			} else {
 				me.overhead("Waiting " + Math.round(((tick + failTimer) - getTickCount()) / 1000) + " Seconds for other players");
 

@@ -8,10 +8,9 @@
 function Andariel () {
 	this.killAndariel = function () {
 		let target = Game.getMonster(sdk.monsters.Andariel);
-
 		if (!target) throw new Error("Andariel not found.");
 
-		Config.MFLeader && Pather.makePortal() && say("kill " + 156);
+		Config.MFLeader && Pather.makePortal() && say("kill " + sdk.monsters.Andariel);
 
 		for (let i = 0; i < 300 && target.attackable; i += 1) {
 			ClassAttack.doAttack(target);
