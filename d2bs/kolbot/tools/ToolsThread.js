@@ -257,11 +257,11 @@ function main() {
 	};
 
 	this.checkVipers = function () {
-		let monster = getUnit(1, 597);
+		let monster = Game.getMonster(sdk.monsters.TombViper2);
 
 		if (monster) {
 			do {
-				if (monster.getState(96)) {
+				if (monster.getState(sdk.states.Revive)) {
 					let owner = monster.getParent();
 
 					if (owner && owner.name !== me.name) {
@@ -277,7 +277,7 @@ function main() {
 	};
 
 	this.getIronGolem = function () {
-		let golem = getUnit(1, 291);
+		let golem = Game.getMonster(sdk.monsters.IronGolem);
 
 		if (golem) {
 			do {
@@ -338,21 +338,21 @@ function main() {
 		hellPoisonRes > maxHellPoisonRes && (hellPoisonRes = maxHellPoisonRes);
 
 		let str =
-		"ÿc4Character Level: ÿc0" + unit.charlvl + (unit === me ? " ÿc4Difficulty: ÿc0" + sdk.difficulty.nameOf(me.diff) + " ÿc4HighestActAvailable: ÿc0" + me.highestAct : "") + "\n" +
-		"ÿc1FR: ÿc0" + unit.getStat(sdk.stats.FireResist) + "ÿc1 Applied FR: ÿc0" + unit.fireRes +
-		"/ÿc3 CR: ÿc0" + unit.getStat(sdk.stats.ColdResist) + "ÿc3 Applied CR: ÿc0" + unit.coldRes +
-		"/ÿc9 LR: ÿc0" + unit.getStat(sdk.stats.LightResist) + "ÿc9 Applied LR: ÿc0" + unit.lightRes +
-		"/ÿc2 PR: ÿc0" + unit.getStat(sdk.stats.PoisonResist) + "ÿc2 Applied PR: ÿc0" + unit.poisonRes + "\n" +
-		(!me.hell ? "Hell res: ÿc1" + hellFireRes + "ÿc0/ÿc3" + hellColdRes + "ÿc0/ÿc9" + hellLightRes + "ÿc0/ÿc2" + hellPoisonRes + "ÿc0\n" : "") +
-		"ÿc4MF: ÿc0" + unit.getStat(sdk.stats.MagicBonus) + "ÿc4 GF: ÿc0" + unit.getStat(sdk.stats.GoldBonus) +
-		" ÿc4FCR: ÿc0" + realFCR + " ÿc4IAS: ÿc0" + realIAS + " ÿc4FBR: ÿc0" + realFBR +
-		" ÿc4FHR: ÿc0" + realFHR + " ÿc4FRW: ÿc0" + unit.getStat(sdk.stats.FRW) + "\n" +
-		"ÿc4CB: ÿc0" + unit.getStat(sdk.stats.CrushingBlow) + " ÿc4DS: ÿc0" + unit.getStat(sdk.stats.DeadlyStrike) +
-		" ÿc4OW: ÿc0" + unit.getStat(sdk.stats.OpenWounds) +
-		" ÿc1LL: ÿc0" + unit.getStat(sdk.stats.LifeLeech) + " ÿc3ML: ÿc0" + unit.getStat(sdk.stats.ManaLeech) +
-		" ÿc8DR: ÿc0" + unit.getStat(sdk.stats.DamageResist) + "% + " + unit.getStat(sdk.stats.NormalDamageReduction) +
-		" ÿc8MDR: ÿc0" + unit.getStat(sdk.stats.MagicResist) + "% + " + unit.getStat(sdk.stats.MagicDamageReduction) + "\n" +
-		(unit.getStat(sdk.stats.CannotbeFrozen) > 0 ? "ÿc3Cannot be Frozenÿc1\n" : "\n");
+			"ÿc4Character Level: ÿc0" + unit.charlvl + (unit === me ? " ÿc4Difficulty: ÿc0" + sdk.difficulty.nameOf(me.diff) + " ÿc4HighestActAvailable: ÿc0" + me.highestAct : "") + "\n"
+			+ "ÿc1FR: ÿc0" + unit.getStat(sdk.stats.FireResist) + "ÿc1 Applied FR: ÿc0" + unit.fireRes
+			+ "/ÿc3 CR: ÿc0" + unit.getStat(sdk.stats.ColdResist) + "ÿc3 Applied CR: ÿc0" + unit.coldRes
+			+ "/ÿc9 LR: ÿc0" + unit.getStat(sdk.stats.LightResist) + "ÿc9 Applied LR: ÿc0" + unit.lightRes
+			+ "/ÿc2 PR: ÿc0" + unit.getStat(sdk.stats.PoisonResist) + "ÿc2 Applied PR: ÿc0" + unit.poisonRes + "\n"
+			+ (!me.hell ? "Hell res: ÿc1" + hellFireRes + "ÿc0/ÿc3" + hellColdRes + "ÿc0/ÿc9" + hellLightRes + "ÿc0/ÿc2" + hellPoisonRes + "ÿc0\n" : "")
+			+ "ÿc4MF: ÿc0" + unit.getStat(sdk.stats.MagicBonus) + "ÿc4 GF: ÿc0" + unit.getStat(sdk.stats.GoldBonus)
+			+ " ÿc4FCR: ÿc0" + realFCR + " ÿc4IAS: ÿc0" + realIAS + " ÿc4FBR: ÿc0" + realFBR
+			+ " ÿc4FHR: ÿc0" + realFHR + " ÿc4FRW: ÿc0" + unit.getStat(sdk.stats.FRW) + "\n"
+			+ "ÿc4CB: ÿc0" + unit.getStat(sdk.stats.CrushingBlow) + " ÿc4DS: ÿc0" + unit.getStat(sdk.stats.DeadlyStrike)
+			+ " ÿc4OW: ÿc0" + unit.getStat(sdk.stats.OpenWounds)
+			+ " ÿc1LL: ÿc0" + unit.getStat(sdk.stats.LifeLeech) + " ÿc3ML: ÿc0" + unit.getStat(sdk.stats.ManaLeech)
+			+ " ÿc8DR: ÿc0" + unit.getStat(sdk.stats.DamageResist) + "% + " + unit.getStat(sdk.stats.NormalDamageReduction)
+			+ " ÿc8MDR: ÿc0" + unit.getStat(sdk.stats.MagicResist) + "% + " + unit.getStat(sdk.stats.MagicDamageReduction) + "\n"
+			+ (unit.getStat(sdk.stats.CannotbeFrozen) > 0 ? "ÿc3Cannot be Frozenÿc1\n" : "\n");
 
 		return str;
 	};
@@ -363,6 +363,10 @@ function main() {
 		case sdk.keys.PauseBreak: // pause default.dbj
 			this.togglePause();
 
+			break;
+		case sdk.keys.Delete: // quit current game
+			this.exit();
+			
 			break;
 		case sdk.keys.End: // stop profile and log character
 			MuleLogger.logChar();
@@ -404,7 +408,19 @@ function main() {
 
 			break;
 		case sdk.keys.NumpadDash: // log our items to item log ? should this try to get nearest player? Isn't that what it was meant for
-			Misc.spy(me.name);
+			{
+				// check if we are hovering the mouse over somebody
+				let selectedUnit = Game.getSelectedUnit();
+				if (selectedUnit && selectedUnit.isPlayer) {
+					me.overhead("logging " + selectedUnit.name);
+					// the unit is a valid player lets log thier stuff...muhahaha
+					Misc.spy(selectedUnit.name);
+				} else {
+					me.overhead("logging my stuff");
+					// just log ourselves
+					Misc.spy(me.name);
+				}
+			}
 
 			break;
 		case sdk.keys.NumpadDecimal: // show fps info - built in d2 function - does this need force server if we are using localchat?
