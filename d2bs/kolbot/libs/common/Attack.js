@@ -1331,7 +1331,7 @@ const Attack = {
 		if (!unit || !unit.type || unit.type === sdk.unittype.Player) return true;
 
 		let damageType = typeof val === "number" ? this.getSkillElement(val) : val;
-		let addLowerRes = !!(me.getSkill(sdk.skills.LowerResist, 1) && unit.curseable);
+		let addLowerRes = !!(Skill.canUse(sdk.skills.LowerResist) && unit.curseable);
 
 		// Static handler
 		if (val === sdk.skills.StaticField && this.getResist(unit, damageType) < 100) {

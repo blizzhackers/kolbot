@@ -4164,7 +4164,7 @@ item: {
 			CapsLock: 20,
 			Escape: 27,
 			PageUp: 33,
-			PageDown: 34
+			PageDown: 34,
 			End: 35,
 			Home: 36,
 			LeftArrow: 37,
