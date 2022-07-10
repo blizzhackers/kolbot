@@ -84,9 +84,14 @@ function includeCommonLibs () {
 		.filter(file => file.endsWith('.js') && !file.match("auto", "gi") && file !== "Util.js")
 		.forEach(function (x) {
 			if (!include("common/" + x)) {
-				throw new Error("Failed to include " + "common/" + x);
+				throw new Error("Failed to include common/" + x);
 			}
 		});
+}
+
+function includeIfNotIncluded (file = "") {
+	if (!isIncluded(file)) return include(file);
+	return true;
 }
 
 // helper functions in case you find it annoying like me to write while (getTickCount() - tick > 3 * 60 * 1000) which is 3 minutes

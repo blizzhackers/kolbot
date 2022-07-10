@@ -788,7 +788,9 @@ const ControlAction = {
 
 	setEmail: function (email = "", domain = "@email.com") {
 		if (getLocation() !== sdk.game.locations.RegisterEmail) return false;
-		!email && (email = Starter.randomString(null, true));
+		if (!email || !email.length) {
+			email = Starter.randomString(null, true);
+		}
 		
 		while (getLocation() !== sdk.game.locations.CharSelect) {
 			switch (getLocation()) {
@@ -805,6 +807,9 @@ const ControlAction = {
 				Controls.LoginErrorOk.click();
 				
 				return false;
+			case sdk.game.locations.CharSelectNoChars:
+				// fresh acc
+				return true;
 			}
 		}
 
@@ -1646,7 +1651,7 @@ const Starter = {
 	},
 
 	randomString: function (len, useNumbers = false) {
-		len === undefined && (len = rand(5, 14));
+		!len && (len = rand(5, 14));
 
 		let rval = "";
 		let letters = useNumbers ? "abcdefghijklmnopqrstuvwxyz0123456789" : "abcdefghijklmnopqrstuvwxyz";
