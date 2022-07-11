@@ -69,6 +69,8 @@ const AutoMule = {
 
 			// Stop a profile prior to muling. Useful when running 8 bots without proxies.
 			stopProfile: "",
+			stopProfileKeyRelease: false, // true = stopProfile key will get released on stop. useful when using 100% of your keys for botting.
+
 			// Continuous Mule settings
 			continuousMule:	true, // Mule stays in game for continuous muling. muleProfile must be dedicated and started manually.
 			skipMuleResponse: true, // Skip mule response check and attempt to join mule game. Useful if mule is shared and/or ran on different system.
@@ -443,7 +445,7 @@ const AutoMule = {
 
 	// finished if no items are on ground
 	isFinished: function () {
-		let item = getUnit(4);
+		let item = Game.getItem();
 
 		if (item) {
 			do {
