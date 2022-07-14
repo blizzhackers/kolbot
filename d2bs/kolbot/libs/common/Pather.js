@@ -582,7 +582,7 @@ const Pather = {
 		x - the x coord to teleport to
 		y - the y coord to teleport to
 	*/
-	// does this need a validLocation check?
+	// does this need a validLocation check? - maybe if we fail once check the spot
 	teleportTo: function (x, y, maxRange = 5) {
 		for (let i = 0; i < 3; i += 1) {
 			Config.PacketCasting > 0 ? Skill.setSkill(sdk.skills.Teleport, 0) && Packet.castSkill(0, x, y) : Skill.cast(sdk.skills.Teleport, 0, x, y);
@@ -724,7 +724,7 @@ const Pather = {
 		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
 
 		// Regular doors
-		let door = getUnit(sdk.unittype.Object, "door", 0);
+		let door = Game.getObject("door", 0);
 
 		if (door) {
 			do {
@@ -744,7 +744,7 @@ const Pather = {
 
 		// handle act 5 gate
 		if ([sdk.areas.Harrogath, sdk.areas.BloodyFoothills].includes(me.area)) {
-			let gate = getUnit(sdk.unittype.Object, "gate", 0);
+			let gate = Game.getObject("gate", 0);
 
 			if (gate) {
 				if ((getDistance(gate, x, y) < 4 && gate.distance < 9) || gate.distance < 4) {
@@ -761,8 +761,8 @@ const Pather = {
 			}
 		}
 
-		// Monsta doors (Barricaded)
-		let monstadoor = getUnit(sdk.unittype.Monster, "barricaded door");
+		// Monsta doors (Barricaded) - not sure if this is really needed anymore
+		let monstadoor = Game.getMonster("barricaded door");
 
 		if (monstadoor) {
 			do {
@@ -774,7 +774,7 @@ const Pather = {
 			} while (monstadoor.getNext());
 		}
 
-		let monstawall = getUnit(sdk.unittype.Monster, "barricade");
+		let monstawall = Game.getMonster("barricade");
 		
 		if (monstawall) {
 			do {
