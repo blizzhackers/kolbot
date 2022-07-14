@@ -5,6 +5,8 @@
 *
 */
 
+includeIfNotIncluded("Item.js");
+
 const Skill = {
 	usePvpRange: false,
 	skills: {
@@ -851,243 +853,6 @@ Object.defineProperties(Skill, {
 	},
 });
 
-// whole section should be moved
-const Item = {
-	hasTier: function (item) {
-		return Config.AutoEquip && NTIP.GetTier(item) > 0;
-	},
-
-	canEquip: function (item) {
-		// Not an item or unid
-		if (item.type !== 4 || !item.identified) return false;
-		// Higher requirements
-		if (item.getStat(92) > me.getStat(12) || item.dexreq > me.getStat(2) || item.strreq > me.getStat(0)) return false;
-
-		return true;
-	},
-
-	// Equips an item and throws away the old equipped item
-	equip: function (item, bodyLoc) {
-		if (!this.canEquip(item)) return false;
-
-		// Already equipped in the right slot
-		if (item.mode === 1 && item.bodylocation === bodyLoc) return true;
-		if (item.location === 7 && !Town.openStash()) return false;
-
-		for (let i = 0; i < 3; i += 1) {
-			if (item.toCursor()) {
-				clickItemAndWait(0, bodyLoc);
-
-
-				if (item.bodylocation === bodyLoc) {
-					if (getCursorType() === 3) {
-						let cursorItem = getUnit(100);
-
-						if (cursorItem) {
-							if (!Storage.Inventory.CanFit(cursorItem) || !Storage.Inventory.MoveTo(cursorItem)) {
-								cursorItem.drop();
-							}
-						}
-					}
-
-					return true;
-				}
-			}
-		}
-
-		return false;
-	},
-
-	getEquippedItem: function (bodyLoc) {
-		let item = me.getItem();
-
-		if (item) {
-			do {
-				if (item.bodylocation === bodyLoc) {
-					return {
-						classid: item.classid,
-						tier: NTIP.GetTier(item)
-					};
-				}
-			} while (item.getNext());
-		}
-
-		// Don't have anything equipped in there
-		return {
-			classid: -1,
-			tier: -1
-		};
-	},
-
-	getBodyLoc: function (item) {
-		let bodyLoc;
-
-		switch (item.itemType) {
-		case sdk.itemtype.Shield:
-		case sdk.itemtype.AuricShields:
-		case sdk.itemtype.VoodooHeads:
-		case sdk.itemtype.BowQuiver:
-		case sdk.itemtype.CrossbowQuiver:
-			bodyLoc = 5;
-
-			break;
-		case sdk.itemtype.Armor:
-			bodyLoc = 3;
-
-			break;
-		case sdk.itemtype.Ring:
-			bodyLoc = [6, 7];
-
-			break;
-		case sdk.itemtype.Amulet:
-			bodyLoc = 2;
-
-			break;
-		case sdk.itemtype.Boots:
-			bodyLoc = 9;
-
-			break;
-		case sdk.itemtype.Gloves:
-			bodyLoc = 10;
-
-			break;
-		case sdk.itemtype.Belt:
-			bodyLoc = 8;
-
-			break;
-		case sdk.itemtype.Helm:
-		case sdk.itemtype.PrimalHelm:
-		case sdk.itemtype.Circlet:
-		case sdk.itemtype.Pelt:
-			bodyLoc = 1;
-
-			break;
-		case sdk.itemtype.Scepter:
-		case sdk.itemtype.Wand:
-		case sdk.itemtype.Staff:
-		case sdk.itemtype.Bow:
-		case sdk.itemtype.Axe:
-		case sdk.itemtype.Club:
-		case sdk.itemtype.Sword:
-		case sdk.itemtype.Hammer:
-		case sdk.itemtype.Knife:
-		case sdk.itemtype.Spear:
-		case sdk.itemtype.Polearm:
-		case sdk.itemtype.Crossbow:
-		case sdk.itemtype.Mace:
-		case sdk.itemtype.ThrowingKnife:
-		case sdk.itemtype.ThrowingAxe:
-		case sdk.itemtype.Javelin:
-		case sdk.itemtype.Orb:
-		case sdk.itemtype.AmazonBow:
-		case sdk.itemtype.AmazonSpear:
-		case sdk.itemtype.AmazonJavelin:
-		case sdk.itemtype.MissilePotion:
-			bodyLoc = me.barbarian ? [4, 5] : 4;
-
-			break;
-		case sdk.itemtype.HandtoHand:
-		case sdk.itemtype.AssassinClaw:
-			bodyLoc = me.assassin ? [4, 5] : 4;
-
-			break;
-		default:
-			return false;
-		}
-
-		!Array.isArray(bodyLoc) && (bodyLoc = [bodyLoc]);
-
-		return bodyLoc;
-	},
-
-	autoEquipCheck: function (item) {
-		if (!Config.AutoEquip) return true;
-
-		let tier = NTIP.GetTier(item);
-		let bodyLoc = this.getBodyLoc(item);
-
-		if (tier > 0 && bodyLoc) {
-			for (let i = 0; i < bodyLoc.length; i += 1) {
-				// Low tier items shouldn't be kept if they can't be equipped
-				if (tier > this.getEquippedItem(bodyLoc[i]).tier && (this.canEquip(item) || !item.getFlag(0x10))) {
-					return true;
-				}
-			}
-		}
-
-		// Sell/ignore low tier items, keep high tier
-		if (tier > 0 && tier < 100) return false;
-
-		return true;
-	},
-
-	// returns true if the item should be kept+logged, false if not
-	autoEquip: function () {
-		if (!Config.AutoEquip) return true;
-
-		let items = me.findItems(-1, 0);
-
-		if (!items) return false;
-
-		function sortEq(a, b) {
-			if (Item.canEquip(a)) return -1;
-			if (Item.canEquip(b)) return 1;
-
-			return 0;
-		}
-
-		me.cancel();
-
-		// Remove items without tier
-		for (let i = 0; i < items.length; i += 1) {
-			if (NTIP.GetTier(items[i]) === 0) {
-				items.splice(i, 1);
-
-				i -= 1;
-			}
-		}
-
-		while (items.length > 0) {
-			items.sort(sortEq);
-
-			let tier = NTIP.GetTier(items[0]);
-			let bodyLoc = this.getBodyLoc(items[0]);
-
-			if (tier > 0 && bodyLoc) {
-				for (let j = 0; j < bodyLoc.length; j += 1) {
-					// khalim's will adjustment
-					if ([3, 7].indexOf(items[0].location) > -1 && tier > this.getEquippedItem(bodyLoc[j]).tier && this.getEquippedItem(bodyLoc[j]).classid !== 174) {
-						if (!items[0].getFlag(0x10)) { // unid
-							let tome = me.findItem(519, 0, 3);
-
-							if (tome && tome.getStat(sdk.stats.Quantity) > 0) {
-								if (items[0].location === 7) {
-									Town.openStash();
-								}
-
-								Town.identifyItem(items[0], tome);
-							}
-						}
-
-						let gid = items[0].gid;
-						console.log(items[0].name);
-
-						if (this.equip(items[0], bodyLoc[j])) {
-							Misc.logItem("Equipped", me.getItem(-1, -1, gid));
-						}
-
-						break;
-					}
-				}
-			}
-
-			items.shift();
-		}
-
-		return true;
-	}
-};
-
 const Misc = {
 	// Click something
 	click: function (button, shift, x, y) {
@@ -1183,7 +948,7 @@ const Misc = {
 
 	// Get player unit
 	getPlayerUnit: function (name) {
-		let player = getUnit(0, name);
+		let player = Game.getPlayer(name);
 
 		if (player) {
 			do {
@@ -1328,7 +1093,7 @@ const Misc = {
 
 	// Open a chest Unit (takes chestID or unit)
 	openChest: function (unit) {
-		typeof unit === "number" && (unit = getUnit(2, unit));
+		typeof unit === "number" && (unit = Game.getObject(unit));
 		
 		// Skip invalid/open and Countess chests
 		if (!unit || unit.x === 12526 || unit.x === 12565 || unit.mode) return false;
@@ -1371,7 +1136,7 @@ const Misc = {
 		area !== me.area && Pather.journeyTo(area);
 		
 		let coords = [];
-		let presetUnits = getPresetUnits(area, 2);
+		let presetUnits = Game.getPresetObjects(area);
 
 		if (!presetUnits) return false;
 
@@ -1384,7 +1149,7 @@ const Misc = {
 		}
 
 		while (presetUnits.length > 0) {
-			if (chestIds.indexOf(presetUnits[0].id) > -1) {
+			if (chestIds.includes(presetUnits[0].id)) {
 				coords.push({
 					x: presetUnits[0].roomx * 5 + presetUnits[0].x,
 					y: presetUnits[0].roomy * 5 + presetUnits[0].y
@@ -1499,7 +1264,7 @@ const Misc = {
 			}
 		}
 
-		let shrine = getUnit(2, "shrine");
+		let shrine = Game.getObject("shrine");
 
 		if (shrine) {
 			let index = -1;
@@ -1568,7 +1333,7 @@ const Misc = {
 	getShrinesInArea: function (area, type, use) {
 		let shrineLocs = [];
 		let shrineIds = [2, 81, 83];
-		let unit = getPresetUnits(area);
+		let unit = Game.getPresetObjects(area);
 
 		if (unit) {
 			for (let i = 0; i < unit.length; i += 1) {
@@ -1584,7 +1349,7 @@ const Misc = {
 
 			Skill.haveTK ? Pather.moveNear(coords[0], coords[1], 20) : Pather.moveTo(coords[0], coords[1], 2);
 
-			let shrine = getUnit(2, "shrine");
+			let shrine = Game.getObject("shrine");
 
 			if (shrine) {
 				do {
@@ -1612,7 +1377,7 @@ const Misc = {
 		// Lines are normally in reverse. Add color tags if needed and reverse order.
 		for (let i = 0; i < desc.length; i += 1) {
 			// Remove sell value
-			if (desc[i].indexOf(getLocaleString(3331)) > -1) {
+			if (desc[i].includes(getLocaleString(3331))) {
 				desc.splice(i, 1);
 
 				i -= 1;
@@ -2149,8 +1914,8 @@ const Misc = {
 
 	// Log someone's gear
 	spy: function (name) {
-		!isIncluded("oog.js") && include("oog.js");
-		!isIncluded("common/prototypes.js") && include("common/prototypes.js");
+		includeIfNotIncluded("oog.js");
+		includeIfNotIncluded("common/prototypes.js");
 
 		let unit = getUnit(-1, name);
 
@@ -2276,8 +2041,8 @@ const Misc = {
 		let npc;
 
 		switch (id) {
-		case 0x1507: // Resurrect (non-English dialog)
-		case 0x0D44: // Trade (crash dialog)
+		case sdk.menu.RessurectMerc: // (non-English dialog)
+		case sdk.menu.Trade: // (crash dialog)
 			npc = getInteractedNPC();
 
 			if (npc) {
@@ -2297,7 +2062,7 @@ const Misc = {
 		}
 
 		for (let i = 0; i < lines.length; i += 1) {
-			if (lines[i].selectable && lines[i].text.indexOf(getLocaleString(id)) > -1) {
+			if (lines[i].selectable && lines[i].text.includes(getLocaleString(id))) {
 				getDialogLines()[i].handler();
 				delay(750);
 
@@ -2468,27 +2233,27 @@ const Experience = {
 	],
 	// Percent progress into the current level. Format: xx.xx%
 	progress: function () {
-		return me.getStat(12) === 99 ? 0 : (((me.getStat(13) - this.totalExp[me.getStat(12)]) / this.nextExp[me.getStat(12)]) * 100).toFixed(2);
+		return me.getStat(sdk.stats.Level) === 99 ? 0 : (((me.getStat(sdk.stats.Experience) - this.totalExp[me.getStat(sdk.stats.Level)]) / this.nextExp[me.getStat(sdk.stats.Level)]) * 100).toFixed(2);
 	},
 
 	// Total experience gained in current run
 	gain: function () {
-		return (me.getStat(13) - DataFile.getStats().experience);
+		return (me.getStat(sdk.stats.Experience) - DataFile.getStats().experience);
 	},
 
 	// Percent experience gained in current run
 	gainPercent: function () {
-		return me.getStat(12) === 99 ? 0 : (this.gain() * 100 / this.nextExp[me.getStat(12)]).toFixed(6);
+		return me.getStat(sdk.stats.Level) === 99 ? 0 : (this.gain() * 100 / this.nextExp[me.getStat(sdk.stats.Level)]).toFixed(6);
 	},
 
 	// Runs until next level
 	runsToLevel: function () {
-		return Math.round(((100 - this.progress()) / 100) * this.nextExp[me.getStat(12)] / this.gain());
+		return Math.round(((100 - this.progress()) / 100) * this.nextExp[me.getStat(sdk.stats.Level)] / this.gain());
 	},
 
 	// Total runs needed for next level (not counting current progress)
 	totalRunsToLevel: function () {
-		return Math.round(this.nextExp[me.getStat(12)] / this.gain());
+		return Math.round(this.nextExp[me.getStat(sdk.stats.Level)] / this.gain());
 	},
 
 	// Total time till next level
@@ -2522,13 +2287,13 @@ const Experience = {
 		let progress = this.progress();
 		let runsToLevel = this.runsToLevel();
 		let getGameTime = this.getGameTime();
-		let string = "[Game: " + me.gamename + (me.gamepassword ? "//" + me.gamepassword : "") + getGameTime + "] [Level: " + me.getStat(12) + " (" + progress + "%)] [XP: " + gain + "] [Games ETA: " + runsToLevel + "]";
+		let string = "[Game: " + me.gamename + (me.gamepassword ? "//" + me.gamepassword : "") + getGameTime + "] [Level: " + me.getStat(sdk.stats.Level) + " (" + progress + "%)] [XP: " + gain + "] [Games ETA: " + runsToLevel + "]";
 
 		if (gain) {
 			D2Bot.printToConsole(string, 4);
 
-			if (me.getStat(12) > DataFile.getStats().level) {
-				D2Bot.printToConsole("Congrats! You gained a level. Current level:" + me.getStat(12), 5);
+			if (me.getStat(sdk.stats.Level) > DataFile.getStats().level) {
+				D2Bot.printToConsole("Congrats! You gained a level. Current level:" + me.getStat(sdk.stats.Level), 5);
 			}
 		}
 	}
@@ -2536,7 +2301,7 @@ const Experience = {
 
 const Packet = {
 	openMenu: function (unit) {
-		if (unit.type !== 1) throw new Error("openMenu: Must be used on NPCs.");
+		if (unit.type !== sdk.unittype.NPC) throw new Error("openMenu: Must be used on NPCs.");
 		if (getUIFlag(sdk.uiflags.NPCMenu)) return true;
 		let pingDelay = (me.gameReady ? me.ping : 125);
 
@@ -2570,8 +2335,8 @@ const Packet = {
 	},
 
 	startTrade: function (unit, mode) {
-		if (unit.type !== 1) throw new Error("Unit.startTrade: Must be used on NPCs.");
-		if (getUIFlag(0x0C)) return true;
+		if (unit.type !== sdk.unittype.NPC) throw new Error("Unit.startTrade: Must be used on NPCs.");
+		if (getUIFlag(sdk.uiflags.Shop)) return true;
 
 		let gamble = mode === "Gamble";
 		console.log("Starting " + mode + " at " + unit.name);
@@ -2595,7 +2360,7 @@ const Packet = {
 	},
 
 	buyItem: function (unit, shiftBuy, gamble) {
-		let oldGold = me.getStat(14) + me.getStat(15);
+		let oldGold = me.gold;
 		let itemCount = me.itemcount;
 		let npc = getInteractedNPC();
 
@@ -2611,14 +2376,14 @@ const Packet = {
 				let tick = getTickCount();
 
 				while (getTickCount() - tick < Math.max(2000, me.ping * 2 + 500)) {
-					if (shiftBuy && me.getStat(14) + me.getStat(15) < oldGold) return true;
+					if (shiftBuy && me.gold < oldGold) return true;
 					if (itemCount !== me.itemcount) return true;
 
 					delay(10);
 				}
 			}
 		} catch (e) {
-			console.warn(e);
+			console.error(e);
 		}
 
 		return false;
@@ -2626,9 +2391,9 @@ const Packet = {
 
 	sellItem: function (unit) {
 		// Check if it's an item we want to buy
-		if (unit.type !== 4) throw new Error("Unit.sell: Must be used on items.");
+		if (unit.type !== sdk.unittype.Item) throw new Error("Unit.sell: Must be used on items.");
 		if (!unit.sellable) {
-			console.errorReport((new Error("Item is unsellable")));
+			console.error((new Error("Item is unsellable")));
 			return false;
 		}
 
@@ -2698,16 +2463,17 @@ const Packet = {
 	itemToCursor: function (item) {
 		// Something already on cursor
 		if (me.itemoncursor) {
+			let cursorItem = Game.getCursorUnit();
 			// Return true if the item is already on cursor
-			if (getUnit(100).gid === item.gid) {
+			if (cursorItem.gid === item.gid) {
 				return true;
 			}
-			this.dropItem(getUnit(100)); // If another item is on cursor, drop it
+			this.dropItem(cursorItem); // If another item is on cursor, drop it
 		}
 
 		for (let i = 0; i < 15; i += 1) {
 			// equipped
-			item.mode === 1 ? sendPacket(1, 0x1c, 2, item.bodylocation) : sendPacket(1, 0x19, 4, item.gid);
+			item.isEquipped ? sendPacket(1, 0x1c, 2, item.bodylocation) : sendPacket(1, 0x19, 4, item.gid);
 
 			let tick = getTickCount();
 

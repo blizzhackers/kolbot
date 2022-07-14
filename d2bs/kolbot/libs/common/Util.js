@@ -154,6 +154,14 @@ const Game = {
 		!area && (area = me.area);
 		return getPresetUnits(area, sdk.unittype.Object, id);
 	},
+	getPresetStair: function (area, id) {
+		!area && (area = me.area);
+		return getPresetUnit(area, sdk.unittype.Stairs, id);
+	},
+	getPresetStairs: function (area, id) {
+		!area && (area = me.area);
+		return getPresetUnits(area, sdk.unittype.Stairs, id);
+	},
 };
 
 (function (global, print) {
