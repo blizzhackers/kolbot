@@ -138,6 +138,22 @@ const Game = {
 	getStairs: function (id, mode, gid) {
 		return getUnit(sdk.unittype.Stairs, id, mode, gid);
 	},
+	getPresetMonster: function (area, id) {
+		!area && (area = me.area);
+		return getPresetUnit(area, sdk.unittype.Monster, id);
+	},
+	getPresetMonsters: function (area, id) {
+		!area && (area = me.area);
+		return getPresetUnits(area, sdk.unittype.Monster, id);
+	},
+	getPresetObject: function (area, id) {
+		!area && (area = me.area);
+		return getPresetUnit(area, sdk.unittype.Object, id);
+	},
+	getPresetObjects: function (area, id) {
+		!area && (area = me.area);
+		return getPresetUnits(area, sdk.unittype.Object, id);
+	},
 };
 
 (function (global, print) {
