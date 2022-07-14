@@ -5,6 +5,7 @@
 *
 */
 !isIncluded('Polyfill.js') && include('Polyfill.js');
+include('common/Util.js');
 
 let sdk = require('./modules/sdk');
 let Controls = require('./modules/Control');
@@ -1664,7 +1665,7 @@ const Starter = {
 	},
 
 	randomNumberString: function (len) {
-		len === undefined && (len = rand(2, 5));
+		!len && (len = rand(2, 5));
 
 		let rval = "";
 		let vals = "0123456789";
