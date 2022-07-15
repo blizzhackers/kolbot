@@ -26,7 +26,7 @@ let wpsToGive = Pather.nonTownWpAreas.slice(0).filter(function (area) {
 	return true;
 });
 
-function wpEvent(who, msg) {
+function wpEvent (who, msg) {
 	if (typeof msg === "string" && msg === "gotwp") {
 		count++;
 		!silentNameTracker.includes(who) && silentNameTracker.push(who);
@@ -39,7 +39,7 @@ function giveWP () {
 	if (wp && !me.inTown && wpsToGive.includes(me.area)) {
 		try {
 			addEventListener("chatmsg", wpEvent);
-			let playerCount = Misc.getPartyCount() - 1;
+			let playerCount = Misc.getPartyCount();
 			let mobCount = getUnits(sdk.unittype.Monster).filter(mon => mon.distance <= 15 && mon.attackable).length;
 			mobCount > 0 && Attack.securePosition(me.x, me.y, 15, Time.seconds(30), true);
 			wp.distance > 5 && Pather.moveToUnit(wp);
@@ -1065,6 +1065,8 @@ function main () {
 	CraftingSystem.buildLists();
 	Runewords.init();
 	Cubing.init();
+
+	Config.MFLeader = false;
 
 	while (true) {
 		if (command) {
