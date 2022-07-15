@@ -14,12 +14,12 @@ include("AutoMule.js");
 include("CraftingSystem.js");
 include("TorchSystem.js");
 include("common/util.js");
-
 includeCommonLibs();
 
 let Overrides = require('../modules/Override');
 
 let count = 0;
+let silentNameTracker = [];
 let wpsToGive = Pather.nonTownWpAreas.slice(0).filter(function (area) {
 	if (area === sdk.areas.HallsofPain) return false;
 	if (me.classic && area >= sdk.areas.Harrogath) return false;
@@ -34,24 +34,23 @@ function wpEvent(who, msg) {
 }
 
 function giveWP () {
-	let wp = getUnit(sdk.unittype.Object, "waypoint");
+	let wp = Game.getObject("waypoint");
 	let success = false;
 	if (wp && !me.inTown && wpsToGive.includes(me.area)) {
 		try {
-			let silentNameTracker = [];
 			addEventListener("chatmsg", wpEvent);
 			let playerCount = Misc.getPartyCount() - 1;
-			let mobCount = getUnits(1).filter(mon => mon.distance <= 15 && mon.attackable).length;
-			mobCount > 0 && Attack.securePosition(me.x, me.y, 15, 30e3, true);
+			let mobCount = getUnits(sdk.unittype.Monster).filter(mon => mon.distance <= 15 && mon.attackable).length;
+			mobCount > 0 && Attack.securePosition(me.x, me.y, 15, Time.seconds(30), true);
 			wp.distance > 5 && Pather.moveToUnit(wp);
 			Pather.makePortal();
 			say("wp");
 			let tick = getTickCount();
-			while (getTickCount() - tick < 2 * 60 * 1000) {
-				let player = getUnit(sdk.unittype.Player);
+			while (getTickCount() - tick < Time.minutes(2)) {
+				let player = Game.getPlayer();
 				if (player) {
 					do {
-						if (!silentNameTracker.includes(player.name)) {
+						if (player.name !== me.name && !silentNameTracker.includes(player.name)) {
 							silentNameTracker.push(player.name);
 						}
 					} while (player.getNext());
@@ -64,10 +63,11 @@ function giveWP () {
 				delay(50);
 			}
 		} catch (e) {
-			print(e);
+			console.error(e);
 			Config.LocalChat.Enabled && say("Failed to give wp");
 		} finally {
 			removeEventListener("chatmsg", wpEvent);
+			silentNameTracker = [];
 			count = 0;
 		}
 		return success;
@@ -177,7 +177,7 @@ function main () {
 			Precast.doPrecast(true);
 
 			if (!Pather.moveToExit(sdk.areas.HallsoftheDeadLvl3, true)
-				|| !Pather.moveToPreset(me.area, 2, sdk.quest.chest.HoradricCubeChest)) {
+				|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricCubeChest)) {
 				throw new Error("cube failed");
 			}
 
@@ -233,7 +233,7 @@ function main () {
 		Pather.useWaypoint(sdk.areas.FarOasis, true) && Precast.doPrecast(true);
 
 		if (!Pather.moveToExit([sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.MaggotLairLvl3], true)
-			|| !Pather.moveToPreset(me.area, 2, sdk.quest.chest.ShaftoftheHoradricStaffChest)) {
+			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.ShaftoftheHoradricStaffChest)) {
 			throw new Error("staff failed");
 		}
 
@@ -264,7 +264,7 @@ function main () {
 		Town.doChores();
 		Pather.useWaypoint(sdk.areas.ArcaneSanctuary, true) && Precast.doPrecast(true);
 
-		let preset = getPresetUnit(me.area, 2, sdk.quest.chest.Journal);
+		let preset = Game.getPresetObject(sdk.areas.ArcaneSanctuary, sdk.quest.chest.Journal);
 		let spot = {};
 
 		switch (preset.roomx * 5 + preset.x) {
@@ -301,7 +301,7 @@ function main () {
 			delay(250);
 		}
 
-		Pather.moveToPreset(me.area, 2, sdk.quest.chest.Journal);
+		Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.Journal);
 		Attack.kill(sdk.monsters.Summoner);
 		this.log("2");
 
@@ -310,7 +310,7 @@ function main () {
 		}
 
 		Pickit.pickItems();
-		Pather.moveToPreset(me.area, 2, sdk.quest.chest.Journal);
+		Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.Journal);
 
 		let redPortal = Game.getObject(sdk.units.RedPortal);
 
@@ -345,7 +345,7 @@ function main () {
 		Precast.doPrecast(true);
 
 		if (!Pather.moveToExit(getRoom().correcttomb, true)
-			|| !Pather.moveToPreset(me.area, 2, sdk.quest.chest.HoradricStaffHolder)) {
+			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricStaffHolder)) {
 			throw new Error("duriel failed");
 		}
 
@@ -365,7 +365,7 @@ function main () {
 			delay(500);
 		}
 
-		Pather.useUnit(2, sdk.units.PortaltoDurielsLair, sdk.areas.DurielsLair);
+		Pather.useUnit(sdk.unittype.Object, sdk.units.PortaltoDurielsLair, sdk.areas.DurielsLair);
 		Attack.kill(sdk.monsters.Duriel);
 		Pickit.pickItems();
 
@@ -456,7 +456,7 @@ function main () {
 
 		Pather.moveTo(17591, 8070) && Attack.securePosition(me.x, me.y, 40, 3000);
 
-		let hydra = Game.getMonster(getLocaleString(3325));
+		let hydra = Game.getMonster(getLocaleString(sdk.locale.monsters.Hydra));
 
 		if (hydra) {
 			do {
@@ -635,7 +635,7 @@ function main () {
 		}
 
 		Common.Baal.clearThrone();
-		me.getMobCount(30) > 0 && this.clearWaves(); // ensure waves are actually done
+		me.checkForMobs({range: 30}) && this.clearWaves(); // ensure waves are actually done
 		Pather.moveTo(15090, 5008);
 		delay(5000);
 		Precast.doPrecast(true);
@@ -680,7 +680,7 @@ function main () {
 		Town.doChores();
 		Pather.useWaypoint(sdk.areas.DarkWood, true) && Precast.doPrecast(true);
 
-		if (!Pather.moveToPreset(sdk.areas.DarkWood, 2, sdk.quest.chest.InifussTree, 5, 5)) {
+		if (!Pather.moveToPreset(sdk.areas.DarkWood, sdk.unittype.Object, sdk.quest.chest.InifussTree, 5, 5)) {
 			throw new Error("Failed to move to Tree of Inifuss");
 		}
 
@@ -702,9 +702,9 @@ function main () {
 		Pather.usePortal(1) || Town.goToTown();
 		Pather.useWaypoint(sdk.areas.StonyField, true);
 		Precast.doPrecast(true);
-		Pather.moveToPreset(sdk.areas.StonyField, 1, sdk.monsters.preset.Rakanishu, 10, 10, false, true);
+		Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Monster, sdk.monsters.preset.Rakanishu, 10, 10, false, true);
 		Attack.securePosition(me.x, me.y, 40, 3000, true);
-		Pather.moveToPreset(sdk.areas.StonyField, 2, sdk.quest.chest.StoneAlpha, null, null, true);
+		Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Object, sdk.quest.chest.StoneAlpha, null, null, true);
 		Pather.makePortal();
 		this.log("1");
 
@@ -722,7 +722,7 @@ function main () {
 			let gibbet = Game.getObject(sdk.quest.chest.CainsJail);
 
 			if (gibbet && !gibbet.mode) {
-				if (!Pather.moveToPreset(me.area, 2, sdk.quest.chest.CainsJail, 0, 0, true, true)) {
+				if (!Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.CainsJail, 0, 0, true, true)) {
 					throw new Error("Failed to move to Cain's Jail");
 				}
 
@@ -750,9 +750,9 @@ function main () {
 		this.log("starting radament");
 
 		let	moveIntoPos = function (unit, range) {
-			let coords = [],
-				angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
-				angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 105, -105, 120, -120, 135, -135, 150, -150, 180];
+			let coords = [];
+			let angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
+			let angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 105, -105, 120, -120, 135, -135, 150, -150, 180];
 
 			for (let i = 0; i < angles.length; i += 1) {
 				let coordx = Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * range + unit.x);
@@ -782,7 +782,7 @@ function main () {
 		Pather.useWaypoint(sdk.areas.A2SewersLvl2, true) && Precast.doPrecast(false);
 		Pather.moveToExit(sdk.areas.A2SewersLvl3, true);
 
-		let radaPreset = getPresetUnit(sdk.areas.A2SewersLvl3, 2, sdk.quest.chest.HoradricScrollChest);
+		let radaPreset = Game.getPresetObject(sdk.areas.A2SewersLvl3, sdk.quest.chest.HoradricScrollChest);
 		let radaCoords = {
 			area: sdk.areas.A2SewersLvl3,
 			x: radaPreset.roomx * 5 + radaPreset.x,
@@ -847,7 +847,7 @@ function main () {
 		Precast.doPrecast(false);
 
 		if (!Pather.moveToExit(sdk.areas.RuinedTemple, true)
-			|| !Pather.moveToPreset(me.area, 2, sdk.quest.chest.LamEsensTomeHolder)) {
+			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.LamEsensTomeHolder)) {
 			throw new Error("Lam Essen quest failed");
 		}
 
@@ -906,7 +906,7 @@ function main () {
 		Pather.useWaypoint(sdk.areas.CityoftheDamned, true) && Precast.doPrecast(false);
 		Pather.moveToExit(sdk.areas.PlainsofDespair, true);
 
-		let izualPreset = getPresetUnit(sdk.areas.PlainsofDespair, 1, sdk.monsters.Izual);
+		let izualPreset = Game.getPresetMonster(sdk.areas.PlainsofDespair, sdk.monsters.Izual);
 		let izualCoords = {
 			area: sdk.areas.PlainsofDespair,
 			x: izualPreset.roomx * 5 + izualPreset.x,
@@ -1028,7 +1028,7 @@ function main () {
 		if (!Config.Rusher.GiveWps) return false;
 
 		let wpsLeft = wpsToGive.slice(0);
-		print(JSON.stringify(wpsLeft));
+		console.log(JSON.stringify(wpsLeft));
 
 		wpsLeft.forEach(function (wp) {
 			Town.checkScrolls(sdk.items.TomeofTownPortal) <= 5 && (Pather.useWaypoint(sdk.areas.townOf(me.area)) || Town.goToTown()) && Town.doChores();
@@ -1038,16 +1038,16 @@ function main () {
 		return true;
 	};
 
-	print("Loading RushThread");
+	console.log(sdk.colors.LightGold + "Loading RushThread");
 
-	let command = "",
-		current = 0,
-		commandsplit = "",
-		check = -1,
-		sequence = [
-			"cain", "andariel", "radament", "cube", "amulet", "staff", "summoner", "duriel", "lamesen",
-			"travincal", "mephisto", "izual", "diablo", "shenk", "anya", "ancients", "baal", "givewps"
-		];
+	let command = "";
+	let current = 0;
+	let commandsplit = "";
+	let check = -1;
+	let sequence = [
+		"cain", "andariel", "radament", "cube", "amulet", "staff", "summoner", "duriel", "lamesen",
+		"travincal", "mephisto", "izual", "diablo", "shenk", "anya", "ancients", "baal", "givewps"
+	];
 
 	this.scriptEvent = function (msg) {
 		if (typeof msg === "string") {
@@ -1057,7 +1057,7 @@ function main () {
 
 	addEventListener("scriptmsg", this.scriptEvent);
 
-	// Start
+	// START
 	Config.init(false);
 	Pickit.init(false);
 	Attack.init();
@@ -1074,7 +1074,7 @@ function main () {
 				if (current >= sequence.length || (Config.Rusher.LastRun && current > sequence.indexOf(Config.Rusher.LastRun))) {
 					delay(3000);
 					this.log("bye ~");
-					print("Current sequence length: " + current + " sequence length: " + sequence.length);
+					console.log("Current sequence length: " + current + " sequence length: " + sequence.length);
 
 					while (Misc.getPlayerCount() > 1) {
 						delay(1000);
