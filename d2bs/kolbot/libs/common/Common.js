@@ -115,7 +115,7 @@ const Common = {
 			let finalRooms = [];
 			let indexes = [];
 
-			let kingPreset = getPresetUnit(sdk.areas.MooMooFarm, sdk.unittype.Monster, sdk.monsters.preset.TheCowKing);
+			let kingPreset = Game.getPresetMonster(sdk.areas.MooMooFarm, sdk.monsters.preset.TheCowKing);
 			let badRooms = getRoom(kingPreset.roomx * 5 + kingPreset.x, kingPreset.roomy * 5 + kingPreset.y).getNearby();
 
 			for (let i = 0; i < badRooms.length; i += 1) {
@@ -236,7 +236,7 @@ const Common = {
 		},
 
 		getLayout: function (seal, value) {
-			let sealPreset = getPresetUnit(sdk.areas.ChaosSanctuary, 2, seal);
+			let sealPreset = Game.getPresetObject(sdk.areas.ChaosSanctuary, seal);
 			if (!seal) throw new Error("Seal preset not found. Can't continue.");
 
 			if (sealPreset.roomy * 5 + sealPreset.y === value
@@ -288,7 +288,7 @@ const Common = {
 
 		clearStrays: function () {
 			let oldPos = {x: me.x, y: me.y};
-			let monster = getUnit(sdk.unittype.Monster);
+			let monster = Game.getMonster();
 
 			if (monster) {
 				do {
@@ -349,7 +349,7 @@ const Common = {
 					usetk
 						? Pather.moveNearPreset(sdk.areas.ChaosSanctuary, sdk.unittype.Object, classid, 15)
 						: Pather.moveToPreset(sdk.areas.ChaosSanctuary, sdk.unittype.Object, classid, seisSeal ? 5 : 2, seisSeal ? 5 : 0);
-					seal = Misc.poll(() => getUnit(sdk.unittype.Object, classid), 1000, 100);
+					seal = Misc.poll(() => Game.getObject(classid), 1000, 100);
 				}
 
 				if (!seal) {
@@ -715,7 +715,7 @@ const Common = {
 		altarSpot: {x: 10047, y: 12622},
 
 		canAttack: function () {
-			let ancient = getUnit(sdk.unittype.Monster);
+			let ancient = Game.getMonster();
 
 			if (ancient) {
 				do {
@@ -751,7 +751,7 @@ const Common = {
 				}
 
 				// wait for ancients to spawn
-				while (!getUnit(sdk.unittype.Monster, sdk.monsters.TalictheDefender)) {
+				while (!Game.getMonster(sdk.monsters.TalictheDefender)) {
 					delay(250 + me.ping);
 				}
 
@@ -908,13 +908,16 @@ const Common = {
 
 				if (mon) {
 					do {
-						if (mon.x >= 15072 && mon.x <= 15118 && mon.y >= 5002 && mon.y <= 5079 && mon.attackable && !Attack.skipCheck(mon)) {
+						// exclude dolls from the list
+						if (!mon.isDoll && mon.x >= 15072 && mon.x <= 15118 && mon.y >= 5002 && mon.y <= 5079 && mon.attackable && !Attack.skipCheck(mon)) {
 							monList.push(copyUnit(mon));
 						}
 					} while (mon.getNext());
 				}
 
-				return monList.length > 0 && Attack.clearList(monList);
+				if (monList.length > 0) {
+					return Attack.clearList(monList);
+				}
 			}
 
 			let pos = [
@@ -988,7 +991,7 @@ const Common = {
 
 			MainLoop:
 			while (true) {
-				if (!getUnit(sdk.unittype.Monster, sdk.monsters.ThroneBaal)) return true;
+				if (!Game.getMonster(sdk.monsters.ThroneBaal)) return true;
 
 				switch (this.checkThrone()) {
 				case 1:

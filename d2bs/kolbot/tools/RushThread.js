@@ -56,7 +56,7 @@ function giveWP () {
 						}
 					} while (player.getNext());
 				}
-				if (count === playerCount || (silentNameTracker.length === playerCount && Misc.getNearbyPlayerCount() === 1)) {
+				if (count === playerCount || (silentNameTracker.length === playerCount && Misc.getNearbyPlayerCount() === 0)) {
 					wpsToGive.remove(me.area);
 					success = true;
 					break;

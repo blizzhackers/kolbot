@@ -1024,14 +1024,15 @@ const Misc = {
 	},
 
 	// check if any member of our party meets a certain level req
-	checkPartyLevel: function (levelCheck = 1) {
+	checkPartyLevel: function (levelCheck = 1, exclude = []) {
+		!Array.isArray(exclude) && (exclude = [exclude]);
 		let party = getParty();
 
 		if (party) {
 			let myPartyId = party.partyid;
 
 			do {
-				if (party.partyid !== 65535 && party.partyid === myPartyId && party.name !== me.name) {
+				if (party.partyid !== 65535 && party.partyid === myPartyId && party.name !== me.name && !exclude.includes(party.name)) {
 					if (party.level >= levelCheck) {
 						return true;
 					}

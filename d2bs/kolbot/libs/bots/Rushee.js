@@ -61,7 +61,7 @@ function Rushee() {
 
 		if (me.inTown) return false;
 
-		let chest = getUnit(sdk.unittype.Object, chestid);
+		let chest = Game.getObject(chestid);
 
 		if (!chest) {
 			this.log("Couldn't find: " + chestid);
@@ -77,7 +77,7 @@ function Rushee() {
 			coord && Pather.moveTo(coord.x, coord.y);
 		}
 
-		let item = getUnit(sdk.unittype.Item, classid);
+		let item = Game.getItem(classid);
 
 		if (!item) {
 			if (getTickCount() - tick < 500) {
@@ -91,7 +91,7 @@ function Rushee() {
 	};
 
 	this.checkQuestMonster = function (classid) {
-		let monster = getUnit(sdk.unittype.Monster, classid);
+		let monster = Game.getMonster(classid);
 
 		if (monster) {
 			while (monster.mode !== 12 && monster.mode !== 0) {
@@ -105,7 +105,7 @@ function Rushee() {
 	};
 
 	this.tyraelTalk = function () {
-		let npc = getUnit(sdk.unittype.NPC, NPC.Tyrael);
+		let npc = Game.getNPC(NPC.Tyrael);
 
 		if (!npc) return false;
 
@@ -151,7 +151,6 @@ function Rushee() {
 	this.placeStaff = function () {
 		let tick = getTickCount();
 		let orifice = Game.getObject(sdk.quest.chest.HoradricStaffHolder);
-
 		if (!orifice) return false;
 
 		Misc.openChest(orifice);
@@ -171,7 +170,7 @@ function Rushee() {
 		delay(750 + me.ping);
 
 		// unbug cursor
-		let item = me.findItem(-1, sdk.unitmode.inStorage, sdk.storage.Inventory);
+		let item = me.findItem(-1, sdk.itemmode.inStorage, sdk.storage.Inventory);
 
 		if (item && item.toCursor()) {
 			Storage.Inventory.MoveTo(item);
@@ -181,7 +180,6 @@ function Rushee() {
 	};
 
 	this.changeAct = function (act) {
-		let npc;
 		let preArea = me.area;
 
 		if (me.mode === 17) {
@@ -192,25 +190,16 @@ function Rushee() {
 			}
 		}
 
-		if (me.act === act) return true;
+		if (me.act === act || me.act > act) return true;
 
 		try {
 			switch (act) {
 			case 2:
-				if (me.act >= 2) {
-					break;
-				}
-
 				if (!Town.npcInteract("Warriv", false)) return false;
-
-				Misc.useMenu(0x0D36);
+				Misc.useMenu(sdk.menu.GoEast);
 
 				break;
 			case 3:
-				if (me.act >= 3) {
-					break;
-				}
-
 				// Non Quester needs to talk to Townsfolk to enable Harem TP
 				if (!Config.Rushee.Quester) {
 					// Talk to Atma
@@ -219,34 +208,27 @@ function Rushee() {
 					}
 				}
 				
-				Pather.usePortal(50, Config.Leader);
-				Pather.moveToExit(40, true);
-
-				npc = getUnit(1, NPC.Jerhyn);
-
-				if (!npc || !npc.openMenu()) {
+				Pather.usePortal(sdk.areas.HaremLvl1, Config.Leader);
+				Pather.moveToExit(sdk.areas.LutGholein, true);
+				
+				if (!Town.npcInteract("Jerhyn")) {
 					Pather.moveTo(5166, 5206);
 
 					return false;
 				}
 
 				me.cancel();
-				Pather.moveToExit(50, true);
-				Pather.usePortal(40, Config.Leader);
+				Pather.moveToExit(sdk.areas.HaremLvl1, true);
+				Pather.usePortal(sdk.areas.LutGholein, Config.Leader);
 
 				if (!Town.npcInteract("Meshif", false)) return false;
-
-				Misc.useMenu(0x0D38);
+				Misc.useMenu(sdk.menu.SailEast);
 
 				break;
 			case 4:
-				if (me.act >= 4) {
-					break;
-				}
-
 				if (me.inTown) {
 					Town.npcInteract("Cain");
-					Pather.usePortal(102, Config.Leader);
+					Pather.usePortal(sdk.areas.DuranceofHateLvl3, Config.Leader);
 				} else {
 					delay(1500);
 				}
@@ -256,19 +238,14 @@ function Rushee() {
 
 				break;
 			case 5:
-				if (me.act >= 5) {
-					break;
-				}
-
 				Town.npcInteract("Tyrael", false);
-
 				delay(me.ping + 1);
 
 				if (Game.getObject(sdk.units.RedPortalToAct5)) {
 					me.cancel();
-					Pather.useUnit(2, sdk.units.RedPortalToAct5, 109);
+					Pather.useUnit(sdk.unittype.Object, sdk.units.RedPortalToAct5, sdk.areas.Harrogath);
 				} else {
-					Misc.useMenu(0x58D2);
+					Misc.useMenu(sdk.menu.TravelToHarrogath);
 				}
 
 				break;
@@ -299,11 +276,12 @@ function Rushee() {
 	this.getQuestInfo = function (id) {
 		// note: end bosses double printed to match able to go to act flag
 		let quests = [
-			["cain", 4], ["andariel", 6], ["andariel", 7],
-			["radament", 9], ["cube", 10], ["amulet", 11], ["summoner", 12], ["duriel", 14], ["duriel", 15],
-			["lamesen", 20], ["travincal", 21], ["mephisto", 22], ["mephisto", 23],
-			["izual", 25], ["diablo", 26], ["diablo", 28],
-			["shenk", 35], ["anya", 37], ["ancients", 39], ["baal", 40]
+			["cain", sdk.quest.id.TheSearchForCain], ["andariel", sdk.quest.id.SistersToTheSlaughter], ["andariel", sdk.quest.id.AbleToGotoActII],
+			["radament", sdk.quest.id.RadamentsLair], ["cube", sdk.quest.id.TheHoradricStaff], ["amulet", sdk.quest.id.TheTaintedSun],
+			["summoner", sdk.quest.id.TheArcaneSanctuary], ["duriel", sdk.quest.id.TheSevenTombs], ["duriel", sdk.quest.id.AbleToGotoActIII],
+			["lamesen", sdk.quest.id.LamEsensTome], ["travincal", sdk.quest.id.TheBlackenedTemple], ["mephisto", sdk.quest.id.TheGuardian], ["mephisto", sdk.quest.id.AbleToGotoActIV],
+			["izual", sdk.quest.id.TheFallenAngel], ["diablo", sdk.quest.id.TerrorsEnd], ["diablo", sdk.quest.id.AbleToGotoActV],
+			["shenk", sdk.quest.id.SiegeOnHarrogath], ["anya", sdk.quest.id.PrisonofIce], ["ancients", sdk.quest.id.RiteofPassage], ["baal", sdk.quest.id.EyeofDestruction]
 		];
 
 		let quest = quests.find(element => element[1] === id);
@@ -322,11 +300,9 @@ function Rushee() {
 	Town.goToTown(me.highestAct);
 	me.inTown && Town.move("portalspot");
 
-	while (!leader) {
-		leader = Misc.findPlayer(Config.Leader);
-
-		delay(500);
-	}
+	// if we can't find our leader after 5 minutes, I'm thinking they aren't showing up. Lets not wait around forever
+	leader = Misc.poll(() => Misc.findPlayer(Config.Leader), Time.minutes(5), 1000);
+	if (!leader) throw new Error("Failed to find my rusher");
 
 	Config.Rushee.Quester && this.log("Leader found", Config.LocalChat.Enabled);
 
@@ -339,9 +315,10 @@ function Rushee() {
 		// hell is the end of a rush so always end profile after
 		if (Misc.getPlayerCount() > 2 && !me.hell) {
 			// there is more than just us and the rusher in game - so check party level
-			nextGame = Misc.checkPartyLevel(bumperLevelReq);
+			nextGame = Misc.checkPartyLevel(bumperLevelReq, leader.name);
 		}
 	}
+	console.debug("Is this our last run? " + (nextGame ? "No" : "Yes"));
 
 	while (true) {
 		try {
@@ -374,7 +351,7 @@ function Rushee() {
 							}
 						}
 
-						Pather.usePortal(40, Config.Leader);
+						Pather.usePortal(sdk.areas.LutGholein, Config.Leader);
 						actions.shift();
 
 						break;
@@ -504,7 +481,7 @@ function Rushee() {
 							break;
 						}
 
-						this.getQuestItem(sdk.items.quest.ScrollofInifuss, 30);
+						this.getQuestItem(sdk.items.quest.ScrollofInifuss, sdk.quest.chest.InifussTree);
 						delay(500);
 						Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader);
 						
@@ -557,7 +534,7 @@ function Rushee() {
 						break;
 					case sdk.areas.HallsoftheDeadLvl3:
 						Pather.usePortal(sdk.areas.HallsoftheDeadLvl3, Config.Leader);
-						this.getQuestItem(549, 354);
+						this.getQuestItem(sdk.quest.item.Cube, sdk.quest.chest.HoradricCubeChest);
 						Pather.usePortal(sdk.areas.LutGholein, Config.Leader);
 
 						actions.shift();
@@ -565,7 +542,7 @@ function Rushee() {
 						break;
 					case sdk.areas.ClawViperTempleLvl2:
 						Pather.usePortal(sdk.areas.ClawViperTempleLvl2, Config.Leader);
-						this.getQuestItem(521, 149);
+						this.getQuestItem(sdk.quest.item.ViperAmulet, sdk.quest.chest.ViperAmuletChest);
 						Pather.usePortal(sdk.areas.LutGholein, Config.Leader);
 						
 						if (Town.npcInteract("Drognan")) {
@@ -578,7 +555,7 @@ function Rushee() {
 						break;
 					case sdk.areas.MaggotLairLvl3:
 						Pather.usePortal(sdk.areas.MaggotLairLvl3, Config.Leader);
-						this.getQuestItem(92, 356);
+						this.getQuestItem(sdk.quest.item.ShaftoftheHoradricStaff, sdk.quest.chest.ShaftoftheHoradricStaffChest);
 						delay(500);
 						Pather.usePortal(sdk.areas.LutGholein, Config.Leader);
 						this.cubeStaff();
@@ -625,13 +602,13 @@ function Rushee() {
 
 						break;
 					case sdk.areas.RuinedTemple:
-						if (!Pather.usePortal(94, Config.Leader)) {
+						if (!Pather.usePortal(sdk.areas.RuinedTemple, Config.Leader)) {
 							me.cancel();
 
 							break;
 						}
 
-						this.getQuestItem(548, 193);
+						this.getQuestItem(sdk.quest.item.LamEsensTome, sdk.quest.chest.LamEsensTomeHolder);
 						Pather.usePortal(sdk.areas.KurastDocktown, Config.Leader);
 						Town.npcInteract("Alkor");
 						Town.move("portalspot");
@@ -711,7 +688,7 @@ function Rushee() {
 						// Non-questers can piggyback off quester out messages
 						case sdk.areas.OuterSteppes:
 						case sdk.areas.PlainsofDespair:
-							me.act === 4 && Misc.checkQuest(25, 1) && Town.npcInteract("Tyrael");
+							me.act === 4 && Misc.checkQuest(sdk.quest.id.TheFallenAngel, 1) && Town.npcInteract("Tyrael");
 
 							break;
 						case sdk.areas.BloodyFoothills:
@@ -741,7 +718,7 @@ function Rushee() {
 							break;
 						}
 
-						if (!Misc.checkQuest(6, 4)) {
+						if (!Misc.checkQuest(sdk.quest.id.SistersToTheSlaughter, 4)) {
 							D2Bot.printToConsole("Andariel quest failed", 9);
 							quit();
 						}
@@ -764,7 +741,7 @@ function Rushee() {
 
 						Town.npcInteract("Atma");
 
-						if (!Misc.checkQuest(13, 0)) {
+						if (!Misc.checkQuest(sdk.quest.id.TheSummoner, 0)) {
 							D2Bot.printToConsole("Summoner quest failed", 9);
 							quit();
 						}
@@ -780,7 +757,7 @@ function Rushee() {
 
 						Town.npcInteract("Cain");
 
-						if (!Misc.checkQuest(21, 0)) {
+						if (!Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, 0)) {
 							D2Bot.printToConsole("Travincal quest failed", 9);
 							quit();
 						}
@@ -803,7 +780,7 @@ function Rushee() {
 							break;
 						}
 
-						if (Misc.checkQuest(25, 1)) {
+						if (Misc.checkQuest(sdk.quest.id.TheFallenAngel, 1)) {
 							Town.npcInteract("Tyrael");
 							Town.move("portalspot");
 						}
@@ -832,7 +809,7 @@ function Rushee() {
 
 						break;
 					case sdk.areas.FrozenRiver:
-						if (!me.inTown && !Pather.usePortal(109, Config.Leader)) {
+						if (!me.inTown && !Pather.usePortal(sdk.areas.FrozenRiver, Config.Leader)) {
 							break;
 						}
 
@@ -940,7 +917,7 @@ function Rushee() {
 
 					break;
 				case "leader":
-					print(Config.Leader + " is my leader in my config. " + leader.name + " is my leader right now");
+					console.log(Config.Leader + " is my leader in my config. " + leader.name + " is my leader right now");
 					Config.LocalChat.Enabled && say(Config.Leader + " is my leader in my config. " + leader.name + " is my leader right now");
 					actions.shift();
 
@@ -961,7 +938,7 @@ function Rushee() {
 			}
 		}
 
-		if (getUIFlag(0x17)) {
+		if (getUIFlag(sdk.uiflags.TradePrompt)) {
 			me.cancel();
 		}
 
