@@ -19,6 +19,56 @@ new Overrides.Override(Town, Town.goToTown, function(orignal, act, wpmenu) {
 	}
 }).apply();
 
+new Overrides.Override(Pather, Pather.getWP, function(orignal, area, clearPath) {
+	if (area !== me.area) return false;
+
+	let wpIDs = [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539];
+
+	for (let i = 0; i < wpIDs.length; i++) {
+		let preset = Game.getPresetObject(area, wpIDs[i]);
+
+		if (preset) {
+			let x = (preset.roomx * 5 + preset.x);
+			let y = (preset.roomy * 5 + preset.y);
+			if (!me.inTown && [x, y].distance > 15) return false;
+
+			Skill.haveTK ? this.moveNearUnit(preset, 20, {clearSettings: {clearPath: clearPath}}) : this.moveToUnit(preset, 0, 0, clearPath);
+
+			let wp = Game.getObject("waypoint");
+
+			if (wp) {
+				for (let j = 0; j < 10; j++) {
+					if (!getUIFlag(sdk.uiflags.Waypoint)) {
+						if (wp.distance > 5 && Skill.useTK(wp) && j < 3) {
+							wp.distance > 21 && Attack.getIntoPosition(wp, 20, 0x4);
+							Skill.cast(sdk.skills.Telekinesis, 0, wp);
+						} else if (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint)) {
+							this.moveToUnit(wp) && Misc.click(0, 0, wp);
+						}
+					}
+
+					if (Misc.poll(() => me.gameReady && getUIFlag(sdk.uiflags.Waypoint), 1000, 150)) {
+						delay(500);
+						me.cancelUIFlags();
+
+						return true;
+					}
+
+					// handle getUnit bug
+					if (!getUIFlag(sdk.uiflags.Waypoint) && me.inTown && wp.name.toLowerCase() === "dummy") {
+						Town.getDistance("waypoint") > 5 && Town.move("waypoint");
+						Misc.click(0, 0, wp);
+					}
+
+					delay(500);
+				}
+			}
+		}
+	}
+
+	return false;
+}).apply();
+
 function Rushee() {
 	let act, leader, target, done = false;
 	let actions = [];
@@ -289,6 +339,8 @@ function Rushee() {
 		return (!!quest ? quest[0] : "");
 	};
 
+	this.nonQuesterNPCTalk = false;
+
 	addEventListener("chatmsg",
 		function (who, msg) {
 			if (who === Config.Leader) {
@@ -321,6 +373,7 @@ function Rushee() {
 	console.debug("Is this our last run? " + (nextGame ? "No" : "Yes"));
 
 	while (true) {
+		// todo - clean all this up so there is clear distinction between quester/non-quester and no repeat sequnces
 		try {
 			if (actions.length > 0) {
 				switch (actions[0]) {
@@ -405,6 +458,9 @@ function Rushee() {
 						Town.goToTown(act);
 						Town.move("portalspot");
 					}
+					
+					// we aren't the quester but need to talk to npcs in order to be able to get wps from certain areas 
+					(!Config.Rushee.Quester && !this.nonQuesterNPCTalk) && (this.nonQuesterNPCTalk = true);
 
 					Town.getDistance("portalspot") > 10 && Town.move("portalspot");
 					if (Pather.usePortal(null, Config.Leader) && Pather.getWP(me.area) && Pather.usePortal(sdk.areas.townOf(me.area), Config.Leader) && Town.move("portalspot")) {
@@ -684,8 +740,48 @@ function Rushee() {
 					break;
 				case "2": // Go back to town and check quest
 					if (!Config.Rushee.Quester) {
-						switch (leader.area) {
+						// we need to talk to certain npcs in order to be able to grab waypoints as a non-quester
+						if (this.nonQuesterNPCTalk) {
+							switch (leader.area) {
+							case sdk.areas.ClawViperTempleLvl2:
+								Misc.poll(() => (Misc.checkQuest(sdk.quest.id.TheTaintedSun, 1) || Misc.checkQuest(sdk.quest.id.TheTaintedSun, 13), Time.seconds(15), 1000));
+								if (Town.npcInteract("Drognan")) {
+									actions.shift();
+									console.debug("drognan done");
+								}
+
+								break;
+							case sdk.areas.ArcaneSanctuary:
+								Misc.poll(() => (Misc.checkQuest(sdk.quest.id.TheSummoner, 0), Time.seconds(15), 1000));
+								if (Town.npcInteract("Atma")) {
+									actions.shift();
+									console.debug("atma done");
+								}
+
+								break;
+							case sdk.areas.Travincal:
+								Misc.poll(() => (Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, 4) || Misc.checkQuest(sdk.quest.id.TheGuardian, 8), Time.seconds(15), 1000));
+								if (Town.npcInteract("Cain")) {
+									actions.shift();
+									console.debug("cain done");
+								}
+
+								break;
+							case sdk.areas.ArreatSummit:
+								Misc.poll(() => (Misc.checkQuest(sdk.quest.id.RiteofPassage, 1) || Misc.checkQuest(sdk.quest.id.RiteofPassage, 13), Time.seconds(15), 1000));
+								if (Town.npcInteract("Malah")) {
+									actions.shift();
+									console.debug("malah done");
+								}
+
+								break;
+							}
+
+							me.inTown && Town.move("portalspot");
+						}
+
 						// Non-questers can piggyback off quester out messages
+						switch (leader.area) {
 						case sdk.areas.OuterSteppes:
 						case sdk.areas.PlainsofDespair:
 							me.act === 4 && Misc.checkQuest(sdk.quest.id.TheFallenAngel, 1) && Town.npcInteract("Tyrael");
@@ -712,9 +808,9 @@ function Rushee() {
 					this.revive();
 
 					switch (me.area) {
-					case sdk.areas.CatacombsLvl4: // Catacombs level 4
+					case sdk.areas.CatacombsLvl4:
 						// Go to town if not there, break if procedure fails
-						if (!me.inTown && !Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader)) {
+						if (!me.inTown && !Pather.usePortal(sdk.areas.RogueEncampment)) {
 							break;
 						}
 

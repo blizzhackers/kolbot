@@ -147,7 +147,7 @@ const Town = {
 
 		switch (NPC[name]) {
 		case NPC.Jerhyn:
-			Town.move('palace');
+			!Game.getNPC(NPC.Jerhyn) && Town.move('palace');
 			break;
 		case NPC.Hratli:
 			if (!me.getQuest(sdk.quest.id.SpokeToHratli, 0)) {
