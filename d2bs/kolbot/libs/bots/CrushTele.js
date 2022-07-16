@@ -44,7 +44,7 @@ function CrushTele() {
 				Pather.moveToExit(102, true);
 				break;
 			case 107:
-				Pather.moveToPreset(108, sdk.unittype.Object, 255);
+				Pather.moveToPreset(sdk.areas.ChaosSanctuary, sdk.unittype.Object, 255);
 				break;
 			}
 

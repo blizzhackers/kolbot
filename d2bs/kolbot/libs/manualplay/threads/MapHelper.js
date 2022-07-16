@@ -134,7 +134,7 @@ function main() {
 							Pather.moveToPreset(me.area, sdk.unittype.Object, 152, -11, 3);
 
 							for (let i = 0; i < 3; i++) {
-								if (Pather.useUnit(2, 100, sdk.areas.DurielsLair)) {
+								if (Pather.useUnit(sdk.unittype.Object, 100, sdk.areas.DurielsLair)) {
 									break;
 								}
 							}
@@ -194,7 +194,7 @@ function main() {
 							
 							break;
 						} else if (obj.dest === sdk.areas.WorldstoneChamber && !Game.getMonster(sdk.monsters.ThroneBaal)) {
-							redPortal = Game.getObject(563);
+							redPortal = Game.getObject(sdk.units.WorldstonePortal);
 							redPortal && Pather.usePortal(null, null, redPortal);
 
 							break;

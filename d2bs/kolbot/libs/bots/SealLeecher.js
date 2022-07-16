@@ -6,8 +6,8 @@
 */
 
 function SealLeecher() {
-	let monster,
-		commands = [];
+	let monster;
+	let commands = [];
 
 	Town.goToTown(4);
 	Town.doChores();
@@ -37,7 +37,7 @@ function SealLeecher() {
 			switch (commands[0]) {
 			case "in":
 				if (me.inTown) {
-					Pather.usePortal(108, Config.Leader);
+					Pather.usePortal(sdk.areas.ChaosSanctuary, Config.Leader);
 					delay(250);
 				}
 
@@ -50,7 +50,7 @@ function SealLeecher() {
 				break;
 			case "out":
 				if (!me.inTown) {
-					Pather.usePortal(103, Config.Leader);
+					Pather.usePortal(sdk.areas.PandemoniumFortress, Config.Leader);
 				}
 
 				commands.shift();
@@ -58,7 +58,7 @@ function SealLeecher() {
 				break;
 			case "done":
 				if (!me.inTown) {
-					Pather.usePortal(103, Config.Leader);
+					Pather.usePortal(sdk.areas.PandemoniumFortress, Config.Leader);
 				}
 
 				return true; // End script
@@ -84,7 +84,7 @@ function SealLeecher() {
 				do {
 					if (monster.attackable && getDistance(me, monster) < 20) {
 						me.overhead("HOT");
-						Pather.usePortal(103, Config.Leader);
+						Pather.usePortal(sdk.areas.PandemoniumFortress, Config.Leader);
 					}
 				} while (monster.getNext());
 			}

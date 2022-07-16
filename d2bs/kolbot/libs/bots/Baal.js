@@ -16,8 +16,8 @@ function Baal() {
 			do {
 				if (monster.attackable && monster.y < 5094) {
 					monster.distance <= 40 && (count += 1);
-					!souls && monster.classid === 641 && (souls = true);
-					!dolls && monster.classid === 691 && (dolls = true);
+					!souls && monster.classid === sdk.monsters.BurningSoul1 && (souls = true);
+					!dolls && monster.classid === sdk.monsters.SoulKiller && (dolls = true);
 				}
 			} while (monster.getNext());
 		}
@@ -55,13 +55,13 @@ function Baal() {
 
 	Pather.moveTo(15095, 5029);
 
-	if (Config.Baal.DollQuit && Game.getMonster(691)) {
+	if (Config.Baal.DollQuit && Game.getMonster(sdk.monsters.SoulKiller)) {
 		say("Dolls found! NG.");
 
 		return true;
 	}
 
-	if (Config.Baal.SoulQuit && Game.getMonster(641)) {
+	if (Config.Baal.SoulQuit && Game.getMonster(sdk.monsters.BurningSoul1)) {
 		say("Souls found! NG.");
 
 		return true;

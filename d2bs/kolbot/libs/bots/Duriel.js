@@ -7,11 +7,10 @@
 
 function Duriel () {
 	this.killDuriel = function () {
-		let target = Misc.poll(() => montser(sdk.monsters.Duriel), 1000, 200);
-
+		let target = Misc.poll(() => Game.getMonster(sdk.monsters.Duriel), 1000, 200);
 		if (!target) throw new Error("Duriel not found.");
 
-		Config.MFLeader && Pather.makePortal() && say("kill " + 211);
+		Config.MFLeader && Pather.makePortal() && say("kill " + sdk.monsters.Duriel);
 
 		for (let i = 0; i < 300 && target.attackable; i += 1) {
 			ClassAttack.doAttack(target);

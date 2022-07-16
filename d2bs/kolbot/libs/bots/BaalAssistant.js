@@ -257,7 +257,7 @@ function BaalAssistant() {
 
 							Pather.moveTo(15095, 5029);
 
-							if ((Config.BaalAssistant.SoulQuit && Game.getMonster(641)) || (Config.BaalAssistant.DollQuit && Game.getMonster(691))) {
+							if ((Config.BaalAssistant.SoulQuit && Game.getMonster(sdk.monsters.BurningSoul1)) || (Config.BaalAssistant.DollQuit && Game.getMonster(sdk.monsters.SoulKiller))) {
 								print("Burning Souls or Undead Soul Killers found, ending script.");
 								return true;
 							}
@@ -287,7 +287,7 @@ function BaalAssistant() {
 								throw new Error("No portals to Throne.");
 							}
 
-							if ((Config.BaalAssistant.SoulQuit && Game.getMonster(641)) || (Config.BaalAssistant.DollQuit && Game.getMonster(691))) {
+							if ((Config.BaalAssistant.SoulQuit && Game.getMonster(sdk.monsters.BurningSoul1)) || (Config.BaalAssistant.DollQuit && Game.getMonster(sdk.monsters.SoulKiller))) {
 								throw new Error("Burning Souls or Undead Soul Killers found, ending script.");
 							}
 
@@ -389,7 +389,7 @@ function BaalAssistant() {
 						delay(500);
 					}
 
-					let portal = Game.getObject(563);
+					let portal = Game.getObject(sdk.units.WorldstonePortal);
 
 					if (portal) {
 						delay((Helper ? 1000 : 4000));

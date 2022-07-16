@@ -49,12 +49,12 @@
 */
 
 function Follower() {
-	let i, stop, leader, leaderUnit, charClass, piece, skill, result, unit, player, coord,
-		commanders = [Config.Leader],
-		allowSay = true,
-		attack = true,
-		openContainers = true,
-		action = "";
+	let i, stop, leader, leaderUnit, charClass, piece, skill, result, unit, player, coord;
+	let commanders = [Config.Leader];
+	let allowSay = true;
+	let attack = true;
+	let openContainers = true;
+	let action = "";
 
 	this.announce = function (msg = "") {
 		if (!allowSay) return;
@@ -65,8 +65,8 @@ function Follower() {
 	this.checkExit = function (unit, area) {
 		if (unit.inTown) return false;
 
-		let target,
-			exits = getArea().exits;
+		let target;
+		let exits = getArea().exits;
 
 		for (let i = 0; i < exits.length; i += 1) {
 			if (exits[i].target === area) {
@@ -104,14 +104,14 @@ function Follower() {
 
 		// Tal-Rasha's tomb->Duriel's lair
 		if (me.area >= sdk.areas.TalRashasTomb1 && me.area <= sdk.areas.TalRashasTomb7 && area === sdk.areas.DurielsLair) {
-			Pather.useUnit(2, sdk.units.PortaltoDurielsLair, area);
+			Pather.useUnit(sdk.unittype.Object, sdk.units.PortaltoDurielsLair, area);
 
 			return 4;
 		}
 
 		// Throne->Chamber
 		if (me.area === sdk.areas.ThroneofDestruction && area === sdk.areas.WorldstoneChamber) {
-			target = Game.getObject(563);
+			target = Game.getObject(sdk.units.WorldstonePortal);
 
 			if (target) {
 				Pather.usePortal(null, null, target);
@@ -238,7 +238,7 @@ function Follower() {
 				me.cancel();
 
 				try {
-					Pather.useUnit(2, 566, 109);
+					Pather.useUnit(sdk.unittype.Object, 566, 109);
 				} catch (a5e) {
 					break;
 				}
@@ -277,9 +277,9 @@ function Follower() {
 			delay(40);
 		}
 
-		let status,
-			pickList = [],
-			item = Game.getItem();
+		let status;
+		let pickList = [];
+		let item = Game.getItem();
 
 		if (item) {
 			do {

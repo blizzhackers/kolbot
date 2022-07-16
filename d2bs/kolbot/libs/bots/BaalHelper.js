@@ -50,7 +50,7 @@ function BaalHelper() {
 		}, Time.minutes(Config.BaalHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
 	}
 
-	if (Config.BaalHelper.DollQuit && Game.getMonster(691)) {
+	if (Config.BaalHelper.DollQuit && Game.getMonster(sdk.monsters.SoulKiller)) {
 		print("Undead Soul Killers found.");
 
 		return true;

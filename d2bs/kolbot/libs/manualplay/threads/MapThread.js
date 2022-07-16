@@ -261,11 +261,11 @@ function main() {
 
 		if (hideFlagFound) continue;
 
-		getUIFlag(0x0A) ? Hooks.update() : Hooks.flush(true) && (!HelpMenu.cleared && HelpMenu.hideMenu());
+		getUIFlag(sdk.uiflags.AutoMap) ? Hooks.update() : Hooks.flush(true) && (!HelpMenu.cleared && HelpMenu.hideMenu());
 
 		delay(20);
 
-		while (getUIFlag(0x0D)) {
+		while (getUIFlag(sdk.uiflags.ShowItem)) {
 			ItemHooks.flush();
 		}
 	}

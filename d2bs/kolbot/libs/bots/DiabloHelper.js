@@ -9,10 +9,11 @@ function DiabloHelper() {
 	this.Leader = Config.Leader;
 	Common.Diablo.waitForGlow = true;
 	Town.doChores();
-	addEventListener("gamepacket", Common.Diablo.diabloLightsEvent);
 	const Worker = require('../modules/Worker');
 
 	try {
+		addEventListener("gamepacket", Common.Diablo.diabloLightsEvent);
+		
 		if (Config.DiabloHelper.SkipIfBaal) {
 			let leadTick = getTickCount();
 
@@ -71,7 +72,7 @@ function DiabloHelper() {
 		} else {
 			Town.goToTown(4);
 			Town.move("portalspot");
-			!DiabloHelper.Leader && (DiabloHelper.Leader = Misc.autoLeaderDetect({destination: 108, quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area), timeout: Time.minutes(2)}));
+			!DiabloHelper.Leader && (DiabloHelper.Leader = Misc.autoLeaderDetect({destination: sdk.areas.ChaosSanctuary, quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area), timeout: Time.minutes(2)}));
 
 			if (!Misc.poll(() => {
 				if (Pather.getPortal(sdk.areas.ChaosSanctuary, Config.Leader || null) && Pather.usePortal(sdk.areas.ChaosSanctuary, Config.Leader || null)) {

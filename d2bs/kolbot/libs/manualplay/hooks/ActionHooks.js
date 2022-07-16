@@ -187,7 +187,7 @@ const ActionHooks = {
 				if (!me.inTown) {
 					Town.getTpTool() && (qolObj.action = "makePortal");
 				} else if (me.inTown) {
-					if (!getUIFlag(0x19) && !getUIFlag(0x17) && !getUIFlag(0x01)) {
+					if (!getUIFlag(sdk.uiflags.Stash) && !getUIFlag(sdk.uiflags.TradePrompt) && !getUIFlag(sdk.uiflags.Inventory)) {
 						qolObj.action = "heal";
 					}
 				}
@@ -197,7 +197,7 @@ const ActionHooks = {
 				if (!me.inTown) {
 					Town.getTpTool() && (qolObj.action = "takePortal");
 				} else if (me.inTown) {
-					if (!getUIFlag(0x19) && !getUIFlag(0x17) && !getUIFlag(0x01)) {
+					if (!getUIFlag(sdk.uiflags.Stash) && !getUIFlag(sdk.uiflags.TradePrompt) && !getUIFlag(sdk.uiflags.Inventory)) {
 						qolObj.action = "openStash";
 					}
 				}
@@ -675,7 +675,7 @@ const ActionHooks = {
 			});
 		}
 
-		let uberPortals = (me.area === 109 && me.hell) ? getUnits(2, 60) : false;
+		let uberPortals = (me.area === 109 && me.hell) ? getUnits(sdk.unittype.Object, sdk.units.RedPortal) : false;
 
 		if (uberPortals && uberPortals.some((portal) => [133, 134, 135, 136].includes(portal.objtype))) {
 			TextHooks.displaySettings = false;
@@ -903,7 +903,7 @@ const ActionHooks = {
 	},
 
 	getDiabloSeals: function (seal) {
-		let unit = Game.getPresetObject(108, seal);
+		let unit = Game.getPresetObject(sdk.areas.ChaosSanctuary, seal);
 
 		if (unit) {
 			if (unit instanceof PresetUnit) {

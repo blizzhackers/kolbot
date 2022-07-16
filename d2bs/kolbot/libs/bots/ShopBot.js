@@ -13,10 +13,10 @@ function ShopBot() {
 		totalCycles: new Text("Total cycles:", 50, 290, 2, 1),
 	};
 
-	let tickCount,
-		cycles = 0,
-		validItems = 0,
-		totalCycles = 0;
+	let tickCount;
+	let cycles = 0;
+	let validItems = 0;
+	let totalCycles = 0;
 
 	Pather.teleport = false;
 	this.pickEntries = [];
@@ -66,12 +66,12 @@ function ShopBot() {
 			me.cancel();
 		}
 
-		if (getUIFlag(0x08)) return true;
+		if (getUIFlag(sdk.uiflags.NPCMenu)) return true;
 
 		for (let i = 0; i < 10; i += 1) {
 			npc.distance > 5 && Pather.walkTo(npc.x, npc.y);
 
-			if (!getUIFlag(0x08)) {
+			if (!getUIFlag(sdk.uiflags.NPCMenu)) {
 				Packet.entityInteract(npc);
 				sendPacket(1, 0x2f, 4, 1, 4, npc.gid);
 			}
@@ -79,7 +79,7 @@ function ShopBot() {
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < Math.max(Math.round((i + 1) * 250 / (i / 3 + 1)), me.ping + 1)) {
-				if (getUIFlag(0x08)) {
+				if (getUIFlag(sdk.uiflags.NPCMenu)) {
 					return true;
 				}
 
@@ -261,7 +261,7 @@ function ShopBot() {
 				wp = Game.getPresetObject(me.area, [119, 156, 237, 398, 429][me.act - 1]),
 				wpX = wp.roomx * 5 + wp.x,
 				wpY = wp.roomy * 5 + wp.y,
-				redPortal = (getUnits(2, 60).sort((a, b) => a.distance - b.distance)).first(),
+				redPortal = (getUnits(sdk.unittype.Object, sdk.units.RedPortal).sort((a, b) => a.distance - b.distance)).first(),
 				exit = area.exits[0];
 
 			for (let i = 1; i < area.exits.length; i++) {

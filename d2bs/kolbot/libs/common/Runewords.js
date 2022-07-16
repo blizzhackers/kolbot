@@ -399,7 +399,7 @@ const Runewords = {
 
 		this.buildLists();
 
-		while (getUIFlag(0x1A) || getUIFlag(0x19)) {
+		while (getUIFlag(sdk.uiflags.Cube) || getUIFlag(sdk.uiflags.Stash)) {
 			me.cancel();
 			delay(300);
 		}

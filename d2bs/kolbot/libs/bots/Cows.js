@@ -77,7 +77,7 @@ function Cows() {
 			}
 		}
 
-		return tpTome.first();
+		return tpTome.last();
 	};
 
 	this.openPortal = function (leg, tome) {

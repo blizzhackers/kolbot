@@ -142,7 +142,7 @@ Unit.prototype.startTrade = function (mode) {
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 1000) {
-				if (getUIFlag(0x0C) && this.itemcount > 0) {
+				if (getUIFlag(sdk.uiflags.Shop) && this.itemcount > 0) {
 					delay(200);
 					console.log("Successfully started " + mode + " at " + this.name);
 
@@ -1500,7 +1500,7 @@ Unit.prototype.equip = function (destLocation = undefined) {
 	const findspot = function (item) {
 			let tempspot = Storage.Stash.FindSpot(item);
 
-			if (getUIFlag(0x19) && tempspot) {
+			if (getUIFlag(sdk.uiflags.Stash) && tempspot) {
 				return {location: Storage.Stash.location, coord: tempspot};
 			}
 

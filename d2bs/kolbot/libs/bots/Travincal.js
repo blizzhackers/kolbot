@@ -7,8 +7,8 @@
 
 function Travincal() {
 	this.buildList = function (checkColl) {
-		let monsterList = [],
-			monster = Game.getMonster();
+		let monsterList = [];
+		let monster = Game.getMonster();
 
 		if (monster) {
 			do {

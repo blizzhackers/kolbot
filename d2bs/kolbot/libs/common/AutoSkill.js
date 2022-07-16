@@ -97,7 +97,7 @@ const AutoSkill = new function () {
 
 		this.remaining = me.getStat(5);
 
-		if (!getUIFlag(0x17)) {
+		if (!getUIFlag(sdk.uiflags.TradePrompt)) {
 			let addTo = this.skillToAdd(this.skillBuildOrder);
 
 			if (addTo) {

@@ -187,7 +187,11 @@ function Wakka() {
 		if (!Misc.poll(() => Misc.inMyParty(leader), 30e3, 1000)) throw new Error("Wakka: Leader not partied");
 	}
 
-	!leader && (leader = Misc.autoLeaderDetect({destination: 108, quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area), timeout: timeout * 60e3}));
+	!leader && (leader = Misc.autoLeaderDetect({
+		destination: sdk.areas.ChaosSanctuary,
+		quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area),
+		timeout: timeout * 60e3
+	}));
 	Town.doChores();
 
 	if (leader) {

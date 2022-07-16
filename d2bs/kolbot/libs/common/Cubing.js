@@ -888,7 +888,7 @@ const Cubing = {
 
 			if (items) {
 				// If cube isn't open, attempt to open stash (the function returns true if stash is already open)
-				if ((!getUIFlag(0x1a) && !Town.openStash()) || !this.emptyCube()) return false;
+				if ((!getUIFlag(sdk.uiflags.Cube) && !Town.openStash()) || !this.emptyCube()) return false;
 
 				this.cursorCheck();
 
@@ -939,10 +939,10 @@ const Cubing = {
 			}
 		}
 
-		if (getUIFlag(0x1A) || getUIFlag(0x19)) {
+		if (getUIFlag(sdk.uiflags.Cube) || getUIFlag(sdk.uiflags.Stash)) {
 			delay(1000);
 
-			while (getUIFlag(0x1A) || getUIFlag(0x19)) {
+			while (getUIFlag(sdk.uiflags.Cube) || getUIFlag(sdk.uiflags.Stash)) {
 				me.cancel();
 				delay(300);
 			}
@@ -975,7 +975,7 @@ const Cubing = {
 		let cube = me.getItem(549);
 
 		if (!cube) return false;
-		if (getUIFlag(0x1a)) return true;
+		if (getUIFlag(sdk.uiflags.Cube)) return true;
 		if (cube.location === 7 && !Town.openStash()) return false;
 
 		for (let i = 0; i < 3; i += 1) {
@@ -983,7 +983,7 @@ const Cubing = {
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 5000) {
-				if (getUIFlag(0x1a)) {
+				if (getUIFlag(sdk.uiflags.Cube)) {
 					delay(100 + me.ping * 2); // allow UI to initialize
 
 					return true;
@@ -997,14 +997,14 @@ const Cubing = {
 	},
 
 	closeCube: function () {
-		if (!getUIFlag(0x1a)) return true;
+		if (!getUIFlag(sdk.uiflags.Cube)) return true;
 
 		for (let i = 0; i < 5; i++) {
 			me.cancel();
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 3000) {
-				if (!getUIFlag(0x1a)) {
+				if (!getUIFlag(sdk.uiflags.Cube)) {
 					delay(250 + me.ping * 2); // allow UI to initialize
 					return true;
 				}
