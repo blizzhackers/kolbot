@@ -356,7 +356,7 @@ function Rushee() {
 	leader = Misc.poll(() => Misc.findPlayer(Config.Leader), Time.minutes(5), 1000);
 	if (!leader) throw new Error("Failed to find my rusher");
 
-	Config.Rushee.Quester && this.log("Leader found", Config.LocalChat.Enabled);
+	Config.Rushee.Quester ? this.log("Leader found", Config.LocalChat.Enabled) : console.log("Leader Found: " + Config.Leader);
 
 	// lets figure out if we either are the bumper or have a bumper so we know if we need to stop at the end of the rush
 	let bumperLevelReq = [20, 40, 60][me.diff];
@@ -458,6 +458,9 @@ function Rushee() {
 						Town.goToTown(act);
 						Town.move("portalspot");
 					}
+
+					// make sure we talk to cain to access durance
+					leader.area === sdk.areas.DuranceofHateLvl2 && (!Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, 0)) && Town.npcInteract("Cain");
 					
 					// we aren't the quester but need to talk to npcs in order to be able to get wps from certain areas 
 					(!Config.Rushee.Quester && !this.nonQuesterNPCTalk) && (this.nonQuesterNPCTalk = true);
@@ -466,8 +469,16 @@ function Rushee() {
 					if (Pather.usePortal(null, Config.Leader) && Pather.getWP(me.area) && Pather.usePortal(sdk.areas.townOf(me.area), Config.Leader) && Town.move("portalspot")) {
 						me.inTown && Config.LocalChat.Enabled && say("gotwp");
 					} else {
-						this.log("Failed to get wp", Config.LocalChat.Enabled);
-						!me.inTown && Town.goToTown();
+						// check for bugged portal
+						let p = Game.getObject("portal");
+						let preArea = me.area;
+						if (!!p && Misc.click(0, 0, p) && Misc.poll(() => me.area !== preArea, 1000, 100)
+							&& Pather.getWP(me.area) && (Pather.usePortal(sdk.areas.townOf(me.area), Config.Leader) || Pather.useWaypoint(sdk.areas.townOf(me.area)))) {
+							me.inTown && Config.LocalChat.Enabled && say("gotwp");
+						} else {
+							this.log("Failed to get wp", Config.LocalChat.Enabled);
+							!me.inTown && Town.goToTown();
+						}
 					}
 
 					actions.shift();
@@ -478,17 +489,59 @@ function Rushee() {
 						delay(500);
 					}
 
-					if (!Config.Rushee.Quester) {
-						actions.shift();
-
-						break;
-					}
-
 					act = Misc.getPlayerAct(leader);
 
 					if (me.act !== act) {
 						Town.goToTown(act);
 						Town.move("portalspot");
+					}
+
+					// we need to talk to certain npcs in order to be able to grab waypoints as a non-quester
+					if (this.nonQuesterNPCTalk) {
+						console.debug("Leader Area: " + Pather.getAreaName(leader.area));
+
+						switch (leader.area) {
+						case sdk.areas.ClawViperTempleLvl2:
+							Misc.poll(() => !!(Misc.checkQuest(sdk.quest.id.TheTaintedSun, 1) || Misc.checkQuest(sdk.quest.id.TheTaintedSun, 13), Time.seconds(20), 1000));
+							if (Town.npcInteract("Drognan")) {
+								actions.shift();
+								console.debug("drognan done");
+							}
+
+							break;
+						case sdk.areas.ArcaneSanctuary:
+							Misc.poll(() => !!(Misc.checkQuest(sdk.quest.id.TheSummoner, 1) || Misc.checkQuest(sdk.quest.id.TheSummoner, 13), Time.seconds(20), 1000));
+							if (Town.npcInteract("Atma")) {
+								actions.shift();
+								console.debug("atma done");
+							}
+
+							break;
+						case sdk.areas.Travincal:
+							Misc.poll(() => !!(Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, 4) || Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, 13) || Misc.checkQuest(sdk.quest.id.TheGuardian, 8), Time.seconds(20), 1000));
+							if (Town.npcInteract("Cain")) {
+								actions.shift();
+								console.debug("cain done");
+							}
+
+							break;
+						case sdk.areas.ArreatSummit:
+							Misc.poll(() => (Misc.checkQuest(sdk.quest.id.RiteofPassage, 1) || Misc.checkQuest(sdk.quest.id.RiteofPassage, 13), Time.seconds(20), 1000));
+							if (Town.npcInteract("Malah")) {
+								actions.shift();
+								console.debug("malah done");
+							}
+
+							break;
+						}
+
+						me.inTown && Town.move("portalspot");
+					}
+
+					if (!Config.Rushee.Quester) {
+						actions.shift();
+
+						break;
 					}
 
 					switch (leader.area) {
@@ -740,46 +793,6 @@ function Rushee() {
 					break;
 				case "2": // Go back to town and check quest
 					if (!Config.Rushee.Quester) {
-						// we need to talk to certain npcs in order to be able to grab waypoints as a non-quester
-						if (this.nonQuesterNPCTalk) {
-							switch (leader.area) {
-							case sdk.areas.ClawViperTempleLvl2:
-								Misc.poll(() => (Misc.checkQuest(sdk.quest.id.TheTaintedSun, 1) || Misc.checkQuest(sdk.quest.id.TheTaintedSun, 13), Time.seconds(15), 1000));
-								if (Town.npcInteract("Drognan")) {
-									actions.shift();
-									console.debug("drognan done");
-								}
-
-								break;
-							case sdk.areas.ArcaneSanctuary:
-								Misc.poll(() => (Misc.checkQuest(sdk.quest.id.TheSummoner, 0), Time.seconds(15), 1000));
-								if (Town.npcInteract("Atma")) {
-									actions.shift();
-									console.debug("atma done");
-								}
-
-								break;
-							case sdk.areas.Travincal:
-								Misc.poll(() => (Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, 4) || Misc.checkQuest(sdk.quest.id.TheGuardian, 8), Time.seconds(15), 1000));
-								if (Town.npcInteract("Cain")) {
-									actions.shift();
-									console.debug("cain done");
-								}
-
-								break;
-							case sdk.areas.ArreatSummit:
-								Misc.poll(() => (Misc.checkQuest(sdk.quest.id.RiteofPassage, 1) || Misc.checkQuest(sdk.quest.id.RiteofPassage, 13), Time.seconds(15), 1000));
-								if (Town.npcInteract("Malah")) {
-									actions.shift();
-									console.debug("malah done");
-								}
-
-								break;
-							}
-
-							me.inTown && Town.move("portalspot");
-						}
-
 						// Non-questers can piggyback off quester out messages
 						switch (leader.area) {
 						case sdk.areas.OuterSteppes:

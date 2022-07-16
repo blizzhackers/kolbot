@@ -7,10 +7,23 @@
 
 // @notes: can't do duriel or meph because all the extra tasks. this is not meant to be autoplay or self rush
 
-function Questing() {
+function Questing () {
 	const log = (msg = "", errorMsg = false) => {
 		me.overhead(msg);
 		console.log("ÿc9(Questing) :: " + (errorMsg ? "ÿc1" : "ÿc0") + msg);
+	};
+
+	const getQuestItem = (item) => {
+		if (item) {
+			let id = item.classid;
+			let canFit = Storage.Inventory.CanFit(item);
+			if (!canFit && Pickit.canMakeRoom()) {
+				console.log("ÿc7Trying to make room for " + Pickit.itemColor(item) + item.name);
+				Town.visitTown();
+				!copyUnit(item).x && (item = Misc.poll(() => Game.getItem(id)));
+			}
+		}
+		return Pickit.pickItem(item);
 	};
 
 	let quests = [
@@ -54,7 +67,7 @@ function Questing() {
 		!!malusChest && malusChest.distance > 5 && Pather.moveToUnit(malusChest);
 		Misc.openChest(malusChest);
 		let malus = Misc.poll(() => Game.getItem(sdk.quest.item.HoradricMalus), 1000, 100);
-		Pickit.pickItem(malus);
+		getQuestItem(malus);
 		Town.goToTown();
 		Town.npcInteract("Charsi");
 
@@ -129,7 +142,7 @@ function Questing() {
 		Attack.kill(sdk.monsters.Radament);
 
 		let book = Game.getItem(sdk.quest.item.BookofSkill);
-		book && Pickit.pickItem(book) && book.use();
+		getQuestItem(book);
 
 		Town.goToTown();
 		Town.npcInteract("Atma");
@@ -154,8 +167,7 @@ function Questing() {
 
 		Misc.openChest(sdk.quest.chest.LamEsensTomeHolder);
 		let book = Misc.poll(() => Game.getItem(sdk.quest.item.LamEsensTome), 1000, 100);
-
-		Pickit.pickItem(book);
+		getQuestItem(book);
 		Town.goToTown();
 		Town.npcInteract("Alkor");
 
@@ -214,7 +226,7 @@ function Questing() {
 		Pather.journeyTo(sdk.areas.FrigidHighlands);
 		Precast.doPrecast(true);
 
-		let barbs = (getPresetUnits(me.area, sdk.unittype.Object, sdk.quest.chest.BarbCage) || []);
+		let barbs = (Game.getPresetObjects(me.area, sdk.quest.chest.BarbCage) || []);
 
 		if (!barbs.length) {
 			log("Couldn't find the barbs");
@@ -279,12 +291,15 @@ function Questing() {
 		// get pot from malah, then return to anya
 		Town.goToTown();
 		Town.npcInteract("Malah");
-		Town.move("portalspot");
-		Pather.usePortal(sdk.areas.FrozenRiver, me.name);
+		if (!Misc.poll(() => {
+			Pather.usePortal(sdk.areas.FrozenRiver, me.name);
+			return me.area === sdk.areas.FrozenRiver;
+		}, Time.seconds(30), 1000)) throw new Error("Anya quest failed - Failed to return to frozen river");
 
 		// unfreeze her, cancel her speech again
+		anya = Game.getObject(sdk.units.FrozenAnya);
 		anya.interact();
-		delay(300);
+		delay(1000);
 		me.cancel();
 
 		// get reward

@@ -27,7 +27,7 @@ let wpsToGive = Pather.nonTownWpAreas.slice(0).filter(function (area) {
 });
 
 function wpEvent (who, msg) {
-	if (typeof msg === "string" && msg === "gotwp") {
+	if (typeof msg === "string" && msg === "gotwp" || msg === "Failed to get wp") {
 		count++;
 		!silentNameTracker.includes(who) && silentNameTracker.push(who);
 	}
@@ -714,7 +714,7 @@ function main () {
 			if (Pather.usePortal(sdk.areas.Tristram)) {
 				break;
 			}
-			Attack.securePosition(me.x, me.y, 25, 1000);
+			Attack.securePosition(me.x, me.y, 35, 1000);
 		}
 
 		if (me.area === sdk.areas.Tristram) {
