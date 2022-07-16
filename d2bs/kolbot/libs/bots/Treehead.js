@@ -10,7 +10,7 @@ function Treehead() {
 	Pather.useWaypoint(sdk.areas.DarkWood);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToPreset(me.area, 2, sdk.quest.chest.InifussTree, 5, 5)) {
+	if (!Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.InifussTree, 5, 5)) {
 		throw new Error("Failed to move to Treehead");
 	}
 

@@ -29,7 +29,7 @@ function Duriel () {
 	Precast.doPrecast(true);
 
 	if (!Pather.moveToExit(getRoom().correcttomb, true)) throw new Error("Failed to move to Tal Rasha's Tomb");
-	if (!Pather.moveToPreset(me.area, 2, sdk.quest.chest.HoradricStaffHolder, -11, 3)) throw new Error("Failed to move to Orifice");
+	if (!Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricStaffHolder, -11, 3)) throw new Error("Failed to move to Orifice");
 
 	me.hardcore && !me.sorceress && Attack.clear(5);
 

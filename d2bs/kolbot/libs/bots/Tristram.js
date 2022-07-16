@@ -23,7 +23,7 @@ function Tristram() {
 
 			break;
 		case me.area === sdk.areas.StonyField:
-			if (!Pather.moveToPreset(sdk.areas.StonyField, 1, 737, 0, 0, false, true)) {
+			if (!Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Monster, 737, 0, 0, false, true)) {
 				throw new Error("Failed to move to Rakanishu");
 			}
 

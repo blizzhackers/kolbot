@@ -10,7 +10,7 @@ function Eyeback() {
 	Pather.useWaypoint(sdk.areas.ArreatPlateau);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToPreset(sdk.areas.FrigidHighlands, 1, sdk.monsters.preset.EyebacktheUnleashed)) {
+	if (!Pather.moveToPreset(sdk.areas.FrigidHighlands, sdk.unittype.Monster, sdk.monsters.preset.EyebacktheUnleashed)) {
 		throw new Error("Failed to move to Eyeback the Unleashed");
 	}
 

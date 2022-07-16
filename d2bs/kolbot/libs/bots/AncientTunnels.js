@@ -11,8 +11,8 @@ function AncientTunnels() {
 	Precast.doPrecast(true);
 
 	try {
-		Config.AncientTunnels.OpenChest && Pather.moveToPreset(me.area, 2, 580) && Misc.openChests(5) && Pickit.pickItems();
-		Config.AncientTunnels.KillDarkElder && Pather.moveToPreset(me.area, 1, 751) && Attack.clear(15, 0, getLocaleString(sdk.locale.monsters.DarkElder));
+		Config.AncientTunnels.OpenChest && Pather.moveToPreset(me.area, sdk.unittype.Object, 580) && Misc.openChests(5) && Pickit.pickItems();
+		Config.AncientTunnels.KillDarkElder && Pather.moveToPreset(me.area, sdk.unittype.Monster, 751) && Attack.clear(15, 0, getLocaleString(sdk.locale.monsters.DarkElder));
 	} catch (e) {
 		console.warn(e);
 	}

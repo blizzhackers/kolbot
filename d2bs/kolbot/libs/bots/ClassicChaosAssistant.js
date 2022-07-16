@@ -96,7 +96,7 @@ function ClassicChaosAssistant() {
 
 			if (diablopickup) {
 				Common.Diablo.openSeal(sdk.units.DiabloSealVizier);
-				Pather.moveToPreset(108, 2, 255);
+				Pather.moveToPreset(108, sdk.unittype.Object, 255);
 				for (let i = 0; i < 300; i += 1) {
 					Pickit.pickItems();
 					delay(100);
@@ -114,7 +114,7 @@ function ClassicChaosAssistant() {
 			if (stargo) {
 				if (me.area === sdk.areas.RiverofFlame) {
 					Precast.doPrecast(true);
-					Pather.moveToPreset(108, 2, 255);
+					Pather.moveToPreset(108, sdk.unittype.Object, 255);
 					Common.Diablo.initLayout();
 					break;
 				}

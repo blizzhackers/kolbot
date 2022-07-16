@@ -20,7 +20,7 @@ function Summoner () {
 	}
 
 	if (me.area === sdk.areas.PalaceCellarLvl3 && !Pather.usePortal(null)) throw new Error("Failed to move to Summoner");
-	if (!Pather.moveToPreset(me.area, 2, sdk.quest.chest.Journal, -3, -3)) throw new Error("Failed to move to Summoner");
+	if (!Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.Journal, -3, -3)) throw new Error("Failed to move to Summoner");
 
 	Attack.clear(15, 0, sdk.monsters.TheSummoner);
 

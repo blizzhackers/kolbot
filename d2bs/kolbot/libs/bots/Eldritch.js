@@ -16,7 +16,7 @@ function Eldritch() {
 	try {
 		// FrigidHighlands returns invalid size with getBaseStat('leveldefs', 111, ['SizeX', 'SizeX(N)', 'SizeX(H)'][me.diff]);
 		// Could this be causing crashes here?
-		if (Config.Eldritch.OpenChest && Pather.moveNearPreset(sdk.areas.FrigidHighlands, 2, sdk.units.FrigidHighlandsChest, 10)) {
+		if (Config.Eldritch.OpenChest && Pather.moveNearPreset(sdk.areas.FrigidHighlands, sdk.unittype.Object, sdk.units.FrigidHighlandsChest, 10)) {
 			Misc.openChest(sdk.units.FrigidHighlandsChest) && Pickit.pickItems();
 			// check distance from current location to shenk and if far tp to town and use wp instead
 			[x, y].distance > 120 && Town.goToTown() && Pather.useWaypoint(sdk.areas.FrigidHighlands);
@@ -33,7 +33,7 @@ function Eldritch() {
 		console.warn("(Eldritch) :: Failed to Kill Shenk. " + e);
 	}
 
-	if (Config.Eldritch.KillDacFarren && Pather.moveNearPreset(sdk.areas.BloodyFoothills, 1, sdk.monsters.preset.DacFarren, 10) && Pather.moveTo(4478, 5108)) {
+	if (Config.Eldritch.KillDacFarren && Pather.moveNearPreset(sdk.areas.BloodyFoothills, sdk.unittype.Monster, sdk.monsters.preset.DacFarren, 10) && Pather.moveTo(4478, 5108)) {
 		Attack.kill(getLocaleString(sdk.locale.monsters.DacFarren));
 	}
 

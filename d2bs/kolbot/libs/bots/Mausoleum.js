@@ -13,7 +13,7 @@ function Mausoleum() {
 	if (!Pather.moveToExit(sdk.areas.BurialGrounds, true)) throw new Error("Failed to move to Burial Grounds");
 
 	if (Config.Mausoleum.KillBloodRaven) {
-		Pather.moveToPreset(sdk.areas.BurialGrounds, 1, sdk.monsters.preset.BloodRaven);
+		Pather.moveToPreset(sdk.areas.BurialGrounds, sdk.unittype.Monster, sdk.monsters.preset.BloodRaven);
 		Attack.kill(getLocaleString(sdk.locale.monsters.BloodRaven));
 		Pickit.pickItems();
 	}
