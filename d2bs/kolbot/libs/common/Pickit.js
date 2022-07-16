@@ -15,6 +15,10 @@ const Pickit = {
 		sdk.itemtype.Scroll, sdk.itemtype.Key, sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion,
 		sdk.itemtype.RejuvPotion, sdk.itemtype.StaminaPotion, sdk.itemtype.AntidotePotion, sdk.itemtype.ThawingPotion
 	],
+	tkable: [
+		sdk.itemtype.Gold, sdk.itemtype.Scroll, sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion,
+		sdk.itemtype.RejuvPotion, sdk.itemtype.StaminaPotion, sdk.itemtype.AntidotePotion, sdk.itemtype.ThawingPotion
+	],
 	essentials: [sdk.itemtype.Gold, sdk.itemtype.Scroll, sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion],
 
 	init: function (notify) {
@@ -59,7 +63,7 @@ const Pickit = {
 		let rval = NTIP.CheckItem(unit, false, true);
 
 		// make sure we have essentials - no pickit files loaded
-		if (rval.result === 0 && Config.PickitFiles.length === 0 && Pickit.essentials.includes(unit.itemType) && this.canPick(unit)) {
+		if (rval.result === Pickit.result.UNWANTED && Config.PickitFiles.length === 0 && Pickit.essentials.includes(unit.itemType) && this.canPick(unit)) {
 			return {
 				result: Pickit.result.WANTED,
 				line: null
@@ -94,12 +98,12 @@ const Pickit = {
 			};
 		}
 
-		if (rval.result === 0 && !getBaseStat("items", unit.classid, "quest") && !Town.ignoredItemTypes.includes(unit.itemType)
+		if (rval.result === Pickit.result.UNWANTED && !getBaseStat("items", unit.classid, "quest") && !Town.ignoredItemTypes.includes(unit.itemType)
 			&& !unit.questItem && (unit.isInInventory || (me.gold < Config.LowGold || (me.gold < 500000 && Config.PickitFiles.length === 0)))) {
 			// Gold doesn't take up room, just pick it up
 			if (unit.classid === sdk.items.Gold) {
 				return {
-					result: 4,
+					result: Pickit.result.TRASH,
 					line: null
 				};
 			}
@@ -110,13 +114,13 @@ const Pickit = {
 				if (itemValuePerSquare >= 2000) {
 					// If total gold is less than 500k pick up anything worth 2k gold per square to sell in town.
 					return {
-						result: 4,
+						result: Pickit.result.TRASH,
 						line: "Valuable Item: " + unit.getItemCost(1)
 					};
 				} else if (itemValuePerSquare >= 10) {
 					// If total gold is less than LowGold setting pick up anything worth 10 gold per square to sell in town.
 					return {
-						result: 4,
+						result: Pickit.result.TRASH,
 						line: "LowGold Item: " + unit.getItemCost(1)
 					};
 				}
@@ -127,22 +131,22 @@ const Pickit = {
 	},
 
 	pickItems: function (range = Config.PickRange) {
+		if (me.dead) return false;
+		
 		let needMule = false;
 		let pickList = [];
 
 		Town.clearBelt();
 
-		if (me.dead) return false;
-
 		while (!me.idle) {
 			delay(40);
 		}
 
-		let item = getUnit(sdk.unittype.Item);
+		let item = Game.getItem();
 
 		if (item) {
 			do {
-				if ((item.mode === sdk.itemmode.onGround || item.mode === sdk.itemmode.Dropping) && getDistance(me, item) <= range) {
+				if (item.onGroundOrDropping && getDistance(me, item) <= range) {
 					pickList.push(copyUnit(item));
 				}
 			} while (item.getNext());
@@ -155,7 +159,7 @@ const Pickit = {
 
 			// Check if the item unit is still valid and if it's on ground or being dropped
 			// Don't pick items behind walls/obstacles when walking
-			if (copyUnit(pickList[0]).x !== undefined && (pickList[0].mode === sdk.itemmode.onGround || pickList[0].mode === sdk.itemmode.Dropping)
+			if (copyUnit(pickList[0]).x !== undefined && pickList[0].onGroundOrDropping
 					&& (Pather.useTeleport() || me.inTown || !checkCollision(me, pickList[0], 0x1))) {
 				// Check if the item should be picked
 				let status = this.checkItem(pickList[0]);
@@ -249,8 +253,7 @@ const Pickit = {
 			this.color = Pickit.itemColor(unit);
 			this.gold = unit.getStat(sdk.stats.Gold);
 			this.dist = (unit.distance || Infinity);
-			this.useTk = (Skill.haveTK
-				&& (this.type === sdk.itemtype.Gold || this.type === sdk.itemtype.Scroll || (this.type >= sdk.itemtype.HealingPotion && this.type <= sdk.itemtype.ThawingPotion))
+			this.useTk = (Skill.haveTK && Pickit.tkable.includes(this.type)
 				&& this.dist > 5 && this.dist < 20 && !checkCollision(me, unit, 0x5));
 			this.picked = false;
 		}
@@ -258,7 +261,7 @@ const Pickit = {
 		let gid = (unit.gid || -1);
 		let cancelFlags = [sdk.uiflags.Inventory, sdk.uiflags.NPCMenu, sdk.uiflags.Waypoint, sdk.uiflags.Shop, sdk.uiflags.Stash, sdk.uiflags.Cube];
 		let itemCount = me.itemcount;
-		let item = gid > -1 ? getUnit(sdk.unittype.Item, -1, -1, gid) : false;
+		let item = gid > -1 ? Game.getItem(-1, -1, gid) : false;
 
 		if (!item) return false;
 
@@ -276,7 +279,7 @@ const Pickit = {
 
 		MainLoop:
 		for (let i = 0; i < retry; i += 1) {
-			if (!getUnit(sdk.unittype.Item, -1, -1, gid)) {
+			if (!Game.getItem(-1, -1, gid)) {
 				break;
 			}
 
@@ -286,7 +289,7 @@ const Pickit = {
 				delay(40);
 			}
 
-			if (item.mode !== sdk.itemmode.onGround && item.mode !== sdk.itemmode.Dropping) {
+			if (!item.onGroundOrDropping) {
 				break;
 			}
 
@@ -425,13 +428,11 @@ const Pickit = {
 	canPick: function (unit) {
 		if (!unit) return false;
 
-		let tome, charm, potion, needPots, buffers, pottype, myKey, key;
-
-		if (sdk.quest.items.includes(unit.classid)) {
-			if (me.getItem(unit.classid)) {
-				return false;
-			}
+		if (sdk.quest.items.includes(unit.classid) && me.getItem(unit.classid)) {
+			return false;
 		}
+
+		let tome, charm, potion, needPots, buffers, pottype, myKey, key;
 
 		switch (unit.itemType) {
 		case sdk.itemtype.Gold:
@@ -462,7 +463,7 @@ const Pickit = {
 			if (me.assassin) return false;
 
 			myKey = me.getItem(sdk.items.Key, sdk.itemmode.inStorage);
-			key = getUnit(sdk.unittype.Item, -1, -1, unit.gid); // Passed argument isn't an actual unit, we need to get it
+			key = Game.getItem(-1, -1, unit.gid); // Passed argument isn't an actual unit, we need to get it
 
 			if (myKey && key) {
 				do {
@@ -613,9 +614,9 @@ const Pickit = {
 
 		while (this.gidList.length > 0) {
 			let gid = this.gidList.shift();
-			item = getUnit(sdk.unittype.Item, -1, -1, gid);
+			item = Game.getItem(-1, -1, gid);
 
-			if (item && (item.mode === sdk.itemmode.onGround || item.mode === sdk.itemmode.Dropping)
+			if (item && item.onGroundOrDropping
 				&& (Town.ignoredItemTypes.indexOf(item.itemType) === -1 || (item.itemType >= sdk.itemtype.HealingPotion && item.itemType <= sdk.itemtype.RejuvPotion))
 				&& item.itemType !== sdk.itemtype.Gold && getDistance(me, item) <= Config.PickRange) {
 				itemList.push(copyUnit(item));

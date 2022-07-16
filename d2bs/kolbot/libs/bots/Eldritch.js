@@ -9,6 +9,7 @@ function Eldritch() {
 	Town.doChores();
 	Pather.useWaypoint(sdk.areas.FrigidHighlands);
 	Precast.doPrecast(true);
+	let {x, y} = me;
 	Pather.moveTo(3745, 5084);
 	Attack.kill(getLocaleString(sdk.locale.monsters.EldritchtheRectifier));
 	
@@ -17,6 +18,8 @@ function Eldritch() {
 		// Could this be causing crashes here?
 		if (Config.Eldritch.OpenChest && Pather.moveNearPreset(sdk.areas.FrigidHighlands, 2, sdk.units.FrigidHighlandsChest, 10)) {
 			Misc.openChest(sdk.units.FrigidHighlandsChest) && Pickit.pickItems();
+			// check distance from current location to shenk and if far tp to town and use wp instead
+			[x, y].distance > 120 && Town.goToTown() && Pather.useWaypoint(sdk.areas.FrigidHighlands);
 		}
 	} catch (e) {
 		console.warn("(Eldritch) :: Failed to open chest. " + e);
