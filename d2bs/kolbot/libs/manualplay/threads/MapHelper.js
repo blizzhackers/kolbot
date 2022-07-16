@@ -23,8 +23,8 @@ MapMode.include();
 
 function main() {
 	let obj = {type: false, dest: false, action: false};
-	let action, fail = 0, x, y,
-		mapThread = getScript("libs/manualplay/threads/mapthread.js");
+	let action, fail = 0, x, y;
+	let mapThread = getScript("libs/manualplay/threads/mapthread.js");
 
 	const portalMap = {
 		// Abaddon
@@ -131,7 +131,7 @@ function main() {
 						} else if ([sdk.areas.CanyonofMagic, sdk.areas.A2SewersLvl1, sdk.areas.PalaceCellarLvl3, sdk.areas.PandemoniumFortress, sdk.areas.BloodyFoothills].includes(obj.dest)) {
 							Pather.journeyTo(obj.dest);
 						} else if (obj.dest === sdk.areas.DurielsLair) {
-							Pather.moveToPreset(me.area, 2, 152, -11, 3);
+							Pather.moveToPreset(me.area, sdk.unittype.Object, 152, -11, 3);
 
 							for (let i = 0; i < 3; i++) {
 								if (Pather.useUnit(2, 100, sdk.areas.DurielsLair)) {
@@ -189,12 +189,12 @@ function main() {
 
 						break;
 					case "portal":
-						if (obj.dest === sdk.areas.WorldstoneChamber && getUnit(1, sdk.monsters.ThroneBaal)) {
+						if (obj.dest === sdk.areas.WorldstoneChamber && Game.getMonster(sdk.monsters.ThroneBaal)) {
 							me.overhead("Can't enter Worldstone Chamber yet. Baal still in area");
 							
 							break;
-						} else if (obj.dest === sdk.areas.WorldstoneChamber && !getUnit(1, sdk.monsters.ThroneBaal)) {
-							redPortal = getUnit(2, 563);
+						} else if (obj.dest === sdk.areas.WorldstoneChamber && !Game.getMonster(sdk.monsters.ThroneBaal)) {
+							redPortal = Game.getObject(563);
 							redPortal && Pather.usePortal(null, null, redPortal);
 
 							break;
@@ -202,7 +202,7 @@ function main() {
 
 						switch (obj.dest) {
 						case sdk.areas.RogueEncampment:
-							king = getPresetUnit(me.area, 1, 773);
+							king = Game.getPresetMonster(me.area, 773);
 
 							switch (king.x) {
 							case 1:
@@ -234,7 +234,7 @@ function main() {
 						case sdk.areas.FrigidHighlands:
 						case sdk.areas.ArreatPlateau:
 						case sdk.areas.FrozenTundra:
-							chestLoc = getPresetUnit(me.area, 2, 397);
+							chestLoc = Game.getPresetObject(me.area, 397);
 
 							if (!chestLoc) {
 								break;

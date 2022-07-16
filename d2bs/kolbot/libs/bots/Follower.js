@@ -75,14 +75,14 @@ function Follower() {
 		}
 
 		if (unit.inTown) {
-			target = getUnit(2, "waypoint");
+			target = Game.getObject("waypoint");
 
 			if (target && getDistance(me, target) < 20) {
 				return 3;
 			}
 		}
 
-		target = getUnit(2, "portal");
+		target = Game.getObject("portal");
 
 		if (target) {
 			do {
@@ -111,7 +111,7 @@ function Follower() {
 
 		// Throne->Chamber
 		if (me.area === sdk.areas.ThroneofDestruction && area === sdk.areas.WorldstoneChamber) {
-			target = getUnit(2, 563);
+			target = Game.getObject(563);
 
 			if (target) {
 				Pather.usePortal(null, null, target);
@@ -162,7 +162,7 @@ function Follower() {
 
 			Town.move(NPC.Warriv);
 
-			npc = getUnit(1, 155);
+			npc = Game.getNPC(155);
 
 			if (npc) {
 				npc.openMenu();
@@ -177,7 +177,7 @@ function Follower() {
 
 			Town.move("palace");
 
-			npc = getUnit(1, 201);
+			npc = Game.getNPC(201);
 
 			if (npc) {
 				npc.openMenu();
@@ -186,7 +186,7 @@ function Follower() {
 
 			Town.move(NPC.Meshif);
 
-			npc = getUnit(1, 210);
+			npc = Game.getNPC(210);
 
 			if (npc) {
 				npc.openMenu();
@@ -202,7 +202,7 @@ function Follower() {
 			if (me.inTown) {
 				Town.move(NPC.Cain);
 
-				npc = getUnit(1, 245);
+				npc = Game.getNPC(245);
 
 				if (npc) {
 					npc.openMenu();
@@ -215,7 +215,7 @@ function Follower() {
 
 			delay(1500);
 
-			target = getUnit(2, 342);
+			target = Game.getObject(342);
 
 			if (target) {
 				Pather.moveTo(target.x - 3, target.y - 1);
@@ -231,7 +231,7 @@ function Follower() {
 
 			Town.move(NPC.Tyrael);
 
-			npc = getUnit(1, NPC.Tyrael);
+			npc = Game.getNPC(NPC.Tyrael);
 
 			if (npc) {
 				npc.openMenu();
@@ -597,7 +597,7 @@ function Follower() {
 
 			delay(rand(1, 3) * 500);
 
-			unit = getUnit(2, "waypoint");
+			unit = Game.getObject("waypoint");
 
 			if (unit) {
 				for (i = 0; i < 3; i += 1) {

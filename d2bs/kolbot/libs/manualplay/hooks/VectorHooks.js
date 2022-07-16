@@ -111,7 +111,7 @@ const VectorHooks = {
 			wpIDs = [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539];
 
 		for (i = 0; i < wpIDs.length; i += 1) {
-			preset = getPresetUnit(me.area, 2, wpIDs[i]);
+			preset = Game.getPresetObject(me.area, wpIDs[i]);
 
 			if (preset) {
 				return {
@@ -148,45 +148,45 @@ const VectorHooks = {
 		case 125: // Abadon
 		case 126: // Pit of Acheron
 		case 127: // Infernal Pit
-			unit = getPresetUnit(me.area, 2, 397);
+			unit = Game.getPresetObject(me.area, 397);
 			poi = {name: "SuperChest", action: {do: "openChest", id: 397}};
 
 			break;
 		case 115: // Glacial Trail
 		case 122: // Halls of Anguish
 		case 123: // Halls of Pain
-			unit = getPresetUnit(me.area, 2, 455);
+			unit = Game.getPresetObject(me.area, 455);
 			poi = {name: "SuperChest", action: {do: "openChest", id: 455}};
 
 			break;
 		case 3: // Cold Plains
-			unit = getPresetUnit(me.area, 5, 2);
+			unit = Game.getPresetStair(me.area, 2);
 
 			if (!unit) {
-				unit = getPresetUnit(me.area, 5, 3);
+				unit = Game.getPresetStair(me.area, 3);
 			}
 
 			name = "Cave Level 1";
 
 			break;
 		case 4: // Stony Field
-			unit = getPresetUnit(me.area, 1, 737);
+			unit = Game.getPresetMonster(me.area, 737);
 			poi = {name: "Cairn Stones", action: {do: "usePortal", id: 38}};
 
 			break;
 		case 5: // Dark Wood
-			unit = getPresetUnit(me.area, 2, 30);
+			unit = Game.getPresetObject(me.area, 30);
 			name = "Tree";
 
 			break;
 		case 6: // Black Marsh
-			unit = getPresetUnit(me.area, 5, 2);
+			unit = Game.getPresetStair(me.area, 2);
 
 			if (!unit) {
-				unit = getPresetUnit(me.area, 5, 3);
+				unit = Game.getPresetStair(me.area, 3);
 
 				if (!unit) {
-					unit = getPresetUnit(me.area, 5, 1);
+					unit = Game.getPresetStair(me.area, 1);
 				}
 			}
 
@@ -194,22 +194,22 @@ const VectorHooks = {
 
 			break;
 		case 8: // Den of Evil
-			unit = getPresetUnit(me.area, 1, 774);
+			unit = Game.getPresetMonster(me.area, 774);
 			name = "Corpsefire";
 
 			break;
 		case 17: // Bloodraven
-			unit = getPresetUnit(me.area, 1, 805);
+			unit = Game.getPresetMonster(me.area, 805);
 			name = "Bloodraven";
 
 			break;
 		case 25: // Countess
-			unit = getPresetUnit(me.area, 2, 580);
+			unit = Game.getPresetObject(me.area, 580);
 			name = "Countess";
 
 			break;
 		case 28: // Smith
-			unit = getPresetUnit(me.area, 2, 108);
+			unit = Game.getPresetObject(me.area, 108);
 			name = "Smith";
 
 			break;
@@ -224,22 +224,22 @@ const VectorHooks = {
 
 			break;
 		case 38: // Griswold
-			unit = getUnit(1, 365) ? getUnit(1, 365) : {x: 25163, y: 5170};
+			unit = Game.getMonster(365) ? Game.getMonster(365) : {x: 25163, y: 5170};
 			name = "Griswold";
 
 			break;
 		case 39: // Cow King
-			unit = getUnit(1, 743) ? getUnit(1, 743) : getPresetUnit(me.area, 1, 773);
+			unit = Game.getMonster(743) ? Game.getMonster(743) : Game.getPresetMonster(me.area, 773);
 			name = "Cow King";
 
 			break;
 		case 40: // Lut Gholein
-			unit = getPresetUnit(me.area, 5, 20);
+			unit = Game.getPresetStair(me.area, 20);
 			name = "Sewer's Level 1";
 
 			break;
 		case 49: // Sewers 3
-			unit = getPresetUnit(me.area, 2, 355);
+			unit = Game.getPresetObject(me.area, 355);
 			name = "Radament";
 
 			break;
@@ -249,22 +249,22 @@ const VectorHooks = {
 
 			break;
 		case 60: // Halls of the Dead 3
-			unit = getPresetUnit(me.area, 2, 354);
+			unit = Game.getPresetObject(me.area, 354);
 			poi = {name: "Cube", action: {do: "openChest", id: 354}};
 
 			break;
 		case 61: // Claw Viper Temple 2
-			unit = getPresetUnit(me.area, 2, 149);
+			unit = Game.getPresetObject(me.area, 149);
 			poi = {name: "Amulet", action: {do: "openChest", id: 149}};
 
 			break;
 		case 64: // Maggot Lair 3
-			unit = getPresetUnit(me.area, 2, 356);
+			unit = Game.getPresetObject(me.area, 356);
 			poi = {name: "Staff", action: {do: "openChest", id: 356}};
 
 			break;
 		case 74: // Arcane Sanctuary
-			unit = getPresetUnit(me.area, 2, 357);
+			unit = Game.getPresetObject(me.area, 357);
 			name = "Summoner";
 
 			break;
@@ -275,11 +275,11 @@ const VectorHooks = {
 		case 70:
 		case 71:
 		case 72:
-			unit = getPresetUnit(me.area, 2, 152);
+			unit = Game.getPresetObject(me.area, 152);
 			name = "Orifice";
 
 			if (!unit) {
-				unit = getPresetUnit(me.area, 2, 397);
+				unit = Game.getPresetObject(me.area, 397);
 				name = "SuperChest";
 			}
 
@@ -290,37 +290,37 @@ const VectorHooks = {
 
 			break;
 		case 78: // Flayer Jungle
-			unit = getPresetUnit(me.area, 2, 252);
+			unit = Game.getPresetObject(me.area, 252);
 			name = "Gidbinn";
 
 			break;
 		case 80: // Sewer's Level 1
-			unit = getPresetUnit(me.area, 5, 57);
+			unit = Game.getPresetStair(me.area, 57);
 			name = "Sewer's Level 1";
 
 			break;
 		case 85: // Spider Cavern
-			unit = getPresetUnit(me.area, 2, 407);
+			unit = Game.getPresetObject(me.area, 407);
 			poi = {name: "Eye", action: {do: "openChest", id: 407}};
 
 			break;
 		case 91: // Flayer Dungeon Level 3
-			unit = getPresetUnit(me.area, 2, 406);
+			unit = Game.getPresetObject(me.area, 406);
 			poi = {name: "Brain", action: {do: "openChest", id: 406}};
 
 			break;
 		case 93: // A3 Sewer's Level 2
-			unit = getPresetUnit(me.area, 2, 405);
+			unit = Game.getPresetObject(me.area, 405);
 			poi = {name: "Heart", action: {do: "openChest", id: 405}};
 
 			break;
 		case 94: // Ruined Temple
-			unit = getPresetUnit(me.area, 2, 193);
+			unit = Game.getPresetObject(me.area, 193);
 			poi = {name: "Lam Esen", action: {do: "openChest", id: 193}};
 
 			break;
 		case 83: // Travincal
-			unit = getPresetUnit(me.area, 2, 404);
+			unit = Game.getPresetObject(me.area, 404);
 			name = "Orb";
 
 			break;
@@ -330,17 +330,17 @@ const VectorHooks = {
 
 			break;
 		case 105: // Plains of Despair
-			unit = getPresetUnit(me.area, 1, 256);
+			unit = Game.getPresetMonster(me.area, 256);
 			name = "Izual";
 
 			break;
 		case 107: // River of Flame
-			unit = getPresetUnit(me.area, 2, 376);
+			unit = Game.getPresetObject(me.area, 376);
 			name = "Hephasto";
 
 			break;
 		case 108: // Chaos Sanctuary
-			unit = getPresetUnit(me.area, 2, 255);
+			unit = Game.getPresetObject(me.area, 255);
 			name = "Star";
 
 			break;
@@ -357,12 +357,12 @@ const VectorHooks = {
 		case 111: // Frigid Highlands
 		case 112: // Arreat Plateau
 		case 117: // Frozen Tundra
-			unit = getPresetUnit(me.area, 2, 60);
+			unit = Game.getPresetObject(me.area, 60);
 			poi = {name: "Hell Entrance", action: {do: "usePortal"}};
 
 			break;
 		case 114: // Frozen River
-			unit = getPresetUnit(me.area, 2, 460);
+			unit = Game.getPresetObject(me.area, 460);
 			name = "Frozen Anya";
 
 			break;
@@ -372,7 +372,7 @@ const VectorHooks = {
 
 			break;
 		case 124: // Halls of Vaught
-			unit = getPresetUnit(me.area, 2, 462);
+			unit = Game.getPresetObject(me.area, 462);
 			name = "Nihlathak";
 
 			break;
@@ -382,22 +382,22 @@ const VectorHooks = {
 
 			break;
 		case 132: // Worldstone Chamber
-			unit = getUnit(1, 544) ? getUnit(1, 544) : {x: 15134, y: 5923};
+			unit = Game.getMonster(544) ? Game.getMonster(544) : {x: 15134, y: 5923};
 			name = "Baal";
 
 			break;
 		case 133: // Matron's Den
-			unit = getPresetUnit(me.area, 2, 397);
+			unit = Game.getPresetObject(me.area, 397);
 			name = "Lilith";
 
 			break;
 		case 134: // Forgotten Sands
-			unit = getUnit(1, 708);
+			unit = Game.getMonster(708);
 			name = "Duriel";
 
 			break;
 		case 135: // Furnace of Pain
-			unit = getPresetUnit(me.area, 2, 397);
+			unit = Game.getPresetObject(me.area, 397);
 			name = "Izual";
 
 			break;

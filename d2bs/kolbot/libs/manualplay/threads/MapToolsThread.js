@@ -287,14 +287,14 @@ function main() {
 			} while (monster.getNext());
 		}
 
-		monster = gid ? getUnit(1, -1, -1, gid) : false;
+		monster = gid ? Game.getMonster(-1, -1, gid) : false;
 
 		return monster ? " to " + monster.name : "";
 	};
 
 	this.checkVipers = function () {
 		let owner,
-			monster = getUnit(1, 597);
+			monster = Game.getMonster(597);
 
 		if (monster) {
 			do {
@@ -313,7 +313,7 @@ function main() {
 
 	this.getIronGolem = function () {
 		let owner,
-			golem = getUnit(1, 291);
+			golem = Game.getMonster(291);
 
 		if (golem) {
 			do {

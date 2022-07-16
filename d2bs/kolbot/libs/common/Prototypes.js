@@ -359,7 +359,7 @@ Unit.prototype.use = function () {
 	if (checkQuantity) {
 		return this.getStat(sdk.stats.Quantity) < quantity;
 	} else {
-		return !(getUnit(4, -1, -1, gid));
+		return !(Game.getItem(-1, -1, gid));
 	}
 };
 

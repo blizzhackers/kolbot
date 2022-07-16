@@ -34,7 +34,7 @@ function Gamble() {
 				Town.needGamble() && (needGold = false);
 				Town.stash();
 
-				let gold = getUnit(4, 523, 3);
+				let gold = Game.getItem(523, 3);
 
 				if (!gold || !Pickit.canPick(gold)) {
 					break;

@@ -41,8 +41,8 @@ Pather.changeAct = function (act) {
 	!me.inTown && Town.goToTown();
 	
 	if (npc) {
-		npcUnit = getUnit(1, NPC[npc]);
-		wp = getUnit(2, "waypoint");
+		npcUnit = Game.getNPC(NPC[npc]);
+		wp = Game.getObject("waypoint");
 
 		if (Pather.accessToAct(act)
 			&& ((wp && !npcUnit)
@@ -65,7 +65,7 @@ Pather.changeAct = function (act) {
 			Town.move(NPC[npc]);
 			Packet.flash(me.gid);
 			delay(me.ping * 2 + 100);
-			npcUnit = getUnit(1, NPC[npc]);
+			npcUnit = Game.getNPC(NPC[npc]);
 		}
 	}
 
@@ -101,12 +101,12 @@ Pather.getWP = function (area, clearPath) {
 	area !== me.area && this.journeyTo(area);
 
 	for (let i = 0; i < wpIDs.length; i++) {
-		let preset = getPresetUnit(area, 2, wpIDs[i]);
+		let preset = Game.getPresetObject(area, wpIDs[i]);
 
 		if (preset) {
 			useTK ? this.moveNearUnit(preset, 20, clearPath) : this.moveToUnit(preset, 0, 0, clearPath);
 
-			let wp = getUnit(2, "waypoint");
+			let wp = Game.getObject("waypoint");
 
 			if (wp) {
 				for (let j = 0; j < 10; j++) {

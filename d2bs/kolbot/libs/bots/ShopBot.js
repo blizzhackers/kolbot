@@ -201,11 +201,11 @@ function ShopBot() {
 
 		if (!Pather.useWaypoint(wp)) return false;
 
-		let npc = this.npcs[name] || getUnit(1, name);
+		let npc = this.npcs[name] || Game.getNPC(name);
 
 		if (!npc || npc.distance > 5) {
 			Town.move(name);
-			npc = getUnit(1, name);
+			npc = Game.getNPC(name);
 		}
 
 		if (!npc) return false;
@@ -258,7 +258,7 @@ function ShopBot() {
 
 		if (me.inTown) {
 			let area = getArea(),
-				wp = getPresetUnit(me.area, 2, [119, 156, 237, 398, 429][me.act - 1]),
+				wp = Game.getPresetObject(me.area, [119, 156, 237, 398, 429][me.act - 1]),
 				wpX = wp.roomx * 5 + wp.x,
 				wpY = wp.roomy * 5 + wp.y,
 				redPortal = (getUnits(2, 60).sort((a, b) => a.distance - b.distance)).first(),

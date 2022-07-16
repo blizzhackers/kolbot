@@ -231,7 +231,7 @@ function runewordIngredient(item) {
 
 function pickItems() {
 	let items = [],
-		item = getUnit(4, -1, 3);
+		item = Game.getItem(-1, 3);
 
 	if (item) {
 		updateInfo();
@@ -381,7 +381,7 @@ function shopStuff(npcId, classids, amount) {
 
 		if (!Town.goToTown(2) || !Town.move(NPC.Fara)) throw new Error("Failed to get to NPC");
 
-		npc = getUnit(1, NPC.Fara);
+		npc = Game.getNPC(NPC.Fara);
 
 		break;
 	case "elzix":
@@ -391,9 +391,9 @@ function shopStuff(npcId, classids, amount) {
 		menuId = "Shop";
 
 		Town.goToTown(2);
-		!getUnit(1, NPC.Elzix) && Town.move(NPC.Elzix);
+		!Game.getNPC(NPC.Elzix) && Town.move(NPC.Elzix);
 
-		npc = getUnit(1, NPC.Elzix);
+		npc = Game.getNPC(NPC.Elzix);
 
 		break;
 	case "drognan":
@@ -404,7 +404,7 @@ function shopStuff(npcId, classids, amount) {
 
 		if (!Town.goToTown(2) || !Town.move(NPC.Drognan)) throw new Error("Failed to get to NPC");
 
-		npc = getUnit(1, NPC.Drognan);
+		npc = Game.getNPC(NPC.Drognan);
 
 		break;
 	case "ormus":
@@ -415,7 +415,7 @@ function shopStuff(npcId, classids, amount) {
 
 		if (!Town.goToTown(3) || !Town.move(NPC.Ormus)) throw new Error("Failed to get to NPC");
 
-		npc = getUnit(1, NPC.Ormus);
+		npc = Game.getNPC(NPC.Ormus);
 
 		break;
 	case "anya":
@@ -426,7 +426,7 @@ function shopStuff(npcId, classids, amount) {
 
 		if (!Town.goToTown(5) || !Town.move(NPC.Anya)) throw new Error("Failed to get to NPC");
 
-		npc = getUnit(1, NPC.Anya);
+		npc = Game.getNPC(NPC.Anya);
 
 		break;
 	case "malah":
@@ -437,7 +437,7 @@ function shopStuff(npcId, classids, amount) {
 
 		if (!Town.goToTown(5) || !Town.move(NPC.Malah)) throw new Error("Failed to get to NPC");
 
-		npc = getUnit(1, NPC.Malah);
+		npc = Game.getNPC(NPC.Malah);
 
 		break;
 	default:

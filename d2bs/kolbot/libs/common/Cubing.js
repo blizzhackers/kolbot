@@ -155,13 +155,13 @@ const Cubing = {
 		Pather.useWaypoint(57, true);
 		Precast.doPrecast(true);
 
-		if (Pather.moveToExit(60, true) && Pather.moveToPreset(me.area, 2, 354)) {
-			let chest = getUnit(2, 354);
+		if (Pather.moveToExit(60, true) && Pather.moveToPreset(me.area, sdk.unittype.Object, 354)) {
+			let chest = Game.getObject(354);
 
 			if (chest) {
 				Misc.openChest(chest);
 				Misc.poll(function () {
-					cube = getUnit(4, 549);
+					cube = Game.getItem(549);
 					return !!cube && Pickit.pickItem(cube);
 				}, 1000, 2000);
 			}

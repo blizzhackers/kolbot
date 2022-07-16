@@ -48,7 +48,7 @@ const ShrineHooks = {
 			}
 		}
 
-		let shrine = getUnit(2, "shrine");
+		let shrine = Game.getObject("shrine");
 
 		if (shrine) {
 			do {

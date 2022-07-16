@@ -121,7 +121,7 @@ Misc.talkToTyrael = function () {
 	Pather.moveTo(22578, 15618);
 	Pather.moveTo(22576, 15591); // tyreal
 
-	let tyrael = getUnit(1, NPC.Tyrael);
+	let tyrael = Game.getNPC(NPC.Tyrael);
 
 	if (tyrael) {
 		for (let i = 0; i < 3; i++) {

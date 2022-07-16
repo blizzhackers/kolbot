@@ -458,7 +458,7 @@ const ActionHooks = {
 			break;
 		}
 
-		let cowPortal = me.area === 1 ? getUnit(2, 60) : false;
+		let cowPortal = me.area === 1 ? Game.getObject(60) : false;
 
 		if (cowPortal && cowPortal.objtype === 39) {
 			this.hooks.push({
@@ -808,7 +808,7 @@ const ActionHooks = {
 		case 133:
 		// Furnace
 		case 135:
-			bossX = getPresetUnit(me.area, 2, 397);
+			bossX = Game.getPresetObject(me.area, 397);
 			bossX && (entrance = this.areaInfo[me.area][bossX.x]);
 		// Tristram
 		case 136:
@@ -903,7 +903,7 @@ const ActionHooks = {
 	},
 
 	getDiabloSeals: function (seal) {
-		let unit = getPresetUnit(108, 2, seal);
+		let unit = Game.getPresetObject(108, seal);
 
 		if (unit) {
 			if (unit instanceof PresetUnit) {
