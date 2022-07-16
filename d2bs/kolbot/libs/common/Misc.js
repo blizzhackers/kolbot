@@ -5,7 +5,7 @@
 *
 */
 
-includeIfNotIncluded("Item.js");
+includeIfNotIncluded("common/Item.js");
 
 const Skill = {
 	usePvpRange: false,
@@ -668,6 +668,11 @@ const Skill = {
 			throw new Error("Unit.cast: Must supply a skill ID");
 		}
 
+		if (skillId === sdk.skills.Telekinesis && typeof x === "object" && Packet.telekinesis(x)) {
+			delay(250);
+			return true;
+		}
+
 		hand === undefined && (hand = this.getHand(skillId));
 		x === undefined && (x = me.x);
 		y === undefined && (y = me.y);
@@ -1115,7 +1120,7 @@ const Misc = {
 				}
 			} else {
 				[(unit.x + 1), (unit.y + 2)].distance > 5 && Pather.moveTo(unit.x + 1, unit.y + 2, 3);
-				(specialChest || i > 2) ? Misc.click(0, 0, unit) : sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
+				(specialChest || i > 2) ? Misc.click(0, 0, unit) : Packet.entityInteract(unit);
 			}
 
 			if (Misc.poll(() => unit.mode, 1000, 50)) {
@@ -2167,7 +2172,7 @@ const Misc = {
 	},
 
 	checkQuest: function (id, state) {
-		sendPacket(1, 0x40);
+		Packet.questRefresh();
 		delay(500);
 
 		return me.getQuest(id, state);
@@ -2308,7 +2313,7 @@ const Packet = {
 
 		for (let i = 0; i < 5; i += 1) {
 			unit.distance > 4 && Pather.moveToUnit(unit);
-			sendPacket(1, 0x13, 4, 1, 4, unit.gid);
+			Packet.entityInteract(unit);
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 5000) {
@@ -2327,7 +2332,7 @@ const Packet = {
 
 			sendPacket(1, 0x2f, 4, 1, 4, unit.gid);
 			delay(pingDelay + 1 * 2);
-			sendPacket(1, 0x30, 4, 1, 4, unit.gid);
+			Packet.cancelNPC(unit);
 			delay(pingDelay + 1 * 2);
 			this.flash(me.gid);
 		}
@@ -2534,6 +2539,30 @@ const Packet = {
 		return false;
 	},
 
+	click: function (who) {
+		if (!who || !copyUnit(who).x) return false;
+		sendPacket(1, 0x16, 4, 0x4, 4, who.gid, 4, 0);
+		return true;
+	},
+
+	entityInteract: function (who) {
+		if (!who || !copyUnit(who).x) return false;
+		sendPacket(1, 0x13, 4, who.type, 4, who.gid);
+		return true;
+	},
+
+	cancelNPC: function (who) {
+		if (!who || !copyUnit(who).x) return false;
+		sendPacket(1, 0x30, 4, who.type, 4, who.gid);
+		return true;
+	},
+
+	useBeltItemForMerc: function (who) {
+		if (!who) return false;
+		sendPacket(1, 0x26, 4, who.gid, 4, 1, 4, 0);
+		return true;
+	},
+
 	castSkill: function (hand, wX, wY) {
 		hand = (hand === 0) ? 0x0c : 0x05;
 		sendPacket(1, hand, 2, wX, 2, wY);
@@ -2542,6 +2571,24 @@ const Packet = {
 	unitCast: function (hand, who) {
 		hand = (hand === 0) ? 0x11 : 0x0a;
 		sendPacket(1, hand, 4, who.type, 4, who.gid);
+	},
+
+	telekinesis: function (who) {
+		if (!who || !Skill.setSkill(sdk.skills.Telekinesis, 0)) return false;
+		sendPacket(1, 0x11, 4, who.type, 4, who.gid);
+		return true;
+	},
+
+	enchant: function (who) {
+		if (!who || !Skill.setSkill(sdk.skills.Enchant, 0)) return false;
+		sendPacket(1, 0x11, 4, who.type, 4, who.gid);
+		return true;
+	},
+
+	teleport: function (wX, wY) {
+		if (![wX, wY].every(n => typeof n === "number") || !Skill.setSkill(sdk.skills.Teleport, 0)) return false;
+		sendPacket(1, 0x0C, 2, wX, 2, wY);
+		return true;
 	},
 
 	// moveNPC: function (npc, dwX, dwY) { // commented the patched packet
@@ -2569,6 +2616,10 @@ const Packet = {
 		}
 
 		return false;
+	},
+
+	questRefresh: function () {
+		sendPacket(1, 0x40);
 	},
 
 	flash: function (gid, wait = 0) {

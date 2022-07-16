@@ -242,10 +242,10 @@ function main() {
 				if (type < 3) {
 					potion.interact();
 				} else {
-					sendPacket(1, 0x26, 4, potion.gid, 4, 1, 4, 0);
+					Packet.useBeltItemForMerc(potion);
 				}
 			} catch (e) {
-				console.errorReport(e);
+				console.error(e);
 			}
 
 			timerLastDrink[type] = getTickCount();
@@ -366,7 +366,7 @@ function main() {
 			break;
 		case sdk.keys.Delete: // quit current game
 			this.exit();
-			
+
 			break;
 		case sdk.keys.End: // stop profile and log character
 			MuleLogger.logChar();
@@ -668,7 +668,7 @@ function main() {
 
 				while (getTickCount() - tick < (Config.DCloneWaitTime * 60 * 1000)) {
 					if (getTickCount() - idleTick > 0) {
-						sendPacket(1, 0x40);
+						Packet.questRefresh();
 						idleTick += rand(1200, 1500) * 1000;
 						let timeStr = Time.format(idleTick - getTickCount());
 						me.overhead("Diablo Walks the Earth! - Next packet in: (" + timeStr + ")");

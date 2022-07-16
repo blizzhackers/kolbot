@@ -7,10 +7,10 @@
 */
 
 function ControlBot() {
-	let command, nick,
-		startTime = getTickCount(),
-		shitList = [],
-		greet = [];
+	let command, nick;
+	let startTime = getTickCount();
+	let shitList = [];
+	let greet = [];
 
 	let controlCommands = ["help", "timeleft", "cows", "wps", "chant", "bo"];
 	let commandDesc = {
@@ -68,9 +68,9 @@ function ControlBot() {
 			return false;
 		}
 
-		let unit = getUnit(0, nick);
+		let unit = Game.getPlayer(nick);
 
-		if (getDistance(me, unit) > 35) {
+		if (unit.distance > 35) {
 			say("Get closer.");
 
 			return false;
@@ -84,7 +84,7 @@ function ControlBot() {
 				say("Wait for me at waypoint.");
 				Town.goToTown(sdk.areas.townOf(partyUnit.area));
 
-				unit = getUnit(0, nick);
+				unit = Game.getPlayer(nick);
 			} else {
 				say("You need to be in one of the towns.");
 
@@ -96,14 +96,13 @@ function ControlBot() {
 			do {
 				// player is alive
 				if (!unit.dead) {
-					if (getDistance(me, unit) >= 35) {
+					if (unit.distance >= 35) {
 						say("You went too far away.");
 
 						return false;
 					}
 
-					Skill.setSkill(sdk.skills.Enchant, 0);
-					sendPacket(1, 0x11, 4, unit.type, 4, unit.gid);
+					Packet.enchant(unit);
 					delay(500);
 				}
 			} while (unit.getNext());
@@ -117,8 +116,7 @@ function ControlBot() {
 			do {
 				// merc or any other owned unit
 				if (unit.getParent() && unit.getParent().name === nick) {
-					Skill.setSkill(sdk.skills.Enchant, 0);
-					sendPacket(1, 0x11, 4, unit.type, 4, unit.gid);
+					Packet.enchant(unit);
 					delay(500);
 				}
 			} while (unit.getNext());
@@ -151,7 +149,7 @@ function ControlBot() {
 			return false;
 		}
 
-		let unit = getUnit(0, nick);
+		let unit = Game.getPlayer(nick);
 
 		if (unit && unit.distance > 15) {
 			say("Get closer.");
@@ -183,26 +181,24 @@ function ControlBot() {
 		if (!Config.ControlBot.Chant.Enchant) return false;
 
 		let chanted = [];
-		let unit = getUnit(sdk.unittype.Player);
+		let unit = Game.getPlayer();
 
 		if (unit) {
 			do {
-				if (unit.name !== me.name && !unit.dead && shitList.indexOf(unit.name) === -1 && Misc.inMyParty(unit.name) && !unit.getState(16) && getDistance(me, unit) <= 40) {
-					Skill.setSkill(sdk.skills.Enchant, 0);
-					sendPacket(1, 0x11, 4, unit.type, 4, unit.gid);
+				if (unit.name !== me.name && !unit.dead && shitList.indexOf(unit.name) === -1 && Misc.inMyParty(unit.name) && !unit.getState(16) && unit.distance <= 40) {
+					Packet.enchant(unit);
 					delay(500);
 					chanted.push(unit.name);
 				}
 			} while (unit.getNext());
 		}
 
-		unit = getUnit(sdk.unittype.Monster);
+		unit = Game.getMonster();
 
 		if (unit) {
 			do {
-				if (unit.getParent() && chanted.indexOf(unit.getParent().name) > -1 && !unit.getState(16) && getDistance(me, unit) <= 40) {
-					Skill.setSkill(sdk.skills.Enchant, 0);
-					sendPacket(1, 0x11, 4, unit.type, 4, unit.gid);
+				if (unit.getParent() && chanted.includes(unit.getParent().name) && !unit.getState(16) && unit.distance <= 40) {
+					Packet.enchant(unit);
 					delay(500);
 				}
 			} while (unit.getNext());
@@ -212,20 +208,20 @@ function ControlBot() {
 	};
 
 	this.getLeg = function () {
-		let leg, gid, wrongLeg;
-
 		if (me.getItem(sdk.items.quest.WirtsLeg)) {
 			return me.getItem(sdk.items.quest.WirtsLeg);
 		}
 
+		let leg, gid, wrongLeg;
+
 		if (!Config.ControlBot.Cows.GetLeg) {
-			leg = getUnit(4, sdk.items.quest.WirtsLeg);
+			leg = Game.getItem(sdk.items.quest.WirtsLeg);
 
 			if (leg) {
 				do {
-					if (leg.name.indexOf("ÿc1") > -1) {
+					if (leg.name.includes("ÿc1")) {
 						wrongLeg = true;
-					} else if (getDistance(me, leg) <= 15) {
+					} else if (leg.distance <= 15) {
 						gid = leg.gid;
 						Pickit.pickItem(leg);
 
@@ -248,13 +244,13 @@ function ControlBot() {
 
 		Pather.moveTo(25048, 5177);
 
-		let wirt = getUnit(2, 268);
+		let wirt = Game.getObject(268);
 
 		for (let i = 0; i < 8; i += 1) {
 			wirt.interact();
 			delay(500);
 
-			leg = getUnit(4, sdk.items.quest.WirtsLeg);
+			leg = Game.getItem(sdk.items.quest.WirtsLeg);
 
 			if (leg) {
 				gid = leg.gid;
@@ -456,7 +452,7 @@ function ControlBot() {
 				say(Pather.getAreaName(me.area) + " TP up");
 
 				for (let timeout = 0; timeout < 20; timeout++) {
-					if (getUnit(0, nick)) {
+					if (Game.getPlayer(nick)) {
 						break;
 					}
 
@@ -486,8 +482,8 @@ function ControlBot() {
 	};
 
 	this.checkHostiles = function () {
-		let rval = false,
-			party = getParty();
+		let rval = false;
+		let party = getParty();
 
 		if (party) {
 			do {

@@ -284,7 +284,7 @@ function Questing () {
 
 		// talk to anya, then cancel her boring speech
 		Pather.moveToUnit(anya);
-		sendPacket(1, 0x13, 4, 0x2, 4, anya.gid);
+		Packet.entityInteract(anya);
 		delay(300);
 		me.cancel();
 

@@ -46,7 +46,7 @@ function Gamble() {
 			}
 
 			if (needGold && getTickCount() - idleTick > 0) {
-				sendPacket(1, 0x40);
+				Packet.questRefresh();
 				idleTick += rand(1200, 1500) * 1000;
 			}
 

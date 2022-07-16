@@ -296,7 +296,7 @@ const Pickit = {
 			// fastPick check? should only pick items if surrounding monsters have been cleared or if fastPick is active
 			// note: clear of surrounding monsters of the spectype we are set to clear
 			if (stats.useTk && me.mp > tkMana) {
-				Skill.setSkill(sdk.skills.Telekinesis, 0) && Packet.unitCast(0, item);
+				Packet.telekinesis(item);
 			} else {
 				if (item.distance > (Config.FastPick || i < 1 ? 6 : 4) || checkCollision(me, item, 0x1)) {
 					if (!Pather.moveToUnit(item)) {
@@ -305,7 +305,7 @@ const Pickit = {
 				}
 
 				// use packet first, if we fail and not using fast pick use click
-				(Config.FastPick || i < 1) ? sendPacket(1, 0x16, 4, 0x4, 4, gid, 4, 0) : Misc.click(0, 0, item);
+				(Config.FastPick || i < 1) ? Packet.click(item) : Misc.click(0, 0, item);
 			}
 
 			let tick = getTickCount();

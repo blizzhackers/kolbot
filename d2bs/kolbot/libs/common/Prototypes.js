@@ -117,7 +117,7 @@ Unit.prototype.openMenu = function (addDelay) {
 
 		sendPacket(1, 0x2f, 4, 1, 4, this.gid);
 		delay(pingDelay * 2 + 1);
-		sendPacket(1, 0x30, 4, 1, 4, this.gid);
+		Packet.cancelNPC(this);
 		delay(pingDelay * 2 + 1);
 		Packet.flash(me.gid);
 	}

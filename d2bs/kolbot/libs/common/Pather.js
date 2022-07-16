@@ -585,10 +585,11 @@ const Pather = {
 	// does this need a validLocation check? - maybe if we fail once check the spot
 	teleportTo: function (x, y, maxRange = 5) {
 		for (let i = 0; i < 3; i += 1) {
-			Config.PacketCasting > 0 ? Skill.setSkill(sdk.skills.Teleport, 0) && Packet.castSkill(0, x, y) : Skill.cast(sdk.skills.Teleport, 0, x, y);
+			Config.PacketCasting > 0 ? Packet.teleport(x, y) : Skill.cast(sdk.skills.Teleport, 0, x, y);
 			let tick = getTickCount();
+			let pingDelay = i === 0 ? 150 : me.getPingDelay();
 
-			while (getTickCount() - tick < Math.max(500, me.ping * 2 + 200)) {
+			while (getTickCount() - tick < Math.max(500, pingDelay * 2 + 200)) {
 				if ([x, y].distance < maxRange) {
 					return true;
 				}
@@ -815,7 +816,7 @@ const Pather = {
 			if (unit && !checkCollision(me, unit, 0x5)) {
 				try {
 					for (let i = 0; i < 5; i++) {
-						i < 3 ? sendPacket(1, 0x13, 4, unit.type, 4, unit.gid) : Misc.click(0, 0, unit);
+						i < 3 ? Packet.entityInteract(unit) : Misc.click(0, 0, unit);
 
 						if (unit.mode) {
 							brokeABarrel = true;
@@ -1130,7 +1131,7 @@ const Pather = {
 			unit.distance > 5 && this.moveToUnit(unit);
 
 			delay(300);
-			sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
+			Packet.entityInteract(unit);
 
 			if (Misc.poll(() => unit.mode !== 0, 2000, 60)) {
 				delay(100);
@@ -1186,7 +1187,7 @@ const Pather = {
 			delay(300);
 			type === sdk.unittype.Stairs
 				? Misc.click(0, 0, unit)
-				: usetk && unit.distance > 5 ? Skill.cast(sdk.skills.Telekinesis, 0, unit) : sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
+				: usetk && unit.distance > 5 ? Skill.cast(sdk.skills.Telekinesis, 0, unit) : Packet.entityInteract(unit);
 			delay(300);
 
 			let tick = getTickCount();
@@ -1264,7 +1265,7 @@ const Pather = {
 			}
 
 			delay(300);
-			type === 5 ? Misc.click(0, 0, unit) : usetk && unit.distance > 5 ? Skill.cast(sdk.skills.Telekinesis, 0, unit) : sendPacket(1, 0x13, 4, unit.type, 4, unit.gid);
+			type === 5 ? Misc.click(0, 0, unit) : usetk && unit.distance > 5 ? Skill.cast(sdk.skills.Telekinesis, 0, unit) : Packet.entityInteract(unit);
 			delay(300);
 
 			let tick = getTickCount();
@@ -1584,7 +1585,7 @@ const Pather = {
 						portal.distance > 5 && this.moveToUnit(portal);
 
 						if (getTickCount() - this.lastPortalTick > 2500) {
-							i < 2 ? sendPacket(1, 0x13, 4, 0x2, 4, portal.gid) : Misc.click(0, 0, portal);
+							i < 2 ? Packet.entityInteract(portal) : Misc.click(0, 0, portal);
 							!!redPortal && delay(150);
 						} else {
 							let timeTillNextPortal = Math.max(3, Math.round(2500 - (getTickCount() - this.lastPortalTick)));

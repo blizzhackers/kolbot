@@ -17,7 +17,7 @@ const ClassAttack = {
 			print("towncheck");
 
 			if (Town.visitTown(!!needRepair.length)) {
-				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
+				if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
 					return 1; // lost reference to the mob we were attacking
 				}
 			}

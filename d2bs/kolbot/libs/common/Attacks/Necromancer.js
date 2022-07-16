@@ -13,7 +13,7 @@ const ClassAttack = {
 
 	setArmySize: function () {
 		this.maxSkeletons = Config.Skeletons === "max" ? Skill.getMaxSummonCount(sdk.skills.RaiseSkeleton) : Config.Skeletons;
-		this.SkeletonMages = Config.SkeletonMages === "max" ? Skill.getMaxSummonCount(sdk.skills.RaiseSkeletalMage) : Config.SkeletonMages;
+		this.maxMages = Config.SkeletonMages === "max" ? Skill.getMaxSummonCount(sdk.skills.RaiseSkeletalMage) : Config.SkeletonMages;
 		this.maxRevives = Config.Revives === "max" ? Skill.getMaxSummonCount(sdk.skills.Revive) : Config.Revives;
 	},
 
@@ -138,7 +138,7 @@ const ClassAttack = {
 			print("mercwatch");
 
 			if (Town.visitTown()) {
-				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
+				if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
 					return 1; // lost reference to the mob we were attacking
 				}
 			}
@@ -236,7 +236,7 @@ const ClassAttack = {
 			while (unit.attackable) {
 				if (Misc.townCheck()) {
 					if (!unit || !copyUnit(unit).x) {
-						unit = Misc.poll(() => getUnit(1, -1, -1, gid), 1000, 80);
+						unit = Misc.poll(() => Game.getMonster(-1, -1, gid), 1000, 80);
 					}
 				}
 
@@ -367,7 +367,7 @@ const ClassAttack = {
 		this.setArmySize();
 
 		for (let i = 0; i < 3; i += 1) {
-			let corpse = getUnit(1, -1, 12);
+			let corpse = Game.getMonster(-1, 12);
 			let corpseList = [];
 
 			if (corpse) {
@@ -382,6 +382,7 @@ const ClassAttack = {
 			while (corpseList.length > 0) {
 				corpse = corpseList.shift();
 
+				// should probably have a way to priortize which ones we summon first
 				if (me.getMinionCount(sdk.minions.Skeleton) < this.maxSkeletons) {
 					if (!Skill.cast(sdk.skills.RaiseSkeleton, 0, corpse)) {
 						return false;
@@ -447,7 +448,7 @@ const ClassAttack = {
 
 		let corpseList = [];
 		let range = Math.floor((me.getSkill(Config.ExplodeCorpses, 1) + 7) / 3);
-		let corpse = getUnit(1, -1, 12);
+		let corpse = Game.getMonster(-1, 12);
 
 		if (corpse) {
 			do {
@@ -499,7 +500,7 @@ const ClassAttack = {
 	},
 
 	checkCorpseNearMonster: function (monster, range) {
-		let corpse = getUnit(1, -1, 12);
+		let corpse = Game.getMonster(-1, 12);
 
 		// Assume CorpseExplosion if no range specified
 		range === undefined && (range = Math.floor((me.getSkill(Config.ExplodeCorpses, 1) + 7) / 3));

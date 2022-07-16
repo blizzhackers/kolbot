@@ -62,7 +62,7 @@ function ShopBot() {
 		let interactedNPC = getInteractedNPC();
 
 		if (interactedNPC && interactedNPC.name !== npc.name) {
-			sendPacket(1, 0x30, 4, interactedNPC.type, 4, interactedNPC.gid);
+			Packet.cancelNPC(interactedNPC);
 			me.cancel();
 		}
 
@@ -72,7 +72,7 @@ function ShopBot() {
 			npc.distance > 5 && Pather.walkTo(npc.x, npc.y);
 
 			if (!getUIFlag(0x08)) {
-				sendPacket(1, 0x13, 4, 1, 4, npc.gid);
+				Packet.entityInteract(npc);
 				sendPacket(1, 0x2f, 4, 1, 4, npc.gid);
 			}
 

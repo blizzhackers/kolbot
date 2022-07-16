@@ -15,7 +15,7 @@ const ClassAttack = {
 
 			if (Town.visitTown()) {
 				// lost reference to the mob we were attacking
-				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
+				if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
 					return 1;
 				}
 			}
@@ -89,7 +89,7 @@ const ClassAttack = {
 			while (unit.attackable) {
 				if (Misc.townCheck()) {
 					if (!unit || !copyUnit(unit).x) {
-						unit = Misc.poll(() => getUnit(1, -1, -1, gid), 1000, 80);
+						unit = Misc.poll(() => Game.getMonster(-1, -1, gid), 1000, 80);
 					}
 				}
 
