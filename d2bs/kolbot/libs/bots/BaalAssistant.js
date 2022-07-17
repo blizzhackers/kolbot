@@ -94,7 +94,7 @@ function BaalAssistant() {
 	const Worker = require('../modules/Worker');
 
 	if (Leader) {
-		if (!Misc.poll(() => Misc.inMyParty(Leader), 30e3, 1000)) throw new Error("BaalAssistant: Leader not partied");
+		if (!Misc.poll(() => Misc.inMyParty(Leader), Time.seconds(30), 1000)) throw new Error("BaalAssistant: Leader not partied");
 	}
 
 	let killLeaderTracker = false;

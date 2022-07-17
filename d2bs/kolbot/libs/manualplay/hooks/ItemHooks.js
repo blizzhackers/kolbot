@@ -1,9 +1,11 @@
-/*
-*	@filename	ItemHooks.js
-*	@author		theBGuy
-*	@desc		Item hooks for MapThread
+/**
+*  @filename    ItemHooks.js
+*  @author      theBGuy
+*  @desc        Item hooks for MapThread
+*
 */
 
+// todo - clean up all the map stuff
 const ItemHooks = {
 	enabled: true,
 	pickitEnabled: false,
@@ -197,21 +199,27 @@ const ItemHooks = {
 		let item = Game.getItem();
 
 		if (item) {
-			do {
-				if (item.area === ActionHooks.currArea && [2, 3].includes(item.mode) && (item.quality >= 4 || ([2, 3].includes(item.quality) && !this.ignoreItemTypes.includes(item.itemType)))) {
-					if (this.pickitEnabled) {
-						if ([0, 4].indexOf(Pickit.checkItem(item).result) === -1) {
+			try {
+				do {
+					if (item.area === ActionHooks.currArea && [2, 3].includes(item.mode)
+						&& (item.quality >= sdk.itemquality.Magic || ((item.normal || item.superior) && !this.ignoreItemTypes.includes(item.itemType)))) {
+						if (this.pickitEnabled) {
+							if ([Pickit.result.UNWANTED, Pickit.result.TRASH].indexOf(Pickit.checkItem(item).result) === -1) {
+								!this.getHook(item) && this.add(item);
+							}
+						} else {
 							!this.getHook(item) && this.add(item);
 						}
-					} else {
-						!this.getHook(item) && this.add(item);
-					}
 
-					this.getHook(item) && this.update();
-				} else {
-					this.remove(item);
-				}
-			} while (item.getNext());
+						this.getHook(item) && this.update();
+					} else {
+						this.remove(item);
+					}
+				} while (item.getNext());
+			} catch (e) {
+				console.error(e);
+				this.flush();
+			}
 		}
 	},
 
@@ -239,22 +247,22 @@ const ItemHooks = {
 
 	newHook: function (item) {
 		let color = 0, code = "", arr = [], name = [], vector = [];
-		let eth = (item.getFlag(0x400000) ? "Eth: " : "");
+		let eth = (item.ethereal ? "Eth: " : "");
 
 		switch (item.quality) {
-		case 2:
-		case 3:
+		case sdk.itemquality.Normal:
+		case sdk.itemquality.Superior:
 			switch (item.itemType) {
-			case 39:
+			case sdk.itemtype.Quest:
 				color = 0x9A;
 				code += (!!this.itemCodeByClassId[item.classid] ? this.itemCodeByClassId[item.classid] : "ÿc8" + item.fname);
 
 				break;
-			case 74:
-				if (item.classid >= 635) {
+			case sdk.itemtype.Rune:
+				if (item.classid >= sdk.items.runes.Vex) {
 					color = 0x9B;
 					code = "ÿc;" + item.fname;
-				} else if (item.classid >= 626) {
+				} else if (item.classid >= sdk.items.runes.Lum) {
 					color = 0x9A;
 					code = "ÿc8" + item.fname;
 				} else {
@@ -272,7 +280,7 @@ const ItemHooks = {
 					color = 0x20;
 					code = "ÿc0" + (item.sockets > 0 ? "[" + item.sockets + "]" : "");
 					code += this.getName(item);
-					item.itemType === 70 && (code += "[R: " + item.getStat(39) + "]");
+					item.itemType === sdk.itemtype.AuricShields && (code += "[R: " + item.getStat(sdk.stats.FireResist) + "]");
 					code += "(" + item.ilvl + ")";
 				}
 
@@ -280,14 +288,14 @@ const ItemHooks = {
 			}
 
 			break;
-		case 5: 	// Set
-		case 7: 	// Unique
+		case sdk.itemquality.Set:
+		case sdk.itemquality.Unique:
 			({color, code} = this.itemColorCode[item.quality]);
 
 			if (!this.itemCodeByClassId[item.classid]) {
 				switch (item.classid) {
-				case 522: 	// Amulet's
-				case 520: 	// Ring's
+				case sdk.items.Ring:
+				case sdk.items.Amulet:
 					code += item.name + "(" + item.ilvl + ")";
 					
 					break;
@@ -301,8 +309,8 @@ const ItemHooks = {
 			}
 
 			break;
-		case 4: 	// Magic
-		case 6: 	// Rare
+		case sdk.itemquality.Magic:
+		case sdk.itemquality.Rare:
 			if (item.name) {
 				({color, code} = this.itemColorCode[item.quality]);
 

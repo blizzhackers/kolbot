@@ -204,7 +204,7 @@ const VectorHooks = {
 
 			break;
 		case 25: // Countess
-			unit = Game.getPresetObject(me.area, 580);
+			unit = Game.getPresetObject(me.area, sdk.units.objects.SuperChest);
 			name = "Countess";
 
 			break;

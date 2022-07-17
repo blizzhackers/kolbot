@@ -15,7 +15,7 @@ function Summoner () {
 			if (!Pather.usePortal(null)) throw new Error("Failed to move to Fire Eye");
 			Attack.clear(15, 0, getLocaleString(sdk.locale.monsters.FireEye));
 		} catch (e) {
-			console.errorReport(e);
+			console.error(e);
 		}
 	}
 

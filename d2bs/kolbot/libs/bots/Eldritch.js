@@ -16,7 +16,7 @@ function Eldritch() {
 	try {
 		// FrigidHighlands returns invalid size with getBaseStat('leveldefs', 111, ['SizeX', 'SizeX(N)', 'SizeX(H)'][me.diff]);
 		// Could this be causing crashes here?
-		if (Config.Eldritch.OpenChest && Pather.moveNearPreset(sdk.areas.FrigidHighlands, sdk.unittype.Object, sdk.units.FrigidHighlandsChest, 10)) {
+		if (Config.Eldritch.OpenChest && Pather.moveNearPreset(sdk.areas.FrigidHighlands, sdk.unittype.Object, sdk.units.LargeSparklyChest, 10)) {
 			Misc.openChest(sdk.units.FrigidHighlandsChest) && Pickit.pickItems();
 			// check distance from current location to shenk and if far tp to town and use wp instead
 			[x, y].distance > 120 && Town.goToTown() && Pather.useWaypoint(sdk.areas.FrigidHighlands);

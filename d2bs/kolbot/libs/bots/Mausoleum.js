@@ -21,12 +21,12 @@ function Mausoleum() {
 	try {
 		Pather.moveToExit(sdk.areas.Mausoleum, true) && Attack.clearLevel(Config.ClearType);
 	} catch (e) {
-		console.errorReport(e);
+		console.error(e);
 	}
 
 	if (Config.Mausoleum.ClearCrypt) {
 		// Crypt exit is... awkward
-		if (!(Pather.moveToExit(sdk.areas.BurialGrounds, true) && Pather.moveToPreset(sdk.areas.BurialGrounds, 5, 6) && Pather.moveToExit(sdk.areas.Crypt, true))) {
+		if (!(Pather.moveToExit(sdk.areas.BurialGrounds, true) && Pather.moveToPreset(sdk.areas.BurialGrounds, sdk.unittype.Stairs, 6) && Pather.moveToExit(sdk.areas.Crypt, true))) {
 			throw new Error("Failed to move to Crypt");
 		}
 

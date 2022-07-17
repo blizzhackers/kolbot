@@ -54,7 +54,7 @@ const MuleLogger = {
 				delay(1000);
 
 				if ((getTickCount() - tick) > 0) {
-					sendPacket(1, 0x40); // quest status refresh, working as anti-idle
+					Packet.questRefresh(); // quest status refresh, working as anti-idle
 					tick += rand(1500, 1750) * 1000;
 				}
 			}
@@ -80,7 +80,6 @@ const MuleLogger = {
 	load: function (hash) {
 		let filename = "data/secure/" + hash + ".txt";
 		if (!FileTools.exists(filename)) throw new Error("File " + filename + " does not exist!");
-
 		return FileTools.readText(filename);
 	},
 
@@ -101,8 +100,8 @@ const MuleLogger = {
 			include("common/util.js");
 		}
 
-		let header = "",
-			name = unit.itemType + "_" + unit.fname.split("\n").reverse().join(" ").replace(/(y|ÿ)c[0-9!"+<:;.*]|\/|\\/g, "").trim();
+		let header = "";
+		let name = unit.itemType + "_" + unit.fname.split("\n").reverse().join(" ").replace(/(y|ÿ)c[0-9!"+<:;.*]|\/|\\/g, "").trim();
 
 		let desc = Misc.getItemDesc(unit, logIlvl) + "$" + unit.gid + ":" + unit.classid + ":" + unit.location + ":" + unit.x + ":" + unit.y + (unit.getFlag(0x400000) ? ":eth" : "");
 		let color = unit.getColor();
@@ -111,7 +110,7 @@ const MuleLogger = {
 
 		if (sock.length) {
 			for (let i = 0; i < sock.length; i += 1) {
-				if (sock[i].itemType === 58) {
+				if (sock[i].itemType === sdk.itemtype.Jewel) {
 					desc += "\n\n";
 					desc += Misc.getItemDesc(sock[i], logIlvl);
 				}

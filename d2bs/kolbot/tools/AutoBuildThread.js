@@ -17,12 +17,12 @@ js_strict(true);
 Config.init(); // includes libs/common/AutoBuild.js
 
 const debug = !!Config.AutoBuild.DebugMode;
-const SPEND_POINTS 	= true;		// For testing, it actually allows skill and stat point spending.
+const SPEND_POINTS 	= true; // For testing, it actually allows skill and stat point spending.
 const STAT_ID_TO_NAME =	[
-	getLocaleString(4060),		// Strength
-	getLocaleString(4069),		// Energy
-	getLocaleString(4062),		// Dexterity
-	getLocaleString(4066)		// Vitality
+	getLocaleString(sdk.locale.text.Strength),
+	getLocaleString(sdk.locale.text.Energy),
+	getLocaleString(sdk.locale.text.Dexterity),
+	getLocaleString(sdk.locale.text.Vitality)
 ];
 let	prevLevel = me.charlvl;
 
@@ -53,24 +53,24 @@ function skillInValidRange (id) {
 function gainedLevels () { return me.charlvl - prevLevel; }
 
 function canSpendPoints () {
-	let unusedStatPoints = me.getStat(4);
+	let unusedStatPoints = me.getStat(sdk.stats.StatPts);
 	let haveUnusedStatpoints = unusedStatPoints >= 5;	// We spend 5 stat points per level up
-	let unusedSkillPoints = me.getStat(5);
+	let unusedSkillPoints = me.getStat(sdk.stats.NewSkills);
 	let haveUnusedSkillpoints = unusedSkillPoints >= 1;	// We spend 1 skill point per level up
 	debug && AutoBuild.print("Stat points:", unusedStatPoints, "     Skill points:", unusedSkillPoints);
 	return haveUnusedStatpoints && haveUnusedSkillpoints;
 }
 
 function spendStatPoint (id) {
-	let unusedStatPoints = me.getStat(4);
+	let unusedStatPoints = me.getStat(sdk.stats.StatPts);
 	if (SPEND_POINTS) {
 		useStatPoint(id);
 		AutoBuild.print("useStatPoint(" + id + "): " + STAT_ID_TO_NAME[id]);
 	} else {
 		AutoBuild.print("Fake useStatPoint(" + id + "): " + STAT_ID_TO_NAME[id]);
 	}
-	delay(100);											// TODO: How long should we wait... if at all?
-	return (unusedStatPoints - me.getStat(4) === 1);	// Check if we spent one point
+	delay(100);	// TODO: How long should we wait... if at all?
+	return (unusedStatPoints - me.getStat(sdk.stats.StatPts) === 1); // Check if we spent one point
 }
 
 // TODO: What do we do if it fails? report/ignore/continue?
@@ -78,7 +78,7 @@ function spendStatPoints () {
 	let stats = AutoBuildTemplate[me.charlvl].StatPoints;
 	let errorMessage = "\nInvalid stat point set in build template " + getTemplateFilename() + " at level " + me.charlvl;
 	let spentEveryPoint = true;
-	let unusedStatPoints = me.getStat(4);
+	let unusedStatPoints = me.getStat(sdk.stats.StatPts);
 	let len = stats.length;
 
 	if (Config.AutoStat.Enabled) {
@@ -87,14 +87,14 @@ function spendStatPoints () {
 
 	if (len > unusedStatPoints) {
 		len = unusedStatPoints;
-		AutoBuild.print("Warning: Number of stats specified in your build template at level " + me.charlvl + " exceeds the available unused stat points" +
-			"\nOnly the first " + len + " stats " + stats.slice(0, len).join(", ") + " will be added");
+		AutoBuild.print("Warning: Number of stats specified in your build template at level " + me.charlvl + " exceeds the available unused stat points"
+			+ "\nOnly the first " + len + " stats " + stats.slice(0, len).join(", ") + " will be added");
 	}
 
 	// We silently ignore stats set to -1
 	for (let i = 0; i < len; i++) {
 		let id = stats[i];
-		let statIsValid = (typeof id === "number") && (0 <= id && id <= 3);
+		let statIsValid = (typeof id === "number") && (sdk.stats.Strength <= id && id <= sdk.stats.Vitality);
 
 		if (id === -1) {
 			continue;
@@ -110,8 +110,8 @@ function spendStatPoints () {
 				}
 			}
 		} else {
-			throw new Error("Stat id must be one of the following:\n0:" + STAT_ID_TO_NAME[0] +
-				",\t1:" + STAT_ID_TO_NAME[1] + ",\t2:" + STAT_ID_TO_NAME[2] + ",\t3:" + STAT_ID_TO_NAME[3] + errorMessage);
+			throw new Error("Stat id must be one of the following:\n0:" + STAT_ID_TO_NAME[0]
+				+ ",\t1:" + STAT_ID_TO_NAME[1] + ",\t2:" + STAT_ID_TO_NAME[2] + ",\t3:" + STAT_ID_TO_NAME[3] + errorMessage);
 		}
 	}
 
@@ -137,7 +137,7 @@ function getRequiredSkills (id) {
 
 		for (let i = 0; i < results.length; i++) {
 			let skill = results[i];
-			let skillInValidRange = (0 < skill && skill <= 280) && (![217, 218, 219, 220].contains(skill));
+			let skillInValidRange = (sdk.skills.Attack < skill && skill <= sdk.skills.PhoenixStrike) && (![217, 218, sdk.skills.IdentifyScroll, sdk.skills.TownPortal].contains(skill));
 			let hardPointsInSkill = me.getSkill(skill, 0);
 
 			if (skillInValidRange && !hardPointsInSkill) {
@@ -154,7 +154,7 @@ function getRequiredSkills (id) {
 }
 
 function spendSkillPoint (id) {
-	let unusedSkillPoints = me.getStat(5);
+	let unusedSkillPoints = me.getStat(sdk.stats.NewSkills);
 	let skillName = getSkillById(id) + " (" + id + ")";
 	if (SPEND_POINTS) {
 		useSkillPoint(id);
@@ -162,15 +162,15 @@ function spendSkillPoint (id) {
 	} else {
 		AutoBuild.print("Fake useSkillPoint(): " + skillName);
 	}
-	delay(200);											// TODO: How long should we wait... if at all?
-	return (unusedSkillPoints - me.getStat(5) === 1);	// Check if we spent one point
+	delay(200); // TODO: How long should we wait... if at all?
+	return (unusedSkillPoints - me.getStat(sdk.stats.NewSkills) === 1);	// Check if we spent one point
 }
 
 function spendSkillPoints () {
 	let skills = AutoBuildTemplate[me.charlvl].SkillPoints;
 	let errInvalidSkill = "\nInvalid skill point set in build template " + getTemplateFilename() + " for level " + me.charlvl;
 	let spentEveryPoint = true;
-	let unusedSkillPoints = me.getStat(5);
+	let unusedSkillPoints = me.getStat(sdk.stats.NewSkills);
 	let len = skills.length;
 
 	if (Config.AutoSkill.Enabled) {

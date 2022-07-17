@@ -127,7 +127,7 @@ function Cows() {
 			Town.move("stash");
 			console.log("ÿc9(Cows) :: ÿc0Waiting 1 minute to see if anyone else opens the cow portal");
 
-			if (!Misc.poll(() => Pather.getPortal(sdk.areas.MooMooFarm), 60e3, 2000)) throw new Error("No cow portal");
+			if (!Misc.poll(() => Pather.getPortal(sdk.areas.MooMooFarm), Time.minutes(1), 2000)) throw new Error("No cow portal");
 		} else {
 			return false;
 		}

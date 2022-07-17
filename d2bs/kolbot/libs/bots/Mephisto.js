@@ -7,10 +7,9 @@
 
 function Mephisto() {
 	this.killMephisto = function () {
-		let pos = {},
-			attackCount = 0,
-			meph = Game.getMonster(sdk.monsters.Mephisto);
-
+		let pos = {};
+		let attackCount = 0;
+		let meph = Game.getMonster(sdk.monsters.Mephisto);
 		if (!meph) throw new Error("Mephisto not found!");
 
 		Config.MFLeader && Pather.makePortal() && say("kill " + meph.classid);
@@ -92,7 +91,7 @@ function Mephisto() {
 
 		for (let i = 0; i < coords.length; i += 2) {
 			Pather.moveTo(coords[i], coords[i + 1]);
-			Attack.clearList(Attack.getMob([345, 346, 347], 0, 40));
+			Attack.clearList(Attack.getMob([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3], 0, 40));
 		}
 
 		return true;

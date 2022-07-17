@@ -1,7 +1,8 @@
-/*
-*	@filename	ActionHooks.js
-*	@author		theBGuy
-*	@desc		Action hooks for MapThread
+/**
+*  @filename    ActionHooks.js
+*  @author      theBGuy
+*  @desc        Action hooks for MapThread
+*
 */
 
 const ActionHooks = {
@@ -11,11 +12,25 @@ const ActionHooks = {
 	action: null,
 	currArea: 0,
 	enabled: true,
-	prevAreas: [0, 0, 1, 2, 3, 10, 5, 6, 2, 3, 4, 6, 7, 9, 10, 11, 12, 3, 17, 17, 6, 20, 21, 22, 23, 24, 7, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
-		36, 4, 1, 1, 40, 41, 42, 43, 44, 74, 40, 47, 48, 40, 50, 51, 52, 53, 41, 42, 56, 45, 55, 57, 58, 43, 62, 63, 44, 46, 46, 46, 46, 46,
-		46, 46, 1, 54, 1, 75, 76, 76, 78, 79, 80, 81, 82, 76, 76, 78, 86, 78, 88, 87, 89, 81, 92, 80, 80, 81, 81, 82, 82, 83, 100, 101, 102,
-		103, 104, 105, 106, 107, 103, 109, 110, 111, 112, 113, 113, 115, 115, 117, 118, 118, 109, 121, 122, 123, 111, 112, 117, 120, 128, 129,
-		130, 131, 109, 109, 109, 109
+	prevAreas: [
+		sdk.areas.None, sdk.areas.None, sdk.areas.RogueEncampment, sdk.areas.BloodMoor, sdk.areas.ColdPlains, sdk.areas.UndergroundPassageLvl1, sdk.areas.DarkWood, sdk.areas.BlackMarsh,
+		sdk.areas.BloodMoor, sdk.areas.ColdPlains, sdk.areas.StonyField, sdk.areas.BlackMarsh, sdk.areas.TamoeHighland, sdk.areas.CaveLvl1, sdk.areas.UndergroundPassageLvl1, sdk.areas.HoleLvl1,
+		sdk.areas.PitLvl1, sdk.areas.ColdPlains, sdk.areas.BurialGrounds, sdk.areas.BurialGrounds, sdk.areas.BlackMarsh, sdk.areas.ForgottenTower, sdk.areas.TowerCellarLvl1, sdk.areas.TowerCellarLvl2,
+		sdk.areas.TowerCellarLvl3, sdk.areas.TowerCellarLvl4, sdk.areas.TamoeHighland, sdk.areas.MonasteryGate, sdk.areas.OuterCloister, sdk.areas.Barracks, sdk.areas.JailLvl1, sdk.areas.JailLvl2,
+		sdk.areas.JailLvl3, sdk.areas.InnerCloister, sdk.areas.Cathedral, sdk.areas.CatacombsLvl1, sdk.areas.CatacombsLvl2, sdk.areas.CatacombsLvl3, sdk.areas.StonyField, sdk.areas.RogueEncampment,
+		sdk.areas.RogueEncampment, sdk.areas.LutGholein, sdk.areas.RockyWaste, sdk.areas.DryHills, sdk.areas.FarOasis, sdk.areas.LostCity, sdk.areas.ArcaneSanctuary, sdk.areas.LutGholein,
+		sdk.areas.A2SewersLvl1, sdk.areas.A2SewersLvl2, sdk.areas.LutGholein, sdk.areas.HaremLvl1, sdk.areas.HaremLvl2, sdk.areas.PalaceCellarLvl1, sdk.areas.PalaceCellarLvl2, sdk.areas.RockyWaste,
+		sdk.areas.DryHills, sdk.areas.HallsoftheDeadLvl1, sdk.areas.ValleyofSnakes, sdk.areas.StonyTombLvl1, sdk.areas.HallsoftheDeadLvl2, sdk.areas.ClawViperTempleLvl1, sdk.areas.FarOasis,
+		sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.LostCity, sdk.areas.CanyonofMagic, sdk.areas.CanyonofMagic, sdk.areas.CanyonofMagic, sdk.areas.CanyonofMagic, sdk.areas.CanyonofMagic,
+		sdk.areas.CanyonofMagic, sdk.areas.CanyonofMagic, sdk.areas.RogueEncampment, sdk.areas.PalaceCellarLvl3, sdk.areas.RogueEncampment, sdk.areas.KurastDocktown, sdk.areas.SpiderForest,
+		sdk.areas.SpiderForest, sdk.areas.FlayerJungle, sdk.areas.LowerKurast, sdk.areas.KurastBazaar, sdk.areas.UpperKurast, sdk.areas.KurastCauseway,
+		sdk.areas.SpiderForest, sdk.areas.SpiderForest, sdk.areas.FlayerJungle, sdk.areas.SwampyPitLvl1, sdk.areas.FlayerJungle, sdk.areas.FlayerDungeonLvl1, sdk.areas.SwampyPitLvl2, sdk.areas.FlayerDungeonLvl2,
+		sdk.areas.UpperKurast, sdk.areas.A3SewersLvl1, sdk.areas.KurastBazaar, sdk.areas.KurastBazaar, sdk.areas.UpperKurast, sdk.areas.UpperKurast, sdk.areas.KurastCauseway, sdk.areas.KurastCauseway,
+		sdk.areas.Travincal, sdk.areas.DuranceofHateLvl1, sdk.areas.DuranceofHateLvl2, sdk.areas.DuranceofHateLvl3, sdk.areas.PandemoniumFortress, sdk.areas.OuterSteppes, sdk.areas.PlainsofDespair,
+		sdk.areas.CityoftheDamned, sdk.areas.RiverofFlame, sdk.areas.PandemoniumFortress, sdk.areas.Harrogath, sdk.areas.BloodyFoothills, sdk.areas.FrigidHighlands, sdk.areas.ArreatPlateau,
+		sdk.areas.CrystalizedPassage, sdk.areas.CrystalizedPassage, sdk.areas.GlacialTrail, sdk.areas.GlacialTrail, sdk.areas.FrozenTundra, sdk.areas.AncientsWay, sdk.areas.AncientsWay, sdk.areas.Harrogath,
+		sdk.areas.NihlathaksTemple, sdk.areas.HallsofAnguish, sdk.areas.HallsofPain, sdk.areas.FrigidHighlands, sdk.areas.ArreatPlateau, sdk.areas.FrozenTundra, sdk.areas.ArreatSummit, sdk.areas.WorldstoneLvl1,
+		sdk.areas.WorldstoneLvl2, sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction, sdk.areas.Harrogath, sdk.areas.Harrogath, sdk.areas.Harrogath, sdk.areas.Harrogath
 	],
 	areaInfo: {
 		133: {
@@ -44,12 +59,12 @@ const ActionHooks = {
 		3: "sellItem"
 	},
 	blockKeyEventFlags: [
-		0x01, 0x02, 0x05, 0x09, 0x0C, 0x0F, 0x14,
-		0x17, 0x18, 0x19, 0x1A, 0x21, 0x24
+		sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.ChatBox, sdk.uiflags.EscMenu, sdk.uiflags.Shop, sdk.uiflags.Quest, sdk.uiflags.Waypoint,
+		sdk.uiflags.TradePrompt, sdk.uiflags.Msgs, sdk.uiflags.Stash, sdk.uiflags.Cube, sdk.uiflags.Help, sdk.uiflags.MercScreen
 	],
 
 	event: function (keycode) {
-		if ([16, 18].some(k => k === keycode)) {
+		if ([sdk.keys.Shift, sdk.keys.Alt].some(k => k === keycode)) {
 			return;
 		}
 
@@ -57,7 +72,7 @@ const ActionHooks = {
 	},
 
 	getOnScreenLocation: function () {
-		let possibleLocs = [0x17, 0x19, 0x1A, 0x0C];
+		let possibleLocs = [sdk.uiflags.TradePrompt, sdk.uiflags.Stash, sdk.uiflags.Cube, sdk.uiflags.Shop];
 
 		for (let i = 0; i < possibleLocs.length; i++) {
 			if (getUIFlag(possibleLocs[i])) {
@@ -69,87 +84,87 @@ const ActionHooks = {
 	},
 
 	checkAction: function () {
-		let hook,
-			unit, screenLoc,
-			obj = { type: false, dest: false, action: false },
-			qolObj = { type: "qol", dest: false, action: false };
+		let hook;
+		let unit, screenLoc;
+		let obj = { type: false, dest: false, action: false };
+		let qolObj = { type: "qol", dest: false, action: false };
 
 		if (this.action) {
 			switch (this.action) {
-			case 96: // Numpad 0
+			case sdk.keys.Numpad0:
 				hook = this.getHook("Next Area");
 
 				break;
-			case 97: // Numpad 1
+			case sdk.keys.Numpad1:
 				hook = this.getHook("Previous Area");
 
 				break;
-			case 98: // Numpad 2
+			case sdk.keys.Numpad2:
 				hook = this.getHook("Waypoint");
 
 				break;
-			case 99: // Numpad 3
+			case sdk.keys.Numpad3:
 				hook = this.getHook("POI");
 
 				break;
-			case 100: // Numpad 4
+			case sdk.keys.Numpad4:
 				hook = this.getHook("Side Area");
 
 				break;
-			case 101: // Numpad 5
+			case sdk.keys.Numpad5:
 				switch (me.area) {
-				case 1:
-				case 38:
-				case 46:
-				case 76:
-				case 78:
-				case 80:
-				case 81:
-				case 82:
-				case 108:
+				case sdk.areas.RogueEncampment:
+				case sdk.areas.Tristram:
+				case sdk.areas.CanyonofMagic:
+				case sdk.areas.SpiderForest:
+				case sdk.areas.FlayerJungle:
+				case sdk.areas.KurastBazaar:
+				case sdk.areas.UpperKurast:
+				case sdk.areas.KurastCauseway:
+				case sdk.areas.ChaosSanctuary:
 					hook = this.getHook("POI2");
 
 					break;
-				case 109:
+				case sdk.areas.Harrogath:
 					hook = this.getPortalHook("Matron's Den");
 
 					break;
 				}
 
 				break;
-			case 102: // Numpad 6
+			case sdk.keys.Numpad6:
 				switch (me.area) {
-				case 46:
-				case 76:
-				case 81:
-				case 82:
-				case 108:
+				case sdk.areas.CanyonofMagic:
+				case sdk.areas.SpiderForest:
+				case sdk.areas.UpperKurast:
+				case sdk.areas.KurastCauseway:
+				case sdk.areas.ChaosSanctuary:
 					hook = this.getHook("POI3");
 
 					break;
-				case 109:
+				case sdk.areas.Harrogath:
 					hook = this.getPortalHook("Sands");
 
 					break;
 				}
 
 				break;
-			case 103: // Numpad 7
+			case sdk.keys.Numpad7:
 				switch (me.area) {
-				case 46:
-				case 108:
+				case sdk.areas.CanyonofMagic:
+				case sdk.areas.ChaosSanctuary:
 					hook = this.getHook("POI4");
 
 					break;
-				case 109:
+				case sdk.areas.Harrogath:
 					hook = this.getPortalHook("Furnace");
 
 					break;
 				}
 				
 				break;
-			case 104: // Numpad 8
-				hook = me.area === 46 ? this.getHook("POI5") : this.getPortalHook("Uber Tristam");
+			case sdk.keys.Numpad8:
+				hook = me.area === sdk.areas.CanyonofMagic ? this.getHook("POI5") : this.getPortalHook("Uber Tristam");
 
 				break;
 			case 188: // shift <
@@ -160,8 +175,8 @@ const ActionHooks = {
 				hook = TextHooks.getHook("Next Act", TextHooks.qolHooks);
 
 				break;
-			case 17: // Ctrl
-				unit = getUnit(101);
+			case sdk.keys.Ctrl:
+				unit = Game.getSelectedUnit();
 
 				if (!!unit) {
 					screenLoc = this.getOnScreenLocation();
@@ -183,7 +198,7 @@ const ActionHooks = {
 				}
 
 				break;
-			case 53: // Numkey 5
+			case sdk.keys.Five:
 				if (!me.inTown) {
 					Town.getTpTool() && (qolObj.action = "makePortal");
 				} else if (me.inTown) {
@@ -193,7 +208,7 @@ const ActionHooks = {
 				}
 
 				break;
-			case 54: // Numkey 6
+			case sdk.keys.Six:
 				if (!me.inTown) {
 					Town.getTpTool() && (qolObj.action = "takePortal");
 				} else if (me.inTown) {
@@ -203,8 +218,8 @@ const ActionHooks = {
 				}
 
 				break;
-			case 55: // Numkey 7
-				if (this.blockKeyEventFlags.some(function(flag) { return getUIFlag(flag); })) {
+			case sdk.keys.Seven:
+				if (this.blockKeyEventFlags.some((flag) => getUIFlag(flag))) {
 					break;
 				}
 
@@ -212,8 +227,8 @@ const ActionHooks = {
 				ItemHooks.enabled = !ItemHooks.enabled;
 
 				break;
-			case 56: // Numkey 8
-				if (this.blockKeyEventFlags.some(function(flag) { return getUIFlag(flag); })) {
+			case sdk.keys.Eight:
+				if (this.blockKeyEventFlags.some((flag) => getUIFlag(flag))) {
 					break;
 				}
 
@@ -221,8 +236,8 @@ const ActionHooks = {
 				MonsterHooks.enabled = !MonsterHooks.enabled;
 
 				break;
-			case 57: // Numkey 9
-				if (this.blockKeyEventFlags.some(function(flag) { return getUIFlag(flag); })) {
+			case sdk.keys.Nine:
+				if (this.blockKeyEventFlags.some((flag) => getUIFlag(flag))) {
 					break;
 				}
 
@@ -230,8 +245,8 @@ const ActionHooks = {
 				VectorHooks.enabled = !VectorHooks.enabled;
 
 				break;
-			case 109: // Numpad -
-				if (this.blockKeyEventFlags.some(function(flag) { return getUIFlag(flag); })) {
+			case sdk.keys.NumpadDash:
+				if (this.blockKeyEventFlags.some((flag) => getUIFlag(flag))) {
 					break;
 				}
 
@@ -252,7 +267,7 @@ const ActionHooks = {
 				}
 
 				break;
-			case 45: // Ins key
+			case sdk.keys.Insert:
 				if (me.inTown) {
 					break;
 				}
@@ -294,34 +309,34 @@ const ActionHooks = {
 	},
 
 	add: function (area) {
-		let i, exits, wp, poi, nextCheck, infSeal, seisSeal, vizSeal, bossX,
-			nextAreas = [];
+		let i, exits, wp, poi, nextCheck, infSeal, seisSeal, vizSeal, bossX;
+		let nextAreas = [];
 
 		// Specific area override
-		nextAreas[7] = 26;
-		nextAreas[76] = 78;
-		nextAreas[77] = 78;
-		nextAreas[113] = 115;
-		nextAreas[115] = 117;
-		nextAreas[118] = 120;
-		me.area === 46 && (nextAreas[46] = getRoom().correcttomb);
+		nextAreas[sdk.areas.TamoeHighland] = sdk.areas.MonasteryGate;
+		nextAreas[sdk.areas.SpiderForest] = sdk.areas.FlayerJungle;
+		nextAreas[sdk.areas.GreatMarsh] = sdk.areas.FlayerJungle;
+		nextAreas[sdk.areas.CrystalizedPassage] = sdk.areas.GlacialTrail;
+		nextAreas[sdk.areas.GlacialTrail] = sdk.areas.FrozenTundra;
+		nextAreas[sdk.areas.AncientsWay] = sdk.areas.ArreatSummit;
+		me.area === sdk.areas.CanyonofMagic && (nextAreas[sdk.areas.CanyonofMagic] = getRoom().correcttomb);
 
 		switch (me.area) {
-		case 38:
+		case sdk.areas.Tristram:
 			this.hooks.push({
 				name: "POI2",
 				type: "unit",
-				action: {do: "openChest", id: 268},
+				action: {do: "openChest", id: sdk.quest.chest.Wirt},
 				dest: {x: 25048, y: 5177},
 				hook: new Text("ÿc<Num 5: Wirt's Leg", Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 46:
+		case sdk.areas.CanyonofMagic:
 			{
 				let correctTomb = getRoom().correcttomb;
 				let currExits = getArea().exits
-					.filter(function (ex) { return ex.target !== correctTomb; })
+					.filter((ex) => ex.target !== correctTomb)
 					.sort(function(a, b) {
 						return a.target - b.target;
 					}).reverse();
@@ -355,12 +370,12 @@ const ActionHooks = {
 			}
 
 			break;
-		case 76:
+		case sdk.areas.SpiderForest:
 			this.hooks.push({
 				name: "POI3",
 				type: "area",
-				dest: 77,
-				hook: new Text("ÿc<Num 6: " + Pather.getAreaName(77), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.GreatMarsh,
+				hook: new Text("ÿc<Num 6: " + Pather.getAreaName(sdk.areas.GreatMarsh), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			this.hooks.push({
@@ -371,7 +386,7 @@ const ActionHooks = {
 			});
 
 			break;
-		case 78:
+		case sdk.areas.FlayerJungle:
 			this.hooks.push({
 				name: "POI2",
 				type: "area",
@@ -380,7 +395,7 @@ const ActionHooks = {
 			});
 
 			break;
-		case 80:
+		case sdk.areas.KurastBazaar:
 			this.hooks.push({
 				name: "POI2",
 				type: "area",
@@ -389,40 +404,40 @@ const ActionHooks = {
 			});
 
 			break;
-		case 81:
+		case sdk.areas.UpperKurast:
 			this.hooks.push({
 				name: "POI3",
 				type: "area",
-				dest: 97,
-				hook: new Text("ÿc<Num 6: " + Pather.getAreaName(97), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.ForgottenTemple,
+				hook: new Text("ÿc<Num 6: " + Pather.getAreaName(sdk.areas.ForgottenTemple), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			this.hooks.push({
 				name: "POI2",
 				type: "area",
-				dest: 96,
-				hook: new Text("ÿc<Num 5: " + Pather.getAreaName(96), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.ForgottenReliquary,
+				hook: new Text("ÿc<Num 5: " + Pather.getAreaName(sdk.areas.ForgottenReliquary), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 82:
+		case sdk.areas.KurastCauseway:
 			this.hooks.push({
 				name: "POI3",
 				type: "area",
-				dest: 98,
-				hook: new Text("ÿc<Num 6: " + Pather.getAreaName(98), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.RuinedFane,
+				hook: new Text("ÿc<Num 6: " + Pather.getAreaName(sdk.areas.RuinedFane), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			this.hooks.push({
 				name: "POI2",
 				type: "area",
-				dest: 99,
-				hook: new Text("ÿc<Num 5: " + Pather.getAreaName(99), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.DisusedReliquary,
+				hook: new Text("ÿc<Num 5: " + Pather.getAreaName(sdk.areas.DisusedReliquary), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 108:
-			infSeal = this.getDiabloSeals(392);
+		case sdk.areas.ChaosSanctuary:
+			infSeal = this.getDiabloSeals(sdk.units.DiabloSealInfector);
 
 			if (infSeal) {
 				this.hooks.push({
@@ -433,7 +448,7 @@ const ActionHooks = {
 				});
 			}
 
-			seisSeal = this.getDiabloSeals(394);
+			seisSeal = this.getDiabloSeals(sdk.units.DiabloSealSeis);
 
 			if (seisSeal) {
 				this.hooks.push({
@@ -444,7 +459,7 @@ const ActionHooks = {
 				});
 			}
 
-			vizSeal = this.getDiabloSeals(396);
+			vizSeal = this.getDiabloSeals(sdk.units.DiabloSealVizier);
 
 			if (vizSeal) {
 				this.hooks.push({
@@ -458,195 +473,195 @@ const ActionHooks = {
 			break;
 		}
 
-		let cowPortal = me.area === 1 ? Game.getObject(60) : false;
+		let cowPortal = me.area === sdk.areas.RogueEncampment ? Game.getObject(sdk.units.RedPortal) : false;
 
-		if (cowPortal && cowPortal.objtype === 39) {
+		if (cowPortal && cowPortal.objtype === sdk.areas.MooMooFarm) {
 			this.hooks.push({
 				name: "POI2",
 				type: "portal",
-				dest: 39,
-				hook: new Text("ÿc<Num 5: " + Pather.getAreaName(39), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.MooMooFarm,
+				hook: new Text("ÿc<Num 5: " + Pather.getAreaName(sdk.areas.MooMooFarm), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 		}
 
 		switch (me.area) {
-		case 2: // Blood Moor
+		case sdk.areas.BloodMoor:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 8, // Den of Evil
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(8), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.DenofEvil,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.DenofEvil), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 3: // Cold Plains
+		case sdk.areas.ColdPlains:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 17, // Burial Grounds
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(17), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.BurialGrounds,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.BurialGrounds), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 6: // Black Marsh
+		case sdk.areas.BlackMarsh:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 20, // Forgotten Tower
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(20), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.ForgottenTower,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.ForgottenTower), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 7: // Tamoe Highlands
+		case sdk.areas.TamoeHighland:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 12, // Pit Level 1
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(12), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.PitLvl1,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.PitLvl1), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 10: // Underground Passage Level 1
+		case sdk.areas.UndergroundPassageLvl1:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 14, // Underground Passage Level 2
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(14), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.UndergroundPassageLvl2,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.UndergroundPassageLvl2), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 17: // Burial Grounds
+		case sdk.areas.BurialGrounds:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 19, // Mausoleum
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(19), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.Mausoleum,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.Mausoleum), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 40: // Lut Gholein
+		case sdk.areas.LutGholein:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 50, // Harem Level 1
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(50), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.HaremLvl1,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.HaremLvl1), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 41: // Rocky Waste
+		case sdk.areas.RockyWaste:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 55, // Stony Tomb Level 1
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(55), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.StonyTombLvl1,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.StonyTombLvl1), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 42: // Dry Hills
+		case sdk.areas.DryHills:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 56, // Halls of the Dead Level 1
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(56), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.HallsoftheDeadLvl1,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.HallsoftheDeadLvl1), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 43: // Far Oasis
+		case sdk.areas.FarOasis:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 62, // Maggot Lair Level 1
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(62), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.MaggotLairLvl1,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.MaggotLairLvl1), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 44: // Lost City
+		case sdk.areas.LostCity:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 65, // Ancient Tunnels
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(65), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.AncientTunnels,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.AncientTunnels), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 76: // Spider Forest
+		case sdk.areas.SpiderForest:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 85, // Spider Cavern
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(85), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.SpiderCavern,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.SpiderCavern), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 78: // Flayer Jungle
+		case sdk.areas.FlayerJungle:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 88, // Flayer Dungeon Level 1
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(88), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.FlayerDungeonLvl1,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.FlayerDungeonLvl1), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 80: // Kurast Bazaar
+		case sdk.areas.KurastBazaar:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 94, // Ruined Temple
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(94), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.RuinedTemple,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.RuinedTemple), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 81: // Upper Kurast
+		case sdk.areas.UpperKurast:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 92, // Sewers Level 1
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(92), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.A3SewersLvl1,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.A3SewersLvl1), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 82: // Kurast Causeway
+		case sdk.areas.KurastCauseway:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 99, // Disused Reliquary
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(92), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.DisusedReliquary,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.A3SewersLvl1), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 92: // Sewers Level 1
+		case sdk.areas.A3SewersLvl1:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 80, // Kurast Bazaar
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(80), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.KurastBazaar,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.KurastBazaar), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 113: // Crystalline Passage
+		case sdk.areas.CrystalizedPassage:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 114, // Frozen River
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(114), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.FrozenRiver,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.FrozenRiver), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 115: // Glacial Trail
+		case sdk.areas.GlacialTrail:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 116, // Drifter Cavern
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(116), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.DrifterCavern,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.DrifterCavern), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 118: // Ancient's Way
+		case sdk.areas.AncientsWay:
 			this.hooks.push({
 				name: "Side Area",
 				type: "area",
-				dest: 119, // Icy Cellar
-				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(119), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.IcyCellar,
+				hook: new Text("ÿc3Num 4: " + Pather.getAreaName(sdk.areas.IcyCellar), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
@@ -675,9 +690,9 @@ const ActionHooks = {
 			});
 		}
 
-		let uberPortals = (me.area === 109 && me.hell) ? getUnits(sdk.unittype.Object, sdk.units.RedPortal) : false;
+		let uberPortals = (me.area === sdk.areas.Harrogath && me.hell) ? getUnits(sdk.unittype.Object, sdk.units.RedPortal) : false;
 
-		if (uberPortals && uberPortals.some((portal) => [133, 134, 135, 136].includes(portal.objtype))) {
+		if (uberPortals && uberPortals.some((portal) => [sdk.areas.MatronsDen, sdk.areas.ForgottenSands, sdk.areas.FurnaceofPain, sdk.areas.UberTristram].includes(portal.objtype))) {
 			TextHooks.displaySettings = false;
 			this.frame.push({
 				name: "portalbox",
@@ -689,31 +704,31 @@ const ActionHooks = {
 				hook: new Frame(Hooks.portalBoard.x - 8, Hooks.portalBoard.y + Hooks.resfix.y - 17, 190, 70, 0)
 			});
 
-			Pather.getPortal(133) && this.portals.push({
+			Pather.getPortal(sdk.areas.MatronsDen) && this.portals.push({
 				name: "Matron's Den",
 				type: "portal",
-				dest: 133,
+				dest: sdk.areas.MatronsDen,
 				hook: new Text("ÿc1Num 5: Matron's Den", Hooks.portalBoard.x, Hooks.portalBoard.y + Hooks.resfix.y)
 			});
 
-			Pather.getPortal(134) && this.portals.push({
+			Pather.getPortal(sdk.areas.ForgottenSands) && this.portals.push({
 				name: "Sands",
 				type: "portal",
-				dest: 134,
+				dest: sdk.areas.ForgottenSands,
 				hook: new Text("ÿc1Num 6: Forgotten Sands", Hooks.portalBoard.x, Hooks.portalBoard.y + Hooks.resfix.y + 15)
 			});
 
-			Pather.getPortal(135) && this.portals.push({
+			Pather.getPortal(sdk.areas.FurnaceofPain) && this.portals.push({
 				name: "Furnace",
 				type: "portal",
-				dest: 135,
+				dest: sdk.areas.FurnaceofPain,
 				hook: new Text("ÿc1Num 7: Furnace of Pain", Hooks.portalBoard.x, Hooks.portalBoard.y + Hooks.resfix.y + 30)
 			});
 
-			Pather.getPortal(136) && this.portals.push({
+			Pather.getPortal(sdk.areas.UberTristram) && this.portals.push({
 				name: "Uber Tristam",
 				type: "portal",
-				dest: 136,
+				dest: sdk.areas.UberTristram,
 				hook: new Text("ÿc1Num 8: Uber Tristam", Hooks.portalBoard.x, Hooks.portalBoard.y + Hooks.resfix.y + 45)
 			});
 		}
@@ -721,105 +736,103 @@ const ActionHooks = {
 		let entrance = {x: 0, y: 0};
 
 		switch (me.area) {
-		case 38:
+		case sdk.areas.Tristram:
 			this.hooks.push({
 				name: "Previous Area",
 				type: "portal",
-				dest: 4,
-				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(4), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.StonyField,
+				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(sdk.areas.StonyField), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 39:
+		case sdk.areas.MooMooFarm:
 			this.hooks.push({
 				name: "Previous Area",
 				type: "portal",
-				dest: 1,
+				dest: sdk.areas.RogueEncampment,
 				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(1), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 46: 	// Canyon of Magic
+		case sdk.areas.CanyonofMagic:
 			this.hooks.push({
 				name: "Previous Area",
 				type: "portal",
-				dest: 74,
-				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(74), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.ArcaneSanctuary,
+				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(sdk.areas.ArcaneSanctuary), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 74: 	// Arcane Sanctuary
+		case sdk.areas.ArcaneSanctuary:
 			this.hooks.push({
 				name: "Previous Area",
 				type: "area",
-				dest: 54,
-				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(54), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.PalaceCellarLvl3,
+				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(sdk.areas.PalaceCellarLvl3), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			this.hooks.push({
 				name: "Next Area",
 				type: "area",
-				dest: 46,
-				hook: new Text("Num 0: " + Pather.getAreaName(46), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.CanyonofMagic,
+				hook: new Text("Num 0: " + Pather.getAreaName(sdk.areas.CanyonofMagic), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 121: 	// Nithathak's Temple
+		case sdk.areas.NihlathaksTemple:
 			this.hooks.push({
 				name: "Previous Area",
 				type: "unit",
-				action: {do: "usePortal", id: 109},
+				action: {do: "usePortal", id: sdk.areas.Harrogath},
 				dest: {x: 10071, y: 13305},
-				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(109), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(sdk.areas.Harrogath), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 125: 	// Abadon
+		case sdk.areas.Abaddon:
 			this.hooks.push({
 				name: "Previous Area",
 				type: "portal",
-				dest: 111,
-				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(111), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.FrigidHighlands,
+				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(sdk.areas.FrigidHighlands), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 126:
+		case sdk.areas.PitofAcheron:
 			this.hooks.push({
 				name: "Previous Area",
 				type: "portal",
-				dest: 112,
-				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(112), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.ArreatPlateau,
+				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(sdk.areas.ArreatPlateau), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		case 127:
+		case sdk.areas.InfernalPit:
 			this.hooks.push({
 				name: "Previous Area",
 				type: "portal",
-				dest: 117,
-				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(117), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.FrozenTundra,
+				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(sdk.areas.FrozenTundra), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
-		// Forgotten sands
-		case 134:
-			me.area === 134 && (entrance = {x: 20193, y: 8693});
-		// Matron's
-		case 133:
-		// Furnace
-		case 135:
-			bossX = Game.getPresetObject(me.area, 397);
+		case sdk.areas.ForgottenSands:
+			me.area === sdk.areas.ForgottenSands && (entrance = {x: 20193, y: 8693});
+		// eslint-disable-next-line no-fallthrough
+		case sdk.areas.MatronsDen:
+		case sdk.areas.FurnaceofPain:
+			bossX = Game.getPresetObject(me.area, sdk.units.SmallSparklyChest);
 			bossX && (entrance = this.areaInfo[me.area][bossX.x]);
-		// Tristram
-		case 136:
-			me.area === 136 && (entrance = {x: 25105, y: 5140});
+		// eslint-disable-next-line no-fallthrough
+		case sdk.areas.UberTristram:
+			me.area === sdk.areas.UberTristram && (entrance = {x: 25105, y: 5140});
 
 			this.hooks.push({
 				name: "Previous Area",
 				type: "unit",
-				action: {do: "usePortal", id: 109},
+				action: {do: "usePortal", id: sdk.areas.Harrogath},
 				dest: entrance,
-				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(109), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(sdk.areas.Harrogath), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
@@ -877,27 +890,27 @@ const ActionHooks = {
 		if (poi && poi.name === "Orifice") {
 			this.hooks.push({
 				name: "Next Area",
-				dest: 73,
+				dest: sdk.areas.DurielsLair,
 				type: "area",
-				hook: new Text("Num 0: " + Pather.getAreaName(73), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				hook: new Text("Num 0: " + Pather.getAreaName(sdk.areas.DurielsLair), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 		}
 
-		if (me.area === 102) {
+		if (me.area === sdk.areas.DuranceofHateLvl3) {
 			this.hooks.push({
 				name: "Next Area",
-				dest: 103,
+				dest: sdk.areas.PandemoniumFortress,
 				type: "area",
-				hook: new Text("Num 0: " + Pather.getAreaName(103), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				hook: new Text("Num 0: " + Pather.getAreaName(sdk.areas.PandemoniumFortress), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 		}
 
-		if (me.area === 131) {
+		if (me.area === sdk.areas.ThroneofDestruction) {
 			this.hooks.push({
 				name: "Next Area",
-				dest: 132,
+				dest: sdk.areas.WorldstoneChamber,
 				type: "portal",
-				hook: new Text("ÿc3Num 0: " + Pather.getAreaName(132), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				hook: new Text("ÿc3Num 0: " + Pather.getAreaName(sdk.areas.WorldstoneChamber), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 		}
 	},

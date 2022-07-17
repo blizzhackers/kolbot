@@ -77,13 +77,12 @@ const TorchSystem = {
 
 	inGameCheck: function () {
 		let farmers = this.getFarmers();
-
 		if (!farmers) return false;
 
 		for (let i = 0; i < farmers.length; i += 1) {
 			if (farmers[i].FarmGame.length > 0 && me.gamename.toLowerCase().match(farmers[i].FarmGame.toLowerCase())) {
 				print("ÿc4Torch Systemÿc0: In Farm game.");
-				D2Bot.printToConsole("Torch System: Transfering keys.", 7);
+				D2Bot.printToConsole("Torch System: Transfering keys.", sdk.colors.D2Bot.DarkGold);
 				D2Bot.updateStatus("Torch System: In game.");
 				Town.goToTown(1);
 
@@ -101,7 +100,7 @@ const TorchSystem = {
 					}
 				}
 
-				if (me.getStat(14) >= 100000) {
+				if (me.getStat(sdk.stats.Gold) >= 100000) {
 					gold(100000);
 				}
 
@@ -116,9 +115,8 @@ const TorchSystem = {
 	},
 
 	keyCheck: function () {
-		let neededItems = {},
-			farmers = this.getFarmers();
-
+		let neededItems = {};
+		let farmers = this.getFarmers();
 		if (!farmers) return false;
 
 		function keyCheckEvent(mode, msg) {
@@ -199,9 +197,9 @@ const TorchSystem = {
 
 	outOfGameCheck: function () {
 		if (!this.check) return false;
+		this.check = false;
 
 		let game;
-		this.check = false;
 
 		function checkEvent(mode, msg) {
 			let farmers = TorchSystem.getFarmers();
@@ -222,7 +220,6 @@ const TorchSystem = {
 		}
 
 		let farmers = this.getFarmers();
-
 		if (!farmers) return false;
 
 		addEventListener('copydata', checkEvent);

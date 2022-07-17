@@ -118,17 +118,17 @@ const AutoMule = {
 		if (info && info.hasOwnProperty("muleInfo")) {
 			let items = this.getMuleItems();
 
-			if (info.muleInfo.hasOwnProperty("usedStashTrigger") && info.muleInfo.hasOwnProperty("usedInventoryTrigger") &&
-					Storage.Inventory.UsedSpacePercent() >= info.muleInfo.usedInventoryTrigger && Storage.Stash.UsedSpacePercent() >= info.muleInfo.usedStashTrigger &&
-						items.length > 0) {
-				D2Bot.printToConsole("MuleCheck triggered!", 7);
+			if (info.muleInfo.hasOwnProperty("usedStashTrigger") && info.muleInfo.hasOwnProperty("usedInventoryTrigger")
+				&& Storage.Inventory.UsedSpacePercent() >= info.muleInfo.usedInventoryTrigger
+				&& Storage.Stash.UsedSpacePercent() >= info.muleInfo.usedStashTrigger && items.length > 0) {
+				D2Bot.printToConsole("MuleCheck triggered!", sdk.colors.D2Bot.DarkGold);
 
 				return true;
 			}
 
 			for (let i = 0; i < items.length; i += 1) {
 				if (this.matchItem(items[i], Config.AutoMule.Trigger)) {
-					D2Bot.printToConsole("MuleCheck triggered!", 7);
+					D2Bot.printToConsole("MuleCheck triggered!", sdk.colors.D2Bot.DarkGold);
 					return true;
 				}
 			}
@@ -151,27 +151,26 @@ const AutoMule = {
 	outOfGameCheck: function () {
 		if (!this.check && !this.torchAnniCheck) return false;
 
-		let stopCheck = false,
-			muleInfo = {status: ""},
-			failCount = 0;
-
 		let muleObj = this.getMule();
-
 		if (!muleObj) return false;
 
 		function muleCheckEvent(mode, msg) {
 			mode === 10 && (muleInfo = JSON.parse(msg));
 		}
 
+		let stopCheck = false;
+		let muleInfo = {status: ""};
+		let failCount = 0;
+
 		if (!muleObj.continuousMule || !muleObj.skipMuleResponse) {
 			addEventListener("copydata", muleCheckEvent);
 		}
 
 		if (muleObj.continuousMule) {
-			D2Bot.printToConsole("Starting mule.", 7);
+			D2Bot.printToConsole("Starting mule.", sdk.colors.D2Bot.DarkGold);
 			D2Bot.start(muleObj.muleProfile);
 		} else {
-			D2Bot.printToConsole("Starting " + (this.torchAnniCheck === 2 ? "anni " : this.torchAnniCheck === 1 ? "torch " : "") + "mule profile: " + muleObj.muleProfile, 7);
+			D2Bot.printToConsole("Starting " + (this.torchAnniCheck === 2 ? "anni " : this.torchAnniCheck === 1 ? "torch " : "") + "mule profile: " + muleObj.muleProfile, sdk.colors.D2Bot.DarkGold);
 		}
 
 		MainLoop:
@@ -211,12 +210,7 @@ const AutoMule = {
 
 				break MainLoop;
 			case "ready":
-				let control = getControl(6, 652, 469, 120, 20);
-
-				if (control) {
-					delay(200);
-					control.click();
-				}
+				Starter.LocationEvents.openJoinGameWindow();
 
 				delay(2000);
 
@@ -288,10 +282,10 @@ const AutoMule = {
 	},
 
 	inGameCheck: function () {
-		let muleObj, tick,
-			begin = false,
-			timeout = 150 * 1000, // Ingame mule timeout
-			status = "muling";
+		let muleObj, tick;
+		let begin = false;
+		let timeout = 150 * 1000; // Ingame mule timeout
+		let status = "muling";
 
 		// Single player
 		if (!me.gamename) return false;
@@ -302,8 +296,8 @@ const AutoMule = {
 		if (!info) return false;
 
 		// Profile is not in mule or torch mule game
-		if (!((info.hasOwnProperty("muleInfo") && me.gamename.toLowerCase() === info.muleInfo.muleGameName[0].toLowerCase()) ||
-				(info.hasOwnProperty("torchMuleInfo") && me.gamename.toLowerCase() === info.torchMuleInfo.muleGameName[0].toLowerCase()))) {
+		if (!((info.hasOwnProperty("muleInfo") && me.gamename.toLowerCase() === info.muleInfo.muleGameName[0].toLowerCase())
+				|| (info.hasOwnProperty("torchMuleInfo") && me.gamename.toLowerCase() === info.torchMuleInfo.muleGameName[0].toLowerCase()))) {
 			return false;
 		}
 
@@ -408,7 +402,7 @@ const AutoMule = {
 		while (true) {
 			if (muleObj.continuousMule) {
 				if (this.isFinished()) {
-					D2Bot.printToConsole("Done muling.", 7);
+					D2Bot.printToConsole("Done muling.", sdk.colors.D2Bot.DarkGold);
 					status = "quit";
 				} else {
 					delay(5000);
@@ -450,7 +444,7 @@ const AutoMule = {
 		if (item) {
 			do {
 				// exclude trash
-				if (getDistance(me, item) < 20 && [3, 5].includes(item.mode) && Town.ignoredItemTypes.indexOf(item.itemType) === -1) {
+				if (getDistance(me, item) < 20 && item.onGroundOrDropping && Town.ignoredItemTypes.indexOf(item.itemType) === -1) {
 					return false;
 				}
 			} while (item.getNext());
@@ -485,10 +479,9 @@ const AutoMule = {
 		if (!Town.openStash()) return false;
 
 		let items = (this.getMuleItems() || []);
-
 		if (items.length === 0) return false;
 
-		D2Bot.printToConsole("AutoMule: Transfering items.", 7);
+		D2Bot.printToConsole("AutoMule: Transfering items.", sdk.colors.D2Bot.DarkGold);
 
 		for (let i = 0; i < items.length; i += 1) {
 			items[i].drop();
@@ -528,20 +521,22 @@ const AutoMule = {
 
 		if (!info || !info.hasOwnProperty("muleInfo")) return false;
 
-		let item = me.getItem(-1, 0);
+		let item = me.getItem(-1, sdk.itemmode.inStorage);
 		let items = [];
 
 		if (item) {
 			do {
 				if (Town.ignoredItemTypes.indexOf(item.itemType) === -1
-						&& (Pickit.checkItem(item).result > 0 || (item.location === 7 && info.muleInfo.hasOwnProperty("muleOrphans") && info.muleInfo.muleOrphans))
-						&& item.classid !== 549 // Don't drop Horadric Cube
-						&& (item.classid !== 603 || item.quality !== 7) // Don't drop Annihilus
-						&& (item.classid !== 604 || item.quality !== 7) // Don't drop Hellfire Torch
-						&& (item.location === 7 || (item.location === 3 && !Storage.Inventory.IsLocked(item, Config.Inventory))) // Don't drop items in locked slots
-						&& ((!TorchSystem.getFarmers() && !TorchSystem.isFarmer()) || [647, 648, 649].indexOf(item.classid) === -1)) { // Don't drop Keys if part of TorchSystem
-					if (this.matchItem(item, Config.AutoMule.Force.concat(Config.AutoMule.Trigger)) // Always drop items on Force or Trigger list
-						|| (!this.matchItem(item, Config.AutoMule.Exclude) && (!this.cubingIngredient(item) && !this.runewordIngredient(item) && !this.utilityIngredient(item)))) { // Don't drop Excluded items or Runeword/Cubing/CraftingSystem ingredients
+						&& (Pickit.checkItem(item).result > 0 || (item.isInStash && info.muleInfo.hasOwnProperty("muleOrphans") && info.muleInfo.muleOrphans))
+						&& item.classid !== sdk.quest.item.Cube // Don't drop Horadric Cube
+						&& (item.classid !== sdk.items.SmallCharm || item.quality !== sdk.itemquality.Unique) // Don't drop Annihilus
+						&& (item.classid !== sdk.items.LargeCharm || item.quality !== sdk.itemquality.Unique) // Don't drop Hellfire Torch
+						&& (item.isInStash || (item.isInInventory && !Storage.Inventory.IsLocked(item, Config.Inventory))) // Don't drop items in locked slots
+						&& ((!TorchSystem.getFarmers() && !TorchSystem.isFarmer()) || [sdk.quest.item.KeyofTerror, sdk.quest.item.KeyofHate, sdk.quest.item.KeyofDestruction].indexOf(item.classid) === -1)) { // Don't drop Keys if part of TorchSystem
+					// Always drop items on Force or Trigger list
+					if (this.matchItem(item, Config.AutoMule.Force.concat(Config.AutoMule.Trigger))
+						// Don't drop Excluded items or Runeword/Cubing/CraftingSystem ingredients
+						|| (!this.matchItem(item, Config.AutoMule.Exclude) && (!this.cubingIngredient(item) && !this.runewordIngredient(item) && !this.utilityIngredient(item)))) {
 						items.push(copyUnit(item));
 					}
 				}
@@ -589,10 +584,10 @@ const AutoMule = {
 		if (!Town.openStash()) return false;
 
 		if (dropAnni) {
-			let item = me.findItem(603, 0, -1, 7);
+			let item = me.findItem(sdk.items.SmallCharm, sdk.itemmode.inStorage, -1, sdk.itemquality.Unique);
 
 			if (item && !Storage.Inventory.IsLocked(item, Config.Inventory)) {
-				D2Bot.printToConsole("AutoMule: Transfering Anni.", 7);
+				D2Bot.printToConsole("AutoMule: Transfering Anni.", sdk.colors.D2Bot.DarkGold);
 				item.drop();
 				delay(1000);
 				me.cancel();
@@ -603,10 +598,10 @@ const AutoMule = {
 			return false;
 		}
 
-		let item = me.findItem(604, 0, -1, 7);
+		let item = me.findItem(sdk.items.LargeCharm, sdk.itemmode.inStorage, -1, sdk.itemquality.Unique);
 
 		if (item) {
-			D2Bot.printToConsole("AutoMule: Transfering Torch.", 7);
+			D2Bot.printToConsole("AutoMule: Transfering Torch.", sdk.colors.D2Bot.DarkGold);
 			item.drop();
 			delay(1000);
 			me.cancel();

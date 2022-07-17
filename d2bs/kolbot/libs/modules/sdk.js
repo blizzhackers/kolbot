@@ -781,6 +781,7 @@ item: {
 
 		// shrine types
 		shrines: {
+			Ids: [2, 81, 83, 170, 344, 197, 202],
 			Refilling: 1,
 			Health: 2,
 			Mana: 3,
@@ -1023,7 +1024,7 @@ item: {
 			StunLength: 66,
 			VelocityPercent: 67,
 			OtherAnimrate: 69,
-			Hpregen: 74,
+			HpRegen: 74,
 
 			LastBlockFrame: 95,
 			State: 98,
@@ -1547,6 +1548,10 @@ item: {
 
 			FrigidHighlandsChest: 455,
 			IcyCellarChest: 397,
+
+			SmallSparklyChest: 397,
+			LargeSparklyChest: 455,
+			SuperChest: 580,
 
 			// misc
 			BubblingPoolofBlood: 82,
@@ -2207,10 +2212,12 @@ item: {
 				// Confirmed
 				TheSummoner: 250,
 				Bishibosh: 734,
+				Coldcrow: 736,
 				Rakanishu: 737,
 				TreeheadWoodFist: 738,
 				TheCountess: 740,
 				BoneAsh: 743,
+				Beetleburst: 747,
 				TheSmith: 754,
 				Radament: 744,
 				FireEye: 750,
@@ -2224,13 +2231,11 @@ item: {
 				SharpToothSayer: 790,
 				// Unconfirmed
 				Bonebreak: 705,
-				Coldcrow: 706,
 				Griswold: 709,
 				PitspawnFouldog: 711,
 				FlamespiketheCrawler: 712,
 				BloodwitchtheWild: 715,
 				Fangskin: 716,
-				Beetleburst: 717,
 				Leatherarm: 718,
 				ColdwormtheBurrower: 719,
 				AncientKaatheSoulless: 723,
@@ -4095,6 +4100,34 @@ item: {
 			},
 
 			text: {
+				RepairCost: 3330,
+				SellValue: 3331,
+				IdentifyCost: 3332,
+				ItemCannotBeTradedHere: 3333,
+				TradeRepair: 3334,
+				Buy: 3335,
+				Sell: 3336,
+				Heal: 3337,
+				Repair: 3338,
+				NextPage: 3339,
+				PreviousPage: 3340,
+				Transmute: 3341,
+				YourGold: 3342,
+				WhichItemShouldBeImbued: 3343,
+				Yes: 3344,
+				No: 3345,
+				Gold2: 3346,
+				Sell2: 3347,
+				Buy2: 3358,
+				Hire: 3349,
+				ToStrength: 3473,
+				ToDexterity: 3474,
+				Identify: 3350,
+				Repair2: 3351,
+				Strength: 4060,
+				Dexterity: 4062,
+				Vitality: 4066,
+				Energy: 4069,
 				CdKeyDisabled: 5199,
 				OnlyOneInstanceAtATime: 5201,
 				CdKeyIntendedForAnotherProduct: 5202,
@@ -4246,6 +4279,7 @@ item: {
 			LeftWindowKey: 91,
 			RightWindowKey: 92,
 			SelectKey: 93,
+			Numpad0: 96,
 			Numpad1: 97,
 			Numpad2: 98,
 			Numpad3: 99,
