@@ -14,7 +14,7 @@ const BoBarbHelper = () => {
 	const shouldHealMana = amount => me.mp < Math.floor(me.mpmax * amount / 100);
 
 	const healMana = () => {
-		Pather.useWaypoint(1);
+		Pather.useWaypoint(sdk.areas.RogueEncampment);
 		Town.initNPC("Heal", "heal");
 		Pather.useWaypoint(Config.BoBarbHelper.Wp);
 	};
@@ -89,7 +89,7 @@ const BoBarbHelper = () => {
 		giveBuff();
 
 		if (townNearbyMonster && monsterNear()) {
-			if (!Pather.useWaypoint(1)) {
+			if (!Pather.useWaypoint(sdk.areas.RogueEncampment)) {
 				break;
 			}
 		}

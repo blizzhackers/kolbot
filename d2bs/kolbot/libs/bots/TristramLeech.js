@@ -14,7 +14,7 @@ function TristramLeech() {
 
 	if (Config.Leader) {
 		leader = (Config.Leader || Config.TristramLeech.Leader);
-		if (!Misc.poll(() => Misc.inMyParty(leader), 30e3, 1000)) throw new Error("TristramLeech: Leader not partied");
+		if (!Misc.poll(() => Misc.inMyParty(leader), Time.seconds(30), 1000)) throw new Error("TristramLeech: Leader not partied");
 	}
 
 	!leader && (leader = Misc.autoLeaderDetect({

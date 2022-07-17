@@ -12,7 +12,7 @@ function ClearAnyArea() {
 		try {
 			Pather.journeyTo(Config.ClearAnyArea.AreaList[i]) && Attack.clearLevel(Config.ClearType);
 		} catch (e) {
-			console.warn(e);
+			console.error(e);
 		}
 	}
 

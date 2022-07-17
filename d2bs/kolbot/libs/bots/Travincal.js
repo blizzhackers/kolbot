@@ -12,7 +12,8 @@ function Travincal() {
 
 		if (monster) {
 			do {
-				if ([345, 346, 347].includes(monster.classid) && monster.attackable && (!checkColl || !checkCollision(me, monster, 0x1))) {
+				if ([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council4].includes(monster.classid)
+					&& monster.attackable && (!checkColl || !checkCollision(me, monster, 0x1))) {
 					monsterList.push(copyUnit(monster));
 				}
 			} while (monster.getNext());
@@ -39,7 +40,7 @@ function Travincal() {
 		Precast.doPrecast(true);
 	}
 
-	if (me.getSkill(sdk.skills.LeapAttack, 0) && !Pather.canTeleport()) {
+	if (Skill.canUse(sdk.skills.LeapAttack) && !Pather.canTeleport()) {
 		let coords = [60, -53, 64, -72, 78, -72, 74, -88];
 
 		for (let i = 0; i < coords.length; i += 2) {

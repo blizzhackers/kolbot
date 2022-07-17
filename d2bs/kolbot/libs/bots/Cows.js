@@ -11,7 +11,7 @@ function Cows() {
 
 		Pather.useWaypoint(sdk.areas.StonyField);
 		Precast.doPrecast(true);
-		Pather.moveToPreset(me.area, sdk.unittype.Monster, 737, 8, 8);
+		Pather.moveToPreset(me.area, sdk.unittype.Monster, sdk.monsters.preset.Rakanishu, 8, 8);
 
 		if (!Misc.poll(() => {
 			let p = Pather.getPortal(sdk.areas.Tristram);

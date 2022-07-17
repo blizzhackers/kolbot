@@ -81,7 +81,7 @@ function UserAddon () {
 
 		Pickit.fastPick();
 
-		let unit = getUnit(101);
+		let unit = Game.getSelectedUnit();
 		!!unit && UnitInfo.createInfo(unit);
 
 		delay(20);

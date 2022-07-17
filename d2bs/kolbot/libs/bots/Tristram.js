@@ -9,7 +9,7 @@ function Tristram() {
 	Pather._teleport = Pather.teleport;
 
 	// complete quest if its not complete
-	if (!me.getQuest(4, 4) && !me.getQuest(4, 0)) {
+	if (!me.getQuest(sdk.quest.id.TheSearchForCain, 4) && !me.getQuest(sdk.quest.id.TheSearchForCain, 0)) {
 		Common.Questing.cain();
 	}
 
@@ -23,7 +23,7 @@ function Tristram() {
 
 			break;
 		case me.area === sdk.areas.StonyField:
-			if (!Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Monster, 737, 0, 0, false, true)) {
+			if (!Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Monster, sdk.monsters.preset.Rakanishu, 0, 0, false, true)) {
 				throw new Error("Failed to move to Rakanishu");
 			}
 

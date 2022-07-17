@@ -57,6 +57,19 @@ function OrgTorch() {
 		}
 	};
 
+	this.getQuestItem = function (item) {
+		if (item) {
+			let id = item.classid;
+			let canFit = Storage.Inventory.CanFit(item);
+			if (!canFit && Pickit.canMakeRoom()) {
+				console.log("ÿc7Trying to make room for " + Pickit.itemColor(item) + item.name);
+				Town.visitTown();
+				!copyUnit(item).x && (item = Misc.poll(() => Game.getItem(id)));
+			}
+		}
+		return Pickit.pickItem(item);
+	};
+
 	// Identify & mule
 	this.checkTorch = function () {
 		if (me.area === sdk.areas.UberTristram) {
@@ -126,17 +139,20 @@ function OrgTorch() {
 	// todo - equipping an item from storage if we have it
 	this.getFade = function () {
 		if (Config.OrgTorch.GetFade && !me.getState(sdk.states.Fade)
-			&& me.haveSome([{name: sdk.locale.items.Treachery, equipped: true},
-				{name: sdk.locale.items.LastWish, equipped: true}, {name: sdk.locale.items.SpiritWard, equipped: true}])) {
+			&& me.haveSome([{name: sdk.locale.items.Treachery, equipped: true}, {name: sdk.locale.items.LastWish, equipped: true}, {name: sdk.locale.items.SpiritWard, equipped: true}])) {
 			console.log(sdk.colors.Orange + "OrgTorch :: " + sdk.colors.White + "Getting Fade");
+			// lets figure out what fade item we have before we leave town
+			let fadeItem = me.findFirst([
+				{name: sdk.locale.items.Treachery, equipped: true},
+				{name: sdk.locale.items.LastWish, equipped: true},
+				{name: sdk.locale.items.SpiritWard, equipped: true},
+			]);
+
 			Pather.useWaypoint(sdk.areas.RiverofFlame);
 			Precast.doPrecast(true);
 			// check if item is on switch
 			let mainSlot;
-			let fadeItem = me.findFirst([
-				{name: sdk.locale.items.LastWish, equipped: true},
-				{name: sdk.locale.items.SpiritWard, equipped: true}]);
-
+			// move into the fire - get toasty
 			Pather.moveTo(7811, 5872);
 				
 			if (fadeItem.have && fadeItem.item.isOnSwap && me.weaponswitch !== 1) {
@@ -211,6 +227,7 @@ function OrgTorch() {
 		Pather.moveToPreset(sdk.areas.MatronsDen, sdk.unittype.Object, 397, 2, 2);
 		Attack.kill(sdk.monsters.Lilith);
 		Pickit.pickItems();
+		this.getQuestItem(Game.getItem(sdk.items.quest.DiablosHorn));
 		Town.goToTown();
 
 		// we sucessfully picked up the horn
@@ -251,6 +268,7 @@ function OrgTorch() {
 
 			Attack.kill(sdk.monsters.UberDuriel);
 			Pickit.pickItems();
+			this.getQuestItem(Game.getItem(sdk.items.quest.BaalsEye));
 			Town.goToTown();
 		} catch (e) {
 			//
@@ -264,9 +282,10 @@ function OrgTorch() {
 		let mBrain = me.findItems(sdk.items.quest.MephistosBrain, sdk.itemmode.inStorage).length;
 
 		Precast.doPrecast(true);
-		Pather.moveToPreset(135, sdk.unittype.Object, 397, 2, 2);
+		Pather.moveToPreset(sdk.areas.FurnaceofPain, sdk.unittype.Object, 397, 2, 2);
 		Attack.kill(sdk.monsters.UberIzual);
 		Pickit.pickItems();
+		this.getQuestItem(Game.getItem(sdk.items.quest.MephistosBrain));
 		Town.goToTown();
 
 		// we sucessfully picked up the brain
