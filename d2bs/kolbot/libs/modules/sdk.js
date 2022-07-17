@@ -34,7 +34,7 @@ item: {
 
 {
 	let sdk = {
-		waypoints: {
+		waypoints: { // sdk.waypoints.
 			Ids: [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539],
 			Act1: [0x01, 0x03, 0x04, 0x05, 0x06, 0x1b, 0x1d, 0x20, 0x23],
 			Act2: [0x28, 0x30, 0x2a, 0x39, 0x2b, 0x2c, 0x34, 0x4a, 0x2e],
@@ -43,7 +43,7 @@ item: {
 			Act5: [0x6d, 0x6f, 0x70, 0x71, 0x73, 0x7b, 0x75, 0x76, 0x81]
 		},
 
-		difficulty: {
+		difficulty: { // sdk.difficulty.
 			Normal: 0,
 			Nightmare: 1,
 			Hell: 2,
@@ -56,7 +56,7 @@ item: {
 			}
 		},
 
-		charclass: {
+		charclass: { // sdk.clicktypes.
 			Amazon: 0,
 			Sorceress: 1,
 			Necromancer: 2,
@@ -72,7 +72,7 @@ item: {
 			}
 		},
 
-		clicktypes: {
+		clicktypes: { // sdk.clicktypes.
 			click: {
 				Left: 0,
 				Right: 1,
@@ -81,7 +81,7 @@ item: {
 			},
 		},
 
-		areas: {
+		areas: { // sdk.areas.
 			Towns: [1, 40, 75, 103, 109],
 			None: 0,
 
@@ -279,7 +279,11 @@ item: {
 			}
 		},
 
-		skills: {
+		skills: { // sdk.skills.
+            subindex: { // sdk.skills.subindex.
+				hardpoints: 0,
+				softpoints: 1,
+			},
 			// General
 			Attack: 0,
 			Kick: 1,
@@ -535,6 +539,7 @@ item: {
 			RoyalStrike: 280, // Internal
 			WakeofDestructionSentry: 281, // Not used?
 			Summoner: 500, // special
+			// // sdk.skills.tabs.
 			tabs: {
 				// Ama
 				BowandCrossbow: 0,
@@ -573,9 +578,9 @@ item: {
 			}
 		},
 		skillTabs: undefined,
-
+		// sdk.quest.
 		quest: {
-			item: {
+			item: { // sdk.quest.item.
 				// Act 1
 				WirtsLeg: 88,
 				HoradricMalus: 89,
@@ -640,7 +645,8 @@ item: {
 				// act 5
 				644, 645, 646,
 			],
-			chest: {
+
+			chest: { // sdk.quest.chest.
 				// act1
 				InifussTree: 30,
 				MalusHolder: 108,
@@ -672,7 +678,8 @@ item: {
 				// act 5
 				434, 558, 546
 			],
-			id: {
+
+			id: { // sdk.quest.id.
 				SpokeToWarriv: 0,
 				DenofEvil: 1,
 				SistersBurialGrounds: 2,
@@ -711,9 +718,8 @@ item: {
 				Respec: 41,
 			}
 		},
-
 		// in game data
-		uiflags: {
+		uiflags: { // sdk.uiflags.
 			Inventory: 0x01,
 			StatsWindow: 0x02,
 			QuickSkill: 0x03,
@@ -743,7 +749,7 @@ item: {
 			ScrollWindow: 0x25
 		},
 
-		menu: {
+		menu: { // sdk.menu.
 			Respec: 0x2BA0,
 			Ok: 0x0D49,
 			Talk: 0x0D35,
@@ -762,9 +768,8 @@ item: {
 			Personalize: 0x58DD,
 			TravelToHarrogath: 0x58D2,
 		},
-
 		// shrine types
-		shrines: {
+		shrines: { // sdk.shrines.
 			Refilling: 1,
 			Health: 2,
 			Mana: 3,
@@ -788,9 +793,8 @@ item: {
 			Exploding: 21,
 			Poison: 22
 		},
-
 		// unit states
-		states: {
+		states: { // sdk.states.
 			None: 0,
 			FrozenSolid: 1,
 			Poison: 2,
@@ -964,7 +968,7 @@ item: {
 			StaminaPot: 180,
 		},
 
-		enchant: {
+		enchant: { // sdk.enchant.
 			ExtraStrong: 5,
 			ExtraFast: 6,
 			Cursed: 7,
@@ -978,10 +982,9 @@ item: {
 			StoneSkin: 28,
 			MultipleShots: 29,
 		},
-
 		// unit stats
-		stats: {
-			subindex: {
+		stats: { // sdk.stats.
+			subindex: { // sdk.stats.subindex.
 				SkillID: 1,
 				Level: 2
 			},
@@ -1348,9 +1351,8 @@ item: {
 			// doesn't exist but define for prototypes
 			AllRes: 555,
 		},
-
 		// unit info
-		unittype: {
+		unittype: { // sdk.unittype.
 			Player: 0,
 			NPC: 1,
 			Monster: 1,
@@ -1361,7 +1363,7 @@ item: {
 		},
 
 		units: {
-			npcs: {
+			npcs: { // sdk.units.npcs.
 				Akara: 148,
 				Alkor: 254,
 				Asheara: 252,
@@ -1408,7 +1410,8 @@ item: {
 				Flavie: 266,
 
 			},
-			objects: {
+
+			objects: { // sdk.units.objects.
 				// act1
 				MoldyTome: 8,
 				StoneAlpha: 17,
@@ -1441,7 +1444,8 @@ item: {
 				TalictheDefenderStatue: 475,
 				MadawctheGuardianStatue: 476,
 			},
-			exits: { // Todo: add all exits
+			// Todo: add all exits
+			exits: { // sdk.units.exits.
 				// act 1
 				// act 2
 				TrapDoorA2: 74, // ancienttunnel,sewers
@@ -1454,16 +1458,17 @@ item: {
 				// act 5
 				SideCavesA5: 75, // FrozenRiver, DrifterCavern, IcyCellar
 				AncientsDoor: 547, // Worldstone keep lvl 1
-
 			},
-			chests: {
+			
+			chests: { // sdk.units.chests.
 				SuperChest: 580,
-				SparklyChest: 397,
-				IcyCellarChest: 397, // SparklyChest
-				FrigidHighlandsChest: 455,
-
+				SmallSparklyChest: 397,
+				LargeSparklyChest: 455,
+				IcyCellarChest: 397, // SmallSparklyChest
+				FrigidHighlandsChest: 455, // LargeSparklyChest
 			},
-			portals: {
+
+			portals: { // sdk.units.portals.
 				// act 1
 				// act 2
 				ArcaneSanctuaryPortal: 298,
@@ -1481,8 +1486,9 @@ item: {
 				BluePortal: 59,
 				RedPortal: 60,
 			},
-			summons: {
-				type: {
+
+			summons: { // sdk.units.summons.
+				type: { // sdk.units.summons.type.
 					"Valkyrie": 2,
 					"Golem": 3,
 					"Skeleton": 4,
@@ -1522,14 +1528,16 @@ item: {
 				ShadowWarrior: 417,
 				ShadowMaster: 418,
 			},
-			mercs: {
+
+			mercs: { // sdk.units.mercs.
 				Rogue: 271,
 				Guard: 338,
 				IronWolf: 359,
 				A5Barb: 561,
 			},
-			monsters: {
-				mode: {
+
+			monsters: { // sdk.units.monsters.
+				mode: { // sdk.units.monsters.mode.
 					Death: 0,
 					Standing: 1,
 					Walking: 2,
@@ -1547,7 +1555,7 @@ item: {
 					Spawning: 14,
 					Running: 15
 				},
-				spectype: {
+				spectype: { // sdk.units.monsters.spectype.
 					All: 0,
 					Super: 1,
 					Champion: 2,
@@ -1733,8 +1741,8 @@ item: {
 				Maggot: 227,
 				FlyingScimitar: 234,
 				Zakarumite: 235,
-				Zealot1: 237,
 				Faithful: 236,
+				Zealot1: 237,
 				Sexton: 238,
 				Cantor: 239,
 				Heirophant1: 240,
@@ -1945,11 +1953,11 @@ item: {
 				Afflicted2: 580,
 				Tainted2: 581,
 				Misshapen2: 582,
+				Disfigured2: 583,
+				Damned2: 584,
 				MoonClan2: 585,
 				NightClan2: 586,
 				HellClan2: 587,
-				Disfigured2: 583,
-				Damned2: 584,
 				BloodClan2: 588,
 				DeathClan2: 589,
 				FoulCrow2: 590,
@@ -2006,8 +2014,8 @@ item: {
 				BurningSoul1: 641,
 				Carver1: 642,
 				Devilkin: 643,
-				CarverShaman: 645,
 				DarkOne2: 644,
+				CarverShaman: 645,
 				DarkShaman2: 647,
 				BoneWarrior2: 648,
 				Returned2: 649,
@@ -2029,7 +2037,6 @@ item: {
 				Unraveler2: 668,
 				Ancient2: 669,
 				Ancient3: 670,
-				Arach2: 685,
 				Zealot2: 671,
 				Zealot3: 672,
 				Heirophant3: 673,
@@ -2045,6 +2052,7 @@ item: {
 				Slayerexp2: 682,
 				HellSpawn2: 683,
 				GreaterHellSpawn2: 684,
+				Arach2: 685,
 				Balrog2: 686,
 				PitLord2: 687,
 				Imp6: 688,
@@ -2054,8 +2062,8 @@ item: {
 				Strangler2: 692,
 				StormCaster2: 693,
 				MawFiend: 694,
-				GhoulLord2: 696,
 				BloodLord2: 695,
+				GhoulLord2: 696,
 				DarkLord2: 697,
 				UnholyCorpse2: 698,
 				DoomKnight1: 699,
@@ -2112,7 +2120,8 @@ item: {
 				ColdwormtheBurrower: 284,
 				Nihlathak: 526,
 			},
-			preset: {
+
+			preset: { // sdk.units.preset.
 				// Confirmed
 				TheSummoner: 250,
 				Bishibosh: 734,
@@ -2207,7 +2216,7 @@ item: {
 			Cow: 179,
 		},
 
-		storage: {
+		storage: { // sdk.storage.
 			Equipped: 1,
 			Belt: 2,
 			Inventory: 3,
@@ -2216,7 +2225,7 @@ item: {
 			Stash: 7,
 		},
 
-		itemmode: {
+		itemmode: { // sdk.itemmode.
 			inStorage: 0, //Item inven stash cube store = Item inven stash cube store
 			Equipped: 1, // Item equipped self or merc
 			inBelt: 2, // Item in belt
@@ -2225,9 +2234,8 @@ item: {
 			Dropping: 5, // Item being dropped
 			Socketed: 6 // Item socketed in item
 		},
-
 		// Same apply's for merc with less things available
-		body: {
+		body: { // sdk.body.
 			None: 0,
 			Head: 1,
 			Neck: 2,
@@ -2244,7 +2252,7 @@ item: {
 			LeftArmSecondary: 12
 		},
 
-		itemquality: {
+		itemquality: { // sdk.itemquality.
 			LowQuality: 1,
 			Normal: 2,
 			Superior: 3,
@@ -2255,13 +2263,13 @@ item: {
 			Crafted: 8,
 		},
 
-		itemclass: {
+		itemclass: { // sdk.itemclass.
 			Normal: 0,
 			Exceptional: 1,
 			Elite: 2,
 		},
 
-		itemtype: {
+		itemtype: { // sdk.itemtype.
 			Shield: 2,
 			Armor: 3,
 			Gold: 4,
@@ -2365,8 +2373,8 @@ item: {
 			Skull: 102,
 		},
 
-		items: {
-			quest: {
+		items: { // sdk.items.
+			quest: { // sdk.items.quest.
 				// Act 1
 				WirtsLeg: 88,
 				HoradricMalus: 89,
@@ -2969,8 +2977,8 @@ item: {
 			"SmallCharm": 603,
 			"LargeCharm": 604,
 			"GrandCharm": 605,
-			
-			runes: {
+
+			runes: { // sdk.items.runes.
 				El: 610,
 				Eld: 611,
 				Tir: 612,
@@ -3005,8 +3013,9 @@ item: {
 				Cham: 641,
 				Zod: 642,
 			},
-			gems: {
-				Perfect: {
+
+			gems: { // sdk.items.gems.
+				Perfect: { // sdk.items.gems.Perfect.
 					Amethyst: 561,
 					Topaz: 566,
 					Sapphire: 571,
@@ -3015,7 +3024,7 @@ item: {
 					Diamond: 586,
 					Skull: 601,
 				},
-				Flawless: {
+				Flawless: { // sdk.items.gems.Flawless.
 					Amethyst: 560,
 					Topaz: 565,
 					Sapphire: 570,
@@ -3024,7 +3033,7 @@ item: {
 					Diamond: 585,
 					Skull: 600,
 				},
-				Normal: {
+				Normal: { // sdk.items.gems.Normal.
 					Amethyst: 559,
 					Topaz: 564,
 					Sapphire: 569,
@@ -3033,7 +3042,7 @@ item: {
 					Diamond: 584,
 					Skull: 599,
 				},
-				Flawed: {
+				Flawed: { // sdk.items.gems.Flawed.
 					Amethyst: 558,
 					Topaz: 563,
 					Sapphire: 568,
@@ -3042,7 +3051,7 @@ item: {
 					Diamond: 583,
 					Skull: 598,
 				},
-				Chipped: {
+				Chipped: { // sdk.items.gems.Chipped.
 					Amethyst: 557,
 					Topaz: 562,
 					Sapphire: 567,
@@ -3054,9 +3063,8 @@ item: {
 			},
 		},
 
-		// locale strings
 		locale: {
-			monsters: {
+			monsters: { // sdk.locale.monsters.
 				// bosses
 				Andariel: 3021,
 				Duriel: 3054,
@@ -3371,7 +3379,7 @@ item: {
 				SuckerNest: 3175,
 				Hydra: 3325,
 			},
-			npcs: {
+			npcs: { // sdk.locale.npcs.
 				Asheara: 1008,
 				Hratli: 1009,
 				Alkor: 1010,
@@ -3450,7 +3458,7 @@ item: {
 				Combatant: 22482,
 				Nihlathak2: 22483,
 			},
-			items: {
+			items: { // sdk.locale.items.
 				KhalimsFlail: 1060,
 				KhalimsWill1: 1061,
 				KhalimsFlail2: 1062,
@@ -4018,11 +4026,10 @@ item: {
 				Youth: 20674,
 				Zephyr: 20675,
 			},
-			dialog: {
+			dialog: { // sdk.locale.dialog.
 				youDoNotHaveEnoughGoldForThat: 3362
 			},
-
-			text: {
+			text: { // sdk.locale.text.
 				CdKeyDisabled: 5199,
 				OnlyOneInstanceAtATime: 5201,
 				CdKeyIntendedForAnotherProduct: 5202,
@@ -4046,27 +4053,23 @@ item: {
 				CdKeyDisabledFromRealm: 11161,
 			},
 		},
-
-		game: {
-			profiletype: {
+		game: { 
+			profiletype: { // sdk.game.profiletype.
 				SinglePlayer: 1,
 				Battlenet: 2,
 				OpenBattlenet: 3,
 				TcpIpHost: 4,
 				TcpIpJoin: 5
 			},
-
-			controls: {
+			controls: { // sdk.game.controls.
 				Disabled: 4,
 			},
-
-			gametype: {
+			gametype: { // sdk.game.gametype.
 				Classic: 0,
 				Expansion: 1,
 			},
-
 			// out of game locations
-			locations: {
+			locations: { // sdk.game.locations.
 				PreSplash: 0,
 				Lobby: 1,
 				WaitingInLine: 2,
@@ -4114,9 +4117,8 @@ item: {
 				TcpIpUnableToConnect: 44,
 			},
 		},
-        
 
-		colors: {
+		colors: { // sdk.colors.
 			White: "ÿc0",
 			Red: "ÿc1",
 			NeonGreen: "ÿc2",
@@ -4130,7 +4132,7 @@ item: {
 			DarkGreen: "ÿc:",
 			Purple: "ÿc;",
 			Green: "ÿc<",
-			D2Bot: {
+			D2Bot: { // sdk.colors.D2Bot.
 				Black: 0,
 				Blue: 4,
 				Green: 5,
@@ -4142,7 +4144,7 @@ item: {
 			}
 		},
 
-		keys: {
+		keys: { // sdk.keys.
 			PauseBreak: 19,
 			End: 35,
 			Insert: 45,
