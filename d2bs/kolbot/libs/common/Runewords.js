@@ -262,13 +262,13 @@ const Runewords = {
 
 		if (item) {
 			do {
-				if (item && item.quality < 4 && item.sockets === runeword.length) {
+				if (item && item.quality < sdk.itemquality.Magic && item.sockets === runeword.length) {
 					/* check if item has items socketed in it
 						better check than getFlag(0x4000000) because randomly socketed items return false for it
 					*/
 
 					if ((!reroll && !item.getItem()) || (reroll && item.getItem() && !NTIP.CheckItem(item, this.pickitEntries))) {
-						if (!ethFlag || (ethFlag === 1 && item.getFlag(0x400000)) || (ethFlag === 2 && !item.getFlag(0x400000))) {
+						if (!ethFlag || (ethFlag === Roll.Eth && item.ethereal) || (ethFlag === Roll.NonEth && !item.ethereal)) {
 							return copyUnit(item);
 						}
 					}

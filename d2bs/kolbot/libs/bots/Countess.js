@@ -15,7 +15,7 @@ function Countess() {
 		sdk.areas.TowerCellarLvl3, sdk.areas.TowerCellarLvl4, sdk.areas.TowerCellarLvl5
 	], true)) throw new Error("Failed to move to Countess");
 
-	let poi = Game.getPresetObject(me.area, sdk.units.objects.SuperChest);
+	let poi = Game.getPresetObject(me.area, sdk.units.SuperChest);
 
 	if (!poi) throw new Error("Failed to move to Countess (preset not found)");
 
