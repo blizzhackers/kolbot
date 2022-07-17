@@ -33,7 +33,7 @@ function Pindleskin() {
 	try {
 		Attack.kill(getLocaleString(sdk.locale.monsters.Pindleskin));
 	} catch (e) {
-		console.errorReport(e);
+		console.error(e);
 	}
 
 	if (Config.Pindleskin.KillNihlathak) {

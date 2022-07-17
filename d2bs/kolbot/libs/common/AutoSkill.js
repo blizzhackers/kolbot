@@ -95,7 +95,7 @@ const AutoSkill = new function () {
 	this.allocate = function () {
 		let tick = getTickCount();
 
-		this.remaining = me.getStat(5);
+		this.remaining = me.getStat(sdk.stats.NewSkills);
 
 		if (!getUIFlag(sdk.uiflags.TradePrompt)) {
 			let addTo = this.skillToAdd(this.skillBuildOrder);
@@ -108,7 +108,7 @@ const AutoSkill = new function () {
 		}
 
 		while (getTickCount() - tick < 1500 + 2 * me.ping) {
-			if (this.remaining > me.getStat(5)) {
+			if (this.remaining > me.getStat(sdk.stats.NewSkills)) {
 				return true;
 			}
 
@@ -131,12 +131,12 @@ const AutoSkill = new function () {
 			return false;
 		}
 
-		while (me.getStat(5) > this.save) {
+		while (me.getStat(sdk.stats.NewSkills) > this.save) {
 			this.allocate();
 			delay(200 + me.ping); // may need longer delay under high ping
 
 			// break out of loop if we have skill points available but cannot allocate further due to unsatisfied skill
-			if (me.getStat(5) === this.remaining) {
+			if (me.getStat(sdk.stats.NewSkills) === this.remaining) {
 				this.count += 1;
 			}
 

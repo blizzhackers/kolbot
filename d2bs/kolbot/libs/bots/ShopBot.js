@@ -161,7 +161,7 @@ function ShopBot() {
 		// eslint-disable-next-line no-fallthrough
 		case NPC.Akara:
 		case NPC.Gheed:
-			wp = 1;
+			wp = sdk.areas.RogueEncampment;
 
 			break;
 		case NPC.Fara:
@@ -169,7 +169,7 @@ function ShopBot() {
 		// eslint-disable-next-line no-fallthrough
 		case NPC.Elzix:
 		case NPC.Drognan:
-			wp = 40;
+			wp = sdk.areas.LutGholein;
 
 			break;
 		case NPC.Hratli:
@@ -177,14 +177,14 @@ function ShopBot() {
 		// eslint-disable-next-line no-fallthrough
 		case NPC.Asheara:
 		case NPC.Ormus:
-			wp = 75;
+			wp = sdk.areas.KurastDocktown;
 
 			break;
 		case NPC.Halbu:
 			menuId = "Repair";
 		// eslint-disable-next-line no-fallthrough
 		case NPC.Jamella:
-			wp = 103;
+			wp = sdk.areas.PandemoniumFortress;
 
 			break;
 		case NPC.Larzuk:
@@ -192,7 +192,7 @@ function ShopBot() {
 		// eslint-disable-next-line no-fallthrough
 		case NPC.Malah:
 		case NPC.Anya:
-			wp = 109;
+			wp = sdk.areas.Harrogath;
 
 			break;
 		default:
@@ -257,12 +257,12 @@ function ShopBot() {
 		}
 
 		if (me.inTown) {
-			let area = getArea(),
-				wp = Game.getPresetObject(me.area, [119, 156, 237, 398, 429][me.act - 1]),
-				wpX = wp.roomx * 5 + wp.x,
-				wpY = wp.roomy * 5 + wp.y,
-				redPortal = (getUnits(sdk.unittype.Object, sdk.units.RedPortal).sort((a, b) => a.distance - b.distance)).first(),
-				exit = area.exits[0];
+			let area = getArea();
+			let wp = Game.getPresetObject(me.area, [119, 156, 237, 398, 429][me.act - 1]);
+			let wpX = wp.roomx * 5 + wp.x;
+			let wpY = wp.roomy * 5 + wp.y;
+			let redPortal = (getUnits(sdk.unittype.Object, sdk.units.RedPortal).sort((a, b) => a.distance - b.distance)).first();
+			let exit = area.exits[0];
 
 			for (let i = 1; i < area.exits.length; i++) {
 				if (getDistance(me, exit) > getDistance(me, area.exits[i])) {
@@ -270,20 +270,10 @@ function ShopBot() {
 				}
 			}
 
-			if (me.area === sdk.areas.Harrogath && !!redPortal && getDistance(me, redPortal) < 20
+			if ([sdk.areas.RogueEncampment, sdk.areas.Harrogath].includes(me.area) && !!redPortal && redPortal.distance < 20
 				&& Pather.usePortal(null, null, redPortal)) {
 				delay(3000);
-				Pather.usePortal(sdk.areas.Harrogath);
-
-				if (totalCycles === 0) {
-					delay(10000);
-				}
-
-				delay(1500);
-			} else if (me.area === sdk.areas.RogueEncampment && !!redPortal && getDistance(me, redPortal) < 20
-				&& Pather.usePortal(null, null, redPortal)) {
-				delay(3000);
-				Pather.usePortal(1);
+				Pather.usePortal(sdk.areas.townOf(me.area));
 
 				if (totalCycles === 0) {
 					delay(10000);
@@ -294,7 +284,7 @@ function ShopBot() {
 				Pather.moveToExit(me.area + 1, true);
 				Pather.moveToExit(me.area - 1, true);
 			} else {
-				Pather.useWaypoint([35, 48, 101, 107, 113][me.act - 1]);
+				Pather.useWaypoint([sdk.areas.CatacombsLvl2, sdk.areas.A2SewersLvl2, sdk.areas.DuranceofHateLvl2, sdk.areas.RiverofFlame, sdk.areas.CrystalizedPassage][me.act - 1]);
 			}
 		}
 

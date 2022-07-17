@@ -8,6 +8,8 @@
 // TODO: this needs to be re-worked
 // Perform certain actions after moving to each node
 const NodeAction = {
+	shrinesToIgnore: [],
+
 	// Run all the functions within NodeAction (except for itself)
 	go: function (arg) {
 		for (let i in this) {
@@ -62,7 +64,7 @@ const NodeAction = {
 
 	// Scan shrines while pathing
 	getShrines: function () {
-		Config.ScanShrines.length > 0 && Misc.scanShrines();
+		Config.ScanShrines.length > 0 && Misc.scanShrines(null, this.shrinesToIgnore);
 	}
 };
 

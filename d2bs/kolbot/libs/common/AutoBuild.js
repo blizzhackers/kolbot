@@ -12,8 +12,8 @@
 */
 js_strict(true);
 
-!isIncluded("common/Cubing.js") && include("common/Cubing.js");
 !isIncluded("common/Prototypes.js") && include("common/Prototypes.js");
+!isIncluded("common/Cubing.js") && include("common/Cubing.js");
 !isIncluded("common/Runewords.js") && include("common/Runewords.js");
 
 const AutoBuild = new function AutoBuild () {

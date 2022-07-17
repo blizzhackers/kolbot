@@ -582,49 +582,49 @@ const Skill = {
 		case sdk.skills.Strafe:
 		case sdk.skills.ImmolationArrow:
 		case sdk.skills.Fend:
-		case sdk.skills.FreezingArrow: // Freezing Arrow
-		case sdk.skills.LightningFury: // Lightning Fury
-		case sdk.skills.FireBolt: // Fire Bolt
-		case sdk.skills.ChargedBolt: // Charged Bolt
-		case sdk.skills.IceBolt: // Ice Bolt
-		case sdk.skills.Inferno: // Inferno
-		case sdk.skills.IceBlast: // Ice Blast
-		case sdk.skills.FireBall: // Fire Ball
-		case sdk.skills.Lightning: // Lightning
-		case sdk.skills.ChainLightning: // Chain Lightning
-		case sdk.skills.GlacialSpike: // Glacial Spike
-		case sdk.skills.FrozenOrb: // Frozen Orb
-		case sdk.skills.Teeth: // Teeth
-		case sdk.skills.PoisonDagger: // Poison Dagger
-		case sdk.skills.BoneSpear: // Bone Spear
-		case sdk.skills.BoneSpirit: // Bone Spirit
-		case sdk.skills.HolyBolt: // Holy Bolt
-		case sdk.skills.Charge: // Charge
-		case sdk.skills.BlessedHammer: // Blessed Hammer
-		case sdk.skills.FistoftheHeavens: // Fist of the Heavens
-		case sdk.skills.Leap: // Leap
-		case sdk.skills.DoubleThrow: // Double Throw
-		case sdk.skills.LeapAttack: // Leap Attack
-		case sdk.skills.Whirlwind: // Whirlwind
-		case sdk.skills.Firestorm: // Firestorm
-		case sdk.skills.MoltenBoulder: // Molten Boulder
-		case sdk.skills.ArcticBlast: // Arctic Blast
-		case sdk.skills.Twister: // Twister
-		case sdk.skills.ShockWave: // Shock Wave
-		case sdk.skills.Tornado: // Tornado
-		case sdk.skills.FireBlast: // Fire Trauma
-		case sdk.skills.TigerStrike: // Tiger Strike
-		case sdk.skills.ShockWeb: // Shock Field
-		case sdk.skills.BladeSentinel: // Blade Sentinel
-		case sdk.skills.FistsofFire: // Fists of Fire
-		case sdk.skills.CobraStrike: // Cobra Strike
-		case sdk.skills.BladeFury: // Blade Fury
-		case sdk.skills.ClawsofThunder: // Claws of Thunder
-		case sdk.skills.BladesofIce: // Blades of Ice
-		case sdk.skills.DragonFlight: // Dragon Flight
+		case sdk.skills.FreezingArrow:
+		case sdk.skills.LightningFury:
+		case sdk.skills.FireBolt:
+		case sdk.skills.ChargedBolt:
+		case sdk.skills.IceBolt:
+		case sdk.skills.Inferno:
+		case sdk.skills.IceBlast:
+		case sdk.skills.FireBall:
+		case sdk.skills.Lightning:
+		case sdk.skills.ChainLightning:
+		case sdk.skills.GlacialSpike:
+		case sdk.skills.FrozenOrb:
+		case sdk.skills.Teeth:
+		case sdk.skills.PoisonDagger:
+		case sdk.skills.BoneSpear:
+		case sdk.skills.BoneSpirit:
+		case sdk.skills.HolyBolt:
+		case sdk.skills.Charge:
+		case sdk.skills.BlessedHammer:
+		case sdk.skills.FistoftheHeavens:
+		case sdk.skills.Leap:
+		case sdk.skills.DoubleThrow:
+		case sdk.skills.LeapAttack:
+		case sdk.skills.Whirlwind:
+		case sdk.skills.Firestorm:
+		case sdk.skills.MoltenBoulder:
+		case sdk.skills.ArcticBlast:
+		case sdk.skills.Twister:
+		case sdk.skills.ShockWave:
+		case sdk.skills.Tornado:
+		case sdk.skills.FireBlast:
+		case sdk.skills.TigerStrike:
+		case sdk.skills.ShockWeb:
+		case sdk.skills.BladeSentinel:
+		case sdk.skills.FistsofFire:
+		case sdk.skills.CobraStrike:
+		case sdk.skills.BladeFury:
+		case sdk.skills.ClawsofThunder:
+		case sdk.skills.BladesofIce:
+		case sdk.skills.DragonFlight:
 			return 1;
-		case sdk.skills.Attack: // Normal Attack
-		case sdk.skills.Jab: // Jab
+		case sdk.skills.Attack:
+		case sdk.skills.Jab:
 		case sdk.skills.PowerStrike:
 		case sdk.skills.ChargedStrike:
 		case sdk.skills.LightningStrike:
@@ -1223,10 +1223,11 @@ const Misc = {
 
 	shrineStates: false,
 
-	scanShrines: function (range) {
+	scanShrines: function (range, ignore = []) {
 		if (!Config.ScanShrines.length) return false;
 
 		!range && (range = Pather.useTeleport() ? 25 : 15);
+		!Array.isArray(ignore) && (ignore = [ignore]);
 
 		let shrineList = [];
 
@@ -1276,7 +1277,7 @@ const Misc = {
 			let index = -1;
 			// Build a list of nearby shrines
 			do {
-				if (shrine.mode === 0 && getDistance(me.x, me.y, shrine.x, shrine.y) <= range) {
+				if (shrine.mode === 0 && !ignore.includes(shrine.objtype) && getDistance(me.x, me.y, shrine.x, shrine.y) <= range) {
 					shrineList.push(copyUnit(shrine));
 				}
 			} while (shrine.getNext());
@@ -1340,6 +1341,7 @@ const Misc = {
 		let shrineLocs = [];
 		let shrineIds = [2, 81, 83];
 		let unit = Game.getPresetObjects(area);
+		let result = false;
 
 		if (unit) {
 			for (let i = 0; i < unit.length; i += 1) {
@@ -1349,28 +1351,35 @@ const Misc = {
 			}
 		}
 
-		while (shrineLocs.length > 0) {
-			shrineLocs.sort(Sort.points);
-			let coords = shrineLocs.shift();
+		try {
+			NodeAction.shrinesToIgnore.push(type);
 
-			Skill.haveTK ? Pather.moveNear(coords[0], coords[1], 20) : Pather.moveTo(coords[0], coords[1], 2);
+			while (shrineLocs.length > 0) {
+				shrineLocs.sort(Sort.points);
+				let coords = shrineLocs.shift();
 
-			let shrine = Game.getObject("shrine");
+				Skill.haveTK ? Pather.moveNear(coords[0], coords[1], 20) : Pather.moveTo(coords[0], coords[1], 2);
 
-			if (shrine) {
-				do {
-					if (shrine.objtype === type && shrine.mode === 0) {
-						(!Skill.haveTK || !use) && Pather.moveTo(shrine.x - 2, shrine.y - 2);
+				let shrine = Game.getObject("shrine");
 
-						if (!use || this.getShrine(shrine)) {
-							return true;
+				if (shrine) {
+					do {
+						if (shrine.objtype === type && shrine.mode === 0) {
+							(!Skill.haveTK || !use) && Pather.moveTo(shrine.x - 2, shrine.y - 2);
+
+							if (!use || this.getShrine(shrine)) {
+								result = true;
+								return true;
+							}
 						}
-					}
-				} while (shrine.getNext());
+					} while (shrine.getNext());
+				}
 			}
+		} finally {
+			NodeAction.shrinesToIgnore.remove(type);
 		}
 
-		return false;
+		return result;
 	},
 
 	getItemDesc: function (unit, logILvl = true) {

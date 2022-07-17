@@ -1513,7 +1513,7 @@ Unit.prototype.equip = function (destLocation = undefined) {
 	// Not an item, or unidentified, or not enough stats
 	if (this.type !== 4 || !this.getFlag(0x10)
 		|| this.getStat(92) > me.getStat(12)
-		|| this.dexreq > me.getStat(2)
+		|| this.dexreq > me.getStat(sdk.stats.Dexterity)
 		|| this.strreq > me.getStat(0)) {
 		return false;
 	}
