@@ -571,7 +571,7 @@ const Precast = new function () {
 
 		if (unit) {
 			do {
-				if (unit.getParent() && chanted.indexOf(unit.getParent().name) > -1 && unit.distance <= 40) {
+				if (unit.getParent() && chanted.includes(unit.getParent().name) && unit.distance <= 40) {
 					Skill.cast(sdk.skills.Enchant, 0, unit);
 				}
 			} while (unit.getNext());
