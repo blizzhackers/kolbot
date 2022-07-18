@@ -423,8 +423,26 @@ function main() {
 			}
 
 			break;
-		case sdk.keys.NumpadDecimal: // show fps info - built in d2 function - does this need force server if we are using localchat?
-			say("/fps");
+		case sdk.keys.NumpadDecimal: // dump item info
+			{
+				let itemString = "";
+				let generalString = "";
+				let itemToCheck = Game.getSelectedUnit();
+
+				if (!!itemToCheck) {
+					generalString = "ÿc4ItemName: ÿc0" + itemToCheck.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, "")
+						+ "\nÿc4Pickit: ÿc0" + Pickit.checkItem(itemToCheck).result + " | ÿc4NTIP.CheckItem: ÿc0" + NTIP.CheckItem(itemToCheck, false, true).result;
+					itemString = "ÿc4Cubing Item: ÿc0" + Cubing.keepItem(itemToCheck) + " | ÿc4Runeword Item: ÿc0" + Runewords.keepItem(itemToCheck) + " | ÿc4Crafting Item: ÿc0" + CraftingSystem.keepItem(itemToCheck)
+						+ "\nÿc4ItemType: ÿc0" + itemToCheck.itemType + "| ÿc4Classid: ÿc0" + itemToCheck.classid + "| ÿc4Quality: ÿc0" + itemToCheck.quality
+						+ "\nÿc4ItemMode: ÿc0" + itemToCheck.mode + "| ÿc4Location: ÿc0" + itemToCheck.location + "| ÿc4Bodylocation: ÿc0" + itemToCheck.bodylocation;
+				}
+				
+				console.log("ÿc2*************Item Info Start*************");
+				console.log(itemString);
+				console.log("ÿc2General Info Start");
+				console.log(generalString);
+				console.log("ÿc1****************Info End****************");
+			}
 
 			break;
 		case sdk.keys.Numpad9: // get nearest preset unit id
