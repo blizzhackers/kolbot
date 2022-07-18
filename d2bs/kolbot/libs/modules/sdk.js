@@ -280,7 +280,7 @@ item: {
 		},
 
 		skills: { // sdk.skills.
-            subindex: { // sdk.skills.subindex.
+			subindex: { // sdk.skills.subindex.
 				hardpoints: 0,
 				softpoints: 1,
 			},
@@ -578,7 +578,7 @@ item: {
 			}
 		},
 		skillTabs: undefined,
-		// sdk.quest.
+
 		quest: {
 			item: { // sdk.quest.item.
 				// Act 1
