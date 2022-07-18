@@ -99,6 +99,10 @@ const Recipe = {
 const Cubing = {
 	recipes: [],
 	gemList: [],
+	chippedGems: [
+		sdk.items.gems.Chipped.Amethyst, sdk.items.gems.Chipped.Topaz, sdk.items.gems.Chipped.Sapphire, sdk.items.gems.Chipped.Emerald,
+		sdk.items.gems.Chipped.Ruby, sdk.items.gems.Chipped.Diamond, sdk.items.gems.Chipped.Skull
+	],
 
 	init: function () {
 		if (!Config.Cubing) return;
@@ -578,9 +582,9 @@ const Cubing = {
 			IngredientLoop:
 			for (let j = 0; j < this.recipes[i].Ingredients.length; j += 1) {
 				for (let k = 0; k < items.length; k += 1) {
-					if (((this.recipes[i].Ingredients[j] === "pgem" && this.gemList.includes(items[k].classid)) ||
-						(this.recipes[i].Ingredients[j] === "cgem" && [sdk.items.gems.Chipped.Amethyst, sdk.items.gems.Chipped.Topaz, sdk.items.gems.Chipped.Sapphire, sdk.items.gems.Chipped.Emerald, sdk.items.gems.Chipped.Ruby, sdk.items.gems.Chipped.Diamond, sdk.items.gems.Chipped.Skull].includes(items[k].classid)) ||
-						items[k].classid === this.recipes[i].Ingredients[j]) && this.validItem(items[k], this.recipes[i])) {
+					if (((this.recipes[i].Ingredients[j] === "pgem" && this.gemList.includes(items[k].classid))
+						|| (this.recipes[i].Ingredients[j] === "cgem" && this.chippedGems.includes(items[k].classid))
+						|| items[k].classid === this.recipes[i].Ingredients[j]) && this.validItem(items[k], this.recipes[i])) {
 
 						// push the item's info into the valid ingredients array. this will be used to find items when checking recipes
 						this.validIngredients.push({classid: items[k].classid, gid: items[k].gid});
@@ -680,9 +684,9 @@ const Cubing = {
 		for (let i = 0; i < recipe.Ingredients.length; i += 1) {
 			for (let j = 0; j < this.validIngredients.length; j += 1) {
 				if (usedGids.indexOf(this.validIngredients[j].gid) === -1 && (
-					this.validIngredients[j].classid === recipe.Ingredients[i] ||
-						(recipe.Ingredients[i] === "pgem" && this.gemList.includes(this.validIngredients[j].classid)) ||
-						(recipe.Ingredients[i] === "cgem" && [sdk.items.gems.Chipped.Amethyst, sdk.items.gems.Chipped.Topaz, sdk.items.gems.Chipped.Sapphire, sdk.items.gems.Chipped.Emerald, sdk.items.gems.Chipped.Ruby, sdk.items.gems.Chipped.Diamond, sdk.items.gems.Chipped.Skull].includes(this.validIngredients[j].classid))
+					this.validIngredients[j].classid === recipe.Ingredients[i]
+						|| (recipe.Ingredients[i] === "pgem" && this.gemList.includes(this.validIngredients[j].classid))
+						|| (recipe.Ingredients[i] === "cgem" && this.chippedGems.includes(this.validIngredients[j].classid))
 				)) {
 					let item = me.getItem(this.validIngredients[j].classid, -1, this.validIngredients[j].gid);
 
@@ -750,13 +754,10 @@ const Cubing = {
 	},
 
 	validItem: function (unit, recipe) {
-		// Don't use items in locked inventory space
-		if (unit.isInInventory && Storage.Inventory.IsLocked(unit, Config.Inventory)) {
-			return false;
-		}
-
 		// Excluded items
-		if (Runewords.validGids.includes(unit.gid) || CraftingSystem.validGids.includes(unit.gid)) {
+		// Don't use items in locked inventory space - or wanted by other systems
+		if ((unit.isInInventory && Storage.Inventory.IsLocked(unit, Config.Inventory)
+			|| Runewords.validGids.includes(unit.gid) || CraftingSystem.validGids.includes(unit.gid))) {
 			return false;
 		}
 
@@ -768,96 +769,69 @@ const Cubing = {
 
 			return true;
 		}
+		
+		// Token
+		if (recipe.Index === Recipe.Token) return true;
+
+		// START
+		const ntipResult = NTIP.CheckItem(unit);
 
 		if (recipe.Index >= Recipe.HitPower.Helm && recipe.Index <= Recipe.Safety.Weapon) {
 			// Junk jewels (NOT matching a pickit entry)
 			if (unit.itemType === sdk.itemtype.Jewel) {
-				if (recipe.Enabled && NTIP.CheckItem(unit) === Pickit.result.UNWANTED) {
+				if (recipe.Enabled && ntipResult === Pickit.result.UNWANTED) {
 					return true;
 				}
 			// Main item, NOT matching a pickit entry
-			} else if (unit.magic && Math.floor(me.charlvl / 2) + Math.floor(unit.ilvl / 2) >= recipe.Level && NTIP.CheckItem(unit) === Pickit.result.UNWANTED) {
+			} else if (unit.magic && Math.floor(me.charlvl / 2) + Math.floor(unit.ilvl / 2) >= recipe.Level && ntipResult === Pickit.result.UNWANTED) {
 				return true;
 			}
 
 			return false;
 		}
 
-		if (recipe.Index >= Recipe.Unique.Weapon.ToExceptional && recipe.Index <= Recipe.Unique.Armor.ToElite) {
-			// Unique item matching pickit entry
-			if (unit.unique && NTIP.CheckItem(unit) === Pickit.result.WANTED) {
+		let upgradeUnique = recipe.Index >= Recipe.Unique.Weapon.ToExceptional && recipe.Index <= Recipe.Unique.Armor.ToElite;
+		let upgradeRare = recipe.Index >= Recipe.Rare.Weapon.ToExceptional && recipe.Index <= Recipe.Rare.Armor.ToElite;
+		let socketNormal = recipe.Index >= Recipe.Socket.Shield && recipe.Index <= Recipe.Socket.Helm;
+
+		if (upgradeUnique || upgradeRare || socketNormal) {
+			switch (true) {
+			case upgradeUnique && unit.unique && ntipResult === Pickit.result.WANTED: // Unique item matching pickit entry
+			case upgradeRare && unit.rare && ntipResult === Pickit.result.WANTED: // Rare item matching pickit entry
+			case socketNormal && unit.normal && unit.sockets === 0: // Normal item matching pickit entry, no sockets
 				switch (recipe.Ethereal) {
-				case 0:
+				case Roll.All:
 				case undefined:
-					return NTIP.CheckItem(unit) === Pickit.result.WANTED;
-				case 1:
-					return unit.getFlag(0x400000) && NTIP.CheckItem(unit) === Pickit.result.WANTED;
-				case 2:
-					return !unit.getFlag(0x400000) && NTIP.CheckItem(unit) === Pickit.result.WANTED;
+					return ntipResult === Pickit.result.WANTED;
+				case Roll.Eth:
+					return unit.ethereal && ntipResult === Pickit.result.WANTED;
+				case Roll.NonEth:
+					return !unit.ethereal && ntipResult === Pickit.result.WANTED;
 				}
-			}
 
-			return false;
-		}
-
-		if (recipe.Index >= Recipe.Rare.Weapon.ToExceptional && recipe.Index <= Recipe.Rare.Armor.ToElite) {
-			// Rare item matching pickit entry
-			if (unit.rare && NTIP.CheckItem(unit) === Pickit.result.WANTED) {
-				switch (recipe.Ethereal) {
-				case 0:
-				case undefined:
-					return NTIP.CheckItem(unit) === Pickit.result.WANTED;
-				case 1:
-					return unit.getFlag(0x400000) && NTIP.CheckItem(unit) === Pickit.result.WANTED;
-				case 2:
-					return !unit.getFlag(0x400000) && NTIP.CheckItem(unit) === Pickit.result.WANTED;
-				}
-			}
-
-			return false;
-		}
-
-		if (recipe.Index >= Recipe.Socket.Shield && recipe.Index <= Recipe.Socket.Helm) {
-			// Normal item matching pickit entry, no sorcets
-			if (unit.normal && unit.sockets === 0) {
-				switch (recipe.Ethereal) {
-				case 0:
-				case undefined:
-					return NTIP.CheckItem(unit) === Pickit.result.WANTED;
-				case 1:
-					return unit.getFlag(0x400000) && NTIP.CheckItem(unit) === Pickit.result.WANTED;
-				case 2:
-					return !unit.getFlag(0x400000) && NTIP.CheckItem(unit) === Pickit.result.WANTED;
-				}
+				return false;
 			}
 
 			return false;
 		}
 
 		if (recipe.Index === Recipe.Reroll.Magic) {
-			if (unit.magic && unit.ilvl >= recipe.Level && NTIP.CheckItem(unit) === Pickit.result.UNWANTED) {
-				return true;
-			}
-
-			return false;
+			return (unit.magic && unit.ilvl >= recipe.Level && ntipResult === Pickit.result.UNWANTED);
 		}
 
 		if (recipe.Index === Recipe.Reroll.Rare) {
-			if (unit.rare && NTIP.CheckItem(unit) === Pickit.result.UNWANTED) {
-				return true;
-			}
-
-			return false;
+			return (unit.rare && ntipResult === Pickit.result.UNWANTED);
 		}
 
 		if (recipe.Index === Recipe.Reroll.HighRare) {
-			if (recipe.Ingredients[0] === unit.classid && unit.rare && NTIP.CheckItem(unit) === Pickit.result.UNWANTED) {
+			if (recipe.Ingredients[0] === unit.classid && unit.rare && ntipResult === Pickit.result.UNWANTED) {
 				recipe.Enabled = true;
 
 				return true;
 			}
 
-			if (recipe.Enabled && recipe.Ingredients[2] === unit.classid && unit.itemType === sdk.itemtype.Ring && unit.getStat(sdk.stats.MaxManaPercent) && !Storage.Inventory.IsLocked(unit, Config.Inventory)) {
+			if (recipe.Enabled && recipe.Ingredients[2] === unit.classid && unit.itemType === sdk.itemtype.Ring
+				&& unit.getStat(sdk.stats.MaxManaPercent) && !Storage.Inventory.IsLocked(unit, Config.Inventory)) {
 				return true;
 			}
 
@@ -865,15 +839,7 @@ const Cubing = {
 		}
 
 		if (recipe.Index === Recipe.LowToNorm.Armor || recipe.Index === Recipe.LowToNorm.Weapon) {
-			if (unit.lowquality && NTIP.CheckItem(unit) === Pickit.result.UNWANTED) {
-				return true;
-			}
-
-			return false;
-		}
-
-		if (recipe.Index === Recipe.Token) {
-			return true;
+			return (unit.lowquality && ntipResult === Pickit.result.UNWANTED);
 		}
 
 		return false;
@@ -930,7 +896,7 @@ const Cubing = {
 							Misc.logItem("Cubing Kept", cubeItems[j], result.line);
 
 							break;
-						case Pickit.result.CRAFTING: // Crafting System
+						case Pickit.result.CRAFTING:
 							CraftingSystem.update(cubeItems[j]);
 
 							break;

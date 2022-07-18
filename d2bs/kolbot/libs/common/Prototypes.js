@@ -1529,7 +1529,7 @@ Unit.prototype.equip = function (destLocation = undefined) {
 		destLocation.indexOf(item.bodylocation) !== -1
 		|| ( // Deal with double handed weapons
 
-			(item.bodylocation === 4 || item.bodylocation === 5)
+			(item.isOnMain)
 			&& [4, 5].indexOf(destLocation) // in case destination is on the weapon/shield slot
 			&& (
 				doubleHanded.indexOf(this.itemType) !== -1 // this item is a double handed item
@@ -1850,11 +1850,17 @@ Object.defineProperties(Unit.prototype, {
 			return this.location === sdk.storage.Belt && this.mode === sdk.itemmode.inBelt;
 		}
 	},
+	isOnMain: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item || this.location !== sdk.storage.Equipped) return false;
+			return [sdk.body.RightArm, sdk.body.LeftArm].includes(this.bodylocation);
+		}
+	},
 	isOnSwap: {
 		get: function () {
-			if (this.type !== sdk.unittype.Item) return false;
-			return (this.location === sdk.storage.Equipped
-				&& (me.weaponswitch === 0 && [11, 12].includes(this.bodylocation)) || (me.weaponswitch === 1 && [4, 5].includes(this.bodylocation)));
+			if (this.type !== sdk.unittype.Item || this.location !== sdk.storage.Equipped) return false;
+			return ((me.weaponswitch === 0 && [sdk.body.RightArmSecondary, sdk.body.LeftArmSecondary].includes(this.bodylocation))
+				|| (me.weaponswitch === 1 && [sdk.body.RightArm, sdk.body.LeftArm].includes(this.bodylocation)));
 		}
 	},
 	identified: {

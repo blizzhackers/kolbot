@@ -73,8 +73,6 @@ const Precast = new function () {
 		}
 
 		let classid, skillTab;
-		let sumCurr = 0;
-		let sumSwap = 0;
 
 		switch (skillId) {
 		case sdk.skills.FrozenArmor:
@@ -144,6 +142,8 @@ const Precast = new function () {
 
 		me.weaponswitch !== 0 && me.switchWeapons(0);
 
+		let sumCurr = 0;
+		let sumSwap = 0;
 		let sumStats = function (item) {
 			return (item.getStat(sdk.stats.AllSkills)
 				+ item.getStat(sdk.stats.AddClassSkills, classid) + item.getStat(sdk.stats.AddSkillTab, skillTab)
@@ -151,14 +151,14 @@ const Precast = new function () {
 		};
 
 		me.getItemsEx()
-			.filter(item => item.isEquipped && [4, 5, 11, 12].includes(item.bodylocation))
+			.filter(item => item.isEquipped && [sdk.body.RightArm, sdk.body.LeftArm, sdk.body.RightArmSecondary, sdk.body.LeftArmSecondary].includes(item.bodylocation))
 			.forEach(function (item) {
-				if (item.bodylocation === 4 || item.bodylocation === 5) {
+				if (item.isOnMain) {
 					sumCurr += sumStats(item);
 					return;
 				}
 
-				if (item.bodylocation === 11 || item.bodylocation === 12) {
+				if (item.isOnSwap) {
 					sumSwap += sumStats(item);
 					return;
 				}
@@ -183,7 +183,7 @@ const Precast = new function () {
 
 		try {
 			!dontSwitch && me.switchWeapons(this.getBetterSlot(skillId));
-			if (me.getSkill(2) !== skillId && !me.setSkill(skillId, 0)) throw new Error("Failed to set skill on hand");
+			if (me.getSkill(2) !== skillId && !me.setSkill(skillId, 0)) throw new Error("Failed to set " + getSkillById(skillId) + " on hand");
 
 			if (Config.PacketCasting > 1 || usePacket) {
 				console.debug("Packet casting: " + skillId);
@@ -234,7 +234,7 @@ const Precast = new function () {
 				}
 			}
 		} catch (e) {
-			console.errorReport(e);
+			console.error(e);
 			success = false;
 		}
 
@@ -478,11 +478,7 @@ const Precast = new function () {
 		let check = me.checkItem({name: sdk.locale.items.CalltoArms, equipped: true});
 
 		if (check.have) {
-			if (check.item.isOnSwap) {
-				this.haveCTA = 1;
-			} else {
-				this.haveCTA = 0;
-			}
+			this.haveCTA = check.item.isOnSwap ? 1 : 0;
 		}
 
 		return this.haveCTA > -1;
@@ -598,7 +594,7 @@ const Precast = new function () {
 			}
 			Pather.useWaypoint(returnTo);
 		} catch (e) {
-			console.errorReport(e);
+			console.error(e);
 		} finally {
 			if (me.area !== returnTo && (!Pather.useWaypoint(returnTo) || !Pather.useWaypoint(sdk.areas.townOf(me.area)))) {
 				Pather.journeyTo(returnTo);

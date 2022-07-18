@@ -56,7 +56,7 @@ const Attack = {
 						return true;
 					}
 				} else {
-					if (item.bodylocation === 4 || item.bodylocation === 5) {
+					if (item.isOnMain) {
 						return true;
 					}
 				}
@@ -922,7 +922,14 @@ const Attack = {
 		if (unitA.getState(sdk.states.Attract)) return 1;
 		if (unitB.getState(sdk.states.Attract)) return -1;
 
-		let ids = [312, 58, 59, 60, 61, 62, 101, 102, 103, 104, 105, sdk.monsters.BloodRaven, 278, 279, 280, 281, 282, 298, 299, 300, 645, 646, 647, 662, 663, 664, 667, 668, 669, 670, 675, 676];
+		let ids = [
+			sdk.monsters.OblivionKnight1, sdk.monsters.OblivionKnight2, sdk.monsters.OblivionKnight3, sdk.monsters.FallenShaman, sdk.monsters.CarverShaman, sdk.monsters.CarverShaman2,
+			sdk.monsters.DevilkinShaman, sdk.monsters.DevilkinShaman2, sdk.monsters.DarkShaman1, sdk.monsters.DarkShaman2, sdk.monsters.WarpedShaman, sdk.monsters.HollowOne, sdk.monsters.Guardian1,
+			sdk.monsters.Guardian2, sdk.monsters.Unraveler1, sdk.monsters.Unraveler2, sdk.monsters.Ancient1, sdk.monsters.BaalSubjectMummy, sdk.monsters.BloodRaven, sdk.monsters.RatManShaman,
+			sdk.monsters.FetishShaman, sdk.monsters.FlayerShaman1, sdk.monsters.FlayerShaman2, sdk.monsters.SoulKillerShaman1, sdk.monsters.SoulKillerShaman2, sdk.monsters.StygianDollShaman1,
+			sdk.monsters.StygianDollShaman2, sdk.monsters.FleshSpawner1, sdk.monsters.FleshSpawner2, sdk.monsters.StygianHag, sdk.monsters.Grotesque1, sdk.monsters.Ancient2, sdk.monsters.Ancient3,
+			sdk.monsters.Grotesque2
+		];
 
 		if (!me.inArea(sdk.areas.ClawViperTempleLvl2) && ids.includes(unitA.classid) && ids.includes(unitB.classid)) {
 			// Kill "scary" uniques first (like Bishibosh)
@@ -1087,9 +1094,7 @@ const Attack = {
 	},
 
 	deploy: function (unit, distance, spread, range) {
-		if (arguments.length < 4) {
-			throw new Error("deploy: Not enough arguments supplied");
-		}
+		if (arguments.length < 4) throw new Error("deploy: Not enough arguments supplied");
 
 		let safeLoc = this.findSafeSpot(unit, distance, spread, range);
 
@@ -1263,7 +1268,7 @@ const Attack = {
 		case sdk.skills.Concentrate:
 		case sdk.skills.Frenzy:
 		case sdk.skills.MindBlast:
-		case 500: // Summoner
+		case sdk.skills.Summoner:
 			return "physical";
 		case sdk.skills.HolyBolt:
 			// no need to use this.elements array because it returns before going over the array
@@ -1328,7 +1333,7 @@ const Attack = {
 
 	// Check if a monster is immune to specified attack type
 	checkResist: function (unit, val, maxres = 100) {
-		if (!unit || !unit.type || unit.type === sdk.unittype.Player) return true;
+		if (!unit || !unit.type || unit.isPlayer) return true;
 
 		let damageType = typeof val === "number" ? this.getSkillElement(val) : val;
 		let addLowerRes = !!(Skill.canUse(sdk.skills.LowerResist) && unit.curseable);
@@ -1420,7 +1425,7 @@ const Attack = {
 
 		if (item) {
 			do {
-				if (item.bodylocation === 4 || item.bodylocation === 5) {
+				if (item.isOnMain) {
 					switch (item.itemType) {
 					case sdk.itemtype.Bow:
 					case sdk.itemtype.AmazonBow:
