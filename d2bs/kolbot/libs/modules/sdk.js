@@ -2220,6 +2220,7 @@ item: {
 				Beetleburst: 747,
 				TheSmith: 754,
 				Radament: 744,
+				CreepingFeature: 748,
 				FireEye: 750,
 				DarkElder: 751,
 				Corpsefire: 774,

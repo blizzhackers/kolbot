@@ -1,7 +1,7 @@
 /**
 *  @filename    Mausoleum.js
-*  @author      kolton
-*  @desc        clear Mausoleum
+*  @author      kolton, theBGuy
+*  @desc        clear Mausoleum - optionally kill Bishibosh and Bloodraven along the way. Also optionally clear crypt
 *
 */
 
@@ -9,6 +9,12 @@ function Mausoleum() {
 	Town.doChores();
 	Pather.useWaypoint(sdk.areas.ColdPlains);
 	Precast.doPrecast(true);
+
+	if (Config.Mausoleum.KillBishibosh) {
+		Pather.moveToPreset(sdk.areas.ColdPlains, sdk.unittype.Monster, sdk.monsters.preset.Bishibosh);
+		Attack.kill(getLocaleString(sdk.locale.monsters.Bishibosh));
+		Pickit.pickItems();
+	}
 
 	if (!Pather.moveToExit(sdk.areas.BurialGrounds, true)) throw new Error("Failed to move to Burial Grounds");
 

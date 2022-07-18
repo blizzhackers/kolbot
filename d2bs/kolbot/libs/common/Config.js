@@ -204,7 +204,7 @@ let Config = {
 	RejuvBuffer: 0,
 	PickRange: 40,
 	MakeRoom: true,
-	ClearInvOnStart: true,
+	ClearInvOnStart: false,
 	FastPick: false,
 	ManualPlayPick: false,
 	OpenChests: {
@@ -365,6 +365,7 @@ let Config = {
 	// Script specific
 	MFLeader: false,
 	Mausoleum: {
+		KillBishibosh: false,
 		KillBloodRaven: false,
 		ClearCrypt: false
 	},
