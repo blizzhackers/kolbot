@@ -264,7 +264,7 @@ const Runewords = {
 			do {
 				if (item && item.quality < sdk.itemquality.Magic && item.sockets === runeword.length) {
 					/* check if item has items socketed in it
-						better check than getFlag(0x4000000) because randomly socketed items return false for it
+						better check than getFlag(sdk.items.flags.Runeword) because randomly socketed items return false for it
 					*/
 
 					if ((!reroll && !item.getItem()) || (reroll && item.getItem() && !NTIP.CheckItem(item, this.pickitEntries))) {

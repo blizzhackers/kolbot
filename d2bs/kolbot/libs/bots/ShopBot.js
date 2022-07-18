@@ -127,7 +127,7 @@ function ShopBot() {
 
 		for (let i = 0; i < items.length; i += 1) {
 			if (Storage.Inventory.CanFit(items[i]) && Pickit.canPick(items[i]) &&
-					me.gold >= items[i].getItemCost(0) &&
+					me.gold >= items[i].getItemCost(sdk.items.cost.ToBuy) &&
 					NTIP.CheckItem(items[i], this.pickEntries)
 			) {
 				beep();

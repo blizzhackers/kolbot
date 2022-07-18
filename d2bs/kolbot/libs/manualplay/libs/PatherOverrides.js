@@ -95,7 +95,7 @@ Pather.changeAct = function (act) {
 };
 
 Pather.getWP = function (area, clearPath) {
-	let useTK = me.getSkill(sdk.skills.Telekinesis, 1),
+	let useTK = me.getSkill(sdk.skills.Telekinesis, sdk.skills.subindex.SoftPoints),
 		wpIDs = [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539];
 
 	area !== me.area && this.journeyTo(area);
@@ -166,7 +166,7 @@ Pather.walkTo = function (x = undefined, y = undefined, minDist = undefined) {
 		if (Config.Charge && me.paladin && me.mp >= 9 && getDistance(me.x, me.y, x, y) > 8 && Skill.setSkill(sdk.skills.Charge, sdk.skills.hand.Left)) {
 			if (Config.Vigor) {
 				Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right);
-			} else if (!Config.Vigor && me.getSkill(sdk.skills.HolyFreeze, 1)) {
+			} else if (!Config.Vigor && me.getSkill(sdk.skills.HolyFreeze, sdk.skills.subindex.SoftPoints)) {
 				// Useful in classic to keep mobs cold while you rush them
 				Skill.setSkill(sdk.skills.HolyFreeze, sdk.skills.hand.Right);
 			}
@@ -352,7 +352,7 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
 					}
 
 					// Only do this once
-					if (fail > 1 && me.getSkill(143, 1) && !leaped) {
+					if (fail > 1 && me.getSkill(143, sdk.skills.subindex.SoftPoints) && !leaped) {
 						Skill.cast(143, 0, node.x, node.y);
 						leaped = true;
 					}

@@ -34,7 +34,7 @@ const AutoSkill = new function () {
 			// Check ReqSkills
 			let preReq = (getBaseStat('skills', skillid, t));
 
-			if (preReq > 0 && preReq < 356 && !me.getSkill(preReq, 0)) {
+			if (preReq > 0 && preReq < 356 && !me.getSkill(preReq, sdk.skills.subindex.HardPoints)) {
 				return preReq;
 			}
 		}
@@ -43,7 +43,7 @@ const AutoSkill = new function () {
 	};
 
 	this.skillCheck = function (skillid, count) {
-		if (me.getSkill(skillid, 0) <= me.charlvl - getBaseStat("skills", skillid, 176) && me.getSkill(skillid, 0) < count) {
+		if (me.getSkill(skillid, sdk.skills.subindex.HardPoints) <= me.charlvl - getBaseStat("skills", skillid, 176) && me.getSkill(skillid, sdk.skills.subindex.HardPoints) < count) {
 			return true;
 		}
 
@@ -64,11 +64,11 @@ const AutoSkill = new function () {
 			}
 
 			// check to see if skill count in previous array is satisfied
-			if (i > 0 && inputArray[i - 1][2] && (!me.getSkill(inputArray[i - 1][0], 0) ? 0 : me.getSkill(inputArray[i - 1][0], 0)) < inputArray[i - 1][1]) {
+			if (i > 0 && inputArray[i - 1][2] && (!me.getSkill(inputArray[i - 1][0], sdk.skills.subindex.HardPoints) ? 0 : me.getSkill(inputArray[i - 1][0], sdk.skills.subindex.HardPoints)) < inputArray[i - 1][1]) {
 				return false;
 			}
 
-			if (me.getSkill(inputArray[i][0], 0) && this.skillCheck(inputArray[i][0], inputArray[i][1])) {
+			if (me.getSkill(inputArray[i][0], sdk.skills.subindex.HardPoints) && this.skillCheck(inputArray[i][0], inputArray[i][1])) {
 				return inputArray[i][0];
 			}
 

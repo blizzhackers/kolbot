@@ -77,8 +77,13 @@ item: {
 				Left: 0,
 				Right: 1,
 				ShiftLeft: 2, // For belt
-				Mercenary: 3 // Give to merc
+				MercFromBelt: 3, // For belt
+				Mercenary: 4 // Give to merc
 			},
+			shift: {
+				NoShift: 0,
+				Shift: 1
+			}
 		},
 
 		cursortype: {
@@ -288,16 +293,22 @@ item: {
 		},
 
 		skills: {
-			hand: {
-				Right: 0,
-				Left: 1
-			},
 			get: {
 				RightName: 0,
 				LeftName: 1,
 				RightId: 2,
 				LeftId: 3,
 				AllSkills: 4
+			},
+			hand: {
+				Right: 0,
+				Left: 1,
+				LeftNoShift: 2,
+				RightShift: 3,
+			},
+			subindex: {
+				HardPoints: 0,
+				SoftPoints: 1
 			},
 			// General
 			Attack: 0,
@@ -2464,6 +2475,30 @@ item: {
 		},
 
 		items: {
+			cost: {
+				ToBuy: 0,
+				ToSell: 1,
+				ToRepair: 2,
+			},
+			flags: {
+				Equipped: 0x00000001,
+				InSocket: 0x00000008,
+				Identified: 0x00000010,
+				OnActiveWeaponSlot: 0x00000040,
+				OnSwapWeaponSlot: 0x00000080,
+				Broken: 0x00000100,
+				FullRejuv: 0x00000400,
+				Socketed: 0x00000800,
+				InTradeGamble: 0x00002000,
+				NotInSocket: 0x00004000,
+				Ear: 0x00010000,
+				StartingItem: 0x00020000,
+				RuneQuestPotion: 0x00200000,
+				Ethereal: 0x00400000,
+				IsAnItem: 0x00800000,
+				Personalized: 0x01000000,
+				Runeword: 0x04000000,
+			},
 			// Weapons
 			"HandAxe": 0,
 			"Axe": 1,

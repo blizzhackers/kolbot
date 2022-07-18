@@ -400,7 +400,7 @@ function Follower() {
 					if (piece === me.name || piece === "all") {
 						skill = parseInt(msg.split(" ")[2], 10);
 
-						if (me.getSkill(skill, 1)) {
+						if (me.getSkill(skill, sdk.skills.subindex.SoftPoints)) {
 							this.announce("Active aura is: " + skill);
 
 							Config.AttackSkill[2] = skill;
@@ -422,7 +422,7 @@ function Follower() {
 					if (charClass.includes(piece) || piece === me.name || piece === "all") {
 						skill = parseInt(msg.split(" ")[2], 10);
 
-						if (me.getSkill(skill, 1)) {
+						if (me.getSkill(skill, sdk.skills.subindex.SoftPoints)) {
 							this.announce("Attack skill is: " + skill);
 
 							Config.AttackSkill[1] = skill;

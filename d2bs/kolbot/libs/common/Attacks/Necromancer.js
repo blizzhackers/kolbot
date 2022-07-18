@@ -447,7 +447,7 @@ const ClassAttack = {
 		}
 
 		let corpseList = [];
-		let range = Math.floor((me.getSkill(Config.ExplodeCorpses, 1) + 7) / 3);
+		let range = Math.floor((me.getSkill(Config.ExplodeCorpses, sdk.skills.subindex.SoftPoints) + 7) / 3);
 		let corpse = Game.getMonster(-1, 12);
 
 		if (corpse) {
@@ -503,7 +503,7 @@ const ClassAttack = {
 		let corpse = Game.getMonster(-1, 12);
 
 		// Assume CorpseExplosion if no range specified
-		range === undefined && (range = Math.floor((me.getSkill(Config.ExplodeCorpses, 1) + 7) / 3));
+		range === undefined && (range = Math.floor((me.getSkill(Config.ExplodeCorpses, sdk.skills.subindex.SoftPoints) + 7) / 3));
 
 		if (corpse) {
 			do {

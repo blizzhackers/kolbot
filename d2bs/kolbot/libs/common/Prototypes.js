@@ -171,7 +171,7 @@ Unit.prototype.buy = function (shiftBuy, gamble) {
 	}
 
 	// Can we afford the item?
-	if (me.gold < this.getItemCost(0)) return false;
+	if (me.gold < this.getItemCost(sdk.items.cost.ToBuy)) return false;
 
 	let oldGold = me.gold;
 	let itemCount = me.itemcount;
@@ -764,7 +764,7 @@ Unit.prototype.getSuffix = function (id) {
 
 Unit.prototype.__defineGetter__("dexreq",
 	function () {
-		let ethereal = this.getFlag(0x400000);
+		let ethereal = this.getFlag(sdk.items.flags.Ethereal);
 		let reqModifier = this.getStat(sdk.stats.ReqPercent);
 		let baseReq = getBaseStat("items", this.classid, "reqdex");
 		let finalReq = baseReq + Math.floor(baseReq * reqModifier / 100) - (ethereal ? 10 : 0);
@@ -774,7 +774,7 @@ Unit.prototype.__defineGetter__("dexreq",
 
 Unit.prototype.__defineGetter__("strreq",
 	function () {
-		let ethereal = this.getFlag(0x400000);
+		let ethereal = this.getFlag(sdk.items.flags.Ethereal);
 		let reqModifier = this.getStat(sdk.stats.ReqPercent);
 		let baseReq = getBaseStat("items", this.classid, "reqstr");
 		let finalReq = baseReq + Math.floor(baseReq * reqModifier / 100) - (ethereal ? 10 : 0);
@@ -1037,7 +1037,7 @@ Unit.prototype.getStatEx = function (id, subid) {
 		return this.getStat(sdk.stats.PerLevelHp) / 2048;
 	}
 
-	if (this.getFlag(0x04000000)) { // Runeword
+	if (this.getFlag(sdk.items.flags.Runeword)) { // Runeword
 		switch (id) {
 		case sdk.stats.ArmorPercent:
 			if ([0, 1].indexOf(this.mode) < 0) {
@@ -1418,10 +1418,9 @@ Unit.prototype.castChargedSkill = function (...args) {
 		throw Error("invalid arguments, expected 'me' object or 'item' unit");
 	}
 
-	if (this === me) { // Called the function the unit, me.
-		if (!skillId) {
-			throw Error('Must supply skillId on me.castChargedSkill');
-		}
+	// Called the function the unit, me.
+	if (this === me) {
+		if (!skillId) throw Error('Must supply skillId on me.castChargedSkill');
 
 		chargedItems = [];
 
@@ -1431,17 +1430,17 @@ Unit.prototype.castChargedSkill = function (...args) {
 			.forEach(function (item) {
 				let stats = item.getStat(-2);
 
-				if (stats.hasOwnProperty(204)) {
-					if (stats[204] instanceof Array) {
-						stats = stats[204].filter(validCharge);
+				if (stats.hasOwnProperty(sdk.stats.ChargedSkill)) {
+					if (stats[sdk.stats.ChargedSkill] instanceof Array) {
+						stats = stats[sdk.stats.ChargedSkill].filter(validCharge);
 						stats.length && chargedItems.push({
 							charge: stats.first(),
 							item: item
 						});
 					} else {
-						if (stats[204].skill === skillId && stats[204].charges > 1) {
+						if (stats[sdk.stats.ChargedSkill].skill === skillId && stats[sdk.stats.ChargedSkill].charges > 1) {
 							chargedItems.push({
-								charge: stats[204].charges,
+								charge: stats[sdk.stats.ChargedSkill].charges,
 								item: item
 							});
 						}
@@ -1449,22 +1448,19 @@ Unit.prototype.castChargedSkill = function (...args) {
 				}
 			});
 
-		if (chargedItems.length === 0) {
-			throw Error("Don't have the charged skill (" + skillId + "), or not enough charges");
-		}
+		if (chargedItems.length === 0) throw Error("Don't have the charged skill (" + skillId + "), or not enough charges");
 
 		chargedItem = chargedItems.sort((a, b) => a.charge.level - b.charge.level).first().item;
 
 		return chargedItem.castChargedSkill.apply(chargedItem, args);
-	} else if (this.type === 4) {
-		charge = this.getStat(-2)[204]; // WARNING. Somehow this gives duplicates
+	} else if (this.type === sdk.unittype.Item) {
+		charge = this.getStat(-2)[sdk.stats.ChargedSkill]; // WARNING. Somehow this gives duplicates
 
-		if (!charge) {
-			throw Error('No charged skill on this item');
-		}
+		if (!charge) throw Error('No charged skill on this item');
 
 		if (skillId) {
-			charge = charge.filter(item => (skillId && item.skill === skillId) && !!item.charges); // Filter out all other charged skills
+			// Filter out all other charged skills
+			charge = charge.filter(item => (skillId && item.skill === skillId) && !!item.charges);
 		} else if (charge.length > 1) {
 			throw new Error('multiple charges on this item without a given skillId');
 		}
@@ -1473,7 +1469,7 @@ Unit.prototype.castChargedSkill = function (...args) {
 
 		if (charge) {
 			// Setting skill on hand
-			if (!Config.PacketCasting || Config.PacketCasting === 1 && skillId !== 54) {
+			if (!Config.PacketCasting || Config.PacketCasting === 1 && skillId !== sdk.skills.Teleport) {
 				return Skill.cast(skillId, 0, x || me.x, y || me.y, this); // Non packet casting
 			}
 
@@ -1495,23 +1491,23 @@ Unit.prototype.castChargedSkill = function (...args) {
  * @description equip an item.
  */
 Unit.prototype.equip = function (destLocation = undefined) {
-	if (this.location === 1) return true; // Item is equiped
+	if (this.isEquipped) return true; // Item already equiped
 
 	const findspot = function (item) {
-			let tempspot = Storage.Stash.FindSpot(item);
+		let tempspot = Storage.Stash.FindSpot(item);
 
-			if (getUIFlag(sdk.uiflags.Stash) && tempspot) {
-				return {location: Storage.Stash.location, coord: tempspot};
-			}
+		if (getUIFlag(sdk.uiflags.Stash) && tempspot) {
+			return {location: Storage.Stash.location, coord: tempspot};
+		}
 
-			tempspot = Storage.Inventory.FindSpot(item);
+		tempspot = Storage.Inventory.FindSpot(item);
 
-			return tempspot ? {location: Storage.Inventory.location, coord: tempspot} : false;
-		},
-		doubleHanded = [26, 27, 34, 35, 67, 85, 86];
+		return tempspot ? {location: Storage.Inventory.location, coord: tempspot} : false;
+	};
+	const doubleHanded = [26, 27, 34, 35, 67, 85, 86];
 
 	// Not an item, or unidentified, or not enough stats
-	if (this.type !== 4 || !this.getFlag(0x10)
+	if (this.type !== 4 || !this.getFlag(sdk.items.flags.Identified)
 		|| this.getStat(92) > me.getStat(12)
 		|| this.dexreq > me.getStat(sdk.stats.Dexterity)
 		|| this.strreq > me.getStat(0)) {
@@ -1868,14 +1864,14 @@ Object.defineProperties(Unit.prototype, {
 			// Can't tell, as it isn't an item
 			if (this.type !== sdk.unittype.Item) return undefined;
 			// Is also true for white items
-			return this.getFlag(0x10);
+			return this.getFlag(sdk.items.flags.Identified);
 		}
 	},
 	ethereal: {
 		get: function () {
 			// Can't tell, as it isn't an item
 			if (this.type !== sdk.unittype.Item) return undefined;
-			return this.getFlag(0x400000);
+			return this.getFlag(sdk.items.flags.Ethereal);
 		}
 	},
 	twoHanded: {
@@ -1887,7 +1883,7 @@ Object.defineProperties(Unit.prototype, {
 	runeword: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return !!this.getFlag(0x4000000);
+			return !!this.getFlag(sdk.items.flags.Runeword);
 		}
 	},
 	questItem: {
@@ -1904,7 +1900,7 @@ Object.defineProperties(Unit.prototype, {
 	sellable: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			if (this.getItemCost(1) <= 1) return false;
+			if (this.getItemCost(sdk.items.cost.ToSell) <= 1) return false;
 			return (!this.questItem
 				&& [
 					sdk.items.quest.KeyofTerror, sdk.items.quest.KeyofHate, sdk.items.quest.KeyofDestruction, sdk.items.quest.DiablosHorn,

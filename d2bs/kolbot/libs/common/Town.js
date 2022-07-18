@@ -832,7 +832,7 @@ const Town = {
 			let result = Pickit.checkItem(item);
 
 			// Force ID for unid items matching autoEquip criteria
-			//result.result === 1 && !item.getFlag(0x10) && Item.hasTier(item) && (result.result = -1);
+			//result.result === 1 && !item.getFlag(sdk.items.flags.Identified) && Item.hasTier(item) && (result.result = -1);
 
 			// unid item that should be identified
 			if (result.result === Pickit.result.UNID) {
@@ -955,7 +955,7 @@ const Town = {
 
 			if (result.result === Pickit.result.WANTED/*  && Item.autoEquipCheck(items[i]) */) {
 				try {
-					if (Storage.Inventory.CanFit(items[i]) && me.gold >= items[i].getItemCost(0)) {
+					if (Storage.Inventory.CanFit(items[i]) && me.gold >= items[i].getItemCost(sdk.items.cost.ToBuy)) {
 						Misc.itemLogger("Shopped", items[i]);
 						Misc.logItem("Shopped", items[i], result.line);
 						items[i].buy();

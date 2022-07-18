@@ -163,7 +163,7 @@ const Item = {
 		if (tier > 0 && bodyLoc) {
 			for (let i = 0; i < bodyLoc.length; i += 1) {
 				// Low tier items shouldn't be kept if they can't be equipped
-				if (tier > this.getEquippedItem(bodyLoc[i]).tier && (this.canEquip(item) || !item.getFlag(0x10))) {
+				if (tier > this.getEquippedItem(bodyLoc[i]).tier && (this.canEquip(item) || !item.getFlag(sdk.items.flags.Identified))) {
 					return true;
 				}
 			}
@@ -211,7 +211,7 @@ const Item = {
 				for (let j = 0; j < bodyLoc.length; j += 1) {
 					// khalim's will adjustment
 					if ([3, 7].indexOf(items[0].location) > -1 && tier > this.getEquippedItem(bodyLoc[j]).tier && this.getEquippedItem(bodyLoc[j]).classid !== 174) {
-						if (!items[0].getFlag(0x10)) { // unid
+						if (!items[0].getFlag(sdk.items.flags.Identified)) { // unid
 							let tome = me.findItem(519, 0, 3);
 
 							if (tome && tome.getStat(sdk.stats.Quantity) > 0) {

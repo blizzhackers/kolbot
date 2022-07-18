@@ -33,7 +33,7 @@ function ControlBot() {
 
 			break;
 		case "chant":
-			if (!Config.ControlBot.Chant.Enchant || !me.getSkill(sdk.skills.Enchant, 1)) {
+			if (!Config.ControlBot.Chant.Enchant || !me.getSkill(sdk.skills.Enchant, sdk.skills.subindex.SoftPoints)) {
 				Config.ControlBot.Chant.Enchant = false;
 				Config.ControlBot.Chant.AutoEnchant = false;
 				controlCommands.splice(i, 1);
@@ -49,7 +49,7 @@ function ControlBot() {
 
 			break;
 		case "bo":
-			if (!Config.ControlBot.Bo || (!me.getSkill(sdk.skills.BattleOrders, 1) && Precast.haveCTA === -1)) {
+			if (!Config.ControlBot.Bo || (!me.getSkill(sdk.skills.BattleOrders, sdk.skills.subindex.SoftPoints) && Precast.haveCTA === -1)) {
 				Config.ControlBot.Bo = false;
 				controlCommands.splice(i, 1);
 				i--;
@@ -280,7 +280,7 @@ function ControlBot() {
 
 			let tome = npc.getItem(sdk.items.TomeofTownPortal);
 
-			if (!!tome && tome.getItemCost(0) < me.gold && tome.buy()) {
+			if (!!tome && tome.getItemCost(sdk.items.cost.ToBuy) < me.gold && tome.buy()) {
 				delay(500);
 				tpTome = me.findItems(sdk.items.TomeofTownPortal, 0, 3);
 				tpTome.forEach(function (book) {
@@ -288,7 +288,7 @@ function ControlBot() {
 						let scroll = npc.getItem(sdk.items.ScrollofTownPortal);
 
 						while (book.getStat(sdk.stats.Quantity) < 20) {
-							if (!!scroll && scroll.getItemCost(0) < me.gold) {
+							if (!!scroll && scroll.getItemCost(sdk.items.cost.ToBuy) < me.gold) {
 								scroll.buy(true);
 							} else {
 								break;

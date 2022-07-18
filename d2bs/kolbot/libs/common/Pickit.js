@@ -109,19 +109,19 @@ const Pickit = {
 			}
 
 			if (!this.invoLocked) {
-				let itemValuePerSquare = unit.getItemCost(1) / (unit.sizex * unit.sizey);
+				let itemValuePerSquare = unit.getItemCost(sdk.items.cost.ToSell) / (unit.sizex * unit.sizey);
 
 				if (itemValuePerSquare >= 2000) {
 					// If total gold is less than 500k pick up anything worth 2k gold per square to sell in town.
 					return {
 						result: Pickit.result.TRASH,
-						line: "Valuable Item: " + unit.getItemCost(1)
+						line: "Valuable Item: " + unit.getItemCost(sdk.items.cost.ToSell)
 					};
 				} else if (itemValuePerSquare >= 10) {
 					// If total gold is less than LowGold setting pick up anything worth 10 gold per square to sell in town.
 					return {
 						result: Pickit.result.TRASH,
-						line: "LowGold Item: " + unit.getItemCost(1)
+						line: "LowGold Item: " + unit.getItemCost(sdk.items.cost.ToSell)
 					};
 				}
 			}

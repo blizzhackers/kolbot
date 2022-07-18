@@ -27,12 +27,12 @@ const ClassAttack = {
 
 		if (!this.feralBoost && Config.AttackSkill.includes(sdk.skills.FeralRage)) {
 			// amount of life leech with max rage
-			this.feralBoost = ((Math.floor(me.getSkill(sdk.skills.FeralRage, 1) / 2) + 3) * 4) + this.baseLL;
+			this.feralBoost = ((Math.floor(me.getSkill(sdk.skills.FeralRage, sdk.skills.subindex.SoftPoints) / 2) + 3) * 4) + this.baseLL;
 		}
 
 		if (!this.maulBoost && Config.AttackSkill.includes(sdk.skills.Maul)) {
 			// amount of enhanced damage with max maul
-			this.maulBoost = ((Math.floor(me.getSkill(sdk.skills.Maul, 1) / 2) + 3) * 20) + this.baseED;
+			this.maulBoost = ((Math.floor(me.getSkill(sdk.skills.Maul, sdk.skills.subindex.SoftPoints) / 2) + 3) * 20) + this.baseED;
 		}
 
 		Misc.shapeShift(Config.Wereform);

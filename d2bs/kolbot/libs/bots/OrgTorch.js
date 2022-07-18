@@ -139,20 +139,34 @@ function OrgTorch() {
 	// todo - equipping an item from storage if we have it
 	this.getFade = function () {
 		if (Config.OrgTorch.GetFade && !me.getState(sdk.states.Fade)
-			&& me.haveSome([{name: sdk.locale.items.Treachery, equipped: true}, {name: sdk.locale.items.LastWish, equipped: true}, {name: sdk.locale.items.SpiritWard, equipped: true}])) {
+			&& me.haveSome([{name: sdk.locale.items.Treachery}, {name: sdk.locale.items.LastWish}, {name: sdk.locale.items.SpiritWard}])) {
 			console.log(sdk.colors.Orange + "OrgTorch :: " + sdk.colors.White + "Getting Fade");
 			// lets figure out what fade item we have before we leave town
 			let fadeItem = me.findFirst([
 				{name: sdk.locale.items.Treachery, equipped: true},
 				{name: sdk.locale.items.LastWish, equipped: true},
-				{name: sdk.locale.items.SpiritWard, equipped: true}
-			]);
+				{name: sdk.locale.items.SpiritWard, equipped: true},
+				{name: sdk.locale.items.Treachery},
+				{name: sdk.locale.items.LastWish},
+				{name: sdk.locale.items.SpiritWard}]);
 
+			let bodyLoc;
+			if (Config.OrgTorch.GetFadeUseStorageItem && fadeItem.have && fadeItem.isInStorage) {
+				bodyLoc = Item.getBodyLoc(fadeItem.item);
+				fadeItem.isInStash && Town.openStash();
+				fadeItem.equip(bodyLoc.first());
+
+				let cursorItem = Game.getCursorUnit();
+				Storage.Stash.MoveTo(cursorItem) || Storage.Inventory.MoveTo(cursorItem);
+				if (!cursorItem.isInStorage) {
+					//
+				}
+			}
 			Pather.useWaypoint(sdk.areas.RiverofFlame);
 			Precast.doPrecast(true);
 			// check if item is on switch
 			let mainSlot;
-			// move into the fire - get toasty
+
 			Pather.moveTo(7811, 5872);
 				
 			if (fadeItem.have && fadeItem.item.isOnSwap && me.weaponswitch !== 1) {

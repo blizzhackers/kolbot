@@ -1323,7 +1323,7 @@ const Attack = {
 	getLowerResistPercent: function () {
 		let calc = function (level) { return Math.floor(Math.min(25 + (45 * ((110 * level) / (level + 6)) / 100), 70)); };
 		if (Skill.canUse(sdk.skills.LowerResist)) {
-			return calc(me.getSkill(sdk.skills.LowerResist, 1));
+			return calc(me.getSkill(sdk.skills.LowerResist, sdk.skills.subindex.SoftPoints));
 		}
 		return 0;
 	},
@@ -1334,7 +1334,7 @@ const Attack = {
 			return calc(12);
 		}
 		if (Skill.canUse(sdk.skills.Conviction)) {
-			return calc(me.getSkill(sdk.skills.Conviction, 1));
+			return calc(me.getSkill(sdk.skills.Conviction, sdk.skills.subindex.SoftPoints));
 		}
 		return 0;
 	},

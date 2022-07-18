@@ -22,10 +22,10 @@ const Skill = {
 					if (skill === undefined) return false;
 					if (this.hardpoints) return true;
 					if (!this.checked) {
-						this.hardpoints = !!me.getSkill(skill, 0);
+						this.hardpoints = !!me.getSkill(skill, sdk.skills.subindex.HardPoints);
 						this.checked = true;
 					}
-					return (this.hardpoints || me.getSkill(skill, 1));
+					return (this.hardpoints || me.getSkill(skill, sdk.skills.subindex.SoftPoints));
 				}
 			};
 		},
@@ -288,9 +288,9 @@ const Skill = {
 			if (Config.UseColdArmor === true) {
 				Precast.precastables.coldArmor.best = (function () {
 					let coldArmor = [
-						{skillId: sdk.skills.ShiverArmor, level: me.getSkill(sdk.skills.ShiverArmor, 1)},
-						{skillId: sdk.skills.ChillingArmor, level: me.getSkill(sdk.skills.ChillingArmor, 1)},
-						{skillId: sdk.skills.FrozenArmor, level: me.getSkill(sdk.skills.FrozenArmor, 1)},
+						{skillId: sdk.skills.ShiverArmor, level: me.getSkill(sdk.skills.ShiverArmor, sdk.skills.subindex.SoftPoints)},
+						{skillId: sdk.skills.ChillingArmor, level: me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.SoftPoints)},
+						{skillId: sdk.skills.FrozenArmor, level: me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.SoftPoints)},
 					].filter(skill => !!skill.level && skill.level > 0).sort((a, b) => b.level - a.level).first();
 					return coldArmor !== undefined ? coldArmor.skillId : false;
 				})();
@@ -352,38 +352,38 @@ const Skill = {
 	getDuration: function (skillId = -1) {
 		switch (skillId) {
 		case sdk.skills.Decoy:
-			return ((10 + me.getSkill(sdk.skills.Decoy, 1) * 5) * 1000);
+			return ((10 + me.getSkill(sdk.skills.Decoy, sdk.skills.subindex.SoftPoints) * 5) * 1000);
 		case sdk.skills.FrozenArmor:
-			return (((12 * me.getSkill(sdk.skills.FrozenArmor, 1) + 108) + ((me.getSkill(sdk.skills.ShiverArmor, 0) + me.getSkill(sdk.skills.ChillingArmor, 0)) * 10)) * 1000);
+			return (((12 * me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.SoftPoints) + 108) + ((me.getSkill(sdk.skills.ShiverArmor, sdk.skills.subindex.HardPoints) + me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.HardPoints)) * 10)) * 1000);
 		case sdk.skills.ShiverArmor:
-			return (((12 * me.getSkill(sdk.skills.ShiverArmor, 1) + 108) + ((me.getSkill(sdk.skills.FrozenArmor, 0) + me.getSkill(sdk.skills.ChillingArmor, 0)) * 10)) * 1000);
+			return (((12 * me.getSkill(sdk.skills.ShiverArmor, sdk.skills.subindex.SoftPoints) + 108) + ((me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.HardPoints) + me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.HardPoints)) * 10)) * 1000);
 		case sdk.skills.ChillingArmor:
-			return (((6 * me.getSkill(sdk.skills.ChillingArmor, 1) + 138) + ((me.getSkill(sdk.skills.FrozenArmor, 0) + me.getSkill(sdk.skills.ChillingArmor, 0)) * 10)) * 1000);
+			return (((6 * me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.SoftPoints) + 138) + ((me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.HardPoints) + me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.HardPoints)) * 10)) * 1000);
 		case sdk.skills.EnergyShield:
-			return (84 + (60 * me.getSkill(sdk.skills.EnergyShield, 1)) * 1000);
+			return (84 + (60 * me.getSkill(sdk.skills.EnergyShield, sdk.skills.subindex.SoftPoints)) * 1000);
 		case sdk.skills.ThunderStorm:
-			return (24 + (8 * me.getSkill(sdk.skills.ThunderStorm, 1))) * 1000;
+			return (24 + (8 * me.getSkill(sdk.skills.ThunderStorm, sdk.skills.subindex.SoftPoints))) * 1000;
 		case sdk.skills.Shout:
-			return (((10 + me.getSkill(sdk.skills.Shout, 1) * 10) + ((me.getSkill(sdk.skills.BattleOrders, 0) + me.getSkill(sdk.skills.BattleCommand, 0)) * 5)) * 1000);
+			return (((10 + me.getSkill(sdk.skills.Shout, sdk.skills.subindex.SoftPoints) * 10) + ((me.getSkill(sdk.skills.BattleOrders, sdk.skills.subindex.HardPoints) + me.getSkill(sdk.skills.BattleCommand, sdk.skills.subindex.HardPoints)) * 5)) * 1000);
 		case sdk.skills.BattleOrders:
-			return (((20 + me.getSkill(sdk.skills.BattleOrders, 1) * 10) + ((me.getSkill(sdk.skills.Shout, 0) + me.getSkill(sdk.skills.BattleCommand, 0)) * 5)) * 1000);
+			return (((20 + me.getSkill(sdk.skills.BattleOrders, sdk.skills.subindex.SoftPoints) * 10) + ((me.getSkill(sdk.skills.Shout, sdk.skills.subindex.HardPoints) + me.getSkill(sdk.skills.BattleCommand, sdk.skills.subindex.HardPoints)) * 5)) * 1000);
 		case sdk.skills.BattleCommand:
-			return (((10 * me.getSkill(sdk.skills.BattleCommand, 1) - 5) + ((me.getSkill(sdk.skills.Shout, 0) + me.getSkill(sdk.skills.BattleOrders, 0)) * 5)) * 1000);
+			return (((10 * me.getSkill(sdk.skills.BattleCommand, sdk.skills.subindex.SoftPoints) - 5) + ((me.getSkill(sdk.skills.Shout, sdk.skills.subindex.HardPoints) + me.getSkill(sdk.skills.BattleOrders, sdk.skills.subindex.HardPoints)) * 5)) * 1000);
 		case sdk.skills.HolyShield:
-			return (5 + (25 * me.getSkill(sdk.skills.HolyShield, 1)) * 1000);
+			return (5 + (25 * me.getSkill(sdk.skills.HolyShield, sdk.skills.subindex.SoftPoints)) * 1000);
 		case sdk.skills.Hurricane:
-			return (10 + (2 * me.getSkill(sdk.skills.CycloneArmor, 0)) * 1000);
+			return (10 + (2 * me.getSkill(sdk.skills.CycloneArmor, sdk.skills.subindex.HardPoints)) * 1000);
 		case sdk.skills.Werewolf:
 		case sdk.skills.Werebear:
-			return (40 + (20 * me.getSkill(sdk.skills.Lycanthropy, 1) + 20) * 1000);
+			return (40 + (20 * me.getSkill(sdk.skills.Lycanthropy, sdk.skills.subindex.SoftPoints) + 20) * 1000);
 		case sdk.skills.BurstofSpeed:
-			return (108 + (12 * me.getSkill(sdk.skills.BurstofSpeed, 1)) * 1000);
+			return (108 + (12 * me.getSkill(sdk.skills.BurstofSpeed, sdk.skills.subindex.SoftPoints)) * 1000);
 		case sdk.skills.Fade:
-			return (108 + (12 * me.getSkill(sdk.skills.Fade, 1)) * 1000);
+			return (108 + (12 * me.getSkill(sdk.skills.Fade, sdk.skills.subindex.SoftPoints)) * 1000);
 		case sdk.skills.Venom:
-			return (116 + (4 * me.getSkill(sdk.skills.Venom, 1)) * 1000);
+			return (116 + (4 * me.getSkill(sdk.skills.Venom, sdk.skills.subindex.SoftPoints)) * 1000);
 		case sdk.skills.BladeShield:
-			return (15 + (5 * me.getSkill(sdk.skills.BladeShield, 1)) * 1000);
+			return (15 + (5 * me.getSkill(sdk.skills.BladeShield, sdk.skills.subindex.SoftPoints)) * 1000);
 		default:
 			return 0;
 		}
@@ -394,17 +394,17 @@ const Skill = {
 
 		switch (skillId) {
 		case sdk.skills.Raven:
-			return Math.min(me.getSkill(skillId, 1), 5);
+			return Math.min(me.getSkill(skillId, sdk.skills.subindex.SoftPoints), 5);
 		case sdk.skills.SummonSpiritWolf:
-			return Math.min(me.getSkill(skillId, 1), 5);
+			return Math.min(me.getSkill(skillId, sdk.skills.subindex.SoftPoints), 5);
 		case sdk.skills.SummonDireWolf:
-			return Math.min(me.getSkill(skillId, 1), 3);
+			return Math.min(me.getSkill(skillId, sdk.skills.subindex.SoftPoints), 3);
 		case sdk.skills.RaiseSkeleton:
 		case sdk.skills.RaiseSkeletalMage:
-			skillNum = me.getSkill(skillId, 1);
+			skillNum = me.getSkill(skillId, sdk.skills.subindex.SoftPoints);
 			return skillNum < 4 ? skillNum : (Math.floor(skillNum / 3) + 2);
 		case sdk.skills.Revive:
-			return me.getSkill(sdk.skills.Revive, 1);
+			return me.getSkill(sdk.skills.Revive, sdk.skills.subindex.SoftPoints);
 		case sdk.skills.ShadowWarrior:
 		case sdk.skills.ShadowMaster:
 		case sdk.skills.PoisonCreeper:
@@ -469,7 +469,7 @@ const Skill = {
 		case sdk.skills.FrostNova:
 		case sdk.skills.Twister:
 		case sdk.skills.Tornado:
-		case 500: // Summoner
+		case sdk.skills.Summoner:
 			return 5;
 		case sdk.skills.ChargedBolt:
 			return 6;
@@ -521,15 +521,15 @@ const Skill = {
 			return 50;
 		// Variable range
 		case sdk.skills.StaticField:
-			return Math.floor((me.getSkill(sdk.skills.StaticField, 1) + 4) * 2 / 3);
+			return Math.floor((me.getSkill(sdk.skills.StaticField, sdk.skills.subindex.SoftPoints) + 4) * 2 / 3);
 		case sdk.skills.Leap:
 		{
-			let skLvl = me.getSkill(sdk.skills.Leap, 1);
+			let skLvl = me.getSkill(sdk.skills.Leap, sdk.skills.subindex.SoftPoints);
 			return Math.floor(Math.min(4 + (26 * ((110 * skLvl / (skLvl + 6)) / 100)), 30) * (2 / 3));
 		}
 		case sdk.skills.ArcticBlast:
 		{
-			let skLvl = me.getSkill(sdk.skills.ArcticBlast, 1);
+			let skLvl = me.getSkill(sdk.skills.ArcticBlast, sdk.skills.subindex.SoftPoints);
 			let range = Math.floor(((33 + (2 * skLvl)) / 4) * (2 / 3));
 			// Druid using this on physical immunes needs the monsters to be within range of hurricane
 			range > 6 && Config.AttackSkill[5] === sdk.skills.ArcticBlast && (range = 6);
@@ -622,7 +622,7 @@ const Skill = {
 		case sdk.skills.ClawsofThunder:
 		case sdk.skills.BladesofIce:
 		case sdk.skills.DragonFlight:
-			return 1;
+			return sdk.skills.hand.Left;
 		case sdk.skills.Attack:
 		case sdk.skills.Jab:
 		case sdk.skills.PowerStrike:
@@ -648,11 +648,11 @@ const Skill = {
 		case sdk.skills.DragonTalon:
 		case sdk.skills.DragonClaw:
 		case sdk.skills.DragonTail:
-			return 2; // Shift bypass
+			return sdk.skills.hand.LeftNoShift; // Shift bypass
 		}
 
 		// Every other skill
-		return 0;
+		return sdk.skills.hand.Right;
 	},
 
 	charges: [],
@@ -705,23 +705,24 @@ const Skill = {
 		} else {
 			let clickType, shift;
 
+			// todo - get a better idea of clickType in reference to clickMap
 			switch (hand) {
-			case 0: // Right hand + No Shift
+			case sdk.skills.hand.Right: // Right hand + No Shift
 				clickType = 3;
 				shift = 0;
 
 				break;
-			case 1: // Left hand + Shift
+			case sdk.skills.hand.Left: // Left hand + Shift
 				clickType = 0;
 				shift = 1;
 
 				break;
-			case 2: // Left hand + No Shift
+			case sdk.skills.hand.LeftNoShift: // Left hand + No Shift
 				clickType = 0;
 				shift = 0;
 
 				break;
-			case 3: // Right hand + Shift
+			case sdk.skills.hand.RightShift: // Right hand + Shift
 				clickType = 3;
 				shift = 1;
 
@@ -765,12 +766,12 @@ const Skill = {
 	// Put a skill on desired slot
 	setSkill: function (skillId, hand, item) {
 		// Check if the skill is already set
-		if (me.getSkill(hand === 0 ? 2 : 3) === skillId) return true;
+		if (me.getSkill(hand === sdk.skills.hand.Right ? sdk.skills.get.RightId : sdk.skills.get.LeftId) === skillId) return true;
 		if (!item && !Skill.canUse(skillId)) return false;
 
 		// Charged skills must be cast from right hand
-		if (hand === undefined || hand === 3 || item) {
-			item && hand !== 0 && console.warn('[ÿc9Warningÿc0] charged skills must be cast from right hand');
+		if (hand === undefined || hand === sdk.skills.hand.RightShift || item) {
+			item && hand !== sdk.skills.hand.Right && console.warn('[ÿc9Warningÿc0] charged skills must be cast from right hand');
 			hand = 0;
 		}
 
@@ -801,7 +802,6 @@ const Skill = {
 
 		// Can be cast by werewolf only
 		if (me.getState(sdk.states.Wearwolf) && [sdk.skills.Werewolf, sdk.skills.FeralRage, sdk.skills.Rabies, sdk.skills.Fury].includes(skillId)) return true;
-
 		// Can be cast by werebear only
 		if (me.getState(sdk.states.Wearbear) && [sdk.skills.Werebear, sdk.skills.Maul, sdk.skills.ShockWave].includes(skillId)) return true;
 
@@ -822,10 +822,10 @@ const Skill = {
 
 	// Get mana cost of the skill (mBot)
 	getManaCost: function (skillId) {
-		if (skillId < 6) return 0;
+		if (skillId < sdk.skills.MagicArrow) return 0;
 		if (this.manaCostList.hasOwnProperty(skillId)) return this.manaCostList[skillId];
 
-		let skillLvl = me.getSkill(skillId, 1);
+		let skillLvl = me.getSkill(skillId, sdk.skills.subindex.SoftPoints);
 		let effectiveShift = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024];
 		let lvlmana = getBaseStat(3, skillId, "lvlmana") === 65535 ? -1 : getBaseStat(3, skillId, "lvlmana"); // Correction for skills that need less mana with levels (kolton)
 		let ret = Math.max((getBaseStat(3, skillId, "mana") + lvlmana * (skillLvl - 1)) * (effectiveShift[getBaseStat(3, skillId, "manashift")] / 256), getBaseStat(3, skillId, "minmana"));
@@ -2331,7 +2331,7 @@ const Packet = {
 			if (!npc) throw new Error("buyItem: No NPC menu open.");
 
 			// Can we afford the item?
-			if (oldGold < unit.getItemCost(0)) return false;
+			if (oldGold < unit.getItemCost(sdk.items.cost.ToBuy)) return false;
 
 			for (let i = 0; i < 3; i += 1) {
 				sendPacket(1, 0x32, 4, npc.gid, 4, unit.gid, 4, shiftBuy ? 0x80000000 : gamble ? 0x2 : 0x0, 4, 0);

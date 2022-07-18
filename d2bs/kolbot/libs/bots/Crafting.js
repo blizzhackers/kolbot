@@ -351,7 +351,7 @@ function shopStuff(npcId, classids, amount) {
 				for (let i = 0; i < items.length; i += 1) {
 					if (Storage.Inventory.CanFit(items[i])
 							&& Pickit.canPick(items[i])
-							&& me.gold >= items[i].getItemCost(0)
+							&& me.gold >= items[i].getItemCost(sdk.items.cost.ToBuy)
 							&& classids.includes(items[i].classid)) {
 
 						//print("Bought " + items[i].name);
