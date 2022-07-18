@@ -363,7 +363,7 @@ function BaalAssistant() {
 								break MainLoop;
 							default:
 								if (getTickCount() - tick < 7e3) {
-									if (me.paladin && me.getState(sdk.states.Poison) && Skill.setSkill(sdk.skills.Cleansing, 0)) {
+									if (me.paladin && me.getState(sdk.states.Poison) && Skill.setSkill(sdk.skills.Cleansing, sdk.skills.hand.Right)) {
 										break;
 									}
 								}

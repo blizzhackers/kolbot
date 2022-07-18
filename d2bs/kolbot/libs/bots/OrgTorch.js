@@ -145,7 +145,7 @@ function OrgTorch() {
 			let fadeItem = me.findFirst([
 				{name: sdk.locale.items.Treachery, equipped: true},
 				{name: sdk.locale.items.LastWish, equipped: true},
-				{name: sdk.locale.items.SpiritWard, equipped: true},
+				{name: sdk.locale.items.SpiritWard, equipped: true}
 			]);
 
 			Pather.useWaypoint(sdk.areas.RiverofFlame);
@@ -160,7 +160,7 @@ function OrgTorch() {
 				me.switchWeapons(1);
 			}
 
-			Skill.canUse(sdk.skills.Salvation) && Skill.setSkill(sdk.skills.Salvation, 0);
+			Skill.canUse(sdk.skills.Salvation) && Skill.setSkill(sdk.skills.Salvation, sdk.skills.hand.Right);
 
 			while (!me.getState(sdk.states.Fade)) {
 				delay(100);
@@ -310,10 +310,10 @@ function OrgTorch() {
 			Pather.moveTo(nodes[i].x, nodes[i].y);
 		}
 
-		useSalvation && Skill.setSkill(sdk.skills.Salvation, 0);
+		useSalvation && Skill.setSkill(sdk.skills.Salvation, sdk.skills.hand.Right);
 		this.lure(sdk.monsters.UberMephisto);
 		Pather.moveTo(25129, 5198);
-		useSalvation && Skill.setSkill(sdk.skills.Salvation, 0);
+		useSalvation && Skill.setSkill(sdk.skills.Salvation, sdk.skills.hand.Right);
 		this.lure(sdk.monsters.UberMephisto);
 
 		if (!Game.getMonster(sdk.monsters.UberMephisto)) {

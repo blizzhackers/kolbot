@@ -89,6 +89,61 @@ const Town = {
 		sdk.itemtype.AntidotePotion, sdk.itemtype.ThawingPotion
 	],
 
+	needPotions: function () {
+		// we aren't using MinColumn if none of the values are set
+		if (!Config.MinColumn.some(el => el > 0)) return false;
+		// no hp pots or mp pots in Config.BeltColumn (who uses only rejuv pots?)
+		if (!Config.BeltColumn.some(el => ["hp", "mp"].includes(el))) return false;
+		
+		// Start
+		if (me.charlvl > 2 && me.gold > 1000) {
+			let pots = {
+				hp: [],
+				mp: [],
+			};
+			me.getItemsEx(-1, sdk.itemmode.inBelt)
+				.filter(p => [sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion].includes(p.itemType) && p.x < 4)
+				.forEach(p => {
+					if (p.itemType === sdk.itemtype.HealingPotion) {
+						pots.hp.push(copyUnit(p));
+					} else if (p.itemType === sdk.itemtype.ManaPotion) {
+						pots.mp.push(copyUnit(p));
+					}
+				});
+
+			// quick check
+			if ((Config.BeltColumn.includes("hp") && !pots.hp.length)
+				|| (Config.BeltColumn.includes("mp") && !pots.mp.length)) {
+				return true;
+			}
+
+			// should we check the actual amount in the column?
+			// For now just keeping the way it was and checking if a column is empty
+			for (let i = 0; i < 4; i += 1) {
+				if (Config.MinColumn[i] <= 0) {
+					continue;
+				}
+
+				switch (Config.BeltColumn[i]) {
+				case "hp":
+					if (!pots.hp.some(p => p.x === i)) {
+						console.debug("Column: " + (i + 1) + " needs hp pots");
+						return true;
+					}
+					break;
+				case "mp":
+					if (!pots.mp.some(p => p.x === i)) {
+						console.debug("Column: " + (i + 1) + " needs mp pots");
+						return true;
+					}
+					break;
+				}
+			}
+		}
+
+		return false;
+	},
+
 	// Do town chores
 	doChores: function (repair = false) {
 		delay(250);
@@ -849,7 +904,7 @@ const Town = {
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 500) {
-				if (getCursorType() === 6) {
+				if (getCursorType() === sdk.cursortype.Identify) {
 					break CursorLoop;
 				}
 
@@ -857,12 +912,12 @@ const Town = {
 			}
 		}
 
-		if (getCursorType() !== 6) return false;
+		if (getCursorType() !== sdk.cursortype.Identify) return false;
 
 		delay(270);
 
 		for (let i = 0; i < 3; i += 1) {
-			if (getCursorType() === 6) {
+			if (getCursorType() === sdk.cursortype.Identify) {
 				clickItem(0, unit);
 			}
 

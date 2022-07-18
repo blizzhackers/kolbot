@@ -310,7 +310,7 @@ function main() {
 							break;
 						case "moveItemFromInvoToStash":
 						case "moveItemFromStashToInvo":
-							unit = getUnit(101);
+							unit = Game.getSelectedUnit();
 
 							switch (unit.location) {
 							case 3:
@@ -326,7 +326,7 @@ function main() {
 							break;
 						case "moveItemFromInvoToCube":
 						case "moveItemFromCubeToInvo":
-							unit = getUnit(101);
+							unit = Game.getSelectedUnit();
 
 							switch (unit.location) {
 							case 3:
@@ -342,7 +342,7 @@ function main() {
 							break;
 						case "moveItemFromInvoToTrade":
 						case "moveItemFromTradeToInvo":
-							unit = getUnit(101);
+							unit = Game.getSelectedUnit();
 
 							switch (unit.location) {
 							case 3:
@@ -364,7 +364,7 @@ function main() {
 
 							break;
 						case "sellItem":
-							unit = getUnit(101);
+							unit = Game.getSelectedUnit();
 
 							if (unit.location === 3 && unit.sellable) {
 								try {

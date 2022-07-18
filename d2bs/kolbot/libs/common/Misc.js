@@ -841,7 +841,7 @@ const Skill = {
 		if (!unit || !Skill.canUse(sdk.skills.Telekinesis)
 			|| typeof unit !== 'object' || unit.type !== sdk.unittype.Object
 			|| unit.name.toLowerCase() === 'dummy'
-			|| (unit.name.toLowerCase() === 'portal' && !me.inTown && unit.classid !== 298)
+			|| (unit.name.toLowerCase() === 'portal' && !me.inTown && unit.classid !== sdk.units.ArcaneSanctuaryPortal)
 			|| [sdk.units.RedPortalToAct4, sdk.units.WorldstonePortal, sdk.units.RedPortal, sdk.units.RedPortalToAct5].includes(unit.classid)) {
 			return false;
 		}
@@ -1141,9 +1141,7 @@ const Misc = {
 		!area && (area = me.area);
 		area !== me.area && Pather.journeyTo(area);
 		
-		let coords = [];
 		let presetUnits = Game.getPresetObjects(area);
-
 		if (!presetUnits) return false;
 
 		if (!chestIds.length) {
@@ -1153,6 +1151,8 @@ const Misc = {
 				406, 407, 413, 420, 424, 425, 430, 431, 432, 433, 454, 455, 501, 502, 504, 505, 580, 581
 			];
 		}
+
+		let coords = [];
 
 		while (presetUnits.length > 0) {
 			if (chestIds.includes(presetUnits[0].id)) {
@@ -1237,7 +1237,7 @@ const Misc = {
 
 			for (let i = 0; i < Config.ScanShrines.length; i += 1) {
 				switch (Config.ScanShrines[i]) {
-				case 0: // None
+				case sdk.shrines.None:
 				case sdk.shrines.Refilling:
 				case sdk.shrines.Health:
 				case sdk.shrines.Mana:
@@ -1392,7 +1392,7 @@ const Misc = {
 		// Lines are normally in reverse. Add color tags if needed and reverse order.
 		for (let i = 0; i < desc.length; i += 1) {
 			// Remove sell value
-			if (desc[i].includes(getLocaleString(3331))) {
+			if (desc[i].includes(getLocaleString(sdk.locale.text.SellValue))) {
 				desc.splice(i, 1);
 
 				i -= 1;
@@ -1423,127 +1423,127 @@ const Misc = {
 	},
 
 	getItemCode: function (unit) {
+		if (unit === undefined) return "";
+		
 		let code = "";
 		
-		if (unit === undefined) return code;
-
 		switch (unit.quality) {
-		case 5: // Set
+		case sdk.itemquality.Set:
 			switch (unit.classid) {
-			case 27: // Angelic sabre
+			case sdk.items.Sabre:
 				code = "inv9sbu";
 
 				break;
-			case 74: // Arctic short war bow
+			case sdk.items.ShortWarBow:
 				code = "invswbu";
 
 				break;
-			case 308: // Berserker's helm
+			case sdk.items.Helm:
 				code = "invhlmu";
 
 				break;
-			case 330: // Civerb's large shield
+			case sdk.items.LargeShield:
 				code = "invlrgu";
 
 				break;
-			case 31: // Cleglaw's long sword
-			case 227: // Szabi's cryptic sword
+			case sdk.items.LongSword:
+			case sdk.items.CrypticSword:
 				code = "invlsdu";
 
 				break;
-			case 329: // Cleglaw's small shield
+			case sdk.items.SmallShield:
 				code = "invsmlu";
 
 				break;
-			case 328: // Hsaru's buckler
+			case sdk.items.Buckler:
 				code = "invbucu";
 
 				break;
-			case 306: // Infernal cap / Sander's cap
+			case sdk.items.Cap:
 				code = "invcapu";
 
 				break;
-			case 30: // Isenhart's broad sword
+			case sdk.items.BroadSword:
 				code = "invbsdu";
 
 				break;
-			case 309: // Isenhart's full helm
+			case sdk.items.FullHelm:
 				code = "invfhlu";
 
 				break;
-			case 333: // Isenhart's gothic shield
+			case sdk.items.GothicShield:
 				code = "invgtsu";
 
 				break;
-			case 326: // Milabrega's ancient armor
-			case 442: // Immortal King's sacred armor
+			case sdk.items.AncientArmor:
+			case sdk.items.SacredArmor:
 				code = "invaaru";
 
 				break;
-			case 331: // Milabrega's kite shield
+			case sdk.items.KiteShield:
 				code = "invkitu";
 
 				break;
-			case 332: // Sigon's tower shield
+			case sdk.items.TowerShield:
 				code = "invtowu";
 
 				break;
-			case 325: // Tancred's full plate mail
+			case sdk.items.FullPlateMail:
 				code = "invfulu";
 
 				break;
-			case 3: // Tancred's military pick
+			case sdk.items.MilitaryPick:
 				code = "invmpiu";
 
 				break;
-			case 113: // Aldur's jagged star
+			case sdk.items.JaggedStar:
 				code = "invmstu";
 
 				break;
-			case 234: // Bul-Kathos' colossus blade
+			case sdk.items.ColossusBlade:
 				code = "invgsdu";
 
 				break;
-			case 372: // Grizwold's ornate plate
+			case sdk.items.OrnatePlate:
 				code = "invxaru";
 
 				break;
-			case 366: // Heaven's cuirass
-			case 215: // Heaven's reinforced mace
-			case 449: // Heaven's ward
-			case 426: // Heaven's spired helm
+			case sdk.items.Cuirass:
+			case sdk.items.ReinforcedMace:
+			case sdk.items.Ward:
+			case sdk.items.SpiredHelm:
 				code = "inv" + unit.code + "s";
 
 				break;
-			case 357: // Hwanin's grand crown
+			case sdk.items.GrandCrown:
 				code = "invxrnu";
 
 				break;
-			case 195: // Nalya's scissors suwayyah
+			case sdk.items.ScissorsSuwayyah:
 				code = "invskru";
 
 				break;
-			case 395: // Nalya's grim helm
-			case 465: // Trang-Oul's bone visage
+			case sdk.items.GrimHelm:
+			case sdk.items.BoneVisage:
 				code = "invbhmu";
 
 				break;
-			case 261: // Naj's elder staff
+			case sdk.items.ElderStaff:
 				code = "invcstu";
 
 				break;
-			case 375: // Orphan's round shield
+			case sdk.items.RoundShield:
 				code = "invxmlu";
 
 				break;
-			case 12: // Sander's bone wand
+			case sdk.items.BoneWand:
 				code = "invbwnu";
 
 				break;
 			}
 
 			break;
-		case 7: // Unique
+		case sdk.itemquality.Unique:
 			for (let i = 0; i < 401; i += 1) {
 				if (unit.code === getBaseStat(17, i, 4).trim() && unit.fname.split("\n").reverse()[0].indexOf(getLocaleString(getBaseStat(17, i, 2))) > -1) {
 					code = getBaseStat(17, i, "invfile");
@@ -1559,7 +1559,7 @@ const Misc = {
 			// Tiara/Diadem
 			code = ["ci2", "ci3"].includes(unit.code) ? unit.code : (getBaseStat(0, unit.classid, 'normcode') || unit.code);
 			code = code.replace(" ", "");
-			[10, 12, 58, 82, 83, 84].includes(unit.itemType) && (code += (unit.gfx + 1));
+			[sdk.itemtype.Ring, sdk.itemtype.Amulet, sdk.itemtype.Jewel, sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(unit.itemType) && (code += (unit.gfx + 1));
 		}
 
 		return code;
@@ -1619,7 +1619,7 @@ const Misc = {
 			if (tempArray[i]) {
 				code = tempArray[i].code;
 
-				if ([10, 12, 58, 82, 83, 84].includes(tempArray[i].itemType)) {
+				if ([sdk.itemtype.Ring, sdk.itemtype.Amulet, sdk.itemtype.Jewel, sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(tempArray[i].itemType)) {
 					code += (tempArray[i].gfx + 1);
 				}
 			} else {
@@ -1703,7 +1703,7 @@ const Misc = {
 
 		if (sock) {
 			do {
-				if (sock.itemType === 58) {
+				if (sock.itemType === sdk.itemtype.Jewel) {
 					desc += "\n\n";
 					desc += this.getItemDesc(sock);
 				}
@@ -1711,7 +1711,7 @@ const Misc = {
 		}
 
 		keptLine && (desc += ("\n\\xffc0Line: " + keptLine));
-		desc += "$" + (unit.getFlag(0x400000) ? ":eth" : "");
+		desc += "$" + (unit.ethereal ? ":eth" : "");
 
 		let itemObj = {
 			title: action + " " + name,
@@ -1731,7 +1731,6 @@ const Misc = {
 	// skip low items: MuleLogger
 	skipItem: function (id) {
 		switch (id) {
-		//case 549: // horadric cube
 		case sdk.items.HandAxe:
 		case sdk.items.Wand:
 		case sdk.items.Club:
@@ -1790,7 +1789,7 @@ const Misc = {
 		}
 
 		// don't have wanted skill
-		if (Skill.canUse(skill)) return false;
+		if (!Skill.canUse(skill)) return false;
 		// already in wanted state
 		if (me.getState(state)) return true;
 
@@ -1822,7 +1821,7 @@ const Misc = {
 	unShift: function () {
 		if (me.getState(sdk.states.Wearwolf) || me.getState(sdk.states.Wearbear)) {
 			for (let i = 0; i < 3; i += 1) {
-				Skill.cast(me.getState(sdk.states.Wearwolf) ? 223 : 228);
+				Skill.cast(me.getState(sdk.states.Wearwolf) ? sdk.skills.Werewolf : sdk.skills.Werebear);
 
 				let tick = getTickCount();
 
@@ -1848,80 +1847,29 @@ const Misc = {
 		if (!Town.canTpToTown()) return false;
 
 		let tTick = getTickCount();
-		let potion, check;
-		let needhp = true;
-		let needmp = true;
+		let check = false;
 
 		if (Config.TownCheck && !me.inTown) {
 			try {
-				if (me.gold > 1000) {
-					// I think there is a better way to do this
-					for (let i = 0; i < 4; i += 1) {
-						if (Config.BeltColumn[i] === "hp" && Config.MinColumn[i] > 0) {
-							potion = me.getItem(-1, 2); // belt item
-
-							if (potion) {
-								do {
-									if (potion.code.includes("hp")) {
-										needhp = false;
-
-										break;
-									}
-								} while (potion.getNext());
-							}
-
-							if (needhp) {
-								print("We need healing potions");
-
-								check = true;
-							}
-						}
-
-						if (Config.BeltColumn[i] === "mp" && Config.MinColumn[i] > 0) {
-							potion = me.getItem(-1, 2); // belt item
-
-							if (potion) {
-								do {
-									if (potion.code.includes("mp")) {
-										needmp = false;
-
-										break;
-									}
-								} while (potion.getNext());
-							}
-
-							if (needmp) {
-								print("We need mana potions");
-
-								check = true;
-							}
-						}
-
-						if (check) {
-							break;
-						}
-					}
-				}
-
-				if (Config.OpenChests.Enabled && Town.needKeys()) {
+				if (Town.needPotions() || (Config.OpenChests.Enabled && Town.needKeys())) {
 					check = true;
 				}
 			} catch (e) {
-				check = false;
-			}
-		}
-
-		if (check) {
-			// check that townchicken is running - so we don't spam needing potions if it isn't
-			let townChick = getScript("tools/TownChicken.js");
-			if (!townChick || townChick && !townChick.running) {
 				return false;
 			}
 
-			townChick.send("townCheck");
-			console.log("townCheck check Duration: " + (getTickCount() - tTick));
+			if (check) {
+				// check that townchicken is running - so we don't spam needing potions if it isn't
+				let townChick = getScript("tools/TownChicken.js");
+				if (!townChick || townChick && !townChick.running) {
+					return false;
+				}
 
-			return true;
+				townChick.send("townCheck");
+				console.log("townCheck check Duration: " + (getTickCount() - tTick));
+
+				return true;
+			}
 		}
 
 		return false;
@@ -2444,7 +2392,7 @@ const Packet = {
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 2000) {
-				if (getCursorType() === 6) {
+				if (getCursorType() === sdk.cursortype.Identify) {
 					break CursorLoop;
 				}
 
@@ -2452,12 +2400,12 @@ const Packet = {
 			}
 		}
 
-		if (getCursorType() !== 6) {
+		if (getCursorType() !== sdk.cursortype.Identify) {
 			return false;
 		}
 
 		for (let i = 0; i < 3; i += 1) {
-			getCursorType() === 6 && sendPacket(1, 0x27, 4, unit.gid, 4, tome.gid);
+			getCursorType() === sdk.cursortype.Identify && sendPacket(1, 0x27, 4, unit.gid, 4, tome.gid);
 
 			let tick = getTickCount();
 
@@ -2529,9 +2477,7 @@ const Packet = {
 			&& [sdk.itemtype.HealingPotion, sdk.itemtype.RejuvPotion, sdk.itemtype.ThawingPotion, sdk.itemtype.AntidotePotion].includes(item.itemType)) {
 			switch (item.location) {
 			case sdk.storage.Belt:
-				sendPacket(1, 0x26, 4, item.gid, 4, 1, 4, 0);
-
-				return true;
+				return this.useBeltItemForMerc(item);
 			case sdk.storage.Inventory:
 				if (this.itemToCursor(item)) {
 					sendPacket(1, 0x61, 2, 0);
@@ -2583,19 +2529,19 @@ const Packet = {
 	},
 
 	telekinesis: function (who) {
-		if (!who || !Skill.setSkill(sdk.skills.Telekinesis, 0)) return false;
+		if (!who || !Skill.setSkill(sdk.skills.Telekinesis, sdk.skills.hand.Right)) return false;
 		sendPacket(1, 0x11, 4, who.type, 4, who.gid);
 		return true;
 	},
 
 	enchant: function (who) {
-		if (!who || !Skill.setSkill(sdk.skills.Enchant, 0)) return false;
+		if (!who || !Skill.setSkill(sdk.skills.Enchant, sdk.skills.hand.Right)) return false;
 		sendPacket(1, 0x11, 4, who.type, 4, who.gid);
 		return true;
 	},
 
 	teleport: function (wX, wY) {
-		if (![wX, wY].every(n => typeof n === "number") || !Skill.setSkill(sdk.skills.Teleport, 0)) return false;
+		if (![wX, wY].every(n => typeof n === "number") || !Skill.setSkill(sdk.skills.Teleport, sdk.skills.hand.Right)) return false;
 		sendPacket(1, 0x0C, 2, wX, 2, wY);
 		return true;
 	},

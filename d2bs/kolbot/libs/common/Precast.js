@@ -183,7 +183,7 @@ const Precast = new function () {
 
 		try {
 			!dontSwitch && me.switchWeapons(this.getBetterSlot(skillId));
-			if (me.getSkill(2) !== skillId && !me.setSkill(skillId, 0)) throw new Error("Failed to set " + getSkillById(skillId) + " on hand");
+			if (me.getSkill(sdk.skills.get.RightId) !== skillId && !me.setSkill(skillId, sdk.skills.hand.Right)) throw new Error("Failed to set " + getSkillById(skillId) + " on hand");
 
 			if (Config.PacketCasting > 1 || usePacket) {
 				console.debug("Packet casting: " + skillId);

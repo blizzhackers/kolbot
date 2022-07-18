@@ -537,7 +537,7 @@ const Common = {
 					// check if we can move there
 					if (Attack.validSpot(target.x + positions[i][0], target.y + positions[i][1])) {
 						Pather.moveTo(target.x + positions[i][0], target.y + positions[i][1]);
-						Skill.setSkill(Config.AttackSkill[2], 0);
+						Skill.setSkill(Config.AttackSkill[2], sdk.skills.hand.Right);
 
 						for (let n = 0; n < amount; n += 1) {
 							Skill.cast(Config.AttackSkill[1], 1);
@@ -950,7 +950,7 @@ const Common = {
 				break;
 			case sdk.charclass.Paladin:
 				if (Config.AttackSkill[3] === sdk.skills.BlessedHammer) {
-					Config.AttackSkill[4] > 0 && Skill.setSkill(Config.AttackSkill[4], 0);
+					Config.AttackSkill[4] > 0 && Skill.setSkill(Config.AttackSkill[4], sdk.skills.hand.Right);
 
 					return Skill.cast(Config.AttackSkill[3], 1);
 				}
@@ -1018,7 +1018,7 @@ const Common = {
 				default:
 					if (getTickCount() - tick < Time.seconds(7)) {
 						if (Skill.canUse(sdk.skills.Cleansing) && me.getState(sdk.states.Poison)) {
-							Skill.setSkill(sdk.skills.Cleansing, 0);
+							Skill.setSkill(sdk.skills.Cleansing, sdk.skills.hand.Right);
 						}
 					}
 

@@ -35,7 +35,7 @@ const Item = {
 
 				if (item.bodylocation === bodyLoc) {
 					if (getCursorType() === 3) {
-						let cursorItem = getUnit(100);
+						let cursorItem = Game.getCursorUnit();
 
 						if (cursorItem) {
 							if (!Storage.Inventory.CanFit(cursorItem) || !Storage.Inventory.MoveTo(cursorItem)) {

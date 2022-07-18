@@ -2421,7 +2421,7 @@ Unit.prototype.__defineGetter__('curseable', function () {
 });
 
 Unit.prototype.__defineGetter__('scareable', function () {
-	return this.curseable && !(this.spectype & 0x7) && this.classid !== sdk.monsters.ListerTheTormenter;
+	return this.curseable && !(this.isSpecial) && this.classid !== sdk.monsters.ListerTheTormenter;
 });
 
 Unit.prototype.getMobCount = function (range = 10, coll = 0, type = 0, noSpecialMobs = false) {

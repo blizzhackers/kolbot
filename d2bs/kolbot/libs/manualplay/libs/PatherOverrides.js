@@ -163,12 +163,12 @@ Pather.walkTo = function (x = undefined, y = undefined, minDist = undefined) {
 		// the less stamina you have, the more you wait to recover
 		let recover = me.staminaMaxDuration < 30 ? 80 : 50;
 		(me.runwalk === 0 && me.staminaPercent >= recover) && (me.runwalk = 1);
-		if (Config.Charge && me.paladin && me.mp >= 9 && getDistance(me.x, me.y, x, y) > 8 && Skill.setSkill(sdk.skills.Charge, 1)) {
+		if (Config.Charge && me.paladin && me.mp >= 9 && getDistance(me.x, me.y, x, y) > 8 && Skill.setSkill(sdk.skills.Charge, sdk.skills.hand.Left)) {
 			if (Config.Vigor) {
-				Skill.setSkill(sdk.skills.Vigor, 0);
+				Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right);
 			} else if (!Config.Vigor && me.getSkill(sdk.skills.HolyFreeze, 1)) {
 				// Useful in classic to keep mobs cold while you rush them
-				Skill.setSkill(sdk.skills.HolyFreeze, 0);
+				Skill.setSkill(sdk.skills.HolyFreeze, sdk.skills.hand.Right);
 			}
 			Misc.click(0, 1, x, y);
 			while (me.mode !== 1 && me.mode !== 5 && !me.dead) {
@@ -180,8 +180,8 @@ Pather.walkTo = function (x = undefined, y = undefined, minDist = undefined) {
 	(me.inTown && me.runwalk === 0) && (me.runwalk = 1);
 
 	while (getDistance(me.x, me.y, x, y) > minDist && !me.dead && !Pather.stop) {
-		me.paladin && Config.Vigor && Skill.setSkill(sdk.skills.Vigor, 0);
-		me.paladin && !Config.Vigor && Skill.setSkill(Config.AttackSkill[2], 0);
+		me.paladin && Config.Vigor && Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right);
+		me.paladin && !Config.Vigor && Skill.setSkill(Config.AttackSkill[2], sdk.skills.hand.Right);
 
 		if (this.openDoors(x, y) && getDistance(me.x, me.y, x, y) <= minDist) {
 			return true;
@@ -241,7 +241,7 @@ Pather.walkTo = function (x = undefined, y = undefined, minDist = undefined) {
 
 Pather.teleportTo = function (x, y, maxRange = 5) {
 	for (let i = 0; i < 3; i++) {
-		Config.PacketCasting ? Skill.setSkill(sdk.skills.Teleport, 0) && Packet.castSkill(0, x, y) : Skill.cast(sdk.skills.Teleport, 0, x, y);
+		Config.PacketCasting ? Skill.setSkill(sdk.skills.Teleport, sdk.skills.hand.Right) && Packet.castSkill(0, x, y) : Skill.cast(sdk.skills.Teleport, 0, x, y);
 		let tick = getTickCount();
 
 		while (getTickCount() - tick < Math.max(500, me.ping * 2 + 200)) {
@@ -262,7 +262,7 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
 
 	let path, adjustedNode, cleared, leaped = false,
 		useTeleport = false,
-		preSkill = me.getSkill(2),
+		preSkill = me.getSkill(sdk.skills.get.RightId),
 		node = {x: x, y: y},
 		fail = 0;
 
@@ -384,7 +384,7 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
 	}
 
 	useTeleport && Config.TeleSwitch && me.switchWeapons(Attack.getPrimarySlot());
-	me.getSkill(2) !== preSkill && Skill.setSkill(preSkill, 0);
+	me.getSkill(sdk.skills.get.RightId) !== preSkill && Skill.setSkill(preSkill, sdk.skills.hand.Right);
 	PathDebug.removeHooks();
 
 	return getDistance(me, node.x, node.y) < 5;

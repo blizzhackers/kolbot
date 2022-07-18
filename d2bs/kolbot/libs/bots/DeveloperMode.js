@@ -268,8 +268,8 @@ function DeveloperMode() {
 		}
 
 		if (userAddon) {
-			!UnitInfo.cleared && !getUnit(101) && UnitInfo.remove();
-			unitInfo = getUnit(101);
+			!UnitInfo.cleared && !Game.getSelectedUnit() && UnitInfo.remove();
+			unitInfo = Game.getSelectedUnit();
 			UnitInfo.createInfo(unitInfo);
 		}
 

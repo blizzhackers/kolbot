@@ -434,10 +434,10 @@ function main() {
 			break;
 		case 106: // numpad * - precast
 			{
-				let preSkill = me.getSkill(2);
+				let preSkill = me.getSkill(sdk.skills.get.RightId);
 
 				Precast.doPrecast(true);
-				Skill.setSkill(preSkill, 0);
+				Skill.setSkill(preSkill, sdk.skills.hand.Right);
 			}
 			
 			break;

@@ -406,7 +406,7 @@ function Follower() {
 							Config.AttackSkill[2] = skill;
 							Config.AttackSkill[4] = skill;
 
-							Skill.setSkill(skill, 0);
+							Skill.setSkill(skill, sdk.skills.hand.Right);
 							//Attack.init();
 						} else {
 							this.announce("I don't have that aura.");
@@ -536,7 +536,7 @@ function Follower() {
 				this.pickPotions(20);
 			}
 
-			me.paladin && Config.AttackSkill[2] > 0 && Skill.setSkill(Config.AttackSkill[2], 0);
+			me.paladin && Config.AttackSkill[2] > 0 && Skill.setSkill(Config.AttackSkill[2], sdk.skills.hand.Right);
 
 			if (leader.area !== me.area && !me.inTown) {
 				while (leader.area === 0) {

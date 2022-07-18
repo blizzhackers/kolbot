@@ -128,7 +128,7 @@ const ClassAttack = {
 		// only proceed with other checks if we can use redemption and the config values aren't 0
 		if (Skill.canUse(sdk.skills.Redemption) && Config.Redemption.some(v => v > 0)) {
 			if ((me.hpPercent < Config.Redemption[0] || me.mpPercent < Config.Redemption[1])
-				&& Attack.checkNearCorpses(me) > 2 && Skill.setSkill(sdk.skills.Redemption, 0)) {
+				&& Attack.checkNearCorpses(me) > 2 && Skill.setSkill(sdk.skills.Redemption, sdk.skills.hand.Right)) {
 				delay(1500);
 			}
 		}
@@ -144,7 +144,7 @@ const ClassAttack = {
 			// todo: add doll avoid to other classes
 			if (Config.AvoidDolls && unit.isDoll) {
 				this.dollAvoid(unit);
-				aura > -1 && Skill.setSkill(aura, 0);
+				aura > -1 && Skill.setSkill(aura, sdk.skills.hand.Right);
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 
 				return 1;
@@ -163,7 +163,7 @@ const ClassAttack = {
 
 			if (unit.distance > 9 || !unit.attackable) return 1;
 
-			aura > -1 && Skill.setSkill(aura, 0);
+			aura > -1 && Skill.setSkill(aura, sdk.skills.hand.Right);
 
 			for (let i = 0; i < 3; i += 1) {
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
@@ -190,7 +190,7 @@ const ClassAttack = {
 			}
 
 			if (!unit.dead) {
-				aura > -1 && Skill.setSkill(aura, 0);
+				aura > -1 && Skill.setSkill(aura, sdk.skills.hand.Right);
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 			}
 
@@ -204,7 +204,7 @@ const ClassAttack = {
 				}
 
 				if (!unit.dead) {
-					aura > -1 && Skill.setSkill(aura, 0);
+					aura > -1 && Skill.setSkill(aura, sdk.skills.hand.Right);
 					Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 
 					return 1;
@@ -228,7 +228,7 @@ const ClassAttack = {
 			}
 
 			if (unit.attackable) {
-				aura > -1 && Skill.setSkill(aura, 0);
+				aura > -1 && Skill.setSkill(aura, sdk.skills.hand.Right);
 				return (Skill.cast(attackSkill, 2, unit) ? 1 : 0);
 			}
 
@@ -244,7 +244,7 @@ const ClassAttack = {
 			}
 
 			if (!unit.dead) {
-				aura > -1 && Skill.setSkill(aura, 0);
+				aura > -1 && Skill.setSkill(aura, sdk.skills.hand.Right);
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 			}
 

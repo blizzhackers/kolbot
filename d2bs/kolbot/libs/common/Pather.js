@@ -633,12 +633,12 @@ const Pather = {
 			// the less stamina you have, the more you wait to recover
 			let recover = me.staminaMaxDuration < 30 ? 80 : 50;
 			(me.runwalk === 0 && me.staminaPercent >= recover) && (me.runwalk = 1);
-			if (Skill.canUse(sdk.skills.Charge) && me.paladin && me.mp >= 9 && getDistance(me.x, me.y, x, y) > 8 && Skill.setSkill(sdk.skills.Charge, 1)) {
+			if (Skill.canUse(sdk.skills.Charge) && me.paladin && me.mp >= 9 && getDistance(me.x, me.y, x, y) > 8 && Skill.setSkill(sdk.skills.Charge, sdk.skills.hand.Left)) {
 				if (Skill.canUse(sdk.skills.Vigor)) {
-					Skill.setSkill(sdk.skills.Vigor, 0);
+					Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right);
 				} else if (!Config.Vigor && !Attack.auradin && Skill.canUse(sdk.skills.HolyFreeze)) {
 					// Useful in classic to keep mobs cold while you rush them
-					Skill.setSkill(sdk.skills.HolyFreeze, 0);
+					Skill.setSkill(sdk.skills.HolyFreeze, sdk.skills.hand.Right);
 				}
 				Misc.click(0, 1, x, y);
 				while (me.mode !== 1 && me.mode !== 5 && !me.dead) {
@@ -651,7 +651,7 @@ const Pather = {
 
 		while (getDistance(me.x, me.y, x, y) > minDist && !me.dead) {
 			if (me.paladin) {
-				Skill.canUse(sdk.skills.Vigor) ? Skill.setSkill(sdk.skills.Vigor, 0) : Skill.setSkill(Config.AttackSkill[2], 0);
+				Skill.canUse(sdk.skills.Vigor) ? Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right) : Skill.setSkill(Config.AttackSkill[2], sdk.skills.hand.Right);
 			}
 
 			if (this.openDoors(x, y) && getDistance(me.x, me.y, x, y) <= minDist) {

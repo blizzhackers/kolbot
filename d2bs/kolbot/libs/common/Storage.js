@@ -190,14 +190,14 @@ let Container = function (name, width, height, location) {
 			//Loop three times to try and place it.
 			for (n = 0; n < 5; n += 1) {
 				if (this.location === 6) { // place item into cube
-					cItem = getUnit(100);
+					cItem = Game.getCursorUnit();
 					cube = me.getItem(549);
 
 					if (cItem !== null && cube !== null) {
 						sendPacket(1, 0x2a, 4, cItem.gid, 4, cube.gid);
 					}
 				} else if (this.location === 2) {
-					cItem = getUnit(100);
+					cItem = Game.getCursorUnit();
 					if (cItem !== null) {
 						sendPacket(1, 0x23, 4, cItem.gid, 4, nPos.y);
 					}

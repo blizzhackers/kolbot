@@ -52,7 +52,7 @@ const Attack = {
 		if (item) {
 			do {
 				if (me.weaponswitch !== slot) {
-					if (item.bodylocation === 11 || item.bodylocation === 12) {
+					if (item.bodylocation === sdk.body.RightArmSecondary || item.bodylocation === sdk.body.LeftArmSecondary) {
 						return true;
 					}
 				} else {
@@ -135,17 +135,17 @@ const Attack = {
 			do {
 				let stats = item.getStat(-2);
 
-				if (stats.hasOwnProperty(204)) {
-					if (stats[204] instanceof Array) {
-						for (let i = 0; i < stats[204].length; i += 1) {
-							if (stats[204][i] !== undefined) {
+				if (stats.hasOwnProperty(sdk.stats.ChargedSkill)) {
+					if (stats[sdk.stats.ChargedSkill] instanceof Array) {
+						for (let i = 0; i < stats[sdk.stats.ChargedSkill].length; i += 1) {
+							if (stats[sdk.stats.ChargedSkill][i] !== undefined) {
 								Skill.charges.push({
 									unit: copyUnit(item),
 									gid: item.gid,
-									skill: stats[204][i].skill,
-									level: stats[204][i].level,
-									charges: stats[204][i].charges,
-									maxcharges: stats[204][i].maxcharges
+									skill: stats[sdk.stats.ChargedSkill][i].skill,
+									level: stats[sdk.stats.ChargedSkill][i].level,
+									charges: stats[sdk.stats.ChargedSkill][i].charges,
+									maxcharges: stats[sdk.stats.ChargedSkill][i].maxcharges
 								});
 							}
 						}
@@ -153,10 +153,10 @@ const Attack = {
 						Skill.charges.push({
 							unit: copyUnit(item),
 							gid: item.gid,
-							skill: stats[204].skill,
-							level: stats[204].level,
-							charges: stats[204].charges,
-							maxcharges: stats[204].maxcharges
+							skill: stats[sdk.stats.ChargedSkill].skill,
+							level: stats[sdk.stats.ChargedSkill].level,
+							charges: stats[sdk.stats.ChargedSkill].charges,
+							maxcharges: stats[sdk.stats.ChargedSkill].maxcharges
 						});
 					}
 				}
@@ -330,16 +330,24 @@ const Attack = {
 
 	getScarinessLevel: function (unit) {
 		// todo - define summonertype prototype
-		let scariness = 0, ids = [58, 59, 60, 61, 62, 101, 102, 103, 104, 105, 278, 279, 280, 281, 282, 298, 299, 300, 645, 646, 647, 662, 663, 664, 667, 668, 669, 670, 675, 676];
+		let scariness = 0;
+		let ids = [
+			sdk.monsters.FallenShaman, sdk.monsters.CarverShaman, sdk.monsters.CarverShaman2, sdk.monsters.DevilkinShaman, sdk.monsters.DevilkinShaman2,
+			sdk.monsters.DarkShaman1, sdk.monsters.DarkShaman2, sdk.monsters.WarpedShaman, sdk.monsters.HollowOne, sdk.monsters.Guardian1,
+			sdk.monsters.Guardian2, sdk.monsters.Unraveler1, sdk.monsters.Unraveler2, sdk.monsters.Ancient1, sdk.monsters.Ancient2, sdk.monsters.Ancient3,
+			sdk.monsters.BaalSubjectMummy, sdk.monsters.RatManShaman, sdk.monsters.FetishShaman, sdk.monsters.FlayerShaman1, sdk.monsters.FlayerShaman2, sdk.monsters.SoulKillerShaman1,
+			sdk.monsters.SoulKillerShaman2, sdk.monsters.StygianDollShaman1, sdk.monsters.StygianDollShaman2, sdk.monsters.FleshSpawner1, sdk.monsters.FleshSpawner2,
+			sdk.monsters.StygianHag, sdk.monsters.Grotesque1, sdk.monsters.Grotesque2
+		];
 
 		// Only handling monsters for now
-		if (!unit || unit.type !== 1) return undefined;
+		if (!unit || unit.type !== sdk.unittype.Monster) return undefined;
 		// Minion
-		(unit.spectype & 0x08) && (scariness += 1);
+		(unit.isMinion) && (scariness += 1);
 		// Champion
-		(unit.spectype & 0x02) && (scariness += 2);
+		(unit.isChampion) && (scariness += 2);
 		// Boss
-		(unit.spectype & 0x04) && (scariness += 4);
+		(unit.isUnique) && (scariness += 4);
 		// Summoner or the like
 		ids.includes(unit.classid) && (scariness += 8);
 
@@ -744,7 +752,7 @@ const Attack = {
 			}
 
 			if (special) {
-				if (me.paladin && Skill.canUse(sdk.skills.Redemption) && Skill.setSkill(sdk.skills.Redemption, 0)) {
+				if (me.paladin && Skill.canUse(sdk.skills.Redemption) && Skill.setSkill(sdk.skills.Redemption, sdk.skills.hand.Right)) {
 					delay(1000);
 				}
 			}
@@ -771,7 +779,7 @@ const Attack = {
 
 		if (monster) {
 			do {
-				if ((monster.spectype & 0x5) && this.ignoredGids.indexOf(monster.gid) === -1) {
+				if ((monster.isSuperUnique) && this.ignoredGids.indexOf(monster.gid) === -1) {
 					this.uniques += 1;
 					this.ignoredGids.push(monster.gid);
 				}
@@ -909,11 +917,11 @@ const Attack = {
 
 		// Barb optimization
 		if (me.barbarian) {
-			if (!Attack.checkResist(unitA, Attack.getSkillElement(Config.AttackSkill[(unitA.spectype & 0x7) ? 1 : 3]))) {
+			if (!Attack.checkResist(unitA, Attack.getSkillElement(Config.AttackSkill[(unitA.isSpecial) ? 1 : 3]))) {
 				return 1;
 			}
 
-			if (!Attack.checkResist(unitB, Attack.getSkillElement(Config.AttackSkill[(unitB.spectype & 0x7) ? 1 : 3]))) {
+			if (!Attack.checkResist(unitB, Attack.getSkillElement(Config.AttackSkill[(unitB.isSpecial) ? 1 : 3]))) {
 				return -1;
 			}
 		}
@@ -933,12 +941,12 @@ const Attack = {
 
 		if (!me.inArea(sdk.areas.ClawViperTempleLvl2) && ids.includes(unitA.classid) && ids.includes(unitB.classid)) {
 			// Kill "scary" uniques first (like Bishibosh)
-			if ((unitA.spectype & 0x04) && (unitB.spectype & 0x04)) {
+			if ((unitA.isUnique) && (unitB.isUnique)) {
 				return getDistance(me, unitA) - getDistance(me, unitB);
 			}
 
-			if (unitA.spectype & 0x04) return -1;
-			if (unitB.spectype & 0x04) return 1;
+			if (unitA.isUnique) return -1;
+			if (unitB.isUnique) return 1;
 
 			return getDistance(me, unitA) - getDistance(me, unitB);
 		}
@@ -947,12 +955,12 @@ const Attack = {
 		if (ids.includes(unitB.classid)) return 1;
 
 		if (Config.BossPriority) {
-			if ((unitA.spectype & 0x5) && (unitB.spectype & 0x5)) {
+			if ((unitA.isSuperUnique) && (unitB.isSuperUnique)) {
 				return getDistance(me, unitA) - getDistance(me, unitB);
 			}
 
-			if (unitA.spectype & 0x5) return -1;
-			if (unitB.spectype & 0x5) return 1;
+			if (unitA.isSuperUnique) return -1;
+			if (unitB.isSuperUnique) return 1;
 		}
 
 		return getDistance(me, unitA) - getDistance(me, unitB);
@@ -1552,7 +1560,7 @@ const Attack = {
 
 	checkCorpse: function (unit) {
 		if (!unit || (unit.mode !== sdk.units.monsters.monstermode.Death && unit.mode !== sdk.units.monsters.monstermode.Dead)) return false;
-		if (unit.classid <= 575 && !getBaseStat("monstats2", unit.classid, "corpseSel")) return false;
+		if (unit.classid <= sdk.monsters.BurningDeadArcher2 && !getBaseStat("monstats2", unit.classid, "corpseSel")) return false;
 		return ([
 			sdk.states.FrozenSolid, sdk.states.Revive, sdk.states.Redeemed,
 			sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
@@ -1581,10 +1589,10 @@ const Attack = {
 			let coords = [Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * 4 + unit.x), Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * 4 + unit.y)];
 
 			if (!CollMap.checkColl(me, {x: coords[0], y: coords[1]}, 0x1, 1)) {
-				return Skill.cast(151, 0, coords[0], coords[1]);
+				return Skill.cast(sdk.skills.Whirlwind, 0, coords[0], coords[1]);
 			}
 		}
 
-		return (Attack.validSpot(unit.x, unit.y) && Skill.cast(151, Skill.getHand(151), me.x, me.y));
+		return (Attack.validSpot(unit.x, unit.y) && Skill.cast(sdk.skills.Whirlwind, Skill.getHand(sdk.skills.Whirlwind), me.x, me.y));
 	}
 };

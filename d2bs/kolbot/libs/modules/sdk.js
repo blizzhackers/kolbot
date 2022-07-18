@@ -81,6 +81,14 @@ item: {
 			},
 		},
 
+		cursortype: {
+			Empty: 1,
+			ItemOnUnitHover: 3, // only while belt is showing
+			ItemOnCursor: 4, // need more testing on these
+			Identify: 6,
+			Repair: 7,
+		},
+
 		areas: {
 			Towns: [1, 40, 75, 103, 109],
 			None: 0,
@@ -280,6 +288,17 @@ item: {
 		},
 
 		skills: {
+			hand: {
+				Right: 0,
+				Left: 1
+			},
+			get: {
+				RightName: 0,
+				LeftName: 1,
+				RightId: 2,
+				LeftId: 3,
+				AllSkills: 4
+			},
 			// General
 			Attack: 0,
 			Kick: 1,
@@ -782,6 +801,7 @@ item: {
 		// shrine types
 		shrines: {
 			Ids: [2, 81, 83, 170, 344, 197, 202],
+			None: 0,
 			Refilling: 1,
 			Health: 2,
 			Mana: 3,

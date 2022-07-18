@@ -110,12 +110,12 @@ function main() {
 	const Worker = require('../../modules/Worker');
 
 	Worker.runInBackground.unitInfo = function () {
-		if (!Hooks.userAddon || (!UnitInfo.cleared && !getUnit(101))) {
+		if (!Hooks.userAddon || (!UnitInfo.cleared && !Game.getSelectedUnit())) {
 			UnitInfo.remove();
 			return true;
 		}
 
-		let unit = getUnit(101);
+		let unit = Game.getSelectedUnit();
 		!!unit && UnitInfo.createInfo(unit);
 
 		return true;
