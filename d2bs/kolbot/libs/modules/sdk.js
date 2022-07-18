@@ -73,12 +73,10 @@ item: {
 		},
 
 		clicktypes: { // sdk.clicktypes.
-			click: {
-				Left: 0,
-				Right: 1,
-				ShiftLeft: 2, // For belt
-				Mercenary: 3 // Give to merc
-			},
+			Left: 0,
+			Right: 1,
+			ShiftLeft: 2, // For belt
+			Mercenary: 3 // Give to merc
 		},
 
 		areas: { // sdk.areas.
