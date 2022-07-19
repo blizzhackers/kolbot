@@ -146,7 +146,7 @@ const ClassAttack = {
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), sdk.collision.Ranged)) {
 					return Attack.result.Failed;
 				}
 			}
@@ -162,7 +162,7 @@ const ClassAttack = {
 
 			if (customCurse && this.canCurse(unit, customCurse)) {
 				if (unit.distance > 25 || checkCollision(me, unit, sdk.collision.Ranged)) {
-					if (!Attack.getIntoPosition(unit, 25, 0x4)) {
+					if (!Attack.getIntoPosition(unit, 25, sdk.collision.Ranged)) {
 						return Attack.result.Failed;
 					}
 				}
@@ -171,9 +171,9 @@ const ClassAttack = {
 
 				return Attack.result.Success;
 			} else if (!customCurse) {
-				if (Config.Curse[0] > 0 && (unit.spectype & 0x7) && this.canCurse(unit, Config.Curse[0])) {
+				if (Config.Curse[0] > 0 && unit.isSpecial && this.canCurse(unit, Config.Curse[0])) {
 					if (unit.distance > 25 || checkCollision(me, unit, sdk.collision.Ranged)) {
-						if (!Attack.getIntoPosition(unit, 25, 0x4)) {
+						if (!Attack.getIntoPosition(unit, 25, sdk.collision.Ranged)) {
 							return Attack.result.Failed;
 						}
 					}
@@ -183,9 +183,9 @@ const ClassAttack = {
 					return Attack.result.Success;
 				}
 
-				if (Config.Curse[1] > 0 && !(unit.spectype & 0x7) && this.canCurse(unit, Config.Curse[1])) {
+				if (Config.Curse[1] > 0 && !unit.isSpecial && this.canCurse(unit, Config.Curse[1])) {
 					if (unit.distance > 25 || checkCollision(me, unit, sdk.collision.Ranged)) {
-						if (!Attack.getIntoPosition(unit, 25, 0x4)) {
+						if (!Attack.getIntoPosition(unit, 25, sdk.collision.Ranged)) {
 							return Attack.result.Failed;
 						}
 					}
@@ -230,7 +230,7 @@ const ClassAttack = {
 		if (result === 1) {
 			Config.ActiveSummon && this.raiseArmy();
 			this.explodeCorpses(unit);
-		} else if (result === 2 && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
+		} else if (result === Attack.result.CantAttack && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
 			let merc = me.getMerc();
 
 			while (unit.attackable) {
@@ -295,7 +295,7 @@ const ClassAttack = {
 			case sdk.skills.PoisonNova:
 				if (!this.novaTick || getTickCount() - this.novaTick > Config.PoisonNovaDelay * 1000) {
 					if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
-						if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4)) {
+						if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), sdk.collision.Ranged)) {
 							return Attack.result.Failed;
 						}
 					}
@@ -306,9 +306,9 @@ const ClassAttack = {
 				}
 
 				break;
-			case 500: // Pure Summoner
+			case sdk.skills.Summoner: // Pure Summoner
 				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
-					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4)) {
+					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), sdk.collision.Ranged)) {
 						return Attack.result.Failed;
 					}
 				}
@@ -323,7 +323,7 @@ const ClassAttack = {
 					// Allow short-distance walking for melee skills
 					let walk = Skill.getRange(timedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
-					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4, walk)) {
+					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), sdk.collision.Ranged, walk)) {
 						return Attack.result.Failed;
 					}
 				}
@@ -341,7 +341,7 @@ const ClassAttack = {
 				// Allow short-distance walking for melee skills
 				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
-				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), 0x4, walk)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), sdk.collision.Ranged, walk)) {
 					return Attack.result.Failed;
 				}
 			}
@@ -367,7 +367,7 @@ const ClassAttack = {
 		this.setArmySize();
 
 		for (let i = 0; i < 3; i += 1) {
-			let corpse = Game.getMonster(-1, 12);
+			let corpse = Game.getMonster(-1, sdk.units.monsters.monstermode.Dead);
 			let corpseList = [];
 
 			if (corpse) {
@@ -446,7 +446,7 @@ const ClassAttack = {
 
 		let corpseList = [];
 		let range = Math.floor((me.getSkill(Config.ExplodeCorpses, sdk.skills.subindex.SoftPoints) + 7) / 3);
-		let corpse = Game.getMonster(-1, 12);
+		let corpse = Game.getMonster(-1, sdk.units.monsters.monstermode.Dead);
 
 		if (corpse) {
 			do {
@@ -498,7 +498,7 @@ const ClassAttack = {
 	},
 
 	checkCorpseNearMonster: function (monster, range) {
-		let corpse = Game.getMonster(-1, 12);
+		let corpse = Game.getMonster(-1, sdk.units.monsters.monstermode.Dead);
 
 		// Assume CorpseExplosion if no range specified
 		range === undefined && (range = Math.floor((me.getSkill(Config.ExplodeCorpses, sdk.skills.subindex.SoftPoints) + 7) / 3));
@@ -515,7 +515,7 @@ const ClassAttack = {
 	},
 
 	checkCorpse: function (unit, revive = false) {
-		if (!unit || unit.mode !== 12) return false;
+		if (!unit || unit.mode !== sdk.units.monsters.monstermode.Dead) return false;
 
 		let baseId = getBaseStat("monstats", unit.classid, "baseid"), badList = [312, 571];
 		let	states = [
@@ -523,7 +523,7 @@ const ClassAttack = {
 			sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
 		];
 
-		if (revive && ((unit.spectype & 0x7) || badList.includes(baseId) || (Config.ReviveUnstackable && getBaseStat("monstats2", baseId, "sizex") === 3))) {
+		if (revive && (unit.isSpecial || badList.includes(baseId) || (Config.ReviveUnstackable && getBaseStat("monstats2", baseId, "sizex") === 3))) {
 			return false;
 		}
 

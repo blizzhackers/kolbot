@@ -65,7 +65,7 @@ const ClassAttack = {
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), sdk.collision.Ranged)) {
 					return Attack.result.Failed;
 				}
 			}
@@ -101,7 +101,8 @@ const ClassAttack = {
 		let skills = this.decideSkill(unit);
 		let result = this.doCast(unit, skills.timed, skills.untimed);
 
-		if (result === 2 && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
+		if (result === Attack.result.CantAttack && Config.TeleStomp && Config.UseMerc
+			&& Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
 			let merc = me.getMerc();
 
 			while (unit.attackable) {
@@ -134,7 +135,7 @@ const ClassAttack = {
 				
 				if (!!closeMob) {
 					let findSkill = this.decideSkill(closeMob);
-					(this.doCast(closeMob, findSkill.timed, findSkill.untimed) === 1) || (Skill.canUse(sdk.skills.Decoy) && Skill.cast(sdk.skills.Decoy, sdk.skills.hand.Right, unit));
+					(this.doCast(closeMob, findSkill.timed, findSkill.untimed) === Attack.result.Success) || (Skill.canUse(sdk.skills.Decoy) && Skill.cast(sdk.skills.Decoy, sdk.skills.hand.Right, unit));
 				}
 			}
 
@@ -167,8 +168,8 @@ const ClassAttack = {
 		// Arrow/bolt check
 		if (this.bowCheck) {
 			switch (true) {
-			case this.bowCheck === "bow" && !me.getItem("aqv", 1):
-			case this.bowCheck === "crossbow" && !me.getItem("cqv", 1):
+			case this.bowCheck === "bow" && !me.getItem("aqv", sdk.itemmode.Equipped):
+			case this.bowCheck === "crossbow" && !me.getItem("cqv", sdk.itemmode.Equipped):
 				console.log("Bow check");
 				Town.visitTown();
 
@@ -181,7 +182,7 @@ const ClassAttack = {
 			case sdk.skills.LightningFury:
 				if (!this.lightFuryTick || getTickCount() - this.lightFuryTick > Config.LightningFuryDelay * 1000) {
 					if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
-						if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4)) {
+						if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), sdk.collision.Ranged)) {
 							return Attack.result.Failed;
 						}
 					}
@@ -203,7 +204,7 @@ const ClassAttack = {
 					// Allow short-distance walking for melee skills
 					walk = Skill.getRange(timedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
-					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4, walk)) {
+					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), sdk.collision.Ranged, walk)) {
 						return Attack.result.Failed;
 					}
 				}
@@ -223,7 +224,7 @@ const ClassAttack = {
 				// Allow short-distance walking for melee skills
 				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
-				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), 0x4, walk)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), sdk.collision.Ranged, walk)) {
 					return Attack.result.Failed;
 				}
 			}

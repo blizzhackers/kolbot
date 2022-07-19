@@ -112,7 +112,7 @@ Pather.getWP = function (area, clearPath) {
 				for (let j = 0; j < 10; j++) {
 					if (wp.distance > 5 && Skill.useTK(wp) && j < 3) {
 						if (wp.distance > 21) {
-							Attack.getIntoPosition(wp, 20, 0x4);
+							Attack.getIntoPosition(wp, 20, sdk.collision.Ranged);
 						}
 
 						Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, wp);

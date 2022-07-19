@@ -25,7 +25,7 @@ const ClassAttack = {
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), sdk.collision.Ranged)) {
 					return Attack.result.Failed;
 				}
 			}
@@ -45,7 +45,7 @@ const ClassAttack = {
 		if (Config.AggressiveCloak && Skill.canUse(sdk.skills.CloakofShadows) && !me.skillDelay && !me.getState(sdk.states.CloakofShadows)) {
 			if (unit.distance < 20) {
 				Skill.cast(sdk.skills.CloakofShadows, sdk.skills.hand.Right);
-			} else if (!Attack.getIntoPosition(unit, 20, 0x4)) {
+			} else if (!Attack.getIntoPosition(unit, 20, sdk.collision.Ranged)) {
 				return Attack.result.Failed;
 			}
 		}
@@ -54,7 +54,7 @@ const ClassAttack = {
 
 		if (checkTraps) {
 			if (unit.distance > this.trapRange || checkCollision(me, unit, sdk.collision.Ranged)) {
-				if (!Attack.getIntoPosition(unit, this.trapRange, 0x4) || (checkCollision(me, unit, sdk.collision.BlockWall) && (getCollision(me.area, unit.x, unit.y) & 0x1))) {
+				if (!Attack.getIntoPosition(unit, this.trapRange, sdk.collision.Ranged) || (checkCollision(me, unit, sdk.collision.BlockWall) && (getCollision(me.area, unit.x, unit.y) & 0x1))) {
 					return Attack.result.Failed;
 				}
 			}
@@ -97,7 +97,7 @@ const ClassAttack = {
 
 		let result = this.doCast(unit, timedSkill, untimedSkill);
 
-		if (result === 2 && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
+		if (result === Attack.result.CantAttack && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
 			let merc = me.getMerc();
 
 			while (unit.attackable) {
@@ -154,7 +154,7 @@ const ClassAttack = {
 			switch (timedSkill) {
 			case sdk.skills.Whirlwind:
 				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, sdk.collision.BlockWall)) {
-					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x1)) {
+					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), sdk.collision.BlockWall)) {
 						return Attack.result.Failed;
 					}
 				}
@@ -234,7 +234,8 @@ const ClassAttack = {
 					if (traps >= amount || (unit.hasOwnProperty("mode") && unit.dead)) return true;
 
 					// Duriel, Mephisto, Diablo, Baal, other players - why not andy?
-					if ((unit.hasOwnProperty("classid") && [211, 242, 243, 544].includes(unit.classid)) || (unit.hasOwnProperty("type") && unit.isPlayer)) {
+					if ((unit.hasOwnProperty("classid") && [sdk.monsters.Duriel, sdk.monsters.Mephisto, sdk.monsters.Diablo, sdk.monsters.Baal].includes(unit.classid))
+						|| (unit.hasOwnProperty("type") && unit.isPlayer)) {
 						if (traps >= Config.BossTraps.length) return true;
 
 						Skill.cast(Config.BossTraps[traps], sdk.skills.hand.Right, unit.x + i, unit.y + j);

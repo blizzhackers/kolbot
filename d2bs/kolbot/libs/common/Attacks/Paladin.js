@@ -23,7 +23,7 @@ const ClassAttack = {
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), sdk.collision.Ranged)) {
 					return Attack.result.Failed;
 				}
 			}
@@ -83,7 +83,7 @@ const ClassAttack = {
 
 		let result = this.doCast(unit, attackSkill, aura);
 
-		if (result === 2 && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
+		if (result === Attack.result.CantAttack && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
 			let merc = me.getMerc();
 
 			while (unit.attackable) {
@@ -175,16 +175,16 @@ const ClassAttack = {
 
 			return Attack.result.Success;
 		case sdk.skills.HolyBolt:
-			if (unit.distance > Skill.getRange(attackSkill) + 3 || CollMap.checkColl(me, unit, 0x4)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4)) {
+			if (unit.distance > Skill.getRange(attackSkill) + 3 || CollMap.checkColl(me, unit, sdk.collision.Ranged)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.Ranged)) {
 					return Attack.result.Failed;
 				}
 			}
 
 			CollMap.reset();
 
-			if (unit.distance > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, 0x2004, 2)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x2004, true)) {
+			if (unit.distance > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, sdk.collision.FriendlyRanged, 2)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.FriendlyRanged, true)) {
 					return Attack.result.Failed;
 				}
 			}
@@ -197,8 +197,8 @@ const ClassAttack = {
 			return Attack.result.Success;
 		case sdk.skills.FistoftheHeavens:
 			if (!me.skillDelay) {
-				if (unit.distance > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, 0x2004, 2)) {
-					if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x2004, true)) {
+				if (unit.distance > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, sdk.collision.FriendlyRanged, 2)) {
+					if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.FriendlyRanged, true)) {
 						return Attack.result.Failed;
 					}
 				}
@@ -222,14 +222,14 @@ const ClassAttack = {
 			
 			// 3591 - wall/line of sight/ranged/items/objects/closeddoor 
 			if (unit.distance > 3 || checkCollision(me, unit, sdk.collision.WallOrRanged)) {
-				if (!Attack.getIntoPosition(unit, 3, 0x5, true)) {
+				if (!Attack.getIntoPosition(unit, 3, sdk.collision.WallOrRanged, true)) {
 					return Attack.result.Failed;
 				}
 			}
 
 			if (unit.attackable) {
 				aura > -1 && Skill.setSkill(aura, sdk.skills.hand.Right);
-				return (Skill.cast(attackSkill, 2, unit) ? 1 : 0);
+				return (Skill.cast(attackSkill, sdk.skills.hand.LeftNoShift, unit) ? Attack.result.Success : Attack.result.Failed);
 			}
 
 			break;
@@ -237,10 +237,10 @@ const ClassAttack = {
 			if (Skill.getRange(attackSkill) < 4 && !Attack.validSpot(unit.x, unit.y, attackSkill, unit.classid)) return Attack.result.Failed;
 
 			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
-				let walk = (attackSkill !== 97 && Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall));
+				let walk = (attackSkill !== sdk.skills.Smite && Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall));
 
 				// walk short distances instead of tele for melee attacks. teleport if failed to walk
-				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4, walk)) return Attack.result.Failed;
+				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.Ranged, walk)) return Attack.result.Failed;
 			}
 
 			if (!unit.dead) {
@@ -311,7 +311,7 @@ const ClassAttack = {
 				y: positions[i][1]
 			};
 
-			if (Attack.validSpot(check.x, check.y) && !CollMap.checkColl(unit, check, 0x5 | 0x400 | 0x1000, 0)) {
+			if (Attack.validSpot(check.x, check.y) && !CollMap.checkColl(unit, check, sdk.collision.BlockWalk, 0)) {
 				if (this.reposition(positions[i][0], positions[i][1])) return true;
 			}
 		}
@@ -327,7 +327,7 @@ const ClassAttack = {
 			} else {
 				if ([x, y].distance <= 4) {
 					Misc.click(0, 0, x, y);
-				} else if (!CollMap.checkColl(me, {x: x, y: y}, 0x5 | 0x400 | 0x1000, 3)) {
+				} else if (!CollMap.checkColl(me, {x: x, y: y}, sdk.collision.BlockWalk, 3)) {
 					Pather.walkTo(x, y);
 				} else {
 					// don't clear while trying to reposition

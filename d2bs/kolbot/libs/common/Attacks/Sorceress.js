@@ -67,7 +67,7 @@ const ClassAttack = {
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), sdk.collision.Ranged)) {
 					return Attack.result.Failed;
 				}
 			}
@@ -100,7 +100,7 @@ const ClassAttack = {
 
 			while (!me.dead && unit.hpPercent > Config.CastStatic && unit.attackable) {
 				if (unit.distance > staticRange || checkCollision(me, unit, sdk.collision.Ranged)) {
-					if (!Attack.getIntoPosition(unit, staticRange, 0x4)) {
+					if (!Attack.getIntoPosition(unit, staticRange, sdk.collision.Ranged)) {
 						return Attack.result.Failed;
 					}
 				}
@@ -123,7 +123,7 @@ const ClassAttack = {
 		let skills = this.decideSkill(unit);
 		let result = this.doCast(unit, skills.timed, skills.untimed);
 
-		if (result === 2 && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
+		if (result === Attack.result.CantAttack && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
 			let merc = me.getMerc();
 			let mercRevive = 0;
 

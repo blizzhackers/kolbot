@@ -1789,7 +1789,7 @@ const Pather = {
 					for (let j = 0; j < 10; j++) {
 						if (!getUIFlag(sdk.uiflags.Waypoint)) {
 							if (wp.distance > 5 && Skill.useTK(wp) && j < 3) {
-								wp.distance > 21 && Attack.getIntoPosition(wp, 20, 0x4);
+								wp.distance > 21 && Attack.getIntoPosition(wp, 20, sdk.collision.Ranged);
 								Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, wp);
 							} else if (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint)) {
 								this.moveToUnit(wp) && Misc.click(0, 0, wp);
