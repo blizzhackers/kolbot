@@ -91,17 +91,17 @@ function FasterExp() {
 			break;
 		case msgSeal1:
 			canKill1 = true;
-			id = getLocaleString(2851);
+			id = getLocaleString(sdk.locale.monster.GrandVizierofChaos);
 
 			break;
 		case msgSeal2:
 			canKill2 = true;
-			id = getLocaleString(2852);
+			id = getLocaleString(sdk.locale.monster.LordDeSeis);
 
 			break;
 		case msgSeal3:
 			canKill3 = true;
-			id = getLocaleString(2853);
+			id = getLocaleString(sdk.locale.monster.InfectorofSouls);
 
 			break;
 		case msgDia:
@@ -163,7 +163,7 @@ function FasterExp() {
 	if (me.name === Roles.nithPrep) {
 		Pather.useWaypoint(sdk.areas.HallsofPain);
 		Pather.moveToExit(sdk.areas.HallsofVaught, true);
-		Pather.moveToPreset(sdk.areas.HallsofVaught, 2, sdk.units.NihlathaksPlatform, 10, 10);
+		Pather.moveToPreset(sdk.areas.HallsofVaught, sdk.unittype.Objects, sdk.units.NihlathaksPlatform, 10, 10);
 		Attack.hurt(sdk.monsters.Nihlathak, hurtNith);
 		Town.doChores();
 		say(msgNith);
@@ -335,7 +335,7 @@ function FasterExp() {
 		} finally {
 			say(nithDone);
 			Pickit.pickItems();
-			Town.goToTown();
+			Town.goToTown() && Pather.usePortal(sdk.areas.ThroneofDestruction, Roles.diaLead);
 
 		}
 
@@ -349,13 +349,13 @@ function FasterExp() {
 				ClassAttack.raiseArmy(50);
 
 				if (Config.Curse[1] > 0) {
-					let monster = getUnit(1);
+					let monster = Game.getMonster();
 
 					if (monster) {
 						do {
-							if (monster.attackable && monster.distance < 50 && !checkCollision(me, monster, 0x4)
+							if (monster.attackable && monster.distance < 50 && !checkCollision(me, monster, sdk.collision.Ranged)
 								&& monster.curseable && !monster.isSpecial && !monster.getState(ClassAttack.curseState[1])) {
-								Skill.cast(Config.Curse[1], 0, monster);
+								Skill.cast(Config.Curse[1], sdk.clicktypes.click.Right, monster);
 							}
 						} while (monster.getNext());
 					}
@@ -381,12 +381,12 @@ function FasterExp() {
 				return false;
 			}
 
-			let monster = getUnit(1);
+			let monster = Game.getMonster();
 			let monList = [];
 
 			if (monster) {
 				do {
-					if (monster.attackable && monster.distance < 50 && !checkCollision(me, monster, 0x4)) {
+					if (monster.attackable && monster.distance < 50 && !checkCollision(me, monster, sdk.collision.Ranged)) {
 						monList.push(copyUnit(monster));
 					}
 				} while (monster.getNext());
@@ -467,7 +467,7 @@ function FasterExp() {
 		Common.Diablo.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
 		me.name === Roles.diaLead && Pather.makePortal() && say(msgSeal1);
 
-		while (!Common.Diablo.getBoss(getLocaleString(2851))) {
+		while (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monster.GrandVizierofChaos))) {
 			delay(100);
 		}
 
@@ -475,17 +475,16 @@ function FasterExp() {
 		Common.Diablo.seisLayout === 1 ? Pather.moveTo(7771, 5196) : Pather.moveTo(7798, 5186);
 		me.name === Roles.diaLead && Pather.makePortal() && say(msgSeal2);
 
-		while (!Common.Diablo.getBoss(getLocaleString(2852))) {
+		while (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monster.LordDeSeis))) {
 			delay(100);
 		}
 
-		Common.Diablo.openSeal(sdk.units.DiabloSealInfector);
-		me.name === Roles.diaLead && Common.Diablo.openSeal(sdk.units.DiabloSealInfector2);
+		Common.Diablo.openSeal(sdk.units.DiabloSealInfector2);
+		me.name === Roles.diaLead && Common.Diablo.openSeal(sdk.units.DiabloSealInfector);
 		Common.Diablo.infLayout === 1 ? delay(1) : Pather.moveTo(7928, 5295);
-
 		me.name === Roles.diaLead && Pather.makePortal() && say(msgSeal3);
 
-		while (!Common.Diablo.getBoss(getLocaleString(2853))) {
+		while (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monster.InfectorofSouls))) {
 			delay(100);
 		}
 
@@ -524,6 +523,7 @@ function FasterExp() {
 	}
 
 	me.name === Roles.shrineHunter && Pather.makePortal();
+	me.name === Roles.diaLead && me.area === sdk.areas.ThroneofDestruction && Pather.makePortal() && say(wavesReady);
 
 	Common.Baal.clearThrone();
 	Pickit.pickItems();
@@ -565,6 +565,8 @@ function FasterExp() {
 		}
 
 		Attack.kill(sdk.monsters.Baal);
+		Pickit.pickItems();
+		delay(5000);
 		say(msgQuit);
 	}
 
