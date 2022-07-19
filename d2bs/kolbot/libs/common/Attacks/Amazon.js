@@ -48,7 +48,7 @@ const ClassAttack = {
 	},
 
 	doAttack: function (unit, preattack) {
-		if (!unit) return 1;
+		if (!unit) return Attack.result.Success;
 		let gid = unit.gid;
 		let needRepair = Town.needRepair();
 
@@ -58,7 +58,7 @@ const ClassAttack = {
 			if (Town.visitTown(!!needRepair.length)) {
 				// lost reference to the mob we were attacking
 				if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
-					return 1;
+					return Attack.result.Success;
 				}
 			}
 		}
@@ -66,13 +66,13 @@ const ClassAttack = {
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
-					return 0;
+					return Attack.result.Failed;
 				}
 			}
 
 			Skill.cast(Config.AttackSkill[0], Skill.getHand(Config.AttackSkill[0]), unit);
 
-			return 1;
+			return Attack.result.Success;
 		}
 
 		if (Skill.canUse(sdk.skills.InnerSight)) {
@@ -111,13 +111,13 @@ const ClassAttack = {
 					}
 				}
 
-				if (!unit) return 1;
+				if (!unit) return Attack.result.Success;
 
 				if (Town.needMerc()) {
 					if (Config.MercWatch && mercRevive++ < 1) {
 						Town.visitTown();
 					} else {
-						return 2;
+						return Attack.result.CantAttack;
 					}
 
 					(merc === undefined || !merc) && (merc = me.getMerc());
@@ -138,7 +138,7 @@ const ClassAttack = {
 				}
 			}
 
-			return 1;
+			return Attack.result.Success;
 		}
 
 		return result;
@@ -161,7 +161,7 @@ const ClassAttack = {
 
 		// No valid skills can be found
 		if (timedSkill < 0 && untimedSkill < 0) {
-			return 2;
+			return Attack.result.CantAttack;
 		}
 
 		// Arrow/bolt check
@@ -182,7 +182,7 @@ const ClassAttack = {
 				if (!this.lightFuryTick || getTickCount() - this.lightFuryTick > Config.LightningFuryDelay * 1000) {
 					if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
 						if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4)) {
-							return 0;
+							return Attack.result.Failed;
 						}
 					}
 
@@ -190,13 +190,13 @@ const ClassAttack = {
 						this.lightFuryTick = getTickCount();
 					}
 
-					return 1;
+					return Attack.result.Success;
 				}
 
 				break;
 			default:
 				if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, timedSkill, unit.classid)) {
-					return 0;
+					return Attack.result.Failed;
 				}
 
 				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
@@ -204,19 +204,19 @@ const ClassAttack = {
 					walk = Skill.getRange(timedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
 
 					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4, walk)) {
-						return 0;
+						return Attack.result.Failed;
 					}
 				}
 
 				!unit.dead && Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
 
-				return 1;
+				return Attack.result.Success;
 			}
 		}
 
 		if (untimedSkill > -1) {
 			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, untimedSkill, unit.classid)) {
-				return 0;
+				return Attack.result.Failed;
 			}
 
 			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
@@ -224,13 +224,13 @@ const ClassAttack = {
 				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), 0x4, walk)) {
-					return 0;
+					return Attack.result.Failed;
 				}
 			}
 
 			!unit.dead && Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
 
-			return 1;
+			return Attack.result.Success;
 		}
 
 		Misc.poll(() => !me.skillDelay, 1000, 40);
@@ -240,6 +240,6 @@ const ClassAttack = {
 			delay(40);
 		}
 
-		return 1;
+		return Attack.result.Success;
 	}
 };

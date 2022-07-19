@@ -45,7 +45,7 @@ const ClassAttack = {
 	},
 
 	doAttack: function (unit, preattack = false) {
-		if (!unit) return 1;
+		if (!unit) return Attack.result.Success;
 		let gid = unit.gid;
 
 		if (Config.MercWatch && Town.needMerc()) {
@@ -54,7 +54,7 @@ const ClassAttack = {
 				
 				if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
 					console.debug("Lost reference to unit");
-					return 1;
+					return Attack.result.Success;
 				}
 			}
 		}
@@ -68,13 +68,13 @@ const ClassAttack = {
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
-					return 0;
+					return Attack.result.Failed;
 				}
 			}
 
 			Skill.cast(Config.AttackSkill[0], Skill.getHand(Config.AttackSkill[0]), unit);
 
-			return 1;
+			return Attack.result.Success;
 		}
 
 		let useStatic = (Config.StaticList.length > 0 && Config.CastStatic < 100 && Skill.canUse(sdk.skills.StaticField) && Attack.checkResist(unit, "lightning"));
@@ -101,7 +101,7 @@ const ClassAttack = {
 			while (!me.dead && unit.hpPercent > Config.CastStatic && unit.attackable) {
 				if (unit.distance > staticRange || checkCollision(me, unit, 0x4)) {
 					if (!Attack.getIntoPosition(unit, staticRange, 0x4)) {
-						return 0;
+						return Attack.result.Failed;
 					}
 				}
 
@@ -116,7 +116,7 @@ const ClassAttack = {
 			// re-check mob after static
 			if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
 				console.debug("Lost reference to unit");
-				return 1;
+				return Attack.result.Success;
 			}
 		}
 
@@ -134,13 +134,13 @@ const ClassAttack = {
 					}
 				}
 
-				if (!unit) return 1;
+				if (!unit) return Attack.result.Success;
 
 				if (Town.needMerc()) {
 					if (Config.MercWatch && mercRevive++ < 1) {
 						Town.visitTown();
 					} else {
-						return 2;
+						return Attack.result.CantAttack;
 					}
 
 					(merc === undefined || !merc) && (merc = me.getMerc());
@@ -161,7 +161,7 @@ const ClassAttack = {
 				}
 			}
 
-			return 1;
+			return Attack.result.Success;
 		}
 
 		return result;
@@ -174,16 +174,16 @@ const ClassAttack = {
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, timedSkill = -1, untimedSkill = -1) {
 		// No valid skills can be found
-		if (timedSkill < 0 && untimedSkill < 0) return 2;
+		if (timedSkill < 0 && untimedSkill < 0) return Attack.result.CantAttack;
 		// unit became invalidated
-		if (!unit || !unit.attackable) return 1;
+		if (!unit || !unit.attackable) return Attack.result.Success;
 		
 		let walk, noMana = false;
 		let classid = unit.classid;
 
 		if (timedSkill > -1 && (!me.skillDelay || !Skill.isTimed(timedSkill)) && Skill.getManaCost(timedSkill) < me.mp) {
 			if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, timedSkill, classid)) {
-				return 0;
+				return Attack.result.Failed;
 			}
 
 			if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
@@ -191,20 +191,20 @@ const ClassAttack = {
 				walk = Skill.getRange(timedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4, walk)) {
-					return 0;
+					return Attack.result.Failed;
 				}
 			}
 
 			!unit.dead && !checkCollision(me, unit, 0x4) && Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
 
-			return 1;
+			return Attack.result.Success;
 		} else {
 			noMana = !me.skillDelay;
 		}
 
 		if (untimedSkill > -1 && Skill.getManaCost(untimedSkill) < me.mp) {
 			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, untimedSkill, classid)) {
-				return 0;
+				return Attack.result.Failed;
 			}
 
 			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
@@ -212,22 +212,22 @@ const ClassAttack = {
 				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), 0x4, walk)) {
-					return 0;
+					return Attack.result.Failed;
 				}
 			}
 
 			!unit.dead && Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
 
-			return 1;
+			return Attack.result.Success;
 		} else {
 			noMana = true;
 		}
 
 		// don't count as failed
-		if (noMana) return 3;
+		if (noMana) return Attack.result.NeedMana;
 
 		Misc.poll(() => !me.skillDelay, 1000, 40);
 
-		return 1;
+		return Attack.result.Success;
 	}
 };

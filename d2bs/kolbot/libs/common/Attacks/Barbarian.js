@@ -9,7 +9,7 @@
 
 const ClassAttack = {
 	doAttack: function (unit, preattack = false) {
-		if (!unit) return 1;
+		if (!unit) return Attack.result.Success;
 		let gid = unit.gid;
 		let needRepair = Town.needRepair();
 
@@ -18,7 +18,7 @@ const ClassAttack = {
 
 			if (Town.visitTown(!!needRepair.length)) {
 				if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
-					return 1; // lost reference to the mob we were attacking
+					return Attack.result.Success; // lost reference to the mob we were attacking
 				}
 			}
 		}
@@ -26,13 +26,13 @@ const ClassAttack = {
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Attack.getSkillElement(Config.AttackSkill[0])) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
-					return 0;
+					return Attack.result.Failed;
 				}
 			}
 
 			Skill.cast(Config.AttackSkill[0], Skill.getHand(Config.AttackSkill[0]), unit);
 
-			return 1;
+			return Attack.result.Success;
 		}
 
 		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
@@ -66,37 +66,37 @@ const ClassAttack = {
 	},
 
 	doCast: function (unit, attackSkill = -1) {
-		if (attackSkill < 0) return 2;
+		if (attackSkill < 0) return Attack.result.CantAttack;
 		// check if unit became invalidated
-		if (!unit || !unit.attackable) return 1;
+		if (!unit || !unit.attackable) return Attack.result.Success;
 		
 		switch (attackSkill) {
 		case sdk.skills.Whirlwind:
 			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x1)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x1, 2)) {
-					return 0;
+					return Attack.result.Failed;
 				}
 			}
 
 			!unit.dead && Attack.whirlwind(unit);
 
-			return 1;
+			return Attack.result.Success;
 		default:
 			if (Skill.getRange(attackSkill) < 4 && !Attack.validSpot(unit.x, unit.y, attackSkill, unit.classid)) {
-				return 0;
+				return Attack.result.Failed;
 			}
 
 			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x4)) {
 				let walk = Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4, walk)) {
-					return 0;
+					return Attack.result.Failed;
 				}
 			}
 
 			!unit.dead && Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 
-			return 1;
+			return Attack.result.Success;
 		}
 	},
 

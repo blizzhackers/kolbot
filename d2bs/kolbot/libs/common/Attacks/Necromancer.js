@@ -124,7 +124,7 @@ const ClassAttack = {
 	},
 
 	doAttack: function (unit, preattack = false) {
-		if (!unit || unit.dead) return 1;
+		if (!unit || unit.dead) return Attack.result.Success;
 
 		let mercRevive = 0;
 		let timedSkill = -1;
@@ -139,7 +139,7 @@ const ClassAttack = {
 
 			if (Town.visitTown()) {
 				if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
-					return 1; // lost reference to the mob we were attacking
+					return Attack.result.Success; // lost reference to the mob we were attacking
 				}
 			}
 		}
@@ -147,13 +147,13 @@ const ClassAttack = {
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
-					return 0;
+					return Attack.result.Failed;
 				}
 			}
 
 			Skill.cast(Config.AttackSkill[0], Skill.getHand(Config.AttackSkill[0]), unit);
 
-			return 1;
+			return Attack.result.Success;
 		}
 
 		// only continue if we can actually curse the unit otherwise its a waste of time
@@ -163,36 +163,36 @@ const ClassAttack = {
 			if (customCurse && this.canCurse(unit, customCurse)) {
 				if (unit.distance > 25 || checkCollision(me, unit, 0x4)) {
 					if (!Attack.getIntoPosition(unit, 25, 0x4)) {
-						return 0;
+						return Attack.result.Failed;
 					}
 				}
 
 				Skill.cast(customCurse, 0, unit);
 
-				return 1;
+				return Attack.result.Success;
 			} else if (!customCurse) {
 				if (Config.Curse[0] > 0 && (unit.spectype & 0x7) && this.canCurse(unit, Config.Curse[0])) {
 					if (unit.distance > 25 || checkCollision(me, unit, 0x4)) {
 						if (!Attack.getIntoPosition(unit, 25, 0x4)) {
-							return 0;
+							return Attack.result.Failed;
 						}
 					}
 
 					Skill.cast(Config.Curse[0], 0, unit);
 
-					return 1;
+					return Attack.result.Success;
 				}
 
 				if (Config.Curse[1] > 0 && !(unit.spectype & 0x7) && this.canCurse(unit, Config.Curse[1])) {
 					if (unit.distance > 25 || checkCollision(me, unit, 0x4)) {
 						if (!Attack.getIntoPosition(unit, 25, 0x4)) {
-							return 0;
+							return Attack.result.Failed;
 						}
 					}
 
 					Skill.cast(Config.Curse[1], 0, unit);
 
-					return 1;
+					return Attack.result.Success;
 				}
 			}
 		}
@@ -240,13 +240,13 @@ const ClassAttack = {
 					}
 				}
 
-				if (!unit) return 1;
+				if (!unit) return Attack.result.Success;
 
 				if (Town.needMerc()) {
 					if (Config.MercWatch && mercRevive++ < 1) {
 						Town.visitTown();
 					} else {
-						return 2;
+						return Attack.result.CantAttack;
 					}
 
 					(merc === undefined || !merc) && (merc = me.getMerc());
@@ -265,7 +265,7 @@ const ClassAttack = {
 				!!closeMob && this.doCast(closeMob, timedSkill, untimedSkill);
 			}
 
-			return 1;
+			return Attack.result.Success;
 		}
 
 		return result;
@@ -280,9 +280,9 @@ const ClassAttack = {
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, timedSkill = -1, untimedSkill = -1) {
 		// No valid skills can be found
-		if (timedSkill < 0 && untimedSkill < 0) return 2;
+		if (timedSkill < 0 && untimedSkill < 0) return Attack.result.CantAttack;
 		// unit became invalidated
-		if (!unit || !unit.attackable) return 1;
+		if (!unit || !unit.attackable) return Attack.result.Success;
 		
 		let walk;
 		let classid = unit.classid;
@@ -296,7 +296,7 @@ const ClassAttack = {
 				if (!this.novaTick || getTickCount() - this.novaTick > Config.PoisonNovaDelay * 1000) {
 					if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
 						if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4)) {
-							return 0;
+							return Attack.result.Failed;
 						}
 					}
 
@@ -309,7 +309,7 @@ const ClassAttack = {
 			case 500: // Pure Summoner
 				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
 					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4)) {
-						return 0;
+						return Attack.result.Failed;
 					}
 				}
 
@@ -317,14 +317,14 @@ const ClassAttack = {
 
 				break;
 			default:
-				if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, timedSkill, classid)) return 0;
+				if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, timedSkill, classid)) return Attack.result.Failed;
 
 				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
 					// Allow short-distance walking for melee skills
 					let walk = Skill.getRange(timedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
 
 					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4, walk)) {
-						return 0;
+						return Attack.result.Failed;
 					}
 				}
 
@@ -335,20 +335,20 @@ const ClassAttack = {
 		}
 
 		if (untimedSkill > -1) {
-			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, untimedSkill, classid)) return 0;
+			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, untimedSkill, classid)) return Attack.result.Failed;
 
 			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
 				// Allow short-distance walking for melee skills
 				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), 0x4, walk)) {
-					return 0;
+					return Attack.result.Failed;
 				}
 			}
 
 			!unit.dead && Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
 
-			return 1;
+			return Attack.result.Success;
 		}
 
 		Misc.poll(() => !me.skillDelay, 1000, 40);
@@ -358,7 +358,7 @@ const ClassAttack = {
 			delay(40);
 		}
 
-		return 1;
+		return Attack.result.Success;
 	},
 
 	raiseArmy: function (range = 25) {
