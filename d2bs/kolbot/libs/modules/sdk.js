@@ -1629,6 +1629,8 @@ item: {
 		},
         
 		monsters: {
+			Dummy1: 149,
+			Dummy2: 268,
 			AbyssKnight: 311,
 			Afflicted: 10,
 			Afflicted2: 580,

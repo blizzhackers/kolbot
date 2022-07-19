@@ -31,7 +31,7 @@ let sdk = require('../modules/sdk');
 
 		// deal with bug
 		if (first === 1 && typeof second === 'string' && ret
-			&& ((me.act === 1 && ret.classid === 149) || me.act === 2 && ret.classid === 268)) {
+			&& ((me.act === 1 && ret.classid === sdk.monsters.Dummy1) || me.act === 2 && ret.classid === sdk.monsters.Dummy2)) {
 			return null;
 		}
 
@@ -41,10 +41,7 @@ let sdk = require('../modules/sdk');
 
 // Check if unit is idle
 Unit.prototype.__defineGetter__("idle", function () {
-	if (this.type > 0) {
-		throw new Error("Unit.idle: Must be used with player units.");
-	}
-
+	if (this.type > sdk.unittype.Player) throw new Error("Unit.idle: Must be used with player units.");
 	return (this.mode === 1 || this.mode === 5 || this.mode === 17); // Dead is pretty idle too
 });
 
@@ -58,7 +55,7 @@ Unit.prototype.__defineGetter__("dead", function () {
 	case sdk.unittype.Player:
 		return this.mode === 0 || this.mode === 17;
 	case sdk.unittype.Monster:
-		return this.mode === 0 || this.mode === 12;
+		return this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead;
 	default:
 		return false;
 	}
@@ -66,7 +63,7 @@ Unit.prototype.__defineGetter__("dead", function () {
 
 // Check if unit is in town
 Unit.prototype.__defineGetter__("inTown", function () {
-	if (this.type > 0) throw new Error("Unit.inTown: Must be used with player units.");
+	if (this.type > sdk.unittype.Player) throw new Error("Unit.inTown: Must be used with player units.");
 	return [sdk.areas.RogueEncampment, sdk.areas.LutGholein, sdk.areas.KurastDocktown, sdk.areas.PandemoniumFortress, sdk.areas.Harrogath].includes(this.area);
 });
 
@@ -76,7 +73,7 @@ Party.prototype.__defineGetter__("inTown", function () {
 });
 
 Unit.prototype.__defineGetter__("attacking", function () {
-	if (this.type > 0) throw new Error("Unit.attacking: Must be used with player units.");
+	if (this.type > sdk.unittype.Player) throw new Error("Unit.attacking: Must be used with player units.");
 	return [7, 8, 10, 11, 12, 13, 14, 15, 16, 18].includes(this.mode);
 });
 
@@ -248,7 +245,7 @@ Unit.prototype.sell = function () {
 
 Unit.prototype.toCursor = function (usePacket = false) {
 	if (this.type !== sdk.unittype.Item) throw new Error("Unit.toCursor: Must be used with items.");
-	if (me.itemoncursor && this.mode === 4) return true;
+	if (me.itemoncursor && this.mode === sdk.itemmode.onCursor) return true;
 
 	this.location === sdk.storage.Stash && Town.openStash();
 	this.location === sdk.storage.Cube && Cubing.openCube();
@@ -2373,14 +2370,14 @@ Unit.prototype.__defineGetter__('attackable', function () {
 	if ([
 		sdk.monsters.CarrionBird1, sdk.monsters.UndeadScavenger, sdk.monsters.HellBuzzard,
 		sdk.monsters.WingedNightmare, sdk.monsters.SoulKiller2/*feel like this one is wrong*/,
-		sdk.monsters.CarrionBird2].includes(this.classid) && this.mode === 8) {
+		sdk.monsters.CarrionBird2].includes(this.classid) && this.mode === sdk.units.monsters.monstermode.UsingSkill1) {
 		return false;
 	}
 	// Monsters that are Burrowed/Submerged
 	if ([
 		sdk.monsters.SandMaggot, sdk.monsters.RockWorm, sdk.monsters.Devourer, sdk.monsters.GiantLamprey, sdk.monsters.WorldKiller2,
 		sdk.monsters.WaterWatcherLimb, sdk.monsters.RiverStalkerLimb, sdk.monsters.StygianWatcherLimb,
-		sdk.monsters.WaterWatcherHead, sdk.monsters.RiverStalkerHead, sdk.monsters.StygianWatcherHead].includes(this.classid) && this.mode === 14) {
+		sdk.monsters.WaterWatcherHead, sdk.monsters.RiverStalkerHead, sdk.monsters.StygianWatcherHead].includes(this.classid) && this.mode === sdk.units.monsters.monstermode.Spawning) {
 		return false;
 	}
 
@@ -2402,9 +2399,19 @@ Unit.prototype.__defineGetter__('curseable', function () {
 	// catapults were returning a level of 0 and hanging up clear scripts
 	if (this.charlvl < 1) return false;
 	// Monsters that are in flight
-	if ([110, 111, 112, 113, 144, 608].includes(this.classid) && this.mode === 8) return false;
+	if ([
+		sdk.monsters.CarrionBird1, sdk.monsters.UndeadScavenger, sdk.monsters.HellBuzzard,
+		sdk.monsters.WingedNightmare, sdk.monsters.SoulKiller2/*feel like this one is wrong*/,
+		sdk.monsters.CarrionBird2].includes(this.classid) && this.mode === sdk.units.monsters.monstermode.UsingSkill1) {
+		return false;
+	}
 	// Monsters that are Burrowed/Submerged
-	if ([68, 69, 70, 71, 72, 258, 258, 259, 260, 261, 262, 263].includes(this.classid) && this.mode === 14) return false;
+	if ([
+		sdk.monsters.SandMaggot, sdk.monsters.RockWorm, sdk.monsters.Devourer, sdk.monsters.GiantLamprey, sdk.monsters.WorldKiller2,
+		sdk.monsters.WaterWatcherLimb, sdk.monsters.RiverStalkerLimb, sdk.monsters.StygianWatcherLimb,
+		sdk.monsters.WaterWatcherHead, sdk.monsters.RiverStalkerHead, sdk.monsters.StygianWatcherHead].includes(this.classid) && this.mode === sdk.units.monsters.monstermode.Spawning) {
+		return false;
+	}
 
 	return [
 		sdk.monsters.Turret1, sdk.monsters.Turret2, sdk.monsters.Turret3, sdk.monsters.SandMaggotEgg, sdk.monsters.RockWormEgg, sdk.monsters.DevourerEgg, sdk.monsters.GiantLampreyEgg,

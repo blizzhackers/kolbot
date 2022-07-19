@@ -208,7 +208,7 @@ const Attack = {
 		let attackCount = 0;
 		let gid = target.gid;
 
-		let findTarget = function (gid, loc) {
+		const findTarget = function (gid, loc) {
 			let path = getPath(me.area, me.x, me.y, loc.x, loc.y, 1, 5);
 			if (!path) return false;
 
@@ -224,7 +224,8 @@ const Attack = {
 
 		let lastLoc = {x: me.x, y: me.y};
 		let tick = getTickCount();
-		console.log("ÿc7Kill ÿc0:: " + (!!target.name ? target.name : classId));
+		const who = (!!target.name ? target.name : classId);
+		console.log("ÿc7Kill ÿc0:: " + who);
 		Config.MFLeader && Pather.makePortal() && say("kill " + classId);
 
 		while (attackCount < Config.MaxAttackCount && target.attackable && !this.skipCheck(target)) {
@@ -236,6 +237,7 @@ const Attack = {
 				!target && (target = findTarget(gid, lastLoc));
 
 				if (!target) {
+					console.warn("Failed to kill " + who + " (couldn't relocate unit)");
 					break;
 				}
 			}
@@ -278,9 +280,9 @@ const Attack = {
 		Pickit.pickItems();
 
 		if (!!target && target.attackable) {
-			console.warn("Failed to kill " + target.name + errorInfo);
+			console.warn("Failed to kill " + who + errorInfo);
 		} else {
-			console.log("ÿc7Killed ÿc0:: " + (!!target.name ? target.name : classId) + "ÿc0 - ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
+			console.log("ÿc7Killed ÿc0:: " + who + "ÿc0 - ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
 		}
 
 		return (!target || !copyUnit(target).x || target.dead || !target.attackable);
@@ -296,6 +298,7 @@ const Attack = {
 		}
 
 		let retry = 0, attackCount = 0;
+		const who = (!!target.name ? target.name : classId);
 
 		while (attackCount < Config.MaxAttackCount && target.attackable && !Attack.skipCheck(target)) {
 			let result = ClassAttack.doAttack(target, attackCount % 15 === 0);
@@ -321,6 +324,7 @@ const Attack = {
 			attackCount += 1;
 
 			if (target.hpPercent <= percent) {
+				console.log("ÿc7Hurt ÿc0:: " + who + "ÿc7HpPercent: ÿc0" + target.hpPercent + "ÿc0 - ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
 				break;
 			}
 		}
@@ -497,7 +501,7 @@ const Attack = {
 						monsterList.shift();
 					}
 
-					if (target.mode === 0 || target.mode === 12 || Config.FastPick === 2) {
+					if (target.dead || Config.FastPick === 2) {
 						if (boss && boss.gid === target.gid) {
 							killedBoss = true;
 							console.log("ÿc7Cleared ÿc0:: " + (!!target.name ? target.name : bossId) + "ÿc0 - ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
@@ -682,13 +686,13 @@ const Attack = {
 
 					// Skip non-unique monsters after 15 attacks, except in Throne of Destruction
 					if (!me.inArea(sdk.areas.ThroneofDestruction) && !isSpecial && gidAttack[i].attacks > 15) {
-						print("ÿc1Skipping " + target.name + " " + target.gid + " " + gidAttack[i].attacks);
+						console.log("ÿc1Skipping " + target.name + " " + target.gid + " " + gidAttack[i].attacks);
 						monsterList.shift();
 					}
 
 					attackCount += 1;
 
-					if (target.mode === 0 || target.mode === 12 || Config.FastPick === 2) {
+					if (target.dead || Config.FastPick === 2) {
 						Pickit.fastPick();
 					}
 				} else {
@@ -719,7 +723,7 @@ const Attack = {
 		let tick;
 
 		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
-		skipBlocked === true && (skipBlocked = 0x4);
+		skipBlocked === true && (skipBlocked = sdk.collision.Ranged);
 
 		while (true) {
 			[x, y].distance > 5 && Pather.moveTo(x, y);
@@ -1454,7 +1458,7 @@ const Attack = {
 
 		walk === true && (walk = 1);
 
-		if (distance < 4 && (!unit.hasOwnProperty("mode") || (unit.mode !== 0 && unit.mode !== 12))) {
+		if (distance < 4 && (!unit.hasOwnProperty("mode") || !unit.dead)) {
 			//me.overhead("Short range");
 
 			if (walk) {
