@@ -259,9 +259,9 @@ Unit.prototype.toCursor = function (usePacket = false) {
 		try {
 			if (this.mode === 1) {
 				// fix for equipped items (cubing viper staff for example)
-				clickItem(0, this.bodylocation);
+				clickItem(sdk.clicktypes.click.Left, this.bodylocation);
 			} else {
-				clickItem(0, this);
+				clickItem(sdk.clicktypes.click.Left, this);
 			}
 		} catch (e) {
 			return false;
@@ -1536,8 +1536,8 @@ Unit.prototype.equip = function (destLocation = undefined) {
 
 	// if nothing is equipped at the moment, just equip it
 	if (!currentEquiped.length) {
-		clickItemAndWait(0, this);
-		clickItemAndWait(0, destLocation.first());
+		clickItemAndWait(sdk.clicktypes.click.Left, this);
+		clickItemAndWait(sdk.clicktypes.click.Left, destLocation.first());
 	} else {
 		// unequip / swap items
 		currentEquiped.forEach((item, index) => {
@@ -1545,18 +1545,18 @@ Unit.prototype.equip = function (destLocation = undefined) {
 			if (index === (currentEquiped.length - 1)) {
 				print('swap ' + this.name + ' for ' + item.name);
 				let oldLoc = {x: this.x, y: this.y, location: this.location};
-				clickItemAndWait(0, this); // Pick up current item
-				clickItemAndWait(0, destLocation.first()); // the swap of items
+				clickItemAndWait(sdk.clicktypes.click.Left, this); // Pick up current item
+				clickItemAndWait(sdk.clicktypes.click.Left, destLocation.first()); // the swap of items
 				// Find a spot for the current item
 				let	spot = findspot(item);
 
 				if (!spot) { // If no spot is found for the item, rollback
-					clickItemAndWait(0, destLocation.first()); // swap again
-					clickItemAndWait(0, oldLoc.x, oldLoc.y, oldLoc.location); // put item back on old spot
+					clickItemAndWait(sdk.clicktypes.click.Left, destLocation.first()); // swap again
+					clickItemAndWait(sdk.clicktypes.click.Left, oldLoc.x, oldLoc.y, oldLoc.location); // put item back on old spot
 					throw Error('cant find spot for unequipped item');
 				}
 
-				clickItemAndWait(0, spot.coord.y, spot.coord.x, spot.location); // put item on the found spot
+				clickItemAndWait(sdk.clicktypes.click.Left, spot.coord.y, spot.coord.x, spot.location); // put item on the found spot
 
 				return;
 			}
@@ -1567,8 +1567,8 @@ Unit.prototype.equip = function (destLocation = undefined) {
 
 			if (!spot) throw Error('cant find spot for unequipped item');
 
-			clickItemAndWait(0, item.bodylocation);
-			clickItemAndWait(0, spot.coord.x, spot.coord.y, spot.location);
+			clickItemAndWait(sdk.clicktypes.click.Left, item.bodylocation);
+			clickItemAndWait(sdk.clicktypes.click.Left, spot.coord.x, spot.coord.y, spot.location);
 		});
 	}
 

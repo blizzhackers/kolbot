@@ -6,37 +6,37 @@
 */
 
 const NPC = {
-	Akara: getLocaleString(2892).toLowerCase(),
-	Gheed: getLocaleString(2891).toLowerCase(),
-	Charsi: getLocaleString(2894).toLowerCase(),
-	Kashya: getLocaleString(2893).toLowerCase(),
-	Warriv: getLocaleString(2895).toLowerCase(),
+	Akara: getLocaleString(sdk.locale.npcs.Akara).toLowerCase(),
+	Gheed: getLocaleString(sdk.locale.npcs.Gheed).toLowerCase(),
+	Charsi: getLocaleString(sdk.locale.npcs.Charsi).toLowerCase(),
+	Kashya: getLocaleString(sdk.locale.npcs.Kashya).toLowerCase(),
+	Warriv: getLocaleString(sdk.locale.npcs.Warriv).toLowerCase(),
 
-	Fara: getLocaleString(3025).toLowerCase(),
-	Drognan: getLocaleString(3023).toLowerCase(),
-	Elzix: getLocaleString(3030).toLowerCase(),
-	Greiz: getLocaleString(3031).toLowerCase(),
-	Lysander: getLocaleString(3026).toLowerCase(),
-	Jerhyn: getLocaleString(3027).toLowerCase(),
-	Meshif: getLocaleString(3032).toLowerCase(),
-	Atma: getLocaleString(3024).toLowerCase(),
+	Fara: getLocaleString(sdk.locale.npcs.Fara).toLowerCase(),
+	Drognan: getLocaleString(sdk.locale.npcs.Drognan).toLowerCase(),
+	Elzix: getLocaleString(sdk.locale.npcs.Elzix).toLowerCase(),
+	Greiz: getLocaleString(sdk.locale.npcs.Greiz).toLowerCase(),
+	Lysander: getLocaleString(sdk.locale.npcs.Lysander).toLowerCase(),
+	Jerhyn: getLocaleString(sdk.locale.npcs.Jerhyn).toLowerCase(),
+	Meshif: getLocaleString(sdk.locale.npcs.Meshif).toLowerCase(),
+	Atma: getLocaleString(sdk.locale.npcs.Atma).toLowerCase(),
 
-	Ormus: getLocaleString(1011).toLowerCase(),
-	Alkor: getLocaleString(1010).toLowerCase(),
-	Hratli: getLocaleString(1009).toLowerCase(),
-	Asheara: getLocaleString(1008).toLowerCase(),
+	Ormus: getLocaleString(sdk.locale.npcs.Ormus).toLowerCase(),
+	Alkor: getLocaleString(sdk.locale.npcs.Alkor).toLowerCase(),
+	Hratli: getLocaleString(sdk.locale.npcs.Hratli).toLowerCase(),
+	Asheara: getLocaleString(sdk.locale.npcs.Asheara).toLowerCase(),
 
-	Jamella: getLocaleString(1016).toLowerCase(),
-	Halbu: getLocaleString(1017).toLowerCase(),
-	Tyrael: getLocaleString(1013).toLowerCase(),
+	Jamella: getLocaleString(sdk.locale.npcs.Jamella).toLowerCase(),
+	Halbu: getLocaleString(sdk.locale.npcs.Halbu).toLowerCase(),
+	Tyrael: getLocaleString(sdk.locale.npcs.Tyrael).toLowerCase(),
 
-	Malah: getLocaleString(22478).toLowerCase(),
-	Anya: getLocaleString(22477).toLowerCase(),
-	Larzuk: getLocaleString(22476).toLowerCase(),
-	Qual_Kehk: getLocaleString(22480).toLowerCase(),
-	Nihlathak: getLocaleString(22483).toLowerCase(),
+	Malah: getLocaleString(sdk.locale.npcs.Malah).toLowerCase(),
+	Anya: getLocaleString(sdk.locale.npcs.Anya).toLowerCase(),
+	Larzuk: getLocaleString(sdk.locale.npcs.Larzuk).toLowerCase(),
+	Qual_Kehk: getLocaleString(sdk.locale.npcs.QualKehk).toLowerCase(),
+	Nihlathak: getLocaleString(sdk.locale.npcs.Nihlathak2).toLowerCase(),
 
-	Cain: getLocaleString(2890).toLowerCase()
+	Cain: getLocaleString(sdk.locale.npcs.DeckardCain).toLowerCase()
 };
 
 const Town = {
@@ -186,7 +186,7 @@ const Town = {
 		me.cancelUIFlags();
 		!me.barbarian && Precast.haveCTA === -1 && Precast.doPrecast(false);
 
-		delay(200 + me.ping * 2);
+		delay(250);
 
 		console.log("ÿc8Finish TownChores ÿc0- ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
 
@@ -899,7 +899,7 @@ const Town = {
 
 		CursorLoop:
 		for (let i = 0; i < 3; i += 1) {
-			clickItem(1, tome);
+			clickItem(sdk.clicktypes.click.Right, tome);
 
 			let tick = getTickCount();
 
@@ -918,7 +918,7 @@ const Town = {
 
 		for (let i = 0; i < 3; i += 1) {
 			if (getCursorType() === sdk.cursortype.Identify) {
-				clickItem(0, unit);
+				clickItem(sdk.clicktypes.click.Left, unit);
 			}
 
 			let tick = getTickCount();
@@ -1340,7 +1340,7 @@ const Town = {
 
 				if (me.itemoncursor) {
 					for (let i = 0; i < 3; i += 1) {
-						clickItem(0, bodyLoc);
+						clickItem(sdk.clicktypes.click.Left, bodyLoc);
 						delay(me.ping * 2 + 500);
 
 						if (cubeItems[0].bodylocation === bodyLoc) {
@@ -1594,7 +1594,7 @@ const Town = {
 					let pickResult = Pickit.checkItem(items[i]).result;
 					
 					switch (true) {
-					case pickResult > 0 && pickResult < 4:
+					case pickResult > Pickit.result.UNWANTED && pickResult < Pickit.result.TRASH:
 					case Cubing.keepItem(items[i]):
 					case Runewords.keepItem(items[i]):
 					case CraftingSystem.keepItem(items[i]):
@@ -1648,7 +1648,7 @@ const Town = {
 			me.cancel();
 
 			if (this.move("stash")) {
-				let stash = Game.getObject(267);
+				let stash = Game.getObject(sdk.units.Stash);
 
 				if (stash) {
 					let pingDelay = me.getPingDelay();
@@ -1758,14 +1758,14 @@ const Town = {
 			shard.toCursor();
 
 			while (me.itemoncursor) {
-				clickItem(0, sdk.body.RightArm);
+				clickItem(sdk.clicktypes.click.Left, sdk.body.RightArm);
 				delay(500);
 			}
 		} else if (!check.left) {
 			shard.toCursor();
 
 			while (me.itemoncursor) {
-				clickItem(0, sdk.body.LeftArm);
+				clickItem(sdk.clicktypes.click.Left, sdk.body.LeftArm);
 				delay(500);
 			}
 		}
@@ -1826,7 +1826,7 @@ const Town = {
 				if (tpTome && tpTome.getStat(sdk.stats.Quantity) < 20) {
 					currQuantity = tpTome.getStat(sdk.stats.Quantity);
 					if (scrolls[i].toCursor()) {
-						clickItemAndWait(0, tpTome.x, tpTome.y, tpTome.location);
+						clickItemAndWait(sdk.clicktypes.click.Left, tpTome.x, tpTome.y, tpTome.location);
 
 						if (tpTome.getStat(sdk.stats.Quantity) > currQuantity) {
 							console.log('ÿc9clearScrollsÿc0 :: placed scroll in tp tome');
@@ -1841,7 +1841,7 @@ const Town = {
 				if (idTome && idTome.getStat(sdk.stats.Quantity) < 20) {
 					currQuantity = idTome.getStat(sdk.stats.Quantity);
 					if (scrolls[i].toCursor()) {
-						clickItemAndWait(0, idTome.x, idTome.y, idTome.location);
+						clickItemAndWait(sdk.clicktypes.click.Left, idTome.x, idTome.y, idTome.location);
 
 						if (idTome.getStat(sdk.stats.Quantity) > currQuantity) {
 							console.log('ÿc9clearScrollsÿc0 :: placed scroll in id tome');
@@ -2253,7 +2253,7 @@ const Town = {
 
 			switch (spot) {
 			case "stash":
-				if (!!Game.getObject(267)) {
+				if (!!Game.getObject(sdk.units.Stash)) {
 					return true;
 				}
 
