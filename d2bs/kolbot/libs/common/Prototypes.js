@@ -1984,10 +1984,10 @@ Object.defineProperties(me, {
 	highestAct: {
 		get: function () {
 			let acts = [true,
-				me.getQuest(sdk.quest.id.AbleToGotoActII, 0),
-				me.getQuest(sdk.quest.id.AbleToGotoActIII, 0),
-				me.getQuest(sdk.quest.id.AbleToGotoActIV, 0),
-				me.getQuest(sdk.quest.id.AbleToGotoActV, 0)];
+				me.getQuest(sdk.quest.id.AbleToGotoActII, sdk.quest.states.Completed),
+				me.getQuest(sdk.quest.id.AbleToGotoActIII, sdk.quest.states.Completed),
+				me.getQuest(sdk.quest.id.AbleToGotoActIV, sdk.quest.states.Completed),
+				me.getQuest(sdk.quest.id.AbleToGotoActV, sdk.quest.states.Completed)];
 			let index = acts.findIndex((i) => !i); // find first false, returns between 1 and 5
 			return index === -1 ? 5 : index;
 		}
@@ -1995,12 +1995,12 @@ Object.defineProperties(me, {
 	highestQuestDone: {
 		get: function () {
 			for (let i = sdk.quest.id.Respec; i >= sdk.quest.id.SpokeToWarriv; i--) {
-				if (me.getQuest(i, 0)) {
+				if (me.getQuest(i, sdk.quest.states.Completed)) {
 					return i;
 				}
 
 				// check if we've completed main part but not used our reward
-				if ([sdk.quest.id.RescueonMountArreat, sdk.quest.id.SiegeOnHarrogath, sdk.quest.id.ToolsoftheTrade].includes(i) && me.getQuest(i, 1)) {
+				if ([sdk.quest.id.RescueonMountArreat, sdk.quest.id.SiegeOnHarrogath, sdk.quest.id.ToolsoftheTrade].includes(i) && me.getQuest(i, sdk.quest.states.ReqComplete)) {
 					return i;
 				}
 			}
@@ -2203,133 +2203,133 @@ Object.defineProperties(me, {
 	// quests
 	den: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.DenofEvil, 0);
+			return me.getQuest(sdk.quest.id.DenofEvil, sdk.quest.states.Completed);
 		}
 	},
 	bloodraven: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.SistersBurialGrounds, 0);
+			return me.getQuest(sdk.quest.id.SistersBurialGrounds, sdk.quest.states.Completed);
 		}
 	},
 	smith: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.ToolsoftheTrade, 0);
+			return me.getQuest(sdk.quest.id.ToolsoftheTrade, sdk.quest.states.Completed);
 		}
 	},
 	cain: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.TheSearchForCain, 0);
+			return me.getQuest(sdk.quest.id.TheSearchForCain, sdk.quest.states.Completed);
 		}
 	},
 	tristram: {
 		get: function () {
 			// update where this is used and change the state to be portal opened and me.cain to be quest completed
-			return me.getQuest(sdk.quest.id.TheSearchForCain, 0);
+			return me.getQuest(sdk.quest.id.TheSearchForCain, sdk.quest.states.Completed);
 		}
 	},
 	countess: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.ForgottenTower, 0);
+			return me.getQuest(sdk.quest.id.ForgottenTower, sdk.quest.states.Completed);
 		}
 	},
 	andariel: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.AbleToGotoActII, 0);
+			return me.getQuest(sdk.quest.id.AbleToGotoActII, sdk.quest.states.Completed);
 		}
 	},
 	radament: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.RadamentsLair, 0);
+			return me.getQuest(sdk.quest.id.RadamentsLair, sdk.quest.states.Completed);
 		}
 	},
 	horadricstaff: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.TheHoradricStaff, 0);
+			return me.getQuest(sdk.quest.id.TheHoradricStaff, sdk.quest.states.Completed);
 		}
 	},
 	summoner: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.TheSummoner, 0);
+			return me.getQuest(sdk.quest.id.TheSummoner, sdk.quest.states.Completed);
 		}
 	},
 	duriel: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.AbleToGotoActIII, 0);
+			return me.getQuest(sdk.quest.id.AbleToGotoActIII, sdk.quest.states.Completed);
 		}
 	},
 	goldenbird: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.TheGoldenBird, 0);
+			return me.getQuest(sdk.quest.id.TheGoldenBird, sdk.quest.states.Completed);
 		}
 	},
 	lamessen: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.LamEsensTome, 0);
+			return me.getQuest(sdk.quest.id.LamEsensTome, sdk.quest.states.Completed);
 		}
 	},
 	gidbinn: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.BladeoftheOldReligion, 0);
+			return me.getQuest(sdk.quest.id.BladeoftheOldReligion, sdk.quest.states.Completed);
 		}
 	},
 	travincal: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.KhalimsWill, 0);
+			return me.getQuest(sdk.quest.id.KhalimsWill, sdk.quest.states.Completed);
 		}
 	},
 	mephisto: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.AbleToGotoActIV, 0);
+			return me.getQuest(sdk.quest.id.AbleToGotoActIV, sdk.quest.states.Completed);
 		}
 	},
 	izual: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.TheFallenAngel, 0);
+			return me.getQuest(sdk.quest.id.TheFallenAngel, sdk.quest.states.Completed);
 		}
 	},
 	hellforge: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.HellsForge, 0);
+			return me.getQuest(sdk.quest.id.HellsForge, sdk.quest.states.Completed);
 		}
 	},
 	diablo: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.TerrorsEnd, 0);
+			return me.getQuest(sdk.quest.id.TerrorsEnd, sdk.quest.states.Completed);
 		}
 	},
 	shenk: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.SiegeOnHarrogath, 0);
+			return me.getQuest(sdk.quest.id.SiegeOnHarrogath, sdk.quest.states.Completed);
 		}
 	},
 	larzuk: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.SiegeOnHarrogath, 1);
+			return me.getQuest(sdk.quest.id.SiegeOnHarrogath, sdk.quest.states.ReqComplete);
 		}
 	},
 	savebarby: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.RescueonMountArreat, 0);
+			return me.getQuest(sdk.quest.id.RescueonMountArreat, sdk.quest.states.Completed);
 		}
 	},
 	barbrescue: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.RescueonMountArreat, 0);
+			return me.getQuest(sdk.quest.id.RescueonMountArreat, sdk.quest.states.Completed);
 		}
 	},
 	anya: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.PrisonofIce, 0);
+			return me.getQuest(sdk.quest.id.PrisonofIce, sdk.quest.states.Completed);
 		}
 	},
 	ancients: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.RiteofPassage, 0);
+			return me.getQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.Completed);
 		}
 	},
 	baal: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.EyeofDestruction, 0);
+			return me.getQuest(sdk.quest.id.EyeofDestruction, sdk.quest.states.Completed);
 		}
 	},
 	// Misc
@@ -2340,7 +2340,7 @@ Object.defineProperties(me, {
 	},
 	respec: {
 		get: function () {
-			return me.getQuest(sdk.quest.id.Respec, 0);
+			return me.getQuest(sdk.quest.id.Respec, sdk.quest.states.Completed);
 		}
 	},
 	diffCompleted: {

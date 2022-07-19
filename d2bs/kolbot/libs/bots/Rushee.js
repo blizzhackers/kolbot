@@ -460,7 +460,7 @@ function Rushee() {
 					}
 
 					// make sure we talk to cain to access durance
-					leader.area === sdk.areas.DuranceofHateLvl2 && (!Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, 0)) && Town.npcInteract("Cain");
+					leader.area === sdk.areas.DuranceofHateLvl2 && (!Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, sdk.quest.states.Completed)) && Town.npcInteract("Cain");
 					
 					// we aren't the quester but need to talk to npcs in order to be able to get wps from certain areas 
 					(!Config.Rushee.Quester && !this.nonQuesterNPCTalk) && (this.nonQuesterNPCTalk = true);
@@ -502,7 +502,7 @@ function Rushee() {
 
 						switch (leader.area) {
 						case sdk.areas.ClawViperTempleLvl2:
-							Misc.poll(() => !!(Misc.checkQuest(sdk.quest.id.TheTaintedSun, 1) || Misc.checkQuest(sdk.quest.id.TheTaintedSun, 13), Time.seconds(20), 1000));
+							Misc.poll(() => !!(Misc.checkQuest(sdk.quest.id.TheTaintedSun, sdk.quest.states.ReqComplete) || Misc.checkQuest(sdk.quest.id.TheTaintedSun, 13), Time.seconds(20), 1000));
 							if (Town.npcInteract("Drognan")) {
 								actions.shift();
 								console.debug("drognan done");
@@ -510,7 +510,7 @@ function Rushee() {
 
 							break;
 						case sdk.areas.ArcaneSanctuary:
-							Misc.poll(() => !!(Misc.checkQuest(sdk.quest.id.TheSummoner, 1) || Misc.checkQuest(sdk.quest.id.TheSummoner, 13), Time.seconds(20), 1000));
+							Misc.poll(() => !!(Misc.checkQuest(sdk.quest.id.TheSummoner, sdk.quest.states.ReqComplete) || Misc.checkQuest(sdk.quest.id.TheSummoner, 13), Time.seconds(20), 1000));
 							if (Town.npcInteract("Atma")) {
 								actions.shift();
 								console.debug("atma done");
@@ -526,7 +526,7 @@ function Rushee() {
 
 							break;
 						case sdk.areas.ArreatSummit:
-							Misc.poll(() => (Misc.checkQuest(sdk.quest.id.RiteofPassage, 1) || Misc.checkQuest(sdk.quest.id.RiteofPassage, 13), Time.seconds(20), 1000));
+							Misc.poll(() => (Misc.checkQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.ReqComplete) || Misc.checkQuest(sdk.quest.id.RiteofPassage, 13), Time.seconds(20), 1000));
 							if (Town.npcInteract("Malah")) {
 								actions.shift();
 								console.debug("malah done");
@@ -797,7 +797,7 @@ function Rushee() {
 						switch (leader.area) {
 						case sdk.areas.OuterSteppes:
 						case sdk.areas.PlainsofDespair:
-							me.act === 4 && Misc.checkQuest(sdk.quest.id.TheFallenAngel, 1) && Town.npcInteract("Tyrael");
+							me.act === 4 && Misc.checkQuest(sdk.quest.id.TheFallenAngel, sdk.quest.states.ReqComplete) && Town.npcInteract("Tyrael");
 
 							break;
 						case sdk.areas.BloodyFoothills:
@@ -850,7 +850,7 @@ function Rushee() {
 
 						Town.npcInteract("Atma");
 
-						if (!Misc.checkQuest(sdk.quest.id.TheSummoner, 0)) {
+						if (!Misc.checkQuest(sdk.quest.id.TheSummoner, sdk.quest.states.Completed)) {
 							D2Bot.printToConsole("Summoner quest failed", 9);
 							quit();
 						}
@@ -866,7 +866,7 @@ function Rushee() {
 
 						Town.npcInteract("Cain");
 
-						if (!Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, 0)) {
+						if (!Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, sdk.quest.states.Completed)) {
 							D2Bot.printToConsole("Travincal quest failed", 9);
 							quit();
 						}
@@ -889,7 +889,7 @@ function Rushee() {
 							break;
 						}
 
-						if (Misc.checkQuest(sdk.quest.id.TheFallenAngel, 1)) {
+						if (Misc.checkQuest(sdk.quest.id.TheFallenAngel, sdk.quest.states.ReqComplete)) {
 							Town.npcInteract("Tyrael");
 							Town.move("portalspot");
 						}

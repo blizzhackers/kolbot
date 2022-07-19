@@ -9,7 +9,7 @@ function Tristram() {
 	Pather._teleport = Pather.teleport;
 
 	// complete quest if its not complete
-	if (!me.getQuest(sdk.quest.id.TheSearchForCain, 4) && !me.getQuest(sdk.quest.id.TheSearchForCain, 0)) {
+	if (!me.getQuest(sdk.quest.id.TheSearchForCain, 4) && !me.getQuest(sdk.quest.id.TheSearchForCain, sdk.quest.states.Completed)) {
 		Common.Questing.cain();
 	}
 

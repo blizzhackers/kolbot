@@ -587,7 +587,7 @@ const Pather = {
 	// does this need a validLocation check? - maybe if we fail once check the spot
 	teleportTo: function (x, y, maxRange = 5) {
 		for (let i = 0; i < 3; i += 1) {
-			Config.PacketCasting > 0 ? Packet.teleport(x, y) : Skill.cast(sdk.skills.Teleport, 0, x, y);
+			Config.PacketCasting > 0 ? Packet.teleport(x, y) : Skill.cast(sdk.skills.Teleport, sdk.skills.hand.Right, x, y);
 			let tick = getTickCount();
 			let pingDelay = i === 0 ? 150 : me.getPingDelay();
 
@@ -1173,8 +1173,8 @@ const Pather = {
 			}
 
 			if (type === sdk.unittype.Object && unit.mode === 0) {
-				if ((me.area === sdk.areas.Travincal && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(21, 0) !== 1)
-					|| (me.area === sdk.areas.ArreatSummit && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(39, 0) !== 1)) {
+				if ((me.area === sdk.areas.Travincal && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(21, sdk.quest.states.Completed) !== 1)
+					|| (me.area === sdk.areas.ArreatSummit && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(39, sdk.quest.states.Completed) !== 1)) {
 					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 				}
 
@@ -1182,7 +1182,7 @@ const Pather = {
 			}
 
 			if (type === sdk.unittype.Object && id === sdk.units.RedPortalToAct4 && me.area === sdk.areas.DuranceofHateLvl3
-				&& targetArea === sdk.areas.PandemoniumFortress && me.getQuest(22, 0) !== 1) {
+				&& targetArea === sdk.areas.PandemoniumFortress && me.getQuest(22, sdk.quest.states.Completed) !== 1) {
 				throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 			}
 
@@ -1254,15 +1254,15 @@ const Pather = {
 			}
 
 			if (type === 2 && unit.mode === 0) {
-				if ((me.area === sdk.areas.Travincal && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(21, 0) !== 1)
-					|| (me.area === sdk.areas.ArreatSummit && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(39, 0) !== 1)) {
+				if ((me.area === sdk.areas.Travincal && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(21, sdk.quest.states.Completed) !== 1)
+					|| (me.area === sdk.areas.ArreatSummit && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(39, sdk.quest.states.Completed) !== 1)) {
 					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 				}
 
 				me.area === sdk.areas.A3SewersLvl1 ? this.openUnit(2, 367) : this.openUnit(2, id);
 			}
 
-			if (type === 2 && id === 342 && me.area === sdk.areas.DuranceofHateLvl3 && targetArea === sdk.areas.PandemoniumFortress && me.getQuest(22, 0) !== 1) {
+			if (type === 2 && id === 342 && me.area === sdk.areas.DuranceofHateLvl3 && targetArea === sdk.areas.PandemoniumFortress && me.getQuest(22, sdk.quest.states.Completed) !== 1) {
 				throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 			}
 
@@ -1754,13 +1754,13 @@ const Pather = {
 			return true;
 		// For the other acts, check the "Able to go to Act *" quests
 		case 2:
-			return me.getQuest(sdk.quest.id.AbleToGotoActII, 0) === 1;
+			return me.getQuest(sdk.quest.id.AbleToGotoActII, sdk.quest.states.Completed) === 1;
 		case 3:
-			return me.getQuest(sdk.quest.id.AbleToGotoActIII, 0) === 1;
+			return me.getQuest(sdk.quest.id.AbleToGotoActIII, sdk.quest.states.Completed) === 1;
 		case 4:
-			return me.getQuest(sdk.quest.id.AbleToGotoActIV, 0) === 1;
+			return me.getQuest(sdk.quest.id.AbleToGotoActIV, sdk.quest.states.Completed) === 1;
 		case 5:
-			return me.expansion && me.getQuest(sdk.quest.id.AbleToGotoActV, 0) === 1;
+			return me.expansion && me.getQuest(sdk.quest.id.AbleToGotoActV, sdk.quest.states.Completed) === 1;
 		default:
 			return false;
 		}
@@ -1927,7 +1927,7 @@ const Pather = {
 				this.useUnit(sdk.unittype.Object, sdk.units.DuranceEntryStairs, sdk.areas.DuranceofHateLvl1);
 			} else if (currArea === sdk.areas.DuranceofHateLvl3 && target.course[0] === sdk.areas.PandemoniumFortress) {
 				// Durance Lvl 3 -> Pandemonium Fortress
-				if (me.getQuest(sdk.quest.id.TheGuardian, 0) !== 1) {
+				if (me.getQuest(sdk.quest.id.TheGuardian, sdk.quest.states.Completed) !== 1) {
 					console.log(sdk.colors.Red + "(journeyTo) :: Incomplete Quest");
 					return false;
 				}

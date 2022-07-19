@@ -58,7 +58,7 @@ function Questing () {
 	};
 
 	this.smith = function () {
-		if (Misc.checkQuest(sdk.quest.id.ToolsoftheTrade, 1)) return true;
+		if (Misc.checkQuest(sdk.quest.id.ToolsoftheTrade, sdk.quest.states.ReqComplete)) return true;
 
 		log("starting smith");
 		if (!Loader.runScript("Smith")) throw new Error();
@@ -71,7 +71,7 @@ function Questing () {
 		Town.goToTown();
 		Town.npcInteract("Charsi");
 
-		return !!Misc.checkQuest(sdk.quest.id.ToolsoftheTrade, 1);
+		return !!Misc.checkQuest(sdk.quest.id.ToolsoftheTrade, sdk.quest.states.ReqComplete);
 	};
 
 	this.cain = function () {
@@ -187,7 +187,7 @@ function Questing () {
 
 	this.diablo = function () {
 		if (!Pather.accessToAct(4)) return false;
-		if (Misc.checkQuest(sdk.quest.id.TerrorsEnd, 0)) return true;
+		if (Misc.checkQuest(sdk.quest.id.TerrorsEnd, sdk.quest.states.Completed)) return true;
 
 		log("starting diablo");
 		if (!Loader.runScript("Diablo")) throw new Error();
@@ -202,7 +202,7 @@ function Questing () {
 
 	this.shenk = function () {
 		if (!Pather.accessToAct(5)) return false;
-		if (Misc.checkQuest(sdk.quest.id.SiegeOnHarrogath, 1)) return true;
+		if (Misc.checkQuest(sdk.quest.id.SiegeOnHarrogath, sdk.quest.states.ReqComplete)) return true;
 
 		log("starting shenk");
 
@@ -259,12 +259,12 @@ function Questing () {
 
 		Town.npcInteract("qual_kehk");
 
-		return !!Misc.checkQuest(sdk.quest.id.RescueonMountArreat, 0);
+		return !!Misc.checkQuest(sdk.quest.id.RescueonMountArreat, sdk.quest.states.Completed);
 	};
 
 	this.anya = function () {
 		if (!Pather.accessToAct(5)) return false;
-		if (Misc.checkQuest(sdk.quest.id.PrisonofIce, 1)) return true;
+		if (Misc.checkQuest(sdk.quest.id.PrisonofIce, sdk.quest.states.ReqComplete)) return true;
 
 		log("starting anya");
 
@@ -369,7 +369,7 @@ function Questing () {
 		(Config.TownHP > 0 || Config.TownMP > 0) && (townChick && !townChick.running || !townChick) && load("tools/TownChicken.js");
 
 		try {
-			if (Misc.checkQuest(sdk.quest.id.RiteofPassage, 0)) {
+			if (Misc.checkQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.Completed)) {
 				Pather.moveToExit([sdk.areas.WorldstoneLvl1, sdk.areas.WorldstoneLvl2], true);
 				Pather.getWP(sdk.areas.WorldstoneLvl2);
 			}
@@ -398,7 +398,7 @@ function Questing () {
 		let j;
 
 		for (j = 0; j < 3; j += 1) {
-			if (!Misc.checkQuest(quests[i][0], 0)) {
+			if (!Misc.checkQuest(quests[i][0], sdk.quest.states.Completed)) {
 				try {
 					if (this[quests[i][1]]()) {
 						didTask = true;

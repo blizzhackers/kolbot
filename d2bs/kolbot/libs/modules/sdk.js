@@ -782,6 +782,14 @@ item: {
 				RiteofPassage: 39,
 				EyeofDestruction: 40,
 				Respec: 41,
+			},
+			// just common states for now
+			states: {
+				Completed: 0,
+				ReqComplete: 1,
+				GreyedOut: 12,
+				PartyMemberComplete: 13,
+				CannotComplete: 14,
 			}
 		},
 

@@ -19,7 +19,7 @@ function Pindleskin() {
 	} else {
 		Town.move(NPC.Anya);
 
-		if (!Pather.getPortal(sdk.areas.NihlathaksTemple) && me.getQuest(sdk.quest.id.PrisonofIce, 1)) {
+		if (!Pather.getPortal(sdk.areas.NihlathaksTemple) && me.getQuest(sdk.quest.id.PrisonofIce, sdk.quest.states.ReqComplete)) {
 			Town.npcInteract("Anya");
 		}
 

@@ -74,7 +74,7 @@ const Common = {
 					}
 
 					break;
-				case me.area === sdk.areas.Tristram && !Misc.checkQuest(sdk.quest.id.TheSearchForCain, 0):
+				case me.area === sdk.areas.Tristram && !Misc.checkQuest(sdk.quest.id.TheSearchForCain, sdk.quest.states.Completed):
 					let gibbet = Game.getObject(sdk.quest.chest.CainsJail);
 
 					if (gibbet && !gibbet.mode) {
@@ -805,7 +805,7 @@ const Common = {
 				delay(1000);
 
 				if (checkQuest) {
-					if (Misc.checkQuest(sdk.quest.id.RiteofPassage, 0)) {
+					if (Misc.checkQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.Completed)) {
 						break;
 					} else {
 						console.log("Failed to kill anicents. Attempt: " + retry);

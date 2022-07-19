@@ -687,6 +687,11 @@ const Skill = {
 			return false;
 		}
 
+		if (skillId === sdk.skills.Teleport && typeof x === "number" && Packet.teleport(x, y)) {
+			delay(250);
+			return true;
+		}
+
 		if (!this.setSkill(skillId, hand, item)) return false;
 
 		if (Config.PacketCasting > 1) {
@@ -827,8 +832,8 @@ const Skill = {
 
 		let skillLvl = me.getSkill(skillId, sdk.skills.subindex.SoftPoints);
 		let effectiveShift = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024];
-		let lvlmana = getBaseStat(3, skillId, "lvlmana") === 65535 ? -1 : getBaseStat(3, skillId, "lvlmana"); // Correction for skills that need less mana with levels (kolton)
-		let ret = Math.max((getBaseStat(3, skillId, "mana") + lvlmana * (skillLvl - 1)) * (effectiveShift[getBaseStat(3, skillId, "manashift")] / 256), getBaseStat(3, skillId, "minmana"));
+		let lvlmana = getBaseStat("skills", skillId, "lvlmana") === 65535 ? -1 : getBaseStat("skills", skillId, "lvlmana"); // Correction for skills that need less mana with levels (kolton)
+		let ret = Math.max((getBaseStat("skills", skillId, "mana") + lvlmana * (skillLvl - 1)) * (effectiveShift[getBaseStat("skills", skillId, "manashift")] / 256), getBaseStat("skills", skillId, "minmana"));
 
 		if (!this.manaCostList.hasOwnProperty(skillId)) {
 			this.manaCostList[skillId] = ret;
@@ -838,15 +843,19 @@ const Skill = {
 	},
 
 	useTK: function (unit = undefined) {
-		if (!unit || !Skill.canUse(sdk.skills.Telekinesis)
-			|| typeof unit !== 'object' || unit.type !== sdk.unittype.Object
-			|| unit.name.toLowerCase() === 'dummy'
-			|| (unit.name.toLowerCase() === 'portal' && !me.inTown && unit.classid !== sdk.units.ArcaneSanctuaryPortal)
-			|| [sdk.units.RedPortalToAct4, sdk.units.WorldstonePortal, sdk.units.RedPortal, sdk.units.RedPortalToAct5].includes(unit.classid)) {
+		try {
+			if (!unit || !Skill.canUse(sdk.skills.Telekinesis)
+				|| typeof unit !== 'object' || unit.type !== sdk.unittype.Object
+				|| unit.name.toLowerCase() === 'dummy'
+				|| (unit.name.toLowerCase() === 'portal' && !me.inTown && unit.classid !== sdk.units.ArcaneSanctuaryPortal)
+				|| [sdk.units.RedPortalToAct4, sdk.units.WorldstonePortal, sdk.units.RedPortal, sdk.units.RedPortalToAct5].includes(unit.classid)) {
+				return false;
+			}
+
+			return me.inTown || (me.mpPercent > 25);
+		} catch (e) {
 			return false;
 		}
-
-		return me.inTown || (me.mpPercent > 25);
 	}
 };
 
@@ -1545,8 +1554,9 @@ const Misc = {
 			break;
 		case sdk.itemquality.Unique:
 			for (let i = 0; i < 401; i += 1) {
-				if (unit.code === getBaseStat(17, i, 4).trim() && unit.fname.split("\n").reverse()[0].indexOf(getLocaleString(getBaseStat(17, i, 2))) > -1) {
-					code = getBaseStat(17, i, "invfile");
+				if (unit.code === getBaseStat("uniqueitems", i, 4).trim()
+					&& unit.fname.split("\n").reverse()[0].includes(getLocaleString(getBaseStat("uniqueitems", i, 2)))) {
+					code = getBaseStat("uniqueitems", i, "invfile");
 
 					break;
 				}
@@ -1557,7 +1567,7 @@ const Misc = {
 
 		if (!code) {
 			// Tiara/Diadem
-			code = ["ci2", "ci3"].includes(unit.code) ? unit.code : (getBaseStat(0, unit.classid, 'normcode') || unit.code);
+			code = ["ci2", "ci3"].includes(unit.code) ? unit.code : (getBaseStat("items", unit.classid, 'normcode') || unit.code);
 			code = code.replace(" ", "");
 			[sdk.itemtype.Ring, sdk.itemtype.Amulet, sdk.itemtype.Jewel, sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(unit.itemType) && (code += (unit.gfx + 1));
 		}
@@ -1797,7 +1807,7 @@ const Misc = {
 		me.switchWeapons(Precast.getBetterSlot(skill));
 
 		for (let i = 0; i < 3; i += 1) {
-			Skill.cast(skill, 0);
+			Skill.cast(skill, sdk.skill.hand.Right);
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 2000) {
@@ -2132,6 +2142,8 @@ const Misc = {
 
 	getQuestStates: function (questID) {
 		if (!me.gameReady) return [];
+		Packet.questRefresh();
+		delay(500);
 		const MAX_STATE = 16;
 		let questStates = [];
 
@@ -2514,12 +2526,12 @@ const Packet = {
 	},
 
 	castSkill: function (hand, wX, wY) {
-		hand = (hand === 0) ? 0x0c : 0x05;
+		hand = (hand === sdk.skills.hand.Right) ? 0x0c : 0x05;
 		sendPacket(1, hand, 2, wX, 2, wY);
 	},
 
 	unitCast: function (hand, who) {
-		hand = (hand === 0) ? 0x11 : 0x0a;
+		hand = (hand === sdk.skills.hand.Right) ? 0x11 : 0x0a;
 		sendPacket(1, hand, 4, who.type, 4, who.gid);
 	},
 

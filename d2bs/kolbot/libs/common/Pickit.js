@@ -478,7 +478,7 @@ const Pickit = {
 		case sdk.itemtype.MediumCharm: // Large Charm
 		case sdk.itemtype.LargeCharm: // Grand Charm
 			if (unit.unique) {
-				charm = me.getItem(unit.classid, 0);
+				charm = me.getItem(unit.classid, sdk.itemmode.inStorage);
 
 				if (charm) {
 					do {

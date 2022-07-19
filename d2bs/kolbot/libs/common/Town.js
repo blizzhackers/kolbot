@@ -205,7 +205,7 @@ const Town = {
 			!Game.getNPC(NPC.Jerhyn) && Town.move('palace');
 			break;
 		case NPC.Hratli:
-			if (!me.getQuest(sdk.quest.id.SpokeToHratli, 0)) {
+			if (!me.getQuest(sdk.quest.id.SpokeToHratli, sdk.quest.states.Completed)) {
 				Town.move(NPC.Meshif);
 				break;
 			}
