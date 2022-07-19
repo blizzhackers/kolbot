@@ -179,7 +179,7 @@ const Item = {
 	autoEquip: function () {
 		if (!Config.AutoEquip) return true;
 
-		let items = me.findItems(-1, 0);
+		let items = me.findItems(-1, sdk.itemmode.inStorage);
 
 		if (!items) return false;
 
@@ -212,13 +212,10 @@ const Item = {
 					// khalim's will adjustment
 					if ([3, 7].indexOf(items[0].location) > -1 && tier > this.getEquippedItem(bodyLoc[j]).tier && this.getEquippedItem(bodyLoc[j]).classid !== 174) {
 						if (!items[0].getFlag(sdk.items.flags.Identified)) { // unid
-							let tome = me.findItem(519, 0, 3);
+							let tome = me.findItem(sdk.items.TomeofIdentify, sdk.itemmode.inStorage, sdk.storage.Inventory);
 
 							if (tome && tome.getStat(sdk.stats.Quantity) > 0) {
-								if (items[0].location === 7) {
-									Town.openStash();
-								}
-
+								items[0].isInStash && Town.openStash();
 								Town.identifyItem(items[0], tome);
 							}
 						}

@@ -176,9 +176,9 @@ function OrgTorch() {
 
 	// Open a red portal. Mode 0 = mini ubers, mode 1 = Tristram
 	this.openPortal = function (mode) {
-		let item1 = mode === portalMode.MiniUbers ? me.findItem("pk1", 0) : me.findItem("dhn", 0);
-		let item2 = mode === portalMode.MiniUbers ? me.findItem("pk2", 0) : me.findItem("bey", 0);
-		let item3 = mode === portalMode.MiniUbers ? me.findItem("pk3", 0) : me.findItem("mbr", 0);
+		let item1 = mode === portalMode.MiniUbers ? me.findItem("pk1", sdk.itemmode.inStorage) : me.findItem("dhn", sdk.itemmode.inStorage);
+		let item2 = mode === portalMode.MiniUbers ? me.findItem("pk2", sdk.itemmode.inStorage) : me.findItem("bey", sdk.itemmode.inStorage);
+		let item3 = mode === portalMode.MiniUbers ? me.findItem("pk3", sdk.itemmode.inStorage) : me.findItem("mbr", sdk.itemmode.inStorage);
 
 		Town.goToTown(5);
 		Town.doChores();
@@ -426,12 +426,12 @@ function OrgTorch() {
 	}
 
 	let portal;
-	let tkeys = me.findItems("pk1", 0).length || 0;
-	let hkeys = me.findItems("pk2", 0).length || 0;
-	let dkeys = me.findItems("pk3", 0).length || 0;
-	let brains = me.findItems("mbr", 0).length || 0;
-	let eyes = me.findItems("bey", 0).length || 0;
-	let horns = me.findItems("dhn", 0).length || 0;
+	let tkeys = me.findItems("pk1", sdk.itemmode.inStorage).length || 0;
+	let hkeys = me.findItems("pk2", sdk.itemmode.inStorage).length || 0;
+	let dkeys = me.findItems("pk3", sdk.itemmode.inStorage).length || 0;
+	let brains = me.findItems("mbr", sdk.itemmode.inStorage).length || 0;
+	let eyes = me.findItems("bey", sdk.itemmode.inStorage).length || 0;
+	let horns = me.findItems("dhn", sdk.itemmode.inStorage).length || 0;
 
 	// Do town chores and quit if MakeTorch is true and we have a torch.
 	this.checkTorch();
@@ -512,9 +512,9 @@ function OrgTorch() {
 	}
 
 	// Count organs
-	brains = me.findItems("mbr", 0).length || 0;
-	eyes = me.findItems("bey", 0).length || 0;
-	horns = me.findItems("dhn", 0).length || 0;
+	brains = me.findItems("mbr", sdk.itemmode.inStorage).length || 0;
+	eyes = me.findItems("bey", sdk.itemmode.inStorage).length || 0;
+	horns = me.findItems("dhn", sdk.itemmode.inStorage).length || 0;
 
 	// We have enough organs, do Tristram - or trist is open we may have chickened and came back so check it
 	// if trist was already open when we joined should we run that first?

@@ -18,7 +18,7 @@ function main() {
 
 		if (script) {
 			do {
-				if (script.name.indexOf(".dbj") > -1) {
+				if (script.name.includes(".dbj")) {
 					if (script.running) {
 						print("ÿc1Pausing ÿc0" + script.name);
 						script.pause();
@@ -36,7 +36,7 @@ function main() {
 	// Event functions
 	function KeyEvent(key) {
 		switch (key) {
-		case 19:
+		case sdk.keys.PauseBreak:
 			if (me.ingame) {
 				break;
 			}

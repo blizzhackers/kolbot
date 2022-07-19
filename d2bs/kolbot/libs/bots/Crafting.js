@@ -137,11 +137,11 @@ function getNPCName(idList) {
 
 function countItems(idList, quality) {
 	let count = 0;
-	let item = me.getItem(-1, 0);
+	let item = me.getItem(-1, sdk.itemmode.inStorage);
 
 	if (item) {
 		do {
-			if (idList.indexOf(item.classid) > -1 && item.quality === quality) {
+			if (idList.includes(item.classid) && item.quality === quality) {
 				count += 1;
 			}
 		} while (item.getNext());
@@ -152,7 +152,7 @@ function countItems(idList, quality) {
 
 function updateInfo() {
 	if (info) {
-		let items = me.findItems(-1, 0);
+		let items = me.findItems(-1, sdk.itemmode.inStorage);
 
 		for (let i = 0; i < info.Sets.length; i += 1) {
 			MainSwitch:

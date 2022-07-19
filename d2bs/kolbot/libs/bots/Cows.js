@@ -44,7 +44,7 @@ function Cows() {
 	};
 
 	this.getTome = function () {
-		let tpTome = me.findItems(sdk.items.TomeofTownPortal, 0, 3);
+		let tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.itemmode.inStorage, sdk.storage.Inventory);
 
 		if (tpTome.length < 2) {
 			let npc = Town.initNPC("Shop", "buyTpTome");
@@ -57,7 +57,7 @@ function Cows() {
 
 			if (!!tome && tome.getItemCost(sdk.items.cost.ToBuy) < me.gold && tome.buy()) {
 				delay(500);
-				tpTome = me.findItems(sdk.items.TomeofTownPortal, 0, 3);
+				tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.itemmode.inStorage, sdk.storage.Inventory);
 				tpTome.forEach(function (book) {
 					if (book.isInInventory) {
 						let scroll = npc.getItem(sdk.items.ScrollofTownPortal);

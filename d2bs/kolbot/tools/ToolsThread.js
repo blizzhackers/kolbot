@@ -26,6 +26,14 @@ new Overrides.Override(Attack, Attack.getNearestMonster, function (orignal) {
 }).apply();
 
 function main() {
+	const pots = {
+		Health: 0,
+		Mana: 1,
+		Rejuv: 2,
+		MercHealth: 3,
+		MercRejuv: 4
+	};
+
 	let ironGolem, debugInfo = {area: 0, currScript: "no entry"};
 	let pingTimer = [];
 	let quitFlag = false;
@@ -36,7 +44,7 @@ function main() {
 	let canQuit = true;
 	let timerLastDrink = [];
 
-	print("ÿc3Start ToolsThread script");
+	console.log("ÿc3Start ToolsThread script");
 	D2Bot.init();
 	Config.init(false);
 	Pickit.init(false);
@@ -57,9 +65,7 @@ function main() {
 	// General functions
 	this.checkPing = function (print = true) {
 		// Quit after at least 5 seconds in game
-		if (getTickCount() - me.gamestarttime < 5000) {
-			return false;
-		}
+		if (getTickCount() - me.gamestarttime < 5000) return false;
 
 		for (let i = 0; i < Config.PingQuit.length; i += 1) {
 			if (Config.PingQuit[i].Ping > 0) {
@@ -71,7 +77,7 @@ function main() {
 					}
 
 					if (getTickCount() - pingTimer[i] >= Config.PingQuit[i].Duration * 1000) {
-						print && D2Bot.printToConsole("High ping (" + me.ping + "/" + Config.PingQuit[i].Ping + ") - leaving game.", 9);
+						print && D2Bot.printToConsole("High ping (" + me.ping + "/" + Config.PingQuit[i].Ping + ") - leaving game.", sdk.colors.D2Bot.Red);
 						scriptBroadcast("pingquit");
 
 						return true;
@@ -103,32 +109,6 @@ function main() {
 		}
 
 		Config.QuitList = temp.slice(0);
-	};
-
-	this.getPotion = function (pottype, type) {
-		if (!pottype) return false;
-
-		let items = me.getItemsEx().filter((item) => item.itemType === pottype);
-		if (items.length === 0) return false;
-
-		// Get highest id = highest potion first
-		items.sort(function (a, b) {
-			return b.classid - a.classid;
-		});
-
-		for (let i = 0; i < items.length; i += 1) {
-			if (type < 3 && items[i].isInInventory && items[i].itemType === pottype) {
-				console.log("ÿc2Drinking potion from inventory.");
-				return copyUnit(items[i]);
-			}
-
-			if (items[i].mode === 2 && items[i].itemType === pottype) {
-				console.log("ÿc2" + (type > 2 ? "Giving Merc" : "Drinking") + " potion from belt.");
-				return copyUnit(items[i]);
-			}
-		}
-
-		return false;
 	};
 
 	this.togglePause = function () {
@@ -180,26 +160,52 @@ function main() {
 		quit();
 	};
 
+	this.getPotion = function (pottype, type) {
+		if (!pottype) return false;
+
+		let items = me.getItemsEx().filter((item) => item.itemType === pottype);
+		if (items.length === 0) return false;
+
+		// Get highest id = highest potion first
+		items.sort(function (a, b) {
+			return b.classid - a.classid;
+		});
+
+		for (let i = 0; i < items.length; i += 1) {
+			if (type < pots.MercHealth && items[i].isInInventory && items[i].itemType === pottype) {
+				console.log("ÿc2Drinking potion from inventory.");
+				return copyUnit(items[i]);
+			}
+
+			if (items[i].isInBelt && items[i].itemType === pottype) {
+				console.log("ÿc2" + (type > 2 ? "Giving Merc" : "Drinking") + " potion from belt.");
+				return copyUnit(items[i]);
+			}
+		}
+
+		return false;
+	};
+
 	this.drinkPotion = function (type) {
 		if (type === undefined) return false;
 		let pottype, tNow = getTickCount();
 
 		switch (type) {
-		case 0:
-		case 1:
-			if ((timerLastDrink[type] && (tNow - timerLastDrink[type] < 1000)) || me.getState(type === 0 ? 100 : 106)) {
+		case pots.Health:
+		case pots.Mana:
+			if ((timerLastDrink[type] && (tNow - timerLastDrink[type] < 1000)) || me.getState(type === pots.Health ? sdk.states.HealthPot : sdk.states.ManaPot)) {
 				return false;
 			}
 
 			break;
-		case 2:
+		case pots.Rejuv:
 			// small delay for juvs just to prevent using more at once
 			if (timerLastDrink[type] && (tNow - timerLastDrink[type] < 300)) {
 				return false;
 			}
 
 			break;
-		case 4:
+		case pots.MercRejuv:
 			// larger delay for juvs just to prevent using more at once, considering merc update rate
 			if (timerLastDrink[type] && (tNow - timerLastDrink[type] < 2000)) {
 				return false;
@@ -218,12 +224,12 @@ function main() {
 		if (me.mode === 0 || me.mode === 17 || me.mode === 18) return false;
 
 		switch (type) {
-		case 0:
-		case 3:
+		case pots.Health:
+		case pots.MercHealth:
 			pottype = sdk.itemtype.HealingPotion;
 
 			break;
-		case 1:
+		case pots.Mana:
 			pottype = sdk.itemtype.ManaPotion;
 
 			break;
@@ -239,11 +245,7 @@ function main() {
 			if (me.mode === 0 || me.mode === 17 || me.mode === 18) return false;
 
 			try {
-				if (type < 3) {
-					potion.interact();
-				} else {
-					Packet.useBeltItemForMerc(potion);
-				}
+				type < pots.MercHealth ? potion.interact() : Packet.useBeltItemForMerc(potion);
 			} catch (e) {
 				console.error(e);
 			}
@@ -265,7 +267,7 @@ function main() {
 					let owner = monster.getParent();
 
 					if (owner && owner.name !== me.name) {
-						D2Bot.printToConsole("Revived Tomb Vipers found. Leaving game.", 9);
+						D2Bot.printToConsole("Revived Tomb Vipers found. Leaving game.", sdk.colors.D2Bot.Red);
 
 						return true;
 					}
@@ -370,7 +372,7 @@ function main() {
 			break;
 		case sdk.keys.End: // stop profile and log character
 			MuleLogger.logChar();
-			delay(rand(Config.QuitListDelay[0] * 1e3, Config.QuitListDelay[1] * 1e3));
+			delay(rand(Time.seconds(Config.QuitListDelay[0]), Time.seconds(Config.QuitListDelay[1])));
 			D2Bot.printToConsole(me.profile + " - end run " + me.gamename);
 			D2Bot.stop(me.profile, true);
 
@@ -383,9 +385,9 @@ function main() {
 		case sdk.keys.NumpadPlus: // log stats
 			showConsole();
 
-			print("ÿc8My stats :: " + this.getStatsString(me));
+			console.log("ÿc8My stats :: " + this.getStatsString(me));
 			let merc = me.getMerc();
-			!!merc && print("ÿc8Merc stats :: " + this.getStatsString(merc));
+			!!merc && console.log("ÿc8Merc stats :: " + this.getStatsString(merc));
 
 			break;
 		case sdk.keys.Numpad5: // force automule check
@@ -430,16 +432,16 @@ function main() {
 				let itemToCheck = Game.getSelectedUnit();
 
 				if (!!itemToCheck) {
-					generalString = "ÿc4ItemName: ÿc0" + itemToCheck.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, "")
-						+ "\nÿc4Pickit: ÿc0" + Pickit.checkItem(itemToCheck).result + " | ÿc4NTIP.CheckItem: ÿc0" + NTIP.CheckItem(itemToCheck, false, true).result;
-					itemString = "ÿc4Cubing Item: ÿc0" + Cubing.keepItem(itemToCheck) + " | ÿc4Runeword Item: ÿc0" + Runewords.keepItem(itemToCheck) + " | ÿc4Crafting Item: ÿc0" + CraftingSystem.keepItem(itemToCheck)
-						+ "\nÿc4ItemType: ÿc0" + itemToCheck.itemType + "| ÿc4Classid: ÿc0" + itemToCheck.classid + "| ÿc4Quality: ÿc0" + itemToCheck.quality
+					itemString = "ÿc4ItemName: ÿc0" + itemToCheck.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, "")
+						+ "\nÿc4ItemType: ÿc0" + itemToCheck.itemType + "| ÿc4Classid: ÿc0" + itemToCheck.classid + "| ÿc4Quality: ÿc0" + itemToCheck.quality + "| ÿc4Gid: ÿc0" + itemToCheck.gid
 						+ "\nÿc4ItemMode: ÿc0" + itemToCheck.mode + "| ÿc4Location: ÿc0" + itemToCheck.location + "| ÿc4Bodylocation: ÿc0" + itemToCheck.bodylocation;
+					generalString = "ÿc4Pickit: ÿc0" + Pickit.checkItem(itemToCheck).result + " | ÿc4NTIP.CheckItem: ÿc0" + NTIP.CheckItem(itemToCheck, false, true).result
+						+ "\nÿc4Cubing Item: ÿc0" + Cubing.keepItem(itemToCheck) + " | ÿc4Runeword Item: ÿc0" + Runewords.keepItem(itemToCheck) + " | ÿc4Crafting Item: ÿc0" + CraftingSystem.keepItem(itemToCheck);
 				}
 				
 				console.log("ÿc2*************Item Info Start*************");
 				console.log(itemString);
-				console.log("ÿc2General Info Start");
+				console.log("ÿc2Systems Info Start");
 				console.log(generalString);
 				console.log("ÿc1****************Info End****************");
 			}
@@ -454,9 +456,9 @@ function main() {
 
 			break;
 		case sdk.keys.NumpadSlash: // re-load default
-			print("ÿc8ToolsThread :: " + sdk.colors.Red + "Stopping threads and waiting 5 seconds to restart");
-			this.stopDefault() && delay(5e3);
-			print('Starting default.dbj');
+			console.log("ÿc8ToolsThread :: " + sdk.colors.Red + "Stopping threads and waiting 5 seconds to restart");
+			this.stopDefault() && delay(Time.seconds(5));
+			console.log('Starting default.dbj');
 			load('default.dbj');
 
 			break;
@@ -470,13 +472,13 @@ function main() {
 		case 0x03: // "%Name1(%Name2) left our world. Diablo's minions weaken."
 			Config.DebugMode && mode === 0 && D2Bot.printToConsole(name1 + " timed out, check their logs");
 
-			if ((typeof Config.QuitList === "string" && Config.QuitList.toLowerCase() === "any") ||
-					(Config.QuitList instanceof Array && Config.QuitList.indexOf(name1) > -1)) {
+			if ((typeof Config.QuitList === "string" && Config.QuitList.toLowerCase() === "any")
+					|| (Config.QuitList instanceof Array && Config.QuitList.includes(name1))) {
 				print(name1 + (mode === 0 ? " timed out" : " left"));
 
 				if (typeof Config.QuitListDelay !== "undefined" && typeof quitListDelayTime === "undefined" && Config.QuitListDelay.length > 0) {
-					Config.QuitListDelay.sort(function(a, b) { return a - b; });
-					quitListDelayTime = getTickCount() + rand(Config.QuitListDelay[0] * 1e3, Config.QuitListDelay[1] * 1e3);
+					Config.QuitListDelay.sort((a, b) => a - b);
+					quitListDelayTime = getTickCount() + rand(Time.seconds(Config.QuitListDelay[0]), Time.seconds(Config.QuitListDelay[1]));
 				} else {
 					quitListDelayTime = getTickCount();
 				}
@@ -511,7 +513,7 @@ function main() {
 			}
 
 			if (Config.SoJWaitTime && me.expansion) {
-				!!me.realm && D2Bot.printToConsole(param1 + " Stones of Jordan Sold to Merchants on IP " + me.gameserverip.split(".")[3], 7);
+				!!me.realm && D2Bot.printToConsole(param1 + " Stones of Jordan Sold to Merchants on IP " + me.gameserverip.split(".")[3], sdk.colors.D2Bot.DarkGold);
 				Messaging.sendToScript("default.dbj", "soj");
 			}
 
@@ -526,7 +528,7 @@ function main() {
 			}
 
 			if (Config.StopOnDClone && me.expansion) {
-				D2Bot.printToConsole("Diablo Walks the Earth", 7);
+				D2Bot.printToConsole("Diablo Walks the Earth", sdk.colors.D2Bot.DarkGold);
 				cloneWalked = true;
 
 				this.togglePause();
@@ -558,6 +560,17 @@ function main() {
 				quitFlag = true;
 
 				break;
+			case "datadump":
+				console.log("ÿc8Systems Data Dump: ÿc2Start");
+				console.log("ÿc8Cubing");
+				console.log("ÿc9Cubing Valid Itemsÿc0", Cubing.validIngredients);
+				console.log("ÿc9Cubing Needed Itemsÿc0", Cubing.neededIngredients);
+				console.log("ÿc8Runeword");
+				console.log("ÿc9Runeword Valid Itemsÿc0", Runewords.validGids);
+				console.log("ÿc9Runeword Needed Itemsÿc0", Runewords.needList);
+				console.log("ÿc8Systems Data Dump: ÿc1****************Info End****************");
+
+				break;
 			// ignore common scriptBroadcast messages that aren't relevent to this thread
 			case "mule":
 			case "muleTorch":
@@ -578,13 +591,8 @@ function main() {
 				}
 
 				if (obj) {
-					if (obj.hasOwnProperty("currScript")) {
-						debugInfo.currScript = obj.currScript;
-					}
-
-					if (obj.hasOwnProperty("lastAction")) {
-						debugInfo.lastAction = obj.lastAction;
-					}
+					obj.hasOwnProperty("currScript") && (debugInfo.currScript = obj.currScript);
+					obj.hasOwnProperty("lastAction") && (debugInfo.lastAction = obj.lastAction);
 
 					DataFile.updateStats("debugInfo", JSON.stringify(debugInfo));
 				}
@@ -614,24 +622,24 @@ function main() {
 	while (true) {
 		try {
 			if (me.gameReady && !me.inTown) {
-				Config.UseHP > 0 && me.hpPercent < Config.UseHP && this.drinkPotion(0);
-				Config.UseRejuvHP > 0 && me.hpPercent < Config.UseRejuvHP && this.drinkPotion(2);
+				Config.UseHP > 0 && me.hpPercent < Config.UseHP && this.drinkPotion(pots.Health);
+				Config.UseRejuvHP > 0 && me.hpPercent < Config.UseRejuvHP && this.drinkPotion(pots.Rejuv);
 
 				if (Config.LifeChicken > 0 && me.hpPercent <= Config.LifeChicken) {
 					// takes a moment sometimes for townchicken to actually get to town so re-check that we aren't in town before quitting
 					if (!me.inTown) {
-						D2Bot.printToConsole("Life Chicken (" + me.hp + "/" + me.hpmax + ")" + Attack.getNearestMonster() + " in " + Pather.getAreaName(me.area) + ". Ping: " + me.ping, 9);
+						D2Bot.printToConsole("Life Chicken (" + me.hp + "/" + me.hpmax + ")" + Attack.getNearestMonster() + " in " + Pather.getAreaName(me.area) + ". Ping: " + me.ping, sdk.colors.D2Bot.Red);
 						this.exit(true);
 
 						break;
 					}
 				}
 
-				Config.UseMP > 0 && me.mpPercent < Config.UseMP && this.drinkPotion(1);
-				Config.UseRejuvMP > 0 && me.mpPercent < Config.UseRejuvMP && this.drinkPotion(2);
+				Config.UseMP > 0 && me.mpPercent < Config.UseMP && this.drinkPotion(pots.Mana);
+				Config.UseRejuvMP > 0 && me.mpPercent < Config.UseRejuvMP && this.drinkPotion(pots.Rejuv);
 
 				if (Config.ManaChicken > 0 && me.mpPercent <= Config.ManaChicken) {
-					D2Bot.printToConsole("Mana Chicken: (" + me.mp + "/" + me.mpmax + ") in " + Pather.getAreaName(me.area), 9);
+					D2Bot.printToConsole("Mana Chicken: (" + me.mp + "/" + me.mpmax + ") in " + Pather.getAreaName(me.area), sdk.colors.D2Bot.Red);
 					this.exit(true);
 
 					break;
@@ -645,7 +653,7 @@ function main() {
 					if (ironGolem) {
 						// ironGolem.hpmax is bugged with BO
 						if (ironGolem.hp <= Math.floor(128 * Config.IronGolemChicken / 100)) {
-							D2Bot.printToConsole("Irom Golem Chicken in " + Pather.getAreaName(me.area), 9);
+							D2Bot.printToConsole("Irom Golem Chicken in " + Pather.getAreaName(me.area), sdk.colors.D2Bot.Red);
 							this.exit(true);
 
 							break;
@@ -660,14 +668,14 @@ function main() {
 
 						if (mercHP > 0 && merc.mode !== 12) {
 							if (mercHP < Config.MercChicken) {
-								D2Bot.printToConsole("Merc Chicken in " + Pather.getAreaName(me.area), 9);
+								D2Bot.printToConsole("Merc Chicken in " + Pather.getAreaName(me.area), sdk.colors.D2Bot.Red);
 								this.exit(true);
 
 								break;
 							}
 
-							mercHP < Config.UseMercHP && this.drinkPotion(3);
-							mercHP < Config.UseMercRejuv && this.drinkPotion(4);
+							mercHP < Config.UseMercHP && this.drinkPotion(pots.MercHealth);
+							mercHP < Config.UseMercRejuv && this.drinkPotion(pots.MercRejuv);
 						}
 					}
 				}
@@ -684,7 +692,7 @@ function main() {
 			if (antiIdle) {
 				tick = getTickCount();
 
-				while (getTickCount() - tick < (Config.DCloneWaitTime * 60 * 1000)) {
+				while (getTickCount() - tick < Time.minutes(Config.DCloneWaitTime)) {
 					if (getTickCount() - idleTick > 0) {
 						Packet.questRefresh();
 						idleTick += rand(1200, 1500) * 1000;

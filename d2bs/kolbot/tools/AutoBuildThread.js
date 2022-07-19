@@ -138,7 +138,7 @@ function getRequiredSkills (id) {
 		for (let i = 0; i < results.length; i++) {
 			let skill = results[i];
 			let skillInValidRange = (sdk.skills.Attack < skill && skill <= sdk.skills.PhoenixStrike) && (![217, 218, sdk.skills.IdentifyScroll, sdk.skills.TownPortal].contains(skill));
-			let hardPointsInSkill = me.getSkill(skill, 0);
+			let hardPointsInSkill = me.getSkill(skill, sdk.skills.subindex.HardPoints);
 
 			if (skillInValidRange && !hardPointsInSkill) {
 				requirements.push(skill);
@@ -211,7 +211,7 @@ function spendSkillPoints () {
 				spentEveryPoint = false;
 				AutoBuild.print("Attempt to spend skill point " + (i + 1) + " in " + skillName + " may have failed!");
 			} else if (debug) {
-				let actualSkillLevel = me.getSkill(id, 1);
+				let actualSkillLevel = me.getSkill(id, sdk.skills.subindex.SoftPoints);
 				AutoBuild.print("Skill (" + (i + 1) + "/" + len + ") Increased " + skillName + " by one (level: ", actualSkillLevel + ")");
 			}
 		}
