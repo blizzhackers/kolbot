@@ -56,7 +56,7 @@ item: {
 			}
 		},
 
-		charclass: { // sdk.clicktypes.
+		charclass: { // sdk.charclass.
 			Amazon: 0,
 			Sorceress: 1,
 			Necromancer: 2,
@@ -72,11 +72,18 @@ item: {
 			}
 		},
 
-		clicktypes: { // sdk.clicktypes.
-			Left: 0,
-			Right: 1,
-			ShiftLeft: 2, // For belt
-			Mercenary: 3 // Give to merc
+		clicktypes: {
+			click: { // sdk.clicktypes.click.
+				Left: 0,
+				Right: 1,
+				ShiftLeft: 2, // For belt
+				MercFromBelt: 3, // For belt
+				Mercenary: 4 // Give to merc
+			},
+			shift: { // sdk.clicktypes.shift
+				NoShift: 0,
+				Shift: 1
+			}
 		},
 
 		areas: { // sdk.areas.
@@ -233,54 +240,67 @@ item: {
 
 			actOf: function (area) {
 				switch (true) {
-				case area < sdk.areas.LutGholein:
-					return 1;
-				case area < sdk.areas.KurastDocktown:
-					return 2;
-				case area < sdk.areas.PandemoniumFortress:
-					return 3;
-				case area < sdk.areas.Harrogath:
-					return 4;
-				default:
-					return 5;
+					case area < sdk.areas.LutGholein:
+						return 1;
+					case area < sdk.areas.KurastDocktown:
+						return 2;
+					case area < sdk.areas.PandemoniumFortress:
+						return 3;
+					case area < sdk.areas.Harrogath:
+						return 4;
+					default:
+						return 5;
 				}
 			},
 
 			townOf: function (area) {
 				switch (true) {
-				case area < sdk.areas.LutGholein:
-					return sdk.areas.RogueEncampment;
-				case area < sdk.areas.KurastDocktown:
-					return sdk.areas.LutGholein;
-				case area < sdk.areas.PandemoniumFortress:
-					return sdk.areas.KurastDocktown;
-				case area < sdk.areas.Harrogath:
-					return sdk.areas.PandemoniumFortress;
-				default:
-					return sdk.areas.Harrogath;
+					case area < sdk.areas.LutGholein:
+						return sdk.areas.RogueEncampment;
+					case area < sdk.areas.KurastDocktown:
+						return sdk.areas.LutGholein;
+					case area < sdk.areas.PandemoniumFortress:
+						return sdk.areas.KurastDocktown;
+					case area < sdk.areas.Harrogath:
+						return sdk.areas.PandemoniumFortress;
+					default:
+						return sdk.areas.Harrogath;
 				}
 			},
 
 			townOfAct: function (act) {
 				switch (act) {
-				case 1:
-					return sdk.areas.RogueEncampment;
-				case 2:
-					return sdk.areas.LutGholein;
-				case 3:
-					return sdk.areas.KurastDocktown;
-				case 4:
-					return sdk.areas.PandemoniumFortress;
-				default:
-					return sdk.areas.Harrogath;
+					case 1:
+						return sdk.areas.RogueEncampment;
+					case 2:
+						return sdk.areas.LutGholein;
+					case 3:
+						return sdk.areas.KurastDocktown;
+					case 4:
+						return sdk.areas.PandemoniumFortress;
+					default:
+						return sdk.areas.Harrogath;
 				}
 			}
 		},
 
 		skills: { // sdk.skills.
+			get: { // sdk.skills.get.
+				ightName: 0,
+				LeftName: 1,
+				RightId: 2,
+				LeftId: 3,
+				AllSkills: 4
+			},
+			hand: { // sdk.skills.hand.
+				Right: 0,
+				Left: 1,
+				LeftNoShift: 2,
+				RightShift: 3,
+			},
 			subindex: { // sdk.skills.subindex.
-				hardpoints: 0,
-				softpoints: 1,
+				HardPoints: 0,
+				SoftPoints: 1
 			},
 			// General
 			Attack: 0,
@@ -452,9 +472,10 @@ item: {
 			BattleCommand: 155,
 
 			// General stuff
-			IdentifyScroll: 219,
-			TownPortal: 220,
-
+			IdentifyScroll: 217,
+			BookIdentify: 218,
+			TownPortalScroll: 219,
+			BookTownPortal: 220,
 
 			// Druid
 			Raven: 221,
@@ -537,8 +558,8 @@ item: {
 			RoyalStrike: 280, // Internal
 			WakeofDestructionSentry: 281, // Not used?
 			Summoner: 500, // special
-			// // sdk.skills.tabs.
-			tabs: {
+
+			tabs: { // sdk.skills.tabs.
 				// Ama
 				BowandCrossbow: 0,
 				PassiveandMagic: 1,
@@ -1361,6 +1382,30 @@ item: {
 		},
 
 		units: {
+			player: {
+				mode: { // sdk.units.player.mode.
+					Death: 0,
+					StandingOutsideTown: 1,
+					Walking: 2,
+					Running: 3,
+					GettingHit: 4,
+					StandingInTown: 5,
+					WalkingInTown: 6,
+					Attacking1: 7,
+					Attacking2: 8,
+					Blocking: 9,
+					CastingSkill: 10,
+					ThrowingItem: 11,
+					Kicking: 12,
+					UsingSkill1: 13,
+					UsingSkill2: 14,
+					UsingSkill3: 15,
+					UsingSkill4: 16,
+					Dead: 17,
+					ActionSequence: 18, // leaping/whirling/strafe
+					KnockedBack: 19,
+				},
+			},
 			npcs: { // sdk.units.npcs.
 				Akara: 148,
 				Alkor: 254,
@@ -1410,6 +1455,11 @@ item: {
 			},
 
 			objects: { // sdk.units.objects.
+				mode: { // sdk.units.objects.mode.
+					Inactive: 0,
+					Interacted: 1,
+					Active: 2,
+				},
 				// act1
 				MoldyTome: 8,
 				StoneAlpha: 17,
@@ -1457,7 +1507,7 @@ item: {
 				SideCavesA5: 75, // FrozenRiver, DrifterCavern, IcyCellar
 				AncientsDoor: 547, // Worldstone keep lvl 1
 			},
-			
+
 			chests: { // sdk.units.chests.
 				SuperChest: 580,
 				SmallSparklyChest: 397,
@@ -2085,7 +2135,7 @@ item: {
 				BarricadeWall1: 524,
 				BarricadeWall2: 525,
 				GargoyleTrap: 273,
-				
+
 				// Bosses/Ubers
 				Andariel: 156,
 				Duriel: 211,
@@ -3012,7 +3062,7 @@ item: {
 				Zod: 642,
 			},
 
-			gems: { // sdk.items.gems.
+			gems: {
 				Perfect: { // sdk.items.gems.Perfect.
 					Amethyst: 561,
 					Topaz: 566,
@@ -4051,7 +4101,7 @@ item: {
 				CdKeyDisabledFromRealm: 11161,
 			},
 		},
-		game: { 
+		game: {
 			profiletype: { // sdk.game.profiletype.
 				SinglePlayer: 1,
 				Battlenet: 2,
