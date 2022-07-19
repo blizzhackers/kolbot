@@ -1464,8 +1464,50 @@ item: {
 
 		units: {
 			// TODO: seperate all these out
+			player: {
+				mode: { // sdk.units.player.mode.
+					Death: 0,
+					StandingOutsideTown: 1,
+					Walking: 2,
+					Running: 3,
+					GettingHit: 4,
+					StandingInTown: 5,
+					WalkingInTown: 6,
+					Attacking1: 7,
+					Attacking2: 8,
+					Blocking: 9,
+					CastingSkill: 10,
+					ThrowingItem: 11,
+					Kicking: 12,
+					UsingSkill1: 13,
+					UsingSkill2: 14,
+					UsingSkill3: 15,
+					UsingSkill4: 16,
+					Dead: 17,
+					SkillActionSequence: 18,
+					KnockedBack: 19,
+				},
+			},
 			npcs: {
-
+				// same as monsters but more clear to use units.npcs.mode
+				mode: {
+					Death: 0,
+					Standing: 1,
+					Walking: 2,
+					GettingHit: 3,
+					Attacking1: 4,
+					Attacking2: 5,
+					Blocking: 6,
+					CastingSkill: 7,
+					UsingSkill1: 8,
+					UsingSkill2: 9,
+					UsingSkill3: 10,
+					UsingSkill4: 11,
+					Dead: 12,
+					KnockedBack: 13,
+					Spawning: 14,
+					Running: 15
+				},
 			},
 			monsters: {
 				monstermode: {
@@ -1556,7 +1598,11 @@ item: {
 				}
 			},
 			objects: {
-
+				mode: {
+					Inactive: 0,
+					Interacted: 1,
+					Active: 2,
+				},
 			},
 			items: {
 

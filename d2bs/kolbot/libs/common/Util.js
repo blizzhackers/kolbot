@@ -179,8 +179,14 @@ const Game = {
 			if (console.printDebug) {
 				const stack = new Error().stack.match(/[^\r\n]+/g);
 				let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf('\\') + 1) || 'unknown:0';
-				this.log('ÿc:[ÿc:' + filenameAndLine + 'ÿc:]ÿc0 ' + args.map(argMap).join(','));
+				this.log('[ÿc:Debugÿc0] ÿc:[' + filenameAndLine + ']ÿc0 ' + args.map(argMap).join(','));
 			}
+		};
+
+		console.warn = function (...args) {
+			const stack = new Error().stack.match(/[^\r\n]+/g);
+			let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf('\\') + 1) || 'unknown:0';
+			this.log('[ÿc9Warningÿc0] ÿc9[' + filenameAndLine + ']ÿc0 ' + args.map(argMap).join(','));
 		};
 
 		console.error = function (error = "") {
@@ -232,8 +238,6 @@ const Game = {
 
 			print(msg);
 		};
-
-		console.warn = console.debug;
 
 		return console;
 

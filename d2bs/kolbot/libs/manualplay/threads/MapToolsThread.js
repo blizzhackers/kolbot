@@ -226,7 +226,7 @@ function main() {
 		}
 
 		// mode 18 - can't drink while leaping/whirling etc.
-		if (me.mode === 0 || me.mode === 17 || me.mode === 18) {
+		if (me.dead || me.mode === sdk.units.player.mode.SkillActionSequence) {
 			return false;
 		}
 
@@ -249,7 +249,7 @@ function main() {
 		let potion = this.getPotion(pottype, type);
 
 		if (!!potion) {
-			if (me.mode === 0 || me.mode === 17 || me.mode === 18) return false;
+			if (me.dead || me.mode === sdk.units.player.mode.SkillActionSequence) return false;
 
 			try {
 				if (type < 3) {

@@ -65,11 +65,11 @@ function SealLeecher() {
 			}
 		}
 
-		while (me.mode === 40) {
+		while (me.mode === sdk.units.player.mode.Death) {
 			delay(40);
 		}
 
-		if (me.mode === 17) {
+		if (me.mode === sdk.units.player.mode.Dead) {
 			me.revive();
 
 			while (!me.inTown) {

@@ -20,10 +20,10 @@
 
 include("NTItemAlias.dbl");
 
-let NTIP = {},
-	NTIP_CheckList = [],
-	NTIP_CheckListNoTier = [],
-	stringArray = [];
+let NTIP = {};
+let NTIP_CheckList = [];
+let NTIP_CheckListNoTier = [];
+let stringArray = [];
 
 NTIP.OpenFile = function (filepath, notify) {
 	if (!FileTools.exists(filepath)) {
@@ -34,10 +34,10 @@ NTIP.OpenFile = function (filepath, notify) {
 		return false;
 	}
 
-	let nipfile, lines, item,
-		tick = getTickCount(),
-		filename = filepath.substring(filepath.lastIndexOf("/") + 1, filepath.length),
-		entries = 0;
+	let nipfile, lines;
+	let tick = getTickCount();
+	let filename = filepath.substring(filepath.lastIndexOf("/") + 1, filepath.length);
+	let entries = 0;
 
 	try {
 		nipfile = File.open(filepath, 0);
@@ -84,9 +84,9 @@ NTIP.OpenFile = function (filepath, notify) {
 };
 
 NTIP.CheckQuantityOwned = function (item_type, item_stats) {
-	let i, item,
-		num = 0,
-		items = me.getItemsEx();
+	let item;
+	let num = 0;
+	let items = me.getItemsEx();
 
 	if (!items.length) {
 		print("I can't find my items!");
@@ -94,7 +94,7 @@ NTIP.CheckQuantityOwned = function (item_type, item_stats) {
 		return 0;
 	}
 
-	for (i = 0; i < items.length; i += 1) {
+	for (let i = 0; i < items.length; i += 1) {
 		if (items[i].mode === 0 && items[i].location === 7) {
 			item = items[i];
 
@@ -126,11 +126,10 @@ NTIP.Clear = function () {
 	stringArray = [];
 };
 
-
 /** @return {function({Unit} item)} */
 NTIP.generateTierFunc = function (tierType) {
 	return function (item) {
-		let i, tier = -1;
+		let tier = -1;
 
 		const updateTier = (wanted) => {
 			const tmpTier = wanted[tierType](item);
@@ -141,13 +140,12 @@ NTIP.generateTierFunc = function (tierType) {
 		};
 
 		// Go through ALL lines that describe the item
-		for (i = 0; i < NTIP_CheckList.length; i += 1) {
-
+		for (let i = 0; i < NTIP_CheckList.length; i += 1) {
 			if (NTIP_CheckList[i].length !== 3) {
 				continue;
 			}
 
-			let [type,stat,wanted] = NTIP_CheckList[i];
+			let [type, stat, wanted] = NTIP_CheckList[i];
 
 			// If the line doesnt have a tier of this type, we dont need to call it
 			if (typeof wanted === 'object' && wanted && typeof wanted[tierType] === 'function') {
@@ -169,7 +167,7 @@ NTIP.generateTierFunc = function (tierType) {
 					}
 				} catch (e) {
 					const info = stringArray[i];
-					Misc.errorReport("ÿc1Pickit Tier ("+tierType+") error! Line # ÿc2" + info.line + " ÿc1Entry: ÿc0" + info.string + " (" + info.file + ") Error message: " + e.message);
+					Misc.errorReport("ÿc1Pickit Tier (" + tierType + ") error! Line # ÿc2" + info.line + " ÿc1Entry: ÿc0" + info.string + " (" + info.file + ") Error message: " + e.message);
 				}
 			}
 		}
@@ -187,17 +185,12 @@ NTIP.GetTier = NTIP.generateTierFunc('Tier');
 NTIP.GetMercTier = NTIP.generateTierFunc('Merctier');
 
 NTIP.CheckItem = function (item, entryList, verbose) {
-	var i, list, identified, num,
-		rval = {},
-		result = 0;
+	let i, num;
+	let rval = {};
+	let result = 0;
 
-	if (!entryList) {
-		list = NTIP_CheckList;
-	} else {
-		list = entryList;
-	}
-
-	identified = item.getFlag(0x10);
+	let list = entryList ? entryList : NTIP_CheckList;
+	let identified = item.getFlag(sdk.items.flags.Identified);
 
 	for (i = 0; i < list.length; i++) {
 		try {
@@ -216,7 +209,8 @@ NTIP.CheckItem = function (item, entryList, verbose) {
 
 									break;
 								} else {
-									if (item.getParent() && item.getParent().name === me.name && item.mode === 0 && num === wanted.MaxQuantity) { // attempt at inv fix for maxquantity
+									// attempt at inv fix for maxquantity
+									if (item.getParent() && item.getParent().name === me.name && item.isInStorage && num === wanted.MaxQuantity) {
 										result = 1;
 
 										break;
@@ -229,10 +223,7 @@ NTIP.CheckItem = function (item, entryList, verbose) {
 							}
 						} else if (!identified && result === 0) {
 							result = -1;
-
-							if (verbose) {
-								rval.line = stringArray[i].file + " #" + stringArray[i].line;
-							}
+							verbose && (rval.line = stringArray[i].file + " #" + stringArray[i].line);
 						}
 					} else {
 						if (wanted && wanted.MaxQuantity && !isNaN(wanted.MaxQuantity)) {
@@ -243,7 +234,8 @@ NTIP.CheckItem = function (item, entryList, verbose) {
 
 								break;
 							} else {
-								if (item.getParent() && item.getParent().name === me.name && item.mode === 0 && num === wanted.MaxQuantity) { // attempt at inv fix for maxquantity
+								// attempt at inv fix for maxquantity
+								if (item.getParent() && item.getParent().name === me.name && item.isInStorage && num === wanted.MaxQuantity) {
 									result = 1;
 
 									break;
@@ -266,7 +258,8 @@ NTIP.CheckItem = function (item, entryList, verbose) {
 
 							break;
 						} else {
-							if (item.getParent() && item.getParent().name === me.name && item.mode === 0 && num === wanted.MaxQuantity) { // attempt at inv fix for maxquantity
+							// attempt at inv fix for maxquantity
+							if (item.getParent() && item.getParent().name === me.name && item.isInStorage && num === wanted.MaxQuantity) {
 								result = 1;
 
 								break;
@@ -279,10 +272,7 @@ NTIP.CheckItem = function (item, entryList, verbose) {
 					}
 				} else if (!identified && result === 0) {
 					result = -1;
-
-					if (verbose) {
-						rval.line = stringArray[i].file + " #" + stringArray[i].line;
-					}
+					verbose && (rval.line = stringArray[i].file + " #" + stringArray[i].line);
 				}
 			}
 		} catch (pickError) {
@@ -291,7 +281,7 @@ NTIP.CheckItem = function (item, entryList, verbose) {
 			if (!entryList) {
 				Misc.errorReport("ÿc1Pickit error! Line # ÿc2" + stringArray[i].line + " ÿc1Entry: ÿc0" + stringArray[i].string + " (" + stringArray[i].file + ") Error message: " + pickError.message + " Trigger item: " + item.fname.split("\n").reverse().join(" "));
 
-				NTIP_CheckList.splice(i,1); // Remove the element from the list
+				NTIP_CheckList.splice(i, 1); // Remove the element from the list
 			} else {
 				Misc.errorReport("ÿc1Pickit error in runeword config!");
 			}
@@ -327,7 +317,7 @@ NTIP.IsSyntaxInt = function (ch) {
 };
 
 NTIP.ParseLineInt = function (input, info) {
-	var i, property, p_start, p_end, p_section, p_keyword, p_result, value;
+	let i, property, p_start, p_end, p_section, p_keyword, p_result, value;
 
 	p_end = input.indexOf("//");
 
@@ -411,7 +401,7 @@ NTIP.ParseLineInt = function (input, info) {
 			case 'uswest':
 			case 'useast':
 			case 'asia':
-				p_result[0] += '("'+me.realm.toLowerCase() + '"==="' + property.toLowerCase() + '")';
+				p_result[0] += '("' + me.realm.toLowerCase() + '"==="' + property.toLowerCase() + '")';
 
 				break;
 			case 'ladder':
@@ -585,8 +575,8 @@ NTIP.ParseLineInt = function (input, info) {
 				try {
 					// p_result[2].Tier = function(item) { return value };
 					p_result[2][keyword.charAt(0).toUpperCase() + keyword.slice(1)] = (new Function('return function(item) { return ' + p_section[i].split("==")[1] + ';}')).call(null); // generate function out of
-				} catch(e) {
-					Misc.errorReport("ÿc1Pickit Tier ("+keyword+") error! Line # ÿc2" + info.line + " ÿc1Entry: ÿc0" + info.string + " (" + info.file + ") Error message: " + e.message);
+				} catch (e) {
+					Misc.errorReport("ÿc1Pickit Tier (" + keyword + ") error! Line # ÿc2" + info.line + " ÿc1Entry: ÿc0" + info.string + " (" + info.file + ") Error message: " + e.message);
 				}
 				break;
 
@@ -597,12 +587,11 @@ NTIP.ParseLineInt = function (input, info) {
 		}
 	}
 	// Compile the line, to 1) remove the eval lines, and 2) increase the speed
-	for (let i = 0,tmp; i < 2; i++) {
-		tmp = p_result[i];
+	for (let i = 0; i < 2; i++) {
 		if (p_result[i].length) {
 			try {
 				p_result[i] = (new Function('return function(item) { return ' + p_result[i] + ';}')).call(null); // generate function out of
-			} catch(e) {
+			} catch (e) {
 				Misc.errorReport("ÿc1Pickit error! Line # ÿc2" + info.line + " ÿc1Entry: ÿc0" + info.string + " (" + info.file + ") Error message: " + e.message);
 
 				return null ; // failed load this line so return false

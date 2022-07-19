@@ -26,7 +26,7 @@ function TravincalLeech() {
 			break;
 		}
 		
-		if (me.mode === 17) {
+		if (me.mode === sdk.units.player.mode.Dead) {
 			me.revive();
 
 			while (!me.inTown) {

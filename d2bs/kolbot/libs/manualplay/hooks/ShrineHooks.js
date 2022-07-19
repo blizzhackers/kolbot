@@ -52,7 +52,7 @@ const ShrineHooks = {
 
 		if (shrine) {
 			do {
-				if (shrine.mode === 0) {
+				if (shrine.mode === sdk.units.objects.mode.Inactive) {
 					if (!this.getHook(shrine)) {
 						this.add(shrine);
 					}

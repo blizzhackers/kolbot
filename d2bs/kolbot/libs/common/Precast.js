@@ -186,7 +186,7 @@ const Precast = new function () {
 			if (me.getSkill(sdk.skills.get.RightId) !== skillId && !me.setSkill(skillId, sdk.skills.hand.Right)) throw new Error("Failed to set " + getSkillById(skillId) + " on hand");
 
 			if (Config.PacketCasting > 1 || usePacket) {
-				console.debug("Packet casting: " + skillId);
+				Config.DebugMode && console.debug("Packet casting: " + skillId);
 				
 				switch (typeof x) {
 				case "number":

@@ -41,7 +41,7 @@ new Overrides.Override(Pather, Pather.getWP, function(orignal, area, clearPath) 
 					if (!getUIFlag(sdk.uiflags.Waypoint)) {
 						if (wp.distance > 5 && Skill.useTK(wp) && j < 3) {
 							wp.distance > 21 && Attack.getIntoPosition(wp, 20, 0x4);
-							Skill.cast(sdk.skills.Telekinesis, 0, wp);
+							Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, wp);
 						} else if (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint)) {
 							this.moveToUnit(wp) && Misc.click(0, 0, wp);
 						}
@@ -87,11 +87,11 @@ function Rushee() {
 	};
 
 	this.revive = function () {
-		while (me.mode === 0) {
+		while (me.mode === sdk.units.player.mode.Death) {
 			delay(40);
 		}
 
-		if (me.mode === 17) {
+		if (me.mode === sdk.units.player.mode.Dead) {
 			me.revive();
 
 			while (!me.inTown) {
@@ -232,7 +232,7 @@ function Rushee() {
 	this.changeAct = function (act) {
 		let preArea = me.area;
 
-		if (me.mode === 17) {
+		if (me.mode === sdk.units.player.mode.Dead) {
 			me.revive();
 
 			while (!me.inTown) {
@@ -1038,7 +1038,7 @@ function Rushee() {
 				}
 			}
 		} catch (e) {
-			if (me.mode === 17) {
+			if (me.mode === sdk.units.player.mode.Dead) {
 				me.revive();
 
 				while (!me.inTown) {

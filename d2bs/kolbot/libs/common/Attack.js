@@ -203,11 +203,6 @@ const Attack = {
 			return Attack.clear(10);
 		}
 
-		let retry = 0;
-		let errorInfo = "";
-		let attackCount = 0;
-		let gid = target.gid;
-
 		const findTarget = function (gid, loc) {
 			let path = getPath(me.area, me.x, me.y, loc.x, loc.y, 1, 5);
 			if (!path) return false;
@@ -222,9 +217,15 @@ const Attack = {
 			}
 		};
 
+		const who = (!!target.name ? target.name : classId);
+		const gid = target.gid;
+
+		let retry = 0;
+		let errorInfo = "";
+		let attackCount = 0;
+
 		let lastLoc = {x: me.x, y: me.y};
 		let tick = getTickCount();
-		const who = (!!target.name ? target.name : classId);
 		console.log("ÿc7Kill ÿc0:: " + who);
 		Config.MFLeader && Pather.makePortal() && say("kill " + classId);
 
@@ -237,7 +238,7 @@ const Attack = {
 				!target && (target = findTarget(gid, lastLoc));
 
 				if (!target) {
-					console.warn("Failed to kill " + who + " (couldn't relocate unit)");
+					console.warn("ÿc1Failed to kill " + who + " (couldn't relocate unit)");
 					break;
 				}
 			}
@@ -280,7 +281,7 @@ const Attack = {
 		Pickit.pickItems();
 
 		if (!!target && target.attackable) {
-			console.warn("Failed to kill " + who + errorInfo);
+			console.warn("ÿc1Failed to kill ÿc0" + who + errorInfo);
 		} else {
 			console.log("ÿc7Killed ÿc0:: " + who + "ÿc0 - ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
 		}
@@ -501,7 +502,7 @@ const Attack = {
 						monsterList.shift();
 					}
 
-					if (target.dead || Config.FastPick === 2) {
+					if (target.dead || Config.FastPick) {
 						if (boss && boss.gid === target.gid) {
 							killedBoss = true;
 							console.log("ÿc7Cleared ÿc0:: " + (!!target.name ? target.name : bossId) + "ÿc0 - ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
@@ -692,7 +693,7 @@ const Attack = {
 
 					attackCount += 1;
 
-					if (target.dead || Config.FastPick === 2) {
+					if (target.dead || Config.FastPick) {
 						Pickit.fastPick();
 					}
 				} else {

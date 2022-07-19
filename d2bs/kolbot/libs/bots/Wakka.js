@@ -109,7 +109,7 @@ function Wakka() {
 		if (!path) throw new Error("Failed go get path");
 
 		while (path.length > 0) {
-			if (me.mode === 17 || me.inTown) return false;
+			if (me.mode === sdk.units.player.mode.Dead || me.inTown) return false;
 			(!leaderUnit || !copyUnit(leaderUnit).x) && (leaderUnit = Game.getPlayer(leader));
 
 			if (leaderUnit) {

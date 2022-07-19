@@ -560,7 +560,7 @@ function ControlBot() {
 		switch (mode) {
 		case 0x02:
 			// idle in town
-			me.inTown && me.mode === 5 && greet.push(name1);
+			me.inTown && me.mode === sdk.units.player.mode.StandingInTown && greet.push(name1);
 
 			break;
 		}

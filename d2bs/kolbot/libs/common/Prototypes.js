@@ -42,7 +42,8 @@ let sdk = require('../modules/sdk');
 // Check if unit is idle
 Unit.prototype.__defineGetter__("idle", function () {
 	if (this.type > sdk.unittype.Player) throw new Error("Unit.idle: Must be used with player units.");
-	return (this.mode === 1 || this.mode === 5 || this.mode === 17); // Dead is pretty idle too
+	// Dead is pretty idle too
+	return (this.mode === sdk.units.player.mode.StandingOutsideTown || this.mode === sdk.units.player.mode.StandingInTown || this.mode === sdk.units.player.mode.Dead);
 });
 
 Unit.prototype.__defineGetter__("gold", function () {
@@ -53,7 +54,7 @@ Unit.prototype.__defineGetter__("gold", function () {
 Unit.prototype.__defineGetter__("dead", function () {
 	switch (this.type) {
 	case sdk.unittype.Player:
-		return this.mode === 0 || this.mode === 17;
+		return this.mode === sdk.units.player.mode.Death || this.mode === sdk.units.player.mode.Dead;
 	case sdk.unittype.Monster:
 		return this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead;
 	default:
@@ -74,7 +75,11 @@ Party.prototype.__defineGetter__("inTown", function () {
 
 Unit.prototype.__defineGetter__("attacking", function () {
 	if (this.type > sdk.unittype.Player) throw new Error("Unit.attacking: Must be used with player units.");
-	return [7, 8, 10, 11, 12, 13, 14, 15, 16, 18].includes(this.mode);
+	return [
+		sdk.units.player.mode.Attacking1, sdk.units.player.mode.Attacking2, sdk.units.player.mode.CastingSkill, sdk.units.player.mode.ThrowingItem,
+		sdk.units.player.mode.Kicking, sdk.units.player.mode.UsingSkill1, sdk.units.player.mode.UsingSkill2, sdk.units.player.mode.UsingSkill3,
+		sdk.units.player.mode.UsingSkill4, sdk.units.player.mode.SkillActionSequence
+	].includes(this.mode);
 });
 
 Unit.prototype.__defineGetter__('durabilityPercent', function () {
@@ -254,7 +259,7 @@ Unit.prototype.toCursor = function (usePacket = false) {
 
 	for (let i = 0; i < 3; i += 1) {
 		try {
-			if (this.mode === 1) {
+			if (this.mode === sdk.itemmode.Equipped) {
 				// fix for equipped items (cubing viper staff for example)
 				clickItem(sdk.clicktypes.click.Left, this.bodylocation);
 			} else {

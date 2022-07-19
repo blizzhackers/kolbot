@@ -287,7 +287,7 @@ const ClassAttack = {
 
 			break;
 		case sdk.unittype.Monster:
-			let commonCheck = ((unit.mode === 2 || unit.mode === 15) && unit.distance < 10);
+			let commonCheck = (unit.isMoving && unit.distance < 10);
 			x = commonCheck && getDistance(me, unit.targetx, unit.targety) > 5 ? unit.targetx : unit.x;
 			y = commonCheck && getDistance(me, unit.targetx, unit.targety) > 5 ? unit.targety : unit.y;
 			positions = [[x + 2, y + 1], [x, y + 3], [x + 2, y - 1], [x - 2, y + 2], [x - 5, y]];

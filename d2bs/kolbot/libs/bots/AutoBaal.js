@@ -212,14 +212,14 @@ function AutoBaal() {
 			let baal = Game.getMonster(sdk.monsters.Baal);
 
 			if (baal) {
-				if (baal.mode === 0 || baal.mode === 12) {
+				if (baal.dead) {
 					break;
 				}
 
 				this.longRangeSupport();
 			}
 
-			me.mode === 17 && me.revive();
+			me.mode === sdk.units.player.mode.Dead && me.revive();
 
 			delay(500);
 		}

@@ -231,12 +231,10 @@ const ClassAttack = {
 				// used for X formation
 				if (Math.abs(i) === Math.abs(j)) {
 					// unit can be an object with x, y props too, that's why having "mode" prop is checked
-					if (traps >= amount || (unit.hasOwnProperty("mode") && (unit.mode === 0 || unit.mode === 12))) {
-						return true;
-					}
+					if (traps >= amount || (unit.hasOwnProperty("mode") && unit.dead)) return true;
 
 					// Duriel, Mephisto, Diablo, Baal, other players - why not andy?
-					if ((unit.hasOwnProperty("classid") && [211, 242, 243, 544].includes(unit.classid)) || (unit.hasOwnProperty("type") && unit.type === 0)) {
+					if ((unit.hasOwnProperty("classid") && [211, 242, 243, 544].includes(unit.classid)) || (unit.hasOwnProperty("type") && unit.isPlayer)) {
 						if (traps >= Config.BossTraps.length) return true;
 
 						Skill.cast(Config.BossTraps[traps], sdk.skills.hand.Right, unit.x + i, unit.y + j);

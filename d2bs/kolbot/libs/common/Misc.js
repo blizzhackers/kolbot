@@ -1212,7 +1212,7 @@ const Misc = {
 
 		if (unit) {
 			do {
-				if (unit.name && unit.mode === 0 && getDistance(me.x, me.y, unit.x, unit.y) <= range && containers.includes(unit.name.toLowerCase())) {
+				if (unit.name && unit.mode === sdk.units.objects.mode.Inactive && getDistance(me.x, me.y, unit.x, unit.y) <= range && containers.includes(unit.name.toLowerCase())) {
 					unitList.push(copyUnit(unit));
 				}
 			} while (unit.getNext());
@@ -1286,7 +1286,7 @@ const Misc = {
 			let index = -1;
 			// Build a list of nearby shrines
 			do {
-				if (shrine.mode === 0 && !ignore.includes(shrine.objtype) && getDistance(me.x, me.y, shrine.x, shrine.y) <= range) {
+				if (shrine.mode === sdk.units.objects.mode.Inactive && !ignore.includes(shrine.objtype) && getDistance(me.x, me.y, shrine.x, shrine.y) <= range) {
 					shrineList.push(copyUnit(shrine));
 				}
 			} while (shrine.getNext());
@@ -1325,7 +1325,7 @@ const Misc = {
 
 	// Use a shrine Unit
 	getShrine: function (unit) {
-		if (unit.mode === 2) return false;
+		if (unit.mode === sdk.units.objects.mode.Active) return false;
 
 		for (let i = 0; i < 3; i++) {
 			if (Skill.useTK(unit) && i < 2) {
@@ -1373,7 +1373,7 @@ const Misc = {
 
 				if (shrine) {
 					do {
-						if (shrine.objtype === type && shrine.mode === 0) {
+						if (shrine.objtype === type && shrine.mode === sdk.units.objects.mode.Inactive) {
 							(!Skill.haveTK || !use) && Pather.moveTo(shrine.x - 2, shrine.y - 2);
 
 							if (!use || this.getShrine(shrine)) {

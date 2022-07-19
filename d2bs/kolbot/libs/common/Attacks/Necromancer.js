@@ -442,9 +442,7 @@ const ClassAttack = {
 	},
 
 	explodeCorpses: function (unit) {
-		if (Config.ExplodeCorpses === 0 || unit.mode === 0 || unit.mode === 12) {
-			return false;
-		}
+		if (Config.ExplodeCorpses === 0 || unit.dead) return false;
 
 		let corpseList = [];
 		let range = Math.floor((me.getSkill(Config.ExplodeCorpses, sdk.skills.subindex.SoftPoints) + 7) / 3);

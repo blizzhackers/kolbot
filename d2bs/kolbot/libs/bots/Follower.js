@@ -283,7 +283,7 @@ function Follower() {
 
 		if (item) {
 			do {
-				if ((item.mode === 3 || item.mode === 5) && item.itemType >= 76 && item.itemType <= 78 && getDistance(me, item) <= range) {
+				if (item.onGroundOrDropping && item.itemType >= 76 && item.itemType <= 78 && getDistance(me, item) <= range) {
 					pickList.push(copyUnit(item));
 				}
 			} while (item.getNext());
@@ -488,7 +488,7 @@ function Follower() {
 
 	// Main Loop
 	while (Misc.inMyParty(Config.Leader)) {
-		if (me.mode === 17) {
+		if (me.mode === sdk.units.player.mode.Dead) {
 			while (!me.inTown) {
 				me.revive();
 				delay(1000);

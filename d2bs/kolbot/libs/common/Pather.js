@@ -735,7 +735,7 @@ const Pather = {
 					for (let i = 0; i < 3; i++) {
 						Misc.click(0, 0, door);
 
-						if (Misc.poll(() => door.mode === 2, 1000, 30)) {
+						if (Misc.poll(() => door.mode === sdk.units.objects.mode.Active, 1000, 30)) {
 							return true;
 						}
 
@@ -754,7 +754,7 @@ const Pather = {
 					for (let i = 0; i < 3; i++) {
 						Misc.click(0, 0, gate);
 
-						if (Misc.poll(() => gate.mode === 2, 1000, 30)) {
+						if (Misc.poll(() => gate.mode === sdk.units.objects.mode.Active, 1000, 30)) {
 							return true;
 						}
 
@@ -805,7 +805,7 @@ const Pather = {
 		// anything small and annoying really
 		let barrels = getUnits(sdk.unittype.Object)
 			.filter(function (el) {
-				return (el.name && el.mode === 0
+				return (el.name && el.mode === sdk.units.objects.mode.Inactive
 				&& ["ratnest", "goo pile", "barrel", "basket", "largeurn", "jar3", "jar2", "jar1", "urn", "jug", "barrel wilderness", "cocoon"].includes(el.name.toLowerCase())
 				&& ((getDistance(el, x, y) < 4 && el.distance < 9) || el.distance < 4));
 			});
@@ -1169,10 +1169,10 @@ const Pather = {
 			if (unit.distance > 5) {
 				usetk ? this.moveNearUnit(unit, 20) : this.moveToUnit(unit);
 				// try to activate it once
-				usetk && i === 0 && unit.mode === 0 && unit.distance < 21 && Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit);
+				usetk && i === 0 && unit.mode === sdk.units.objects.mode.Inactive && unit.distance < 21 && Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit);
 			}
 
-			if (type === sdk.unittype.Object && unit.mode === 0) {
+			if (type === sdk.unittype.Object && unit.mode === sdk.units.objects.mode.Inactive) {
 				if ((me.inArea(sdk.areas.Travincal) && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(sdk.quest.id.TheBlackenedTemple, sdk.quest.states.Completed) !== 1)
 					|| (me.inArea(sdk.areas.ArreatSummit) && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.Completed) !== 1)) {
 					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
@@ -1250,10 +1250,10 @@ const Pather = {
 			if (unit.distance > 5) {
 				usetk ? this.moveNearUnit(unit, 20) : this.moveToUnit(unit);
 				// try to activate it once
-				usetk && i === 0 && unit.mode === 0 && unit.distance < 21 && Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit);
+				usetk && i === 0 && unit.mode === sdk.units.objects.mode.Inactive && unit.distance < 21 && Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit);
 			}
 
-			if (type === 2 && unit.mode === 0) {
+			if (type === 2 && unit.mode === sdk.units.objects.mode.Inactive) {
 				if ((me.inArea(sdk.areas.Travincal) && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(sdk.quest.id.TheBlackenedTemple, sdk.quest.states.Completed) !== 1)
 					|| (me.inArea(sdk.areas.ArreatSummit) && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.Completed) !== 1)) {
 					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
@@ -1605,7 +1605,7 @@ const Pather = {
 					let tick = getTickCount();
 
 					while (getTickCount() - tick < 2000) {
-						if (portal.mode === 2 || me.area === sdk.areas.ArcaneSanctuary) {
+						if (portal.mode === sdk.units.objects.mode.Active || me.area === sdk.areas.ArcaneSanctuary) {
 							break;
 						}
 

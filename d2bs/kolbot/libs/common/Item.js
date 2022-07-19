@@ -25,8 +25,8 @@ const Item = {
 		if (!this.canEquip(item)) return false;
 
 		// Already equipped in the right slot
-		if (item.mode === 1 && item.bodylocation === bodyLoc) return true;
-		if (item.location === 7 && !Town.openStash()) return false;
+		if (item.mode === sdk.itemmode.Equipped && item.bodylocation === bodyLoc) return true;
+		if (item.isInStash && !Town.openStash()) return false;
 
 		for (let i = 0; i < 3; i += 1) {
 			if (item.toCursor()) {

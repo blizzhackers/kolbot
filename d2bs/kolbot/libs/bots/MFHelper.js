@@ -57,7 +57,7 @@ function MFHelper() {
 
 	// START
 	while (true) {
-		if (me.softcore && me.mode === 17) {
+		if (me.softcore && me.mode === sdk.units.player.mode.Dead) {
 			while (!me.inTown) {
 				me.revive();
 				delay(1000);

@@ -745,7 +745,7 @@ const Cubing = {
 		if (!Config.Cubing) return false;
 
 		for (let i = 0; i < this.validIngredients.length; i += 1) {
-			if (unit.mode === 0 && unit.gid === this.validIngredients[i].gid) {
+			if (unit.mode === sdk.itemmode.inStorage && unit.gid === this.validIngredients[i].gid) {
 				return true;
 			}
 		}

@@ -764,7 +764,7 @@ const Common = {
 		checkStatues: function () {
 			let statues = getUnits(sdk.unittype.Object)
 				.filter(u => [sdk.units.KorlictheProtectorStatue, sdk.units.TalictheDefenderStatue, sdk.units.MadawctheGuardianStatue].includes(u.classid)
-					&& u.mode === 2);
+					&& u.mode === sdk.units.objects.mode.Active);
 			return statues.length === 3;
 		},
 
@@ -1089,7 +1089,7 @@ const Common = {
 				delay(5000);
 				Precast.doPrecast(true);
 				Misc.poll(() => {
-					if (me.mode === 4/*Getting hit*/ || me.checkForMobs({range: 15})) {
+					if (me.mode === sdk.units.player.mode.GettingHit || me.checkForMobs({range: 15})) {
 						Common.Baal.clearThrone();
 						Pather.moveTo(15090, 5008);
 					}
