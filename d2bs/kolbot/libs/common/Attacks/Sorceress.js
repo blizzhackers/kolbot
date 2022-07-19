@@ -60,10 +60,10 @@ const ClassAttack = {
 		}
 
 		// Keep Energy Shield active
-		Skill.canUse(sdk.skills.EnergyShield) && !me.getState(sdk.states.EnergyShield) && Skill.cast(sdk.skills.EnergyShield, 0);
+		Skill.canUse(sdk.skills.EnergyShield) && !me.getState(sdk.states.EnergyShield) && Skill.cast(sdk.skills.EnergyShield, sdk.skills.hand.Right);
 
 		// Keep Thunder-Storm active
-		Skill.canUse(sdk.skills.ThunderStorm) && !me.getState(sdk.states.ThunderStorm) && Skill.cast(sdk.skills.ThunderStorm, 0);
+		Skill.canUse(sdk.skills.ThunderStorm) && !me.getState(sdk.states.ThunderStorm) && Skill.cast(sdk.skills.ThunderStorm, sdk.skills.hand.Right);
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
@@ -106,7 +106,7 @@ const ClassAttack = {
 				}
 
 				// if we fail to cast or we've casted 3 or more times - do something else
-				if (!Skill.cast(sdk.skills.StaticField, 0) || casts >= 3) {
+				if (!Skill.cast(sdk.skills.StaticField, sdk.skills.hand.Right) || casts >= 3) {
 					break;
 				} else {
 					casts++;
@@ -157,7 +157,7 @@ const ClassAttack = {
 				
 				if (!!closeMob) {
 					let findSkill = this.decideSkill(closeMob);
-					(this.doCast(closeMob, findSkill.timed, findSkill.untimed) === 1) || (Skill.haveTK && Skill.cast(sdk.skills.Telekinesis, 0, unit));
+					(this.doCast(closeMob, findSkill.timed, findSkill.untimed) === 1) || (Skill.haveTK && Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit));
 				}
 			}
 

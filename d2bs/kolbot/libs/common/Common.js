@@ -330,7 +330,7 @@ const Common = {
 			for (let i = 0; i < 5; i++) {
 				seal.distance > 13 && Attack.getIntoPosition(seal, 13, 0x4);
 				
-				if (Skill.cast(sdk.skills.Telekinesis, 0, seal) && Misc.poll(() => seal.mode, 1000, 100)) {
+				if (Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, seal) && Misc.poll(() => seal.mode, 1000, 100)) {
 					break;
 				}
 			}
@@ -540,7 +540,7 @@ const Common = {
 						Skill.setSkill(Config.AttackSkill[2], sdk.skills.hand.Right);
 
 						for (let n = 0; n < amount; n += 1) {
-							Skill.cast(Config.AttackSkill[1], 1);
+							Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Left);
 						}
 
 						return;
@@ -571,7 +571,7 @@ const Common = {
 			case sdk.charclass.Sorceress:
 				if ([sdk.skills.Meteor, sdk.skills.Blizzard, sdk.skills.FrozenOrb, sdk.skills.FireWall].includes(Config.AttackSkill[1])) {
 					me.skillDelay && delay(500);
-					Skill.cast(Config.AttackSkill[1], 0, coords[0], coords[1]);
+					Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Right, coords[0], coords[1]);
 
 					return true;
 				}
@@ -661,7 +661,7 @@ const Common = {
 					switch (me.classid) {
 					case sdk.charclass.Sorceress:
 						if ([sdk.skills.Meteor, sdk.skills.Blizzard, sdk.skills.FrozenOrb, sdk.skills.FireWall].includes(Config.AttackSkill[1])) {
-							Skill.cast(Config.AttackSkill[1], 0, 7793 + rand(-1, 1), 5293);
+							Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Right, 7793 + rand(-1, 1), 5293);
 						}
 
 						delay(500);
@@ -669,12 +669,12 @@ const Common = {
 						break;
 					case sdk.charclass.Paladin:
 						Skill.setSkill(Config.AttackSkill[2]);
-						Config.AttackSkill[1] === sdk.skills.BlessedHammer && Skill.cast(Config.AttackSkill[1], 1);
+						Config.AttackSkill[1] === sdk.skills.BlessedHammer && Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Left);
 
 						break;
 					case sdk.charclass.Druid:
 						if ([sdk.skills.Tornado, sdk.skills.Fissure, sdk.skills.Volcano].includes(Config.AttackSkill[3])) {
-							Skill.cast(Config.AttackSkill[1], 0, 7793 + rand(-1, 1), 5293);
+							Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Right, 7793 + rand(-1, 1), 5293);
 
 							break;
 						}
@@ -688,7 +688,7 @@ const Common = {
 							trapCheck && ClassAttack.placeTraps({x: 7793, y: 5293, classid: 243}, trapCheck);
 						}
 
-						Config.AttackSkill[1] === sdk.skills.ShockWeb && Skill.cast(Config.AttackSkill[1], 0, 7793, 5293);
+						Config.AttackSkill[1] === sdk.skills.ShockWeb && Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Right, 7793, 5293);
 
 						delay(500);
 
@@ -943,7 +943,7 @@ const Common = {
 					if (me.getState(sdk.states.SkillDelay)) {
 						delay(50);
 					} else {
-						Skill.cast(Config.AttackSkill[1], 0, 15094 + rand(-1, 1), 5024);
+						Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Right, 15094 + rand(-1, 1), 5024);
 					}
 				}
 
@@ -952,13 +952,13 @@ const Common = {
 				if (Config.AttackSkill[3] === sdk.skills.BlessedHammer) {
 					Config.AttackSkill[4] > 0 && Skill.setSkill(Config.AttackSkill[4], sdk.skills.hand.Right);
 
-					return Skill.cast(Config.AttackSkill[3], 1);
+					return Skill.cast(Config.AttackSkill[3], sdk.skills.hand.Left);
 				}
 
 				break;
 			case sdk.charclass.Druid:
 				if ([sdk.skills.Tornado, sdk.skills.Fissure, sdk.skills.Volcano].includes(Config.AttackSkill[3])) {
-					Skill.cast(Config.AttackSkill[3], 0, 15094 + rand(-1, 1), 5029);
+					Skill.cast(Config.AttackSkill[3], sdk.skills.hand.Right, 15094 + rand(-1, 1), 5029);
 
 					return true;
 				}
@@ -974,7 +974,7 @@ const Common = {
 				}
 
 				if (Config.AttackSkill[3] === sdk.skills.ShockWeb) {
-					return Skill.cast(Config.AttackSkill[3], 0, 15094, 5028);
+					return Skill.cast(Config.AttackSkill[3], sdk.skills.hand.Right, 15094, 5028);
 				}
 
 				break;

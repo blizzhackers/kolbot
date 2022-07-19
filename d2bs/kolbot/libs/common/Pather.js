@@ -265,7 +265,7 @@ const Pather = {
 							}
 
 							// Only do this once
-							if (fail > 1 && !leaped && Skill.canUse(sdk.skills.LeapAttack) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
+							if (fail > 1 && !leaped && Skill.canUse(sdk.skills.LeapAttack) && Skill.cast(sdk.skills.LeapAttack, sdk.skills.hand.Right, node.x, node.y)) {
 								leaped = true;
 							}
 						}
@@ -408,7 +408,7 @@ const Pather = {
 							}
 
 							// Only do this once
-							if (fail > 1 && !leaped && Skill.canUse(sdk.skills.LeapAttack) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
+							if (fail > 1 && !leaped && Skill.canUse(sdk.skills.LeapAttack) && Skill.cast(sdk.skills.LeapAttack, sdk.skills.hand.Right, node.x, node.y)) {
 								leaped = true;
 							}
 						}
@@ -540,7 +540,7 @@ const Pather = {
 							}
 
 							// Only do this once
-							if (fail > 1 && !leaped && Skill.canUse(sdk.skills.LeapAttack) && Skill.cast(sdk.skills.LeapAttack, 0, node.x, node.y)) {
+							if (fail > 1 && !leaped && Skill.canUse(sdk.skills.LeapAttack) && Skill.cast(sdk.skills.LeapAttack, sdk.skills.hand.Right, node.x, node.y)) {
 								leaped = true;
 							}
 						}
@@ -1038,7 +1038,7 @@ const Pather = {
 
 						break;
 					case 2: // stairs
-						if (!this.openExit(areas[i]) && !this.useUnit(5, currExit.tileid, areas[i])) {
+						if (!this.openExit(areas[i]) && !this.useUnit(sdk.unittype.Stairs, currExit.tileid, areas[i])) {
 							return false;
 						}
 
@@ -1169,27 +1169,27 @@ const Pather = {
 			if (unit.distance > 5) {
 				usetk ? this.moveNearUnit(unit, 20) : this.moveToUnit(unit);
 				// try to activate it once
-				usetk && i === 0 && unit.mode === 0 && unit.distance < 21 && Skill.cast(sdk.skills.Telekinesis, 0, unit);
+				usetk && i === 0 && unit.mode === 0 && unit.distance < 21 && Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit);
 			}
 
 			if (type === sdk.unittype.Object && unit.mode === 0) {
-				if ((me.area === sdk.areas.Travincal && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(21, sdk.quest.states.Completed) !== 1)
-					|| (me.area === sdk.areas.ArreatSummit && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(39, sdk.quest.states.Completed) !== 1)) {
+				if ((me.inArea(sdk.areas.Travincal) && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(sdk.quest.id.TheBlackenedTemple, sdk.quest.states.Completed) !== 1)
+					|| (me.inArea(sdk.areas.ArreatSummit) && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.Completed) !== 1)) {
 					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 				}
 
-				me.area === sdk.areas.A3SewersLvl1 ? this.openUnit(2, 367) : this.openUnit(2, id);
+				me.inArea(sdk.areas.A3SewersLvl1) ? this.openUnit(sdk.unittype.Object, 367) : this.openUnit(sdk.unittype.Object, id);
 			}
 
-			if (type === sdk.unittype.Object && id === sdk.units.RedPortalToAct4 && me.area === sdk.areas.DuranceofHateLvl3
-				&& targetArea === sdk.areas.PandemoniumFortress && me.getQuest(22, sdk.quest.states.Completed) !== 1) {
+			if (type === sdk.unittype.Object && id === sdk.units.RedPortalToAct4 && me.inArea(sdk.areas.DuranceofHateLvl3)
+				&& targetArea === sdk.areas.PandemoniumFortress && me.getQuest(sdk.quest.id.TheGuardian, sdk.quest.states.Completed) !== 1) {
 				throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 			}
 
 			delay(300);
 			type === sdk.unittype.Stairs
 				? Misc.click(0, 0, unit)
-				: usetk && unit.distance > 5 ? Skill.cast(sdk.skills.Telekinesis, 0, unit) : Packet.entityInteract(unit);
+				: usetk && unit.distance > 5 ? Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit) : Packet.entityInteract(unit);
 			delay(300);
 
 			let tick = getTickCount();
@@ -1250,24 +1250,25 @@ const Pather = {
 			if (unit.distance > 5) {
 				usetk ? this.moveNearUnit(unit, 20) : this.moveToUnit(unit);
 				// try to activate it once
-				usetk && i === 0 && unit.mode === 0 && unit.distance < 21 && Skill.cast(sdk.skills.Telekinesis, 0, unit);
+				usetk && i === 0 && unit.mode === 0 && unit.distance < 21 && Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit);
 			}
 
 			if (type === 2 && unit.mode === 0) {
-				if ((me.area === sdk.areas.Travincal && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(21, sdk.quest.states.Completed) !== 1)
-					|| (me.area === sdk.areas.ArreatSummit && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(39, sdk.quest.states.Completed) !== 1)) {
+				if ((me.inArea(sdk.areas.Travincal) && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(sdk.quest.id.TheBlackenedTemple, sdk.quest.states.Completed) !== 1)
+					|| (me.inArea(sdk.areas.ArreatSummit) && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.Completed) !== 1)) {
 					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 				}
 
-				me.area === sdk.areas.A3SewersLvl1 ? this.openUnit(2, 367) : this.openUnit(2, id);
+				me.area === sdk.areas.A3SewersLvl1 ? this.openUnit(sdk.unittype.Object, 367) : this.openUnit(sdk.unittype.Object, id);
 			}
 
-			if (type === 2 && id === 342 && me.area === sdk.areas.DuranceofHateLvl3 && targetArea === sdk.areas.PandemoniumFortress && me.getQuest(22, sdk.quest.states.Completed) !== 1) {
+			if (type === sdk.unittype.Object && id === sdk.units.RedPortalToAct4 && me.inArea(sdk.areas.DuranceofHateLvl3)
+				&& targetArea === sdk.areas.PandemoniumFortress && me.getQuest(sdk.quest.id.TheGuardian, sdk.quest.states.Completed) !== 1) {
 				throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 			}
 
 			delay(300);
-			type === 5 ? Misc.click(0, 0, unit) : usetk && unit.distance > 5 ? Skill.cast(sdk.skills.Telekinesis, 0, unit) : Packet.entityInteract(unit);
+			type === 5 ? Misc.click(0, 0, unit) : usetk && unit.distance > 5 ? Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit) : Packet.entityInteract(unit);
 			delay(300);
 
 			let tick = getTickCount();
@@ -1358,7 +1359,7 @@ const Pather = {
 
 				if (useTK && !getUIFlag(sdk.uiflags.Waypoint)) {
 					wp.distance > 21 && Pather.moveNearUnit(wp, 20);
-					Skill.cast(sdk.skills.Telekinesis, 0, wp);
+					Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, wp);
 				} else if (!me.inTown && wp.distance > 7) {
 					this.moveToUnit(wp);
 				}
@@ -1569,7 +1570,7 @@ const Pather = {
 				if (portal.area === me.area) {
 					if (Skill.useTK(portal) && i < 3) {
 						portal.distance > 21 && (me.area === sdk.areas.Harrogath ? Town.move("portalspot") : Pather.moveNearUnit(portal, 20));
-						if (Skill.cast(sdk.skills.Telekinesis, 0, portal)) {
+						if (Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, portal)) {
 							if (Misc.poll(() => {
 								if (me.area !== preArea) {
 									Pather.lastPortalTick = getTickCount();
@@ -1789,7 +1790,7 @@ const Pather = {
 						if (!getUIFlag(sdk.uiflags.Waypoint)) {
 							if (wp.distance > 5 && Skill.useTK(wp) && j < 3) {
 								wp.distance > 21 && Attack.getIntoPosition(wp, 20, 0x4);
-								Skill.cast(sdk.skills.Telekinesis, 0, wp);
+								Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, wp);
 							} else if (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint)) {
 								this.moveToUnit(wp) && Misc.click(0, 0, wp);
 							}

@@ -1589,7 +1589,7 @@ const Attack = {
 			let coords = [Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * 4 + unit.x), Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * 4 + unit.y)];
 
 			if (!CollMap.checkColl(me, {x: coords[0], y: coords[1]}, 0x1, 1)) {
-				return Skill.cast(sdk.skills.Whirlwind, 0, coords[0], coords[1]);
+				return Skill.cast(sdk.skills.Whirlwind, sdk.skills.hand.Right, coords[0], coords[1]);
 			}
 		}
 

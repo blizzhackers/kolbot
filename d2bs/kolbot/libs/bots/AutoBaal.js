@@ -64,7 +64,7 @@ function AutoBaal() {
 					do {
 						if (monster.attackable && monster.distance < 50 && !checkCollision(me, monster, sdk.collision.Ranged)
 							&& monster.curseable && !monster.isSpecial && !monster.getState(ClassAttack.curseState[1])) {
-							Skill.cast(Config.Curse[1], 0, monster);
+							Skill.cast(Config.Curse[1], sdk.skills.hand.Right, monster);
 						}
 					} while (monster.getNext());
 				}

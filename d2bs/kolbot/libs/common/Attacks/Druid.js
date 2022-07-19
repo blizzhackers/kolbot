@@ -21,9 +21,9 @@ const ClassAttack = {
 		}
 
 		// Rebuff Hurricane
-		Skill.canUse(sdk.skills.Hurricane) && !me.getState(sdk.states.Hurricane) && Skill.cast(sdk.skills.Hurricane, 0);
+		Skill.canUse(sdk.skills.Hurricane) && !me.getState(sdk.states.Hurricane) && Skill.cast(sdk.skills.Hurricane, sdk.skills.hand.Right);
 		// Rebuff Cyclone Armor
-		Skill.canUse(sdk.skills.CycloneArmor) && !me.getState(sdk.states.CycloneArmor) && Skill.cast(sdk.skills.CycloneArmor, 0);
+		Skill.canUse(sdk.skills.CycloneArmor) && !me.getState(sdk.states.CycloneArmor) && Skill.cast(sdk.skills.CycloneArmor, sdk.skills.hand.Right);
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
 			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {

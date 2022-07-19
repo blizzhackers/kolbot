@@ -44,7 +44,7 @@ const ClassAttack = {
 		// Cloak of Shadows (Aggressive) - can't be cast again until previous one runs out and next to useless if cast in precast sequence (won't blind anyone)
 		if (Config.AggressiveCloak && Skill.canUse(sdk.skills.CloakofShadows) && !me.skillDelay && !me.getState(sdk.states.CloakofShadows)) {
 			if (unit.distance < 20) {
-				Skill.cast(sdk.skills.CloakofShadows, 0);
+				Skill.cast(sdk.skills.CloakofShadows, sdk.skills.hand.Right);
 			} else if (!Attack.getIntoPosition(unit, 20, 0x4)) {
 				return Attack.result.Failed;
 			}
@@ -64,7 +64,7 @@ const ClassAttack = {
 
 		// Cloak of Shadows (Defensive; default) - can't be cast again until previous one runs out and next to useless if cast in precast sequence (won't blind anyone)
 		if (!Config.AggressiveCloak && Skill.canUse(sdk.skills.CloakofShadows) && unit.distance < 20 && !me.skillDelay && !me.getState(sdk.states.CloakofShadows)) {
-			Skill.cast(sdk.skills.CloakofShadows, 0);
+			Skill.cast(sdk.skills.CloakofShadows, sdk.skills.hand.Right);
 		}
 
 		// Get timed skill
@@ -239,11 +239,11 @@ const ClassAttack = {
 					if ((unit.hasOwnProperty("classid") && [211, 242, 243, 544].includes(unit.classid)) || (unit.hasOwnProperty("type") && unit.type === 0)) {
 						if (traps >= Config.BossTraps.length) return true;
 
-						Skill.cast(Config.BossTraps[traps], 0, unit.x + i, unit.y + j);
+						Skill.cast(Config.BossTraps[traps], sdk.skills.hand.Right, unit.x + i, unit.y + j);
 					} else {
 						if (traps >= Config.Traps.length) return true;
 
-						Skill.cast(Config.Traps[traps], 0, unit.x + i, unit.y + j);
+						Skill.cast(Config.Traps[traps], sdk.skills.hand.Right, unit.x + i, unit.y + j);
 					}
 
 					traps += 1;

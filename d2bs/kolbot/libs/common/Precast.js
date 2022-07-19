@@ -501,14 +501,14 @@ const Precast = new function () {
 					}
 					
 					Town.move("portalspot");
-					Skill.cast(skillId, 0, me.x, me.y);
+					Skill.cast(skillId, sdk.skills.hand.Right, me.x, me.y);
 				} else {
 					let coord = CollMap.getRandCoordinate(me.x, -6, 6, me.y, -6, 6);
 
 					// Keep bots from getting stuck trying to summon
 					if (!!coord && Attack.validSpot(coord.x, coord.y)) {
 						Pather.moveTo(coord.x, coord.y);
-						Skill.cast(skillId, 0, me.x, me.y);
+						Skill.cast(skillId, sdk.skills.hand.Right, me.x, me.y);
 					}
 				}
 
@@ -530,7 +530,7 @@ const Precast = new function () {
 			let coord = CollMap.getRandCoordinate(me.x, -4, 4, me.y, -4, 4);
 
 			if (!!coord && Attack.validSpot(coord.x, coord.y)) {
-				Skill.cast(skillId, 0, coord.x, coord.y);
+				Skill.cast(skillId, sdk.skills.hand.Right, coord.x, coord.y);
 
 				if (me.getMinionCount(minionType) === count) {
 					break;
@@ -556,7 +556,7 @@ const Precast = new function () {
 		if (unit) {
 			do {
 				if (!unit.dead && Misc.inMyParty(unit.name) && unit.distance <= 40) {
-					Skill.cast(sdk.skills.Enchant, 0, unit);
+					Skill.cast(sdk.skills.Enchant, sdk.skills.hand.Right, unit);
 					chanted.push(unit.name);
 				}
 			} while (unit.getNext());
@@ -568,7 +568,7 @@ const Precast = new function () {
 		if (unit) {
 			do {
 				if (unit.getParent() && chanted.includes(unit.getParent().name) && unit.distance <= 40) {
-					Skill.cast(sdk.skills.Enchant, 0, unit);
+					Skill.cast(sdk.skills.Enchant, sdk.skills.hand.Right, unit);
 				}
 			} while (unit.getNext());
 		}

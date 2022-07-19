@@ -154,7 +154,7 @@ const ClassAttack = {
 
 					CorpseLoop:
 					for (let j = 0; j < 3; j += 1) {
-						Skill.cast(sdk.skills.FindItem, 0, corpse);
+						Skill.cast(sdk.skills.FindItem, sdk.skills.hand.Right, corpse);
 
 						let tick = getTickCount();
 

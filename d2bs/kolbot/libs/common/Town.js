@@ -161,7 +161,7 @@ const Town = {
 
 		// Burst of speed while in town
 		if (me.inTown && Skill.canUse(sdk.skills.BurstofSpeed) && !me.getState(sdk.states.BurstofSpeed)) {
-			Skill.cast(sdk.skills.BurstofSpeed, 0);
+			Skill.cast(sdk.skills.BurstofSpeed, sdk.skills.hand.Right);
 		}
 
 		me.switchWeapons(Attack.getPrimarySlot());
@@ -1656,7 +1656,7 @@ const Town = {
 					if (Skill.useTK(stash)) {
 						// Fix for out of range telek
 						i > 0 && stash.distance > (23 - (i * 2)) && Pather.walkTo(stash.x, stash.y, (23 - (i * 2)));
-						Skill.cast(sdk.skills.Telekinesis, 0, stash);
+						Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, stash);
 					} else {
 						Misc.click(0, 0, stash);
 					}

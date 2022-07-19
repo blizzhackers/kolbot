@@ -167,7 +167,7 @@ const ClassAttack = {
 					}
 				}
 
-				Skill.cast(customCurse, 0, unit);
+				Skill.cast(customCurse, sdk.skills.hand.Right, unit);
 
 				return Attack.result.Success;
 			} else if (!customCurse) {
@@ -178,7 +178,7 @@ const ClassAttack = {
 						}
 					}
 
-					Skill.cast(Config.Curse[0], 0, unit);
+					Skill.cast(Config.Curse[0], sdk.skills.hand.Right, unit);
 
 					return Attack.result.Success;
 				}
@@ -190,7 +190,7 @@ const ClassAttack = {
 						}
 					}
 
-					Skill.cast(Config.Curse[1], 0, unit);
+					Skill.cast(Config.Curse[1], sdk.skills.hand.Right, unit);
 
 					return Attack.result.Success;
 				}
@@ -384,7 +384,7 @@ const ClassAttack = {
 
 				// should probably have a way to priortize which ones we summon first
 				if (me.getMinionCount(sdk.minions.Skeleton) < this.maxSkeletons) {
-					if (!Skill.cast(sdk.skills.RaiseSkeleton, 0, corpse)) {
+					if (!Skill.cast(sdk.skills.RaiseSkeleton, sdk.skills.hand.Right, corpse)) {
 						return false;
 					}
 
@@ -399,7 +399,7 @@ const ClassAttack = {
 						delay(10);
 					}
 				} else if (me.getMinionCount(sdk.minions.SkeletonMage) < this.maxMages) {
-					if (!Skill.cast(sdk.skills.RaiseSkeletalMage, 0, corpse)) {
+					if (!Skill.cast(sdk.skills.RaiseSkeletalMage, sdk.skills.hand.Right, corpse)) {
 						return false;
 					}
 
@@ -417,7 +417,7 @@ const ClassAttack = {
 					if (this.checkCorpse(corpse, true)) {
 						print("Reviving " + corpse.name);
 
-						if (!Skill.cast(sdk.skills.Revive, 0, corpse)) {
+						if (!Skill.cast(sdk.skills.Revive, sdk.skills.hand.Right, corpse)) {
 							return false;
 						}
 
@@ -470,7 +470,7 @@ const ClassAttack = {
 							// Added corpse ID so I can see when it blows another monster with the same ClassID and Name
 							me.overhead("Exploding: " + corpse.classid + " " + corpse.name + " id:" + corpse.gid);
 
-							if (Skill.cast(Config.ExplodeCorpses, 0, corpse)) {
+							if (Skill.cast(Config.ExplodeCorpses, sdk.skills.hand.Right, corpse)) {
 								delay(me.ping + 1);
 							}
 						}
@@ -485,7 +485,7 @@ const ClassAttack = {
 						if (corpse) {
 							me.overhead("Exploding: " + corpse.classid + " " + corpse.name);
 
-							if (Skill.cast(Config.ExplodeCorpses, 0, corpse)) {
+							if (Skill.cast(Config.ExplodeCorpses, sdk.skills.hand.Right, corpse)) {
 								delay(200);
 							}
 						}

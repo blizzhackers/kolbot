@@ -1123,7 +1123,7 @@ const Misc = {
 			let useTK = (unit.distance > 5 && Skill.useTK(unit) && i < 3);
 			if (useTK) {
 				unit.distance > 13 && Attack.getIntoPosition(unit, 13, 0x4);
-				if (!Skill.cast(sdk.skills.Telekinesis, 0, unit)) {
+				if (!Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit)) {
 					console.debug("Failed to tk: attempt: " + i);
 					continue;
 				}
@@ -1330,7 +1330,7 @@ const Misc = {
 		for (let i = 0; i < 3; i++) {
 			if (Skill.useTK(unit) && i < 2) {
 				unit.distance > 21 && Pather.moveNearUnit(unit, 20);
-				!Skill.cast(sdk.skills.Telekinesis, 0, unit) && Attack.getIntoPosition(unit, 20, 0x5);
+				!Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit) && Attack.getIntoPosition(unit, 20, 0x5);
 			} else {
 				if (getDistance(me, unit) < 4 || Pather.moveToUnit(unit, 3, 0)) {
 					Misc.click(0, 0, unit);

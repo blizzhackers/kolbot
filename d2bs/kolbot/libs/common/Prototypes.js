@@ -1470,7 +1470,7 @@ Unit.prototype.castChargedSkill = function (...args) {
 		if (charge) {
 			// Setting skill on hand
 			if (!Config.PacketCasting || Config.PacketCasting === 1 && skillId !== sdk.skills.Teleport) {
-				return Skill.cast(skillId, 0, x || me.x, y || me.y, this); // Non packet casting
+				return Skill.cast(skillId, sdk.skills.hand.Right, x || me.x, y || me.y, this); // Non packet casting
 			}
 
 			// Packet casting

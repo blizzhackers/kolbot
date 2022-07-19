@@ -47,7 +47,7 @@ function Travincal() {
 			if (i % 4 === 0) {
 				Pather.moveTo(orgX + coords[i], orgY + coords[i + 1]);
 			} else {
-				Skill.cast(sdk.skills.LeapAttack, 0, orgX + coords[i], orgY + coords[i + 1]);
+				Skill.cast(sdk.skills.LeapAttack, sdk.skills.hand.Right, orgX + coords[i], orgY + coords[i + 1]);
 				Attack.clearList(this.buildList(1));
 			}
 		}

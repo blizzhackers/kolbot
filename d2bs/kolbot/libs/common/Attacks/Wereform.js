@@ -56,7 +56,7 @@ const ClassAttack = {
 		}
 
 		// Rebuff Armageddon
-		Skill.canUse(sdk.skills.Armageddon) && !me.getState(sdk.states.Armageddon) && Skill.cast(sdk.skills.Armageddon, 0);
+		Skill.canUse(sdk.skills.Armageddon) && !me.getState(sdk.states.Armageddon) && Skill.cast(sdk.skills.Armageddon, sdk.skills.hand.Right);
 
 		let timedSkill = -1;
 		let untimedSkill = -1;

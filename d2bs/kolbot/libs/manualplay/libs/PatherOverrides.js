@@ -115,7 +115,7 @@ Pather.getWP = function (area, clearPath) {
 							Attack.getIntoPosition(wp, 20, 0x4);
 						}
 
-						Skill.cast(sdk.skills.Telekinesis, 0, wp);
+						Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, wp);
 					} else if (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint)) {
 						this.moveToUnit(wp) && Misc.click(0, 0, wp);
 					}
@@ -241,7 +241,7 @@ Pather.walkTo = function (x = undefined, y = undefined, minDist = undefined) {
 
 Pather.teleportTo = function (x, y, maxRange = 5) {
 	for (let i = 0; i < 3; i++) {
-		Config.PacketCasting ? Skill.setSkill(sdk.skills.Teleport, sdk.skills.hand.Right) && Packet.castSkill(0, x, y) : Skill.cast(sdk.skills.Teleport, 0, x, y);
+		Config.PacketCasting ? Skill.setSkill(sdk.skills.Teleport, sdk.skills.hand.Right) && Packet.castSkill(0, x, y) : Skill.cast(sdk.skills.Teleport, sdk.skills.hand.Right, x, y);
 		let tick = getTickCount();
 
 		while (getTickCount() - tick < Math.max(500, me.ping * 2 + 200)) {
@@ -353,7 +353,7 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
 
 					// Only do this once
 					if (fail > 1 && me.getSkill(143, sdk.skills.subindex.SoftPoints) && !leaped) {
-						Skill.cast(143, 0, node.x, node.y);
+						Skill.cast(143, sdk.skills.hand.Right, node.x, node.y);
 						leaped = true;
 					}
 				}

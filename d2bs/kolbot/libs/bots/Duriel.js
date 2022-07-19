@@ -36,7 +36,7 @@ function Duriel () {
 
 	if (Skill.useTK(unit)) {
 		Misc.poll(function () {
-			Skill.cast(sdk.skills.Telekinesis, 0, unit) && delay(100);
+			Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit) && delay(100);
 			return me.area === sdk.areas.DurielsLair;
 		}, 1000, 200);
 	}
