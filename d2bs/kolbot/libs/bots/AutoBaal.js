@@ -62,7 +62,7 @@ function AutoBaal() {
 
 				if (monster) {
 					do {
-						if (monster.attackable && monster.distance < 50 && !checkCollision(me, monster, 0x4)
+						if (monster.attackable && monster.distance < 50 && !checkCollision(me, monster, sdk.collision.Ranged)
 							&& monster.curseable && !monster.isSpecial && !monster.getState(ClassAttack.curseState[1])) {
 							Skill.cast(Config.Curse[1], 0, monster);
 						}
@@ -95,7 +95,7 @@ function AutoBaal() {
 
 		if (monster) {
 			do {
-				if (monster.attackable && monster.distance < 50 && !checkCollision(me, monster, 0x4)) {
+				if (monster.attackable && monster.distance < 50 && !checkCollision(me, monster, sdk.collision.Ranged)) {
 					monList.push(copyUnit(monster));
 				}
 			} while (monster.getNext());

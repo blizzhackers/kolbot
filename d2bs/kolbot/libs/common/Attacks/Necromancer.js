@@ -145,7 +145,7 @@ const ClassAttack = {
 		}
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
-			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
 					return Attack.result.Failed;
 				}
@@ -161,7 +161,7 @@ const ClassAttack = {
 			customCurse = this.getCustomCurse(unit);
 
 			if (customCurse && this.canCurse(unit, customCurse)) {
-				if (unit.distance > 25 || checkCollision(me, unit, 0x4)) {
+				if (unit.distance > 25 || checkCollision(me, unit, sdk.collision.Ranged)) {
 					if (!Attack.getIntoPosition(unit, 25, 0x4)) {
 						return Attack.result.Failed;
 					}
@@ -172,7 +172,7 @@ const ClassAttack = {
 				return Attack.result.Success;
 			} else if (!customCurse) {
 				if (Config.Curse[0] > 0 && (unit.spectype & 0x7) && this.canCurse(unit, Config.Curse[0])) {
-					if (unit.distance > 25 || checkCollision(me, unit, 0x4)) {
+					if (unit.distance > 25 || checkCollision(me, unit, sdk.collision.Ranged)) {
 						if (!Attack.getIntoPosition(unit, 25, 0x4)) {
 							return Attack.result.Failed;
 						}
@@ -184,7 +184,7 @@ const ClassAttack = {
 				}
 
 				if (Config.Curse[1] > 0 && !(unit.spectype & 0x7) && this.canCurse(unit, Config.Curse[1])) {
-					if (unit.distance > 25 || checkCollision(me, unit, 0x4)) {
+					if (unit.distance > 25 || checkCollision(me, unit, sdk.collision.Ranged)) {
 						if (!Attack.getIntoPosition(unit, 25, 0x4)) {
 							return Attack.result.Failed;
 						}
@@ -294,7 +294,7 @@ const ClassAttack = {
 			switch (timedSkill) {
 			case sdk.skills.PoisonNova:
 				if (!this.novaTick || getTickCount() - this.novaTick > Config.PoisonNovaDelay * 1000) {
-					if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
+					if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
 						if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4)) {
 							return Attack.result.Failed;
 						}
@@ -307,7 +307,7 @@ const ClassAttack = {
 
 				break;
 			case 500: // Pure Summoner
-				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
+				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
 					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4)) {
 						return Attack.result.Failed;
 					}
@@ -319,9 +319,9 @@ const ClassAttack = {
 			default:
 				if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, timedSkill, classid)) return Attack.result.Failed;
 
-				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
+				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
 					// Allow short-distance walking for melee skills
-					let walk = Skill.getRange(timedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
+					let walk = Skill.getRange(timedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
 					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4, walk)) {
 						return Attack.result.Failed;
@@ -337,9 +337,9 @@ const ClassAttack = {
 		if (untimedSkill > -1) {
 			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, untimedSkill, classid)) return Attack.result.Failed;
 
-			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
 				// Allow short-distance walking for melee skills
-				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
+				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), 0x4, walk)) {
 					return Attack.result.Failed;
@@ -531,6 +531,6 @@ const ClassAttack = {
 
 		if (!getBaseStat("monstats2", baseId, revive ? "revive" : "corpseSel")) return false;
 
-		return !!(unit.distance <= 25 && !checkCollision(me, unit, 0x4) && states.every(state => !unit.getState(state)));
+		return !!(unit.distance <= 25 && !checkCollision(me, unit, sdk.collision.Ranged) && states.every(state => !unit.getState(state)));
 	}
 };

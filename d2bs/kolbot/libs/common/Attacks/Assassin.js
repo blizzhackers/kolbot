@@ -24,7 +24,7 @@ const ClassAttack = {
 		}
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
-			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
 					return Attack.result.Failed;
 				}
@@ -53,8 +53,8 @@ const ClassAttack = {
 		let checkTraps = this.checkTraps(unit);
 
 		if (checkTraps) {
-			if (unit.distance > this.trapRange || checkCollision(me, unit, 0x4)) {
-				if (!Attack.getIntoPosition(unit, this.trapRange, 0x4) || (checkCollision(me, unit, 0x1) && (getCollision(me.area, unit.x, unit.y) & 0x1))) {
+			if (unit.distance > this.trapRange || checkCollision(me, unit, sdk.collision.Ranged)) {
+				if (!Attack.getIntoPosition(unit, this.trapRange, 0x4) || (checkCollision(me, unit, sdk.collision.BlockWall) && (getCollision(me.area, unit.x, unit.y) & 0x1))) {
 					return Attack.result.Failed;
 				}
 			}
@@ -153,7 +153,7 @@ const ClassAttack = {
 		if (timedSkill > -1 && (!me.skillDelay || !Skill.isTimed(timedSkill))) {
 			switch (timedSkill) {
 			case sdk.skills.Whirlwind:
-				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x1)) {
+				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, sdk.collision.BlockWall)) {
 					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x1)) {
 						return Attack.result.Failed;
 					}
@@ -167,9 +167,9 @@ const ClassAttack = {
 					return Attack.result.Failed;
 				}
 
-				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
+				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
 					// Allow short-distance walking for melee skills
-					walk = Skill.getRange(timedSkill) < 4 && getDistance(me, unit) < 10 && !checkCollision(me, unit, 0x1);
+					walk = Skill.getRange(timedSkill) < 4 && getDistance(me, unit) < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
 					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4, walk)) {
 						return Attack.result.Failed;
@@ -187,9 +187,9 @@ const ClassAttack = {
 				return Attack.result.Failed;
 			}
 
-			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
 				// Allow short-distance walking for melee skills
-				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
+				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), 0x4, walk)) {
 					return Attack.result.Failed;

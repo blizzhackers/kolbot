@@ -229,7 +229,7 @@ const Common = {
 
 			// Infector
 			if (me.x > 7825) {
-				return (!checkCollision(me, a, 0x1) && a.x < b.x ? -1 : 1);
+				return (!checkCollision(me, a, sdk.collision.BlockWall) && a.x < b.x ? -1 : 1);
 			}
 
 			return getDistance(me, a) - getDistance(me, b);

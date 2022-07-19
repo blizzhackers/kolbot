@@ -24,7 +24,7 @@ const ClassAttack = {
 		}
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Attack.getSkillElement(Config.AttackSkill[0])) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
-			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
 					return Attack.result.Failed;
 				}
@@ -72,7 +72,7 @@ const ClassAttack = {
 		
 		switch (attackSkill) {
 		case sdk.skills.Whirlwind:
-			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x1)) {
+			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, sdk.collision.BlockWall)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x1, 2)) {
 					return Attack.result.Failed;
 				}
@@ -86,8 +86,8 @@ const ClassAttack = {
 				return Attack.result.Failed;
 			}
 
-			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x4)) {
-				let walk = Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
+			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
+				let walk = Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4, walk)) {
 					return Attack.result.Failed;
@@ -105,7 +105,7 @@ const ClassAttack = {
 
 		if (monster) {
 			do {
-				if (monster.distance <= range && monster.attackable && !checkCollision(me, monster, 0x4)
+				if (monster.distance <= range && monster.attackable && !checkCollision(me, monster, sdk.collision.Ranged)
 						&& (Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[monster.isSpecial ? 1 : 3]))
 							|| (Config.AttackSkill[3] > -1 && Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[3]))))) {
 					return true;
@@ -149,7 +149,7 @@ const ClassAttack = {
 				corpse = corpseList.shift();
 
 				if (this.checkCorpse(corpse)) {
-					(corpse.distance > 30 || checkCollision(me, corpse, 0x1)) && Pather.moveToUnit(corpse);
+					(corpse.distance > 30 || checkCollision(me, corpse, sdk.collision.BlockWall)) && Pather.moveToUnit(corpse);
 					Config.FindItemSwitch && me.switchWeapons(Attack.getPrimarySlot() ^ 1);
 
 					CorpseLoop:
@@ -196,6 +196,6 @@ const ClassAttack = {
 			sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
 		];
 
-		return !!(unit.distance <= 25 && !checkCollision(me, unit, 0x4) && states.every(state => !unit.getState(state)));
+		return !!(unit.distance <= 25 && !checkCollision(me, unit, sdk.collision.Ranged) && states.every(state => !unit.getState(state)));
 	}
 };

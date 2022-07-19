@@ -81,7 +81,7 @@ function Rushee() {
 	this.useScrollOfRes = function () {
 		let scroll = me.scrollofresistance;
 		if (scroll) {
-			clickItem(1, scroll);
+			clickItem(sdk.clicktypes.click.Right, scroll);
 			print("Using scroll of resistance");
 		}
 	};
@@ -398,7 +398,7 @@ function Rushee() {
 
 							if (target) {
 								print("Using book of skill");
-								clickItem(1, target);
+								clickItem(sdk.clicktypes.click.Right, target);
 
 								break;
 							}
@@ -773,7 +773,7 @@ function Rushee() {
 						if (target) {
 							Pather.moveToUnit(target);
 							Misc.poll(() => {
-								sendPacket(1, 0x13, 4, 0x2, 4, target.gid);
+								Packet.entityInteract(target);
 								delay(100);
 								return !Game.getObject(sdk.units.FrozenAnya);
 							}, 1000, 200);

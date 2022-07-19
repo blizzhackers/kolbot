@@ -72,6 +72,10 @@ item: {
 			}
 		},
 
+		party: {
+			NoParty: 65535
+		},
+
 		clicktypes: {
 			click: {
 				Left: 0,
@@ -92,6 +96,29 @@ item: {
 			ItemOnCursor: 4, // need more testing on these
 			Identify: 6,
 			Repair: 7,
+		},
+
+		collision: {
+			BlockWall: 0x01,
+			LineOfSight: 0x02,
+			Ranged: 0x04,
+			PlayerToWalk: 0x08,
+			DarkArea: 0x10,
+			Casting: 0x20,
+			Unknown: 0x40,
+			Players: 0x80,
+			Monsters: 0x100,
+			Items: 0x200,
+			Objects: 0x400,
+			ClosedDoor: 0x800,
+			IsOnFloor: 0x1000,
+			FriendlyNPC: 0x2000,
+			Unknown2: 0x4000,
+			DeadBodies: 0x8000,
+			MonsterObject: 0xFFFF,
+			BlockMissile: 0x80E,
+			WallOrRanged: 0x5,
+			BlockWalk: 0x1805
 		},
 
 		areas: {

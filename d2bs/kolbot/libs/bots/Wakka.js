@@ -42,7 +42,7 @@ function Wakka() {
 
 		monList.sort(Sort.units);
 
-		if (monList[0].distance < 25 && !checkCollision(me, monList[0], 0x4)) {
+		if (monList[0].distance < 25 && !checkCollision(me, monList[0], sdk.collision.Ranged)) {
 			Attack.deploy(monList[0], 25, 5, 15);
 		}
 

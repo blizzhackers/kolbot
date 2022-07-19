@@ -13,7 +13,7 @@ function Travincal() {
 		if (monster) {
 			do {
 				if ([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3].includes(monster.classid)
-					&& monster.attackable && (!checkColl || !checkCollision(me, monster, 0x1))) {
+					&& monster.attackable && (!checkColl || !checkCollision(me, monster, sdk.collision.BlockWall))) {
 					monsterList.push(copyUnit(monster));
 				}
 			} while (monster.getNext());

@@ -66,7 +66,7 @@ const ClassAttack = {
 		Skill.canUse(sdk.skills.ThunderStorm) && !me.getState(sdk.states.ThunderStorm) && Skill.cast(sdk.skills.ThunderStorm, 0);
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
-			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
 					return Attack.result.Failed;
 				}
@@ -99,7 +99,7 @@ const ClassAttack = {
 			let casts = 0;
 
 			while (!me.dead && unit.hpPercent > Config.CastStatic && unit.attackable) {
-				if (unit.distance > staticRange || checkCollision(me, unit, 0x4)) {
+				if (unit.distance > staticRange || checkCollision(me, unit, sdk.collision.Ranged)) {
 					if (!Attack.getIntoPosition(unit, staticRange, 0x4)) {
 						return Attack.result.Failed;
 					}
@@ -186,16 +186,16 @@ const ClassAttack = {
 				return Attack.result.Failed;
 			}
 
-			if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
 				// Allow short-distance walking for melee skills
-				walk = Skill.getRange(timedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
+				walk = Skill.getRange(timedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4, walk)) {
 					return Attack.result.Failed;
 				}
 			}
 
-			!unit.dead && !checkCollision(me, unit, 0x4) && Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
+			!unit.dead && !checkCollision(me, unit, sdk.collision.Ranged) && Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
 
 			return Attack.result.Success;
 		} else {
@@ -207,9 +207,9 @@ const ClassAttack = {
 				return Attack.result.Failed;
 			}
 
-			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
 				// Allow short-distance walking for melee skills
-				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
+				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
 				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), 0x4, walk)) {
 					return Attack.result.Failed;

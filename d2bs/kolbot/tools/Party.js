@@ -122,7 +122,7 @@ function main() {
 							break;
 						}
 
-						if (player.partyflag !== 4 && player.partyflag !== 2 && player.partyid === 65535) {
+						if (player.partyflag !== 4 && player.partyflag !== 2 && player.partyid === sdk.party.NoParty) {
 							clickParty(player, 2);
 							delay(100);
 						}
@@ -132,7 +132,7 @@ function main() {
 						}
 					// eslint-disable-next-line no-fallthrough
 					case 2: // Accept invites
-						if (myPartyId === 65535) {
+						if (myPartyId === sdk.party.NoParty) {
 							if (Config.Leader && player.name !== Config.Leader) {
 								break;
 							}
@@ -152,7 +152,7 @@ function main() {
 							shitList.push(player.name);
 						}
 
-						if (shitList.indexOf(player.name) > -1 && myPartyId !== 65535 && player.partyid === myPartyId) {
+						if (shitList.indexOf(player.name) > -1 && myPartyId !== sdk.party.NoParty && player.partyid === myPartyId) {
 							// Only the one sending invites should say this.
 							if ([1, 3].indexOf(Config.PublicMode) > -1) {
 								say(player.name + " is shitlisted. Do not invite them.");

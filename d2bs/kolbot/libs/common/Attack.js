@@ -409,7 +409,7 @@ const Attack = {
 			do {
 				if ((!spectype || (target.spectype & spectype)) && target.attackable && !this.skipCheck(target)) {
 					// Speed optimization - don't go through monster list until there's at least one within clear range
-					if (!start && getDistance(target, orgx, orgy) <= range && (Pather.canTeleport() || !checkCollision(me, target, 0x5))) {
+					if (!start && getDistance(target, orgx, orgy) <= range && (Pather.canTeleport() || !checkCollision(me, target, sdk.collision.WallOrRanged))) {
 						start = true;
 					}
 
@@ -731,7 +731,7 @@ const Attack = {
 				do {
 					if (getDistance(monster, x, y) <= range && monster.attackable && this.canAttack(monster)
 							&& (!skipBlocked || !checkCollision(me, monster, skipBlocked))
-							&& (Pather.canTeleport() || !checkCollision(me, monster, 0x1))) {
+							&& (Pather.canTeleport() || !checkCollision(me, monster, sdk.collision.BlockWall))) {
 						monList.push(copyUnit(monster));
 					}
 				} while (monster.getNext());
@@ -902,12 +902,12 @@ const Attack = {
 		// sort main bosses first
 		// Andy
 		if (me.inArea(sdk.areas.CatacombsLvl4)) {
-			if (unitA.distance < 5 && unitA.classid === sdk.monsters.Andariel && !checkCollision(me, unitA, 0x4)) return -1;
+			if (unitA.distance < 5 && unitA.classid === sdk.monsters.Andariel && !checkCollision(me, unitA, sdk.collision.Ranged)) return -1;
 		}
 
 		// Meph
 		if (me.inArea(sdk.areas.DuranceofHateLvl3)) {
-			if (unitA.distance < 5 && unitA.classid === sdk.monsters.Mephisto && !checkCollision(me, unitA, 0x4)) return -1;
+			if (unitA.distance < 5 && unitA.classid === sdk.monsters.Mephisto && !checkCollision(me, unitA, sdk.collision.Ranged)) return -1;
 		}
 
 		// Baal
@@ -1546,7 +1546,7 @@ const Attack = {
 
 					if (distance < range
 						&& (settings.skipGid === -1 || monster.gid !== settings.skipGid)
-						&& (!settings.skipBlocked || !checkCollision(me, monster, 0x5))
+						&& (!settings.skipBlocked || !checkCollision(me, monster, sdk.collision.WallOrRanged))
 						&& (!settings.skipImmune || Attack.canAttack(monster))) {
 						range = distance;
 						gid = monster.gid;

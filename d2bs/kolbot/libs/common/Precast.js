@@ -190,18 +190,18 @@ const Precast = new function () {
 				
 				switch (typeof x) {
 				case "number":
-					Packet.castSkill(0, x, y);
+					Packet.castSkill(sdk.skills.hand.Right, x, y);
 
 					break;
 				case "object":
-					Packet.unitCast(0, x);
+					Packet.unitCast(sdk.skills.hand.Right, x);
 
 					break;
 				}
 				delay(250);
 			} else {
 				// Right hand + No Shift
-				let clickType = 3, shift = 0;
+				let clickType = 3, shift = sdk.clicktypes.shift.NoShift;
 
 				MainLoop:
 				for (let n = 0; n < 3; n += 1) {

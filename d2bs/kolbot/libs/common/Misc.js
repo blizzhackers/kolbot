@@ -709,22 +709,22 @@ const Skill = {
 			switch (hand) {
 			case sdk.skills.hand.Right: // Right hand + No Shift
 				clickType = 3;
-				shift = 0;
+				shift = sdk.clicktypes.shift.NoShift;
 
 				break;
 			case sdk.skills.hand.Left: // Left hand + Shift
 				clickType = 0;
-				shift = 1;
+				shift = sdk.clicktypes.shift.Shift;
 
 				break;
 			case sdk.skills.hand.LeftNoShift: // Left hand + No Shift
 				clickType = 0;
-				shift = 0;
+				shift = sdk.clicktypes.shift.NoShift;
 
 				break;
 			case sdk.skills.hand.RightShift: // Right hand + Shift
 				clickType = 3;
-				shift = 1;
+				shift = sdk.clicktypes.shift.Shift;
 
 				break;
 			}
@@ -772,7 +772,7 @@ const Skill = {
 		// Charged skills must be cast from right hand
 		if (hand === undefined || hand === sdk.skills.hand.RightShift || item) {
 			item && hand !== sdk.skills.hand.Right && console.warn('[ÿc9Warningÿc0] charged skills must be cast from right hand');
-			hand = 0;
+			hand = sdk.skills.hand.Right;
 		}
 
 		return (me.setSkill(skillId, hand, item));
@@ -916,7 +916,7 @@ const Misc = {
 			myPartyId = player.partyid;
 			player = getParty(name); // May throw an error
 
-			if (player && player.partyid !== 65535 && player.partyid === myPartyId) {
+			if (player && player.partyid !== sdk.party.NoParty && player.partyid === myPartyId) {
 				return true;
 			}
 		} catch (e) {
@@ -926,7 +926,7 @@ const Misc = {
 				myPartyId = player.partyid;
 
 				while (player.getNext()) {
-					if (player.partyid !== 65535 && player.partyid === myPartyId) {
+					if (player.partyid !== sdk.party.NoParty && player.partyid === myPartyId) {
 						return true;
 					}
 				}
@@ -1018,7 +1018,7 @@ const Misc = {
 			let myPartyId = party.partyid;
 			
 			do {
-				if (party.partyid !== 65535 && party.partyid === myPartyId && party.name !== me.name) {
+				if (party.partyid !== sdk.party.NoParty && party.partyid === myPartyId && party.name !== me.name) {
 					print(party.name);
 					count += 1;
 				}
@@ -1037,7 +1037,7 @@ const Misc = {
 			let myPartyId = party.partyid;
 
 			do {
-				if (party.partyid !== 65535 && party.partyid === myPartyId && party.name !== me.name && !exclude.includes(party.name)) {
+				if (party.partyid !== sdk.party.NoParty && party.partyid === myPartyId && party.name !== me.name && !exclude.includes(party.name)) {
 					if (party.level >= levelCheck) {
 						return true;
 					}
@@ -1213,7 +1213,7 @@ const Misc = {
 			unitList.sort(Sort.units);
 			unit = unitList.shift();
 
-			if (unit && (Pather.useTeleport() || !checkCollision(me, unit, 0x5)) && this.openChest(unit)) {
+			if (unit && (Pather.useTeleport() || !checkCollision(me, unit, sdk.collision.WallOrRanged)) && this.openChest(unit)) {
 				Pickit.pickItems();
 			}
 		}
@@ -1298,7 +1298,7 @@ const Misc = {
 					// todo - check to make sure we can actually get the shrine for ones without states
 					// can't grab a health shrine if we are in perfect health, can't grab mana shrine if our mana is maxed
 					if (index === -1 || i <= index || this.shrineStates[i] === 0) {
-						if (shrineList[j].objtype === Config.ScanShrines[i] && (Pather.useTeleport() || !checkCollision(me, shrineList[j], 0x5))) {
+						if (shrineList[j].objtype === Config.ScanShrines[i] && (Pather.useTeleport() || !checkCollision(me, shrineList[j], sdk.collision.WallOrRanged))) {
 							this.getShrine(shrineList[j]);
 
 							// Gem shrine - pick gem
@@ -1972,17 +1972,12 @@ const Misc = {
 				}
 			}
 
-			if (stackLog) {
-				filemsg += "Stack: " + stackLog + "\n";
-			}
+			stackLog && (filemsg += "Stack: " + stackLog + "\n");
 		}
 
-		if (this.errorConsolePrint) {
-			D2Bot.printToConsole(oogmsg, 10);
-		}
-
+		this.errorConsolePrint && D2Bot.printToConsole(oogmsg, 10);
 		showConsole();
-		print(msg);
+		console.log(msg);
 		this.fileAction("logs/ScriptErrorLog.txt", 2, filemsg);
 
 		if (this.screenshotErrors) {

@@ -160,7 +160,7 @@ const Pickit = {
 			// Check if the item unit is still valid and if it's on ground or being dropped
 			// Don't pick items behind walls/obstacles when walking
 			if (copyUnit(pickList[0]).x !== undefined && pickList[0].onGroundOrDropping
-					&& (Pather.useTeleport() || me.inTown || !checkCollision(me, pickList[0], 0x1))) {
+					&& (Pather.useTeleport() || me.inTown || !checkCollision(me, pickList[0], sdk.collision.BlockWall))) {
 				// Check if the item should be picked
 				let status = this.checkItem(pickList[0]);
 
@@ -254,7 +254,7 @@ const Pickit = {
 			this.gold = unit.getStat(sdk.stats.Gold);
 			this.dist = (unit.distance || Infinity);
 			this.useTk = (Skill.haveTK && Pickit.tkable.includes(this.type)
-				&& this.dist > 5 && this.dist < 20 && !checkCollision(me, unit, 0x5));
+				&& this.dist > 5 && this.dist < 20 && !checkCollision(me, unit, sdk.collision.WallOrRanged));
 			this.picked = false;
 		}
 
@@ -298,7 +298,7 @@ const Pickit = {
 			if (stats.useTk && me.mp > tkMana) {
 				Packet.telekinesis(item);
 			} else {
-				if (item.distance > (Config.FastPick || i < 1 ? 6 : 4) || checkCollision(me, item, 0x1)) {
+				if (item.distance > (Config.FastPick || i < 1 ? 6 : 4) || checkCollision(me, item, sdk.collision.BlockWall)) {
 					if (!Pather.moveToUnit(item)) {
 						continue;
 					}

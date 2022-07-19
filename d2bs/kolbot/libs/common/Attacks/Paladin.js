@@ -22,7 +22,7 @@ const ClassAttack = {
 		}
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
-			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
 					return Attack.result.Failed;
 				}
@@ -221,7 +221,7 @@ const ClassAttack = {
 			}
 			
 			// 3591 - wall/line of sight/ranged/items/objects/closeddoor 
-			if (unit.distance > 3 || checkCollision(me, unit, 0x5)) {
+			if (unit.distance > 3 || checkCollision(me, unit, sdk.collision.WallOrRanged)) {
 				if (!Attack.getIntoPosition(unit, 3, 0x5, true)) {
 					return Attack.result.Failed;
 				}
@@ -236,8 +236,8 @@ const ClassAttack = {
 		default:
 			if (Skill.getRange(attackSkill) < 4 && !Attack.validSpot(unit.x, unit.y, attackSkill, unit.classid)) return Attack.result.Failed;
 
-			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x4)) {
-				let walk = (attackSkill !== 97 && Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1));
+			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
+				let walk = (attackSkill !== 97 && Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall));
 
 				// walk short distances instead of tele for melee attacks. teleport if failed to walk
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4, walk)) return Attack.result.Failed;

@@ -311,7 +311,7 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
 		if (getDistance(me, node) > 2) {
 			// Make life in Maggot Lair easier
 			if ([62, 63, 64].indexOf(me.area) > -1) {
-				adjustedNode = this.getNearestWalkable(node.x, node.y, 15, 3, 0x1 | 0x4 | 0x800 | 0x1000);
+				adjustedNode = this.getNearestWalkable(node.x, node.y, 15, 3, sdk.collision.BlockWalk);
 
 				if (adjustedNode) {
 					node.x = adjustedNode[0];
