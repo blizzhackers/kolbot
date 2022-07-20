@@ -244,13 +244,13 @@ function ControlBot() {
 
 		Pather.moveTo(25048, 5177);
 
-		let wirt = Game.getObject(268);
+		let wirt = Game.getObject(sdk.quest.chest.Wirt);
 
 		for (let i = 0; i < 8; i += 1) {
 			wirt.interact();
 			delay(500);
 
-			leg = Game.getItem(sdk.items.quest.WirtsLeg);
+			leg = Game.getItem(sdk.quest.item.WirtsLeg);
 
 			if (leg) {
 				gid = leg.gid;

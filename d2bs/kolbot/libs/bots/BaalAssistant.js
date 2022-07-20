@@ -250,7 +250,7 @@ function BaalAssistant() {
 							if (!Pather.moveToExit([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction], false)) throw new Error("Failed to move to WSK3.");
 
 							this.checkParty();
-							let entrance = Misc.poll(() => Game.getStairs(82), 1000, 200);
+							let entrance = Misc.poll(() => Game.getStairs(sdk.units.exits.preset.NextAreaWorldstone), 1000, 200);
 							entrance && Pather.moveTo(entrance.x > me.x ? entrance.x - 5 : entrance.x + 5, entrance.y > me.y ? entrance.y - 5 : entrance.y + 5);
 
 							if (!Pather.moveToExit(sdk.areas.WorldstoneLvl3, true) || !Pather.moveTo(15118, 5002)) throw new Error("Failed to move to Throne of Destruction.");

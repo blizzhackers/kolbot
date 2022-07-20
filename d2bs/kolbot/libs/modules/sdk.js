@@ -1742,6 +1742,8 @@ item: {
 			TalictheDefenderStatue: 475,
 			MadawctheGuardianStatue: 476,
 			AncientsAltar: 546,
+			ArreatEnterAncientsWay: 564,
+			ArreatEnterWorldstone: 547,
 			//AncientsDoor: 547,
 			AncientsDoor: 547, // Worldstone keep lvl 1
 			FrozenAnya: 558,

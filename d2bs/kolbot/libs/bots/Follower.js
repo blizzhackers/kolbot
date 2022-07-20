@@ -150,95 +150,42 @@ function Follower() {
 
 	// Change act after completing last act quest
 	this.changeAct = function (act) {
-		let npc, preArea, target;
+		let preArea = me.area;
 
-		preArea = me.area;
+		if (me.area >= sdk.areas.townOfAct(act)) {
+			this.announce("My current act is higher than " + act);
+			return false;
+		}
 
 		switch (act) {
 		case 2:
-			if (me.area >= 40) {
-				break;
-			}
-
-			Town.move(NPC.Warriv);
-
-			npc = Game.getNPC(155);
-
-			if (npc) {
-				npc.openMenu();
-				Misc.useMenu(0x0D36);
-			}
+			Town.npcInteract("Warriv", false) && Misc.useMenu(sdk.menu.GoEast);
 
 			break;
 		case 3:
-			if (me.area >= 75) {
-				break;
-			}
-
-			Town.move("palace");
-
-			npc = Game.getNPC(201);
-
-			if (npc) {
-				npc.openMenu();
-				me.cancel();
-			}
-
-			Town.move(NPC.Meshif);
-
-			npc = Game.getNPC(210);
-
-			if (npc) {
-				npc.openMenu();
-				Misc.useMenu(0x0D38);
-			}
+			Town.npcInteract("Jerhyn");
+			Town.move("Meshif") && Misc.useMenu(sdk.menu.SailEast);
 
 			break;
 		case 4:
-			if (me.area >= 103) {
-				break;
-			}
-
 			if (me.inTown) {
-				Town.move(NPC.Cain);
-
-				npc = Game.getNPC(245);
-
-				if (npc) {
-					npc.openMenu();
-					me.cancel();
-				}
-
+				Town.npcInteract("Cain");
 				Town.move("portalspot");
-				Pather.usePortal(102, null);
+				Pather.usePortal(sdk.areas.DuranceofHateLvl3, null);
 			}
 
 			delay(1500);
 
-			target = Game.getObject(342);
-
-			if (target) {
-				Pather.moveTo(target.x - 3, target.y - 1);
-			}
+			let target = Game.getObject(sdk.units.RedPortalToAct4);
+			target && Pather.moveTo(target.x - 3, target.y - 1);
 
 			Pather.usePortal(null);
 
 			break;
 		case 5:
-			if (me.area >= 109) {
-				break;
-			}
-
-			Town.move(NPC.Tyrael);
-
-			npc = Game.getNPC(NPC.Tyrael);
-
-			if (npc) {
-				npc.openMenu();
-				me.cancel();
-
+			if (Town.npcInteract("Tyrael")) {
 				try {
-					Pather.useUnit(sdk.unittype.Object, 566, 109);
+					Pather.useUnit(sdk.unittype.Object, sdk.units.RedPortalToAct5, sdk.areas.Harrogath);
 				} catch (a5e) {
 					break;
 				}
@@ -277,13 +224,12 @@ function Follower() {
 			delay(40);
 		}
 
-		let status;
 		let pickList = [];
 		let item = Game.getItem();
 
 		if (item) {
 			do {
-				if (item.onGroundOrDropping && item.itemType >= 76 && item.itemType <= 78 && getDistance(me, item) <= range) {
+				if (item.onGroundOrDropping && item.itemType >= sdk.itemtype.HealingPotion && item.itemType <= sdk.itemtype.RejuvPotion && item.distance <= range) {
 					pickList.push(copyUnit(item));
 				}
 			} while (item.getNext());
@@ -295,7 +241,7 @@ function Follower() {
 			item = pickList.shift();
 
 			if (item && copyUnit(item).x) {
-				status = Pickit.checkItem(item).result;
+				let status = Pickit.checkItem(item).result;
 
 				if (status && Pickit.canPick(item)) {
 					Pickit.pickItem(item, status);
@@ -394,7 +340,7 @@ function Follower() {
 
 				break;
 			default:
-				if (me.paladin && msg.indexOf("aura ") > -1) {
+				if (me.paladin && msg.includes("aura ")) {
 					piece = msg.split(" ")[0];
 
 					if (piece === me.name || piece === "all") {
@@ -407,7 +353,6 @@ function Follower() {
 							Config.AttackSkill[4] = skill;
 
 							Skill.setSkill(skill, sdk.skills.hand.Right);
-							//Attack.init();
 						} else {
 							this.announce("I don't have that aura.");
 						}
