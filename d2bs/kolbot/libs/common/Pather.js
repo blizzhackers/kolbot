@@ -23,7 +23,7 @@ const NodeAction = {
 	killMonsters: function (arg = {}) {
 		let settings = Object.assign({}, {
 			clearPath: false,
-			specType: 0,
+			specType: sdk.units.monsters.spectype.All,
 			range: 10,
 			overrideConfig: false,
 		}, arg);
@@ -178,7 +178,7 @@ const Pather = {
 			clearSettings: {
 				clearPath: false,
 				range: 10,
-				specType: 0,
+				specType: sdk.units.monsters.spectype.All,
 			},
 			pop: false,
 			returnSpotOnError: true
@@ -333,7 +333,7 @@ const Pather = {
 		let clearSettings = {
 			clearPath: (!!clearPath || !useTeleport), // walking characters need to clear in front of them
 			range: 10,
-			specType: (typeof clearPath === "number" ? clearPath : 0),
+			specType: (typeof clearPath === "number" ? clearPath : sdk.units.monsters.spectype.All),
 		};
 		(!retry || (retry <= 3 && !useTeleport)) && (retry = useTeleport ? 5 : 15);
 		let path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? (annoyingArea ? 30 : this.teleDistance) : this.walkDistance);
@@ -452,7 +452,7 @@ const Pather = {
 				allowClearing: true,
 				clearPath: false,
 				range: 10,
-				specType: 0,
+				specType: sdk.units.monsters.spectype.All,
 			},
 			pop: false,
 			retry: 15
@@ -658,7 +658,7 @@ const Pather = {
 				return true;
 			}
 
-			if (attemptCount > 1 && CollMap.checkColl(me, {x: x, y: y}, 0x1 | 0x800)) {
+			if (attemptCount > 1 && CollMap.checkColl(me, {x: x, y: y}, sdk.collision.BlockWall | sdk.collision.ClosedDoor)) {
 				this.openDoors(me.x, me.y);
 			}
 
@@ -1178,7 +1178,7 @@ const Pather = {
 					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 				}
 
-				me.inArea(sdk.areas.A3SewersLvl1) ? this.openUnit(sdk.unittype.Object, 367) : this.openUnit(sdk.unittype.Object, id);
+				me.inArea(sdk.areas.A3SewersLvl1) ? this.openUnit(sdk.unittype.Object, sdk.units.SewerLever) : this.openUnit(sdk.unittype.Object, id);
 			}
 
 			if (type === sdk.unittype.Object && id === sdk.units.RedPortalToAct4 && me.inArea(sdk.areas.DuranceofHateLvl3)
@@ -1253,13 +1253,13 @@ const Pather = {
 				usetk && i === 0 && unit.mode === sdk.units.objects.mode.Inactive && unit.distance < 21 && Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit);
 			}
 
-			if (type === 2 && unit.mode === sdk.units.objects.mode.Inactive) {
+			if (type === sdk.unittype.Object && unit.mode === sdk.units.objects.mode.Inactive) {
 				if ((me.inArea(sdk.areas.Travincal) && targetArea === sdk.areas.DuranceofHateLvl1 && me.getQuest(sdk.quest.id.TheBlackenedTemple, sdk.quest.states.Completed) !== 1)
 					|| (me.inArea(sdk.areas.ArreatSummit) && targetArea === sdk.areas.WorldstoneLvl1 && me.getQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.Completed) !== 1)) {
 					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 				}
 
-				me.area === sdk.areas.A3SewersLvl1 ? this.openUnit(sdk.unittype.Object, 367) : this.openUnit(sdk.unittype.Object, id);
+				me.area === sdk.areas.A3SewersLvl1 ? this.openUnit(sdk.unittype.Object, sdk.units.SewerLever) : this.openUnit(sdk.unittype.Object, id);
 			}
 
 			if (type === sdk.unittype.Object && id === sdk.units.RedPortalToAct4 && me.inArea(sdk.areas.DuranceofHateLvl3)
@@ -1489,9 +1489,7 @@ const Pather = {
 		let oldGid;
 
 		for (let i = 0; i < 5; i += 1) {
-			if (me.dead) {
-				break;
-			}
+			if (me.dead) return false;
 
 			let tpTool = Town.getTpTool();
 			let pingDelay = i === 0 ? 100 : me.gameReady ? (me.ping + 25) : 350;
@@ -1554,13 +1552,8 @@ const Pather = {
 		let preArea = me.area;
 
 		for (let i = 0; i < 10; i += 1) {
-			if (me.dead) {
-				break;
-			}
-
-			if (i > 0 && owner && me.inTown) {
-				Town.move("portalspot");
-			}
+			if (me.dead) return false;
+			i > 0 && owner && me.inTown && Town.move("portalspot");
 
 			let portal = unit ? copyUnit(unit) : this.getPortal(targetArea, owner);
 
@@ -1600,7 +1593,7 @@ const Pather = {
 				}
 
 				// Portal to/from Arcane
-				if (portal.classid === sdk.units.ArcaneSanctuaryPortal && portal.mode !== 2) {
+				if (portal.classid === sdk.units.ArcaneSanctuaryPortal && portal.mode !== sdk.units.objects.mode.Active) {
 					Misc.click(0, 0, portal);
 					let tick = getTickCount();
 
@@ -1685,7 +1678,7 @@ const Pather = {
 	*/
 	getNearestWalkable: function (x, y, range, step, coll, size) {
 		!step && (step = 1);
-		coll === undefined && (coll = 0x1);
+		coll === undefined && (coll = sdk.collision.BlockWall);
 
 		let distance = 1;
 		let result = false;
@@ -1726,7 +1719,7 @@ const Pather = {
 		cacheOnly - use only cached room data
 	*/
 	checkSpot: function (x, y, coll, cacheOnly, size) {
-		coll === undefined && (coll = 0x1);
+		coll === undefined && (coll = sdk.collision.BlockWall);
 		!size && (size = 1);
 
 		for (let dx = -size; dx <= size; dx += 1) {
@@ -1773,12 +1766,10 @@ const Pather = {
 		clearPath - clear path
 	*/
 	getWP: function (area, clearPath) {
-		let wpIDs = [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539];
-
 		area !== me.area && this.journeyTo(area);
 
-		for (let i = 0; i < wpIDs.length; i++) {
-			let preset = getPresetUnit(area, sdk.unittype.Object, wpIDs[i]);
+		for (let i = 0; i < sdk.waypoints.Ids.length; i++) {
+			let preset = Game.getPresetObject(me.area, sdk.waypoints.Ids[i]);
 
 			if (preset) {
 				Skill.haveTK ? this.moveNearUnit(preset, 20, {clearSettings: {clearPath: clearPath}}) : this.moveToUnit(preset, 0, 0, clearPath);
@@ -1883,12 +1874,12 @@ const Pather = {
 				Misc.poll(() => this.usePortal(sdk.areas.Tristram), 5000, 1000);
 			} else if (currArea === sdk.areas.LutGholein && target.course[0] === sdk.areas.A2SewersLvl1) {
 				// Lut Gholein -> Sewers Level 1 (use Trapdoor)
-				this.moveToPreset(currArea, sdk.unittype.Stairs, 19);
+				this.moveToPreset(currArea, sdk.unittype.Stairs, sdk.units.exits.preset.A2SewersTrapDoor);
 				this.useUnit(sdk.unittype.Object, sdk.units.TrapDoorA2, sdk.areas.A2SewersLvl1);
 			} else if (currArea === sdk.areas.A2SewersLvl2 && target.course[0] === sdk.areas.A2SewersLvl1) {
 				// Sewers Level 2 -> Sewers Level 1
 				Pather.moveToExit(target.course[0], false);
-				this.useUnit(sdk.unittype.Stairs, 22, sdk.areas.A2SewersLvl1);
+				this.useUnit(sdk.unittype.Stairs, sdk.units.A2UndergroundUpStairs, sdk.areas.A2SewersLvl1);
 			} else if (currArea === sdk.areas.PalaceCellarLvl3 && target.course[0] === sdk.areas.ArcaneSanctuary) {
 				// Palace -> Arcane
 				this.moveTo(10073, 8670);
@@ -1939,7 +1930,7 @@ const Pather = {
 			} else if (currArea === sdk.areas.Harrogath && target.course[0] === sdk.areas.BloodyFoothills) {
 				// Harrogath -> Bloody Foothills
 				this.moveTo(5026, 5095);
-				this.openUnit(sdk.unittype.Object, 449);
+				this.openUnit(sdk.unittype.Object, sdk.units.Act5Gate);
 				this.moveToExit(target.course[0], true);
 			} else if (currArea === sdk.areas.Harrogath && target.course[0] === sdk.areas.NihlathaksTemple) {
 				// Harrogath -> Nihlathak's Temple
@@ -1959,7 +1950,7 @@ const Pather = {
 				this.usePortal(sdk.areas.InfernalPit);
 			} else if (target.course[0] === sdk.areas.MooMooFarm) {
 				// Moo Moo farm
-				currArea !== 1 && Town.goToTown(1);
+				currArea !== sdk.areas.RogueEncampment && Town.goToTown(1);
 				Town.move("stash") && (unit = this.getPortal(target.course[0]));
 				unit && this.usePortal(null, null, unit);
 			} else if ([sdk.areas.MatronsDen, sdk.areas.ForgottenSands, sdk.areas.FurnaceofPain, sdk.areas.UberTristram].includes(target.course[0])) {

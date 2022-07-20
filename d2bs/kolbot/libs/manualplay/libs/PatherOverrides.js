@@ -96,12 +96,10 @@ Pather.changeAct = function (act) {
 };
 
 Pather.getWP = function (area, clearPath) {
-	let wpIDs = [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539];
-
 	area !== me.area && this.journeyTo(area);
 
-	for (let i = 0; i < wpIDs.length; i++) {
-		let preset = Game.getPresetObject(area, wpIDs[i]);
+	for (let i = 0; i < sdk.waypoints.Ids.length; i++) {
+		let preset = Game.getPresetObject(me.area, sdk.waypoints.Ids[i]);
 
 		if (preset) {
 			Skill.haveTK ? this.moveNearUnit(preset, 20, {clearSettings: {clearPath: clearPath}}) : this.moveToUnit(preset, 0, 0, clearPath);

@@ -327,7 +327,7 @@ function main() {
 
 				while (attackCount < 100) {
 					// Invalidated Unit (out of getUnit range) or player in town
-					if (!copyUnit(player).x || player.inTown || me.mode === 17) {
+					if (!copyUnit(player).x || player.inTown || me.mode === sdk.units.player.mode.Dead) {
 						break;
 					}
 
@@ -360,7 +360,7 @@ function main() {
 						// Smite summoners
 						if (Config.AttackSkill[1] === sdk.skills.BlessedHammer && Skill.canUse(sdk.skills.Smite)) {
 							if ([sdk.charclass.Necromancer, sdk.charclass.Druid].includes(player.classid) && getDistance(me, player) < 4 && this.checkSummons(player)) {
-								Skill.cast(sdk.skills.Smite, 1, player);
+								Skill.cast(sdk.skills.Smite, sdk.skills.hand.Left, player);
 							}
 						}
 
@@ -369,7 +369,7 @@ function main() {
 
 					attackCount += 1;
 
-					if (player.mode === 0 || player.mode === 17) {
+					if (player.dead) {
 						break;
 					}
 				}

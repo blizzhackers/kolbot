@@ -234,7 +234,7 @@ function main() {
 						case sdk.areas.FrigidHighlands:
 						case sdk.areas.ArreatPlateau:
 						case sdk.areas.FrozenTundra:
-							chestLoc = Game.getPresetObject(me.area, 397);
+							chestLoc = Game.getPresetObject(me.area, sdk.units.SmallSparklyChest);
 
 							if (!chestLoc) {
 								break;

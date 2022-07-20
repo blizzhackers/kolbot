@@ -722,6 +722,7 @@ item: {
 				// act 3
 				ForestAltar: 81,
 				LamEsensTomeHolder: 193,
+				GidbinnAltar: 252,
 				KhalimsHeartChest: 405,
 				KhalimsBrainChest: 406,
 				KhalimsEyeChest: 407,
@@ -1609,7 +1610,89 @@ item: {
 
 			},
 			exits: {
+				preset: {
+					AreaEntrance: 0, // special
+					// act 1
+					CaveHoleUp: 4,
+					CaveHoleLvl2: 5,
+					Crypt: 6,
+					Mausoleum: 7,
+					CryptMausExit: 8,
+					JailUpStairs: 13,
+					JailDownStairs: 14,
+					CathedralDownStairs: 15,
+					CathedralUpStairs: 16,
+					CatacombsUpStairs: 17,
+					CatacombsDownStairs: 18,
 
+					// act 2
+					A2SewersTrapDoor: 19,
+					A2EnterSewersDoor: 20,
+					A2ExitSewersDoor: 21,
+					A2UndergroundUpStairs: 22,
+					A2DownStairs: 23,
+					EnterHaremStairs: 24,
+					ExitHaremStairs: 25,
+					PreviousLevelHaremRight: 26,
+					PreviousLevelHaremLeft: 27,
+					NextLevelHaremRight: 28,
+					NextLevelHaremLeft: 29,
+					PreviousPalaceRight: 30,
+					PreviousPalaceLeft: 31,
+					NextLevelPalace: 32,
+					EnterStonyTomb: 33,
+					EnterHalls: 36,
+					EnterTalTomb1: 38,
+					EnterTalTomb2: 39,
+					EnterTalTomb3: 40,
+					EnterTalTomb4: 41,
+					EnterTalTomb5: 42,
+					EnterTalTomb6: 43,
+					EnterTalTomb7: 44,
+					PreviousAreaTomb: 45,
+					NextLevelTomb: 46,
+					EnterMaggotLair: 47,
+					PreviousAreaMaggotLair: 48,
+					NextLevelMaggotLair: 49,
+					AncientTunnelsTrapDoor: 50,
+					EntrancetoDurielsLair: 100,
+
+					// act 3
+					EnterSpiderHole: 51,
+					ExitSpiderHole: 52,
+					EnterPit: 53,
+					EnterDungeon: 54,
+					PreviousAreaDungeon: 55,
+					NextLevelDungeon: 56,
+					A3EnterSewers: 57,
+					A3ExitSewersUpperK: 58,
+					A3SewersPreviousArea: 58,
+					A3ExitSewers: 59,
+					A3NextLevelSewers: 60,
+					EnterTemple: 61,
+					ExitTemple: 63,
+					EnterDurance: 64,
+					PreviousLevelDurance: 65,
+					NextLevelDurance: 68,
+					SewerStairsA3: 366,
+					DuranceEntryStairs: 386,
+
+					// act 4
+					EnterRiverStairs: 69,
+					ExitRiverStairs: 70,
+					// act 5
+					EnterCrystal: 71,
+					A5ExitCave: 73,
+					A5NextLevelCave: 74,
+					EnterSubLevelCave: 75,
+					EnterNithsTemple: 76,
+					PreviousAreaNithsTemple: 77,
+					NextAreaNithsTemple: 78,
+					ArreatEnterAncientsWay: 79,
+					ArreatEnterWorldstone: 80,
+					PreviousAreaWorldstone: 81,
+					NextAreaWorldstone: 82,
+				},
 			},
 			// act1
 			StoneAlpha: 17,
@@ -1623,6 +1706,7 @@ item: {
 			Malus: 108,
 
 			// act 2
+			A2UndergroundUpStairs: 22,
 			TrapDoorA2: 74, // ancienttunnel/sewers act 2
 			DoorbyDockAct2: 75, // incorrect ? TODO: figure out what 75 really corresponds to since the door is obj type 5 with classid 20
 			PortaltoDurielsLair: 100,
@@ -1636,11 +1720,14 @@ item: {
 			ForestAltar: 81,
 			LamEsensTome: 193,
 			SewerStairsA3: 366,
+			SewerLever: 367,
 			DuranceEntryStairs: 386,
 			RedPortalToAct4: 342,
+			CompellingOrb: 404,
 
 			// act 4
 			SealGlow: 131,
+			DiabloStar: 255,
 			DiabloSealInfector: 392,
 			DiabloSealInfector2: 393,
 			DiabloSealSeis: 394,
@@ -1649,11 +1736,14 @@ item: {
 			RedPortalToAct5: 566, // The one of tyreal
 
 			// act 5
+			SideCavesA5: 75, // FrozenRiver, DrifterCavern, IcyCellar
+			Act5Gate: 449,
 			KorlictheProtectorStatue: 474,
 			TalictheDefenderStatue: 475,
 			MadawctheGuardianStatue: 476,
 			AncientsAltar: 546,
-			AncientsDoor: 547,
+			//AncientsDoor: 547,
+			AncientsDoor: 547, // Worldstone keep lvl 1
 			FrozenAnya: 558,
 			FrozenAnyasPlatform: 460,
 			NihlathaksPlatform: 462,

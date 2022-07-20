@@ -289,9 +289,7 @@ const ActionHooks = {
 	},
 
 	check: function () {
-		if (!this.enabled) {
-			return;
-		}
+		if (!this.enabled) return;
 
 		this.checkAction();
 
@@ -390,7 +388,7 @@ const ActionHooks = {
 			this.hooks.push({
 				name: "POI2",
 				type: "area",
-				dest: 86,
+				dest: sdk.areas.SwampyPitLvl1,
 				hook: new Text("ÿc<Num 5: Swampy Pit Level 1", Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
@@ -399,8 +397,8 @@ const ActionHooks = {
 			this.hooks.push({
 				name: "POI2",
 				type: "area",
-				dest: 95,
-				hook: new Text("ÿc<Num 5: " + Pather.getAreaName(95), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				dest: sdk.areas.DisusedFane,
+				hook: new Text("ÿc<Num 5: " + Pather.getAreaName(sdk.areas.DisusedFane), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;
@@ -750,7 +748,7 @@ const ActionHooks = {
 				name: "Previous Area",
 				type: "portal",
 				dest: sdk.areas.RogueEncampment,
-				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(1), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
+				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(sdk.areas.RogueEncampment), Hooks.dashBoard.x + 5, 545 - (this.hooks.length * 10) + Hooks.resfix.y)
 			});
 
 			break;

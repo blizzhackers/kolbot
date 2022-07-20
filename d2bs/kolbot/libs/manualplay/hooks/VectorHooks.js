@@ -22,20 +22,18 @@ const VectorHooks = {
 		if (me.area !== this.currArea) {
 			this.flush();
 
+			if (!me.area || !me.gameReady) return;
+
 			let nextAreas = [];
 
 			// Specific area override
-			nextAreas[7] = 26;
-			nextAreas[76] = 78;
-			nextAreas[77] = 78;
-			nextAreas[113] = 115;
-			nextAreas[115] = 117;
-			nextAreas[118] = 120;
-			nextAreas[131] = 132;
-
-			if (!me.area || !me.gameReady) {
-				return;
-			}
+			nextAreas[sdk.areas.TamoeHighland] = sdk.areas.MonasteryGate;
+			nextAreas[sdk.areas.SpiderForest] = sdk.areas.FlayerJungle;
+			nextAreas[sdk.areas.GreatMarsh] = sdk.areas.FlayerJungle;
+			nextAreas[sdk.areas.CrystalizedPassage] = sdk.areas.GlacialTrail;
+			nextAreas[sdk.areas.GlacialTrail] = sdk.areas.FrozenTundra;
+			nextAreas[sdk.areas.AncientsWay] = sdk.areas.ArreatSummit;
+			nextAreas[sdk.areas.ThroneofDestruction] = sdk.areas.WorldstoneChamber;
 
 			try {
 				let exits = getArea().exits;
@@ -43,7 +41,7 @@ const VectorHooks = {
 
 				if (exits) {
 					for (let i = 0; i < exits.length; i++) {
-						if (me.area === 46) {
+						if (me.area === sdk.areas.CanyonofMagic) {
 							this.add(exits[i].x, exits[i].y, exits[i].target === getRoom().correcttomb ? 0x69 : 0x99);
 						} else if (exits[i].target === nextAreas[me.area] && nextAreas[me.area]) {
 							this.add(exits[i].x, exits[i].y, 0x1F);
@@ -105,7 +103,7 @@ const VectorHooks = {
 	getWP: function () {
 		if (Pather.wpAreas.indexOf(me.area) === -1) return false;
 
-		for (let i = 0; i < sdk.waypoints.Ids.length; i += 1) {
+		for (let i = 0; i < sdk.waypoints.Ids.length; i++) {
 			let preset = Game.getPresetObject(me.area, sdk.waypoints.Ids[i]);
 
 			if (preset) {
@@ -124,275 +122,261 @@ const VectorHooks = {
 		let poi = {};
 
 		switch (me.area) {
-		case 13: // Cave Level 2
-		case 15: // Hole Level 2
-		case 16: // Pit Level 2
-		case 18: // Crypt
-		case 19: // Mausoleum
-		case 59: // Stony Tomb Level 2
-		case 65: // Ancient Tunnels
-		case 77: // Great Marsh
-		case 84: // Spider Cave
-		case 90: // Swampy Pit Level 3
-		case 95: // Disused Fane
-		case 96: // Forgotten Reliquary
-		case 97: // Forgotten Temple
-		case 99: // Disused Reliquary
-		case 116: // Drifter Cavern
-		case 119: // Icy Cellar
-		case 125: // Abadon
-		case 126: // Pit of Acheron
-		case 127: // Infernal Pit
-			unit = Game.getPresetObject(me.area, 397);
-			poi = {name: "SuperChest", action: {do: "openChest", id: 397}};
+		case sdk.areas.CaveLvl2:
+		case sdk.areas.HoleLvl2:
+		case sdk.areas.PitLvl2:
+		case sdk.areas.Crypt:
+		case sdk.areas.Mausoleum:
+		case sdk.areas.StonyTombLvl2:
+		case sdk.areas.AncientTunnels:
+		case sdk.areas.GreatMarsh:
+		case sdk.areas.SpiderCave:
+		case sdk.areas.SwampyPitLvl3:
+		case sdk.areas.DisusedFane:
+		case sdk.areas.ForgottenReliquary:
+		case sdk.areas.ForgottenTemple:
+		case sdk.areas.DisusedReliquary:
+		case sdk.areas.DrifterCavern:
+		case sdk.areas.IcyCellar:
+		case sdk.areas.Abaddon:
+		case sdk.areas.PitofAcheron:
+		case sdk.areas.InfernalPit:
+			unit = Game.getPresetObject(me.area, sdk.units.SmallSparklyChest);
+			poi = {name: "SuperChest", action: {do: "openChest", id: sdk.units.SmallSparklyChest}};
 
 			break;
-		case 115: // Glacial Trail
-		case 122: // Halls of Anguish
-		case 123: // Halls of Pain
-			unit = Game.getPresetObject(me.area, 455);
-			poi = {name: "SuperChest", action: {do: "openChest", id: 455}};
+		case sdk.areas.GlacialTrail:
+		case sdk.areas.HallsofAnguish:
+		case sdk.areas.HallsofPain:
+			unit = Game.getPresetObject(me.area, sdk.units.LargeSparklyChest);
+			poi = {name: "SuperChest", action: {do: "openChest", id: sdk.units.LargeSparklyChest}};
 
 			break;
-		case 3: // Cold Plains
-			unit = Game.getPresetStair(me.area, 2);
-
-			if (!unit) {
-				unit = Game.getPresetStair(me.area, 3);
-			}
-
+		case sdk.areas.ColdPlains:
+			unit = Game.getPresetStair(me.area, sdk.units.exits.preset.AreaEntrance);
 			name = "Cave Level 1";
 
 			break;
-		case 4: // Stony Field
-			unit = Game.getPresetMonster(me.area, 737);
-			poi = {name: "Cairn Stones", action: {do: "usePortal", id: 38}};
+		case sdk.areas.StonyField:
+			unit = Game.getPresetMonster(me.area, sdk.monsters.preset.Rakanishu);
+			poi = {name: "Cairn Stones", action: {do: "usePortal", id: sdk.areas.Tristram}};
 
 			break;
-		case 5: // Dark Wood
-			unit = Game.getPresetObject(me.area, 30);
+		case sdk.areas.DarkWood:
+			unit = Game.getPresetObject(me.area, sdk.quest.chest.InifussTree);
 			name = "Tree";
 
 			break;
-		case 6: // Black Marsh
-			unit = Game.getPresetStair(me.area, 2);
-
-			if (!unit) {
-				unit = Game.getPresetStair(me.area, 3);
-
-				if (!unit) {
-					unit = Game.getPresetStair(me.area, 1);
-				}
-			}
-
+		case sdk.areas.BlackMarsh:
+			unit = Game.getPresetStair(me.area, sdk.units.exits.preset.AreaEntrance);
 			name = "Hole Level 1";
 
 			break;
-		case 8: // Den of Evil
-			unit = Game.getPresetMonster(me.area, 774);
+		case sdk.areas.DenofEvil:
+			unit = Game.getPresetMonster(me.area, sdk.monsters.preset.Corpsefire);
 			name = "Corpsefire";
 
 			break;
-		case 17: // Bloodraven
-			unit = Game.getPresetMonster(me.area, 805);
+		case sdk.areas.BurialGrounds:
+			unit = Game.getPresetMonster(me.area, sdk.monsters.preset.BloodRaven);
 			name = "Bloodraven";
 
 			break;
-		case 25: // Countess
+		case sdk.areas.TowerCellarLvl5:
 			unit = Game.getPresetObject(me.area, sdk.units.SuperChest);
 			name = "Countess";
 
 			break;
-		case 28: // Smith
-			unit = Game.getPresetObject(me.area, 108);
+		case sdk.areas.Barracks:
+			unit = Game.getPresetObject(me.area, sdk.quest.chest.MalusHolder);
 			name = "Smith";
 
 			break;
-		case 33: // BoneAsh
+		case sdk.areas.Cathedral:
 			unit = {x: 20047, y: 4898};
 			name = "BoneAsh";
 
 			break;
-		case 37: // Andariel
+		case sdk.areas.CatacombsLvl4:
 			unit = {x: 22549, y: 9520};
 			name = "Andariel";
 
 			break;
-		case 38: // Griswold
-			unit = Game.getMonster(365) ? Game.getMonster(365) : {x: 25163, y: 5170};
+		case sdk.areas.Tristram:
+			unit = Game.getMonster(sdk.monsters.Griswold) ? Game.getMonster(sdk.monsters.Griswold) : {x: 25163, y: 5170};
 			name = "Griswold";
 
 			break;
-		case 39: // Cow King
-			unit = Game.getMonster(743) ? Game.getMonster(743) : Game.getPresetMonster(me.area, 773);
+		case sdk.areas.MooMooFarm:
+			unit = Game.getMonster(sdk.monsters.TheCowKing) ? Game.getMonster(sdk.monsters.TheCowKing) : Game.getPresetMonster(me.area, sdk.monsters.preset.TheCowKing);
 			name = "Cow King";
 
 			break;
-		case 40: // Lut Gholein
-			unit = Game.getPresetStair(me.area, 20);
+		case sdk.areas.LutGholein:
+			unit = Game.getPresetStair(me.area, sdk.units.exits.preset.A2EnterSewersDoor);
 			name = "Sewer's Level 1";
 
 			break;
-		case 49: // Sewers 3
-			unit = Game.getPresetObject(me.area, 355);
+		case sdk.areas.A2SewersLvl3:
+			unit = Game.getPresetObject(me.area, sdk.quest.chest.HoradricScrollChest);
 			name = "Radament";
 
 			break;
-		case 54: // Arcane Sanctuary
+		case sdk.areas.PalaceCellarLvl3:
 			unit = {x: 10073, y: 8670};
 			poi = {name: "Arcane Sanctuary", action: {do: "usePortal"}};
 
 			break;
-		case 60: // Halls of the Dead 3
-			unit = Game.getPresetObject(me.area, 354);
-			poi = {name: "Cube", action: {do: "openChest", id: 354}};
+		case sdk.areas.HallsoftheDeadLvl3:
+			unit = Game.getPresetObject(me.area, sdk.quest.chest.HoradricCubeChest);
+			poi = {name: "Cube", action: {do: "openChest", id: sdk.quest.chest.HoradricCubeChest}};
 
 			break;
-		case 61: // Claw Viper Temple 2
-			unit = Game.getPresetObject(me.area, 149);
-			poi = {name: "Amulet", action: {do: "openChest", id: 149}};
+		case sdk.areas.ClawViperTempleLvl2:
+			unit = Game.getPresetObject(me.area, sdk.quest.chest.ViperAmuletChest);
+			poi = {name: "Amulet", action: {do: "openChest", id: sdk.quest.chest.ViperAmuletChest}};
 
 			break;
-		case 64: // Maggot Lair 3
-			unit = Game.getPresetObject(me.area, 356);
-			poi = {name: "Staff", action: {do: "openChest", id: 356}};
+		case sdk.areas.MaggotLairLvl3:
+			unit = Game.getPresetObject(me.area, sdk.quest.chest.ShaftoftheHoradricStaffChest);
+			poi = {name: "Staff", action: {do: "openChest", id: sdk.quest.chest.ShaftoftheHoradricStaffChest}};
 
 			break;
-		case 74: // Arcane Sanctuary
-			unit = Game.getPresetObject(me.area, 357);
+		case sdk.areas.ArcaneSanctuary:
+			unit = Game.getPresetObject(me.area, sdk.quest.chest.Journal);
 			name = "Summoner";
 
 			break;
-		case 66: // Tal Rasha's Tombs
-		case 67:
-		case 68:
-		case 69:
-		case 70:
-		case 71:
-		case 72:
-			unit = Game.getPresetObject(me.area, 152);
+		case sdk.areas.TalRashasTomb1:
+		case sdk.areas.TalRashasTomb2:
+		case sdk.areas.TalRashasTomb3:
+		case sdk.areas.TalRashasTomb4:
+		case sdk.areas.TalRashasTomb5:
+		case sdk.areas.TalRashasTomb6:
+		case sdk.areas.TalRashasTomb7:
+			unit = Game.getPresetObject(me.area, sdk.quest.chest.HoradricStaffHolder);
 			name = "Orifice";
 
 			if (!unit) {
-				unit = Game.getPresetObject(me.area, 397);
+				unit = Game.getPresetObject(me.area, sdk.units.SmallSparklyChest);
 				name = "SuperChest";
 			}
 
 			break;
-		case 73: // Duriels Lair
+		case sdk.areas.DurielsLair:
 			unit = {x: 22577, y: 15609};
 			name = "Tyrael";
 
 			break;
-		case 78: // Flayer Jungle
-			unit = Game.getPresetObject(me.area, 252);
+		case sdk.areas.FlayerJungle:
+			unit = Game.getPresetObject(me.area, sdk.quest.chest.GidbinnAltar);
 			name = "Gidbinn";
 
 			break;
-		case 80: // Sewer's Level 1
-			unit = Game.getPresetStair(me.area, 57);
+		case sdk.areas.KurastBazaar:
+			unit = Game.getPresetStair(me.area, sdk.units.exits.preset.A3EnterSewers);
 			name = "Sewer's Level 1";
 
 			break;
-		case 85: // Spider Cavern
-			unit = Game.getPresetObject(me.area, 407);
-			poi = {name: "Eye", action: {do: "openChest", id: 407}};
+		case sdk.areas.SpiderCavern:
+			unit = Game.getPresetObject(me.area, sdk.quest.chest.KhalimsEyeChest);
+			poi = {name: "Eye", action: {do: "openChest", id: sdk.quest.chest.KhalimsEyeChest}};
 
 			break;
-		case 91: // Flayer Dungeon Level 3
-			unit = Game.getPresetObject(me.area, 406);
-			poi = {name: "Brain", action: {do: "openChest", id: 406}};
+		case sdk.areas.FlayerDungeonLvl3:
+			unit = Game.getPresetObject(me.area, sdk.quest.chest.KhalimsBrainChest);
+			poi = {name: "Brain", action: {do: "openChest", id: sdk.quest.chest.KhalimsBrainChest}};
 
 			break;
-		case 93: // A3 Sewer's Level 2
-			unit = Game.getPresetObject(me.area, 405);
-			poi = {name: "Heart", action: {do: "openChest", id: 405}};
+		case sdk.areas.A3SewersLvl2:
+			unit = Game.getPresetObject(me.area, sdk.quest.chest.KhalimsHeartChest);
+			poi = {name: "Heart", action: {do: "openChest", id: sdk.quest.chest.KhalimsHeartChest}};
 
 			break;
-		case 94: // Ruined Temple
-			unit = Game.getPresetObject(me.area, 193);
-			poi = {name: "Lam Esen", action: {do: "openChest", id: 193}};
+		case sdk.areas.RuinedTemple:
+			unit = Game.getPresetObject(me.area, sdk.quest.chest.LamEsensTomeHolder);
+			poi = {name: "Lam Esen", action: {do: "openChest", id: sdk.quest.chest.LamEsensTomeHolder}};
 
 			break;
-		case 83: // Travincal
-			unit = Game.getPresetObject(me.area, 404);
+		case sdk.areas.Travincal:
+			unit = Game.getPresetObject(me.area, sdk.units.CompellingOrb);
 			name = "Orb";
 
 			break;
-		case 102: // Durance of Hate 3
+		case sdk.areas.DuranceofHateLvl3:
 			unit = {x: 17588, y: 8069};
 			name = "Mephisto";
 
 			break;
-		case 105: // Plains of Despair
-			unit = Game.getPresetMonster(me.area, 256);
+		case sdk.areas.PlainsofDespair:
+			unit = Game.getPresetMonster(me.area, sdk.monsters.Izual);
 			name = "Izual";
 
 			break;
-		case 107: // River of Flame
-			unit = Game.getPresetObject(me.area, 376);
+		case sdk.areas.RiverofFlame:
+			unit = Game.getPresetObject(me.area, sdk.quest.chest.HellForge);
 			name = "Hephasto";
 
 			break;
-		case 108: // Chaos Sanctuary
-			unit = Game.getPresetObject(me.area, 255);
+		case sdk.areas.ChaosSanctuary:
+			unit = Game.getPresetObject(me.area, sdk.units.DiabloStar);
 			name = "Star";
 
 			break;
-		case 109: // Anya Portal
+		case sdk.areas.Harrogath:
 			unit = {x: 5112, y: 5120};
-			poi = {name: "Anya Portal", action: {do: "usePortal", id: 121}};
+			poi = {name: "Anya Portal", action: {do: "usePortal", id: sdk.areas.NihlathaksTemple}};
 
 			break;
-		case 110: // Bloody Foothills
+		case sdk.areas.BloodyFoothills:
 			unit = {x: 3899, y: 5113};
 			name = "Shenk";
 
 			break;
-		case 111: // Frigid Highlands
-		case 112: // Arreat Plateau
-		case 117: // Frozen Tundra
-			unit = Game.getPresetObject(me.area, 60);
+		case sdk.areas.FrigidHighlands:
+		case sdk.areas.ArreatPlateau:
+		case sdk.areas.FrozenTundra:
+			unit = Game.getPresetObject(me.area, sdk.units.RedPortal);
 			poi = {name: "Hell Entrance", action: {do: "usePortal"}};
 
 			break;
-		case 114: // Frozen River
-			unit = Game.getPresetObject(me.area, 460);
+		case sdk.areas.FrozenRiver:
+			unit = Game.getPresetObject(me.area, sdk.units.FrozenAnyasPlatform);
 			name = "Frozen Anya";
 
 			break;
-		case 121: // Nihlathaks Temple
+		case sdk.areas.NihlathaksTemple:
 			unit = {x: 10058, y: 13234};
 			name = "Pindle";
 
 			break;
-		case 124: // Halls of Vaught
-			unit = Game.getPresetObject(me.area, 462);
+		case sdk.areas.HallsofVaught:
+			unit = Game.getPresetObject(me.area, sdk.units.NihlathaksPlatform);
 			name = "Nihlathak";
 
 			break;
-		case 131: // Throne of Destruction
+		case sdk.areas.ThroneofDestruction:
 			unit = {x: 15118, y: 5002};
 			name = "Throne Room";
 
 			break;
-		case 132: // Worldstone Chamber
-			unit = Game.getMonster(544) ? Game.getMonster(544) : {x: 15134, y: 5923};
+		case sdk.areas.WorldstoneChamber:
+			unit = Game.getMonster(sdk.monsters.Baal) ? Game.getMonster(sdk.monsters.Baal) : {x: 15134, y: 5923};
 			name = "Baal";
 
 			break;
-		case 133: // Matron's Den
-			unit = Game.getPresetObject(me.area, 397);
+		case sdk.areas.MatronsDen:
+			unit = Game.getPresetObject(me.area, sdk.units.SmallSparklyChest);
 			name = "Lilith";
 
 			break;
-		case 134: // Forgotten Sands
-			unit = Game.getMonster(708);
+		case sdk.areas.ForgottenSands:
+			unit = Game.getMonster(sdk.monsters.UberDuriel);
 			name = "Duriel";
 
 			break;
-		case 135: // Furnace of Pain
-			unit = Game.getPresetObject(me.area, 397);
+		case sdk.areas.FurnaceofPain:
+			unit = Game.getPresetObject(me.area, sdk.units.SmallSparklyChest);
 			name = "Izual";
 
 			break;
