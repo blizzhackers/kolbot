@@ -158,13 +158,9 @@ const ClassAttack = {
 
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, timedSkill = -1, untimedSkill = -1) {
-		let walk;
-
 		// No valid skills can be found
-		if (timedSkill < 0 && untimedSkill < 0) {
-			return Attack.result.CantAttack;
-		}
-
+		if (timedSkill < 0 && untimedSkill < 0) return Attack.result.CantAttack;
+		
 		// Arrow/bolt check
 		if (this.bowCheck) {
 			switch (true) {
@@ -176,6 +172,8 @@ const ClassAttack = {
 				break;
 			}
 		}
+
+		let walk;
 
 		if (timedSkill > -1 && (!me.skillDelay || !Skill.isTimed(timedSkill))) {
 			switch (timedSkill) {

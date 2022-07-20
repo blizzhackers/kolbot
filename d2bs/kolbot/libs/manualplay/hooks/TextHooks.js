@@ -1,7 +1,8 @@
-/*
-*	@filename	TextHooks.js
-*	@author		theBGuy
-*	@desc		Text hooks for MapThread
+/**
+*  @filename    TextHooks.js
+*  @author      theBGuy
+*  @desc        Text hooks for MapThread
+*
 */
 
 const TextHooks = {

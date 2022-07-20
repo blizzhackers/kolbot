@@ -4,7 +4,8 @@
 *  @desc        Attack.js fixes to improve functionality for map mode
 *
 */
-!isIncluded("common/Attack.js") && include("common/Attack.js");
+
+includeIfNotIncluded("common/Attack.js");
 
 Attack.init = function (notify = false) {
 	if (Config.Wereform) {

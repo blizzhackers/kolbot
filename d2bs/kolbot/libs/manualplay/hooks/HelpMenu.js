@@ -1,7 +1,8 @@
-/*
-*	@filename	HelpMenu.js
-*	@author		theBGuy
-*	@desc		Help Menu for MapThread
+/**
+*  @filename    HelpMenu.js
+*  @author      theBGuy
+*  @desc        Help Menu for MapThread
+*
 */
 
 const HelpMenu = new function () {

@@ -83,7 +83,7 @@ const ClassAttack = {
 
 		let result = this.doCast(unit, attackSkill, aura);
 
-		if (result === Attack.result.CantAttack && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
+		if (result === Attack.result.CantAttack && Attack.canTeleStomp(unit)) {
 			let merc = me.getMerc();
 
 			while (unit.attackable) {

@@ -1,17 +1,18 @@
-/*
-*	@filename	TownOverrides.js
-*	@author		theBGuy
-*	@desc		Town.js fixes to improve functionality for map mode
+/**
+*  @filename    TownOverrides.js
+*  @author      theBGuy
+*  @desc        Town.js additions to improve functionality for map mode
+*
 */
 
-if (!isIncluded("common/Town.js")) { include("common/Town.js"); }
+includeIfNotIncluded("common/Town.js");
 
 Town.stash = function (stashGold = true) {
 	me.cancel();
 
 	let items = me.getItemsEx()
 		.filter(function (item) {
-			return item.isInInventory && !(item.isEquippedCharm && (item.quality === sdk.itemquality.Unique || Storage.Inventory.IsLocked(item, Config.Inventory)));
+			return item.isInInventory && !(item.isEquippedCharm && (item.unique || Storage.Inventory.IsLocked(item, Config.Inventory)));
 		})
 		.sort(function (a, b) {
 			if (a.itemType >= 96 && a.itemType <= 102 || a.itemType === 74 || a.quality === 7) {

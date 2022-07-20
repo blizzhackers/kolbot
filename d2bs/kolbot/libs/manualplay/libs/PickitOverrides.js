@@ -1,15 +1,15 @@
-/*
-*	@filename	PickitOverrides.js
-*	@author		theBGuy
-*	@desc		Pickit.js fixes to improve functionality for map mode
+/**
+*  @filename    PickitOverrides.js
+*  @author      theBGuy
+*  @desc        Pickit.js additions to improve functionality for map mode
+*
 */
 
-if (!isIncluded("common/Pickit.js")) { include("common/Pickit.js"); }
+includeIfNotIncluded("common/Pickit.js");
 
 Pickit.basicPickItems = function () {
-	let item, itemList = [];
-
-	item = Game.getItem();
+	let itemList = [];
+	let item = Game.getItem();
 
 	if (item) {
 		do {
@@ -25,7 +25,7 @@ Pickit.basicPickItems = function () {
 
 		// Check if the item unit is still valid
 		if (item.x !== undefined) {
-			if (this.canPick(item) && (Storage.Inventory.CanFit(item) || [4, 22, 76, 77, 78].indexOf(item.itemType) > -1)) {
+			if (this.canPick(item) && (Storage.Inventory.CanFit(item) || Pickit.essentials.includes(item.itemType))) {
 				this.pickItem(item);
 			}
 		}

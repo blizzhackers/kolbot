@@ -1,7 +1,8 @@
-/*
-*	@filename	VectorHooks.js
-*	@author		theBGuy
-*	@desc		Vector hooks for MapThread
+/**
+*  @filename    VectorHooks.js
+*  @author      theBGuy
+*  @desc        Vector hooks for MapThread
+*
 */
 
 const VectorHooks = {
@@ -21,8 +22,7 @@ const VectorHooks = {
 		if (me.area !== this.currArea) {
 			this.flush();
 
-			let i, exits, wp, poi,
-				nextAreas = [];
+			let nextAreas = [];
 
 			// Specific area override
 			nextAreas[7] = 26;
@@ -38,11 +38,11 @@ const VectorHooks = {
 			}
 
 			try {
-				exits = getArea().exits;
+				let exits = getArea().exits;
 				this.currArea = me.area;
 
 				if (exits) {
-					for (i = 0; i < exits.length; i++) {
+					for (let i = 0; i < exits.length; i++) {
 						if (me.area === 46) {
 							this.add(exits[i].x, exits[i].y, exits[i].target === getRoom().correcttomb ? 0x69 : 0x99);
 						} else if (exits[i].target === nextAreas[me.area] && nextAreas[me.area]) {
@@ -61,12 +61,12 @@ const VectorHooks = {
 					}
 				}
 
-				wp = this.getWP();
+				let wp = this.getWP();
 				wp && this.add(wp.x, wp.y, 0xA8);
-				poi = this.getPOI();
+				let poi = this.getPOI();
 				poi && this.add(poi.x, poi.y, 0x7D);
 			} catch (e) {
-				print(e);
+				console.error(e);
 			}
 		} else if (me.x !== this.lastLoc.x || me.y !== this.lastLoc.y) {
 			this.update();
@@ -103,15 +103,10 @@ const VectorHooks = {
 	},
 
 	getWP: function () {
-		if (Pather.wpAreas.indexOf(me.area) === -1) {
-			return false;
-		}
+		if (Pather.wpAreas.indexOf(me.area) === -1) return false;
 
-		let i, preset,
-			wpIDs = [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539];
-
-		for (i = 0; i < wpIDs.length; i += 1) {
-			preset = Game.getPresetObject(me.area, wpIDs[i]);
+		for (let i = 0; i < sdk.waypoints.Ids.length; i += 1) {
+			let preset = Game.getPresetObject(me.area, sdk.waypoints.Ids[i]);
 
 			if (preset) {
 				return {

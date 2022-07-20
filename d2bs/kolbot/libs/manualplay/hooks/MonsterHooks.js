@@ -1,8 +1,9 @@
-/*
-*	@filename	MonsterHooks.js
-*	@author		theBGuy
-*	@credit		DetectiveSquirrel
-*	@desc		Monster hooks for MapThread
+/**
+*  @filename    MonsterHooks.js
+*  @author      theBGuy
+*  @credits     DetectiveSquirrel
+*  @desc        Monster hooks for MapThread
+*
 */
 
 const MonsterHooks = {

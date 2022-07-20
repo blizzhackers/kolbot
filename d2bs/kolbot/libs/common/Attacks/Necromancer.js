@@ -230,7 +230,7 @@ const ClassAttack = {
 		if (result === 1) {
 			Config.ActiveSummon && this.raiseArmy();
 			this.explodeCorpses(unit);
-		} else if (result === Attack.result.CantAttack && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
+		} else if (result === Attack.result.CantAttack && Attack.canTeleStomp(unit)) {
 			let merc = me.getMerc();
 
 			while (unit.attackable) {

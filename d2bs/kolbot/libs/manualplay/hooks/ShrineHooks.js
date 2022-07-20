@@ -1,7 +1,8 @@
-/*
-*	@filename	ShrineHooks.js
-*	@author		theBGuy
-*	@desc		Shrine hooks for MapThread
+/**
+*  @filename    ShrineHooks.js
+*  @author      theBGuy
+*  @desc        Shrine hooks for MapThread
+*
 */
 
 const ShrineHooks = {
@@ -74,9 +75,7 @@ const ShrineHooks = {
 	},
 
 	add: function (shrine) {
-		if (!shrine.objtype) {
-			return;
-		}
+		if (!shrine.objtype) return;
 
 		this.hooks.push({
 			shrine: copyUnit(shrine),

@@ -193,6 +193,12 @@ const Attack = {
 		return this.auradin;
 	},
 
+	// just check if we can telestomp
+	canTeleStomp: function (unit) {
+		if (!unit || !unit.attackable) return false;
+		return Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y);
+	},
+
 	// Kill a monster based on its classId, can pass a unit as well
 	kill: function (classId) {
 		if (!classId || Config.AttackSkill[1] < 0) return false;

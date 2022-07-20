@@ -1983,6 +1983,16 @@ Unit.prototype.usingShield = function () {
 };
 
 Object.defineProperties(me, {
+	deadOrInSequence: {
+		get: function () {
+			return me.dead || me.mode === sdk.units.player.mode.SkillActionSequence;
+		}
+	},
+	moving: {
+		get: function () {
+			return [sdk.units.player.mode.Walking, sdk.units.player.mode.Running, sdk.units.player.mode.WalkingInTown].includes(me.mode);
+		}
+	},
 	highestAct: {
 		get: function () {
 			let acts = [true,

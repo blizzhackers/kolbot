@@ -627,7 +627,7 @@ const Pather = {
 			// Check if I have a stamina potion and use it if I do
 			if (me.staminaPercent <= 20) {
 				let stam = me.getItemsEx(-1, sdk.itemmode.inStorage).filter((i) => i.classid === sdk.items.StaminaPotion && i.isInInventory).first();
-				!!stam && ![0, 17, 18].includes(me.mode) && stam.use();
+				!!stam && !me.deadOrInSequence && stam.use();
 			}
 			(me.runwalk === 1 && me.staminaPercent <= 15) && (me.runwalk = 0);
 			// the less stamina you have, the more you wait to recover
@@ -641,7 +641,7 @@ const Pather = {
 					Skill.setSkill(sdk.skills.HolyFreeze, sdk.skills.hand.Right);
 				}
 				Misc.click(0, 1, x, y);
-				while (me.mode !== 1 && me.mode !== 5 && !me.dead) {
+				while (!me.idle) {
 					delay(40);
 				}
 			}
@@ -667,7 +667,7 @@ const Pather = {
 			attemptCount += 1;
 			nTimer = getTickCount();
 
-			while (me.mode !== 2 && me.mode !== 3 && me.mode !== 6) {
+			while (!me.moving) {
 				if (me.dead) return false;
 
 				if ((getTickCount() - nTimer) > 500) {
@@ -706,7 +706,7 @@ const Pather = {
 			attemptCount > 1 && this.kickBarrels(x, y);
 
 			// Wait until we're done walking - idle or dead
-			while (getDistance(me.x, me.y, x, y) > minDist && me.mode !== 1 && me.mode !== 5 && !me.dead) {
+			while (getDistance(me.x, me.y, x, y) > minDist && !me.idle) {
 				delay(10);
 			}
 

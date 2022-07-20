@@ -54,7 +54,8 @@ const ClassAttack = {
 
 		if (checkTraps) {
 			if (unit.distance > this.trapRange || checkCollision(me, unit, sdk.collision.Ranged)) {
-				if (!Attack.getIntoPosition(unit, this.trapRange, sdk.collision.Ranged) || (checkCollision(me, unit, sdk.collision.BlockWall) && (getCollision(me.area, unit.x, unit.y) & 0x1))) {
+				if (!Attack.getIntoPosition(unit, this.trapRange, sdk.collision.Ranged)
+					|| (checkCollision(me, unit, sdk.collision.BlockWall) && (getCollision(me.area, unit.x, unit.y) & sdk.collision.BlockWall))) {
 					return Attack.result.Failed;
 				}
 			}
@@ -97,7 +98,7 @@ const ClassAttack = {
 
 		let result = this.doCast(unit, timedSkill, untimedSkill);
 
-		if (result === Attack.result.CantAttack && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
+		if (result === Attack.result.CantAttack && Attack.canTeleStomp(unit)) {
 			let merc = me.getMerc();
 
 			while (unit.attackable) {
