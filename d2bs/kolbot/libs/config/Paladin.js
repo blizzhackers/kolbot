@@ -42,7 +42,9 @@ function LoadConfig() {
 	// *** act 1 ***
 	Scripts.Corpsefire = false;
 		Config.Corpsefire.ClearDen = false;
+	Scripts.Bishibosh = false;
 	Scripts.Mausoleum = false;
+		Config.Mausoleum.KillBishibosh = false;
 		Config.Mausoleum.KillBloodRaven = false;
 		Config.Mausoleum.ClearCrypt = false;
 	Scripts.Rakanishu = false;
@@ -66,6 +68,7 @@ function LoadConfig() {
 
 	// *** act 2 ***
 	Scripts.Radament = false;
+	Scripts.CreepingFeature = false;
 	Scripts.Coldworm = false;
 		Config.Coldworm.KillBeetleburst = false;
 		Config.Coldworm.ClearMaggotLair = false; // Clear all 3 levels
@@ -79,6 +82,7 @@ function LoadConfig() {
 
 	// *** act 3 ***
 	Scripts.Stormtree = false;
+	Scripts.BattlemaidSarina = false;
 	Scripts.KurastTemples = false;
 	Scripts.Icehawk = false;
 	Scripts.Endugu = false;
