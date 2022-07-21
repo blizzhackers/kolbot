@@ -223,7 +223,7 @@ const Skill = {
 		have: function (skill = 0) {
 			// ensure the values have been initialized
 			!this.initialized && this.init();
-			return typeof this.all[skill] !== 'undefined' && this.all[skill].have();
+			return typeof this.all[skill] !== "undefined" && this.all[skill].have();
 		},
 		reset: function () {
 			let min = 0, max = 999;
@@ -776,7 +776,7 @@ const Skill = {
 
 		// Charged skills must be cast from right hand
 		if (hand === undefined || hand === sdk.skills.hand.RightShift || item) {
-			item && hand !== sdk.skills.hand.Right && console.warn('[ÿc9Warningÿc0] charged skills must be cast from right hand');
+			item && hand !== sdk.skills.hand.Right && console.warn("[ÿc9Warningÿc0] charged skills must be cast from right hand");
 			hand = sdk.skills.hand.Right;
 		}
 
@@ -845,9 +845,9 @@ const Skill = {
 	useTK: function (unit = undefined) {
 		try {
 			if (!unit || !Skill.canUse(sdk.skills.Telekinesis)
-				|| typeof unit !== 'object' || unit.type !== sdk.unittype.Object
-				|| unit.name.toLowerCase() === 'dummy'
-				|| (unit.name.toLowerCase() === 'portal' && !me.inTown && unit.classid !== sdk.units.ArcaneSanctuaryPortal)
+				|| typeof unit !== "object" || unit.type !== sdk.unittype.Object
+				|| unit.name.toLowerCase() === "dummy"
+				|| (unit.name.toLowerCase() === "portal" && !me.inTown && unit.classid !== sdk.units.ArcaneSanctuaryPortal)
 				|| [sdk.units.RedPortalToAct4, sdk.units.WorldstonePortal, sdk.units.RedPortal, sdk.units.RedPortalToAct5].includes(unit.classid)) {
 				return false;
 			}
@@ -1567,7 +1567,7 @@ const Misc = {
 
 		if (!code) {
 			// Tiara/Diadem
-			code = ["ci2", "ci3"].includes(unit.code) ? unit.code : (getBaseStat("items", unit.classid, 'normcode') || unit.code);
+			code = ["ci2", "ci3"].includes(unit.code) ? unit.code : (getBaseStat("items", unit.classid, "normcode") || unit.code);
 			code = code.replace(" ", "");
 			[sdk.itemtype.Ring, sdk.itemtype.Amulet, sdk.itemtype.Jewel, sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(unit.itemType) && (code += (unit.gfx + 1));
 		}
@@ -1649,7 +1649,7 @@ const Misc = {
 
 		let desc;
 		let date = new Date();
-		let dateString = "[" + new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, -5).replace(/-/g, '/').replace('T', ' ') + "]";
+		let dateString = "[" + new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, -5).replace(/-/g, "/").replace("T", " ") + "]";
 
 		switch (action) {
 		case "Sold":
@@ -1948,7 +1948,7 @@ const Misc = {
 		let stackLog = "";
 
 		let date = new Date();
-		let dateString = "[" + new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, -5).replace(/-/g, '/').replace('T', ' ') + "]";
+		let dateString = "[" + new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, -5).replace(/-/g, "/").replace("T", " ") + "]";
 
 		if (typeof error === "string") {
 			msg = error;
@@ -2118,7 +2118,7 @@ const Misc = {
 		const MAX_FLAG = 37; // anything over 37 crashes
 		let flags = [];
 
-		if (typeof excluded !== 'object' || excluded.length === undefined) {
+		if (typeof excluded !== "object" || excluded.length === undefined) {
 			// not an array-like object, make it an array
 			excluded = [excluded];
 		}
@@ -2601,12 +2601,12 @@ const Packet = {
 
 	// specialized wrapper for addEventListener
 	addListener: function (packetType, callback) {
-		if (typeof packetType === 'number') {
+		if (typeof packetType === "number") {
 			packetType = [packetType];
 		}
 
-		if (typeof packetType === 'object' && packetType.length) {
-			addEventListener('gamepacket', packet => (packetType.indexOf(packet[0]) > -1 ? callback(packet) : false));
+		if (typeof packetType === "object" && packetType.length) {
+			addEventListener("gamepacket", packet => (packetType.indexOf(packet[0]) > -1 ? callback(packet) : false));
 
 			return callback;
 		}
@@ -2614,7 +2614,7 @@ const Packet = {
 		return null;
 	},
 
-	removeListener: callback => removeEventListener('gamepacket', callback), // just a wrapper
+	removeListener: callback => removeEventListener("gamepacket", callback), // just a wrapper
 };
 
 /*
@@ -2637,7 +2637,7 @@ function PacketBuilder () {
 	// accepts any number of arguments
 	let enqueue = (type, size) => (...args) => {
 		args.forEach(arg => {
-			if (type === 'String') {
+			if (type === "String") {
 				arg = stringToEUC(arg);
 				size = arg.length + 1;
 			}
@@ -2665,7 +2665,7 @@ function PacketBuilder () {
 
 				i += field.size - field.data.length; // fix index for field.size !== field.data.length
 			} else {
-				dv['set' + field.type](i, field.data, true);
+				dv["set" + field.type](i, field.data, true);
 				i += field.size;
 			}
 		});
@@ -2731,7 +2731,7 @@ const LocalChat = new function () {
 		}
 
 		if (Config.LocalChat.Toggle) {
-			toggle = typeof Config.LocalChat.Toggle === 'string' ? Config.LocalChat.Toggle.charCodeAt(0) : Config.LocalChat.Toggle;
+			toggle = typeof Config.LocalChat.Toggle === "string" ? Config.LocalChat.Toggle.charCodeAt(0) : Config.LocalChat.Toggle;
 			Config.LocalChat.Toggle = false;
 			addEventListener("keyup", onKeyEvent);
 		}

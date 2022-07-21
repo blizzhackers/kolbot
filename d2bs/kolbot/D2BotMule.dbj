@@ -35,8 +35,8 @@ include("common/util.js");
 include("common/config.js");
 include("common/prototypes.js");
 include("common/collmap.js");
-let Controls = require('./modules/Control');
-let Overrides = require('./modules/Override');
+let Controls = require("./modules/Control");
+let Overrides = require("./modules/Override");
 
 let master, muleMode, muleFilename, muleObj, maxCharCount;
 let checkOnJoin = false;
@@ -719,7 +719,7 @@ function gameEvent (mode, param1, param2, name1, name2) {
 }
 
 function main () {
-	addEventListener('copydata', Starter.receiveCopyData);
+	addEventListener("copydata", Starter.receiveCopyData);
 
 	while (!Starter.handle) {
 		delay(100);

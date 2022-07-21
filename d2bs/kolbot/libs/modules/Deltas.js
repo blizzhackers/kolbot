@@ -4,7 +4,7 @@
  *
  */
 (function (module, require) {
-	const Worker = require('Worker');
+	const Worker = require("Worker");
 	let instances = 0;
 
 	/** @constructor
@@ -32,8 +32,8 @@
 
 		this.destroy = () => active = false;
 
-		Worker.runInBackground['__delta' + (instances++)] = () => active && (this.check() || true);
+		Worker.runInBackground["__delta" + (instances++)] = () => active && (this.check() || true);
 		return this;
 	};
 
-}).call(null, typeof module === 'object' && module || {}, typeof require === 'undefined' && (include('require.js') && require) || require);
+}).call(null, typeof module === "object" && module || {}, typeof require === "undefined" && (include("require.js") && require) || require);

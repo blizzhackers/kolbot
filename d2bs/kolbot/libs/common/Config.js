@@ -99,7 +99,7 @@ let Config = {
 		if (Config.Silence && !Config.LocalChat.Enabled) {
 			// Override the say function with print, so it just gets printed to console
 			global._say = global.say;
-			global.say = (what) => print('Tryed to say: ' + what);
+			global.say = (what) => print("Tryed to say: " + what);
 		}
 
 		try {
@@ -360,7 +360,7 @@ let Config = {
 	SummonShadow: false,
 
 	// Custom Attack
-	CustomClassAttack: '', // If set it loads common/Attack/[CustomClassAttack].js
+	CustomClassAttack: "", // If set it loads common/Attack/[CustomClassAttack].js
 
 	// Script specific
 	MFLeader: false,

@@ -23,7 +23,7 @@ function Test() {
 			try {
 				test();
 			} catch (qq) {
-				print('faile');
+				print("faile");
 				print(qq + " " + qq.fileName + " " + qq.lineNumber);
 			}
 

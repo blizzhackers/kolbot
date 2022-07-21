@@ -11,7 +11,7 @@ const MapMode = {
 		let files = dopen("libs/manualplay/libs/").getFiles();
 		
 		Array.isArray(files) && files
-			.filter(file => file.endsWith('.js'))
+			.filter(file => file.endsWith(".js"))
 			.forEach(function (x) {
 				if (!isIncluded("manualplay/libs/" + x)) {
 					if (!include("manualplay/libs/" + x)) {

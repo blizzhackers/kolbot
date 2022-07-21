@@ -11,7 +11,7 @@ include("common/misc.js");
 include("common/util.js");
 
 function main () {
-	addEventListener('copydata', Starter.receiveCopyData);
+	addEventListener("copydata", Starter.receiveCopyData);
 
 	while (!Starter.handle) {
 		delay(100);
@@ -23,6 +23,8 @@ function main () {
 	load("tools/heartbeat.js");
 
 	while (true) {
+		delay(1000);
+		
 		if (me.gameReady) {
 			Starter.isUp === "no" && (Starter.isUp = "yes");
 			me.ingame && D2Bot.updateStatus("(Char: " + me.charname + ") (Game: " + (me.gamename || "singleplayer") + ") (Level: " + me.charlvl + ")");

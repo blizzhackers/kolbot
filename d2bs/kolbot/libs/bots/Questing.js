@@ -315,7 +315,7 @@ function Questing () {
 	// @theBGuy
 	this.ancients = function () {
 		Town.doChores();
-		log('starting ancients');
+		log("starting ancients");
 
 		Pather.useWaypoint(sdk.areas.AncientsWay);
 		Precast.doPrecast(true);
@@ -340,7 +340,7 @@ function Questing () {
 		Config.MPBuffer = 15;
 		Config.LifeChicken = 10;
 
-		log('updated settings');
+		log("updated settings");
 
 		Town.buyPotions();
 		// re-enter Arreat Summit
@@ -361,7 +361,7 @@ function Questing () {
 		
 		me.cancel();
 		Config = tempConfig;
-		log('restored settings');
+		log("restored settings");
 		Precast.doPrecast(true);
 
 		// reload town chicken in case we are doing others scripts after this one finishes
@@ -374,7 +374,7 @@ function Questing () {
 				Pather.getWP(sdk.areas.WorldstoneLvl2);
 			}
 		} catch (err) {
-			log('Cleared Ancients. Failed to get WSK Waypoint', true);
+			log("Cleared Ancients. Failed to get WSK Waypoint", true);
 		}
 
 		return true;

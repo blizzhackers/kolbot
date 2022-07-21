@@ -23,9 +23,9 @@ const Attack = {
 	init: function () {
 		if (Config.Wereform) {
 			include("common/Attacks/wereform.js");
-		} else if (Config.CustomClassAttack && FileTools.exists('libs/common/Attacks/' + Config.CustomClassAttack + '.js')) {
-			print('Loading custom attack file');
-			include('common/Attacks/' + Config.CustomClassAttack + '.js');
+		} else if (Config.CustomClassAttack && FileTools.exists("libs/common/Attacks/" + Config.CustomClassAttack + ".js")) {
+			print("Loading custom attack file");
+			include("common/Attacks/" + Config.CustomClassAttack + ".js");
 		} else {
 			include("common/Attacks/" + sdk.charclass.nameOf(me.classid) + ".js");
 		}

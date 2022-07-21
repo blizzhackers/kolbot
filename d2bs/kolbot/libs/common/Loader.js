@@ -124,7 +124,7 @@ const Loader = {
 					if (this.skipTown.includes(script) || Town.goToTown()) {
 						print("ÿc2Starting script: ÿc9" + script);
 						Messaging.sendToScript("tools/toolsthread.js", JSON.stringify({currScript: script}));
-						reconfiguration = typeof Scripts[script] === 'object';
+						reconfiguration = typeof Scripts[script] === "object";
 
 						if (reconfiguration) {
 							print("ÿc2Copying Config properties from " + script + " object.");
@@ -203,7 +203,7 @@ const Loader = {
 					print(mainScriptStr + "ÿc2Starting script: ÿc9" + script);
 					Messaging.sendToScript("tools/toolsthread.js", JSON.stringify({currScript: script}));
 
-					reconfiguration = typeof Scripts[script] === 'object';
+					reconfiguration = typeof Scripts[script] === "object";
 
 					if (reconfiguration) {
 						print("ÿc2Copying Config properties from " + script + " object.");

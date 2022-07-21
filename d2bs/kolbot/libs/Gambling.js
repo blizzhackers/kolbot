@@ -162,7 +162,7 @@ const Gambling = {
 			if (mode === 4) {
 				for (let i = 0; i < info.gambleGames.length; i += 1) {
 					if (info.gambleGames[i] && msg.match(info.gambleGames[i], "i")) {
-						game = msg.split('/');
+						game = msg.split("/");
 
 						break;
 					}
@@ -170,7 +170,7 @@ const Gambling = {
 			}
 		}
 
-		addEventListener('copydata', checkEvent);
+		addEventListener("copydata", checkEvent);
 
 		game = null;
 
@@ -183,7 +183,7 @@ const Gambling = {
 			}
 		}
 
-		removeEventListener('copydata', checkEvent);
+		removeEventListener("copydata", checkEvent);
 
 		return game;
 	}

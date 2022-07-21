@@ -38,7 +38,7 @@ Starter.Config.AttemptNextGameRetrys = 5;
 */
 
 const IncludeFilter = [
-	[""]
+	["cbaalz"]
 ];
 
 const ExcludeFilter = [
@@ -93,7 +93,7 @@ function excludeCheck (game) {
 
 // No touchy!
 include("json2.js");
-include('polyfill.js');
+include("polyfill.js");
 include("OOG.js");
 include("automule.js");
 include("gambling.js");
@@ -101,9 +101,9 @@ include("craftingsystem.js");
 include("torchsystem.js");
 include("common/misc.js");
 include("common/util.js");
-let sdk = require('./modules/sdk');
-let Controls = require('./modules/Control');
-let Overrides = require('./modules/Override');
+let sdk = require("./modules/sdk");
+let Controls = require("./modules/Control");
+let Overrides = require("./modules/Override");
 
 if (typeof AdvancedConfig[me.profile] === "object") {
 	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
@@ -235,6 +235,8 @@ function locationAction (location) {
 			delay(1000);
 		}
 
+		console.debug(gameList);
+
 		if (gameList) {
 			doneGames = [];
 			gameToJoin = false;
@@ -245,6 +247,9 @@ function locationAction (location) {
 			});
 
 			for (let i = 0; i < gameList.length; i += 1) {
+				console.debug("DoneGames? ", doneGames.indexOf(gameList[i].gameName) === -1);
+				console.debug("IncludeCheck? ", includeCheck(gameList[i].gameName));
+				console.debug("ExcludeCheck? ", excludeCheck(gameList[i].gameName));
 				if (doneGames.indexOf(gameList[i].gameName) === -1 && includeCheck(gameList[i].gameName) && excludeCheck(gameList[i].gameName)) {
 					print("ÿc7Game: " + gameList[i].gameName + ", Players: " + gameList[i].players);
 					gameToJoin = gameList[i].gameName;
@@ -367,8 +372,8 @@ function locationAction (location) {
 
 function main() {
 	debugLog(me.profile);
-	addEventListener('copydata', Starter.receiveCopyData);
-	addEventListener('scriptmsg', Starter.scriptMsgEvent);
+	addEventListener("copydata", Starter.receiveCopyData);
+	addEventListener("scriptmsg", Starter.scriptMsgEvent);
 
 	while (!Starter.handle) {
 		delay(100);

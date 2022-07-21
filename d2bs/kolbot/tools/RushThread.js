@@ -16,7 +16,7 @@ include("TorchSystem.js");
 include("common/util.js");
 includeCommonLibs();
 
-let Overrides = require('../modules/Override');
+let Overrides = require("../modules/Override");
 
 let count = 0;
 let silentNameTracker = [];

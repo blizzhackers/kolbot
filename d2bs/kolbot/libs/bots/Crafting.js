@@ -19,7 +19,7 @@ function Crafting() {
 	updateInfo();
 	pickItems();
 
-	addEventListener('copydata',
+	addEventListener("copydata",
 		function (mode, msg) {
 			let obj, rval;
 

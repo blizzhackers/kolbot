@@ -38,7 +38,7 @@ function BaalAssistant() {
 		Config.BaalAssistant.NextGameMessage[i] = msg.toLowerCase();
 	});
 
-	addEventListener('chatmsg',
+	addEventListener("chatmsg",
 		function (nick, msg) {
 			if (nick === Leader) {
 				msg = msg.toLowerCase();
@@ -91,7 +91,7 @@ function BaalAssistant() {
 	};
 
 	// Start
-	const Worker = require('../modules/Worker');
+	const Worker = require("../modules/Worker");
 
 	if (Leader) {
 		if (!Misc.poll(() => Misc.inMyParty(Leader), Time.seconds(30), 1000)) throw new Error("BaalAssistant: Leader not partied");

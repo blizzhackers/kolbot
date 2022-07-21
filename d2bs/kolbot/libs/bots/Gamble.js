@@ -15,7 +15,7 @@ function Gamble() {
 	me.maxgametime = 0;
 	Town.goToTown(1);
 
-	addEventListener('copydata',
+	addEventListener("copydata",
 		function (mode, msg) {
 			if (needGold && mode === 0 && info.goldFinders.indexOf(msg) > -1) {
 				print("Got game request from " + msg);

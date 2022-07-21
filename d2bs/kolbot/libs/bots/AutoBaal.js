@@ -16,7 +16,7 @@ function AutoBaal() {
 	let hotMsg = ["hot", "warm", "dangerous", "lethal"]; // used for shrine hunt
 
 	// chat event handler function, listen to what leader says
-	addEventListener('chatmsg', function (nick, msg) {
+	addEventListener("chatmsg", function (nick, msg) {
 		// filter leader messages
 		if (nick === leader) {
 			// loop through all predefined messages to find a match

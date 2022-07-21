@@ -148,7 +148,7 @@ CraftingSystem.getWorker = function () {
 		if (mode === 4) {
 			for (let i = 0; i < info.CraftingGames.length; i += 1) {
 				if (info.CraftingGames[i] && msg.match(info.CraftingGames[i], "i")) {
-					rval.game = msg.split('/');
+					rval.game = msg.split("/");
 
 					break;
 				}
@@ -157,7 +157,7 @@ CraftingSystem.getWorker = function () {
 	}
 
 	if (info && info.collector) {
-		addEventListener('copydata', checkEvent);
+		addEventListener("copydata", checkEvent);
 
 		rval.game = false;
 
@@ -172,7 +172,7 @@ CraftingSystem.getWorker = function () {
 			}
 		}
 
-		removeEventListener('copydata', checkEvent);
+		removeEventListener("copydata", checkEvent);
 
 		return rval;
 	}

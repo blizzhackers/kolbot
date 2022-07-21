@@ -1023,7 +1023,7 @@ const Cubing = {
 		}
 
 		// Go to town and open stash
-		Town.goToTown() && Town.moveToSpot('stash');
+		Town.goToTown() && Town.moveToSpot("stash");
 		Town.openStash();
 
 		// For reasons unclear, cubing goes wrong in stash in my test, so for ease, i put cube in inventory

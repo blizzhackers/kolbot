@@ -9,7 +9,7 @@ function DiabloHelper() {
 	this.Leader = Config.Leader;
 	Common.Diablo.waitForGlow = true;
 	Town.doChores();
-	const Worker = require('../modules/Worker');
+	const Worker = require("../modules/Worker");
 
 	try {
 		addEventListener("gamepacket", Common.Diablo.diabloLightsEvent);
@@ -33,7 +33,7 @@ function DiabloHelper() {
 						// Player is in Throne of Destruction or Worldstone Chamber
 						if ([sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(party.area)) {
 							if (Loader.scriptName() === "DiabloHelper") {
-								throw new Error('Party leader is running baal');
+								throw new Error("Party leader is running baal");
 							} else {
 								// kill process
 								return false;

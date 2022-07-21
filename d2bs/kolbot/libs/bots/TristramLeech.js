@@ -24,7 +24,7 @@ function TristramLeech() {
 	}));
 
 	if (leader) {
-		const Worker = require('../modules/Worker');
+		const Worker = require("../modules/Worker");
 
 		let leadTick = getTickCount();
 		let killLeaderTracker = false;
@@ -46,7 +46,7 @@ function TristramLeech() {
 				if ([sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(party.area)) {
 					if (Loader.scriptName() === "TristramLeech") {
 						killLeaderTracker = true;
-						throw new Error('Party leader is running baal');
+						throw new Error("Party leader is running baal");
 					} else {
 						// kill process
 						return false;

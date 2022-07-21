@@ -95,13 +95,13 @@ const AdvancedCleanerConfig = {
 
 // No touchy!
 include("json2.js");
-include('polyfill.js');
+include("polyfill.js");
 include("OOG.js");
 include("common/misc.js");
 include("common/prototypes.js");
 include("common/util.js");
-let Controls = require('./modules/Control');
-let sdk = require('./modules/sdk');
+let sdk = require("./modules/sdk");
+let Controls = require("./modules/Control");
 
 if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 	Starter.firstRun = true;
@@ -461,7 +461,7 @@ function locationAction (location) {
 }
 
 function main () {
-	addEventListener('copydata', Starter.receiveCopyData);
+	addEventListener("copydata", Starter.receiveCopyData);
 
 	while (!Starter.handle) {
 		delay(100);

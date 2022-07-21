@@ -220,7 +220,7 @@ function DeveloperMode() {
 	};
 
 	let copiedConfig = Misc.copy(Config);
-	print('starting developermode');
+	print("starting developermode");
 	me.overhead("Started developer mode");
 	addEventListener("gamepacketsent", packetSent);
 	addEventListener("gamepacket", packetReceived);

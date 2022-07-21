@@ -122,7 +122,7 @@ const HelpMenu = new function () {
 	};
 };
 
-let Worker = require('../../modules/Worker');
+let Worker = require("../../modules/Worker");
 
 Worker.runInBackground.helpAction = function () {
 	while (HelpMenu.action.length > 0) {

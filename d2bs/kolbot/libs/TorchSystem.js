@@ -222,7 +222,7 @@ const TorchSystem = {
 		let farmers = this.getFarmers();
 		if (!farmers) return false;
 
-		addEventListener('copydata', checkEvent);
+		addEventListener("copydata", checkEvent);
 
 		for (let i = 0; i < farmers.length; i += 1) {
 			sendCopyData(null, farmers[i].profile, 6, JSON.stringify({name: "gameCheck", profile: me.profile}));
@@ -233,7 +233,7 @@ const TorchSystem = {
 			}
 		}
 
-		removeEventListener('copydata', checkEvent);
+		removeEventListener("copydata", checkEvent);
 
 		if (game) {
 			delay(2000);
@@ -318,7 +318,7 @@ const TorchSystem = {
 		};
 
 		// Register event that will communicate with key hunters, go to Act 1 town and wait by stash
-		addEventListener('copydata', this.torchSystemEvent);
+		addEventListener("copydata", this.torchSystemEvent);
 		Town.goToTown(1);
 		Town.move("stash");
 
@@ -340,7 +340,7 @@ const TorchSystem = {
 			if (((tkeys >= 3 && hkeys >= 3 && dkeys >= 3)
 				|| (Config.OrgTorch.WaitTimeout && (getTickCount() - timer > Config.OrgTorch.WaitTimeout * 1000 * 60)))
 				&& this.aloneInGame()) {
-				removeEventListener('copydata', this.torchSystemEvent);
+				removeEventListener("copydata", this.torchSystemEvent);
 
 				break;
 			}

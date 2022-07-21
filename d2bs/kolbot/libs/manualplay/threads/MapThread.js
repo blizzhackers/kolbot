@@ -34,7 +34,7 @@ const Hooks = {
 		let files = dopen("libs/manualplay/hooks/").getFiles();
 		
 		Array.isArray(files) && files
-			.filter(file => file.endsWith('.js'))
+			.filter(file => file.endsWith(".js"))
 			.forEach(function (x) {
 				if (!isIncluded("manualplay/hooks/" + x)) {
 					if (!include("manualplay/hooks/" + x)) {
@@ -107,7 +107,7 @@ function main() {
 	Pickit.init(true);
 	Hooks.init();
 
-	const Worker = require('../../modules/Worker');
+	const Worker = require("../../modules/Worker");
 
 	Worker.runInBackground.unitInfo = function () {
 		if (!Hooks.userAddon || (!UnitInfo.cleared && !Game.getSelectedUnit())) {

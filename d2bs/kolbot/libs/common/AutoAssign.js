@@ -245,5 +245,5 @@ const AutoAssign = {
 	}
 };
 	//addEventListener("scriptmsg", AutoAssign.ScriptMsgEvent);
-addEventListener('copydata', AutoAssign.receiveCopyData);
+addEventListener("copydata", AutoAssign.receiveCopyData);
 addEventListener("gameevent", AutoAssign.gameEvent);

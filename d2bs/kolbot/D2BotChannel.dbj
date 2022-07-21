@@ -24,7 +24,7 @@ Starter.Config.Follow = []; // leader's in game character name, only use this if
 
 // No touchy!
 include("json2.js");
-include('polyfill.js');
+include("polyfill.js");
 include("OOG.js");
 include("automule.js");
 include("gambling.js");
@@ -33,9 +33,9 @@ include("craftingsystem.js");
 include("common/misc.js");
 include("common/util.js");
 include("common/prototypes.js");
-let sdk = require('./modules/sdk');
-let Controls = require('./modules/Control');
-let Overrides = require('./modules/Override');
+let sdk = require("./modules/sdk");
+let Controls = require("./modules/Control");
+let Overrides = require("./modules/Override");
 
 if (typeof AdvancedConfig[me.profile] === "object") {
 	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
@@ -477,8 +477,8 @@ function locationAction (location) {
 }
 
 function main() {
-	addEventListener('copydata', Starter.receiveCopyData);
-	addEventListener('scriptmsg', Starter.scriptMsgEvent);
+	addEventListener("copydata", Starter.receiveCopyData);
+	addEventListener("scriptmsg", Starter.scriptMsgEvent);
 
 	while (!Starter.handle) {
 		delay(100);

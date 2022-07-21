@@ -81,7 +81,7 @@ function includeCommonLibs () {
 	if (!files.length) throw new Error("Failed to find my files");
 		
 	Array.isArray(files) && files
-		.filter(file => file.endsWith('.js') && !file.match("auto", "gi") && file !== "Util.js")
+		.filter(file => file.endsWith(".js") && !file.match("auto", "gi") && file !== "Util.js")
 		.forEach(function (x) {
 			if (!include("common/" + x)) {
 				throw new Error("Failed to include common/" + x);
@@ -167,26 +167,26 @@ const Game = {
 (function (global, print) {
 	global.console = global.console || (function () {
 		const console = {};
-		const argMap = el => typeof el === 'object' && el /*not null */ && JSON.stringify(el) || el;
+		const argMap = el => typeof el === "object" && el /*not null */ && JSON.stringify(el) || el;
 
 		console.log = function (...args) {
 			// use call to avoid type errors
-			print.call(null, args.map(argMap).join(','));
+			print.call(null, args.map(argMap).join(","));
 		};
 
 		console.printDebug = true;
 		console.debug = function (...args) {
 			if (console.printDebug) {
 				const stack = new Error().stack.match(/[^\r\n]+/g);
-				let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf('\\') + 1) || 'unknown:0';
-				this.log('[ÿc:Debugÿc0] ÿc:[' + filenameAndLine + ']ÿc0 ' + args.map(argMap).join(','));
+				let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf("\\") + 1) || "unknown:0";
+				this.log("[ÿc:Debugÿc0] ÿc:[" + filenameAndLine + "]ÿc0 " + args.map(argMap).join(","));
 			}
 		};
 
 		console.warn = function (...args) {
 			const stack = new Error().stack.match(/[^\r\n]+/g);
-			let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf('\\') + 1) || 'unknown:0';
-			this.log('[ÿc9Warningÿc0] ÿc9[' + filenameAndLine + ']ÿc0 ' + args.map(argMap).join(','));
+			let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf("\\") + 1) || "unknown:0";
+			this.log("[ÿc9Warningÿc0] ÿc9[" + filenameAndLine + "]ÿc0 " + args.map(argMap).join(","));
 		};
 
 		console.error = function (error = "") {
@@ -242,4 +242,4 @@ const Game = {
 		return console;
 
 	})();
-})([].filter.constructor('return this')(), print);
+})([].filter.constructor("return this")(), print);

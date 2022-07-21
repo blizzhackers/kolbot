@@ -4,11 +4,11 @@
 *  @desc        handle out of game operations like creating characters/accounts, maintaining profile datafiles, d2bot# logging etc.
 *
 */
-!isIncluded('Polyfill.js') && include('Polyfill.js');
-include('common/Util.js');
+!isIncluded("Polyfill.js") && include("Polyfill.js");
+include("common/Util.js");
 
-let sdk = require('./modules/sdk');
-let Controls = require('./modules/Control');
+let sdk = require("./modules/sdk");
+let Controls = require("./modules/Control");
 
 const D2Bot = {
 	handle: 0,
@@ -1349,7 +1349,7 @@ const ControlAction = {
 		const text = Controls.CreateGameInLine.getText();
 		if (text && text.indexOf(getLocaleString(11026)) > -1) {
 			const result = /ÿc0(\d*)/gm.exec(text);
-			if (result && typeof result[1] === 'string') {
+			if (result && typeof result[1] === "string") {
 				return parseInt(result[1]) || 0;
 			}
 		}

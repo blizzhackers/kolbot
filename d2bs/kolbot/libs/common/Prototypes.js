@@ -7,11 +7,11 @@
 */
 
 // Ensure these are in polyfill.js
-!isIncluded('Polyfill.js') && include('Polyfill.js');
+!isIncluded("Polyfill.js") && include("Polyfill.js");
 // Make sure we have our util functions
-!isIncluded('Util.js') && include('Util.js');
+!isIncluded("Util.js") && include("Util.js");
 
-let sdk = require('../modules/sdk');
+let sdk = require("../modules/sdk");
 
 (function (global, original) {
 	let firstRun = true;
@@ -30,14 +30,14 @@ let sdk = require('../modules/sdk');
 		const ret = original.apply(this, args);
 
 		// deal with bug
-		if (first === 1 && typeof second === 'string' && ret
+		if (first === 1 && typeof second === "string" && ret
 			&& ((me.act === 1 && ret.classid === sdk.monsters.Dummy1) || me.act === 2 && ret.classid === sdk.monsters.Dummy2)) {
 			return null;
 		}
 
 		return original.apply(this, args);
 	};
-})([].filter.constructor('return this')(), getUnit);
+})([].filter.constructor("return this")(), getUnit);
 
 // Check if unit is idle
 Unit.prototype.__defineGetter__("idle", function () {
@@ -82,7 +82,7 @@ Unit.prototype.__defineGetter__("attacking", function () {
 	].includes(this.mode);
 });
 
-Unit.prototype.__defineGetter__('durabilityPercent', function () {
+Unit.prototype.__defineGetter__("durabilityPercent", function () {
 	if (this.type !== sdk.unittype.Item) throw new Error("Unit.durabilityPercent: Must be used on items.");
 	if (this.getStat(sdk.stats.Quantity) || !this.getStat(sdk.stats.MaxDurability)) return 100;
 	return Math.round(this.getStat(sdk.stats.Durability) * 100 / this.getStat(sdk.stats.MaxDurability));
@@ -163,7 +163,6 @@ Unit.prototype.startTrade = function (mode) {
 
 Unit.prototype.buy = function (shiftBuy, gamble) {
 	if (Config.PacketShopping) return Packet.buyItem(this, shiftBuy, gamble);
-
 	// Check if it's an item we want to buy
 	if (this.type !== sdk.unittype.Item) throw new Error("Unit.buy: Must be used on items.");
 
@@ -418,7 +417,7 @@ me.switchWeapons = function (slot) {
 		return true;
 	}
 
-	while (typeof me !== 'object') {
+	while (typeof me !== "object") {
 		delay(10);
 	}
 
@@ -429,7 +428,7 @@ me.switchWeapons = function (slot) {
 	let originalSlot = this.weaponswitch;
 	let switched = false;
 	let packetHandler = (bytes) => bytes.length > 0 && bytes[0] === 0x97 && (switched = true) && false; // false to not block
-	addEventListener('gamepacket', packetHandler);
+	addEventListener("gamepacket", packetHandler);
 	try {
 		for (let i = 0; i < 10; i += 1) {
 			for (let j = 10; --j && me.idle;) {
@@ -451,7 +450,7 @@ me.switchWeapons = function (slot) {
 			// Retry
 		}
 	} finally {
-		removeEventListener('gamepacket', packetHandler);
+		removeEventListener("gamepacket", packetHandler);
 	}
 
 	return false;
@@ -784,11 +783,11 @@ Unit.prototype.__defineGetter__("strreq",
 		return Math.max(finalReq, 0);
 	});
 
-Unit.prototype.__defineGetter__('itemclass',
+Unit.prototype.__defineGetter__("itemclass",
 	function () {
-		if (getBaseStat(0, this.classid, 'code') === undefined) return 0;
-		if (getBaseStat(0, this.classid, 'code') === getBaseStat(0, this.classid, 'ultracode')) return 2;
-		if (getBaseStat(0, this.classid, 'code') === getBaseStat(0, this.classid, 'ubercode')) return 1;
+		if (getBaseStat("items", this.classid, "code") === undefined) return 0;
+		if (getBaseStat("items", this.classid, "code") === getBaseStat(0, this.classid, "ultracode")) return 2;
+		if (getBaseStat("items", this.classid, "code") === getBaseStat(0, this.classid, "ubercode")) return 1;
 
 		return 0;
 	});
@@ -1334,16 +1333,16 @@ Unit.prototype.getColor = function () {
 	} else if (this.set) {
 		if (this.identified) {
 			for (let i = 0; i < 127; i += 1) {
-				if (this.fname.split("\n").reverse()[0].indexOf(getLocaleString(getBaseStat(16, i, 3))) > -1) {
+				if (this.fname.split("\n").reverse()[0].includes(getLocaleString(getBaseStat(16, i, 3)))) {
 					return getBaseStat(16, i, 12) > 20 ? -1 : getBaseStat(16, i, 12);
 				}
 			}
 		} else {
 			return Color.lightyellow; // Unidentified set item
 		}
-	} else if (this.unique) { // Unique
+	} else if (this.unique) {
 		for (let i = 0; i < 401; i += 1) {
-			if (this.code === getBaseStat(17, i, 4).replace(/^\s+|\s+$/g, "") && this.fname.split("\n").reverse()[0].indexOf(getLocaleString(getBaseStat(17, i, 2))) > -1) {
+			if (this.code === getBaseStat(17, i, 4).replace(/^\s+|\s+$/g, "") && this.fname.split("\n").reverse()[0].includes(getLocaleString(getBaseStat(17, i, 2)))) {
 				return getBaseStat(17, i, 13) > 20 ? -1 : getBaseStat(17, i, 13);
 			}
 		}
@@ -1391,20 +1390,20 @@ Unit.prototype.castChargedSkill = function (...args) {
 
 		break;
 	case 2:
-		if (typeof args[0] === 'number') {
+		if (typeof args[0] === "number") {
 			if (args[1] instanceof Unit) { // me.castChargedSkill(skillId,unit)
 				[skillId, unit] = [...args];
-			} else if (typeof args[1] === 'number') { // item.castChargedSkill(x,y)
+			} else if (typeof args[1] === "number") { // item.castChargedSkill(x,y)
 				[x, y] = [...args];
 			}
 		} else {
-			throw new Error(' invalid arguments, expected (skillId, unit) or (x, y)');
+			throw new Error(" invalid arguments, expected (skillId, unit) or (x, y)");
 		}
 
 		break;
 	case 3:
 		// If all arguments are numbers
-		if (typeof args[0] === 'number' && typeof args[1] === 'number' && typeof args[2] === 'number') {
+		if (typeof args[0] === "number" && typeof args[1] === "number" && typeof args[2] === "number") {
 			[skillId, x, y] = [...args];
 		}
 
@@ -1422,7 +1421,7 @@ Unit.prototype.castChargedSkill = function (...args) {
 
 	// Called the function the unit, me.
 	if (this === me) {
-		if (!skillId) throw Error('Must supply skillId on me.castChargedSkill');
+		if (!skillId) throw Error("Must supply skillId on me.castChargedSkill");
 
 		chargedItems = [];
 
@@ -1458,13 +1457,13 @@ Unit.prototype.castChargedSkill = function (...args) {
 	} else if (this.type === sdk.unittype.Item) {
 		charge = this.getStat(-2)[sdk.stats.ChargedSkill]; // WARNING. Somehow this gives duplicates
 
-		if (!charge) throw Error('No charged skill on this item');
+		if (!charge) throw Error("No charged skill on this item");
 
 		if (skillId) {
 			// Filter out all other charged skills
 			charge = charge.filter(item => (skillId && item.skill === skillId) && !!item.charges);
 		} else if (charge.length > 1) {
-			throw new Error('multiple charges on this item without a given skillId');
+			throw new Error("multiple charges on this item without a given skillId");
 		}
 
 		charge = charge.first();
@@ -1506,10 +1505,13 @@ Unit.prototype.equip = function (destLocation = undefined) {
 
 		return tempspot ? {location: Storage.Inventory.location, coord: tempspot} : false;
 	};
-	const doubleHanded = [26, 27, 34, 35, 67, 85, 86];
+	const doubleHanded = [
+		skd.itemtype.Staff, sdk.itemtype.Bow, sdk.itemtype.Polearm, sdk.itemtype.Crossbow,
+		sdk.itemtype.HandtoHand, sdk.itemtype.AmazonBow, sdk.itemtype.AmazonSpear
+	];
 
 	// Not an item, or unidentified, or not enough stats
-	if (this.type !== 4 || !this.getFlag(sdk.items.flags.Identified)
+	if (this.type !== sdk.unittype.Item || !this.getFlag(sdk.items.flags.Identified)
 		|| this.getStat(sdk.stats.LevelReq) > me.getStat(sdk.stats.Level)
 		|| this.dexreq > me.getStat(sdk.stats.Dexterity)
 		|| this.strreq > me.getStat(sdk.stats.Strength)) {
@@ -1521,14 +1523,14 @@ Unit.prototype.equip = function (destLocation = undefined) {
 	// If destLocation isnt an array, make it one
 	!Array.isArray(destLocation) && (destLocation = [destLocation]);
 
-	console.log('equiping ' + this.name + " to bodylocation: " + destLocation.first());
+	console.log("equiping " + this.name + " to bodylocation: " + destLocation.first());
 
 	let currentEquiped = me.getItemsEx(-1).filter(item =>
 		destLocation.indexOf(item.bodylocation) !== -1
 		|| ( // Deal with double handed weapons
 
 			(item.isOnMain)
-			&& [4, 5].indexOf(destLocation) // in case destination is on the weapon/shield slot
+			&& [sdk.body.RightArm, sdk.body.LeftArm].indexOf(destLocation) // in case destination is on the weapon/shield slot
 			&& (
 				doubleHanded.indexOf(this.itemType) !== -1 // this item is a double handed item
 				|| doubleHanded.indexOf(item.itemType) !== -1 // current item is a double handed item
@@ -1545,7 +1547,7 @@ Unit.prototype.equip = function (destLocation = undefined) {
 		currentEquiped.forEach((item, index) => {
 			// Last item, so swap instead of putting off first
 			if (index === (currentEquiped.length - 1)) {
-				print('swap ' + this.name + ' for ' + item.name);
+				print("swap " + this.name + " for " + item.name);
 				let oldLoc = {x: this.x, y: this.y, location: this.location};
 				clickItemAndWait(sdk.clicktypes.click.Left, this); // Pick up current item
 				clickItemAndWait(sdk.clicktypes.click.Left, destLocation.first()); // the swap of items
@@ -1555,7 +1557,7 @@ Unit.prototype.equip = function (destLocation = undefined) {
 				if (!spot) { // If no spot is found for the item, rollback
 					clickItemAndWait(sdk.clicktypes.click.Left, destLocation.first()); // swap again
 					clickItemAndWait(sdk.clicktypes.click.Left, oldLoc.x, oldLoc.y, oldLoc.location); // put item back on old spot
-					throw Error('cant find spot for unequipped item');
+					throw Error("cant find spot for unequipped item");
 				}
 
 				clickItemAndWait(sdk.clicktypes.click.Left, spot.coord.y, spot.coord.x, spot.location); // put item on the found spot
@@ -1563,11 +1565,11 @@ Unit.prototype.equip = function (destLocation = undefined) {
 				return;
 			}
 
-			print('Unequip item first ' + item.name);
+			print("Unequip item first " + item.name);
 			// Incase multiple items are equipped
 			let spot = findspot(item); // Find a spot for the current item
 
-			if (!spot) throw Error('cant find spot for unequipped item');
+			if (!spot) throw Error("cant find spot for unequipped item");
 
 			clickItemAndWait(sdk.clicktypes.click.Left, item.bodylocation);
 			clickItemAndWait(sdk.clicktypes.click.Left, spot.coord.x, spot.coord.y, spot.location);
@@ -1583,17 +1585,22 @@ Unit.prototype.equip = function (destLocation = undefined) {
 
 Unit.prototype.getBodyLoc = function () {
 	let types = {
-			1: [37, 71, 75], // helm
-			2: [12], // amulet
-			3: [3], // armor
-			4: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 42, 43, 44, 67, 68, 69, 72, 85, 86, 87, 88], // weapons
-			5: [2, 5, 6, 70], // shields / Arrows / bolts
-			6: [10], // ring slot 1
-			7: [10], // ring slot 2
-			8: [19], // belt
-			9: [15], // boots
-			10: [16], // gloves
-		}, bodyLoc = [];
+		1: [sdk.itemtype.Helm, sdk.itemtype.Pelt, sdk.itemtype.PrimalHelm], // helm
+		2: [sdk.itemtype.Amulet], // amulet
+		3: [sdk.itemtype.Armor], // armor
+		4: [
+			sdk.itemtype.Scepter, sdk.itemtype.Wand, sdk.itemtype.Staff, sdk.itemtype.Bow, sdk.itemtype.Axe, sdk.itemtype.Club, sdk.itemtype.Sword, sdk.itemtype.Hammer,
+			sdk.itemtype.Knife, sdk.itemtype.Spear, sdk.itemtype.Polearm, sdk.itemtype.Crossbow, sdk.itemtype.Mace, sdk.itemtype.ThrowingKnife, sdk.itemtype.ThrowingAxe,
+			sdk.itemtype.Javelin, sdk.itemtype.HandtoHand, sdk.itemtype.Orb, sdk.itemtype.AmazonBow, sdk.itemtype.AmazonSpear, sdk.itemtype.AmazonJavelin, sdk.itemtype.AssassinClaw
+		], // weapons
+		5: [sdk.itemtype.Shield, sdk.itemtype.BowQuiver, sdk.itemtype.CrossbowQuiver, sdk.itemtype.AuricShields, sdk.itemtype.VoodooHeads], // shields / Arrows / bolts
+		6: [sdk.itemtype.Ring], // ring slot 1
+		7: [sdk.itemtype.Ring], // ring slot 2
+		8: [sdk.itemtype.Belt], // belt
+		9: [sdk.itemtype.Boots], // boots
+		10: [sdk.itemtype.Gloves], // gloves
+	};
+	let bodyLoc = [];
 
 	for (let i in types) {
 		this.itemType && types[i].indexOf(this.itemType) !== -1 && bodyLoc.push(i);
@@ -1643,7 +1650,7 @@ Unit.prototype.getRes = function (type, difficulty) {
 			return [this[0], this[1]];
 		}
 
-		if (typeof this.x !== 'undefined' && typeof this.y !== 'undefined') {
+		if (typeof this.x !== "undefined" && typeof this.y !== "undefined") {
 			return this instanceof PresetUnit && [this.roomx * 5 + this.x, this.roomy * 5 + this.y] || [this.x, this.y];
 		}
 
@@ -1703,7 +1710,7 @@ Object.defineProperties(Unit.prototype, {
 				sdk.monsters.Andariel, sdk.monsters.Duriel, sdk.monsters.Mephisto, sdk.monsters.Diablo,
 				sdk.monsters.Baal, sdk.monsters.BaalClone, sdk.monsters.UberDuriel, sdk.monsters.UberIzual,
 				sdk.monsters.UberMephisto, sdk.monsters.UberDiablo, sdk.monsters.UberBaal, sdk.monsters.Lilith, sdk.monsters.DiabloClone
-			].includes(this.classid) || getBaseStat('monstats', this.classid, 'primeevil');
+			].includes(this.classid) || getBaseStat("monstats", this.classid, "primeevil");
 		},
 	},
 	isBoss: {
@@ -1723,7 +1730,7 @@ Object.defineProperties(Unit.prototype, {
 			return [
 				sdk.monsters.Ghost1, sdk.monsters.Wraith1, sdk.monsters.Specter1,
 				sdk.monsters.Apparition, sdk.monsters.DarkShape, sdk.monsters.Ghost2, sdk.monsters.Wraith2, sdk.monsters.Specter2
-			].includes(this.classid) || getBaseStat('monstats', this.classid, 'MonType') === sdk.units.monsters.type.Wraith;
+			].includes(this.classid) || getBaseStat("monstats", this.classid, "MonType") === sdk.units.monsters.type.Wraith;
 		},
 	},
 	isDoll: {
@@ -2363,7 +2370,7 @@ Object.defineProperties(me, {
 });
 
 // something in here is causing demon imps in barricade towers to be skipped - todo: figure out what
-Unit.prototype.__defineGetter__('attackable', function () {
+Unit.prototype.__defineGetter__("attackable", function () {
 	if (this === undefined || !copyUnit(this).x) return false;
 	if (this.type > sdk.unittype.Monster) return false;
 	// must be in same area
@@ -2399,7 +2406,7 @@ Unit.prototype.__defineGetter__('attackable', function () {
 	return [sdk.monsters.ThroneBaal, sdk.monsters.Cow/*an evil force*/].indexOf(this.classid) === -1;
 });
 
-Unit.prototype.__defineGetter__('curseable', function () {
+Unit.prototype.__defineGetter__("curseable", function () {
 	// must be player or monster
 	if (this === undefined || !copyUnit(this).x || this.type > 1) return false;
 	// Dead monster
@@ -2407,8 +2414,8 @@ Unit.prototype.__defineGetter__('curseable', function () {
 	// attract can't be overridden
 	if (this.getState(sdk.states.Attract)) return false;
 	// "Possessed"
-	if (!!this.name && !!this.name.includes(getLocaleString(11086))) return false;
-	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) return true;
+	if (!!this.name && !!this.name.includes(getLocaleString(sdk.locale.text.Possessed))) return false;
+	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && !this.dead) return true;
 	// Friendly monster/NPC
 	if (this.getStat(sdk.stats.Alignment) === 2) return false;
 	// catapults were returning a level of 0 and hanging up clear scripts
@@ -2438,7 +2445,7 @@ Unit.prototype.__defineGetter__('curseable', function () {
 	].indexOf(this.classid) === -1;
 });
 
-Unit.prototype.__defineGetter__('scareable', function () {
+Unit.prototype.__defineGetter__("scareable", function () {
 	return this.curseable && !(this.isSpecial) && this.classid !== sdk.monsters.ListerTheTormenter;
 });
 
@@ -2460,7 +2467,7 @@ Unit.prototype.checkForMobs = function (givenSettings = {}) {
 		range: 10,
 		count: 1,
 		coll: 0,
-		spectype: 0
+		spectype: sdk.units.monsters.spectype.All
 	}, givenSettings);
 	let mob = getUnit(sdk.unittype.Monster);
 	let count = 0;
@@ -2494,7 +2501,7 @@ Unit.prototype.inArea = function (area = 0) {
 			return [this[0], this[1]];
 		}
 
-		if (typeof this.x !== 'undefined' && typeof this.y !== 'undefined') {
+		if (typeof this.x !== "undefined" && typeof this.y !== "undefined") {
 			return this instanceof PresetUnit && [this.roomx * 5 + this.x, this.roomy * 5 + this.y] || [this.x, this.y];
 		}
 
@@ -2505,7 +2512,7 @@ Unit.prototype.inArea = function (area = 0) {
 		let [x, y] = coords.apply(this);
 		let settings = Object.assign({}, {
 			range: 5,
-			coll: (0x1 | 2048 | 0x2),
+			coll: (sdk.collision.BlockWall | sdk.collision.LineOfSight | sdk.collision.BlockMissile),
 			type: 0,
 			ignoreClassids: [],
 		}, givenSettings);

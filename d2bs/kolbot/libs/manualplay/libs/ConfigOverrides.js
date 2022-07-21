@@ -99,7 +99,7 @@ Config.init = function (notify) {
 	if (Config.Silence && !Config.LocalChat.Enabled) {
 		// Override the say function with print, so it just gets printed to console
 		global._say = global.say;
-		global.say = (what) => print('Tryed to say: ' + what);
+		global.say = (what) => print("Tryed to say: " + what);
 	}
 
 	try {

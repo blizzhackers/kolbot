@@ -7,10 +7,10 @@
 function main() {
 	include("json2.js");
 	include("OOG.js");
-	include("common/misc.js");
 	include("common/util.js");
+	include("common/misc.js");
 
-	addEventListener('copydata', Starter.receiveCopyData);
+	addEventListener("copydata", Starter.receiveCopyData);
 
 	while (!Starter.handle) {
 		delay(100);

@@ -20,14 +20,14 @@
 
 		return new Proxy(this, {
 			get: function (target, p) {
-				const passthroughFunc = ['click', 'setText', 'getText'];
+				const passthroughFunc = ["click", "setText", "getText"];
 
-				if (p === 'valueOf') {
+				if (p === "valueOf") {
 					return target;
 				}
 
 				const control = getControl(target.type, target.x, target.y, target.xsize, target.ysize);
-				if (p === 'control') {
+				if (p === "control") {
 					return control;
 				}
 
@@ -37,7 +37,7 @@
 				}
 
 				// if control is found, and it's a property of the control
-				if (typeof control === 'object' && control && control.hasOwnProperty(p)) {
+				if (typeof control === "object" && control && control.hasOwnProperty(p)) {
 					return control[p];
 				}
 

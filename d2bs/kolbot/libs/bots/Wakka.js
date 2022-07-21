@@ -196,7 +196,7 @@ function Wakka() {
 
 	if (leader) {
 		addEventListener("gamepacket", Common.Diablo.diabloLightsEvent);
-		const Worker = require('../modules/Worker');
+		const Worker = require("../modules/Worker");
 
 		try {
 			if (Config.Wakka.SkipIfBaal) {
@@ -217,7 +217,7 @@ function Wakka() {
 					if ([sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(this.getLeaderUnitArea())) {
 						if (Loader.scriptName() === "Wakka") {
 							killLeaderTracker = true;
-							throw new Error('Party leader is running baal');
+							throw new Error("Party leader is running baal");
 						} else {
 							// kill process
 							return false;
@@ -245,7 +245,7 @@ function Wakka() {
 
 					if (Loader.scriptName() === "Wakka") {
 						killLevelTracker = true;
-						throw new Error('Reached wanted level');
+						throw new Error("Reached wanted level");
 					} else {
 						// kill process
 						return false;

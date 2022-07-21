@@ -32,7 +32,7 @@ const AutoSkill = new function () {
 		//a loop to go through each reqskill
 		for (let t = 183; t >= 181; t--) {
 			// Check ReqSkills
-			let preReq = (getBaseStat('skills', skillid, t));
+			let preReq = (getBaseStat("skills", skillid, t));
 
 			if (preReq > 0 && preReq < 356 && !me.getSkill(preReq, sdk.skills.subindex.HardPoints)) {
 				return preReq;

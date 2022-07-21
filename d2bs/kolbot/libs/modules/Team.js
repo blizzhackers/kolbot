@@ -3,15 +3,15 @@
  * @Author Jaenster
  *
  */
-!isIncluded('require.js') && include('require.js'); // load the require.js
+!isIncluded("require.js") && include("require.js"); // load the require.js
 
 (function (threadType) {
 
 	const others = [];
 
-	const myEvents = new (require('Events'));
-	const Worker = require('Worker');
-	const Messaging = require('Messaging');
+	const myEvents = new (require("Events"));
+	const Worker = require("Worker");
+	const Messaging = require("Messaging");
 	const defaultCopyDataMode = 0xC0FFFEE;
 
 	const Team = {
@@ -24,23 +24,23 @@
 		},
 		broadcast: (what, mode) => {
 			what.profile = me.windowtitle;
-			return others.forEach(other => sendCopyData(null, other.profile, mode || defaultCopyDataMode, JSON.stringify(what)))
+			return others.forEach(other => sendCopyData(null, other.profile, mode || defaultCopyDataMode, JSON.stringify(what)));
 		},
 		broadcastInGame: (what, mode) => {
 			what.profile = me.windowtitle;
 			others.forEach(function (other) {
 				for (const party = getParty(); party && party.getNext();) {
-					typeof party === 'object' && party && party.hasOwnProperty('name') && party.name === other.name && sendCopyData(null, other.profile, mode || defaultCopyDataMode, JSON.stringify(what));
+					typeof party === "object" && party && party.hasOwnProperty("name") && party.name === other.name && sendCopyData(null, other.profile, mode || defaultCopyDataMode, JSON.stringify(what));
 				}
-			})
+			});
 		}
 	};
 
-	if (threadType === 'thread') {
-		print('ÿc2Kolbotÿc0 :: Team thread started');
+	if (threadType === "thread") {
+		print("ÿc2Kolbotÿc0 :: Team thread started");
 
-		Messaging.on('Team', data => {
-			return typeof data === 'object' && data && data.hasOwnProperty('call') && Team[data.call].apply(Team, data.hasOwnProperty('args') && data.args || []);
+		Messaging.on("Team", data => {
+			return typeof data === "object" && data && data.hasOwnProperty("call") && Team[data.call].apply(Team, data.hasOwnProperty("args") && data.args || []);
 		});
 
 		Worker.runInBackground.copydata = (new function () {
@@ -48,15 +48,15 @@
 			const updateOtherProfiles = function () {
 				const fileList = dopen("data/").getFiles();
 				fileList && fileList.forEach(function (filename) {
-					let newContent, obj, profile = filename.split("").reverse().splice(5).reverse().join(''); // strip the last 5 chars (.json) = 5 chars
+					let newContent, obj, profile = filename.split("").reverse().splice(5).reverse().join(""); // strip the last 5 chars (.json) = 5 chars
 
 
-					if (profile === me.windowtitle || !filename.endsWith('.json')) return;
+					if (profile === me.windowtitle || !filename.endsWith(".json")) return;
 					try {
-						newContent = FileTools.readText('data/' + filename);
+						newContent = FileTools.readText("data/" + filename);
 						if (!newContent) return; // no content
 					} catch (e) {
-						print('Can\'t read: `' + 'data/' + filename + '`');
+						print("Can't read: `" + "data/" + filename + "`");
 					}
 
 
@@ -69,7 +69,7 @@
 					let other;
 					for (let i = 0, tmp; i < others.length; i++) {
 						tmp = others[i];
-						if (tmp.hasOwnProperty('profile') && tmp.profile === profile) {
+						if (tmp.hasOwnProperty("profile") && tmp.profile === profile) {
 							other = tmp;
 							break;
 						}
@@ -82,9 +82,9 @@
 
 					other.profile = profile;
 					Object.keys(obj).map(key => other[key] = obj[key]);
-				})
+				});
 			};
-			addEventListener('copydata', (mode, data) => workBench.push({mode: mode, data: data}));
+			addEventListener("copydata", (mode, data) => workBench.push({mode: mode, data: data}));
 
 			let timer = getTickCount() - Math.round((Math.random() * 2500) + 1000); // start with 3 seconds off
 			this.update = function () {
@@ -106,9 +106,9 @@
 						}
 						return {mode: obj.mode, data: data};
 					})
-					.filter(obj => typeof obj === 'object' && obj)
-					.filter(obj => typeof obj.data === 'object' && obj.data)
-					.filter(obj => typeof obj.mode === 'number' && obj.mode);
+					.filter(obj => typeof obj === "object" && obj)
+					.filter(obj => typeof obj.data === "object" && obj.data)
+					.filter(obj => typeof obj.mode === "number" && obj.mode);
 				emit.length && Messaging.send({
 					Team: {
 						emit: emit
@@ -128,7 +128,7 @@
 
 			// Filter out all Team functions that are linked to myEvent
 			Object.keys(Team)
-				.filter(key => !myEvents.hasOwnProperty(key) && typeof Team[key] === 'function')
+				.filter(key => !myEvents.hasOwnProperty(key) && typeof Team[key] === "function")
 				.forEach(key => {
 					return module.exports[key] = (...args) => {
 						return Messaging.send({
@@ -140,10 +140,10 @@
 					};
 				});
 
-			Messaging.on('Team', msg =>
-				typeof msg === 'object'
+			Messaging.on("Team", msg =>
+				typeof msg === "object"
 				&& msg
-				&& msg.hasOwnProperty('emit')
+				&& msg.hasOwnProperty("emit")
 				&& Array.isArray(msg.emit)
 				&& msg.emit.forEach(function (obj) {
 
@@ -151,14 +151,14 @@
 					myEvents.emit(obj.mode, obj.data);
 
 					// Only if data is set
-					typeof obj.data === 'object' && obj.data && Object.keys(obj.data).forEach(function (item) {
+					typeof obj.data === "object" && obj.data && Object.keys(obj.data).forEach(function (item) {
 
 						// For each item in the object, trigger an event
 						obj.data[item].reply = (what, mode) => localTeam.send(obj.data.profile, what, mode);
 
 						// Registered events on a data item
 						myEvents.emit(item, obj.data[item]);
-					})
+					});
 				})
 			);
 		})(module, require);

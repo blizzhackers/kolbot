@@ -31,7 +31,7 @@ String.prototype.lcsGraph = function (compareToThis) {
 
 String.prototype.diffCount = function (stringB) {
 	try {
-		if (typeof stringB !== 'string' || !stringB) {
+		if (typeof stringB !== "string" || !stringB) {
 			return this.length;
 		}
 
@@ -51,8 +51,8 @@ String.prototype.diffCount = function (stringB) {
 
 if (!String.prototype.includes) {
 	String.prototype.includes = function (search, start) {
-		'use strict';
-		if (typeof start !== 'number') {
+		"use strict";
+		if (typeof start !== "number") {
 			start = 0;
 		}
 
@@ -89,7 +89,7 @@ Array.prototype.filterHighDistance = function (step = 0) {
 
 // https://tc39.github.io/ecma262/#sec-array.prototype.findindex
 if (!Array.prototype.findIndex) {
-	Object.defineProperty(Array.prototype, 'findIndex', {
+	Object.defineProperty(Array.prototype, "findIndex", {
 		value: function (predicate) {
 			// 1. Let O be ? ToObject(this value).
 			if (this == null) {
@@ -102,8 +102,8 @@ if (!Array.prototype.findIndex) {
 			let len = o.length >>> 0;
 
 			// 3. If IsCallable(predicate) is false, throw a TypeError exception.
-			if (typeof predicate !== 'function') {
-				throw new TypeError('predicate must be a function');
+			if (typeof predicate !== "function") {
+				throw new TypeError("predicate must be a function");
 			}
 
 			// 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
@@ -162,7 +162,7 @@ if (!Array.from) {
 	Array.from = (function () {
 		let toStr = Object.prototype.toString;
 		let isCallable = function (fn) {
-			return typeof fn === 'function' || toStr.call(fn) === '[object Function]';
+			return typeof fn === "function" || toStr.call(fn) === "[object Function]";
 		};
 		let toInteger = function (value) {
 			let number = Number(value);
@@ -190,17 +190,17 @@ if (!Array.from) {
 
 			// 3. ReturnIfAbrupt(items).
 			if (arrayLike == null) {
-				throw new TypeError('Array.from requires an array-like object - not null or undefined');
+				throw new TypeError("Array.from requires an array-like object - not null or undefined");
 			}
 
 			// 4. If mapfn is undefined, then let mapping be false.
 			let mapFn = arguments.length > 1 ? arguments[1] : void undefined;
 			let T;
-			if (typeof mapFn !== 'undefined') {
+			if (typeof mapFn !== "undefined") {
 				// 5. else
 				// 5. a If IsCallable(mapfn) is false, throw a TypeError exception.
 				if (!isCallable(mapFn)) {
-					throw new TypeError('Array.from: when provided, the second argument must be a function');
+					throw new TypeError("Array.from: when provided, the second argument must be a function");
 				}
 
 				// 5. b. If thisArg was supplied, let T be thisArg; else let T be undefined.
@@ -226,7 +226,7 @@ if (!Array.from) {
 			while (k < len) {
 				kValue = items[k];
 				if (mapFn) {
-					A[k] = typeof T === 'undefined' ? mapFn(kValue, k) : mapFn.call(T, kValue, k);
+					A[k] = typeof T === "undefined" ? mapFn(kValue, k) : mapFn.call(T, kValue, k);
 				} else {
 					A[k] = kValue;
 				}
@@ -318,11 +318,11 @@ String.prototype.trim = function () {
 };
 
 // Object.assign polyfill from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
-if (typeof Object.assign !== 'function') {
+if (typeof Object.assign !== "function") {
 	Object.defineProperty(Object, "assign", {
 		value: function assign(target) {
 			if (target === null) {
-				throw new TypeError('Cannot convert undefined or null to object');
+				throw new TypeError("Cannot convert undefined or null to object");
 			}
 
 			let to = Object(target);
@@ -348,7 +348,7 @@ if (typeof Object.assign !== 'function') {
 
 // Array.find polyfill from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
 if (!Array.prototype.find) {
-	Object.defineProperty(Array.prototype, 'find', {
+	Object.defineProperty(Array.prototype, "find", {
 		value: function (predicate) {
 			if (this === null) {
 				throw new TypeError('"this" is null or not defined');
@@ -358,8 +358,8 @@ if (!Array.prototype.find) {
 
 			let len = o.length >>> 0;
 
-			if (typeof predicate !== 'function') {
-				throw new TypeError('predicate must be a function');
+			if (typeof predicate !== "function") {
+				throw new TypeError("predicate must be a function");
 			}
 
 			let thisArg = arguments[1];
@@ -417,7 +417,7 @@ if (!Array.prototype.last) {
  * @return array
  */
 if (!Array.prototype.flat) {
-	Object.defineProperty(Array.prototype, 'flat', {
+	Object.defineProperty(Array.prototype, "flat", {
 		value: function flat() {
 			let depth = arguments.length > 0 ? isNaN(arguments[0]) ? 1 : Number(arguments[0]) : 1;
 
@@ -435,16 +435,16 @@ if (!Array.prototype.flat) {
 		writable: true
 	});
 }
-if (typeof global === 'undefined') {
+if (typeof global === "undefined") {
 	var global = this;
 }
 
-if (!global.hasOwnProperty('require')) {
+if (!global.hasOwnProperty("require")) {
 	let cache;
-	Object.defineProperty(global, 'require', {
+	Object.defineProperty(global, "require", {
 		get: function () {
 			if (cache) return cache;
-			!isIncluded('require.js') && include('require.js');
+			!isIncluded("require.js") && include("require.js");
 			return cache; // cache is loaded by require.js
 		},
 		set: function(v) {
@@ -455,7 +455,7 @@ if (!global.hasOwnProperty('require')) {
 
 String.prototype.padEnd = function padEnd(targetLength, padString) {
 	targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
-	padString = String(typeof padString !== 'undefined' ? padString : ' ');
+	padString = String(typeof padString !== "undefined" ? padString : " ");
 	if (this.length > targetLength) {
 		return String(this);
 	} else {
@@ -469,7 +469,7 @@ String.prototype.padEnd = function padEnd(targetLength, padString) {
 
 String.prototype.padStart = function padStart(targetLength, padString) {
 	targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
-	padString = String(typeof padString !== 'undefined' ? padString : ' ');
+	padString = String(typeof padString !== "undefined" ? padString : " ");
 	if (this.length > targetLength) {
 		return String(this);
 	} else {
@@ -482,31 +482,31 @@ String.prototype.padStart = function padStart(targetLength, padString) {
 };
 
 String.prototype.repeat = function(count) {
-	'use strict';
+	"use strict";
 	if (this == null) {
-		throw new TypeError("can't convert " + this + ' to object');
+		throw new TypeError("can't convert " + this + " to object");
 	}
-	let str = '' + this;
+	let str = "" + this;
 	count = +count;
 	if (count !== count) {
 		count = 0;
 	}
 	if (count < 0) {
-		throw new RangeError('repeat count must be non-negative');
+		throw new RangeError("repeat count must be non-negative");
 	}
 	if (count === Infinity) {
-		throw new RangeError('repeat count must be less than infinity');
+		throw new RangeError("repeat count must be less than infinity");
 	}
 	count = Math.floor(count);
 	if (str.length === 0 || count === 0) {
-		return '';
+		return "";
 	}
 	if (str.length * count >= 1 << 28) {
 		throw new RangeError(
-			'repeat count must not overflow maximum string size'
+			"repeat count must not overflow maximum string size"
 		);
 	}
-	let rpt = '';
+	let rpt = "";
 	for (;;) {
 		if ((count & 1) === 1) {
 			rpt += str;

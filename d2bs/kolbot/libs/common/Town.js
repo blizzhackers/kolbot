@@ -202,7 +202,7 @@ const Town = {
 
 		switch (NPC[name]) {
 		case NPC.Jerhyn:
-			!Game.getNPC(NPC.Jerhyn) && Town.move('palace');
+			!Game.getNPC(NPC.Jerhyn) && Town.move("palace");
 			break;
 		case NPC.Hratli:
 			if (!me.getQuest(sdk.quest.id.SpokeToHratli, sdk.quest.states.Completed)) {
@@ -1147,7 +1147,7 @@ const Town = {
 		let pot = npc.getItem(type);
 		let name = (pot.name || "");
 
-		console.log('ÿc9BuyPotsÿc0 :: buying ' + quantity + ' ' + name + ' Potions');
+		console.log("ÿc9BuyPotsÿc0 :: buying " + quantity + " " + name + " Potions");
 
 		for (let pots = 0; pots < quantity; pots++) {
 			if (!!pot && Storage.Inventory.CanFit(pot)) {
@@ -1180,7 +1180,7 @@ const Town = {
 				}
 			});
 
-			log && name && console.log('ÿc9DrinkPotsÿc0 :: drank ' + quantity + " " + name + "s. Timer [" + Time.format(quantity * 30 * 1000) + "]");
+			log && name && console.log("ÿc9DrinkPotsÿc0 :: drank " + quantity + " " + name + "s. Timer [" + Time.format(quantity * 30 * 1000) + "]");
 		} else {
 			console.log("ÿc9DrinkPotsÿc0 :: couldn't find my pots");
 		}
@@ -1829,7 +1829,7 @@ const Town = {
 						clickItemAndWait(sdk.clicktypes.click.Left, tpTome.x, tpTome.y, tpTome.location);
 
 						if (tpTome.getStat(sdk.stats.Quantity) > currQuantity) {
-							console.log('ÿc9clearScrollsÿc0 :: placed scroll in tp tome');
+							console.log("ÿc9clearScrollsÿc0 :: placed scroll in tp tome");
 
 							continue;
 						}
@@ -1844,7 +1844,7 @@ const Town = {
 						clickItemAndWait(sdk.clicktypes.click.Left, idTome.x, idTome.y, idTome.location);
 
 						if (idTome.getStat(sdk.stats.Quantity) > currQuantity) {
-							console.log('ÿc9clearScrollsÿc0 :: placed scroll in id tome');
+							console.log("ÿc9clearScrollsÿc0 :: placed scroll in id tome");
 
 							continue;
 						}

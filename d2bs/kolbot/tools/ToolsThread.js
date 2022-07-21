@@ -18,7 +18,7 @@ include("common/util.js");
 
 includeCommonLibs();
 
-let Overrides = require('../modules/Override');
+let Overrides = require("../modules/Override");
 
 new Overrides.Override(Attack, Attack.getNearestMonster, function (orignal) {
 	let monster = orignal({skipBlocked: false, skipImmune: false});
@@ -160,8 +160,8 @@ function main() {
 		case sdk.keys.NumpadSlash: // re-load default
 			console.log("ÿc8ToolsThread :: " + sdk.colors.Red + "Stopping threads and waiting 5 seconds to restart");
 			Common.Toolsthread.stopDefault() && delay(Time.seconds(5));
-			console.log('Starting default.dbj');
-			load('default.dbj');
+			console.log("Starting default.dbj");
+			load("default.dbj");
 
 			break;
 		}

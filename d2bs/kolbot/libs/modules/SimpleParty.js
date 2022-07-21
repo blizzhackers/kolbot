@@ -1,5 +1,5 @@
 (function (module, require) {
-	const Worker = require('Worker');
+	const Worker = require("Worker");
 	const NO_PARTY = 65535;
 	const PARTY_MEMBER = 1;
 	const ACCEPTABLE = 2;
@@ -8,7 +8,7 @@
 	const BUTTON_LEAVE_PARTY = 3;
 	const BUTTON_HOSTILE = 4;
 
-	print('ÿc2Kolbotÿc0 :: Simple party running');
+	print("ÿc2Kolbotÿc0 :: Simple party running");
 
 	const SimpleParty = {};
 
@@ -45,8 +45,7 @@
 		return names.filter(n => n !== me.name /*cant accept yourself ;)*/).sort((a, b) => toMd5Int(a) - toMd5Int(b)).first();
 	};
 
-	SimpleParty.getFirstPartyMember = function ()
-	{
+	SimpleParty.getFirstPartyMember = function () {
 		let myPartyId = ((() => (getParty() || {partyid: 0}).partyid))();
 		for (let party = getParty(); party.getNext();) {
 			if (party.partyid === myPartyId && party.name !== me.charname) {
@@ -70,7 +69,7 @@
 
 	SimpleParty.timer = 0;
 
-	if (getScript(true).name.toLowerCase() === 'default.dbj') {
+	if (getScript(true).name.toLowerCase() === "default.dbj") {
 		(Worker.runInBackground.party = (function () {// For now, we gonna do this in game with a single party
 			SimpleParty.timer = getTickCount();
 			return function () {
@@ -91,11 +90,11 @@
 				const biggestPartyId = SimpleParty.biggestPartyId();
 
 				for (let party = getParty(), acceptFirst; party && party.getNext();) {
-					if (!(party && typeof party === 'object')) {
+					if (!(party && typeof party === "object")) {
 						continue;
 					}
 
-					if (!(party.hasOwnProperty('life'))) {
+					if (!(party.hasOwnProperty("life"))) {
 						continue;
 					} // Somehow not a party member
 

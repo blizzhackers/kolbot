@@ -4382,6 +4382,7 @@ item: {
 				LoDKeyDisabled: 10913,
 				CdKeyInUseBy: 10914,
 				LoDKeyIntendedForAnotherProduct: 10915,
+				Possessed: 11086,
 				CdKeyDisabledFromRealm: 11161,
 			},
 		},
