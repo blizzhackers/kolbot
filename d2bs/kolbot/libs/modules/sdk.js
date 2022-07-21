@@ -76,6 +76,16 @@ item: {
 			NoParty: 65535
 		},
 
+		slot: {
+			Main: 0,
+			Secondary: 1
+		},
+
+		move: {
+			Walk: 0,
+			Run: 1
+		},
+
 		clicktypes: {
 			click: {
 				Left: 0,
@@ -4554,32 +4564,47 @@ item: {
 			BackSlash: 220,
 			CloseBracket: 221,
 			SingleQuote: 222,
+			code: {
+				Backspace: 0x08,
+				Tab: 0x09,
+				Clear: 0x0C,
+				Enter: 0x0D,
+				Shift: 0x10,
+				Ctrl: 0x11,
+				Alt: 0x12,
+				PauseBreak: 0x13,
+				CapsLock: 0x14,
+				Esc: 0x1B,
+				Space: 0x20,
+				PageUp: 0x21,
+				PageDown: 0x22,
+				End: 0x23,
+				Home: 0x24,
+				LeftArrow: 0x25,
+				UpArrow: 0x26,
+				RightArrow: 0x27,
+				DownArrow: 0x28,
+				Select: 0x29,
+				Print: 0x2A,
+				PrintScreen: 0x2C,
+				Insert: 0x2D,
+				Delete: 0x2E,
+			}
 		},
-		code: {
-			Backspace: 0x08,
-			Tab: 0x09,
-			Clear: 0x0C,
-			Enter: 0x0D,
-			Shift: 0x10,
-			Ctrl: 0x11,
-			Alt: 0x12,
-			PauseBreak: 0x13,
-			CapsLock: 0x14,
-			Esc: 0x1B,
-			Space: 0x20,
-			PageUp: 0x21,
-			PageDown: 0x22,
-			End: 0x23,
-			Home: 0x24,
-			LeftArrow: 0x25,
-			UpArrow: 0x26,
-			RightArrow: 0x27,
-			DownArrow: 0x28,
-			Select: 0x29,
-			Print: 0x2A,
-			PrintScreen: 0x2C,
-			Insert: 0x2D,
-			Delete: 0x2E,
+
+		controls: {
+			TextBox: 1,
+			Image1: 2,
+			Image2: 3,
+			LabelBox: 4,
+			ScrollBar: 5,
+			Button: 6,
+			List: 7,
+			Timer: 8,
+			Smack: 9,
+			ProgressBard: 10,
+			Popup: 11,
+			AccountList: 12
 		}
 	};
 

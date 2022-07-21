@@ -424,8 +424,9 @@ function main () {
 		Pather.moveTo(coords[0] + 71, coords[1] - 94);
 		Attack.securePosition(me.x, me.y, 40, 3000);
 
-		this.log("2");
 		Pather.moveTo(coords[0] + 23, coords[1] - 102);
+		Pather.makePortal();
+		this.log("2");
 		Pather.usePortal(null, me.name);
 
 		return true;
