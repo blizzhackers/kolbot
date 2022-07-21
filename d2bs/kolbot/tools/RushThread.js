@@ -999,7 +999,7 @@ function main () {
 		if (anya) {
 			Pather.moveToUnit(anya);
 			// Rusher should be able to interact so quester can get the potion without entering
-			sendPacket(1, 0x13, 4, 0x2, 4, anya.gid);
+			Packet.entityInteract(anya);
 			delay(1000 + me.ping);
 			me.cancel();
 		}

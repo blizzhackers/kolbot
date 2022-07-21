@@ -46,7 +46,7 @@ const MONSTER_KEYS = [
  *  .Minions = array of minions that can spawn with this unit
  */
 
-var MonsterData = Array(MONSTER_INDEX_COUNT);
+const MonsterData = Array(MONSTER_INDEX_COUNT);
 
 for (let i = 0; i < MonsterData.length; i++) {
 	let index = i;
@@ -101,7 +101,7 @@ Object.freeze(MonsterData);
  *  .LocaleString = locale string index for getLocaleString
  */
 
-var AreaData = new Array(AREA_INDEX_COUNT);
+const AreaData = new Array(AREA_INDEX_COUNT);
 
 for (let i = 0; i < AreaData.length; i++) {
 	let index = i;
@@ -134,7 +134,7 @@ for (let i = 0; i < AreaData.length; i++) {
 
 Object.freeze(AreaData);
 
-var GameData = {
+const GameData = {
 	townAreas: [0, 1, 40, 75, 103, 109],
 	monsterLevel: function (monsterID, areaID) {
 		if (me.diff) { // levels on nm/hell are determined by area, not by monster data

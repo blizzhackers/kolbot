@@ -185,7 +185,7 @@ function ControlBot() {
 
 		if (unit) {
 			do {
-				if (unit.name !== me.name && !unit.dead && shitList.indexOf(unit.name) === -1 && Misc.inMyParty(unit.name) && !unit.getState(16) && unit.distance <= 40) {
+				if (unit.name !== me.name && !unit.dead && shitList.indexOf(unit.name) === -1 && Misc.inMyParty(unit.name) && !unit.getState(sdk.states.Enchant) && unit.distance <= 40) {
 					Packet.enchant(unit);
 					delay(500);
 					chanted.push(unit.name);
@@ -197,7 +197,7 @@ function ControlBot() {
 
 		if (unit) {
 			do {
-				if (unit.getParent() && chanted.includes(unit.getParent().name) && !unit.getState(16) && unit.distance <= 40) {
+				if (unit.getParent() && chanted.includes(unit.getParent().name) && !unit.getState(sdk.states.Enchant) && unit.distance <= 40) {
 					Packet.enchant(unit);
 					delay(500);
 				}
@@ -303,7 +303,7 @@ function ControlBot() {
 			}
 		}
 
-		return tpTome.first();
+		return tpTome.last();
 	};
 
 	this.openPortal = function (nick) {

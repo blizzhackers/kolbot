@@ -37,8 +37,8 @@ Town.stash = function (stashGold = true) {
 
 	// Stash gold
 	if (stashGold) {
-		if (me.getStat(14) >= Config.StashGold && me.getStat(15) < 25e5 && this.openStash()) {
-			gold(me.getStat(14), 3);
+		if (me.getStat(sdk.stats.Gold) >= Config.StashGold && me.getStat(sdk.stats.GoldBank) < 25e5 && this.openStash()) {
+			gold(me.getStat(sdk.stats.Gold), 3);
 			delay(1000); // allow UI to initialize
 			me.cancel();
 		}

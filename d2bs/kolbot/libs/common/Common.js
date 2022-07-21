@@ -1371,7 +1371,7 @@ const Common = {
 			let realIAS = unit.getStat(sdk.stats.IAS);
 			let realFBR = unit.getStat(sdk.stats.FBR);
 			let realFHR = unit.getStat(sdk.stats.FHR);
-			// me.getStat(105) will return real FCR from gear + Config.FCR from char cfg
+			// me.getStat(sdk.stats.FasterCastRate) will return real FCR from gear + Config.FCR from char cfg
 
 			if (unit === me) {
 				realFCR -= Config.FCR;

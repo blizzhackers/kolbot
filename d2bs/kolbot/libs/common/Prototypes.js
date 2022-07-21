@@ -1510,9 +1510,9 @@ Unit.prototype.equip = function (destLocation = undefined) {
 
 	// Not an item, or unidentified, or not enough stats
 	if (this.type !== 4 || !this.getFlag(sdk.items.flags.Identified)
-		|| this.getStat(92) > me.getStat(12)
+		|| this.getStat(sdk.stats.LevelReq) > me.getStat(sdk.stats.Level)
 		|| this.dexreq > me.getStat(sdk.stats.Dexterity)
-		|| this.strreq > me.getStat(0)) {
+		|| this.strreq > me.getStat(sdk.stats.Strength)) {
 		return false;
 	}
 
@@ -2369,7 +2369,7 @@ Unit.prototype.__defineGetter__('attackable', function () {
 	// must be in same area
 	if (this.area !== me.area) return false;
 	// player and they are hostile
-	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && this.mode !== 17 && this.mode !== 0) return true;
+	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && !this.dead) return true;
 	// Dead monster
 	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) return false;
 	// Friendly monster/NPC

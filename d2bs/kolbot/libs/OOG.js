@@ -444,8 +444,8 @@ const DataFile = {
 		for (let i = 0; i < statArr.length; i += 1) {
 			switch (statArr[i]) {
 			case "experience":
-				obj.experience = me.getStat(13);
-				obj.level = me.getStat(12);
+				obj.experience = me.getStat(sdk.stats.Experience);
+				obj.level = me.getStat(sdk.stats.Level);
 
 				break;
 			case "lastArea":
@@ -461,7 +461,7 @@ const DataFile = {
 					break;
 				}
 
-				obj.gold = me.getStat(14) + me.getStat(15);
+				obj.gold = me.getStat(sdk.stats.Gold) + me.getStat(sdk.stats.GoldBank);
 
 				break;
 			case "name":
@@ -820,6 +820,7 @@ const ControlAction = {
 	makeAccount: function (info) {
 		me.blockMouse = true;
 
+		let openBnet = Profile().type === sdk.game.profiletype.OpenBattlenet;
 		let realms = {
 			"uswest": 0,
 			"useast": 1,
@@ -827,11 +828,16 @@ const ControlAction = {
 			"europe": 3
 		};
 		// cycle until in empty char screen
+		MainLoop:
 		while (getLocation() !== sdk.game.locations.CharSelectNoChars) {
 			switch (getLocation()) {
 			case sdk.game.locations.MainMenu:
 				ControlAction.clickRealm(realms[info.realm]);
-				Controls.BattleNet.click();
+				if (openBnet) {
+					Controls.OtherMultiplayer.click() && Controls.OpenBattleNet.click();
+				} else {
+					Controls.BattleNet.click();
+				}
 
 				break;
 			case sdk.game.locations.Login:
@@ -863,6 +869,12 @@ const ControlAction = {
 				break;
 			case sdk.game.locations.RegisterEmail:
 				Controls.EmailDontRegisterContinue.control ? Controls.EmailDontRegisterContinue.click() : Controls.EmailDontRegister.click();
+
+				break;
+			case sdk.game.locations.CharSelect:
+				if (openBnet) {
+					break MainLoop;
+				}
 
 				break;
 			default:
@@ -1210,7 +1222,21 @@ const ControlAction = {
 				} else {
 					Controls.CharCreateCharName.setText(info.charName);
 
-					!info.expansion && Controls.CharCreateExpansion.click();
+					if (!info.expansion) {
+						switch (info.charClass) {
+						case "druid":
+						case "assassin":
+							D2Bot.printToConsole("Error in profile name. Expansion characters cannot be made in classic", 9);
+							D2Bot.stop();
+
+							break;
+						default:
+							break;
+						}
+
+						Controls.CharCreateExpansion.click();
+					}
+
 					!info.ladder && Controls.CharCreateLadder.click();
 					info.hardcore && Controls.CharCreateHardcore.click();
 

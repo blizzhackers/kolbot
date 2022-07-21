@@ -15,7 +15,7 @@ const Item = {
 		// Not an item or unid
 		if (item.type !== 4 || !item.identified) return false;
 		// Higher requirements
-		if (item.getStat(92) > me.getStat(12) || item.dexreq > me.getStat(sdk.stats.Dexterity) || item.strreq > me.getStat(0)) return false;
+		if (item.getStat(sdk.stats.LevelReq) > me.getStat(sdk.stats.Level) || item.dexreq > me.getStat(sdk.stats.Dexterity) || item.strreq > me.getStat(sdk.stats.Strength)) return false;
 
 		return true;
 	},

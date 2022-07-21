@@ -299,7 +299,7 @@ const ClassAttack = {
 		// If one of the valid positions is a position im at already
 		for (let i = 0; i < positions.length; i += 1) {
 			if ((getDistance(me, positions[i][0], positions[i][1]) < 1
-				&& !CollMap.checkColl(unit, {x: positions[i][0], y: positions[i][1]}, 0x5 | 0x400 | 0x1000, 0))
+				&& !CollMap.checkColl(unit, {x: positions[i][0], y: positions[i][1]}, sdk.collision.BlockWalk, 0))
 				|| (getDistance(me, positions[i][0], positions[i][1]) <= 4 && me.getMobCount(6) > 2)) {
 				return true;
 			}
