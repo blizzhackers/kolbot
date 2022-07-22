@@ -5,7 +5,7 @@
 *
 */
 
-let Overrides = require('../modules/Override');
+let Overrides = require("../modules/Override");
 
 new Overrides.Override(Town, Town.goToTown, function(orignal, act, wpmenu) {
 	try {
@@ -502,7 +502,7 @@ function Rushee() {
 
 						switch (leader.area) {
 						case sdk.areas.ClawViperTempleLvl2:
-							Misc.poll(() => !!(Misc.checkQuest(sdk.quest.id.TheTaintedSun, sdk.quest.states.ReqComplete) || Misc.checkQuest(sdk.quest.id.TheTaintedSun, 13), Time.seconds(20), 1000));
+							Misc.poll(() => !!(Misc.checkQuest(sdk.quest.id.TheTaintedSun, sdk.quest.states.ReqComplete) || Misc.checkQuest(sdk.quest.id.TheTaintedSun, sdk.quest.states.PartyMemberComplete), Time.seconds(20), 1000));
 							if (Town.npcInteract("Drognan")) {
 								actions.shift();
 								console.debug("drognan done");
@@ -510,7 +510,7 @@ function Rushee() {
 
 							break;
 						case sdk.areas.ArcaneSanctuary:
-							Misc.poll(() => !!(Misc.checkQuest(sdk.quest.id.TheSummoner, sdk.quest.states.ReqComplete) || Misc.checkQuest(sdk.quest.id.TheSummoner, 13), Time.seconds(20), 1000));
+							Misc.poll(() => !!(Misc.checkQuest(sdk.quest.id.TheSummoner, sdk.quest.states.ReqComplete) || Misc.checkQuest(sdk.quest.id.TheSummoner, sdk.quest.states.PartyMemberComplete), Time.seconds(20), 1000));
 							if (Town.npcInteract("Atma")) {
 								actions.shift();
 								console.debug("atma done");
@@ -518,7 +518,7 @@ function Rushee() {
 
 							break;
 						case sdk.areas.Travincal:
-							Misc.poll(() => !!(Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, 4) || Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, 13) || Misc.checkQuest(sdk.quest.id.TheGuardian, 8), Time.seconds(20), 1000));
+							Misc.poll(() => !!(Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, 4) || Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, sdk.quest.states.PartyMemberComplete) || Misc.checkQuest(sdk.quest.id.TheGuardian, 8), Time.seconds(20), 1000));
 							if (Town.npcInteract("Cain")) {
 								actions.shift();
 								console.debug("cain done");
@@ -526,7 +526,7 @@ function Rushee() {
 
 							break;
 						case sdk.areas.ArreatSummit:
-							Misc.poll(() => (Misc.checkQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.ReqComplete) || Misc.checkQuest(sdk.quest.id.RiteofPassage, 13), Time.seconds(20), 1000));
+							Misc.poll(() => (Misc.checkQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.ReqComplete) || Misc.checkQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.PartyMemberComplete), Time.seconds(20), 1000));
 							if (Town.npcInteract("Malah")) {
 								actions.shift();
 								console.debug("malah done");

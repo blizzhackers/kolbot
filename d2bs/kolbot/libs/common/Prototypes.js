@@ -2469,7 +2469,7 @@ Unit.prototype.checkForMobs = function (givenSettings = {}) {
 		coll: 0,
 		spectype: sdk.units.monsters.spectype.All
 	}, givenSettings);
-	let mob = getUnit(sdk.unittype.Monster);
+	let mob = Game.getMonster();
 	let count = 0;
 	if (mob) {
 		do {

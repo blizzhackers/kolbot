@@ -1,7 +1,8 @@
+/* eslint-disable indent */
 // Sorceress config file
 
 /* Brief instructions:
- * Use any IDE to modify these files, Sublime Text 3, Visual Studio Code, NotePad++
+ * Use any IDE to modify these files, Visual Studio Code (recommended), Atom, Sublime Text 3 (good), NotePad++ (not recommended)
  * 
  * Basic JS Rules:
  * To comment out something, put // in front of that line
@@ -452,7 +453,11 @@ function LoadConfig() {
 	/* Attack config
 	 * To disable an attack, set it to -1
 	 * Skills MUST be POSITIVE numbers. For reference see ...\kolbot\sdk\skills.txt or use sdk.skills.SkillName see -> \kolbot\libs\modules\sdk.js
-	 * DO NOT LEAVE THE NEGATIVE SIGN IN FRONT OF THE SKILLID. GOOD: Config.AttackSkill[1] = 56; BAD: Config.AttackSkill[1] = -56;
+	 * DO NOT LEAVE THE NEGATIVE SIGN IN FRONT OF THE SKILLID.
+	 * GOOD: Config.AttackSkill[1] = 56;
+	 * GOOD: Config.AttackSkill[1] = sdk.skills.Meteor;
+	 * BAD: Config.AttackSkill[1] = -56;
+	 * BAD: Config.AttackSkill[1] = "meteor";
 	 */
 	// Wereform setup. Make sure you read Templates/Attacks.txt for attack skill format.
 	Config.Wereform = false; // 0 / false - don't shapeshift, 1 / "Werewolf" - change to werewolf, 2 / "Werebear" - change to werebear

@@ -1,7 +1,8 @@
+/* eslint-disable indent */
 // Necromancer config file
 
 /* Brief instructions:
- * Use any IDE to modify these files, Sublime Text 3, Visual Studio Code, NotePad++
+ * Use any IDE to modify these files, Visual Studio Code (recommended), Atom, Sublime Text 3 (good), NotePad++ (not recommended)
  * 
  * Basic JS Rules:
  * To comment out something, put // in front of that line
@@ -374,10 +375,10 @@ function LoadConfig() {
 	 * 1 = item is unlocked and will be dropped, stashed or sold.
 	 * If you don't change the default values, the bot won't stash items.
 	 */
-	Config.Inventory[0] = [0,0,0,0,0,0,0,0,0,0];
-	Config.Inventory[1] = [0,0,0,0,0,0,0,0,0,0];
-	Config.Inventory[2] = [0,0,0,0,0,0,0,0,0,0];
-	Config.Inventory[3] = [0,0,0,0,0,0,0,0,0,0];
+	Config.Inventory[0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	Config.Inventory[1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	Config.Inventory[2] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	Config.Inventory[3] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 	// ########################### //
 	/* ##### PICKIT SETTINGS ##### */
@@ -452,7 +453,11 @@ function LoadConfig() {
 	/* Attack config
 	 * To disable an attack, set it to -1
 	 * Skills MUST be POSITIVE numbers. For reference see ...\kolbot\sdk\skills.txt or use sdk.skills.SkillName see -> \kolbot\libs\modules\sdk.js
-	 * DO NOT LEAVE THE NEGATIVE SIGN IN FRONT OF THE SKILLID. GOOD: Config.AttackSkill[1] = 84; BAD: Config.AttackSkill[1] = -84;
+	 * DO NOT LEAVE THE NEGATIVE SIGN IN FRONT OF THE SKILLID.
+	 * GOOD: Config.AttackSkill[1] = 84;
+	 * GOOD: Config.AttackSkill[1] = sdk.skills.BoneSpear;
+	 * BAD: Config.AttackSkill[1] = -84;
+	 * BAD: Config.AttackSkill[1] = "BoneSpear";
 	 */
 	// Wereform setup. Make sure you read Templates/Attacks.txt for attack skill format.
 	Config.Wereform = false; // 0 / false - don't shapeshift, 1 / "Werewolf" - change to werewolf, 2 / "Werebear" - change to werebear

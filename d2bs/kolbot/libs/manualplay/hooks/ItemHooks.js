@@ -63,7 +63,7 @@ const ItemHooks = {
 					if (item.area === ActionHooks.currArea && item.onGroundOrDropping
 						&& (item.quality >= sdk.itemquality.Magic || ((item.normal || item.superior) && !this.ignoreItemTypes.includes(item.itemType)))) {
 						if (this.pickitEnabled) {
-							if ([Pickit.result.UNWANTED, Pickit.result.TRASH].indexOf(Pickit.checkItem(item).result) === -1) {
+							if ([Pickit.Result.UNWANTED, Pickit.Result.TRASH].indexOf(Pickit.checkItem(item).result) === -1) {
 								!this.getHook(item) && this.add(item);
 							}
 						} else {

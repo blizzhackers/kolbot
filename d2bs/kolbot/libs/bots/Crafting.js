@@ -1,7 +1,8 @@
 /**
-*	@filename	Crafting.js
-*	@author		kolton
-*	@desc		Part of CraftingSystem
+*  @filename    Crafting.js
+*  @author      kolton
+*  @desc        Part of CraftingSystem
+*
 */
 
 let info;

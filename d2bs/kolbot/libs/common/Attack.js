@@ -12,11 +12,11 @@ const Attack = {
 		sdk.monsters.BarricadeDoor1, sdk.monsters.BarricadeDoor2, sdk.monsters.BarricadeWall1, sdk.monsters.BarricadeWall2,
 		sdk.monsters.BarricadeTower, sdk.monsters.PrisonDoor
 	],
-	result: {
-		Failed: 0,
-		Success: 1,
-		CantAttack: 2, // need to fix the ambiguity between this result and Failed
-		NeedMana: 3
+	Result: {
+		FAILED: 0,
+		SUCCESS: 1,
+		CANTATTACK: 2, // need to fix the ambiguity between this result and Failed
+		NEEDMANA: 3
 	},
 
 	// Initialize attacks
@@ -259,7 +259,7 @@ const Attack = {
 
 			let result = ClassAttack.doAttack(target, attackCount % 15 === 0);
 
-			if (result === this.result.Failed) {
+			if (result === this.Result.FAILED) {
 				if (retry++ > 3) {
 					errorInfo = " (doAttack failed)";
 
@@ -267,11 +267,11 @@ const Attack = {
 				}
 
 				Packet.flash(me.gid);
-			} else if (result === this.result.CantAttack) {
+			} else if (result === this.Result.CANTATTACK) {
 				errorInfo = " (No valid attack skills)";
 
 				break;
-			} else if (result === this.result.NeedMana) {
+			} else if (result === this.Result.NEEDMANA) {
 				continue;
 			} else {
 				retry = 0;
@@ -310,15 +310,15 @@ const Attack = {
 		while (attackCount < Config.MaxAttackCount && target.attackable && !Attack.skipCheck(target)) {
 			let result = ClassAttack.doAttack(target, attackCount % 15 === 0);
 
-			if (result === this.result.Failed) {
+			if (result === this.Result.FAILED) {
 				if (retry++ > 3) {
 					break;
 				}
 
 				Packet.flash(me.gid);
-			} else if (result === this.result.CantAttack) {
+			} else if (result === this.Result.CANTATTACK) {
 				break;
-			} else if (result === this.result.NeedMana) {
+			} else if (result === this.Result.NEEDMANA) {
 				continue;
 			} else {
 				retry = 0;
@@ -453,11 +453,11 @@ const Attack = {
 				if (result) {
 					retry = 0;
 
-					if (result === this.result.CantAttack) {
+					if (result === this.Result.CANTATTACK) {
 						monsterList.shift();
 
 						continue;
-					} else if (result === this.result.NeedMana) {
+					} else if (result === this.Result.NEEDMANA) {
 						continue;
 					}
 
@@ -651,11 +651,11 @@ const Attack = {
 				if (result) {
 					retry = 0;
 
-					if (result === this.result.CantAttack) {
+					if (result === this.Result.CANTATTACK) {
 						monsterList.shift();
 
 						continue;
-					} else if (result === this.result.NeedMana) {
+					} else if (result === this.Result.NEEDMANA) {
 						continue;
 					}
 

@@ -328,7 +328,7 @@ const Common = {
 			if (!Skill.useTK(seal)) return false;
 
 			for (let i = 0; i < 5; i++) {
-				seal.distance > 13 && Attack.getIntoPosition(seal, 13, sdk.collision.Ranged);
+				seal.distance > 20 && Attack.getIntoPosition(seal, 18, sdk.collision.WallOrRanged);
 				
 				if (Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, seal) && Misc.poll(() => seal.mode, 1000, 100)) {
 					break;

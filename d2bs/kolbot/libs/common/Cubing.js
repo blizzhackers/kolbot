@@ -779,11 +779,11 @@ const Cubing = {
 		if (recipe.Index >= Recipe.HitPower.Helm && recipe.Index <= Recipe.Safety.Weapon) {
 			// Junk jewels (NOT matching a pickit entry)
 			if (unit.itemType === sdk.itemtype.Jewel) {
-				if (recipe.Enabled && ntipResult === Pickit.result.UNWANTED) {
+				if (recipe.Enabled && ntipResult === Pickit.Result.UNWANTED) {
 					return true;
 				}
 			// Main item, NOT matching a pickit entry
-			} else if (unit.magic && Math.floor(me.charlvl / 2) + Math.floor(unit.ilvl / 2) >= recipe.Level && ntipResult === Pickit.result.UNWANTED) {
+			} else if (unit.magic && Math.floor(me.charlvl / 2) + Math.floor(unit.ilvl / 2) >= recipe.Level && ntipResult === Pickit.Result.UNWANTED) {
 				return true;
 			}
 
@@ -796,17 +796,17 @@ const Cubing = {
 
 		if (upgradeUnique || upgradeRare || socketNormal) {
 			switch (true) {
-			case upgradeUnique && unit.unique && ntipResult === Pickit.result.WANTED: // Unique item matching pickit entry
-			case upgradeRare && unit.rare && ntipResult === Pickit.result.WANTED: // Rare item matching pickit entry
+			case upgradeUnique && unit.unique && ntipResult === Pickit.Result.WANTED: // Unique item matching pickit entry
+			case upgradeRare && unit.rare && ntipResult === Pickit.Result.WANTED: // Rare item matching pickit entry
 			case socketNormal && unit.normal && unit.sockets === 0: // Normal item matching pickit entry, no sockets
 				switch (recipe.Ethereal) {
 				case Roll.All:
 				case undefined:
-					return ntipResult === Pickit.result.WANTED;
+					return ntipResult === Pickit.Result.WANTED;
 				case Roll.Eth:
-					return unit.ethereal && ntipResult === Pickit.result.WANTED;
+					return unit.ethereal && ntipResult === Pickit.Result.WANTED;
 				case Roll.NonEth:
-					return !unit.ethereal && ntipResult === Pickit.result.WANTED;
+					return !unit.ethereal && ntipResult === Pickit.Result.WANTED;
 				}
 
 				return false;
@@ -816,15 +816,15 @@ const Cubing = {
 		}
 
 		if (recipe.Index === Recipe.Reroll.Magic) {
-			return (unit.magic && unit.ilvl >= recipe.Level && ntipResult === Pickit.result.UNWANTED);
+			return (unit.magic && unit.ilvl >= recipe.Level && ntipResult === Pickit.Result.UNWANTED);
 		}
 
 		if (recipe.Index === Recipe.Reroll.Rare) {
-			return (unit.rare && ntipResult === Pickit.result.UNWANTED);
+			return (unit.rare && ntipResult === Pickit.Result.UNWANTED);
 		}
 
 		if (recipe.Index === Recipe.Reroll.HighRare) {
-			if (recipe.Ingredients[0] === unit.classid && unit.rare && ntipResult === Pickit.result.UNWANTED) {
+			if (recipe.Ingredients[0] === unit.classid && unit.rare && ntipResult === Pickit.Result.UNWANTED) {
 				recipe.Enabled = true;
 
 				return true;
@@ -839,7 +839,7 @@ const Cubing = {
 		}
 
 		if (recipe.Index === Recipe.LowToNorm.Armor || recipe.Index === Recipe.LowToNorm.Weapon) {
-			return (unit.lowquality && ntipResult === Pickit.result.UNWANTED);
+			return (unit.lowquality && ntipResult === Pickit.Result.UNWANTED);
 		}
 
 		return false;
@@ -886,17 +886,17 @@ const Cubing = {
 						let result = Pickit.checkItem(cubeItems[j]);
 
 						switch (result.result) {
-						case Pickit.result.UNWANTED:
+						case Pickit.Result.UNWANTED:
 							Misc.itemLogger("Dropped", cubeItems[j], "doCubing");
 							cubeItems[j].drop();
 
 							break;
-						case Pickit.result.WANTED:
+						case Pickit.Result.WANTED:
 							Misc.itemLogger("Cubing Kept", cubeItems[j]);
 							Misc.logItem("Cubing Kept", cubeItems[j], result.line);
 
 							break;
-						case Pickit.result.CRAFTING:
+						case Pickit.Result.CRAFTING:
 							CraftingSystem.update(cubeItems[j]);
 
 							break;

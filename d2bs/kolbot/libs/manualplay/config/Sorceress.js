@@ -1,7 +1,8 @@
+/* eslint-disable indent */
 // Sorceress config file
 
 /* Brief instructions:
- * Use any IDE to modify these files, Sublime Text 3, Visual Studio Code, NotePad++
+ * Use any IDE to modify these files, Visual Studio Code (recommended), Atom, Sublime Text 3 (good), NotePad++ (not recommended)
  * 
  * Basic JS Rules:
  * To comment out something, put // in front of that line

@@ -656,7 +656,7 @@ const Town = {
 		// Only unid items or sellable junk (low level) should trigger a NPC visit
 		if (!list.some(item => {
 			let identified = item.identified;
-			return ((!identified || Config.LowGold > 0) && ([Pickit.result.UNID, Pickit.result.TRASH].includes(Pickit.checkItem(item).result)/*  || (!identified && AutoEquip.hasTier(item)) */));
+			return ((!identified || Config.LowGold > 0) && ([Pickit.Result.UNID, Pickit.Result.TRASH].includes(Pickit.checkItem(item).result)/*  || (!identified && AutoEquip.hasTier(item)) */));
 		})) {
 			return false;
 		}
@@ -680,12 +680,12 @@ const Town = {
 				switch (result.result) {
 				// Items for gold, will sell magics, etc. w/o id, but at low levels
 				// magics are often not worth iding.
-				case Pickit.result.TRASH:
+				case Pickit.Result.TRASH:
 					Misc.itemLogger("Sold", item);
 					item.sell();
 
 					break;
-				case Pickit.result.UNID:
+				case Pickit.Result.UNID:
 					let idTool = tome ? tome : Town.getIdTool();
 
 					if (idTool) {
@@ -723,7 +723,7 @@ const Town = {
 					//!Item.autoEquipCheck(item) && (result.result = 0);
 
 					switch (result.result) {
-					case Pickit.result.WANTED:
+					case Pickit.Result.WANTED:
 						// Couldn't id autoEquip item. Don't log it.
 						// if (result.result === 1 && Config.AutoEquip && !item.indentifed && Item.autoEquipCheck(item)) {
 						// 	break;
@@ -733,15 +733,15 @@ const Town = {
 						Misc.logItem("Kept", item, result.line);
 
 						break;
-					case Pickit.result.UNID:
-					case Pickit.result.RUNEWORD: // (doesn't trigger normally)
+					case Pickit.Result.UNID:
+					case Pickit.Result.RUNEWORD: // (doesn't trigger normally)
 						break;
-					case Pickit.result.CUBING:
+					case Pickit.Result.CUBING:
 						Misc.itemLogger("Kept", item, "Cubing-Town");
 						Cubing.update();
 
 						break;
-					case Pickit.result.CRAFTING:
+					case Pickit.Result.CRAFTING:
 						Misc.itemLogger("Kept", item, "CraftSys-Town");
 						CraftingSystem.update(item);
 
@@ -800,12 +800,12 @@ const Town = {
 				//!Item.autoEquipCheck(unids[i]) && (result = 0);
 
 				switch (result.result) {
-				case Pickit.result.UNWANTED:
+				case Pickit.Result.UNWANTED:
 					Misc.itemLogger("Dropped", unids[i], "cainID");
 					unids[i].drop();
 
 					break;
-				case Pickit.result.WANTED:
+				case Pickit.Result.WANTED:
 					Misc.itemLogger("Kept", unids[i]);
 					Misc.logItem("Kept", unids[i], result.line);
 
@@ -835,7 +835,7 @@ const Town = {
 			//result.result === 1 && !item.getFlag(sdk.items.flags.Identified) && Item.hasTier(item) && (result.result = -1);
 
 			// unid item that should be identified
-			if (result.result === Pickit.result.UNID) {
+			if (result.result === Pickit.Result.UNID) {
 				this.identifyItem(item, tome, Config.FieldID.PacketID);
 				delay(me.ping + 1);
 				result = Pickit.checkItem(item);
@@ -843,7 +843,7 @@ const Town = {
 				//!Item.autoEquipCheck(item) && (result.result = 0);
 
 				switch (result.result) {
-				case Pickit.result.UNWANTED:
+				case Pickit.Result.UNWANTED:
 					Misc.itemLogger("Dropped", item, "fieldID");
 
 					if (Config.DroppedItemsAnnounce.Enable && Config.DroppedItemsAnnounce.Quality.includes(item.quality)) {
@@ -857,7 +857,7 @@ const Town = {
 					item.drop();
 
 					break;
-				case Pickit.result.WANTED:
+				case Pickit.Result.WANTED:
 					Misc.itemLogger("Field Kept", item);
 					Misc.logItem("Field Kept", item, result.line);
 
@@ -953,7 +953,7 @@ const Town = {
 		for (let i = 0; i < items.length; i += 1) {
 			let result = Pickit.checkItem(items[i]);
 
-			if (result.result === Pickit.result.WANTED/*  && Item.autoEquipCheck(items[i]) */) {
+			if (result.result === Pickit.Result.WANTED/*  && Item.autoEquipCheck(items[i]) */) {
 				try {
 					if (Storage.Inventory.CanFit(items[i]) && me.gold >= items[i].getItemCost(sdk.items.cost.ToBuy)) {
 						Misc.itemLogger("Shopped", items[i]);
@@ -1033,18 +1033,18 @@ const Town = {
 						//!Item.autoEquipCheck(newItem) && (result = 0);
 
 						switch (result.result) {
-						case Pickit.result.WANTED:
+						case Pickit.Result.WANTED:
 							Misc.itemLogger("Gambled", newItem);
 							Misc.logItem("Gambled", newItem, result.line);
 							list.push(newItem.gid);
 
 							break;
-						case Pickit.result.CUBING:
+						case Pickit.Result.CUBING:
 							list.push(newItem.gid);
 							Cubing.update();
 
 							break;
-						case Pickit.result.CRAFTING:
+						case Pickit.Result.CRAFTING:
 							CraftingSystem.update(newItem);
 
 							break;
@@ -1594,7 +1594,7 @@ const Town = {
 					let pickResult = Pickit.checkItem(items[i]).result;
 					
 					switch (true) {
-					case pickResult > Pickit.result.UNWANTED && pickResult < Pickit.result.TRASH:
+					case pickResult > Pickit.Result.UNWANTED && pickResult < Pickit.Result.TRASH:
 					case Cubing.keepItem(items[i]):
 					case Runewords.keepItem(items[i]):
 					case CraftingSystem.keepItem(items[i]):
@@ -2007,9 +2007,9 @@ const Town = {
 			items.forEach(function (item) {
 				let result = Pickit.checkItem(item).result;
 				switch (result) {
-				case Pickit.result.UNWANTED:
+				case Pickit.Result.UNWANTED:
 					return drop.push(item);
-				case Pickit.result.TRASH:
+				case Pickit.Result.TRASH:
 					return sell.push(item);
 				}
 				return false;

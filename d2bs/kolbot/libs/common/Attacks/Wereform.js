@@ -12,7 +12,7 @@ const ClassAttack = {
 	maulBoost: 0,
 
 	doAttack: function (unit, preattack) {
-		if (!unit) return Attack.result.Success;
+		if (!unit) return Attack.Result.SUCCESS;
 		let gid = unit.gid;
 
 		if (Config.MercWatch && Town.needMerc()) {
@@ -20,7 +20,7 @@ const ClassAttack = {
 
 			if (Town.visitTown()) {
 				if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
-					return Attack.result.Success; // lost reference to the mob we were attacking
+					return Attack.Result.SUCCESS; // lost reference to the mob we were attacking
 				}
 			}
 		}
@@ -46,13 +46,13 @@ const ClassAttack = {
 			&& (Skill.wereFormCheck(Config.AttackSkill[0]) || !me.shapeshifted)) {
 			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.WallOrRanged)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), sdk.collision.WallOrRanged, true)) {
-					return Attack.result.Failed;
+					return Attack.Result.FAILED;
 				}
 			}
 
 			Skill.cast(Config.AttackSkill[0], Skill.getHand(Config.AttackSkill[0]), unit);
 
-			return Attack.result.Success;
+			return Attack.Result.SUCCESS;
 		}
 
 		// Rebuff Armageddon
@@ -128,17 +128,17 @@ const ClassAttack = {
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, skill) {
 		// unit reference no longer valid or it died
-		if (!unit || unit.dead) return Attack.result.Success;
+		if (!unit || unit.dead) return Attack.Result.SUCCESS;
 		// No valid skills can be found
-		if (skill < 0) return Attack.result.CantAttack;
+		if (skill < 0) return Attack.Result.CANTATTACK;
 
 		if (Skill.getRange(skill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
-			return Attack.result.Failed;
+			return Attack.Result.FAILED;
 		}
 
 		if (unit.distance > Skill.getRange(skill) || checkCollision(me, unit, sdk.collision.WallOrRanged)) {
 			if (!Attack.getIntoPosition(unit, Skill.getRange(skill), sdk.collision.WallOrRanged, true)) {
-				return Attack.result.Failed;
+				return Attack.Result.FAILED;
 			}
 		}
 
@@ -146,6 +146,6 @@ const ClassAttack = {
 
 		Misc.poll(() => !me.skillDelay, 1000, 40);
 
-		return Attack.result.Success;
+		return Attack.Result.SUCCESS;
 	}
 };

@@ -213,7 +213,7 @@ CraftingSystem.validItem = function (item) {
 	switch (item.itemType) {
 	case sdk.itemtype.Jewel:
 		// Use junk jewels only
-		return NTIP.CheckItem(item) === Pickit.result.UNWANTED;
+		return NTIP.CheckItem(item) === Pickit.Result.UNWANTED;
 	}
 
 	return true;

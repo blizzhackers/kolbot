@@ -41,7 +41,7 @@ const Pickit = {
 		}
 	},
 
-	result: {
+	Result: {
 		UNID: -1,
 		UNWANTED: 0,
 		WANTED: 1,
@@ -63,47 +63,47 @@ const Pickit = {
 		let rval = NTIP.CheckItem(unit, false, true);
 
 		// make sure we have essentials - no pickit files loaded
-		if (rval.result === Pickit.result.UNWANTED && Config.PickitFiles.length === 0 && Pickit.essentials.includes(unit.itemType) && this.canPick(unit)) {
+		if (rval.result === Pickit.Result.UNWANTED && Config.PickitFiles.length === 0 && Pickit.essentials.includes(unit.itemType) && this.canPick(unit)) {
 			return {
-				result: Pickit.result.WANTED,
+				result: Pickit.Result.WANTED,
 				line: null
 			};
 		}
 
 		if ((unit.classid === sdk.items.runes.Ort || unit.classid === sdk.items.runes.Ral) && Town.repairIngredientCheck(unit)) {
 			return {
-				result: Pickit.result.UTILITY,
+				result: Pickit.Result.UTILITY,
 				line: null
 			};
 		}
 
 		if (CraftingSystem.checkItem(unit)) {
 			return {
-				result: Pickit.result.CRAFTING,
+				result: Pickit.Result.CRAFTING,
 				line: null
 			};
 		}
 
 		if (Cubing.checkItem(unit)) {
 			return {
-				result: Pickit.result.CUBING,
+				result: Pickit.Result.CUBING,
 				line: null
 			};
 		}
 
 		if (Runewords.checkItem(unit)) {
 			return {
-				result: Pickit.result.RUNEWORD,
+				result: Pickit.Result.RUNEWORD,
 				line: null
 			};
 		}
 
-		if (rval.result === Pickit.result.UNWANTED && !getBaseStat("items", unit.classid, "quest") && !Town.ignoredItemTypes.includes(unit.itemType)
+		if (rval.result === Pickit.Result.UNWANTED && !getBaseStat("items", unit.classid, "quest") && !Town.ignoredItemTypes.includes(unit.itemType)
 			&& !unit.questItem && (unit.isInInventory || (me.gold < Config.LowGold || (me.gold < 500000 && Config.PickitFiles.length === 0)))) {
 			// Gold doesn't take up room, just pick it up
 			if (unit.classid === sdk.items.Gold) {
 				return {
-					result: Pickit.result.TRASH,
+					result: Pickit.Result.TRASH,
 					line: null
 				};
 			}
@@ -114,13 +114,13 @@ const Pickit = {
 				if (itemValuePerSquare >= 2000) {
 					// If total gold is less than 500k pick up anything worth 2k gold per square to sell in town.
 					return {
-						result: Pickit.result.TRASH,
+						result: Pickit.Result.TRASH,
 						line: "Valuable Item: " + unit.getItemCost(sdk.items.cost.ToSell)
 					};
 				} else if (itemValuePerSquare >= 10) {
 					// If total gold is less than LowGold setting pick up anything worth 10 gold per square to sell in town.
 					return {
-						result: Pickit.result.TRASH,
+						result: Pickit.Result.TRASH,
 						line: "LowGold Item: " + unit.getItemCost(sdk.items.cost.ToSell)
 					};
 				}
@@ -226,10 +226,10 @@ const Pickit = {
 		if (items) {
 			for (let i = 0; i < items.length; i += 1) {
 				switch (this.checkItem(items[i]).result) {
-				case Pickit.result.UNID:
+				case Pickit.Result.UNID:
 					// For low level chars that can't actually get id scrolls -> prevent an infinite loop
 					return (me.gold > 100);
-				case Pickit.result.UNWANTED:
+				case Pickit.Result.UNWANTED:
 					break;
 				default: // Check if a kept item can be stashed
 					if (Town.canStash(items[i])) {
@@ -350,7 +350,7 @@ const Pickit = {
 			DataFile.updateStats("lastArea");
 
 			switch (status) {
-			case Pickit.result.WANTED:
+			case Pickit.Result.WANTED:
 				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + (keptLine ? ") (" + keptLine + ")" : ")"));
 
 				if (this.ignoreLog.indexOf(stats.type) === -1) {
@@ -359,19 +359,19 @@ const Pickit = {
 				}
 
 				break;
-			case Pickit.result.CUBING:
+			case Pickit.Result.CUBING:
 				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Cubing)");
 				Misc.itemLogger("Kept", item, "Cubing " + me.findItems(item.classid).length);
 				Cubing.update();
 
 				break;
-			case Pickit.result.RUNEWORD:
+			case Pickit.Result.RUNEWORD:
 				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Runewords)");
 				Misc.itemLogger("Kept", item, "Runewords");
 				Runewords.update(stats.classid, gid);
 
 				break;
-			case Pickit.result.CRAFTING:
+			case Pickit.Result.CRAFTING:
 				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Crafting System)");
 				CraftingSystem.update(item);
 
