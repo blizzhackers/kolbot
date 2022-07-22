@@ -1385,7 +1385,7 @@ const Town = {
 
 				if (bowCheck) {
 					let quiver = bowCheck === "bow" ? "aqv" : "cqv";
-					let myQuiver = me.getItem(quiver, 1);
+					let myQuiver = me.getItem(quiver, sdk.itemmode.Equipped);
 					!!myQuiver && myQuiver.drop();
 					
 					npc = this.initNPC("Repair", "repair");

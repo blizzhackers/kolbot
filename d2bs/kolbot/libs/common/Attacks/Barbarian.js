@@ -89,7 +89,7 @@ const ClassAttack = {
 			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
 				let walk = Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
-				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4, walk)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.Ranged, walk)) {
 					return Attack.Result.FAILED;
 				}
 			}
