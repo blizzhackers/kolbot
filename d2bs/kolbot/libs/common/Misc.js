@@ -1807,7 +1807,7 @@ const Misc = {
 		me.switchWeapons(Precast.getBetterSlot(skill));
 
 		for (let i = 0; i < 3; i += 1) {
-			Skill.cast(skill, sdk.skill.hand.Right);
+			Skill.cast(skill, sdk.skills.hand.Right);
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 2000) {
