@@ -171,8 +171,8 @@ const Attack = {
 		if (me.classic) return false;
 
 		let merc;
-		// check if we have a merc
-		Config.UseMerc && (merc = Misc.poll(() => me.getMerc(), 1000, 100));
+		// check if we have a merc and they aren't dead
+		Config.UseMerc && !me.mercrevivecost && (merc = Misc.poll(() => me.getMerc(), 1000, 100));
 
 		// Check merc infinity
 		!!merc && (this.infinity = merc.checkItem({name: sdk.locale.items.Infinity}).have);

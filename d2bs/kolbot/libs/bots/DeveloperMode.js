@@ -228,9 +228,7 @@ function DeveloperMode() {
 
 	while (!done) {
 		if (action) {
-			if (!isIncluded("bots/" + action + ".js")) {
-				include("bots/" + action + ".js");
-			}
+			includeIfNotIncluded("bots/" + action + ".js");
 
 			if (!UnitInfo.cleared) {
 				UnitInfo.remove();

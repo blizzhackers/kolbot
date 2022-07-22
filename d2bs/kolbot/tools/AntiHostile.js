@@ -79,11 +79,11 @@ function main() {
 	// Find hostile player Units
 	this.findPlayer = function () {
 		for (let i = 0; i < hostiles.length; i += 1) {
-			let player = getUnit(0, hostiles[i]);
+			let player = Game.getPlayer(hostiles[i]);
 
 			if (player) {
 				do {
-					if (player.mode !== 0 && player.mode !== 17 && getPlayerFlag(me.gid, player.gid, 8) && !player.inTown && !me.inTown) {
+					if (!player.dead && getPlayerFlag(me.gid, player.gid, 8) && !player.inTown && !me.inTown) {
 						return player;
 					}
 				} while (player.getNext());

@@ -274,7 +274,7 @@ const ClassAttack = {
 
 	getHammerPosition: function (unit) {
 		let x, y, positions, baseId = getBaseStat("monstats", unit.classid, "baseid");
-		let	size = getBaseStat("monstats2", baseId, "sizex");
+		let size = getBaseStat("monstats2", baseId, "sizex");
 
 		// in case base stat returns something outrageous
 		(typeof size !== "number" || size < 1 || size > 3) && (size = 3);
