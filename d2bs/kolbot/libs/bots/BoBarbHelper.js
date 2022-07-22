@@ -1,12 +1,12 @@
 /**
-*  @filename    Baal.js
+*  @filename    BoBarbHelper.js
 *  @author      nag0k
 *  @desc        give Battle Orders buff modded for hardcore, with barbarian waiting whole game on Catacombs 2 wp by default
 *               get the required lines for character config files from ...\libs\config\_BaseConfigFile.js
 *
 */
 
-const BoBarbHelper = () => {
+function BoBarbHelper () {
 	if (!me.barbarian && Config.BoBarbHelper.Mode !== 0) return true;
 
 	const townNearbyMonster = true; // go to town if monsters nearby
@@ -101,4 +101,4 @@ const BoBarbHelper = () => {
 	Town.goToTown();
 
 	return true;
-};
+}
