@@ -239,6 +239,18 @@ const Game = {
 			print(msg);
 		};
 
+		const timers = {};
+		console.time = function (name) {
+			name && (timers[name] = Date.now());
+		};
+
+		console.timeEnd = function (name) {
+			if (timers[name]) {
+				this.log("[ÿc8" + name + "ÿc0] :: ÿc4Durationÿc0: " + (Date.now() - timers[name]) + "ms");
+				delete timers[name];
+			}
+		};
+
 		return console;
 
 	})();

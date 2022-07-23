@@ -757,7 +757,7 @@ const Skill = {
 		// account for lag, state 121 doesn't kick in immediately
 		if (this.isTimed(skillId)) {
 			for (let i = 0; i < 10; i += 1) {
-				if ([4, 9].includes(me.mode) || me.skillDelay) {
+				if ([sdk.units.player.mode.GettingHit, sdk.units.player.mode.Blocking].includes(me.mode) || me.skillDelay) {
 					break;
 				}
 
