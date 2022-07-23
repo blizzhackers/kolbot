@@ -90,7 +90,12 @@ function includeCommonLibs () {
 }
 
 function includeIfNotIncluded (file = "") {
-	if (!isIncluded(file)) return include(file);
+	if (!isIncluded(file)) {
+		if (!include(file)) {
+			console.error("Failed to include " + file);
+			console.trace();
+		}
+	}
 	return true;
 }
 
@@ -241,13 +246,32 @@ const Game = {
 
 		const timers = {};
 		console.time = function (name) {
-			name && (timers[name] = Date.now());
+			name && (timers[name] = getTickCount());
 		};
 
 		console.timeEnd = function (name) {
-			if (timers[name]) {
-				this.log("[ÿc8" + name + "ÿc0] :: ÿc4Durationÿc0: " + (Date.now() - timers[name]) + "ms");
+			let currTimer = timers[name];
+			if (currTimer) {
+				this.log("[ÿc8" + name + "ÿc0] :: ÿc4Durationÿc0: " + (getTickCount() - currTimer) + "ms");
 				delete timers[name];
+			}
+		};
+
+		console.trace = function () {
+			let stackLog = "";
+			let stack = new Error().stack;
+			if (stack) {
+				stack = stack.split("\n");
+				stack && typeof stack === "object" && stack.reverse();
+
+				for (let i = 0; i < stack.length - 1; i += 1) {
+					if (stack[i]) {
+						stackLog += stack[i].substr(0, stack[i].indexOf("@") + 1) + stack[i].substr(stack[i].lastIndexOf("\\") + 1, stack[i].length - 1);
+						i < stack.length - 1 && (stackLog += ", ");
+					}
+				}
+
+				this.log("[ÿc8StackTraceÿc0] :: " + stackLog);
 			}
 		};
 
