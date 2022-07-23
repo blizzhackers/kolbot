@@ -572,11 +572,11 @@ const Town = {
 	},
 
 	// Get the highest potion from current npc
-	getPotion: function (npc, type) {
+	getPotion: function (npc, type, highestPot = 5) {
 		if (!type) return false;
 
 		if (type === "hp" || type === "mp") {
-			for (let i = 5; i > 0; i -= 1) {
+			for (let i = highestPot; i > 0; i -= 1) {
 				let result = npc.getItem(type + i);
 
 				if (result) {

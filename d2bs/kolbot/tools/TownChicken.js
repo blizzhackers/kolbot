@@ -66,6 +66,11 @@ function main() {
 	let checkHP = Config.TownHP > 0;
 	let checkMP = Config.TownMP > 0;
 
+	// START
+	// test for getUnit bug
+	let test = Game.getMonster();
+	test === null && console.warn("getUnit is bugged");
+
 	while (true) {
 		if (!me.inTown && (townCheck
 			// should TownHP/MP check be in toolsthread?

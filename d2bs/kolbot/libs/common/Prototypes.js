@@ -9,7 +9,7 @@
 // Ensure these are in polyfill.js
 !isIncluded("Polyfill.js") && include("Polyfill.js");
 // Make sure we have our util functions
-!isIncluded("Util.js") && include("Util.js");
+!isIncluded("common/Util.js") && include("common/Util.js");
 
 let sdk = require("../modules/sdk");
 

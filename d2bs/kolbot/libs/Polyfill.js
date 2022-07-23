@@ -435,12 +435,16 @@ if (!Array.prototype.flat) {
 		writable: true
 	});
 }
+// eslint-disable-next-line block-scoped-var
 if (typeof global === "undefined") {
+	// eslint-disable-next-line no-var
 	var global = this;
 }
 
+// eslint-disable-next-line block-scoped-var
 if (!global.hasOwnProperty("require")) {
 	let cache;
+	// eslint-disable-next-line block-scoped-var
 	Object.defineProperty(global, "require", {
 		get: function () {
 			if (cache) return cache;
@@ -483,20 +487,16 @@ String.prototype.padStart = function padStart(targetLength, padString) {
 
 String.prototype.repeat = function(count) {
 	"use strict";
-	if (this == null) {
-		throw new TypeError("can't convert " + this + " to object");
-	}
+	if (this == null) throw new TypeError("can't convert " + this + " to object");
 	let str = "" + this;
 	count = +count;
+	// eslint-disable-next-line no-self-compare
 	if (count !== count) {
 		count = 0;
 	}
-	if (count < 0) {
-		throw new RangeError("repeat count must be non-negative");
-	}
-	if (count === Infinity) {
-		throw new RangeError("repeat count must be less than infinity");
-	}
+	if (count < 0) throw new RangeError("repeat count must be non-negative");
+	if (count === Infinity) throw new RangeError("repeat count must be less than infinity");
+
 	count = Math.floor(count);
 	if (str.length === 0 || count === 0) {
 		return "";
@@ -519,3 +519,114 @@ String.prototype.repeat = function(count) {
 	}
 	return rpt;
 };
+
+(function (global, print) {
+	global.console = global.console || (function () {
+		const console = {};
+		const argMap = el => typeof el === "object" && el /*not null */ && JSON.stringify(el) || el;
+
+		console.log = function (...args) {
+			// use call to avoid type errors
+			print.call(null, args.map(argMap).join(","));
+		};
+
+		console.printDebug = true;
+		console.debug = function (...args) {
+			if (console.printDebug) {
+				const stack = new Error().stack.match(/[^\r\n]+/g);
+				let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf("\\") + 1) || "unknown:0";
+				this.log("[ÿc:Debugÿc0] ÿc:[" + filenameAndLine + "]ÿc0 " + args.map(argMap).join(","));
+			}
+		};
+
+		console.warn = function (...args) {
+			const stack = new Error().stack.match(/[^\r\n]+/g);
+			let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf("\\") + 1) || "unknown:0";
+			this.log("[ÿc9Warningÿc0] ÿc9[" + filenameAndLine + "]ÿc0 " + args.map(argMap).join(","));
+		};
+
+		console.error = function (error = "") {
+			let msg, source, stack;
+			
+			if (typeof error === "string") {
+				msg = error;
+			} else {
+				source = error.fileName.substring(error.fileName.lastIndexOf("\\") + 1, error.fileName.length);
+				msg = "ÿc1Error @ ÿc2[" + source + " line :: " + error.lineNumber + "ÿc2] ÿc1(" + error.message + ")";
+
+				if (error.hasOwnProperty("stack")) {
+					stack = error.stack;
+
+					if (stack) {
+						stack = stack.split("\n");
+
+						if (stack && typeof stack === "object") {
+							stack.reverse();
+						}
+					}
+				}
+			}
+
+			print(msg);
+		};
+
+		console.errorReport = function (error = "") {
+			let msg, source, stack;
+			
+			if (typeof error === "string") {
+				msg = error;
+			} else {
+				source = error.fileName.substring(error.fileName.lastIndexOf("\\") + 1, error.fileName.length);
+				msg = "ÿc1Error @ ÿc2[" + source + " line :: " + error.lineNumber + "ÿc2] ÿc1(" + error.message + ")";
+
+				if (error.hasOwnProperty("stack")) {
+					stack = error.stack;
+
+					if (stack) {
+						stack = stack.split("\n");
+
+						if (stack && typeof stack === "object") {
+							stack.reverse();
+						}
+					}
+				}
+			}
+
+			print(msg);
+		};
+
+		const timers = {};
+		console.time = function (name) {
+			name && (timers[name] = getTickCount());
+		};
+
+		console.timeEnd = function (name) {
+			let currTimer = timers[name];
+			if (currTimer) {
+				this.log("[ÿc8" + name + "ÿc0] :: ÿc4Durationÿc0: " + (getTickCount() - currTimer) + "ms");
+				delete timers[name];
+			}
+		};
+
+		console.trace = function () {
+			let stackLog = "";
+			let stack = new Error().stack;
+			if (stack) {
+				stack = stack.split("\n");
+				stack && typeof stack === "object" && stack.reverse();
+
+				for (let i = 0; i < stack.length - 1; i += 1) {
+					if (stack[i]) {
+						stackLog += stack[i].substr(0, stack[i].indexOf("@") + 1) + stack[i].substr(stack[i].lastIndexOf("\\") + 1, stack[i].length - 1);
+						i < stack.length - 1 && (stackLog += ", ");
+					}
+				}
+
+				this.log("[ÿc8StackTraceÿc0] :: " + stackLog);
+			}
+		};
+
+		return console;
+
+	})();
+})([].filter.constructor("return this")(), print);
