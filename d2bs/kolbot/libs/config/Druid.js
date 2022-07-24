@@ -159,21 +159,36 @@ function LoadConfig() {
 	// ############################ //
 	/* ##### LEECHING SCRIPTS ##### */
 	// ############################ //
+	
 	Scripts.TristramLeech = false; // Enters Tristram, attempts to stay close to the leader and will try and help kill.
 		Config.TristramLeech.Helper = false; // If set to true the character will help attack.
 	Scripts.TravincalLeech = false; // Enters portal at back of Travincal.
 		Config.TravincalLeech.Helper = true; // If set to true the character will teleport to the stairs and help attack.
 	
-	// ## Team MF
+	// ##### MFHelper ##### //
 	// Run the same MF run as the MFLeader. Leader must have Config.MFLeader = true and Config.PublicMode > 0
+	// NOTE: MFHelper ends when Config.Leader starts Diablo or Baal. Use one of the specific helper scripts as they are better suited
 	Scripts.MFHelper = false;
 	
+	// ###################### //
+	/* ##### Pure Leech ##### */
+	// ###################### //
+
 	Scripts.Wakka = false; // Walking chaos leecher with auto leader assignment, stays at safe distance from the leader
 		Config.Wakka.Wait = 1; // Minutes to wait for leader
 		Config.Wakka.StopAtLevel = 99; // Stop wakka when this level is reached
 		Config.Wakka.StopProfile = false; // when StopAtLevel is reached, set to true to stop the profile, false to end script and move on to next
 		Config.SkipIfBaal = true; // end script it leader is in throne of destruction
 	Scripts.SealLeecher = false; // Enter safe portals to Chaos. Leader should run SealLeader.
+	Scripts.AutoBaal = false; // Baal leecher with auto leader assignment
+		Config.AutoBaal.FindShrine = false; // false = disabled, 1 = search after hot tp message, 2 = search as soon as leader is found
+		Config.AutoBaal.LeechSpot = [15115, 5050]; // X, Y coords of Throne Room leech spot
+		Config.AutoBaal.LongRangeSupport = false; // Cast long distance skills from a safe spot
+	
+	// ########################## //
+	/* ##### Helper SCRIPTS ##### */
+	// ########################## //
+
 	Scripts.DiabloHelper = false; // Chaos helper, kills monsters and doesn't open seals on its own.
 		Config.DiabloHelper.Wait = 5; // minutes to wait for a runner to be in Chaos. If Config.Leader is set, it will wait only for the leader.
 		Config.DiabloHelper.Entrance = true; // Start from entrance. Set to false to start from star.
@@ -183,10 +198,6 @@ function LoadConfig() {
 		Config.DiabloHelper.SafePrecast = true; // take random WP to safely precast
 		Config.DiabloHelper.SealOrder = ["vizier", "seis", "infector"]; // the order in which to clear the seals. If seals are excluded, they won't be checked unless diablo fails to appear
 		Config.DiabloHelper.RecheckSeals = false; // Teleport to each seal and double-check that it was opened and boss was killed if Diablo doesn't appear
-	Scripts.AutoBaal = false; // Baal leecher with auto leader assignment
-		Config.AutoBaal.FindShrine = false; // false = disabled, 1 = search after hot tp message, 2 = search as soon as leader is found
-		Config.AutoBaal.LeechSpot = [15115, 5050]; // X, Y coords of Throne Room leech spot
-		Config.AutoBaal.LongRangeSupport = false; // Cast long distance skills from a safe spot
 	Scripts.BaalHelper = false;
 		Config.BaalHelper.Wait = 5; // minutes to wait for a runner to be in Throne
 		Config.BaalHelper.KillNihlathak = false; // Kill Nihlathak before going to Throne
