@@ -131,7 +131,7 @@ function ShopBot() {
 					NTIP.CheckItem(items[i], this.pickEntries)
 			) {
 				beep();
-				D2Bot.printToConsole("Match found!", 7);
+				D2Bot.printToConsole("Match found!", sdk.colors.D2Bot.DarkGold);
 				delay(1000);
 
 				if (npc.startTrade(menuId)) {

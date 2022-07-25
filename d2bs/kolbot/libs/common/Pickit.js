@@ -109,19 +109,20 @@ const Pickit = {
 			}
 
 			if (!this.invoLocked) {
-				let itemValuePerSquare = unit.getItemCost(sdk.items.cost.ToSell) / (unit.sizex * unit.sizey);
+				const itemValue = unit.getItemCost(sdk.items.cost.ToSell);
+				const itemValuePerSquare = itemValue / (unit.sizex * unit.sizey);
 
 				if (itemValuePerSquare >= 2000) {
 					// If total gold is less than 500k pick up anything worth 2k gold per square to sell in town.
 					return {
 						result: Pickit.Result.TRASH,
-						line: "Valuable Item: " + unit.getItemCost(sdk.items.cost.ToSell)
+						line: "Valuable Item: " + itemValue
 					};
 				} else if (itemValuePerSquare >= 10) {
 					// If total gold is less than LowGold setting pick up anything worth 10 gold per square to sell in town.
 					return {
 						result: Pickit.Result.TRASH,
-						line: "LowGold Item: " + unit.getItemCost(sdk.items.cost.ToSell)
+						line: "LowGold Item: " + itemValue
 					};
 				}
 			}
@@ -177,7 +178,7 @@ const Pickit = {
 					if (!canFit) {
 						// Check if any of the current inventory items can be stashed or need to be identified and eventually sold to make room
 						if (this.canMakeRoom()) {
-							print("ÿc7Trying to make room for " + this.itemColor(pickList[0]) + pickList[0].name);
+							console.log("ÿc7Trying to make room for " + this.itemColor(pickList[0]) + pickList[0].name);
 
 							// Go to town and do town chores
 							if (Town.visitTown()) {
@@ -188,14 +189,14 @@ const Pickit = {
 							}
 
 							// Town visit failed - abort
-							print("ÿc7Not enough room for " + this.itemColor(pickList[0]) + pickList[0].name);
+							console.log("ÿc7Not enough room for " + this.itemColor(pickList[0]) + pickList[0].name);
 
 							return false;
 						}
 
 						// Can't make room - trigger automule
 						Misc.itemLogger("No room for", pickList[0]);
-						print("ÿc7Not enough room for " + this.itemColor(pickList[0]) + pickList[0].name);
+						console.log("ÿc7Not enough room for " + this.itemColor(pickList[0]) + pickList[0].name);
 
 						needMule = true;
 					}
@@ -315,7 +316,7 @@ const Pickit = {
 
 				if (stats.classid === sdk.items.Gold) {
 					if (!item.getStat(sdk.stats.Gold) || item.getStat(sdk.stats.Gold) < stats.gold) {
-						print("ÿc7Picked up " + stats.color + (item.getStat(sdk.stats.Gold) ? (item.getStat(sdk.stats.Gold) - stats.gold) : stats.gold) + " " + stats.name);
+						console.log("ÿc7Picked up " + stats.color + (item.getStat(sdk.stats.Gold) ? (item.getStat(sdk.stats.Gold) - stats.gold) : stats.gold) + " " + stats.name);
 
 						return true;
 					}
@@ -324,12 +325,12 @@ const Pickit = {
 				if (item.mode !== sdk.itemmode.onGround && item.mode !== sdk.itemmode.Dropping) {
 					switch (stats.classid) {
 					case sdk.items.Key:
-						print("ÿc7Picked up " + stats.color + stats.name + " ÿc7(" + Town.checkKeys() + "/12)");
+						console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc7(" + Town.checkKeys() + "/12)");
 
 						return true;
 					case sdk.items.ScrollofTownPortal:
 					case sdk.items.ScrollofIdentify:
-						print("ÿc7Picked up " + stats.color + stats.name + " ÿc7(" + Town.checkScrolls(stats.classid === sdk.items.ScrollofTownPortal ? "tbk" : "ibk") + "/20)");
+						console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc7(" + Town.checkScrolls(stats.classid === sdk.items.ScrollofTownPortal ? "tbk" : "ibk") + "/20)");
 
 						return true;
 					}
@@ -474,9 +475,9 @@ const Pickit = {
 			}
 
 			break;
-		case sdk.itemtype.SmallCharm: // Small Charm
-		case sdk.itemtype.MediumCharm: // Large Charm
-		case sdk.itemtype.LargeCharm: // Grand Charm
+		case sdk.itemtype.SmallCharm:
+		case sdk.itemtype.LargeCharm:
+		case sdk.itemtype.GrandCharm:
 			if (unit.unique) {
 				charm = me.getItem(unit.classid, sdk.itemmode.inStorage);
 
@@ -573,7 +574,7 @@ const Pickit = {
 
 			break;
 		case undefined: // Yes, it does happen
-			print("undefined item (!?)");
+			console.warn("undefined item (!?)");
 
 			return false;
 		}

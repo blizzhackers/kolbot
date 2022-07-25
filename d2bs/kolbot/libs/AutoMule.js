@@ -206,7 +206,7 @@ const AutoMule = {
 				break;
 			case "busy":
 			case "begin":
-				D2Bot.printToConsole("Mule profile is busy.", 9);
+				D2Bot.printToConsole("Mule profile is busy.", sdk.colors.D2Bot.Red);
 
 				break MainLoop;
 			case "ready":
@@ -235,7 +235,7 @@ const AutoMule = {
 				}
 
 				if (muleObj.continuousMule && muleObj.skipMuleResponse && !me.ingame) {
-					D2Bot.printToConsole("Unable to join mule game", 9);
+					D2Bot.printToConsole("Unable to join mule game", sdk.colors.D2Bot.Red);
 
 					break MainLoop;
 				}
@@ -248,7 +248,7 @@ const AutoMule = {
 			}
 
 			if (failCount >= 260) {
-				D2Bot.printToConsole("No response from mule profile.", 9);
+				D2Bot.printToConsole("No response from mule profile.", sdk.colors.D2Bot.Red);
 
 				break;
 			}
@@ -414,7 +414,7 @@ const AutoMule = {
 			}
 
 			if (getTickCount() - tick > timeout) {
-				D2Bot.printToConsole("Mule didn't rejoin. Picking up items.", 9);
+				D2Bot.printToConsole("Mule didn't rejoin. Picking up items.", sdk.colors.D2Bot.Red);
 				Misc.useItemLog = false; // Don't log items picked back up in town.
 				Pickit.pickItems();
 

@@ -51,7 +51,7 @@ function IPHunter() {
 		delay(1000);
 	}
 
-	D2Bot.printToConsole("IPHunter: IP was [" + ip + "]", 10);
+	D2Bot.printToConsole("IPHunter: IP was [" + ip + "]", sdk.colors.D2Bot.Gray);
 
 	return true;
 }

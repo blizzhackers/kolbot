@@ -146,7 +146,7 @@ Misc.dropItems = function (fromLoc) {
 				let item = items.shift();
 
 				if (item.classid === sdk.quest.item.Cube
-					|| (item.isInInventory && [sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(item.itemType) && Storage.Inventory.IsLocked(item, Config.Inventory))) {
+					|| (item.isInInventory && [sdk.itemtype.SmallCharm, sdk.itemtype.LargeCharm, sdk.itemtype.GrandCharm].includes(item.itemType) && Storage.Inventory.IsLocked(item, Config.Inventory))) {
 					continue;
 				} else {
 					item.drop();

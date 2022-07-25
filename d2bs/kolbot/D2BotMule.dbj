@@ -221,21 +221,21 @@ function pickItems () {
 
 				// Torch handling
 				if (muleMode > 0 && item.classid === sdk.items.LargeCharm && item.unique && !Pickit.canPick(item)) {
-					D2Bot.printToConsole("Mule already has a Torch.", 7);
+					D2Bot.printToConsole("Mule already has a Torch.", sdk.colors.D2Bot.DarkGold);
 
 					rval = "next";
 				}
 
 				// Anni handling
 				if (muleMode > 0 && item.classid === sdk.items.SmallCharm && item.unique && !Pickit.canPick(item)) {
-					D2Bot.printToConsole("Mule already has an Anni.", 7);
+					D2Bot.printToConsole("Mule already has an Anni.", sdk.colors.D2Bot.DarkGold);
 
 					rval = "next";
 				}
 
 				// Gheed's Fortune handling
 				if (item.classid === sdk.items.GrandCharm && item.unique && !Pickit.canPick(item)) {
-					D2Bot.printToConsole("Mule already has Gheed's.", 7);
+					D2Bot.printToConsole("Mule already has Gheed's.", sdk.colors.D2Bot.DarkGold);
 
 					rval = "next";
 				}
@@ -827,7 +827,7 @@ function main () {
 					}
 
 					if (status !== "begin") {
-						D2Bot.printToConsole("Nobody joined - stopping.", 9);
+						D2Bot.printToConsole("Nobody joined - stopping.", sdk.colors.D2Bot.Red);
 						D2Bot.stop(me.profile, true);
 					}
 				}
@@ -852,7 +852,7 @@ function main () {
 						}
 
 						MuleData.write(obj);
-						D2Bot.printToConsole("Done muling.", 7);
+						D2Bot.printToConsole("Done muling.", sdk.colors.D2Bot.DarkGold);
 						sendCopyData(null, master, 10, JSON.stringify({status: "quit"}));
 						D2Bot.stop(me.profile, true);
 
@@ -873,7 +873,7 @@ function main () {
 						obj.fullChars.push(me.name);
 						MuleData.write(obj);
 						nextChar();
-						D2Bot.printToConsole("Mule full, getting next character.", 7);
+						D2Bot.printToConsole("Mule full, getting next character.", sdk.colors.D2Bot.DarkGold);
 
 						if (Starter.Config.MinGameTime && getTickCount() - tick < Starter.Config.MinGameTime * 1000) {
 							while (getTickCount() - tick < Starter.Config.MinGameTime * 1000) {

@@ -2521,6 +2521,14 @@ item: {
 			Socketed: 6 // Item socketed in item
 		},
 
+		node: {
+			NotOnPlayer: 0,
+			Storage: 1,
+			Belt: 2,
+			Equipped: 3,
+			Cursor: 4,
+		},
+
 		// Same apply's for merc with less things available
 		body: {
 			None: 0,
@@ -2638,8 +2646,8 @@ item: {
 			AntidotePotion: 80,
 			ThawingPotion: 81,
 			SmallCharm: 82,
-			MediumCharm: 83,
-			LargeCharm: 84,
+			LargeCharm: 83,
+			GrandCharm: 84,
 			AmazonBow: 85,
 			AmazonSpear: 86,
 			AmazonJavelin: 87,

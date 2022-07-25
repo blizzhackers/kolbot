@@ -932,8 +932,8 @@ Unit.prototype.getStatEx = function (id, subid) {
 			switch (this.itemType) {
 			case sdk.itemtype.Jewel:
 			case sdk.itemtype.SmallCharm:
-			case sdk.itemtype.MediumCharm: // todo - fix this in sdk
 			case sdk.itemtype.LargeCharm:
+			case sdk.itemtype.GrandCharm:
 				// defense is the same as plusdefense for these items
 				return this.getStat(sdk.stats.Defense);
 			}
@@ -1822,7 +1822,7 @@ Object.defineProperties(Unit.prototype, {
 	isEquippedCharm: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return (this.location === sdk.storage.Inventory && [sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(this.itemType));
+			return (this.location === sdk.storage.Inventory && [sdk.itemtype.SmallCharm, sdk.itemtype.LargeCharm, sdk.itemtype.GrandCharm].includes(this.itemType));
 		}
 	},
 	isInInventory: {

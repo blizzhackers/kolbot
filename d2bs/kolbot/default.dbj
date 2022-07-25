@@ -126,7 +126,7 @@ function main () {
 
 	// Check for experience decrease -> log death. Skip report if life chicken is disabled.
 	if (stats.name === me.name && me.getStat(sdk.stats.Experience) < stats.experience && Config.LifeChicken > 0) {
-		D2Bot.printToConsole("You died in last game", 9);
+		D2Bot.printToConsole("You died in last game", sdk.colors.D2Bot.Red);
 		D2Bot.printToConsole("Experience decreased by " + (stats.experience - me.getStat(sdk.stats.Experience)), 9);
 		DataFile.updateStats("deaths");
 		D2Bot.updateDeaths();
@@ -139,7 +139,7 @@ function main () {
 	(Config.TownCheck || Config.TownHP > 0 || Config.TownMP > 0) && load("tools/TownChicken.js");
 
 	if (Config.PublicMode) {
-		Config.PublicMode === true ? require('libs/modules/SimpleParty') : load("tools/Party.js");
+		Config.PublicMode === true ? require("libs/modules/SimpleParty") : load("tools/Party.js");
 	}
 	
 	Config.AntiHostile && load("tools/AntiHostile.js");
@@ -164,7 +164,6 @@ function main () {
 		me.hpPercent <= 10 && Town.heal() && me.cancelUIFlags();
 
 		if (Config.DebugMode) {
-			// log our current running threads, useful for traceing stack-walk
 			delay(2000);
 			let script = getScript();
 

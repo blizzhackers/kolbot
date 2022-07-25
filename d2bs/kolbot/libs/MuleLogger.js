@@ -33,7 +33,7 @@ const MuleLogger = {
 	inGameCheck: function () {
 		if (getScript("D2BotMuleLog.dbj") && this.LogGame[0] && me.gamename.match(this.LogGame[0], "i")) {
 			print("ÿc4MuleLoggerÿc0: Logging items on " + me.account + " - " + me.name + ".");
-			D2Bot.printToConsole("MuleLogger: Logging items on " + me.account + " - " + me.name + ".", 7);
+			D2Bot.printToConsole("MuleLogger: Logging items on " + me.account + " - " + me.name + ".", sdk.colors.D2Bot.DarkGold);
 			this.logChar();
 			let stayInGame = this.IngameTime;
 			let tick = getTickCount() + rand(1500, 1750) * 1000; // trigger anti-idle every ~30 minutes

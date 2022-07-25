@@ -1569,7 +1569,7 @@ const Misc = {
 			// Tiara/Diadem
 			code = ["ci2", "ci3"].includes(unit.code) ? unit.code : (getBaseStat("items", unit.classid, "normcode") || unit.code);
 			code = code.replace(" ", "");
-			[sdk.itemtype.Ring, sdk.itemtype.Amulet, sdk.itemtype.Jewel, sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(unit.itemType) && (code += (unit.gfx + 1));
+			[sdk.itemtype.Ring, sdk.itemtype.Amulet, sdk.itemtype.Jewel, sdk.itemtype.SmallCharm, sdk.itemtype.LargeCharm, sdk.itemtype.GrandCharm].includes(unit.itemType) && (code += (unit.gfx + 1));
 		}
 
 		return code;
@@ -1629,7 +1629,7 @@ const Misc = {
 			if (tempArray[i]) {
 				code = tempArray[i].code;
 
-				if ([sdk.itemtype.Ring, sdk.itemtype.Amulet, sdk.itemtype.Jewel, sdk.itemtype.SmallCharm, sdk.itemtype.MediumCharm, sdk.itemtype.LargeCharm].includes(tempArray[i].itemType)) {
+				if ([sdk.itemtype.Ring, sdk.itemtype.Amulet, sdk.itemtype.Jewel, sdk.itemtype.SmallCharm, sdk.itemtype.LargeCharm, sdk.itemtype.GrandCharm].includes(tempArray[i].itemType)) {
 					code += (tempArray[i].gfx + 1);
 				}
 			} else {

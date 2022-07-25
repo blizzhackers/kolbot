@@ -477,7 +477,7 @@ function OrgTorch() {
 		this.getFade();
 		Town.goToTown(5);
 		console.log("Making organs.");
-		D2Bot.printToConsole("OrgTorch: Making organs.", 7);
+		D2Bot.printToConsole("OrgTorch: Making organs.", sdk.colors.D2Bot.DarkGold);
 		Town.move("stash");
 
 		// there are already open portals lets check our info on them
@@ -525,7 +525,7 @@ function OrgTorch() {
 
 		if (!tristOpen) {
 			console.log("Making torch");
-			D2Bot.printToConsole("OrgTorch: Making torch.", 7);
+			D2Bot.printToConsole("OrgTorch: Making torch.", sdk.colors.D2Bot.DarkGold);
 			portal = this.openPortal(portalMode.UberTristram);
 		} else {
 			portal = Pather.getPortal(sdk.areas.UberTristram);

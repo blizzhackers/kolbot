@@ -1718,7 +1718,7 @@ const Town = {
 			}
 
 			if (getTickCount() - timer > 30000) {
-				D2Bot.printToConsole("Failed to get corpse, stopping.", 9);
+				D2Bot.printToConsole("Failed to get corpse, stopping.", sdk.colors.D2Bot.Red);
 				D2Bot.stop();
 			}
 

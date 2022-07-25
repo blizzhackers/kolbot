@@ -415,11 +415,11 @@ function Questing () {
 			}
 		}
 
-		j === 3 && D2Bot.printToConsole("Questing :: " + quests[i][1] + " quest failed.", 9);
+		j === 3 && D2Bot.printToConsole("Questing :: " + quests[i][1] + " quest failed.", sdk.colors.D2Bot.Red);
 	}
 
 	if (Config.Questing.StopProfile || Loader.scriptList.length === 1) {
-		D2Bot.printToConsole("All quests done. Stopping profile.", 5);
+		D2Bot.printToConsole("All quests done. Stopping profile.", sdk.colors.D2Bot.Green);
 		D2Bot.stop();
 	} else {
 		log("ÿc9(Questing) :: ÿc2Complete");

@@ -107,7 +107,7 @@ CraftingSystem.outOfGameCheck = function () {
 		let worker = CraftingSystem.getWorker();
 
 		if (worker && worker.game) {
-			D2Bot.printToConsole("CraftingSystem: Transfering items.", 7);
+			D2Bot.printToConsole("CraftingSystem: Transfering items.", sdk.colors.D2Bot.DarkGold);
 			D2Bot.updateStatus("CraftingSystem: In game.");
 			addEventListener("scriptmsg", scriptMsg);
 

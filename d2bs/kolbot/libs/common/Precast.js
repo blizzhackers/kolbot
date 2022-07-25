@@ -515,7 +515,7 @@ const Precast = new function () {
 				if (me.getMinionCount(minionType) === count) {
 					return true;
 				} else {
-					console.debug("(Precast) :: Failed to summon minion " + skillId);
+					console.warn("Failed to summon minion " + skillId);
 
 					return false;
 				}

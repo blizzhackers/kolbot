@@ -5,7 +5,7 @@
 *
 */
 !isIncluded("Polyfill.js") && include("Polyfill.js");
-include("common/Util.js");
+!isIncluded("common/Util.js") && include("common/Util.js");
 
 let sdk = require("./modules/sdk");
 let Controls = require("./modules/Control");
@@ -1226,7 +1226,7 @@ const ControlAction = {
 						switch (info.charClass) {
 						case "druid":
 						case "assassin":
-							D2Bot.printToConsole("Error in profile name. Expansion characters cannot be made in classic", 9);
+							D2Bot.printToConsole("Error in profile name. Expansion characters cannot be made in classic", sdk.colors.D2Bot.Red);
 							D2Bot.stop();
 
 							break;
@@ -2121,7 +2121,7 @@ const Starter = {
 						if (getLocation() === sdk.game.locations.OkCenteredErrorPopUp) {
 							// Exit from that pop-up
 							Controls.OkCentered.click();
-							D2Bot.printToConsole("Character died", 9);
+							D2Bot.printToConsole("Character died", sdk.colors.D2Bot.Red);
 							D2Bot.stop();
 						} else {
 							Starter.loginRetry++;
