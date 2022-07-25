@@ -941,22 +941,22 @@ const Pather = {
 	moveToExit: function (targetArea, use = false, clearPath = false) {
 		if (targetArea === undefined) return false;
 
-		let tick = getTickCount();
-		console.log("ÿc7Start :: ÿc8(moveToExit)");
+		console.time("moveToExit");
+		console.info(true, "ÿc7MyArea: ÿc0" + Pather.getAreaName(me.area) + " ÿc7TargetArea: ÿc0" + Pather.getAreaName(targetArea));
 		let areas = Array.isArray(targetArea) ? targetArea : [targetArea];
 		let finalDest = areas.last();
 
 		for (let i = 0; i < areas.length; i += 1) {
 			if (me.area === areas[i]) {
-				console.log("ÿc7(moveToExit) :: ÿc0Already in: " + Pather.getAreaName(areas[i]));
+				console.debug("Already in: " + Pather.getAreaName(areas[i]));
 				continue;
 			}
 
-			console.log("ÿc7(moveToExit) :: ÿc0Moving from: " + Pather.getAreaName(me.area) + " to " + Pather.getAreaName(areas[i]));
+			console.info(null, "ÿc0Moving from: " + Pather.getAreaName(me.area) + " to " + Pather.getAreaName(areas[i]));
 			
-			let t1 = getTickCount();
+			Config.DebugMode && console.time("getArea");
 			let area = Misc.poll(() => getArea(me.area));
-			Config.DebugMode && console.log("Took: " + (getTickCount() - t1) + " to find get area");
+			Config.DebugMode && console.timeEnd("getArea");
 
 			if (!area) throw new Error("moveToExit: error in getArea()");
 
@@ -1051,7 +1051,7 @@ const Pather = {
 			}
 		}
 
-		console.log("ÿc7End ÿc8(moveToExit) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(finalDest) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (Time.format(getTickCount() - tick)));
+		console.info(false, "ÿc7targetArea: ÿc0" + this.getAreaName(finalDest) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area), "moveToExit");
 		delay(300);
 
 		return (use && finalDest ? me.area === finalDest : true);
@@ -1276,7 +1276,6 @@ const Pather = {
 			while (getTickCount() - tick < 3000) {
 				if ((!targetArea && me.area !== preArea) || me.area === targetArea) {
 					delay(200);
-					//Packet.flash(me.gid);
 
 					return true;
 				}
@@ -1325,7 +1324,7 @@ const Pather = {
 		}
 
 		this.broadcastIntent(targetArea);
-		console.log("ÿc7Start ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area));
+		console.info(true, "ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area));
 		let wpTick = getTickCount();
 
 		for (let i = 0; i < 12; i += 1) {
@@ -1440,7 +1439,7 @@ const Pather = {
 					while (getTickCount() - tick < Math.max(Math.round((i + 1) * 1000 / (i / 5 + 1)), pingDelay * 2)) {
 						if (me.area === targetArea) {
 							delay((1500 + (pingDelay * i)));
-							console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (Time.format(getTickCount() - wpTick)));
+							console.info(false, "ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (Time.format(getTickCount() - wpTick)));
 
 							return true;
 						}
@@ -1471,7 +1470,7 @@ const Pather = {
 		if (me.area === targetArea) {
 			// delay to allow act to init - helps with crashes
 			delay(500);
-			console.log("ÿc7End ÿc8(useWaypoint) ÿc0:: ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (Time.format(getTickCount() - wpTick)));
+			console.info(false, "ÿc7targetArea: ÿc0" + this.getAreaName(targetArea) + " ÿc7myArea: ÿc0" + this.getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (Time.format(getTickCount() - wpTick)));
 
 			return true;
 		}
@@ -1815,8 +1814,9 @@ const Pather = {
 	*/
 	journeyTo: function (area) {
 		if (area === undefined) return false;
+		console.time("journeyTo");
 
-		let unit, target, retry = 0;
+		let target, retry = 0;
 
 		if (area !== sdk.areas.DurielsLair) {
 			target = this.plotCourse(area, me.area);
@@ -1825,7 +1825,7 @@ const Pather = {
 			this.wpAreas.indexOf(me.area) === -1 && (target.useWP = true);
 		}
 
-		console.log(target.course);
+		console.info(true, "Course :: " + target.course);
 		area === sdk.areas.PandemoniumFortress && me.area === sdk.areas.DuranceofHateLvl3 && (target.useWP = false);
 		target.useWP && Town.goToTown();
 
@@ -1849,13 +1849,15 @@ const Pather = {
 		}
 
 		while (target.course.length) {
-			if (me.area === target.course[0] && target.course.shift()) {
+			const currArea = me.area;
+			const targetArea = target.course[0];
+			let unit;
+
+			if (currArea === targetArea && target.course.shift()) {
 				continue;
 			}
 
-			let currArea = me.area;
-
-			console.log("ÿc7(journeyTo) :: ÿc0Moving from: " + Pather.getAreaName(currArea) + " to " + Pather.getAreaName(target.course[0]));
+			console.info(null, "ÿc0Moving from: " + Pather.getAreaName(currArea) + " to " + Pather.getAreaName(targetArea));
 
 			if (!me.inTown) {
 				Precast.doPrecast(false);
@@ -1865,31 +1867,31 @@ const Pather = {
 				}
 			}
 
-			if (me.inTown && this.nextAreas[currArea] !== target.course[0] && this.wpAreas.includes(target.course[0]) && getWaypoint(this.wpAreas.indexOf(target.course[0]))) {
-				this.useWaypoint(target.course[0], !this.plotCourse_openedWpMenu);
+			if (me.inTown && this.nextAreas[currArea] !== targetArea && this.wpAreas.includes(targetArea) && getWaypoint(this.wpAreas.indexOf(targetArea))) {
+				this.useWaypoint(targetArea, !this.plotCourse_openedWpMenu);
 				Precast.doPrecast(false);
-			} else if (currArea === sdk.areas.StonyField && target.course[0] === sdk.areas.Tristram) {
+			} else if (currArea === sdk.areas.StonyField && targetArea === sdk.areas.Tristram) {
 				// Stony Field -> Tristram
 				this.moveToPreset(currArea, sdk.unittype.Monster, sdk.monsters.preset.Rakanishu, 0, 0, false, true);
 				Misc.poll(() => this.usePortal(sdk.areas.Tristram), 5000, 1000);
-			} else if (currArea === sdk.areas.LutGholein && target.course[0] === sdk.areas.A2SewersLvl1) {
+			} else if (currArea === sdk.areas.LutGholein && targetArea === sdk.areas.A2SewersLvl1) {
 				// Lut Gholein -> Sewers Level 1 (use Trapdoor)
 				this.moveToPreset(currArea, sdk.unittype.Stairs, sdk.units.exits.preset.A2SewersTrapDoor);
 				this.useUnit(sdk.unittype.Object, sdk.units.TrapDoorA2, sdk.areas.A2SewersLvl1);
-			} else if (currArea === sdk.areas.A2SewersLvl2 && target.course[0] === sdk.areas.A2SewersLvl1) {
+			} else if (currArea === sdk.areas.A2SewersLvl2 && targetArea === sdk.areas.A2SewersLvl1) {
 				// Sewers Level 2 -> Sewers Level 1
-				Pather.moveToExit(target.course[0], false);
+				Pather.moveToExit(targetArea, false);
 				this.useUnit(sdk.unittype.Stairs, sdk.units.A2UndergroundUpStairs, sdk.areas.A2SewersLvl1);
-			} else if (currArea === sdk.areas.PalaceCellarLvl3 && target.course[0] === sdk.areas.ArcaneSanctuary) {
+			} else if (currArea === sdk.areas.PalaceCellarLvl3 && targetArea === sdk.areas.ArcaneSanctuary) {
 				// Palace -> Arcane
 				this.moveTo(10073, 8670);
 				this.usePortal(null);
-			} else if (currArea === sdk.areas.ArcaneSanctuary && target.course[0] === sdk.areas.PalaceCellarLvl3) {
+			} else if (currArea === sdk.areas.ArcaneSanctuary && targetArea === sdk.areas.PalaceCellarLvl3) {
 				// Arcane Sanctuary -> Palace Cellar 3
 				Skill.haveTK ? this.moveNearPreset(currArea, sdk.unittype.Object, sdk.units.ArcaneSanctuaryPortal, 20) : this.moveToPreset(currArea, sdk.unittype.Object, sdk.units.ArcaneSanctuaryPortal);
 				unit = Misc.poll(() => Game.getObject(sdk.units.ArcaneSanctuaryPortal));
 				unit && Pather.useUnit(sdk.unittype.Object, sdk.units.ArcaneSanctuaryPortal, sdk.areas.PalaceCellarLvl3);
-			} else if (currArea === sdk.areas.ArcaneSanctuary && target.course[0] === sdk.areas.CanyonofMagic) {
+			} else if (currArea === sdk.areas.ArcaneSanctuary && targetArea === sdk.areas.CanyonofMagic) {
 				// Arcane Sanctuary -> Canyon of the Magic
 				this.moveToPreset(currArea, sdk.unittype.Object, sdk.units.Journal);
 				unit = Game.getObject(sdk.units.RedPortal);
@@ -1907,17 +1909,17 @@ const Pather = {
 						}
 					}
 				}
-			} else if (currArea === sdk.areas.CanyonofMagic && target.course[0] === sdk.areas.DurielsLair) {
+			} else if (currArea === sdk.areas.CanyonofMagic && targetArea === sdk.areas.DurielsLair) {
 				// Canyon -> Duriels Lair
 				this.moveToExit(getRoom().correcttomb, true);
 				this.moveToPreset(me.area, sdk.unittype.Object, sdk.units.HoradricStaffHolder);
 				unit = Misc.poll(() => Game.getObject(sdk.units.PortaltoDurielsLair));
 				unit && Pather.useUnit(sdk.unittype.Object, sdk.units.PortaltoDurielsLair, sdk.areas.DurielsLair);
-			} else if (currArea === sdk.areas.Travincal && target.course[0] === sdk.areas.DuranceofHateLvl1) {
+			} else if (currArea === sdk.areas.Travincal && targetArea === sdk.areas.DuranceofHateLvl1) {
 				// Trav -> Durance Lvl 1
 				Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.units.DuranceEntryStairs);
 				this.useUnit(sdk.unittype.Object, sdk.units.DuranceEntryStairs, sdk.areas.DuranceofHateLvl1);
-			} else if (currArea === sdk.areas.DuranceofHateLvl3 && target.course[0] === sdk.areas.PandemoniumFortress) {
+			} else if (currArea === sdk.areas.DuranceofHateLvl3 && targetArea === sdk.areas.PandemoniumFortress) {
 				// Durance Lvl 3 -> Pandemonium Fortress
 				if (me.getQuest(sdk.quest.id.TheGuardian, sdk.quest.states.Completed) !== 1) {
 					console.log(sdk.colors.Red + "(journeyTo) :: Incomplete Quest");
@@ -1927,56 +1929,57 @@ const Pather = {
 				Pather.moveTo(17581, 8070);
 				delay(250 + me.ping * 2);
 				this.useUnit(sdk.unittype.Object, sdk.units.RedPortalToAct4, sdk.areas.PandemoniumFortress);
-			} else if (currArea === sdk.areas.Harrogath && target.course[0] === sdk.areas.BloodyFoothills) {
+			} else if (currArea === sdk.areas.Harrogath && targetArea === sdk.areas.BloodyFoothills) {
 				// Harrogath -> Bloody Foothills
 				this.moveTo(5026, 5095);
 				this.openUnit(sdk.unittype.Object, sdk.units.Act5Gate);
-				this.moveToExit(target.course[0], true);
-			} else if (currArea === sdk.areas.Harrogath && target.course[0] === sdk.areas.NihlathaksTemple) {
+				this.moveToExit(targetArea, true);
+			} else if (currArea === sdk.areas.Harrogath && targetArea === sdk.areas.NihlathaksTemple) {
 				// Harrogath -> Nihlathak's Temple
 				Town.move(NPC.Anya);
 				this.usePortal(sdk.areas.NihlathaksTemple);
-			} else if (currArea === sdk.areas.FrigidHighlands && target.course[0] === sdk.areas.Abaddon) {
+			} else if (currArea === sdk.areas.FrigidHighlands && targetArea === sdk.areas.Abaddon) {
 				// Abaddon
 				this.moveToPreset(sdk.areas.FrigidHighlands, sdk.unittype.Object, sdk.units.RedPortal);
 				this.usePortal(sdk.areas.Abaddon);
-			} else if (currArea === sdk.areas.ArreatPlateau && target.course[0] === sdk.areas.PitofAcheron) {
+			} else if (currArea === sdk.areas.ArreatPlateau && targetArea === sdk.areas.PitofAcheron) {
 				// Pits of Archeon
 				this.moveToPreset(sdk.areas.ArreatPlateau, sdk.unittype.Object, sdk.units.RedPortal);
 				this.usePortal(sdk.areas.PitofAcheron);
-			} else if (currArea === sdk.areas.FrozenTundra && target.course[0] === sdk.areas.InfernalPit) {
+			} else if (currArea === sdk.areas.FrozenTundra && targetArea === sdk.areas.InfernalPit) {
 				// Infernal Pit
 				this.moveToPreset(sdk.areas.FrozenTundra, sdk.unittype.Object, sdk.units.RedPortal);
 				this.usePortal(sdk.areas.InfernalPit);
-			} else if (target.course[0] === sdk.areas.MooMooFarm) {
+			} else if (targetArea === sdk.areas.MooMooFarm) {
 				// Moo Moo farm
 				currArea !== sdk.areas.RogueEncampment && Town.goToTown(1);
-				Town.move("stash") && (unit = this.getPortal(target.course[0]));
+				Town.move("stash") && (unit = this.getPortal(targetArea));
 				unit && this.usePortal(null, null, unit);
-			} else if ([sdk.areas.MatronsDen, sdk.areas.ForgottenSands, sdk.areas.FurnaceofPain, sdk.areas.UberTristram].includes(target.course[0])) {
+			} else if ([sdk.areas.MatronsDen, sdk.areas.ForgottenSands, sdk.areas.FurnaceofPain, sdk.areas.UberTristram].includes(targetArea)) {
 				// Uber Portals
 				currArea !== sdk.areas.Harrogath && Town.goToTown(5);
-				Town.move("stash") && (unit = this.getPortal(target.course[0]));
+				Town.move("stash") && (unit = this.getPortal(targetArea));
 				unit && this.usePortal(null, null, unit);
 			} else {
-				this.moveToExit(target.course[0], true);
+				this.moveToExit(targetArea, true);
 			}
 
 			// give time for act to load, increases stabilty of changing acts
 			delay(500);
 
-			if (me.area === target.course[0]) {
+			if (me.area === targetArea) {
 				target.course.shift();
 				retry = 0;
 			} else {
 				if (retry > 3) {
-					console.log(sdk.colors.Red + "Failed to journeyTo " + Pather.getAreaName(area) + " currentarea: " + Pather.getAreaName(me.area));
+					console.warn("Failed to journeyTo " + Pather.getAreaName(area) + " currentarea: " + Pather.getAreaName(me.area));
 					return false;
 				}
 				retry++;
 			}
 		}
 
+		console.info(false, "ÿc4MyArea: ÿc0" + Pather.getAreaName(me.area), "journeyTo");
 		return me.area === area;
 	},
 

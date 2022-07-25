@@ -215,6 +215,7 @@ let Config = {
 	PickitFiles: [],
 	BeltColumn: [],
 	MinColumn: [],
+	SkipId: [],
 	SkipEnchant: [],
 	SkipImmune: [],
 	SkipAura: [],

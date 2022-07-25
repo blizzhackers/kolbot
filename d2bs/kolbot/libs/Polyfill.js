@@ -535,6 +535,7 @@ String.prototype.repeat = function(count) {
 			if (console.printDebug) {
 				const stack = new Error().stack.match(/[^\r\n]+/g);
 				let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf("\\") + 1) || "unknown:0";
+				filenameAndLine = filenameAndLine.replace(":", " :: ");
 				this.log("[ÿc:Debugÿc0] ÿc:[" + filenameAndLine + "]ÿc0 " + args.map(argMap).join(","));
 			}
 		};
@@ -542,57 +543,21 @@ String.prototype.repeat = function(count) {
 		console.warn = function (...args) {
 			const stack = new Error().stack.match(/[^\r\n]+/g);
 			let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf("\\") + 1) || "unknown:0";
+			filenameAndLine = filenameAndLine.replace(":", " :: ");
 			this.log("[ÿc9Warningÿc0] ÿc9[" + filenameAndLine + "]ÿc0 " + args.map(argMap).join(","));
 		};
 
 		console.error = function (error = "") {
-			let msg, source, stack;
+			let msg, source;
 			
 			if (typeof error === "string") {
 				msg = error;
 			} else {
 				source = error.fileName.substring(error.fileName.lastIndexOf("\\") + 1, error.fileName.length);
-				msg = "ÿc1Error @ ÿc2[" + source + " line :: " + error.lineNumber + "ÿc2] ÿc1(" + error.message + ")";
-
-				if (error.hasOwnProperty("stack")) {
-					stack = error.stack;
-
-					if (stack) {
-						stack = stack.split("\n");
-
-						if (stack && typeof stack === "object") {
-							stack.reverse();
-						}
-					}
-				}
+				msg = "ÿc1[" + source + " :: " + error.lineNumber + "] ÿc0" + error.message;
 			}
 
-			print(msg);
-		};
-
-		console.errorReport = function (error = "") {
-			let msg, source, stack;
-			
-			if (typeof error === "string") {
-				msg = error;
-			} else {
-				source = error.fileName.substring(error.fileName.lastIndexOf("\\") + 1, error.fileName.length);
-				msg = "ÿc1Error @ ÿc2[" + source + " line :: " + error.lineNumber + "ÿc2] ÿc1(" + error.message + ")";
-
-				if (error.hasOwnProperty("stack")) {
-					stack = error.stack;
-
-					if (stack) {
-						stack = stack.split("\n");
-
-						if (stack && typeof stack === "object") {
-							stack.reverse();
-						}
-					}
-				}
-			}
-
-			print(msg);
+			this.log("[ÿc1Errorÿc0] " + msg);
 		};
 
 		const timers = {};
@@ -603,7 +568,7 @@ String.prototype.repeat = function(count) {
 		console.timeEnd = function (name) {
 			let currTimer = timers[name];
 			if (currTimer) {
-				this.log("[ÿc8" + name + "ÿc0] :: ÿc4Durationÿc0: " + (getTickCount() - currTimer) + "ms");
+				this.log("[ÿc7Timerÿc0] :: ÿc8" + name + " - ÿc4Durationÿc0: " + (getTickCount() - currTimer) + "ms");
 				delete timers[name];
 			}
 		};
@@ -622,8 +587,26 @@ String.prototype.repeat = function(count) {
 					}
 				}
 
-				this.log("[ÿc8StackTraceÿc0] :: " + stackLog);
+				this.log("[ÿc;StackTraceÿc0] :: " + stackLog);
 			}
+		};
+
+		console.info = function (start = false, msg = "", timer = "") {
+			let stack = new Error().stack.match(/[^\r\n]+/g);
+			let funcName = stack[1].substr(0, stack[1].indexOf("@"));
+			let logInfo = start === true ? "[ÿc2Start " : start === false ? "[ÿc1End " : "[ÿc8";
+			logInfo += (funcName + "ÿc0] :: " + (msg ? msg : ""));
+			if (timer) {
+				let currTimer = timers[timer];
+				if (currTimer) {
+					let tFormat = (getTickCount() - currTimer);
+					// if less than 1 second, display in ms
+					tFormat > 1000 ? (tFormat = Time.format(tFormat)) : (tFormat += " ms");
+					logInfo += (" - ÿc4Durationÿc0: " + tFormat);
+					delete timers[timer];
+				}
+			}
+			this.log(logInfo);
 		};
 
 		return console;

@@ -148,7 +148,7 @@ function DiabloHelper() {
 		Attack.kill(sdk.monsters.Diablo);
 		Pickit.pickItems();
 	} catch (e) {
-		console.errorReport(e);
+		console.error(e);
 	} finally {
 		Common.Diablo.done = true;
 		removeEventListener("gamepacket", Common.Diablo.diabloLightsEvent);

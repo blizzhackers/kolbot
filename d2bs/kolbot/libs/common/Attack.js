@@ -262,6 +262,7 @@ const Attack = {
 			if (result === this.Result.FAILED) {
 				if (retry++ > 3) {
 					errorInfo = " (doAttack failed)";
+					me.paladin && D2Bot.printToConsole("doAttack Failed, check logs");
 
 					break;
 				}
@@ -1175,6 +1176,8 @@ const Attack = {
 			console.log("ÿc1Skip Exception: " + unit.name);
 			return false;
 		}
+
+		if (Config.SkipId.includes(unit.classid)) return true;
 
 		let tempArray = [];
 

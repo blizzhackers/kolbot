@@ -421,7 +421,7 @@ function BaalAssistant() {
 				delay(500);
 			}
 		} catch (e) {
-			console.errorReport(e);
+			console.error(e);
 		} finally {
 			killTracker = true;
 		}

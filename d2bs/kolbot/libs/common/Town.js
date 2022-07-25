@@ -61,7 +61,7 @@ const Town = {
 					return getInteractedNPC();
 				}
 			} catch (e) {
-				Config.DebugMode && console.errorReport(e);
+				Config.DebugMode && console.error(e);
 				this.reset();
 				Config.DebugMode && console.debug("getting new npc");
 				return getInteractedNPC();
@@ -148,8 +148,8 @@ const Town = {
 	doChores: function (repair = false) {
 		delay(250);
 
-		console.log("ÿc8Start ÿc0:: ÿc8TownChores");
-		let tick = getTickCount();
+		console.time("doChores");
+		console.info(true);
 
 		!me.inTown && this.goToTown();
 
@@ -187,8 +187,7 @@ const Town = {
 		!me.barbarian && Precast.haveCTA === -1 && Precast.doPrecast(false);
 
 		delay(250);
-
-		console.log("ÿc8Finish TownChores ÿc0- ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
+		console.info(false, null, "doChores");
 
 		return true;
 	},
@@ -314,7 +313,8 @@ const Town = {
 
 	// Start a task and return the NPC Unit
 	initNPC: function (task = "", reason = "undefined") {
-		print("initNPC: " + reason);
+		console.time("initNPC");
+		console.info(true, reason);
 		task = task.capitalize(false);
 
 		delay(250);
@@ -369,9 +369,9 @@ const Town = {
 				break;
 			}
 
-			console.log("Did " + reason + " at " + npc.name);
+			console.info(false, "Did " + reason + " at " + npc.name, "initNPC");
 		} catch (e) {
-			console.errorReport(e);
+			console.error(e);
 
 			if (!!e.message && e.message === "Couldn't interact with npc") {
 				// getUnit bug probably, lets see if going to different act helps
@@ -380,7 +380,7 @@ const Town = {
 				let myAct = me.act;
 				let potentialActs = [1, 2, 3, 4, 5].filter(a => a <= highestAct && a !== myAct);
 				let goTo = potentialActs[rand(0, potentialActs.length - 1)];
-				console.debug("Going to Act " + goTo + " to see if it fixes getUnit bug");
+				Config.DebugMode && console.debug("Going to Act " + goTo + " to see if it fixes getUnit bug");
 				Town.goToTown(goTo);
 			}
 
@@ -391,7 +391,7 @@ const Town = {
 		this.lastInteractedNPC.set(npc);
 
 		if (task === "Heal") {
-			console.log("Checking if we are frozen");
+			Config.DebugMode && console.debug("Checking if we are frozen");
 			if (me.getState(sdk.states.Frozen)) {
 				console.log("We are frozen, lets unfreeze real quick with some thawing pots");
 				Town.buyPots(2, sdk.items.ThawingPotion, true, true, npc);
@@ -1100,19 +1100,21 @@ const Town = {
 		typeof type === "string" && (type = (sdk.items[type.capitalize(true) + "Potion"] || false));
 		if (!type) return false;
 
+		// todo - change act in a3 if we are next to the wp as it's faster than going all the way to Alkor
+		// todo - compare distance Ormus -> Alkor compared to Ormus -> WP -> Akara
 		let potDealer = ["Akara", "Lysander", "Alkor", "Jamella", "Malah"][me.act - 1];
 
 		switch (type) {
 		case sdk.items.ThawingPotion:
 			// Don't buy if already at max res
 			if (!force && me.coldRes >= 75) return true;
-			console.log("ÿc9BuyPotsÿc0 :: Current cold resistance: " + me.coldRes);
+			console.info(null, "Current cold resistance: " + me.coldRes);
 
 			break;
 		case sdk.items.AntidotePotion:
 			// Don't buy if already at max res
 			if (!force && me.poisonRes >= 75) return true;
-			console.log("ÿc9BuyPotsÿc0 :: Current poison resistance: " + me.poisonRes);
+			console.info(null, "Current poison resistance: " + me.poisonRes);
 
 			break;
 		case sdk.items.StaminaPotion:
@@ -1139,7 +1141,7 @@ const Town = {
 				Town.lastInteractedNPC.set(npc);
 			}
 		} catch (e) {
-			console.errorReport(e);
+			console.error(e);
 
 			return false;
 		}
@@ -1147,7 +1149,7 @@ const Town = {
 		let pot = npc.getItem(type);
 		let name = (pot.name || "");
 
-		console.log("ÿc9BuyPotsÿc0 :: buying " + quantity + " " + name + " Potions");
+		console.info(null, "Buying " + quantity + " " + name + "s");
 
 		for (let pots = 0; pots < quantity; pots++) {
 			if (!!pot && Storage.Inventory.CanFit(pot)) {
@@ -1180,9 +1182,9 @@ const Town = {
 				}
 			});
 
-			log && name && console.log("ÿc9DrinkPotsÿc0 :: drank " + quantity + " " + name + "s. Timer [" + Time.format(quantity * 30 * 1000) + "]");
+			log && name && console.info(null, "Drank " + quantity + " " + name + "s. Timer [" + Time.format(quantity * 30 * 1000) + "]");
 		} else {
-			console.log("ÿc9DrinkPotsÿc0 :: couldn't find my pots");
+			console.warn("couldn't find my pots");
 		}
 
 		return {
@@ -1438,7 +1440,7 @@ const Town = {
 				repairAction.push("repair");
 			}
 		} else {
-			print("ÿc4Town: ÿc1Can't afford repairs.");
+			console.warn("Can't afford repairs.");
 		}
 
 		return repairAction;
@@ -1563,7 +1565,7 @@ const Town = {
 		for (let i = 0; i < 3; i += 1) {
 			let merc = me.getMerc();
 
-			if (!!merc && merc.mode !== 0 && merc.mode !== 12) {
+			if (!!merc && !merc.dead) {
 				return false;
 			}
 
@@ -1688,9 +1690,9 @@ const Town = {
 
 		// No equipped items - high chance of dying in last game, force retries
 		if (!me.getItem(-1, sdk.itemmode.Equipped)) {
-			corpse = Misc.poll(() => Game.getPlayer(me.name, 17), 2500, 500);
+			corpse = Misc.poll(() => Game.getPlayer(me.name, sdk.units.player.mode.Dead), 2500, 500);
 		} else {
-			corpse = Game.getPlayer(me.name, 17);
+			corpse = Game.getPlayer(me.name, sdk.units.player.mode.Dead);
 		}
 
 		if (!corpse) return true;
@@ -1829,7 +1831,7 @@ const Town = {
 						clickItemAndWait(sdk.clicktypes.click.Left, tpTome.x, tpTome.y, tpTome.location);
 
 						if (tpTome.getStat(sdk.stats.Quantity) > currQuantity) {
-							console.log("ÿc9clearScrollsÿc0 :: placed scroll in tp tome");
+							console.info(null, "Placed scroll in tp tome");
 
 							continue;
 						}
@@ -1844,7 +1846,7 @@ const Town = {
 						clickItemAndWait(sdk.clicktypes.click.Left, idTome.x, idTome.y, idTome.location);
 
 						if (idTome.getStat(sdk.stats.Quantity) > currQuantity) {
-							console.log("ÿc9clearScrollsÿc0 :: placed scroll in id tome");
+							console.info(null, "Placed scroll in id tome");
 
 							continue;
 						}
@@ -1861,7 +1863,7 @@ const Town = {
 
 			// Might as well sell the item if already in shop
 			if (getUIFlag(sdk.uiflags.Shop) || (Config.PacketShopping && getInteractedNPC() && getInteractedNPC().itemcount > 0)) {
-				console.log("clearInventory sell " + scrolls[i].name);
+				console.info(null, "Sell " + scrolls[i].name);
 				Misc.itemLogger("Sold", scrolls[i]);
 				scrolls[i].sell();
 			} else {
@@ -1874,8 +1876,8 @@ const Town = {
 	},
 
 	clearInventory: function () {
-		console.log("ÿc8Start ÿc0:: ÿc8clearInventory");
-		let clearInvoTick = getTickCount();
+		console.info(true);
+		console.time("clearInventory");
 		this.checkQuestItems(); // only golden bird quest for now
 
 		// If we are at an npc already, open the window otherwise moving potions around fails
@@ -1883,7 +1885,7 @@ const Town = {
 			try {
 				!!getInteractedNPC() && Misc.useMenu(sdk.menu.Trade);
 			} catch (e) {
-				console.errorReport(e);
+				console.error(e);
 				me.cancelUIFlags();
 			}
 		}
@@ -2029,7 +2031,7 @@ const Town = {
 				sell.forEach(function (item) {
 					let sold = false; // so we know to delay or not
 					try {
-						console.log("clearInventory sell :: " + item.name);
+						console.info(null, "Sell :: " + item.name);
 						Misc.itemLogger("Sold", item);
 						item.sell() && (sold = true);
 					} catch (e) {
@@ -2040,11 +2042,12 @@ const Town = {
 				// now lets see if we need to drop anything, so lets exit the shop
 				me.cancelUIFlags();
 			}
+
 			if (drop.length) {
 				drop.forEach(function (item) {
 					let drop = false; // so we know to delay or not
 					try {
-						console.log("clearInventory drop :: " + item.name);
+						console.info(null, "Drop :: " + item.name);
 						Misc.itemLogger("Dropped", item, "clearInventory");
 						item.drop() && (drop = true);
 					} catch (e) {
@@ -2055,7 +2058,7 @@ const Town = {
 			}
 		}
 
-		console.log("ÿc8Exit clearInventory ÿc0- ÿc7Duration: ÿc0" + Time.format(getTickCount() - clearInvoTick));
+		console.info(false, null, "clearInventory");
 
 		return true;
 	},
@@ -2201,9 +2204,7 @@ const Town = {
 					Pather.walkTo(path[i], path[i + 1]);
 				}
 
-				if (returnWhenDone) {
-					return true;
-				}
+				if (returnWhenDone) return true;
 			}
 		}
 
@@ -2299,9 +2300,9 @@ const Town = {
 		if (!me.inTown) {
 			try {
 				if (!Pather.makePortal(true)) {
-					console.error("Town.goToTown: Failed to make TP");
+					console.warn("Town.goToTown: Failed to make TP");
 					if (!me.inTown && !Pather.usePortal(null, me.name)) {
-						console.error("Town.goToTown: Failed to take TP");
+						console.warn("Town.goToTown: Failed to take TP");
 						if (!me.inTown && !Pather.usePortal(sdk.areas.townOf(me.area))) throw new Error("Town.goToTown: Failed to take TP");
 					}
 				}
@@ -2314,7 +2315,7 @@ const Town = {
 					let p = Game.getObject("portal");
 					console.debug(p);
 					!!p && Misc.click(0, 0, p) && delay(100);
-					console.log("inTown? " + me.inTown);
+					console.debug("inTown? " + me.inTown);
 				}
 			}
 		}
@@ -2335,7 +2336,8 @@ const Town = {
 	},
 
 	visitTown: function (repair = false) {
-		console.log("ÿc8Start ÿc0:: ÿc8visitTown");
+		console.info(true);
+
 		if (me.inTown) {
 			this.doChores();
 			this.move("stash");
@@ -2369,7 +2371,7 @@ const Town = {
 		}
 
 		Config.PublicMode && Pather.makePortal();
-		console.log("ÿc8End ÿc0:: ÿc8visitTown - currentArea: " + Pather.getAreaName(me.area));
+		console.info(false, "CurrentArea: " + Pather.getAreaName(me.area));
 
 		return true;
 	}

@@ -84,10 +84,10 @@ function Wakka() {
 	};
 
 	this.getCorpse = function () {
-		me.dead && me.revive();
+		me.mode === sdk.units.player.mode.Dead && me.revive();
 
 		let rval = false;
-		let corpse = Game.getPlayer(me.name, 17);
+		let corpse = Game.getPlayer(me.name, sdk.units.player.mode.Dead);
 
 		if (corpse) {
 			do {

@@ -67,6 +67,7 @@ function BaalHelper() {
 	if (Config.BaalHelper.KillBaal) {
 		Common.Baal.killBaal();
 	} else {
+		Town.goToTown();
 		while (true) {
 			delay(500);
 		}

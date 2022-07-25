@@ -1019,6 +1019,12 @@ const Common = {
 					if (getTickCount() - tick < Time.seconds(7)) {
 						if (Skill.canUse(sdk.skills.Cleansing) && me.getState(sdk.states.Poison)) {
 							Skill.setSkill(sdk.skills.Cleansing, sdk.skills.hand.Right);
+							Misc.poll(() => {
+								if (Config.AttackSkill[3] === sdk.skills.BlessedHammer) {
+									Skill.cast(Config.AttackSkill[3], sdk.skills.hand.Left);
+								}
+								return !me.getState(sdk.states.Poison) || me.mode === sdk.units.player.mode.GettingHit;
+							}, Time.seconds(3), 100);
 						}
 					}
 
@@ -1063,7 +1069,7 @@ const Common = {
 					}
 				// eslint-disable-next-line no-fallthrough
 				case sdk.charclass.Barbarian:
-					[15112, 5062].distance > 3 && Pather.moveTo(15112, 5062);
+					[15101, 5045].distance > 3 && Pather.moveTo(15101, 5045);
 
 					break;
 				}
