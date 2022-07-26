@@ -1524,7 +1524,7 @@ const Town = {
 				}
 
 				// "You do not have enough gold for that."
-				if (dialog[lines].text.match(getLocaleString(3362), "gi")) {
+				if (dialog[lines].text.match(getLocaleString(sdk.locale.text.SellValue), "gi")) {
 					return false;
 				}
 			}

@@ -534,7 +534,7 @@ function locationAction (location) {
 				}
 			}
 
-			if (string === getLocaleString(11161)) { // CDKey disabled from realm play
+			if (string === getLocaleString(sdk.locale.text.CdKeyDisabledFromRealm)) { // CDKey disabled from realm play
 				D2Bot.updateStatus("Realm Disabled CDKey");
 				D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, 6);
 				D2Bot.CDKeyDisabled();

@@ -5,6 +5,8 @@
 *
 */
 
+// todo - handle a Bear necro summonmancer
+
 const ClassAttack = {
 	feralBoost: 0,
 	baseLL: me.getStat(sdk.stats.LifeLeech),

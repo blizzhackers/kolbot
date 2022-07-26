@@ -24,7 +24,7 @@ const Attack = {
 		if (Config.Wereform) {
 			include("common/Attacks/wereform.js");
 		} else if (Config.CustomClassAttack && FileTools.exists("libs/common/Attacks/" + Config.CustomClassAttack + ".js")) {
-			print("Loading custom attack file");
+			console.log("Loading custom attack file");
 			include("common/Attacks/" + Config.CustomClassAttack + ".js");
 		} else {
 			include("common/Attacks/" + sdk.charclass.nameOf(me.classid) + ".js");
@@ -32,7 +32,7 @@ const Attack = {
 
 		if (Config.AttackSkill[1] < 0 || Config.AttackSkill[3] < 0) {
 			showConsole();
-			console.log("ÿc1Bad attack config. Don't expect your bot to attack.");
+			console.warn("ÿc1Bad attack config. Don't expect your bot to attack.");
 		}
 
 		this.getPrimarySlot();
@@ -262,7 +262,6 @@ const Attack = {
 			if (result === this.Result.FAILED) {
 				if (retry++ > 3) {
 					errorInfo = " (doAttack failed)";
-					me.paladin && D2Bot.printToConsole("doAttack Failed, check logs");
 
 					break;
 				}
@@ -343,7 +342,7 @@ const Attack = {
 	getScarinessLevel: function (unit) {
 		// todo - define summonertype prototype
 		let scariness = 0;
-		let ids = [
+		const ids = [
 			sdk.monsters.FallenShaman, sdk.monsters.CarverShaman, sdk.monsters.CarverShaman2, sdk.monsters.DevilkinShaman, sdk.monsters.DevilkinShaman2,
 			sdk.monsters.DarkShaman1, sdk.monsters.DarkShaman2, sdk.monsters.WarpedShaman, sdk.monsters.HollowOne, sdk.monsters.Guardian1,
 			sdk.monsters.Guardian2, sdk.monsters.Unraveler1, sdk.monsters.Unraveler2, sdk.monsters.Ancient1, sdk.monsters.Ancient2, sdk.monsters.Ancient3,
@@ -800,9 +799,7 @@ const Attack = {
 	},
 
 	storeStatistics: function (area) {
-		if (!FileTools.exists("statistics.json")) {
-			Misc.fileAction("statistics.json", 1, "{}");
-		}
+		!FileTools.exists("statistics.json") && Misc.fileAction("statistics.json", 1, "{}");
 
 		let obj = JSON.parse(Misc.fileAction("statistics.json", 0));
 
@@ -833,13 +830,13 @@ const Attack = {
 		let room = getRoom();
 		if (!room) return false;
 
-		let tick = getTickCount();
-		console.log("ÿc7Start ÿc8(clearLevel) ÿc0:: " + Pather.getAreaName(me.area));
+		console.time("clearLevel");
+		console.info(true, Pather.getAreaName(me.area));
 
 		let myRoom, previousArea;
 		let rooms = [];
-		let currentArea = getArea().id;
-		let breakClearLevelCheck = !!(Loader.scriptName() === "MFHelper" && Config.MFHelper.BreakClearLevel && Config.Leader !== "");
+		const currentArea = getArea().id;
+		const breakClearLevelCheck = !!(Loader.scriptName() === "MFHelper" && Config.MFHelper.BreakClearLevel && Config.Leader !== "");
 
 		do {
 			rooms.push([room.x * 5 + room.xsize / 2, room.y * 5 + room.ysize / 2]);
@@ -898,7 +895,7 @@ const Attack = {
 		}
 
 		//this.storeStatistics(Pather.getAreaName(me.area));
-		console.log("ÿc7End ÿc8(clearLevel) ÿc0:: ÿc7" + Pather.getAreaName(currentArea) + "ÿc0 - ÿc7Duration: ÿc0" + (Time.format(getTickCount() - tick)));
+		console.info(false, Pather.getAreaName(currentArea), "clearLevel");
 
 		return true;
 	},
@@ -907,9 +904,7 @@ const Attack = {
 	// Think this needs a collison check included for non tele chars, might prevent choosing closer mob that is actually behind a wall vs the one we pass trying to get behind the wall
 	sortMonsters: function (unitA, unitB) {
 		// No special sorting for were-form
-		if (Config.Wereform) {
-			return getDistance(me, unitA) - getDistance(me, unitB);
-		}
+		if (Config.Wereform) return getDistance(me, unitA) - getDistance(me, unitB);
 
 		// sort main bosses first
 		// Andy
@@ -942,7 +937,7 @@ const Attack = {
 		if (unitA.getState(sdk.states.Attract)) return 1;
 		if (unitB.getState(sdk.states.Attract)) return -1;
 
-		let ids = [
+		const ids = [
 			sdk.monsters.OblivionKnight1, sdk.monsters.OblivionKnight2, sdk.monsters.OblivionKnight3, sdk.monsters.FallenShaman, sdk.monsters.CarverShaman, sdk.monsters.CarverShaman2,
 			sdk.monsters.DevilkinShaman, sdk.monsters.DevilkinShaman2, sdk.monsters.DarkShaman1, sdk.monsters.DarkShaman2, sdk.monsters.WarpedShaman, sdk.monsters.HollowOne, sdk.monsters.Guardian1,
 			sdk.monsters.Guardian2, sdk.monsters.Unraveler1, sdk.monsters.Unraveler2, sdk.monsters.Ancient1, sdk.monsters.BaalSubjectMummy, sdk.monsters.BloodRaven, sdk.monsters.RatManShaman,
@@ -953,10 +948,7 @@ const Attack = {
 
 		if (!me.inArea(sdk.areas.ClawViperTempleLvl2) && ids.includes(unitA.classid) && ids.includes(unitB.classid)) {
 			// Kill "scary" uniques first (like Bishibosh)
-			if ((unitA.isUnique) && (unitB.isUnique)) {
-				return getDistance(me, unitA) - getDistance(me, unitB);
-			}
-
+			if ((unitA.isUnique) && (unitB.isUnique)) return getDistance(me, unitA) - getDistance(me, unitB);
 			if (unitA.isUnique) return -1;
 			if (unitB.isUnique) return 1;
 
@@ -967,9 +959,7 @@ const Attack = {
 		if (ids.includes(unitB.classid)) return 1;
 
 		if (Config.BossPriority) {
-			if ((unitA.isSuperUnique) && (unitB.isSuperUnique)) {
-				return getDistance(me, unitA) - getDistance(me, unitB);
-			}
+			if ((unitA.isSuperUnique) && (unitB.isSuperUnique)) return getDistance(me, unitA) - getDistance(me, unitB);
 
 			if (unitA.isSuperUnique) return -1;
 			if (unitB.isSuperUnique) return 1;
@@ -1335,7 +1325,7 @@ const Attack = {
 	},
 
 	getLowerResistPercent: function () {
-		let calc = function (level) { return Math.floor(Math.min(25 + (45 * ((110 * level) / (level + 6)) / 100), 70)); };
+		const calc = (level) => Math.floor(Math.min(25 + (45 * ((110 * level) / (level + 6)) / 100), 70));
 		if (Skill.canUse(sdk.skills.LowerResist)) {
 			return calc(me.getSkill(sdk.skills.LowerResist, sdk.skills.subindex.SoftPoints));
 		}
@@ -1343,7 +1333,7 @@ const Attack = {
 	},
 
 	getConvictionPercent: function () {
-		let calc = function (level) { return Math.floor(Math.min(25 + (5 * level), 150)); };
+		const calc = (level) => Math.floor(Math.min(25 + (5 * level), 150));
 		if (me.expansion && this.checkInfinity()) {
 			return calc(12);
 		}
@@ -1357,8 +1347,8 @@ const Attack = {
 	checkResist: function (unit, val, maxres = 100) {
 		if (!unit || !unit.type || unit.isPlayer) return true;
 
-		let damageType = typeof val === "number" ? this.getSkillElement(val) : val;
-		let addLowerRes = !!(Skill.canUse(sdk.skills.LowerResist) && unit.curseable);
+		const damageType = typeof val === "number" ? this.getSkillElement(val) : val;
+		const addLowerRes = !!(Skill.canUse(sdk.skills.LowerResist) && unit.curseable);
 
 		// Static handler
 		if (val === sdk.skills.StaticField && this.getResist(unit, damageType) < 100) {
@@ -1543,7 +1533,7 @@ const Attack = {
 	},
 
 	getNearestMonster: function (givenSettings = {}) {
-		let settings = Object.assign({}, {
+		const settings = Object.assign({}, {
 			skipBlocked: true,
 			skipImmune: true,
 			skipGid: -1,

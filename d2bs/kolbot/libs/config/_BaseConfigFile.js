@@ -440,7 +440,7 @@
 	// always attempt to kill these bosses despite immunities and mods
 	Config.SkipException = [];
 	// vizier, de seis, infector
-	// Config.SkipException = [getLocaleString(2851), getLocaleString(2852), getLocaleString(2853)];
+	// Config.SkipException = [getLocaleString(sdk.locale.monsters.GrandVizierofChaos), getLocaleString(sdk.locale.monsters.LordDeSeis), getLocaleString(sdk.locale.monsters.InfectorofSouls)];
 
 	// ########################### //
 	/* ##### ATTACK SETTINGS ##### */

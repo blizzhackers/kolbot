@@ -199,7 +199,7 @@ function locationAction (location) {
 				}
 
 				// Didn't meet level restriction
-				if (string === getLocaleString(5162)) {
+				if (string === getLocaleString(sdk.locale.text.DoNotMeetLevelReqForThisGame)) {
 					print(string);
 
 					retry = Starter.Config.JoinRetry;

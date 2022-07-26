@@ -666,7 +666,7 @@ const ControlAction = {
 					break;
 				}
 
-				switch (control.text.split(getLocaleString(11049).substring(0, getLocaleString(11049).length - 2))[1]) {
+				switch (control.text.split(getLocaleString(sdk.locale.text.Gateway).substring(0, getLocaleString(sdk.locale.text.Gateway).length - 2))[1]) {
 				case "U.S. EAST":
 					currentRealm = 1;
 
@@ -993,7 +993,7 @@ const ControlAction = {
 	getPermStatus: function (info) {
 		let count = 0;
 		let tick = getTickCount();
-		let expireStr = getLocaleString(11133);
+		let expireStr = getLocaleString(sdk.locale.text.ExpiresIn);
 		expireStr = expireStr.slice(0, expireStr.indexOf("%")).trim();
 
 		while (getLocation() !== sdk.game.locations.CharSelect) {
@@ -1347,7 +1347,7 @@ const ControlAction = {
 	getQueueTime: function() {
 		// You are in line to create a game.,Try joining a game to avoid waiting.,,Your position in line is: ÿc02912
 		const text = Controls.CreateGameInLine.getText();
-		if (text && text.indexOf(getLocaleString(11026)) > -1) {
+		if (text && text.indexOf(getLocaleString(sdk.locale.text.YourPositionInLineIs)) > -1) {
 			const result = /ÿc0(\d*)/gm.exec(text);
 			if (result && typeof result[1] === "string") {
 				return parseInt(result[1]) || 0;

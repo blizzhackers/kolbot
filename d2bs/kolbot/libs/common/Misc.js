@@ -2308,8 +2308,8 @@ const Packet = {
 		if (unit.type !== sdk.unittype.NPC) throw new Error("Unit.startTrade: Must be used on NPCs.");
 		if (getUIFlag(sdk.uiflags.Shop)) return true;
 
-		let gamble = mode === "Gamble";
-		console.log("Starting " + mode + " at " + unit.name);
+		const gamble = mode === "Gamble";
+		console.info(true, mode + " at " + unit.name);
 
 		if (this.openMenu(unit)) {
 			for (let i = 0; i < 10; i += 1) {
@@ -2319,7 +2319,7 @@ const Packet = {
 
 				if (unit.itemcount > 0) {
 					delay(200);
-					console.log("Successfully started " + mode + " at " + unit.name);
+					console.info(false, "Successfully started " + mode + " at " + unit.name);
 
 					return true;
 				}
