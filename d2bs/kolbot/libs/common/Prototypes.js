@@ -506,7 +506,7 @@ me.getPingDelay = function () {
 Unit.prototype.checkItem = function (itemInfo) {
 	if (this === undefined || this.type > 1 || typeof itemInfo !== "object") return {have: false, item: null};
 
-	let itemObj = Object.assign({}, {
+	const itemObj = Object.assign({}, {
 		classid: -1,
 		itemtype: -1,
 		quality: -1,
@@ -566,7 +566,7 @@ Unit.prototype.findFirst = function (itemInfo = []) {
 	let itemList = this.getItemsEx();
 
 	for (let i = 0; i < itemInfo.length; i++) {
-		let itemObj = Object.assign({}, {
+		const itemObj = Object.assign({}, {
 			classid: -1,
 			itemtype: -1,
 			quality: -1,
@@ -629,7 +629,7 @@ Unit.prototype.haveAll = function (itemInfo = [], returnIfSome = false) {
 	let checkedGids = [];
 
 	for (let i = 0; i < itemInfo.length; i++) {
-		let itemObj = Object.assign({}, {
+		const itemObj = Object.assign({}, {
 			classid: -1,
 			itemtype: -1,
 			quality: -1,
@@ -943,7 +943,7 @@ Unit.prototype.getStatEx = function (id, subid) {
 
 			if (this.desc) {
 				temp = this.desc.split("\n");
-				regex = new RegExp("\\+\\d+ " + getLocaleString(3481).replace(/^\s+|\s+$/g, ""));
+				regex = new RegExp("\\+\\d+ " + getLocaleString(sdk.locale.text.Defense).replace(/^\s+|\s+$/g, ""));
 
 				for (let i = 0; i < temp.length; i += 1) {
 					if (temp[i].match(regex, "i")) {
@@ -1038,7 +1038,7 @@ Unit.prototype.getStatEx = function (id, subid) {
 		return this.getStat(sdk.stats.PerLevelHp) / 2048;
 	}
 
-	if (this.getFlag(sdk.items.flags.Runeword)) { // Runeword
+	if (this.getFlag(sdk.items.flags.Runeword)) {
 		switch (id) {
 		case sdk.stats.ArmorPercent:
 			if ([0, 1].indexOf(this.mode) < 0) {
@@ -1051,7 +1051,7 @@ Unit.prototype.getStatEx = function (id, subid) {
 				temp = this.desc.split("\n");
 
 				for (let i = 0; i < temp.length; i += 1) {
-					if (temp[i].match(getLocaleString(3520).replace(/^\s+|\s+$/g, ""), "i")) {
+					if (temp[i].match(getLocaleString(sdk.locale.text.EnhancedDefense).replace(/^\s+|\s+$/g, ""), "i")) {
 						return parseInt(temp[i].replace(/ÿc[0-9!"+<;.*]/, ""), 10);
 					}
 				}
@@ -1069,7 +1069,7 @@ Unit.prototype.getStatEx = function (id, subid) {
 				temp = this.desc.split("\n");
 
 				for (let i = 0; i < temp.length; i += 1) {
-					if (temp[i].match(getLocaleString(10038).replace(/^\s+|\s+$/g, ""), "i")) {
+					if (temp[i].match(getLocaleString(sdk.locale.text.EnhancedDamage).replace(/^\s+|\s+$/g, ""), "i")) {
 						return parseInt(temp[i].replace(/ÿc[0-9!"+<;.*]/, ""), 10);
 					}
 				}
@@ -1977,7 +1977,13 @@ Object.defineProperties(Unit.prototype, {
 			if (this.type !== sdk.unittype.Item) return false;
 			return (this.mode === sdk.itemmode.onGround || this.mode === sdk.itemmode.Dropping);
 		},
-	}
+	},
+	isShield: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return [sdk.itemtype.Shield, sdk.itemtype.AuricShields, sdk.itemtype.VoodooHeads].includes(this.itemType);
+		},
+	},
 });
 
 Unit.prototype.usingShield = function () {
@@ -1985,7 +1991,7 @@ Unit.prototype.usingShield = function () {
 	// always switch to main hand if we are checking ourselves
 	this === me && me.weaponswitch !== 0 && me.switchWeapons(0);
 	let shield = this.getItemsEx(-1, sdk.itemmode.Equipped)
-		.filter(s => [sdk.itemtype.Shield, sdk.itemtype.AuricShields, sdk.itemtype.VoodooHeads].includes(s.itemType)).first();
+		.filter(s => s.isShield).first();
 	return !!shield;
 };
 
@@ -2525,3 +2531,11 @@ Unit.prototype.inArea = function (area = 0) {
 			}).length;
 	};
 }
+
+PresetUnit.prototype.realCoords = function () {
+	return {
+		area: this.level, // for some reason, preset units names the area "level"
+		x: this.roomx * 5 + this.x,
+		y: this.roomy * 5 + this.y,
+	};
+};

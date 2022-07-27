@@ -685,7 +685,7 @@ const Common = {
 					case sdk.charclass.Assassin:
 						if (Config.UseTraps) {
 							let trapCheck = ClassAttack.checkTraps({x: 7793, y: 5293});
-							trapCheck && ClassAttack.placeTraps({x: 7793, y: 5293, classid: 243}, trapCheck);
+							trapCheck && ClassAttack.placeTraps({x: 7793, y: 5293, classid: sdk.monsters.Diablo}, trapCheck);
 						}
 
 						Config.AttackSkill[1] === sdk.skills.ShockWeb && Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Right, 7793, 5293);
