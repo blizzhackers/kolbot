@@ -224,7 +224,7 @@ function OrgTorch() {
 		let dHorns = me.findItems(sdk.items.quest.DiablosHorn, sdk.itemmode.inStorage).length;
 
 		Precast.doPrecast(true);
-		Pather.moveToPreset(sdk.areas.MatronsDen, sdk.unittype.Object, 397, 2, 2);
+		Pather.moveToPreset(sdk.areas.MatronsDen, sdk.unittype.Object, sdk.units.SmallSparklyChest, 2, 2);
 		Attack.kill(sdk.monsters.Lilith);
 		Pickit.pickItems();
 		this.getQuestItem(Game.getItem(sdk.items.quest.DiablosHorn));
@@ -282,7 +282,7 @@ function OrgTorch() {
 		let mBrain = me.findItems(sdk.items.quest.MephistosBrain, sdk.itemmode.inStorage).length;
 
 		Precast.doPrecast(true);
-		Pather.moveToPreset(sdk.areas.FurnaceofPain, sdk.unittype.Object, 397, 2, 2);
+		Pather.moveToPreset(sdk.areas.FurnaceofPain, sdk.unittype.Object, sdk.units.SmallSparklyChest, 2, 2);
 		Attack.kill(sdk.monsters.UberIzual);
 		Pickit.pickItems();
 		this.getQuestItem(Game.getItem(sdk.items.quest.MephistosBrain));

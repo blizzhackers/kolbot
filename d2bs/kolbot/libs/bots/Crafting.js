@@ -376,8 +376,8 @@ function shopStuff(npcId, classids, amount) {
 	case "fara":
 		if (!Town.goToTown(2) || !Town.move(NPC.Fara)) throw new Error("Failed to get to NPC");
 		
-		wpArea = 48;
-		town = 40;
+		wpArea = sdk.areas.A2SewersLvl2;
+		town = sdk.areas.LutGholein;
 		path = [5112, 5094, 5092, 5096, 5078, 5098, 5070, 5085];
 		menuId = "Repair";
 		npc = Game.getNPC(NPC.Fara);

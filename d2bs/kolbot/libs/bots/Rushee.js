@@ -22,10 +22,8 @@ new Overrides.Override(Town, Town.goToTown, function(orignal, act, wpmenu) {
 new Overrides.Override(Pather, Pather.getWP, function(orignal, area, clearPath) {
 	if (area !== me.area) return false;
 
-	let wpIDs = [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539];
-
-	for (let i = 0; i < wpIDs.length; i++) {
-		let preset = Game.getPresetObject(area, wpIDs[i]);
+	for (let i = 0; i < sdk.waypoints.Ids.length; i++) {
+		let preset = Game.getPresetObject(me.area, sdk.waypoints.Ids[i]);
 
 		if (preset) {
 			let x = (preset.roomx * 5 + preset.x);
@@ -144,7 +142,7 @@ function Rushee() {
 		let monster = Game.getMonster(classid);
 
 		if (monster) {
-			while (monster.mode !== 12 && monster.mode !== 0) {
+			while (!monster.dead) {
 				delay(500);
 			}
 
@@ -828,7 +826,7 @@ function Rushee() {
 						}
 
 						if (!Misc.checkQuest(sdk.quest.id.SistersToTheSlaughter, 4)) {
-							D2Bot.printToConsole("Andariel quest failed", 9);
+							D2Bot.printToConsole("Andariel quest failed", sdk.colors.D2Bot.Red);
 							quit();
 						}
 
@@ -851,7 +849,7 @@ function Rushee() {
 						Town.npcInteract("Atma");
 
 						if (!Misc.checkQuest(sdk.quest.id.TheSummoner, sdk.quest.states.Completed)) {
-							D2Bot.printToConsole("Summoner quest failed", 9);
+							D2Bot.printToConsole("Summoner quest failed", sdk.colors.D2Bot.Red);
 							quit();
 						}
 
@@ -867,7 +865,7 @@ function Rushee() {
 						Town.npcInteract("Cain");
 
 						if (!Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, sdk.quest.states.Completed)) {
-							D2Bot.printToConsole("Travincal quest failed", 9);
+							D2Bot.printToConsole("Travincal quest failed", sdk.colors.D2Bot.Red);
 							quit();
 						}
 
