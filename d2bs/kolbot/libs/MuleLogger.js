@@ -102,7 +102,6 @@ const MuleLogger = {
 
 		let header = "";
 		let name = unit.itemType + "_" + unit.fname.split("\n").reverse().join(" ").replace(/(y|ÿ)c[0-9!"+<:;.*]|\/|\\/g, "").trim();
-
 		let desc = Misc.getItemDesc(unit, logIlvl) + "$" + unit.gid + ":" + unit.classid + ":" + unit.location + ":" + unit.x + ":" + unit.y + (unit.getFlag(sdk.items.flags.Ethereal) ? ":eth" : "");
 		let color = unit.getColor();
 		let code = Misc.getItemCode(unit);
@@ -142,8 +141,8 @@ const MuleLogger = {
 		let items = me.getItemsEx();
 		if (!items.length) return;
 
-		let folder, realm = me.realm || "Single Player",
-			finalString = "";
+		let folder, realm = me.realm || "Single Player";
+		let finalString = "";
 
 		if (!FileTools.exists("mules/" + realm)) {
 			folder = dopen("mules");
@@ -167,7 +166,7 @@ const MuleLogger = {
 		});
 
 		for (let i = 0; i < items.length; i += 1) {
-			if ((this.LogEquipped || items[i].isInStorage) && (items[i].quality !== 2 || !Misc.skipItem(items[i].classid))) {
+			if ((this.LogEquipped || items[i].isInStorage) && (items[i].quality > sdk.itemquality.Normal || !Misc.skipItem(items[i].classid))) {
 				let parsedItem = this.logItem(items[i], logIlvl);
 
 				// Log names to saved image

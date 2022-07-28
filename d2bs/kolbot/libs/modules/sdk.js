@@ -1183,6 +1183,7 @@ item: {
 			ArmorPercent: 16,
 			MaxDamagePercent: 17,
 			MinDamagePercent: 18,
+			EnhancedDamage: 18,
 			ToHit: 19,
 			ToBlock: 20,
 			MinDamage: 21,

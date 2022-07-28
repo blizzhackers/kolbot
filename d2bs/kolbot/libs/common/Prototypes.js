@@ -977,7 +977,15 @@ Unit.prototype.getStatEx = function (id, subid) {
 		break;
 	case sdk.stats.AddSkillTab:
 		if (subid === undefined) {
-			temp = [0, 1, 2, 8, 9, 10, 16, 17, 18, 24, 25, 26, 32, 33, 34, 40, 41, 42, 48, 49, 50];
+			temp = [
+				sdk.skills.tabs.BowandCrossbow, sdk.skills.tabs.PassiveandMagic, sdk.skills.tabs.JavelinandSpear,
+				sdk.skills.tabs.Fire, sdk.skills.tabs.Lightning, sdk.skills.tabs.Cold,
+				sdk.skills.tabs.Curses, sdk.skills.tabs.PoisonandBone, sdk.skills.tabs.NecroSummoning,
+				sdk.skills.tabs.PalaCombat, sdk.skills.tabs.Offensive, sdk.skills.tabs.Defensive,
+				sdk.skills.tabs.BarbCombat, sdk.skills.tabs.Masteries, sdk.skills.tabs.Warcries,
+				sdk.skills.tabs.DruidSummon, sdk.skills.tabs.ShapeShifting, sdk.skills.tabs.Elemental,
+				sdk.skills.tabs.Traps, sdk.skills.tabs.ShadowDisciplines, sdk.skills.tabs.MartialArts
+			];
 
 			for (let i = 0; i < temp.length; i += 1) {
 				let sTab = this.getStat(sdk.stats.AddSkillTab, temp[i]);
@@ -1058,7 +1066,7 @@ Unit.prototype.getStatEx = function (id, subid) {
 			}
 
 			return 0;
-		case 18: // enhanceddamage
+		case sdk.stats.EnhancedDamage:
 			if ([0, 1].indexOf(this.mode) < 0) {
 				break;
 			}

@@ -13,7 +13,7 @@ const Item = {
 
 	canEquip: function (item) {
 		// Not an item or unid
-		if (item.type !== 4 || !item.identified) return false;
+		if (!item || item.type !== sdk.unittype.Item || !item.identified) return false;
 		// Higher requirements
 		if (item.getStat(sdk.stats.LevelReq) > me.getStat(sdk.stats.Level) || item.dexreq > me.getStat(sdk.stats.Dexterity) || item.strreq > me.getStat(sdk.stats.Strength)) return false;
 
@@ -31,7 +31,6 @@ const Item = {
 		for (let i = 0; i < 3; i += 1) {
 			if (item.toCursor()) {
 				clickItemAndWait(sdk.clicktypes.click.Left, bodyLoc);
-
 
 				if (item.bodylocation === bodyLoc) {
 					if (getCursorType() === 3) {
@@ -82,38 +81,38 @@ const Item = {
 		case sdk.itemtype.VoodooHeads:
 		case sdk.itemtype.BowQuiver:
 		case sdk.itemtype.CrossbowQuiver:
-			bodyLoc = 5;
+			bodyLoc = sdk.body.LeftArm;
 
 			break;
 		case sdk.itemtype.Armor:
-			bodyLoc = 3;
+			bodyLoc = sdk.body.Armor;
 
 			break;
 		case sdk.itemtype.Ring:
-			bodyLoc = [6, 7];
+			bodyLoc = [sdk.body.RingRight, sdk.body.RingLeft];
 
 			break;
 		case sdk.itemtype.Amulet:
-			bodyLoc = 2;
+			bodyLoc = sdk.body.Neck;
 
 			break;
 		case sdk.itemtype.Boots:
-			bodyLoc = 9;
+			bodyLoc = sdk.body.Feet;
 
 			break;
 		case sdk.itemtype.Gloves:
-			bodyLoc = 10;
+			bodyLoc = sdk.body.Gloves;
 
 			break;
 		case sdk.itemtype.Belt:
-			bodyLoc = 8;
+			bodyLoc = sdk.body.Belt;
 
 			break;
 		case sdk.itemtype.Helm:
 		case sdk.itemtype.PrimalHelm:
 		case sdk.itemtype.Circlet:
 		case sdk.itemtype.Pelt:
-			bodyLoc = 1;
+			bodyLoc = sdk.body.Head;
 
 			break;
 		case sdk.itemtype.Scepter:
@@ -137,12 +136,12 @@ const Item = {
 		case sdk.itemtype.AmazonSpear:
 		case sdk.itemtype.AmazonJavelin:
 		case sdk.itemtype.MissilePotion:
-			bodyLoc = me.barbarian ? [4, 5] : 4;
+			bodyLoc = me.barbarian ? [sdk.body.RightArm, sdk.body.LeftArm] : sdk.body.RightArm;
 
 			break;
 		case sdk.itemtype.HandtoHand:
 		case sdk.itemtype.AssassinClaw:
-			bodyLoc = me.assassin ? [4, 5] : 4;
+			bodyLoc = me.assassin ? [sdk.body.RightArm, sdk.body.LeftArm] : sdk.body.RightArm;
 
 			break;
 		default:
@@ -210,8 +209,9 @@ const Item = {
 			if (tier > 0 && bodyLoc) {
 				for (let j = 0; j < bodyLoc.length; j += 1) {
 					// khalim's will adjustment
-					if ([3, 7].indexOf(items[0].location) > -1 && tier > this.getEquippedItem(bodyLoc[j]).tier && this.getEquippedItem(bodyLoc[j]).classid !== 174) {
-						if (!items[0].getFlag(sdk.items.flags.Identified)) { // unid
+					const equippedItem = this.getEquippedItem(bodyLoc[j]);
+					if (items[0].isInStorage && tier > equippedItem.tier && equippedItem.classid !== sdk.items.quest.KhalimsWill) {
+						if (!items[0].identified) {
 							let tome = me.findItem(sdk.items.TomeofIdentify, sdk.itemmode.inStorage, sdk.storage.Inventory);
 
 							if (tome && tome.getStat(sdk.stats.Quantity) > 0) {

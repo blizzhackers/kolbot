@@ -996,20 +996,20 @@ const Attack = {
 
 		switch (true) {
 		case Skill.needFloor.includes(skill) && nonFloorAreas.includes(me.area):
-			let isFloor = !!(result & (0 | 0x1000));
+			let isFloor = !!(result & (0 | sdk.collision.IsOnFloor));
 			// this spot is not on the floor (lava (river/chaos, space (arcane), ect))
 			if (!isFloor) {
 				return false;
 			}
 
 			return !(result & 0x1); // outside lava area in abaddon returns coll 1
-		case Attack.monsterObjects.includes(unitid) && (!!(result & 0x1110) || !!(result & 0xFFFF)):
+		case Attack.monsterObjects.includes(unitid) && (!!(result & 0x1110) || !!(result & sdk.collision.MonsterObject)):
 			// kinda dumb - monster objects have a collision that causes them to not be attacked
 			// this should fix that
 			return true;
 		default:
 			// Avoid non-walkable spots, objects - this preserves the orignal function and also physical attack skills will get here
-			if ((result & 0x1) || (result & 0x400)) return false;
+			if ((result & sdk.collision.BlockWall) || (result & sdk.collision.Objects)) return false;
 
 			break;
 		}
@@ -1079,7 +1079,7 @@ const Attack = {
 		grid.sort((a, b) => getDistance(b.x, b.y, unit.x, unit.y) - getDistance(a.x, a.y, unit.x, unit.y));
 
 		for (let i = 0; i < grid.length; i += 1) {
-			if (!(CollMap.getColl(grid[i].x, grid[i].y, true) & 0x1) && !CollMap.checkColl(unit, {x: grid[i].x, y: grid[i].y}, 0x4)) {
+			if (!(CollMap.getColl(grid[i].x, grid[i].y, true) & 0x1) && !CollMap.checkColl(unit, {x: grid[i].x, y: grid[i].y}, sdk.collision.Ranged)) {
 				let currCount = this.getMonsterCount(grid[i].x, grid[i].y, range, monList);
 
 				if (currCount < count) {
@@ -1508,7 +1508,7 @@ const Attack = {
 
 							break;
 						case 2:
-							if (coords[i].distance < 6 && !CollMap.checkColl(me, coords[i], 0x5)) {
+							if (coords[i].distance < 6 && !CollMap.checkColl(me, coords[i], sdk.collision.WallOrRanged)) {
 								Pather.walkTo(coords[i].x, coords[i].y, 2);
 							} else {
 								Pather.moveTo(coords[i].x, coords[i].y, 1);
