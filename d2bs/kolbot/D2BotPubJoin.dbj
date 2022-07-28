@@ -5,7 +5,6 @@
 *
 */
 include("StarterConfig.js");
-// todo - allow joining chat and looking for games there too
 
 // D2BotPubJoin specific settings - for global settings see libs/StarterConfig.js
 Starter.Config.MinGameTime = 0; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
@@ -38,7 +37,7 @@ Starter.Config.AttemptNextGameRetrys = 5;
 */
 
 const IncludeFilter = [
-	["cbaalz"]
+	[""]
 ];
 
 const ExcludeFilter = [
@@ -247,11 +246,8 @@ function locationAction (location) {
 			});
 
 			for (let i = 0; i < gameList.length; i += 1) {
-				console.debug("DoneGames? ", doneGames.indexOf(gameList[i].gameName) === -1);
-				console.debug("IncludeCheck? ", includeCheck(gameList[i].gameName));
-				console.debug("ExcludeCheck? ", excludeCheck(gameList[i].gameName));
 				if (doneGames.indexOf(gameList[i].gameName) === -1 && includeCheck(gameList[i].gameName) && excludeCheck(gameList[i].gameName)) {
-					print("ÿc7Game: " + gameList[i].gameName + ", Players: " + gameList[i].players);
+					console.log("ÿc7Game: " + gameList[i].gameName + ", Players: " + gameList[i].players);
 					gameToJoin = gameList[i].gameName;
 
 					break;
