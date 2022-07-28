@@ -518,9 +518,10 @@ item: {
 			BattleCommand: 155,
 
 			// General stuff
-			IdentifyScroll: 219,
-			TownPortal: 220,
-
+			IdentifyScroll: 217,
+			BookofIdentify: 218,
+			TownPortalScroll: 219,
+			BookofTownPortal: 220,
 
 			// Druid
 			Raven: 221,
@@ -1116,6 +1117,7 @@ item: {
 			Target0: 173,
 			Target1: 174,
 			GoldLost: 175,
+			MinimumRequiredLevel: 176,
 			ConversionLevel: 176,
 			ConversionMaxHp: 177,
 			UnitDooverlay: 178,

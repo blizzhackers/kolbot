@@ -1985,7 +1985,7 @@ const Misc = {
 			stackLog && (filemsg += "Stack: " + stackLog + "\n");
 		}
 
-		this.errorConsolePrint && D2Bot.printToConsole(oogmsg, 10);
+		this.errorConsolePrint && D2Bot.printToConsole(oogmsg, sdk.colors.D2Bot.Gray);
 		showConsole();
 		console.log(msg);
 		this.fileAction("logs/ScriptErrorLog.txt", 2, filemsg);
@@ -2260,7 +2260,7 @@ const Experience = {
 		let string = "[Game: " + me.gamename + (me.gamepassword ? "//" + me.gamepassword : "") + getGameTime + "] [Level: " + me.getStat(sdk.stats.Level) + " (" + progress + "%)] [XP: " + gain + "] [Games ETA: " + runsToLevel + "]";
 
 		if (gain) {
-			D2Bot.printToConsole(string, 4);
+			D2Bot.printToConsole(string, sdk.colors.D2Bot.Blue);
 
 			if (me.getStat(sdk.stats.Level) > DataFile.getStats().level) {
 				D2Bot.printToConsole("Congrats! You gained a level. Current level:" + me.getStat(sdk.stats.Level), 5);
