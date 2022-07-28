@@ -116,7 +116,7 @@ function locationAction (location) {
 		fullText = lines.join(" ").replace(/\s+/g, " ");
 
 		if (fullText.match(Starter.Config.MutedKeyTrigger.replace(/\s+/g, " "), "gi")) {
-			D2Bot.printToConsole(Starter.gameInfo.mpq + " is muted.", 6);
+			D2Bot.printToConsole(Starter.gameInfo.mpq + " is muted.", sdk.colors.D2Bot.Gold);
 
 			ControlAction.mutedKey = true;
 
@@ -503,7 +503,7 @@ function main() {
 	if (Starter.gameInfo.error) {
 		if (!!DataFile.getStats().debugInfo) {
 			Starter.gameInfo.crashInfo = DataFile.getStats().debugInfo;
-			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, 10);
+			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, sdk.colors.D2Bot.Gray);
 		}
 
 		ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);

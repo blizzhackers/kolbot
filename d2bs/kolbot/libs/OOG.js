@@ -1792,7 +1792,7 @@ const Starter = {
 					break;
 				case getLocaleString(sdk.locale.text.CdKeyInUseBy):
 					string += (" " + Controls.LoginCdKeyInUseBy.getText());
-					D2Bot.printToConsole(Starter.gameInfo.mpq + " " + string, 6);
+					D2Bot.printToConsole(Starter.gameInfo.mpq + " " + string, sdk.colors.D2Bot.Gold);
 					D2Bot.CDKeyInUse();
 
 					if (Starter.gameInfo.switchKeys) {
@@ -1825,7 +1825,7 @@ const Starter = {
 				}
 
 				if (cdkeyError) {
-					defaultPrint && D2Bot.printToConsole(string + Starter.gameInfo.mpq, 6);
+					defaultPrint && D2Bot.printToConsole(string + Starter.gameInfo.mpq, sdk.colors.D2Bot.Gold);
 					defaultPrint && D2Bot.updateStatus(string);
 					D2Bot.CDKeyDisabled();
 					if (Starter.gameInfo.switchKeys) {
@@ -1859,7 +1859,7 @@ const Starter = {
 
 				if (string === getLocaleString(sdk.locale.text.CdKeyDisabledFromRealm)) {
 					D2Bot.updateStatus("Realm Disabled CDKey");
-					D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, 6);
+					D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, sdk.colors.D2Bot.Gold);
 					D2Bot.CDKeyDisabled();
 
 					if (Starter.gameInfo.switchKeys) {
@@ -1935,7 +1935,7 @@ const Starter = {
 						D2Bot.updateStatus("Waiting out Queue restriction: " + queue);
 					} else {
 						print("Restricted... Queue: " + queue);
-						D2Bot.printToConsole("Restricted... Queue: " + queue, 9);
+						D2Bot.printToConsole("Restricted... Queue: " + queue, sdk.colors.D2Bot.Red);
 						Controls.CancelCreateGame.click();
 
 						if (Starter.Config.WaitOutQueueExitToMenu) {
@@ -1958,7 +1958,7 @@ const Starter = {
 			console.log("Game doesn't exist");
 
 			if (Starter.gameInfo.rdBlocker) {
-				D2Bot.printToConsole(Starter.gameInfo.mpq + " is probably flagged.", 6);
+				D2Bot.printToConsole(Starter.gameInfo.mpq + " is probably flagged.", sdk.colors.D2Bot.Gold);
 
 				if (Starter.gameInfo.switchKeys) {
 					ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
@@ -2037,10 +2037,10 @@ const Starter = {
 			// dead HardCore character
 			if (Controls.CreateGameWindow.control && Controls.CreateGameWindow.disabled === sdk.game.controls.Disabled) {
 				if (Starter.Config.StopOnDeadHardcore) {
-					D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Shutting down, better luck next time", 6);
+					D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Shutting down, better luck next time", sdk.colors.D2Bot.Gold);
 					D2Bot.stop();
 				} else {
-					D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Better luck next time", 6);
+					D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Better luck next time", sdk.colors.D2Bot.Gold);
 					D2Bot.updateStatus(Profile().character + " has died. They shall be remembered...maybe. Better luck next time");
 					Starter.deadCheck = true;
 					Controls.LobbyQuit.click();

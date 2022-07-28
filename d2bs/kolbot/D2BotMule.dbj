@@ -486,7 +486,7 @@ function locationAction (location) {
 
 		if (Starter.makeAccount) {
 			ControlAction.makeAccount(info);
-			D2Bot.printToConsole("Made account: " + info.account, 7);
+			D2Bot.printToConsole("Made account: " + info.account, sdk.colors.D2Bot.DarkGold);
 			Starter.makeAccount = false;
 
 			break;
@@ -536,7 +536,7 @@ function locationAction (location) {
 
 			if (string === getLocaleString(sdk.locale.text.CdKeyDisabledFromRealm)) { // CDKey disabled from realm play
 				D2Bot.updateStatus("Realm Disabled CDKey");
-				D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, 6);
+				D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, sdk.colors.D2Bot.Gold);
 				D2Bot.CDKeyDisabled();
 
 				if (Starter.gameInfo.switchKeys) {
@@ -631,7 +631,7 @@ function locationAction (location) {
 				break;
 			}
 
-			D2Bot.printToConsole("Made character: " + info.charName, 7);
+			D2Bot.printToConsole("Made character: " + info.charName, sdk.colors.D2Bot.DarkGold);
 		}
 
 		break;
@@ -791,7 +791,7 @@ function main () {
 					statusString = "In " + (muleMode === 2 ? "anni " : muleMode === 1 ? "torch " : "") + "mule game.";
 
 					D2Bot.updateStatus(statusString + " Status: " + status);
-					D2Bot.printToConsole(statusString, 7);
+					D2Bot.printToConsole(statusString, sdk.colors.D2Bot.DarkGold);
 					tick = getTickCount();
 
 					while ((getLocation() !== null || !me.area) && getTickCount() - tick < 5000) {
