@@ -155,30 +155,31 @@ const Pickit = {
 
 		while (pickList.length > 0) {
 			if (me.dead) return false;
-
 			pickList.sort(this.sortItems);
+
+			const itemToPick = pickList.shift();
 
 			// Check if the item unit is still valid and if it's on ground or being dropped
 			// Don't pick items behind walls/obstacles when walking
-			if (copyUnit(pickList[0]).x !== undefined && pickList[0].onGroundOrDropping
-					&& (Pather.useTeleport() || me.inTown || !checkCollision(me, pickList[0], sdk.collision.BlockWall))) {
+			if (copyUnit(itemToPick).x !== undefined && itemToPick.onGroundOrDropping
+					&& (Pather.useTeleport() || me.inTown || !checkCollision(me, itemToPick, sdk.collision.BlockWall))) {
 				// Check if the item should be picked
-				let status = this.checkItem(pickList[0]);
+				let status = this.checkItem(itemToPick);
 
-				if (status.result && this.canPick(pickList[0])) {
+				if (status.result && this.canPick(itemToPick)) {
 					// Override canFit for scrolls, potions and gold
-					let canFit = (Storage.Inventory.CanFit(pickList[0]) || Pickit.essentials.includes(pickList[0].itemType));
+					let canFit = (Storage.Inventory.CanFit(itemToPick) || Pickit.essentials.includes(itemToPick.itemType));
 
 					// Field id when our used space is above a certain percent or if we are full try to make room with FieldID
 					if (Config.FieldID.Enabled && (!canFit || Storage.Inventory.UsedSpacePercent() > Config.FieldID.UsedSpace)) {
-						Town.fieldID() && (canFit = (pickList[0].gid !== undefined && Storage.Inventory.CanFit(pickList[0])));
+						Town.fieldID() && (canFit = (itemToPick.gid !== undefined && Storage.Inventory.CanFit(itemToPick)));
 					}
 
 					// Try to make room by selling items in town
 					if (!canFit) {
 						// Check if any of the current inventory items can be stashed or need to be identified and eventually sold to make room
 						if (this.canMakeRoom()) {
-							console.log("ÿc7Trying to make room for " + this.itemColor(pickList[0]) + pickList[0].name);
+							console.log("ÿc7Trying to make room for " + this.itemColor(itemToPick) + itemToPick.name);
 
 							// Go to town and do town chores
 							if (Town.visitTown()) {
@@ -189,24 +190,26 @@ const Pickit = {
 							}
 
 							// Town visit failed - abort
-							console.log("ÿc7Not enough room for " + this.itemColor(pickList[0]) + pickList[0].name);
+							console.log("ÿc7Not enough room for " + this.itemColor(itemToPick) + itemToPick.name);
 
 							return false;
 						}
 
 						// Can't make room - trigger automule
-						Misc.itemLogger("No room for", pickList[0]);
-						console.log("ÿc7Not enough room for " + this.itemColor(pickList[0]) + pickList[0].name);
+						Misc.itemLogger("No room for", itemToPick);
+						console.log("ÿc7Not enough room for " + this.itemColor(itemToPick) + itemToPick.name);
+						
+						if (copyUnit(itemToPick).x !== undefined) {
+							needMule = true;
 
-						needMule = true;
+							break;
+						}
 					}
 
 					// Item can fit - pick it up
-					canFit && this.pickItem(pickList[0], status.result, status.line);
+					canFit && this.pickItem(itemToPick, status.result, status.line);
 				}
 			}
-
-			pickList.shift();
 		}
 
 		// Quit current game and transfer the items to mule
