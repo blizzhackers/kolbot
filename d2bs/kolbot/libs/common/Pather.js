@@ -137,10 +137,12 @@ const Pather = {
 
 	init: function () {
 		if (!this.initialized) {
-			!getWaypoint(1) && this.getWP(me.area);
 			me.classic && (this.nonTownWpAreas = this.nonTownWpAreas.filter((wp) => wp < sdk.areas.Harrogath));
-			me.cancelUIFlags();
-			this.initialized = true;
+			if (!Config.WaypointMenu) {
+				!getWaypoint(1) && this.getWP(me.area);
+				me.cancelUIFlags();
+				this.initialized = true;
+			}
 		}
 	},
 
@@ -727,7 +729,7 @@ const Pather = {
 		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
 
 		// Regular doors
-		let door = Game.getObject("door", 0);
+		let door = Game.getObject("door", sdk.units.objects.mode.Inactive);
 
 		if (door) {
 			do {
@@ -747,7 +749,7 @@ const Pather = {
 
 		// handle act 5 gate
 		if ([sdk.areas.Harrogath, sdk.areas.BloodyFoothills].includes(me.area)) {
-			let gate = Game.getObject("gate", 0);
+			let gate = Game.getObject("gate", sdk.units.objects.mode.Inactive);
 
 			if (gate) {
 				if ((getDistance(gate, x, y) < 4 && gate.distance < 9) || gate.distance < 4) {
@@ -1055,6 +1057,18 @@ const Pather = {
 		delay(300);
 
 		return (use && finalDest ? me.area === finalDest : true);
+	},
+
+	getDistanceToExit: function (area, exit) {
+		area === undefined && (area = me.area);
+		exit === undefined && (exit = me.area + 1);
+		let areaToCheck = Misc.poll(() => getArea(area));
+		if (!areaToCheck) throw new Error("Couldn't get area info for " + Pather.getAreaName(area));
+		let exits = areaToCheck.exits;
+		if (!exits.length) throw new Error("Failed to find exits");
+		let loc = exits.find(a => a.target === exit);
+		console.debug(area, exit, loc);
+		return loc ? [loc.x, loc.y].distance : Infinity;
 	},
 
 	/*
@@ -1380,6 +1394,7 @@ const Pather = {
 						// Waypoint screen is open
 						if (getUIFlag(sdk.uiflags.Waypoint)) {
 							delay(500);
+							!this.initialized && (this.initialized = true);
 
 							switch (targetArea) {
 							case "random":
@@ -1788,6 +1803,7 @@ const Pather = {
 
 						if (Misc.poll(() => me.gameReady && getUIFlag(sdk.uiflags.Waypoint), 1000, 150)) {
 							delay(500);
+							!this.initialized && (this.initialized = true);
 							me.cancelUIFlags();
 
 							return true;

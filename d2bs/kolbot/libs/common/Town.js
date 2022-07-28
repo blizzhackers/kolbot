@@ -57,7 +57,7 @@ const Town = {
 					return this.unit;
 				} else {
 					this.reset();
-					console.debug("getting new npc");
+					Config.DebugMode && console.debug("getting new npc");
 					return getInteractedNPC();
 				}
 			} catch (e) {

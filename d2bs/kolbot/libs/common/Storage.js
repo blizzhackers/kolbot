@@ -191,7 +191,7 @@ let Container = function (name, width, height, location) {
 			for (n = 0; n < 5; n += 1) {
 				if (this.location === 6) { // place item into cube
 					cItem = Game.getCursorUnit();
-					cube = me.getItem(549);
+					cube = me.getItem(sdk.quest.item.Cube);
 
 					if (cItem !== null && cube !== null) {
 						sendPacket(1, 0x2a, 4, cItem.gid, 4, cube.gid);

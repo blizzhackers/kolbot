@@ -6,9 +6,9 @@
 */
 
 function Gamble() {
-	let idleTick = 0,
-		info = Gambling.getInfo(),
-		needGold = false;
+	let idleTick = 0;
+	let info = Gambling.getInfo();
+	let needGold = false;
 
 	if (!info) throw new Error("Bad Gambling System config.");
 
@@ -34,7 +34,7 @@ function Gamble() {
 				Town.needGamble() && (needGold = false);
 				Town.stash();
 
-				let gold = Game.getItem(523, sdk.itemmode.onGround);
+				let gold = Game.getItem(sdk.items.Gold, sdk.itemmode.onGround);
 
 				if (!gold || !Pickit.canPick(gold)) {
 					break;
