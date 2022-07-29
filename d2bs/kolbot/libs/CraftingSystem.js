@@ -211,7 +211,7 @@ CraftingSystem.fullSets = [];
 // Check whether item can be used for crafting
 CraftingSystem.validItem = function (item) {
 	switch (item.itemType) {
-	case sdk.itemtype.Jewel:
+	case sdk.items.type.Jewel:
 		// Use junk jewels only
 		return NTIP.CheckItem(item) === Pickit.Result.UNWANTED;
 	}
@@ -316,7 +316,7 @@ CraftingSystem.buildLists = function (onlyNeeded) {
 		CraftingSystem.neededItems = [];
 		CraftingSystem.validGids = [];
 		CraftingSystem.fullSets = [];
-		CraftingSystem.itemList = me.findItems(-1, sdk.itemmode.inStorage);
+		CraftingSystem.itemList = me.findItems(-1, sdk.items.mode.inStorage);
 
 		for (let i = 0; i < info.Sets.length; i += 1) {
 			if (!onlyNeeded || info.Sets[i].Enabled) {

@@ -56,7 +56,7 @@ const AutoBuild = new function AutoBuild () {
 
 	function getTemplateFilename () {
 		let build = getBuildType();
-		let template = "config/Builds/" + sdk.charclass.nameOf(me.classid) + "." + build + ".js";
+		let template = "config/Builds/" + sdk.player.class.nameOf(me.classid) + "." + build + ".js";
 		return template.toLowerCase();
 	}
 

@@ -31,19 +31,19 @@ Array.prototype.contains = (val) => this.indexOf(val) > -1;
 
 function skillInValidRange (id) {
 	switch (me.classid) {
-	case sdk.charclass.Amazon:
+	case sdk.player.class.Amazon:
 		return sdk.skills.MagicArrow <= id && id <= sdk.skills.LightningFury;
-	case sdk.charclass.Sorceress:
+	case sdk.player.class.Sorceress:
 		return sdk.skills.FireBolt <= id && id <= sdk.skills.ColdMastery;
-	case sdk.charclass.Necromancer:
+	case sdk.player.class.Necromancer:
 		return sdk.skills.AmplifyDamage <= id && id <= sdk.skills.Revive;
-	case sdk.charclass.Paladin:
+	case sdk.player.class.Paladin:
 		return sdk.skills.Sacrifice <= id && id <= sdk.skills.Salvation;
-	case sdk.charclass.Barbarian:
+	case sdk.player.class.Barbarian:
 		return sdk.skills.Bash <= id && id <= sdk.skills.BattleCommand;
-	case sdk.charclass.Druid:
+	case sdk.player.class.Druid:
 		return sdk.skills.Raven <= id && id <= sdk.skills.Hurricane;
-	case sdk.charclass.Assassin:
+	case sdk.player.class.Assassin:
 		return sdk.skills.FireBlast <= id && id <= sdk.skills.PhoenixStrike;
 	default:
 		return false;
@@ -120,7 +120,7 @@ function spendStatPoints () {
 
 function getTemplateFilename () {
 	let buildType = Config.AutoBuild.Template;
-	let templateFilename = "config/Builds/" + sdk.charclass.nameOf(me.classid) + "." + buildType + ".js";
+	let templateFilename = "config/Builds/" + sdk.player.class.nameOf(me.classid) + "." + buildType + ".js";
 	return templateFilename;
 }
 

@@ -42,7 +42,7 @@ function CrushTele() {
 				Pather.moveToExit(sdk.areas.DuranceofHateLvl3, true);
 				break;
 			case sdk.areas.RiverofFlame:
-				Pather.moveToPreset(sdk.areas.ChaosSanctuary, sdk.unittype.Object, sdk.units.DiabloStar);
+				Pather.moveToPreset(sdk.areas.ChaosSanctuary, sdk.unittype.Object, sdk.objects.DiabloStar);
 				break;
 			}
 

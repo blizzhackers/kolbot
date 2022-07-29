@@ -54,7 +54,7 @@ function AutoBaal() {
 	// test
 	this.longRangeSupport = function () {
 		switch (me.classid) {
-		case sdk.charclass.Necromancer:
+		case sdk.player.class.Necromancer:
 			ClassAttack.raiseArmy(50);
 
 			if (Config.Curse[1] > 0) {
@@ -71,7 +71,7 @@ function AutoBaal() {
 			}
 
 			break;
-		case sdk.charclass.Assassin:
+		case sdk.player.class.Assassin:
 			if (Config.UseTraps && ClassAttack.checkTraps({x: 15095, y: 5037})) {
 				ClassAttack.placeTraps({x: 15095, y: 5037}, 5);
 			}
@@ -201,7 +201,7 @@ function AutoBaal() {
 					delay(500);
 				}
 
-				let portal = Game.getObject(sdk.units.WorldstonePortal);
+				let portal = Game.getObject(sdk.objects.WorldstonePortal);
 
 				delay(2000); // wait for others to enter first - helps with curses and tentacles from spawning around you
 				print("ÿc4AutoBaal: ÿc0Entering chamber.");
@@ -219,7 +219,7 @@ function AutoBaal() {
 				this.longRangeSupport();
 			}
 
-			me.mode === sdk.units.player.mode.Dead && me.revive();
+			me.mode === sdk.player.mode.Dead && me.revive();
 
 			delay(500);
 		}

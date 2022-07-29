@@ -43,7 +43,7 @@ let sdk = require("../modules/sdk");
 Unit.prototype.__defineGetter__("idle", function () {
 	if (this.type > sdk.unittype.Player) throw new Error("Unit.idle: Must be used with player units.");
 	// Dead is pretty idle too
-	return (this.mode === sdk.units.player.mode.StandingOutsideTown || this.mode === sdk.units.player.mode.StandingInTown || this.mode === sdk.units.player.mode.Dead);
+	return (this.mode === sdk.player.mode.StandingOutsideTown || this.mode === sdk.player.mode.StandingInTown || this.mode === sdk.player.mode.Dead);
 });
 
 Unit.prototype.__defineGetter__("gold", function () {
@@ -54,9 +54,9 @@ Unit.prototype.__defineGetter__("gold", function () {
 Unit.prototype.__defineGetter__("dead", function () {
 	switch (this.type) {
 	case sdk.unittype.Player:
-		return this.mode === sdk.units.player.mode.Death || this.mode === sdk.units.player.mode.Dead;
+		return this.mode === sdk.player.mode.Death || this.mode === sdk.player.mode.Dead;
 	case sdk.unittype.Monster:
-		return this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead;
+		return this.mode === sdk.monsters.mode.Death || this.mode === sdk.monsters.mode.Dead;
 	default:
 		return false;
 	}
@@ -76,9 +76,9 @@ Party.prototype.__defineGetter__("inTown", function () {
 Unit.prototype.__defineGetter__("attacking", function () {
 	if (this.type > sdk.unittype.Player) throw new Error("Unit.attacking: Must be used with player units.");
 	return [
-		sdk.units.player.mode.Attacking1, sdk.units.player.mode.Attacking2, sdk.units.player.mode.CastingSkill, sdk.units.player.mode.ThrowingItem,
-		sdk.units.player.mode.Kicking, sdk.units.player.mode.UsingSkill1, sdk.units.player.mode.UsingSkill2, sdk.units.player.mode.UsingSkill3,
-		sdk.units.player.mode.UsingSkill4, sdk.units.player.mode.SkillActionSequence
+		sdk.player.mode.Attacking1, sdk.player.mode.Attacking2, sdk.player.mode.CastingSkill, sdk.player.mode.ThrowingItem,
+		sdk.player.mode.Kicking, sdk.player.mode.UsingSkill1, sdk.player.mode.UsingSkill2, sdk.player.mode.UsingSkill3,
+		sdk.player.mode.UsingSkill4, sdk.player.mode.SkillActionSequence
 	].includes(this.mode);
 });
 
@@ -249,7 +249,7 @@ Unit.prototype.sell = function () {
 
 Unit.prototype.toCursor = function (usePacket = false) {
 	if (this.type !== sdk.unittype.Item) throw new Error("Unit.toCursor: Must be used with items.");
-	if (me.itemoncursor && this.mode === sdk.itemmode.onCursor) return true;
+	if (me.itemoncursor && this.mode === sdk.items.mode.onCursor) return true;
 
 	this.location === sdk.storage.Stash && Town.openStash();
 	this.location === sdk.storage.Cube && Cubing.openCube();
@@ -258,7 +258,7 @@ Unit.prototype.toCursor = function (usePacket = false) {
 
 	for (let i = 0; i < 3; i += 1) {
 		try {
-			if (this.mode === sdk.itemmode.Equipped) {
+			if (this.mode === sdk.items.mode.Equipped) {
 				// fix for equipped items (cubing viper staff for example)
 				clickItem(sdk.clicktypes.click.Left, this.bodylocation);
 			} else {
@@ -342,7 +342,7 @@ Unit.prototype.use = function () {
 	case sdk.storage.Inventory:
 		// doesn't work, not sure why but it's missing something 
 		//new PacketBuilder().byte(sdk.packets.send.UseItem).dword(gid).dword(this.x).dword(this.y).send();
-		checkQuantity = iType === sdk.itemtype.Book;
+		checkQuantity = iType === sdk.items.type.Book;
 		checkQuantity && (quantity = this.getStat(sdk.stats.Quantity));
 		this.interact(); // use interact instead, was hoping to skip this since its really just doing the same thing over but oh well
 
@@ -472,7 +472,7 @@ me.castingFrames = function (skillId, fcr, charClass) {
 		human: 208,
 		wolf: 229,
 		bear: 228
-	}[charClass === sdk.charclass.Druid ? (me.getState(sdk.states.Wolf) || me.getState(sdk.states.Bear)) : "normal"];
+	}[charClass === sdk.player.class.Druid ? (me.getState(sdk.states.Wolf) || me.getState(sdk.states.Bear)) : "normal"];
 	return Math.ceil(256 * baseCastRate / Math.floor(animationSpeed * (100 + effectiveFCR) / 100) - (isLightning ? 0 : 1));
 };
 
@@ -930,10 +930,10 @@ Unit.prototype.getStatEx = function (id, subid) {
 			}
 
 			switch (this.itemType) {
-			case sdk.itemtype.Jewel:
-			case sdk.itemtype.SmallCharm:
-			case sdk.itemtype.LargeCharm:
-			case sdk.itemtype.GrandCharm:
+			case sdk.items.type.Jewel:
+			case sdk.items.type.SmallCharm:
+			case sdk.items.type.LargeCharm:
+			case sdk.items.type.GrandCharm:
 				// defense is the same as plusdefense for these items
 				return this.getStat(sdk.stats.Defense);
 			}
@@ -1132,51 +1132,51 @@ Unit.prototype.getColor = function () {
 
 	// check type
 	switch (this.itemType) {
-	case sdk.itemtype.Shield:
-	case sdk.itemtype.Armor:
-	case sdk.itemtype.Boots:
-	case sdk.itemtype.Gloves:
-	case sdk.itemtype.Belt:
-	case sdk.itemtype.AuricShields:
-	case sdk.itemtype.VoodooHeads:
-	case sdk.itemtype.Helm:
-	case sdk.itemtype.PrimalHelm:
-	case sdk.itemtype.Circlet:
-	case sdk.itemtype.Pelt:
-	case sdk.itemtype.Scepter:
-	case sdk.itemtype.Wand:
-	case sdk.itemtype.Staff:
-	case sdk.itemtype.Bow:
-	case sdk.itemtype.Axe:
-	case sdk.itemtype.Club:
-	case sdk.itemtype.Sword:
-	case sdk.itemtype.Hammer:
-	case sdk.itemtype.Knife:
-	case sdk.itemtype.Spear:
-	case sdk.itemtype.Polearm:
-	case sdk.itemtype.Crossbow:
-	case sdk.itemtype.Mace:
-	case sdk.itemtype.ThrowingKnife:
-	case sdk.itemtype.ThrowingAxe:
-	case sdk.itemtype.Javelin:
-	case sdk.itemtype.Orb:
-	case sdk.itemtype.AmazonBow:
-	case sdk.itemtype.AmazonSpear:
-	case sdk.itemtype.AmazonJavelin:
-	case sdk.itemtype.MissilePotion:
-	case sdk.itemtype.HandtoHand:
-	case sdk.itemtype.AssassinClaw:
+	case sdk.items.type.Shield:
+	case sdk.items.type.Armor:
+	case sdk.items.type.Boots:
+	case sdk.items.type.Gloves:
+	case sdk.items.type.Belt:
+	case sdk.items.type.AuricShields:
+	case sdk.items.type.VoodooHeads:
+	case sdk.items.type.Helm:
+	case sdk.items.type.PrimalHelm:
+	case sdk.items.type.Circlet:
+	case sdk.items.type.Pelt:
+	case sdk.items.type.Scepter:
+	case sdk.items.type.Wand:
+	case sdk.items.type.Staff:
+	case sdk.items.type.Bow:
+	case sdk.items.type.Axe:
+	case sdk.items.type.Club:
+	case sdk.items.type.Sword:
+	case sdk.items.type.Hammer:
+	case sdk.items.type.Knife:
+	case sdk.items.type.Spear:
+	case sdk.items.type.Polearm:
+	case sdk.items.type.Crossbow:
+	case sdk.items.type.Mace:
+	case sdk.items.type.ThrowingKnife:
+	case sdk.items.type.ThrowingAxe:
+	case sdk.items.type.Javelin:
+	case sdk.items.type.Orb:
+	case sdk.items.type.AmazonBow:
+	case sdk.items.type.AmazonSpear:
+	case sdk.items.type.AmazonJavelin:
+	case sdk.items.type.MissilePotion:
+	case sdk.items.type.HandtoHand:
+	case sdk.items.type.AssassinClaw:
 		break;
 	default:
 		return -1;
 	}
 
 	// check quality
-	if ([sdk.itemquality.Magic, sdk.itemquality.Set, sdk.itemquality.Rare, sdk.itemquality.Unique].indexOf(this.quality) === -1) {
+	if ([sdk.items.quality.Magic, sdk.items.quality.Set, sdk.items.quality.Rare, sdk.items.quality.Unique].indexOf(this.quality) === -1) {
 		return -1;
 	}
 
-	if (this.quality === sdk.itemquality.Magic || this.quality === sdk.itemquality.Rare) {
+	if (this.quality === sdk.items.quality.Magic || this.quality === sdk.items.quality.Rare) {
 		colors = {
 			"Screaming": Color.orange,
 			"Howling": Color.orange,
@@ -1326,11 +1326,11 @@ Unit.prototype.getColor = function () {
 		};
 
 		switch (this.itemType) {
-		case sdk.itemtype.Boots:
+		case sdk.items.type.Boots:
 			colors["of Precision"] = Color.darkgold;
 
 			break;
-		case sdk.itemtype.Gloves:
+		case sdk.items.type.Gloves:
 			colors["of Alacrity"] = Color.darkyellow;
 			colors["of the Leech"] = Color.crystalred;
 			colors["of the Bat"] = Color.crystalred;
@@ -1514,8 +1514,8 @@ Unit.prototype.equip = function (destLocation = undefined) {
 		return tempspot ? {location: Storage.Inventory.location, coord: tempspot} : false;
 	};
 	const doubleHanded = [
-		skd.itemtype.Staff, sdk.itemtype.Bow, sdk.itemtype.Polearm, sdk.itemtype.Crossbow,
-		sdk.itemtype.HandtoHand, sdk.itemtype.AmazonBow, sdk.itemtype.AmazonSpear
+		skd.itemtype.Staff, sdk.items.type.Bow, sdk.items.type.Polearm, sdk.items.type.Crossbow,
+		sdk.items.type.HandtoHand, sdk.items.type.AmazonBow, sdk.items.type.AmazonSpear
 	];
 
 	// Not an item, or unidentified, or not enough stats
@@ -1593,20 +1593,20 @@ Unit.prototype.equip = function (destLocation = undefined) {
 
 Unit.prototype.getBodyLoc = function () {
 	let types = {
-		1: [sdk.itemtype.Helm, sdk.itemtype.Pelt, sdk.itemtype.PrimalHelm], // helm
-		2: [sdk.itemtype.Amulet], // amulet
-		3: [sdk.itemtype.Armor], // armor
+		1: [sdk.items.type.Helm, sdk.items.type.Pelt, sdk.items.type.PrimalHelm], // helm
+		2: [sdk.items.type.Amulet], // amulet
+		3: [sdk.items.type.Armor], // armor
 		4: [
-			sdk.itemtype.Scepter, sdk.itemtype.Wand, sdk.itemtype.Staff, sdk.itemtype.Bow, sdk.itemtype.Axe, sdk.itemtype.Club, sdk.itemtype.Sword, sdk.itemtype.Hammer,
-			sdk.itemtype.Knife, sdk.itemtype.Spear, sdk.itemtype.Polearm, sdk.itemtype.Crossbow, sdk.itemtype.Mace, sdk.itemtype.ThrowingKnife, sdk.itemtype.ThrowingAxe,
-			sdk.itemtype.Javelin, sdk.itemtype.HandtoHand, sdk.itemtype.Orb, sdk.itemtype.AmazonBow, sdk.itemtype.AmazonSpear, sdk.itemtype.AmazonJavelin, sdk.itemtype.AssassinClaw
+			sdk.items.type.Scepter, sdk.items.type.Wand, sdk.items.type.Staff, sdk.items.type.Bow, sdk.items.type.Axe, sdk.items.type.Club, sdk.items.type.Sword, sdk.items.type.Hammer,
+			sdk.items.type.Knife, sdk.items.type.Spear, sdk.items.type.Polearm, sdk.items.type.Crossbow, sdk.items.type.Mace, sdk.items.type.ThrowingKnife, sdk.items.type.ThrowingAxe,
+			sdk.items.type.Javelin, sdk.items.type.HandtoHand, sdk.items.type.Orb, sdk.items.type.AmazonBow, sdk.items.type.AmazonSpear, sdk.items.type.AmazonJavelin, sdk.items.type.AssassinClaw
 		], // weapons
-		5: [sdk.itemtype.Shield, sdk.itemtype.BowQuiver, sdk.itemtype.CrossbowQuiver, sdk.itemtype.AuricShields, sdk.itemtype.VoodooHeads], // shields / Arrows / bolts
-		6: [sdk.itemtype.Ring], // ring slot 1
-		7: [sdk.itemtype.Ring], // ring slot 2
-		8: [sdk.itemtype.Belt], // belt
-		9: [sdk.itemtype.Boots], // boots
-		10: [sdk.itemtype.Gloves], // gloves
+		5: [sdk.items.type.Shield, sdk.items.type.BowQuiver, sdk.items.type.CrossbowQuiver, sdk.items.type.AuricShields, sdk.items.type.VoodooHeads], // shields / Arrows / bolts
+		6: [sdk.items.type.Ring], // ring slot 1
+		7: [sdk.items.type.Ring], // ring slot 2
+		8: [sdk.items.type.Belt], // belt
+		9: [sdk.items.type.Boots], // boots
+		10: [sdk.items.type.Gloves], // gloves
 	};
 	let bodyLoc = [];
 
@@ -1678,22 +1678,22 @@ Unit.prototype.getRes = function (type, difficulty) {
 Object.defineProperties(Unit.prototype, {
 	isChampion: {
 		get: function () {
-			return (this.spectype & sdk.units.monsters.spectype.Champion) > 0;
+			return (this.spectype & sdk.monsters.spectype.Champion) > 0;
 		},
 	},
 	isUnique: {
 		get: function () {
-			return (this.spectype & sdk.units.monsters.spectype.Unique) > 0;
+			return (this.spectype & sdk.monsters.spectype.Unique) > 0;
 		},
 	},
 	isMinion: {
 		get: function () {
-			return (this.spectype & sdk.units.monsters.spectype.Minion) > 0;
+			return (this.spectype & sdk.monsters.spectype.Minion) > 0;
 		},
 	},
 	isSuperUnique: {
 		get: function () {
-			return (this.spectype & (sdk.units.monsters.spectype.Super | sdk.units.monsters.spectype.Unique)) > 0;
+			return (this.spectype & (sdk.monsters.spectype.Super | sdk.monsters.spectype.Unique)) > 0;
 		},
 	},
 	isSpecial: {
@@ -1738,7 +1738,7 @@ Object.defineProperties(Unit.prototype, {
 			return [
 				sdk.monsters.Ghost1, sdk.monsters.Wraith1, sdk.monsters.Specter1,
 				sdk.monsters.Apparition, sdk.monsters.DarkShape, sdk.monsters.Ghost2, sdk.monsters.Wraith2, sdk.monsters.Specter2
-			].includes(this.classid) || getBaseStat("monstats", this.classid, "MonType") === sdk.units.monsters.type.Wraith;
+			].includes(this.classid) || getBaseStat("monstats", this.classid, "MonType") === sdk.monsters.type.Wraith;
 		},
 	},
 	isDoll: {
@@ -1751,12 +1751,12 @@ Object.defineProperties(Unit.prototype, {
 	},
 	isWalking: {
 		get: function () {
-			return (this.mode === sdk.units.monsters.monstermode.Walking && (this.targetx !== this.x || this.targety !== this.y));
+			return (this.mode === sdk.monsters.mode.Walking && (this.targetx !== this.x || this.targety !== this.y));
 		}
 	},
 	isRunning: {
 		get: function () {
-			return (this.mode === sdk.units.monsters.monstermode.Running && (this.targetx !== this.x || this.targety !== this.y));
+			return (this.mode === sdk.monsters.mode.Running && (this.targetx !== this.x || this.targety !== this.y));
 		}
 	},
 	isMoving: {
@@ -1830,37 +1830,37 @@ Object.defineProperties(Unit.prototype, {
 	isEquippedCharm: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return (this.location === sdk.storage.Inventory && [sdk.itemtype.SmallCharm, sdk.itemtype.LargeCharm, sdk.itemtype.GrandCharm].includes(this.itemType));
+			return (this.location === sdk.storage.Inventory && [sdk.items.type.SmallCharm, sdk.items.type.LargeCharm, sdk.items.type.GrandCharm].includes(this.itemType));
 		}
 	},
 	isInInventory: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.location === sdk.storage.Inventory && this.mode === sdk.itemmode.inStorage;
+			return this.location === sdk.storage.Inventory && this.mode === sdk.items.mode.inStorage;
 		}
 	},
 	isInStash: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.location === sdk.storage.Stash && this.mode === sdk.itemmode.inStorage;
+			return this.location === sdk.storage.Stash && this.mode === sdk.items.mode.inStorage;
 		}
 	},
 	isInCube: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.location === sdk.storage.Cube && this.mode === sdk.itemmode.inStorage;
+			return this.location === sdk.storage.Cube && this.mode === sdk.items.mode.inStorage;
 		}
 	},
 	isInStorage: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.mode === sdk.itemmode.inStorage && [sdk.storage.Inventory, sdk.storage.Cube, sdk.storage.Stash].includes(this.location);
+			return this.mode === sdk.items.mode.inStorage && [sdk.storage.Inventory, sdk.storage.Cube, sdk.storage.Stash].includes(this.location);
 		}
 	},
 	isInBelt: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.location === sdk.storage.Belt && this.mode === sdk.itemmode.inBelt;
+			return this.location === sdk.storage.Belt && this.mode === sdk.items.mode.inBelt;
 		}
 	},
 	isOnMain: {
@@ -1906,7 +1906,7 @@ Object.defineProperties(Unit.prototype, {
 	questItem: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return (this.itemType === sdk.itemtype.Quest
+			return (this.itemType === sdk.items.type.Quest
 			|| [
 				sdk.items.quest.HoradricMalus, sdk.items.quest.WirtsLeg, sdk.items.quest.HoradricStaff, sdk.items.quest.ShaftoftheHoradricStaff,
 				sdk.items.quest.ViperAmulet, sdk.items.quest.DecoyGidbinn, sdk.items.quest.TheGidbinn, sdk.items.quest.KhalimsFlail,
@@ -1929,49 +1929,49 @@ Object.defineProperties(Unit.prototype, {
 	lowquality: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.quality === sdk.itemquality.LowQuality;
+			return this.quality === sdk.items.quality.LowQuality;
 		},
 	},
 	normal: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.quality === sdk.itemquality.Normal;
+			return this.quality === sdk.items.quality.Normal;
 		},
 	},
 	superior: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.quality === sdk.itemquality.Superior;
+			return this.quality === sdk.items.quality.Superior;
 		},
 	},
 	magic: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.quality === sdk.itemquality.Magic;
+			return this.quality === sdk.items.quality.Magic;
 		},
 	},
 	set: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.quality === sdk.itemquality.Set;
+			return this.quality === sdk.items.quality.Set;
 		},
 	},
 	rare: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.quality === sdk.itemquality.Rare;
+			return this.quality === sdk.items.quality.Rare;
 		},
 	},
 	unique: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.quality === sdk.itemquality.Unique;
+			return this.quality === sdk.items.quality.Unique;
 		},
 	},
 	crafted: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return this.quality === sdk.itemquality.Crafted;
+			return this.quality === sdk.items.quality.Crafted;
 		},
 	},
 	sockets: {
@@ -1983,13 +1983,13 @@ Object.defineProperties(Unit.prototype, {
 	onGroundOrDropping: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return (this.mode === sdk.itemmode.onGround || this.mode === sdk.itemmode.Dropping);
+			return (this.mode === sdk.items.mode.onGround || this.mode === sdk.items.mode.Dropping);
 		},
 	},
 	isShield: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
-			return [sdk.itemtype.Shield, sdk.itemtype.AuricShields, sdk.itemtype.VoodooHeads].includes(this.itemType);
+			return [sdk.items.type.Shield, sdk.items.type.AuricShields, sdk.items.type.VoodooHeads].includes(this.itemType);
 		},
 	},
 });
@@ -1998,7 +1998,7 @@ Unit.prototype.usingShield = function () {
 	if (this.type > sdk.unittype.Monster) return false;
 	// always switch to main hand if we are checking ourselves
 	this === me && me.weaponswitch !== 0 && me.switchWeapons(0);
-	let shield = this.getItemsEx(-1, sdk.itemmode.Equipped)
+	let shield = this.getItemsEx(-1, sdk.items.mode.Equipped)
 		.filter(s => s.isShield).first();
 	return !!shield;
 };
@@ -2006,12 +2006,12 @@ Unit.prototype.usingShield = function () {
 Object.defineProperties(me, {
 	deadOrInSequence: {
 		get: function () {
-			return me.dead || me.mode === sdk.units.player.mode.SkillActionSequence;
+			return me.dead || me.mode === sdk.player.mode.SkillActionSequence;
 		}
 	},
 	moving: {
 		get: function () {
-			return [sdk.units.player.mode.Walking, sdk.units.player.mode.Running, sdk.units.player.mode.WalkingInTown].includes(me.mode);
+			return [sdk.player.mode.Walking, sdk.player.mode.Running, sdk.player.mode.WalkingInTown].includes(me.mode);
 		}
 	},
 	highestAct: {
@@ -2134,37 +2134,37 @@ Object.defineProperties(me, {
 	},
 	amazon: {
 		get: function () {
-			return me.classid === sdk.charclass.Amazon;
+			return me.classid === sdk.player.class.Amazon;
 		}
 	},
 	sorceress: {
 		get: function () {
-			return me.classid === sdk.charclass.Sorceress;
+			return me.classid === sdk.player.class.Sorceress;
 		}
 	},
 	necromancer: {
 		get: function () {
-			return me.classid === sdk.charclass.Necromancer;
+			return me.classid === sdk.player.class.Necromancer;
 		}
 	},
 	paladin: {
 		get: function () {
-			return me.classid === sdk.charclass.Paladin;
+			return me.classid === sdk.player.class.Paladin;
 		}
 	},
 	barbarian: {
 		get: function () {
-			return me.classid === sdk.charclass.Barbarian;
+			return me.classid === sdk.player.class.Barbarian;
 		}
 	},
 	druid: {
 		get: function () {
-			return me.classid === sdk.charclass.Druid;
+			return me.classid === sdk.player.class.Druid;
 		}
 	},
 	assassin: {
 		get: function () {
-			return me.classid === sdk.charclass.Assassin;
+			return me.classid === sdk.player.class.Assassin;
 		}
 	},
 	// quest items
@@ -2392,7 +2392,7 @@ Unit.prototype.__defineGetter__("attackable", function () {
 	// player and they are hostile
 	if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && !this.dead) return true;
 	// Dead monster
-	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) return false;
+	if (this.hp === 0 || this.mode === sdk.monsters.mode.Death || this.mode === sdk.monsters.mode.Dead) return false;
 	// Friendly monster/NPC
 	if (this.getStat(sdk.stats.Alignment) === 2) return false;
 	// catapults were returning a level of 0 and hanging up clear scripts
@@ -2406,14 +2406,14 @@ Unit.prototype.__defineGetter__("attackable", function () {
 	if ([
 		sdk.monsters.CarrionBird1, sdk.monsters.UndeadScavenger, sdk.monsters.HellBuzzard,
 		sdk.monsters.WingedNightmare, sdk.monsters.SoulKiller2/*feel like this one is wrong*/,
-		sdk.monsters.CarrionBird2].includes(this.classid) && this.mode === sdk.units.monsters.monstermode.UsingSkill1) {
+		sdk.monsters.CarrionBird2].includes(this.classid) && this.mode === sdk.monsters.mode.UsingSkill1) {
 		return false;
 	}
 	// Monsters that are Burrowed/Submerged
 	if ([
 		sdk.monsters.SandMaggot, sdk.monsters.RockWorm, sdk.monsters.Devourer, sdk.monsters.GiantLamprey, sdk.monsters.WorldKiller2,
 		sdk.monsters.WaterWatcherLimb, sdk.monsters.RiverStalkerLimb, sdk.monsters.StygianWatcherLimb,
-		sdk.monsters.WaterWatcherHead, sdk.monsters.RiverStalkerHead, sdk.monsters.StygianWatcherHead].includes(this.classid) && this.mode === sdk.units.monsters.monstermode.Spawning) {
+		sdk.monsters.WaterWatcherHead, sdk.monsters.RiverStalkerHead, sdk.monsters.StygianWatcherHead].includes(this.classid) && this.mode === sdk.monsters.mode.Spawning) {
 		return false;
 	}
 
@@ -2424,7 +2424,7 @@ Unit.prototype.__defineGetter__("curseable", function () {
 	// must be player or monster
 	if (this === undefined || !copyUnit(this).x || this.type > 1) return false;
 	// Dead monster
-	if (this.hp === 0 || this.mode === sdk.units.monsters.monstermode.Death || this.mode === sdk.units.monsters.monstermode.Dead) return false;
+	if (this.hp === 0 || this.mode === sdk.monsters.mode.Death || this.mode === sdk.monsters.mode.Dead) return false;
 	// attract can't be overridden
 	if (this.getState(sdk.states.Attract)) return false;
 	// "Possessed"
@@ -2438,14 +2438,14 @@ Unit.prototype.__defineGetter__("curseable", function () {
 	if ([
 		sdk.monsters.CarrionBird1, sdk.monsters.UndeadScavenger, sdk.monsters.HellBuzzard,
 		sdk.monsters.WingedNightmare, sdk.monsters.SoulKiller2/*feel like this one is wrong*/,
-		sdk.monsters.CarrionBird2].includes(this.classid) && this.mode === sdk.units.monsters.monstermode.UsingSkill1) {
+		sdk.monsters.CarrionBird2].includes(this.classid) && this.mode === sdk.monsters.mode.UsingSkill1) {
 		return false;
 	}
 	// Monsters that are Burrowed/Submerged
 	if ([
 		sdk.monsters.SandMaggot, sdk.monsters.RockWorm, sdk.monsters.Devourer, sdk.monsters.GiantLamprey, sdk.monsters.WorldKiller2,
 		sdk.monsters.WaterWatcherLimb, sdk.monsters.RiverStalkerLimb, sdk.monsters.StygianWatcherLimb,
-		sdk.monsters.WaterWatcherHead, sdk.monsters.RiverStalkerHead, sdk.monsters.StygianWatcherHead].includes(this.classid) && this.mode === sdk.units.monsters.monstermode.Spawning) {
+		sdk.monsters.WaterWatcherHead, sdk.monsters.RiverStalkerHead, sdk.monsters.StygianWatcherHead].includes(this.classid) && this.mode === sdk.monsters.mode.Spawning) {
 		return false;
 	}
 
@@ -2481,7 +2481,7 @@ Unit.prototype.checkForMobs = function (givenSettings = {}) {
 		range: 10,
 		count: 1,
 		coll: 0,
-		spectype: sdk.units.monsters.spectype.All
+		spectype: sdk.monsters.spectype.All
 	}, givenSettings);
 	let mob = Game.getMonster();
 	let count = 0;

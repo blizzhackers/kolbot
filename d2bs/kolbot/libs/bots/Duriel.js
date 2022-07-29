@@ -32,7 +32,7 @@ function Duriel () {
 
 	me.hardcore && !me.sorceress && Attack.clear(5);
 
-	let unit = Game.getObject(sdk.units.PortaltoDurielsLair);
+	let unit = Game.getObject(sdk.objects.PortaltoDurielsLair);
 
 	if (Skill.useTK(unit)) {
 		Misc.poll(function () {
@@ -43,7 +43,7 @@ function Duriel () {
 
 	if (me.area !== sdk.areas.DurielsLair && (!unit || !Pather.useUnitEx({unit: unit}, sdk.areas.DurielsLair))) {
 		Attack.clear(10);
-		Pather.useUnit(sdk.unittype.Object, sdk.units.PortaltoDurielsLair, sdk.areas.DurielsLair);
+		Pather.useUnit(sdk.unittype.Object, sdk.objects.PortaltoDurielsLair, sdk.areas.DurielsLair);
 	}
 
 	if (me.area !== sdk.areas.DurielsLair) throw new Error("Failed to move to Duriel");

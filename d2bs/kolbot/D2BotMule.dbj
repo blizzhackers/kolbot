@@ -138,7 +138,7 @@ function cursorCheck () {
 
 // stash picked items
 function stashItems () {
-	let items = me.findItems(-1, sdk.itemmode.inStorage, sdk.storage.Inventory);
+	let items = me.findItems(-1, sdk.items.mode.inStorage, sdk.storage.Inventory);
 
 	// stash large items first by sorting items by size in descending order
 	items.sort((a, b) => (b.sizex * b.sizey - a.sizex * a.sizey));
@@ -166,7 +166,7 @@ function pickItems () {
 	}
 
 	if (!clearedJunk) {
-		items = me.findItems(-1, sdk.itemmode.inStorage, sdk.storage.Inventory);
+		items = me.findItems(-1, sdk.items.mode.inStorage, sdk.storage.Inventory);
 
 		if (items) {
 			for (i = 0; i < items.length; i++) {
@@ -358,8 +358,8 @@ function checkAnniTorch () {
 		delay(500);
 	}
 
-	return (me.findItem(sdk.items.SmallCharm, sdk.itemmode.inStorage, -1, sdk.itemquality.Unique)
-		|| me.findItem(sdk.items.LargeCharm, sdk.itemmode.inStorage, -1, sdk.itemquality.Unique));
+	return (me.findItem(sdk.items.SmallCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique)
+		|| me.findItem(sdk.items.LargeCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique));
 }
 
 function foreverAlone () {

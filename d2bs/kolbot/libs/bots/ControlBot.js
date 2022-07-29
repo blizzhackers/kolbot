@@ -269,7 +269,7 @@ function ControlBot() {
 	};
 
 	this.getTome = function () {
-		let tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.itemmode.inStorage, sdk.storage.Inventory);
+		let tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.items.mode.inStorage, sdk.storage.Inventory);
 
 		if (tpTome.length < 2) {
 			let npc = Town.initNPC("Shop", "buyTpTome");
@@ -282,7 +282,7 @@ function ControlBot() {
 
 			if (!!tome && tome.getItemCost(sdk.items.cost.ToBuy) < me.gold && tome.buy()) {
 				delay(500);
-				tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.itemmode.inStorage, sdk.storage.Inventory);
+				tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.items.mode.inStorage, sdk.storage.Inventory);
 				tpTome.forEach(function (book) {
 					if (book.isInInventory) {
 						let scroll = npc.getItem(sdk.items.ScrollofTownPortal);
@@ -560,7 +560,7 @@ function ControlBot() {
 		switch (mode) {
 		case 0x02:
 			// idle in town
-			me.inTown && me.mode === sdk.units.player.mode.StandingInTown && greet.push(name1);
+			me.inTown && me.mode === sdk.player.mode.StandingInTown && greet.push(name1);
 
 			break;
 		}

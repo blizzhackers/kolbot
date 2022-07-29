@@ -28,9 +28,9 @@ const ClassAttack = {
 		this.setArmySize();
 
 		// See if we're at full army count
-		if ((me.getMinionCount(sdk.minions.Skeleton) < this.maxSkeletons)
-			&& (me.getMinionCount(sdk.minions.SkeletonMage) < this.maxMages)
-			&& (me.getMinionCount(sdk.minions.Revive) < this.maxRevives)) {
+		if ((me.getMinionCount(sdk.summons.type.Skeleton) < this.maxSkeletons)
+			&& (me.getMinionCount(sdk.summons.type.SkeletonMage) < this.maxMages)
+			&& (me.getMinionCount(sdk.summons.type.Revive) < this.maxRevives)) {
 			return false;
 		}
 
@@ -367,7 +367,7 @@ const ClassAttack = {
 		this.setArmySize();
 
 		for (let i = 0; i < 3; i += 1) {
-			let corpse = Game.getMonster(-1, sdk.units.monsters.monstermode.Dead);
+			let corpse = Game.getMonster(-1, sdk.monsters.mode.Dead);
 			let corpseList = [];
 
 			if (corpse) {
@@ -383,37 +383,37 @@ const ClassAttack = {
 				corpse = corpseList.shift();
 
 				// should probably have a way to priortize which ones we summon first
-				if (me.getMinionCount(sdk.minions.Skeleton) < this.maxSkeletons) {
+				if (me.getMinionCount(sdk.summons.type.Skeleton) < this.maxSkeletons) {
 					if (!Skill.cast(sdk.skills.RaiseSkeleton, sdk.skills.hand.Right, corpse)) {
 						return false;
 					}
 
-					count = me.getMinionCount(sdk.minions.Skeleton);
+					count = me.getMinionCount(sdk.summons.type.Skeleton);
 					tick = getTickCount();
 
 					while (getTickCount() - tick < 200) {
-						if (me.getMinionCount(sdk.minions.Skeleton) > count) {
+						if (me.getMinionCount(sdk.summons.type.Skeleton) > count) {
 							break;
 						}
 
 						delay(10);
 					}
-				} else if (me.getMinionCount(sdk.minions.SkeletonMage) < this.maxMages) {
+				} else if (me.getMinionCount(sdk.summons.type.SkeletonMage) < this.maxMages) {
 					if (!Skill.cast(sdk.skills.RaiseSkeletalMage, sdk.skills.hand.Right, corpse)) {
 						return false;
 					}
 
-					count = me.getMinionCount(sdk.minions.SkeletonMage);
+					count = me.getMinionCount(sdk.summons.type.SkeletonMage);
 					tick = getTickCount();
 
 					while (getTickCount() - tick < 200) {
-						if (me.getMinionCount(sdk.minions.SkeletonMage) > count) {
+						if (me.getMinionCount(sdk.summons.type.SkeletonMage) > count) {
 							break;
 						}
 
 						delay(10);
 					}
-				} else if (me.getMinionCount(sdk.minions.Revive) < this.maxRevives) {
+				} else if (me.getMinionCount(sdk.summons.type.Revive) < this.maxRevives) {
 					if (this.checkCorpse(corpse, true)) {
 						print("Reviving " + corpse.name);
 
@@ -421,11 +421,11 @@ const ClassAttack = {
 							return false;
 						}
 
-						count = me.getMinionCount(sdk.minions.Revive);
+						count = me.getMinionCount(sdk.summons.type.Revive);
 						tick = getTickCount();
 
 						while (getTickCount() - tick < 200) {
-							if (me.getMinionCount(sdk.minions.Revive) > count) {
+							if (me.getMinionCount(sdk.summons.type.Revive) > count) {
 								break;
 							}
 
@@ -446,7 +446,7 @@ const ClassAttack = {
 
 		let corpseList = [];
 		let range = Math.floor((me.getSkill(Config.ExplodeCorpses, sdk.skills.subindex.SoftPoints) + 7) / 3);
-		let corpse = Game.getMonster(-1, sdk.units.monsters.monstermode.Dead);
+		let corpse = Game.getMonster(-1, sdk.monsters.mode.Dead);
 
 		if (corpse) {
 			do {
@@ -498,7 +498,7 @@ const ClassAttack = {
 	},
 
 	checkCorpseNearMonster: function (monster, range) {
-		let corpse = Game.getMonster(-1, sdk.units.monsters.monstermode.Dead);
+		let corpse = Game.getMonster(-1, sdk.monsters.mode.Dead);
 
 		// Assume CorpseExplosion if no range specified
 		range === undefined && (range = Math.floor((me.getSkill(Config.ExplodeCorpses, sdk.skills.subindex.SoftPoints) + 7) / 3));
@@ -515,7 +515,7 @@ const ClassAttack = {
 	},
 
 	checkCorpse: function (unit, revive = false) {
-		if (!unit || unit.mode !== sdk.units.monsters.monstermode.Dead) return false;
+		if (!unit || unit.mode !== sdk.monsters.mode.Dead) return false;
 
 		let baseId = getBaseStat("monstats", unit.classid, "baseid"), badList = [312, 571];
 		let	states = [

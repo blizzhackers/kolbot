@@ -206,7 +206,7 @@ function main() {
 			// Mode 3 - Spam entrance (still experimental)
 			if (Config.HostileAction === 3 && hostiles.length > 0 && me.area === sdk.areas.ThroneofDestruction) {
 				switch (me.classid) {
-				case sdk.charclass.Sorceress:
+				case sdk.player.class.Sorceress:
 					prevPos = {x: me.x, y: me.y};
 					this.pause();
 					Pather.moveTo(15103, 5247);
@@ -226,7 +226,7 @@ function main() {
 					}
 
 					break;
-				case sdk.charclass.Druid:
+				case sdk.player.class.Druid:
 					// Don't bother if it's not a tornado druid
 					if (Config.AttackSkill[1] !== sdk.skills.Tornado) {
 						break;
@@ -242,7 +242,7 @@ function main() {
 					}
 
 					break;
-				case sdk.charclass.Assassin:
+				case sdk.player.class.Assassin:
 					prevPos = {x: me.x, y: me.y};
 					this.pause();
 					Pather.moveTo(15103, 5247);
@@ -327,7 +327,7 @@ function main() {
 
 				while (attackCount < 100) {
 					// Invalidated Unit (out of getUnit range) or player in town
-					if (!copyUnit(player).x || player.inTown || me.mode === sdk.units.player.mode.Dead) {
+					if (!copyUnit(player).x || player.inTown || me.mode === sdk.player.mode.Dead) {
 						break;
 					}
 
@@ -335,8 +335,8 @@ function main() {
 
 					// Specific attack additions
 					switch (me.classid) {
-					case sdk.charclass.Sorceress:
-					case sdk.charclass.Necromancer:
+					case sdk.player.class.Sorceress:
+					case sdk.player.class.Necromancer:
 						// Dodge missiles - experimental
 						missile = Game.getMissile();
 
@@ -356,10 +356,10 @@ function main() {
 						}
 
 						break;
-					case sdk.charclass.Paladin:
+					case sdk.player.class.Paladin:
 						// Smite summoners
 						if (Config.AttackSkill[1] === sdk.skills.BlessedHammer && Skill.canUse(sdk.skills.Smite)) {
-							if ([sdk.charclass.Necromancer, sdk.charclass.Druid].includes(player.classid) && getDistance(me, player) < 4 && this.checkSummons(player)) {
+							if ([sdk.player.class.Necromancer, sdk.player.class.Druid].includes(player.classid) && getDistance(me, player) < 4 && this.checkSummons(player)) {
 								Skill.cast(sdk.skills.Smite, sdk.skills.hand.Left, player);
 							}
 						}

@@ -12,7 +12,7 @@ Misc.openRedPortal = function (portalID) {
 
 	function getTome () {
 		let npc, tome, scroll;
-		let tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.itemmode.inStorage, sdk.storage.Inventory);
+		let tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.items.mode.inStorage, sdk.storage.Inventory);
 
 		try {
 			if (tpTome.length < 2) {
@@ -26,7 +26,7 @@ Misc.openRedPortal = function (portalID) {
 
 				if (!!tome && tome.getItemCost(sdk.items.cost.ToBuy) < me.gold && tome.buy()) {
 					delay(500);
-					tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.itemmode.inStorage, sdk.storage.Inventory);
+					tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.items.mode.inStorage, sdk.storage.Inventory);
 					tpTome.forEach(function (book) {
 						while (book.getStat(sdk.stats.Quantity) < 20) {
 							scroll = npc.getItem(sdk.items.ScrollofTownPortal);
@@ -139,14 +139,14 @@ Misc.dropItems = function (fromLoc) {
 		if (!fromLoc) throw new Error("No location given");
 		if (fromLoc === sdk.storage.Stash && !Town.openStash()) throw new Error("Failed to open stash");
 
-		let items = me.findItems(-1, sdk.itemmode.inStorage, fromLoc);
+		let items = me.findItems(-1, sdk.items.mode.inStorage, fromLoc);
 
 		if (items) {
 			while (items.length > 0) {
 				let item = items.shift();
 
 				if (item.classid === sdk.quest.item.Cube
-					|| (item.isInInventory && [sdk.itemtype.SmallCharm, sdk.itemtype.LargeCharm, sdk.itemtype.GrandCharm].includes(item.itemType) && Storage.Inventory.IsLocked(item, Config.Inventory))) {
+					|| (item.isInInventory && [sdk.items.type.SmallCharm, sdk.items.type.LargeCharm, sdk.items.type.GrandCharm].includes(item.itemType) && Storage.Inventory.IsLocked(item, Config.Inventory))) {
 					continue;
 				} else {
 					item.drop();

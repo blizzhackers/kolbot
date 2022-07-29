@@ -573,7 +573,7 @@ const Cubing = {
 
 		this.validIngredients = [];
 		this.neededIngredients = [];
-		let items = me.findItems(-1, sdk.itemmode.inStorage);
+		let items = me.findItems(-1, sdk.items.mode.inStorage);
 
 		for (let i = 0; i < this.recipes.length; i += 1) {
 			// Set default Enabled property - true if recipe is always enabled, false otherwise
@@ -745,7 +745,7 @@ const Cubing = {
 		if (!Config.Cubing) return false;
 
 		for (let i = 0; i < this.validIngredients.length; i += 1) {
-			if (unit.mode === sdk.itemmode.inStorage && unit.gid === this.validIngredients[i].gid) {
+			if (unit.mode === sdk.items.mode.inStorage && unit.gid === this.validIngredients[i].gid) {
 				return true;
 			}
 		}
@@ -762,7 +762,7 @@ const Cubing = {
 		}
 
 		// Gems and runes
-		if ((unit.itemType >= sdk.itemtype.Amethyst && unit.itemType <= sdk.itemtype.Skull) || unit.itemType === sdk.itemtype.Rune) {
+		if ((unit.itemType >= sdk.items.type.Amethyst && unit.itemType <= sdk.items.type.Skull) || unit.itemType === sdk.items.type.Rune) {
 			if (!recipe.Enabled && recipe.Ingredients[0] !== unit.classid && recipe.Ingredients[1] !== unit.classid) {
 				return false;
 			}
@@ -778,7 +778,7 @@ const Cubing = {
 
 		if (recipe.Index >= Recipe.HitPower.Helm && recipe.Index <= Recipe.Safety.Weapon) {
 			// Junk jewels (NOT matching a pickit entry)
-			if (unit.itemType === sdk.itemtype.Jewel) {
+			if (unit.itemType === sdk.items.type.Jewel) {
 				if (recipe.Enabled && ntipResult === Pickit.Result.UNWANTED) {
 					return true;
 				}
@@ -830,7 +830,7 @@ const Cubing = {
 				return true;
 			}
 
-			if (recipe.Enabled && recipe.Ingredients[2] === unit.classid && unit.itemType === sdk.itemtype.Ring
+			if (recipe.Enabled && recipe.Ingredients[2] === unit.classid && unit.itemType === sdk.items.type.Ring
 				&& unit.getStat(sdk.stats.MaxManaPercent) && !Storage.Inventory.IsLocked(unit, Config.Inventory)) {
 				return true;
 			}

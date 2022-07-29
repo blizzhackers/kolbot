@@ -12,11 +12,11 @@ const ItemHooks = {
 	modifier: 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)),
 	hooks: [],
 	ignoreItemTypes: [
-		sdk.itemtype.Gold, sdk.itemtype.BowQuiver, sdk.itemtype.CrossbowQuiver, sdk.itemtype.Book, sdk.itemtype.Gem, sdk.itemtype.Scroll,
-		sdk.itemtype.MissilePotion, sdk.itemtype.Key, sdk.itemtype.Boots, sdk.itemtype.Gloves, sdk.itemtype.ThrowingKnife, sdk.itemtype.ThrowingAxe,
-		sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion, sdk.itemtype.StaminaPotion, sdk.itemtype.AntidotePotion,
-		sdk.itemtype.ThawingPotion, sdk.itemtype.ChippedGem, sdk.itemtype.FlawedGem, sdk.itemtype.StandardGem, sdk.itemtype.FlawlessGem, sdk.itemtype.PerfectgGem,
-		sdk.itemtype.Amethyst, sdk.itemtype.Diamond, sdk.itemtype.Emerald, sdk.itemtype.Ruby, sdk.itemtype.Sapphire, sdk.itemtype.Topaz, sdk.itemtype.Skull
+		sdk.items.type.Gold, sdk.items.type.BowQuiver, sdk.items.type.CrossbowQuiver, sdk.items.type.Book, sdk.items.type.Gem, sdk.items.type.Scroll,
+		sdk.items.type.MissilePotion, sdk.items.type.Key, sdk.items.type.Boots, sdk.items.type.Gloves, sdk.items.type.ThrowingKnife, sdk.items.type.ThrowingAxe,
+		sdk.items.type.HealingPotion, sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion, sdk.items.type.StaminaPotion, sdk.items.type.AntidotePotion,
+		sdk.items.type.ThawingPotion, sdk.items.type.ChippedGem, sdk.items.type.FlawedGem, sdk.items.type.StandardGem, sdk.items.type.FlawlessGem, sdk.items.type.PerfectgGem,
+		sdk.items.type.Amethyst, sdk.items.type.Diamond, sdk.items.type.Emerald, sdk.items.type.Ruby, sdk.items.type.Sapphire, sdk.items.type.Topaz, sdk.items.type.Skull
 	],
 	itemCodeByClassId: [],
 	itemCodeByClassIdAndQuality: [],
@@ -25,12 +25,12 @@ const ItemHooks = {
 	addToCodeByClassIdAndQuality: function (id, setName = "", uniqueName = "") {
 		if (!id) return;
 		if (setName) {
-			this.itemCodeByClassIdAndQuality[id] = [sdk.itemquality.Set];
-			this.itemCodeByClassIdAndQuality[id][sdk.itemquality.Set] = setName;
+			this.itemCodeByClassIdAndQuality[id] = [sdk.items.quality.Set];
+			this.itemCodeByClassIdAndQuality[id][sdk.items.quality.Set] = setName;
 		}
 		if (uniqueName) {
-			this.itemCodeByClassIdAndQuality[id] = [sdk.itemquality.Unique];
-			this.itemCodeByClassIdAndQuality[id][sdk.itemquality.Unique] = uniqueName;
+			this.itemCodeByClassIdAndQuality[id] = [sdk.items.quality.Unique];
+			this.itemCodeByClassIdAndQuality[id][sdk.items.quality.Unique] = uniqueName;
 		}
 	},
 
@@ -61,7 +61,7 @@ const ItemHooks = {
 			try {
 				do {
 					if (item.area === ActionHooks.currArea && item.onGroundOrDropping
-						&& (item.quality >= sdk.itemquality.Magic || ((item.normal || item.superior) && !this.ignoreItemTypes.includes(item.itemType)))) {
+						&& (item.quality >= sdk.items.quality.Magic || ((item.normal || item.superior) && !this.ignoreItemTypes.includes(item.itemType)))) {
 						if (this.pickitEnabled) {
 							if ([Pickit.Result.UNWANTED, Pickit.Result.TRASH].indexOf(Pickit.checkItem(item).result) === -1) {
 								!this.getHook(item) && this.add(item);
@@ -109,15 +109,15 @@ const ItemHooks = {
 		let eth = (item.ethereal ? "Eth: " : "");
 
 		switch (item.quality) {
-		case sdk.itemquality.Normal:
-		case sdk.itemquality.Superior:
+		case sdk.items.quality.Normal:
+		case sdk.items.quality.Superior:
 			switch (item.itemType) {
-			case sdk.itemtype.Quest:
+			case sdk.items.type.Quest:
 				color = 0x9A;
 				code += (!!this.itemCodeByClassId[item.classid] ? this.itemCodeByClassId[item.classid] : "ÿc8" + item.fname);
 
 				break;
-			case sdk.itemtype.Rune:
+			case sdk.items.type.Rune:
 				if (item.classid >= sdk.items.runes.Vex) {
 					color = 0x9B;
 					code = "ÿc;" + item.fname;
@@ -143,7 +143,7 @@ const ItemHooks = {
 					} else {
 						code = "ÿc0" + (item.sockets > 0 ? "[" + item.sockets + "]" : "");
 						code += this.getName(item);
-						item.itemType === sdk.itemtype.AuricShields && (code += "[R: " + item.getStat(sdk.stats.FireResist) + "]");
+						item.itemType === sdk.items.type.AuricShields && (code += "[R: " + item.getStat(sdk.stats.FireResist) + "]");
 						code += "(" + item.ilvl + ")";
 					}
 				}
@@ -152,8 +152,8 @@ const ItemHooks = {
 			}
 
 			break;
-		case sdk.itemquality.Set:
-		case sdk.itemquality.Unique:
+		case sdk.items.quality.Set:
+		case sdk.items.quality.Unique:
 			({color, code} = this.itemColorCode[item.quality]);
 
 			if (!this.itemCodeByClassId[item.classid]) {
@@ -173,8 +173,8 @@ const ItemHooks = {
 			}
 
 			break;
-		case sdk.itemquality.Magic:
-		case sdk.itemquality.Rare:
+		case sdk.items.quality.Magic:
+		case sdk.items.quality.Rare:
 			if (item.name) {
 				({color, code} = this.itemColorCode[item.quality]);
 
@@ -398,7 +398,7 @@ ItemHooks.addToCodeByClassIdAndQuality(sdk.items.DoubleAxe, "Beserker's Axe", "B
 ItemHooks.addToCodeByClassIdAndQuality(sdk.items.SplintMail, "Beserker's Armor", "Iceblink");
 ItemHooks.addToCodeByClassIdAndQuality(sdk.items.Helm, "Beserker's Helm", "Coif of Glory");
 
-ItemHooks.itemColorCode[sdk.itemquality.Magic] = { color: 0x97, code: "ÿc3" };
-ItemHooks.itemColorCode[sdk.itemquality.Set] = { color: 0x84, code: "ÿc2" };
-ItemHooks.itemColorCode[sdk.itemquality.Rare] = { color: 0x6F, code: "ÿc9" };
-ItemHooks.itemColorCode[sdk.itemquality.Unique] = { color: 0xA8, code: "ÿc4" };
+ItemHooks.itemColorCode[sdk.items.quality.Magic] = { color: 0x97, code: "ÿc3" };
+ItemHooks.itemColorCode[sdk.items.quality.Set] = { color: 0x84, code: "ÿc2" };
+ItemHooks.itemColorCode[sdk.items.quality.Rare] = { color: 0x6F, code: "ÿc9" };
+ItemHooks.itemColorCode[sdk.items.quality.Unique] = { color: 0xA8, code: "ÿc4" };

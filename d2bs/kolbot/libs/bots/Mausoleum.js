@@ -32,7 +32,9 @@ function Mausoleum() {
 
 	if (Config.Mausoleum.ClearCrypt) {
 		// Crypt exit is... awkward
-		if (!(Pather.moveToExit(sdk.areas.BurialGrounds, true) && Pather.moveToPreset(sdk.areas.BurialGrounds, sdk.unittype.Stairs, 6) && Pather.moveToExit(sdk.areas.Crypt, true))) {
+		if (!(Pather.moveToExit(sdk.areas.BurialGrounds, true)
+			&& Pather.moveToPreset(sdk.areas.BurialGrounds, sdk.unittype.Stairs, sdk.exits.preset.Crypt)
+			&& Pather.moveToExit(sdk.areas.Crypt, true))) {
 			throw new Error("Failed to move to Crypt");
 		}
 

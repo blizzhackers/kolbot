@@ -104,14 +104,14 @@ function Follower() {
 
 		// Tal-Rasha's tomb->Duriel's lair
 		if (me.area >= sdk.areas.TalRashasTomb1 && me.area <= sdk.areas.TalRashasTomb7 && area === sdk.areas.DurielsLair) {
-			Pather.useUnit(sdk.unittype.Object, sdk.units.PortaltoDurielsLair, area);
+			Pather.useUnit(sdk.unittype.Object, sdk.objects.PortaltoDurielsLair, area);
 
 			return 4;
 		}
 
 		// Throne->Chamber
 		if (me.area === sdk.areas.ThroneofDestruction && area === sdk.areas.WorldstoneChamber) {
-			target = Game.getObject(sdk.units.WorldstonePortal);
+			target = Game.getObject(sdk.objects.WorldstonePortal);
 
 			if (target) {
 				Pather.usePortal(null, null, target);
@@ -176,7 +176,7 @@ function Follower() {
 
 			delay(1500);
 
-			let target = Game.getObject(sdk.units.RedPortalToAct4);
+			let target = Game.getObject(sdk.objects.RedPortalToAct4);
 			target && Pather.moveTo(target.x - 3, target.y - 1);
 
 			Pather.usePortal(null);
@@ -185,7 +185,7 @@ function Follower() {
 		case 5:
 			if (Town.npcInteract("Tyrael")) {
 				try {
-					Pather.useUnit(sdk.unittype.Object, sdk.units.RedPortalToAct5, sdk.areas.Harrogath);
+					Pather.useUnit(sdk.unittype.Object, sdk.objects.RedPortalToAct5, sdk.areas.Harrogath);
 				} catch (a5e) {
 					break;
 				}
@@ -229,7 +229,7 @@ function Follower() {
 
 		if (item) {
 			do {
-				if (item.onGroundOrDropping && item.itemType >= sdk.itemtype.HealingPotion && item.itemType <= sdk.itemtype.RejuvPotion && item.distance <= range) {
+				if (item.onGroundOrDropping && item.itemType >= sdk.items.type.HealingPotion && item.itemType <= sdk.items.type.RejuvPotion && item.distance <= range) {
 					pickList.push(copyUnit(item));
 				}
 			} while (item.getNext());
@@ -412,7 +412,7 @@ function Follower() {
 	Config.TownCheck = false;
 	Config.TownHP = 0;
 	Config.TownMP = 0;
-	charClass = sdk.charclass.nameOf(me.classid).toLowerCase();
+	charClass = sdk.player.class.nameOf(me.classid).toLowerCase();
 	leader = Misc.poll(() => Misc.findPlayer(Config.Leader), Time.seconds(20), Time.seconds(1));
 
 	if (!leader) {
@@ -433,7 +433,7 @@ function Follower() {
 
 	// Main Loop
 	while (Misc.inMyParty(Config.Leader)) {
-		if (me.mode === sdk.units.player.mode.Dead) {
+		if (me.mode === sdk.player.mode.Dead) {
 			while (!me.inTown) {
 				me.revive();
 				delay(1000);

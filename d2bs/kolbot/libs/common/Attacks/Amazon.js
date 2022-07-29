@@ -163,8 +163,8 @@ const ClassAttack = {
 		// Arrow/bolt check
 		if (this.bowCheck) {
 			switch (true) {
-			case this.bowCheck === "bow" && !me.getItem("aqv", sdk.itemmode.Equipped):
-			case this.bowCheck === "crossbow" && !me.getItem("cqv", sdk.itemmode.Equipped):
+			case this.bowCheck === "bow" && !me.getItem("aqv", sdk.items.mode.Equipped):
+			case this.bowCheck === "crossbow" && !me.getItem("cqv", sdk.items.mode.Equipped):
 				console.log("Bow check");
 				Town.visitTown();
 

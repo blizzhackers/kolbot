@@ -25,7 +25,7 @@ const Item = {
 		if (!this.canEquip(item)) return false;
 
 		// Already equipped in the right slot
-		if (item.mode === sdk.itemmode.Equipped && item.bodylocation === bodyLoc) return true;
+		if (item.mode === sdk.items.mode.Equipped && item.bodylocation === bodyLoc) return true;
 		if (item.isInStash && !Town.openStash()) return false;
 
 		for (let i = 0; i < 3; i += 1) {
@@ -76,71 +76,71 @@ const Item = {
 		let bodyLoc;
 
 		switch (item.itemType) {
-		case sdk.itemtype.Shield:
-		case sdk.itemtype.AuricShields:
-		case sdk.itemtype.VoodooHeads:
-		case sdk.itemtype.BowQuiver:
-		case sdk.itemtype.CrossbowQuiver:
+		case sdk.items.type.Shield:
+		case sdk.items.type.AuricShields:
+		case sdk.items.type.VoodooHeads:
+		case sdk.items.type.BowQuiver:
+		case sdk.items.type.CrossbowQuiver:
 			bodyLoc = sdk.body.LeftArm;
 
 			break;
-		case sdk.itemtype.Armor:
+		case sdk.items.type.Armor:
 			bodyLoc = sdk.body.Armor;
 
 			break;
-		case sdk.itemtype.Ring:
+		case sdk.items.type.Ring:
 			bodyLoc = [sdk.body.RingRight, sdk.body.RingLeft];
 
 			break;
-		case sdk.itemtype.Amulet:
+		case sdk.items.type.Amulet:
 			bodyLoc = sdk.body.Neck;
 
 			break;
-		case sdk.itemtype.Boots:
+		case sdk.items.type.Boots:
 			bodyLoc = sdk.body.Feet;
 
 			break;
-		case sdk.itemtype.Gloves:
+		case sdk.items.type.Gloves:
 			bodyLoc = sdk.body.Gloves;
 
 			break;
-		case sdk.itemtype.Belt:
+		case sdk.items.type.Belt:
 			bodyLoc = sdk.body.Belt;
 
 			break;
-		case sdk.itemtype.Helm:
-		case sdk.itemtype.PrimalHelm:
-		case sdk.itemtype.Circlet:
-		case sdk.itemtype.Pelt:
+		case sdk.items.type.Helm:
+		case sdk.items.type.PrimalHelm:
+		case sdk.items.type.Circlet:
+		case sdk.items.type.Pelt:
 			bodyLoc = sdk.body.Head;
 
 			break;
-		case sdk.itemtype.Scepter:
-		case sdk.itemtype.Wand:
-		case sdk.itemtype.Staff:
-		case sdk.itemtype.Bow:
-		case sdk.itemtype.Axe:
-		case sdk.itemtype.Club:
-		case sdk.itemtype.Sword:
-		case sdk.itemtype.Hammer:
-		case sdk.itemtype.Knife:
-		case sdk.itemtype.Spear:
-		case sdk.itemtype.Polearm:
-		case sdk.itemtype.Crossbow:
-		case sdk.itemtype.Mace:
-		case sdk.itemtype.ThrowingKnife:
-		case sdk.itemtype.ThrowingAxe:
-		case sdk.itemtype.Javelin:
-		case sdk.itemtype.Orb:
-		case sdk.itemtype.AmazonBow:
-		case sdk.itemtype.AmazonSpear:
-		case sdk.itemtype.AmazonJavelin:
-		case sdk.itemtype.MissilePotion:
+		case sdk.items.type.Scepter:
+		case sdk.items.type.Wand:
+		case sdk.items.type.Staff:
+		case sdk.items.type.Bow:
+		case sdk.items.type.Axe:
+		case sdk.items.type.Club:
+		case sdk.items.type.Sword:
+		case sdk.items.type.Hammer:
+		case sdk.items.type.Knife:
+		case sdk.items.type.Spear:
+		case sdk.items.type.Polearm:
+		case sdk.items.type.Crossbow:
+		case sdk.items.type.Mace:
+		case sdk.items.type.ThrowingKnife:
+		case sdk.items.type.ThrowingAxe:
+		case sdk.items.type.Javelin:
+		case sdk.items.type.Orb:
+		case sdk.items.type.AmazonBow:
+		case sdk.items.type.AmazonSpear:
+		case sdk.items.type.AmazonJavelin:
+		case sdk.items.type.MissilePotion:
 			bodyLoc = me.barbarian ? [sdk.body.RightArm, sdk.body.LeftArm] : sdk.body.RightArm;
 
 			break;
-		case sdk.itemtype.HandtoHand:
-		case sdk.itemtype.AssassinClaw:
+		case sdk.items.type.HandtoHand:
+		case sdk.items.type.AssassinClaw:
 			bodyLoc = me.assassin ? [sdk.body.RightArm, sdk.body.LeftArm] : sdk.body.RightArm;
 
 			break;
@@ -178,7 +178,7 @@ const Item = {
 	autoEquip: function () {
 		if (!Config.AutoEquip) return true;
 
-		let items = me.findItems(-1, sdk.itemmode.inStorage);
+		let items = me.findItems(-1, sdk.items.mode.inStorage);
 
 		if (!items) return false;
 
@@ -212,7 +212,7 @@ const Item = {
 					const equippedItem = this.getEquippedItem(bodyLoc[j]);
 					if (items[0].isInStorage && tier > equippedItem.tier && equippedItem.classid !== sdk.items.quest.KhalimsWill) {
 						if (!items[0].identified) {
-							let tome = me.findItem(sdk.items.TomeofIdentify, sdk.itemmode.inStorage, sdk.storage.Inventory);
+							let tome = me.findItem(sdk.items.TomeofIdentify, sdk.items.mode.inStorage, sdk.storage.Inventory);
 
 							if (tome && tome.getStat(sdk.stats.Quantity) > 0) {
 								items[0].isInStash && Town.openStash();

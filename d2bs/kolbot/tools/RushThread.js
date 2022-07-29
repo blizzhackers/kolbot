@@ -312,7 +312,7 @@ function main () {
 		Pickit.pickItems();
 		Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.Journal);
 
-		let redPortal = Game.getObject(sdk.units.RedPortal);
+		let redPortal = Game.getObject(sdk.objects.RedPortal);
 
 		if (!redPortal || !this.usePortal(null, null, redPortal)) {
 			if (!Misc.poll(() => {
@@ -361,11 +361,11 @@ function main () {
 			delay(100);
 		}
 
-		while (!Game.getObject(sdk.units.PortaltoDurielsLair)) {
+		while (!Game.getObject(sdk.objects.PortaltoDurielsLair)) {
 			delay(500);
 		}
 
-		Pather.useUnit(sdk.unittype.Object, sdk.units.PortaltoDurielsLair, sdk.areas.DurielsLair);
+		Pather.useUnit(sdk.unittype.Object, sdk.objects.PortaltoDurielsLair, sdk.areas.DurielsLair);
 		Attack.kill(sdk.monsters.Duriel);
 		Pickit.pickItems();
 
@@ -642,7 +642,7 @@ function main () {
 		Precast.doPrecast(true);
 		Misc.poll(() => !Game.getMonster(sdk.monsters.ThroneBaal), Time.minutes(3), 1000);
 
-		let portal = Game.getObject(sdk.units.WorldstonePortal);
+		let portal = Game.getObject(sdk.objects.WorldstonePortal);
 
 		if (portal) {
 			Pather.usePortal(null, null, portal);
@@ -989,13 +989,13 @@ function main () {
 		Precast.doPrecast(false);
 
 		if (!Pather.moveToExit(sdk.areas.FrozenRiver, true)
-			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.units.FrozenAnyasPlatform)) {
+			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.FrozenAnyasPlatform)) {
 			throw new Error("Anya quest failed");
 		}
 
 		Attack.securePosition(me.x, me.y, 30, 2000);
 
-		let anya = Game.getObject(sdk.units.FrozenAnya);
+		let anya = Game.getObject(sdk.objects.FrozenAnya);
 
 		if (anya) {
 			Pather.moveToUnit(anya);
@@ -1012,7 +1012,7 @@ function main () {
 			delay(200);
 		}
 
-		Misc.poll(() => !Game.getObject(sdk.units.FrozenAnya), 30000, 1000);
+		Misc.poll(() => !Game.getObject(sdk.objects.FrozenAnya), 30000, 1000);
 
 		this.log("2"); // Mainly for non-questers to know when to get the scroll of resistance
 

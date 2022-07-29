@@ -130,7 +130,7 @@ function main() {
 							Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricStaffHolder, -11, 3);
 
 							for (let i = 0; i < 3; i++) {
-								if (Pather.useUnit(sdk.unittype.Object, sdk.units.PortaltoDurielsLair, sdk.areas.DurielsLair)) {
+								if (Pather.useUnit(sdk.unittype.Object, sdk.objects.PortaltoDurielsLair, sdk.areas.DurielsLair)) {
 									break;
 								}
 							}
@@ -157,11 +157,11 @@ function main() {
 
 							break;
 						case sdk.areas.LutGholein:
-							Pather.useUnit(sdk.unittype.Stairs, sdk.units.exits.preset.A2EnterSewersDoor, sdk.areas.A2SewersLvl1);
+							Pather.useUnit(sdk.unittype.Stairs, sdk.exits.preset.A2EnterSewersDoor, sdk.areas.A2SewersLvl1);
 
 							break;
 						case sdk.areas.KurastBazaar:
-							Pather.useUnit(sdk.unittype.Stairs, sdk.units.exits.preset.A3EnterSewers, sdk.areas.A3SewersLvl1);
+							Pather.useUnit(sdk.unittype.Stairs, sdk.exits.preset.A3EnterSewers, sdk.areas.A3SewersLvl1);
 
 							break;
 						}
@@ -190,7 +190,7 @@ function main() {
 							
 							break;
 						} else if (obj.dest === sdk.areas.WorldstoneChamber && !Game.getMonster(sdk.monsters.ThroneBaal)) {
-							redPortal = Game.getObject(sdk.units.WorldstonePortal);
+							redPortal = Game.getObject(sdk.objects.WorldstonePortal);
 							redPortal && Pather.usePortal(null, null, redPortal);
 
 							break;
@@ -230,7 +230,7 @@ function main() {
 						case sdk.areas.FrigidHighlands:
 						case sdk.areas.ArreatPlateau:
 						case sdk.areas.FrozenTundra:
-							chestLoc = Game.getPresetObject(me.area, sdk.units.SmallSparklyChest);
+							chestLoc = Game.getPresetObject(me.area, sdk.objects.SmallSparklyChest);
 
 							if (!chestLoc) {
 								break;

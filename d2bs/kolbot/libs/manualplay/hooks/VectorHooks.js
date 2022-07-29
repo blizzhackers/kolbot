@@ -141,19 +141,19 @@ const VectorHooks = {
 		case sdk.areas.Abaddon:
 		case sdk.areas.PitofAcheron:
 		case sdk.areas.InfernalPit:
-			unit = Game.getPresetObject(me.area, sdk.units.SmallSparklyChest);
-			poi = {name: "SuperChest", action: {do: "openChest", id: sdk.units.SmallSparklyChest}};
+			unit = Game.getPresetObject(me.area, sdk.objects.SmallSparklyChest);
+			poi = {name: "SuperChest", action: {do: "openChest", id: sdk.objects.SmallSparklyChest}};
 
 			break;
 		case sdk.areas.GlacialTrail:
 		case sdk.areas.HallsofAnguish:
 		case sdk.areas.HallsofPain:
-			unit = Game.getPresetObject(me.area, sdk.units.LargeSparklyChest);
-			poi = {name: "SuperChest", action: {do: "openChest", id: sdk.units.LargeSparklyChest}};
+			unit = Game.getPresetObject(me.area, sdk.objects.LargeSparklyChest);
+			poi = {name: "SuperChest", action: {do: "openChest", id: sdk.objects.LargeSparklyChest}};
 
 			break;
 		case sdk.areas.ColdPlains:
-			unit = Game.getPresetStair(me.area, sdk.units.exits.preset.AreaEntrance);
+			unit = Game.getPresetStair(me.area, sdk.exits.preset.AreaEntrance);
 			name = "Cave Level 1";
 
 			break;
@@ -168,7 +168,7 @@ const VectorHooks = {
 
 			break;
 		case sdk.areas.BlackMarsh:
-			unit = Game.getPresetStair(me.area, sdk.units.exits.preset.AreaEntrance);
+			unit = Game.getPresetStair(me.area, sdk.exits.preset.AreaEntrance);
 			name = "Hole Level 1";
 
 			break;
@@ -183,7 +183,7 @@ const VectorHooks = {
 
 			break;
 		case sdk.areas.TowerCellarLvl5:
-			unit = Game.getPresetObject(me.area, sdk.units.SuperChest);
+			unit = Game.getPresetObject(me.area, sdk.objects.SuperChest);
 			name = "Countess";
 
 			break;
@@ -213,7 +213,7 @@ const VectorHooks = {
 
 			break;
 		case sdk.areas.LutGholein:
-			unit = Game.getPresetStair(me.area, sdk.units.exits.preset.A2EnterSewersDoor);
+			unit = Game.getPresetStair(me.area, sdk.exits.preset.A2EnterSewersDoor);
 			name = "Sewer's Level 1";
 
 			break;
@@ -258,7 +258,7 @@ const VectorHooks = {
 			name = "Orifice";
 
 			if (!unit) {
-				unit = Game.getPresetObject(me.area, sdk.units.SmallSparklyChest);
+				unit = Game.getPresetObject(me.area, sdk.objects.SmallSparklyChest);
 				name = "SuperChest";
 			}
 
@@ -274,7 +274,7 @@ const VectorHooks = {
 
 			break;
 		case sdk.areas.KurastBazaar:
-			unit = Game.getPresetStair(me.area, sdk.units.exits.preset.A3EnterSewers);
+			unit = Game.getPresetStair(me.area, sdk.exits.preset.A3EnterSewers);
 			name = "Sewer's Level 1";
 
 			break;
@@ -299,7 +299,7 @@ const VectorHooks = {
 
 			break;
 		case sdk.areas.Travincal:
-			unit = Game.getPresetObject(me.area, sdk.units.CompellingOrb);
+			unit = Game.getPresetObject(me.area, sdk.objects.CompellingOrb);
 			name = "Orb";
 
 			break;
@@ -319,7 +319,7 @@ const VectorHooks = {
 
 			break;
 		case sdk.areas.ChaosSanctuary:
-			unit = Game.getPresetObject(me.area, sdk.units.DiabloStar);
+			unit = Game.getPresetObject(me.area, sdk.objects.DiabloStar);
 			name = "Star";
 
 			break;
@@ -336,12 +336,12 @@ const VectorHooks = {
 		case sdk.areas.FrigidHighlands:
 		case sdk.areas.ArreatPlateau:
 		case sdk.areas.FrozenTundra:
-			unit = Game.getPresetObject(me.area, sdk.units.RedPortal);
+			unit = Game.getPresetObject(me.area, sdk.objects.RedPortal);
 			poi = {name: "Hell Entrance", action: {do: "usePortal"}};
 
 			break;
 		case sdk.areas.FrozenRiver:
-			unit = Game.getPresetObject(me.area, sdk.units.FrozenAnyasPlatform);
+			unit = Game.getPresetObject(me.area, sdk.objects.FrozenAnyasPlatform);
 			name = "Frozen Anya";
 
 			break;
@@ -351,7 +351,7 @@ const VectorHooks = {
 
 			break;
 		case sdk.areas.HallsofVaught:
-			unit = Game.getPresetObject(me.area, sdk.units.NihlathaksPlatform);
+			unit = Game.getPresetObject(me.area, sdk.objects.NihlathaksPlatform);
 			name = "Nihlathak";
 
 			break;
@@ -366,7 +366,7 @@ const VectorHooks = {
 
 			break;
 		case sdk.areas.MatronsDen:
-			unit = Game.getPresetObject(me.area, sdk.units.SmallSparklyChest);
+			unit = Game.getPresetObject(me.area, sdk.objects.SmallSparklyChest);
 			name = "Lilith";
 
 			break;
@@ -376,7 +376,7 @@ const VectorHooks = {
 
 			break;
 		case sdk.areas.FurnaceofPain:
-			unit = Game.getPresetObject(me.area, sdk.units.SmallSparklyChest);
+			unit = Game.getPresetObject(me.area, sdk.objects.SmallSparklyChest);
 			name = "Izual";
 
 			break;

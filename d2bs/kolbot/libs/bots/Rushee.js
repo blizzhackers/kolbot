@@ -85,11 +85,11 @@ function Rushee() {
 	};
 
 	this.revive = function () {
-		while (me.mode === sdk.units.player.mode.Death) {
+		while (me.mode === sdk.player.mode.Death) {
 			delay(40);
 		}
 
-		if (me.mode === sdk.units.player.mode.Dead) {
+		if (me.mode === sdk.player.mode.Dead) {
 			me.revive();
 
 			while (!me.inTown) {
@@ -218,7 +218,7 @@ function Rushee() {
 		delay(750 + me.ping);
 
 		// unbug cursor
-		let item = me.findItem(-1, sdk.itemmode.inStorage, sdk.storage.Inventory);
+		let item = me.findItem(-1, sdk.items.mode.inStorage, sdk.storage.Inventory);
 
 		if (item && item.toCursor()) {
 			Storage.Inventory.MoveTo(item);
@@ -230,7 +230,7 @@ function Rushee() {
 	this.changeAct = function (act) {
 		let preArea = me.area;
 
-		if (me.mode === sdk.units.player.mode.Dead) {
+		if (me.mode === sdk.player.mode.Dead) {
 			me.revive();
 
 			while (!me.inTown) {
@@ -289,9 +289,9 @@ function Rushee() {
 				Town.npcInteract("Tyrael", false);
 				delay(me.ping + 1);
 
-				if (Game.getObject(sdk.units.RedPortalToAct5)) {
+				if (Game.getObject(sdk.objects.RedPortalToAct5)) {
 					me.cancel();
-					Pather.useUnit(sdk.unittype.Object, sdk.units.RedPortalToAct5, sdk.areas.Harrogath);
+					Pather.useUnit(sdk.unittype.Object, sdk.objects.RedPortalToAct5, sdk.areas.Harrogath);
 				} else {
 					Misc.useMenu(sdk.menu.TravelToHarrogath);
 				}
@@ -766,14 +766,14 @@ function Rushee() {
 						Pather.usePortal(sdk.areas.FrozenRiver, Config.Leader);
 						delay(500);
 
-						target = Game.getObject(sdk.units.FrozenAnya);
+						target = Game.getObject(sdk.objects.FrozenAnya);
 
 						if (target) {
 							Pather.moveToUnit(target);
 							Misc.poll(() => {
 								Packet.entityInteract(target);
 								delay(100);
-								return !Game.getObject(sdk.units.FrozenAnya);
+								return !Game.getObject(sdk.objects.FrozenAnya);
 							}, 1000, 200);
 							delay(1000);
 							me.cancel();
@@ -1036,7 +1036,7 @@ function Rushee() {
 				}
 			}
 		} catch (e) {
-			if (me.mode === sdk.units.player.mode.Dead) {
+			if (me.mode === sdk.player.mode.Dead) {
 				me.revive();
 
 				while (!me.inTown) {

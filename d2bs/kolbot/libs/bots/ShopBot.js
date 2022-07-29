@@ -261,7 +261,7 @@ function ShopBot() {
 			let wp = Game.getPresetObject(me.area, [119, 156, 237, 398, 429][me.act - 1]);
 			let wpX = wp.roomx * 5 + wp.x;
 			let wpY = wp.roomy * 5 + wp.y;
-			let redPortal = (getUnits(sdk.unittype.Object, sdk.units.RedPortal).sort((a, b) => a.distance - b.distance)).first();
+			let redPortal = (getUnits(sdk.unittype.Object, sdk.objects.RedPortal).sort((a, b) => a.distance - b.distance)).first();
 			let exit = area.exits[0];
 
 			for (let i = 1; i < area.exits.length; i++) {

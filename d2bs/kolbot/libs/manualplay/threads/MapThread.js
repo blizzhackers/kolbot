@@ -207,11 +207,11 @@ function main() {
 
 			break;
 		case "make":
-			if (!FileTools.exists("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js")) {
-				FileTools.copy("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + ".js", "libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js");
-				D2Bot.printToConsole("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
-				print("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
-				me.overhead("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+			if (!FileTools.exists("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js")) {
+				FileTools.copy("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + ".js", "libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js");
+				D2Bot.printToConsole("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+				print("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+				me.overhead("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
 			}
 
 			break;

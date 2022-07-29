@@ -146,7 +146,7 @@ const Runewords = {
 		this.validGids = [];
 		this.needList = [];
 		let baseCheck;
-		let items = me.findItems(-1, sdk.itemmode.inStorage);
+		let items = me.findItems(-1, sdk.items.mode.inStorage);
 
 		for (let i = 0; i < Config.Runewords.length; i += 1) {
 			if (!baseCheck) {
@@ -174,7 +174,7 @@ const Runewords = {
 
 		// hel rune for rerolling purposes
 		if (baseCheck) {
-			let hel = me.getItem(sdk.items.runes.Hel, sdk.itemmode.inStorage);
+			let hel = me.getItem(sdk.items.runes.Hel, sdk.items.mode.inStorage);
 
 			if (hel) {
 				do {
@@ -206,7 +206,7 @@ const Runewords = {
 
 	// returns an array of items that make a runeword if found, false if we don't have enough items for any
 	checkRunewords: function () {
-		let items = me.findItems(-1, sdk.itemmode.inStorage);
+		let items = me.findItems(-1, sdk.items.mode.inStorage);
 
 		for (let i = 0; i < Config.Runewords.length; i += 1) {
 			let itemList = []; // reset item list
@@ -245,7 +245,7 @@ const Runewords = {
 	// for pickit
 	checkItem: function (unit) {
 		if (!Config.MakeRunewords) return false;
-		return (unit.itemType === sdk.itemtype.Rune && this.needList.includes(unit.classid));
+		return (unit.itemType === sdk.items.type.Rune && this.needList.includes(unit.classid));
 	},
 
 	// for clearInventory - don't drop runes that are a part of runeword recipe
@@ -258,11 +258,11 @@ const Runewords = {
 		rigged to accept item or classid as 2nd arg
 	*/
 	getBase: function (runeword, base, ethFlag, reroll) {
-		let item = typeof base === "object" ? base : me.getItem(base, sdk.itemmode.inStorage);
+		let item = typeof base === "object" ? base : me.getItem(base, sdk.items.mode.inStorage);
 
 		if (item) {
 			do {
-				if (item && item.quality < sdk.itemquality.Magic && item.sockets === runeword.length) {
+				if (item && item.quality < sdk.items.quality.Magic && item.sockets === runeword.length) {
 					/* check if item has items socketed in it
 						better check than getFlag(sdk.items.flags.Runeword) because randomly socketed items return false for it
 					*/
@@ -303,7 +303,7 @@ const Runewords = {
 	},
 
 	getScroll: function () {
-		let scroll = me.getItem(sdk.items.ScrollofTownPortal, sdk.itemmode.inStorage); // check if we already have the scroll
+		let scroll = me.getItem(sdk.items.ScrollofTownPortal, sdk.items.mode.inStorage); // check if we already have the scroll
 		if (scroll) return scroll;
 
 		let npc = Town.initNPC("Shop");
@@ -323,7 +323,7 @@ const Runewords = {
 
 		me.cancel();
 
-		return me.getItem(sdk.items.ScrollofTownPortal, sdk.itemmode.inStorage);
+		return me.getItem(sdk.items.ScrollofTownPortal, sdk.items.mode.inStorage);
 	},
 
 	makeRunewords: function () {
@@ -363,7 +363,7 @@ const Runewords = {
 
 	rerollRunewords: function () {
 		for (let i = 0; i < Config.Runewords.length; i += 1) {
-			let hel = me.getItem(sdk.items.runes.Hel, sdk.itemmode.inStorage);
+			let hel = me.getItem(sdk.items.runes.Hel, sdk.items.mode.inStorage);
 			if (!hel) return false;
 
 			let base = this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0), true); // get a bad runeword

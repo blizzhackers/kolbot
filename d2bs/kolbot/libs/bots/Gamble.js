@@ -34,7 +34,7 @@ function Gamble() {
 				Town.needGamble() && (needGold = false);
 				Town.stash();
 
-				let gold = Game.getItem(sdk.items.Gold, sdk.itemmode.onGround);
+				let gold = Game.getItem(sdk.items.Gold, sdk.items.mode.onGround);
 
 				if (!gold || !Pickit.canPick(gold)) {
 					break;

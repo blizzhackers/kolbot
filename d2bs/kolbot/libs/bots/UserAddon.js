@@ -16,8 +16,8 @@ function UserAddon () {
 	this.keyEvent = function (key) {
 		switch (key) {
 		case 32:
-			FileTools.copy("libs/config/" + sdk.charclass.nameOf(me.classid) + ".js", "libs/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js");
-			D2Bot.printToConsole("libs/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created.");
+			FileTools.copy("libs/config/" + sdk.player.class.nameOf(me.classid) + ".js", "libs/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js");
+			D2Bot.printToConsole("libs/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js has been created.");
 			D2Bot.printToConsole("Please configure your bot and start it again.");
 			D2Bot.stop();
 
@@ -39,7 +39,7 @@ function UserAddon () {
 	!Config.FastPick && addEventListener("itemaction", Pickit.itemEvent);
 	addEventListener("chatinputblocker", onChatInput);
 
-	if (!FileTools.exists("libs/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js")) {
+	if (!FileTools.exists("libs/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js")) {
 		showConsole();
 		print("ÿc4UserAddonÿc0: Press HOME and then press SPACE if you want to create character config.");
 		addEventListener("keyup", this.keyEvent);

@@ -27,7 +27,7 @@ const Attack = {
 			console.log("Loading custom attack file");
 			include("common/Attacks/" + Config.CustomClassAttack + ".js");
 		} else {
-			include("common/Attacks/" + sdk.charclass.nameOf(me.classid) + ".js");
+			include("common/Attacks/" + sdk.player.class.nameOf(me.classid) + ".js");
 		}
 
 		if (Config.AttackSkill[1] < 0 || Config.AttackSkill[3] < 0) {
@@ -47,7 +47,7 @@ const Attack = {
 
 	// check if slot has items
 	checkSlot: function (slot = me.weaponswitch) {
-		let item = me.getItem(-1, sdk.itemmode.Equipped);
+		let item = me.getItem(-1, sdk.items.mode.Equipped);
 
 		if (item) {
 			do {
@@ -129,7 +129,7 @@ const Attack = {
 	getCharges: function () {
 		!Skill.charges && (Skill.charges = []);
 
-		let item = me.getItem(-1, sdk.itemmode.Equipped);
+		let item = me.getItem(-1, sdk.items.mode.Equipped);
 
 		if (item) {
 			do {
@@ -262,6 +262,7 @@ const Attack = {
 			if (result === this.Result.FAILED) {
 				if (retry++ > 3) {
 					errorInfo = " (doAttack failed)";
+					me.paladin && D2Bot.printToConsole("doAttack Failed, check logs");
 
 					break;
 				}
@@ -1433,16 +1434,16 @@ const Attack = {
 
 	// Detect use of bows/crossbows
 	usingBow: function () {
-		let item = me.getItem(-1, sdk.itemmode.Equipped);
+		let item = me.getItem(-1, sdk.items.mode.Equipped);
 
 		if (item) {
 			do {
 				if (item.isOnMain) {
 					switch (item.itemType) {
-					case sdk.itemtype.Bow:
-					case sdk.itemtype.AmazonBow:
+					case sdk.items.type.Bow:
+					case sdk.items.type.AmazonBow:
 						return "bow";
-					case sdk.itemtype.Crossbow:
+					case sdk.items.type.Crossbow:
 						return "crossbow";
 					}
 				}
@@ -1563,7 +1564,7 @@ const Attack = {
 	},
 
 	checkCorpse: function (unit) {
-		if (!unit || (unit.mode !== sdk.units.monsters.monstermode.Death && unit.mode !== sdk.units.monsters.monstermode.Dead)) return false;
+		if (!unit || (unit.mode !== sdk.monsters.mode.Death && unit.mode !== sdk.monsters.mode.Dead)) return false;
 		if (unit.classid <= sdk.monsters.BurningDeadArcher2 && !getBaseStat("monstats2", unit.classid, "corpseSel")) return false;
 		return ([
 			sdk.states.FrozenSolid, sdk.states.Revive, sdk.states.Redeemed,

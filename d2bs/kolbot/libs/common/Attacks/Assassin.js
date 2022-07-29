@@ -212,12 +212,12 @@ const ClassAttack = {
 
 		// getDistance crashes when using an object with x, y props, that's why it's unit.x, unit.y and not unit
 		// is this still a thing ^^? todo: test it
-		if (me.getMinionCount(sdk.minions.AssassinTrap) === 0 || !this.lastTrapPos.hasOwnProperty("x")
+		if (me.getMinionCount(sdk.summons.type.AssassinTrap) === 0 || !this.lastTrapPos.hasOwnProperty("x")
 			|| getDistance(unit.x, unit.y, this.lastTrapPos.x, this.lastTrapPos.y) > 15) {
 			return 5;
 		}
 
-		return 5 - me.getMinionCount(sdk.minions.AssassinTrap);
+		return 5 - me.getMinionCount(sdk.summons.type.AssassinTrap);
 	},
 
 	// todo - either import soloplays immune to trap check or add config option for immune to traps

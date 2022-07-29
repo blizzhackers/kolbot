@@ -152,7 +152,7 @@ Pather.walkTo = function (x = undefined, y = undefined, minDist = undefined) {
 	if (!me.inTown && !me.dead) {
 		// Check if I have a stamina potion and use it if I do
 		if (me.staminaPercent <= 20) {
-			let stam = me.getItemsEx(-1, sdk.itemmode.inStorage).filter((i) => i.classid === sdk.items.StaminaPotion && i.isInInventory).first();
+			let stam = me.getItemsEx(-1, sdk.items.mode.inStorage).filter((i) => i.classid === sdk.items.StaminaPotion && i.isInInventory).first();
 			!!stam && !me.deadOrInSequence && stam.use();
 		}
 		(me.runwalk === 1 && me.staminaPercent <= 15) && (me.runwalk = 0);

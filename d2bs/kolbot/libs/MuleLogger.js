@@ -109,7 +109,7 @@ const MuleLogger = {
 
 		if (sock.length) {
 			for (let i = 0; i < sock.length; i += 1) {
-				if (sock[i].itemType === sdk.itemtype.Jewel) {
+				if (sock[i].itemType === sdk.items.type.Jewel) {
 					desc += "\n\n";
 					desc += Misc.getItemDesc(sock[i], logIlvl);
 				}
@@ -166,7 +166,7 @@ const MuleLogger = {
 		});
 
 		for (let i = 0; i < items.length; i += 1) {
-			if ((this.LogEquipped || items[i].isInStorage) && (items[i].quality > sdk.itemquality.Normal || !Misc.skipItem(items[i].classid))) {
+			if ((this.LogEquipped || items[i].isInStorage) && (items[i].quality > sdk.items.quality.Normal || !Misc.skipItem(items[i].classid))) {
 				let parsedItem = this.logItem(items[i], logIlvl);
 
 				// Log names to saved image

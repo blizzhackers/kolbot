@@ -193,8 +193,8 @@ function Questing () {
 		if (!Loader.runScript("Diablo")) throw new Error();
 		Town.goToTown(4);
 
-		Game.getObject(sdk.units.RedPortalToAct5)
-			? Pather.useUnit(sdk.unittype.Object, sdk.units.RedPortalToAct5, sdk.areas.Harrogath)
+		Game.getObject(sdk.objects.RedPortalToAct5)
+			? Pather.useUnit(sdk.unittype.Object, sdk.objects.RedPortalToAct5, sdk.areas.Harrogath)
 			: Town.npcInteract("Tyrael", false) && Misc.useMenu(sdk.menu.TravelToHarrogath);
 
 		return true;
@@ -274,13 +274,13 @@ function Questing () {
 
 		Precast.doPrecast(true);
 
-		if (!Pather.moveToPreset(sdk.areas.FrozenRiver, sdk.unittype.Object, sdk.units.FrozenAnyasPlatform)) {
+		if (!Pather.moveToPreset(sdk.areas.FrozenRiver, sdk.unittype.Object, sdk.objects.FrozenAnyasPlatform)) {
 			throw new Error("Anya quest failed");
 		}
 
 		delay(1000);
 
-		let anya = Game.getObject(sdk.units.FrozenAnya);
+		let anya = Game.getObject(sdk.objects.FrozenAnya);
 
 		// talk to anya, then cancel her boring speech
 		Pather.moveToUnit(anya);
@@ -297,7 +297,7 @@ function Questing () {
 		}, Time.seconds(30), 1000)) throw new Error("Anya quest failed - Failed to return to frozen river");
 
 		// unfreeze her, cancel her speech again
-		anya = Game.getObject(sdk.units.FrozenAnya);
+		anya = Game.getObject(sdk.objects.FrozenAnya);
 		anya.interact();
 		delay(1000);
 		me.cancel();

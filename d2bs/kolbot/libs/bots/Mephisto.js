@@ -15,7 +15,7 @@ function Mephisto() {
 		Config.MFLeader && Pather.makePortal() && say("kill " + meph.classid);
 
 		while (attackCount < 300 && meph.attackable(meph)) {
-			if (meph.mode === sdk.units.monsters.monstermode.Attacking2) {
+			if (meph.mode === sdk.monsters.mode.Attacking2) {
 				let angle = Math.round(Math.atan2(me.y - meph.y, me.x - meph.x) * 180 / Math.PI);
 				let angles = me.y > meph.y ? [-30, -60, -90] : [30, 60, 90];
 

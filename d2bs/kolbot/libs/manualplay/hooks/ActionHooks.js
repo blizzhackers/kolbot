@@ -435,7 +435,7 @@ const ActionHooks = {
 
 			break;
 		case sdk.areas.ChaosSanctuary:
-			infSeal = this.getDiabloSeals(sdk.units.DiabloSealInfector);
+			infSeal = this.getDiabloSeals(sdk.objects.DiabloSealInfector);
 
 			if (infSeal) {
 				this.hooks.push({
@@ -446,7 +446,7 @@ const ActionHooks = {
 				});
 			}
 
-			seisSeal = this.getDiabloSeals(sdk.units.DiabloSealSeis);
+			seisSeal = this.getDiabloSeals(sdk.objects.DiabloSealSeis);
 
 			if (seisSeal) {
 				this.hooks.push({
@@ -457,7 +457,7 @@ const ActionHooks = {
 				});
 			}
 
-			vizSeal = this.getDiabloSeals(sdk.units.DiabloSealVizier);
+			vizSeal = this.getDiabloSeals(sdk.objects.DiabloSealVizier);
 
 			if (vizSeal) {
 				this.hooks.push({
@@ -471,7 +471,7 @@ const ActionHooks = {
 			break;
 		}
 
-		let cowPortal = me.area === sdk.areas.RogueEncampment ? Game.getObject(sdk.units.RedPortal) : false;
+		let cowPortal = me.area === sdk.areas.RogueEncampment ? Game.getObject(sdk.objects.RedPortal) : false;
 
 		if (cowPortal && cowPortal.objtype === sdk.areas.MooMooFarm) {
 			this.hooks.push({
@@ -688,7 +688,7 @@ const ActionHooks = {
 			});
 		}
 
-		let uberPortals = (me.area === sdk.areas.Harrogath && me.hell) ? getUnits(sdk.unittype.Object, sdk.units.RedPortal) : false;
+		let uberPortals = (me.area === sdk.areas.Harrogath && me.hell) ? getUnits(sdk.unittype.Object, sdk.objects.RedPortal) : false;
 
 		if (uberPortals && uberPortals.some((portal) => [sdk.areas.MatronsDen, sdk.areas.ForgottenSands, sdk.areas.FurnaceofPain, sdk.areas.UberTristram].includes(portal.objtype))) {
 			TextHooks.displaySettings = false;
@@ -819,7 +819,7 @@ const ActionHooks = {
 		// eslint-disable-next-line no-fallthrough
 		case sdk.areas.MatronsDen:
 		case sdk.areas.FurnaceofPain:
-			bossX = Game.getPresetObject(me.area, sdk.units.SmallSparklyChest);
+			bossX = Game.getPresetObject(me.area, sdk.objects.SmallSparklyChest);
 			bossX && (entrance = this.areaInfo[me.area][bossX.x]);
 		// eslint-disable-next-line no-fallthrough
 		case sdk.areas.UberTristram:

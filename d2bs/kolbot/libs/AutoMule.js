@@ -521,7 +521,7 @@ const AutoMule = {
 
 		if (!info || !info.hasOwnProperty("muleInfo")) return false;
 
-		let item = me.getItem(-1, sdk.itemmode.inStorage);
+		let item = me.getItem(-1, sdk.items.mode.inStorage);
 		let items = [];
 
 		if (item) {
@@ -529,8 +529,8 @@ const AutoMule = {
 				if (Town.ignoredItemTypes.indexOf(item.itemType) === -1
 						&& (Pickit.checkItem(item).result > 0 || (item.isInStash && info.muleInfo.hasOwnProperty("muleOrphans") && info.muleInfo.muleOrphans))
 						&& item.classid !== sdk.quest.item.Cube // Don't drop Horadric Cube
-						&& (item.classid !== sdk.items.SmallCharm || item.quality !== sdk.itemquality.Unique) // Don't drop Annihilus
-						&& (item.classid !== sdk.items.LargeCharm || item.quality !== sdk.itemquality.Unique) // Don't drop Hellfire Torch
+						&& (item.classid !== sdk.items.SmallCharm || item.quality !== sdk.items.quality.Unique) // Don't drop Annihilus
+						&& (item.classid !== sdk.items.LargeCharm || item.quality !== sdk.items.quality.Unique) // Don't drop Hellfire Torch
 						&& (item.isInStash || (item.isInInventory && !Storage.Inventory.IsLocked(item, Config.Inventory))) // Don't drop items in locked slots
 						&& ((!TorchSystem.getFarmers() && !TorchSystem.isFarmer()) || [sdk.quest.item.KeyofTerror, sdk.quest.item.KeyofHate, sdk.quest.item.KeyofDestruction].indexOf(item.classid) === -1)) { // Don't drop Keys if part of TorchSystem
 					// Always drop items on Force or Trigger list
@@ -584,7 +584,7 @@ const AutoMule = {
 		if (!Town.openStash()) return false;
 
 		if (dropAnni) {
-			let item = me.findItem(sdk.items.SmallCharm, sdk.itemmode.inStorage, -1, sdk.itemquality.Unique);
+			let item = me.findItem(sdk.items.SmallCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique);
 
 			if (item && !Storage.Inventory.IsLocked(item, Config.Inventory)) {
 				D2Bot.printToConsole("AutoMule: Transfering Anni.", sdk.colors.D2Bot.DarkGold);
@@ -598,7 +598,7 @@ const AutoMule = {
 			return false;
 		}
 
-		let item = me.findItem(sdk.items.LargeCharm, sdk.itemmode.inStorage, -1, sdk.itemquality.Unique);
+		let item = me.findItem(sdk.items.LargeCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique);
 
 		if (item) {
 			D2Bot.printToConsole("AutoMule: Transfering Torch.", sdk.colors.D2Bot.DarkGold);

@@ -534,7 +534,7 @@ const AutoStat = new function () {
 			for (let i = 0; i < items.length; i += 1) {
 				// items equipped but inactive (these are possible dex sources unseen by me.getStat(sdk.stats.Dexterity))
 				if (items[i].isEquipped && !items[i].isOnSwap && !this.validItem(items[i])) {
-					if (items[i].quality === sdk.itemquality.Set) {
+					if (items[i].quality === sdk.items.quality.Set) {
 						set = true;
 
 						break;

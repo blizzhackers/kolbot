@@ -14,7 +14,7 @@ Attack.init = function (notify = false) {
 		print("Loading custom attack file");
 		include("common/Attacks/" + Config.CustomClassAttack + ".js");
 	} else {
-		include("common/Attacks/" + sdk.charclass.nameOf(me.classid) + ".js");
+		include("common/Attacks/" + sdk.player.class.nameOf(me.classid) + ".js");
 	}
 
 	if (Config.AttackSkill[1] < 0 || Config.AttackSkill[3] < 0) {

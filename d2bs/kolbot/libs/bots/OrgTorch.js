@@ -176,9 +176,9 @@ function OrgTorch() {
 
 	// Open a red portal. Mode 0 = mini ubers, mode 1 = Tristram
 	this.openPortal = function (mode) {
-		let item1 = mode === portalMode.MiniUbers ? me.findItem("pk1", sdk.itemmode.inStorage) : me.findItem("dhn", sdk.itemmode.inStorage);
-		let item2 = mode === portalMode.MiniUbers ? me.findItem("pk2", sdk.itemmode.inStorage) : me.findItem("bey", sdk.itemmode.inStorage);
-		let item3 = mode === portalMode.MiniUbers ? me.findItem("pk3", sdk.itemmode.inStorage) : me.findItem("mbr", sdk.itemmode.inStorage);
+		let item1 = mode === portalMode.MiniUbers ? me.findItem("pk1", sdk.items.mode.inStorage) : me.findItem("dhn", sdk.items.mode.inStorage);
+		let item2 = mode === portalMode.MiniUbers ? me.findItem("pk2", sdk.items.mode.inStorage) : me.findItem("bey", sdk.items.mode.inStorage);
+		let item3 = mode === portalMode.MiniUbers ? me.findItem("pk3", sdk.items.mode.inStorage) : me.findItem("mbr", sdk.items.mode.inStorage);
 
 		Town.goToTown(5);
 		Town.doChores();
@@ -194,7 +194,7 @@ function OrgTorch() {
 			transmute();
 			delay(1000);
 
-			let portal = Game.getObject(sdk.units.RedPortal);
+			let portal = Game.getObject(sdk.objects.RedPortal);
 
 			if (portal) {
 				do {
@@ -221,21 +221,21 @@ function OrgTorch() {
 	};
 
 	this.matronsDen = function () {
-		let dHorns = me.findItems(sdk.items.quest.DiablosHorn, sdk.itemmode.inStorage).length;
+		let dHorns = me.findItems(sdk.items.quest.DiablosHorn, sdk.items.mode.inStorage).length;
 
 		Precast.doPrecast(true);
-		Pather.moveToPreset(sdk.areas.MatronsDen, sdk.unittype.Object, sdk.units.SmallSparklyChest, 2, 2);
+		Pather.moveToPreset(sdk.areas.MatronsDen, sdk.unittype.Object, sdk.objects.SmallSparklyChest, 2, 2);
 		Attack.kill(sdk.monsters.Lilith);
 		Pickit.pickItems();
 		this.getQuestItem(Game.getItem(sdk.items.quest.DiablosHorn));
 		Town.goToTown();
 
 		// we sucessfully picked up the horn
-		return (me.findItems(sdk.items.quest.DiablosHorn, sdk.itemmode.inStorage).length > dHorns);
+		return (me.findItems(sdk.items.quest.DiablosHorn, sdk.items.mode.inStorage).length > dHorns);
 	};
 
 	this.forgottenSands = function () {
-		let bEyes = me.findItems(sdk.items.quest.BaalsEye, sdk.itemmode.inStorage).length;
+		let bEyes = me.findItems(sdk.items.quest.BaalsEye, sdk.items.mode.inStorage).length;
 
 		Precast.doPrecast(true);
 
@@ -259,7 +259,7 @@ function OrgTorch() {
 					break;
 				}
 
-				let eye = Game.getItem(sdk.items.quest.BaalsEye, sdk.itemmode.onGround);
+				let eye = Game.getItem(sdk.items.quest.BaalsEye, sdk.items.mode.onGround);
 
 				if (eye && Pickit.pickItem(eye)) {
 					throw new Error("Found an picked wanted organ");
@@ -275,21 +275,21 @@ function OrgTorch() {
 		}
 
 		// we sucessfully picked up the eye
-		return (me.findItems(sdk.items.quest.BaalsEye, sdk.itemmode.inStorage).length > bEyes);
+		return (me.findItems(sdk.items.quest.BaalsEye, sdk.items.mode.inStorage).length > bEyes);
 	};
 
 	this.furnance = function () {
-		let mBrain = me.findItems(sdk.items.quest.MephistosBrain, sdk.itemmode.inStorage).length;
+		let mBrain = me.findItems(sdk.items.quest.MephistosBrain, sdk.items.mode.inStorage).length;
 
 		Precast.doPrecast(true);
-		Pather.moveToPreset(sdk.areas.FurnaceofPain, sdk.unittype.Object, sdk.units.SmallSparklyChest, 2, 2);
+		Pather.moveToPreset(sdk.areas.FurnaceofPain, sdk.unittype.Object, sdk.objects.SmallSparklyChest, 2, 2);
 		Attack.kill(sdk.monsters.UberIzual);
 		Pickit.pickItems();
 		this.getQuestItem(Game.getItem(sdk.items.quest.MephistosBrain));
 		Town.goToTown();
 
 		// we sucessfully picked up the brain
-		return (me.findItems(sdk.items.quest.MephistosBrain, sdk.itemmode.inStorage).length > mBrain);
+		return (me.findItems(sdk.items.quest.MephistosBrain, sdk.items.mode.inStorage).length > mBrain);
 	};
 
 	// re-write this, lure doesn't always work and other classes can do ubers
@@ -426,12 +426,12 @@ function OrgTorch() {
 	}
 
 	let portal;
-	let tkeys = me.findItems("pk1", sdk.itemmode.inStorage).length || 0;
-	let hkeys = me.findItems("pk2", sdk.itemmode.inStorage).length || 0;
-	let dkeys = me.findItems("pk3", sdk.itemmode.inStorage).length || 0;
-	let brains = me.findItems("mbr", sdk.itemmode.inStorage).length || 0;
-	let eyes = me.findItems("bey", sdk.itemmode.inStorage).length || 0;
-	let horns = me.findItems("dhn", sdk.itemmode.inStorage).length || 0;
+	let tkeys = me.findItems("pk1", sdk.items.mode.inStorage).length || 0;
+	let hkeys = me.findItems("pk2", sdk.items.mode.inStorage).length || 0;
+	let dkeys = me.findItems("pk3", sdk.items.mode.inStorage).length || 0;
+	let brains = me.findItems("mbr", sdk.items.mode.inStorage).length || 0;
+	let eyes = me.findItems("bey", sdk.items.mode.inStorage).length || 0;
+	let horns = me.findItems("dhn", sdk.items.mode.inStorage).length || 0;
 
 	// Do town chores and quit if MakeTorch is true and we have a torch.
 	this.checkTorch();
@@ -442,7 +442,7 @@ function OrgTorch() {
 	Town.goToTown(5);
 	Town.move("stash");
 
-	let redPortals = getUnits(sdk.unittype.Object, sdk.units.RedPortal)
+	let redPortals = getUnits(sdk.unittype.Object, sdk.objects.RedPortal)
 		.filter(el => [sdk.areas.MatronsDen, sdk.areas.ForgottenSands, sdk.areas.FurnaceofPain, sdk.areas.UberTristram].includes(el.objtype));
 	let miniPortals = 0;
 	let keySetsReq = 3;
@@ -512,9 +512,9 @@ function OrgTorch() {
 	}
 
 	// Count organs
-	brains = me.findItems("mbr", sdk.itemmode.inStorage).length || 0;
-	eyes = me.findItems("bey", sdk.itemmode.inStorage).length || 0;
-	horns = me.findItems("dhn", sdk.itemmode.inStorage).length || 0;
+	brains = me.findItems("mbr", sdk.items.mode.inStorage).length || 0;
+	eyes = me.findItems("bey", sdk.items.mode.inStorage).length || 0;
+	horns = me.findItems("dhn", sdk.items.mode.inStorage).length || 0;
 
 	// We have enough organs, do Tristram - or trist is open we may have chickened and came back so check it
 	// if trist was already open when we joined should we run that first?

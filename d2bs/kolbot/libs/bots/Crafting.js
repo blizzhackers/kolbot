@@ -138,7 +138,7 @@ function getNPCName(idList) {
 
 function countItems(idList, quality) {
 	let count = 0;
-	let item = me.getItem(-1, sdk.itemmode.inStorage);
+	let item = me.getItem(-1, sdk.items.mode.inStorage);
 
 	if (item) {
 		do {
@@ -153,7 +153,7 @@ function countItems(idList, quality) {
 
 function updateInfo() {
 	if (info) {
-		let items = me.findItems(-1, sdk.itemmode.inStorage);
+		let items = me.findItems(-1, sdk.items.mode.inStorage);
 
 		for (let i = 0; i < info.Sets.length; i += 1) {
 			MainSwitch:
@@ -232,7 +232,7 @@ function runewordIngredient(item) {
 
 function pickItems() {
 	let items = [];
-	let item = Game.getItem(-1, sdk.itemmode.onGround);
+	let item = Game.getItem(-1, sdk.items.mode.onGround);
 
 	if (item) {
 		updateInfo();
@@ -302,7 +302,7 @@ function shopStuff(npcId, classids, amount) {
 			moveNPC(npc, path[i], path[i + 1]); // moving npc doesn't work, probably should be removed?
 
 			for (j = 0; j < leadTimeout; j += 1) {
-				while (npc.mode === sdk.units.npcs.mode.Walking) {
+				while (npc.mode === sdk.npcs.mode.Walking) {
 					delay(100);
 				}
 
@@ -357,7 +357,7 @@ function shopStuff(npcId, classids, amount) {
 						//print("Bought " + items[i].name);
 						items[i].buy();
 
-						let num = countItems(classids, sdk.itemquality.Magic);
+						let num = countItems(classids, sdk.items.quality.Magic);
 
 						if (num >= amount) {
 							return true;

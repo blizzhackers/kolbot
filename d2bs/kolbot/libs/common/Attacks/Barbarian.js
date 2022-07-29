@@ -183,9 +183,9 @@ const ClassAttack = {
 	},
 
 	checkCorpse: function (unit) {
-		if (!unit || unit.mode !== sdk.units.monsters.monstermode.Death && unit.mode !== sdk.units.monsters.monstermode.Dead) return false;
+		if (!unit || unit.mode !== sdk.monsters.mode.Death && unit.mode !== sdk.monsters.mode.Dead) return false;
 		if ([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3].indexOf(unit.classid) === -1
-			&& unit.spectype === sdk.units.monsters.spectype.All) {
+			&& unit.spectype === sdk.monsters.spectype.All) {
 			return false;
 		}
 

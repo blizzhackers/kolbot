@@ -246,7 +246,7 @@ function main () {
 	TorchSystem.keyCheck() && scriptBroadcast("torch");
 
 	// Anni handler. Mule Anni if it's in unlocked space and profile is set to mule torch/anni.
-	let anni = me.findItem(sdk.items.SmallCharm, sdk.itemmode.inStorage, -1, sdk.itemquality.Unique);
+	let anni = me.findItem(sdk.items.SmallCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique);
 
 	if (anni && !Storage.Inventory.IsLocked(anni, Config.Inventory) && AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
 		scriptBroadcast("muleAnni");

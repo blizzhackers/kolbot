@@ -11,7 +11,7 @@ function AncientTunnels() {
 	Precast.doPrecast(true);
 
 	try {
-		Config.AncientTunnels.OpenChest && Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.units.SuperChest) && Misc.openChests(5) && Pickit.pickItems();
+		Config.AncientTunnels.OpenChest && Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.SuperChest) && Misc.openChests(5) && Pickit.pickItems();
 	} catch (e) {
 		console.error(e);
 	}

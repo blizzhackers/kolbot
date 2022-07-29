@@ -11,15 +11,15 @@ const Pickit = {
 	beltSize: 1,
 	// Ignored item types for item logging
 	ignoreLog: [
-		sdk.itemtype.Gold, sdk.itemtype.BowQuiver, sdk.itemtype.CrossbowQuiver,
-		sdk.itemtype.Scroll, sdk.itemtype.Key, sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion,
-		sdk.itemtype.RejuvPotion, sdk.itemtype.StaminaPotion, sdk.itemtype.AntidotePotion, sdk.itemtype.ThawingPotion
+		sdk.items.type.Gold, sdk.items.type.BowQuiver, sdk.items.type.CrossbowQuiver,
+		sdk.items.type.Scroll, sdk.items.type.Key, sdk.items.type.HealingPotion, sdk.items.type.ManaPotion,
+		sdk.items.type.RejuvPotion, sdk.items.type.StaminaPotion, sdk.items.type.AntidotePotion, sdk.items.type.ThawingPotion
 	],
 	tkable: [
-		sdk.itemtype.Gold, sdk.itemtype.Scroll, sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion,
-		sdk.itemtype.RejuvPotion, sdk.itemtype.StaminaPotion, sdk.itemtype.AntidotePotion, sdk.itemtype.ThawingPotion
+		sdk.items.type.Gold, sdk.items.type.Scroll, sdk.items.type.HealingPotion, sdk.items.type.ManaPotion,
+		sdk.items.type.RejuvPotion, sdk.items.type.StaminaPotion, sdk.items.type.AntidotePotion, sdk.items.type.ThawingPotion
 	],
-	essentials: [sdk.itemtype.Gold, sdk.itemtype.Scroll, sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion],
+	essentials: [sdk.items.type.Gold, sdk.items.type.Scroll, sdk.items.type.HealingPotion, sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion],
 
 	init: function (notify) {
 		for (let i = 0; i < Config.PickitFiles.length; i += 1) {
@@ -400,29 +400,29 @@ const Pickit = {
 
 		if (type) {
 			switch (unit.itemType) {
-			case sdk.itemtype.Gold:
+			case sdk.items.type.Gold:
 				return "ÿc4";
-			case sdk.itemtype.Rune:
+			case sdk.items.type.Rune:
 				return "ÿc8";
-			case sdk.itemtype.HealingPotion:
+			case sdk.items.type.HealingPotion:
 				return "ÿc1";
-			case sdk.itemtype.ManaPotion:
+			case sdk.items.type.ManaPotion:
 				return "ÿc3";
-			case sdk.itemtype.RejuvPotion:
+			case sdk.items.type.RejuvPotion:
 				return "ÿc;";
 			}
 		}
 
 		switch (unit.quality) {
-		case sdk.itemquality.Magic:
+		case sdk.items.quality.Magic:
 			return "ÿc3";
-		case sdk.itemquality.Set:
+		case sdk.items.quality.Set:
 			return "ÿc2";
-		case sdk.itemquality.Rare:
+		case sdk.items.quality.Rare:
 			return "ÿc9";
-		case sdk.itemquality.Unique:
+		case sdk.items.quality.Unique:
 			return "ÿc4";
-		case sdk.itemquality.Crafted:
+		case sdk.items.quality.Crafted:
 			return "ÿc8";
 		}
 
@@ -439,16 +439,16 @@ const Pickit = {
 		let tome, charm, potion, needPots, buffers, pottype, myKey, key;
 
 		switch (unit.itemType) {
-		case sdk.itemtype.Gold:
+		case sdk.items.type.Gold:
 			// Check current gold vs max capacity (cLvl*10000)
 			if (me.getStat(sdk.stats.Gold) === me.getStat(sdk.stats.Level) * 10000) {
 				return false; // Skip gold if full
 			}
 
 			break;
-		case sdk.itemtype.Scroll:
+		case sdk.items.type.Scroll:
 			// 518 - Tome of Town Portal or 519 - Tome of Identify
-			tome = me.getItem(unit.classid - 11, sdk.itemmode.inStorage);
+			tome = me.getItem(unit.classid - 11, sdk.items.mode.inStorage);
 
 			if (tome) {
 				do {
@@ -462,11 +462,11 @@ const Pickit = {
 			}
 
 			break;
-		case sdk.itemtype.Key:
+		case sdk.items.type.Key:
 			// Assassins don't ever need keys
 			if (me.assassin) return false;
 
-			myKey = me.getItem(sdk.items.Key, sdk.itemmode.inStorage);
+			myKey = me.getItem(sdk.items.Key, sdk.items.mode.inStorage);
 			key = Game.getItem(-1, -1, unit.gid); // Passed argument isn't an actual unit, we need to get it
 
 			if (myKey && key) {
@@ -478,11 +478,11 @@ const Pickit = {
 			}
 
 			break;
-		case sdk.itemtype.SmallCharm:
-		case sdk.itemtype.LargeCharm:
-		case sdk.itemtype.GrandCharm:
+		case sdk.items.type.SmallCharm:
+		case sdk.items.type.LargeCharm:
+		case sdk.items.type.GrandCharm:
 			if (unit.unique) {
-				charm = me.getItem(unit.classid, sdk.itemmode.inStorage);
+				charm = me.getItem(unit.classid, sdk.items.mode.inStorage);
 
 				if (charm) {
 					do {
@@ -495,9 +495,9 @@ const Pickit = {
 			}
 
 			break;
-		case sdk.itemtype.HealingPotion:
-		case sdk.itemtype.ManaPotion:
-		case sdk.itemtype.RejuvPotion:
+		case sdk.items.type.HealingPotion:
+		case sdk.items.type.ManaPotion:
+		case sdk.items.type.RejuvPotion:
 			needPots = 0;
 
 			for (let i = 0; i < 4; i += 1) {
@@ -506,7 +506,7 @@ const Pickit = {
 				}
 			}
 
-			potion = me.getItem(-1, sdk.itemmode.inBelt);
+			potion = me.getItem(-1, sdk.items.mode.inBelt);
 
 			if (potion) {
 				do {
@@ -523,15 +523,15 @@ const Pickit = {
 					if (Config[buffers[i]]) {
 						switch (buffers[i]) {
 						case "HPBuffer":
-							pottype = sdk.itemtype.HealingPotion;
+							pottype = sdk.items.type.HealingPotion;
 
 							break;
 						case "MPBuffer":
-							pottype = sdk.itemtype.ManaPotion;
+							pottype = sdk.items.type.ManaPotion;
 
 							break;
 						case "RejuvBuffer":
-							pottype = sdk.itemtype.RejuvPotion;
+							pottype = sdk.items.type.RejuvPotion;
 
 							break;
 						}
@@ -540,7 +540,7 @@ const Pickit = {
 							if (!Storage.Inventory.CanFit(unit)) return false;
 
 							needPots = Config[buffers[i]];
-							potion = me.getItem(-1, sdk.itemmode.inStorage);
+							potion = me.getItem(-1, sdk.items.mode.inStorage);
 
 							if (potion) {
 								do {
@@ -587,7 +587,7 @@ const Pickit = {
 
 	checkBelt: function () {
 		let check = 0;
-		let item = me.getItem(-1, sdk.itemmode.inBelt);
+		let item = me.getItem(-1, sdk.items.mode.inBelt);
 
 		if (item) {
 			do {
@@ -607,8 +607,8 @@ const Pickit = {
 
 	// Prioritize runes and unique items for fast pick
 	sortFastPickItems: function (unitA, unitB) {
-		if (unitA.itemType === sdk.itemtype.Rune || unitA.unique) return -1;
-		if (unitB.itemType === sdk.itemtype.Rune || unitB.unique) return 1;
+		if (unitA.itemType === sdk.items.type.Rune || unitA.unique) return -1;
+		if (unitB.itemType === sdk.items.type.Rune || unitB.unique) return 1;
 
 		return getDistance(me, unitA) - getDistance(me, unitB);
 	},
@@ -621,8 +621,8 @@ const Pickit = {
 			item = Game.getItem(-1, -1, gid);
 
 			if (item && item.onGroundOrDropping
-				&& (Town.ignoredItemTypes.indexOf(item.itemType) === -1 || (item.itemType >= sdk.itemtype.HealingPotion && item.itemType <= sdk.itemtype.RejuvPotion))
-				&& item.itemType !== sdk.itemtype.Gold && getDistance(me, item) <= Config.PickRange) {
+				&& (Town.ignoredItemTypes.indexOf(item.itemType) === -1 || (item.itemType >= sdk.items.type.HealingPotion && item.itemType <= sdk.items.type.RejuvPotion))
+				&& item.itemType !== sdk.items.type.Gold && getDistance(me, item) <= Config.PickRange) {
 				itemList.push(copyUnit(item));
 			}
 		}

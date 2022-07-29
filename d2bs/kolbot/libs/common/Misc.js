@@ -229,37 +229,37 @@ const Skill = {
 			let min = 0, max = 999;
 
 			switch (me.classid) {
-			case sdk.charclass.Amazon:
+			case sdk.player.class.Amazon:
 				min = sdk.skills.MagicArrow;
 				max = sdk.skills.LightningFury;
 				
 				break;
-			case sdk.charclass.Sorceress:
+			case sdk.player.class.Sorceress:
 				min = sdk.skills.FireBolt;
 				max = sdk.skills.ColdMastery;
 				
 				break;
-			case sdk.charclass.Necromancer:
+			case sdk.player.class.Necromancer:
 				min = sdk.skills.AmplifyDamage;
 				max = sdk.skills.Revive;
 				
 				break;
-			case sdk.charclass.Paladin:
+			case sdk.player.class.Paladin:
 				min = sdk.skills.Sacrifice;
 				max = sdk.skills.Salvation;
 				
 				break;
-			case sdk.charclass.Barbarian:
+			case sdk.player.class.Barbarian:
 				min = sdk.skills.Bash;
 				max = sdk.skills.BattleCommand;
 				
 				break;
-			case sdk.charclass.Druid:
+			case sdk.player.class.Druid:
 				min = sdk.skills.Raven;
 				max = sdk.skills.Hurricane;
 				
 				break;
-			case sdk.charclass.Assassin:
+			case sdk.player.class.Assassin:
 				min = sdk.skills.FireBlast;
 				max = sdk.skills.PhoenixStrike;
 				
@@ -282,9 +282,9 @@ const Skill = {
 		!Skill.skills.initialized ? Skill.skills.init() : Skill.skills.reset();
 
 		switch (me.classid) {
-		case sdk.charclass.Amazon:
+		case sdk.player.class.Amazon:
 			break;
-		case sdk.charclass.Sorceress:
+		case sdk.player.class.Sorceress:
 			if (Config.UseColdArmor === true) {
 				Precast.precastables.coldArmor.best = (function () {
 					let coldArmor = [
@@ -300,25 +300,25 @@ const Skill = {
 			}
 
 			break;
-		case sdk.charclass.Necromancer:
+		case sdk.player.class.Necromancer:
 			if (!!Config.Golem && Config.Golem !== "None") {
 				// todo: change Config.Golem to use skillid instead of 0, 1, 2, and 3
 			}
 			break;
-		case sdk.charclass.Paladin:
+		case sdk.player.class.Paladin:
 			// how to handle if someone manually equips a shield during game play, don't want to build entire item list if we don't need to
 			// maybe store gid of shield, would still require doing me.getItem(-1, 1, gid) everytime we wanted to cast but that's still less involved
 			// than getting every item we have and finding shield, for now keeping this. Checks during init if we have a shield or not
 			Precast.precastables.HolyShield.canUse = me.usingShield();
 
 			break;
-		case sdk.charclass.Barbarian:
+		case sdk.player.class.Barbarian:
 			Skill.canUse(sdk.skills.Shout) && (Precast.precastables.Shout.duration = this.getDuration(sdk.skills.Shout));
 			Skill.canUse(sdk.skills.BattleOrders) && (Precast.precastables.BattleOrders.duration = this.getDuration(sdk.skills.BattleOrders));
 			Skill.canUse(sdk.skills.BattleCommand) && (Precast.precastables.BattleCommand.duration = this.getDuration(sdk.skills.BattleCommand));
 			
 			break;
-		case sdk.charclass.Druid:
+		case sdk.player.class.Druid:
 			if (!!Config.SummonAnimal && Config.SummonAnimal !== "None") {
 				// todo: change Config.SummonAnimal to use skillid instead of 0, 1, 2, and 3
 			}
@@ -329,7 +329,7 @@ const Skill = {
 				// todo: change Config.SummonSpirit to use skillid instead of 0, 1, 2, and 3
 			}
 			break;
-		case sdk.charclass.Assassin:
+		case sdk.player.class.Assassin:
 			if (!!Config.SummonShadow) {
 				// todo: change Config.SummonShadow to use skillid instead of 0, 1, 2, and 3
 			}
@@ -757,7 +757,7 @@ const Skill = {
 		// account for lag, state 121 doesn't kick in immediately
 		if (this.isTimed(skillId)) {
 			for (let i = 0; i < 10; i += 1) {
-				if ([sdk.units.player.mode.GettingHit, sdk.units.player.mode.Blocking].includes(me.mode) || me.skillDelay) {
+				if ([sdk.player.mode.GettingHit, sdk.player.mode.Blocking].includes(me.mode) || me.skillDelay) {
 					break;
 				}
 
@@ -847,8 +847,8 @@ const Skill = {
 			if (!unit || !Skill.canUse(sdk.skills.Telekinesis)
 				|| typeof unit !== "object" || unit.type !== sdk.unittype.Object
 				|| unit.name.toLowerCase() === "dummy"
-				|| (unit.name.toLowerCase() === "portal" && !me.inTown && unit.classid !== sdk.units.ArcaneSanctuaryPortal)
-				|| [sdk.units.RedPortalToAct4, sdk.units.WorldstonePortal, sdk.units.RedPortal, sdk.units.RedPortalToAct5].includes(unit.classid)) {
+				|| (unit.name.toLowerCase() === "portal" && !me.inTown && unit.classid !== sdk.objects.ArcaneSanctuaryPortal)
+				|| [sdk.objects.RedPortalToAct4, sdk.objects.WorldstonePortal, sdk.objects.RedPortal, sdk.objects.RedPortalToAct5].includes(unit.classid)) {
 				return false;
 			}
 
@@ -1114,7 +1114,7 @@ const Misc = {
 		if (!unit || unit.x === 12526 || unit.x === 12565 || unit.mode) return false;
 
 		// locked chest, no keys
-		if (!me.assassin && unit.islocked && !me.findItem(sdk.items.Key, sdk.itemmode.inStorage, sdk.storage.Inventory)) return false;
+		if (!me.assassin && unit.islocked && !me.findItem(sdk.items.Key, sdk.items.mode.inStorage, sdk.storage.Inventory)) return false;
 
 		let specialChest = sdk.quest.chests.includes(unit.classid);
 
@@ -1212,7 +1212,7 @@ const Misc = {
 
 		if (unit) {
 			do {
-				if (unit.name && unit.mode === sdk.units.objects.mode.Inactive && getDistance(me.x, me.y, unit.x, unit.y) <= range && containers.includes(unit.name.toLowerCase())) {
+				if (unit.name && unit.mode === sdk.objects.mode.Inactive && getDistance(me.x, me.y, unit.x, unit.y) <= range && containers.includes(unit.name.toLowerCase())) {
 					unitList.push(copyUnit(unit));
 				}
 			} while (unit.getNext());
@@ -1286,7 +1286,7 @@ const Misc = {
 			let index = -1;
 			// Build a list of nearby shrines
 			do {
-				if (shrine.mode === sdk.units.objects.mode.Inactive && !ignore.includes(shrine.objtype) && getDistance(me.x, me.y, shrine.x, shrine.y) <= range) {
+				if (shrine.mode === sdk.objects.mode.Inactive && !ignore.includes(shrine.objtype) && getDistance(me.x, me.y, shrine.x, shrine.y) <= range) {
 					shrineList.push(copyUnit(shrine));
 				}
 			} while (shrine.getNext());
@@ -1325,7 +1325,7 @@ const Misc = {
 
 	// Use a shrine Unit
 	getShrine: function (unit) {
-		if (unit.mode === sdk.units.objects.mode.Active) return false;
+		if (unit.mode === sdk.objects.mode.Active) return false;
 
 		for (let i = 0; i < 3; i++) {
 			if (Skill.useTK(unit) && i < 2) {
@@ -1373,7 +1373,7 @@ const Misc = {
 
 				if (shrine) {
 					do {
-						if (shrine.objtype === type && shrine.mode === sdk.units.objects.mode.Inactive) {
+						if (shrine.objtype === type && shrine.mode === sdk.objects.mode.Inactive) {
 							(!Skill.haveTK || !use) && Pather.moveTo(shrine.x - 2, shrine.y - 2);
 
 							if (!use || this.getShrine(shrine)) {
@@ -1437,7 +1437,7 @@ const Misc = {
 		let code = "";
 		
 		switch (unit.quality) {
-		case sdk.itemquality.Set:
+		case sdk.items.quality.Set:
 			switch (unit.classid) {
 			case sdk.items.Sabre:
 				code = "inv9sbu";
@@ -1552,7 +1552,7 @@ const Misc = {
 			}
 
 			break;
-		case sdk.itemquality.Unique:
+		case sdk.items.quality.Unique:
 			for (let i = 0; i < 401; i += 1) {
 				if (unit.code === getBaseStat("uniqueitems", i, 4).trim()
 					&& unit.fname.split("\n").reverse()[0].includes(getLocaleString(getBaseStat("uniqueitems", i, 2)))) {
@@ -1569,7 +1569,7 @@ const Misc = {
 			// Tiara/Diadem
 			code = ["ci2", "ci3"].includes(unit.code) ? unit.code : (getBaseStat("items", unit.classid, "normcode") || unit.code);
 			code = code.replace(" ", "");
-			[sdk.itemtype.Ring, sdk.itemtype.Amulet, sdk.itemtype.Jewel, sdk.itemtype.SmallCharm, sdk.itemtype.LargeCharm, sdk.itemtype.GrandCharm].includes(unit.itemType) && (code += (unit.gfx + 1));
+			[sdk.items.type.Ring, sdk.items.type.Amulet, sdk.items.type.Jewel, sdk.items.type.SmallCharm, sdk.items.type.LargeCharm, sdk.items.type.GrandCharm].includes(unit.itemType) && (code += (unit.gfx + 1));
 		}
 
 		return code;
@@ -1629,7 +1629,7 @@ const Misc = {
 			if (tempArray[i]) {
 				code = tempArray[i].code;
 
-				if ([sdk.itemtype.Ring, sdk.itemtype.Amulet, sdk.itemtype.Jewel, sdk.itemtype.SmallCharm, sdk.itemtype.LargeCharm, sdk.itemtype.GrandCharm].includes(tempArray[i].itemType)) {
+				if ([sdk.items.type.Ring, sdk.items.type.Amulet, sdk.items.type.Jewel, sdk.items.type.SmallCharm, sdk.items.type.LargeCharm, sdk.items.type.GrandCharm].includes(tempArray[i].itemType)) {
 					code += (tempArray[i].gfx + 1);
 				}
 			} else {
@@ -1713,7 +1713,7 @@ const Misc = {
 
 		if (sock) {
 			do {
-				if (sock.itemType === sdk.itemtype.Jewel) {
+				if (sock.itemType === sdk.items.type.Jewel) {
 					desc += "\n\n";
 					desc += this.getItemDesc(sock);
 				}
@@ -2481,7 +2481,7 @@ const Packet = {
 
 	givePotToMerc: function (item) {
 		if (!!item
-			&& [sdk.itemtype.HealingPotion, sdk.itemtype.RejuvPotion, sdk.itemtype.ThawingPotion, sdk.itemtype.AntidotePotion].includes(item.itemType)) {
+			&& [sdk.items.type.HealingPotion, sdk.items.type.RejuvPotion, sdk.items.type.ThawingPotion, sdk.items.type.AntidotePotion].includes(item.itemType)) {
 			switch (item.location) {
 			case sdk.storage.Belt:
 				return this.useBeltItemForMerc(item);

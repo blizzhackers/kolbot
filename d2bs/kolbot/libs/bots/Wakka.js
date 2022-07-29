@@ -60,7 +60,7 @@ function Wakka() {
 	};
 
 	this.checkBoss = function (name) {
-		let glow = Game.getObject(sdk.units.SealGlow);
+		let glow = Game.getObject(sdk.objects.SealGlow);
 
 		if (glow) {
 			for (let i = 0; i < 10; i += 1) {
@@ -84,10 +84,10 @@ function Wakka() {
 	};
 
 	this.getCorpse = function () {
-		me.mode === sdk.units.player.mode.Dead && me.revive();
+		me.mode === sdk.player.mode.Dead && me.revive();
 
 		let rval = false;
-		let corpse = Game.getPlayer(me.name, sdk.units.player.mode.Dead);
+		let corpse = Game.getPlayer(me.name, sdk.player.mode.Dead);
 
 		if (corpse) {
 			do {
@@ -109,7 +109,7 @@ function Wakka() {
 		if (!path) throw new Error("Failed go get path");
 
 		while (path.length > 0) {
-			if (me.mode === sdk.units.player.mode.Dead || me.inTown) return false;
+			if (me.mode === sdk.player.mode.Dead || me.inTown) return false;
 			(!leaderUnit || !copyUnit(leaderUnit).x) && (leaderUnit = Game.getPlayer(leader));
 
 			if (leaderUnit) {

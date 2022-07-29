@@ -249,11 +249,11 @@ const Common = {
 
 		initLayout: function () {
 			// 1 = "Y", 2 = "L"
-			this.vizLayout = this.getLayout(sdk.units.DiabloSealVizier, 5275);
+			this.vizLayout = this.getLayout(sdk.objects.DiabloSealVizier, 5275);
 			// 1 = "2", 2 = "5"
-			this.seisLayout = this.getLayout(sdk.units.DiabloSealSeis, 7773);
+			this.seisLayout = this.getLayout(sdk.objects.DiabloSealSeis, 7773);
 			// 1 = "I", 2 = "J"
-			this.infLayout = this.getLayout(sdk.units.DiabloSealInfector, 7893);
+			this.infLayout = this.getLayout(sdk.objects.DiabloSealInfector, 7893);
 		},
 
 		followPath: function (path) {
@@ -339,9 +339,9 @@ const Common = {
 		},
 
 		openSeal: function (classid) {
-			let warn = Config.PublicMode && [sdk.units.DiabloSealVizier, sdk.units.DiabloSealSeis, sdk.units.DiabloSealInfector].includes(classid) && Loader.scriptName() === "Diablo";
-			let usetk = (Skill.haveTK && (classid !== sdk.units.DiabloSealSeis || this.seisLayout !== 1));
-			let seisSeal = classid === sdk.units.DiabloSealSeis;
+			let warn = Config.PublicMode && [sdk.objects.DiabloSealVizier, sdk.objects.DiabloSealSeis, sdk.objects.DiabloSealInfector].includes(classid) && Loader.scriptName() === "Diablo";
+			let usetk = (Skill.haveTK && (classid !== sdk.objects.DiabloSealSeis || this.seisLayout !== 1));
+			let seisSeal = classid === sdk.objects.DiabloSealSeis;
 			let seal;
 
 			for (let i = 0; i < 5; i++) {
@@ -363,7 +363,7 @@ const Common = {
 				}
 
 				// Clear around Infector seal, Any leftover abyss knights casting decrep is bad news with Infector
-				if (([sdk.units.DiabloSealInfector, sdk.units.DiabloSealInfector2].includes(classid) || i > 1) && me.getMobCount() > 1) {
+				if (([sdk.objects.DiabloSealInfector, sdk.objects.DiabloSealInfector2].includes(classid) || i > 1) && me.getMobCount() > 1) {
 					Attack.clear(15);
 					// Move back to seal
 					usetk ? Pather.moveNearUnit(seal, 15) : Pather.moveToUnit(seal, seisSeal ? 5 : 2, seisSeal ? 5 : 0);
@@ -374,7 +374,7 @@ const Common = {
 				} else {
 					usetk && (usetk = false);
 
-					if (classid === sdk.units.DiabloSealInfector && me.assassin && this.infLayout === 1) {
+					if (classid === sdk.objects.DiabloSealInfector && me.assassin && this.infLayout === 1) {
 						if (Config.UseTraps) {
 							let check = ClassAttack.checkTraps({x: 7899, y: 5293});
 							check && ClassAttack.placeTraps({x: 7899, y: 5293}, check);
@@ -424,7 +424,7 @@ const Common = {
 
 			distCheck.distance > 30 && this.followPath(Common.Diablo.vizLayout === 1 ? this.starToVizA : this.starToVizB);
 
-			if (openSeal && (!Common.Diablo.openSeal(sdk.units.DiabloSealVizier2) || !Common.Diablo.openSeal(sdk.units.DiabloSealVizier))) {
+			if (openSeal && (!Common.Diablo.openSeal(sdk.objects.DiabloSealVizier2) || !Common.Diablo.openSeal(sdk.objects.DiabloSealVizier))) {
 				throw new Error("Failed to open Vizier seals.");
 			}
 
@@ -456,7 +456,7 @@ const Common = {
 
 			distCheck.distance > 30 && this.followPath(Common.Diablo.seisLayout === 1 ? this.starToSeisA : this.starToSeisB);
 
-			if (openSeal && !Common.Diablo.openSeal(sdk.units.DiabloSealSeis)) throw new Error("Failed to open de Seis seal.");
+			if (openSeal && !Common.Diablo.openSeal(sdk.objects.DiabloSealSeis)) throw new Error("Failed to open de Seis seal.");
 			Common.Diablo.seisLayout === 1 ? Pather.moveTo(7798, 5194) : Pather.moveTo(7796, 5155);
 			if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.LordDeSeis))) throw new Error("Failed to kill de Seis");
 
@@ -483,8 +483,8 @@ const Common = {
 			distCheck.distance > 70 && this.followPath(Common.Diablo.infLayout === 1 ? this.starToInfA : this.starToInfB);
 			
 			if (Config.Diablo.Fast) {
-				if (openSeal && !Common.Diablo.openSeal(sdk.units.DiabloSealInfector2)) throw new Error("Failed to open Infector seals.");
-				if (openSeal && !Common.Diablo.openSeal(sdk.units.DiabloSealInfector)) throw new Error("Failed to open Infector seals.");
+				if (openSeal && !Common.Diablo.openSeal(sdk.objects.DiabloSealInfector2)) throw new Error("Failed to open Infector seals.");
+				if (openSeal && !Common.Diablo.openSeal(sdk.objects.DiabloSealInfector)) throw new Error("Failed to open Infector seals.");
 
 				if (Common.Diablo.infLayout === 1) {
 					(me.sorceress || me.assassin) && Pather.moveTo(7876, 5296);
@@ -496,7 +496,7 @@ const Common = {
 
 				if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.InfectorofSouls))) throw new Error("Failed to kill Infector");
 			} else {
-				if (openSeal && !Common.Diablo.openSeal(sdk.units.DiabloSealInfector)) throw new Error("Failed to open Infector seals.");
+				if (openSeal && !Common.Diablo.openSeal(sdk.objects.DiabloSealInfector)) throw new Error("Failed to open Infector seals.");
 
 				if (Common.Diablo.infLayout === 1) {
 					(me.sorceress || me.assassin) && Pather.moveTo(7876, 5296);
@@ -507,12 +507,12 @@ const Common = {
 				}
 
 				if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.InfectorofSouls))) throw new Error("Failed to kill Infector");
-				if (openSeal && !Common.Diablo.openSeal(sdk.units.DiabloSealInfector2)) throw new Error("Failed to open Infector seals.");
+				if (openSeal && !Common.Diablo.openSeal(sdk.objects.DiabloSealInfector2)) throw new Error("Failed to open Infector seals.");
 				// wait until seal has been popped to avoid missing diablo due to wait time ending before he spawns, happens if leader does town chores after seal boss
 				!openSeal && [3, "infector"].includes(Common.Diablo.sealOrder.last()) && Misc.poll(() => {
 					if (Common.Diablo.diabloSpawned) return true;
 
-					let lastSeal = Game.getObject(sdk.units.DiabloSealInfector2);
+					let lastSeal = Game.getObject(sdk.objects.DiabloSealInfector2);
 					if (lastSeal && lastSeal.mode) {
 						return true;
 					}
@@ -568,7 +568,7 @@ const Common = {
 			}
 
 			switch (me.classid) {
-			case sdk.charclass.Sorceress:
+			case sdk.player.class.Sorceress:
 				if ([sdk.skills.Meteor, sdk.skills.Blizzard, sdk.skills.FrozenOrb, sdk.skills.FireWall].includes(Config.AttackSkill[1])) {
 					me.skillDelay && delay(500);
 					Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Right, coords[0], coords[1]);
@@ -577,11 +577,11 @@ const Common = {
 				}
 
 				break;
-			case sdk.charclass.Paladin:
+			case sdk.player.class.Paladin:
 				this.hammerdinPreAttack(id, 8);
 
 				break;
-			case sdk.charclass.Assassin:
+			case sdk.player.class.Assassin:
 				if (Config.UseTraps) {
 					let trapCheck = ClassAttack.checkTraps({x: coords[0], y: coords[1]});
 
@@ -599,7 +599,7 @@ const Common = {
 		},
 
 		getBoss: function (name) {
-			let glow = Game.getObject(sdk.units.SealGlow);
+			let glow = Game.getObject(sdk.objects.SealGlow);
 
 			if (this.waitForGlow) {
 				while (true) {
@@ -607,7 +607,7 @@ const Common = {
 						delay(500);
 					}
 
-					glow = Game.getObject(sdk.units.SealGlow);
+					glow = Game.getObject(sdk.objects.SealGlow);
 
 					if (glow) {
 						break;
@@ -631,14 +631,14 @@ const Common = {
 
 		moveToStar: function () {
 			switch (me.classid) {
-			case sdk.charclass.Amazon:
-			case sdk.charclass.Sorceress:
-			case sdk.charclass.Necromancer:
-			case sdk.charclass.Assassin:
+			case sdk.player.class.Amazon:
+			case sdk.player.class.Sorceress:
+			case sdk.player.class.Necromancer:
+			case sdk.player.class.Assassin:
 				return Pather.moveNear(7791, 5293, (me.sorceress ? 35 : 25), {returnSpotOnError: true});
-			case sdk.charclass.Paladin:
-			case sdk.charclass.Druid:
-			case sdk.charclass.Barbarian:
+			case sdk.player.class.Paladin:
+			case sdk.player.class.Druid:
+			case sdk.player.class.Barbarian:
 				return Pather.moveTo(7788, 5292);
 			}
 
@@ -659,7 +659,7 @@ const Common = {
 			while (getTickCount() - tick < 30000) {
 				if (getTickCount() - tick >= 8000) {
 					switch (me.classid) {
-					case sdk.charclass.Sorceress:
+					case sdk.player.class.Sorceress:
 						if ([sdk.skills.Meteor, sdk.skills.Blizzard, sdk.skills.FrozenOrb, sdk.skills.FireWall].includes(Config.AttackSkill[1])) {
 							Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Right, 7793 + rand(-1, 1), 5293);
 						}
@@ -667,12 +667,12 @@ const Common = {
 						delay(500);
 
 						break;
-					case sdk.charclass.Paladin:
+					case sdk.player.class.Paladin:
 						Skill.setSkill(Config.AttackSkill[2]);
 						Config.AttackSkill[1] === sdk.skills.BlessedHammer && Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Left);
 
 						break;
-					case sdk.charclass.Druid:
+					case sdk.player.class.Druid:
 						if ([sdk.skills.Tornado, sdk.skills.Fissure, sdk.skills.Volcano].includes(Config.AttackSkill[3])) {
 							Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Right, 7793 + rand(-1, 1), 5293);
 
@@ -682,7 +682,7 @@ const Common = {
 						delay(500);
 
 						break;
-					case sdk.charclass.Assassin:
+					case sdk.player.class.Assassin:
 						if (Config.UseTraps) {
 							let trapCheck = ClassAttack.checkTraps({x: 7793, y: 5293});
 							trapCheck && ClassAttack.placeTraps({x: 7793, y: 5293, classid: sdk.monsters.Diablo}, trapCheck);
@@ -733,17 +733,17 @@ const Common = {
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 5000) {
-				if (Game.getObject(sdk.units.AncientsAltar)) {
+				if (Game.getObject(sdk.objects.AncientsAltar)) {
 					break;
 				}
 
 				delay(20 + me.ping);
 			}
 
-			let altar = Game.getObject(sdk.units.AncientsAltar);
+			let altar = Game.getObject(sdk.objects.AncientsAltar);
 
 			if (altar) {
-				while (altar.mode !== sdk.units.objects.mode.Active) {
+				while (altar.mode !== sdk.objects.mode.Active) {
 					Pather.moveToUnit(altar);
 					altar.interact();
 					delay(200 + me.ping);
@@ -763,8 +763,8 @@ const Common = {
 
 		checkStatues: function () {
 			let statues = getUnits(sdk.unittype.Object)
-				.filter(u => [sdk.units.KorlictheProtectorStatue, sdk.units.TalictheDefenderStatue, sdk.units.MadawctheGuardianStatue].includes(u.classid)
-					&& u.mode === sdk.units.objects.mode.Active);
+				.filter(u => [sdk.objects.KorlictheProtectorStatue, sdk.objects.TalictheDefenderStatue, sdk.objects.MadawctheGuardianStatue].includes(u.classid)
+					&& u.mode === sdk.objects.mode.Active);
 			return statues.length === 3;
 		},
 
@@ -847,9 +847,9 @@ const Common = {
 			let hydra = Game.getMonster(getLocaleString(sdk.locale.monsters.Hydra));
 			if (hydra) {
 				do {
-					if (hydra.mode !== sdk.units.monsters.monstermode.Dead && hydra.getStat(sdk.stats.Alignment) !== 2) {
+					if (hydra.mode !== sdk.monsters.mode.Dead && hydra.getStat(sdk.stats.Alignment) !== 2) {
 						Pather.moveTo(15072, 5002);
-						while (hydra.mode !== sdk.units.monsters.monstermode.Dead) {
+						while (hydra.mode !== sdk.monsters.mode.Dead) {
 							delay(500);
 							if (!copyUnit(hydra).x) {
 								break;
@@ -938,7 +938,7 @@ const Common = {
 
 		preattack: function () {
 			switch (me.classid) {
-			case sdk.charclass.Sorceress:
+			case sdk.player.class.Sorceress:
 				if ([sdk.skills.Meteor, sdk.skills.Blizzard, sdk.skills.FrozenOrb, sdk.skills.FireWall].includes(Config.AttackSkill[1])) {
 					if (me.getState(sdk.states.SkillDelay)) {
 						delay(50);
@@ -948,7 +948,7 @@ const Common = {
 				}
 
 				break;
-			case sdk.charclass.Paladin:
+			case sdk.player.class.Paladin:
 				if (Config.AttackSkill[3] === sdk.skills.BlessedHammer) {
 					Config.AttackSkill[4] > 0 && Skill.setSkill(Config.AttackSkill[4], sdk.skills.hand.Right);
 
@@ -956,7 +956,7 @@ const Common = {
 				}
 
 				break;
-			case sdk.charclass.Druid:
+			case sdk.player.class.Druid:
 				if ([sdk.skills.Tornado, sdk.skills.Fissure, sdk.skills.Volcano].includes(Config.AttackSkill[3])) {
 					Skill.cast(Config.AttackSkill[3], sdk.skills.hand.Right, 15094 + rand(-1, 1), 5029);
 
@@ -964,7 +964,7 @@ const Common = {
 				}
 
 				break;
-			case sdk.charclass.Assassin:
+			case sdk.player.class.Assassin:
 				if (Config.UseTraps) {
 					let check = ClassAttack.checkTraps({x: 15094, y: 5028});
 
@@ -1023,7 +1023,7 @@ const Common = {
 								if (Config.AttackSkill[3] === sdk.skills.BlessedHammer) {
 									Skill.cast(Config.AttackSkill[3], sdk.skills.hand.Left);
 								}
-								return !me.getState(sdk.states.Poison) || me.mode === sdk.units.player.mode.GettingHit;
+								return !me.getState(sdk.states.Poison) || me.mode === sdk.player.mode.GettingHit;
 							}, Time.seconds(3), 100);
 						}
 					}
@@ -1041,21 +1041,21 @@ const Common = {
 				}
 
 				switch (me.classid) {
-				case sdk.charclass.Amazon:
-				case sdk.charclass.Sorceress:
-				case sdk.charclass.Necromancer:
-				case sdk.charclass.Assassin:
+				case sdk.player.class.Amazon:
+				case sdk.player.class.Sorceress:
+				case sdk.player.class.Necromancer:
+				case sdk.player.class.Assassin:
 					[15116, 5026].distance > 3 && Pather.moveTo(15116, 5026);
 
 					break;
-				case sdk.charclass.Paladin:
+				case sdk.player.class.Paladin:
 					if (Config.AttackSkill[3] === sdk.skills.BlessedHammer) {
 						[15094, 5029].distance > 3 && Pather.moveTo(15094, 5029);
 						
 						break;
 					}
 				// eslint-disable-next-line no-fallthrough
-				case sdk.charclass.Druid:
+				case sdk.player.class.Druid:
 					if ([sdk.skills.Fissure, sdk.skills.Volcano].includes(Config.AttackSkill[3])) {
 						[15116, 5026].distance > 3 && Pather.moveTo(15116, 5026);
 
@@ -1068,7 +1068,7 @@ const Common = {
 						break;
 					}
 				// eslint-disable-next-line no-fallthrough
-				case sdk.charclass.Barbarian:
+				case sdk.player.class.Barbarian:
 					[15101, 5045].distance > 3 && Pather.moveTo(15101, 5045);
 
 					break;
@@ -1095,14 +1095,14 @@ const Common = {
 				delay(5000);
 				Precast.doPrecast(true);
 				Misc.poll(() => {
-					if (me.mode === sdk.units.player.mode.GettingHit || me.checkForMobs({range: 15})) {
+					if (me.mode === sdk.player.mode.GettingHit || me.checkForMobs({range: 15})) {
 						Common.Baal.clearThrone();
 						Pather.moveTo(15090, 5008);
 					}
 					return !Game.getMonster(sdk.monsters.ThroneBaal);
 				}, Time.minutes(3), 1000);
 
-				let portal = Game.getObject(sdk.units.WorldstonePortal);
+				let portal = Game.getObject(sdk.objects.WorldstonePortal);
 
 				if (portal) {
 					Pather.usePortal(null, null, portal);
@@ -1284,20 +1284,20 @@ const Common = {
 			}
 
 			// mode 18 - can't drink while leaping/whirling etc.
-			if (me.dead || me.mode === sdk.units.player.mode.SkillActionSequence) return false;
+			if (me.dead || me.mode === sdk.player.mode.SkillActionSequence) return false;
 
 			switch (type) {
 			case this.pots.Health:
 			case this.pots.MercHealth:
-				pottype = sdk.itemtype.HealingPotion;
+				pottype = sdk.items.type.HealingPotion;
 
 				break;
 			case this.pots.Mana:
-				pottype = sdk.itemtype.ManaPotion;
+				pottype = sdk.items.type.ManaPotion;
 
 				break;
 			default:
-				pottype = sdk.itemtype.RejuvPotion;
+				pottype = sdk.items.type.RejuvPotion;
 
 				break;
 			}
@@ -1305,7 +1305,7 @@ const Common = {
 			let potion = this.getPotion(pottype, type);
 
 			if (!!potion) {
-				if (me.dead || me.mode === sdk.units.player.mode.SkillActionSequence) return false;
+				if (me.dead || me.mode === sdk.player.mode.SkillActionSequence) return false;
 
 				try {
 					type < this.pots.MercHealth ? potion.interact() : Packet.useBeltItemForMerc(potion);
@@ -1342,7 +1342,7 @@ const Common = {
 		},
 
 		getIronGolem: function () {
-			let golem = Game.getMonster(sdk.monsters.IronGolem);
+			let golem = Game.getMonster(sdk.summons.IronGolem);
 
 			if (golem) {
 				do {
