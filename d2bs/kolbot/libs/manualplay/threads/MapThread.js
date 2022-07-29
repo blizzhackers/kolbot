@@ -122,8 +122,9 @@ function main() {
 	};
 
 	const hideFlags = [
-		0x01, 0x02, 0x03, 0x04, 0x05, 0x09, 0x0C, 0x0F, 0x14,
-		0x17, 0x18, 0x19, 0x1A, 0x21, 0x24
+		sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.QuickSkill, sdk.uiflags.SkillWindow, sdk.uiflags.ChatBox,
+		sdk.uiflags.EscMenu, sdk.uiflags.Shop, sdk.uiflags.Quest, sdk.uiflags.Waypoint, sdk.uiflags.TradePrompt, sdk.uiflags.Msgs,
+		sdk.uiflags.Stash, sdk.uiflags.Cube, sdk.uiflags.Help, sdk.uiflags.MercScreen
 	];
 
 	this.revealArea = function (area) {

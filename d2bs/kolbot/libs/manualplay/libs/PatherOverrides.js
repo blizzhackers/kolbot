@@ -74,7 +74,7 @@ Pather.changeAct = function (act) {
 		getDistance(me, npcUnit) > 5 && Town.move(NPC[npc]);
 
 		for (let i = 0; i < 5; i += 1) {
-			sendPacket(1, 56, 4, 0, 4, npcUnit.gid, 4, loc);
+			sendPacket(1, sdk.packets.send.EntityAction, 4, 0, 4, npcUnit.gid, 4, loc);
 			delay(500 + me.ping);
 
 			if (me.act === act) {

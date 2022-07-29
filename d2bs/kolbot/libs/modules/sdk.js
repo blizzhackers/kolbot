@@ -1806,6 +1806,8 @@ item: {
 				Super: 1,
 				Champion: 2,
 				Unique: 4,
+				SuperUnique: 5,
+				Magic: 6,
 				Minion: 8,
 			},
 			// todo - determine what all these correlate to

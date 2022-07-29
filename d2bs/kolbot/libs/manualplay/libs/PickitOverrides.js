@@ -13,7 +13,7 @@ Pickit.basicPickItems = function () {
 
 	if (item) {
 		do {
-			if ((item.onGroundOrDropping)) {
+			if (item.onGroundOrDropping) {
 				itemList.push(copyUnit(item));
 			}
 		} while (item.getNext());

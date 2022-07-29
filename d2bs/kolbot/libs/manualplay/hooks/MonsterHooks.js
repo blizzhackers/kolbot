@@ -41,21 +41,14 @@ const MonsterHooks = {
 
 	// credit DetectiveSquirrel from his maphack https://github.com/DetectiveSquirrel/Kolbot-MapThread/blob/9c721a72a934518cfca1d1a05211b5e03b5b624f/kolbot/tools/MapThread.js#L2353
 	specTypeColor: function (unit) {
-		const spectype = {
-			Boss: 0x04,
-			Unique: 0x05,
-			Magic: 0x06,
-			Minion: 0x08
-		};
-
 		switch (unit.spectype) {
-		case spectype.Minion:
+		case sdk.monsters.spectype.Minion:
 			return 3;
-		case spectype.Magic:
+		case sdk.monsters.spectype.Magic:
 			return 9;
-		case spectype.Boss:
+		case sdk.monsters.spectype.Unique:
 			return 11;
-		case spectype.Unique:
+		case sdk.monsters.spectype.SuperUnique:
 			return 2;
 		default:
 			return 8;
