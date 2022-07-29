@@ -1067,7 +1067,7 @@ const Misc = {
 
 	// autoleader by Ethic - refactored by theBGuy
 	autoLeaderDetect: function (givenSettings = {}) {
-		let settings = Object.assign({}, {
+		const settings = Object.assign({}, {
 			destination: -1,
 			quitIf: false,
 			timeout: Infinity
@@ -1112,7 +1112,6 @@ const Misc = {
 		
 		// Skip invalid/open and Countess chests
 		if (!unit || unit.x === 12526 || unit.x === 12565 || unit.mode) return false;
-
 		// locked chest, no keys
 		if (!me.assassin && unit.islocked && !me.findItem(sdk.items.Key, sdk.items.mode.inStorage, sdk.storage.Inventory)) return false;
 
@@ -2526,12 +2525,12 @@ const Packet = {
 	},
 
 	castSkill: function (hand, wX, wY) {
-		hand = (hand === sdk.skills.hand.Right) ? 0x0c : 0x05;
+		hand = (hand === sdk.skills.hand.Right) ? sdk.packets.send.RightSkillOnLocation : sdk.packets.send.LeftSkillOnLocation;
 		sendPacket(1, hand, 2, wX, 2, wY);
 	},
 
 	unitCast: function (hand, who) {
-		hand = (hand === sdk.skills.hand.Right) ? sdk.packets.send.RightSkillOnEntityEx3 : 0x0a;
+		hand = (hand === sdk.skills.hand.Right) ? sdk.packets.send.RightSkillOnEntityEx3 : sdk.packets.send.LeftSkillOnEntityEx3;
 		sendPacket(1, hand, 4, who.type, 4, who.gid);
 	},
 

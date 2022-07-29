@@ -2070,12 +2070,9 @@ const Town = {
 
 		switch (me.act) {
 		case 1:
-			let wp = getPresetUnit(sdk.areas.RogueEncampment, sdk.unittype.Object, 119);
-			let fireUnit = getPresetUnit(sdk.areas.RogueEncampment, sdk.unittype.Object, 39);
-
-			if (!fireUnit) {
-				return false;
-			}
+			let wp = Game.getPresetObject(sdk.areas.RogueEncampment, sdk.objects.A1Waypoint);
+			let fireUnit = Game.getPresetObject(sdk.areas.RogueEncampment, sdk.objects.A1TownFire);
+			if (!fireUnit) return false;
 
 			let fire = [fireUnit.roomx * 5 + fireUnit.x, fireUnit.roomy * 5 + fireUnit.y];
 

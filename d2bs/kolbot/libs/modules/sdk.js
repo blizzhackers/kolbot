@@ -73,11 +73,17 @@ item: {
 				Shift: 1
 			}
 		},
-
+		/**
+		*  @notes
+		*   - I get cursortype 3 when I swap an item that is equipped, but I get 4 if I just unequip an item
+		*   - I get cursortype 3 if I pick an item from my inventory then hover it over another item
+		*   - I get cursortype 4 if I pick and item from my inventory and don't hover it over another item
+		*     - If I then hover it over an item it turns to 3 then stays 3
+		*/
 		cursortype: {
 			Empty: 1,
-			ItemOnUnitHover: 3, // only while belt is showing
-			ItemOnCursor: 4, // need more testing on these
+			ItemOnUnitHover: 3, // see notes
+			ItemOnCursor: 4, // see notes
 			Identify: 6,
 			Repair: 7,
 		},
@@ -96,6 +102,7 @@ item: {
 			Objects: 0x400,
 			ClosedDoor: 0x800,
 			IsOnFloor: 0x1000,
+			MonsterIsOnFloor: 0x1100,
 			FriendlyNPC: 0x2000,
 			Unknown2: 0x4000,
 			DeadBodies: 0x8000,
@@ -1549,6 +1556,8 @@ item: {
 			},
 
 			// act1
+			A1TownFire: 39,
+			A1Waypoint: 119,
 			StoneAlpha: 17,
 			StoneBeta: 18,
 			StoneGamma: 19,
@@ -1560,6 +1569,7 @@ item: {
 			Malus: 108,
 
 			// act 2
+			A2Waypoint: 156,
 			A2UndergroundUpStairs: 22,
 			TrapDoorA2: 74, // ancienttunnel/sewers act 2
 			DoorbyDockAct2: 75, // incorrect ? TODO: figure out what 75 really corresponds to since the door is obj type 5 with classid 20
@@ -1571,6 +1581,7 @@ item: {
 			Journal: 357,
 
 			// act 3
+			A3Waypoint: 237,
 			ForestAltar: 81,
 			LamEsensTome: 193,
 			SewerStairsA3: 366,
@@ -1580,6 +1591,7 @@ item: {
 			CompellingOrb: 404,
 
 			// act 4
+			A4Waypoint: 398,
 			SealGlow: 131,
 			DiabloStar: 255,
 			DiabloSealInfector: 392,
@@ -1590,6 +1602,7 @@ item: {
 			RedPortalToAct5: 566, // The one of tyreal
 
 			// act 5
+			A5Waypoint: 429,
 			SideCavesA5: 75, // FrozenRiver, DrifterCavern, IcyCellar
 			Act5Gate: 449,
 			KorlictheProtectorStatue: 474,

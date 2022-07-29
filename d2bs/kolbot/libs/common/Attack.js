@@ -1004,7 +1004,7 @@ const Attack = {
 			}
 
 			return !(result & sdk.collision.BlockWall); // outside lava area in abaddon returns coll 1
-		case Attack.monsterObjects.includes(unitid) && (!!(result & 0x1110) || !!(result & sdk.collision.MonsterObject)):
+		case Attack.monsterObjects.includes(unitid) && (!!(result & sdk.collision.MonsterIsOnFloor) || !!(result & sdk.collision.MonsterObject)):
 			// kinda dumb - monster objects have a collision that causes them to not be attacked
 			// this should fix that
 			return true;

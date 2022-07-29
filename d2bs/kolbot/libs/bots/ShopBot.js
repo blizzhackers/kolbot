@@ -258,7 +258,9 @@ function ShopBot() {
 
 		if (me.inTown) {
 			let area = getArea();
-			let wp = Game.getPresetObject(me.area, [119, 156, 237, 398, 429][me.act - 1]);
+			let wp = Game.getPresetObject(me.area, [
+				sdk.objects.A1Waypoint, sdk.objects.A2Waypoint, sdk.objects.A3Waypoint, sdk.objects.A4Waypoint, sdk.objects.A5Waypoint
+			][me.act - 1]);
 			let wpX = wp.roomx * 5 + wp.x;
 			let wpY = wp.roomy * 5 + wp.y;
 			let redPortal = (getUnits(sdk.unittype.Object, sdk.objects.RedPortal).sort((a, b) => a.distance - b.distance)).first();

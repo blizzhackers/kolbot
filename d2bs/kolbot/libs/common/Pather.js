@@ -157,7 +157,7 @@ const Pather = {
 	},
 
 	spotOnDistance: function (spot, distance, givenSettings = {}) {
-		let settings = Object.assign({}, {
+		const settings = Object.assign({}, {
 			area: me.area,
 			reductionType: 2,
 			coll: (sdk.collision.BlockWalk),
@@ -175,7 +175,7 @@ const Pather = {
 	moveNear: function (x, y, minDist, givenSettings = {}) {
 		// Abort if dead
 		if (me.dead) return false;
-		let settings = Object.assign({}, {
+		const settings = Object.assign({}, {
 			allowTeleport: true,
 			clearSettings: {
 				clearPath: false,
@@ -448,7 +448,7 @@ const Pather = {
 	moveToEx: function (x, y, givenSettings = {}) {
 		// Abort if dead
 		if (me.dead) return false;
-		let settings = Object.assign({}, {
+		const settings = Object.assign({}, {
 			allowTeleport: true,
 			clearSettings: {
 				allowClearing: true,

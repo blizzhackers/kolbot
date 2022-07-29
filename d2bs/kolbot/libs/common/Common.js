@@ -209,12 +209,10 @@ const Common = {
 
 		sort: function (a, b) {
 			if (Config.BossPriority) {
-				if ((a.spectype & 0x5) && (b.spectype & 0x5)) {
-					return getDistance(me, a) - getDistance(me, b);
-				}
+				if ((a.isSuperUnique) && (b.isSuperUnique)) return getDistance(me, a) - getDistance(me, b);
 
-				if (a.spectype & 0x5) return -1;
-				if (b.spectype & 0x5) return 1;
+				if (a.isSuperUnique) return -1;
+				if (b.isSuperUnique) return 1;
 			}
 
 			// Entrance to Star / De Seis
