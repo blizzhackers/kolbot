@@ -176,7 +176,7 @@ function MFHelper() {
 							}
 						} else if (command.includes("council")) {
 							print("ÿc4MFHelperÿc0: Kill Council");
-							Attack.clearList(Attack.getMob([345, 346, 347], 0, 40));
+							Attack.clearList(Attack.getMob([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3], 0, 40));
 						}
 
 						delay(100);

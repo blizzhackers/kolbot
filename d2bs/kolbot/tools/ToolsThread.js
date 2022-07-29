@@ -368,7 +368,7 @@ function main() {
 					if (!!merc) {
 						let mercHP = getMercHP();
 
-						if (mercHP > 0 && merc.mode !== 12) {
+						if (mercHP > 0 && merc.mode !== sdk.units.monsters.monstermode.Dead) {
 							if (mercHP < Config.MercChicken) {
 								D2Bot.printToConsole("Merc Chicken in " + Pather.getAreaName(me.area), sdk.colors.D2Bot.Red);
 								Common.Toolsthread.exit(true);

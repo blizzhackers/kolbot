@@ -1141,7 +1141,7 @@ const Pather = {
 	openUnit: function (type, id) {
 		let unit = Misc.poll(() => getUnit(type, id), 1000, 200);
 		if (!unit) throw new Error("openUnit: Unit not found. ID: " + unit);
-		if (unit.mode !== 0) return true;
+		if (unit.mode !== sdk.units.objects.mode.Inactive) return true;
 
 		for (let i = 0; i < 3; i += 1) {
 			unit.distance > 5 && this.moveToUnit(unit);
@@ -1149,7 +1149,7 @@ const Pather = {
 			delay(300);
 			Packet.entityInteract(unit);
 
-			if (Misc.poll(() => unit.mode !== 0, 2000, 60)) {
+			if (Misc.poll(() => unit.mode !== sdk.units.objects.mode.Inactive, 2000, 60)) {
 				delay(100);
 
 				return true;

@@ -876,7 +876,7 @@ const Cubing = {
 				transmute();
 				delay(700 + me.ping);
 				print("ÿc4Cubing: " + string);
-				Config.ShowCubingInfo && D2Bot.printToConsole(string, 5);
+				Config.ShowCubingInfo && D2Bot.printToConsole(string, sdk.colors.D2Bot.Green);
 				this.update();
 
 				let cubeItems = me.findItems(-1, -1, sdk.storage.Cube);

@@ -30,11 +30,11 @@ const AutoSkill = new function () {
 	//a function to return false if have all prereqs or a skill if not
 	this.needPreReq = function (skillid) {
 		//a loop to go through each reqskill
-		for (let t = 183; t >= 181; t--) {
+		for (let t = sdk.stats.PreviousSkillLeft; t >= sdk.stats.PreviousSkillRight; t--) {
 			// Check ReqSkills
 			let preReq = (getBaseStat("skills", skillid, t));
 
-			if (preReq > 0 && preReq < 356 && !me.getSkill(preReq, sdk.skills.subindex.HardPoints)) {
+			if (preReq > sdk.skills.Attack && preReq < 356 && !me.getSkill(preReq, sdk.skills.subindex.HardPoints)) {
 				return preReq;
 			}
 		}
@@ -43,7 +43,7 @@ const AutoSkill = new function () {
 	};
 
 	this.skillCheck = function (skillid, count) {
-		if (me.getSkill(skillid, sdk.skills.subindex.HardPoints) <= me.charlvl - getBaseStat("skills", skillid, 176) && me.getSkill(skillid, sdk.skills.subindex.HardPoints) < count) {
+		if (me.getSkill(skillid, sdk.skills.subindex.HardPoints) <= me.charlvl - getBaseStat("skills", skillid, sdk.stats.MinimumRequiredLevel) && me.getSkill(skillid, sdk.skills.subindex.HardPoints) < count) {
 			return true;
 		}
 
@@ -72,8 +72,8 @@ const AutoSkill = new function () {
 				return inputArray[i][0];
 			}
 
-			let reqIn,
-				reqOut = this.needPreReq(inputArray[i][0]);
+			let reqIn;
+			let reqOut = this.needPreReq(inputArray[i][0]);
 
 			if (!reqOut && this.skillCheck(inputArray[i][0], inputArray[i][1])) {
 				return inputArray[i][0];

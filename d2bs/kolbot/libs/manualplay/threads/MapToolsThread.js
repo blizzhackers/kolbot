@@ -112,12 +112,12 @@ function main() {
 		case 0x00: // "%Name1(%Name2) dropped due to time out."
 		case 0x01: // "%Name1(%Name2) dropped due to errors."
 		case 0x03: // "%Name1(%Name2) left our world. Diablo's minions weaken."
-			if ((typeof Config.QuitList === "string" && Config.QuitList.toLowerCase() === "any") ||
-					(Config.QuitList instanceof Array && Config.QuitList.indexOf(name1) > -1)) {
+			if ((typeof Config.QuitList === "string" && Config.QuitList.toLowerCase() === "any")
+				|| (Array.isArray(Config.QuitList) && Config.QuitList.includes(name1))) {
 				print(name1 + (mode === 0 ? " timed out" : " left"));
 
 				if (typeof Config.QuitListDelay !== "undefined" && typeof quitListDelayTime === "undefined" && Config.QuitListDelay.length > 0) {
-					Config.QuitListDelay.sort(function (a, b) { return a - b; });
+					Config.QuitListDelay.sort((a, b) => a - b);
 					quitListDelayTime = getTickCount() + rand(Config.QuitListDelay[0] * 1e3, Config.QuitListDelay[1] * 1e3);
 				} else {
 					quitListDelayTime = getTickCount();
@@ -242,7 +242,7 @@ function main() {
 					if (!!merc) {
 						let mercHP = getMercHP();
 
-						if (mercHP > 0 && merc.mode !== 12) {
+						if (mercHP > 0 && merc.mode !== sdk.units.monsters.monstermode.Dead) {
 							if (mercHP < Config.MercChicken) {
 								D2Bot.printToConsole("Merc Chicken in " + Pather.getAreaName(me.area), sdk.colors.D2Bot.Red);
 								Common.Toolsthread.exit(true);

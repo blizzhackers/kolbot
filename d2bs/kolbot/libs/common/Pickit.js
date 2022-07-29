@@ -325,7 +325,7 @@ const Pickit = {
 					}
 				}
 
-				if (item.mode !== sdk.itemmode.onGround && item.mode !== sdk.itemmode.Dropping) {
+				if (!item.onGroundOrDropping) {
 					switch (stats.classid) {
 					case sdk.items.Key:
 						console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc7(" + Town.checkKeys() + "/12)");

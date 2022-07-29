@@ -73,7 +73,7 @@ const ClassAttack = {
 		switch (attackSkill) {
 		case sdk.skills.Whirlwind:
 			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, sdk.collision.BlockWall)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x1, 2)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.BlockWall, 2)) {
 					return Attack.Result.FAILED;
 				}
 			}

@@ -2263,7 +2263,7 @@ const Experience = {
 			D2Bot.printToConsole(string, sdk.colors.D2Bot.Blue);
 
 			if (me.getStat(sdk.stats.Level) > DataFile.getStats().level) {
-				D2Bot.printToConsole("Congrats! You gained a level. Current level:" + me.getStat(sdk.stats.Level), 5);
+				D2Bot.printToConsole("Congrats! You gained a level. Current level:" + me.getStat(sdk.stats.Level), sdk.colors.D2Bot.Green);
 			}
 		}
 	}

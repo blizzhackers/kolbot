@@ -743,7 +743,7 @@ const Common = {
 			let altar = Game.getObject(sdk.units.AncientsAltar);
 
 			if (altar) {
-				while (altar.mode !== 2) {
+				while (altar.mode !== sdk.units.objects.mode.Active) {
 					Pather.moveToUnit(altar);
 					altar.interact();
 					delay(200 + me.ping);
@@ -847,9 +847,9 @@ const Common = {
 			let hydra = Game.getMonster(getLocaleString(sdk.locale.monsters.Hydra));
 			if (hydra) {
 				do {
-					if (hydra.mode !== 12 && hydra.getStat(sdk.stats.Alignment) !== 2) {
+					if (hydra.mode !== sdk.units.monsters.monstermode.Dead && hydra.getStat(sdk.stats.Alignment) !== 2) {
 						Pather.moveTo(15072, 5002);
-						while (hydra.mode !== 12) {
+						while (hydra.mode !== sdk.units.monsters.monstermode.Dead) {
 							delay(500);
 							if (!copyUnit(hydra).x) {
 								break;

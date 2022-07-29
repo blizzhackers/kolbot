@@ -346,7 +346,7 @@ const Runewords = {
 			}
 
 			print("ÿc4Runewords: ÿc0Made runeword: " + items[0].fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, ""));
-			D2Bot.printToConsole("Made runeword: " + items[0].fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, ""), 5);
+			D2Bot.printToConsole("Made runeword: " + items[0].fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, ""), sdk.colors.D2Bot.Green);
 
 			if (NTIP.CheckItem(items[0], this.pickitEntries)) {
 				Misc.itemLogger("Runeword Kept", items[0]);
@@ -383,7 +383,7 @@ const Runewords = {
 				if (!Cubing.openCube()) return false;
 
 				print("ÿc4Runewords: ÿc0Rerolling runeword: " + base.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, ""));
-				D2Bot.printToConsole("Rerolling runeword: " + base.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, ""), 5);
+				D2Bot.printToConsole("Rerolling runeword: " + base.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, ""), sdk.colors.D2Bot.Green);
 				transmute();
 				delay(500);
 

@@ -461,7 +461,7 @@ function main () {
 
 		if (hydra) {
 			do {
-				while (hydra.mode !== 0 && hydra.mode !== 12 && hydra.hp > 0) {
+				while (!hydra.dead && hydra.hp > 0) {
 					delay(500);
 				}
 			} while (hydra.getNext());

@@ -161,7 +161,7 @@ function Wakka() {
 
 			Pather.moveTo(path[0].x, path[0].y) && path.shift();
 			// no mobs around us, so it's safe to pick
-			!me.checkForMobs({range: 10, coll: (0x1 | 0x400 | 0x800)}) && Pickit.pickItems(5);
+			!me.checkForMobs({range: 10, coll: (sdk.collision.BlockWall | sdk.collision.Objects | sdk.collision.ClosedDoor)}) && Pickit.pickItems(5);
 			this.getCorpse();
 		}
 
