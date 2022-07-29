@@ -1002,7 +1002,7 @@ const Attack = {
 				return false;
 			}
 
-			return !(result & 0x1); // outside lava area in abaddon returns coll 1
+			return !(result & sdk.collision.BlockWall); // outside lava area in abaddon returns coll 1
 		case Attack.monsterObjects.includes(unitid) && (!!(result & 0x1110) || !!(result & sdk.collision.MonsterObject)):
 			// kinda dumb - monster objects have a collision that causes them to not be attacked
 			// this should fix that
@@ -1079,7 +1079,7 @@ const Attack = {
 		grid.sort((a, b) => getDistance(b.x, b.y, unit.x, unit.y) - getDistance(a.x, a.y, unit.x, unit.y));
 
 		for (let i = 0; i < grid.length; i += 1) {
-			if (!(CollMap.getColl(grid[i].x, grid[i].y, true) & 0x1) && !CollMap.checkColl(unit, {x: grid[i].x, y: grid[i].y}, sdk.collision.Ranged)) {
+			if (!(CollMap.getColl(grid[i].x, grid[i].y, true) & sdk.collision.BlockWall) && !CollMap.checkColl(unit, {x: grid[i].x, y: grid[i].y}, sdk.collision.Ranged)) {
 				let currCount = this.getMonsterCount(grid[i].x, grid[i].y, range, monList);
 
 				if (currCount < count) {
@@ -1487,7 +1487,7 @@ const Attack = {
 				let cx = Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * distance + unit.x);
 				let cy = Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * distance + unit.y);
 
-				if (Pather.checkSpot(cx, cy, 0x1, false)) {
+				if (Pather.checkSpot(cx, cy, sdk.collision.BlockWall, false)) {
 					coords.push({x: cx, y: cy});
 				}
 			}
@@ -1592,7 +1592,7 @@ const Attack = {
 		for (let i = 0; i < angles.length; i += 1) {
 			let coords = [Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * 4 + unit.x), Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * 4 + unit.y)];
 
-			if (!CollMap.checkColl(me, {x: coords[0], y: coords[1]}, 0x1, 1)) {
+			if (!CollMap.checkColl(me, {x: coords[0], y: coords[1]}, sdk.collision.BlockWall, 1)) {
 				return Skill.cast(sdk.skills.Whirlwind, sdk.skills.hand.Right, coords[0], coords[1]);
 			}
 		}

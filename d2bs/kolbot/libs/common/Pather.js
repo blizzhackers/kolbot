@@ -861,7 +861,7 @@ const Pather = {
 			this.moveTo(unit.x + offX, unit.y + offY, 0, clearPath, true);
 		}
 
-		return this.moveTo(unit.x + offX, unit.y + offY, useTeleport && unit.type && unit.type === 1 ? 3 : 0, clearPath, pop);
+		return this.moveTo(unit.x + offX, unit.y + offY, useTeleport && unit.type && unit.type === sdk.unittype.Monster ? 3 : 0, clearPath, pop);
 	},
 
 	moveNearUnit: function (unit, minDist, clearPath, pop = false) {

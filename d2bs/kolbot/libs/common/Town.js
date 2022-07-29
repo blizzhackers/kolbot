@@ -1921,7 +1921,7 @@ const Town = {
 					// prevents shift-clicking potion into wrong column
 					if (freeSpace[i] === beltSize || freeSpace.some((spot) => spot === beltSize)) {
 						let x = freeSpace[i] === beltSize ? i : (beltCapRef[i] - (freeSpace[i] * 4));
-						p.toCursor(true) && new PacketBuilder().byte(0x23).dword(p.gid).dword(x).send();
+						p.toCursor(true) && new PacketBuilder().byte(sdk.packets.send.ItemToBelt).dword(p.gid).dword(x).send();
 					} else {
 						clickItemAndWait(sdk.clicktypes.click.ShiftLeft, p.x, p.y, p.location);
 					}

@@ -95,7 +95,7 @@ NTIP.CheckQuantityOwned = function (item_type, item_stats) {
 	}
 
 	for (let i = 0; i < items.length; i += 1) {
-		if (items[i].mode === 0 && items[i].location === 7) {
+		if (items[i].mode === sdk.itemmode.inStorage && items[i].location === sdk.storage.Stash) {
 			item = items[i];
 
 			if ((item_type !== null && typeof item_type === "function" && item_type(item)) || item_type === null) {
@@ -103,7 +103,7 @@ NTIP.CheckQuantityOwned = function (item_type, item_stats) {
 					num += 1;
 				}
 			}
-		} else if (items[i].mode === 0 && items[i].location === 3) { // inv check
+		} else if (items[i].mode === sdk.itemmode.inStorage && items[i].location === sdk.storage.Inventory) { // inv check
 			item = items[i];
 
 			if ((item_type !== null && typeof item_type === "function" && item_type(item)) || item_type === null) {

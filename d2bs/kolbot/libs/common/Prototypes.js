@@ -117,7 +117,7 @@ Unit.prototype.openMenu = function (addDelay) {
 			delay(100);
 		}
 
-		sendPacket(1, 0x2f, 4, 1, 4, this.gid);
+		sendPacket(1, sdk.packets.send.NPCInit, 4, 1, 4, this.gid);
 		delay(pingDelay * 2 + 1);
 		Packet.cancelNPC(this);
 		delay(pingDelay * 2 + 1);
@@ -341,14 +341,14 @@ Unit.prototype.use = function () {
 	switch (this.location) {
 	case sdk.storage.Inventory:
 		// doesn't work, not sure why but it's missing something 
-		//new PacketBuilder().byte(0x20).dword(gid).dword(this.x).dword(this.y).send();
+		//new PacketBuilder().byte(sdk.packets.send.UseItem).dword(gid).dword(this.x).dword(this.y).send();
 		checkQuantity = iType === sdk.itemtype.Book;
 		checkQuantity && (quantity = this.getStat(sdk.stats.Quantity));
 		this.interact(); // use interact instead, was hoping to skip this since its really just doing the same thing over but oh well
 
 		break;
 	case sdk.storage.Belt:
-		new PacketBuilder().byte(0x26).dword(gid).dword(0).dword(0).send();
+		new PacketBuilder().byte(sdk.packets.send.UseBeltItem).dword(gid).dword(0).dword(0).send();
 
 		break;
 	default:
@@ -427,7 +427,7 @@ me.switchWeapons = function (slot) {
 
 	let originalSlot = this.weaponswitch;
 	let switched = false;
-	let packetHandler = (bytes) => bytes.length > 0 && bytes[0] === 0x97 && (switched = true) && false; // false to not block
+	let packetHandler = (bytes) => bytes.length > 0 && bytes[0] === sdk.packets.recv.WeaponSwitch && (switched = true) && false; // false to not block
 	addEventListener("gamepacket", packetHandler);
 	try {
 		for (let i = 0; i < 10; i += 1) {
@@ -436,7 +436,7 @@ me.switchWeapons = function (slot) {
 			}
 
 			i > 0 && delay(10);
-			!switched && sendPacket(1, 0x60); // Swap weapons
+			!switched && sendPacket(1, sdk.packets.send.SwapWeapon); // Swap weapons
 
 			let tick = getTickCount();
 			while (getTickCount() - tick < 300) {
@@ -1423,7 +1423,7 @@ Unit.prototype.castChargedSkill = function (...args) {
 	// Charged skills can only be casted on x, y coordinates
 	unit && ([x, y] = [unit.x, unit.y]);
 
-	if (this !== me && this.type !== 4) {
+	if (this !== me && this.type !== sdk.unittype.Item) {
 		throw Error("invalid arguments, expected 'me' object or 'item' unit");
 	}
 
@@ -1483,11 +1483,11 @@ Unit.prototype.castChargedSkill = function (...args) {
 			}
 
 			// Packet casting
-			sendPacket(1, 0x3c, 2, charge.skill, 1, 0x0, 1, 0x00, 4, this.gid);
+			sendPacket(1, sdk.packets.send.SelectSkill, 2, charge.skill, 1, 0x0, 1, 0x00, 4, this.gid);
 			// No need for a delay, since its TCP, the server recv's the next statement always after the send cast skill packet
 
 			// The result of "successfully" casted is different, so we cant wait for it here. We have to assume it worked
-			sendPacket(1, 0x0C, 2, x || me.x, 2, y || me.y); // Cast the skill
+			sendPacket(1, sdk.packets.send.RightSkillOnLocation, 2, x || me.x, 2, y || me.y); // Cast the skill
 
 			return true;
 		}

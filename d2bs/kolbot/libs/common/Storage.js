@@ -194,12 +194,12 @@ let Container = function (name, width, height, location) {
 					cube = me.getItem(sdk.quest.item.Cube);
 
 					if (cItem !== null && cube !== null) {
-						sendPacket(1, 0x2a, 4, cItem.gid, 4, cube.gid);
+						sendPacket(1, sdk.packets.send.ItemToCube, 4, cItem.gid, 4, cube.gid);
 					}
 				} else if (this.location === 2) {
 					cItem = Game.getCursorUnit();
 					if (cItem !== null) {
-						sendPacket(1, 0x23, 4, cItem.gid, 4, nPos.y);
+						sendPacket(1, sdk.packets.send.ItemToBelt, 4, cItem.gid, 4, nPos.y);
 					}
 				} else {
 					clickItemAndWait(sdk.clicktypes.click.Left, nPos.y, nPos.x, this.location);

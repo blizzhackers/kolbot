@@ -571,9 +571,9 @@ const AutoStat = new function () {
 		// use 0x3a packet to spend multiple stat points at once (up to 100)
 		if (this.bulkStat) {
 			if (goal) {
-				sendPacket(1, 0x3a, 1, type, 1, Math.min(me.getStat(sdk.stats.StatPts) - this.save - 1, goal - 1, 99));
+				sendPacket(1, sdk.packets.send.AddStat, 1, type, 1, Math.min(me.getStat(sdk.stats.StatPts) - this.save - 1, goal - 1, 99));
 			} else {
-				sendPacket(1, 0x3a, 1, type, 1, Math.min(me.getStat(sdk.stats.StatPts) - this.save - 1, 99));
+				sendPacket(1, sdk.packets.send.AddStat, 1, type, 1, Math.min(me.getStat(sdk.stats.StatPts) - this.save - 1, 99));
 			}
 		} else {
 			useStatPoint(type);

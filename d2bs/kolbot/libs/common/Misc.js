@@ -2294,7 +2294,7 @@ const Packet = {
 				delay(100);
 			}
 
-			sendPacket(1, 0x2f, 4, 1, 4, unit.gid);
+			sendPacket(1, sdk.packets.send.NPCInit, 4, 1, 4, unit.gid);
 			delay(pingDelay + 1 * 2);
 			Packet.cancelNPC(unit);
 			delay(pingDelay + 1 * 2);
@@ -2315,7 +2315,7 @@ const Packet = {
 			for (let i = 0; i < 10; i += 1) {
 				delay(200);
 
-				i % 2 === 0 && sendPacket(1, 0x38, 4, gamble ? 2 : 1, 4, unit.gid, 4, 0);
+				i % 2 === 0 && sendPacket(1, sdk.packets.send.EntityAction, 4, gamble ? 2 : 1, 4, unit.gid, 4, 0);
 
 				if (unit.itemcount > 0) {
 					delay(200);
@@ -2341,7 +2341,7 @@ const Packet = {
 			if (oldGold < unit.getItemCost(sdk.items.cost.ToBuy)) return false;
 
 			for (let i = 0; i < 3; i += 1) {
-				sendPacket(1, 0x32, 4, npc.gid, 4, unit.gid, 4, shiftBuy ? 0x80000000 : gamble ? 0x2 : 0x0, 4, 0);
+				sendPacket(1, sdk.packets.send.NPCBuy, 4, npc.gid, 4, unit.gid, 4, shiftBuy ? 0x80000000 : gamble ? 0x2 : 0x0, 4, 0);
 
 				let tick = getTickCount();
 
@@ -2373,7 +2373,7 @@ const Packet = {
 		if (!npc) return false;
 
 		for (let i = 0; i < 5; i += 1) {
-			sendPacket(1, 0x33, 4, npc.gid, 4, unit.gid, 4, 0, 4, 0);
+			sendPacket(1, sdk.packets.send.NPCSell, 4, npc.gid, 4, unit.gid, 4, 0, 4, 0);
 
 			let tick = getTickCount();
 
@@ -2394,7 +2394,7 @@ const Packet = {
 
 		CursorLoop:
 		for (let i = 0; i < 3; i += 1) {
-			sendPacket(1, 0x27, 4, unit.gid, 4, tome.gid);
+			sendPacket(1, sdk.packets.send.IndentifyItem, 4, unit.gid, 4, tome.gid);
 
 			let tick = getTickCount();
 
@@ -2412,7 +2412,7 @@ const Packet = {
 		}
 
 		for (let i = 0; i < 3; i += 1) {
-			getCursorType() === sdk.cursortype.Identify && sendPacket(1, 0x27, 4, unit.gid, 4, tome.gid);
+			getCursorType() === sdk.cursortype.Identify && sendPacket(1, sdk.packets.send.IndentifyItem, 4, unit.gid, 4, tome.gid);
 
 			let tick = getTickCount();
 
@@ -2443,7 +2443,7 @@ const Packet = {
 
 		for (let i = 0; i < 15; i += 1) {
 			// equipped
-			item.isEquipped ? sendPacket(1, 0x1c, 2, item.bodylocation) : sendPacket(1, 0x19, 4, item.gid);
+			item.isEquipped ? sendPacket(1, sdk.packets.send.PickupBodyItem, 2, item.bodylocation) : sendPacket(1, sdk.packets.send.PickupBufferItem, 4, item.gid);
 
 			let tick = getTickCount();
 
@@ -2463,7 +2463,7 @@ const Packet = {
 		if (!this.itemToCursor(item)) return false;
 
 		for (let i = 0; i < 15; i += 1) {
-			sendPacket(1, 0x17, 4, item.gid);
+			sendPacket(1, sdk.packets.send.DropItem, 4, item.gid);
 
 			let tick = getTickCount();
 
@@ -2487,7 +2487,7 @@ const Packet = {
 				return this.useBeltItemForMerc(item);
 			case sdk.storage.Inventory:
 				if (this.itemToCursor(item)) {
-					sendPacket(1, 0x61, 2, 0);
+					sendPacket(1, sdk.packets.send.MercItem, 2, 0);
 
 					return true;
 				}
@@ -2503,25 +2503,25 @@ const Packet = {
 
 	click: function (who) {
 		if (!who || !copyUnit(who).x) return false;
-		sendPacket(1, 0x16, 4, 0x4, 4, who.gid, 4, 0);
+		sendPacket(1, sdk.packets.send.PickupItem, 4, 0x4, 4, who.gid, 4, 0);
 		return true;
 	},
 
 	entityInteract: function (who) {
 		if (!who || !copyUnit(who).x) return false;
-		sendPacket(1, 0x13, 4, who.type, 4, who.gid);
+		sendPacket(1, sdk.packets.send.InteractWithEntity, 4, who.type, 4, who.gid);
 		return true;
 	},
 
 	cancelNPC: function (who) {
 		if (!who || !copyUnit(who).x) return false;
-		sendPacket(1, 0x30, 4, who.type, 4, who.gid);
+		sendPacket(1, sdk.packets.send.NPCCancel, 4, who.type, 4, who.gid);
 		return true;
 	},
 
 	useBeltItemForMerc: function (who) {
 		if (!who) return false;
-		sendPacket(1, 0x26, 4, who.gid, 4, 1, 4, 0);
+		sendPacket(1, sdk.packets.send.UseBeltItem, 4, who.gid, 4, 1, 4, 0);
 		return true;
 	},
 
@@ -2531,30 +2531,30 @@ const Packet = {
 	},
 
 	unitCast: function (hand, who) {
-		hand = (hand === sdk.skills.hand.Right) ? 0x11 : 0x0a;
+		hand = (hand === sdk.skills.hand.Right) ? sdk.packets.send.RightSkillOnEntityEx3 : 0x0a;
 		sendPacket(1, hand, 4, who.type, 4, who.gid);
 	},
 
 	telekinesis: function (who) {
 		if (!who || !Skill.setSkill(sdk.skills.Telekinesis, sdk.skills.hand.Right)) return false;
-		sendPacket(1, 0x11, 4, who.type, 4, who.gid);
+		sendPacket(1, sdk.packets.send.RightSkillOnEntityEx3, 4, who.type, 4, who.gid);
 		return true;
 	},
 
 	enchant: function (who) {
 		if (!who || !Skill.setSkill(sdk.skills.Enchant, sdk.skills.hand.Right)) return false;
-		sendPacket(1, 0x11, 4, who.type, 4, who.gid);
+		sendPacket(1, sdk.packets.send.RightSkillOnEntityEx3, 4, who.type, 4, who.gid);
 		return true;
 	},
 
 	teleport: function (wX, wY) {
 		if (![wX, wY].every(n => typeof n === "number") || !Skill.setSkill(sdk.skills.Teleport, sdk.skills.hand.Right)) return false;
-		sendPacket(1, 0x0C, 2, wX, 2, wY);
+		sendPacket(1, sdk.packets.send.RightSkillOnLocation, 2, wX, 2, wY);
 		return true;
 	},
 
 	// moveNPC: function (npc, dwX, dwY) { // commented the patched packet
-	// 	//sendPacket(1, 0x59, 4, npc.type, 4, npc.gid, 4, dwX, 4, dwY);
+	// 	//sendPacket(1, sdk.packets.send.MakeEntityMove, 4, npc.type, 4, npc.gid, 4, dwX, 4, dwY);
 	// },
 
 	teleWalk: function (x, y, maxDist = 5) {
@@ -2562,9 +2562,9 @@ const Packet = {
 
 		if (getDistance(me, x, y) > 10 && getTickCount() - this.telewalkTick > 3000 && Attack.validSpot(x, y)) {
 			for (let i = 0; i < 5; i += 1) {
-				sendPacket(1, 0x5f, 2, x + rand(-1, 1), 2, y + rand(-1, 1));
+				sendPacket(1, sdk.packets.send.UpdatePlayerPos, 2, x + rand(-1, 1), 2, y + rand(-1, 1));
 				delay(me.ping + 1);
-				sendPacket(1, 0x4b, 4, me.type, 4, me.gid);
+				sendPacket(1, sdk.packets.send.RequestEntityUpdate, 4, me.type, 4, me.gid);
 				delay(me.ping + 1);
 
 				if (getDistance(me, x, y) < maxDist) {
@@ -2581,12 +2581,12 @@ const Packet = {
 	},
 
 	questRefresh: function () {
-		sendPacket(1, 0x40);
+		sendPacket(1, sdk.packets.send.UpdateQuests);
 	},
 
 	flash: function (gid, wait = 0) {
 		wait === 0 && (wait = 300 + (me.gameReady ? 2 * me.ping : 300));
-		sendPacket(1, 0x4b, 4, 0, 4, gid);
+		sendPacket(1, sdk.packets.send.RequestEntityUpdate, 4, 0, 4, gid);
 
 		if (wait > 0) {
 			delay(wait);
@@ -2622,10 +2622,10 @@ const Packet = {
 new PacketBuilder() - create new packet object
 
 Example (Spoof 'reassign player' packet to client):
-	new PacketBuilder().byte(0x15).byte(0).dword(me.gid).word(x).word(y).byte(1).get();
+	new PacketBuilder().byte(sdk.packets.recv.ReassignPlayer).byte(0).dword(me.gid).word(x).word(y).byte(1).get();
 
 Example (Spoof 'player move' packet to server):
-	new PacketBuilder().byte(0x3).word(x).word(y).send();
+	new PacketBuilder().byte(sdk.packets.send.RunToLocation).word(x).word(y).send();
 */
 
 function PacketBuilder () {

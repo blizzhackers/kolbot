@@ -57,7 +57,7 @@ function ShopBot() {
 	};
 
 	this.openMenu = function (npc) {
-		if (!npc || npc.type !== 1) throw new Error("Unit.openMenu: Must be used on NPCs.");
+		if (!npc || npc.type !== sdk.unittype.NPC) throw new Error("Unit.openMenu: Must be used on NPCs.");
 
 		let interactedNPC = getInteractedNPC();
 
@@ -73,7 +73,7 @@ function ShopBot() {
 
 			if (!getUIFlag(sdk.uiflags.NPCMenu)) {
 				Packet.entityInteract(npc);
-				sendPacket(1, 0x2f, 4, 1, 4, npc.gid);
+				sendPacket(1, sdk.packets.send.NPCInit, 4, 1, 4, npc.gid);
 			}
 
 			let tick = getTickCount();
@@ -107,7 +107,7 @@ function ShopBot() {
 		for (let i = 0; i < 10; i += 1) {
 			delay(150);
 
-			i % 2 === 0 && sendPacket(1, 0x38, 4, 1, 4, npc.gid, 4, 0);
+			i % 2 === 0 && sendPacket(1, sdk.packets.send.EntityAction, 4, 1, 4, npc.gid, 4, 0);
 
 			if (npc.itemcount > 0) {
 				break;
