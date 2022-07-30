@@ -15,7 +15,7 @@ function ControlBot() {
 	let controlCommands = ["help", "timeleft", "cows", "wps", "chant", "bo"];
 	let commandDesc = {
 		"help": "Display commands",
-		"timeleft": "Remaining left for this game",
+		"timeleft": "Remaining time left for this game",
 		"cows": "Open cow level",
 		"chant": "Enchant. AutoChant is " + (Config.ControlBot.Chant.AutoEnchant ? "ON" : "OFF"),
 		"wps": "Give waypoints",
@@ -415,23 +415,35 @@ function ControlBot() {
 
 		switch (act) {
 		case 1:
-			wpList = [3, 4, 5, 6, 27, 29, 32, 35];
+			wpList = [
+				sdk.areas.ColdPlains, sdk.areas.StonyField, sdk.areas.DarkWood, sdk.areas.BlackMarsh,
+				sdk.areas.OuterCloister, sdk.areas.JailLvl1, sdk.areas.InnerCloister, sdk.areas.CatacombsLvl2
+			];
 
 			break;
 		case 2:
-			wpList = [48, 42, 57, 43, 44, 52, 74, 46];
+			wpList = [
+				sdk.areas.A2SewersLvl2, sdk.areas.DryHills, sdk.areas.HallsoftheDeadLvl2, sdk.areas.FarOasis,
+				sdk.areas.LostCity, sdk.areas.PalaceCellarLvl1, sdk.areas.ArcaneSanctuary, sdk.areas.CanyonofMagic
+			];
 
 			break;
 		case 3:
-			wpList = [76, 77, 78, 79, 80, 81, 83, 101];
+			wpList = [
+				sdk.areas.SpiderForest, sdk.areas.GreatMarsh, sdk.areas.FlayerJungle, sdk.areas.LowerKurast,
+				sdk.areas.KurastBazaar, sdk.areas.UpperKurast, sdk.areas.Travincal, sdk.areas.DuranceofHateLvl2
+			];
 
 			break;
 		case 4:
-			wpList = [106, 107];
+			wpList = [sdk.areas.CityoftheDamned, sdk.areas.RiverofFlame];
 
 			break;
 		case 5:
-			wpList = [111, 112, 113, 115, 117, 118, 129];
+			wpList = [
+				sdk.areas.FrigidHighlands, sdk.areas.ArreatPlateau, sdk.areas.CrystalizedPassage,
+				sdk.areas.GlacialTrail, sdk.areas.FrozenTundra, sdk.areas.AncientsWay, sdk.areas.WorldstoneLvl2
+			];
 
 			break;
 		}
