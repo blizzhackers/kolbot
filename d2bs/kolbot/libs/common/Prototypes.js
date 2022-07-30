@@ -1711,6 +1711,11 @@ Object.defineProperties(Unit.prototype, {
 			return this.type === sdk.unittype.Monster;
 		},
 	},
+	isNPC: {
+		get: function () {
+			return this.type === sdk.unittype.Monster && this.getStat(sdk.stats.Alignment) === 2;
+		},
+	},
 	// todo - monster types
 	isPrimeEvil: {
 		get: function () {
@@ -2477,7 +2482,7 @@ Unit.prototype.getMobCount = function (range = 10, coll = 0, type = 0, noSpecial
 Unit.prototype.checkForMobs = function (givenSettings = {}) {
 	if (this === undefined) return 0;
 	const _this = this;
-	let settings = Object.assign({
+	const settings = Object.assign({
 		range: 10,
 		count: 1,
 		coll: 0,
@@ -2502,11 +2507,23 @@ Unit.prototype.checkForMobs = function (givenSettings = {}) {
 
 /**
  * @description check if unit is in an area
- * @returns boolean
+ * @param {number} area
+ * @returns {boolean} if unit is in specified area
  */
 Unit.prototype.inArea = function (area = 0) {
 	if (this === undefined) return false;
 	return this.area === area;
+};
+
+// should this be broken into two functions for item vs unit (player, monster, ect)
+/**
+ * @description check if unit is a certain unit by classid
+ * @param {number} classid
+ * @returns {boolean} if unit matches the specified classid
+ */
+Unit.prototype.isUnit = function (classid = -1) {
+	if (this === undefined) return false;
+	return this.classid === classid;
 };
 
 {
@@ -2524,7 +2541,7 @@ Unit.prototype.inArea = function (area = 0) {
 
 	Object.prototype.mobCount = function (givenSettings = {}) {
 		let [x, y] = coords.apply(this);
-		let settings = Object.assign({}, {
+		const settings = Object.assign({}, {
 			range: 5,
 			coll: (sdk.collision.BlockWall | sdk.collision.LineOfSight | sdk.collision.BlockMissile),
 			type: 0,

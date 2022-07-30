@@ -845,7 +845,7 @@ const Pather = {
 		pop - remove last node
 	*/
 	moveToUnit: function (unit, offX, offY, clearPath, pop) {
-		let useTeleport = this.useTeleport();
+		const useTeleport = this.useTeleport();
 
 		offX === undefined && (offX = 0);
 		offY === undefined && (offY = 0);
@@ -861,11 +861,11 @@ const Pather = {
 			this.moveTo(unit.x + offX, unit.y + offY, 0, clearPath, true);
 		}
 
-		return this.moveTo(unit.x + offX, unit.y + offY, useTeleport && unit.type && unit.type === sdk.unittype.Monster ? 3 : 0, clearPath, pop);
+		return this.moveTo(unit.x + offX, unit.y + offY, useTeleport && unit.type && unit.isMonster ? 3 : 0, clearPath, pop);
 	},
 
 	moveNearUnit: function (unit, minDist, clearPath, pop = false) {
-		let useTeleport = this.useTeleport();
+		const useTeleport = this.useTeleport();
 		minDist === undefined && (minDist = me.inTown ? 2 : 5);
 
 		if (!unit || !unit.hasOwnProperty("x") || !unit.hasOwnProperty("y")) throw new Error("moveNearUnit: Invalid unit.");
@@ -1421,7 +1421,7 @@ const Pather = {
 								console.log("Trying to get the waypoint: " + this.getAreaName(targetArea));
 								me.overhead("Trying to get the waypoint");
 
-								if (this.getWP(targetArea)) {
+								if (Pather.getWP(targetArea)) {
 									return true;
 								}
 
@@ -1786,7 +1786,7 @@ const Pather = {
 			let preset = Game.getPresetObject(me.area, sdk.waypoints.Ids[i]);
 
 			if (preset) {
-				Skill.haveTK ? this.moveNearUnit(preset, 20, {clearSettings: {clearPath: clearPath}}) : this.moveToUnit(preset, 0, 0, clearPath);
+				Skill.haveTK ? Pather.moveNearUnit(preset, 20, clearPath) : this.moveToUnit(preset, 0, 0, clearPath);
 
 				let wp = Game.getObject("waypoint");
 

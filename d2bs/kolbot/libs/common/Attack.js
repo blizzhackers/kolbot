@@ -306,6 +306,7 @@ const Attack = {
 		}
 
 		let retry = 0, attackCount = 0;
+		let tick = getTickCount();
 		const who = (!!target.name ? target.name : classId);
 
 		while (attackCount < Config.MaxAttackCount && target.attackable && !Attack.skipCheck(target)) {
@@ -1412,7 +1413,7 @@ const Attack = {
 
 	// Check if we have valid skills to attack a monster
 	canAttack: function (unit) {
-		if (unit.type === sdk.unittype.Monster) {
+		if (unit.isMonster) {
 			// Unique/Champion
 			if (unit.isSpecial) {
 				if (Attack.checkResist(unit, this.getSkillElement(Config.AttackSkill[1])) || Attack.checkResist(unit, this.getSkillElement(Config.AttackSkill[2]))) {
