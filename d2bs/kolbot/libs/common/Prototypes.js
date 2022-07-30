@@ -1595,22 +1595,23 @@ Unit.prototype.equip = function (destLocation = undefined) {
 };
 
 Unit.prototype.getBodyLoc = function () {
-	let types = {
-		1: [sdk.items.type.Helm, sdk.items.type.Pelt, sdk.items.type.PrimalHelm], // helm
-		2: [sdk.items.type.Amulet], // amulet
-		3: [sdk.items.type.Armor], // armor
-		4: [
-			sdk.items.type.Scepter, sdk.items.type.Wand, sdk.items.type.Staff, sdk.items.type.Bow, sdk.items.type.Axe, sdk.items.type.Club, sdk.items.type.Sword, sdk.items.type.Hammer,
-			sdk.items.type.Knife, sdk.items.type.Spear, sdk.items.type.Polearm, sdk.items.type.Crossbow, sdk.items.type.Mace, sdk.items.type.ThrowingKnife, sdk.items.type.ThrowingAxe,
-			sdk.items.type.Javelin, sdk.items.type.HandtoHand, sdk.items.type.Orb, sdk.items.type.AmazonBow, sdk.items.type.AmazonSpear, sdk.items.type.AmazonJavelin, sdk.items.type.AssassinClaw
-		], // weapons
-		5: [sdk.items.type.Shield, sdk.items.type.BowQuiver, sdk.items.type.CrossbowQuiver, sdk.items.type.AuricShields, sdk.items.type.VoodooHeads], // shields / Arrows / bolts
-		6: [sdk.items.type.Ring], // ring slot 1
-		7: [sdk.items.type.Ring], // ring slot 2
-		8: [sdk.items.type.Belt], // belt
-		9: [sdk.items.type.Boots], // boots
-		10: [sdk.items.type.Gloves], // gloves
-	};
+	const types = {};
+	types[sdk.body.Head] = [sdk.items.type.Helm, sdk.items.type.Pelt, sdk.items.type.PrimalHelm]; // helm
+	types[sdk.body.Neck] = [sdk.items.type.Amulet]; // amulet
+	types[sdk.body.Armor] = [sdk.items.type.Armor]; // armor
+	types[sdk.body.RightArm] = [
+		sdk.items.type.Scepter, sdk.items.type.Wand, sdk.items.type.Staff, sdk.items.type.Bow, sdk.items.type.Axe, sdk.items.type.Club, sdk.items.type.Sword, sdk.items.type.Hammer,
+		sdk.items.type.Knife, sdk.items.type.Spear, sdk.items.type.Polearm, sdk.items.type.Crossbow, sdk.items.type.Mace, sdk.items.type.ThrowingKnife, sdk.items.type.ThrowingAxe,
+		sdk.items.type.Javelin, sdk.items.type.HandtoHand, sdk.items.type.Orb, sdk.items.type.AmazonBow, sdk.items.type.AmazonSpear, sdk.items.type.AmazonJavelin, sdk.items.type.AssassinClaw
+	]; // weapons
+	types[sdk.body.LeftArm] = [sdk.items.type.Shield, sdk.items.type.BowQuiver, sdk.items.type.CrossbowQuiver, sdk.items.type.AuricShields, sdk.items.type.VoodooHeads], // shields / Arrows / bolts
+	types[sdk.body.RingRight] = [sdk.items.type.Ring]; // ring slot 1
+	types[sdk.body.RingLeft] = [sdk.items.type.Ring]; // ring slot 2
+	types[sdk.body.Belt] = [sdk.items.type.Belt]; // belt
+	types[sdk.body.Feet] = [sdk.items.type.Boots]; // boots
+	types[sdk.body.Gloves] = [sdk.items.type.Gloves]; // gloves
+	//types[sdk.body.RightArmSecondary] = types[sdk.body.RightArm];
+	//types[sdk.body.LeftArmSecondary] = types[sdk.body.LeftArm];
 	let bodyLoc = [];
 
 	for (let i in types) {
@@ -1676,6 +1677,24 @@ Unit.prototype.getRes = function (type, difficulty) {
 			enumerable: false,
 		},
 	});
+
+	Object.prototype.mobCount = function (givenSettings = {}) {
+		let [x, y] = coords.apply(this);
+		const settings = Object.assign({}, {
+			range: 5,
+			coll: (sdk.collision.BlockWall | sdk.collision.LineOfSight | sdk.collision.BlockMissile),
+			type: 0,
+			ignoreClassids: [],
+		}, givenSettings);
+		return getUnits(sdk.unittype.Monster)
+			.filter(function (mon) {
+				return mon.attackable && getDistance(x, y, mon.x, mon.y) < settings.range
+					&& (!settings.type || (settings.type & mon.spectype))
+					&& (settings.ignoreClassids.indexOf(mon.classid) === -1)
+					&& !CollMap.checkColl({x: x, y: y}, mon, settings.coll, 1);
+			}).length;
+	};
+	Object.defineProperty(Object.prototype, "mobCount", {enumerable: false});
 }
 
 Object.defineProperties(Unit.prototype, {
@@ -1880,8 +1899,8 @@ Object.defineProperties(Unit.prototype, {
 	isOnSwap: {
 		get: function () {
 			if (this.type !== sdk.unittype.Item || this.location !== sdk.storage.Equipped) return false;
-			return ((me.weaponswitch === 0 && [sdk.body.RightArmSecondary, sdk.body.LeftArmSecondary].includes(this.bodylocation))
-				|| (me.weaponswitch === 1 && [sdk.body.RightArm, sdk.body.LeftArm].includes(this.bodylocation)));
+			return ((me.weaponswitch === sdk.player.slot.Main && [sdk.body.RightArmSecondary, sdk.body.LeftArmSecondary].includes(this.bodylocation))
+				|| (me.weaponswitch === sdk.player.slot.Secondary && [sdk.body.RightArm, sdk.body.LeftArm].includes(this.bodylocation)));
 		}
 	},
 	identified: {
@@ -2005,7 +2024,7 @@ Object.defineProperties(Unit.prototype, {
 Unit.prototype.usingShield = function () {
 	if (this.type > sdk.unittype.Monster) return false;
 	// always switch to main hand if we are checking ourselves
-	this === me && me.weaponswitch !== 0 && me.switchWeapons(0);
+	this === me && me.weaponswitch !== sdk.player.slot.Main && me.switchWeapons(sdk.player.slot.Main);
 	let shield = this.getItemsEx(-1, sdk.items.mode.Equipped)
 		.filter(s => s.isShield).first();
 	return !!shield;
@@ -2014,12 +2033,12 @@ Unit.prototype.usingShield = function () {
 Object.defineProperties(me, {
 	walking: {
 		get: function () {
-			return me.runwalk === 0;
+			return me.runwalk === sdk.player.move.Walk;
 		}
 	},
 	running: {
 		get: function () {
-			return me.runwalk === 1;
+			return me.runwalk === sdk.player.move.Run;
 		}
 	},
 	deadOrInSequence: {
@@ -2538,37 +2557,6 @@ Unit.prototype.isUnit = function (classid = -1) {
 	if (this === undefined) return false;
 	return this.classid === classid;
 };
-
-{
-	let coords = function () {
-		if (Array.isArray(this) && this.length > 1) {
-			return [this[0], this[1]];
-		}
-
-		if (typeof this.x !== "undefined" && typeof this.y !== "undefined") {
-			return this instanceof PresetUnit && [this.roomx * 5 + this.x, this.roomy * 5 + this.y] || [this.x, this.y];
-		}
-
-		return [undefined, undefined];
-	};
-
-	Object.prototype.mobCount = function (givenSettings = {}) {
-		let [x, y] = coords.apply(this);
-		const settings = Object.assign({}, {
-			range: 5,
-			coll: (sdk.collision.BlockWall | sdk.collision.LineOfSight | sdk.collision.BlockMissile),
-			type: 0,
-			ignoreClassids: [],
-		}, givenSettings);
-		return getUnits(sdk.unittype.Monster)
-			.filter(function (mon) {
-				return mon.attackable && getDistance(x, y, mon.x, mon.y) < settings.range
-					&& (!settings.type || (settings.type & mon.spectype))
-					&& (settings.ignoreClassids.indexOf(mon.classid) === -1)
-					&& !CollMap.checkColl({x: x, y: y}, mon, settings.coll, 1);
-			}).length;
-	};
-}
 
 PresetUnit.prototype.realCoords = function () {
 	return {
