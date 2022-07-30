@@ -7,17 +7,22 @@
 *               Shows other players' gear.
 *
 */
+
 include("UnitInfo.js");
 
 function UserAddon () {
 	let i, title, dummy, command = "";
-	let flags = [0x1, 0x2, 0x3, 0x4, 0x5, 0xf, 0x18, 0x19, 0xc, 0x9];
+	const className = sdk.player.class.nameOf(me.classid);
+	const flags = [
+		sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.QuickSkill, sdk.uiflags.SkillWindow, sdk.uiflags.ChatBox,
+		sdk.uiflags.Quest, sdk.uiflags.Msgs, sdk.uiflags.Stash, sdk.uiflags.Shop, sdk.uiflags.EscMenu, sdk.uiflags.Cube
+	];
 
-	this.keyEvent = function (key) {
+	const keyEvent = function (key) {
 		switch (key) {
-		case 32:
-			FileTools.copy("libs/config/" + sdk.player.class.nameOf(me.classid) + ".js", "libs/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js");
-			D2Bot.printToConsole("libs/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js has been created.");
+		case sdk.keys.Spacebar:
+			FileTools.copy("libs/config/" + className + ".js", "libs/config/" + className + "." + me.name + ".js");
+			D2Bot.printToConsole("libs/config/" + className + "." + me.name + ".js has been created.");
 			D2Bot.printToConsole("Please configure your bot and start it again.");
 			D2Bot.stop();
 
@@ -25,7 +30,7 @@ function UserAddon () {
 		}
 	};
 
-	let onChatInput = (speaker, msg) => {
+	const onChatInput = (speaker, msg) => {
 		if (msg.length && msg[0] === ".") {
 			command = str.split(" ")[0].split(".")[1];
 
@@ -39,10 +44,10 @@ function UserAddon () {
 	!Config.FastPick && addEventListener("itemaction", Pickit.itemEvent);
 	addEventListener("chatinputblocker", onChatInput);
 
-	if (!FileTools.exists("libs/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js")) {
+	if (!FileTools.exists("libs/config/" + className + "." + me.name + ".js")) {
 		showConsole();
 		print("ÿc4UserAddonÿc0: Press HOME and then press SPACE if you want to create character config.");
-		addEventListener("keyup", this.keyEvent);
+		addEventListener("keyup", keyEvent);
 	}
 
 	while (true) {
@@ -69,7 +74,7 @@ function UserAddon () {
 
 		if (command && command.toLowerCase() === "done") {
 			print("ÿc4UserAddon ÿc1ended");
-			removeEventListener("keyup", this.keyEvent);
+			removeEventListener("keyup", keyEvent);
 			removeEventListener("itemaction", Pickit.itemEvent);
 			removeEventListener("chatinputblocker", onChatInput);
 

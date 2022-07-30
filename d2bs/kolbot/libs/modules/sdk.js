@@ -32,8 +32,8 @@ item: {
 }
 */
 
-{
-	let sdk = {
+(function (module) {
+	const sdk = {
 		waypoints: {
 			Ids: [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539],
 			Act1: [0x01, 0x03, 0x04, 0x05, 0x06, 0x1b, 0x1d, 0x20, 0x23],
@@ -4560,6 +4560,7 @@ item: {
 			PauseBreak: 19,
 			CapsLock: 20,
 			Escape: 27,
+			Spacebar: 32,
 			PageUp: 33,
 			PageDown: 34,
 			End: 35,
@@ -4863,5 +4864,5 @@ item: {
 		},
 	};
 
-	module.exports = sdk; // in case it gets loaded as an module
-}
+	module.exports = sdk;
+})(module);
