@@ -79,6 +79,7 @@ function LoadConfig() {
 	Scripts.Summoner = false;
 		Config.Summoner.FireEye = false;
 	Scripts.Tombs = false;
+		Config.Tombs.KillDuriel = false;
 	Scripts.Duriel = false;
 
 	// *** act 3 ***
