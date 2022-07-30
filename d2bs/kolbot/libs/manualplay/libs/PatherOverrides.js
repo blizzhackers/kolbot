@@ -155,10 +155,10 @@ Pather.walkTo = function (x = undefined, y = undefined, minDist = undefined) {
 			let stam = me.getItemsEx(-1, sdk.items.mode.inStorage).filter((i) => i.classid === sdk.items.StaminaPotion && i.isInInventory).first();
 			!!stam && !me.deadOrInSequence && stam.use();
 		}
-		(me.runwalk === 1 && me.staminaPercent <= 15) && (me.runwalk = 0);
+		(me.running && me.staminaPercent <= 15) && me.walk();
 		// the less stamina you have, the more you wait to recover
 		let recover = me.staminaMaxDuration < 30 ? 80 : 50;
-		(me.runwalk === 0 && me.staminaPercent >= recover) && (me.runwalk = 1);
+		(me.walking && me.staminaPercent >= recover) && me.run();
 		if (Skill.canUse(sdk.skills.Charge) && me.mp >= 9 && getDistance(me.x, me.y, x, y) > 8 && Skill.setSkill(sdk.skills.Charge, sdk.skills.hand.Left)) {
 			if (Skill.canUse(sdk.skills.Vigor)) {
 				Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right);
@@ -173,7 +173,7 @@ Pather.walkTo = function (x = undefined, y = undefined, minDist = undefined) {
 		}
 	}
 
-	(me.inTown && me.runwalk === 0) && (me.runwalk = 1);
+	(me.inTown && me.walking) && me.run();
 
 	while (getDistance(me.x, me.y, x, y) > minDist && !me.dead && !Pather.stop) {
 		if (me.paladin) {

@@ -489,6 +489,9 @@ me.getPingDelay = function () {
 	return pingDelay;
 };
 
+me.walk = () => me.runwalk = 0;
+me.run = () => me.runwalk = 1;
+
 /**
  * @description Returns item given by itemInfo
  * @param itemInfo object -
@@ -2009,6 +2012,16 @@ Unit.prototype.usingShield = function () {
 };
 
 Object.defineProperties(me, {
+	walking: {
+		get: function () {
+			return me.runwalk === 0;
+		}
+	},
+	running: {
+		get: function () {
+			return me.runwalk === 1;
+		}
+	},
 	deadOrInSequence: {
 		get: function () {
 			return me.dead || me.mode === sdk.player.mode.SkillActionSequence;
