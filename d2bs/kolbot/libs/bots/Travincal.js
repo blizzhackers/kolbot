@@ -69,5 +69,7 @@ function Travincal() {
 		Attack.clearList(this.buildList(0));
 	}
 
+	Config.MFLeader && Config.PublicMode && say("travdone");
+
 	return true;
 }

@@ -5,7 +5,7 @@
 *
 */
 
-function Tristram() {
+function Tristram () {
 	Pather._teleport = Pather.teleport;
 
 	// complete quest if its not complete
@@ -52,6 +52,7 @@ function Tristram() {
 		}
 	}
 
+	Config.MFLeader && Config.PublicMode && say("tristdone");
 	Pather.teleport = Pather._teleport;
 
 	return true;

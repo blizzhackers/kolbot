@@ -17,7 +17,7 @@
 *      - bo barb or war cry barb would make killing main boss easier with all the surrounding mobs being stunned
 */
 
-function OrgTorch() {
+function OrgTorch () {
 	this.currentGameInfo = null;
 
 	const portalMode = {

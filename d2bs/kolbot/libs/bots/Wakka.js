@@ -5,7 +5,7 @@
 *
 */
 
-function Wakka() {
+function Wakka () {
 	const timeout = Config.Wakka.Wait;
 	const minDist = 50;
 	const maxDist = 80;
