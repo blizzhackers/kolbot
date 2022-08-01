@@ -1515,7 +1515,7 @@ const Pather = {
 
 			!!oldPortal && (oldGid = oldPortal.gid);
 			
-			if (tpTool.use()) {
+			if (tpTool.use() || Game.getObject("portal")) {
 				let tick = getTickCount();
 
 				while (getTickCount() - tick < Math.max(500 + i * 100, pingDelay * 2 + 100)) {

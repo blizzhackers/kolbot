@@ -358,9 +358,9 @@ Unit.prototype.use = function () {
 	delay(Math.max(pingDelay * 2, 200));
 
 	if (checkQuantity) {
-		return this.getStat(sdk.stats.Quantity) < quantity;
+		return Misc.poll(() => this.getStat(sdk.stats.Quantity) < quantity, 200, 50);
 	} else {
-		return !(Game.getItem(-1, -1, gid));
+		return Misc.poll(() => !Game.getItem(-1, -1, gid), 200, 50);
 	}
 };
 
