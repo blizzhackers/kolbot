@@ -34,12 +34,12 @@ const Common = {
 					Town.npcInteract("Akara");
 
 					break;
-				case Game.getItem(sdk.quest.item.KeytotheCairnStones) && me.area !== sdk.areas.StonyField:
+				case Game.getItem(sdk.quest.item.KeytotheCairnStones) && !me.inArea(sdk.areas.StonyField):
 					Pather.journeyTo(sdk.areas.StonyField);
 					Precast.doPrecast(true);
 
 					break;
-				case Game.getItem(sdk.quest.item.KeytotheCairnStones) && me.area === sdk.areas.StonyField:
+				case Game.getItem(sdk.quest.item.KeytotheCairnStones) && me.inArea(sdk.areas.StonyField):
 					Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Monster, sdk.monsters.preset.Rakanishu, 10, 10, false, true);
 					Attack.securePosition(me.x, me.y, 40, 3000, true);
 					Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Object, sdk.quest.chest.StoneAlpha, null, null, true);
@@ -74,7 +74,7 @@ const Common = {
 					}
 
 					break;
-				case me.area === sdk.areas.Tristram && !Misc.checkQuest(sdk.quest.id.TheSearchForCain, sdk.quest.states.Completed):
+				case me.inArea(sdk.areas.Tristram) && !Misc.checkQuest(sdk.quest.id.TheSearchForCain, sdk.quest.states.Completed):
 					let gibbet = Game.getObject(sdk.quest.chest.CainsJail);
 
 					if (gibbet && !gibbet.mode) {
@@ -202,7 +202,7 @@ const Common = {
 		cleared: [],
 
 		diabloLightsEvent: function (bytes = []) {
-			if (me.area === sdk.areas.ChaosSanctuary && bytes && bytes.length === 2 && bytes[0] === 0x89 && bytes[1] === 0x0C) {
+			if (me.inArea(sdk.areas.ChaosSanctuary) && bytes && bytes.length === 2 && bytes[0] === 0x89 && bytes[1] === 0x0C) {
 				Common.Diablo.diabloSpawned = true;
 			}
 		},
@@ -1086,7 +1086,7 @@ const Common = {
 		},
 
 		killBaal: function () {
-			if (me.area === sdk.areas.ThroneofDestruction) {
+			if (me.inArea(sdk.areas.ThroneofDestruction)) {
 				Config.PublicMode && Loader.scriptName() === "Baal" && say(Config.Baal.BaalMessage);
 				me.checkForMobs({range: 30}) && this.clearWaves(); // ensure waves are actually done
 				Pather.moveTo(15090, 5008);
@@ -1109,7 +1109,7 @@ const Common = {
 				}
 			}
 
-			if (me.area === sdk.areas.WorldstoneChamber) {
+			if (me.inArea(sdk.areas.WorldstoneChamber)) {
 				Pather.moveTo(15134, 5923);
 				Attack.kill(sdk.monsters.Baal);
 				Pickit.pickItems();

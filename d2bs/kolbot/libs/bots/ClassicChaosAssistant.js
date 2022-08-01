@@ -112,7 +112,7 @@ function ClassicChaosAssistant() {
 			break;
 		default:
 			if (stargo) {
-				if (me.area === sdk.areas.RiverofFlame) {
+				if (me.inArea(sdk.areas.RiverofFlame)) {
 					Precast.doPrecast(true);
 					Pather.moveToPreset(sdk.areas.ChaosSanctuary, sdk.unittype.Object, 255);
 					Common.Diablo.initLayout();

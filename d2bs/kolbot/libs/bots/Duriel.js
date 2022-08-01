@@ -20,7 +20,7 @@ function Duriel () {
 		return target.dead;
 	};
 
-	if (me.area !== sdk.areas.CanyonofMagic) {
+	if (!me.inArea(sdk.areas.CanyonofMagic)) {
 		Town.doChores();
 		Pather.useWaypoint(sdk.areas.CanyonofMagic);
 	}
@@ -37,16 +37,16 @@ function Duriel () {
 	if (Skill.useTK(unit)) {
 		Misc.poll(function () {
 			Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit) && delay(100);
-			return me.area === sdk.areas.DurielsLair;
+			return me.inArea(sdk.areas.DurielsLair);
 		}, 1000, 200);
 	}
 
-	if (me.area !== sdk.areas.DurielsLair && (!unit || !Pather.useUnitEx({unit: unit}, sdk.areas.DurielsLair))) {
+	if (!me.inArea(sdk.areas.DurielsLair) && (!unit || !Pather.useUnitEx({unit: unit}, sdk.areas.DurielsLair))) {
 		Attack.clear(10);
 		Pather.useUnit(sdk.unittype.Object, sdk.objects.PortaltoDurielsLair, sdk.areas.DurielsLair);
 	}
 
-	if (me.area !== sdk.areas.DurielsLair) throw new Error("Failed to move to Duriel");
+	if (!me.inArea(sdk.areas.DurielsLair)) throw new Error("Failed to move to Duriel");
 
 	me.sorceress && me.classic ? this.killDuriel() : Attack.kill(sdk.monsters.Duriel);
 	Pickit.pickItems();

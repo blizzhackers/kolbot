@@ -77,7 +77,7 @@ Misc.openRedPortal = function (portalID) {
 
 		if (validMats.length !== materials.length) throw new Error("Missing materials to open portal");
 
-		portalID === sdk.areas.MooMooFarm ? me.area !== sdk.areas.RogueEncampment && Town.goToTown(1) : me.area !== sdk.areas.Harrogath && Town.goToTown(5);
+		portalID === sdk.areas.MooMooFarm ? !me.inArea(sdk.areas.RogueEncampment) && Town.goToTown(1) : !me.inArea(sdk.areas.Harrogath) && Town.goToTown(5);
 
 		Town.move("stash");
 
@@ -100,7 +100,7 @@ Misc.openRedPortal = function (portalID) {
 };
 
 Misc.talkToTyrael = function () {
-	if (me.area !== sdk.areas.DurielsLair) return false;
+	if (!me.inArea(sdk.areas.DurielsLair)) return false;
 
 	Pather.walkTo(22621, 15711);
 	Pather.moveTo(22602, 15705);

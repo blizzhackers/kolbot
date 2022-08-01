@@ -8,12 +8,18 @@
 *
 */
 
+/**
+*  @todo:
+*   - add silent follow support
+*      - needs to be in a way that doesn't interfere with normal following
+*/
+
 function AutoBaal() {
-	// editable variables
+	// internal variables
 	let i, baalCheck, throneCheck, hotCheck, leader; // internal variables
-	let safeMsg = ["safe", "throne clear", "leechers can come", "tp is up", "1 clear"]; // safe message - casing doesn't matter
-	let baalMsg = ["baal"]; // baal message - casing doesn't matter
-	let hotMsg = ["hot", "warm", "dangerous", "lethal"]; // used for shrine hunt
+	const safeMsg = ["safe", "throne clear", "leechers can come", "tp is up", "1 clear"]; // safe message - casing doesn't matter
+	const baalMsg = ["baal"]; // baal message - casing doesn't matter
+	const hotMsg = ["hot", "warm", "dangerous", "lethal"]; // used for shrine hunt
 
 	// chat event handler function, listen to what leader says
 	addEventListener("chatmsg", function (nick, msg) {
@@ -51,7 +57,7 @@ function AutoBaal() {
 		}
 	});
 
-	// test
+	// test - maybe factor this out and make it useable for other leecher scripts?
 	this.longRangeSupport = function () {
 		switch (me.classid) {
 		case sdk.player.class.Necromancer:
@@ -101,7 +107,7 @@ function AutoBaal() {
 			} while (monster.getNext());
 		}
 
-		if (me.area === sdk.areas.ThroneofDestruction) {
+		if (me.inArea(sdk.areas.ThroneofDestruction)) {
 			[15116, 5026].distance > 10 && Pather.moveTo(15116, 5026);
 		}
 
@@ -148,26 +154,28 @@ function AutoBaal() {
 	Town.move("portalspot");
 
 	// find the first player in throne of destruction
-	if (leader || (leader = Misc.autoLeaderDetect({destination: sdk.areas.ThroneofDestruction}))) {
+	if (leader || (leader = Misc.autoLeaderDetect({destination: sdk.areas.ThroneofDestruction, quitIf: (area) => [sdk.areas.WorldstoneChamber].includes(area)}))) {
 		// do our stuff while partied
 		while (Misc.inMyParty(leader)) {
 			if (hotCheck) {
-				Pather.useWaypoint(sdk.areas.StonyField);
-				Precast.doPrecast(true);
+				if (Config.AutoBaal.FindShrine) {
+					Pather.useWaypoint(sdk.areas.StonyField);
+					Precast.doPrecast(true);
 
-				for (i = sdk.areas.StonyField; i > 1; i--) {
-					if (Misc.getShrinesInArea(i, sdk.shrines.Experience, true)) {
-						break;
-					}
-				}
-
-				if (i === 1) {
-					Town.goToTown();
-					Pather.useWaypoint(sdk.areas.DarkWood);
-
-					for (i = sdk.areas.DarkWood; i < sdk.areas.DenofEvil; i++) {
+					for (i = sdk.areas.StonyField; i > 1; i--) {
 						if (Misc.getShrinesInArea(i, sdk.shrines.Experience, true)) {
 							break;
+						}
+					}
+
+					if (i === 1) {
+						Town.goToTown();
+						Pather.useWaypoint(sdk.areas.DarkWood);
+
+						for (i = sdk.areas.DarkWood; i < sdk.areas.DenofEvil; i++) {
+							if (Misc.getShrinesInArea(i, sdk.shrines.Experience, true)) {
+								break;
+							}
 						}
 					}
 				}
@@ -179,7 +187,7 @@ function AutoBaal() {
 			}
 
 			// wait for throne signal - leader's safe message
-			if ((throneCheck || baalCheck) && me.area === sdk.areas.Harrogath) {
+			if ((throneCheck || baalCheck) && me.inArea(sdk.areas.Harrogath)) {
 				print("ÿc4AutoBaal: ÿc0Trying to take TP to throne.");
 				Pather.usePortal(sdk.areas.ThroneofDestruction, null);
 				// move to a safe spot
@@ -188,10 +196,10 @@ function AutoBaal() {
 				Town.getCorpse();
 			}
 
-			!baalCheck && me.area === sdk.areas.ThroneofDestruction && Config.AutoBaal.LongRangeSupport && this.longRangeSupport();
+			!baalCheck && me.inArea(sdk.areas.ThroneofDestruction) && Config.AutoBaal.LongRangeSupport && this.longRangeSupport();
 
 			// wait for baal signal - leader's baal message
-			if (baalCheck && me.area === sdk.areas.ThroneofDestruction) {
+			if (baalCheck && me.inArea(sdk.areas.ThroneofDestruction)) {
 				// move closer to chamber portal
 				Pather.moveTo(15092, 5010);
 				Precast.doPrecast(false);

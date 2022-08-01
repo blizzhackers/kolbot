@@ -293,7 +293,7 @@ function Questing () {
 		Town.npcInteract("Malah");
 		if (!Misc.poll(() => {
 			Pather.usePortal(sdk.areas.FrozenRiver, me.name);
-			return me.area === sdk.areas.FrozenRiver;
+			return me.inArea(sdk.areas.FrozenRiver);
 		}, Time.seconds(30), 1000)) throw new Error("Anya quest failed - Failed to return to frozen river");
 
 		// unfreeze her, cancel her speech again
@@ -322,7 +322,7 @@ function Questing () {
 		Pather.moveToExit(sdk.areas.ArreatSummit, true);
 
 		// failed to move to Arreat Summit
-		if (me.area !== sdk.areas.ArreatSummit) return false;
+		if (!me.inArea(sdk.areas.ArreatSummit)) return false;
 
 		// ancients prep
 		Town.doChores();

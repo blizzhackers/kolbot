@@ -1113,7 +1113,7 @@ const Pather = {
 	openExit: function (targetArea) {
 		switch (true) {
 		case targetArea === sdk.areas.AncientTunnels:
-		case targetArea === sdk.areas.A2SewersLvl1 && !(me.area === sdk.areas.LutGholein && [5218, 5180].distance < 20):
+		case targetArea === sdk.areas.A2SewersLvl1 && !(me.inArea(sdk.areas.LutGholein) && [5218, 5180].distance < 20):
 			return this.useUnit(sdk.unittype.Object, sdk.objects.TrapDoorA2, targetArea);
 		case targetArea === sdk.areas.A3SewersLvl2:
 			return this.useUnit(sdk.unittype.Object, sdk.objects.SewerStairsA3, targetArea);
@@ -1124,9 +1124,9 @@ const Pather = {
 		case targetArea === sdk.areas.RuinedFane:
 		case targetArea === sdk.areas.DisusedReliquary:
 			return this.useUnit(sdk.unittype.Object, "stair", targetArea);
-		case targetArea === sdk.areas.DuranceOfHateLvl1 && me.area === sdk.areas.Travincal:
+		case targetArea === sdk.areas.DuranceOfHateLvl1 && me.inArea(sdk.areas.Travincal):
 			return this.useUnit(sdk.unittype.Object, sdk.objects.DuranceEntryStairs, targetArea);
-		case targetArea === sdk.areas.WorldstoneLvl1 && me.area === sdk.areas.ArreatSummit:
+		case targetArea === sdk.areas.WorldstoneLvl1 && me.inArea(sdk.areas.ArreatSummit):
 			return this.useUnit(sdk.unittype.Object, sdk.objects.AncientsDoor, targetArea);
 		}
 
@@ -1273,7 +1273,7 @@ const Pather = {
 					throw new Error("useUnit: Incomplete quest." + (!!targetArea ? " TargetArea: " + Pather.getAreaName(targetArea) : ""));
 				}
 
-				me.area === sdk.areas.A3SewersLvl1 ? this.openUnit(sdk.unittype.Object, sdk.objects.SewerLever) : this.openUnit(sdk.unittype.Object, id);
+				me.inArea(sdk.areas.A3SewersLvl1) ? this.openUnit(sdk.unittype.Object, sdk.objects.SewerLever) : this.openUnit(sdk.unittype.Object, id);
 			}
 
 			if (type === sdk.unittype.Object && id === sdk.objects.RedPortalToAct4 && me.inArea(sdk.areas.DuranceofHateLvl3)
@@ -1347,14 +1347,14 @@ const Pather = {
 			}
 
 			if (me.inTown) {
-				if (me.area === sdk.areas.LutGholein) {
+				if (me.inArea(sdk.areas.LutGholein)) {
 					let npc = Game.getNPC(NPC.Warriv);
 
 					if (!!npc && npc.distance < 50) {
 						if (npc && npc.openMenu()) {
 							Misc.useMenu(sdk.menu.GoWest);
 
-							if (!Misc.poll(() => me.gameReady && me.area === sdk.areas.RogueEncampment, 2000, 100)) {
+							if (!Misc.poll(() => me.gameReady && me.inArea(sdk.areas.RogueEncampment), 2000, 100)) {
 								throw new Error("Failed to go to act 1 using Warriv");
 							}
 						}
@@ -1576,7 +1576,7 @@ const Pather = {
 
 				if (portal.area === me.area) {
 					if (Skill.useTK(portal) && i < 3) {
-						portal.distance > 21 && (me.area === sdk.areas.Harrogath ? Town.move("portalspot") : Pather.moveNearUnit(portal, 20));
+						portal.distance > 21 && (me.inArea(sdk.areas.Harrogath) ? Town.move("portalspot") : Pather.moveNearUnit(portal, 20));
 						if (Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, portal)) {
 							if (Misc.poll(() => {
 								if (me.area !== preArea) {
@@ -1612,7 +1612,7 @@ const Pather = {
 					let tick = getTickCount();
 
 					while (getTickCount() - tick < 2000) {
-						if (portal.mode === sdk.objects.mode.Active || me.area === sdk.areas.ArcaneSanctuary) {
+						if (portal.mode === sdk.objects.mode.Active || me.inArea(sdk.areas.ArcaneSanctuary)) {
 							break;
 						}
 
@@ -1842,7 +1842,7 @@ const Pather = {
 		}
 
 		console.info(true, "Course :: " + target.course);
-		area === sdk.areas.PandemoniumFortress && me.area === sdk.areas.DuranceofHateLvl3 && (target.useWP = false);
+		area === sdk.areas.PandemoniumFortress && me.inArea(sdk.areas.DuranceofHateLvl3) && (target.useWP = false);
 		target.useWP && Town.goToTown();
 
 		// handle variable flayer jungle entrances

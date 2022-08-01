@@ -62,7 +62,7 @@ const ClassAttack = {
 
 		// Repair check
 		needRepair.length > 0 && Town.visitTown(true);
-		pickit && this.findItem(me.area === sdk.areas.Travincal ? 60 : 20);
+		pickit && this.findItem(me.inArea(sdk.areas.Travincal) ? 60 : 20);
 	},
 
 	doCast: function (unit, attackSkill = -1) {
@@ -173,7 +173,7 @@ const ClassAttack = {
 		}
 
 		if (retry) {
-			return this.findItem(me.area === sdk.areas.Travincal ? 60 : 20);
+			return this.findItem(me.inArea(sdk.areas.Travincal) ? 60 : 20);
 		}
 
 		Config.FindItemSwitch && me.switchWeapons(Attack.getPrimarySlot());

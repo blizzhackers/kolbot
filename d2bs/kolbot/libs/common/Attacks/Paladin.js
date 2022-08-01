@@ -6,6 +6,8 @@
 */
 
 const ClassAttack = {
+	attackAuras: [sdk.skills.HolyFire, sdk.skills.HolyFreeze, sdk.skills.HolyShock],
+
 	doAttack: function (unit, preattack) {
 		if (!unit) return Attack.Result.SUCCESS;
 		let gid = unit.gid;
@@ -47,7 +49,7 @@ const ClassAttack = {
 		}
 
 		// Classic auradin check
-		if ([sdk.skills.HolyFire, sdk.skills.HolyFreeze, sdk.skills.HolyShock].includes(aura)) {
+		if (this.attackAuras.includes(aura)) {
 			// Monster immune to primary aura
 			if (!Attack.checkResist(unit, aura)) {
 				// Reset skills
@@ -55,7 +57,7 @@ const ClassAttack = {
 				aura = -1;
 
 				// Set to secondary if not immune, check if using secondary attack aura if not check main skill for immunity
-				if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, ([sdk.skills.HolyFire, sdk.skills.HolyFreeze, sdk.skills.HolyShock].includes(Config.AttackSkill[6]) ? Config.AttackSkill[6] : Config.AttackSkill[5]))) {
+				if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, (this.attackAuras.includes(Config.AttackSkill[6]) ? Config.AttackSkill[6] : Config.AttackSkill[5]))) {
 					attackSkill = Config.AttackSkill[5];
 					aura = Config.AttackSkill[6];
 				}
@@ -314,8 +316,11 @@ const ClassAttack = {
 
 			if (Attack.validSpot(check.x, check.y) && !CollMap.checkColl(unit, check, sdk.collision.BlockWalk, 0)) {
 				if (this.reposition(check.x, check.y)) return true;
+				console.debug("Found valid spot: ", check, " Failed to reposition to it");
 			}
 		}
+
+		console.debug("Failed to find a hammer position for " + unit.name + " distance from me: " + unit.distance);
 
 		return false;
 	},

@@ -154,7 +154,7 @@ const ActionHooks = {
 				
 				break;
 			case sdk.keys.Numpad8:
-				hook = me.area === sdk.areas.CanyonofMagic ? this.getHook("POI5") : this.getPortalHook("Uber Tristam");
+				hook = me.inArea(sdk.areas.CanyonofMagic) ? this.getHook("POI5") : this.getPortalHook("Uber Tristam");
 
 				break;
 			case 188: // shift <
@@ -338,7 +338,7 @@ const ActionHooks = {
 		nextAreas[sdk.areas.CrystalizedPassage] = sdk.areas.GlacialTrail;
 		nextAreas[sdk.areas.GlacialTrail] = sdk.areas.FrozenTundra;
 		nextAreas[sdk.areas.AncientsWay] = sdk.areas.ArreatSummit;
-		me.area === sdk.areas.CanyonofMagic && (nextAreas[sdk.areas.CanyonofMagic] = getRoom().correcttomb);
+		me.inArea(sdk.areas.CanyonofMagic) && (nextAreas[sdk.areas.CanyonofMagic] = getRoom().correcttomb);
 
 		switch (me.area) {
 		case sdk.areas.Tristram:
@@ -444,7 +444,7 @@ const ActionHooks = {
 			break;
 		}
 
-		let cowPortal = me.area === sdk.areas.RogueEncampment ? Game.getObject(sdk.objects.RedPortal) : false;
+		let cowPortal = me.inArea(sdk.areas.RogueEncampment) ? Game.getObject(sdk.objects.RedPortal) : false;
 
 		if (cowPortal && cowPortal.objtype === sdk.areas.MooMooFarm) {
 			this.hooks.push(this.newHook("POI2", "portal", sdk.areas.MooMooFarm));
@@ -556,7 +556,7 @@ const ActionHooks = {
 			});
 		}
 
-		let uberPortals = (me.area === sdk.areas.Harrogath && me.hell) ? getUnits(sdk.unittype.Object, sdk.objects.RedPortal) : false;
+		let uberPortals = (me.inArea(sdk.areas.Harrogath) && me.hell) ? getUnits(sdk.unittype.Object, sdk.objects.RedPortal) : false;
 
 		if (uberPortals && uberPortals.some((portal) => [sdk.areas.MatronsDen, sdk.areas.ForgottenSands, sdk.areas.FurnaceofPain, sdk.areas.UberTristram].includes(portal.objtype))) {
 			TextHooks.displaySettings = false;
@@ -642,7 +642,7 @@ const ActionHooks = {
 
 			break;
 		case sdk.areas.ForgottenSands:
-			me.area === sdk.areas.ForgottenSands && (entrance = {x: 20193, y: 8693});
+			me.inArea(sdk.areas.ForgottenSands) && (entrance = {x: 20193, y: 8693});
 		// eslint-disable-next-line no-fallthrough
 		case sdk.areas.MatronsDen:
 		case sdk.areas.FurnaceofPain:
@@ -650,7 +650,7 @@ const ActionHooks = {
 			bossX && (entrance = this.areaInfo[me.area][bossX.x]);
 		// eslint-disable-next-line no-fallthrough
 		case sdk.areas.UberTristram:
-			me.area === sdk.areas.UberTristram && (entrance = {x: 25105, y: 5140});
+			me.inArea(sdk.areas.UberTristram) && (entrance = {x: 25105, y: 5140});
 
 			this.hooks.push({
 				name: "Previous Area",
@@ -700,11 +700,11 @@ const ActionHooks = {
 			this.hooks.push(this.newHook("Next Area", "area", sdk.areas.DurielsLair));
 		}
 
-		if (me.area === sdk.areas.DuranceofHateLvl3) {
+		if (me.inArea(sdk.areas.DuranceofHateLvl3)) {
 			this.hooks.push(this.newHook("Next Area", "area", sdk.areas.PandemoniumFortress));
 		}
 
-		if (me.area === sdk.areas.ThroneofDestruction) {
+		if (me.inArea(sdk.areas.ThroneofDestruction)) {
 			this.hooks.push(this.newHook("Next Area", "area", sdk.areas.WorldstoneChamber));
 		}
 	},

@@ -16,7 +16,7 @@ function KurastTemples() {
 	];
 
 	areas.forEach((area, i) => {
-		if (me.area !== sdk.areas.KurastBazaar + Math.floor(i / 2)) {
+		if (!me.inArea(sdk.areas.KurastBazaar) + Math.floor(i / 2)) {
 			if (!Pather.moveToExit(sdk.areas.KurastBazaar + Math.floor(i / 2), true)) throw new Error("Failed to change area");
 		}
 

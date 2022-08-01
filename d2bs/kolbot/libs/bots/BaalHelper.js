@@ -14,7 +14,7 @@ function BaalHelper() {
 	Config.RandomPrecast && Precast.needOutOfTownCast() ? Precast.doRandomPrecast(true, sdk.areas.Harrogath) : Precast.doPrecast(true);
 
 	if (Config.BaalHelper.SkipTP) {
-		me.area !== sdk.areas.WorldstoneLvl2 && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
+		!me.inArea(sdk.areas.WorldstoneLvl2) && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
 
 		if (!Pather.moveToExit([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction], false)) throw new Error("Failed to move to WSK3.");
 		if (!Misc.poll(() => {

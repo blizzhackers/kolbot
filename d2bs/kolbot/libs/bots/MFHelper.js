@@ -118,7 +118,7 @@ function MFHelper() {
 						delay(500 + me.ping);
 					}
 
-					if (me.area === sdk.areas.MooMooFarm) {
+					if (me.inArea(sdk.areas.MooMooFarm)) {
 						Precast.doPrecast(false);
 						Common.Cows.clearCowLevel();
 						delay(1000);

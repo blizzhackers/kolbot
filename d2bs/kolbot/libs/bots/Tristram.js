@@ -22,7 +22,7 @@ function Tristram () {
 			Precast.doPrecast(true);
 
 			break;
-		case me.area === sdk.areas.StonyField:
+		case me.inArea(sdk.areas.StonyField):
 			if (!Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Monster, sdk.monsters.preset.Rakanishu, 0, 0, false, true)) {
 				throw new Error("Failed to move to Rakanishu");
 			}
@@ -34,7 +34,7 @@ function Tristram () {
 			}
 
 			break;
-		case me.area === sdk.areas.Tristram:
+		case me.inArea(sdk.areas.Tristram):
 			let redPortal = Game.getObject(sdk.objects.RedPortal);
 			!!redPortal && Pather.moveTo(redPortal.x, redPortal.y + 6);
 

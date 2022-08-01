@@ -140,8 +140,8 @@ function main() {
 
 						break;
 					case "unit":
-						if (me.area === sdk.areas.MooMooFarm
-							|| (me.area === sdk.areas.DurielsLair && Misc.talkToTyrael())) {
+						if (me.inArea(sdk.areas.MooMooFarm)
+							|| (me.inArea(sdk.areas.DurielsLair) && Misc.talkToTyrael())) {
 							break;
 						}
 

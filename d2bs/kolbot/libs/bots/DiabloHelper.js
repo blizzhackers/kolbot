@@ -49,7 +49,7 @@ function DiabloHelper() {
 		Config.DiabloHelper.SafePrecast && Precast.needOutOfTownCast() ? Precast.doRandomPrecast(true, sdk.areas.PandemoniumFortress) : Precast.doPrecast(true);
 
 		if (Config.DiabloHelper.SkipTP) {
-			me.area !== sdk.areas.RiverofFlame && Pather.useWaypoint(sdk.areas.RiverofFlame);
+			!me.inArea(sdk.areas.RiverofFlame) && Pather.useWaypoint(sdk.areas.RiverofFlame);
 
 			if (!Pather.moveTo(7790, 5544)) throw new Error("Failed to move to Chaos Sanctuary");
 			!Config.DiabloHelper.Entrance && Pather.moveTo(7774, 5305);

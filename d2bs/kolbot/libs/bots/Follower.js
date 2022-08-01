@@ -95,8 +95,8 @@ function Follower() {
 		}
 
 		// Arcane<->Cellar portal
-		if ((me.area === sdk.areas.ArcaneSanctuary && area === sdk.areas.PalaceCellarLvl3)
-			|| (me.area === sdk.areas.PalaceCellarLvl3 && area === sdk.areas.ArcaneSanctuary)) {
+		if ((me.inArea(sdk.areas.ArcaneSanctuary) && area === sdk.areas.PalaceCellarLvl3)
+			|| (me.inArea(sdk.areas.PalaceCellarLvl3) && area === sdk.areas.ArcaneSanctuary)) {
 			Pather.usePortal(null);
 
 			return 4;
@@ -110,7 +110,7 @@ function Follower() {
 		}
 
 		// Throne->Chamber
-		if (me.area === sdk.areas.ThroneofDestruction && area === sdk.areas.WorldstoneChamber) {
+		if (me.inArea(sdk.areas.ThroneofDestruction) && area === sdk.areas.WorldstoneChamber) {
 			target = Game.getObject(sdk.objects.WorldstonePortal);
 
 			if (target) {
@@ -523,7 +523,7 @@ function Follower() {
 
 		switch (action) {
 		case "cow":
-			if (me.area === sdk.areas.RogueEncampment) {
+			if (me.inArea(sdk.areas.RogueEncampment)) {
 				Town.move("portalspot");
 				!Pather.usePortal(sdk.areas.MooMooFarm) && this.announce("Failed to use cow portal.");
 			}

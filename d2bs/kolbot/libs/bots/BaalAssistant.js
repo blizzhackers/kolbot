@@ -8,7 +8,7 @@
 // todo - combine autobaal, baalhelper, and baalassistant into one script
 // todo - track leaders area so we can do silent follow
 
-function BaalAssistant() {
+function BaalAssistant () {
 	let Leader = Config.Leader;
 	let Helper = Config.BaalAssistant.Helper;
 	let hotCheck = false;
@@ -192,7 +192,7 @@ function BaalAssistant() {
 			}
 
 			while (Misc.inMyParty(Leader)) {
-				if (!secondAttempt && !safeCheck && !baalCheck && !ShrineStatus && !!Config.BaalAssistant.GetShrine && me.area === sdk.areas.Harrogath) {
+				if (!secondAttempt && !safeCheck && !baalCheck && !ShrineStatus && !!Config.BaalAssistant.GetShrine && me.inArea(sdk.areas.Harrogath)) {
 					if (!!Config.BaalAssistant.GetShrineWaitForHotTP) {
 						Misc.poll(() => hotCheck, Time.seconds(Config.BaalAssistant.Wait), 1000);
 
@@ -239,14 +239,14 @@ function BaalAssistant() {
 					ShrineStatus = true;
 				}
 
-				if (firstAttempt && !secondAttempt && !safeCheck && !baalCheck && me.area !== sdk.areas.ThroneofDestruction && me.area !== sdk.areas.WorldstoneChamber) {
+				if (firstAttempt && !secondAttempt && !safeCheck && !baalCheck && !me.inArea(sdk.areas.ThroneofDestruction) && !me.inArea(sdk.areas.WorldstoneChamber)) {
 					!!Config.RandomPrecast ? Precast.doRandomPrecast(true, sdk.areas.WorldstoneLvl2) : Pather.useWaypoint(sdk.areas.WorldstoneLvl2) && Precast.doPrecast(true);
 				}
 
-				if (me.area !== sdk.areas.ThroneofDestruction && me.area !== sdk.areas.WorldstoneChamber) {
+				if (!me.inArea(sdk.areas.ThroneofDestruction) && !me.inArea(sdk.areas.WorldstoneChamber)) {
 					if (Config.BaalAssistant.SkipTP) {
 						if (firstAttempt && !secondAttempt) {
-							me.area !== sdk.areas.WorldstoneLvl2 && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
+							!me.inArea(sdk.areas.WorldstoneLvl2) && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
 							if (!Pather.moveToExit([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction], false)) throw new Error("Failed to move to WSK3.");
 
 							this.checkParty();
@@ -276,7 +276,7 @@ function BaalAssistant() {
 						}
 					} else {
 						if (firstAttempt && !secondAttempt) {
-							me.area !== sdk.areas.Harrogath && Pather.useWaypoint(sdk.areas.Harrogath);
+							!me.inArea(sdk.areas.Harrogath) && Pather.useWaypoint(sdk.areas.Harrogath);
 							Town.move("portalspot");
 
 							if (Config.BaalAssistant.WaitForSafeTP && !Misc.poll(() => safeCheck, Time.seconds(Config.BaalAssistant.Wait), 1000)) {
@@ -304,7 +304,7 @@ function BaalAssistant() {
 					}
 				}
 
-				if (safeCheck && !baalCheck && me.area === sdk.areas.ThroneofDestruction) {
+				if (safeCheck && !baalCheck && me.inArea(sdk.areas.ThroneofDestruction)) {
 					if (!baalCheck && !throneStatus) {
 						if (Helper) {
 							Attack.clear(15);
@@ -381,7 +381,7 @@ function BaalAssistant() {
 					}
 				}
 
-				if ((throneStatus || baalCheck) && Config.BaalAssistant.KillBaal && me.area === sdk.areas.ThroneofDestruction) {
+				if ((throneStatus || baalCheck) && Config.BaalAssistant.KillBaal && me.inArea(sdk.areas.ThroneofDestruction)) {
 					Helper ? Pather.moveTo(15090, 5008) && delay(2000) : Pather.moveTo(15090, 5010);
 					Precast.doPrecast(true);
 

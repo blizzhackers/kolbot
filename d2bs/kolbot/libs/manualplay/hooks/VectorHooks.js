@@ -41,7 +41,7 @@ const VectorHooks = {
 
 				if (exits) {
 					for (let i = 0; i < exits.length; i++) {
-						if (me.area === sdk.areas.CanyonofMagic) {
+						if (me.inArea(sdk.areas.CanyonofMagic)) {
 							this.add(exits[i].x, exits[i].y, exits[i].target === getRoom().correcttomb ? 0x69 : 0x99);
 						} else if (exits[i].target === nextAreas[me.area] && nextAreas[me.area]) {
 							this.add(exits[i].x, exits[i].y, 0x1F);

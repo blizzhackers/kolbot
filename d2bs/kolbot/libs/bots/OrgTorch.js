@@ -72,7 +72,7 @@ function OrgTorch () {
 
 	// Identify & mule
 	this.checkTorch = function () {
-		if (me.area === sdk.areas.UberTristram) {
+		if (me.inArea(sdk.areas.UberTristram)) {
 			Pather.moveTo(25105, 5140);
 			Pather.usePortal(sdk.areas.Harrogath);
 		}
