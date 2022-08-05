@@ -316,7 +316,6 @@ const ClassAttack = {
 
 			if (Attack.validSpot(check.x, check.y) && !CollMap.checkColl(unit, check, sdk.collision.BlockWalk, 0)) {
 				if (this.reposition(check.x, check.y)) return true;
-				console.debug("Found valid spot: ", check, " Failed to reposition to it");
 			}
 		}
 

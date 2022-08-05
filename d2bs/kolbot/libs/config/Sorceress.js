@@ -64,8 +64,9 @@ function LoadConfig() {
 		Config.Countess.KillGhosts = false;
 	Scripts.Andariel = false;
 	Scripts.Cows = false;
-		Config.MakeCows = false; // if set to true just opens cow portal but doesn't clear - useful to ensure maker never gets king killed
-		Config.KillKing = false; // MAKE SURE YOUR MAKER DOESN"T HAVE THIS SET TO TRUE!!!!
+		Config.Cows.DontMakePortal = false; // if set to true, will go to act 1 stash and wait for 3 minutes for someone to make the cow portal
+		Config.Cows.JustMakePortal = false; // if set to true just opens cow portal but doesn't clear - useful to ensure maker never gets king killed
+		Config.Cows.KillKing = false; // MAKE SURE YOUR MAKER DOESN"T HAVE THIS SET TO TRUE!!!!
 
 	// *** act 2 ***
 	Scripts.Radament = false;

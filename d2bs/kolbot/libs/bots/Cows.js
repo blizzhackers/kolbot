@@ -88,7 +88,8 @@ function Cows() {
 		}
 
 		transmute();
-		delay(500);
+		delay(1000);
+		me.cancelUIFlags();
 
 		for (let i = 0; i < 10; i += 1) {
 			if (Pather.getPortal(sdk.areas.MooMooFarm)) {
@@ -112,6 +113,7 @@ function Cows() {
 
 		// Check to see if portal is already open, if not get the ingredients
 		if (!Pather.getPortal(sdk.areas.MooMooFarm)) {
+			if (Config.Cows.DontMakePortal) throw new Error("NOT PORTAL MAKER");
 			if (!me.tristram) throw new Error("Cain quest incomplete");
 			if (me.cows) throw new Error("Already killed the Cow King.");
 			
@@ -120,20 +122,20 @@ function Cows() {
 			this.openPortal(leg, tome);
 		}
 	} catch (e) {
-		print("ÿc1" + e);
+		typeof e === "object" && e.message && e.message !== "NOT PORTAL MAKER" && console.error(e);
 
 		if (Misc.getPlayerCount() > 1) {
 			!me.inTown && Town.goToTown(1);
 			Town.move("stash");
 			console.log("ÿc9(Cows) :: ÿc0Waiting 1 minute to see if anyone else opens the cow portal");
 
-			if (!Misc.poll(() => Pather.getPortal(sdk.areas.MooMooFarm), Time.minutes(1), 2000)) throw new Error("No cow portal");
+			if (!Misc.poll(() => Pather.getPortal(sdk.areas.MooMooFarm), Time.minutes(3), 2000)) throw new Error("No cow portal");
 		} else {
 			return false;
 		}
 	}
 
-	if (Config.Cows.MakeCows) {
+	if (Config.Cows.JustMakePortal) {
 		if (Pather.getPortal(sdk.areas.MooMooFarm)) {
 			return true;
 		} else {

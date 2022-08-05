@@ -371,7 +371,8 @@ let Config = {
 		ClearCrypt: false
 	},
 	Cows: {
-		MakeCows: false,
+		DontMakePortal: false,
+		JustMakePortal: false,
 		KillKing: false
 	},
 	Tombs: {

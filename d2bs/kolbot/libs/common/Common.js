@@ -7,6 +7,34 @@
 
 const Common = {
 	Questing: {
+		activateStone: function (stone) {
+			for (let i = 0; i < 3; i++) {
+				// don't use tk if we are right next to it
+				let useTK = (stone.distance > 5 && Skill.useTK(stone) && i === 0);
+				if (useTK) {
+					stone.distance > 13 && Attack.getIntoPosition(stone, 13, sdk.collision.Ranged);
+					if (!Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, stone)) {
+						console.debug("Failed to tk: attempt: " + i);
+						continue;
+					}
+				} else {
+					[(stone.x + 1), (stone.y + 2)].distance > 5 && Pather.moveTo(stone.x + 1, stone.y + 2, 3);
+					Misc.click(0, 0, stone);
+				}
+
+				if (Misc.poll(() => stone.mode, 1000, 50)) {
+					return true;
+				} else {
+					Packet.flash(me.gid);
+				}
+			}
+
+			// Click to stop walking in case we got stuck
+			!me.idle && Misc.click(0, 0, me.x, me.y);
+
+			return false;
+		},
+
 		cain: function () {
 			MainLoop:
 			while (true) {
@@ -55,7 +83,7 @@ const Common = {
 						for (let i = 0; i < stones.length; i++) {
 							let stone = stones[i];
 
-							if (Misc.openChest(stone)) {
+							if (this.activateStone(stone)) {
 								stones.splice(i, 1);
 								i--;
 							}
@@ -1150,6 +1178,7 @@ const Common = {
 						if (getTickCount() - this.pingTimer[i] >= Config.PingQuit[i].Duration * 1000) {
 							print && D2Bot.printToConsole("High ping (" + me.ping + "/" + Config.PingQuit[i].Ping + ") - leaving game.", sdk.colors.D2Bot.Red);
 							scriptBroadcast("pingquit");
+							scriptBroadcast("quit");
 
 							return true;
 						}

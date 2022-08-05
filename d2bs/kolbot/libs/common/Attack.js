@@ -262,7 +262,6 @@ const Attack = {
 			if (result === this.Result.FAILED) {
 				if (retry++ > 3) {
 					errorInfo = " (doAttack failed)";
-					me.paladin && D2Bot.printToConsole("doAttack Failed, check logs");
 
 					break;
 				}
