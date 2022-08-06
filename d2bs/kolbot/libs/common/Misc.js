@@ -127,7 +127,7 @@ const Skill = {
 			this.addSkills(sdk.skills.BlessedHammer);
 			this.addSkills(sdk.skills.Concentration);
 			this.addSkills(sdk.skills.HolyFreeze);
-			this.addSkills(sdk.skills.Vigor, () => Config.Vigor);
+			this.addSkills(sdk.skills.Vigor, () => Config.Vigor || me.inTown);
 			this.addSkills(sdk.skills.Conversion);
 			this.addSkills(sdk.skills.HolyShield);
 			this.addSkills(sdk.skills.HolyShock);

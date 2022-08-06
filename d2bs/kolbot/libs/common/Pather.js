@@ -649,10 +649,11 @@ const Pather = {
 			}
 		} else {
 			me.walking && me.run();
+			Skill.canUse(sdk.skills.Vigor) && Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right);
 		}
 
 		while (getDistance(me.x, me.y, x, y) > minDist && !me.dead) {
-			if (me.paladin) {
+			if (me.paladin && !me.inTown) {
 				Skill.canUse(sdk.skills.Vigor) ? Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right) : Skill.setSkill(Config.AttackSkill[2], sdk.skills.hand.Right);
 			}
 
