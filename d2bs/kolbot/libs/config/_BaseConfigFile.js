@@ -280,12 +280,27 @@
 	
 	// ##### EXTRA SCRIPTS ##### //
 	Scripts.GhostBusters = false; // Kill ghosts in most areas that contain them (rune hunting)
-	Scripts.ChestMania = false; // Open chests in configured areas. See sdk/areas.txt
-		Config.ChestMania.Act1 = [13, 14, 15, 16, 18, 19]; // List of act 1 areas to open chests in
-		Config.ChestMania.Act2 = [55, 59, 65, 66, 67, 68, 69, 70, 71, 72]; // List of act 2 areas to open chests in
-		Config.ChestMania.Act3 = [79, 80, 81, 92, 93, 84, 85, 90]; // List of act 3 areas to open chests in
-		Config.ChestMania.Act4 = [107]; // List of act 4 areas to open chests in
-		Config.ChestMania.Act5 = [115, 116, 119, 125, 126, 127]; // List of act 5 areas to open chests in
+	Scripts.ChestMania = false; // Open chests in configured areas. See sdk/areas.txt or use sdk.areas.AreaName see -> \kolbot\libs\modules\sdk.js
+		// List of act 1 areas to open chests in
+		Config.ChestMania.Act1 = [
+			sdk.areas.CaveLvl2, sdk.areas.UndergroundPassageLvl2, sdk.areas.HoleLvl2, sdk.areas.PitLvl2, sdk.areas.Crypt, sdk.areas.Mausoleum
+		];
+		// List of act 2 areas to open chests in
+		Config.ChestMania.Act2 = [
+			sdk.areas.StonyTombLvl1, sdk.areas.StonyTombLvl2, sdk.areas.AncientTunnels, sdk.areas.TalRashasTomb1, sdk.areas.TalRashasTomb2,
+			sdk.areas.TalRashasTomb3, sdk.areas.TalRashasTomb4, sdk.areas.TalRashasTomb5, sdk.areas.TalRashasTomb6, sdk.areas.TalRashasTomb7
+		];
+		// List of act 3 areas to open chests in
+		Config.ChestMania.Act3 = [
+			sdk.areas.LowerKurast, sdk.areas.KurastBazaar, sdk.areas.UpperKurast, sdk.areas.A3SewersLvl1, sdk.areas.A3SewersLvl2,
+			sdk.areas.SpiderCave, sdk.areas.SpiderCavern, sdk.areas.SwampyPitLvl3
+		];
+		// List of act 4 areas to open chests in
+		Config.ChestMania.Act4 = [sdk.areas.RiverofFlame];
+		// List of act 5 areas to open chests in
+		Config.ChestMania.Act5 = [
+			sdk.areas.GlacialTrail, sdk.areas.DrifterCavern, sdk.areas.IcyCellar, sdk.areas.Abaddon, sdk.areas.PitofAcheron, sdk.areas.InfernalPit
+		];
 	Scripts.ClearAnyArea = false; // Clear any area. Uses Config.ClearType to determine which type of monsters to kill.
 		Config.ClearAnyArea.AreaList = []; // List of area ids to clear. See sdk/areas.txt
 
