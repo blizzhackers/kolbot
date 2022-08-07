@@ -177,7 +177,7 @@ function FasterExp() {
 
 		Pather.useWaypoint(sdk.areas.StonyField);
 		for (i = sdk.areas.StonyField; i > sdk.areas.RogueEncampment; i -= 1) {
-			if (Misc.getShrinesInArea(i, 15, false)) {
+			if (Misc.getShrinesInArea(i, sdk.shrines.Experience, false)) {
 				if (me.name === Roles.shrineHunter) {
 					say(msgShrineY);
 					noShrine = false;
@@ -192,7 +192,7 @@ function FasterExp() {
 			Pather.useWaypoint(sdk.areas.DarkWood);
 
 			for (i = sdk.areas.DarkWood; i < sdk.areas.DenofEvil; i += 1) {
-				if (Misc.getShrinesInArea(i, 15, false)) {
+				if (Misc.getShrinesInArea(i, sdk.shrines.Experience, false)) {
 					if (me.name === Roles.shrineHunter) {
 						say(msgShrineY);
 						noShrine = false;
@@ -291,7 +291,7 @@ function FasterExp() {
 			}
 
 			say(msgGoThrone);
-			Misc.getShrinesInArea(me.area, 15, true);
+			Misc.getShrinesInArea(me.area, sdk.shrines.Experience, true);
 			delay(300);
 			Pather.usePortal(null, Roles.shrineHunter);
 			delay(300);
