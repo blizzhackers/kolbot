@@ -26,7 +26,7 @@ function main() {
 	let action, fail = 0, x, y;
 	let mapThread = getScript("libs/manualplay/threads/mapthread.js");
 
-	const portalMap = [];
+	const portalMap = {};
 	portalMap[sdk.areas.Abaddon] = {
 		14: [12638, 6373],
 		15: [12638, 6063],

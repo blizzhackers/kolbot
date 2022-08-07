@@ -70,10 +70,10 @@ const Attack = {
 		// determine primary slot if not set
 		if (Config.PrimarySlot === -1) {
 			if (me.classic) {
-				Config.PrimarySlot = 0;
+				Config.PrimarySlot = sdk.player.slot.Main;
 			} else {
 				// Always start on main-hand
-				me.weaponswitch !== 0 && me.switchWeapons(0);
+				me.weaponswitch !== sdk.player.slot.Main && me.switchWeapons(sdk.player.slot.Main);
 				// have cta
 				if ((Precast.haveCTA > -1) || Precast.checkCTA()) {
 					// have item on non-cta slot - set non-cta slot as primary
@@ -83,12 +83,12 @@ const Attack = {
 						// other slot is empty - set cta as primary slot
 						Config.PrimarySlot = Precast.haveCTA;
 					}
-				} else if (!this.checkSlot(0) && this.checkSlot(1)) {
+				} else if (!this.checkSlot(sdk.player.slot.Main) && this.checkSlot(sdk.player.slot.Secondary)) {
 					// only slot II has items
-					Config.PrimarySlot = 1;
+					Config.PrimarySlot = sdk.player.slot.Secondary;
 				} else {
 					// both slots have items, both are empty, or only slot I has items
-					Config.PrimarySlot = 0;
+					Config.PrimarySlot = sdk.player.slot.Main;
 				}
 			}
 		}
