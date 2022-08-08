@@ -398,7 +398,11 @@ me.findItems = function (id = -1, mode = -1, loc = false) {
 };
 
 me.cancelUIFlags = function () {
-	let flags = [
+	while (!me.gameReady) {
+		delay(25);
+	}
+
+	const flags = [
 		sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.SkillWindow, sdk.uiflags.NPCMenu,
 		sdk.uiflags.Waypoint, sdk.uiflags.Party, sdk.uiflags.Shop, sdk.uiflags.Quest, sdk.uiflags.Stash,
 		sdk.uiflags.Cube, sdk.uiflags.KeytotheCairnStonesScreen, sdk.uiflags.SubmitItem
