@@ -20,9 +20,9 @@
 
 include("NTItemAlias.dbl");
 
-let NTIP = {};
-let NTIP_CheckList = [];
-let NTIP_CheckListNoTier = [];
+const NTIP = {};
+const NTIP_CheckList = [];
+const NTIP_CheckListNoTier = [];
 let stringArray = [];
 
 NTIP.OpenFile = function (filepath, notify) {
@@ -122,7 +122,8 @@ NTIP.CheckQuantityOwned = function (item_type, item_stats) {
 };
 
 NTIP.Clear = function () {
-	NTIP_CheckList = [];
+	NTIP_CheckList.length = 0;
+	NTIP_CheckListNoTier.length = 0;
 	stringArray = [];
 };
 
