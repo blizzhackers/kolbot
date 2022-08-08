@@ -1,36 +1,14 @@
-/*
-*	@filename	ShrineHooks.js
-*	@author		theBGuy
-*	@desc		Shrine hooks for MapThread
+/**
+*  @filename    ShrineHooks.js
+*  @author      theBGuy
+*  @desc        Shrine hooks for MapThread
+*
 */
 
 const ShrineHooks = {
 	enabled: true,
 	hooks: [],
-	shrines: {
-		1: "Refilling",
-		2: "Health",
-		3: "Mana",
-		4: "Health Exchange",
-		5: "Mana Exchange",
-		6: "Armor",
-		7: "Combat",
-		8: "Resist Fire",
-		9: "Resist Cold",
-		10: "Resist Lightning",
-		11: "Resist Poison",
-		12: "Skill",
-		13: "Mana Recharge",
-		14: "Stamina",
-		15: "Experience",
-		16: "Enirhs",
-		17: "Portal",
-		18: "Gem",
-		19: "Fire",
-		20: "Monster",
-		21: "Exploding",
-		22: "Poison"
-	},
+	shrines: {},
 
 	check: function () {
 		if (!this.enabled || me.inTown) {
@@ -48,11 +26,11 @@ const ShrineHooks = {
 			}
 		}
 
-		let shrine = getUnit(2, "shrine");
+		let shrine = Game.getObject("shrine");
 
 		if (shrine) {
 			do {
-				if (shrine.mode === 0) {
+				if (shrine.mode === sdk.objects.mode.Inactive) {
 					if (!this.getHook(shrine)) {
 						this.add(shrine);
 					}
@@ -74,9 +52,7 @@ const ShrineHooks = {
 	},
 
 	add: function (shrine) {
-		if (!shrine.objtype) {
-			return;
-		}
+		if (!shrine.objtype) return;
 
 		this.hooks.push({
 			shrine: copyUnit(shrine),
@@ -114,3 +90,26 @@ const ShrineHooks = {
 		}
 	}
 };
+
+ShrineHooks.shrines[sdk.shrines.Refilling] = "Refilling";
+ShrineHooks.shrines[sdk.shrines.Health] = "Health";
+ShrineHooks.shrines[sdk.shrines.Mana] = "Mana";
+ShrineHooks.shrines[sdk.shrines.HealthExchange] = "Health Exchange";
+ShrineHooks.shrines[sdk.shrines.ManaExchange] = "Mana Exchange";
+ShrineHooks.shrines[sdk.shrines.Armor] = "Armor";
+ShrineHooks.shrines[sdk.shrines.Combat] = "Combat";
+ShrineHooks.shrines[sdk.shrines.ResistFire] = "Resist Fire";
+ShrineHooks.shrines[sdk.shrines.ResistCold] = "Resist Cold";
+ShrineHooks.shrines[sdk.shrines.ResistLightning] = "Resist Lightning";
+ShrineHooks.shrines[sdk.shrines.ResistPoison] = "Resist Poison";
+ShrineHooks.shrines[sdk.shrines.Skill] = "Skill";
+ShrineHooks.shrines[sdk.shrines.ManaRecharge] = "Mana Recharge";
+ShrineHooks.shrines[sdk.shrines.Stamina] = "Stamina";
+ShrineHooks.shrines[sdk.shrines.Experience] = "Experience";
+ShrineHooks.shrines[sdk.shrines.Enirhs] = "Enirhs";
+ShrineHooks.shrines[sdk.shrines.Portal] = "Portal";
+ShrineHooks.shrines[sdk.shrines.Gem] = "Gem";
+ShrineHooks.shrines[sdk.shrines.Fire] = "Fire";
+ShrineHooks.shrines[sdk.shrines.Monster] = "Monster";
+ShrineHooks.shrines[sdk.shrines.Exploding] = "Exploding";
+ShrineHooks.shrines[sdk.shrines.Poison] = "Poison";

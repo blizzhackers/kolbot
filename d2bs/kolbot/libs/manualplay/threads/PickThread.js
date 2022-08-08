@@ -28,8 +28,12 @@ function main() {
 	Runewords.init();
 	Cubing.init();
 
-	let noPick = false,
-		UIFlagList = [0x01, 0x02, 0x03, 0x04, 0x05, 0x09, 0x0B, 0x0E, 0x0F, 0x14, 0x16, 0x1A, 0x24];
+	let noPick = false;
+	const UIFlagList = [
+		sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.QuickSkill, sdk.uiflags.SkillWindow,
+		sdk.uiflags.ChatBox, sdk.uiflags.EscMenu, sdk.uiflags.ConfigControls, sdk.uiflags.SubmitItem,
+		sdk.uiflags.Quest, sdk.uiflags.Waypoint, sdk.uiflags.Party, sdk.uiflags.Cube, sdk.uiflags.MercScreen
+	];
 
 	addEventListener("itemaction", Pickit.itemEvent);
 

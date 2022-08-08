@@ -35,18 +35,18 @@ include("common/util.js");
 include("common/config.js");
 include("common/prototypes.js");
 include("common/collmap.js");
-let Controls = require('./modules/Control');
-let Overrides = require('./modules/Override');
+let Controls = require("./modules/Control");
+let Overrides = require("./modules/Override");
 
-let master, muleMode, muleFilename, muleObj, maxCharCount,
-	checkOnJoin = false,
-	clearedJunk = false,
-	continuousMule = false,
-	makeNext = false,
-	status = "loading",
-	masterStatus = {
-		status: ""
-	};
+let master, muleMode, muleFilename, muleObj, maxCharCount;
+let checkOnJoin = false;
+let clearedJunk = false;
+let continuousMule = false;
+let makeNext = false;
+let status = "loading";
+let masterStatus = {
+	status: ""
+};
 
 new Overrides.Override (Starter, Starter.receiveCopyData, function (orignal, mode, msg) {
 	if (mode === 3) return;
@@ -95,9 +95,7 @@ new Overrides.Override (Starter, Starter.receiveCopyData, function (orignal, mod
 const MuleData = {
 	// create a new mule datafile
 	create: function () {
-		let obj, string;
-
-		obj = {
+		let obj = {
 			account: "",
 			accNum: 0,
 			character: "",
@@ -106,33 +104,28 @@ const MuleData = {
 			torchChars: []
 		};
 
-		string = JSON.stringify(obj);
+		let string = JSON.stringify(obj);
 
 		FileTools.writeText(muleFilename, string);
 	},
 
 	// read data from the mule datafile and return the data object
 	read: function () {
-		let obj, string;
-
-		string = FileTools.readText(muleFilename);
-		obj = JSON.parse(string);
+		let string = FileTools.readText(muleFilename);
+		let obj = JSON.parse(string);
 
 		return obj;
 	},
 
 	// write a data object to the mule datafile
 	write: function (obj) {
-		let string;
-
-		string = JSON.stringify(obj);
-
+		let string = JSON.stringify(obj);
 		FileTools.writeText(muleFilename, string);
 	}
 };
 
 function cursorCheck () {
-	let cursorItem = getUnit(100);
+	let cursorItem = Game.getCursorUnit();
 
 	if (cursorItem) {
 		if (!Storage.Inventory.CanFit(cursorItem) || !Storage.Inventory.MoveTo(cursorItem)) {
@@ -145,10 +138,10 @@ function cursorCheck () {
 
 // stash picked items
 function stashItems () {
-	let items = me.findItems(-1, 0, 3);
+	let items = me.findItems(-1, sdk.items.mode.inStorage, sdk.storage.Inventory);
 
 	// stash large items first by sorting items by size in descending order
-	items.sort(function(a, b) {return (b.sizex * b.sizey - a.sizex * a.sizey);});
+	items.sort((a, b) => (b.sizex * b.sizey - a.sizex * a.sizey));
 
 	for (let i = 0; i < items.length; i++) {
 		Storage.Stash.MoveTo(items[i]);
@@ -160,9 +153,9 @@ function stashItems () {
 // pick items from ground
 function pickItems () {
 	let waitTick = getTickCount();
-	let i, items, canFit, item,
-		rval = "fail",
-		list = [];
+	let i, items, canFit, item;
+	let rval = "fail";
+	let list = [];
 
 	while (!me.name || !me.gameReady) {
 		if (!me.ingame) {
@@ -173,14 +166,14 @@ function pickItems () {
 	}
 
 	if (!clearedJunk) {
-		items = me.findItems(-1, 0, 3);
+		items = me.findItems(-1, sdk.items.mode.inStorage, sdk.storage.Inventory);
 
 		if (items) {
 			for (i = 0; i < items.length; i++) {
 				// drop trash (id/tp scroll primarily)
-				if (items[i].mode === 0 && items[i].location === 3 && Town.ignoredItemTypes.indexOf(items[i].itemType) > -1
+				if (items[i].isInInventory && Town.ignoredItemTypes.includes(items[i].itemType)
 						// don't drop ID scroll with torch/anni mules
-						&& (muleMode === 0 || items[i].classid !== 530)) {
+						&& (muleMode === 0 || items[i].classid !== sdk.items.ScrollofIdentify)) {
 					try {
 						items[i].drop();
 					} catch (dropError) {
@@ -196,12 +189,12 @@ function pickItems () {
 	while (me.gameReady) {
 		if (masterStatus.status === "done" || continuousMule || checkOnJoin) {
 			checkOnJoin && (checkOnJoin = false);
-			item = getUnit(4);
+			item = Game.getItem();
 
 			if (item) {
 				do {
 					// don't pick up trash
-					if (getDistance(me, item) < 20 && [3, 5].indexOf(item.mode) > -1 && Town.ignoredItemTypes.indexOf(item.itemType) === -1) {
+					if (item.distance < 20 && item.onGroundOrDropping && Town.ignoredItemTypes.indexOf(item.itemType) === -1) {
 						list.push(copyUnit(item));
 					}
 				} while (item.getNext());
@@ -216,13 +209,8 @@ function pickItems () {
 
 			// pick large items first by sorting items by size in descending order and move gheed's charm to the end of the list
 			list.sort(function(a, b) {
-				if (a.classid === 605 && a.unique && !Pickit.canPick(a)) {
-					return 1;
-				}
-
-				if (b.classid === 605 && b.unique && !Pickit.canPick(b)) {
-					return -1;
-				}
+				if (a.classid === sdk.items.GrandCharm && a.unique && !Pickit.canPick(a)) return 1;
+				if (b.classid === sdk.items.GrandCharm && b.unique && !Pickit.canPick(b)) return -1;
 
 				return (b.sizex * b.sizey - a.sizex * a.sizey);
 			});
@@ -232,22 +220,22 @@ function pickItems () {
 				canFit = Storage.Inventory.CanFit(item);
 
 				// Torch handling
-				if (muleMode > 0 && item.classid === 604 && item.unique && !Pickit.canPick(item)) {
-					D2Bot.printToConsole("Mule already has a Torch.", 7);
+				if (muleMode > 0 && item.classid === sdk.items.LargeCharm && item.unique && !Pickit.canPick(item)) {
+					D2Bot.printToConsole("Mule already has a Torch.", sdk.colors.D2Bot.DarkGold);
 
 					rval = "next";
 				}
 
 				// Anni handling
-				if (muleMode > 0 && item.classid === 603 && item.unique && !Pickit.canPick(item)) {
-					D2Bot.printToConsole("Mule already has an Anni.", 7);
+				if (muleMode > 0 && item.classid === sdk.items.SmallCharm && item.unique && !Pickit.canPick(item)) {
+					D2Bot.printToConsole("Mule already has an Anni.", sdk.colors.D2Bot.DarkGold);
 
 					rval = "next";
 				}
 
 				// Gheed's Fortune handling
-				if (item.classid === 605 && item.unique && !Pickit.canPick(item)) {
-					D2Bot.printToConsole("Mule already has Gheed's.", 7);
+				if (item.classid === sdk.items.GrandCharm && item.unique && !Pickit.canPick(item)) {
+					D2Bot.printToConsole("Mule already has Gheed's.", sdk.colors.D2Bot.DarkGold);
 
 					rval = "next";
 				}
@@ -261,7 +249,8 @@ function pickItems () {
 				if (canFit) {
 					Pickit.pickItem(item);
 
-					if (muleMode > 0 && continuousMule && item.unique && (item.classid === 603 || item.classid === 604 || item.classid === 605)) {
+					if (muleMode > 0 && continuousMule && item.unique
+						&& ([sdk.items.SmallCharm, sdk.items.LargeCharm, sdk.items.GrandCharm].includes(item.classid))) {
 						rval = "next";
 					}
 				} else {
@@ -306,9 +295,9 @@ function nextAccount () {
 
 // set next character - increase character number in mule datafile
 function nextChar () {
-	let charSuffix = "",
-		charNumbers = "abcdefghijklmnopqrstuvwxyz",
-		obj = MuleData.read();
+	let charSuffix = "";
+	let charNumbers = "abcdefghijklmnopqrstuvwxyz";
+	let obj = MuleData.read();
 
 	// dirty
 	obj.charNum > 25 && (obj.charNum = 0);
@@ -369,7 +358,8 @@ function checkAnniTorch () {
 		delay(500);
 	}
 
-	return me.findItem(603, 0, -1, 7) || me.findItem(604, 0, -1, 7);
+	return (me.findItem(sdk.items.SmallCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique)
+		|| me.findItem(sdk.items.LargeCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique));
 }
 
 function foreverAlone () {
@@ -496,7 +486,7 @@ function locationAction (location) {
 
 		if (Starter.makeAccount) {
 			ControlAction.makeAccount(info);
-			D2Bot.printToConsole("Made account: " + info.account, 7);
+			D2Bot.printToConsole("Made account: " + info.account, sdk.colors.D2Bot.DarkGold);
 			Starter.makeAccount = false;
 
 			break;
@@ -544,9 +534,9 @@ function locationAction (location) {
 				}
 			}
 
-			if (string === getLocaleString(11161)) { // CDKey disabled from realm play
+			if (string === getLocaleString(sdk.locale.text.CdKeyDisabledFromRealm)) { // CDKey disabled from realm play
 				D2Bot.updateStatus("Realm Disabled CDKey");
-				D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, 6);
+				D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, sdk.colors.D2Bot.Gold);
 				D2Bot.CDKeyDisabled();
 
 				if (Starter.gameInfo.switchKeys) {
@@ -641,7 +631,7 @@ function locationAction (location) {
 				break;
 			}
 
-			D2Bot.printToConsole("Made character: " + info.charName, 7);
+			D2Bot.printToConsole("Made character: " + info.charName, sdk.colors.D2Bot.DarkGold);
 		}
 
 		break;
@@ -729,7 +719,7 @@ function gameEvent (mode, param1, param2, name1, name2) {
 }
 
 function main () {
-	addEventListener('copydata', Starter.receiveCopyData);
+	addEventListener("copydata", Starter.receiveCopyData);
 
 	while (!Starter.handle) {
 		delay(100);
@@ -801,7 +791,7 @@ function main () {
 					statusString = "In " + (muleMode === 2 ? "anni " : muleMode === 1 ? "torch " : "") + "mule game.";
 
 					D2Bot.updateStatus(statusString + " Status: " + status);
-					D2Bot.printToConsole(statusString, 7);
+					D2Bot.printToConsole(statusString, sdk.colors.D2Bot.DarkGold);
 					tick = getTickCount();
 
 					while ((getLocation() !== null || !me.area) && getTickCount() - tick < 5000) {
@@ -837,7 +827,7 @@ function main () {
 					}
 
 					if (status !== "begin") {
-						D2Bot.printToConsole("Nobody joined - stopping.", 9);
+						D2Bot.printToConsole("Nobody joined - stopping.", sdk.colors.D2Bot.Red);
 						D2Bot.stop(me.profile, true);
 					}
 				}
@@ -862,7 +852,7 @@ function main () {
 						}
 
 						MuleData.write(obj);
-						D2Bot.printToConsole("Done muling.", 7);
+						D2Bot.printToConsole("Done muling.", sdk.colors.D2Bot.DarkGold);
 						sendCopyData(null, master, 10, JSON.stringify({status: "quit"}));
 						D2Bot.stop(me.profile, true);
 
@@ -883,7 +873,7 @@ function main () {
 						obj.fullChars.push(me.name);
 						MuleData.write(obj);
 						nextChar();
-						D2Bot.printToConsole("Mule full, getting next character.", 7);
+						D2Bot.printToConsole("Mule full, getting next character.", sdk.colors.D2Bot.DarkGold);
 
 						if (Starter.Config.MinGameTime && getTickCount() - tick < Starter.Config.MinGameTime * 1000) {
 							while (getTickCount() - tick < Starter.Config.MinGameTime * 1000) {
@@ -933,7 +923,7 @@ function main () {
 
 				// anti-idle
 				if (getTickCount() - idleTick > 0) {
-					sendPacket(1, 0x40);
+					Packet.questRefresh();
 					idleTick += rand(1200, 1500) * 1000;
 					print("Sent anti-idle packet, next refresh in: (" + Time.format(idleTick - getTickCount()) + ")");
 				}

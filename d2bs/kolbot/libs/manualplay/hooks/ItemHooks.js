@@ -1,176 +1,37 @@
-/*
-*	@filename	ItemHooks.js
-*	@author		theBGuy
-*	@desc		Item hooks for MapThread
+/**
+*  @filename    ItemHooks.js
+*  @author      theBGuy
+*  @desc        Item hooks for MapThread
+*
 */
 
+// todo - clean up all the map stuff
 const ItemHooks = {
 	enabled: true,
 	pickitEnabled: false,
 	modifier: 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)),
 	hooks: [],
 	ignoreItemTypes: [
-		4, 5, 6, 18, 20, 22, 38, 41, 76, 77, 78, 79, 80,
-		81, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 15, 19, 44, 42, 43
+		sdk.items.type.Gold, sdk.items.type.BowQuiver, sdk.items.type.CrossbowQuiver, sdk.items.type.Book, sdk.items.type.Gem, sdk.items.type.Scroll,
+		sdk.items.type.MissilePotion, sdk.items.type.Key, sdk.items.type.Boots, sdk.items.type.Gloves, sdk.items.type.ThrowingKnife, sdk.items.type.ThrowingAxe,
+		sdk.items.type.HealingPotion, sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion, sdk.items.type.StaminaPotion, sdk.items.type.AntidotePotion,
+		sdk.items.type.ThawingPotion, sdk.items.type.ChippedGem, sdk.items.type.FlawedGem, sdk.items.type.StandardGem, sdk.items.type.FlawlessGem, sdk.items.type.PerfectgGem,
+		sdk.items.type.Amethyst, sdk.items.type.Diamond, sdk.items.type.Emerald, sdk.items.type.Ruby, sdk.items.type.Sapphire, sdk.items.type.Topaz, sdk.items.type.Skull
 	],
-	itemCodeByClassId: {
-		7: "The Chieftain",
-		28: "Gleamscythe",
-		103: "Suicide Branch",
-		104: "Carin Shard",
-		105: "King Leoric's Arm",
-		157: "Ribcracker",
-		161: "Skystrike",
-		187: "Bartuc's",
-		190: "Jade Talon",
-		192: "Shadow Killer",
-		193: "Firelizard's",
-		198: "Rune Master",
-		208: "Boneshade",
-		209: "Death's Web",
-		240: "Gimmershred",
-		241: "Warshrike",
-		242: "Lacerator",
-		255: "Reaper's Toll",
-		256: "Tomb Reaver",
-		258: "Stormspire",
-		263: "Mang Song's",
-		269: "Eaglehorn",
-		270: "Ward Bow",
-		271: "Windforce",
-		292: "Lycander's Aim",
-		294: "Lycander's Pike",
-		295: "Titan's Revenge",
-		297: "Eschuta's",
-		300: "Death's Fathom",
-		301: "Bloodraven's",
-		303: "Stoneraven",
-		305: "Thunder Stroke",
-		342: "Goblin Toe",
-		353: "Rockstopper",
-		359: "Spirit Shroud",
-		360: "Vipermagi's",
-		365: "Shaftstop",
-		367: "Skullder's",
-		373: "Que-Hegan's",
-		386: "Waterwalk",
-		417: "Andariel's Vis",
-		420: "Kira's",
-		422: "Harlequin Crest",
-		432: "Gladiator's Bane",
-		456: "Sandstorm Trek's",
-		457: "Marrowwalk",
-		549: "Shadow Dancer",
-		472: "Jalal's",
-		477: "Arreat's Face",
-		481: "HoZ",
-		487: "Homunculus",
-		488: "Cerebus",
-		490: "Spirit Keeper",
-		494: "Wolfhowl",
-		495: "Demonhorn's",
-		496: "Halaberd's",
-		499: "Alma Negra",
-		501: "Dragonscale",
-		507: "Darkforce",
-		506: "Boneflame",
-		603: "Annihilus",
-		604: "Hellfire Torch",
-		605: "Gheed's",
-		643: "Facet",
-		653: "ÿc8Token",
-		654: "ÿc3Ess-Of-Suffering",
-		655: "ÿc7Ess-Of-Hatred",
-		656: "ÿc1Ess-Of-Terror",
-		657: "ÿc3Ess-Of-Destruction",
-	},
-	itemCodeByClassIdAndQuality: {
-		113: {5: "Aldur's Wep", 7: "Moonfall"},
-		470: {5: "Aldur's Helm"},
-		441: {5: "Aldur's Armor", 7: "Steel Carapace"},
-		388: {5: "Aldur's Boots", 7: "War Trav's"},
-		213: {5: "Griswold's Wep", 7: "Moonfall"},
-		427: {5: "Griswold's Helm", 7: "Crown of Ages"},
-		372: {5: "Griswold's Armor", 7: "Corpsemourn"},
-		502: {5: "Griswold's Shield"},
-		219: {5: "IK Maul", 7: "Windhammer"},
-		407: {5: "IK Helm"},
-		442: {5: "IK Armor"},
-		384: {5: "IK Gloves", 7: "HellMouth"},
-		389: {5: "IK Boots", 7: "Gore Rider"},
-		302: {5: "Mavina's Bow"},
-		439: {5: "Mavina's Armor", 7: "Leviathan"},
-		421: {5: "Mavina's Helm", 7: "Griffon's Eye"},
-		391: {5: "Mavina's Belt", 7: "Razortail"},
-		383: {5: "Mavina's Gloves", 7: "Lava Gout"},
-		181: {5: "Natalya's Wep"},
-		434: {5: "Natalya's Armor"},
-		395: {5: "Natalya's Helm", 7: "Vamp Gaze"},
-		387: {5: "Natalya's Boots", 7: "Silkweave"},
-		290: {5: "Tal Orb", 7: "Occulus"},
-		440: {5: "Tal Armor"},
-		358: {5: "Tal Helm", 7: "Blackhorn's"},
-		392: {5: "Tal Belt", 7: "Gloom's Trap"},
-		465: {5: "Trang Helm", 7: "Giant Skull"},
-		371: {5: "Trang Armor", 7: "Black Hades"},
-		463: {5: "Trang Belt"},
-		382: {5: "Trang Gloves", 7: "Ghoulhide"},
-		486: {5: "Trang Shield"},
-		234: {5: "Bul-Kathos Blade", 7: "Grandfather"},
-		228: {5: "Bul-Kathos Sword"},
-		352: {5: "Cow King's Helm", 7: "Peasant Crown"},
-		316: {5: "Cow King's Armor", 7: "Twitchthroe"},
-		340: {7: "Gorefoot"},
-		19: {5: "Heavens's Wep", 7: "Crushflange"},
-		426: {5: "Heavens's Helm", 7: "Nightwing's"},
-		366: {5: "Heavens's Armor", 7: "Duriel's Shell"},
-		449: {5: "Heavens's Shield"},
-		151: {5: "Hwanin's Bill", 7: "Blackleach"},
-		364: {5: "Hwanin's Armor", 7: "Crow Caw"},
-		357: {5: "Hwanin's Helm", 7: "Crown of Thieves"},
-		346: {7: "Nightsmoke"},
-		438: {5: "Naj's Armor"},
-		261: {5: "Naj's Staff", 7: "Ondal's Wisdom"},
-		418: {5: "Naj's Helm", 7: "Moonfall"},
-		329: {7: "Umbral Disk"},
-		356: {5: "G-Face", 7: "Valk Wing"},
-		347: {5: "Orphan's Belt"},
-		335: {7: "Bloodfist"},
-		227: {5: "Sazabi's Wep", 7: "Frostwind"},
-		437: {5: "Sazabi's Armor", 7: "Arkaine's"},
-		320: {7: "Venom Ward"},
-		333: {7: "The Ward"},
-		429: {5: "Disciple's Armor", 7: "Ormus Robe's"},
-		462: {5: "Disciple's Belt", 7: "Verdungo's"},
-		450: {5: "Disciple's Gloves"},
-		385: {5: "Disciple's Boots", 7: "Infernostride"},
-		317: {5: "Angelic's Armor", 7: "Darkglow"},
-		27: {5: "Angelic's Wep", 7: "Krintiz"},
-		307: {5: "Arcanna's Helm", 7: "Tarnhelm"},
-		327: {5: "Arcanna's Armor", 7: "Heavenly Garb"},
-		67: {5: "Arcanna's Staff", 7: "Iron Jang Bong"},
-		337: {5: "Artic's Gloves", 7: "Magefist"},
-		345: {5: "Artic's Belt", 7: "Snakecord"},
-		313: {5: "Artic's Armor", 7: "Greyform"},
-		74: {5: "Artic's Bow", 7: "Hellclap"},
-		2: {5: "Beserker's Axe", 7: "Bladebone"},
-		321: {5: "Beserker's Armor", 7: "Iceblink"},
-		308: {5: "Beserker's Helm", 7: "Coif of Glory"}
-	},
-	itemColorCode: {
-		// item quality
-		4: {
-			color: 0x97, code: "ÿc3"
-		},
-		5: {
-			color: 0x84, code: "ÿc2"
-		},
-		6: {
-			color: 0x6F, code: "ÿc9"
-		},
-		7: {
-			color: 0xA8, code: "ÿc4"
-		},
+	itemCodeByClassId: [],
+	itemCodeByClassIdAndQuality: [],
+	itemColorCode: [],
+
+	addToCodeByClassIdAndQuality: function (id, setName = "", uniqueName = "") {
+		if (!id) return;
+		if (setName) {
+			this.itemCodeByClassIdAndQuality[id] = [sdk.items.quality.Set];
+			this.itemCodeByClassIdAndQuality[id][sdk.items.quality.Set] = setName;
+		}
+		if (uniqueName) {
+			this.itemCodeByClassIdAndQuality[id] = [sdk.items.quality.Unique];
+			this.itemCodeByClassIdAndQuality[id][sdk.items.quality.Unique] = uniqueName;
+		}
 	},
 
 	check: function () {
@@ -194,24 +55,30 @@ const ItemHooks = {
 			}
 		}
 
-		let item = getUnit(4);
+		let item = Game.getItem();
 
 		if (item) {
-			do {
-				if (item.area === ActionHooks.currArea && [2, 3].includes(item.mode) && (item.quality >= 4 || ([2, 3].includes(item.quality) && !this.ignoreItemTypes.includes(item.itemType)))) {
-					if (this.pickitEnabled) {
-						if ([0, 4].indexOf(Pickit.checkItem(item).result) === -1) {
+			try {
+				do {
+					if (item.area === ActionHooks.currArea && item.onGroundOrDropping
+						&& (item.quality >= sdk.items.quality.Magic || ((item.normal || item.superior) && !this.ignoreItemTypes.includes(item.itemType)))) {
+						if (this.pickitEnabled) {
+							if ([Pickit.Result.UNWANTED, Pickit.Result.TRASH].indexOf(Pickit.checkItem(item).result) === -1) {
+								!this.getHook(item) && this.add(item);
+							}
+						} else {
 							!this.getHook(item) && this.add(item);
 						}
-					} else {
-						!this.getHook(item) && this.add(item);
-					}
 
-					this.getHook(item) && this.update();
-				} else {
-					this.remove(item);
-				}
-			} while (item.getNext());
+						this.getHook(item) && this.update();
+					} else {
+						this.remove(item);
+					}
+				} while (item.getNext());
+			} catch (e) {
+				console.error(e);
+				this.flush();
+			}
 		}
 	},
 
@@ -239,22 +106,22 @@ const ItemHooks = {
 
 	newHook: function (item) {
 		let color = 0, code = "", arr = [], name = [], vector = [];
-		let eth = (item.getFlag(0x400000) ? "Eth: " : "");
+		let eth = (item.ethereal ? "Eth: " : "");
 
 		switch (item.quality) {
-		case 2:
-		case 3:
+		case sdk.items.quality.Normal:
+		case sdk.items.quality.Superior:
 			switch (item.itemType) {
-			case 39:
+			case sdk.items.type.Quest:
 				color = 0x9A;
 				code += (!!this.itemCodeByClassId[item.classid] ? this.itemCodeByClassId[item.classid] : "ÿc8" + item.fname);
 
 				break;
-			case 74:
-				if (item.classid >= 635) {
+			case sdk.items.type.Rune:
+				if (item.classid >= sdk.items.runes.Vex) {
 					color = 0x9B;
 					code = "ÿc;" + item.fname;
-				} else if (item.classid >= 626) {
+				} else if (item.classid >= sdk.items.runes.Lum) {
 					color = 0x9A;
 					code = "ÿc8" + item.fname;
 				} else {
@@ -270,24 +137,29 @@ const ItemHooks = {
 					}
 
 					color = 0x20;
-					code = "ÿc0" + (item.sockets > 0 ? "[" + item.sockets + "]" : "");
-					code += this.getName(item);
-					item.itemType === 70 && (code += "[R: " + item.getStat(39) + "]");
-					code += "(" + item.ilvl + ")";
+
+					if (item.runeword) {
+						code = item.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, "");
+					} else {
+						code = "ÿc0" + (item.sockets > 0 ? "[" + item.sockets + "]" : "");
+						code += this.getName(item);
+						item.itemType === sdk.items.type.AuricShields && (code += "[R: " + item.getStat(sdk.stats.FireResist) + "]");
+						code += "(" + item.ilvl + ")";
+					}
 				}
 
 				break;
 			}
 
 			break;
-		case 5: 	// Set
-		case 7: 	// Unique
+		case sdk.items.quality.Set:
+		case sdk.items.quality.Unique:
 			({color, code} = this.itemColorCode[item.quality]);
 
 			if (!this.itemCodeByClassId[item.classid]) {
 				switch (item.classid) {
-				case 522: 	// Amulet's
-				case 520: 	// Ring's
+				case sdk.items.Ring:
+				case sdk.items.Amulet:
 					code += item.name + "(" + item.ilvl + ")";
 					
 					break;
@@ -301,8 +173,8 @@ const ItemHooks = {
 			}
 
 			break;
-		case 4: 	// Magic
-		case 6: 	// Rare
+		case sdk.items.quality.Magic:
+		case sdk.items.quality.Rare:
 			if (item.name) {
 				({color, code} = this.itemColorCode[item.quality]);
 
@@ -382,3 +254,151 @@ const ItemHooks = {
 		}
 	}
 };
+
+// have to be set after ItemHooks is created
+ItemHooks.itemCodeByClassId[sdk.items.BattleAxe] = "The Chieftain";
+ItemHooks.itemCodeByClassId[sdk.items.Falchion] = "Gleamscythe";
+ItemHooks.itemCodeByClassId[sdk.items.BurntWand] = "Suicide Branch";
+ItemHooks.itemCodeByClassId[sdk.items.PetrifiedWand] = "Carin Shard";
+ItemHooks.itemCodeByClassId[sdk.items.TombWand] = "King Leoric's Arm";
+ItemHooks.itemCodeByClassId[sdk.items.Quarterstaff] = "Ribcracker";
+ItemHooks.itemCodeByClassId[sdk.items.EdgeBow] = "Skystrike";
+ItemHooks.itemCodeByClassId[sdk.items.GreaterTalons] = "Bartuc's";
+ItemHooks.itemCodeByClassId[sdk.items.WristSword] = "Jade Talon";
+ItemHooks.itemCodeByClassId[sdk.items.BattleCestus] = "Shadow Killer";
+ItemHooks.itemCodeByClassId[sdk.items.FeralClaws] = "Firelizard's";
+ItemHooks.itemCodeByClassId[sdk.items.EttinAxe] = "Rune Master";
+ItemHooks.itemCodeByClassId[sdk.items.LichWand] = "Boneshade";
+ItemHooks.itemCodeByClassId[sdk.items.UnearthedWand] = "Death's Web";
+ItemHooks.itemCodeByClassId[sdk.items.FlyingAxe] = "Gimmershred";
+ItemHooks.itemCodeByClassId[sdk.items.WingedKnife] = "Warshrike";
+ItemHooks.itemCodeByClassId[sdk.items.WingedAxe] = "Lacerator";
+ItemHooks.itemCodeByClassId[sdk.items.Thresher] = "Reaper's Toll";
+ItemHooks.itemCodeByClassId[sdk.items.CrypticAxe] = "Tomb Reaver";
+ItemHooks.itemCodeByClassId[sdk.items.GiantThresher] = "Stormspire";
+ItemHooks.itemCodeByClassId[sdk.items.ArchonStaff] = "Mang Song's";
+ItemHooks.itemCodeByClassId[sdk.items.CrusaderBow] = "Eaglehorn";
+ItemHooks.itemCodeByClassId[sdk.items.WardBow] = "Ward Bow";
+ItemHooks.itemCodeByClassId[sdk.items.HydraBow] = "Windforce";
+ItemHooks.itemCodeByClassId[sdk.items.CeremonialBow] = "Lycander's Aim";
+ItemHooks.itemCodeByClassId[sdk.items.CeremonialPike] = "Lycander's Pike";
+ItemHooks.itemCodeByClassId[sdk.items.CeremonialJavelin] = "Titan's Revenge";
+ItemHooks.itemCodeByClassId[sdk.items.EldritchOrb] = "Eschuta's";
+ItemHooks.itemCodeByClassId[sdk.items.DimensionalShard] = "Death's Fathom";
+ItemHooks.itemCodeByClassId[sdk.items.MatriarchalBow] = "Bloodraven's";
+ItemHooks.itemCodeByClassId[sdk.items.MatriarchalSpear] = "Stoneraven";
+ItemHooks.itemCodeByClassId[sdk.items.MatriarchalJavelin] = "Thunder Stroke";
+ItemHooks.itemCodeByClassId[sdk.items.LightPlatedBoots] = "Goblin Toe";
+ItemHooks.itemCodeByClassId[sdk.items.Sallet] = "Rockstopper";
+ItemHooks.itemCodeByClassId[sdk.items.GhostArmor] = "Spirit Shroud";
+ItemHooks.itemCodeByClassId[sdk.items.SerpentskinArmor] = "Vipermagi's";
+ItemHooks.itemCodeByClassId[sdk.items.MeshArmor] = "Shaftstop";
+ItemHooks.itemCodeByClassId[sdk.items.RussetArmor] = "Skullder's";
+ItemHooks.itemCodeByClassId[sdk.items.MagePlate] = "Que-Hegan's";
+ItemHooks.itemCodeByClassId[sdk.items.SharkskinBoots] = "Waterwalk";
+ItemHooks.itemCodeByClassId[sdk.items.DemonHead] = "Andariel's Vis";
+ItemHooks.itemCodeByClassId[sdk.items.Tiara] = "Kira's";
+ItemHooks.itemCodeByClassId[sdk.items.Shako] = "Harlequin Crest";
+ItemHooks.itemCodeByClassId[sdk.items.WireFleece] = "Gladiator's Bane";
+ItemHooks.itemCodeByClassId[sdk.items.ScarabshellBoots] = "Sandstorm Trek's";
+ItemHooks.itemCodeByClassId[sdk.items.BoneweaveBoots] = "Marrowwalk";
+ItemHooks.itemCodeByClassId[sdk.items.MyrmidonGreaves] = "Shadow Dancer";
+ItemHooks.itemCodeByClassId[sdk.items.TotemicMask] = "Jalal's";
+ItemHooks.itemCodeByClassId[sdk.items.SlayerGuard] = "Arreat's Face";
+ItemHooks.itemCodeByClassId[sdk.items.GildedShield] = "HoZ";
+ItemHooks.itemCodeByClassId[sdk.items.HierophantTrophy] = "Homunculus";
+ItemHooks.itemCodeByClassId[sdk.items.BloodSpirit] = "Cerebus";
+ItemHooks.itemCodeByClassId[sdk.items.EarthSpirit] = "Spirit Keeper";
+ItemHooks.itemCodeByClassId[sdk.items.FuryVisor] = "Wolfhowl";
+ItemHooks.itemCodeByClassId[sdk.items.DestroyerHelm] = "Demonhorn's";
+ItemHooks.itemCodeByClassId[sdk.items.ConquerorCrown] = "Halaberd's";
+ItemHooks.itemCodeByClassId[sdk.items.SacredRondache] = "Alma Negra";
+ItemHooks.itemCodeByClassId[sdk.items.ZakarumShield] = "Dragonscale";
+ItemHooks.itemCodeByClassId[sdk.items.BloodlordSkull] = "Darkforce";
+ItemHooks.itemCodeByClassId[sdk.items.SuccubusSkull] = "Boneflame";
+ItemHooks.itemCodeByClassId[sdk.items.SmallCharm] = "Annihilus";
+ItemHooks.itemCodeByClassId[sdk.items.LargeCharm] = "Hellfire Torch";
+ItemHooks.itemCodeByClassId[sdk.items.GrandCharm] = "Gheed's";
+ItemHooks.itemCodeByClassId[sdk.items.Jewel] = "Facet";
+ItemHooks.itemCodeByClassId[sdk.items.quest.TokenofAbsolution] = "ÿc8Token";
+ItemHooks.itemCodeByClassId[sdk.items.quest.TwistedEssenceofSuffering] = "ÿc3Ess-Of-Suffering";
+ItemHooks.itemCodeByClassId[sdk.items.quest.ChargedEssenceofHatred] = "ÿc7Ess-Of-Hatred";
+ItemHooks.itemCodeByClassId[sdk.items.quest.BurningEssenceofTerror] = "ÿc1Ess-Of-Terror";
+ItemHooks.itemCodeByClassId[sdk.items.quest.FesteringEssenceofDestruction] = "ÿc3Ess-Of-Destruction";
+
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.JaggedStar, "Aldur's Wep", "Moonfall");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.HuntersGuise, "Aldur's Helm");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.ShadowPlate, "Aldur's Armor", "Steel Carapace");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.BattleBoots, "Aldur's Boots", "War Trav's");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.Caduceus, "Griswold's Wep", "Moonfall");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.Corona, "Griswold's Helm", "Crown of Ages");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.OrnatePlate, "Griswold's Armor", "Corpsemourn");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.VortexShield, "Griswold's Shield");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.OgreMaul, "IK Maul", "Windhammer");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.AvengerGuard, "IK Helm");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.SacredArmor, "IK Armor");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.WarGauntlets, "IK Gloves", "HellMouth");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.WarBoots, "IK Boots", "Gore Rider");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.GrandMatronBow, "Mavina's Bow");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.KrakenShell, "Mavina's Armor", "Leviathan");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.Diadem, "Mavina's Helm", "Griffon's Eye");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.SharkskinBelt, "Mavina's Belt", "Razortail");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.BattleGauntlets, "Mavina's Gloves", "Lava Gout");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.ScissorsKatar, "Natalya's Wep");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.LoricatedMail, "Natalya's Armor");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.GrimHelm, "Natalya's Helm", "Vamp Gaze");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.MeshBoots, "Natalya's Boots", "Silkweave");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.SwirlingCrystal, "Tal Orb", "Occulus");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.LacqueredPlate, "Tal Armor");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.DeathMask, "Tal Helm", "Blackhorn's");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.MeshBelt, "Tal Belt", "Gloom's Trap");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.BoneVisage, "Trang Helm", "Giant Skull");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.ChaosArmor, "Trang Armor", "Black Hades");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.TrollBelt, "Trang Belt");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.HeavyBracers, "Trang Gloves", "Ghoulhide");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.CantorTrophy, "Trang Shield");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.ColossusBlade, "Bul-Kathos Blade", "Grandfather");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.MythicalSword, "Bul-Kathos Sword");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.WarHat, "Cow King's Helm", "Peasant Crown");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.StuddedLeather, "Cow King's Armor", "Twitchthroe");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.HeavyBoots, null, "Gorefoot");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.Mace, "Heavens's Wep", "Crushflange");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.SpiredHelm, "Heavens's Helm", "Nightwing's");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.Cuirass, "Heavens's Armor", "Duriel's Shell");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.Ward, "Heavens's Shield");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.Bill, "Hwanin's Bill", "Blackleach");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.TigulatedMail, "Hwanin's Armor", "Crow Caw");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.GrandCrown, "Hwanin's Helm", "Crown of Thieves");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.Belt, null, "Nightsmoke");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.HellforgePlate, "Naj's Armor");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.ElderStaff, "Naj's Staff", "Ondal's Wisdom");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.Circlet, "Naj's Helm", "Moonfall");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.SmallShield, null, "Umbral Disk");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.WingedHelm, "G-Face", "Valk Wing");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.HeavyBelt, "Orphan's Belt");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.HeavyGloves, null, "Bloodfist");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.CrypticSword, "Sazabi's Wep", "Frostwind");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.BalrogSkin, "Sazabi's Armor", "Arkaine's");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.BreastPlate, null, "Venom Ward");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.GothicShield, null, "The Ward");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.DuskShroud, "Disciple's Armor", "Ormus Robe's");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.MithrilCoil, "Disciple's Belt", "Verdungo's");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.BrambleMitts, "Disciple's Gloves");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.DemonhideBoots, "Disciple's Boots", "Infernostride");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.RingMail, "Angelic's Armor", "Darkglow");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.Sabre, "Angelic's Wep", "Krintiz");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.SkullCap, "Arcanna's Helm", "Tarnhelm");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.LightPlate, "Arcanna's Armor", "Heavenly Garb");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.WarStaff, "Arcanna's Staff", "Iron Jang Bong");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.LightGauntlets, "Artic's Gloves", "Magefist");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.LightBelt, "Artic's Belt", "Snakecord");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.QuiltedArmor, "Artic's Armor", "Greyform");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.ShortWarBow, "Artic's Bow", "Hellclap");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.DoubleAxe, "Beserker's Axe", "Bladebone");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.SplintMail, "Beserker's Armor", "Iceblink");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.Helm, "Beserker's Helm", "Coif of Glory");
+
+ItemHooks.itemColorCode[sdk.items.quality.Magic] = { color: 0x97, code: "ÿc3" };
+ItemHooks.itemColorCode[sdk.items.quality.Set] = { color: 0x84, code: "ÿc2" };
+ItemHooks.itemColorCode[sdk.items.quality.Rare] = { color: 0x6F, code: "ÿc9" };
+ItemHooks.itemColorCode[sdk.items.quality.Unique] = { color: 0xA8, code: "ÿc4" };

@@ -34,7 +34,7 @@ const Hooks = {
 		let files = dopen("libs/manualplay/hooks/").getFiles();
 		
 		Array.isArray(files) && files
-			.filter(file => file.endsWith('.js'))
+			.filter(file => file.endsWith(".js"))
 			.forEach(function (x) {
 				if (!isIncluded("manualplay/hooks/" + x)) {
 					if (!include("manualplay/hooks/" + x)) {
@@ -107,23 +107,24 @@ function main() {
 	Pickit.init(true);
 	Hooks.init();
 
-	const Worker = require('../../modules/Worker');
+	const Worker = require("../../modules/Worker");
 
 	Worker.runInBackground.unitInfo = function () {
-		if (!Hooks.userAddon || (!UnitInfo.cleared && !getUnit(101))) {
+		if (!Hooks.userAddon || (!UnitInfo.cleared && !Game.getSelectedUnit())) {
 			UnitInfo.remove();
 			return true;
 		}
 
-		let unit = getUnit(101);
+		let unit = Game.getSelectedUnit();
 		!!unit && UnitInfo.createInfo(unit);
 
 		return true;
 	};
 
 	const hideFlags = [
-		0x01, 0x02, 0x03, 0x04, 0x05, 0x09, 0x0C, 0x0F, 0x14,
-		0x17, 0x18, 0x19, 0x1A, 0x21, 0x24
+		sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.QuickSkill, sdk.uiflags.SkillWindow, sdk.uiflags.ChatBox,
+		sdk.uiflags.EscMenu, sdk.uiflags.Shop, sdk.uiflags.Quest, sdk.uiflags.Waypoint, sdk.uiflags.TradePrompt, sdk.uiflags.Msgs,
+		sdk.uiflags.Stash, sdk.uiflags.Cube, sdk.uiflags.Help, sdk.uiflags.MercScreen
 	];
 
 	this.revealArea = function (area) {
@@ -207,11 +208,11 @@ function main() {
 
 			break;
 		case "make":
-			if (!FileTools.exists("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js")) {
-				FileTools.copy("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + ".js", "libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js");
-				D2Bot.printToConsole("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
-				print("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
-				me.overhead("libs/manualplay/config/" + sdk.charclass.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+			if (!FileTools.exists("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js")) {
+				FileTools.copy("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + ".js", "libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js");
+				D2Bot.printToConsole("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+				print("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+				me.overhead("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
 			}
 
 			break;
@@ -261,11 +262,11 @@ function main() {
 
 		if (hideFlagFound) continue;
 
-		getUIFlag(0x0A) ? Hooks.update() : Hooks.flush(true) && (!HelpMenu.cleared && HelpMenu.hideMenu());
+		getUIFlag(sdk.uiflags.AutoMap) ? Hooks.update() : Hooks.flush(true) && (!HelpMenu.cleared && HelpMenu.hideMenu());
 
 		delay(20);
 
-		while (getUIFlag(0x0D)) {
+		while (getUIFlag(sdk.uiflags.ShowItem)) {
 			ItemHooks.flush();
 		}
 	}

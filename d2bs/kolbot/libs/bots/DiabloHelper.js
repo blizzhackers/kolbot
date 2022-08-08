@@ -6,48 +6,50 @@
 */
 
 function DiabloHelper() {
+	this.Leader = Config.Leader;
 	Common.Diablo.waitForGlow = true;
 	Town.doChores();
-	addEventListener("gamepacket", Common.Diablo.diabloLightsEvent);
-	const Worker = require('../modules/Worker');
-
-	if (Config.DiabloHelper.SkipIfBaal) {
-		let leadTick = getTickCount();
-
-		Worker.runInBackground.leaderTracker = function () {
-			if (Common.Diablo.done) return false;
-			// check every 3 seconds
-			if (getTickCount() - leadTick < 3000) return true;
-			leadTick = getTickCount();
-
-			// check again in another 3 seconds if game wasn't ready
-			if (!me.gameReady) return true;
-			if (Misc.getPlayerCount() <= 1) throw new Error("Empty game");
-			let party = getParty();
-
-			if (party) {
-				do {
-					// Player is in Throne of Destruction or Worldstone Chamber
-					if ([sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(party.area)) {
-						if (Loader.scriptName() === "DiabloHelper") {
-							throw new Error('Party leader is running baal');
-						} else {
-							// kill process
-							return false;
-						}
-					}
-				} while (party.getNext());
-			}
-
-			return true;
-		};
-	}
+	const Worker = require("../modules/Worker");
 
 	try {
+		addEventListener("gamepacket", Common.Diablo.diabloLightsEvent);
+		
+		if (Config.DiabloHelper.SkipIfBaal) {
+			let leadTick = getTickCount();
+
+			Worker.runInBackground.leaderTracker = function () {
+				if (Common.Diablo.done) return false;
+				// check every 3 seconds
+				if (getTickCount() - leadTick < 3000) return true;
+				leadTick = getTickCount();
+
+				// check again in another 3 seconds if game wasn't ready
+				if (!me.gameReady) return true;
+				if (Misc.getPlayerCount() <= 1) throw new Error("Empty game");
+				let party = getParty();
+
+				if (party) {
+					do {
+						// Player is in Throne of Destruction or Worldstone Chamber
+						if ([sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(party.area)) {
+							if (Loader.scriptName() === "DiabloHelper") {
+								throw new Error("Party leader is running baal");
+							} else {
+								// kill process
+								return false;
+							}
+						}
+					} while (party.getNext());
+				}
+
+				return true;
+			};
+		}
+
 		Config.DiabloHelper.SafePrecast && Precast.needOutOfTownCast() ? Precast.doRandomPrecast(true, sdk.areas.PandemoniumFortress) : Precast.doPrecast(true);
 
 		if (Config.DiabloHelper.SkipTP) {
-			me.area !== sdk.areas.RiverofFlame && Pather.useWaypoint(sdk.areas.RiverofFlame);
+			!me.inArea(sdk.areas.RiverofFlame) && Pather.useWaypoint(sdk.areas.RiverofFlame);
 
 			if (!Pather.moveTo(7790, 5544)) throw new Error("Failed to move to Chaos Sanctuary");
 			!Config.DiabloHelper.Entrance && Pather.moveTo(7774, 5305);
@@ -57,7 +59,7 @@ function DiabloHelper() {
 
 				if (party) {
 					do {
-						if ((!Config.Leader || party.name === Config.Leader) && party.area === sdk.areas.ChaosSanctuary) {
+						if ((!DiabloHelper.Leader || party.name === DiabloHelper.Leader) && party.area === sdk.areas.ChaosSanctuary) {
 							return true;
 						}
 					} while (party.getNext());
@@ -70,6 +72,7 @@ function DiabloHelper() {
 		} else {
 			Town.goToTown(4);
 			Town.move("portalspot");
+			!DiabloHelper.Leader && (DiabloHelper.Leader = Misc.autoLeaderDetect({destination: sdk.areas.ChaosSanctuary, quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area), timeout: Time.minutes(2)}));
 
 			if (!Misc.poll(() => {
 				if (Pather.getPortal(sdk.areas.ChaosSanctuary, Config.Leader || null) && Pather.usePortal(sdk.areas.ChaosSanctuary, Config.Leader || null)) {
@@ -107,21 +110,34 @@ function DiabloHelper() {
 			Pather.moveTo(7774, 5305);
 			Attack.clear(35, 0, false, Common.Diablo.sort);
 			Common.Diablo.runSeals(Config.DiabloHelper.SealOrder, Config.DiabloHelper.OpenSeals);
-			Misc.poll(() => Common.Diablo.diabloSpawned, Time.seconds(30), 500);
+			Common.Diablo.moveToStar();
+			Misc.poll(() => {
+				if (Common.Diablo.diabloSpawned) return true;
+				if (Game.getMonster(sdk.monsters.Diablo)) return true;
+				if ([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(Misc.getPlayerArea(DiabloHelper.Leader))) {
+					throw new Error("END");
+				}
+				return false;
+			}, Time.minutes(2), 500);
 		} catch (e) {
-			console.log((e.message ? e.message : e));
+			let eMsg = e.message ? e.message : e;
+			console.log(eMsg);
+
+			if (eMsg === "END") {
+				return true;
+			}
 		}
 
 		try {
-			print("Attempting to find Diablo");
+			console.log("Attempting to find Diablo");
 			Common.Diablo.diabloPrep();
 		} catch (error) {
-			print("Diablo wasn't found");
+			console.log("Diablo wasn't found");
 			if (Config.DiabloHelper.RecheckSeals) {
 				try {
-					print("Rechecking seals");
+					console.log("Rechecking seals");
 					Common.Diablo.runSeals(Config.DiabloHelper.SealOrder, Config.DiabloHelper.OpenSeals);
-					Misc.poll(() => Common.Diablo.diabloSpawned, Time.seconds(30), 500);
+					Misc.poll(() => Common.Diablo.diabloSpawned, Time.minutes(2), 500);
 					Common.Diablo.diabloPrep();
 				} catch (e2) {
 					//
@@ -132,7 +148,7 @@ function DiabloHelper() {
 		Attack.kill(sdk.monsters.Diablo);
 		Pickit.pickItems();
 	} catch (e) {
-		console.errorReport(e);
+		console.error(e);
 	} finally {
 		Common.Diablo.done = true;
 		removeEventListener("gamepacket", Common.Diablo.diabloLightsEvent);

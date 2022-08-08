@@ -31,7 +31,7 @@ function main() {
 
 			break;
 		case "mugshot": // Take a screenshot and log the kill
-			D2Bot.printToConsole(msg.split(" ")[1] + " has been neutralized.", 4);
+			D2Bot.printToConsole(msg.split(" ")[1] + " has been neutralized.", sdk.colors.D2Bot.Blue);
 			hideConsole();
 			delay(500);
 			takeScreenshot();
@@ -47,7 +47,7 @@ function main() {
 		if (party) {
 			do {
 				if (party.name !== me.name && getPlayerFlag(me.gid, party.gid, 8) && hostiles.indexOf(party.name) === -1) {
-					D2Bot.printToConsole(party.name + " (Level " + party.level + " " + charClass[party.classid] + ")" + " has declared hostility.", 8);
+					D2Bot.printToConsole(party.name + " (Level " + party.level + " " + charClass[party.classid] + ")" + " has declared hostility.", sdk.colors.D2Bot.Orange);
 					hostiles.push(party.name);
 				}
 			} while (party.getNext());
@@ -79,11 +79,11 @@ function main() {
 	// Find hostile player Units
 	this.findPlayer = function () {
 		for (let i = 0; i < hostiles.length; i += 1) {
-			let player = getUnit(0, hostiles[i]);
+			let player = Game.getPlayer(hostiles[i]);
 
 			if (player) {
 				do {
-					if (player.mode !== 0 && player.mode !== 17 && getPlayerFlag(me.gid, player.gid, 8) && !player.inTown && !me.inTown) {
+					if (!player.dead && getPlayerFlag(me.gid, player.gid, 8) && !player.inTown && !me.inTown) {
 						return player;
 					}
 				} while (player.getNext());
@@ -97,8 +97,7 @@ function main() {
 	this.findMissile = function (owner, id, range) {
 		range === undefined && (range = 999);
 
-		let missile = getUnit(3, id);
-
+		let missile = Game.getMissile(id);
 		if (!missile) return false;
 
 		do {
@@ -113,12 +112,12 @@ function main() {
 	this.checkSummons = function (player) {
 		if (!player) return false;
 		let name = player.name;
-		let unit = getUnit(1);
+		let unit = Game.getMonster();
 
 		if (unit) {
 			do {
 				// Revives and spirit wolves
-				if (unit.getParent() && unit.getParent().name === name && (unit.getState(96) || unit.classid === 420)) {
+				if (unit.getParent() && unit.getParent().name === name && (unit.getState(sdk.states.Revive) || unit.classid === sdk.monsters.Wolf2)) {
 					return true;
 				}
 			} while (unit.getNext());
@@ -137,15 +136,15 @@ function main() {
 	Skill.usePvpRange = true;
 
 	// Attack sequence adjustments - this only affects the AntiHostile thread
-	if (me.getSkill(sdk.skills.MindBlast, 1) && [sdk.skills.FireBlast, sdk.skills.ShockWeb].includes(Config.AttackSkill[1])) {
+	if (Skill.canUse(sdk.skills.MindBlast) && [sdk.skills.FireBlast, sdk.skills.ShockWeb].includes(Config.AttackSkill[1])) {
 		Config.AttackSkill[1] = sdk.skills.MindBlast;
 		ClassAttack.trapRange = 40;
 	}
 
 	// A simple but fast player dodge function
 	this.moveAway = function (unit, range) {
-		let angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI),
-			angles = [0, 45, -45, 90, -90, 135, -135, 180];
+		let angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
+		let angles = [0, 45, -45, 90, -90, 135, -135, 180];
 
 		for (let i = 0; i < angles.length; i += 1) {
 			// Avoid the position where the player actually tries to move to
@@ -205,21 +204,21 @@ function main() {
 			}
 
 			// Mode 3 - Spam entrance (still experimental)
-			if (Config.HostileAction === 3 && hostiles.length > 0 && me.area === 131) {
+			if (Config.HostileAction === 3 && hostiles.length > 0 && me.area === sdk.areas.ThroneofDestruction) {
 				switch (me.classid) {
-				case 1: // Sorceress
+				case sdk.player.class.Sorceress:
 					prevPos = {x: me.x, y: me.y};
 					this.pause();
 					Pather.moveTo(15103, 5247);
 
 					while (!this.findPlayer() && hostiles.length > 0) {
-						if (!me.getState(121)) {
+						if (!me.skillDelay) {
 							Skill.cast(Config.AttackSkill[1], Skill.getHand(Config.AttackSkill[1]), 15099, 5237);
 						} else {
 							if (Config.AttackSkill[2] > -1) {
 								Skill.cast(Config.AttackSkill[2], Skill.getHand(Config.AttackSkill[2]), 15099, 5237);
 							} else {
-								while (me.getState(121)) {
+								while (me.skillDelay) {
 									delay(40);
 								}
 							}
@@ -227,9 +226,9 @@ function main() {
 					}
 
 					break;
-				case 5: // Druid
+				case sdk.player.class.Druid:
 					// Don't bother if it's not a tornado druid
-					if (Config.AttackSkill[1] !== 245) {
+					if (Config.AttackSkill[1] !== sdk.skills.Tornado) {
 						break;
 					}
 
@@ -243,7 +242,7 @@ function main() {
 					}
 
 					break;
-				case 6: // Assassin
+				case sdk.player.class.Assassin:
 					prevPos = {x: me.x, y: me.y};
 					this.pause();
 					Pather.moveTo(15103, 5247);
@@ -259,7 +258,7 @@ function main() {
 
 						Skill.cast(Config.AttackSkill[1], Skill.getHand(Config.AttackSkill[1]), 15099, 5237);
 
-						while (me.getState(121)) {
+						while (me.skillDelay) {
 							delay(40);
 						}
 					}
@@ -327,7 +326,8 @@ function main() {
 				attackCount = 0;
 
 				while (attackCount < 100) {
-					if (!copyUnit(player).x || player.inTown || me.mode === 17) { // Invalidated Unit (out of getUnit range) or player in town
+					// Invalidated Unit (out of getUnit range) or player in town
+					if (!copyUnit(player).x || player.inTown || me.mode === sdk.player.mode.Dead) {
 						break;
 					}
 
@@ -335,10 +335,10 @@ function main() {
 
 					// Specific attack additions
 					switch (me.classid) {
-					case 1: // Sorceress
-					case 2: // Necromancer
+					case sdk.player.class.Sorceress:
+					case sdk.player.class.Necromancer:
 						// Dodge missiles - experimental
-						missile = getUnit(3);
+						missile = Game.getMissile();
 
 						if (missile) {
 							do {
@@ -356,11 +356,11 @@ function main() {
 						}
 
 						break;
-					case 3: // Paladin
+					case sdk.player.class.Paladin:
 						// Smite summoners
-						if (Config.AttackSkill[1] === 112 && me.getSkill(97, 1)) {
-							if ([2, 5].indexOf(player.classid) > -1 && getDistance(me, player) < 4 && this.checkSummons(player)) {
-								Skill.cast(97, 1, player);
+						if (Config.AttackSkill[1] === sdk.skills.BlessedHammer && Skill.canUse(sdk.skills.Smite)) {
+							if ([sdk.player.class.Necromancer, sdk.player.class.Druid].includes(player.classid) && getDistance(me, player) < 4 && this.checkSummons(player)) {
+								Skill.cast(sdk.skills.Smite, sdk.skills.hand.Left, player);
 							}
 						}
 
@@ -369,7 +369,7 @@ function main() {
 
 					attackCount += 1;
 
-					if (player.mode === 0 || player.mode === 17) {
+					if (player.dead) {
 						break;
 					}
 				}

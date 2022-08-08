@@ -11,7 +11,7 @@ function Coldcrow() {
 	Precast.doPrecast(true);
 
 	if (!Pather.moveToExit(sdk.areas.CaveLvl1, true, false)) throw new Error("Failed to move to Cave");
-	if (!Pather.moveToPreset(me.area, 1, 736, 0, 0, false)) throw new Error("Failed to move to Coldcrow");
+	if (!Pather.moveToPreset(me.area, sdk.unittype.Monster, sdk.monsters.preset.Coldcrow, 0, 0, false)) throw new Error("Failed to move to Coldcrow");
 
 	Attack.kill(getLocaleString(sdk.locale.monsters.Coldcrow));
 

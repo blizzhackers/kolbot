@@ -62,8 +62,8 @@ const AutoAssign = {
 	},
 
 	getJobs: function () {
-		let quitCheck,
-			array = [this.Barbs, this.Pallys, this.Sorcs];
+		let quitCheck;
+		let array = [this.Barbs, this.Pallys, this.Sorcs];
 
 		for (let i = 0; i < array.length; i++) {
 			let current = array[i];
@@ -111,13 +111,13 @@ const AutoAssign = {
 		let obj = {name: name, level: level};
 
 		switch (classid) {
-		case 1:
+		case sdk.player.class.Sorceress:
 			this.Sorcs.push(obj);
 			break;
-		case 3:
+		case sdk.player.class.Paladin:
 			this.Pallys.push(obj);
 			break;
-		case 4:
+		case sdk.player.class.Barbarian:
 			this.Barbs.push(obj);
 			break;
 		}
@@ -203,19 +203,19 @@ const AutoAssign = {
 			if (party) {
 				do {
 					switch (party.classid) {
-					case 1:
+					case sdk.player.class.Sorceress:
 						if (this.checkNames(party.name, this.Sorcs)) {
 							this.pushNames(party.name, party.level, party.classid);
 						}
 
 						break;
-					case 3:
+					case sdk.player.class.Paladin:
 						if (this.checkNames(party.name, this.Pallys)) {
 							this.pushNames(party.name, party.level, party.classid);
 						}
 
 						break;
-					case 4:
+					case sdk.player.class.Barbarian:
 						if (this.checkNames(party.name, this.Barbs)) {
 							this.pushNames(party.name, party.level, party.classid);
 						}
@@ -245,5 +245,5 @@ const AutoAssign = {
 	}
 };
 	//addEventListener("scriptmsg", AutoAssign.ScriptMsgEvent);
-addEventListener('copydata', AutoAssign.receiveCopyData);
+addEventListener("copydata", AutoAssign.receiveCopyData);
 addEventListener("gameevent", AutoAssign.gameEvent);

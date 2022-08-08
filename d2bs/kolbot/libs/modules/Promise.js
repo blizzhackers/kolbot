@@ -5,14 +5,14 @@
  */
 
 (function (module, require) {
-	const Worker = require('Worker');
+	const Worker = require("Worker");
 	/**
 	 *
 	 * @param {function({resolve},{reject}):boolean} callback
 	 * @constructor
 	 */
 	const Promise = module.exports = function (callback) {
-		typeof Promise.__promiseCounter === 'undefined' && (Promise.__promiseCounter = 0);
+		typeof Promise.__promiseCounter === "undefined" && (Promise.__promiseCounter = 0);
 
 		this._after = [];
 		this._catchers = [];
@@ -22,20 +22,20 @@
 		const self = this;
 
 		const final = function () {
-				typeof self._finally !== 'undefined' && self._finally.forEach(function (callback) {
+				typeof self._finally !== "undefined" && self._finally.forEach(function (callback) {
 					return callback(self.value);
 				});
 			}, resolve = function (result) {
 				self.value = result;
 				self.stopped = true;
-				typeof self._after !== 'undefined' && self._after.forEach(callback => Worker.push(function () {
+				typeof self._after !== "undefined" && self._after.forEach(callback => Worker.push(function () {
 					return callback(result);
 				}));
 				Worker.push(final);
 			},
 			reject = function (e) {
 				self.stopped = true;
-				typeof self._catchers !== 'undefined' && self._catchers.forEach(callback => Worker.push(function () {
+				typeof self._catchers !== "undefined" && self._catchers.forEach(callback => Worker.push(function () {
 					return callback(e);
 				}));
 				if (!Array.isArray(self._catchers) || !self._catchers.length) Misc.errorReport(e || (new Error));
@@ -53,27 +53,27 @@
 		this.valueOf = () => self.stopped ? self.value : self;
 
 		this.then = function (handler) {
-			typeof self._after !== 'undefined' && (self._after = []);
+			typeof self._after !== "undefined" && (self._after = []);
 			self._after.push(handler);
 
 			return self;
 		};
 
 		this.catch = function (handler) {
-			typeof self._catchers !== 'undefined' && (self._catchers = []);
+			typeof self._catchers !== "undefined" && (self._catchers = []);
 			self._catchers.push(handler);
 
 			return self;
 		};
 
 		this.finally = function (handler) {
-			typeof self._finally !== 'undefined' && (self._finally = []);
+			typeof self._finally !== "undefined" && (self._finally = []);
 			self._finally.push(handler);
 
 			return self;
 		};
 
-		Worker.runInBackground['promise__' + (++Promise.__promiseCounter)] = function () {
+		Worker.runInBackground["promise__" + (++Promise.__promiseCounter)] = function () {
 			try {
 				callback(resolve, reject);
 			} catch (e) {

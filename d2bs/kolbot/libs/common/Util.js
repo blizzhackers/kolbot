@@ -5,6 +5,30 @@
 *
 */
 
+// torn on if these include functions should be here or in polyfill - not exactly polyfill functions but sorta?
+function includeIfNotIncluded (file = "") {
+	if (!isIncluded(file)) {
+		if (!include(file)) {
+			console.error("Failed to include " + file);
+			console.trace();
+		}
+	}
+	return true;
+}
+
+function includeCommonLibs () {
+	let files = dopen("libs/common/").getFiles();
+	if (!files.length) throw new Error("Failed to find my files");
+		
+	Array.isArray(files) && files
+		.filter(file => file.endsWith(".js") && !file.match("auto", "gi") && !file.match("util.js", "gi"))
+		.forEach(function (x) {
+			if (!includeIfNotIncluded("common/" + x)) {
+				throw new Error("Failed to include common/" + x);
+			}
+		});
+}
+
 /**
  * @param args
  * @returns Unit[]
@@ -76,24 +100,12 @@ const clickUnitAndWait = (button, shift, unit) => {
 	return (before !== unit.mode);
 };
 
-function includeCommonLibs () {
-	let files = dopen("libs/common/").getFiles();
-		
-	Array.isArray(files) && files
-		.filter(file => file.endsWith('.js') && !file.match("auto", "gi") && file !== "Util.js")
-		.forEach(function (x) {
-			if (!include("common/" + x)) {
-				throw new Error("Failed to include " + "common/" + x);
-			}
-		});
-}
-
 // helper functions in case you find it annoying like me to write while (getTickCount() - tick > 3 * 60 * 1000) which is 3 minutes
 // instead we can do while (getTickCount() - tick > Time.minutes(5))
 const Time = {
 	seconds: function (ms = 0) {
 		if (typeof ms !== "number") return 0;
-		return (ms * 60000);
+		return (ms * 1000);
 	},
 	minutes: function (ms = 0) {
 		if (typeof ms !== "number") return 0;
@@ -105,6 +117,38 @@ const Time = {
 };
 
 const Game = {
+	getDistance: function (...args) {
+		switch (args.length) {
+		case 0:
+			return Infinity;
+		case 1:
+			// getDistance(unit) - returns distance that unit is from me
+			if (typeof args[0] !== "object") return Infinity;
+			if (!args[0].hasOwnProperty("x")) return Infinity;
+			return Math.sqrt(Math.pow((me.x - args[0].x), 2) + Math.pow((me.y - args[0].y), 2));
+		case 2:
+			// getDistance(x, y) - returns distance x, y is from me
+			// getDistance(unitA, unitB) - returns distace unitA is from unitB
+			if (typeof args[0] === "number" && typeof args[1] === "number") {
+				return Math.sqrt(Math.pow((me.x - args[0]), 2) + Math.pow((me.y - args[1]), 2));
+			} else if (typeof args[0] === "object" && typeof args[1] === "object") {
+				if (!args[1].hasOwnProperty("x")) return Infinity;
+				return Math.sqrt(Math.pow((args[0].x - args[1].x), 2) + Math.pow((args[0].y - args[1].y), 2));
+			}
+			return Infinity;
+		case 3:
+			// getDistance(unit, x, y) - returns distance x, y is from unit
+			if (typeof args[2] !== "number") return Infinity;
+			if (!args[0].hasOwnProperty("x")) return Infinity;
+			return Math.sqrt(Math.pow((args[0].x - args[1]), 2) + Math.pow((args[0].y - args[2]), 2));
+		case 4:
+			// getDistance(x1, y1, x2, y2)
+			if (typeof args[0] !== "number" || typeof args[3] !== "number") return Infinity;
+			return Math.sqrt(Math.pow((args[0] - args[2]), 2) + Math.pow((args[1] - args[3]), 2));
+		default:
+			return Infinity;
+		}
+	},
 	getCursorUnit: function () {
 		return getUnit(100);
 	},
@@ -132,80 +176,28 @@ const Game = {
 	getStairs: function (id, mode, gid) {
 		return getUnit(sdk.unittype.Stairs, id, mode, gid);
 	},
+	getPresetMonster: function (area, id) {
+		!area && (area = me.area);
+		return getPresetUnit(area, sdk.unittype.Monster, id);
+	},
+	getPresetMonsters: function (area, id) {
+		!area && (area = me.area);
+		return getPresetUnits(area, sdk.unittype.Monster, id);
+	},
+	getPresetObject: function (area, id) {
+		!area && (area = me.area);
+		return getPresetUnit(area, sdk.unittype.Object, id);
+	},
+	getPresetObjects: function (area, id) {
+		!area && (area = me.area);
+		return getPresetUnits(area, sdk.unittype.Object, id);
+	},
+	getPresetStair: function (area, id) {
+		!area && (area = me.area);
+		return getPresetUnit(area, sdk.unittype.Stairs, id);
+	},
+	getPresetStairs: function (area, id) {
+		!area && (area = me.area);
+		return getPresetUnits(area, sdk.unittype.Stairs, id);
+	},
 };
-
-(function (global, print) {
-	global.console = global.console || (function () {
-		const console = {};
-		const argMap = el => typeof el === 'object' && el /*not null */ && JSON.stringify(el) || el;
-
-		console.log = function (...args) {
-			// use call to avoid type errors
-			print.call(null, args.map(argMap).join(','));
-		};
-
-		console.printDebug = true;
-		console.debug = function (...args) {
-			if (console.printDebug) {
-				const stack = new Error().stack.match(/[^\r\n]+/g);
-				let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf('\\') + 1) || 'unknown:0';
-				this.log('ÿc:[ÿc:' + filenameAndLine + 'ÿc:]ÿc0 ' + args.map(argMap).join(','));
-			}
-		};
-
-		console.error = function (error) {
-			let msg, source, stack;
-			
-			if (typeof error === "string") {
-				msg = error;
-			} else {
-				source = error.fileName.substring(error.fileName.lastIndexOf("\\") + 1, error.fileName.length);
-				msg = "ÿc1Error @ ÿc2[" + source + " line :: " + error.lineNumber + "ÿc2] ÿc1(" + error.message + ")";
-
-				if (error.hasOwnProperty("stack")) {
-					stack = error.stack;
-
-					if (stack) {
-						stack = stack.split("\n");
-
-						if (stack && typeof stack === "object") {
-							stack.reverse();
-						}
-					}
-				}
-			}
-
-			print(msg);
-		};
-
-		console.errorReport = function (error) {
-			let msg, source, stack;
-			
-			if (typeof error === "string") {
-				msg = error;
-			} else {
-				source = error.fileName.substring(error.fileName.lastIndexOf("\\") + 1, error.fileName.length);
-				msg = "ÿc1Error @ ÿc2[" + source + " line :: " + error.lineNumber + "ÿc2] ÿc1(" + error.message + ")";
-
-				if (error.hasOwnProperty("stack")) {
-					stack = error.stack;
-
-					if (stack) {
-						stack = stack.split("\n");
-
-						if (stack && typeof stack === "object") {
-							stack.reverse();
-						}
-					}
-				}
-			}
-
-			print(msg);
-		};
-
-		console.warn = console.debug;
-
-		return console;
-
-	})();
-})([].filter.constructor('return this')(), print);

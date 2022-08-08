@@ -1,7 +1,8 @@
-/*
-*	@filename	HelpMenu.js
-*	@author		theBGuy
-*	@desc		Help Menu for MapThread
+/**
+*  @filename    HelpMenu.js
+*  @author      theBGuy
+*  @desc        Help Menu for MapThread
+*
 */
 
 const HelpMenu = new function () {
@@ -121,7 +122,7 @@ const HelpMenu = new function () {
 	};
 };
 
-let Worker = require('../../modules/Worker');
+let Worker = require("../../modules/Worker");
 
 Worker.runInBackground.helpAction = function () {
 	while (HelpMenu.action.length > 0) {

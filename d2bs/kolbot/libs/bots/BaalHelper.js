@@ -14,7 +14,7 @@ function BaalHelper() {
 	Config.RandomPrecast && Precast.needOutOfTownCast() ? Precast.doRandomPrecast(true, sdk.areas.Harrogath) : Precast.doPrecast(true);
 
 	if (Config.BaalHelper.SkipTP) {
-		me.area !== sdk.areas.WorldstoneLvl2 && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
+		!me.inArea(sdk.areas.WorldstoneLvl2) && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
 
 		if (!Pather.moveToExit([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction], false)) throw new Error("Failed to move to WSK3.");
 		if (!Misc.poll(() => {
@@ -31,7 +31,7 @@ function BaalHelper() {
 			return false;
 		}, Time.minutes(Config.BaalHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "Leader not" : "No players") + " found in Throne)");
 
-		let entrance = Misc.poll(() => getUnit(5, 82), 1000, 200);
+		let entrance = Misc.poll(() => Game.getStairs(sdk.exits.preset.NextAreaWorldstone), 1000, 200);
 		entrance && Pather.moveTo(entrance.x > me.x ? entrance.x - 5 : entrance.x + 5, entrance.y > me.y ? entrance.y - 5 : entrance.y + 5);
 
 		if (!Pather.moveToExit([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction], false)) throw new Error("Failed to move to WSK3.");
@@ -50,7 +50,7 @@ function BaalHelper() {
 		}, Time.minutes(Config.BaalHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
 	}
 
-	if (Config.BaalHelper.DollQuit && getUnit(1, 691)) {
+	if (Config.BaalHelper.DollQuit && Game.getMonster(sdk.monsters.SoulKiller)) {
 		print("Undead Soul Killers found.");
 
 		return true;
@@ -67,6 +67,7 @@ function BaalHelper() {
 	if (Config.BaalHelper.KillBaal) {
 		Common.Baal.killBaal();
 	} else {
+		Town.goToTown();
 		while (true) {
 			delay(500);
 		}

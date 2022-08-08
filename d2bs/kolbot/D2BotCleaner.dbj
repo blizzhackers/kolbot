@@ -95,13 +95,13 @@ const AdvancedCleanerConfig = {
 
 // No touchy!
 include("json2.js");
-include('polyfill.js');
+include("polyfill.js");
 include("OOG.js");
 include("common/misc.js");
 include("common/prototypes.js");
 include("common/util.js");
-let Controls = require('./modules/Control');
-let sdk = require('./modules/sdk');
+let sdk = require("./modules/sdk");
+let Controls = require("./modules/Control");
 
 if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 	Starter.firstRun = true;
@@ -129,7 +129,7 @@ function dataCleaner () {
 		});
 	}
 	if (!profiles.length) {
-		D2Bot.printToConsole("D2BotCleaner: No profiles entered to clean. If this was a mistake, fill out profile information under NEW STUFF. Exiting dataCleaner and moving on to clean characters...", 6);
+		D2Bot.printToConsole("D2BotCleaner: No profiles entered to clean. If this was a mistake, fill out profile information under NEW STUFF. Exiting dataCleaner and moving on to clean characters...", sdk.colors.D2Bot.Gold);
 		return;
 	}
 
@@ -156,7 +156,7 @@ function dataCleaner () {
 			charClass = charClassMap[buildCheck[1]];
 			soloplayProfile = true;
 		} else {
-			//D2Bot.printToConsole("D2BotCleaner: Failed to get charClass. Please check that your profile was entered correctly under NEW STUFF.", 6);
+			//D2Bot.printToConsole("D2BotCleaner: Failed to get charClass. Please check that your profile was entered correctly under NEW STUFF.", sdk.colors.D2Bot.Gold);
 			//print("Invalid profile name, couldn't set character class");
 			charClass = "undefined";
 		}
@@ -220,17 +220,17 @@ function dataCleaner () {
 		}
 		
 		if (Starter.Config.SaveFiles && profileExists && soloplayProfile) {
-			D2Bot.printToConsole("D2BotCleaner: Files saved to -> libs/SoloPlay/Data/" + charType + "/" + charClass + "/" + j, 6);
+			D2Bot.printToConsole("D2BotCleaner: Files saved to -> libs/SoloPlay/Data/" + charType + "/" + charClass + "/" + j, sdk.colors.D2Bot.Gold);
 		}
 
 		if (profileExists) {
-			D2Bot.printToConsole("D2BotCleaner: Cleaned files for -> " + profiles[i], 6);
+			D2Bot.printToConsole("D2BotCleaner: Cleaned files for -> " + profiles[i], sdk.colors.D2Bot.Gold);
 		}
 
 		delay(500);
 	}
 
-	D2Bot.printToConsole("D2BotCleaner: Done cleaning files", 6);
+	D2Bot.printToConsole("D2BotCleaner: Done cleaning files", sdk.colors.D2Bot.Gold);
 }
 	
 function parseInfo () {
@@ -250,7 +250,7 @@ function parseInfo () {
 
 	if (!accounts.length) {
 		FileTools.remove("logs/D2BotCleaner.json");
-		D2Bot.printToConsole("D2BotCleaner: No accounts entered. Exiting...", 6);
+		D2Bot.printToConsole("D2BotCleaner: No accounts entered. Exiting...", sdk.colors.D2Bot.Gold);
 		ControlAction.timeoutDelay("Exiting in: ", 3 * 1e3);
 		D2Bot.stop(me.profile, true);
 	}
@@ -300,7 +300,7 @@ function locationAction (location) {
 	case sdk.game.locations.SplashScreen:
 		if (!accounts.length) {
 			FileTools.remove("logs/D2BotCleaner.json");
-			D2Bot.printToConsole("D2BotCleaner: Done cleaning accounts!", 6);
+			D2Bot.printToConsole("D2BotCleaner: Done cleaning accounts!", sdk.colors.D2Bot.Gold);
 			D2Bot.stop(me.profile, true);
 		}
 		
@@ -335,7 +335,7 @@ function locationAction (location) {
 		obj.currAcc = currAccInfo[0];
 		charList = chars[0];
 
-		D2Bot.printToConsole("D2BotCleaner: Cleaning account:" + currAcc + " , Character list: " + charList, 6);
+		D2Bot.printToConsole("D2BotCleaner: Cleaning account:" + currAcc + " , Character list: " + charList, sdk.colors.D2Bot.Gold);
 		FileTools.writeText("logs/D2BotCleaner.json", JSON.stringify(obj));
 		
 		if (currAcc.toLowerCase() === "singleplayer") {
@@ -461,7 +461,7 @@ function locationAction (location) {
 }
 
 function main () {
-	addEventListener('copydata', Starter.receiveCopyData);
+	addEventListener("copydata", Starter.receiveCopyData);
 
 	while (!Starter.handle) {
 		delay(100);
@@ -479,7 +479,7 @@ function main () {
 	if (Starter.gameInfo.error) {
 		if (!!DataFile.getStats().debugInfo) {
 			Starter.gameInfo.crashInfo = DataFile.getStats().debugInfo;
-			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, 10);
+			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, sdk.colors.D2Bot.Gray);
 		}
 
 		ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);

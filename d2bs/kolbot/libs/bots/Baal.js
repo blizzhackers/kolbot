@@ -7,8 +7,8 @@
 
 function Baal() {
 	this.announce = function () {
-		let count, string, souls, dolls,
-			monster = getUnit(1);
+		let count, string, souls, dolls;
+		let monster = Game.getMonster();
 
 		if (monster) {
 			count = 0;
@@ -16,8 +16,8 @@ function Baal() {
 			do {
 				if (monster.attackable && monster.y < 5094) {
 					monster.distance <= 40 && (count += 1);
-					!souls && monster.classid === 641 && (souls = true);
-					!dolls && monster.classid === 691 && (dolls = true);
+					!souls && monster.classid === sdk.monsters.BurningSoul1 && (souls = true);
+					!dolls && monster.classid === sdk.monsters.SoulKiller && (dolls = true);
 				}
 			} while (monster.getNext());
 		}
@@ -47,7 +47,7 @@ function Baal() {
 
 	Town.doChores();
 	!!Config.RandomPrecast ? Precast.doRandomPrecast(true, sdk.areas.WorldstoneLvl2) : Pather.useWaypoint(sdk.areas.WorldstoneLvl2) && Precast.doPrecast(true);
-	me.area !== sdk.areas.WorldstoneLvl2 && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
+	!me.inArea(sdk.areas.WorldstoneLvl2) && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
 
 	if (!Pather.moveToExit([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction], true)) {
 		throw new Error("Failed to move to Throne of Destruction.");
@@ -55,13 +55,13 @@ function Baal() {
 
 	Pather.moveTo(15095, 5029);
 
-	if (Config.Baal.DollQuit && getUnit(1, 691)) {
+	if (Config.Baal.DollQuit && Game.getMonster(sdk.monsters.SoulKiller)) {
 		say("Dolls found! NG.");
 
 		return true;
 	}
 
-	if (Config.Baal.SoulQuit && getUnit(1, 641)) {
+	if (Config.Baal.SoulQuit && Game.getMonster(sdk.monsters.BurningSoul1)) {
 		say("Souls found! NG.");
 
 		return true;

@@ -144,11 +144,17 @@ function Rusher() {
 
 	// get info from master
 	let tick = getTickCount();
+	let askAgain = 1;
 	say("questinfo");
 	while (!command) {
 		// wait up to 3 minutes
 		if (getTickCount() - tick > Time.minutes(3)) {
 			break;
+		}
+
+		if (getTickCount() - tick > Time.minutes(askAgain)) {
+			say("questinfo");
+			askAgain++;
 		}
 	}
 

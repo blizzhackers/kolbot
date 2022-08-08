@@ -13,7 +13,7 @@ function WPGetter() {
 	let highestAct = me.highestAct;
 	let lastWP = sdk.areas.townOfAct((highestAct === 5 ? highestAct : highestAct + 1));
 	lastWP === sdk.areas.Harrogath && (lastWP = me.baal ? sdk.areas.WorldstoneLvl2 : sdk.areas.AncientsWay);
-	let wpsToGet = Pather.nonTownWpAreas.filter((wp) => wp < lastWP && wp !== 123 && !getWaypoint(Pather.wpAreas.indexOf(wp)));
+	let wpsToGet = Pather.nonTownWpAreas.filter((wp) => wp < lastWP && wp !== sdk.areas.HallsofPain && !getWaypoint(Pather.wpAreas.indexOf(wp)));
 
 	console.debug(wpsToGet);
 

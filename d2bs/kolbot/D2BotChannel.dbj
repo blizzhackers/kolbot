@@ -24,7 +24,7 @@ Starter.Config.Follow = []; // leader's in game character name, only use this if
 
 // No touchy!
 include("json2.js");
-include('polyfill.js');
+include("polyfill.js");
 include("OOG.js");
 include("automule.js");
 include("gambling.js");
@@ -33,25 +33,25 @@ include("craftingsystem.js");
 include("common/misc.js");
 include("common/util.js");
 include("common/prototypes.js");
-let sdk = require('./modules/sdk');
-let Controls = require('./modules/Control');
-let Overrides = require('./modules/Override');
+let sdk = require("./modules/sdk");
+let Controls = require("./modules/Control");
+let Overrides = require("./modules/Override");
 
 if (typeof AdvancedConfig[me.profile] === "object") {
 	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
 }
 
-let channelTick = getTickCount(),
-	fListTick = 0,
-	retry = 0,
-	badGames = [],
-	lastText,
-	joinInfo = {
-		gameName: "",
-		gamePass: "",
-		oldGame: "",
-		inGame: false
-	};
+let channelTick = getTickCount();
+let fListTick = 0;
+let retry = 0;
+let badGames = [];
+let lastText;
+let joinInfo = {
+	gameName: "",
+	gamePass: "",
+	oldGame: "",
+	inGame: false
+};
 
 if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 	Starter.firstRun = true;
@@ -116,7 +116,7 @@ function locationAction (location) {
 		fullText = lines.join(" ").replace(/\s+/g, " ");
 
 		if (fullText.match(Starter.Config.MutedKeyTrigger.replace(/\s+/g, " "), "gi")) {
-			D2Bot.printToConsole(Starter.gameInfo.mpq + " is muted.", 6);
+			D2Bot.printToConsole(Starter.gameInfo.mpq + " is muted.", sdk.colors.D2Bot.Gold);
 
 			ControlAction.mutedKey = true;
 
@@ -199,7 +199,7 @@ function locationAction (location) {
 				}
 
 				// Didn't meet level restriction
-				if (string === getLocaleString(5162)) {
+				if (string === getLocaleString(sdk.locale.text.DoNotMeetLevelReqForThisGame)) {
 					print(string);
 
 					retry = Starter.Config.JoinRetry;
@@ -257,75 +257,80 @@ function locationAction (location) {
 		}
 
 		lastText = fullText;
-		let newLines = lines
-			.map((line, index) => {
-				if (index > 0
-					// eslint-disable-next-line no-useless-escape
-					&& !line.match(/\<.*\>/, "gi")
-					&& !line.match(" has left", "gi")
-					&& !line.match(" has joined", "gi")) {
-					line = lines[index - 1] + line;
-				}
-				return line;
-			})
-			.filter(line => line.match("Next game is", "gi"));
 
-		if (newLines.length === 0) {
-			break;
-		}
-
-		for (n = 0; n < Starter.Config.Follow.length; n++) {
-			let test = [];
-
-			newLines.forEach(element => {
-				if (element.includes(Starter.Config.Follow[n])) {
-					test.push(element);
-				}
-			});
-
-			if (test.length === 0) continue;
-			test.reverse();
-
-			for (let msg = 0; msg < test.length; msg++) {
-				let checkName = test[msg].toString();
-				let hasPass = checkName.indexOf("/") > -1;
-
-				let gName = (checkName.slice(checkName.indexOf("is ") + 3, (hasPass ? checkName.indexOf("/") : undefined)) || "").trim();
-				if (gName.length > 15) continue; // invalid game name
-				let gPass = (hasPass ? checkName.slice(checkName.lastIndexOf("/") + 1) : "");
-				if (gPass.length > 15) continue; // invalid game pass
-				joinInfo.gameName = gName;
-				joinInfo.gamePass = gPass;
-				console.debug(joinInfo.gameName + " " + joinInfo.gamePass);
-
-				if (joinInfo.gameName && joinInfo.gameName !== joinInfo.oldGame && badGames.indexOf(joinInfo.gameName) === -1) {
-					// wait until leader has left the channel
-					if (Starter.Config.JoinDelay && Starter.channelNotify) {
-						let wTick = getTickCount();
-
-						while (true) {
-							lines = Controls.LobbyChat.getText();
-
-							if (!lines || (getTickCount() - wTick > Time.minutes(1))) {
-								break;
-							}
-
-							if (lines.some(line => line.match(Starter.Config.Follow[n] + " has left"))) {
-								break;
-							}
-
-							delay(2000);
-						}
+		// we are set to follow a specific leader, lets look for their messages
+		if (Starter.Config.Follow.length > 0) {
+			let newLines = lines
+				.map((line, index) => {
+					if (index > 0
+						// eslint-disable-next-line no-useless-escape
+						&& !line.match(/\<.*\>/, "gi")
+						&& !line.match(" has left", "gi")
+						&& !line.match(" has joined", "gi")) {
+						line = lines[index - 1] + line;
 					}
+					return line;
+				})
+				.filter(line => line.match("Next game is", "gi"));
 
-					Controls.JoinGameWindow.click();
+			if (newLines.length === 0) {
+				break;
+			}
 
-					break;
+			for (n = 0; n < Starter.Config.Follow.length; n++) {
+				let test = [];
+
+				newLines.forEach(element => {
+					if (element.includes(Starter.Config.Follow[n])) {
+						test.push(element);
+					}
+				});
+
+				if (test.length === 0) continue;
+				test.reverse();
+
+				for (let msg = 0; msg < test.length; msg++) {
+					let checkName = test[msg].toString();
+					let hasPass = checkName.indexOf("/") > -1;
+
+					let gName = (checkName.slice(checkName.indexOf("is ") + 3, (hasPass ? checkName.indexOf("/") : undefined)) || "").trim();
+					if (gName.length > 15) continue; // invalid game name
+					let gPass = (hasPass ? checkName.slice(checkName.lastIndexOf("/") + 1) : "");
+					if (gPass.length > 15) continue; // invalid game pass
+					joinInfo.gameName = gName;
+					joinInfo.gamePass = gPass;
+					console.debug(joinInfo.gameName + " " + joinInfo.gamePass);
+
+					if (joinInfo.gameName && joinInfo.gameName !== joinInfo.oldGame && badGames.indexOf(joinInfo.gameName) === -1) {
+						// wait until leader has left the channel
+						if (Starter.Config.JoinDelay && Starter.channelNotify) {
+							let wTick = getTickCount();
+
+							while (true) {
+								lines = Controls.LobbyChat.getText();
+
+								if (!lines || (getTickCount() - wTick > Time.minutes(1))) {
+									break;
+								}
+
+								if (lines.some(line => line.match(Starter.Config.Follow[n] + " has left"))) {
+									break;
+								}
+
+								delay(2000);
+							}
+						}
+
+						Controls.JoinGameWindow.click();
+
+						break;
+					}
 				}
 			}
 		}
 
-		for (n = 0; n < Starter.Config.Games.length; n += 1) {
+		// we are just trying to follow game names
+		for (let n = 0; n < Starter.Config.Games.length; n += 1) {
 			if (Starter.Config.Games[n] === "") continue;
 			regex = new RegExp("\\W+" + Starter.Config.Games[n].toLowerCase() + "\\d+", "gi");
 			joinInfo.gameName = fullText.match(regex);
@@ -376,7 +381,7 @@ function locationAction (location) {
 
 			me.blockmouse = true;
 
-			Controls.CreateGame.click();
+			Controls.JoinGame.click();
 
 			me.blockmouse = false;
 			Starter.lastGameStatus = "pending";
@@ -477,8 +482,8 @@ function locationAction (location) {
 }
 
 function main() {
-	addEventListener('copydata', Starter.receiveCopyData);
-	addEventListener('scriptmsg', Starter.scriptMsgEvent);
+	addEventListener("copydata", Starter.receiveCopyData);
+	addEventListener("scriptmsg", Starter.scriptMsgEvent);
 
 	while (!Starter.handle) {
 		delay(100);
@@ -498,7 +503,7 @@ function main() {
 	if (Starter.gameInfo.error) {
 		if (!!DataFile.getStats().debugInfo) {
 			Starter.gameInfo.crashInfo = DataFile.getStats().debugInfo;
-			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, 10);
+			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, sdk.colors.D2Bot.Gray);
 		}
 
 		ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);

@@ -23,30 +23,26 @@ MapMode.include();
 
 function main() {
 	let obj = {type: false, dest: false, action: false};
-	let action, fail = 0, x, y,
-		mapThread = getScript("libs/manualplay/threads/mapthread.js");
+	let action, fail = 0, x, y;
+	let mapThread = getScript("libs/manualplay/threads/mapthread.js");
 
-	const portalMap = {
-		// Abaddon
-		125: {
-			14: [12638, 6373],
-			15: [12638, 6063],
-			20: [12708, 6063],
-			25: [12948, 6128],
-		},
-		// Pit of Acheron
-		126: {
-			14: [12638, 7873],
-			15: [12638, 7563],
-			20: [12708, 7563],
-			25: [12948, 7628],
-		},
-		// Infernal Pit
-		127: {
-			14: [12638, 9373],
-			20: [12708, 9063],
-			25: [12948, 9128],
-		},
+	const portalMap = {};
+	portalMap[sdk.areas.Abaddon] = {
+		14: [12638, 6373],
+		15: [12638, 6063],
+		20: [12708, 6063],
+		25: [12948, 6128],
+	};
+	portalMap[sdk.areas.PitofAcheron] = {
+		14: [12638, 7873],
+		15: [12638, 7563],
+		20: [12708, 7563],
+		25: [12948, 7628],
+	};
+	portalMap[sdk.areas.InfernalPit] = {
+		14: [12638, 9373],
+		20: [12708, 9063],
+		25: [12948, 9128],
 	};
 
 	console.log("ÿc9MapHelper loaded");
@@ -131,10 +127,10 @@ function main() {
 						} else if ([sdk.areas.CanyonofMagic, sdk.areas.A2SewersLvl1, sdk.areas.PalaceCellarLvl3, sdk.areas.PandemoniumFortress, sdk.areas.BloodyFoothills].includes(obj.dest)) {
 							Pather.journeyTo(obj.dest);
 						} else if (obj.dest === sdk.areas.DurielsLair) {
-							Pather.moveToPreset(me.area, 2, 152, -11, 3);
+							Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricStaffHolder, -11, 3);
 
 							for (let i = 0; i < 3; i++) {
-								if (Pather.useUnit(2, 100, sdk.areas.DurielsLair)) {
+								if (Pather.useUnit(sdk.unittype.Object, sdk.objects.PortaltoDurielsLair, sdk.areas.DurielsLair)) {
 									break;
 								}
 							}
@@ -144,8 +140,8 @@ function main() {
 
 						break;
 					case "unit":
-						if (me.area === sdk.areas.MooMooFarm
-							|| (me.area === sdk.areas.DurielsLair && Misc.talkToTyrael())) {
+						if (me.inArea(sdk.areas.MooMooFarm)
+							|| (me.inArea(sdk.areas.DurielsLair) && Misc.talkToTyrael())) {
 							break;
 						}
 
@@ -161,11 +157,11 @@ function main() {
 
 							break;
 						case sdk.areas.LutGholein:
-							Pather.useUnit(sdk.unittype.Stairs, 20, sdk.areas.A2SewersLvl1);
+							Pather.useUnit(sdk.unittype.Stairs, sdk.exits.preset.A2EnterSewersDoor, sdk.areas.A2SewersLvl1);
 
 							break;
 						case sdk.areas.KurastBazaar:
-							Pather.useUnit(sdk.unittype.Stairs, 57, sdk.areas.A3SewersLvl1);
+							Pather.useUnit(sdk.unittype.Stairs, sdk.exits.preset.A3EnterSewers, sdk.areas.A3SewersLvl1);
 
 							break;
 						}
@@ -189,12 +185,12 @@ function main() {
 
 						break;
 					case "portal":
-						if (obj.dest === sdk.areas.WorldstoneChamber && getUnit(1, sdk.monsters.ThroneBaal)) {
+						if (obj.dest === sdk.areas.WorldstoneChamber && Game.getMonster(sdk.monsters.ThroneBaal)) {
 							me.overhead("Can't enter Worldstone Chamber yet. Baal still in area");
 							
 							break;
-						} else if (obj.dest === sdk.areas.WorldstoneChamber && !getUnit(1, sdk.monsters.ThroneBaal)) {
-							redPortal = getUnit(2, 563);
+						} else if (obj.dest === sdk.areas.WorldstoneChamber && !Game.getMonster(sdk.monsters.ThroneBaal)) {
+							redPortal = Game.getObject(sdk.objects.WorldstonePortal);
 							redPortal && Pather.usePortal(null, null, redPortal);
 
 							break;
@@ -202,7 +198,7 @@ function main() {
 
 						switch (obj.dest) {
 						case sdk.areas.RogueEncampment:
-							king = getPresetUnit(me.area, 1, 773);
+							king = Game.getPresetMonster(me.area, sdk.monsters.preset.TheCowKing);
 
 							switch (king.x) {
 							case 1:
@@ -214,17 +210,17 @@ function main() {
 							break;
 						case sdk.areas.StonyField:
 							Pather.moveTo(25173, 5086);
-							redPortal = Pather.getPortal(4);
+							redPortal = Pather.getPortal(obj.dest);
 
 							break;
 						case sdk.areas.MooMooFarm:
-							redPortal = Pather.getPortal(39);
+							redPortal = Pather.getPortal(obj.dest);
 
 							break;
 						case sdk.areas.ArcaneSanctuary:
 							Pather.moveTo(12692, 5195);
-							redPortal = Pather.getPortal(74);
-							!redPortal && Pather.useWaypoint(74);
+							redPortal = Pather.getPortal(obj.dest);
+							!redPortal && Pather.useWaypoint(obj.dest);
 
 							break;
 						case sdk.areas.Harrogath:
@@ -234,7 +230,7 @@ function main() {
 						case sdk.areas.FrigidHighlands:
 						case sdk.areas.ArreatPlateau:
 						case sdk.areas.FrozenTundra:
-							chestLoc = getPresetUnit(me.area, 2, 397);
+							chestLoc = Game.getPresetObject(me.area, sdk.objects.SmallSparklyChest);
 
 							if (!chestLoc) {
 								break;
@@ -304,20 +300,20 @@ function main() {
 
 							break;
 						case "filltps":
-							Town.fillTome(518);
+							Town.fillTome(sdk.items.TomeofTownPortal);
 							me.cancel();
 
 							break;
 						case "moveItemFromInvoToStash":
 						case "moveItemFromStashToInvo":
-							unit = getUnit(101);
+							unit = Game.getSelectedUnit();
 
 							switch (unit.location) {
-							case 3:
+							case sdk.storage.Inventory:
 								Storage.Stash.CanFit(unit) && Storage.Stash.MoveTo(unit);
 
 								break;
-							case 7:
+							case sdk.storage.Stash:
 								Storage.Inventory.CanFit(unit) && Storage.Inventory.MoveTo(unit);
 
 								break;
@@ -326,14 +322,14 @@ function main() {
 							break;
 						case "moveItemFromInvoToCube":
 						case "moveItemFromCubeToInvo":
-							unit = getUnit(101);
+							unit = Game.getSelectedUnit();
 
 							switch (unit.location) {
-							case 3:
+							case sdk.storage.Inventory:
 								Storage.Cube.CanFit(unit) && Storage.Cube.MoveTo(unit);
 
 								break;
-							case 6:
+							case sdk.storage.Cube:
 								Storage.Inventory.CanFit(unit) && Storage.Inventory.MoveTo(unit);
 
 								break;
@@ -342,14 +338,14 @@ function main() {
 							break;
 						case "moveItemFromInvoToTrade":
 						case "moveItemFromTradeToInvo":
-							unit = getUnit(101);
+							unit = Game.getSelectedUnit();
 
 							switch (unit.location) {
-							case 3:
+							case sdk.storage.Inventory:
 								Storage.TradeScreen.CanFit(unit) && Storage.TradeScreen.MoveTo(unit);
 
 								break;
-							case 5:
+							case sdk.storage.TradeWindow:
 								if (Storage.Inventory.CanFit(unit)) {
 									Packet.itemToCursor(unit);
 									Storage.Inventory.MoveTo(unit);
@@ -364,13 +360,13 @@ function main() {
 
 							break;
 						case "sellItem":
-							unit = getUnit(101);
+							unit = Game.getSelectedUnit();
 
-							if (unit.location === 3 && unit.sellable) {
+							if (unit.isInInventory && unit.sellable) {
 								try {
 									unit.sell();
 								} catch (e) {
-									print(e);
+									console.error(e);
 								}
 							}
 
@@ -411,7 +407,7 @@ function main() {
 					}
 				}
 			} catch (e) {
-				print(e);
+				console.error(e);
 			} finally {
 				action = false;
 				removeEventListener("keyup", Pather.stopEvent);

@@ -9,8 +9,8 @@ const Scripts = {};
 
 let Config = {
 	init: function (notify) {
-		let configFilename = "",
-			classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"];
+		let configFilename = "";
+		let classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"];
 
 		for (let i = 0; i < 5; i++) {
 			switch (i) {
@@ -99,7 +99,7 @@ let Config = {
 		if (Config.Silence && !Config.LocalChat.Enabled) {
 			// Override the say function with print, so it just gets printed to console
 			global._say = global.say;
-			global.say = (what) => print('Tryed to say: ' + what);
+			global.say = (what) => print("Tryed to say: " + what);
 		}
 
 		try {
@@ -204,7 +204,7 @@ let Config = {
 	RejuvBuffer: 0,
 	PickRange: 40,
 	MakeRoom: true,
-	ClearInvOnStart: true,
+	ClearInvOnStart: false,
 	FastPick: false,
 	ManualPlayPick: false,
 	OpenChests: {
@@ -215,6 +215,7 @@ let Config = {
 	PickitFiles: [],
 	BeltColumn: [],
 	MinColumn: [],
+	SkipId: [],
 	SkipEnchant: [],
 	SkipImmune: [],
 	SkipAura: [],
@@ -360,16 +361,18 @@ let Config = {
 	SummonShadow: false,
 
 	// Custom Attack
-	CustomClassAttack: '', // If set it loads common/Attack/[CustomClassAttack].js
+	CustomClassAttack: "", // If set it loads common/Attack/[CustomClassAttack].js
 
 	// Script specific
 	MFLeader: false,
 	Mausoleum: {
+		KillBishibosh: false,
 		KillBloodRaven: false,
 		ClearCrypt: false
 	},
 	Cows: {
-		MakeCows: false,
+		DontMakePortal: false,
+		JustMakePortal: false,
 		KillKing: false
 	},
 	Tombs: {

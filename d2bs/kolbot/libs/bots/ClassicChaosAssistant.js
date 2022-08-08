@@ -76,27 +76,27 @@ function ClassicChaosAssistant() {
 			}
 
 			if (infseal) {
-				Common.Diablo.openSeal(sdk.units.DiabloSealInfector2);
-				Common.Diablo.openSeal(sdk.units.DiabloSealInfector) && say("Infector of Souls spawned!");
+				Common.Diablo.openSeal(sdk.objects.DiabloSealInfector2);
+				Common.Diablo.openSeal(sdk.objects.DiabloSealInfector) && say("Infector of Souls spawned!");
 				Common.Diablo.infLayout === 1 ? Pather.moveTo(7893, 5306) : Pather.moveTo(7929, 5294);
 				infseal = false;
 			}
 
 			if (seisseal) {
-				Common.Diablo.openSeal(sdk.units.DiabloSealSeis) && say("Lord De Seis spawned!");
+				Common.Diablo.openSeal(sdk.objects.DiabloSealSeis) && say("Lord De Seis spawned!");
 				Common.Diablo.seisLayout === 1 ? Pather.moveTo(7773, 5191) : Pather.moveTo(7794, 5189);
 				seisseal = false;
 			}
 
 			if (vizseal) {
-				Common.Diablo.openSeal(sdk.units.DiabloSealVizier2) && say("Grand Vizier of Chaos spawned!");
+				Common.Diablo.openSeal(sdk.objects.DiabloSealVizier2) && say("Grand Vizier of Chaos spawned!");
 				Common.Diablo.vizLayout === 1 ? Pather.moveTo(7681, 5302) : Pather.moveTo(7675, 5305);
 				vizseal = false;
 			}
 
 			if (diablopickup) {
-				Common.Diablo.openSeal(sdk.units.DiabloSealVizier);
-				Pather.moveToPreset(108, 2, 255);
+				Common.Diablo.openSeal(sdk.objects.DiabloSealVizier);
+				Pather.moveToPreset(sdk.areas.ChaosSanctuary, sdk.unittype.Object, 255);
 				for (let i = 0; i < 300; i += 1) {
 					Pickit.pickItems();
 					delay(100);
@@ -112,9 +112,9 @@ function ClassicChaosAssistant() {
 			break;
 		default:
 			if (stargo) {
-				if (me.area === sdk.areas.RiverofFlame) {
+				if (me.inArea(sdk.areas.RiverofFlame)) {
 					Precast.doPrecast(true);
-					Pather.moveToPreset(108, 2, 255);
+					Pather.moveToPreset(sdk.areas.ChaosSanctuary, sdk.unittype.Object, 255);
 					Common.Diablo.initLayout();
 					break;
 				}

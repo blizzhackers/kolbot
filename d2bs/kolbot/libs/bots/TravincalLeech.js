@@ -1,42 +1,81 @@
 /**
 *  @filename    TravincalLeech.js
-*  @author      ToS/XxXGoD/YGM/azero
+*  @author      ToS/XxXGoD/YGM/azero, theBGuy
 *  @desc        Travincal Leech
 *
 */
 
-function TravincalLeech() {
+/**
+*  @todo:
+*   - add help option
+*      - keep within 40 of leader for just leeching
+*      - long range help for helper?
+*   - add dodge if position is too hot (hydras can kill a low level quickly)
+*/
+
+function TravincalLeech () {
+	let leader;
+	let done = false;
+
+	const chatEvent = function (nick, msg) {
+		if (nick === leader && msg.toLowerCase() === "travdone") {
+			done = true;
+		}
+	};
+
 	Town.goToTown(3);
 	Town.doChores();
 	Town.move("portalspot");
 
-	while (!Misc.inMyParty(Config.Leader)) {
-		delay(500);
+	if (Config.Leader) {
+		leader = Config.Leader;
+		if (!Misc.poll(() => Misc.inMyParty(leader), Time.minutes(2), 1000)) throw new Error("TristramLeech: Leader not partied");
 	}
-	
-	let leader = Misc.findPlayer(Config.Leader);
 
-	while (Misc.inMyParty(Config.Leader)) {
-		if (me.inTown && Pather.getPortal(sdk.areas.Travincal, Config.Leader)) {
-			Pather.usePortal(sdk.areas.Travincal, Config.Leader);
-			Town.getCorpse();
-		}
-		
-		if (me.area === sdk.areas.Travincal && leader.area !== sdk.areas.Travincal && leader.area !== sdk.areas.KurastDocktown) {
-			break;
-		}
-		
-		if (me.mode === 17) {
-			me.revive();
+	!leader && (leader = Misc.autoLeaderDetect({
+		destination: sdk.areas.Travincal,
+		quitIf: (area) => Common.Leecher.nextScriptAreas.includes(area),
+		timeout: Time.minutes(5)
+	}));
 
-			while (!me.inTown) {
+	if (leader) {
+		const Worker = require("../modules/Worker");
+		addEventListener("chatmsg", chatEvent);
+
+		try {
+			Common.Leecher.killLeaderTracker = false;
+			Common.Leecher.leader = leader;
+			Common.Leecher.currentScript = Loader.scriptName();
+			Worker.runInBackground.leaderTracker = Common.Leecher.leaderTracker;
+			
+			while (Misc.inMyParty(Common.Leecher.leader)) {
+				if (done) return true;
+
+				if (me.inTown && Pather.getPortal(sdk.areas.Travincal, Common.Leecher.leader)) {
+					Pather.usePortal(sdk.areas.Travincal, Common.Leecher.leader);
+					Town.getCorpse();
+				}
+				
+				if (me.mode === sdk.player.mode.Dead) {
+					me.revive();
+
+					while (!me.inTown) {
+						delay(100);
+					}
+
+					Town.move("portalspot");
+				}
+
 				delay(100);
 			}
-
-			Town.move("portalspot");
+		} catch (e) {
+			console.error(e);
+		} finally {
+			removeEventListener("chatmsg", chatEvent);
+			Common.Leecher.killLeaderTracker = true;
 		}
-
-		delay(100);
+	} else {
+		console.warn("No leader found");
 	}
 
 	return true;

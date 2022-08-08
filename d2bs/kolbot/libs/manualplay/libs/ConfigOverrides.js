@@ -1,23 +1,22 @@
-/*
-*	@filename	ConfigOverrides.js
-*	@author		theBGuy
-*	@desc		Config.js fixes to improve functionality for map mode
+/**
+*  @filename    ConfigOverrides.js
+*  @author      theBGuy
+*  @desc        Config.js additions to improve functionality for map mode
+*
 */
 
-if (!isIncluded("common/Config.js")) { include("common/Config.js"); }
+includeIfNotIncluded("common/Config.js");
 
 let original = Config.init;
 
 Config.init = function (notify) {
-	let configFilename = "",
-		classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"];
+	let configFilename = "";
+	let classes = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"];
 
 	for (let i = 0; i < 5; i += 1) {
 		switch (i) {
 		case 0: // Custom config
-			if (!isIncluded("config/_customconfig.js")) {
-				include("config/_customconfig.js");
-			}
+			includeIfNotIncluded("config/_customconfig.js");
 
 			for (let n in CustomConfig) {
 				if (CustomConfig.hasOwnProperty(n)) {
@@ -100,7 +99,7 @@ Config.init = function (notify) {
 	if (Config.Silence && !Config.LocalChat.Enabled) {
 		// Override the say function with print, so it just gets printed to console
 		global._say = global.say;
-		global.say = (what) => print('Tryed to say: ' + what);
+		global.say = (what) => print("Tryed to say: " + what);
 	}
 
 	try {

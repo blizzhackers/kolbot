@@ -6,6 +6,7 @@
 */
 
 const Precast = new function () {
+	this.enabled = true;
 	this.haveCTA = -1;
 	this.bestSlot = {};
 
@@ -72,35 +73,33 @@ const Precast = new function () {
 		}
 
 		let classid, skillTab;
-		let sumCurr = 0;
-		let sumSwap = 0;
 
 		switch (skillId) {
 		case sdk.skills.FrozenArmor:
 		case sdk.skills.ShiverArmor:
 		case sdk.skills.ChillingArmor:
-			classid = sdk.charclass.Sorceress;
+			classid = sdk.player.class.Sorceress;
 			skillTab = sdk.skills.tabs.Cold;
 
 			break;
 		case sdk.skills.Enchant:
-			classid = sdk.charclass.Sorceress;
+			classid = sdk.player.class.Sorceress;
 			skillTab = sdk.skills.tabs.Fire;
 
 			break;
 		case sdk.skills.ThunderStorm:
 		case sdk.skills.EnergyShield:
-			classid = sdk.charclass.Sorceress;
+			classid = sdk.player.class.Sorceress;
 			skillTab = sdk.skills.tabs.Lightning;
 
 			break;
 		case sdk.skills.BoneArmor:
-			classid = sdk.charclass.Necromancer;
+			classid = sdk.player.class.Necromancer;
 			skillTab = sdk.skills.tabs.PoisonandBone;
 
 			break;
 		case sdk.skills.HolyShield:
-			classid = sdk.charclass.Paladin;
+			classid = sdk.player.class.Paladin;
 			skillTab = sdk.skills.tabs.PalaCombat;
 
 			break;
@@ -111,29 +110,29 @@ const Precast = new function () {
 		case sdk.skills.Shout:
 		case sdk.skills.BattleOrders:
 		case sdk.skills.BattleCommand:
-			classid = sdk.charclass.Barbarian;
+			classid = sdk.player.class.Barbarian;
 			skillTab = sdk.skills.tabs.Warcries;
 
 			break;
 		case sdk.skills.CycloneArmor:
-			classid = sdk.charclass.Druid;
+			classid = sdk.player.class.Druid;
 			skillTab = sdk.skills.tabs.Elemental;
 
 			break;
 		case sdk.skills.Werewolf:
 		case sdk.skills.Werebear:
-			classid = sdk.charclass.Druid;
+			classid = sdk.player.class.Druid;
 			skillTab = sdk.skills.tabs.ShapeShifting;
 			
 			break;
 		case sdk.skills.BurstofSpeed:
 		case sdk.skills.Fade:
-			classid = sdk.charclass.Assassin;
+			classid = sdk.player.class.Assassin;
 			skillTab = sdk.skills.tabs.ShadowDisciplines;
 
 			break;
 		case sdk.skills.BladeShield:
-			classid = sdk.charclass.Assassin;
+			classid = sdk.player.class.Assassin;
 			skillTab = sdk.skills.tabs.MartialArts;
 
 			break;
@@ -143,6 +142,8 @@ const Precast = new function () {
 
 		me.weaponswitch !== 0 && me.switchWeapons(0);
 
+		let sumCurr = 0;
+		let sumSwap = 0;
 		let sumStats = function (item) {
 			return (item.getStat(sdk.stats.AllSkills)
 				+ item.getStat(sdk.stats.AddClassSkills, classid) + item.getStat(sdk.stats.AddSkillTab, skillTab)
@@ -150,14 +151,14 @@ const Precast = new function () {
 		};
 
 		me.getItemsEx()
-			.filter(item => item.isEquipped && [4, 5, 11, 12].includes(item.bodylocation))
+			.filter(item => item.isEquipped && [sdk.body.RightArm, sdk.body.LeftArm, sdk.body.RightArmSecondary, sdk.body.LeftArmSecondary].includes(item.bodylocation))
 			.forEach(function (item) {
-				if (item.bodylocation === 4 || item.bodylocation === 5) {
+				if (item.isOnMain) {
 					sumCurr += sumStats(item);
 					return;
 				}
 
-				if (item.bodylocation === 11 || item.bodylocation === 12) {
+				if (item.isOnSwap) {
 					sumSwap += sumStats(item);
 					return;
 				}
@@ -173,7 +174,7 @@ const Precast = new function () {
 		let swap = me.weaponswitch;
 		let success = true;
 		// don't use packet casting with summons - or boing
-		let usePacket = ([
+		const usePacket = ([
 			sdk.skills.Valkyrie, sdk.skills.Decoy, sdk.skills.RaiseSkeleton, sdk.skills.ClayGolem, sdk.skills.RaiseSkeletalMage, sdk.skills.BloodGolem, sdk.skills.Shout,
 			sdk.skills.IronGolem, sdk.skills.Revive, sdk.skills.Werewolf, sdk.skills.Werebear, sdk.skills.OakSage, sdk.skills.SpiritWolf, sdk.skills.PoisonCreeper, sdk.skills.BattleOrders,
 			sdk.skills.SummonDireWolf, sdk.skills.Grizzly, sdk.skills.HeartofWolverine, sdk.skills.SpiritofBarbs, sdk.skills.ShadowMaster, sdk.skills.ShadowWarrior, sdk.skills.BattleCommand,
@@ -182,25 +183,25 @@ const Precast = new function () {
 
 		try {
 			!dontSwitch && me.switchWeapons(this.getBetterSlot(skillId));
-			if (me.getSkill(2) !== skillId && !me.setSkill(skillId, 0)) throw new Error("Failed to set skill on hand");
+			if (me.getSkill(sdk.skills.get.RightId) !== skillId && !me.setSkill(skillId, sdk.skills.hand.Right)) throw new Error("Failed to set " + getSkillById(skillId) + " on hand");
 
 			if (Config.PacketCasting > 1 || usePacket) {
-				console.debug("Packet casting: " + skillId);
+				Config.DebugMode && console.debug("Packet casting: " + skillId);
 				
 				switch (typeof x) {
 				case "number":
-					Packet.castSkill(0, x, y);
+					Packet.castSkill(sdk.skills.hand.Right, x, y);
 
 					break;
 				case "object":
-					Packet.unitCast(0, x);
+					Packet.unitCast(sdk.skills.hand.Right, x);
 
 					break;
 				}
 				delay(250);
 			} else {
 				// Right hand + No Shift
-				let clickType = 3, shift = 0;
+				let clickType = 3, shift = sdk.clicktypes.shift.NoShift;
 
 				MainLoop:
 				for (let n = 0; n < 3; n += 1) {
@@ -225,7 +226,7 @@ const Precast = new function () {
 			// account for lag, state 121 doesn't kick in immediately
 			if (Skill.isTimed(skillId)) {
 				for (let i = 0; i < 10; i += 1) {
-					if ([4, 9].includes(me.mode) || me.skillDelay) {
+					if ([sdk.player.mode.GettingHit, sdk.player.mode.Blocking].includes(me.mode) || me.skillDelay) {
 						break;
 					}
 
@@ -233,7 +234,7 @@ const Precast = new function () {
 				}
 			}
 		} catch (e) {
-			console.errorReport(e);
+			console.error(e);
 			success = false;
 		}
 
@@ -245,6 +246,8 @@ const Precast = new function () {
 	// should the config check still be included even though its part of Skill.init?
 	// todo: durations
 	this.doPrecast = function (force = false) {
+		if (!this.enabled) return false;
+
 		while (!me.gameReady) {
 			delay(40);
 		}
@@ -261,11 +264,11 @@ const Precast = new function () {
 		}
 
 		switch (me.classid) {
-		case sdk.charclass.Amazon:
-			Skill.canUse(sdk.skills.Valkyrie) && (buffSummons = this.summon(sdk.skills.Valkyrie, sdk.minions.Valkyrie));
+		case sdk.player.class.Amazon:
+			Skill.canUse(sdk.skills.Valkyrie) && (buffSummons = this.summon(sdk.skills.Valkyrie, sdk.summons.type.Valkyrie));
 
 			break;
-		case sdk.charclass.Sorceress:
+		case sdk.player.class.Sorceress:
 			if (Skill.canUse(sdk.skills.ThunderStorm) && (force || !me.getState(sdk.states.ThunderStorm))) {
 				this.precastSkill(sdk.skills.ThunderStorm);
 			}
@@ -313,7 +316,7 @@ const Precast = new function () {
 			}
 
 			break;
-		case sdk.charclass.Necromancer:
+		case sdk.player.class.Necromancer:
 			if (Skill.canUse(sdk.skills.BoneArmor) && (force || !me.getState(sdk.states.BoneArmor))) {
 				this.precastSkill(sdk.skills.BoneArmor);
 			}
@@ -324,29 +327,29 @@ const Precast = new function () {
 				break;
 			case 1:
 			case "Clay":
-				this.summon(sdk.skills.ClayGolem, sdk.minions.Golem);
+				this.summon(sdk.skills.ClayGolem, sdk.summons.type.Golem);
 
 				break;
 			case 2:
 			case "Blood":
-				this.summon(sdk.skills.BloodGolem, sdk.minions.Golem);
+				this.summon(sdk.skills.BloodGolem, sdk.summons.type.Golem);
 
 				break;
 			case 3:
 			case "Fire":
-				this.summon(sdk.skills.FireGolem, sdk.minions.Golem);
+				this.summon(sdk.skills.FireGolem, sdk.summons.type.Golem);
 
 				break;
 			}
 
 			break;
-		case sdk.charclass.Paladin:
+		case sdk.player.class.Paladin:
 			if (Skill.canUse(sdk.skills.HolyShield) && Precast.precastables.HolyShield.canUse && (force || !me.getState(sdk.states.HolyShield))) {
 				this.precastSkill(sdk.skills.HolyShield);
 			}
 
 			break;
-		case sdk.charclass.Barbarian: // - TODO: durations
+		case sdk.player.class.Barbarian: // - TODO: durations
 			let needShout = (Skill.canUse(sdk.skills.Shout) && (force || !me.getState(sdk.states.Shout)));
 			let needBo = (Skill.canUse(sdk.skills.BattleOrders) && (force || !me.getState(sdk.states.BattleOrders)));
 			let needBc = (Skill.canUse(sdk.skills.BattleCommand) && (force || !me.getState(sdk.states.BattleCommand)));
@@ -364,27 +367,27 @@ const Precast = new function () {
 			}
 
 			break;
-		case sdk.charclass.Druid:
+		case sdk.player.class.Druid:
 			if (Skill.canUse(sdk.skills.CycloneArmor) && (force || !me.getState(sdk.states.CycloneArmor))) {
 				this.precastSkill(sdk.skills.CycloneArmor);
 			}
 
-			Skill.canUse(sdk.skills.Raven) && this.summon(sdk.skills.Raven, sdk.minions.Raven);
+			Skill.canUse(sdk.skills.Raven) && this.summon(sdk.skills.Raven, sdk.summons.type.Raven);
 
 			switch (Config.SummonAnimal) {
 			case 1:
 			case "Spirit Wolf":
-				buffSummons = this.summon(sdk.skills.SummonSpiritWolf, sdk.minions.SpiritWolf) || buffSummons;
+				buffSummons = this.summon(sdk.skills.SummonSpiritWolf, sdk.summons.type.SpiritWolf) || buffSummons;
 
 				break;
 			case 2:
 			case "Dire Wolf":
-				buffSummons = this.summon(sdk.skills.SummonDireWolf, sdk.minions.DireWolf) || buffSummons;
+				buffSummons = this.summon(sdk.skills.SummonDireWolf, sdk.summons.type.DireWolf) || buffSummons;
 
 				break;
 			case 3:
 			case "Grizzly":
-				buffSummons = this.summon(sdk.skills.SummonGrizzly, sdk.minions.Grizzly) || buffSummons;
+				buffSummons = this.summon(sdk.skills.SummonGrizzly, sdk.summons.type.Grizzly) || buffSummons;
 
 				break;
 			}
@@ -392,17 +395,17 @@ const Precast = new function () {
 			switch (Config.SummonVine) {
 			case 1:
 			case "Poison Creeper":
-				buffSummons = this.summon(sdk.skills.PoisonCreeper, sdk.minions.Vine) || buffSummons;
+				buffSummons = this.summon(sdk.skills.PoisonCreeper, sdk.summons.type.Vine) || buffSummons;
 
 				break;
 			case 2:
 			case "Carrion Vine":
-				buffSummons = this.summon(sdk.skills.CarrionVine, sdk.minions.Vine) || buffSummons;
+				buffSummons = this.summon(sdk.skills.CarrionVine, sdk.summons.type.Vine) || buffSummons;
 
 				break;
 			case 3:
 			case "Solar Creeper":
-				buffSummons = this.summon(sdk.skills.SolarCreeper, sdk.minions.Vine) || buffSummons;
+				buffSummons = this.summon(sdk.skills.SolarCreeper, sdk.summons.type.Vine) || buffSummons;
 
 				break;
 			}
@@ -410,17 +413,17 @@ const Precast = new function () {
 			switch (Config.SummonSpirit) {
 			case 1:
 			case "Oak Sage":
-				buffSummons = this.summon(sdk.skills.OakSage, sdk.minions.Spirit) || buffSummons;
+				buffSummons = this.summon(sdk.skills.OakSage, sdk.summons.type.Spirit) || buffSummons;
 
 				break;
 			case 2:
 			case "Heart of Wolverine":
-				buffSummons = this.summon(sdk.skills.HeartofWolverine, sdk.minions.Spirit) || buffSummons;
+				buffSummons = this.summon(sdk.skills.HeartofWolverine, sdk.summons.type.Spirit) || buffSummons;
 
 				break;
 			case 3:
 			case "Spirit of Barbs":
-				buffSummons = this.summon(sdk.skills.SpiritofBarbs, sdk.minions.Spirit) || buffSummons;
+				buffSummons = this.summon(sdk.skills.SpiritofBarbs, sdk.summons.type.Spirit) || buffSummons;
 
 				break;
 			}
@@ -430,7 +433,7 @@ const Precast = new function () {
 			}
 
 			break;
-		case sdk.charclass.Assassin:
+		case sdk.player.class.Assassin:
 			if (Skill.canUse(sdk.skills.Fade) && (force || !me.getState(sdk.states.Fade))) {
 				this.precastSkill(sdk.skills.Fade);
 			}
@@ -450,12 +453,12 @@ const Precast = new function () {
 			switch (Config.SummonShadow) {
 			case 1:
 			case "Warrior":
-				buffSummons = this.summon(sdk.skills.ShadowWarrior, sdk.minions.Shadow);
+				buffSummons = this.summon(sdk.skills.ShadowWarrior, sdk.summons.type.Shadow);
 
 				break;
 			case 2:
 			case "Master":
-				buffSummons = this.summon(sdk.skills.ShadowMaster, sdk.minions.Shadow);
+				buffSummons = this.summon(sdk.skills.ShadowMaster, sdk.summons.type.Shadow);
 
 				break;
 			}
@@ -475,11 +478,7 @@ const Precast = new function () {
 		let check = me.checkItem({name: sdk.locale.items.CalltoArms, equipped: true});
 
 		if (check.have) {
-			if (check.item.isOnSwap) {
-				this.haveCTA = 1;
-			} else {
-				this.haveCTA = 0;
-			}
+			this.haveCTA = check.item.isOnSwap ? 1 : 0;
 		}
 
 		return this.haveCTA > -1;
@@ -502,21 +501,21 @@ const Precast = new function () {
 					}
 					
 					Town.move("portalspot");
-					Skill.cast(skillId, 0, me.x, me.y);
+					Skill.cast(skillId, sdk.skills.hand.Right, me.x, me.y);
 				} else {
 					let coord = CollMap.getRandCoordinate(me.x, -6, 6, me.y, -6, 6);
 
 					// Keep bots from getting stuck trying to summon
 					if (!!coord && Attack.validSpot(coord.x, coord.y)) {
 						Pather.moveTo(coord.x, coord.y);
-						Skill.cast(skillId, 0, me.x, me.y);
+						Skill.cast(skillId, sdk.skills.hand.Right, me.x, me.y);
 					}
 				}
 
 				if (me.getMinionCount(minionType) === count) {
 					return true;
 				} else {
-					console.debug("(Precast) :: Failed to summon minion " + skillId);
+					console.warn("Failed to summon minion " + skillId);
 
 					return false;
 				}
@@ -531,7 +530,7 @@ const Precast = new function () {
 			let coord = CollMap.getRandCoordinate(me.x, -4, 4, me.y, -4, 4);
 
 			if (!!coord && Attack.validSpot(coord.x, coord.y)) {
-				Skill.cast(skillId, 0, coord.x, coord.y);
+				Skill.cast(skillId, sdk.skills.hand.Right, coord.x, coord.y);
 
 				if (me.getMinionCount(minionType) === count) {
 					break;
@@ -552,24 +551,24 @@ const Precast = new function () {
 		me.switchWeapons(this.getBetterSlot(sdk.skills.Enchant));
 
 		// Player
-		unit = getUnit(0);
+		unit = Game.getPlayer();
 
 		if (unit) {
 			do {
 				if (!unit.dead && Misc.inMyParty(unit.name) && unit.distance <= 40) {
-					Skill.cast(sdk.skills.Enchant, 0, unit);
+					Skill.cast(sdk.skills.Enchant, sdk.skills.hand.Right, unit);
 					chanted.push(unit.name);
 				}
 			} while (unit.getNext());
 		}
 
 		// Minion
-		unit = getUnit(1);
+		unit = Game.getMonster();
 
 		if (unit) {
 			do {
-				if (unit.getParent() && chanted.indexOf(unit.getParent().name) > -1 && unit.distance <= 40) {
-					Skill.cast(sdk.skills.Enchant, 0, unit);
+				if (unit.getParent() && chanted.includes(unit.getParent().name) && unit.distance <= 40) {
+					Skill.cast(sdk.skills.Enchant, sdk.skills.hand.Right, unit);
 				}
 			} while (unit.getNext());
 		}
@@ -595,7 +594,7 @@ const Precast = new function () {
 			}
 			Pather.useWaypoint(returnTo);
 		} catch (e) {
-			console.errorReport(e);
+			console.error(e);
 		} finally {
 			if (me.area !== returnTo && (!Pather.useWaypoint(returnTo) || !Pather.useWaypoint(sdk.areas.townOf(me.area)))) {
 				Pather.journeyTo(returnTo);

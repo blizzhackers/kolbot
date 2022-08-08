@@ -5,7 +5,6 @@
 *
 */
 include("StarterConfig.js");
-// todo - allow joining chat and looking for games there too
 
 // D2BotPubJoin specific settings - for global settings see libs/StarterConfig.js
 Starter.Config.MinGameTime = 0; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
@@ -93,7 +92,7 @@ function excludeCheck (game) {
 
 // No touchy!
 include("json2.js");
-include('polyfill.js');
+include("polyfill.js");
 include("OOG.js");
 include("automule.js");
 include("gambling.js");
@@ -101,9 +100,9 @@ include("craftingsystem.js");
 include("torchsystem.js");
 include("common/misc.js");
 include("common/util.js");
-let sdk = require('./modules/sdk');
-let Controls = require('./modules/Control');
-let Overrides = require('./modules/Override');
+let sdk = require("./modules/sdk");
+let Controls = require("./modules/Control");
+let Overrides = require("./modules/Override");
 
 if (typeof AdvancedConfig[me.profile] === "object") {
 	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
@@ -235,6 +234,8 @@ function locationAction (location) {
 			delay(1000);
 		}
 
+		console.debug(gameList);
+
 		if (gameList) {
 			doneGames = [];
 			gameToJoin = false;
@@ -246,7 +247,7 @@ function locationAction (location) {
 
 			for (let i = 0; i < gameList.length; i += 1) {
 				if (doneGames.indexOf(gameList[i].gameName) === -1 && includeCheck(gameList[i].gameName) && excludeCheck(gameList[i].gameName)) {
-					print("ÿc7Game: " + gameList[i].gameName + ", Players: " + gameList[i].players);
+					console.log("ÿc7Game: " + gameList[i].gameName + ", Players: " + gameList[i].players);
 					gameToJoin = gameList[i].gameName;
 
 					break;
@@ -367,8 +368,8 @@ function locationAction (location) {
 
 function main() {
 	debugLog(me.profile);
-	addEventListener('copydata', Starter.receiveCopyData);
-	addEventListener('scriptmsg', Starter.scriptMsgEvent);
+	addEventListener("copydata", Starter.receiveCopyData);
+	addEventListener("scriptmsg", Starter.scriptMsgEvent);
 
 	while (!Starter.handle) {
 		delay(100);
@@ -392,7 +393,7 @@ function main() {
 		delay(200);
 
 		if (Starter.gameInfo.crashInfo) {
-			D2Bot.printToConsole("Crash Info: Script: " + Starter.gameInfo.crashInfo.currScript + " Area: " + Starter.gameInfo.crashInfo.area, 10);
+			D2Bot.printToConsole("Crash Info: Script: " + Starter.gameInfo.crashInfo.currScript + " Area: " + Starter.gameInfo.crashInfo.area, sdk.colors.D2Bot.Gray);
 		}
 
 		ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);

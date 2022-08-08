@@ -1,12 +1,12 @@
 /**
-*  @filename    Baal.js
+*  @filename    BoBarbHelper.js
 *  @author      nag0k
 *  @desc        give Battle Orders buff modded for hardcore, with barbarian waiting whole game on Catacombs 2 wp by default
 *               get the required lines for character config files from ...\libs\config\_BaseConfigFile.js
 *
 */
 
-const BoBarbHelper = () => {
+function BoBarbHelper () {
 	if (!me.barbarian && Config.BoBarbHelper.Mode !== 0) return true;
 
 	const townNearbyMonster = true; // go to town if monsters nearby
@@ -14,7 +14,7 @@ const BoBarbHelper = () => {
 	const shouldHealMana = amount => me.mp < Math.floor(me.mpmax * amount / 100);
 
 	const healMana = () => {
-		Pather.useWaypoint(1);
+		Pather.useWaypoint(sdk.areas.RogueEncampment);
 		Town.initNPC("Heal", "heal");
 		Pather.useWaypoint(Config.BoBarbHelper.Wp);
 	};
@@ -28,7 +28,7 @@ const BoBarbHelper = () => {
 	);
 
 	const giveBuff = () => {
-		const unit = getUnit(0);
+		const unit = Game.getPlayer();
 
 		do {
 			if (shouldBuff(unit)) {
@@ -39,7 +39,7 @@ const BoBarbHelper = () => {
 	};
 
 	const monsterNear = () => {
-		const unit = getUnit(1);
+		const unit = Game.getMonster();
 
 		if (unit) {
 			do {
@@ -54,18 +54,18 @@ const BoBarbHelper = () => {
 
 	if (!Config.QuitList) {
 		showConsole();
-		print('set Config.QuitList in character settings');
-		print('if you don\'t I will idle indefinitely');
+		print("set Config.QuitList in character settings");
+		print("if you don't I will idle indefinitely");
 	}
 
 	if (me.hardcore && Config.LifeChicken <= 0) {
 		showConsole();
-		print('on HARDCORE');
-		print('you should set Config.LifeChicken');
-		print('monsters can find their way to wps ...');
+		print("on HARDCORE");
+		print("you should set Config.LifeChicken");
+		print("monsters can find their way to wps ...");
 		delay(2000);
 		hideConsole();
-		me.overhead('set LifeChiken to 40');
+		me.overhead("set LifeChiken to 40");
 		Config.LifeChicken = 40;
 	}
 
@@ -76,8 +76,8 @@ const BoBarbHelper = () => {
 		Pather.useWaypoint(Config.BoBarbHelper.Wp);
 	} catch (e) {
 		showConsole();
-		print('Failed to move to BO WP');
-		print('make sure I have ' + Pather.getAreaName(Config.BoBarbHelper.Wp) + ' waypoint');
+		print("Failed to move to BO WP");
+		print("make sure I have " + Pather.getAreaName(Config.BoBarbHelper.Wp) + " waypoint");
 		delay(20000);
 
 		return true;
@@ -89,7 +89,7 @@ const BoBarbHelper = () => {
 		giveBuff();
 
 		if (townNearbyMonster && monsterNear()) {
-			if (!Pather.useWaypoint(1)) {
+			if (!Pather.useWaypoint(sdk.areas.RogueEncampment)) {
 				break;
 			}
 		}
@@ -101,4 +101,4 @@ const BoBarbHelper = () => {
 	Town.goToTown();
 
 	return true;
-};
+}

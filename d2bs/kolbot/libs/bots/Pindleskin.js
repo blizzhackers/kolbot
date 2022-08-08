@@ -19,7 +19,7 @@ function Pindleskin() {
 	} else {
 		Town.move(NPC.Anya);
 
-		if (!Pather.getPortal(sdk.areas.NihlathaksTemple) && me.getQuest(sdk.quest.id.PrisonofIce, 1)) {
+		if (!Pather.getPortal(sdk.areas.NihlathaksTemple) && me.getQuest(sdk.quest.id.PrisonofIce, sdk.quest.states.ReqComplete)) {
 			Town.npcInteract("Anya");
 		}
 
@@ -33,13 +33,13 @@ function Pindleskin() {
 	try {
 		Attack.kill(getLocaleString(sdk.locale.monsters.Pindleskin));
 	} catch (e) {
-		console.errorReport(e);
+		console.error(e);
 	}
 
 	if (Config.Pindleskin.KillNihlathak) {
 		if (!Pather.moveToExit([sdk.areas.HallsofAnguish, sdk.areas.HallsofPain, sdk.areas.HallsofVaught], true)) throw new Error("Failed to move to Halls of Vaught");
 
-		Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.units.NihlathaksPlatform, 10, 10);
+		Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.NihlathaksPlatform, 10, 10);
 
 		if (Config.Pindleskin.ViperQuit && Game.getMonster(sdk.monsters.TombViper2)) {
 			console.log("Tomb Vipers found.");

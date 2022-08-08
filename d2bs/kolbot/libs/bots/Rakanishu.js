@@ -10,7 +10,7 @@ function Rakanishu() {
 	Pather.useWaypoint(sdk.areas.StonyField);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToPreset(me.area, 1, sdk.monsters.preset.Rakanishu, 0, 0, false, true)) throw new Error("Failed to move to Rakanishu");
+	if (!Pather.moveToPreset(me.area, sdk.unittype.Monster, sdk.monsters.preset.Rakanishu, 0, 0, false, true)) throw new Error("Failed to move to Rakanishu");
 	Attack.kill(getLocaleString(sdk.locale.monsters.Rakanishu));
 
 	if (Config.Rakanishu.KillGriswold && Pather.getPortal(sdk.areas.Tristram)) {

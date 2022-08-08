@@ -19,7 +19,7 @@ const GameAction = {
 	init: function (task) {
 		this.task = JSON.parse(task);
 
-		if (this.task["data"] && typeof this.task.data === 'string') {
+		if (this.task["data"] && typeof this.task.data === "string") {
 			this.task.data = JSON.parse(this.task.data);
 		}
 
@@ -33,9 +33,9 @@ const GameAction = {
 	},
 
 	update: function (action, data) {
-		if (typeof action !== 'string') throw new Error("Action must be a string!");
+		if (typeof action !== "string") throw new Error("Action must be a string!");
 		
-		typeof data !== 'string' && (data = JSON.stringify(data));
+		typeof data !== "string" && (data = JSON.stringify(data));
 
 		D2Bot.printToConsole(data);
 

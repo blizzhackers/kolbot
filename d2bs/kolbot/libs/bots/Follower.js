@@ -49,12 +49,12 @@
 */
 
 function Follower() {
-	let i, stop, leader, leaderUnit, charClass, piece, skill, result, unit, player, coord,
-		commanders = [Config.Leader],
-		allowSay = true,
-		attack = true,
-		openContainers = true,
-		action = "";
+	let i, stop, leader, leaderUnit, charClass, piece, skill, result, unit, player, coord;
+	let commanders = [Config.Leader];
+	let allowSay = true;
+	let attack = true;
+	let openContainers = true;
+	let action = "";
 
 	this.announce = function (msg = "") {
 		if (!allowSay) return;
@@ -65,8 +65,8 @@ function Follower() {
 	this.checkExit = function (unit, area) {
 		if (unit.inTown) return false;
 
-		let target,
-			exits = getArea().exits;
+		let target;
+		let exits = getArea().exits;
 
 		for (let i = 0; i < exits.length; i += 1) {
 			if (exits[i].target === area) {
@@ -75,14 +75,14 @@ function Follower() {
 		}
 
 		if (unit.inTown) {
-			target = getUnit(2, "waypoint");
+			target = Game.getObject("waypoint");
 
 			if (target && getDistance(me, target) < 20) {
 				return 3;
 			}
 		}
 
-		target = getUnit(2, "portal");
+		target = Game.getObject("portal");
 
 		if (target) {
 			do {
@@ -95,8 +95,8 @@ function Follower() {
 		}
 
 		// Arcane<->Cellar portal
-		if ((me.area === sdk.areas.ArcaneSanctuary && area === sdk.areas.PalaceCellarLvl3)
-			|| (me.area === sdk.areas.PalaceCellarLvl3 && area === sdk.areas.ArcaneSanctuary)) {
+		if ((me.inArea(sdk.areas.ArcaneSanctuary) && area === sdk.areas.PalaceCellarLvl3)
+			|| (me.inArea(sdk.areas.PalaceCellarLvl3) && area === sdk.areas.ArcaneSanctuary)) {
 			Pather.usePortal(null);
 
 			return 4;
@@ -104,14 +104,14 @@ function Follower() {
 
 		// Tal-Rasha's tomb->Duriel's lair
 		if (me.area >= sdk.areas.TalRashasTomb1 && me.area <= sdk.areas.TalRashasTomb7 && area === sdk.areas.DurielsLair) {
-			Pather.useUnit(2, sdk.units.PortaltoDurielsLair, area);
+			Pather.useUnit(sdk.unittype.Object, sdk.objects.PortaltoDurielsLair, area);
 
 			return 4;
 		}
 
 		// Throne->Chamber
-		if (me.area === sdk.areas.ThroneofDestruction && area === sdk.areas.WorldstoneChamber) {
-			target = getUnit(2, 563);
+		if (me.inArea(sdk.areas.ThroneofDestruction) && area === sdk.areas.WorldstoneChamber) {
+			target = Game.getObject(sdk.objects.WorldstonePortal);
 
 			if (target) {
 				Pather.usePortal(null, null, target);
@@ -150,95 +150,42 @@ function Follower() {
 
 	// Change act after completing last act quest
 	this.changeAct = function (act) {
-		let npc, preArea, target;
+		let preArea = me.area;
 
-		preArea = me.area;
+		if (me.area >= sdk.areas.townOfAct(act)) {
+			this.announce("My current act is higher than " + act);
+			return false;
+		}
 
 		switch (act) {
 		case 2:
-			if (me.area >= 40) {
-				break;
-			}
-
-			Town.move(NPC.Warriv);
-
-			npc = getUnit(1, 155);
-
-			if (npc) {
-				npc.openMenu();
-				Misc.useMenu(0x0D36);
-			}
+			Town.npcInteract("Warriv", false) && Misc.useMenu(sdk.menu.GoEast);
 
 			break;
 		case 3:
-			if (me.area >= 75) {
-				break;
-			}
-
-			Town.move("palace");
-
-			npc = getUnit(1, 201);
-
-			if (npc) {
-				npc.openMenu();
-				me.cancel();
-			}
-
-			Town.move(NPC.Meshif);
-
-			npc = getUnit(1, 210);
-
-			if (npc) {
-				npc.openMenu();
-				Misc.useMenu(0x0D38);
-			}
+			Town.npcInteract("Jerhyn");
+			Town.move("Meshif") && Misc.useMenu(sdk.menu.SailEast);
 
 			break;
 		case 4:
-			if (me.area >= 103) {
-				break;
-			}
-
 			if (me.inTown) {
-				Town.move(NPC.Cain);
-
-				npc = getUnit(1, 245);
-
-				if (npc) {
-					npc.openMenu();
-					me.cancel();
-				}
-
+				Town.npcInteract("Cain");
 				Town.move("portalspot");
-				Pather.usePortal(102, null);
+				Pather.usePortal(sdk.areas.DuranceofHateLvl3, null);
 			}
 
 			delay(1500);
 
-			target = getUnit(2, 342);
-
-			if (target) {
-				Pather.moveTo(target.x - 3, target.y - 1);
-			}
+			let target = Game.getObject(sdk.objects.RedPortalToAct4);
+			target && Pather.moveTo(target.x - 3, target.y - 1);
 
 			Pather.usePortal(null);
 
 			break;
 		case 5:
-			if (me.area >= 109) {
-				break;
-			}
-
-			Town.move(NPC.Tyrael);
-
-			npc = getUnit(1, NPC.Tyrael);
-
-			if (npc) {
-				npc.openMenu();
-				me.cancel();
-
+			if (Town.npcInteract("Tyrael")) {
 				try {
-					Pather.useUnit(2, 566, 109);
+					Pather.useUnit(sdk.unittype.Object, sdk.objects.RedPortalToAct5, sdk.areas.Harrogath);
 				} catch (a5e) {
 					break;
 				}
@@ -277,13 +224,12 @@ function Follower() {
 			delay(40);
 		}
 
-		let status,
-			pickList = [],
-			item = getUnit(4);
+		let pickList = [];
+		let item = Game.getItem();
 
 		if (item) {
 			do {
-				if ((item.mode === 3 || item.mode === 5) && item.itemType >= 76 && item.itemType <= 78 && getDistance(me, item) <= range) {
+				if (item.onGroundOrDropping && item.itemType >= sdk.items.type.HealingPotion && item.itemType <= sdk.items.type.RejuvPotion && item.distance <= range) {
 					pickList.push(copyUnit(item));
 				}
 			} while (item.getNext());
@@ -295,7 +241,7 @@ function Follower() {
 			item = pickList.shift();
 
 			if (item && copyUnit(item).x) {
-				status = Pickit.checkItem(item).result;
+				let status = Pickit.checkItem(item).result;
 
 				if (status && Pickit.canPick(item)) {
 					Pickit.pickItem(item, status);
@@ -394,20 +340,19 @@ function Follower() {
 
 				break;
 			default:
-				if (me.paladin && msg.indexOf("aura ") > -1) {
+				if (me.paladin && msg.includes("aura ")) {
 					piece = msg.split(" ")[0];
 
 					if (piece === me.name || piece === "all") {
 						skill = parseInt(msg.split(" ")[2], 10);
 
-						if (me.getSkill(skill, 1)) {
+						if (me.getSkill(skill, sdk.skills.subindex.SoftPoints)) {
 							this.announce("Active aura is: " + skill);
 
 							Config.AttackSkill[2] = skill;
 							Config.AttackSkill[4] = skill;
 
-							Skill.setSkill(skill, 0);
-							//Attack.init();
+							Skill.setSkill(skill, sdk.skills.hand.Right);
 						} else {
 							this.announce("I don't have that aura.");
 						}
@@ -422,7 +367,7 @@ function Follower() {
 					if (charClass.includes(piece) || piece === me.name || piece === "all") {
 						skill = parseInt(msg.split(" ")[2], 10);
 
-						if (me.getSkill(skill, 1)) {
+						if (me.getSkill(skill, sdk.skills.subindex.SoftPoints)) {
 							this.announce("Attack skill is: " + skill);
 
 							Config.AttackSkill[1] = skill;
@@ -467,7 +412,7 @@ function Follower() {
 	Config.TownCheck = false;
 	Config.TownHP = 0;
 	Config.TownMP = 0;
-	charClass = sdk.charclass.nameOf(me.classid).toLowerCase();
+	charClass = sdk.player.class.nameOf(me.classid).toLowerCase();
 	leader = Misc.poll(() => Misc.findPlayer(Config.Leader), Time.seconds(20), Time.seconds(1));
 
 	if (!leader) {
@@ -488,7 +433,7 @@ function Follower() {
 
 	// Main Loop
 	while (Misc.inMyParty(Config.Leader)) {
-		if (me.mode === 17) {
+		if (me.mode === sdk.player.mode.Dead) {
 			while (!me.inTown) {
 				me.revive();
 				delay(1000);
@@ -512,7 +457,7 @@ function Follower() {
 			}
 
 			if (!leaderUnit) {
-				player = getUnit(0);
+				player = Game.getPlayer();
 
 				if (player) {
 					do {
@@ -536,7 +481,7 @@ function Follower() {
 				this.pickPotions(20);
 			}
 
-			me.paladin && Config.AttackSkill[2] > 0 && Skill.setSkill(Config.AttackSkill[2], 0);
+			me.paladin && Config.AttackSkill[2] > 0 && Skill.setSkill(Config.AttackSkill[2], sdk.skills.hand.Right);
 
 			if (leader.area !== me.area && !me.inTown) {
 				while (leader.area === 0) {
@@ -578,7 +523,7 @@ function Follower() {
 
 		switch (action) {
 		case "cow":
-			if (me.area === sdk.areas.RogueEncampment) {
+			if (me.inArea(sdk.areas.RogueEncampment)) {
 				Town.move("portalspot");
 				!Pather.usePortal(sdk.areas.MooMooFarm) && this.announce("Failed to use cow portal.");
 			}
@@ -597,7 +542,7 @@ function Follower() {
 
 			delay(rand(1, 3) * 500);
 
-			unit = getUnit(2, "waypoint");
+			unit = Game.getObject("waypoint");
 
 			if (unit) {
 				for (i = 0; i < 3; i += 1) {

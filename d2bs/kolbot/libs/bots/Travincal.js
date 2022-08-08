@@ -7,12 +7,13 @@
 
 function Travincal() {
 	this.buildList = function (checkColl) {
-		let monsterList = [],
-			monster = getUnit(1);
+		let monsterList = [];
+		let monster = Game.getMonster();
 
 		if (monster) {
 			do {
-				if ([345, 346, 347].includes(monster.classid) && monster.attackable && (!checkColl || !checkCollision(me, monster, 0x1))) {
+				if ([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3].includes(monster.classid)
+					&& monster.attackable && (!checkColl || !checkCollision(me, monster, sdk.collision.BlockWall))) {
 					monsterList.push(copyUnit(monster));
 				}
 			} while (monster.getNext());
@@ -39,14 +40,14 @@ function Travincal() {
 		Precast.doPrecast(true);
 	}
 
-	if (me.getSkill(sdk.skills.LeapAttack, 0) && !Pather.canTeleport()) {
+	if (Skill.canUse(sdk.skills.LeapAttack) && !Pather.canTeleport()) {
 		let coords = [60, -53, 64, -72, 78, -72, 74, -88];
 
 		for (let i = 0; i < coords.length; i += 2) {
 			if (i % 4 === 0) {
 				Pather.moveTo(orgX + coords[i], orgY + coords[i + 1]);
 			} else {
-				Skill.cast(sdk.skills.LeapAttack, 0, orgX + coords[i], orgY + coords[i + 1]);
+				Skill.cast(sdk.skills.LeapAttack, sdk.skills.hand.Right, orgX + coords[i], orgY + coords[i + 1]);
 				Attack.clearList(this.buildList(1));
 			}
 		}
@@ -67,6 +68,8 @@ function Travincal() {
 
 		Attack.clearList(this.buildList(0));
 	}
+
+	Config.MFLeader && Config.PublicMode && say("travdone");
 
 	return true;
 }

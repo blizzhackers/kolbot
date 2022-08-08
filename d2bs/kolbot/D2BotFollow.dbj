@@ -25,12 +25,12 @@ Starter.Config.JoinRetryDelay = 5; // Time in seconds to wait before next join a
 */
 
 const JoinSettings = {
-	"Leader": ["Leecher"]
+	"Leader": ["Leecher"],
 };
 
 // No touchy!
 include("json2.js");
-include('polyfill.js');
+include("polyfill.js");
 include("OOG.js");
 include("automule.js");
 include("gambling.js");
@@ -38,9 +38,9 @@ include("craftingsystem.js");
 include("torchsystem.js");
 include("common/misc.js");
 include("common/util.js");
-let Controls = require('./modules/Control');
-let sdk = require('./modules/sdk');
-let Overrides = require('./modules/Override');
+let sdk = require("./modules/sdk");
+let Controls = require("./modules/Control");
+let Overrides = require("./modules/Override");
 
 if (typeof AdvancedConfig[me.profile] === "object") {
 	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
@@ -54,7 +54,7 @@ if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 	Starter.firstRun = true;
 }
 
-new Overrides.Override(Starter, Starter.receiveCopyData, function(orignal, mode, msg) {
+new Overrides.Override(Starter, Starter.receiveCopyData, function (orignal, mode, msg) {
 	if (mode === 3) {
 		Starter.isUp = (me.gameReady ? "yes" : "no");
 		if (!me.gameReady) {
@@ -197,7 +197,7 @@ function locationAction (location) {
 
 					if (Starter.lastGameStatus === "pending" || (Starter.gameInfo.error && DataFile.getStats().gameName === Starter.joinInfo.gameName)) {
 						D2Bot.printToConsole("Failed to join game");
-						ControlAction.timeoutDelay("Join Delay", Starter.Config.JoinRetryDelay * 1000, joinCheck, leader[j]);
+						ControlAction.timeoutDelay("Join Delay", Starter.Config.JoinRetryDelay * 1000, joinCheck(leader[j]));
 						D2Bot.updateRuns();
 						D2Bot.requestGame(leader[j]);
 						delay(200);
@@ -376,8 +376,8 @@ function locationAction (location) {
 
 function main () {
 	debugLog(me.profile);
-	addEventListener('copydata', Starter.receiveCopyData);
-	addEventListener('scriptmsg', Starter.scriptMsgEvent);
+	addEventListener("copydata", Starter.receiveCopyData);
+	addEventListener("scriptmsg", Starter.scriptMsgEvent);
 
 	while (!Starter.handle) {
 		delay(100);
@@ -400,7 +400,7 @@ function main () {
 		if (!!DataFile.getStats().debugInfo) {
 			Starter.gameInfo.crashInfo = DataFile.getStats().debugInfo;
 
-			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, 10);
+			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, sdk.colors.D2Bot.Gray);
 		}
 
 		ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);

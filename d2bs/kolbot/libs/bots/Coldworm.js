@@ -13,10 +13,10 @@ function Coldworm() {
 	// Beetleburst, added by 13ack.Stab
 	if (Config.Coldworm.KillBeetleburst) {
 		try {
-			if (!Pather.moveToPreset(me.area, 1, 747)) throw new Error("Failed to move to Beetleburst");
+			if (!Pather.moveToPreset(me.area, sdk.unittype.Monster, sdk.monsters.preset.Beetleburst)) throw new Error("Failed to move to Beetleburst");
 			Attack.kill(getLocaleString(sdk.locale.monsters.Beetleburst));
 		} catch (e) {
-			console.warn(e); // not the main part of this script so simply log and move on
+			console.error(e); // not the main part of this script so simply log and move on
 		}
 	}
 
@@ -25,7 +25,7 @@ function Coldworm() {
 	if (Config.Coldworm.ClearMaggotLair) {
 		Attack.clearLevel(Config.ClearType);
 	} else {
-		if (!Pather.moveToPreset(me.area, 2, 356)) throw new Error("Failed to move to Coldworm");
+		if (!Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.ShaftoftheHoradricStaffChest)) throw new Error("Failed to move to Coldworm");
 		Attack.kill(sdk.monsters.ColdwormtheBurrower);
 	}
 

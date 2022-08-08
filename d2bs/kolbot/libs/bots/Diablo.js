@@ -15,7 +15,7 @@ function Diablo() {
 	// START
 	Town.doChores();
 	!!Config.RandomPrecast ? Precast.doRandomPrecast(true, sdk.areas.RiverofFlame) : Pather.useWaypoint(sdk.areas.RiverofFlame) && Precast.doPrecast(true);
-	me.area !== sdk.areas.RiverofFlame && Pather.useWaypoint(sdk.areas.RiverofFlame);
+	!me.inArea(sdk.areas.RiverofFlame) && Pather.useWaypoint(sdk.areas.RiverofFlame);
 
 	if (!Pather.moveToExit(sdk.areas.ChaosSanctuary, true) && !Pather.moveTo(7790, 5544)) throw new Error("Failed to move to Chaos Sanctuary");
 

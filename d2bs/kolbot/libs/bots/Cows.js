@@ -11,7 +11,7 @@ function Cows() {
 
 		Pather.useWaypoint(sdk.areas.StonyField);
 		Precast.doPrecast(true);
-		Pather.moveToPreset(me.area, 1, 737, 8, 8);
+		Pather.moveToPreset(me.area, sdk.unittype.Monster, sdk.monsters.preset.Rakanishu, 8, 8);
 
 		if (!Misc.poll(() => {
 			let p = Pather.getPortal(sdk.areas.Tristram);
@@ -44,7 +44,7 @@ function Cows() {
 	};
 
 	this.getTome = function () {
-		let tpTome = me.findItems(sdk.items.TomeofTownPortal, 0, 3);
+		let tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.items.mode.inStorage, sdk.storage.Inventory);
 
 		if (tpTome.length < 2) {
 			let npc = Town.initNPC("Shop", "buyTpTome");
@@ -55,14 +55,14 @@ function Cows() {
 
 			let tome = npc.getItem(sdk.items.TomeofTownPortal);
 
-			if (!!tome && tome.getItemCost(0) < me.gold && tome.buy()) {
+			if (!!tome && tome.getItemCost(sdk.items.cost.ToBuy) < me.gold && tome.buy()) {
 				delay(500);
-				tpTome = me.findItems(sdk.items.TomeofTownPortal, 0, 3);
+				tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.items.mode.inStorage, sdk.storage.Inventory);
 				tpTome.forEach(function (book) {
 					if (book.isInInventory) {
 						let scroll = npc.getItem(sdk.items.ScrollofTownPortal);
 						while (book.getStat(sdk.stats.Quantity) < 20) {
-							if (!!scroll && scroll.getItemCost(0) < me.gold) {
+							if (!!scroll && scroll.getItemCost(sdk.items.cost.ToBuy) < me.gold) {
 								scroll.buy(true);
 							} else {
 								break;
@@ -77,7 +77,7 @@ function Cows() {
 			}
 		}
 
-		return tpTome.first();
+		return tpTome.last();
 	};
 
 	this.openPortal = function (leg, tome) {
@@ -88,7 +88,8 @@ function Cows() {
 		}
 
 		transmute();
-		delay(500);
+		delay(1000);
+		me.cancelUIFlags();
 
 		for (let i = 0; i < 10; i += 1) {
 			if (Pather.getPortal(sdk.areas.MooMooFarm)) {
@@ -112,6 +113,7 @@ function Cows() {
 
 		// Check to see if portal is already open, if not get the ingredients
 		if (!Pather.getPortal(sdk.areas.MooMooFarm)) {
+			if (Config.Cows.DontMakePortal) throw new Error("NOT PORTAL MAKER");
 			if (!me.tristram) throw new Error("Cain quest incomplete");
 			if (me.cows) throw new Error("Already killed the Cow King.");
 			
@@ -120,20 +122,20 @@ function Cows() {
 			this.openPortal(leg, tome);
 		}
 	} catch (e) {
-		print("ÿc1" + e);
+		typeof e === "object" && e.message && e.message !== "NOT PORTAL MAKER" && console.error(e);
 
 		if (Misc.getPlayerCount() > 1) {
 			!me.inTown && Town.goToTown(1);
 			Town.move("stash");
 			console.log("ÿc9(Cows) :: ÿc0Waiting 1 minute to see if anyone else opens the cow portal");
 
-			if (!Misc.poll(() => Pather.getPortal(sdk.areas.MooMooFarm), 60e3, 2000)) throw new Error("No cow portal");
+			if (!Misc.poll(() => Pather.getPortal(sdk.areas.MooMooFarm), Time.minutes(3), 2000)) throw new Error("No cow portal");
 		} else {
 			return false;
 		}
 	}
 
-	if (Config.Cows.MakeCows) {
+	if (Config.Cows.JustMakePortal) {
 		if (Pather.getPortal(sdk.areas.MooMooFarm)) {
 			return true;
 		} else {

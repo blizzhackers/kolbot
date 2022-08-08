@@ -5,21 +5,33 @@
 *
 */
 
-function Wakka() {
-	let safeTP, portal, vizClear, seisClear, infClear, tick, timeout = Config.Wakka.Wait;
-	let minDist = 50;
-	let maxDist = 80;
+function Wakka () {
+	const timeout = Config.Wakka.Wait;
+	const minDist = 50;
+	const maxDist = 80;
+	const internals = {
+		safeTP: false,
+		coordsInit: false,
+		vizCoords: [],
+		seisCoords: [],
+		infCoords: [],
+		vizClear: false,
+		seisClear: false,
+		infClear: false,
+	};
+
+	let portal, tick;
 	let leaderUnit = null;
 	let leaderPartyUnit = null;
 	let leader = "";
 
-	this.checkMonsters = function (range, dodge) {
+	this.checkMonsters = function (range = 15, dodge = false) {
 		let monList = [];
-		let monster = getUnit(sdk.unittype.Monster);
+		let monster = Game.getMonster();
 
 		if (monster) {
 			do {
-				if (monster.y < 5565 && monster.attackable && getDistance(me, monster) <= range) {
+				if (monster.y < 5565 && monster.attackable && monster.distance <= range) {
 					if (!dodge) return true;
 					monList.push(copyUnit(monster));
 				}
@@ -30,33 +42,35 @@ function Wakka() {
 
 		monList.sort(Sort.units);
 
-		if (getDistance(me, monList[0]) < 25 && !checkCollision(me, monList[0], 0x4)) {
+		if (monList[0].distance < 25 && !checkCollision(me, monList[0], sdk.collision.Ranged)) {
 			Attack.deploy(monList[0], 25, 5, 15);
 		}
 
 		return true;
 	};
 
-	this.coordsInit = false;
-
 	this.getCoords = function () {
-		if (!this.coordsInit) {
+		if (!internals.coordsInit) {
 			Common.Diablo.initLayout();
-			this.vizCoords = Common.Diablo.vizLayout === 1 ? [7707, 5274] : [7708, 5298];
-			this.seisCoords = Common.Diablo.seisLayout === 1 ? [7812, 5223] : [7809, 5193];
-			this.infCoords = Common.Diablo.infLayout === 1 ? [7868, 5294] : [7882, 5306];
-			this.coordsInit = true;
+			internals.vizCoords = Common.Diablo.vizLayout === 1 ? [7707, 5274] : [7708, 5298];
+			internals.seisCoords = Common.Diablo.seisLayout === 1 ? [7812, 5223] : [7809, 5193];
+			internals.infCoords = Common.Diablo.infLayout === 1 ? [7868, 5294] : [7882, 5306];
+			internals.coordsInit = true;
 		}
 	};
 
 	this.checkBoss = function (name) {
-		let glow = Game.getObject(sdk.units.SealGlow);
+		let glow = Game.getObject(sdk.objects.SealGlow);
 
 		if (glow) {
 			for (let i = 0; i < 10; i += 1) {
 				let boss = Game.getMonster(name);
 
-				if (boss && boss.mode === 12) {
+				if (boss) {
+					while (!boss.dead) {
+						delay(500);
+					}
+					
 					return true;
 				}
 
@@ -70,14 +84,14 @@ function Wakka() {
 	};
 
 	this.getCorpse = function () {
-		me.dead && me.revive();
+		me.mode === sdk.player.mode.Dead && me.revive();
 
 		let rval = false;
-		let corpse = getUnit(0, me.name, 17);
+		let corpse = Game.getPlayer(me.name, sdk.player.mode.Dead);
 
 		if (corpse) {
 			do {
-				if (getDistance(me, corpse) <= 15) {
+				if (corpse.distance <= 15) {
 					Pather.moveToUnit(corpse);
 					corpse.interact();
 					delay(500);
@@ -92,16 +106,15 @@ function Wakka() {
 
 	this.followPath = function (dest) {
 		let path = getPath(me.area, me.x, me.y, dest[0], dest[1], 0, 10);
-
 		if (!path) throw new Error("Failed go get path");
 
 		while (path.length > 0) {
-			if (me.mode === 17 || me.inTown) return false;
-			!leaderUnit || !copyUnit(leaderUnit).x && (leaderUnit = getUnit(0, leader));
+			if (me.mode === sdk.player.mode.Dead || me.inTown) return false;
+			(!leaderUnit || !copyUnit(leaderUnit).x) && (leaderUnit = Game.getPlayer(leader));
 
 			if (leaderUnit) {
 				// monsters nearby - don't move
-				if (this.checkMonsters(45, true) && getDistance(me, leaderUnit) <= maxDist) {
+				if (this.checkMonsters(45, true) && leaderUnit.distance <= maxDist) {
 					path = getPath(me.area, me.x, me.y, dest[0], dest[1], 0, 15);
 					delay(200);
 
@@ -109,7 +122,16 @@ function Wakka() {
 				}
 
 				// leader within minDist range - don't move
-				if (getDistance(me, leaderUnit) <= minDist) {
+				if (leaderUnit.distance <= minDist) {
+					delay(200);
+
+					continue;
+				}
+
+				// make sure distance to next node isn't too hot
+				if ([path[0].x, path[0].y].mobCount({range: 15}) !== 0) {
+					console.log("Mobs at next node");
+					// mobs, stay where we are
 					delay(200);
 
 					continue;
@@ -139,7 +161,7 @@ function Wakka() {
 
 			Pather.moveTo(path[0].x, path[0].y) && path.shift();
 			// no mobs around us, so it's safe to pick
-			!me.checkForMobs({range: 10, coll: (0x1 | 0x400 | 0x800)}) && Pickit.pickItems(5);
+			!me.checkForMobs({range: 10, coll: (sdk.collision.BlockWall | sdk.collision.Objects | sdk.collision.ClosedDoor)}) && Pickit.pickItems(5);
 			this.getCorpse();
 		}
 
@@ -147,11 +169,13 @@ function Wakka() {
 	};
 
 	this.getLeaderUnitArea = function () {
-		if (!leaderUnit || !copyUnit(leaderUnit).x) {
-			leaderUnit = getUnit(0, leader);
-		}
-
+		(!leaderUnit || !copyUnit(leaderUnit).x) && (leaderUnit = Game.getPlayer(leader));
 		return !!leaderUnit ? leaderUnit.area : getParty(leader).area;
+	};
+
+	this.log = function (msg = "") {
+		me.overhead(msg);
+		console.log(msg);
 	};
 
 	// START
@@ -163,31 +187,65 @@ function Wakka() {
 		if (!Misc.poll(() => Misc.inMyParty(leader), 30e3, 1000)) throw new Error("Wakka: Leader not partied");
 	}
 
-	!leader && (leader = Misc.autoLeaderDetect({destination: 108, quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area), timeout: timeout * 60e3}));
+	!leader && (leader = Misc.autoLeaderDetect({
+		destination: sdk.areas.ChaosSanctuary,
+		quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area),
+		timeout: timeout * 60e3
+	}));
 	Town.doChores();
 
 	if (leader) {
-		const Worker = require('../modules/Worker');
+		addEventListener("gamepacket", Common.Diablo.diabloLightsEvent);
+		const Worker = require("../modules/Worker");
 
-		if (Config.Wakka.SkipIfBaal) {
-			let leadTick = getTickCount();
-			let killLeaderTracker = false;
+		try {
+			if (Config.Wakka.SkipIfBaal) {
+				let leadTick = getTickCount();
+				let killLeaderTracker = false;
 
-			Worker.runInBackground.leaderTracker = function () {
-				if (Common.Diablo.done || killLeaderTracker) return false;
+				Worker.runInBackground.leaderTracker = function () {
+					if (Common.Diablo.done || killLeaderTracker) return false;
+					// check every 3 seconds
+					if (getTickCount() - leadTick < 3000) return true;
+					leadTick = getTickCount();
+
+					// check again in another 3 seconds if game wasn't ready
+					if (!me.gameReady) return true;
+					if (Misc.getPlayerCount() <= 1) throw new Error("Empty game");
+
+					// Player is in Throne of Destruction or Worldstone Chamber
+					if ([sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(this.getLeaderUnitArea())) {
+						if (Loader.scriptName() === "Wakka") {
+							killLeaderTracker = true;
+							throw new Error("Party leader is running baal");
+						} else {
+							// kill process
+							return false;
+						}
+					}
+
+					return true;
+				};
+			}
+
+			let levelTick = getTickCount();
+			let killLevelTracker = false;
+
+			Worker.runInBackground.levelTracker = function () {
+				if (Common.Diablo.done || killLevelTracker) return false;
 				// check every 3 seconds
-				if (getTickCount() - leadTick < 3000) return true;
-				leadTick = getTickCount();
+				if (getTickCount() - levelTick < 3000) return true;
+				levelTick = getTickCount();
 
 				// check again in another 3 seconds if game wasn't ready
 				if (!me.gameReady) return true;
-				if (Misc.getPlayerCount() <= 1) throw new Error("Empty game");
 
-				// Player is in Throne of Destruction or Worldstone Chamber
-				if ([sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(this.getLeaderUnitArea())) {
+				if (me.charlvl >= Config.Wakka.StopAtLevel) {
+					Config.Wakka.StopProfile && D2Bot.stop();
+
 					if (Loader.scriptName() === "Wakka") {
-						killLeaderTracker = true;
-						throw new Error('Party leader is running baal');
+						killLevelTracker = true;
+						throw new Error("Reached wanted level");
 					} else {
 						// kill process
 						return false;
@@ -196,150 +254,167 @@ function Wakka() {
 
 				return true;
 			};
-		}
 
-		let levelTick = getTickCount();
-		let killLevelTracker = false;
+			while (Misc.inMyParty(leader)) {
+				try {
+					switch (me.area) {
+					case sdk.areas.PandemoniumFortress:
+						portal = Pather.getPortal(sdk.areas.ChaosSanctuary, null);
 
-		Worker.runInBackground.levelTracker = function () {
-			if (Common.Diablo.done || killLevelTracker) return false;
-			// check every 3 seconds
-			if (getTickCount() - levelTick < 3000) return true;
-			levelTick = getTickCount();
+						if (portal) {
+							!internals.safeTP && delay(5000);
+							Pather.usePortal(sdk.areas.ChaosSanctuary, null);
+							Precast.doPrecast(true);
+						}
 
-			// check again in another 3 seconds if game wasn't ready
-			if (!me.gameReady) return true;
+						break;
+					case sdk.areas.ChaosSanctuary:
+						try {
+							let diaTick = getTickCount();
 
-			if (me.charlvl >= Config.Wakka.StopAtLevel) {
-				Config.Wakka.StopProfile && D2Bot.stop();
+							Worker.runInBackground.diaSpawned = function () {
+								if (Common.Diablo.done || (internals.vizClear && internals.seisClear && internals.infClear)) return false;
+								// check every 1/4 second
+								if (getTickCount() - diaTick < 250) return true;
+								diaTick = getTickCount();
 
-				if (Loader.scriptName() === "Wakka") {
-					killLevelTracker = true;
-					throw new Error('Reached wanted level');
-				} else {
-					// kill process
-					return false;
+								if (Common.Diablo.diabloSpawned) {
+									internals.vizClear = true;
+									internals.seisClear = true;
+									internals.infClear = true;
+									throw new Error("Diablo spawned");
+								}
+
+								return true;
+							};
+
+							if (!internals.safeTP) {
+								if (this.checkMonsters(25, false)) {
+									this.log("hot tp");
+									Pather.usePortal(sdk.areas.PandemoniumFortress, null);
+									this.getCorpse();
+
+									break;
+								} else {
+									this.getCoords();
+									internals.safeTP = true;
+								}
+							}
+
+							if (!internals.vizClear) {
+								if (!this.followPath(internals.vizCoords)) {
+									console.debug("Failed to move to viz");
+									break;
+								}
+
+								if (this.checkBoss(getLocaleString(sdk.locale.monsters.GrandVizierofChaos))) {
+									this.log("vizier dead");
+									internals.vizClear = true;
+									Precast.doPrecast(true);
+									tick = getTickCount();
+
+									while (getTickCount() - tick >= 5000) {
+										delay(100);
+									}
+								}
+
+								break;
+							}
+
+							if (internals.vizClear && !internals.seisClear) {
+								if (!this.followPath(internals.seisCoords)) {
+									console.debug("Failed to move to seis");
+									break;
+								}
+								
+								if (this.checkBoss(getLocaleString(sdk.locale.monsters.LordDeSeis))) {
+									this.log("seis dead");
+									internals.seisClear = true;
+									Precast.doPrecast(true);
+									tick = getTickCount();
+
+									while (getTickCount() - tick >= 7000) {
+										delay(100);
+									}
+								}
+
+								break;
+							}
+
+							if (internals.vizClear && internals.seisClear && !internals.infClear) {
+								if (!this.followPath(internals.infCoords)) {
+									console.debug("Failed to move to infector");
+									break;
+								}
+
+								if (this.checkBoss(getLocaleString(sdk.locale.monsters.InfectorofSouls))) {
+									this.log("infector dead");
+									internals.infClear = true;
+									Precast.doPrecast(true);
+									tick = getTickCount();
+
+									while (getTickCount() - tick >= 2000) {
+										delay(100);
+									}
+								}
+
+								break;
+							}
+
+							Pather.moveTo(7767, 5263);
+							Misc.poll(() => {
+								if (Common.Diablo.diabloSpawned) return true;
+								if (Game.getMonster(sdk.monsters.Diablo)) return true;
+								return false;
+							}, Time.minutes(2), 500);
+						} catch (e) {
+							console.log((e.message ? e.message : e));
+						}
+
+						if (internals.vizClear && internals.seisClear && internals.infClear) {
+							Pather.moveTo(7767, 5263);
+
+							let diablo = Misc.poll(() => Game.getMonster(sdk.monsters.Diablo), Time.minutes(3), 500);
+
+							if (diablo) {
+								while (!diablo.dead) {
+									delay(100);
+								}
+								this.log("Diablo is dead");
+
+								if (!Town.canTpToTown() || !Town.goToTown()) {
+									Pather.usePortal(sdk.areas.PandemoniumFortress);
+								}
+
+								return true;
+							} else {
+								this.log("Couldn't find diablo");
+							}
+						}
+
+						break;
+					}
+
+					me.dead && me.revive();
+
+					delay(200);
+				} catch (e) {
+					console.error(e);
+
+					return true;
 				}
 			}
-
-			return true;
-		};
-
-		while (Misc.inMyParty(leader)) {
-			try {
-				switch (me.area) {
-				case sdk.areas.PandemoniumFortress:
-					portal = Pather.getPortal(sdk.areas.ChaosSanctuary, null);
-
-					if (portal) {
-						!safeTP && delay(5000);
-						Pather.usePortal(sdk.areas.ChaosSanctuary, null);
-						Precast.doPrecast(true);
-					}
-
-					break;
-				case sdk.areas.ChaosSanctuary:
-					if (!safeTP) {
-						if (this.checkMonsters(25, false)) {
-							me.overhead("hot tp");
-							Pather.usePortal(sdk.areas.PandemoniumFortress, null);
-							this.getCorpse();
-
-							break;
-						} else {
-							this.getCoords();
-
-							safeTP = true;
-						}
-					}
-
-					if (!vizClear) {
-						if (!this.followPath(this.vizCoords)) {
-							break;
-						}
-
-						if (tick && getTickCount() - tick >= 5000) {
-							vizClear = true;
-							tick = false;
-
-							break;
-						}
-
-						if (this.checkBoss(getLocaleString(2851))) {
-							!tick && (tick = getTickCount());
-							me.overhead("vizier dead");
-							Precast.doPrecast(true);
-						}
-
-						break;
-					}
-
-					if (!seisClear) {
-						if (!this.followPath(this.seisCoords)) {
-							break;
-						}
-
-						if (tick && getTickCount() - tick >= 7000) {
-							seisClear = true;
-							tick = false;
-
-							break;
-						}
-						
-
-						if (this.checkBoss(getLocaleString(2852))) {
-							!tick && (tick = getTickCount());
-							me.overhead("seis dead");
-							Precast.doPrecast(true);
-						}
-
-						break;
-					}
-
-					if (!infClear) {
-						if (!this.followPath(this.infCoords)) {
-							break;
-						}
-
-						if (tick && getTickCount() - tick >= 2000) {
-							infClear = true;
-							tick = false;
-
-							break;
-						}
-
-						if (this.checkBoss(getLocaleString(2853))) {
-							!tick && (tick = getTickCount());
-							me.overhead("infector dead");
-							Precast.doPrecast(true);
-						}
-
-						break;
-					}
-
-					Pather.moveTo(7767, 5263);
-
-					let diablo = getUnit(1, 243);
-
-					if (diablo && (diablo.mode === 0 || diablo.mode === 12)) {
-						return true;
-					}
-
-					break;
-				}
-
-				me.dead && me.revive();
-
-				delay(200);
-			} catch (e) {
-				console.errorReport(e);
-
-				return true;
-			}
+		} catch (e) {
+			//
+		} finally {
+			Common.Diablo.done;
+			removeEventListener("gamepacket", Common.Diablo.diabloLightsEvent);
 		}
 	} else {
 		throw new Error("No leader found");
 	}
+
+	this.log("Wakka complete");
 
 	return true;
 }

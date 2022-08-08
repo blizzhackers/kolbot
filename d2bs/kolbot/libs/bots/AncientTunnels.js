@@ -11,10 +11,15 @@ function AncientTunnels() {
 	Precast.doPrecast(true);
 
 	try {
-		Config.AncientTunnels.OpenChest && Pather.moveToPreset(me.area, 2, 580) && Misc.openChests(5) && Pickit.pickItems();
-		Config.AncientTunnels.KillDarkElder && Pather.moveToPreset(me.area, 1, 751) && Attack.clear(15, 0, getLocaleString(sdk.locale.monsters.DarkElder));
+		Config.AncientTunnels.OpenChest && Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.SuperChest) && Misc.openChests(5) && Pickit.pickItems();
 	} catch (e) {
-		console.warn(e);
+		console.error(e);
+	}
+
+	try {
+		Config.AncientTunnels.KillDarkElder && Pather.moveToPreset(me.area, sdk.unittype.Monster, sdk.monsters.preset.DarkElder) && Attack.clear(15, 0, getLocaleString(sdk.locale.monsters.DarkElder));
+	} catch (e) {
+		console.error(e);
 	}
 
 	if (!Pather.moveToExit(sdk.areas.AncientTunnels, true)) throw new Error("Failed to move to Ancient Tunnels");

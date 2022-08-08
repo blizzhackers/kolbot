@@ -10,7 +10,7 @@ function IPHunter() {
 	let ip = Number(me.gameserverip.split(".")[3]);
 
 	if (Config.IPHunter.IPList.indexOf(ip) > -1) {
-		D2Bot.printToConsole("IPHunter: IP found! - [" + ip + "] Game is : " + me.gamename + "//" + me.gamepassword, 7);
+		D2Bot.printToConsole("IPHunter: IP found! - [" + ip + "] Game is : " + me.gamename + "//" + me.gamepassword, sdk.colors.D2Bot.DarkGold);
 		print("IP found! - [" + ip + "] Game is : " + me.gamename + "//" + me.gamepassword);
 		me.overhead(":D IP found! - [" + ip + "]");
 		me.maxgametime = 0;
@@ -51,7 +51,7 @@ function IPHunter() {
 		delay(1000);
 	}
 
-	D2Bot.printToConsole("IPHunter: IP was [" + ip + "]", 10);
+	D2Bot.printToConsole("IPHunter: IP was [" + ip + "]", sdk.colors.D2Bot.Gray);
 
 	return true;
 }

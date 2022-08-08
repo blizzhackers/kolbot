@@ -5,60 +5,43 @@
 *
 */
 
-function TristramLeech() {
+function TristramLeech () {
+	let done = false;
 	let whereisleader, leader;
-
+	
+	const chatEvent = function (nick, msg) {
+		if (nick === leader && msg.toLowerCase() === "tristdone") {
+			done = true;
+		}
+	};
+	
 	Town.doChores();
 	Town.goToTown(1);
 	Town.move("portalspot");
 
 	if (Config.Leader) {
 		leader = (Config.Leader || Config.TristramLeech.Leader);
-		if (!Misc.poll(() => Misc.inMyParty(leader), 30e3, 1000)) throw new Error("TristramLeech: Leader not partied");
+		if (!Misc.poll(() => Misc.inMyParty(leader), Time.seconds(30), 1000)) throw new Error("TristramLeech: Leader not partied");
 	}
 
 	!leader && (leader = Misc.autoLeaderDetect({
 		destination: sdk.areas.Tristram,
-		quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area),
+		quitIf: (area) => Common.Leecher.nextScriptAreas.includes(area),
 		timeout: Time.minutes(5)
 	}));
 
 	if (leader) {
-		const Worker = require('../modules/Worker');
-
-		let leadTick = getTickCount();
-		let killLeaderTracker = false;
-
-		Worker.runInBackground.leaderTracker = function () {
-			if (killLeaderTracker) return false;
-			// check every 3 seconds
-			if (getTickCount() - leadTick < 3000) return true;
-			leadTick = getTickCount();
-
-			// check again in another 3 seconds if game wasn't ready
-			if (!me.gameReady) return true;
-			if (Misc.getPlayerCount() <= 1) throw new Error("Empty game");
-
-			let party = getParty(leader);
-
-			if (party) {
-				// Player is in Throne of Destruction or Worldstone Chamber
-				if ([sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(party.area)) {
-					if (Loader.scriptName() === "TristramLeech") {
-						killLeaderTracker = true;
-						throw new Error('Party leader is running baal');
-					} else {
-						// kill process
-						return false;
-					}
-				}
-			}
-
-			return true;
-		};
+		const Worker = require("../modules/Worker");
+		addEventListener("chatmsg", chatEvent);
 
 		try {
+			Common.Leecher.leader = leader;
+			Common.Leecher.currentScript = Loader.scriptName();
+			Common.Leecher.killLeaderTracker = false;
+			Worker.runInBackground.leaderTracker = Common.Leecher.leaderTracker;
+
 			if (!Misc.poll(() => {
+				if (done) return true;
 				if (Pather.getPortal(sdk.areas.Tristram, Config.Leader || null) && Pather.usePortal(sdk.areas.Tristram, Config.Leader || null)) {
 					return true;
 				}
@@ -80,6 +63,8 @@ function TristramLeech() {
 			}, Time.minutes(3), 1000);
 			
 			while (true) {
+				if (done) return true;
+
 				whereisleader = getParty(leader);
 				let leaderUnit = Misc.getPlayerUnit(leader);
 
@@ -117,11 +102,14 @@ function TristramLeech() {
 				delay(100);
 			}
 		} catch (e) {
-			console.errorReport(e);
+			console.error(e);
 		} finally {
-			killLeaderTracker = true;
+			removeEventListener("chatmsg", chatEvent);
+			Common.Leecher.killLeaderTracker = true;
 		}
 	}
+
+	if (!me.inTown && Town.goToTown()) throw new Error("Failed to get back to town");
 
 	return true;
 }

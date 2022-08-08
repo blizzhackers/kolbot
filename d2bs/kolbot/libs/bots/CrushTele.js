@@ -10,41 +10,39 @@ function CrushTele() {
 
 	addEventListener("keyup",
 		function (key) {
-			if (key === 109) {
-				go = true;
-			}
+			key === sdk.keys.NumpadDash && (go = true);
 		}
 	);
 
 	while (true) {
 		if (go) {
 			switch (me.area) {
-			case 35:
-				Pather.moveToExit([36, 37], true);
+			case sdk.areas.CatacombsLvl2:
+				Pather.moveToExit([sdk.areas.CatacombsLvl3, sdk.areas.CatacombsLvl4], true);
 				break;
-			case 57:
-				Pather.moveToExit(60, true);
-				Pather.moveToPreset(me.area, 2, 354);
+			case sdk.areas.HallsoftheDeadLvl2:
+				Pather.moveToExit(sdk.areas.HallsoftheDeadLvl3, true);
+				Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricCubeChest);
 				break;
-			case 43:
-				Pather.moveToExit([62, 63, 64], true);
-				Pather.moveToPreset(me.area, 2, 356);
+			case sdk.areas.FarOasis:
+				Pather.moveToExit([sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.MaggotLairLvl3], true);
+				Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.ShaftoftheHoradricStaffChest);
 				break;
-			case 44:
-				Pather.moveToExit([45, 58, 61], true);
+			case sdk.areas.LostCity:
+				Pather.moveToExit([sdk.areas.ValleyofSnakes, sdk.areas.ClawViperTempleLvl1, sdk.areas.ClawViperTempleLvl2], true);
 				break;
-			case 46:
+			case sdk.areas.CanyonofMagic:
 				Pather.moveToExit(getRoom().correcttomb, true);
-				Pather.moveToPreset(me.area, 2, 152);
+				Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricStaffHolder);
 				break;
-			case 74:
-				Pather.moveToPreset(me.area, 2, 357, 0, 0, false, true);
+			case sdk.areas.ArcaneSanctuary:
+				Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.Journal, 0, 0, false, true);
 				break;
-			case 101:
-				Pather.moveToExit(102, true);
+			case sdk.areas.DuranceofHateLvl2:
+				Pather.moveToExit(sdk.areas.DuranceofHateLvl3, true);
 				break;
-			case 107:
-				Pather.moveToPreset(108, 2, 255);
+			case sdk.areas.RiverofFlame:
+				Pather.moveToPreset(sdk.areas.ChaosSanctuary, sdk.unittype.Object, sdk.objects.DiabloStar);
 				break;
 			}
 

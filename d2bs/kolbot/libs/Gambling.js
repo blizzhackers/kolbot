@@ -100,14 +100,17 @@ const Gambling = {
 			Town.goToTown(1);
 			Town.move("stash");
 
-			while (me.getStat(14) + me.getStat(15) > info.goldReserve) {
-				gold(me.getStat(14)); // drop current gold
+			while (me.getStat(sdk.stats.Gold) + me.getStat(sdk.stats.GoldBank) > info.goldReserve) {
+				gold(me.getStat(sdk.stats.Gold)); // drop current gold
 				Town.openStash();
 
-				if (me.getStat(15) <= me.getStat(12) * 1e4) { // check stashed gold vs max carrying capacity
-					gold(me.getStat(15) - info.goldReserve, 4); // leave minGold in stash, pick the rest
+				// check stashed gold vs max carrying capacity
+				if (me.getStat(sdk.stats.GoldBank) <= me.getStat(sdk.stats.Level) * 1e4) {
+					// leave minGold in stash, pick the rest
+					gold(me.getStat(sdk.stats.GoldBank) - info.goldReserve, 4);
 				} else {
-					gold(me.getStat(12) * 1e4, 4); // pick max carrying capacity
+					// pick max carrying capacity
+					gold(me.getStat(sdk.stats.Level) * 1e4, 4);
 				}
 
 				delay(1000);
@@ -116,14 +119,13 @@ const Gambling = {
 	},
 
 	outOfGameCheck: function () {
-		let game,
-			info = this.getInfo();
+		let info = this.getInfo();
 
 		if (info && info.goldFinder && DataFile.getStats().gold >= info.goldTrigger) {
-			game = this.getGame();
+			let game = this.getGame();
 
 			if (game) {
-				D2Bot.printToConsole("Joining gold drop game.", 7);
+				D2Bot.printToConsole("Joining gold drop game.", sdk.colors.D2Bot.DarkGold);
 
 				this.inGame = true;
 				me.blockMouse = true;
@@ -149,8 +151,8 @@ const Gambling = {
 	},
 
 	getGame: function () {
-		let game,
-			info = this.getInfo();
+		let game;
+		let info = this.getInfo();
 
 		if (!info || !info.goldFinder) {
 			return false;
@@ -160,7 +162,7 @@ const Gambling = {
 			if (mode === 4) {
 				for (let i = 0; i < info.gambleGames.length; i += 1) {
 					if (info.gambleGames[i] && msg.match(info.gambleGames[i], "i")) {
-						game = msg.split('/');
+						game = msg.split("/");
 
 						break;
 					}
@@ -168,7 +170,7 @@ const Gambling = {
 			}
 		}
 
-		addEventListener('copydata', checkEvent);
+		addEventListener("copydata", checkEvent);
 
 		game = null;
 
@@ -181,7 +183,7 @@ const Gambling = {
 			}
 		}
 
-		removeEventListener('copydata', checkEvent);
+		removeEventListener("copydata", checkEvent);
 
 		return game;
 	}

@@ -26,7 +26,7 @@ function GhostBusters() {
 				Pather.moveTo(result[0], result[1], 3);
 
 				let monList = [];
-				let monster = getUnit(1);
+				let monster = Game.getMonster();
 
 				if (monster) {
 					do {
@@ -49,7 +49,7 @@ function GhostBusters() {
 		Pather.useWaypoint(sdk.areas.BlackMarsh);
 		Precast.doPrecast(true);
 
-		for (let i = 20; i <= 25; i += 1) {
+		for (let i = sdk.areas.ForgottenTower; i <= sdk.areas.TowerCellarLvl5; i += 1) {
 			Pather.moveToExit(i, true) && this.clearGhosts();
 		}
 
@@ -61,7 +61,7 @@ function GhostBusters() {
 		Pather.useWaypoint(sdk.areas.InnerCloister);
 		Precast.doPrecast(true);
 
-		for (let i = 31; i >= 29; i -= 1) {
+		for (let i = sdk.areas.JailLvl3; i >= sdk.areas.JailLvl1; i -= 1) {
 			Pather.moveToExit(i, true) && this.clearGhosts();
 		}
 
@@ -71,7 +71,7 @@ function GhostBusters() {
 	this.cathedral = function () {
 		Pather.useWaypoint(sdk.areas.InnerCloister);
 		Precast.doPrecast(true);
-		Pather.moveToExit(33, true);
+		Pather.moveToExit(sdk.areas.Cathedral, true);
 		this.clearGhosts();
 
 		return true;
@@ -81,7 +81,7 @@ function GhostBusters() {
 		Pather.useWaypoint(sdk.areas.CanyonofMagic);
 		Precast.doPrecast(true);
 
-		for (let i = 66; i <= 72; i += 1) {
+		for (let i = sdk.areas.TalRashasTomb1; i <= sdk.areas.TalRashasTomb7; i += 1) {
 			Pather.moveToExit(i, true) && this.clearGhosts();
 			Pather.moveToExit(sdk.areas.CanyonofMagic, true);
 		}

@@ -5,11 +5,11 @@
 *
 */
 
-function Tristram() {
+function Tristram () {
 	Pather._teleport = Pather.teleport;
 
 	// complete quest if its not complete
-	if (!me.getQuest(4, 4) && !me.getQuest(4, 0)) {
+	if (!me.getQuest(sdk.quest.id.TheSearchForCain, 4) && !me.getQuest(sdk.quest.id.TheSearchForCain, sdk.quest.states.Completed)) {
 		Common.Questing.cain();
 	}
 
@@ -22,8 +22,8 @@ function Tristram() {
 			Precast.doPrecast(true);
 
 			break;
-		case me.area === sdk.areas.StonyField:
-			if (!Pather.moveToPreset(sdk.areas.StonyField, 1, 737, 0, 0, false, true)) {
+		case me.inArea(sdk.areas.StonyField):
+			if (!Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Monster, sdk.monsters.preset.Rakanishu, 0, 0, false, true)) {
 				throw new Error("Failed to move to Rakanishu");
 			}
 
@@ -34,8 +34,8 @@ function Tristram() {
 			}
 
 			break;
-		case me.area === sdk.areas.Tristram:
-			let redPortal = Game.getObject(sdk.units.RedPortal);
+		case me.inArea(sdk.areas.Tristram):
+			let redPortal = Game.getObject(sdk.objects.RedPortal);
 			!!redPortal && Pather.moveTo(redPortal.x, redPortal.y + 6);
 
 			if (Config.Tristram.PortalLeech) {
@@ -52,6 +52,7 @@ function Tristram() {
 		}
 	}
 
+	Config.MFLeader && Config.PublicMode && say("tristdone");
 	Pather.teleport = Pather._teleport;
 
 	return true;

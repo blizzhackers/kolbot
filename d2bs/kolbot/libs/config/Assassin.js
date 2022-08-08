@@ -1,7 +1,8 @@
+/* eslint-disable indent */
 // Assassin config file
 
 /* Brief instructions:
- * Use any IDE to modify these files, Sublime Text 3, Visual Studio Code, NotePad++
+ * Use any IDE to modify these files, Visual Studio Code (recommended), Atom, Sublime Text 3 (good), NotePad++ (not recommended)
  * 
  * Basic JS Rules:
  * To comment out something, put // in front of that line
@@ -42,7 +43,9 @@ function LoadConfig() {
 	// *** act 1 ***
 	Scripts.Corpsefire = false;
 		Config.Corpsefire.ClearDen = false;
+	Scripts.Bishibosh = false;
 	Scripts.Mausoleum = false;
+		Config.Mausoleum.KillBishibosh = false;
 		Config.Mausoleum.KillBloodRaven = false;
 		Config.Mausoleum.ClearCrypt = false;
 	Scripts.Rakanishu = false;
@@ -61,11 +64,13 @@ function LoadConfig() {
 		Config.Countess.KillGhosts = false;
 	Scripts.Andariel = false;
 	Scripts.Cows = false;
-		Config.MakeCows = false; // if set to true just opens cow portal but doesn't clear - useful to ensure maker never gets king killed
-		Config.KillKing = false; // MAKE SURE YOUR MAKER DOESN"T HAVE THIS SET TO TRUE!!!!
+		Config.Cows.DontMakePortal = false; // if set to true, will go to act 1 stash and wait for 3 minutes for someone to make the cow portal
+		Config.Cows.JustMakePortal = false; // if set to true just opens cow portal but doesn't clear - useful to ensure maker never gets king killed
+		Config.Cows.KillKing = false; // MAKE SURE YOUR MAKER DOESN"T HAVE THIS SET TO TRUE!!!!
 
 	// *** act 2 ***
 	Scripts.Radament = false;
+	Scripts.CreepingFeature = false;
 	Scripts.Coldworm = false;
 		Config.Coldworm.KillBeetleburst = false;
 		Config.Coldworm.ClearMaggotLair = false; // Clear all 3 levels
@@ -75,10 +80,12 @@ function LoadConfig() {
 	Scripts.Summoner = false;
 		Config.Summoner.FireEye = false;
 	Scripts.Tombs = false;
+		Config.Tombs.KillDuriel = false;
 	Scripts.Duriel = false;
 
 	// *** act 3 ***
 	Scripts.Stormtree = false;
+	Scripts.BattlemaidSarina = false;
 	Scripts.KurastTemples = false;
 	Scripts.Icehawk = false;
 	Scripts.Endugu = false;
@@ -154,21 +161,36 @@ function LoadConfig() {
 	// ############################ //
 	/* ##### LEECHING SCRIPTS ##### */
 	// ############################ //
+	
 	Scripts.TristramLeech = false; // Enters Tristram, attempts to stay close to the leader and will try and help kill.
 		Config.TristramLeech.Helper = false; // If set to true the character will help attack.
 	Scripts.TravincalLeech = false; // Enters portal at back of Travincal.
 		Config.TravincalLeech.Helper = true; // If set to true the character will teleport to the stairs and help attack.
 	
-	// ## Team MF
+	// ##### MFHelper ##### //
 	// Run the same MF run as the MFLeader. Leader must have Config.MFLeader = true and Config.PublicMode > 0
+	// NOTE: MFHelper ends when Config.Leader starts Diablo or Baal. Use one of the specific helper scripts as they are better suited
 	Scripts.MFHelper = false;
 	
+	// ###################### //
+	/* ##### Pure Leech ##### */
+	// ###################### //
+
 	Scripts.Wakka = false; // Walking chaos leecher with auto leader assignment, stays at safe distance from the leader
 		Config.Wakka.Wait = 1; // Minutes to wait for leader
 		Config.Wakka.StopAtLevel = 99; // Stop wakka when this level is reached
 		Config.Wakka.StopProfile = false; // when StopAtLevel is reached, set to true to stop the profile, false to end script and move on to next
 		Config.SkipIfBaal = true; // end script it leader is in throne of destruction
 	Scripts.SealLeecher = false; // Enter safe portals to Chaos. Leader should run SealLeader.
+	Scripts.AutoBaal = false; // Baal leecher with auto leader assignment
+		Config.AutoBaal.FindShrine = false; // false = disabled, 1 = search after hot tp message, 2 = search as soon as leader is found
+		Config.AutoBaal.LeechSpot = [15115, 5050]; // X, Y coords of Throne Room leech spot
+		Config.AutoBaal.LongRangeSupport = false; // Cast long distance skills from a safe spot
+	
+	// ########################## //
+	/* ##### Helper SCRIPTS ##### */
+	// ########################## //
+
 	Scripts.DiabloHelper = false; // Chaos helper, kills monsters and doesn't open seals on its own.
 		Config.DiabloHelper.Wait = 5; // minutes to wait for a runner to be in Chaos. If Config.Leader is set, it will wait only for the leader.
 		Config.DiabloHelper.Entrance = true; // Start from entrance. Set to false to start from star.
@@ -178,10 +200,6 @@ function LoadConfig() {
 		Config.DiabloHelper.SafePrecast = true; // take random WP to safely precast
 		Config.DiabloHelper.SealOrder = ["vizier", "seis", "infector"]; // the order in which to clear the seals. If seals are excluded, they won't be checked unless diablo fails to appear
 		Config.DiabloHelper.RecheckSeals = false; // Teleport to each seal and double-check that it was opened and boss was killed if Diablo doesn't appear
-	Scripts.AutoBaal = false; // Baal leecher with auto leader assignment
-		Config.AutoBaal.FindShrine = false; // false = disabled, 1 = search after hot tp message, 2 = search as soon as leader is found
-		Config.AutoBaal.LeechSpot = [15115, 5050]; // X, Y coords of Throne Room leech spot
-		Config.AutoBaal.LongRangeSupport = false; // Cast long distance skills from a safe spot
 	Scripts.BaalHelper = false;
 		Config.BaalHelper.Wait = 5; // minutes to wait for a runner to be in Throne
 		Config.BaalHelper.KillNihlathak = false; // Kill Nihlathak before going to Throne
@@ -281,12 +299,27 @@ function LoadConfig() {
 	
 	// ##### EXTRA SCRIPTS ##### //
 	Scripts.GhostBusters = false; // Kill ghosts in most areas that contain them (rune hunting)
-	Scripts.ChestMania = false; // Open chests in configured areas. See sdk/areas.txt
-		Config.ChestMania.Act1 = [13, 14, 15, 16, 18, 19]; // List of act 1 areas to open chests in
-		Config.ChestMania.Act2 = [55, 59, 65, 66, 67, 68, 69, 70, 71, 72]; // List of act 2 areas to open chests in
-		Config.ChestMania.Act3 = [79, 80, 81, 92, 93, 84, 85, 90]; // List of act 3 areas to open chests in
-		Config.ChestMania.Act4 = [107]; // List of act 4 areas to open chests in
-		Config.ChestMania.Act5 = [115, 116, 119, 125, 126, 127]; // List of act 5 areas to open chests in
+	Scripts.ChestMania = false; // Open chests in configured areas. See sdk/areas.txt or use sdk.areas.AreaName see -> \kolbot\libs\modules\sdk.js
+		// List of act 1 areas to open chests in
+		Config.ChestMania.Act1 = [
+			sdk.areas.CaveLvl2, sdk.areas.UndergroundPassageLvl2, sdk.areas.HoleLvl2, sdk.areas.PitLvl2, sdk.areas.Crypt, sdk.areas.Mausoleum
+		];
+		// List of act 2 areas to open chests in
+		Config.ChestMania.Act2 = [
+			sdk.areas.StonyTombLvl1, sdk.areas.StonyTombLvl2, sdk.areas.AncientTunnels, sdk.areas.TalRashasTomb1, sdk.areas.TalRashasTomb2,
+			sdk.areas.TalRashasTomb3, sdk.areas.TalRashasTomb4, sdk.areas.TalRashasTomb5, sdk.areas.TalRashasTomb6, sdk.areas.TalRashasTomb7
+		];
+		// List of act 3 areas to open chests in
+		Config.ChestMania.Act3 = [
+			sdk.areas.LowerKurast, sdk.areas.KurastBazaar, sdk.areas.UpperKurast, sdk.areas.A3SewersLvl1, sdk.areas.A3SewersLvl2,
+			sdk.areas.SpiderCave, sdk.areas.SpiderCavern, sdk.areas.SwampyPitLvl3
+		];
+		// List of act 4 areas to open chests in
+		Config.ChestMania.Act4 = [sdk.areas.RiverofFlame];
+		// List of act 5 areas to open chests in
+		Config.ChestMania.Act5 = [
+			sdk.areas.GlacialTrail, sdk.areas.DrifterCavern, sdk.areas.IcyCellar, sdk.areas.Abaddon, sdk.areas.PitofAcheron, sdk.areas.InfernalPit
+		];
 	Scripts.ClearAnyArea = false; // Clear any area. Uses Config.ClearType to determine which type of monsters to kill.
 		Config.ClearAnyArea.AreaList = []; // List of area ids to clear. See sdk/areas.txt
 
@@ -370,10 +403,10 @@ function LoadConfig() {
 	 * 1 = item is unlocked and will be dropped, stashed or sold.
 	 * If you don't change the default values, the bot won't stash items.
 	 */
-	Config.Inventory[0] = [0,0,0,0,0,0,0,0,0,0];
-	Config.Inventory[1] = [0,0,0,0,0,0,0,0,0,0];
-	Config.Inventory[2] = [0,0,0,0,0,0,0,0,0,0];
-	Config.Inventory[3] = [0,0,0,0,0,0,0,0,0,0];
+	Config.Inventory[0] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	Config.Inventory[1] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	Config.Inventory[2] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+	Config.Inventory[3] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
 	// ########################### //
 	/* ##### PICKIT SETTINGS ##### */
@@ -439,7 +472,7 @@ function LoadConfig() {
 	// Skip monsters with auras. Possible options: "fanaticism", "might", "holy fire", "blessed aim", "holy freeze", "holy shock". Conviction is bugged, don't use it.
 	Config.SkipAura = [];
 	// Uncomment the following line to always attempt to kill these bosses despite immunities and mods
-	//Config.SkipException = [getLocaleString(2851), getLocaleString(2852), getLocaleString(2853)]; // vizier, de seis, infector
+	//Config.SkipException = [getLocaleString(sdk.locale.monsters.GrandVizierofChaos), getLocaleString(sdk.locale.monsters.LordDeSeis), getLocaleString(sdk.locale.monsters.InfectorofSouls)]; // vizier, de seis, infector
 
 	// ########################### //
 	/* ##### ATTACK SETTINGS ##### */
@@ -448,8 +481,11 @@ function LoadConfig() {
 	/* Attack config
 	 * To disable an attack, set it to -1
 	 * Skills MUST be POSITIVE numbers. For reference see ...\kolbot\sdk\skills.txt or use sdk.skills.SkillName see -> \kolbot\libs\modules\sdk.js
-	 * DO NOT LEAVE THE NEGATIVE SIGN IN FRONT OF THE SKILLID. GOOD: Config.AttackSkill[1] = 251; BAD: Config.AttackSkill[1] = -251;
-	 * Don't put LS/DS/WoF/WoI here! Use Config. UseTraps, Config.Traps and Config.BossTraps
+	 * DO NOT LEAVE THE NEGATIVE SIGN IN FRONT OF THE SKILLID.
+	 * GOOD: Config.AttackSkill[1] = 251;
+	 * GOOD: Config.AttackSkill[1] = sdk.skills.FireBlast;
+	 * BAD: Config.AttackSkill[1] = -251;
+	 * BAD: Config.AttackSkill[1] = "FireBlast";
 	 */
 	// Wereform setup. Make sure you read Templates/Attacks.txt for attack skill format.
 	Config.Wereform = false; // 0 / false - don't shapeshift, 1 / "Werewolf" - change to werewolf, 2 / "Werebear" - change to werebear

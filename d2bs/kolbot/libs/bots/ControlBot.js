@@ -7,15 +7,15 @@
 */
 
 function ControlBot() {
-	let command, nick,
-		startTime = getTickCount(),
-		shitList = [],
-		greet = [];
+	let command, nick;
+	let startTime = getTickCount();
+	let shitList = [];
+	let greet = [];
 
 	let controlCommands = ["help", "timeleft", "cows", "wps", "chant", "bo"];
 	let commandDesc = {
 		"help": "Display commands",
-		"timeleft": "Remaining left for this game",
+		"timeleft": "Remaining time left for this game",
 		"cows": "Open cow level",
 		"chant": "Enchant. AutoChant is " + (Config.ControlBot.Chant.AutoEnchant ? "ON" : "OFF"),
 		"wps": "Give waypoints",
@@ -33,7 +33,7 @@ function ControlBot() {
 
 			break;
 		case "chant":
-			if (!Config.ControlBot.Chant.Enchant || !me.getSkill(sdk.skills.Enchant, 1)) {
+			if (!Config.ControlBot.Chant.Enchant || !me.getSkill(sdk.skills.Enchant, sdk.skills.subindex.SoftPoints)) {
 				Config.ControlBot.Chant.Enchant = false;
 				Config.ControlBot.Chant.AutoEnchant = false;
 				controlCommands.splice(i, 1);
@@ -49,7 +49,7 @@ function ControlBot() {
 
 			break;
 		case "bo":
-			if (!Config.ControlBot.Bo || (!me.getSkill(sdk.skills.BattleOrders, 1) && Precast.haveCTA === -1)) {
+			if (!Config.ControlBot.Bo || (!me.getSkill(sdk.skills.BattleOrders, sdk.skills.subindex.SoftPoints) && Precast.haveCTA === -1)) {
 				Config.ControlBot.Bo = false;
 				controlCommands.splice(i, 1);
 				i--;
@@ -68,9 +68,9 @@ function ControlBot() {
 			return false;
 		}
 
-		let unit = getUnit(0, nick);
+		let unit = Game.getPlayer(nick);
 
-		if (getDistance(me, unit) > 35) {
+		if (unit.distance > 35) {
 			say("Get closer.");
 
 			return false;
@@ -84,7 +84,7 @@ function ControlBot() {
 				say("Wait for me at waypoint.");
 				Town.goToTown(sdk.areas.townOf(partyUnit.area));
 
-				unit = getUnit(0, nick);
+				unit = Game.getPlayer(nick);
 			} else {
 				say("You need to be in one of the towns.");
 
@@ -96,14 +96,13 @@ function ControlBot() {
 			do {
 				// player is alive
 				if (!unit.dead) {
-					if (getDistance(me, unit) >= 35) {
+					if (unit.distance >= 35) {
 						say("You went too far away.");
 
 						return false;
 					}
 
-					Skill.setSkill(sdk.skills.Enchant, 0);
-					sendPacket(1, 0x11, 4, unit.type, 4, unit.gid);
+					Packet.enchant(unit);
 					delay(500);
 				}
 			} while (unit.getNext());
@@ -111,14 +110,13 @@ function ControlBot() {
 			say("I don't see you");
 		}
 
-		unit = getUnit(1);
+		unit = Game.getMonster();
 
 		if (unit) {
 			do {
 				// merc or any other owned unit
 				if (unit.getParent() && unit.getParent().name === nick) {
-					Skill.setSkill(sdk.skills.Enchant, 0);
-					sendPacket(1, 0x11, 4, unit.type, 4, unit.gid);
+					Packet.enchant(unit);
 					delay(500);
 				}
 			} while (unit.getNext());
@@ -151,7 +149,7 @@ function ControlBot() {
 			return false;
 		}
 
-		let unit = getUnit(0, nick);
+		let unit = Game.getPlayer(nick);
 
 		if (unit && unit.distance > 15) {
 			say("Get closer.");
@@ -183,26 +181,24 @@ function ControlBot() {
 		if (!Config.ControlBot.Chant.Enchant) return false;
 
 		let chanted = [];
-		let unit = getUnit(sdk.unittype.Player);
+		let unit = Game.getPlayer();
 
 		if (unit) {
 			do {
-				if (unit.name !== me.name && !unit.dead && shitList.indexOf(unit.name) === -1 && Misc.inMyParty(unit.name) && !unit.getState(16) && getDistance(me, unit) <= 40) {
-					Skill.setSkill(sdk.skills.Enchant, 0);
-					sendPacket(1, 0x11, 4, unit.type, 4, unit.gid);
+				if (unit.name !== me.name && !unit.dead && shitList.indexOf(unit.name) === -1 && Misc.inMyParty(unit.name) && !unit.getState(sdk.states.Enchant) && unit.distance <= 40) {
+					Packet.enchant(unit);
 					delay(500);
 					chanted.push(unit.name);
 				}
 			} while (unit.getNext());
 		}
 
-		unit = getUnit(sdk.unittype.Monster);
+		unit = Game.getMonster();
 
 		if (unit) {
 			do {
-				if (unit.getParent() && chanted.indexOf(unit.getParent().name) > -1 && !unit.getState(16) && getDistance(me, unit) <= 40) {
-					Skill.setSkill(sdk.skills.Enchant, 0);
-					sendPacket(1, 0x11, 4, unit.type, 4, unit.gid);
+				if (unit.getParent() && chanted.includes(unit.getParent().name) && !unit.getState(sdk.states.Enchant) && unit.distance <= 40) {
+					Packet.enchant(unit);
 					delay(500);
 				}
 			} while (unit.getNext());
@@ -212,20 +208,20 @@ function ControlBot() {
 	};
 
 	this.getLeg = function () {
-		let leg, gid, wrongLeg;
-
 		if (me.getItem(sdk.items.quest.WirtsLeg)) {
 			return me.getItem(sdk.items.quest.WirtsLeg);
 		}
 
+		let leg, gid, wrongLeg;
+
 		if (!Config.ControlBot.Cows.GetLeg) {
-			leg = getUnit(4, sdk.items.quest.WirtsLeg);
+			leg = Game.getItem(sdk.items.quest.WirtsLeg);
 
 			if (leg) {
 				do {
-					if (leg.name.indexOf("ÿc1") > -1) {
+					if (leg.name.includes("ÿc1")) {
 						wrongLeg = true;
-					} else if (getDistance(me, leg) <= 15) {
+					} else if (leg.distance <= 15) {
 						gid = leg.gid;
 						Pickit.pickItem(leg);
 
@@ -248,13 +244,13 @@ function ControlBot() {
 
 		Pather.moveTo(25048, 5177);
 
-		let wirt = getUnit(2, 268);
+		let wirt = Game.getObject(sdk.quest.chest.Wirt);
 
 		for (let i = 0; i < 8; i += 1) {
 			wirt.interact();
 			delay(500);
 
-			leg = getUnit(4, sdk.items.quest.WirtsLeg);
+			leg = Game.getItem(sdk.quest.item.WirtsLeg);
 
 			if (leg) {
 				gid = leg.gid;
@@ -273,7 +269,7 @@ function ControlBot() {
 	};
 
 	this.getTome = function () {
-		let tpTome = me.findItems(sdk.items.TomeofTownPortal, 0, 3);
+		let tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.items.mode.inStorage, sdk.storage.Inventory);
 
 		if (tpTome.length < 2) {
 			let npc = Town.initNPC("Shop", "buyTpTome");
@@ -284,15 +280,15 @@ function ControlBot() {
 
 			let tome = npc.getItem(sdk.items.TomeofTownPortal);
 
-			if (!!tome && tome.getItemCost(0) < me.gold && tome.buy()) {
+			if (!!tome && tome.getItemCost(sdk.items.cost.ToBuy) < me.gold && tome.buy()) {
 				delay(500);
-				tpTome = me.findItems(sdk.items.TomeofTownPortal, 0, 3);
+				tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.items.mode.inStorage, sdk.storage.Inventory);
 				tpTome.forEach(function (book) {
 					if (book.isInInventory) {
 						let scroll = npc.getItem(sdk.items.ScrollofTownPortal);
 
 						while (book.getStat(sdk.stats.Quantity) < 20) {
-							if (!!scroll && scroll.getItemCost(0) < me.gold) {
+							if (!!scroll && scroll.getItemCost(sdk.items.cost.ToBuy) < me.gold) {
 								scroll.buy(true);
 							} else {
 								break;
@@ -307,7 +303,7 @@ function ControlBot() {
 			}
 		}
 
-		return tpTome.first();
+		return tpTome.last();
 	};
 
 	this.openPortal = function (nick) {
@@ -419,23 +415,35 @@ function ControlBot() {
 
 		switch (act) {
 		case 1:
-			wpList = [3, 4, 5, 6, 27, 29, 32, 35];
+			wpList = [
+				sdk.areas.ColdPlains, sdk.areas.StonyField, sdk.areas.DarkWood, sdk.areas.BlackMarsh,
+				sdk.areas.OuterCloister, sdk.areas.JailLvl1, sdk.areas.InnerCloister, sdk.areas.CatacombsLvl2
+			];
 
 			break;
 		case 2:
-			wpList = [48, 42, 57, 43, 44, 52, 74, 46];
+			wpList = [
+				sdk.areas.A2SewersLvl2, sdk.areas.DryHills, sdk.areas.HallsoftheDeadLvl2, sdk.areas.FarOasis,
+				sdk.areas.LostCity, sdk.areas.PalaceCellarLvl1, sdk.areas.ArcaneSanctuary, sdk.areas.CanyonofMagic
+			];
 
 			break;
 		case 3:
-			wpList = [76, 77, 78, 79, 80, 81, 83, 101];
+			wpList = [
+				sdk.areas.SpiderForest, sdk.areas.GreatMarsh, sdk.areas.FlayerJungle, sdk.areas.LowerKurast,
+				sdk.areas.KurastBazaar, sdk.areas.UpperKurast, sdk.areas.Travincal, sdk.areas.DuranceofHateLvl2
+			];
 
 			break;
 		case 4:
-			wpList = [106, 107];
+			wpList = [sdk.areas.CityoftheDamned, sdk.areas.RiverofFlame];
 
 			break;
 		case 5:
-			wpList = [111, 112, 113, 115, 117, 118, 129];
+			wpList = [
+				sdk.areas.FrigidHighlands, sdk.areas.ArreatPlateau, sdk.areas.CrystalizedPassage,
+				sdk.areas.GlacialTrail, sdk.areas.FrozenTundra, sdk.areas.AncientsWay, sdk.areas.WorldstoneLvl2
+			];
 
 			break;
 		}
@@ -456,7 +464,7 @@ function ControlBot() {
 				say(Pather.getAreaName(me.area) + " TP up");
 
 				for (let timeout = 0; timeout < 20; timeout++) {
-					if (getUnit(0, nick)) {
+					if (Game.getPlayer(nick)) {
 						break;
 					}
 
@@ -486,8 +494,8 @@ function ControlBot() {
 	};
 
 	this.checkHostiles = function () {
-		let rval = false,
-			party = getParty();
+		let rval = false;
+		let party = getParty();
 
 		if (party) {
 			do {
@@ -564,7 +572,7 @@ function ControlBot() {
 		switch (mode) {
 		case 0x02:
 			// idle in town
-			me.inTown && me.mode === 5 && greet.push(name1);
+			me.inTown && me.mode === sdk.player.mode.StandingInTown && greet.push(name1);
 
 			break;
 		}

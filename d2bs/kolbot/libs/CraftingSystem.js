@@ -107,7 +107,7 @@ CraftingSystem.outOfGameCheck = function () {
 		let worker = CraftingSystem.getWorker();
 
 		if (worker && worker.game) {
-			D2Bot.printToConsole("CraftingSystem: Transfering items.", 7);
+			D2Bot.printToConsole("CraftingSystem: Transfering items.", sdk.colors.D2Bot.DarkGold);
 			D2Bot.updateStatus("CraftingSystem: In game.");
 			addEventListener("scriptmsg", scriptMsg);
 
@@ -139,16 +139,16 @@ CraftingSystem.outOfGameCheck = function () {
 
 CraftingSystem.getWorker = function () {
 	let rval = {
-			game: false,
-			name: false
-		},
-		info = CraftingSystem.getInfo();
+		game: false,
+		name: false
+	};
+	let info = CraftingSystem.getInfo();
 
 	function checkEvent(mode, msg) {
 		if (mode === 4) {
 			for (let i = 0; i < info.CraftingGames.length; i += 1) {
 				if (info.CraftingGames[i] && msg.match(info.CraftingGames[i], "i")) {
-					rval.game = msg.split('/');
+					rval.game = msg.split("/");
 
 					break;
 				}
@@ -157,7 +157,7 @@ CraftingSystem.getWorker = function () {
 	}
 
 	if (info && info.collector) {
-		addEventListener('copydata', checkEvent);
+		addEventListener("copydata", checkEvent);
 
 		rval.game = false;
 
@@ -172,7 +172,7 @@ CraftingSystem.getWorker = function () {
 			}
 		}
 
-		removeEventListener('copydata', checkEvent);
+		removeEventListener("copydata", checkEvent);
 
 		return rval;
 	}
@@ -211,8 +211,9 @@ CraftingSystem.fullSets = [];
 // Check whether item can be used for crafting
 CraftingSystem.validItem = function (item) {
 	switch (item.itemType) {
-	case 58: // Jewel
-		return NTIP.CheckItem(item) === 0; // Use junk jewels only
+	case sdk.items.type.Jewel:
+		// Use junk jewels only
+		return NTIP.CheckItem(item) === Pickit.Result.UNWANTED;
 	}
 
 	return true;
@@ -242,7 +243,7 @@ CraftingSystem.keepItem = function (item) {
 
 		if (info.worker) {
 			// Let pickit decide whether to keep crafted
-			return item.quality === 8 ? false : true;
+			return item.crafted ? false : true;
 		}
 	}
 
@@ -251,8 +252,8 @@ CraftingSystem.keepItem = function (item) {
 
 // Collect ingredients only if a worker needs them
 CraftingSystem.getSetInfoFromWorker = function (workerName) {
-	let setInfo = false,
-		info = CraftingSystem.getInfo();
+	let setInfo = false;
+	let info = CraftingSystem.getInfo();
 
 	function copyData(mode, msg) {
 		let obj;
@@ -315,7 +316,7 @@ CraftingSystem.buildLists = function (onlyNeeded) {
 		CraftingSystem.neededItems = [];
 		CraftingSystem.validGids = [];
 		CraftingSystem.fullSets = [];
-		CraftingSystem.itemList = me.findItems(-1, 0);
+		CraftingSystem.itemList = me.findItems(-1, sdk.items.mode.inStorage);
 
 		for (let i = 0; i < info.Sets.length; i += 1) {
 			if (!onlyNeeded || info.Sets[i].Enabled) {
@@ -331,9 +332,9 @@ CraftingSystem.buildLists = function (onlyNeeded) {
 
 // Check which ingredients a set needs and has
 CraftingSystem.checkSet = function (set) {
-	let rval = {},
-		setNeeds = [],
-		setHas = [];
+	let rval = {};
+	let setNeeds = [];
+	let setHas = [];
 
 	// Get what set needs
 	// Multiply by SetAmount
@@ -381,13 +382,13 @@ CraftingSystem.update = function (item) {
 CraftingSystem.checkSubrecipes = function () {
 	for (let i = 0; i < CraftingSystem.neededItems.length; i += 1) {
 		switch (CraftingSystem.neededItems[i]) {
-		case 561: // Pgems
-		case 566:
-		case 571:
-		case 576:
-		case 581:
-		case 586:
-		case 601:
+		case sdk.items.gems.Perfect.Amethyst:
+		case sdk.items.gems.Perfect.Topaz:
+		case sdk.items.gems.Perfect.Sapphire:
+		case sdk.items.gems.Perfect.Emerald:
+		case sdk.items.gems.Perfect.Ruby:
+		case sdk.items.gems.Perfect.Diamond:
+		case sdk.items.gems.Perfect.Skull:
 			if (Cubing.subRecipes.indexOf(CraftingSystem.neededItems[i]) === -1) {
 				Cubing.subRecipes.push(CraftingSystem.neededItems[i]);
 				Cubing.recipes.push({
@@ -475,11 +476,11 @@ CraftingSystem.dropGold = function () {
 	Town.goToTown(1);
 	Town.move("stash");
 
-	if (me.getStat(14) >= 10000) {
+	if (me.getStat(sdk.stats.Gold) >= 10000) {
 		gold(10000);
-	} else if (me.getStat(15) + me.getStat(14) >= 10000) {
+	} else if (me.getStat(sdk.stats.GoldBank) + me.getStat(sdk.stats.Gold) >= 10000) {
 		Town.openStash();
-		gold(10000 - me.getStat(14), 4);
+		gold(10000 - me.getStat(sdk.stats.Gold), 4);
 		gold(10000);
 	}
 };

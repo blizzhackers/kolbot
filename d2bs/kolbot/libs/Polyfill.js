@@ -31,7 +31,7 @@ String.prototype.lcsGraph = function (compareToThis) {
 
 String.prototype.diffCount = function (stringB) {
 	try {
-		if (typeof stringB !== 'string' || !stringB) {
+		if (typeof stringB !== "string" || !stringB) {
 			return this.length;
 		}
 
@@ -51,8 +51,8 @@ String.prototype.diffCount = function (stringB) {
 
 if (!String.prototype.includes) {
 	String.prototype.includes = function (search, start) {
-		'use strict';
-		if (typeof start !== 'number') {
+		"use strict";
+		if (typeof start !== "number") {
 			start = 0;
 		}
 
@@ -89,7 +89,7 @@ Array.prototype.filterHighDistance = function (step = 0) {
 
 // https://tc39.github.io/ecma262/#sec-array.prototype.findindex
 if (!Array.prototype.findIndex) {
-	Object.defineProperty(Array.prototype, 'findIndex', {
+	Object.defineProperty(Array.prototype, "findIndex", {
 		value: function (predicate) {
 			// 1. Let O be ? ToObject(this value).
 			if (this == null) {
@@ -102,8 +102,8 @@ if (!Array.prototype.findIndex) {
 			let len = o.length >>> 0;
 
 			// 3. If IsCallable(predicate) is false, throw a TypeError exception.
-			if (typeof predicate !== 'function') {
-				throw new TypeError('predicate must be a function');
+			if (typeof predicate !== "function") {
+				throw new TypeError("predicate must be a function");
 			}
 
 			// 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
@@ -162,7 +162,7 @@ if (!Array.from) {
 	Array.from = (function () {
 		let toStr = Object.prototype.toString;
 		let isCallable = function (fn) {
-			return typeof fn === 'function' || toStr.call(fn) === '[object Function]';
+			return typeof fn === "function" || toStr.call(fn) === "[object Function]";
 		};
 		let toInteger = function (value) {
 			let number = Number(value);
@@ -190,17 +190,17 @@ if (!Array.from) {
 
 			// 3. ReturnIfAbrupt(items).
 			if (arrayLike == null) {
-				throw new TypeError('Array.from requires an array-like object - not null or undefined');
+				throw new TypeError("Array.from requires an array-like object - not null or undefined");
 			}
 
 			// 4. If mapfn is undefined, then let mapping be false.
 			let mapFn = arguments.length > 1 ? arguments[1] : void undefined;
 			let T;
-			if (typeof mapFn !== 'undefined') {
+			if (typeof mapFn !== "undefined") {
 				// 5. else
 				// 5. a If IsCallable(mapfn) is false, throw a TypeError exception.
 				if (!isCallable(mapFn)) {
-					throw new TypeError('Array.from: when provided, the second argument must be a function');
+					throw new TypeError("Array.from: when provided, the second argument must be a function");
 				}
 
 				// 5. b. If thisArg was supplied, let T be thisArg; else let T be undefined.
@@ -226,7 +226,7 @@ if (!Array.from) {
 			while (k < len) {
 				kValue = items[k];
 				if (mapFn) {
-					A[k] = typeof T === 'undefined' ? mapFn(kValue, k) : mapFn.call(T, kValue, k);
+					A[k] = typeof T === "undefined" ? mapFn(kValue, k) : mapFn.call(T, kValue, k);
 				} else {
 					A[k] = kValue;
 				}
@@ -318,11 +318,11 @@ String.prototype.trim = function () {
 };
 
 // Object.assign polyfill from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
-if (typeof Object.assign !== 'function') {
+if (typeof Object.assign !== "function") {
 	Object.defineProperty(Object, "assign", {
 		value: function assign(target) {
 			if (target === null) {
-				throw new TypeError('Cannot convert undefined or null to object');
+				throw new TypeError("Cannot convert undefined or null to object");
 			}
 
 			let to = Object(target);
@@ -348,7 +348,7 @@ if (typeof Object.assign !== 'function') {
 
 // Array.find polyfill from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
 if (!Array.prototype.find) {
-	Object.defineProperty(Array.prototype, 'find', {
+	Object.defineProperty(Array.prototype, "find", {
 		value: function (predicate) {
 			if (this === null) {
 				throw new TypeError('"this" is null or not defined');
@@ -358,8 +358,8 @@ if (!Array.prototype.find) {
 
 			let len = o.length >>> 0;
 
-			if (typeof predicate !== 'function') {
-				throw new TypeError('predicate must be a function');
+			if (typeof predicate !== "function") {
+				throw new TypeError("predicate must be a function");
 			}
 
 			let thisArg = arguments[1];
@@ -417,7 +417,7 @@ if (!Array.prototype.last) {
  * @return array
  */
 if (!Array.prototype.flat) {
-	Object.defineProperty(Array.prototype, 'flat', {
+	Object.defineProperty(Array.prototype, "flat", {
 		value: function flat() {
 			let depth = arguments.length > 0 ? isNaN(arguments[0]) ? 1 : Number(arguments[0]) : 1;
 
@@ -435,16 +435,20 @@ if (!Array.prototype.flat) {
 		writable: true
 	});
 }
-if (typeof global === 'undefined') {
+// eslint-disable-next-line block-scoped-var
+if (typeof global === "undefined") {
+	// eslint-disable-next-line no-var
 	var global = this;
 }
 
-if (!global.hasOwnProperty('require')) {
+// eslint-disable-next-line block-scoped-var
+if (!global.hasOwnProperty("require")) {
 	let cache;
-	Object.defineProperty(global, 'require', {
+	// eslint-disable-next-line block-scoped-var
+	Object.defineProperty(global, "require", {
 		get: function () {
 			if (cache) return cache;
-			!isIncluded('require.js') && include('require.js');
+			!isIncluded("require.js") && include("require.js");
 			return cache; // cache is loaded by require.js
 		},
 		set: function(v) {
@@ -455,7 +459,7 @@ if (!global.hasOwnProperty('require')) {
 
 String.prototype.padEnd = function padEnd(targetLength, padString) {
 	targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
-	padString = String(typeof padString !== 'undefined' ? padString : ' ');
+	padString = String(typeof padString !== "undefined" ? padString : " ");
 	if (this.length > targetLength) {
 		return String(this);
 	} else {
@@ -469,7 +473,7 @@ String.prototype.padEnd = function padEnd(targetLength, padString) {
 
 String.prototype.padStart = function padStart(targetLength, padString) {
 	targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
-	padString = String(typeof padString !== 'undefined' ? padString : ' ');
+	padString = String(typeof padString !== "undefined" ? padString : " ");
 	if (this.length > targetLength) {
 		return String(this);
 	} else {
@@ -482,31 +486,27 @@ String.prototype.padStart = function padStart(targetLength, padString) {
 };
 
 String.prototype.repeat = function(count) {
-	'use strict';
-	if (this == null) {
-		throw new TypeError("can't convert " + this + ' to object');
-	}
-	let str = '' + this;
+	"use strict";
+	if (this == null) throw new TypeError("can't convert " + this + " to object");
+	let str = "" + this;
 	count = +count;
+	// eslint-disable-next-line no-self-compare
 	if (count !== count) {
 		count = 0;
 	}
-	if (count < 0) {
-		throw new RangeError('repeat count must be non-negative');
-	}
-	if (count === Infinity) {
-		throw new RangeError('repeat count must be less than infinity');
-	}
+	if (count < 0) throw new RangeError("repeat count must be non-negative");
+	if (count === Infinity) throw new RangeError("repeat count must be less than infinity");
+
 	count = Math.floor(count);
 	if (str.length === 0 || count === 0) {
-		return '';
+		return "";
 	}
 	if (str.length * count >= 1 << 28) {
 		throw new RangeError(
-			'repeat count must not overflow maximum string size'
+			"repeat count must not overflow maximum string size"
 		);
 	}
-	let rpt = '';
+	let rpt = "";
 	for (;;) {
 		if ((count & 1) === 1) {
 			rpt += str;
@@ -519,3 +519,97 @@ String.prototype.repeat = function(count) {
 	}
 	return rpt;
 };
+
+(function (global, print) {
+	global.console = global.console || (function () {
+		const console = {};
+		const argMap = el => typeof el === "object" && el /*not null */ && JSON.stringify(el) || el;
+
+		console.log = function (...args) {
+			// use call to avoid type errors
+			print.call(null, args.map(argMap).join(","));
+		};
+
+		console.printDebug = true;
+		console.debug = function (...args) {
+			if (console.printDebug) {
+				const stack = new Error().stack.match(/[^\r\n]+/g);
+				let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf("\\") + 1) || "unknown:0";
+				filenameAndLine = filenameAndLine.replace(":", " :: ");
+				this.log("[ÿc:Debugÿc0] ÿc:[" + filenameAndLine + "]ÿc0 " + args.map(argMap).join(","));
+			}
+		};
+
+		console.warn = function (...args) {
+			const stack = new Error().stack.match(/[^\r\n]+/g);
+			let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf("\\") + 1) || "unknown:0";
+			filenameAndLine = filenameAndLine.replace(":", " :: ");
+			this.log("[ÿc9Warningÿc0] ÿc9[" + filenameAndLine + "]ÿc0 " + args.map(argMap).join(","));
+		};
+
+		console.error = function (error = "") {
+			let msg, source;
+			
+			if (typeof error === "string") {
+				msg = error;
+			} else {
+				source = error.fileName.substring(error.fileName.lastIndexOf("\\") + 1, error.fileName.length);
+				msg = "ÿc1[" + source + " :: " + error.lineNumber + "] ÿc0" + error.message;
+			}
+
+			this.log("[ÿc1Errorÿc0] " + msg);
+		};
+
+		const timers = {};
+		console.time = function (name) {
+			name && (timers[name] = getTickCount());
+		};
+
+		console.timeEnd = function (name) {
+			let currTimer = timers[name];
+			if (currTimer) {
+				this.log("[ÿc7Timerÿc0] :: ÿc8" + name + " - ÿc4Durationÿc0: " + (getTickCount() - currTimer) + "ms");
+				delete timers[name];
+			}
+		};
+
+		console.trace = function () {
+			let stackLog = "";
+			let stack = new Error().stack;
+			if (stack) {
+				stack = stack.split("\n");
+				stack && typeof stack === "object" && stack.reverse();
+
+				for (let i = 0; i < stack.length - 1; i += 1) {
+					if (stack[i]) {
+						stackLog += stack[i].substr(0, stack[i].indexOf("@") + 1) + stack[i].substr(stack[i].lastIndexOf("\\") + 1, stack[i].length - 1);
+						i < stack.length - 1 && (stackLog += ", ");
+					}
+				}
+
+				this.log("[ÿc;StackTraceÿc0] :: " + stackLog);
+			}
+		};
+
+		console.info = function (start = false, msg = "", timer = "") {
+			let stack = new Error().stack.match(/[^\r\n]+/g);
+			let funcName = stack[1].substr(0, stack[1].indexOf("@"));
+			let logInfo = start === true ? "[ÿc2Start " : start === false ? "[ÿc1End " : "[ÿc8";
+			logInfo += (funcName + "ÿc0] :: " + (msg ? msg : ""));
+			if (timer) {
+				let currTimer = timers[timer];
+				if (currTimer) {
+					let tFormat = (getTickCount() - currTimer);
+					// if less than 1 second, display in ms
+					tFormat > 1000 ? (tFormat = Time.format(tFormat)) : (tFormat += " ms");
+					logInfo += (" - ÿc4Durationÿc0: " + tFormat);
+					delete timers[timer];
+				}
+			}
+			this.log(logInfo);
+		};
+
+		return console;
+
+	})();
+})([].filter.constructor("return this")(), print);

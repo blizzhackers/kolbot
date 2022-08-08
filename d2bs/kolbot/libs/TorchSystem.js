@@ -77,13 +77,12 @@ const TorchSystem = {
 
 	inGameCheck: function () {
 		let farmers = this.getFarmers();
-
 		if (!farmers) return false;
 
 		for (let i = 0; i < farmers.length; i += 1) {
 			if (farmers[i].FarmGame.length > 0 && me.gamename.toLowerCase().match(farmers[i].FarmGame.toLowerCase())) {
 				print("ÿc4Torch Systemÿc0: In Farm game.");
-				D2Bot.printToConsole("Torch System: Transfering keys.", 7);
+				D2Bot.printToConsole("Torch System: Transfering keys.", sdk.colors.D2Bot.DarkGold);
 				D2Bot.updateStatus("Torch System: In game.");
 				Town.goToTown(1);
 
@@ -101,7 +100,7 @@ const TorchSystem = {
 					}
 				}
 
-				if (me.getStat(14) >= 100000) {
+				if (me.getStat(sdk.stats.Gold) >= 100000) {
 					gold(100000);
 				}
 
@@ -116,9 +115,8 @@ const TorchSystem = {
 	},
 
 	keyCheck: function () {
-		let neededItems = {},
-			farmers = this.getFarmers();
-
+		let neededItems = {};
+		let farmers = this.getFarmers();
 		if (!farmers) return false;
 
 		function keyCheckEvent(mode, msg) {
@@ -199,9 +197,9 @@ const TorchSystem = {
 
 	outOfGameCheck: function () {
 		if (!this.check) return false;
+		this.check = false;
 
 		let game;
-		this.check = false;
 
 		function checkEvent(mode, msg) {
 			let farmers = TorchSystem.getFarmers();
@@ -222,10 +220,9 @@ const TorchSystem = {
 		}
 
 		let farmers = this.getFarmers();
-
 		if (!farmers) return false;
 
-		addEventListener('copydata', checkEvent);
+		addEventListener("copydata", checkEvent);
 
 		for (let i = 0; i < farmers.length; i += 1) {
 			sendCopyData(null, farmers[i].profile, 6, JSON.stringify({name: "gameCheck", profile: me.profile}));
@@ -236,7 +233,7 @@ const TorchSystem = {
 			}
 		}
 
-		removeEventListener('copydata', checkEvent);
+		removeEventListener("copydata", checkEvent);
 
 		if (game) {
 			delay(2000);
@@ -266,6 +263,9 @@ const TorchSystem = {
 		let timer = getTickCount();
 		let busy = false;
 		let busyTick;
+		let tkeys = me.findItems("pk1", sdk.items.mode.inStorage).length || 0;
+		let hkeys = me.findItems("pk2", sdk.items.mode.inStorage).length || 0;
+		let dkeys = me.findItems("pk3", sdk.items.mode.inStorage).length || 0;
 		let neededItems = {pk1: 0, pk2: 0, pk3: 0, rv: 0};
 
 		// Check whether the killer is alone in the game
@@ -318,7 +318,7 @@ const TorchSystem = {
 		};
 
 		// Register event that will communicate with key hunters, go to Act 1 town and wait by stash
-		addEventListener('copydata', this.torchSystemEvent);
+		addEventListener("copydata", this.torchSystemEvent);
 		Town.goToTown(1);
 		Town.move("stash");
 
@@ -332,15 +332,15 @@ const TorchSystem = {
 			Town.needStash() && Town.stash();
 
 			// Get the number keys
-			let tkeys = me.findItems("pk1", 0).length || 0;
-			let hkeys = me.findItems("pk2", 0).length || 0;
-			let dkeys = me.findItems("pk3", 0).length || 0;
+			tkeys = me.findItems("pk1", sdk.items.mode.inStorage).length || 0;
+			hkeys = me.findItems("pk2", sdk.items.mode.inStorage).length || 0;
+			dkeys = me.findItems("pk3", sdk.items.mode.inStorage).length || 0;
 
 			// Stop the loop if we have enough keys or if wait time expired
 			if (((tkeys >= 3 && hkeys >= 3 && dkeys >= 3)
 				|| (Config.OrgTorch.WaitTimeout && (getTickCount() - timer > Config.OrgTorch.WaitTimeout * 1000 * 60)))
 				&& this.aloneInGame()) {
-				removeEventListener('copydata', this.torchSystemEvent);
+				removeEventListener("copydata", this.torchSystemEvent);
 
 				break;
 			}

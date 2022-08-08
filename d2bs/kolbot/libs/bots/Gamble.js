@@ -6,16 +6,16 @@
 */
 
 function Gamble() {
-	let idleTick = 0,
-		info = Gambling.getInfo(),
-		needGold = false;
+	let idleTick = 0;
+	let info = Gambling.getInfo();
+	let needGold = false;
 
 	if (!info) throw new Error("Bad Gambling System config.");
 
 	me.maxgametime = 0;
 	Town.goToTown(1);
 
-	addEventListener('copydata',
+	addEventListener("copydata",
 		function (mode, msg) {
 			if (needGold && mode === 0 && info.goldFinders.indexOf(msg) > -1) {
 				print("Got game request from " + msg);
@@ -34,7 +34,7 @@ function Gamble() {
 				Town.needGamble() && (needGold = false);
 				Town.stash();
 
-				let gold = getUnit(4, 523, 3);
+				let gold = Game.getItem(sdk.items.Gold, sdk.items.mode.onGround);
 
 				if (!gold || !Pickit.canPick(gold)) {
 					break;
@@ -46,7 +46,7 @@ function Gamble() {
 			}
 
 			if (needGold && getTickCount() - idleTick > 0) {
-				sendPacket(1, 0x40);
+				Packet.questRefresh();
 				idleTick += rand(1200, 1500) * 1000;
 			}
 

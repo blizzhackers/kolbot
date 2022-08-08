@@ -13,7 +13,7 @@ const ClassAttack = {
 
 	setArmySize: function () {
 		this.maxSkeletons = Config.Skeletons === "max" ? Skill.getMaxSummonCount(sdk.skills.RaiseSkeleton) : Config.Skeletons;
-		this.SkeletonMages = Config.SkeletonMages === "max" ? Skill.getMaxSummonCount(sdk.skills.RaiseSkeletalMage) : Config.SkeletonMages;
+		this.maxMages = Config.SkeletonMages === "max" ? Skill.getMaxSummonCount(sdk.skills.RaiseSkeletalMage) : Config.SkeletonMages;
 		this.maxRevives = Config.Revives === "max" ? Skill.getMaxSummonCount(sdk.skills.Revive) : Config.Revives;
 	},
 
@@ -28,9 +28,9 @@ const ClassAttack = {
 		this.setArmySize();
 
 		// See if we're at full army count
-		if ((me.getMinionCount(sdk.minions.Skeleton) < this.maxSkeletons)
-			&& (me.getMinionCount(sdk.minions.SkeletonMage) < this.maxMages)
-			&& (me.getMinionCount(sdk.minions.Revive) < this.maxRevives)) {
+		if ((me.getMinionCount(sdk.summons.type.Skeleton) < this.maxSkeletons)
+			&& (me.getMinionCount(sdk.summons.type.SkeletonMage) < this.maxMages)
+			&& (me.getMinionCount(sdk.summons.type.Revive) < this.maxRevives)) {
 			return false;
 		}
 
@@ -124,7 +124,7 @@ const ClassAttack = {
 	},
 
 	doAttack: function (unit, preattack = false) {
-		if (!unit || unit.dead) return 1;
+		if (!unit || unit.dead) return Attack.Result.SUCCESS;
 
 		let mercRevive = 0;
 		let timedSkill = -1;
@@ -138,22 +138,22 @@ const ClassAttack = {
 			print("mercwatch");
 
 			if (Town.visitTown()) {
-				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
-					return 1; // lost reference to the mob we were attacking
+				if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
+					return Attack.Result.SUCCESS; // lost reference to the mob we were attacking
 				}
 			}
 		}
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
-			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
-					return 0;
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), sdk.collision.Ranged)) {
+					return Attack.Result.FAILED;
 				}
 			}
 
 			Skill.cast(Config.AttackSkill[0], Skill.getHand(Config.AttackSkill[0]), unit);
 
-			return 1;
+			return Attack.Result.SUCCESS;
 		}
 
 		// only continue if we can actually curse the unit otherwise its a waste of time
@@ -161,38 +161,38 @@ const ClassAttack = {
 			customCurse = this.getCustomCurse(unit);
 
 			if (customCurse && this.canCurse(unit, customCurse)) {
-				if (unit.distance > 25 || checkCollision(me, unit, 0x4)) {
-					if (!Attack.getIntoPosition(unit, 25, 0x4)) {
-						return 0;
+				if (unit.distance > 25 || checkCollision(me, unit, sdk.collision.Ranged)) {
+					if (!Attack.getIntoPosition(unit, 25, sdk.collision.Ranged)) {
+						return Attack.Result.FAILED;
 					}
 				}
 
-				Skill.cast(customCurse, 0, unit);
+				Skill.cast(customCurse, sdk.skills.hand.Right, unit);
 
-				return 1;
+				return Attack.Result.SUCCESS;
 			} else if (!customCurse) {
-				if (Config.Curse[0] > 0 && (unit.spectype & 0x7) && this.canCurse(unit, Config.Curse[0])) {
-					if (unit.distance > 25 || checkCollision(me, unit, 0x4)) {
-						if (!Attack.getIntoPosition(unit, 25, 0x4)) {
-							return 0;
+				if (Config.Curse[0] > 0 && unit.isSpecial && this.canCurse(unit, Config.Curse[0])) {
+					if (unit.distance > 25 || checkCollision(me, unit, sdk.collision.Ranged)) {
+						if (!Attack.getIntoPosition(unit, 25, sdk.collision.Ranged)) {
+							return Attack.Result.FAILED;
 						}
 					}
 
-					Skill.cast(Config.Curse[0], 0, unit);
+					Skill.cast(Config.Curse[0], sdk.skills.hand.Right, unit);
 
-					return 1;
+					return Attack.Result.SUCCESS;
 				}
 
-				if (Config.Curse[1] > 0 && !(unit.spectype & 0x7) && this.canCurse(unit, Config.Curse[1])) {
-					if (unit.distance > 25 || checkCollision(me, unit, 0x4)) {
-						if (!Attack.getIntoPosition(unit, 25, 0x4)) {
-							return 0;
+				if (Config.Curse[1] > 0 && !unit.isSpecial && this.canCurse(unit, Config.Curse[1])) {
+					if (unit.distance > 25 || checkCollision(me, unit, sdk.collision.Ranged)) {
+						if (!Attack.getIntoPosition(unit, 25, sdk.collision.Ranged)) {
+							return Attack.Result.FAILED;
 						}
 					}
 
-					Skill.cast(Config.Curse[1], 0, unit);
+					Skill.cast(Config.Curse[1], sdk.skills.hand.Right, unit);
 
-					return 1;
+					return Attack.Result.SUCCESS;
 				}
 			}
 		}
@@ -230,23 +230,23 @@ const ClassAttack = {
 		if (result === 1) {
 			Config.ActiveSummon && this.raiseArmy();
 			this.explodeCorpses(unit);
-		} else if (result === 2 && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
+		} else if (result === Attack.Result.CANTATTACK && Attack.canTeleStomp(unit)) {
 			let merc = me.getMerc();
 
 			while (unit.attackable) {
 				if (Misc.townCheck()) {
 					if (!unit || !copyUnit(unit).x) {
-						unit = Misc.poll(() => getUnit(1, -1, -1, gid), 1000, 80);
+						unit = Misc.poll(() => Game.getMonster(-1, -1, gid), 1000, 80);
 					}
 				}
 
-				if (!unit) return 1;
+				if (!unit) return Attack.Result.SUCCESS;
 
 				if (Town.needMerc()) {
 					if (Config.MercWatch && mercRevive++ < 1) {
 						Town.visitTown();
 					} else {
-						return 2;
+						return Attack.Result.CANTATTACK;
 					}
 
 					(merc === undefined || !merc) && (merc = me.getMerc());
@@ -256,7 +256,7 @@ const ClassAttack = {
 					Pather.moveToUnit(unit);
 
 					let spot = Attack.findSafeSpot(unit, 10, 5, 9);
-					!!spot && Pather.walkTo(spot.x, spot.y);
+					!!spot && !!spot.x && Pather.walkTo(spot.x, spot.y);
 				}
 
 				Config.ActiveSummon && this.raiseArmy();
@@ -265,7 +265,7 @@ const ClassAttack = {
 				!!closeMob && this.doCast(closeMob, timedSkill, untimedSkill);
 			}
 
-			return 1;
+			return Attack.Result.SUCCESS;
 		}
 
 		return result;
@@ -280,9 +280,9 @@ const ClassAttack = {
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, timedSkill = -1, untimedSkill = -1) {
 		// No valid skills can be found
-		if (timedSkill < 0 && untimedSkill < 0) return 2;
+		if (timedSkill < 0 && untimedSkill < 0) return Attack.Result.CANTATTACK;
 		// unit became invalidated
-		if (!unit || !unit.attackable) return 1;
+		if (!unit || !unit.attackable) return Attack.Result.SUCCESS;
 		
 		let walk;
 		let classid = unit.classid;
@@ -294,9 +294,9 @@ const ClassAttack = {
 			switch (timedSkill) {
 			case sdk.skills.PoisonNova:
 				if (!this.novaTick || getTickCount() - this.novaTick > Config.PoisonNovaDelay * 1000) {
-					if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
-						if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4)) {
-							return 0;
+					if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
+						if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), sdk.collision.Ranged)) {
+							return Attack.Result.FAILED;
 						}
 					}
 
@@ -306,10 +306,10 @@ const ClassAttack = {
 				}
 
 				break;
-			case 500: // Pure Summoner
-				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
-					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4)) {
-						return 0;
+			case sdk.skills.Summoner: // Pure Summoner
+				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
+					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), sdk.collision.Ranged)) {
+						return Attack.Result.FAILED;
 					}
 				}
 
@@ -317,14 +317,14 @@ const ClassAttack = {
 
 				break;
 			default:
-				if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, timedSkill, classid)) return 0;
+				if (Skill.getRange(timedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, timedSkill, classid)) return Attack.Result.FAILED;
 
-				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, 0x4)) {
+				if (unit.distance > Skill.getRange(timedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
 					// Allow short-distance walking for melee skills
-					let walk = Skill.getRange(timedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
+					let walk = Skill.getRange(timedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
-					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), 0x4, walk)) {
-						return 0;
+					if (!Attack.getIntoPosition(unit, Skill.getRange(timedSkill), sdk.collision.Ranged, walk)) {
+						return Attack.Result.FAILED;
 					}
 				}
 
@@ -335,20 +335,20 @@ const ClassAttack = {
 		}
 
 		if (untimedSkill > -1) {
-			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, untimedSkill, classid)) return 0;
+			if (Skill.getRange(untimedSkill) < 4 && !Attack.validSpot(unit.x, unit.y, untimedSkill, classid)) return Attack.Result.FAILED;
 
-			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, 0x4)) {
+			if (unit.distance > Skill.getRange(untimedSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
 				// Allow short-distance walking for melee skills
-				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
+				walk = Skill.getRange(untimedSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
-				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), 0x4, walk)) {
-					return 0;
+				if (!Attack.getIntoPosition(unit, Skill.getRange(untimedSkill), sdk.collision.Ranged, walk)) {
+					return Attack.Result.FAILED;
 				}
 			}
 
 			!unit.dead && Skill.cast(untimedSkill, Skill.getHand(untimedSkill), unit);
 
-			return 1;
+			return Attack.Result.SUCCESS;
 		}
 
 		Misc.poll(() => !me.skillDelay, 1000, 40);
@@ -358,7 +358,7 @@ const ClassAttack = {
 			delay(40);
 		}
 
-		return 1;
+		return Attack.Result.SUCCESS;
 	},
 
 	raiseArmy: function (range = 25) {
@@ -367,7 +367,7 @@ const ClassAttack = {
 		this.setArmySize();
 
 		for (let i = 0; i < 3; i += 1) {
-			let corpse = getUnit(1, -1, 12);
+			let corpse = Game.getMonster(-1, sdk.monsters.mode.Dead);
 			let corpseList = [];
 
 			if (corpse) {
@@ -382,49 +382,50 @@ const ClassAttack = {
 			while (corpseList.length > 0) {
 				corpse = corpseList.shift();
 
-				if (me.getMinionCount(sdk.minions.Skeleton) < this.maxSkeletons) {
-					if (!Skill.cast(sdk.skills.RaiseSkeleton, 0, corpse)) {
+				// should probably have a way to priortize which ones we summon first
+				if (me.getMinionCount(sdk.summons.type.Skeleton) < this.maxSkeletons) {
+					if (!Skill.cast(sdk.skills.RaiseSkeleton, sdk.skills.hand.Right, corpse)) {
 						return false;
 					}
 
-					count = me.getMinionCount(sdk.minions.Skeleton);
+					count = me.getMinionCount(sdk.summons.type.Skeleton);
 					tick = getTickCount();
 
 					while (getTickCount() - tick < 200) {
-						if (me.getMinionCount(sdk.minions.Skeleton) > count) {
+						if (me.getMinionCount(sdk.summons.type.Skeleton) > count) {
 							break;
 						}
 
 						delay(10);
 					}
-				} else if (me.getMinionCount(sdk.minions.SkeletonMage) < this.maxMages) {
-					if (!Skill.cast(sdk.skills.RaiseSkeletalMage, 0, corpse)) {
+				} else if (me.getMinionCount(sdk.summons.type.SkeletonMage) < this.maxMages) {
+					if (!Skill.cast(sdk.skills.RaiseSkeletalMage, sdk.skills.hand.Right, corpse)) {
 						return false;
 					}
 
-					count = me.getMinionCount(sdk.minions.SkeletonMage);
+					count = me.getMinionCount(sdk.summons.type.SkeletonMage);
 					tick = getTickCount();
 
 					while (getTickCount() - tick < 200) {
-						if (me.getMinionCount(sdk.minions.SkeletonMage) > count) {
+						if (me.getMinionCount(sdk.summons.type.SkeletonMage) > count) {
 							break;
 						}
 
 						delay(10);
 					}
-				} else if (me.getMinionCount(sdk.minions.Revive) < this.maxRevives) {
+				} else if (me.getMinionCount(sdk.summons.type.Revive) < this.maxRevives) {
 					if (this.checkCorpse(corpse, true)) {
 						print("Reviving " + corpse.name);
 
-						if (!Skill.cast(sdk.skills.Revive, 0, corpse)) {
+						if (!Skill.cast(sdk.skills.Revive, sdk.skills.hand.Right, corpse)) {
 							return false;
 						}
 
-						count = me.getMinionCount(sdk.minions.Revive);
+						count = me.getMinionCount(sdk.summons.type.Revive);
 						tick = getTickCount();
 
 						while (getTickCount() - tick < 200) {
-							if (me.getMinionCount(sdk.minions.Revive) > count) {
+							if (me.getMinionCount(sdk.summons.type.Revive) > count) {
 								break;
 							}
 
@@ -441,13 +442,11 @@ const ClassAttack = {
 	},
 
 	explodeCorpses: function (unit) {
-		if (Config.ExplodeCorpses === 0 || unit.mode === 0 || unit.mode === 12) {
-			return false;
-		}
+		if (Config.ExplodeCorpses === 0 || unit.dead) return false;
 
 		let corpseList = [];
-		let range = Math.floor((me.getSkill(Config.ExplodeCorpses, 1) + 7) / 3);
-		let corpse = getUnit(1, -1, 12);
+		let range = Math.floor((me.getSkill(Config.ExplodeCorpses, sdk.skills.subindex.SoftPoints) + 7) / 3);
+		let corpse = Game.getMonster(-1, sdk.monsters.mode.Dead);
 
 		if (corpse) {
 			do {
@@ -469,7 +468,7 @@ const ClassAttack = {
 							// Added corpse ID so I can see when it blows another monster with the same ClassID and Name
 							me.overhead("Exploding: " + corpse.classid + " " + corpse.name + " id:" + corpse.gid);
 
-							if (Skill.cast(Config.ExplodeCorpses, 0, corpse)) {
+							if (Skill.cast(Config.ExplodeCorpses, sdk.skills.hand.Right, corpse)) {
 								delay(me.ping + 1);
 							}
 						}
@@ -484,7 +483,7 @@ const ClassAttack = {
 						if (corpse) {
 							me.overhead("Exploding: " + corpse.classid + " " + corpse.name);
 
-							if (Skill.cast(Config.ExplodeCorpses, 0, corpse)) {
+							if (Skill.cast(Config.ExplodeCorpses, sdk.skills.hand.Right, corpse)) {
 								delay(200);
 							}
 						}
@@ -499,10 +498,10 @@ const ClassAttack = {
 	},
 
 	checkCorpseNearMonster: function (monster, range) {
-		let corpse = getUnit(1, -1, 12);
+		let corpse = Game.getMonster(-1, sdk.monsters.mode.Dead);
 
 		// Assume CorpseExplosion if no range specified
-		range === undefined && (range = Math.floor((me.getSkill(Config.ExplodeCorpses, 1) + 7) / 3));
+		range === undefined && (range = Math.floor((me.getSkill(Config.ExplodeCorpses, sdk.skills.subindex.SoftPoints) + 7) / 3));
 
 		if (corpse) {
 			do {
@@ -516,7 +515,7 @@ const ClassAttack = {
 	},
 
 	checkCorpse: function (unit, revive = false) {
-		if (!unit || unit.mode !== 12) return false;
+		if (!unit || unit.mode !== sdk.monsters.mode.Dead) return false;
 
 		let baseId = getBaseStat("monstats", unit.classid, "baseid"), badList = [312, 571];
 		let	states = [
@@ -524,12 +523,12 @@ const ClassAttack = {
 			sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
 		];
 
-		if (revive && ((unit.spectype & 0x7) || badList.includes(baseId) || (Config.ReviveUnstackable && getBaseStat("monstats2", baseId, "sizex") === 3))) {
+		if (revive && (unit.isSpecial || badList.includes(baseId) || (Config.ReviveUnstackable && getBaseStat("monstats2", baseId, "sizex") === 3))) {
 			return false;
 		}
 
 		if (!getBaseStat("monstats2", baseId, revive ? "revive" : "corpseSel")) return false;
 
-		return !!(unit.distance <= 25 && !checkCollision(me, unit, 0x4) && states.every(state => !unit.getState(state)));
+		return !!(unit.distance <= 25 && !checkCollision(me, unit, sdk.collision.Ranged) && states.every(state => !unit.getState(state)));
 	}
 };

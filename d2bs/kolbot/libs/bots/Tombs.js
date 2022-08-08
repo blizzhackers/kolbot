@@ -23,7 +23,7 @@ function Tombs() {
 	
 			if (!Pather.moveToExit(sdk.areas.CanyonofMagic, true)) throw new Error("Failed to move to Canyon");
 		} catch (e) {
-			console.errorReport(e);
+			console.error(e);
 		}
 	}
 

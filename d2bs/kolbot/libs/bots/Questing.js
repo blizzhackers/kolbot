@@ -7,10 +7,23 @@
 
 // @notes: can't do duriel or meph because all the extra tasks. this is not meant to be autoplay or self rush
 
-function Questing() {
+function Questing () {
 	const log = (msg = "", errorMsg = false) => {
 		me.overhead(msg);
 		console.log("ÿc9(Questing) :: " + (errorMsg ? "ÿc1" : "ÿc0") + msg);
+	};
+
+	const getQuestItem = (item) => {
+		if (item) {
+			let id = item.classid;
+			let canFit = Storage.Inventory.CanFit(item);
+			if (!canFit && Pickit.canMakeRoom()) {
+				console.log("ÿc7Trying to make room for " + Pickit.itemColor(item) + item.name);
+				Town.visitTown();
+				!copyUnit(item).x && (item = Misc.poll(() => Game.getItem(id)));
+			}
+		}
+		return Pickit.pickItem(item);
 	};
 
 	let quests = [
@@ -45,7 +58,7 @@ function Questing() {
 	};
 
 	this.smith = function () {
-		if (Misc.checkQuest(sdk.quest.id.ToolsoftheTrade, 1)) return true;
+		if (Misc.checkQuest(sdk.quest.id.ToolsoftheTrade, sdk.quest.states.ReqComplete)) return true;
 
 		log("starting smith");
 		if (!Loader.runScript("Smith")) throw new Error();
@@ -54,11 +67,11 @@ function Questing() {
 		!!malusChest && malusChest.distance > 5 && Pather.moveToUnit(malusChest);
 		Misc.openChest(malusChest);
 		let malus = Misc.poll(() => Game.getItem(sdk.quest.item.HoradricMalus), 1000, 100);
-		Pickit.pickItem(malus);
+		getQuestItem(malus);
 		Town.goToTown();
 		Town.npcInteract("Charsi");
 
-		return !!Misc.checkQuest(sdk.quest.id.ToolsoftheTrade, 1);
+		return !!Misc.checkQuest(sdk.quest.id.ToolsoftheTrade, sdk.quest.states.ReqComplete);
 	};
 
 	this.cain = function () {
@@ -129,7 +142,7 @@ function Questing() {
 		Attack.kill(sdk.monsters.Radament);
 
 		let book = Game.getItem(sdk.quest.item.BookofSkill);
-		book && Pickit.pickItem(book) && book.use();
+		getQuestItem(book);
 
 		Town.goToTown();
 		Town.npcInteract("Atma");
@@ -154,8 +167,7 @@ function Questing() {
 
 		Misc.openChest(sdk.quest.chest.LamEsensTomeHolder);
 		let book = Misc.poll(() => Game.getItem(sdk.quest.item.LamEsensTome), 1000, 100);
-
-		Pickit.pickItem(book);
+		getQuestItem(book);
 		Town.goToTown();
 		Town.npcInteract("Alkor");
 
@@ -175,14 +187,14 @@ function Questing() {
 
 	this.diablo = function () {
 		if (!Pather.accessToAct(4)) return false;
-		if (Misc.checkQuest(sdk.quest.id.TerrorsEnd, 0)) return true;
+		if (Misc.checkQuest(sdk.quest.id.TerrorsEnd, sdk.quest.states.Completed)) return true;
 
 		log("starting diablo");
 		if (!Loader.runScript("Diablo")) throw new Error();
 		Town.goToTown(4);
 
-		Game.getObject(sdk.units.RedPortalToAct5)
-			? Pather.useUnit(sdk.unittype.Object, sdk.units.RedPortalToAct5, sdk.areas.Harrogath)
+		Game.getObject(sdk.objects.RedPortalToAct5)
+			? Pather.useUnit(sdk.unittype.Object, sdk.objects.RedPortalToAct5, sdk.areas.Harrogath)
 			: Town.npcInteract("Tyrael", false) && Misc.useMenu(sdk.menu.TravelToHarrogath);
 
 		return true;
@@ -190,7 +202,7 @@ function Questing() {
 
 	this.shenk = function () {
 		if (!Pather.accessToAct(5)) return false;
-		if (Misc.checkQuest(sdk.quest.id.SiegeOnHarrogath, 1)) return true;
+		if (Misc.checkQuest(sdk.quest.id.SiegeOnHarrogath, sdk.quest.states.ReqComplete)) return true;
 
 		log("starting shenk");
 
@@ -214,7 +226,7 @@ function Questing() {
 		Pather.journeyTo(sdk.areas.FrigidHighlands);
 		Precast.doPrecast(true);
 
-		let barbs = (getPresetUnits(me.area, sdk.unittype.Object, sdk.quest.chest.BarbCage) || []);
+		let barbs = (Game.getPresetObjects(me.area, sdk.quest.chest.BarbCage) || []);
 
 		if (!barbs.length) {
 			log("Couldn't find the barbs");
@@ -247,12 +259,12 @@ function Questing() {
 
 		Town.npcInteract("qual_kehk");
 
-		return !!Misc.checkQuest(sdk.quest.id.RescueonMountArreat, 0);
+		return !!Misc.checkQuest(sdk.quest.id.RescueonMountArreat, sdk.quest.states.Completed);
 	};
 
 	this.anya = function () {
 		if (!Pather.accessToAct(5)) return false;
-		if (Misc.checkQuest(sdk.quest.id.PrisonofIce, 1)) return true;
+		if (Misc.checkQuest(sdk.quest.id.PrisonofIce, sdk.quest.states.ReqComplete)) return true;
 
 		log("starting anya");
 
@@ -262,29 +274,32 @@ function Questing() {
 
 		Precast.doPrecast(true);
 
-		if (!Pather.moveToPreset(sdk.areas.FrozenRiver, sdk.unittype.Object, sdk.units.FrozenAnyasPlatform)) {
+		if (!Pather.moveToPreset(sdk.areas.FrozenRiver, sdk.unittype.Object, sdk.objects.FrozenAnyasPlatform)) {
 			throw new Error("Anya quest failed");
 		}
 
 		delay(1000);
 
-		let anya = Game.getObject(sdk.units.FrozenAnya);
+		let anya = Game.getObject(sdk.objects.FrozenAnya);
 
 		// talk to anya, then cancel her boring speech
 		Pather.moveToUnit(anya);
-		sendPacket(1, 0x13, 4, 0x2, 4, anya.gid);
+		Packet.entityInteract(anya);
 		delay(300);
 		me.cancel();
 
 		// get pot from malah, then return to anya
 		Town.goToTown();
 		Town.npcInteract("Malah");
-		Town.move("portalspot");
-		Pather.usePortal(sdk.areas.FrozenRiver, me.name);
+		if (!Misc.poll(() => {
+			Pather.usePortal(sdk.areas.FrozenRiver, me.name);
+			return me.inArea(sdk.areas.FrozenRiver);
+		}, Time.seconds(30), 1000)) throw new Error("Anya quest failed - Failed to return to frozen river");
 
 		// unfreeze her, cancel her speech again
+		anya = Game.getObject(sdk.objects.FrozenAnya);
 		anya.interact();
-		delay(300);
+		delay(1000);
 		me.cancel();
 
 		// get reward
@@ -300,14 +315,14 @@ function Questing() {
 	// @theBGuy
 	this.ancients = function () {
 		Town.doChores();
-		log('starting ancients');
+		log("starting ancients");
 
 		Pather.useWaypoint(sdk.areas.AncientsWay);
 		Precast.doPrecast(true);
 		Pather.moveToExit(sdk.areas.ArreatSummit, true);
 
 		// failed to move to Arreat Summit
-		if (me.area !== sdk.areas.ArreatSummit) return false;
+		if (!me.inArea(sdk.areas.ArreatSummit)) return false;
 
 		// ancients prep
 		Town.doChores();
@@ -325,7 +340,7 @@ function Questing() {
 		Config.MPBuffer = 15;
 		Config.LifeChicken = 10;
 
-		log('updated settings');
+		log("updated settings");
 
 		Town.buyPotions();
 		// re-enter Arreat Summit
@@ -346,7 +361,7 @@ function Questing() {
 		
 		me.cancel();
 		Config = tempConfig;
-		log('restored settings');
+		log("restored settings");
 		Precast.doPrecast(true);
 
 		// reload town chicken in case we are doing others scripts after this one finishes
@@ -354,12 +369,12 @@ function Questing() {
 		(Config.TownHP > 0 || Config.TownMP > 0) && (townChick && !townChick.running || !townChick) && load("tools/TownChicken.js");
 
 		try {
-			if (Misc.checkQuest(sdk.quest.id.RiteofPassage, 0)) {
+			if (Misc.checkQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.Completed)) {
 				Pather.moveToExit([sdk.areas.WorldstoneLvl1, sdk.areas.WorldstoneLvl2], true);
 				Pather.getWP(sdk.areas.WorldstoneLvl2);
 			}
 		} catch (err) {
-			log('Cleared Ancients. Failed to get WSK Waypoint', true);
+			log("Cleared Ancients. Failed to get WSK Waypoint", true);
 		}
 
 		return true;
@@ -383,7 +398,7 @@ function Questing() {
 		let j;
 
 		for (j = 0; j < 3; j += 1) {
-			if (!Misc.checkQuest(quests[i][0], 0)) {
+			if (!Misc.checkQuest(quests[i][0], sdk.quest.states.Completed)) {
 				try {
 					if (this[quests[i][1]]()) {
 						didTask = true;
@@ -400,11 +415,11 @@ function Questing() {
 			}
 		}
 
-		j === 3 && D2Bot.printToConsole("Questing :: " + quests[i][1] + " quest failed.", 9);
+		j === 3 && D2Bot.printToConsole("Questing :: " + quests[i][1] + " quest failed.", sdk.colors.D2Bot.Red);
 	}
 
 	if (Config.Questing.StopProfile || Loader.scriptList.length === 1) {
-		D2Bot.printToConsole("All quests done. Stopping profile.", 5);
+		D2Bot.printToConsole("All quests done. Stopping profile.", sdk.colors.D2Bot.Green);
 		D2Bot.stop();
 	} else {
 		log("ÿc9(Questing) :: ÿc2Complete");

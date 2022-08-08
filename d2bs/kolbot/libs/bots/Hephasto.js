@@ -10,7 +10,7 @@ function Hephasto() {
 	Pather.useWaypoint(sdk.areas.RiverofFlame);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToPreset(me.area, 2, sdk.quest.chest.HellForge)) throw new Error("Failed to move to Hephasto");
+	if (!Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HellForge)) throw new Error("Failed to move to Hephasto");
 
 	try {
 		Attack.kill(getLocaleString(sdk.locale.monsters.HephastoTheArmorer));

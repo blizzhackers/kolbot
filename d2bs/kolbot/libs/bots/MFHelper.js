@@ -6,14 +6,14 @@
 */
 
 function MFHelper() {
-	let player, playerAct, split,
-		oldCommand = "",
-		command = "";
+	let player, playerAct, split;
+	let oldCommand = "";
+	let command = "";
 
 	function chatEvent (name, msg) {
 		if (!player) {
 			let match = [
-				"kill", "clearlevel", "clear", "quit", "cows", "council", "goto"
+				"kill", "clearlevel", "clear", "quit", "cows", "council", "goto", "nextup"
 			];
 
 			if (msg) {
@@ -44,7 +44,7 @@ function MFHelper() {
 
 	if (player) {
 		if (!Misc.poll(() => player.area, 120 * 60, 100 + me.ping)) {
-			throw new Error('Failed to wait for player area');
+			throw new Error("Failed to wait for player area");
 		}
 
 		playerAct = Misc.getPlayerAct(Config.Leader);
@@ -57,7 +57,7 @@ function MFHelper() {
 
 	// START
 	while (true) {
-		if (me.softcore && me.mode === 17) {
+		if (me.softcore && me.mode === sdk.player.mode.Dead) {
 			while (!me.inTown) {
 				me.revive();
 				delay(1000);
@@ -99,6 +99,14 @@ function MFHelper() {
 					}
 
 					delay(500 + me.ping);
+				} else if (command.includes("nextup")) {
+					split = command.split("nextup ")[1];
+
+					if (split && ["Diablo", "Baal"].includes(split)) {
+						break;
+					}
+
+					delay(500 + me.ping);
 				} else if (command.includes("cows")) {
 					print("ÿc4MFHelperÿc0: Clear Cows");
 
@@ -110,7 +118,7 @@ function MFHelper() {
 						delay(500 + me.ping);
 					}
 
-					if (me.area === sdk.areas.MooMooFarm) {
+					if (me.inArea(sdk.areas.MooMooFarm)) {
 						Precast.doPrecast(false);
 						Common.Cows.clearCowLevel();
 						delay(1000);
@@ -168,7 +176,7 @@ function MFHelper() {
 							}
 						} else if (command.includes("council")) {
 							print("ÿc4MFHelperÿc0: Kill Council");
-							Attack.clearList(Attack.getMob([345, 346, 347], 0, 40));
+							Attack.clearList(Attack.getMob([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3], 0, 40));
 						}
 
 						delay(100);

@@ -4,10 +4,11 @@
 *  @desc        handle out of game operations like creating characters/accounts, maintaining profile datafiles, d2bot# logging etc.
 *
 */
-!isIncluded('Polyfill.js') && include('Polyfill.js');
+!isIncluded("Polyfill.js") && include("Polyfill.js");
+!isIncluded("common/Util.js") && include("common/Util.js");
 
-let sdk = require('./modules/sdk');
-let Controls = require('./modules/Control');
+let sdk = require("./modules/sdk");
+let Controls = require("./modules/Control");
 
 const D2Bot = {
 	handle: 0,
@@ -443,8 +444,8 @@ const DataFile = {
 		for (let i = 0; i < statArr.length; i += 1) {
 			switch (statArr[i]) {
 			case "experience":
-				obj.experience = me.getStat(13);
-				obj.level = me.getStat(12);
+				obj.experience = me.getStat(sdk.stats.Experience);
+				obj.level = me.getStat(sdk.stats.Level);
 
 				break;
 			case "lastArea":
@@ -460,7 +461,7 @@ const DataFile = {
 					break;
 				}
 
-				obj.gold = me.getStat(14) + me.getStat(15);
+				obj.gold = me.getStat(sdk.stats.Gold) + me.getStat(sdk.stats.GoldBank);
 
 				break;
 			case "name":
@@ -665,7 +666,7 @@ const ControlAction = {
 					break;
 				}
 
-				switch (control.text.split(getLocaleString(11049).substring(0, getLocaleString(11049).length - 2))[1]) {
+				switch (control.text.split(getLocaleString(sdk.locale.text.Gateway).substring(0, getLocaleString(sdk.locale.text.Gateway).length - 2))[1]) {
 				case "U.S. EAST":
 					currentRealm = 1;
 
@@ -788,7 +789,9 @@ const ControlAction = {
 
 	setEmail: function (email = "", domain = "@email.com") {
 		if (getLocation() !== sdk.game.locations.RegisterEmail) return false;
-		!email && (email = Starter.randomString(null, true));
+		if (!email || !email.length) {
+			email = Starter.randomString(null, true);
+		}
 		
 		while (getLocation() !== sdk.game.locations.CharSelect) {
 			switch (getLocation()) {
@@ -805,6 +808,9 @@ const ControlAction = {
 				Controls.LoginErrorOk.click();
 				
 				return false;
+			case sdk.game.locations.CharSelectNoChars:
+				// fresh acc
+				return true;
 			}
 		}
 
@@ -814,6 +820,7 @@ const ControlAction = {
 	makeAccount: function (info) {
 		me.blockMouse = true;
 
+		let openBnet = Profile().type === sdk.game.profiletype.OpenBattlenet;
 		let realms = {
 			"uswest": 0,
 			"useast": 1,
@@ -821,11 +828,16 @@ const ControlAction = {
 			"europe": 3
 		};
 		// cycle until in empty char screen
+		MainLoop:
 		while (getLocation() !== sdk.game.locations.CharSelectNoChars) {
 			switch (getLocation()) {
 			case sdk.game.locations.MainMenu:
 				ControlAction.clickRealm(realms[info.realm]);
-				Controls.BattleNet.click();
+				if (openBnet) {
+					Controls.OtherMultiplayer.click() && Controls.OpenBattleNet.click();
+				} else {
+					Controls.BattleNet.click();
+				}
 
 				break;
 			case sdk.game.locations.Login:
@@ -857,6 +869,12 @@ const ControlAction = {
 				break;
 			case sdk.game.locations.RegisterEmail:
 				Controls.EmailDontRegisterContinue.control ? Controls.EmailDontRegisterContinue.click() : Controls.EmailDontRegister.click();
+
+				break;
+			case sdk.game.locations.CharSelect:
+				if (openBnet) {
+					break MainLoop;
+				}
 
 				break;
 			default:
@@ -975,7 +993,7 @@ const ControlAction = {
 	getPermStatus: function (info) {
 		let count = 0;
 		let tick = getTickCount();
-		let expireStr = getLocaleString(11133);
+		let expireStr = getLocaleString(sdk.locale.text.ExpiresIn);
 		expireStr = expireStr.slice(0, expireStr.indexOf("%")).trim();
 
 		while (getLocation() !== sdk.game.locations.CharSelect) {
@@ -1204,7 +1222,21 @@ const ControlAction = {
 				} else {
 					Controls.CharCreateCharName.setText(info.charName);
 
-					!info.expansion && Controls.CharCreateExpansion.click();
+					if (!info.expansion) {
+						switch (info.charClass) {
+						case "druid":
+						case "assassin":
+							D2Bot.printToConsole("Error in profile name. Expansion characters cannot be made in classic", sdk.colors.D2Bot.Red);
+							D2Bot.stop();
+
+							break;
+						default:
+							break;
+						}
+
+						Controls.CharCreateExpansion.click();
+					}
+
 					!info.ladder && Controls.CharCreateLadder.click();
 					info.hardcore && Controls.CharCreateHardcore.click();
 
@@ -1315,9 +1347,9 @@ const ControlAction = {
 	getQueueTime: function() {
 		// You are in line to create a game.,Try joining a game to avoid waiting.,,Your position in line is: ÿc02912
 		const text = Controls.CreateGameInLine.getText();
-		if (text && text.indexOf(getLocaleString(11026)) > -1) {
+		if (text && text.indexOf(getLocaleString(sdk.locale.text.YourPositionInLineIs)) > -1) {
 			const result = /ÿc0(\d*)/gm.exec(text);
-			if (result && typeof result[1] === 'string') {
+			if (result && typeof result[1] === "string") {
 				return parseInt(result[1]) || 0;
 			}
 		}
@@ -1646,7 +1678,7 @@ const Starter = {
 	},
 
 	randomString: function (len, useNumbers = false) {
-		len === undefined && (len = rand(5, 14));
+		!len && (len = rand(5, 14));
 
 		let rval = "";
 		let letters = useNumbers ? "abcdefghijklmnopqrstuvwxyz0123456789" : "abcdefghijklmnopqrstuvwxyz";
@@ -1659,7 +1691,7 @@ const Starter = {
 	},
 
 	randomNumberString: function (len) {
-		len === undefined && (len = rand(2, 5));
+		!len && (len = rand(2, 5));
 
 		let rval = "";
 		let vals = "0123456789";
@@ -1760,7 +1792,7 @@ const Starter = {
 					break;
 				case getLocaleString(sdk.locale.text.CdKeyInUseBy):
 					string += (" " + Controls.LoginCdKeyInUseBy.getText());
-					D2Bot.printToConsole(Starter.gameInfo.mpq + " " + string, 6);
+					D2Bot.printToConsole(Starter.gameInfo.mpq + " " + string, sdk.colors.D2Bot.Gold);
 					D2Bot.CDKeyInUse();
 
 					if (Starter.gameInfo.switchKeys) {
@@ -1793,7 +1825,7 @@ const Starter = {
 				}
 
 				if (cdkeyError) {
-					defaultPrint && D2Bot.printToConsole(string + Starter.gameInfo.mpq, 6);
+					defaultPrint && D2Bot.printToConsole(string + Starter.gameInfo.mpq, sdk.colors.D2Bot.Gold);
 					defaultPrint && D2Bot.updateStatus(string);
 					D2Bot.CDKeyDisabled();
 					if (Starter.gameInfo.switchKeys) {
@@ -1827,7 +1859,7 @@ const Starter = {
 
 				if (string === getLocaleString(sdk.locale.text.CdKeyDisabledFromRealm)) {
 					D2Bot.updateStatus("Realm Disabled CDKey");
-					D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, 6);
+					D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, sdk.colors.D2Bot.Gold);
 					D2Bot.CDKeyDisabled();
 
 					if (Starter.gameInfo.switchKeys) {
@@ -1903,7 +1935,7 @@ const Starter = {
 						D2Bot.updateStatus("Waiting out Queue restriction: " + queue);
 					} else {
 						print("Restricted... Queue: " + queue);
-						D2Bot.printToConsole("Restricted... Queue: " + queue, 9);
+						D2Bot.printToConsole("Restricted... Queue: " + queue, sdk.colors.D2Bot.Red);
 						Controls.CancelCreateGame.click();
 
 						if (Starter.Config.WaitOutQueueExitToMenu) {
@@ -1926,7 +1958,7 @@ const Starter = {
 			console.log("Game doesn't exist");
 
 			if (Starter.gameInfo.rdBlocker) {
-				D2Bot.printToConsole(Starter.gameInfo.mpq + " is probably flagged.", 6);
+				D2Bot.printToConsole(Starter.gameInfo.mpq + " is probably flagged.", sdk.colors.D2Bot.Gold);
 
 				if (Starter.gameInfo.switchKeys) {
 					ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
@@ -2005,10 +2037,10 @@ const Starter = {
 			// dead HardCore character
 			if (Controls.CreateGameWindow.control && Controls.CreateGameWindow.disabled === sdk.game.controls.Disabled) {
 				if (Starter.Config.StopOnDeadHardcore) {
-					D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Shutting down, better luck next time", 6);
+					D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Shutting down, better luck next time", sdk.colors.D2Bot.Gold);
 					D2Bot.stop();
 				} else {
-					D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Better luck next time", 6);
+					D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Better luck next time", sdk.colors.D2Bot.Gold);
 					D2Bot.updateStatus(Profile().character + " has died. They shall be remembered...maybe. Better luck next time");
 					Starter.deadCheck = true;
 					Controls.LobbyQuit.click();
@@ -2089,7 +2121,7 @@ const Starter = {
 						if (getLocation() === sdk.game.locations.OkCenteredErrorPopUp) {
 							// Exit from that pop-up
 							Controls.OkCentered.click();
-							D2Bot.printToConsole("Character died", 9);
+							D2Bot.printToConsole("Character died", sdk.colors.D2Bot.Red);
 							D2Bot.stop();
 						} else {
 							Starter.loginRetry++;

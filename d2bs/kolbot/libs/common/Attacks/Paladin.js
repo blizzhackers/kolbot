@@ -6,8 +6,10 @@
 */
 
 const ClassAttack = {
+	attackAuras: [sdk.skills.HolyFire, sdk.skills.HolyFreeze, sdk.skills.HolyShock],
+
 	doAttack: function (unit, preattack) {
-		if (!unit) return 1;
+		if (!unit) return Attack.Result.SUCCESS;
 		let gid = unit.gid;
 
 		if (Config.MercWatch && Town.needMerc()) {
@@ -15,22 +17,22 @@ const ClassAttack = {
 
 			if (Town.visitTown()) {
 				// lost reference to the mob we were attacking
-				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
-					return 1;
+				if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
+					return Attack.Result.SUCCESS;
 				}
 			}
 		}
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Config.AttackSkill[0]) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
-			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
-					return 0;
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), sdk.collision.Ranged)) {
+					return Attack.Result.FAILED;
 				}
 			}
 
 			Skill.cast(Config.AttackSkill[0], Skill.getHand(Config.AttackSkill[0]), unit);
 
-			return 1;
+			return Attack.Result.SUCCESS;
 		}
 
 		let mercRevive = 0;
@@ -47,7 +49,7 @@ const ClassAttack = {
 		}
 
 		// Classic auradin check
-		if ([sdk.skills.HolyFire, sdk.skills.HolyFreeze, sdk.skills.HolyShock].includes(aura)) {
+		if (this.attackAuras.includes(aura)) {
 			// Monster immune to primary aura
 			if (!Attack.checkResist(unit, aura)) {
 				// Reset skills
@@ -55,7 +57,7 @@ const ClassAttack = {
 				aura = -1;
 
 				// Set to secondary if not immune, check if using secondary attack aura if not check main skill for immunity
-				if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, ([sdk.skills.HolyFire, sdk.skills.HolyFreeze, sdk.skills.HolyShock].includes(Config.AttackSkill[6]) ? Config.AttackSkill[6] : Config.AttackSkill[5]))) {
+				if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, (this.attackAuras.includes(Config.AttackSkill[6]) ? Config.AttackSkill[6] : Config.AttackSkill[5]))) {
 					attackSkill = Config.AttackSkill[5];
 					aura = Config.AttackSkill[6];
 				}
@@ -83,23 +85,23 @@ const ClassAttack = {
 
 		let result = this.doCast(unit, attackSkill, aura);
 
-		if (result === 2 && Config.TeleStomp && Config.UseMerc && Pather.canTeleport() && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y)) {
+		if (result === Attack.Result.CANTATTACK && Attack.canTeleStomp(unit)) {
 			let merc = me.getMerc();
 
 			while (unit.attackable) {
 				if (Misc.townCheck()) {
 					if (!unit || !copyUnit(unit).x) {
-						unit = Misc.poll(() => getUnit(1, -1, -1, gid), 1000, 80);
+						unit = Misc.poll(() => Game.getMonster(-1, -1, gid), 1000, 80);
 					}
 				}
 
-				if (!unit) return 1;
+				if (!unit) return Attack.Result.SUCCESS;
 
 				if (Town.needMerc()) {
 					if (Config.MercWatch && mercRevive++ < 1) {
 						Town.visitTown();
 					} else {
-						return 2;
+						return Attack.Result.CANTATTACK;
 					}
 
 					(merc === undefined || !merc) && (merc = me.getMerc());
@@ -109,14 +111,14 @@ const ClassAttack = {
 					Pather.moveToUnit(unit);
 
 					let spot = Attack.findSafeSpot(unit, 10, 5, 9);
-					!!spot && Pather.walkTo(spot.x, spot.y);
+					!!spot && !!spot.x && Pather.walkTo(spot.x, spot.y);
 				}
 
 				let closeMob = Attack.getNearestMonster({skipGid: gid});
 				!!closeMob && this.doCast(closeMob, attackSkill, aura);
 			}
 
-			return 1;
+			return Attack.Result.SUCCESS;
 		}
 
 		return result;
@@ -128,26 +130,26 @@ const ClassAttack = {
 		// only proceed with other checks if we can use redemption and the config values aren't 0
 		if (Skill.canUse(sdk.skills.Redemption) && Config.Redemption.some(v => v > 0)) {
 			if ((me.hpPercent < Config.Redemption[0] || me.mpPercent < Config.Redemption[1])
-				&& Attack.checkNearCorpses(me) > 2 && Skill.setSkill(sdk.skills.Redemption, 0)) {
+				&& Attack.checkNearCorpses(me) > 2 && Skill.setSkill(sdk.skills.Redemption, sdk.skills.hand.Right)) {
 				delay(1500);
 			}
 		}
 	},
 
 	doCast: function (unit, attackSkill = -1, aura = -1) {
-		if (attackSkill < 0) return 2;
+		if (attackSkill < 0) return Attack.Result.CANTATTACK;
 		// unit became invalidated
-		if (!unit || !unit.attackable) return 1;
+		if (!unit || !unit.attackable) return Attack.Result.SUCCESS;
 		
 		switch (attackSkill) {
 		case sdk.skills.BlessedHammer:
 			// todo: add doll avoid to other classes
 			if (Config.AvoidDolls && unit.isDoll) {
 				this.dollAvoid(unit);
-				aura > -1 && Skill.setSkill(aura, 0);
+				aura > -1 && Skill.setSkill(aura, sdk.skills.hand.Right);
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 
-				return 1;
+				return Attack.Result.SUCCESS;
 			}
 
 			// todo: maybe if we are currently surrounded and no tele to just attack from where we are
@@ -158,12 +160,12 @@ const ClassAttack = {
 					return this.doCast(unit, Config.AttackSkill[5], Config.AttackSkill[6]);
 				}
 
-				return 0;
+				return Attack.Result.FAILED;
 			}
 
-			if (unit.distance > 9 || !unit.attackable) return 1;
+			if (unit.distance > 9 || !unit.attackable) return Attack.Result.SUCCESS;
 
-			aura > -1 && Skill.setSkill(aura, 0);
+			aura > -1 && Skill.setSkill(aura, sdk.skills.hand.Right);
 
 			for (let i = 0; i < 3; i += 1) {
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
@@ -173,41 +175,41 @@ const ClassAttack = {
 				}
 			}
 
-			return 1;
+			return Attack.Result.SUCCESS;
 		case sdk.skills.HolyBolt:
-			if (unit.distance > Skill.getRange(attackSkill) + 3 || CollMap.checkColl(me, unit, 0x4)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4)) {
-					return 0;
+			if (unit.distance > Skill.getRange(attackSkill) + 3 || CollMap.checkColl(me, unit, sdk.collision.Ranged)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.Ranged)) {
+					return Attack.Result.FAILED;
 				}
 			}
 
 			CollMap.reset();
 
-			if (unit.distance > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, 0x2004, 2)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x2004, true)) {
-					return 0;
+			if (unit.distance > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, sdk.collision.FriendlyRanged, 2)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.FriendlyRanged, true)) {
+					return Attack.Result.FAILED;
 				}
 			}
 
 			if (!unit.dead) {
-				aura > -1 && Skill.setSkill(aura, 0);
+				aura > -1 && Skill.setSkill(aura, sdk.skills.hand.Right);
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 			}
 
-			return 1;
+			return Attack.Result.SUCCESS;
 		case sdk.skills.FistoftheHeavens:
 			if (!me.skillDelay) {
-				if (unit.distance > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, 0x2004, 2)) {
-					if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x2004, true)) {
-						return 0;
+				if (unit.distance > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, sdk.collision.FriendlyRanged, 2)) {
+					if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.FriendlyRanged, true)) {
+						return Attack.Result.FAILED;
 					}
 				}
 
 				if (!unit.dead) {
-					aura > -1 && Skill.setSkill(aura, 0);
+					aura > -1 && Skill.setSkill(aura, sdk.skills.hand.Right);
 					Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 
-					return 1;
+					return Attack.Result.SUCCESS;
 				}
 			}
 
@@ -217,43 +219,43 @@ const ClassAttack = {
 		case sdk.skills.Zeal:
 		case sdk.skills.Vengeance:
 			if (!Attack.validSpot(unit.x, unit.y, attackSkill, unit.classid)) {
-				return 0;
+				return Attack.Result.FAILED;
 			}
 			
 			// 3591 - wall/line of sight/ranged/items/objects/closeddoor 
-			if (unit.distance > 3 || checkCollision(me, unit, 0x5)) {
-				if (!Attack.getIntoPosition(unit, 3, 0x5, true)) {
-					return 0;
+			if (unit.distance > 3 || checkCollision(me, unit, sdk.collision.WallOrRanged)) {
+				if (!Attack.getIntoPosition(unit, 3, sdk.collision.WallOrRanged, true)) {
+					return Attack.Result.FAILED;
 				}
 			}
 
 			if (unit.attackable) {
-				aura > -1 && Skill.setSkill(aura, 0);
-				return (Skill.cast(attackSkill, 2, unit) ? 1 : 0);
+				aura > -1 && Skill.setSkill(aura, sdk.skills.hand.Right);
+				return (Skill.cast(attackSkill, sdk.skills.hand.LeftNoShift, unit) ? Attack.Result.SUCCESS : Attack.Result.FAILED);
 			}
 
 			break;
 		default:
-			if (Skill.getRange(attackSkill) < 4 && !Attack.validSpot(unit.x, unit.y, attackSkill, unit.classid)) return 0;
+			if (Skill.getRange(attackSkill) < 4 && !Attack.validSpot(unit.x, unit.y, attackSkill, unit.classid)) return Attack.Result.FAILED;
 
-			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x4)) {
-				let walk = (attackSkill !== 97 && Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1));
+			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
+				let walk = (attackSkill !== sdk.skills.Smite && Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall));
 
 				// walk short distances instead of tele for melee attacks. teleport if failed to walk
-				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4, walk)) return 0;
+				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.Ranged, walk)) return Attack.Result.FAILED;
 			}
 
 			if (!unit.dead) {
-				aura > -1 && Skill.setSkill(aura, 0);
+				aura > -1 && Skill.setSkill(aura, sdk.skills.hand.Right);
 				Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 			}
 
-			return 1;
+			return Attack.Result.SUCCESS;
 		}
 
 		Misc.poll(() => !me.skillDelay, 1000, 40);
 
-		return 1;
+		return Attack.Result.SUCCESS;
 	},
 
 	dollAvoid: function (unit) {
@@ -274,7 +276,8 @@ const ClassAttack = {
 
 	getHammerPosition: function (unit) {
 		let x, y, positions, baseId = getBaseStat("monstats", unit.classid, "baseid");
-		let	size = getBaseStat("monstats2", baseId, "sizex");
+		let size = getBaseStat("monstats2", baseId, "sizex");
+		let canTele = Pather.canTeleport();
 
 		// in case base stat returns something outrageous
 		(typeof size !== "number" || size < 1 || size > 3) && (size = 3);
@@ -287,7 +290,7 @@ const ClassAttack = {
 
 			break;
 		case sdk.unittype.Monster:
-			let commonCheck = ((unit.mode === 2 || unit.mode === 15) && unit.distance < 10);
+			let commonCheck = (unit.isMoving && unit.distance < 10);
 			x = commonCheck && getDistance(me, unit.targetx, unit.targety) > 5 ? unit.targetx : unit.x;
 			y = commonCheck && getDistance(me, unit.targetx, unit.targety) > 5 ? unit.targety : unit.y;
 			positions = [[x + 2, y + 1], [x, y + 3], [x + 2, y - 1], [x - 2, y + 2], [x - 5, y]];
@@ -298,23 +301,25 @@ const ClassAttack = {
 
 		// If one of the valid positions is a position im at already
 		for (let i = 0; i < positions.length; i += 1) {
-			if ((getDistance(me, positions[i][0], positions[i][1]) < 1
-				&& !CollMap.checkColl(unit, {x: positions[i][0], y: positions[i][1]}, 0x5 | 0x400 | 0x1000, 0))
-				|| (getDistance(me, positions[i][0], positions[i][1]) <= 4 && me.getMobCount(6) > 2)) {
+			let check = { x: positions[i][0], y: positions[i][1] };
+
+			if (canTele && [check.x, check.y].distance < 1) {
+				return true;
+			} else if (!canTele && ([check.x, check.y].distance < 1 && !CollMap.checkColl(unit, check, sdk.collision.BlockWalk, 0))
+				|| ([check.x, check.y].distance <= 4 && me.getMobCount(6) > 2)) {
 				return true;
 			}
 		}
 
 		for (let i = 0; i < positions.length; i += 1) {
-			let check = {
-				x: positions[i][0],
-				y: positions[i][1]
-			};
+			let check = { x: positions[i][0], y: positions[i][1] };
 
-			if (Attack.validSpot(check.x, check.y) && !CollMap.checkColl(unit, check, 0x5 | 0x400 | 0x1000, 0)) {
-				if (this.reposition(positions[i][0], positions[i][1])) return true;
+			if (Attack.validSpot(check.x, check.y) && !CollMap.checkColl(unit, check, sdk.collision.BlockWalk, 0)) {
+				if (this.reposition(check.x, check.y)) return true;
 			}
 		}
+
+		console.debug("Failed to find a hammer position for " + unit.name + " distance from me: " + unit.distance);
 
 		return false;
 	},
@@ -327,7 +332,7 @@ const ClassAttack = {
 			} else {
 				if ([x, y].distance <= 4) {
 					Misc.click(0, 0, x, y);
-				} else if (!CollMap.checkColl(me, {x: x, y: y}, 0x5 | 0x400 | 0x1000, 3)) {
+				} else if (!CollMap.checkColl(me, {x: x, y: y}, sdk.collision.BlockWalk, 3)) {
 					Pather.walkTo(x, y);
 				} else {
 					// don't clear while trying to reposition

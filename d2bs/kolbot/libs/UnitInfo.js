@@ -21,20 +21,20 @@ const UnitInfo = new function () {
 		}
 
 		switch (unit.type) {
-		case 0:
+		case sdk.unittype.Player:
 			this.playerInfo(unit);
 
 			break;
-		case 1:
+		case sdk.unittype.Monster:
 			this.monsterInfo(unit);
 
 			break;
-		case 2:
-		case 5:
+		case sdk.unittype.Object:
+		case sdk.unittype.Stairs:
 			this.objectInfo(unit);
 
 			break;
-		case 4:
+		case sdk.unittype.Item:
 			this.itemInfo(unit);
 
 			break;
@@ -42,11 +42,6 @@ const UnitInfo = new function () {
 	};
 
 	this.playerInfo = function (unit) {
-		let string,
-			frameXsize = 0,
-			frameYsize = 20,
-			quality = ["ÿc0", "ÿc0", "ÿc0", "ÿc0", "ÿc3", "ÿc2", "ÿc9", "ÿc4", "ÿc8"];
-
 		!this.currentGid && (this.currentGid = unit.gid);
 
 		if (this.currentGid === unit.gid && !this.cleared) {
@@ -58,19 +53,23 @@ const UnitInfo = new function () {
 			this.currentGid = unit.gid;
 		}
 
-		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, this.x, this.y, 4, 13, 2));
-
+		let string;
+		let frameXsize = 0;
+		let frameYsize = 20;
+		let quality = ["ÿc0", "ÿc0", "ÿc0", "ÿc0", "ÿc3", "ÿc2", "ÿc9", "ÿc4", "ÿc8"];
 		let items = unit.getItemsEx();
+
+		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, this.x, this.y, 4, 13, 2));
 
 		if (items.length) {
 			this.hooks.push(new Text("Equipped items:", this.x, this.y + 15, 4, 13, 2));
 			frameYsize += 15;
 
 			for (let i = 0; i < items.length; i += 1) {
-				if (items[i].getFlag(0x4000000)) {
+				if (items[i].getFlag(sdk.items.flags.Runeword)) {
 					string = items[i].fname.split("\n")[1] + "ÿc0 " + items[i].fname.split("\n")[0];
 				} else {
-					string = quality[items[i].quality] + (items[i].quality > 4 && items[i].getFlag(0x10) ? items[i].fname.split("\n").reverse()[0].replace("ÿc4", "") : items[i].name);
+					string = quality[items[i].quality] + (items[i].quality > 4 && items[i].getFlag(sdk.items.flags.Identified) ? items[i].fname.split("\n").reverse()[0].replace("ÿc4", "") : items[i].name);
 				}
 
 				this.hooks.push(new Text(string, this.x, this.y + (i + 2) * 15, 0, 13, 2));
@@ -87,8 +86,6 @@ const UnitInfo = new function () {
 	};
 
 	this.monsterInfo = function (unit) {
-		let frameYsize = 125;
-
 		!this.currentGid && (this.currentGid = unit.gid);
 
 		if (this.currentGid === unit.gid && !this.cleared) {
@@ -100,14 +97,16 @@ const UnitInfo = new function () {
 			this.currentGid = unit.gid;
 		}
 
+		let frameYsize = 125;
+
 		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, this.x, this.y, 4, 13, 2));
 		this.hooks.push(new Text("HP percent: ÿc0" + Math.round(unit.hp * 100 / 128), this.x, this.y + 15, 4, 13, 2));
-		this.hooks.push(new Text("Fire resist: ÿc0" + unit.getStat(39), this.x, this.y + 30, 4, 13, 2));
-		this.hooks.push(new Text("Cold resist: ÿc0" + unit.getStat(43), this.x, this.y + 45, 4, 13, 2));
-		this.hooks.push(new Text("Lightning resist: ÿc0" + unit.getStat(41), this.x, this.y + 60, 4, 13, 2));
-		this.hooks.push(new Text("Poison resist: ÿc0" + unit.getStat(45), this.x, this.y + 75, 4, 13, 2));
-		this.hooks.push(new Text("Physical resist: ÿc0" + unit.getStat(36), this.x, this.y + 90, 4, 13, 2));
-		this.hooks.push(new Text("Magic resist: ÿc0" + unit.getStat(37), this.x, this.y + 105, 4, 13, 2));
+		this.hooks.push(new Text("Fire resist: ÿc0" + unit.getStat(sdk.stats.FireResist), this.x, this.y + 30, 4, 13, 2));
+		this.hooks.push(new Text("Cold resist: ÿc0" + unit.getStat(sdk.stats.ColdResist), this.x, this.y + 45, 4, 13, 2));
+		this.hooks.push(new Text("Lightning resist: ÿc0" + unit.getStat(sdk.stats.LightResist), this.x, this.y + 60, 4, 13, 2));
+		this.hooks.push(new Text("Poison resist: ÿc0" + unit.getStat(sdk.stats.PoisonResist), this.x, this.y + 75, 4, 13, 2));
+		this.hooks.push(new Text("Physical resist: ÿc0" + unit.getStat(sdk.stats.DamageResist), this.x, this.y + 90, 4, 13, 2));
+		this.hooks.push(new Text("Magic resist: ÿc0" + unit.getStat(sdk.stats.MagicResist), this.x, this.y + 105, 4, 13, 2));
 
 		this.cleared = false;
 
@@ -117,10 +116,6 @@ const UnitInfo = new function () {
 	};
 
 	this.itemInfo = function (unit) {
-		let xpos = 60,
-			ypos = (me.getMerc() ? 80 : 20) + (-1 * this.resfix.y),
-			frameYsize = 50;
-
 		!this.currentGid && (this.currentGid = unit.gid);
 
 		if (this.currentGid === unit.gid && !this.cleared) {
@@ -131,6 +126,10 @@ const UnitInfo = new function () {
 			this.remove();
 			this.currentGid = unit.gid;
 		}
+
+		let xpos = 60;
+		let ypos = (me.getMerc() ? 80 : 20) + (-1 * this.resfix.y);
+		let frameYsize = 50;
 
 		this.hooks.push(new Text("Code: ÿc0" + unit.code, xpos, ypos + 0, 4, 13, 2));
 		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, xpos, ypos + 15, 4, 13, 2));
@@ -151,14 +150,14 @@ const UnitInfo = new function () {
 			}
 		}
 
-		if (unit.quality === 4 && unit.getFlag(0x10)) {
+		if (unit.magic && unit.identified) {
 			this.hooks.push(new Text("Prefix: ÿc0" + unit.prefixnum, xpos, ypos + frameYsize - 5, 4, 13, 2));
 			this.hooks.push(new Text("Suffix: ÿc0" + unit.suffixnum, xpos, ypos + frameYsize + 10, 4, 13, 2));
 
 			frameYsize += 30;
 		}
 
-		if (unit.getFlag(0x4000000)) {
+		if (unit.runeword) {
 			this.hooks.push(new Text("Prefix: ÿc0" + unit.prefixnum, xpos, ypos + frameYsize - 5, 4, 13, 2));
 
 			frameYsize += 15;
@@ -170,8 +169,6 @@ const UnitInfo = new function () {
 	};
 
 	this.objectInfo = function (unit) {
-		let frameYsize = 35;
-
 		!this.currentGid && (this.currentGid = unit.gid);
 
 		if (this.currentGid === unit.gid && !this.cleared) {
@@ -182,6 +179,8 @@ const UnitInfo = new function () {
 			this.remove();
 			this.currentGid = unit.gid;
 		}
+
+		let frameYsize = 35;
 
 		this.hooks.push(new Text("Type: ÿc0" + unit.type, this.x, this.y, 4, 13, 2));
 		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, this.x, this.y + 15, 4, 13, 2));

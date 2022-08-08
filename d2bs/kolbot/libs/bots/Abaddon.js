@@ -10,7 +10,7 @@ function Abaddon() {
 	Pather.useWaypoint(sdk.areas.FrigidHighlands);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToPreset(sdk.areas.FrigidHighlands, 2, sdk.units.RedPortal) || !Pather.usePortal(sdk.areas.Abaddon)) {
+	if (!Pather.moveToPreset(sdk.areas.FrigidHighlands, sdk.unittype.Object, sdk.objects.RedPortal) || !Pather.usePortal(sdk.areas.Abaddon)) {
 		throw new Error("Failed to move to Abaddon");
 	}
 

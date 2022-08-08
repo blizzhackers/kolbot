@@ -10,7 +10,7 @@ function Frozenstein() {
 	Pather.useWaypoint(sdk.areas.CrystalizedPassage);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToExit(sdk.areas.FrozenRiver, true) || !Pather.moveToPreset(me.area, 2, sdk.units.FrozenAnyasPlatform, -5, -5)) {
+	if (!Pather.moveToExit(sdk.areas.FrozenRiver, true) || !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.FrozenAnyasPlatform, -5, -5)) {
 		throw new Error("Failed to move to Frozenstein");
 	}
 

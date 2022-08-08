@@ -10,7 +10,7 @@ function Snapchip() {
 	Pather.useWaypoint(sdk.areas.AncientsWay);
 	Precast.doPrecast(true);
 
-	if (!Pather.moveToExit(sdk.areas.IcyCellar, true) || !Pather.moveToPreset(me.area, 2, sdk.units.IcyCellarChest)) {
+	if (!Pather.moveToExit(sdk.areas.IcyCellar, true) || !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.SmallSparklyChest)) {
 		throw new Error("Failed to move to Snapchip Shatter");
 	}
 

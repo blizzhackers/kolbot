@@ -10,8 +10,8 @@ const AREA_INDEX_COUNT = 137;
 const SUPER = [0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 4, 0, 0, 1, 0, 1, 4, 0, 2, 3, 1, 0, 1, 1, 0, 0, 0, 1, 3, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 5, 1, 1, 1, 1, 3];
 const AREA_LOCALE_STRING = [5389, 5055, 5054, 5053, 5052, 5051, 5050, 5049, 5048, 5047, 5046, 5045, 5044, 5043, 5042, 5041, 5040, 5039, 5038, 5037, 5036, 5035, 5034, 5033, 5032, 5031, 5030, 5029, 5028, 5027, 5026, 5025, 5024, 5023, 5022, 5021, 5020, 5019, 5018, 788, 852, 851, 850, 849, 848, 847, 846, 845, 844, 843, 842, 841, 840, 839, 838, 837, 836, 835, 834, 833, 832, 831, 830, 829, 828, 827, 826, 826, 826, 826, 826, 826, 826, 825, 824, 820, 819, 818, 817, 816, 815, 814, 813, 812, 810, 811, 809, 808, 806, 805, 807, 804, 845, 844, 803, 802, 801, 800, 799, 798, 797, 796, 795, 790, 792, 793, 794, 791, 789, 22646, 22647, 22648, 22649, 22650, 22651, 22652, 22653, 22654, 22655, 22656, 22657, 22658, 22659, 22660, 22662, 21865, 21866, 21867, 22663, 22664, 22665, 22667, 22666, 5389, 5389, 5389, 5018];
 const MONSTER_KEYS = [
-	['mon1', 'mon2', 'mon3', 'mon4', 'mon5', 'mon6', 'mon7', 'mon8', 'mon9', 'mon10'],
-	['nmon1', 'nmon2', 'nmon3', 'nmon4', 'nmon5', 'nmon6', 'nmon7', 'nmon8', 'nmon9', 'nmon10'],
+	["mon1", "mon2", "mon3", "mon4", "mon5", "mon6", "mon7", "mon8", "mon9", "mon10"],
+	["nmon1", "nmon2", "nmon3", "nmon4", "nmon5", "nmon6", "nmon7", "nmon8", "nmon9", "nmon10"],
 ][me.diff && 1]; // mon is for normal, nmon is for nm/hell, umon is specific to picking champion/uniques in normal
 
 /**
@@ -46,40 +46,40 @@ const MONSTER_KEYS = [
  *  .Minions = array of minions that can spawn with this unit
  */
 
-var MonsterData = Array(MONSTER_INDEX_COUNT);
+const MonsterData = Array(MONSTER_INDEX_COUNT);
 
 for (let i = 0; i < MonsterData.length; i++) {
 	let index = i;
 	MonsterData[i] = Object.freeze(Object.defineProperties({}, {
 		Index: {get: () => index, enumerable: true},
-		Level: {get: () => getBaseStat('monstats', index, 'Level'), enumerable: true}, // normal only, nm/hell are determined by area's LevelEx
-		Ranged: {get: () => getBaseStat('monstats', index, 'RangedType'), enumerable: true},
-		Rarity: {get: () => getBaseStat('monstats', index, 'Rarity'), enumerable: true},
-		Threat: {get: () => getBaseStat('monstats', index, 'threat'), enumerable: true},
-		Align: {get: () => getBaseStat('monstats', index, 'Align'), enumerable: true},
-		Melee: {get: () => getBaseStat('monstats', index, 'isMelee'), enumerable: true},
-		NPC: {get: () => getBaseStat('monstats', index, 'npc'), enumerable: true},
-		Demon: {get: () => getBaseStat('monstats', index, 'demon'), enumerable: true},
-		Flying: {get: () => getBaseStat('monstats', index, 'flying'), enumerable: true},
-		Boss: {get: () => getBaseStat('monstats', index, 'boss'), enumerable: true},
-		ActBoss: {get: () => getBaseStat('monstats', index, 'primeevil'), enumerable: true},
-		Killable: {get: () => getBaseStat('monstats', index, 'killable'), enumerable: true},
-		Convertable: {get: () => getBaseStat('monstats', index, 'switchai'), enumerable: true},
-		NeverCount: {get: () => getBaseStat('monstats', index, 'neverCount'), enumerable: true},
-		DeathDamage: {get: () => getBaseStat('monstats', index, 'deathDmg'), enumerable: true},
-		Regeneration: {get: () => getBaseStat('monstats', index, 'DamageRegen'), enumerable: true},
-		LocaleString: {get: () => getBaseStat('monstats', index, 'NameStr'), enumerable: true},
-		ExperienceModifier: {get: () => getBaseStat('monstats', index, ['Exp', 'Exp(N)', 'Exp(H)'][me.diff]), enumerable: true},
-		Undead: {get: () => (getBaseStat('monstats', index, 'hUndead') && 2) | (getBaseStat('monstats', index, 'lUndead') && 1), enumerable: true},
-		Drain: {get: () => getBaseStat('monstats', index, ["Drain", "Drain(N)", "Drain(H)"][me.diff]), enumerable: true},
-		Block: {get: () => getBaseStat('monstats', index, ["ToBlock", "ToBlock(N)", "ToBlock(H)"][me.diff]), enumerable: true},
-		Physical: {get: () => getBaseStat('monstats', index, ["ResDm", "ResDm(N)", "ResDm(H)"][me.diff]), enumerable: true},
-		Magic: {get: () => getBaseStat('monstats', index, ["ResMa", "ResMa(N)", "ResMa(H)"][me.diff]), enumerable: true},
-		Fire: {get: () => getBaseStat('monstats', index, ["ResFi", "ResFi(N)", "ResFi(H)"][me.diff]), enumerable: true},
-		Lightning: {get: () => getBaseStat('monstats', index, ["ResLi", "ResLi(N)", "ResLi(H)"][me.diff]), enumerable: true},
-		Cold: {get: () => getBaseStat('monstats', index, ["ResCo", "ResCo(N)", "ResCo(H)"][me.diff]), enumerable: true},
-		Poison: {get: () => getBaseStat('monstats', index, ["ResPo", "ResPo(N)", "ResPo(H)"][me.diff]), enumerable: true},
-		Minions: {get: () => [getBaseStat('monstats', index, 'minion1'), getBaseStat('monstats', index, 'minion2')].filter(mon => mon !== 65535), enumerable: true},
+		Level: {get: () => getBaseStat("monstats", index, "Level"), enumerable: true}, // normal only, nm/hell are determined by area's LevelEx
+		Ranged: {get: () => getBaseStat("monstats", index, "RangedType"), enumerable: true},
+		Rarity: {get: () => getBaseStat("monstats", index, "Rarity"), enumerable: true},
+		Threat: {get: () => getBaseStat("monstats", index, "threat"), enumerable: true},
+		Align: {get: () => getBaseStat("monstats", index, "Align"), enumerable: true},
+		Melee: {get: () => getBaseStat("monstats", index, "isMelee"), enumerable: true},
+		NPC: {get: () => getBaseStat("monstats", index, "npc"), enumerable: true},
+		Demon: {get: () => getBaseStat("monstats", index, "demon"), enumerable: true},
+		Flying: {get: () => getBaseStat("monstats", index, "flying"), enumerable: true},
+		Boss: {get: () => getBaseStat("monstats", index, "boss"), enumerable: true},
+		ActBoss: {get: () => getBaseStat("monstats", index, "primeevil"), enumerable: true},
+		Killable: {get: () => getBaseStat("monstats", index, "killable"), enumerable: true},
+		Convertable: {get: () => getBaseStat("monstats", index, "switchai"), enumerable: true},
+		NeverCount: {get: () => getBaseStat("monstats", index, "neverCount"), enumerable: true},
+		DeathDamage: {get: () => getBaseStat("monstats", index, "deathDmg"), enumerable: true},
+		Regeneration: {get: () => getBaseStat("monstats", index, "DamageRegen"), enumerable: true},
+		LocaleString: {get: () => getBaseStat("monstats", index, "NameStr"), enumerable: true},
+		ExperienceModifier: {get: () => getBaseStat("monstats", index, ["Exp", "Exp(N)", "Exp(H)"][me.diff]), enumerable: true},
+		Undead: {get: () => (getBaseStat("monstats", index, "hUndead") && 2) | (getBaseStat("monstats", index, "lUndead") && 1), enumerable: true},
+		Drain: {get: () => getBaseStat("monstats", index, ["Drain", "Drain(N)", "Drain(H)"][me.diff]), enumerable: true},
+		Block: {get: () => getBaseStat("monstats", index, ["ToBlock", "ToBlock(N)", "ToBlock(H)"][me.diff]), enumerable: true},
+		Physical: {get: () => getBaseStat("monstats", index, ["ResDm", "ResDm(N)", "ResDm(H)"][me.diff]), enumerable: true},
+		Magic: {get: () => getBaseStat("monstats", index, ["ResMa", "ResMa(N)", "ResMa(H)"][me.diff]), enumerable: true},
+		Fire: {get: () => getBaseStat("monstats", index, ["ResFi", "ResFi(N)", "ResFi(H)"][me.diff]), enumerable: true},
+		Lightning: {get: () => getBaseStat("monstats", index, ["ResLi", "ResLi(N)", "ResLi(H)"][me.diff]), enumerable: true},
+		Cold: {get: () => getBaseStat("monstats", index, ["ResCo", "ResCo(N)", "ResCo(H)"][me.diff]), enumerable: true},
+		Poison: {get: () => getBaseStat("monstats", index, ["ResPo", "ResPo(N)", "ResPo(H)"][me.diff]), enumerable: true},
+		Minions: {get: () => [getBaseStat("monstats", index, "minion1"), getBaseStat("monstats", index, "minion2")].filter(mon => mon !== 65535), enumerable: true},
 	}));
 }
 
@@ -101,18 +101,18 @@ Object.freeze(MonsterData);
  *  .LocaleString = locale string index for getLocaleString
  */
 
-var AreaData = new Array(AREA_INDEX_COUNT);
+const AreaData = new Array(AREA_INDEX_COUNT);
 
 for (let i = 0; i < AreaData.length; i++) {
 	let index = i;
 	AreaData[i] = Object.freeze(Object.defineProperties({}, {
 		Super: {get: () => SUPER[index], enumerable: true},
 		Index: {get: () => index, enumerable: true},
-		Act: {get: () => getBaseStat('levels', index, 'Act'), enumerable: true},
-		MonsterDensity: {get: () => getBaseStat('levels', index, ['MonDen', 'MonDen(N)', 'MonDen(H)'][me.diff]), enumerable: true},
-		ChampionPacks: {get: () => ({Min: getBaseStat('levels', index, ['MonUMin', 'MonUMin(N)', 'MonUMin(H)'][me.diff]), Max: getBaseStat('levels', index, ['MonUMax', 'MonUMax(N)', 'MonUMax(H)'][me.diff])}), enumerable: true},
-		Waypoint: {get: () => getBaseStat('levels', index, 'Waypoint'), enumerable: true},
-		Level: {get: () => getBaseStat('levels', index, ['MonLvl1Ex', 'MonLvl2Ex', 'MonLvl3Ex'][me.diff]), enumerable: true},
+		Act: {get: () => getBaseStat("levels", index, "Act"), enumerable: true},
+		MonsterDensity: {get: () => getBaseStat("levels", index, ["MonDen", "MonDen(N)", "MonDen(H)"][me.diff]), enumerable: true},
+		ChampionPacks: {get: () => ({Min: getBaseStat("levels", index, ["MonUMin", "MonUMin(N)", "MonUMin(H)"][me.diff]), Max: getBaseStat("levels", index, ["MonUMax", "MonUMax(N)", "MonUMax(H)"][me.diff])}), enumerable: true},
+		Waypoint: {get: () => getBaseStat("levels", index, "Waypoint"), enumerable: true},
+		Level: {get: () => getBaseStat("levels", index, ["MonLvl1Ex", "MonLvl2Ex", "MonLvl3Ex"][me.diff]), enumerable: true},
 		Size: {get: () => {
 			if (index === 111) { // frigid highlands doesn't specify size, manual measurement
 				return {x: 210, y: 710};
@@ -123,18 +123,18 @@ for (let i = 0; i < AreaData.length; i++) {
 			}
 
 			return {
-				x: getBaseStat('leveldefs', index, ['SizeX', 'SizeX(N)', 'SizeX(H)'][me.diff]),
-				y: getBaseStat('leveldefs', index, ['SizeY', 'SizeY(N)', 'SizeY(H)'][me.diff])
+				x: getBaseStat("leveldefs", index, ["SizeX", "SizeX(N)", "SizeX(H)"][me.diff]),
+				y: getBaseStat("leveldefs", index, ["SizeY", "SizeY(N)", "SizeY(H)"][me.diff])
 			};
 		}, enumerable: true},
-		Monsters: {get: () => MONSTER_KEYS.map(key => getBaseStat('levels', index, key)).filter(key => key !== 65535), enumerable: true},
+		Monsters: {get: () => MONSTER_KEYS.map(key => getBaseStat("levels", index, key)).filter(key => key !== 65535), enumerable: true},
 		LocaleString: {get: () => AREA_LOCALE_STRING[index], enumerable: true},
 	}));
 }
 
 Object.freeze(AreaData);
 
-var GameData = {
+const GameData = {
 	townAreas: [0, 1, 40, 75, 103, 109],
 	monsterLevel: function (monsterID, areaID) {
 		if (me.diff) { // levels on nm/hell are determined by area, not by monster data

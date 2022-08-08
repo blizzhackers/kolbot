@@ -8,7 +8,7 @@
 // todo - combine autobaal, baalhelper, and baalassistant into one script
 // todo - track leaders area so we can do silent follow
 
-function BaalAssistant() {
+function BaalAssistant () {
 	let Leader = Config.Leader;
 	let Helper = Config.BaalAssistant.Helper;
 	let hotCheck = false;
@@ -38,7 +38,7 @@ function BaalAssistant() {
 		Config.BaalAssistant.NextGameMessage[i] = msg.toLowerCase();
 	});
 
-	addEventListener('chatmsg',
+	addEventListener("chatmsg",
 		function (nick, msg) {
 			if (nick === Leader) {
 				msg = msg.toLowerCase();
@@ -91,10 +91,10 @@ function BaalAssistant() {
 	};
 
 	// Start
-	const Worker = require('../modules/Worker');
+	const Worker = require("../modules/Worker");
 
 	if (Leader) {
-		if (!Misc.poll(() => Misc.inMyParty(Leader), 30e3, 1000)) throw new Error("BaalAssistant: Leader not partied");
+		if (!Misc.poll(() => Misc.inMyParty(Leader), Time.seconds(30), 1000)) throw new Error("BaalAssistant: Leader not partied");
 	}
 
 	let killLeaderTracker = false;
@@ -192,7 +192,7 @@ function BaalAssistant() {
 			}
 
 			while (Misc.inMyParty(Leader)) {
-				if (!secondAttempt && !safeCheck && !baalCheck && !ShrineStatus && !!Config.BaalAssistant.GetShrine && me.area === sdk.areas.Harrogath) {
+				if (!secondAttempt && !safeCheck && !baalCheck && !ShrineStatus && !!Config.BaalAssistant.GetShrine && me.inArea(sdk.areas.Harrogath)) {
 					if (!!Config.BaalAssistant.GetShrineWaitForHotTP) {
 						Misc.poll(() => hotCheck, Time.seconds(Config.BaalAssistant.Wait), 1000);
 
@@ -239,25 +239,25 @@ function BaalAssistant() {
 					ShrineStatus = true;
 				}
 
-				if (firstAttempt && !secondAttempt && !safeCheck && !baalCheck && me.area !== sdk.areas.ThroneofDestruction && me.area !== sdk.areas.WorldstoneChamber) {
+				if (firstAttempt && !secondAttempt && !safeCheck && !baalCheck && !me.inArea(sdk.areas.ThroneofDestruction) && !me.inArea(sdk.areas.WorldstoneChamber)) {
 					!!Config.RandomPrecast ? Precast.doRandomPrecast(true, sdk.areas.WorldstoneLvl2) : Pather.useWaypoint(sdk.areas.WorldstoneLvl2) && Precast.doPrecast(true);
 				}
 
-				if (me.area !== sdk.areas.ThroneofDestruction && me.area !== sdk.areas.WorldstoneChamber) {
+				if (!me.inArea(sdk.areas.ThroneofDestruction) && !me.inArea(sdk.areas.WorldstoneChamber)) {
 					if (Config.BaalAssistant.SkipTP) {
 						if (firstAttempt && !secondAttempt) {
-							me.area !== sdk.areas.WorldstoneLvl2 && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
+							!me.inArea(sdk.areas.WorldstoneLvl2) && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
 							if (!Pather.moveToExit([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction], false)) throw new Error("Failed to move to WSK3.");
 
 							this.checkParty();
-							let entrance = Misc.poll(() => getUnit(5, 82), 1000, 200);
+							let entrance = Misc.poll(() => Game.getStairs(sdk.exits.preset.NextAreaWorldstone), 1000, 200);
 							entrance && Pather.moveTo(entrance.x > me.x ? entrance.x - 5 : entrance.x + 5, entrance.y > me.y ? entrance.y - 5 : entrance.y + 5);
 
 							if (!Pather.moveToExit(sdk.areas.WorldstoneLvl3, true) || !Pather.moveTo(15118, 5002)) throw new Error("Failed to move to Throne of Destruction.");
 
 							Pather.moveTo(15095, 5029);
 
-							if ((Config.BaalAssistant.SoulQuit && Game.getMonster(641)) || (Config.BaalAssistant.DollQuit && Game.getMonster(691))) {
+							if ((Config.BaalAssistant.SoulQuit && Game.getMonster(sdk.monsters.BurningSoul1)) || (Config.BaalAssistant.DollQuit && Game.getMonster(sdk.monsters.SoulKiller))) {
 								print("Burning Souls or Undead Soul Killers found, ending script.");
 								return true;
 							}
@@ -276,7 +276,7 @@ function BaalAssistant() {
 						}
 					} else {
 						if (firstAttempt && !secondAttempt) {
-							me.area !== sdk.areas.Harrogath && Pather.useWaypoint(sdk.areas.Harrogath);
+							!me.inArea(sdk.areas.Harrogath) && Pather.useWaypoint(sdk.areas.Harrogath);
 							Town.move("portalspot");
 
 							if (Config.BaalAssistant.WaitForSafeTP && !Misc.poll(() => safeCheck, Time.seconds(Config.BaalAssistant.Wait), 1000)) {
@@ -287,7 +287,7 @@ function BaalAssistant() {
 								throw new Error("No portals to Throne.");
 							}
 
-							if ((Config.BaalAssistant.SoulQuit && Game.getMonster(641)) || (Config.BaalAssistant.DollQuit && Game.getMonster(691))) {
+							if ((Config.BaalAssistant.SoulQuit && Game.getMonster(sdk.monsters.BurningSoul1)) || (Config.BaalAssistant.DollQuit && Game.getMonster(sdk.monsters.SoulKiller))) {
 								throw new Error("Burning Souls or Undead Soul Killers found, ending script.");
 							}
 
@@ -304,7 +304,7 @@ function BaalAssistant() {
 					}
 				}
 
-				if (safeCheck && !baalCheck && me.area === sdk.areas.ThroneofDestruction) {
+				if (safeCheck && !baalCheck && me.inArea(sdk.areas.ThroneofDestruction)) {
 					if (!baalCheck && !throneStatus) {
 						if (Helper) {
 							Attack.clear(15);
@@ -363,7 +363,7 @@ function BaalAssistant() {
 								break MainLoop;
 							default:
 								if (getTickCount() - tick < 7e3) {
-									if (me.paladin && me.getState(sdk.states.Poison) && Skill.setSkill(sdk.skills.Cleansing, 0)) {
+									if (me.paladin && me.getState(sdk.states.Poison) && Skill.setSkill(sdk.skills.Cleansing, sdk.skills.hand.Right)) {
 										break;
 									}
 								}
@@ -381,7 +381,7 @@ function BaalAssistant() {
 					}
 				}
 
-				if ((throneStatus || baalCheck) && Config.BaalAssistant.KillBaal && me.area === sdk.areas.ThroneofDestruction) {
+				if ((throneStatus || baalCheck) && Config.BaalAssistant.KillBaal && me.inArea(sdk.areas.ThroneofDestruction)) {
 					Helper ? Pather.moveTo(15090, 5008) && delay(2000) : Pather.moveTo(15090, 5010);
 					Precast.doPrecast(true);
 
@@ -389,7 +389,7 @@ function BaalAssistant() {
 						delay(500);
 					}
 
-					let portal = getUnit(2, 563);
+					let portal = Game.getObject(sdk.objects.WorldstonePortal);
 
 					if (portal) {
 						delay((Helper ? 1000 : 4000));
@@ -421,7 +421,7 @@ function BaalAssistant() {
 				delay(500);
 			}
 		} catch (e) {
-			console.errorReport(e);
+			console.error(e);
 		} finally {
 			killTracker = true;
 		}

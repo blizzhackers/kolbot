@@ -7,16 +7,15 @@
 
 function Mephisto() {
 	this.killMephisto = function () {
-		let pos = {},
-			attackCount = 0,
-			meph = Game.getMonster(sdk.monsters.Mephisto);
-
+		let pos = {};
+		let attackCount = 0;
+		let meph = Game.getMonster(sdk.monsters.Mephisto);
 		if (!meph) throw new Error("Mephisto not found!");
 
 		Config.MFLeader && Pather.makePortal() && say("kill " + meph.classid);
 
 		while (attackCount < 300 && meph.attackable(meph)) {
-			if (meph.mode === 5) {
+			if (meph.mode === sdk.monsters.mode.Attacking2) {
 				let angle = Math.round(Math.atan2(me.y - meph.y, me.x - meph.x) * 180 / Math.PI);
 				let angles = me.y > meph.y ? [-30, -60, -90] : [30, 60, 90];
 
@@ -92,7 +91,7 @@ function Mephisto() {
 
 		for (let i = 0; i < coords.length; i += 2) {
 			Pather.moveTo(coords[i], coords[i + 1]);
-			Attack.clearList(Attack.getMob([345, 346, 347], 0, 40));
+			Attack.clearList(Attack.getMob([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3], 0, 40));
 		}
 
 		return true;

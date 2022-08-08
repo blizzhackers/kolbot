@@ -190,19 +190,19 @@ let Container = function (name, width, height, location) {
 			//Loop three times to try and place it.
 			for (n = 0; n < 5; n += 1) {
 				if (this.location === 6) { // place item into cube
-					cItem = getUnit(100);
-					cube = me.getItem(549);
+					cItem = Game.getCursorUnit();
+					cube = me.getItem(sdk.quest.item.Cube);
 
 					if (cItem !== null && cube !== null) {
-						sendPacket(1, 0x2a, 4, cItem.gid, 4, cube.gid);
+						sendPacket(1, sdk.packets.send.ItemToCube, 4, cItem.gid, 4, cube.gid);
 					}
 				} else if (this.location === 2) {
-					cItem = getUnit(100);
+					cItem = Game.getCursorUnit();
 					if (cItem !== null) {
-						sendPacket(1, 0x23, 4, cItem.gid, 4, nPos.y);
+						sendPacket(1, sdk.packets.send.ItemToBelt, 4, cItem.gid, 4, nPos.y);
 					}
 				} else {
-					clickItemAndWait(0, nPos.y, nPos.x, this.location);
+					clickItemAndWait(sdk.clicktypes.click.Left, nPos.y, nPos.x, this.location);
 				}
 
 				nDelay = getTickCount();
@@ -330,7 +330,7 @@ let Storage = new function () {
 	};
 
 	this.BeltSize = function () {
-		let item = me.getItem(-1, 1); // get equipped item
+		let item = me.getItem(-1, sdk.items.mode.Equipped); // get equipped item
 
 		if (!item) { // nothing equipped
 			return 1;

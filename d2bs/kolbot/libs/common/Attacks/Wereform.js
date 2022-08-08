@@ -5,6 +5,8 @@
 *
 */
 
+// todo - handle a Bear necro summonmancer
+
 const ClassAttack = {
 	feralBoost: 0,
 	baseLL: me.getStat(sdk.stats.LifeLeech),
@@ -12,27 +14,27 @@ const ClassAttack = {
 	maulBoost: 0,
 
 	doAttack: function (unit, preattack) {
-		if (!unit) return 1;
+		if (!unit) return Attack.Result.SUCCESS;
 		let gid = unit.gid;
 
 		if (Config.MercWatch && Town.needMerc()) {
 			console.debug("mercwatch");
 
 			if (Town.visitTown()) {
-				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
-					return 1; // lost reference to the mob we were attacking
+				if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
+					return Attack.Result.SUCCESS; // lost reference to the mob we were attacking
 				}
 			}
 		}
 
 		if (!this.feralBoost && Config.AttackSkill.includes(sdk.skills.FeralRage)) {
 			// amount of life leech with max rage
-			this.feralBoost = ((Math.floor(me.getSkill(sdk.skills.FeralRage, 1) / 2) + 3) * 4) + this.baseLL;
+			this.feralBoost = ((Math.floor(me.getSkill(sdk.skills.FeralRage, sdk.skills.subindex.SoftPoints) / 2) + 3) * 4) + this.baseLL;
 		}
 
 		if (!this.maulBoost && Config.AttackSkill.includes(sdk.skills.Maul)) {
 			// amount of enhanced damage with max maul
-			this.maulBoost = ((Math.floor(me.getSkill(sdk.skills.Maul, 1) / 2) + 3) * 20) + this.baseED;
+			this.maulBoost = ((Math.floor(me.getSkill(sdk.skills.Maul, sdk.skills.subindex.SoftPoints) / 2) + 3) * 20) + this.baseED;
 		}
 
 		Misc.shapeShift(Config.Wereform);
@@ -44,19 +46,19 @@ const ClassAttack = {
 			&& Attack.checkResist(unit, Config.AttackSkill[0])
 			&& (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))
 			&& (Skill.wereFormCheck(Config.AttackSkill[0]) || !me.shapeshifted)) {
-			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x5)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x5, true)) {
-					return 0;
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.WallOrRanged)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), sdk.collision.WallOrRanged, true)) {
+					return Attack.Result.FAILED;
 				}
 			}
 
 			Skill.cast(Config.AttackSkill[0], Skill.getHand(Config.AttackSkill[0]), unit);
 
-			return 1;
+			return Attack.Result.SUCCESS;
 		}
 
 		// Rebuff Armageddon
-		Skill.canUse(sdk.skills.Armageddon) && !me.getState(sdk.states.Armageddon) && Skill.cast(sdk.skills.Armageddon, 0);
+		Skill.canUse(sdk.skills.Armageddon) && !me.getState(sdk.states.Armageddon) && Skill.cast(sdk.skills.Armageddon, sdk.skills.hand.Right);
 
 		let timedSkill = -1;
 		let untimedSkill = -1;
@@ -128,17 +130,17 @@ const ClassAttack = {
 	// Returns: 0 - fail, 1 - success, 2 - no valid attack skills
 	doCast: function (unit, skill) {
 		// unit reference no longer valid or it died
-		if (!unit || unit.dead) return 1;
+		if (!unit || unit.dead) return Attack.Result.SUCCESS;
 		// No valid skills can be found
-		if (skill < 0) return 2;
+		if (skill < 0) return Attack.Result.CANTATTACK;
 
 		if (Skill.getRange(skill) < 4 && !Attack.validSpot(unit.x, unit.y)) {
-			return 0;
+			return Attack.Result.FAILED;
 		}
 
-		if (unit.distance > Skill.getRange(skill) || checkCollision(me, unit, 0x5)) {
-			if (!Attack.getIntoPosition(unit, Skill.getRange(skill), 0x5, true)) {
-				return 0;
+		if (unit.distance > Skill.getRange(skill) || checkCollision(me, unit, sdk.collision.WallOrRanged)) {
+			if (!Attack.getIntoPosition(unit, Skill.getRange(skill), sdk.collision.WallOrRanged, true)) {
+				return Attack.Result.FAILED;
 			}
 		}
 
@@ -146,6 +148,6 @@ const ClassAttack = {
 
 		Misc.poll(() => !me.skillDelay, 1000, 40);
 
-		return 1;
+		return Attack.Result.SUCCESS;
 	}
 };

@@ -11,9 +11,7 @@ function Test() {
 	let c;
 
 	function KeyDown(key) {
-		if (key === 45) {
-			c = true;
-		}
+		key === sdk.keys.Insert && (c = true);
 	}
 
 	addEventListener("keydown", KeyDown);
@@ -21,9 +19,9 @@ function Test() {
 	while (true) {
 		if (c) {
 			try {
-				test();
+				doTest();
 			} catch (qq) {
-				print('faile');
+				print("failed");
 				print(qq + " " + qq.fileName + " " + qq.lineNumber);
 			}
 
@@ -34,8 +32,7 @@ function Test() {
 	}
 }
 
-function test() {
+function doTest() {
 	print("test");
-
 	print("done");
 }

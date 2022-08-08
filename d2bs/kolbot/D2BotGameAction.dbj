@@ -16,15 +16,15 @@ Starter.Config.SwitchKeyDelay = 0; // Seconds to wait before switching a used/ba
 
 // No touchy!
 include("json2.js");
-include('polyfill.js');
+include("polyfill.js");
 include("OOG.js");
 include("GameAction.js");
 include("MuleLogger.js");
 include("common/misc.js");
 include("common/util.js");
-let Controls = require('./modules/Control');
-let sdk = require('./modules/sdk');
-let Overrides = require('./modules/Override');
+let sdk = require("./modules/sdk");
+let Controls = require("./modules/Control");
+let Overrides = require("./modules/Override");
 
 if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 	Starter.firstRun = true;
@@ -289,9 +289,9 @@ function locationAction (location) {
 				}
 			}
 
-			if (string === getLocaleString(11161)) { // CDKey disabled from realm play
+			if (string === getLocaleString(sdk.locale.text.CdKeyDisabledFromRealm)) { // CDKey disabled from realm play
 				D2Bot.updateStatus("Realm Disabled CDKey");
-				D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, 6);
+				D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, sdk.colors.D2Bot.Gold);
 				D2Bot.CDKeyDisabled();
 
 				if (Starter.gameInfo.switchKeys) {
@@ -331,7 +331,7 @@ function locationAction (location) {
 }
 
 function main () {
-	addEventListener('copydata', Starter.receiveCopyData);
+	addEventListener("copydata", Starter.receiveCopyData);
 
 	while (!Starter.handle) {
 		delay(100);
@@ -368,7 +368,7 @@ function main () {
 		if (!!DataFile.getStats().debugInfo) {
 			Starter.gameInfo.crashInfo = DataFile.getStats().debugInfo;
 
-			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, 10);
+			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, sdk.colors.D2Bot.Gray);
 		}
 
 		ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);

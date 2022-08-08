@@ -1,24 +1,25 @@
-/*
-*	@filename	TownOverrides.js
-*	@author		theBGuy
-*	@desc		Town.js fixes to improve functionality for map mode
+/**
+*  @filename    TownOverrides.js
+*  @author      theBGuy
+*  @desc        Town.js additions to improve functionality for map mode
+*
 */
 
-if (!isIncluded("common/Town.js")) { include("common/Town.js"); }
+includeIfNotIncluded("common/Town.js");
 
 Town.stash = function (stashGold = true) {
 	me.cancel();
 
 	let items = me.getItemsEx()
 		.filter(function (item) {
-			return item.isInInventory && !(item.isEquippedCharm && (item.quality === sdk.itemquality.Unique || Storage.Inventory.IsLocked(item, Config.Inventory)));
+			return item.isInInventory && !(item.isEquippedCharm && (item.unique || Storage.Inventory.IsLocked(item, Config.Inventory)));
 		})
 		.sort(function (a, b) {
-			if (a.itemType >= 96 && a.itemType <= 102 || a.itemType === 74 || a.quality === 7) {
+			if ((a.itemType >= sdk.items.type.Amethyst && a.itemType <= sdk.items.type.Skull) || a.itemType === sdk.items.type.Rune || a.unique) {
 				return -1;
 			}
 
-			if (b.itemType >= 96 && b.itemType <= 102 || b.itemType === 74 || b.quality === 7) {
+			if ((b.itemType >= sdk.items.type.Amethyst && b.itemType <= sdk.items.type.Skull) || b.itemType === sdk.items.type.Rune || b.unique) {
 				return 1;
 			}
 
@@ -36,8 +37,8 @@ Town.stash = function (stashGold = true) {
 
 	// Stash gold
 	if (stashGold) {
-		if (me.getStat(14) >= Config.StashGold && me.getStat(15) < 25e5 && this.openStash()) {
-			gold(me.getStat(14), 3);
+		if (me.getStat(sdk.stats.Gold) >= Config.StashGold && me.getStat(sdk.stats.GoldBank) < 25e5 && this.openStash()) {
+			gold(me.getStat(sdk.stats.Gold), 3);
 			delay(1000); // allow UI to initialize
 			me.cancel();
 		}

@@ -9,7 +9,7 @@
 
 const ClassAttack = {
 	doAttack: function (unit, preattack = false) {
-		if (!unit) return 1;
+		if (!unit) return Attack.Result.SUCCESS;
 		let gid = unit.gid;
 		let needRepair = Town.needRepair();
 
@@ -17,22 +17,22 @@ const ClassAttack = {
 			print("towncheck");
 
 			if (Town.visitTown(!!needRepair.length)) {
-				if (!unit || !copyUnit(unit).x || !getUnit(1, -1, -1, gid) || unit.dead) {
-					return 1; // lost reference to the mob we were attacking
+				if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
+					return Attack.Result.SUCCESS; // lost reference to the mob we were attacking
 				}
 			}
 		}
 
 		if (preattack && Config.AttackSkill[0] > 0 && Attack.checkResist(unit, Attack.getSkillElement(Config.AttackSkill[0])) && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
-			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, 0x4)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), 0x4)) {
-					return 0;
+			if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), sdk.collision.Ranged)) {
+					return Attack.Result.FAILED;
 				}
 			}
 
 			Skill.cast(Config.AttackSkill[0], Skill.getHand(Config.AttackSkill[0]), unit);
 
-			return 1;
+			return Attack.Result.SUCCESS;
 		}
 
 		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
@@ -62,50 +62,50 @@ const ClassAttack = {
 
 		// Repair check
 		needRepair.length > 0 && Town.visitTown(true);
-		pickit && this.findItem(me.area === sdk.areas.Travincal ? 60 : 20);
+		pickit && this.findItem(me.inArea(sdk.areas.Travincal) ? 60 : 20);
 	},
 
 	doCast: function (unit, attackSkill = -1) {
-		if (attackSkill < 0) return 2;
+		if (attackSkill < 0) return Attack.Result.CANTATTACK;
 		// check if unit became invalidated
-		if (!unit || !unit.attackable) return 1;
+		if (!unit || !unit.attackable) return Attack.Result.SUCCESS;
 		
 		switch (attackSkill) {
 		case sdk.skills.Whirlwind:
-			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x1)) {
-				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x1, 2)) {
-					return 0;
+			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, sdk.collision.BlockWall)) {
+				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.BlockWall, 2)) {
+					return Attack.Result.FAILED;
 				}
 			}
 
 			!unit.dead && Attack.whirlwind(unit);
 
-			return 1;
+			return Attack.Result.SUCCESS;
 		default:
 			if (Skill.getRange(attackSkill) < 4 && !Attack.validSpot(unit.x, unit.y, attackSkill, unit.classid)) {
-				return 0;
+				return Attack.Result.FAILED;
 			}
 
-			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, 0x4)) {
-				let walk = Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, 0x1);
+			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
+				let walk = Skill.getRange(attackSkill) < 4 && unit.distance < 10 && !checkCollision(me, unit, sdk.collision.BlockWall);
 
-				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), 0x4, walk)) {
-					return 0;
+				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.Ranged, walk)) {
+					return Attack.Result.FAILED;
 				}
 			}
 
 			!unit.dead && Skill.cast(attackSkill, Skill.getHand(attackSkill), unit);
 
-			return 1;
+			return Attack.Result.SUCCESS;
 		}
 	},
 
 	checkCloseMonsters: function (range = 10) {
-		let monster = getUnit(1);
+		let monster = Game.getMonster();
 
 		if (monster) {
 			do {
-				if (monster.distance <= range && monster.attackable && !checkCollision(me, monster, 0x4)
+				if (monster.distance <= range && monster.attackable && !checkCollision(me, monster, sdk.collision.Ranged)
 						&& (Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[monster.isSpecial ? 1 : 3]))
 							|| (Config.AttackSkill[3] > -1 && Attack.checkResist(monster, Attack.getSkillElement(Config.AttackSkill[3]))))) {
 					return true;
@@ -126,11 +126,11 @@ const ClassAttack = {
 
 		MainLoop:
 		for (let i = 0; i < 3; i += 1) {
-			let corpse = getUnit(1);
+			let corpse = Game.getMonster();
 
 			if (corpse) {
 				do {
-					if ((corpse.mode === 0 || corpse.mode === 12) && getDistance(corpse, orgX, orgY) <= range && this.checkCorpse(corpse)) {
+					if (corpse.dead && getDistance(corpse, orgX, orgY) <= range && this.checkCorpse(corpse)) {
 						corpseList.push(copyUnit(corpse));
 					}
 				} while (corpse.getNext());
@@ -149,12 +149,12 @@ const ClassAttack = {
 				corpse = corpseList.shift();
 
 				if (this.checkCorpse(corpse)) {
-					(corpse.distance > 30 || checkCollision(me, corpse, 0x1)) && Pather.moveToUnit(corpse);
+					(corpse.distance > 30 || checkCollision(me, corpse, sdk.collision.BlockWall)) && Pather.moveToUnit(corpse);
 					Config.FindItemSwitch && me.switchWeapons(Attack.getPrimarySlot() ^ 1);
 
 					CorpseLoop:
 					for (let j = 0; j < 3; j += 1) {
-						Skill.cast(sdk.skills.FindItem, 0, corpse);
+						Skill.cast(sdk.skills.FindItem, sdk.skills.hand.Right, corpse);
 
 						let tick = getTickCount();
 
@@ -173,7 +173,7 @@ const ClassAttack = {
 		}
 
 		if (retry) {
-			return this.findItem(me.area === sdk.areas.Travincal ? 60 : 20);
+			return this.findItem(me.inArea(sdk.areas.Travincal) ? 60 : 20);
 		}
 
 		Config.FindItemSwitch && me.switchWeapons(Attack.getPrimarySlot());
@@ -183,11 +183,14 @@ const ClassAttack = {
 	},
 
 	checkCorpse: function (unit) {
-		if (!unit || unit.mode !== sdk.units.monsters.monstermode.Death && unit.mode !== sdk.units.monsters.monstermode.Dead) return false;
-		if ([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3].indexOf(unit.classid) === -1 && unit.spectype === 0) return false;
+		if (!unit || unit.mode !== sdk.monsters.mode.Death && unit.mode !== sdk.monsters.mode.Dead) return false;
+		if ([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3].indexOf(unit.classid) === -1
+			&& unit.spectype === sdk.monsters.spectype.All) {
+			return false;
+		}
 
 		// monstats2 doesn't contain guest monsters info. sigh..
-		if (unit.classid <= 575 && !getBaseStat("monstats2", unit.classid, "corpseSel")) {
+		if (unit.classid <= sdk.monsters.BurningDeadArcher2 && !getBaseStat("monstats2", unit.classid, "corpseSel")) {
 			return false;
 		}
 
@@ -196,6 +199,6 @@ const ClassAttack = {
 			sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
 		];
 
-		return !!(unit.distance <= 25 && !checkCollision(me, unit, 0x4) && states.every(state => !unit.getState(state)));
+		return !!(unit.distance <= 25 && !checkCollision(me, unit, sdk.collision.Ranged) && states.every(state => !unit.getState(state)));
 	}
 };

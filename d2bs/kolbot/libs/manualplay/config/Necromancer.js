@@ -1,7 +1,8 @@
+/* eslint-disable indent */
 // Necromancer config file
 
 /* Brief instructions:
- * Use any IDE to modify these files, Sublime Text 3, Visual Studio Code, NotePad++
+ * Use any IDE to modify these files, Visual Studio Code (recommended), Atom, Sublime Text 3 (good), NotePad++ (not recommended)
  * 
  * Basic JS Rules:
  * To comment out something, put // in front of that line
@@ -107,7 +108,7 @@ function LoadConfig() {
 	// Skip monsters with auras. Possible options: "fanaticism", "might", "holy fire", "blessed aim", "holy freeze", "holy shock". Conviction is bugged, don't use it.
 	Config.SkipAura = [];
 	// Uncomment the following line to always attempt to kill these bosses despite immunities and mods
-	//Config.SkipException = [getLocaleString(2851), getLocaleString(2852), getLocaleString(2853)]; // vizier, de seis, infector
+	//Config.SkipException = [getLocaleString(sdk.locale.monsters.GrandVizierofChaos), getLocaleString(sdk.locale.monsters.LordDeSeis), getLocaleString(sdk.locale.monsters.InfectorofSouls)]; // vizier, de seis, infector
 
 	/* Attack config
 	 * To disable an attack, set it to -1

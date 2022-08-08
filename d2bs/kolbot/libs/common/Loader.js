@@ -124,7 +124,7 @@ const Loader = {
 					if (this.skipTown.includes(script) || Town.goToTown()) {
 						print("ÿc2Starting script: ÿc9" + script);
 						Messaging.sendToScript("tools/toolsthread.js", JSON.stringify({currScript: script}));
-						reconfiguration = typeof Scripts[script] === 'object';
+						reconfiguration = typeof Scripts[script] === "object";
 
 						if (reconfiguration) {
 							print("ÿc2Copying Config properties from " + script + " object.");
@@ -137,6 +137,11 @@ const Loader = {
 							Config.StackThawingPots.enabled && Town.buyPots(Config.StackThawingPots.quantity, sdk.items.ThawingPotion, true);
 							Config.StackAntidotePots.enabled && Town.buyPots(Config.StackAntidotePots.quantity, sdk.items.AntidotePotion, true);
 							Config.StackStaminaPots.enabled && Town.buyPots(Config.StackStaminaPots.quantity, sdk.items.StaminaPotion, true);
+						}
+
+						// kinda hacky, but faster for mfhelpers to stop
+						if (Config.MFLeader && Config.PublicMode && ["Diablo", "Baal"].includes(script)) {
+							say("nextup " + script);
 						}
 
 						if (global[script]()) {
@@ -198,7 +203,7 @@ const Loader = {
 					print(mainScriptStr + "ÿc2Starting script: ÿc9" + script);
 					Messaging.sendToScript("tools/toolsthread.js", JSON.stringify({currScript: script}));
 
-					reconfiguration = typeof Scripts[script] === 'object';
+					reconfiguration = typeof Scripts[script] === "object";
 
 					if (reconfiguration) {
 						print("ÿc2Copying Config properties from " + script + " object.");

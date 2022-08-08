@@ -220,7 +220,7 @@ function DeveloperMode() {
 	};
 
 	let copiedConfig = Misc.copy(Config);
-	print('starting developermode');
+	print("starting developermode");
 	me.overhead("Started developer mode");
 	addEventListener("gamepacketsent", packetSent);
 	addEventListener("gamepacket", packetReceived);
@@ -228,9 +228,7 @@ function DeveloperMode() {
 
 	while (!done) {
 		if (action) {
-			if (!isIncluded("bots/" + action + ".js")) {
-				include("bots/" + action + ".js");
-			}
+			includeIfNotIncluded("bots/" + action + ".js");
 
 			if (!UnitInfo.cleared) {
 				UnitInfo.remove();
@@ -268,8 +266,8 @@ function DeveloperMode() {
 		}
 
 		if (userAddon) {
-			!UnitInfo.cleared && !getUnit(101) && UnitInfo.remove();
-			unitInfo = getUnit(101);
+			!UnitInfo.cleared && !Game.getSelectedUnit() && UnitInfo.remove();
+			unitInfo = Game.getSelectedUnit();
 			UnitInfo.createInfo(unitInfo);
 		}
 

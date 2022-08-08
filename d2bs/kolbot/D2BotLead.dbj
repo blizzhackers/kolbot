@@ -18,11 +18,11 @@ include("automule.js");
 include("gambling.js");
 include("craftingsystem.js");
 include("torchsystem.js");
-include('Polyfill.js');
+include("Polyfill.js");
 include("common/misc.js");
 include("common/util.js");
-let Controls = require('./modules/Control');
-let sdk = require('./modules/sdk');
+let sdk = require("./modules/sdk");
+let Controls = require("./modules/Control");
 
 if (typeof AdvancedConfig[me.profile] === "object") {
 	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
@@ -36,6 +36,8 @@ function locationAction (location) {
 	switch (location) {
 	case sdk.game.locations.PreSplash:
 		ControlAction.click();
+		Starter.locationTimeout(5000, location);
+		getLocation() === sdk.game.locations.PreSplash && sendKey(0x0D);
 
 		break;
 	case sdk.game.locations.Lobby:
@@ -330,8 +332,8 @@ function locationAction (location) {
 
 function main () {
 	debugLog(me.profile);
-	addEventListener('copydata', Starter.receiveCopyData);
-	addEventListener('scriptmsg', Starter.scriptMsgEvent);
+	addEventListener("copydata", Starter.receiveCopyData);
+	addEventListener("scriptmsg", Starter.scriptMsgEvent);
 
 	while (!Starter.handle) {
 		delay(100);
@@ -354,7 +356,7 @@ function main () {
 
 		if (!!DataFile.getStats().debugInfo) {
 			Starter.gameInfo.crashInfo = DataFile.getStats().debugInfo;
-			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, 10);
+			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, sdk.colors.D2Bot.Gray);
 		}
 
 		ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);

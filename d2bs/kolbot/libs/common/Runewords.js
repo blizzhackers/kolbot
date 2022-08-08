@@ -9,92 +9,92 @@
 
 const Runeword = {
 	// 1.09
-	AncientsPledge: [617, 618, 616], // Ral + Ort + Tal
-	Black: [619, 625, 613], // Thul + Io + Nef
-	Fury: [640, 634, 614], // Jah + Gul + Eth
-	HolyThunder: [614, 617, 618, 616], // Eth + Ral + Ort + Tal
-	Honor: [620, 610, 615, 612, 621], // Amn + El + Ith + Tir + Sol
-	KingsGrace: [620, 617, 619], // Amn + Ral + Thul
-	Leaf: [612, 617], // Tir + Ral
-	Lionheart: [624, 626, 628], // Hel + Lum + Fal
-	Lore: [618, 621], // Ort + Sol
-	Malice: [615, 610, 614], // Ith + El + Eth
-	Melody: [622, 627, 613], // Shael + Ko + Nef
-	Memory: [626, 625, 621, 614], // Lum + Io + Sol + Eth
-	Nadir: [613, 612], // Nef + Tir
-	Radiance: [613, 621, 615], // Nef + Sol + Ith
-	Rhyme: [622, 614], // Shael + Eth
-	Silence: [623, 611, 624, 633, 612, 635], // Dol + Eld + Hel + Ist + Tir + Vex
-	Smoke: [613, 626], // Nef + Lum
-	Stealth: [616, 614], // Tal + Eth
-	Steel: [612, 610], // Tir + El
-	Strength: [620, 612], // Amn + Tir
-	Venom: [616, 623, 632], // Tal + Dol + Mal
-	Wealth: [629, 627, 612], // Lem + Ko + Tir
-	White: [623, 625], // Dol + Io
-	Zephyr: [618, 614], // Ort + Eth
+	AncientsPledge: [sdk.items.runes.Ral, sdk.items.runes.Ort, sdk.items.runes.Tal], // Ral + Ort + Tal
+	Black: [sdk.items.runes.Thul, sdk.items.runes.Io, sdk.items.runes.Nef], // Thul + Io + Nef
+	Fury: [sdk.items.runes.Jah, sdk.items.runes.Gul, sdk.items.runes.Eth], // Jah + Gul + Eth
+	HolyThunder: [sdk.items.runes.Eth, sdk.items.runes.Ral, sdk.items.runes.Ort, sdk.items.runes.Tal], // Eth + Ral + Ort + Tal
+	Honor: [sdk.items.runes.Amn, sdk.items.runes.El, sdk.items.runes.Ith, sdk.items.runes.Tir, sdk.items.runes.Sol], // Amn + El + Ith + Tir + Sol
+	KingsGrace: [sdk.items.runes.Amn, sdk.items.runes.Ral, sdk.items.runes.Thul], // Amn + Ral + Thul
+	Leaf: [sdk.items.runes.Tir, sdk.items.runes.Ral], // Tir + Ral
+	Lionheart: [sdk.items.runes.Hel, sdk.items.runes.Lum, sdk.items.runes.Fal], // Hel + Lum + Fal
+	Lore: [sdk.items.runes.Ort, sdk.items.runes.Sol], // Ort + Sol
+	Malice: [sdk.items.runes.Ith, sdk.items.runes.El, sdk.items.runes.Eth], // Ith + El + Eth
+	Melody: [sdk.items.runes.Shael, sdk.items.runes.Ko, sdk.items.runes.Nef], // Shael + Ko + Nef
+	Memory: [sdk.items.runes.Lum, sdk.items.runes.Io, sdk.items.runes.Sol, sdk.items.runes.Eth], // Lum + Io + Sol + Eth
+	Nadir: [sdk.items.runes.Nef, sdk.items.runes.Tir], // Nef + Tir
+	Radiance: [sdk.items.runes.Nef, sdk.items.runes.Sol, sdk.items.runes.Ith], // Nef + Sol + Ith
+	Rhyme: [sdk.items.runes.Shael, sdk.items.runes.Eth], // Shael + Eth
+	Silence: [sdk.items.runes.Dol, sdk.items.runes.Eld, sdk.items.runes.Hel, sdk.items.runes.Ist, sdk.items.runes.Tir, sdk.items.runes.Vex], // Dol + Eld + Hel + Ist + Tir + Vex
+	Smoke: [sdk.items.runes.Nef, sdk.items.runes.Lum], // Nef + Lum
+	Stealth: [sdk.items.runes.Tal, sdk.items.runes.Eth], // Tal + Eth
+	Steel: [sdk.items.runes.Tir, sdk.items.runes.El], // Tir + El
+	Strength: [sdk.items.runes.Amn, sdk.items.runes.Tir], // Amn + Tir
+	Venom: [sdk.items.runes.Tal, sdk.items.runes.Dol, sdk.items.runes.Mal], // Tal + Dol + Mal
+	Wealth: [sdk.items.runes.Lem, sdk.items.runes.Ko, sdk.items.runes.Tir], // Lem + Ko + Tir
+	White: [sdk.items.runes.Dol, sdk.items.runes.Io], // Dol + Io
+	Zephyr: [sdk.items.runes.Ort, sdk.items.runes.Eth], // Ort + Eth
 
 	// 1.10
-	Beast: [639, 612, 631, 632, 626], // Ber + Tir + Um + Mal + Lum
-	Bramble: [617, 636, 638, 614], // Ral + Ohm + Sur + Eth
-	BreathoftheDying: [635, 624, 610, 611, 642, 614], // Vex + Hel + El + Eld + Zod + Eth
-	CallToArms: [620, 617, 632, 633, 636], // Amn + Ral + Mal + Ist + Ohm
-	ChainsofHonor: [623, 631, 639, 633], // Dol + Um + Ber + Ist
-	Chaos: [628, 636, 631], // Fal + Ohm + Um
-	CrescentMoon: [622, 631, 612], // Shael + Um + Tir
-	Delirium: [629, 633, 625], // Lem + Ist + Io
-	Doom: [624, 636, 631, 637, 641], // Hel + Ohm + Um + Lo + Cham
-	Duress: [622, 631, 619], // Shael + Um + Thul
-	Enigma: [640, 615, 639], // Jah + Ith + Ber
-	Eternity: [620, 639, 633, 621, 638], // Amn + Ber + Ist + Sol + Sur
-	Exile: [635, 636, 633, 623], // Vex + Ohm + Ist + Dol
-	Famine: [628, 636, 618, 640], // Fal + Ohm + Ort + Jah
-	Gloom: [628, 631, 630], // Fal + Um + Pul
-	HandofJustice: [638, 641, 620, 637], // Sur + Cham + Amn + Lo
-	HeartoftheOak: [627, 635, 630, 619], // Ko + Vex + Pul + Thul
-	Kingslayer: [632, 631, 634, 628], // Mal + Um + Gul + Fal
-	Passion: [623, 618, 611, 629], // Dol + Ort + Eld + Lem
-	Prudence: [632, 612], // Mal + Tir
-	Sanctuary: [627, 627, 632], // Ko + Ko + Mal
-	Splendor: [614, 626], // Eth + Lum
-	Stone: [622, 631, 630, 626], // Shael + Um + Pul + Lum
-	Wind: [638, 610], // Sur + El
+	Beast: [sdk.items.runes.Ber, sdk.items.runes.Tir, sdk.items.runes.Um, sdk.items.runes.Mal, sdk.items.runes.Lum], // Ber + Tir + Um + Mal + Lum
+	Bramble: [sdk.items.runes.Ral, sdk.items.runes.Ohm, sdk.items.runes.Sur, sdk.items.runes.Eth], // Ral + Ohm + Sur + Eth
+	BreathoftheDying: [sdk.items.runes.Vex, sdk.items.runes.Hel, sdk.items.runes.El, sdk.items.runes.Eld, sdk.items.runes.Zod, sdk.items.runes.Eth], // Vex + Hel + El + Eld + Zod + Eth
+	CallToArms: [sdk.items.runes.Amn, sdk.items.runes.Ral, sdk.items.runes.Mal, sdk.items.runes.Ist, sdk.items.runes.Ohm], // Amn + Ral + Mal + Ist + Ohm
+	ChainsofHonor: [sdk.items.runes.Dol, sdk.items.runes.Um, sdk.items.runes.Ber, sdk.items.runes.Ist], // Dol + Um + Ber + Ist
+	Chaos: [sdk.items.runes.Fal, sdk.items.runes.Ohm, sdk.items.runes.Um], // Fal + Ohm + Um
+	CrescentMoon: [sdk.items.runes.Shael, sdk.items.runes.Um, sdk.items.runes.Tir], // Shael + Um + Tir
+	Delirium: [sdk.items.runes.Lem, sdk.items.runes.Ist, sdk.items.runes.Io], // Lem + Ist + Io
+	Doom: [sdk.items.runes.Hel, sdk.items.runes.Ohm, sdk.items.runes.Um, sdk.items.runes.Lo, sdk.items.runes.Cham], // Hel + Ohm + Um + Lo + Cham
+	Duress: [sdk.items.runes.Shael, sdk.items.runes.Um, sdk.items.runes.Thul], // Shael + Um + Thul
+	Enigma: [sdk.items.runes.Jah, sdk.items.runes.Ith, sdk.items.runes.Ber], // Jah + Ith + Ber
+	Eternity: [sdk.items.runes.Amn, sdk.items.runes.Ber, sdk.items.runes.Ist, sdk.items.runes.Sol, sdk.items.runes.Sur], // Amn + Ber + Ist + Sol + Sur
+	Exile: [sdk.items.runes.Vex, sdk.items.runes.Ohm, sdk.items.runes.Ist, sdk.items.runes.Dol], // Vex + Ohm + Ist + Dol
+	Famine: [sdk.items.runes.Fal, sdk.items.runes.Ohm, sdk.items.runes.Ort, sdk.items.runes.Jah], // Fal + Ohm + Ort + Jah
+	Gloom: [sdk.items.runes.Fal, sdk.items.runes.Um, sdk.items.runes.Pul], // Fal + Um + Pul
+	HandofJustice: [sdk.items.runes.Sur, sdk.items.runes.Cham, sdk.items.runes.Amn, sdk.items.runes.Lo], // Sur + Cham + Amn + Lo
+	HeartoftheOak: [sdk.items.runes.Ko, sdk.items.runes.Vex, sdk.items.runes.Pul, sdk.items.runes.Thul], // Ko + Vex + Pul + Thul
+	Kingslayer: [sdk.items.runes.Mal, sdk.items.runes.Um, sdk.items.runes.Gul, sdk.items.runes.Fal], // Mal + Um + Gul + Fal
+	Passion: [sdk.items.runes.Dol, sdk.items.runes.Ort, sdk.items.runes.Eld, sdk.items.runes.Lem], // Dol + Ort + Eld + Lem
+	Prudence: [sdk.items.runes.Mal, sdk.items.runes.Tir], // Mal + Tir
+	Sanctuary: [sdk.items.runes.Ko, sdk.items.runes.Ko, sdk.items.runes.Mal], // Ko + Ko + Mal
+	Splendor: [sdk.items.runes.Eth, sdk.items.runes.Lum], // Eth + Lum
+	Stone: [sdk.items.runes.Shael, sdk.items.runes.Um, sdk.items.runes.Pul, sdk.items.runes.Lum], // Shael + Um + Pul + Lum
+	Wind: [sdk.items.runes.Sur, sdk.items.runes.El], // Sur + El
 
 	// Don't use ladder-only on NL
-	Brand: me.ladder ? [640, 637, 632, 634] : false, // Jah + Lo + Mal + Gul
-	Death: me.ladder ? [624, 610, 635, 618, 634] : false, // Hel + El + Vex + Ort + Gul
-	Destruction: me.ladder ? [635, 637, 639, 640, 627] : false, // Vex + Lo + Ber + Jah + Ko
-	Dragon: me.ladder ? [638, 637, 621] : false, // Sur + Lo + Sol
-	Dream: me.ladder ? [625, 640, 630] : false, // Io + Jah + Pul
-	Edge: me.ladder ? [612, 616, 620] : false, // Tir + Tal + Amn
-	Faith: me.ladder ? [636, 640, 629, 611] : false, // Ohm + Jah + Lem + Eld
-	Fortitude: me.ladder ? [610, 621, 623, 637] : false, // El + Sol + Dol + Lo
-	Grief: me.ladder ? [614, 612, 637, 632, 617] : false, // Eth + Tir + Lo + Mal + Ral
-	Harmony: me.ladder ? [612, 615, 621, 627] : false, // Tir + Ith + Sol + Ko
-	Ice: me.ladder ? [620, 622, 640, 637] : false, // Amn + Shael + Jah + Lo
-	"Infinity": me.ladder ? [639, 632, 639, 633] : false, // Ber + Mal + Ber + Ist
-	Insight: me.ladder ? [617, 612, 616, 621] : false, // Ral + Tir + Tal + Sol
-	LastWish: me.ladder ? [640, 632, 640, 638, 640, 639] : false, // Jah + Mal + Jah + Sur + Jah + Ber
-	Lawbringer: me.ladder ? [620, 629, 627] : false, // Amn + Lem + Ko
-	Oath: me.ladder ? [622, 630, 632, 626] : false, // Shael + Pul + Mal + Lum
-	Obedience: me.ladder ? [624, 627, 619, 614, 628] : false, // Hel + Ko + Thul + Eth + Fal
-	Phoenix: me.ladder ? [635, 635, 637, 640] : false, // Vex + Vex + Lo + Jah
-	Pride: me.ladder ? [641, 638, 625, 637] : false, // Cham + Sur + Io + Lo
-	Rift: me.ladder ? [624, 627, 629, 634] : false, // Hel + Ko + Lem + Gul
-	Spirit: me.ladder ? [616, 619, 618, 620] : false, // Tal + Thul + Ort + Amn
-	VoiceofReason: me.ladder ? [629, 627, 610, 611] : false, // Lem + Ko + El + Eld
-	Wrath: me.ladder ? [630, 626, 639, 632] : false, // Pul + Lum + Ber + Mal
+	Brand: me.ladder ? [sdk.items.runes.Jah, sdk.items.runes.Lo, sdk.items.runes.Mal, sdk.items.runes.Gul] : false, // Jah + Lo + Mal + Gul
+	Death: me.ladder ? [sdk.items.runes.Hel, sdk.items.runes.El, sdk.items.runes.Vex, sdk.items.runes.Ort, sdk.items.runes.Gul] : false, // Hel + El + Vex + Ort + Gul
+	Destruction: me.ladder ? [sdk.items.runes.Vex, sdk.items.runes.Lo, sdk.items.runes.Ber, sdk.items.runes.Jah, sdk.items.runes.Ko] : false, // Vex + Lo + Ber + Jah + Ko
+	Dragon: me.ladder ? [sdk.items.runes.Sur, sdk.items.runes.Lo, sdk.items.runes.Sol] : false, // Sur + Lo + Sol
+	Dream: me.ladder ? [sdk.items.runes.Io, sdk.items.runes.Jah, sdk.items.runes.Pul] : false, // Io + Jah + Pul
+	Edge: me.ladder ? [sdk.items.runes.Tir, sdk.items.runes.Tal, sdk.items.runes.Amn] : false, // Tir + Tal + Amn
+	Faith: me.ladder ? [sdk.items.runes.Ohm, sdk.items.runes.Jah, sdk.items.runes.Lem, sdk.items.runes.Eld] : false, // Ohm + Jah + Lem + Eld
+	Fortitude: me.ladder ? [sdk.items.runes.El, sdk.items.runes.Sol, sdk.items.runes.Dol, sdk.items.runes.Lo] : false, // El + Sol + Dol + Lo
+	Grief: me.ladder ? [sdk.items.runes.Eth, sdk.items.runes.Tir, sdk.items.runes.Lo, sdk.items.runes.Mal, sdk.items.runes.Ral] : false, // Eth + Tir + Lo + Mal + Ral
+	Harmony: me.ladder ? [sdk.items.runes.Tir, sdk.items.runes.Ith, sdk.items.runes.Sol, sdk.items.runes.Ko] : false, // Tir + Ith + Sol + Ko
+	Ice: me.ladder ? [sdk.items.runes.Amn, sdk.items.runes.Shael, sdk.items.runes.Jah, sdk.items.runes.Lo] : false, // Amn + Shael + Jah + Lo
+	"Infinity": me.ladder ? [sdk.items.runes.Ber, sdk.items.runes.Mal, sdk.items.runes.Ber, sdk.items.runes.Ist] : false, // Ber + Mal + Ber + Ist
+	Insight: me.ladder ? [sdk.items.runes.Ral, sdk.items.runes.Tir, sdk.items.runes.Tal, sdk.items.runes.Sol] : false, // Ral + Tir + Tal + Sol
+	LastWish: me.ladder ? [sdk.items.runes.Jah, sdk.items.runes.Mal, sdk.items.runes.Jah, sdk.items.runes.Sur, sdk.items.runes.Jah, sdk.items.runes.Ber] : false, // Jah + Mal + Jah + Sur + Jah + Ber
+	Lawbringer: me.ladder ? [sdk.items.runes.Amn, sdk.items.runes.Lem, sdk.items.runes.Ko] : false, // Amn + Lem + Ko
+	Oath: me.ladder ? [sdk.items.runes.Shael, sdk.items.runes.Pul, sdk.items.runes.Mal, sdk.items.runes.Lum] : false, // Shael + Pul + Mal + Lum
+	Obedience: me.ladder ? [sdk.items.runes.Hel, sdk.items.runes.Ko, sdk.items.runes.Thul, sdk.items.runes.Eth, sdk.items.runes.Fal] : false, // Hel + Ko + Thul + Eth + Fal
+	Phoenix: me.ladder ? [sdk.items.runes.Vex, sdk.items.runes.Vex, sdk.items.runes.Lo, sdk.items.runes.Jah] : false, // Vex + Vex + Lo + Jah
+	Pride: me.ladder ? [sdk.items.runes.Cham, sdk.items.runes.Sur, sdk.items.runes.Io, sdk.items.runes.Lo] : false, // Cham + Sur + Io + Lo
+	Rift: me.ladder ? [sdk.items.runes.Hel, sdk.items.runes.Ko, sdk.items.runes.Lem, sdk.items.runes.Gul] : false, // Hel + Ko + Lem + Gul
+	Spirit: me.ladder ? [sdk.items.runes.Tal, sdk.items.runes.Thul, sdk.items.runes.Ort, sdk.items.runes.Amn] : false, // Tal + Thul + Ort + Amn
+	VoiceofReason: me.ladder ? [sdk.items.runes.Lem, sdk.items.runes.Ko, sdk.items.runes.El, sdk.items.runes.Eld] : false, // Lem + Ko + El + Eld
+	Wrath: me.ladder ? [sdk.items.runes.Pul, sdk.items.runes.Lum, sdk.items.runes.Ber, sdk.items.runes.Mal] : false, // Pul + Lum + Ber + Mal
 
 	// 1.11
-	Bone: [621, 631, 631], // Sol + Um + Um
-	Enlightenment: [630, 617, 621], // Pul + Ral + Sol
-	Myth: [624, 620, 613], // Hel + Amn + Nef
-	Peace: [622, 619, 620], // Shael + Thul + Amn
-	Principle: [617, 634, 611], // Ral + Gul + Eld
-	Rain: [618, 632, 615], // Ort + Mal + Ith
-	Treachery: [622, 619, 629], // Shael + Thul + Lem
+	Bone: [sdk.items.runes.Sol, sdk.items.runes.Um, sdk.items.runes.Um], // Sol + Um + Um
+	Enlightenment: [sdk.items.runes.Pul, sdk.items.runes.Ral, sdk.items.runes.Sol], // Pul + Ral + Sol
+	Myth: [sdk.items.runes.Hel, sdk.items.runes.Amn, sdk.items.runes.Nef], // Hel + Amn + Nef
+	Peace: [sdk.items.runes.Shael, sdk.items.runes.Thul, sdk.items.runes.Amn], // Shael + Thul + Amn
+	Principle: [sdk.items.runes.Ral, sdk.items.runes.Gul, sdk.items.runes.Eld], // Ral + Gul + Eld
+	Rain: [sdk.items.runes.Ort, sdk.items.runes.Mal, sdk.items.runes.Ith], // Ort + Mal + Ith
+	Treachery: [sdk.items.runes.Shael, sdk.items.runes.Thul, sdk.items.runes.Lem], // Shael + Thul + Lem
 
-	Test: [624, 624, 624]
+	Test: [sdk.items.runes.Hel, sdk.items.runes.Hel, sdk.items.runes.Hel]
 };
 
 const Runewords = {
@@ -146,7 +146,7 @@ const Runewords = {
 		this.validGids = [];
 		this.needList = [];
 		let baseCheck;
-		let items = me.findItems(-1, 0);
+		let items = me.findItems(-1, sdk.items.mode.inStorage);
 
 		for (let i = 0; i < Config.Runewords.length; i += 1) {
 			if (!baseCheck) {
@@ -174,7 +174,7 @@ const Runewords = {
 
 		// hel rune for rerolling purposes
 		if (baseCheck) {
-			let hel = me.getItem(624, 0);
+			let hel = me.getItem(sdk.items.runes.Hel, sdk.items.mode.inStorage);
 
 			if (hel) {
 				do {
@@ -186,7 +186,7 @@ const Runewords = {
 				} while (hel.getNext());
 			}
 
-			this.needList.push(624);
+			this.needList.push(sdk.items.runes.Hel);
 		}
 	},
 
@@ -206,7 +206,7 @@ const Runewords = {
 
 	// returns an array of items that make a runeword if found, false if we don't have enough items for any
 	checkRunewords: function () {
-		let items = me.findItems(-1, 0); // get items in inventory/stash
+		let items = me.findItems(-1, sdk.items.mode.inStorage);
 
 		for (let i = 0; i < Config.Runewords.length; i += 1) {
 			let itemList = []; // reset item list
@@ -245,9 +245,7 @@ const Runewords = {
 	// for pickit
 	checkItem: function (unit) {
 		if (!Config.MakeRunewords) return false;
-
-		// rune
-		return (unit.itemType === 74 && this.needList.includes(unit.classid));
+		return (unit.itemType === sdk.items.type.Rune && this.needList.includes(unit.classid));
 	},
 
 	// for clearInventory - don't drop runes that are a part of runeword recipe
@@ -260,17 +258,17 @@ const Runewords = {
 		rigged to accept item or classid as 2nd arg
 	*/
 	getBase: function (runeword, base, ethFlag, reroll) {
-		let item = typeof base === "object" ? base : me.getItem(base, 0);
+		let item = typeof base === "object" ? base : me.getItem(base, sdk.items.mode.inStorage);
 
 		if (item) {
 			do {
-				if (item && item.quality < 4 && item.sockets === runeword.length) {
+				if (item && item.quality < sdk.items.quality.Magic && item.sockets === runeword.length) {
 					/* check if item has items socketed in it
-						better check than getFlag(0x4000000) because randomly socketed items return false for it
+						better check than getFlag(sdk.items.flags.Runeword) because randomly socketed items return false for it
 					*/
 
 					if ((!reroll && !item.getItem()) || (reroll && item.getItem() && !NTIP.CheckItem(item, this.pickitEntries))) {
-						if (!ethFlag || (ethFlag === 1 && item.getFlag(0x400000)) || (ethFlag === 2 && !item.getFlag(0x400000))) {
+						if (!ethFlag || (ethFlag === Roll.Eth && item.ethereal) || (ethFlag === Roll.NonEth && !item.ethereal)) {
 							return copyUnit(item);
 						}
 					}
@@ -286,7 +284,7 @@ const Runewords = {
 		if (!rune.toCursor()) return false;
 
 		for (let i = 0; i < 3; i += 1) {
-			clickItem(0, base.x, base.y, base.location);
+			clickItem(sdk.clicktypes.click.Left, base.x, base.y, base.location);
 
 			let tick = getTickCount();
 
@@ -305,21 +303,19 @@ const Runewords = {
 	},
 
 	getScroll: function () {
-		let scroll = me.getItem(529, 0); // check if we already have the scroll
-
+		let scroll = me.getItem(sdk.items.ScrollofTownPortal, sdk.items.mode.inStorage); // check if we already have the scroll
 		if (scroll) return scroll;
 
 		let npc = Town.initNPC("Shop");
-
 		if (!npc) return false;
 
-		scroll = npc.getItem(529);
+		scroll = npc.getItem(sdk.items.ScrollofTownPortal);
 
 		if (scroll) {
 			for (let i = 0; i < 3; i += 1) {
 				scroll.buy(true);
 
-				if (me.getItem(529)) {
+				if (me.getItem(sdk.items.ScrollofTownPortal)) {
 					break;
 				}
 			}
@@ -327,7 +323,7 @@ const Runewords = {
 
 		me.cancel();
 
-		return me.getItem(529, 0);
+		return me.getItem(sdk.items.ScrollofTownPortal, sdk.items.mode.inStorage);
 	},
 
 	makeRunewords: function () {
@@ -350,7 +346,7 @@ const Runewords = {
 			}
 
 			print("ÿc4Runewords: ÿc0Made runeword: " + items[0].fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, ""));
-			D2Bot.printToConsole("Made runeword: " + items[0].fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, ""), 5);
+			D2Bot.printToConsole("Made runeword: " + items[0].fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, ""), sdk.colors.D2Bot.Green);
 
 			if (NTIP.CheckItem(items[0], this.pickitEntries)) {
 				Misc.itemLogger("Runeword Kept", items[0]);
@@ -367,8 +363,7 @@ const Runewords = {
 
 	rerollRunewords: function () {
 		for (let i = 0; i < Config.Runewords.length; i += 1) {
-			let hel = me.getItem(624, 0);
-
+			let hel = me.getItem(sdk.items.runes.Hel, sdk.items.mode.inStorage);
 			if (!hel) return false;
 
 			let base = this.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0), true); // get a bad runeword
@@ -388,7 +383,7 @@ const Runewords = {
 				if (!Cubing.openCube()) return false;
 
 				print("ÿc4Runewords: ÿc0Rerolling runeword: " + base.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, ""));
-				D2Bot.printToConsole("Rerolling runeword: " + base.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, ""), 5);
+				D2Bot.printToConsole("Rerolling runeword: " + base.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, ""), sdk.colors.D2Bot.Green);
 				transmute();
 				delay(500);
 
@@ -399,7 +394,7 @@ const Runewords = {
 
 		this.buildLists();
 
-		while (getUIFlag(0x1A) || getUIFlag(0x19)) {
+		while (getUIFlag(sdk.uiflags.Cube) || getUIFlag(sdk.uiflags.Stash)) {
 			me.cancel();
 			delay(300);
 		}

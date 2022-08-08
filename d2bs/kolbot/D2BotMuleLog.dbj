@@ -16,14 +16,14 @@ Starter.Config.SwitchKeyDelay = 0; // Seconds to wait before switching a used/ba
 
 // No touchy!
 include("json2.js");
-include('polyfill.js');
+include("polyfill.js");
 include("OOG.js");
 include("MuleLogger.js");
 include("DropperSetup.js");
 include("common/misc.js");
 include("common/util.js");
 include("common/prototypes.js");
-let Controls = require('./modules/Control');
+let Controls = require("./modules/Control");
 
 if (!FileTools.exists("data/" + me.profile + ".json")) {
 	DataFile.create();
@@ -299,7 +299,7 @@ function locationAction (location) {
 }
 
 function main() {
-	addEventListener('copydata', Starter.receiveCopyData);
+	addEventListener("copydata", Starter.receiveCopyData);
 
 	while (!Starter.handle) {
 		delay(100);
@@ -328,7 +328,7 @@ function main() {
 		if (!!DataFile.getStats().debugInfo) {
 			Starter.gameInfo.crashInfo = DataFile.getStats().debugInfo;
 
-			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, 10);
+			D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, sdk.colors.D2Bot.Gray);
 		}
 
 		ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);

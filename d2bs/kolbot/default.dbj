@@ -65,9 +65,9 @@ function main () {
 		}
 	}
 
-	let sojPause,
-		sojCounter = 0,
-		startTime = getTickCount();
+	let sojPause;
+	let sojCounter = 0;
+	let startTime = getTickCount();
 
 	this.scriptEvent = function (msg) {
 		if (typeof msg === "string" && msg === "soj") {
@@ -125,9 +125,9 @@ function main () {
 	let stats = DataFile.getStats();
 
 	// Check for experience decrease -> log death. Skip report if life chicken is disabled.
-	if (stats.name === me.name && me.getStat(13) < stats.experience && Config.LifeChicken > 0) {
-		D2Bot.printToConsole("You died in last game", 9);
-		D2Bot.printToConsole("Experience decreased by " + (stats.experience - me.getStat(13)), 9);
+	if (stats.name === me.name && me.getStat(sdk.stats.Experience) < stats.experience && Config.LifeChicken > 0) {
+		D2Bot.printToConsole("You died in last game", sdk.colors.D2Bot.Red);
+		D2Bot.printToConsole("Experience decreased by " + (stats.experience - me.getStat(sdk.stats.Experience)), sdk.colors.D2Bot.Red);
 		DataFile.updateStats("deaths");
 		D2Bot.updateDeaths();
 	}
@@ -139,7 +139,7 @@ function main () {
 	(Config.TownCheck || Config.TownHP > 0 || Config.TownMP > 0) && load("tools/TownChicken.js");
 
 	if (Config.PublicMode) {
-		Config.PublicMode === true ? require('libs/modules/SimpleParty') : load("tools/Party.js");
+		Config.PublicMode === true ? require("libs/modules/SimpleParty") : load("tools/Party.js");
 	}
 	
 	Config.AntiHostile && load("tools/AntiHostile.js");
@@ -151,19 +151,19 @@ function main () {
 
 	// One time maintenance - check cursor, get corpse, clear leftover items, pick items in case anything important was dropped
 	if (!Scripts.UserAddon && !Scripts.Test) {
-		let orgx = me.x, orgy = me.y;
-
+		// main checks
 		Cubing.cursorCheck();
 		Town.getCorpse();
 		Town.clearBelt();
+		Pather.init(); // initialize wp data
+		
+		let {x, y} = me;
 		Config.ClearInvOnStart && Town.clearInventory();
-		[orgx, orgy].distance > 3 && Pather.moveTo(orgx, orgx);
+		[x, y].distance > 3 && Pather.moveTo(x, y);
 		Pickit.pickItems();
 		me.hpPercent <= 10 && Town.heal() && me.cancelUIFlags();
-		Pather.init(); // initialize wp data
 
 		if (Config.DebugMode) {
-			// log our current running threads, useful for traceing stack-walk
 			delay(2000);
 			let script = getScript();
 
@@ -246,7 +246,7 @@ function main () {
 	TorchSystem.keyCheck() && scriptBroadcast("torch");
 
 	// Anni handler. Mule Anni if it's in unlocked space and profile is set to mule torch/anni.
-	let anni = me.findItem(603, 0, -1, 7);
+	let anni = me.findItem(sdk.items.SmallCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique);
 
 	if (anni && !Storage.Inventory.IsLocked(anni, Config.Inventory) && AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
 		scriptBroadcast("muleAnni");

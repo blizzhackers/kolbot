@@ -11,11 +11,15 @@ const Pickit = {
 	beltSize: 1,
 	// Ignored item types for item logging
 	ignoreLog: [
-		sdk.itemtype.Gold, sdk.itemtype.BowQuiver, sdk.itemtype.CrossbowQuiver,
-		sdk.itemtype.Scroll, sdk.itemtype.Key, sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion,
-		sdk.itemtype.RejuvPotion, sdk.itemtype.StaminaPotion, sdk.itemtype.AntidotePotion, sdk.itemtype.ThawingPotion
+		sdk.items.type.Gold, sdk.items.type.BowQuiver, sdk.items.type.CrossbowQuiver,
+		sdk.items.type.Scroll, sdk.items.type.Key, sdk.items.type.HealingPotion, sdk.items.type.ManaPotion,
+		sdk.items.type.RejuvPotion, sdk.items.type.StaminaPotion, sdk.items.type.AntidotePotion, sdk.items.type.ThawingPotion
 	],
-	essentials: [sdk.itemtype.Gold, sdk.itemtype.Scroll, sdk.itemtype.HealingPotion, sdk.itemtype.ManaPotion, sdk.itemtype.RejuvPotion],
+	tkable: [
+		sdk.items.type.Gold, sdk.items.type.Scroll, sdk.items.type.HealingPotion, sdk.items.type.ManaPotion,
+		sdk.items.type.RejuvPotion, sdk.items.type.StaminaPotion, sdk.items.type.AntidotePotion, sdk.items.type.ThawingPotion
+	],
+	essentials: [sdk.items.type.Gold, sdk.items.type.Scroll, sdk.items.type.HealingPotion, sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion],
 
 	init: function (notify) {
 		for (let i = 0; i < Config.PickitFiles.length; i += 1) {
@@ -26,14 +30,18 @@ const Pickit = {
 
 		// check if we can pick up items, only do this is our inventory slots aren't completly locked
 		this.invoLocked = !Config.Inventory.some(row => row.some(el => el > 0));
-		this.beltSize = Storage.BeltSize();
-		// If MinColumn is set to be more than our current belt size, set it to be 1 less than the belt size 4x3 belt will give us Config.MinColumn = [2, 2, 2, 2]
-		Config.MinColumn.forEach((el, index) => {
-			el >= this.beltSize && (Config.MinColumn[index] = Math.max(0, this.beltSize - 2));
-		});
+
+		// sometime Storage isn't loaded?
+		if (typeof Storage !== "undefined") {
+			this.beltSize = Storage.BeltSize();
+			// If MinColumn is set to be more than our current belt size, set it to be 1 less than the belt size 4x3 belt will give us Config.MinColumn = [2, 2, 2, 2]
+			Config.MinColumn.forEach((el, index) => {
+				el >= this.beltSize && (Config.MinColumn[index] = Math.max(0, this.beltSize - 1));
+			});
+		}
 	},
 
-	result: {
+	Result: {
 		UNID: -1,
 		UNWANTED: 0,
 		WANTED: 1,
@@ -55,65 +63,66 @@ const Pickit = {
 		let rval = NTIP.CheckItem(unit, false, true);
 
 		// make sure we have essentials - no pickit files loaded
-		if (rval.result === 0 && Config.PickitFiles.length === 0 && Pickit.essentials.includes(unit.itemType) && this.canPick(unit)) {
+		if (rval.result === Pickit.Result.UNWANTED && Config.PickitFiles.length === 0 && Pickit.essentials.includes(unit.itemType) && this.canPick(unit)) {
 			return {
-				result: Pickit.result.WANTED,
+				result: Pickit.Result.WANTED,
 				line: null
 			};
 		}
 
 		if ((unit.classid === sdk.items.runes.Ort || unit.classid === sdk.items.runes.Ral) && Town.repairIngredientCheck(unit)) {
 			return {
-				result: Pickit.result.UTILITY,
+				result: Pickit.Result.UTILITY,
 				line: null
 			};
 		}
 
 		if (CraftingSystem.checkItem(unit)) {
 			return {
-				result: Pickit.result.CRAFTING,
+				result: Pickit.Result.CRAFTING,
 				line: null
 			};
 		}
 
 		if (Cubing.checkItem(unit)) {
 			return {
-				result: Pickit.result.CUBING,
+				result: Pickit.Result.CUBING,
 				line: null
 			};
 		}
 
 		if (Runewords.checkItem(unit)) {
 			return {
-				result: Pickit.result.RUNEWORD,
+				result: Pickit.Result.RUNEWORD,
 				line: null
 			};
 		}
 
-		if (rval.result === 0 && !getBaseStat("items", unit.classid, "quest") && !Town.ignoredItemTypes.includes(unit.itemType)
+		if (rval.result === Pickit.Result.UNWANTED && !getBaseStat("items", unit.classid, "quest") && !Town.ignoredItemTypes.includes(unit.itemType)
 			&& !unit.questItem && (unit.isInInventory || (me.gold < Config.LowGold || (me.gold < 500000 && Config.PickitFiles.length === 0)))) {
 			// Gold doesn't take up room, just pick it up
 			if (unit.classid === sdk.items.Gold) {
 				return {
-					result: 4,
+					result: Pickit.Result.TRASH,
 					line: null
 				};
 			}
 
 			if (!this.invoLocked) {
-				let itemValuePerSquare = unit.getItemCost(1) / (unit.sizex * unit.sizey);
+				const itemValue = unit.getItemCost(sdk.items.cost.ToSell);
+				const itemValuePerSquare = itemValue / (unit.sizex * unit.sizey);
 
 				if (itemValuePerSquare >= 2000) {
 					// If total gold is less than 500k pick up anything worth 2k gold per square to sell in town.
 					return {
-						result: 4,
-						line: "Valuable Item: " + unit.getItemCost(1)
+						result: Pickit.Result.TRASH,
+						line: "Valuable Item: " + itemValue
 					};
 				} else if (itemValuePerSquare >= 10) {
 					// If total gold is less than LowGold setting pick up anything worth 10 gold per square to sell in town.
 					return {
-						result: 4,
-						line: "LowGold Item: " + unit.getItemCost(1)
+						result: Pickit.Result.TRASH,
+						line: "LowGold Item: " + itemValue
 					};
 				}
 			}
@@ -123,22 +132,22 @@ const Pickit = {
 	},
 
 	pickItems: function (range = Config.PickRange) {
+		if (me.dead) return false;
+		
 		let needMule = false;
 		let pickList = [];
 
 		Town.clearBelt();
 
-		if (me.dead) return false;
-
 		while (!me.idle) {
 			delay(40);
 		}
 
-		let item = getUnit(sdk.unittype.Item);
+		let item = Game.getItem();
 
 		if (item) {
 			do {
-				if ((item.mode === sdk.itemmode.onGround || item.mode === sdk.itemmode.Dropping) && getDistance(me, item) <= range) {
+				if (item.onGroundOrDropping && getDistance(me, item) <= range) {
 					pickList.push(copyUnit(item));
 				}
 			} while (item.getNext());
@@ -146,30 +155,31 @@ const Pickit = {
 
 		while (pickList.length > 0) {
 			if (me.dead) return false;
-
 			pickList.sort(this.sortItems);
+
+			const itemToPick = pickList.shift();
 
 			// Check if the item unit is still valid and if it's on ground or being dropped
 			// Don't pick items behind walls/obstacles when walking
-			if (copyUnit(pickList[0]).x !== undefined && (pickList[0].mode === sdk.itemmode.onGround || pickList[0].mode === sdk.itemmode.Dropping)
-					&& (Pather.useTeleport() || me.inTown || !checkCollision(me, pickList[0], 0x1))) {
+			if (copyUnit(itemToPick).x !== undefined && itemToPick.onGroundOrDropping
+					&& (Pather.useTeleport() || me.inTown || !checkCollision(me, itemToPick, sdk.collision.BlockWall))) {
 				// Check if the item should be picked
-				let status = this.checkItem(pickList[0]);
+				let status = this.checkItem(itemToPick);
 
-				if (status.result && this.canPick(pickList[0])) {
+				if (status.result && this.canPick(itemToPick)) {
 					// Override canFit for scrolls, potions and gold
-					let canFit = (Storage.Inventory.CanFit(pickList[0]) || Pickit.essentials.includes(pickList[0].itemType));
+					let canFit = (Storage.Inventory.CanFit(itemToPick) || Pickit.essentials.includes(itemToPick.itemType));
 
 					// Field id when our used space is above a certain percent or if we are full try to make room with FieldID
 					if (Config.FieldID.Enabled && (!canFit || Storage.Inventory.UsedSpacePercent() > Config.FieldID.UsedSpace)) {
-						Town.fieldID() && (canFit = (pickList[0].gid !== undefined && Storage.Inventory.CanFit(pickList[0])));
+						Town.fieldID() && (canFit = (itemToPick.gid !== undefined && Storage.Inventory.CanFit(itemToPick)));
 					}
 
 					// Try to make room by selling items in town
 					if (!canFit) {
 						// Check if any of the current inventory items can be stashed or need to be identified and eventually sold to make room
 						if (this.canMakeRoom()) {
-							print("ÿc7Trying to make room for " + this.itemColor(pickList[0]) + pickList[0].name);
+							console.log("ÿc7Trying to make room for " + this.itemColor(itemToPick) + itemToPick.name);
 
 							// Go to town and do town chores
 							if (Town.visitTown()) {
@@ -180,24 +190,26 @@ const Pickit = {
 							}
 
 							// Town visit failed - abort
-							print("ÿc7Not enough room for " + this.itemColor(pickList[0]) + pickList[0].name);
+							console.log("ÿc7Not enough room for " + this.itemColor(itemToPick) + itemToPick.name);
 
 							return false;
 						}
 
 						// Can't make room - trigger automule
-						Misc.itemLogger("No room for", pickList[0]);
-						print("ÿc7Not enough room for " + this.itemColor(pickList[0]) + pickList[0].name);
+						Misc.itemLogger("No room for", itemToPick);
+						console.log("ÿc7Not enough room for " + this.itemColor(itemToPick) + itemToPick.name);
+						
+						if (copyUnit(itemToPick).x !== undefined) {
+							needMule = true;
 
-						needMule = true;
+							break;
+						}
 					}
 
 					// Item can fit - pick it up
-					canFit && this.pickItem(pickList[0], status.result, status.line);
+					canFit && this.pickItem(itemToPick, status.result, status.line);
 				}
 			}
-
-			pickList.shift();
 		}
 
 		// Quit current game and transfer the items to mule
@@ -218,10 +230,10 @@ const Pickit = {
 		if (items) {
 			for (let i = 0; i < items.length; i += 1) {
 				switch (this.checkItem(items[i]).result) {
-				case Pickit.result.UNID:
+				case Pickit.Result.UNID:
 					// For low level chars that can't actually get id scrolls -> prevent an infinite loop
 					return (me.gold > 100);
-				case Pickit.result.UNWANTED:
+				case Pickit.Result.UNWANTED:
 					break;
 				default: // Check if a kept item can be stashed
 					if (Town.canStash(items[i])) {
@@ -245,16 +257,15 @@ const Pickit = {
 			this.color = Pickit.itemColor(unit);
 			this.gold = unit.getStat(sdk.stats.Gold);
 			this.dist = (unit.distance || Infinity);
-			this.useTk = (Skill.haveTK
-				&& (this.type === sdk.itemtype.Gold || this.type === sdk.itemtype.Scroll || (this.type >= sdk.itemtype.HealingPotion && this.type <= sdk.itemtype.ThawingPotion))
-				&& this.dist > 5 && this.dist < 20 && !checkCollision(me, unit, 0x5));
+			this.useTk = (Skill.haveTK && Pickit.tkable.includes(this.type)
+				&& this.dist > 5 && this.dist < 20 && !checkCollision(me, unit, sdk.collision.WallOrRanged));
 			this.picked = false;
 		}
 
 		let gid = (unit.gid || -1);
 		let cancelFlags = [sdk.uiflags.Inventory, sdk.uiflags.NPCMenu, sdk.uiflags.Waypoint, sdk.uiflags.Shop, sdk.uiflags.Stash, sdk.uiflags.Cube];
 		let itemCount = me.itemcount;
-		let item = gid > -1 ? getUnit(sdk.unittype.Item, -1, -1, gid) : false;
+		let item = gid > -1 ? Game.getItem(-1, -1, gid) : false;
 
 		if (!item) return false;
 
@@ -272,7 +283,7 @@ const Pickit = {
 
 		MainLoop:
 		for (let i = 0; i < retry; i += 1) {
-			if (!getUnit(sdk.unittype.Item, -1, -1, gid)) {
+			if (!Game.getItem(-1, -1, gid)) {
 				break;
 			}
 
@@ -282,23 +293,23 @@ const Pickit = {
 				delay(40);
 			}
 
-			if (item.mode !== sdk.itemmode.onGround && item.mode !== sdk.itemmode.Dropping) {
+			if (!item.onGroundOrDropping) {
 				break;
 			}
 
 			// fastPick check? should only pick items if surrounding monsters have been cleared or if fastPick is active
 			// note: clear of surrounding monsters of the spectype we are set to clear
 			if (stats.useTk && me.mp > tkMana) {
-				Skill.setSkill(sdk.skills.Telekinesis, 0) && Packet.unitCast(0, item);
+				Packet.telekinesis(item);
 			} else {
-				if (item.distance > (Config.FastPick || i < 1 ? 6 : 4) || checkCollision(me, item, 0x1)) {
+				if (item.distance > (Config.FastPick || i < 1 ? 6 : 4) || checkCollision(me, item, sdk.collision.BlockWall)) {
 					if (!Pather.moveToUnit(item)) {
 						continue;
 					}
 				}
 
 				// use packet first, if we fail and not using fast pick use click
-				(Config.FastPick || i < 1) ? sendPacket(1, 0x16, 4, 0x4, 4, gid, 4, 0) : Misc.click(0, 0, item);
+				(Config.FastPick || i < 1) ? Packet.click(item) : Misc.click(0, 0, item);
 			}
 
 			let tick = getTickCount();
@@ -308,21 +319,21 @@ const Pickit = {
 
 				if (stats.classid === sdk.items.Gold) {
 					if (!item.getStat(sdk.stats.Gold) || item.getStat(sdk.stats.Gold) < stats.gold) {
-						print("ÿc7Picked up " + stats.color + (item.getStat(sdk.stats.Gold) ? (item.getStat(sdk.stats.Gold) - stats.gold) : stats.gold) + " " + stats.name);
+						console.log("ÿc7Picked up " + stats.color + (item.getStat(sdk.stats.Gold) ? (item.getStat(sdk.stats.Gold) - stats.gold) : stats.gold) + " " + stats.name);
 
 						return true;
 					}
 				}
 
-				if (item.mode !== sdk.itemmode.onGround && item.mode !== sdk.itemmode.Dropping) {
+				if (!item.onGroundOrDropping) {
 					switch (stats.classid) {
 					case sdk.items.Key:
-						print("ÿc7Picked up " + stats.color + stats.name + " ÿc7(" + Town.checkKeys() + "/12)");
+						console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc7(" + Town.checkKeys() + "/12)");
 
 						return true;
 					case sdk.items.ScrollofTownPortal:
 					case sdk.items.ScrollofIdentify:
-						print("ÿc7Picked up " + stats.color + stats.name + " ÿc7(" + Town.checkScrolls(stats.classid === sdk.items.ScrollofTownPortal ? "tbk" : "ibk") + "/20)");
+						console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc7(" + Town.checkScrolls(stats.classid === sdk.items.ScrollofTownPortal ? "tbk" : "ibk") + "/20)");
 
 						return true;
 					}
@@ -343,7 +354,7 @@ const Pickit = {
 			DataFile.updateStats("lastArea");
 
 			switch (status) {
-			case Pickit.result.WANTED:
+			case Pickit.Result.WANTED:
 				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + (keptLine ? ") (" + keptLine + ")" : ")"));
 
 				if (this.ignoreLog.indexOf(stats.type) === -1) {
@@ -352,19 +363,19 @@ const Pickit = {
 				}
 
 				break;
-			case Pickit.result.CUBING:
+			case Pickit.Result.CUBING:
 				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Cubing)");
 				Misc.itemLogger("Kept", item, "Cubing " + me.findItems(item.classid).length);
 				Cubing.update();
 
 				break;
-			case Pickit.result.RUNEWORD:
+			case Pickit.Result.RUNEWORD:
 				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Runewords)");
 				Misc.itemLogger("Kept", item, "Runewords");
 				Runewords.update(stats.classid, gid);
 
 				break;
-			case Pickit.result.CRAFTING:
+			case Pickit.Result.CRAFTING:
 				console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")" + " (Crafting System)");
 				CraftingSystem.update(item);
 
@@ -389,29 +400,29 @@ const Pickit = {
 
 		if (type) {
 			switch (unit.itemType) {
-			case sdk.itemtype.Gold:
+			case sdk.items.type.Gold:
 				return "ÿc4";
-			case sdk.itemtype.Rune:
+			case sdk.items.type.Rune:
 				return "ÿc8";
-			case sdk.itemtype.HealingPotion:
+			case sdk.items.type.HealingPotion:
 				return "ÿc1";
-			case sdk.itemtype.ManaPotion:
+			case sdk.items.type.ManaPotion:
 				return "ÿc3";
-			case sdk.itemtype.RejuvPotion:
+			case sdk.items.type.RejuvPotion:
 				return "ÿc;";
 			}
 		}
 
 		switch (unit.quality) {
-		case sdk.itemquality.Magic:
+		case sdk.items.quality.Magic:
 			return "ÿc3";
-		case sdk.itemquality.Set:
+		case sdk.items.quality.Set:
 			return "ÿc2";
-		case sdk.itemquality.Rare:
+		case sdk.items.quality.Rare:
 			return "ÿc9";
-		case sdk.itemquality.Unique:
+		case sdk.items.quality.Unique:
 			return "ÿc4";
-		case sdk.itemquality.Crafted:
+		case sdk.items.quality.Crafted:
 			return "ÿc8";
 		}
 
@@ -421,25 +432,23 @@ const Pickit = {
 	canPick: function (unit) {
 		if (!unit) return false;
 
-		let tome, charm, potion, needPots, buffers, pottype, myKey, key;
-
-		if (sdk.quest.items.includes(unit.classid)) {
-			if (me.getItem(unit.classid)) {
-				return false;
-			}
+		if (sdk.quest.items.includes(unit.classid) && me.getItem(unit.classid)) {
+			return false;
 		}
 
+		let tome, charm, potion, needPots, buffers, pottype, myKey, key;
+
 		switch (unit.itemType) {
-		case sdk.itemtype.Gold:
+		case sdk.items.type.Gold:
 			// Check current gold vs max capacity (cLvl*10000)
 			if (me.getStat(sdk.stats.Gold) === me.getStat(sdk.stats.Level) * 10000) {
 				return false; // Skip gold if full
 			}
 
 			break;
-		case sdk.itemtype.Scroll:
+		case sdk.items.type.Scroll:
 			// 518 - Tome of Town Portal or 519 - Tome of Identify
-			tome = me.getItem(unit.classid - 11, sdk.itemmode.inStorage);
+			tome = me.getItem(unit.classid - 11, sdk.items.mode.inStorage);
 
 			if (tome) {
 				do {
@@ -453,12 +462,12 @@ const Pickit = {
 			}
 
 			break;
-		case sdk.itemtype.Key:
+		case sdk.items.type.Key:
 			// Assassins don't ever need keys
 			if (me.assassin) return false;
 
-			myKey = me.getItem(sdk.items.Key, sdk.itemmode.inStorage);
-			key = getUnit(sdk.unittype.Item, -1, -1, unit.gid); // Passed argument isn't an actual unit, we need to get it
+			myKey = me.getItem(sdk.items.Key, sdk.items.mode.inStorage);
+			key = Game.getItem(-1, -1, unit.gid); // Passed argument isn't an actual unit, we need to get it
 
 			if (myKey && key) {
 				do {
@@ -469,11 +478,11 @@ const Pickit = {
 			}
 
 			break;
-		case sdk.itemtype.SmallCharm: // Small Charm
-		case sdk.itemtype.MediumCharm: // Large Charm
-		case sdk.itemtype.LargeCharm: // Grand Charm
+		case sdk.items.type.SmallCharm:
+		case sdk.items.type.LargeCharm:
+		case sdk.items.type.GrandCharm:
 			if (unit.unique) {
-				charm = me.getItem(unit.classid, 0);
+				charm = me.getItem(unit.classid, sdk.items.mode.inStorage);
 
 				if (charm) {
 					do {
@@ -486,9 +495,9 @@ const Pickit = {
 			}
 
 			break;
-		case sdk.itemtype.HealingPotion:
-		case sdk.itemtype.ManaPotion:
-		case sdk.itemtype.RejuvPotion:
+		case sdk.items.type.HealingPotion:
+		case sdk.items.type.ManaPotion:
+		case sdk.items.type.RejuvPotion:
 			needPots = 0;
 
 			for (let i = 0; i < 4; i += 1) {
@@ -497,7 +506,7 @@ const Pickit = {
 				}
 			}
 
-			potion = me.getItem(-1, sdk.itemmode.inBelt);
+			potion = me.getItem(-1, sdk.items.mode.inBelt);
 
 			if (potion) {
 				do {
@@ -514,15 +523,15 @@ const Pickit = {
 					if (Config[buffers[i]]) {
 						switch (buffers[i]) {
 						case "HPBuffer":
-							pottype = sdk.itemtype.HealingPotion;
+							pottype = sdk.items.type.HealingPotion;
 
 							break;
 						case "MPBuffer":
-							pottype = sdk.itemtype.ManaPotion;
+							pottype = sdk.items.type.ManaPotion;
 
 							break;
 						case "RejuvBuffer":
-							pottype = sdk.itemtype.RejuvPotion;
+							pottype = sdk.items.type.RejuvPotion;
 
 							break;
 						}
@@ -531,7 +540,7 @@ const Pickit = {
 							if (!Storage.Inventory.CanFit(unit)) return false;
 
 							needPots = Config[buffers[i]];
-							potion = me.getItem(-1, sdk.itemmode.inStorage);
+							potion = me.getItem(-1, sdk.items.mode.inStorage);
 
 							if (potion) {
 								do {
@@ -568,7 +577,7 @@ const Pickit = {
 
 			break;
 		case undefined: // Yes, it does happen
-			print("undefined item (!?)");
+			console.warn("undefined item (!?)");
 
 			return false;
 		}
@@ -578,7 +587,7 @@ const Pickit = {
 
 	checkBelt: function () {
 		let check = 0;
-		let item = me.getItem(-1, sdk.itemmode.inBelt);
+		let item = me.getItem(-1, sdk.items.mode.inBelt);
 
 		if (item) {
 			do {
@@ -598,8 +607,8 @@ const Pickit = {
 
 	// Prioritize runes and unique items for fast pick
 	sortFastPickItems: function (unitA, unitB) {
-		if (unitA.itemType === sdk.itemtype.Rune || unitA.unique) return -1;
-		if (unitB.itemType === sdk.itemtype.Rune || unitB.unique) return 1;
+		if (unitA.itemType === sdk.items.type.Rune || unitA.unique) return -1;
+		if (unitB.itemType === sdk.items.type.Rune || unitB.unique) return 1;
 
 		return getDistance(me, unitA) - getDistance(me, unitB);
 	},
@@ -609,11 +618,11 @@ const Pickit = {
 
 		while (this.gidList.length > 0) {
 			let gid = this.gidList.shift();
-			item = getUnit(sdk.unittype.Item, -1, -1, gid);
+			item = Game.getItem(-1, -1, gid);
 
-			if (item && (item.mode === sdk.itemmode.onGround || item.mode === sdk.itemmode.Dropping)
-				&& (Town.ignoredItemTypes.indexOf(item.itemType) === -1 || (item.itemType >= sdk.itemtype.HealingPotion && item.itemType <= sdk.itemtype.RejuvPotion))
-				&& item.itemType !== sdk.itemtype.Gold && getDistance(me, item) <= Config.PickRange) {
+			if (item && item.onGroundOrDropping
+				&& (Town.ignoredItemTypes.indexOf(item.itemType) === -1 || (item.itemType >= sdk.items.type.HealingPotion && item.itemType <= sdk.items.type.RejuvPotion))
+				&& item.itemType !== sdk.items.type.Gold && getDistance(me, item) <= Config.PickRange) {
 				itemList.push(copyUnit(item));
 			}
 		}

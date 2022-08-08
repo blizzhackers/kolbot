@@ -13,10 +13,10 @@ function ShopBot() {
 		totalCycles: new Text("Total cycles:", 50, 290, 2, 1),
 	};
 
-	let tickCount,
-		cycles = 0,
-		validItems = 0,
-		totalCycles = 0;
+	let tickCount;
+	let cycles = 0;
+	let validItems = 0;
+	let totalCycles = 0;
 
 	Pather.teleport = false;
 	this.pickEntries = [];
@@ -57,29 +57,29 @@ function ShopBot() {
 	};
 
 	this.openMenu = function (npc) {
-		if (!npc || npc.type !== 1) throw new Error("Unit.openMenu: Must be used on NPCs.");
+		if (!npc || npc.type !== sdk.unittype.NPC) throw new Error("Unit.openMenu: Must be used on NPCs.");
 
 		let interactedNPC = getInteractedNPC();
 
 		if (interactedNPC && interactedNPC.name !== npc.name) {
-			sendPacket(1, 0x30, 4, interactedNPC.type, 4, interactedNPC.gid);
+			Packet.cancelNPC(interactedNPC);
 			me.cancel();
 		}
 
-		if (getUIFlag(0x08)) return true;
+		if (getUIFlag(sdk.uiflags.NPCMenu)) return true;
 
 		for (let i = 0; i < 10; i += 1) {
 			npc.distance > 5 && Pather.walkTo(npc.x, npc.y);
 
-			if (!getUIFlag(0x08)) {
-				sendPacket(1, 0x13, 4, 1, 4, npc.gid);
-				sendPacket(1, 0x2f, 4, 1, 4, npc.gid);
+			if (!getUIFlag(sdk.uiflags.NPCMenu)) {
+				Packet.entityInteract(npc);
+				sendPacket(1, sdk.packets.send.NPCInit, 4, 1, 4, npc.gid);
 			}
 
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < Math.max(Math.round((i + 1) * 250 / (i / 3 + 1)), me.ping + 1)) {
-				if (getUIFlag(0x08)) {
+				if (getUIFlag(sdk.uiflags.NPCMenu)) {
 					return true;
 				}
 
@@ -107,7 +107,7 @@ function ShopBot() {
 		for (let i = 0; i < 10; i += 1) {
 			delay(150);
 
-			i % 2 === 0 && sendPacket(1, 0x38, 4, 1, 4, npc.gid, 4, 0);
+			i % 2 === 0 && sendPacket(1, sdk.packets.send.EntityAction, 4, 1, 4, npc.gid, 4, 0);
 
 			if (npc.itemcount > 0) {
 				break;
@@ -127,11 +127,11 @@ function ShopBot() {
 
 		for (let i = 0; i < items.length; i += 1) {
 			if (Storage.Inventory.CanFit(items[i]) && Pickit.canPick(items[i]) &&
-					me.gold >= items[i].getItemCost(0) &&
+					me.gold >= items[i].getItemCost(sdk.items.cost.ToBuy) &&
 					NTIP.CheckItem(items[i], this.pickEntries)
 			) {
 				beep();
-				D2Bot.printToConsole("Match found!", 7);
+				D2Bot.printToConsole("Match found!", sdk.colors.D2Bot.DarkGold);
 				delay(1000);
 
 				if (npc.startTrade(menuId)) {
@@ -161,7 +161,7 @@ function ShopBot() {
 		// eslint-disable-next-line no-fallthrough
 		case NPC.Akara:
 		case NPC.Gheed:
-			wp = 1;
+			wp = sdk.areas.RogueEncampment;
 
 			break;
 		case NPC.Fara:
@@ -169,7 +169,7 @@ function ShopBot() {
 		// eslint-disable-next-line no-fallthrough
 		case NPC.Elzix:
 		case NPC.Drognan:
-			wp = 40;
+			wp = sdk.areas.LutGholein;
 
 			break;
 		case NPC.Hratli:
@@ -177,14 +177,14 @@ function ShopBot() {
 		// eslint-disable-next-line no-fallthrough
 		case NPC.Asheara:
 		case NPC.Ormus:
-			wp = 75;
+			wp = sdk.areas.KurastDocktown;
 
 			break;
 		case NPC.Halbu:
 			menuId = "Repair";
 		// eslint-disable-next-line no-fallthrough
 		case NPC.Jamella:
-			wp = 103;
+			wp = sdk.areas.PandemoniumFortress;
 
 			break;
 		case NPC.Larzuk:
@@ -192,7 +192,7 @@ function ShopBot() {
 		// eslint-disable-next-line no-fallthrough
 		case NPC.Malah:
 		case NPC.Anya:
-			wp = 109;
+			wp = sdk.areas.Harrogath;
 
 			break;
 		default:
@@ -201,11 +201,11 @@ function ShopBot() {
 
 		if (!Pather.useWaypoint(wp)) return false;
 
-		let npc = this.npcs[name] || getUnit(1, name);
+		let npc = this.npcs[name] || Game.getNPC(name);
 
 		if (!npc || npc.distance > 5) {
 			Town.move(name);
-			npc = getUnit(1, name);
+			npc = Game.getNPC(name);
 		}
 
 		if (!npc) return false;
@@ -257,12 +257,14 @@ function ShopBot() {
 		}
 
 		if (me.inTown) {
-			let area = getArea(),
-				wp = getPresetUnit(me.area, 2, [119, 156, 237, 398, 429][me.act - 1]),
-				wpX = wp.roomx * 5 + wp.x,
-				wpY = wp.roomy * 5 + wp.y,
-				redPortal = (getUnits(2, 60).sort((a, b) => a.distance - b.distance)).first(),
-				exit = area.exits[0];
+			let area = getArea();
+			let wp = Game.getPresetObject(me.area, [
+				sdk.objects.A1Waypoint, sdk.objects.A2Waypoint, sdk.objects.A3Waypoint, sdk.objects.A4Waypoint, sdk.objects.A5Waypoint
+			][me.act - 1]);
+			let wpX = wp.roomx * 5 + wp.x;
+			let wpY = wp.roomy * 5 + wp.y;
+			let redPortal = (getUnits(sdk.unittype.Object, sdk.objects.RedPortal).sort((a, b) => a.distance - b.distance)).first();
+			let exit = area.exits[0];
 
 			for (let i = 1; i < area.exits.length; i++) {
 				if (getDistance(me, exit) > getDistance(me, area.exits[i])) {
@@ -270,20 +272,10 @@ function ShopBot() {
 				}
 			}
 
-			if (me.area === sdk.areas.Harrogath && !!redPortal && getDistance(me, redPortal) < 20
+			if ([sdk.areas.RogueEncampment, sdk.areas.Harrogath].includes(me.area) && !!redPortal && redPortal.distance < 20
 				&& Pather.usePortal(null, null, redPortal)) {
 				delay(3000);
-				Pather.usePortal(sdk.areas.Harrogath);
-
-				if (totalCycles === 0) {
-					delay(10000);
-				}
-
-				delay(1500);
-			} else if (me.area === sdk.areas.RogueEncampment && !!redPortal && getDistance(me, redPortal) < 20
-				&& Pather.usePortal(null, null, redPortal)) {
-				delay(3000);
-				Pather.usePortal(1);
+				Pather.usePortal(sdk.areas.townOf(me.area));
 
 				if (totalCycles === 0) {
 					delay(10000);
@@ -294,7 +286,7 @@ function ShopBot() {
 				Pather.moveToExit(me.area + 1, true);
 				Pather.moveToExit(me.area - 1, true);
 			} else {
-				Pather.useWaypoint([35, 48, 101, 107, 113][me.act - 1]);
+				Pather.useWaypoint([sdk.areas.CatacombsLvl2, sdk.areas.A2SewersLvl2, sdk.areas.DuranceofHateLvl2, sdk.areas.RiverofFlame, sdk.areas.CrystalizedPassage][me.act - 1]);
 			}
 		}
 
