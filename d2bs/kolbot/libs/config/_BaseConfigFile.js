@@ -552,6 +552,7 @@
 	/* ### BARBARIAN ### */
 	Config.FindItem = false; // Use Find Item skill on corpses after clearing.
 	Config.FindItemSwitch = false; // Switch to non-primary slot when using Find Item skills
+	Config.UseWarcries = true; // use battle orders, battle command, and shout if we have them
 
 	/* ### DRUID ### */
 	Config.SummonRaven = false;

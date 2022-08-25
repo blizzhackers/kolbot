@@ -103,6 +103,7 @@ item: {
 			ClosedDoor: 0x800,
 			IsOnFloor: 0x1000,
 			MonsterIsOnFloor: 0x1100,
+			MonsterIsOnFloorDarkArea: 0x1110, // in doorway
 			FriendlyNPC: 0x2000,
 			Unknown2: 0x4000,
 			DeadBodies: 0x8000,
@@ -1884,7 +1885,7 @@ item: {
 				DeathMauler: 57,
 				PutridDefiler: 58,
 			},
-
+			DiablosBoneCage: 340,
 			Dummy1: 149,
 			Dummy2: 268,
 			AbyssKnight: 311,
@@ -4438,8 +4439,8 @@ item: {
 				PasswordCantBeMoreThan: 5220,
 				LoginError: 5224,
 				UsernameMustBeAtLeast: 5231,
-				UsenameIncludedIllegalChars: 5232,
-				UsenameIncludedDisallowedwords: 5233,
+				UsernameIncludedIllegalChars: 5232,
+				UsernameIncludedDisallowedwords: 5233,
 				AccountNameAlreadyExist: 5239,
 				UnableToCreateAccount: 5249,
 				Disconnected: 5347,

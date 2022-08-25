@@ -16,14 +16,14 @@ let sdk = require("../modules/sdk");
 (function (global, original) {
 	let firstRun = true;
 	global.getUnit = function (...args) {
-		// eslint-disable-next-line no-unused-vars
-		const test = original(1);
-		// Stupid reference thing
-
 		if (firstRun) {
-			delay(1000);
+			delay(1500);
 			firstRun = false;
 		}
+
+		// Stupid reference thing
+		// eslint-disable-next-line no-unused-vars
+		const test = original(-1);
 
 		let [first] = args, second = args.length >= 2 ? args[1] : undefined;
 
@@ -329,6 +329,7 @@ Unit.prototype.drop = function () {
  * @returns boolean
  */
 Unit.prototype.use = function () {
+	if (this === undefined || !this.type) return false;
 	if (this.type !== sdk.unittype.Item) throw new Error("Unit.use: Must be used with items. Unit Name: " + this.name);
 	if (!getBaseStat("items", this.classid, "useable")) throw new Error("Unit.use: Must be used with consumable items. Unit Name: " + this.name);
 	
@@ -339,7 +340,9 @@ Unit.prototype.use = function () {
 	let checkQuantity = false;
 
 	switch (this.location) {
+	case sdk.storage.Stash:
 	case sdk.storage.Inventory:
+		if (this.isInStash && !Town.openStash()) return false;
 		// doesn't work, not sure why but it's missing something 
 		//new PacketBuilder().byte(sdk.packets.send.UseItem).dword(gid).dword(this.x).dword(this.y).send();
 		checkQuantity = iType === sdk.items.type.Book;
@@ -1521,7 +1524,7 @@ Unit.prototype.equip = function (destLocation = undefined) {
 		return tempspot ? {location: Storage.Inventory.location, coord: tempspot} : false;
 	};
 	const doubleHanded = [
-		skd.itemtype.Staff, sdk.items.type.Bow, sdk.items.type.Polearm, sdk.items.type.Crossbow,
+		sdk.items.type.Staff, sdk.items.type.Bow, sdk.items.type.Polearm, sdk.items.type.Crossbow,
 		sdk.items.type.HandtoHand, sdk.items.type.AmazonBow, sdk.items.type.AmazonSpear
 	];
 
@@ -1676,7 +1679,7 @@ Unit.prototype.getRes = function (type, difficulty) {
 	Object.defineProperties(Object.prototype, {
 		distance: {
 			get: function () {
-				return !me.gameReady ? NaN : Math.round(getDistance.apply(null, [me, ...coords.apply(this)]));
+				return !me.gameReady ? NaN : /* Math.round */(getDistance.apply(null, [me, ...coords.apply(this)]));
 			},
 			enumerable: false,
 		},
@@ -1777,6 +1780,41 @@ Object.defineProperties(Unit.prototype, {
 			return [
 				sdk.monsters.BoneFetish1, sdk.monsters.BoneFetish2, sdk.monsters.BoneFetish3,
 				sdk.monsters.SoulKiller3, sdk.monsters.StygianDoll2, sdk.monsters.StygianDoll6, sdk.monsters.SoulKiller
+			].includes(this.classid);
+		},
+	},
+	isMonsterObject: {
+		get: function () {
+			return [
+				sdk.monsters.Turret1, sdk.monsters.Turret2, sdk.monsters.Turret3, sdk.monsters.MummyGenerator,
+				sdk.monsters.GargoyleTrap, sdk.monsters.LightningSpire, sdk.monsters.FireTower,
+				sdk.monsters.BarricadeDoor1, sdk.monsters.BarricadeDoor2, sdk.monsters.BarricadeWall1, sdk.monsters.BarricadeWall2,
+				sdk.monsters.CatapultS, sdk.monsters.CatapultE, sdk.monsters.CatapultSiege, sdk.monsters.CatapultW,
+				sdk.monsters.BarricadeTower, sdk.monsters.PrisonDoor, sdk.monsters.DiablosBoneCage, sdk.monsters.Hut,
+			].includes(this.classid);
+		},
+	},
+	isMonsterEgg: {
+		get: function () {
+			return [
+				sdk.monsters.SandMaggotEgg, sdk.monsters.RockWormEgg, sdk.monsters.DevourerEgg, sdk.monsters.GiantLampreyEgg,
+				sdk.monsters.WorldKillerEgg1, sdk.monsters.WorldKillerEgg2
+			].includes(this.classid);
+		},
+	},
+	isMonsterNest: {
+		get: function () {
+			return [
+				sdk.monsters.FoulCrowNest, sdk.monsters.BlackVultureNest, sdk.monsters.BloodHawkNest, sdk.monsters.BloodHookNest,
+				sdk.monsters.BloodWingNest, sdk.monsters.CloudStalkerNest, sdk.monsters.FeederNest, sdk.monsters.SuckerNest
+			].includes(this.classid);
+		},
+	},
+	isBaalTentacle: {
+		get: function () {
+			return [
+				sdk.monsters.Tentacle1, sdk.monsters.Tentacle2,
+				sdk.monsters.Tentacle3, sdk.monsters.Tentacle4, sdk.monsters.Tentacle5
 			].includes(this.classid);
 		},
 	},
@@ -2439,8 +2477,7 @@ Unit.prototype.__defineGetter__("attackable", function () {
 	// catapults were returning a level of 0 and hanging up clear scripts
 	if (this.charlvl < 1) return false;
 	// neverCount base stat - hydras, traps etc.
-	if (Attack.monsterObjects.indexOf(this.classid) === -1
-		&& getBaseStat("monstats", this.classid, "neverCount")) {
+	if (!this.isMonsterObject && getBaseStat("monstats", this.classid, "neverCount")) {
 		return false;
 	}
 	// Monsters that are in flight
@@ -2490,14 +2527,9 @@ Unit.prototype.__defineGetter__("curseable", function () {
 		return false;
 	}
 
-	return [
-		sdk.monsters.Turret1, sdk.monsters.Turret2, sdk.monsters.Turret3, sdk.monsters.SandMaggotEgg, sdk.monsters.RockWormEgg, sdk.monsters.DevourerEgg, sdk.monsters.GiantLampreyEgg,
-		sdk.monsters.WorldKillerEgg1, sdk.monsters.WorldKillerEgg2, sdk.monsters.FoulCrowNest, sdk.monsters.BlackVultureNest, sdk.monsters.BloodHawkNest, sdk.monsters.BloodHookNest,
-		sdk.monsters.BloodWingNest, sdk.monsters.CloudStalkerNest, sdk.monsters.FeederNest, sdk.monsters.SuckerNest, sdk.monsters.MummyGenerator, sdk.monsters.WaterWatcherLimb, sdk.monsters.WaterWatcherHead,
-		sdk.monsters.Flavie, sdk.monsters.GargoyleTrap, sdk.monsters.LightningSpire, sdk.monsters.FireTower, sdk.monsters.BarricadeDoor1, sdk.monsters.BarricadeDoor2, sdk.monsters.PrisonDoor, sdk.monsters.BarricadeTower,
-		sdk.monsters.CatapultS, sdk.monsters.CatapultE, sdk.monsters.CatapultSiege, sdk.monsters.CatapultW, sdk.monsters.BarricadeWall1, sdk.monsters.BarricadeWall2, sdk.monsters.Tentacle1, sdk.monsters.Tentacle2,
-		sdk.monsters.Tentacle3, sdk.monsters.Tentacle4, sdk.monsters.Tentacle5, sdk.monsters.Hut, sdk.monsters.ThroneBaal, sdk.monsters.Cow
-	].indexOf(this.classid) === -1;
+	return (!this.isMonsterObject && !this.isMonsterEgg && !this.isMonsterNest && !this.isBaalTentacle && [
+		sdk.monsters.WaterWatcherLimb, sdk.monsters.WaterWatcherHead, sdk.monsters.Flavie, sdk.monsters.ThroneBaal, sdk.monsters.Cow
+	].indexOf(this.classid) === -1);
 });
 
 Unit.prototype.__defineGetter__("scareable", function () {

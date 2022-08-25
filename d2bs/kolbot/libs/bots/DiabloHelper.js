@@ -129,6 +129,7 @@ function DiabloHelper() {
 		}
 
 		try {
+			!Common.Diablo.diabloSpawned && (Common.Diablo.diaWaitTime += Time.minutes(1));
 			console.log("Attempting to find Diablo");
 			Common.Diablo.diabloPrep();
 		} catch (error) {

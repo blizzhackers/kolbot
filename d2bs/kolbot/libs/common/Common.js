@@ -210,6 +210,7 @@ const Common = {
 
 	Diablo: {
 		diabloSpawned: false,
+		diaWaitTime: Time.seconds(30),
 		done: false,
 		waitForGlow: false,
 		sealOrder: [],
@@ -238,25 +239,16 @@ const Common = {
 		sort: function (a, b) {
 			if (Config.BossPriority) {
 				if ((a.isSuperUnique) && (b.isSuperUnique)) return getDistance(me, a) - getDistance(me, b);
-
 				if (a.isSuperUnique) return -1;
 				if (b.isSuperUnique) return 1;
 			}
 
 			// Entrance to Star / De Seis
-			if (me.y > 5325 || me.y < 5260) {
-				return (a.y > b.y ? -1 : 1);
-			}
-
+			if (me.y > 5325 || me.y < 5260) return (a.y > b.y ? -1 : 1);
 			// Vizier
-			if (me.x < 7765) {
-				return (a.x > b.x ? -1 : 1);
-			}
-
+			if (me.x < 7765) return (a.x > b.x ? -1 : 1);
 			// Infector
-			if (me.x > 7825) {
-				return (!checkCollision(me, a, sdk.collision.BlockWall) && a.x < b.x ? -1 : 1);
-			}
+			if (me.x > 7825) return (!checkCollision(me, a, sdk.collision.BlockWall) && a.x < b.x ? -1 : 1);
 
 			return getDistance(me, a) - getDistance(me, b);
 		},
@@ -678,12 +670,12 @@ const Common = {
 				Pather.moveTo(7788, 5292);
 			}
 
-			let tick = getTickCount();
-
 			this.moveToStar();
 
-			while (getTickCount() - tick < 30000) {
-				if (getTickCount() - tick >= 8000) {
+			let tick = getTickCount();
+
+			while (getTickCount() - tick < this.diaWaitTime) {
+				if (getTickCount() - tick >= Time.seconds(8)) {
 					switch (me.classid) {
 					case sdk.player.class.Sorceress:
 						if ([sdk.skills.Meteor, sdk.skills.Blizzard, sdk.skills.FrozenOrb, sdk.skills.FireWall].includes(Config.AttackSkill[1])) {

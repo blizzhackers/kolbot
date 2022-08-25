@@ -36,13 +36,11 @@ const ClassAttack = {
 		}
 
 		let mercRevive = 0;
-		let attackSkill = -1;
-		let aura = -1;
-		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
+		let [attackSkill, aura] = [-1, -1];
+		const index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 
 		if (Attack.getCustomAttack(unit)) {
-			attackSkill = Attack.getCustomAttack(unit)[0];
-			aura = Attack.getCustomAttack(unit)[1];
+			[attackSkill, aura] = Attack.getCustomAttack(unit);
 		} else {
 			attackSkill = Config.AttackSkill[index];
 			aura = Config.AttackSkill[index + 1];
@@ -53,8 +51,7 @@ const ClassAttack = {
 			// Monster immune to primary aura
 			if (!Attack.checkResist(unit, aura)) {
 				// Reset skills
-				attackSkill = -1;
-				aura = -1;
+				[attackSkill, aura] = [-1, -1];
 
 				// Set to secondary if not immune, check if using secondary attack aura if not check main skill for immunity
 				if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, (this.attackAuras.includes(Config.AttackSkill[6]) ? Config.AttackSkill[6] : Config.AttackSkill[5]))) {
@@ -66,8 +63,7 @@ const ClassAttack = {
 			// Monster immune to primary skill
 			if (!Attack.checkResist(unit, attackSkill)) {
 				// Reset skills
-				attackSkill = -1;
-				aura = -1;
+				[attackSkill, aura] = [-1, -1];
 
 				// Set to secondary if not immune
 				if (Config.AttackSkill[5] > -1 && Attack.checkResist(unit, Config.AttackSkill[5])) {
@@ -79,8 +75,7 @@ const ClassAttack = {
 
 		// Low mana skill
 		if (Config.LowManaSkill[0] > -1 && Skill.getManaCost(attackSkill) > me.mp && Attack.checkResist(unit, Config.LowManaSkill[0])) {
-			attackSkill = Config.LowManaSkill[0];
-			aura = Config.LowManaSkill[1];
+			[attackSkill, aura] = Config.LowManaSkill;
 		}
 
 		let result = this.doCast(unit, attackSkill, aura);

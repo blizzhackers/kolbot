@@ -718,7 +718,7 @@ function main () {
 			Attack.securePosition(me.x, me.y, 35, 1000);
 		}
 
-		if (me.area === sdk.areas.Tristram) {
+		if (me.inArea(sdk.areas.Tristram)) {
 			Pather.moveTo(me.x, me.y + 6);
 			let gibbet = Game.getObject(sdk.quest.chest.CainsJail);
 

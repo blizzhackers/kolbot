@@ -88,6 +88,7 @@ let Config = {
 
 		try {
 			LoadConfig.call();
+			Config.Loaded = true;
 		} catch (e2) {
 			if (notify) {
 				print("ÿc8Error in " + e2.fileName.substring(e2.fileName.lastIndexOf("\\") + 1, e2.fileName.length) + "(line " + e2.lineNumber + "): " + e2.message);
@@ -113,6 +114,7 @@ let Config = {
 	},
 
 	// dev
+	Loaded: false,
 	DebugMode: false,
 
 	// Time
@@ -340,6 +342,7 @@ let Config = {
 	// Barbarian specific
 	FindItem: false,
 	FindItemSwitch: false,
+	UseWarcries: true,
 
 	// Druid specific
 	Wereform: 0,

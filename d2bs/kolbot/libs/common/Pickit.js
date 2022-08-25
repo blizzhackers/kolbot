@@ -36,7 +36,7 @@ const Pickit = {
 			this.beltSize = Storage.BeltSize();
 			// If MinColumn is set to be more than our current belt size, set it to be 1 less than the belt size 4x3 belt will give us Config.MinColumn = [2, 2, 2, 2]
 			Config.MinColumn.forEach((el, index) => {
-				el >= this.beltSize && (Config.MinColumn[index] = Math.max(0, this.beltSize - 1));
+				el >= this.beltSize && (Config.MinColumn[index] = Math.max(1, this.beltSize - 1));
 			});
 		}
 	},

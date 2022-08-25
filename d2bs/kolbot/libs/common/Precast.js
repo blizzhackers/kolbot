@@ -21,6 +21,12 @@ const Precast = new function () {
 			duration: 0,
 			tick: 0
 		},
+		boneArmor: {
+			max: 0,
+			armorPercent: function () {
+				return this.max > 0 ? Math.round(me.getStat(sdk.stats.SkillBoneArmor) * 100 / this.max) : 100;
+			},
+		},
 		HolyShield: {
 			canUse: false,
 			duration: 0,
@@ -38,6 +44,48 @@ const Precast = new function () {
 			duration: 0,
 			tick: 0
 		},
+	};
+
+	this.warCries = function (skillId, x, y) {
+		if (!skillId || x === undefined) return false;
+		const states = {};
+		states[sdk.skills.Shout] = sdk.states.Shout;
+		states[sdk.skills.BattleOrders] = sdk.states.BattleOrders;
+		states[sdk.skills.BattleCommand] = sdk.states.BattleCommand;
+		if (states[skillId] === undefined) return false;
+
+		for (let i = 0; i < 3; i++) {
+			try {
+				if (me.getSkill(sdk.skills.get.RightId) !== skillId && !me.setSkill(skillId, sdk.skills.hand.Right)) throw new Error("Failed to set " + getSkillById(skillId) + " on hand");
+				// Right hand + No Shift
+				let clickType = 3, shift = sdk.clicktypes.shift.NoShift;
+
+				MainLoop:
+				for (let n = 0; n < 3; n += 1) {
+					typeof x === "object" ? clickMap(clickType, shift, x) : clickMap(clickType, shift, x, y);
+					delay(20);
+					typeof x === "object" ? clickMap(clickType + 2, shift, x) : clickMap(clickType + 2, shift, x, y);
+
+					for (let i = 0; i < 8; i += 1) {
+						if (me.attacking) {
+							break MainLoop;
+						}
+
+						delay(20);
+					}
+				}
+
+				while (me.attacking) {
+					delay(10);
+				}
+
+				if (Misc.poll(() => me.getState(states[skillId]), 300, 50)) return true;
+			} catch (e) {
+				console.error(e);
+				return false;
+			}
+		}
+		return false;
 	};
 
 	this.precastCTA = function (force = false) {
@@ -68,83 +116,52 @@ const Precast = new function () {
 	// should be done in init function?
 	// should this be part of the skill class instead?
 	this.getBetterSlot = function (skillId) {
-		if (this.bestSlot[skillId] !== undefined) {
-			return this.bestSlot[skillId];
-		}
+		if (this.bestSlot[skillId] !== undefined) return this.bestSlot[skillId];
 
-		let classid, skillTab;
+		let [classid, skillTab] = (() => {
+			switch (skillId) {
+			case sdk.skills.FrozenArmor:
+			case sdk.skills.ShiverArmor:
+			case sdk.skills.ChillingArmor:
+				return [sdk.player.class.Sorceress, sdk.skills.tabs.Cold];
+			case sdk.skills.Enchant:
+				return [sdk.player.class.Sorceress, sdk.skills.tabs.Fire];
+			case sdk.skills.ThunderStorm:
+			case sdk.skills.EnergyShield:
+				return [sdk.player.class.Sorceress, sdk.skills.tabs.Lightning];
+			case sdk.skills.BoneArmor:
+				return [sdk.player.class.Necromancer, sdk.skills.tabs.PoisonandBone];
+			case sdk.skills.HolyShield:
+				return [sdk.player.class.Paladin, sdk.skills.tabs.PalaCombat];
+			case sdk.skills.Taunt:
+			case sdk.skills.FindItem:
+			case sdk.skills.BattleCry:
+			case sdk.skills.WarCry:
+			case sdk.skills.Shout:
+			case sdk.skills.BattleOrders:
+			case sdk.skills.BattleCommand:
+				return [sdk.player.class.Barbarian, sdk.skills.tabs.Warcries];
+			case sdk.skills.CycloneArmor:
+				return [sdk.player.class.Druid, sdk.skills.tabs.Elemental];
+			case sdk.skills.Werewolf:
+			case sdk.skills.Werebear:
+				return [sdk.player.class.Druid, sdk.skills.tabs.ShapeShifting];
+			case sdk.skills.BurstofSpeed:
+			case sdk.skills.Fade:
+				return [sdk.player.class.Assassin, sdk.skills.tabs.ShadowDisciplines];
+			case sdk.skills.BladeShield:
+				return [sdk.player.class.Assassin, sdk.skills.tabs.MartialArts];
+			default:
+				return [-1, -1];
+			}
+		})();
 
-		switch (skillId) {
-		case sdk.skills.FrozenArmor:
-		case sdk.skills.ShiverArmor:
-		case sdk.skills.ChillingArmor:
-			classid = sdk.player.class.Sorceress;
-			skillTab = sdk.skills.tabs.Cold;
-
-			break;
-		case sdk.skills.Enchant:
-			classid = sdk.player.class.Sorceress;
-			skillTab = sdk.skills.tabs.Fire;
-
-			break;
-		case sdk.skills.ThunderStorm:
-		case sdk.skills.EnergyShield:
-			classid = sdk.player.class.Sorceress;
-			skillTab = sdk.skills.tabs.Lightning;
-
-			break;
-		case sdk.skills.BoneArmor:
-			classid = sdk.player.class.Necromancer;
-			skillTab = sdk.skills.tabs.PoisonandBone;
-
-			break;
-		case sdk.skills.HolyShield:
-			classid = sdk.player.class.Paladin;
-			skillTab = sdk.skills.tabs.PalaCombat;
-
-			break;
-		case sdk.skills.Taunt:
-		case sdk.skills.FindItem:
-		case sdk.skills.BattleCry:
-		case sdk.skills.WarCry:
-		case sdk.skills.Shout:
-		case sdk.skills.BattleOrders:
-		case sdk.skills.BattleCommand:
-			classid = sdk.player.class.Barbarian;
-			skillTab = sdk.skills.tabs.Warcries;
-
-			break;
-		case sdk.skills.CycloneArmor:
-			classid = sdk.player.class.Druid;
-			skillTab = sdk.skills.tabs.Elemental;
-
-			break;
-		case sdk.skills.Werewolf:
-		case sdk.skills.Werebear:
-			classid = sdk.player.class.Druid;
-			skillTab = sdk.skills.tabs.ShapeShifting;
-			
-			break;
-		case sdk.skills.BurstofSpeed:
-		case sdk.skills.Fade:
-			classid = sdk.player.class.Assassin;
-			skillTab = sdk.skills.tabs.ShadowDisciplines;
-
-			break;
-		case sdk.skills.BladeShield:
-			classid = sdk.player.class.Assassin;
-			skillTab = sdk.skills.tabs.MartialArts;
-
-			break;
-		default:
-			return me.weaponswitch;
-		}
+		if (classid < 0) return me.weaponswitch;
 
 		me.weaponswitch !== 0 && me.switchWeapons(0);
 
-		let sumCurr = 0;
-		let sumSwap = 0;
-		let sumStats = function (item) {
+		let [sumCurr, sumSwap] = [0, 0];
+		const sumStats = function (item) {
 			return (item.getStat(sdk.stats.AllSkills)
 				+ item.getStat(sdk.stats.AddClassSkills, classid) + item.getStat(sdk.stats.AddSkillTab, skillTab)
 				+ item.getStat(sdk.stats.SingleSkill, skillId) + item.getStat(sdk.stats.NonClassSkill, skillId));
@@ -184,7 +201,8 @@ const Precast = new function () {
 		try {
 			!dontSwitch && me.switchWeapons(this.getBetterSlot(skillId));
 			if (me.getSkill(sdk.skills.get.RightId) !== skillId && !me.setSkill(skillId, sdk.skills.hand.Right)) throw new Error("Failed to set " + getSkillById(skillId) + " on hand");
-
+			if ([sdk.skills.Shout, sdk.skills.BattleOrders, sdk.skills.BattleCommand].includes(skillId)) return this.warCries(skillId, x, y);
+			
 			if (Config.PacketCasting > 1 || usePacket) {
 				Config.DebugMode && console.debug("Packet casting: " + skillId);
 				
@@ -317,30 +335,29 @@ const Precast = new function () {
 
 			break;
 		case sdk.player.class.Necromancer:
-			if (Skill.canUse(sdk.skills.BoneArmor) && (force || !me.getState(sdk.states.BoneArmor))) {
+			if (Skill.canUse(sdk.skills.BoneArmor)
+				&& (force || this.precastables.boneArmor.armorPercent() < 75 || !me.getState(sdk.states.BoneArmor))) {
 				this.precastSkill(sdk.skills.BoneArmor);
+				this.precastables.boneArmor.max === 0 && (this.precastables.boneArmor.max = me.getStat(sdk.stats.SkillBoneArmorMax));
 			}
 
-			switch (Config.Golem) {
-			case 0:
-			case "None":
-				break;
-			case 1:
-			case "Clay":
-				this.summon(sdk.skills.ClayGolem, sdk.summons.type.Golem);
-
-				break;
-			case 2:
-			case "Blood":
-				this.summon(sdk.skills.BloodGolem, sdk.summons.type.Golem);
-
-				break;
-			case 3:
-			case "Fire":
-				this.summon(sdk.skills.FireGolem, sdk.summons.type.Golem);
-
-				break;
-			}
+			(() => {
+				switch (Config.Golem) {
+				case 1:
+				case "Clay":
+					return this.summon(sdk.skills.ClayGolem, sdk.summons.type.Golem);
+				case 2:
+				case "Blood":
+					return this.summon(sdk.skills.BloodGolem, sdk.summons.type.Golem);
+				case 3:
+				case "Fire":
+					return this.summon(sdk.skills.FireGolem, sdk.summons.type.Golem);
+				case 0:
+				case "None":
+				default:
+					return false;
+				}
+			})();
 
 			break;
 		case sdk.player.class.Paladin:
@@ -350,6 +367,9 @@ const Precast = new function () {
 
 			break;
 		case sdk.player.class.Barbarian: // - TODO: durations
+			if (!Config.UseWarcries) {
+				break;
+			}
 			let needShout = (Skill.canUse(sdk.skills.Shout) && (force || !me.getState(sdk.states.Shout)));
 			let needBo = (Skill.canUse(sdk.skills.BattleOrders) && (force || !me.getState(sdk.states.BattleOrders)));
 			let needBc = (Skill.canUse(sdk.skills.BattleCommand) && (force || !me.getState(sdk.states.BattleCommand)));
@@ -374,59 +394,53 @@ const Precast = new function () {
 
 			Skill.canUse(sdk.skills.Raven) && this.summon(sdk.skills.Raven, sdk.summons.type.Raven);
 
-			switch (Config.SummonAnimal) {
-			case 1:
-			case "Spirit Wolf":
-				buffSummons = this.summon(sdk.skills.SummonSpiritWolf, sdk.summons.type.SpiritWolf) || buffSummons;
+			buffSummons = (() => {
+				switch (Config.SummonAnimal) {
+				case 1:
+				case "Spirit Wolf":
+					return (this.summon(sdk.skills.SummonSpiritWolf, sdk.summons.type.SpiritWolf) || buffSummons);
+				case 2:
+				case "Dire Wolf":
+					return (this.summon(sdk.skills.SummonDireWolf, sdk.summons.type.DireWolf) || buffSummons);
+				case 3:
+				case "Grizzly":
+					return (this.summon(sdk.skills.SummonGrizzly, sdk.summons.type.Grizzly) || buffSummons);
+				default:
+					return buffSummons;
+				}
+			})();
 
-				break;
-			case 2:
-			case "Dire Wolf":
-				buffSummons = this.summon(sdk.skills.SummonDireWolf, sdk.summons.type.DireWolf) || buffSummons;
+			buffSummons = (() => {
+				switch (Config.SummonVine) {
+				case 1:
+				case "Poison Creeper":
+					return (this.summon(sdk.skills.PoisonCreeper, sdk.summons.type.Vine) || buffSummons);
+				case 2:
+				case "Carrion Vine":
+					return (this.summon(sdk.skills.CarrionVine, sdk.summons.type.Vine) || buffSummons);
+				case 3:
+				case "Solar Creeper":
+					return (this.summon(sdk.skills.SolarCreeper, sdk.summons.type.Vine) || buffSummons);
+				default:
+					return buffSummons;
+				}
+			})();
 
-				break;
-			case 3:
-			case "Grizzly":
-				buffSummons = this.summon(sdk.skills.SummonGrizzly, sdk.summons.type.Grizzly) || buffSummons;
-
-				break;
-			}
-
-			switch (Config.SummonVine) {
-			case 1:
-			case "Poison Creeper":
-				buffSummons = this.summon(sdk.skills.PoisonCreeper, sdk.summons.type.Vine) || buffSummons;
-
-				break;
-			case 2:
-			case "Carrion Vine":
-				buffSummons = this.summon(sdk.skills.CarrionVine, sdk.summons.type.Vine) || buffSummons;
-
-				break;
-			case 3:
-			case "Solar Creeper":
-				buffSummons = this.summon(sdk.skills.SolarCreeper, sdk.summons.type.Vine) || buffSummons;
-
-				break;
-			}
-
-			switch (Config.SummonSpirit) {
-			case 1:
-			case "Oak Sage":
-				buffSummons = this.summon(sdk.skills.OakSage, sdk.summons.type.Spirit) || buffSummons;
-
-				break;
-			case 2:
-			case "Heart of Wolverine":
-				buffSummons = this.summon(sdk.skills.HeartofWolverine, sdk.summons.type.Spirit) || buffSummons;
-
-				break;
-			case 3:
-			case "Spirit of Barbs":
-				buffSummons = this.summon(sdk.skills.SpiritofBarbs, sdk.summons.type.Spirit) || buffSummons;
-
-				break;
-			}
+			buffSummons = (() => {
+				switch (Config.SummonSpirit) {
+				case 1:
+				case "Oak Sage":
+					return (this.summon(sdk.skills.OakSage, sdk.summons.type.Spirit) || buffSummons);
+				case 2:
+				case "Heart of Wolverine":
+					return (this.summon(sdk.skills.HeartofWolverine, sdk.summons.type.Spirit) || buffSummons);
+				case 3:
+				case "Spirit of Barbs":
+					return this.summon(sdk.skills.SpiritofBarbs, sdk.summons.type.Spirit) || buffSummons;
+				default:
+					return buffSummons;
+				}
+			})();
 
 			if (Skill.canUse(sdk.skills.Hurricane) && (force || !me.getState(sdk.states.Hurricane))) {
 				this.precastSkill(sdk.skills.Hurricane);
@@ -450,18 +464,18 @@ const Precast = new function () {
 				this.precastSkill(sdk.skills.BurstofSpeed);
 			}
 
-			switch (Config.SummonShadow) {
-			case 1:
-			case "Warrior":
-				buffSummons = this.summon(sdk.skills.ShadowWarrior, sdk.summons.type.Shadow);
-
-				break;
-			case 2:
-			case "Master":
-				buffSummons = this.summon(sdk.skills.ShadowMaster, sdk.summons.type.Shadow);
-
-				break;
-			}
+			buffSummons = (() => {
+				switch (Config.SummonShadow) {
+				case 1:
+				case "Warrior":
+					return this.summon(sdk.skills.ShadowWarrior, sdk.summons.type.Shadow);
+				case 2:
+				case "Master":
+					return this.summon(sdk.skills.ShadowMaster, sdk.summons.type.Shadow);
+				default:
+					return false;
+				}
+			})();
 
 			break;
 		}

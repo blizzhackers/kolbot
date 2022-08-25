@@ -516,12 +516,15 @@ const Pather = {
 					if (!me.inTown) {
 						if (settings.clearSettings.allowClearing && this.recursion) {
 							this.recursion = false;
-
 							NodeAction.go(settings.clearSettings);
-
 							node.distance > 5 && this.moveToEx(node.x, node.y, settings);
-
 							this.recursion = true;
+						} else if (!this.recursion) {
+							// not sure why this is happening but sometimes recursion never gets reset and we stop clearing
+							let count = 0;
+							let checkStack = new Error().stack.split("\n");
+							checkStack.forEach(el => el.includes("Pather.moveToEx@") && (count++));
+							count < 2 && (this.recursion = true);
 						}
 
 						Misc.townCheck();
@@ -652,6 +655,7 @@ const Pather = {
 			Skill.canUse(sdk.skills.Vigor) && Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right);
 		}
 
+		MainLoop:
 		while (getDistance(me.x, me.y, x, y) > minDist && !me.dead) {
 			if (me.paladin && !me.inTown) {
 				Skill.canUse(sdk.skills.Vigor) ? Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right) : Skill.setSkill(Config.AttackSkill[2], sdk.skills.hand.Right);
@@ -674,7 +678,9 @@ const Pather = {
 				if (me.dead) return false;
 
 				if ((getTickCount() - nTimer) > 500) {
-					if (nFail >= 3) return false;
+					if (nFail >= 3) {
+						break MainLoop;
+					}
 
 					nFail += 1;
 					let angle = Math.atan2(me.y - y, me.x - x);
@@ -713,10 +719,11 @@ const Pather = {
 				delay(10);
 			}
 
-			if (attemptCount >= 3) return false;
+			if (attemptCount >= 3) {
+				break;
+			}
 		}
-
-		return !me.dead && getDistance(me.x, me.y, x, y) <= minDist;
+		return (!me.dead && getDistance(me.x, me.y, x, y) <= minDist);
 	},
 
 	/*
@@ -1070,6 +1077,18 @@ const Pather = {
 		let loc = exits.find(a => a.target === exit);
 		console.debug(area, exit, loc);
 		return loc ? [loc.x, loc.y].distance : Infinity;
+	},
+
+	getExitCoords: function (area, exit) {
+		area === undefined && (area = me.area);
+		exit === undefined && (exit = me.area + 1);
+		let areaToCheck = Misc.poll(() => getArea(area));
+		if (!areaToCheck) throw new Error("Couldn't get area info for " + Pather.getAreaName(area));
+		let exits = areaToCheck.exits;
+		if (!exits.length) throw new Error("Failed to find exits");
+		let loc = exits.find(a => a.target === exit);
+		console.debug(area, exit, loc);
+		return loc ? {x: loc.x, y: loc.y} : false;
 	},
 
 	/*
