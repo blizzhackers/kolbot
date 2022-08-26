@@ -8,6 +8,7 @@
 function DiabloHelper() {
 	this.Leader = Config.Leader;
 	Common.Diablo.waitForGlow = true;
+	Common.Diablo.clearRadius = Config.DiabloHelper.ClearRadius;
 	Town.doChores();
 	const Worker = require("../modules/Worker");
 

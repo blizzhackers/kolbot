@@ -474,6 +474,7 @@ let Config = {
 		EntranceTP: "Entrance TP up",
 		StarTP: "Star TP up",
 		DiabloMsg: "Diablo",
+		ClearRadius: 30,
 		SealOrder: ["vizier", "seis", "infector"]
 	},
 	DiabloHelper: {
@@ -483,6 +484,7 @@ let Config = {
 		SkipTP: false,
 		OpenSeals: false,
 		SafePrecast: true,
+		ClearRadius: 30,
 		SealOrder: ["vizier", "seis", "infector"],
 		RecheckSeals: false
 	},

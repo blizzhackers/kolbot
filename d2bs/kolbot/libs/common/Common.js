@@ -211,6 +211,7 @@ const Common = {
 	Diablo: {
 		diabloSpawned: false,
 		diaWaitTime: Time.seconds(30),
+		clearRadius: 30,
 		done: false,
 		waitForGlow: false,
 		sealOrder: [],
@@ -291,7 +292,7 @@ const Common = {
 				}
 
 				Pather.moveTo(path[i], path[i + 1], 3, getDistance(me, path[i], path[i + 1]) > 50);
-				Attack.clear(30, 0, false, Common.Diablo.sort);
+				Attack.clear(this.clearRadius, 0, false, Common.Diablo.sort);
 
 				// Push cleared positions so they can be checked for strays
 				this.cleared.push([path[i], path[i + 1]]);
