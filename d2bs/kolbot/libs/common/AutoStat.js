@@ -35,7 +35,7 @@ const AutoStat = new function () {
 
 		// cast holy shield if available
 		if (Skill.canUse(sdk.skills.HolyShield) && !me.getState(sdk.states.HolyShield)) {
-			if (Precast.precastSkill(sdk.skills.HolyShield)) {
+			if (Precast.cast(sdk.skills.HolyShield)) {
 				delay(1000);
 			} else {
 				return this.block;

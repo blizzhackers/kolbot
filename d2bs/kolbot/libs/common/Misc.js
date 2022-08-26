@@ -267,7 +267,7 @@ const Skill = {
 			break;
 		case sdk.player.class.Sorceress:
 			if (Config.UseColdArmor === true) {
-				Precast.precastables.coldArmor.best = (function () {
+				Precast.skills.coldArmor.best = (function () {
 					let coldArmor = [
 						{skillId: sdk.skills.ShiverArmor, level: me.getSkill(sdk.skills.ShiverArmor, sdk.skills.subindex.SoftPoints)},
 						{skillId: sdk.skills.ChillingArmor, level: me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.SoftPoints)},
@@ -275,16 +275,16 @@ const Skill = {
 					].filter(skill => !!skill.level && skill.level > 0).sort((a, b) => b.level - a.level).first();
 					return coldArmor !== undefined ? coldArmor.skillId : false;
 				})();
-				Precast.precastables.coldArmor.duration = this.getDuration(Precast.precastables.coldArmor.best);
+				Precast.skills.coldArmor.duration = this.getDuration(Precast.skills.coldArmor.best);
 			} else {
-				Precast.precastables.coldArmor.duration = this.getDuration(Config.UseColdArmor);
+				Precast.skills.coldArmor.duration = this.getDuration(Config.UseColdArmor);
 			}
 
 			break;
 		case sdk.player.class.Necromancer:
 			{
 				let bMax = me.getStat(sdk.stats.SkillBoneArmorMax);
-				bMax > 0 && (Precast.precastables.boneArmor.max = bMax);
+				bMax > 0 && (Precast.skills.boneArmor.max = bMax);
 			}
 			if (!!Config.Golem && Config.Golem !== "None") {
 				// todo: change Config.Golem to use skillid instead of 0, 1, 2, and 3
@@ -294,13 +294,13 @@ const Skill = {
 			// how to handle if someone manually equips a shield during game play, don't want to build entire item list if we don't need to
 			// maybe store gid of shield, would still require doing me.getItem(-1, 1, gid) everytime we wanted to cast but that's still less involved
 			// than getting every item we have and finding shield, for now keeping this. Checks during init if we have a shield or not
-			Precast.precastables.HolyShield.canUse = me.usingShield();
+			Precast.skills.holyShield.canUse = me.usingShield();
 
 			break;
 		case sdk.player.class.Barbarian:
-			Skill.canUse(sdk.skills.Shout) && (Precast.precastables.Shout.duration = this.getDuration(sdk.skills.Shout));
-			Skill.canUse(sdk.skills.BattleOrders) && (Precast.precastables.BattleOrders.duration = this.getDuration(sdk.skills.BattleOrders));
-			Skill.canUse(sdk.skills.BattleCommand) && (Precast.precastables.BattleCommand.duration = this.getDuration(sdk.skills.BattleCommand));
+			Skill.canUse(sdk.skills.Shout) && (Precast.skills.shout.duration = this.getDuration(sdk.skills.Shout));
+			Skill.canUse(sdk.skills.BattleOrders) && (Precast.skills.battleOrders.duration = this.getDuration(sdk.skills.BattleOrders));
+			Skill.canUse(sdk.skills.BattleCommand) && (Precast.skills.battleCommand.duration = this.getDuration(sdk.skills.BattleCommand));
 			
 			break;
 		case sdk.player.class.Druid:

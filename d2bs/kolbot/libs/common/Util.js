@@ -6,7 +6,7 @@
 */
 
 // torn on if these include functions should be here or in polyfill - not exactly polyfill functions but sorta?
-function includeIfNotIncluded (file = "") {
+const includeIfNotIncluded = (file = "") => {
 	if (!isIncluded(file)) {
 		if (!include(file)) {
 			console.error("Failed to include " + file);
@@ -14,26 +14,55 @@ function includeIfNotIncluded (file = "") {
 		}
 	}
 	return true;
-}
+};
 
-function includeCommonLibs () {
+const includeCommonLibs = () => {
+	includeIfNotIncluded("Polyfill.js");
 	let files = dopen("libs/common/").getFiles();
 	if (!files.length) throw new Error("Failed to find my files");
-		
-	Array.isArray(files) && files
-		.filter(file => file.endsWith(".js") && !file.match("auto", "gi") && !file.match("util.js", "gi"))
+	if (!files.includes("Pather.js")) {
+		console.warn("Incorrect Files?", files);
+		// something went wrong?
+		while (!files.includes("Pather.js")) {
+			files = dopen("libs/common/").getFiles();
+			delay(50);
+		}
+	}
+
+	files.filter(file => file.endsWith(".js") && !file.match("auto", "gi") && !file.match("util.js", "gi"))
 		.forEach(function (x) {
 			if (!includeIfNotIncluded("common/" + x)) {
 				throw new Error("Failed to include common/" + x);
 			}
 		});
-}
+};
+
+const includeOOGLibs = () => {
+	includeIfNotIncluded("Polyfill.js");
+	let files = dopen("libs/oog/").getFiles();
+	if (!files.length) throw new Error("Failed to find my files");
+	if (!files.includes("DataFile.js")) {
+		console.warn("Incorrect Files?", files);
+		// something went wrong?
+		while (!files.includes("DataFile.js")) {
+			files = dopen("libs/oog/").getFiles();
+			delay(50);
+		}
+	}
+		
+	files.filter(file => file.endsWith(".js"))
+		.forEach(function (x) {
+			if (!includeIfNotIncluded("oog/" + x)) {
+				throw new Error("Failed to include oog/" + x);
+			}
+		});
+};
 
 /**
  * @param args
  * @returns Unit[]
  */
-function getUnits(...args) {
+const getUnits = (...args) => {
 	let units = [], unit = getUnit.apply(null, args);
 
 	if (!unit) {
@@ -43,7 +72,7 @@ function getUnits(...args) {
 		units.push(copyUnit(unit));
 	} while (unit.getNext());
 	return units;
-}
+};
 
 const clickItemAndWait = (...args) => {
 	let timeout = getTickCount(), timedOut;
@@ -103,13 +132,13 @@ const clickUnitAndWait = (button, shift, unit) => {
 // helper functions in case you find it annoying like me to write while (getTickCount() - tick > 3 * 60 * 1000) which is 3 minutes
 // instead we can do while (getTickCount() - tick > Time.minutes(5))
 const Time = {
-	seconds: function (ms = 0) {
-		if (typeof ms !== "number") return 0;
-		return (ms * 1000);
+	seconds: function (seconds = 0) {
+		if (typeof seconds !== "number") return 0;
+		return (seconds * 1000);
 	},
-	minutes: function (ms = 0) {
-		if (typeof ms !== "number") return 0;
-		return (ms * 60000);
+	minutes: function (minutes = 0) {
+		if (typeof minutes !== "number") return 0;
+		return (minutes * 60000);
 	},
 	format: function (ms = 0) {
 		return (new Date(ms).toISOString().slice(11, -5));
