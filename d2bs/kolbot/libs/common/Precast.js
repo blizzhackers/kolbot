@@ -113,9 +113,9 @@ const Precast = new function () {
 			this.cast(sdk.skills.BattleCommand, x, y, true);
 			this.cast(sdk.skills.BattleOrders, x, y, true);
 
-			this.skills.BattleOrders.tick = getTickCount();
+			this.skills.battleOrders.tick = getTickCount();
 			// does this need to be re-calculated everytime? if no autobuild should really just be done when we initialize
-			!this.skills.BattleOrders.duration && (this.skills.BattleOrders.duration = Skill.getDuration(sdk.skills.BattleOrders));
+			!this.skills.battleOrders.duration && (this.skills.battleOrders.duration = Skill.getDuration(sdk.skills.BattleOrders));
 
 			me.switchWeapons(slot);
 
@@ -380,7 +380,7 @@ const Precast = new function () {
 		// Force BO 30 seconds before it expires
 		if (this.haveCTA > -1) {
 			forceBo = (force
-				|| (getTickCount() - this.skills.BattleOrders.tick >= this.skills.BattleOrders.duration - 30000)
+				|| (getTickCount() - this.skills.battleOrders.tick >= this.skills.battleOrders.duration - 30000)
 				|| !me.getState(sdk.states.BattleCommand));
 			forceBo && this.precastCTA(forceBo);
 		}
