@@ -1818,6 +1818,27 @@ Object.defineProperties(Unit.prototype, {
 			].includes(this.classid);
 		},
 	},
+	isShaman: {
+		get: function () {
+			return [
+				sdk.monsters.FallenShaman, sdk.monsters.CarverShaman2, sdk.monsters.DevilkinShaman2, sdk.monsters.DarkShaman1,
+				sdk.monsters.WarpedShaman, sdk.monsters.CarverShaman, sdk.monsters.DevilkinShaman, sdk.monsters.DarkShaman2
+			].includes(this.classid);
+		},
+	},
+	isUnraveler: {
+		get: function () {
+			return getBaseStat("monstats", this.classid, "MonType") === sdk.monsters.type.Unraveler;
+		},
+	},
+	isFallen: {
+		get: function () {
+			return [
+				sdk.monsters.Fallen, sdk.monsters.Carver2, sdk.monsters.Devilkin2, sdk.monsters.DarkOne1, sdk.monsters.WarpedFallen,
+				sdk.monsters.Carver1, sdk.monsters.Devilkin, sdk.monsters.DarkOne2
+			].includes(this.classid);
+		},
+	},
 	isWalking: {
 		get: function () {
 			return (this.mode === sdk.monsters.mode.Walking && (this.targetx !== this.x || this.targety !== this.y));
@@ -1841,6 +1862,78 @@ Object.defineProperties(Unit.prototype, {
 	isChilled: {
 		get: function () {
 			return this.getState(sdk.states.Frozen);
+		},
+	},
+	extraStrong: {
+		get: function () {
+			if (!this.isMonster) return false;
+			return this.getEnchant(sdk.enchant.ExtraStrong);
+		},
+	},
+	extraFast: {
+		get: function () {
+			if (!this.isMonster) return false;
+			return this.getEnchant(sdk.enchant.ExtraFast);
+		},
+	},
+	cursed: {
+		get: function () {
+			if (!this.isMonster) return false;
+			return this.getEnchant(sdk.enchant.Cursed);
+		},
+	},
+	magicResistant: {
+		get: function () {
+			if (!this.isMonster) return false;
+			return this.getEnchant(sdk.enchant.MagicResistant);
+		},
+	},
+	fireEnchanted: {
+		get: function () {
+			if (!this.isMonster) return false;
+			return this.getEnchant(sdk.enchant.FireEnchanted);
+		},
+	},
+	lightningEnchanted: {
+		get: function () {
+			if (!this.isMonster) return false;
+			return this.getEnchant(sdk.enchant.LightningEnchanted);
+		},
+	},
+	coldEnchanted: {
+		get: function () {
+			if (!this.isMonster) return false;
+			return this.getEnchant(sdk.enchant.ColdEnchanted);
+		},
+	},
+	manBurn: {
+		get: function () {
+			if (!this.isMonster) return false;
+			return this.getEnchant(sdk.enchant.ManaBurn);
+		},
+	},
+	teleportation: {
+		get: function () {
+			if (!this.isMonster) return false;
+			return this.getEnchant(sdk.enchant.Teleportation);
+		},
+	},
+	spectralHit: {
+		get: function () {
+			if (!this.isMonster) return false;
+			return this.getEnchant(sdk.enchant.SpectralHit);
+		},
+	},
+	stoneSkin: {
+		get: function () {
+			if (!this.isMonster) return false;
+			return this.getEnchant(sdk.enchant.StoneSkin);
+		},
+	},
+	multiShot: {
+		get: function () {
+			if (!this.isMonster) return false;
+			return this.getEnchant(sdk.enchant.MultipleShots);
 		},
 	},
 	resPenalty: {
@@ -2062,6 +2155,14 @@ Object.defineProperties(Unit.prototype, {
 		},
 	},
 });
+
+Unit.prototype.hasEnchant = function (...enchants) {
+	if (!this.isMonster) return false;
+	for (let enchant of enchants) {
+		if (this.getEnchant(enchant)) return true;
+	}
+	return false;
+};
 
 Unit.prototype.usingShield = function () {
 	if (this.type > sdk.unittype.Monster) return false;
@@ -2592,6 +2693,17 @@ Unit.prototype.inArea = function (area = 0) {
 Unit.prototype.isUnit = function (classid = -1) {
 	if (this === undefined) return false;
 	return this.classid === classid;
+};
+
+/**
+ * 
+ * @param {any} key
+ * @returns value of key if it exists
+ * @description replicate .? operator of modern js since d2bs doesn't have it
+ */
+Object.prototype.test = function (key) {
+	if (this === undefined) return false;
+	return this[key] !== undefined ? this[key] : {};
 };
 
 PresetUnit.prototype.realCoords = function () {
