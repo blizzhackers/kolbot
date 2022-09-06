@@ -499,6 +499,11 @@ me.getPingDelay = function () {
 me.walk = () => me.runwalk = 0;
 me.run = () => me.runwalk = 1;
 
+me.getWeaponQuantity = function (weaponLoc = sdk.body.RightArm) {
+	let currItem = me.getItemsEx(-1, sdk.items.mode.Equipped).filter(i => i.bodylocation === weaponLoc).first();
+	return !!currItem ? currItem.getStat(sdk.stats.Quantity) : 0;
+};
+
 /**
  * @description Returns item given by itemInfo
  * @param itemInfo object -
@@ -1839,6 +1844,11 @@ Object.defineProperties(Unit.prototype, {
 			].includes(this.classid);
 		},
 	},
+	isBeetle: {
+		get: function () {
+			return getBaseStat("monstats", this.classid, "MonType") === sdk.monsters.type.Scarab;
+		},
+	},
 	isWalking: {
 		get: function () {
 			return (this.mode === sdk.monsters.mode.Walking && (this.targetx !== this.x || this.targety !== this.y));
@@ -2168,12 +2178,19 @@ Unit.prototype.usingShield = function () {
 	if (this.type > sdk.unittype.Monster) return false;
 	// always switch to main hand if we are checking ourselves
 	this === me && me.weaponswitch !== sdk.player.slot.Main && me.switchWeapons(sdk.player.slot.Main);
-	let shield = this.getItemsEx(-1, sdk.items.mode.Equipped)
-		.filter(s => s.isShield).first();
+	let shield = this.getItemsEx(-1, sdk.items.mode.Equipped).filter(s => s.isShield).first();
 	return !!shield;
 };
 
 Object.defineProperties(me, {
+	inShop: {
+		get: function () {
+			if (getUIFlag(sdk.uiflags.Shop)) return true;
+			if (!Config.PacketShopping) return false;
+			let npc = getInteractedNPC();
+			return !!(npc && npc.itemcount > 0);
+		}
+	},
 	walking: {
 		get: function () {
 			return me.runwalk === sdk.player.move.Walk;
@@ -2701,9 +2718,9 @@ Unit.prototype.isUnit = function (classid = -1) {
  * @returns value of key if it exists
  * @description replicate .? operator of modern js since d2bs doesn't have it
  */
-Object.prototype.test = function (key) {
+Object.prototype.test = function (key, last = false) {
 	if (this === undefined) return false;
-	return this[key] !== undefined ? this[key] : {};
+	return this[key] !== undefined ? this[key] : last ? null : {};
 };
 
 PresetUnit.prototype.realCoords = function () {
