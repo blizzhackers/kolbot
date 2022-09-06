@@ -1106,7 +1106,7 @@ const Misc = {
 			// don't use tk if we are right next to it
 			let useTK = (unit.distance > 5 && Skill.useTK(unit) && i < 3);
 			if (useTK) {
-				unit.distance > 13 && Attack.getIntoPosition(unit, 13, sdk.collision.Ranged);
+				unit.distance > 13 && Attack.getIntoPosition(unit, 13, sdk.collision.WallOrRanged);
 				if (!Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit)) {
 					console.debug("Failed to tk: attempt: " + i);
 					continue;
