@@ -1551,7 +1551,7 @@ const Town = {
 				}
 
 				// "You do not have enough gold for that."
-				if (dialog[lines].text.match(getLocaleString(sdk.locale.text.SellValue), "gi")) {
+				if (dialog[lines].text.match(getLocaleString(sdk.locale.dialog.youDoNotHaveEnoughGoldForThat), "gi")) {
 					return false;
 				}
 			}
@@ -1585,7 +1585,7 @@ const Town = {
 	},
 
 	needMerc: function () {
-		if (me.classic || !Config.UseMerc || me.gold < me.mercrevivecost || !me.mercrevivecost) return false;
+		if (me.classic || !Config.UseMerc || me.gold < me.mercrevivecost || me.mercrevivecost === 0) return false;
 
 		Misc.poll(() => me.gameReady, 1000, 100);
 		// me.getMerc() might return null if called right after taking a portal, that's why there's retry attempts
