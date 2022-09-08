@@ -324,6 +324,19 @@ Unit.prototype.drop = function () {
 	return false;
 };
 
+me.walk = () => me.runwalk = 0;
+me.run = () => me.runwalk = 1;
+
+// calling me.ping can cause issues, use this instead to assign a value
+// might need work to be more accurate but works for now
+me.getPingDelay = function () {
+	// single-player
+	if (!me.gameserverip) return 25;
+	let pingDelay = me.gameReady ? me.ping : 250;
+	pingDelay < 10 && (pingDelay = 50);
+	return pingDelay;
+};
+
 /**
  * @description use consumable item, fixes issue with interact() returning false even if we used an item
  * @returns boolean
@@ -334,7 +347,7 @@ Unit.prototype.use = function () {
 	if (!getBaseStat("items", this.classid, "useable")) throw new Error("Unit.use: Must be used with consumable items. Unit Name: " + this.name);
 	
 	let gid = this.gid;
-	let pingDelay = me.gameReady ? me.ping : 200;
+	let pingDelay = me.getPingDelay();
 	let quantity = 0;
 	let iType = this.itemType;
 	let checkQuantity = false;
@@ -358,12 +371,10 @@ Unit.prototype.use = function () {
 		return false;
 	}
 
-	delay(Math.max(pingDelay * 2, 200));
-
 	if (checkQuantity) {
-		return Misc.poll(() => this.getStat(sdk.stats.Quantity) < quantity, 200, 50);
+		return Misc.poll(() => this.getStat(sdk.stats.Quantity) < quantity, 200 + pingDelay, 50);
 	} else {
-		return Misc.poll(() => !Game.getItem(-1, -1, gid), 200, 50);
+		return Misc.poll(() => !Game.getItem(-1, -1, gid), 200 + pingDelay, 50);
 	}
 };
 
@@ -487,17 +498,6 @@ me.castingFrames = function (skillId, fcr, charClass) {
 me.castingDuration = function (skillId, fcr = me.FCR, charClass = me.classid) {
 	return (me.castingFrames(skillId, fcr, charClass) / 25);
 };
-
-// calling me.ping can cause issues, use this instead to assign a value
-// might need work to be more accurate but works for now
-me.getPingDelay = function () {
-	let pingDelay = me.gameReady ? me.ping : 250;
-	pingDelay < 10 && (pingDelay = 45);
-	return pingDelay;
-};
-
-me.walk = () => me.runwalk = 0;
-me.run = () => me.runwalk = 1;
 
 me.getWeaponQuantity = function (weaponLoc = sdk.body.RightArm) {
 	let currItem = me.getItemsEx(-1, sdk.items.mode.Equipped).filter(i => i.bodylocation === weaponLoc).first();
