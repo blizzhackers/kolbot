@@ -74,12 +74,22 @@ Party.prototype.__defineGetter__("inTown", function () {
 });
 
 Unit.prototype.__defineGetter__("attacking", function () {
-	if (this.type > sdk.unittype.Player) throw new Error("Unit.attacking: Must be used with player units.");
-	return [
-		sdk.player.mode.Attacking1, sdk.player.mode.Attacking2, sdk.player.mode.CastingSkill, sdk.player.mode.ThrowingItem,
-		sdk.player.mode.Kicking, sdk.player.mode.UsingSkill1, sdk.player.mode.UsingSkill2, sdk.player.mode.UsingSkill3,
-		sdk.player.mode.UsingSkill4, sdk.player.mode.SkillActionSequence
-	].includes(this.mode);
+	if (this.type > sdk.unittype.Monster) throw new Error("Unit.attacking: Must be used with Monster or Player units.");
+	switch (this.type) {
+	case sdk.unittype.Player:
+		return [
+			sdk.player.mode.Attacking1, sdk.player.mode.Attacking2, sdk.player.mode.CastingSkill, sdk.player.mode.ThrowingItem,
+			sdk.player.mode.Kicking, sdk.player.mode.UsingSkill1, sdk.player.mode.UsingSkill2, sdk.player.mode.UsingSkill3,
+			sdk.player.mode.UsingSkill4, sdk.player.mode.SkillActionSequence
+		].includes(this.mode);
+	case sdk.unittype.Monster:
+		return [
+			sdk.monsters.mode.Attacking1, sdk.monsters.mode.Attacking2, sdk.monsters.mode.CastingSkill,
+			sdk.monsters.mode.UsingSkill1, sdk.monsters.mode.UsingSkill2, sdk.monsters.mode.UsingSkill3, sdk.monsters.mode.UsingSkill4
+		].includes(this.mode);
+	default:
+		return false;
+	}
 });
 
 Unit.prototype.__defineGetter__("durabilityPercent", function () {
