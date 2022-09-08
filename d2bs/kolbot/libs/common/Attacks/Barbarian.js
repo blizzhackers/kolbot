@@ -50,6 +50,12 @@ const ClassAttack = {
 		if (Skill.getManaCost(attackSkill) > me.mp && Config.LowManaSkill[0] > -1 && Attack.checkResist(unit, Config.LowManaSkill[0])) {
 			attackSkill = Config.LowManaSkill[0];
 		}
+		
+		// low weapon-quantity -> use secondary skill if we can
+		if (attackSkill === sdk.skills.DoubleThrow && (me.getWeaponQuantity() <= 3 || me.getWeaponQuantity(sdk.body.LeftArm) <= 3)
+			&& Skill.canUse(Config.AttackSkill[index + 1]) && Attack.checkResist(unit, Config.AttackSkill[index + 1])) {
+			attackSkill = Config.AttackSkill[index + 1];
+		}
 
 		// Telestomp with barb is pointless
 		return this.doCast(unit, attackSkill);
