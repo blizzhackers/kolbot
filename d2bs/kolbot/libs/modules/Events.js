@@ -14,7 +14,7 @@
 		function Hook(name, callback) {
 			this.name = name;
 			this.callback = callback;
-			this.id = self.hooks.push(this);
+			this.id = self.hooks.push(this) - 1;
 			this.__callback = callback; // used for once
 		}
 
