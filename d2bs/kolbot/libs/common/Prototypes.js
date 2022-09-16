@@ -65,12 +65,12 @@ Unit.prototype.__defineGetter__("dead", function () {
 // Check if unit is in town
 Unit.prototype.__defineGetter__("inTown", function () {
 	if (this.type > sdk.unittype.Player) throw new Error("Unit.inTown: Must be used with player units.");
-	return [sdk.areas.RogueEncampment, sdk.areas.LutGholein, sdk.areas.KurastDocktown, sdk.areas.PandemoniumFortress, sdk.areas.Harrogath].includes(this.area);
+	return sdk.areas.Towns.includes(this.area);
 });
 
 // Check if party unit is in town
 Party.prototype.__defineGetter__("inTown", function () {
-	return [sdk.areas.RogueEncampment, sdk.areas.LutGholein, sdk.areas.KurastDocktown, sdk.areas.PandemoniumFortress, sdk.areas.Harrogath].includes(this.area);
+	return sdk.areas.Towns.includes(this.area);
 });
 
 Unit.prototype.__defineGetter__("attacking", function () {
@@ -193,13 +193,7 @@ Unit.prototype.buy = function (shiftBuy, gamble) {
 		let tick = getTickCount();
 
 		while (getTickCount() - tick < Math.max(2000, me.ping * 2 + 500)) {
-			if (shiftBuy && me.gold < oldGold) {
-				delay(500);
-
-				return true;
-			}
-
-			if (itemCount !== me.itemcount) {
+			if ((shiftBuy && me.gold < oldGold) || itemCount !== me.itemcount) {
 				delay(500);
 
 				return true;
@@ -302,9 +296,7 @@ Unit.prototype.drop = function () {
 	let timeout = Math.max(1000, me.ping * 6);
 
 	while (getUIFlag(sdk.uiflags.Cube) || getUIFlag(sdk.uiflags.Stash) || !me.gameReady) {
-		if (getTickCount() - tick > timeout) {
-			return false;
-		}
+		if (getTickCount() - tick > timeout) return false;
 
 		if (getUIFlag(sdk.uiflags.Cube) || getUIFlag(sdk.uiflags.Stash)) {
 			me.cancel(0);
@@ -821,8 +813,10 @@ Unit.prototype.getStatEx = function (id, subid) {
 	let temp, rval, regex;
 
 	switch (id) {
-	case sdk.stats.AllRes: //calculates all res, doesnt exists trough
-	{ // Block scope due to the variable declaration
+	case sdk.stats.AllRes:
+	// calculates all res, doesn't exist though
+	// Block scope due to the variable declaration
+	{
 		// Get all res
 		let allres = [
 			this.getStatEx(sdk.stats.FireResist),
@@ -991,9 +985,7 @@ Unit.prototype.getStatEx = function (id, subid) {
 		if (subid === undefined) {
 			for (let i = 0; i < 7; i += 1) {
 				let cSkill = this.getStat(sdk.stats.AddClassSkills, i);
-				if (cSkill) {
-					return cSkill;
-				}
+				if (cSkill) return cSkill;
 			}
 
 			return 0;
@@ -1002,21 +994,11 @@ Unit.prototype.getStatEx = function (id, subid) {
 		break;
 	case sdk.stats.AddSkillTab:
 		if (subid === undefined) {
-			temp = [
-				sdk.skills.tabs.BowandCrossbow, sdk.skills.tabs.PassiveandMagic, sdk.skills.tabs.JavelinandSpear,
-				sdk.skills.tabs.Fire, sdk.skills.tabs.Lightning, sdk.skills.tabs.Cold,
-				sdk.skills.tabs.Curses, sdk.skills.tabs.PoisonandBone, sdk.skills.tabs.NecroSummoning,
-				sdk.skills.tabs.PalaCombat, sdk.skills.tabs.Offensive, sdk.skills.tabs.Defensive,
-				sdk.skills.tabs.BarbCombat, sdk.skills.tabs.Masteries, sdk.skills.tabs.Warcries,
-				sdk.skills.tabs.DruidSummon, sdk.skills.tabs.ShapeShifting, sdk.skills.tabs.Elemental,
-				sdk.skills.tabs.Traps, sdk.skills.tabs.ShadowDisciplines, sdk.skills.tabs.MartialArts
-			];
+			temp = Object.values(sdk.skills.tabs);
 
 			for (let i = 0; i < temp.length; i += 1) {
 				let sTab = this.getStat(sdk.stats.AddSkillTab, temp[i]);
-				if (sTab) {
-					return sTab;
-				}
+				if (sTab) return sTab;
 			}
 
 			return 0;
@@ -2077,6 +2059,17 @@ Object.defineProperties(Unit.prototype, {
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return false;
 			return getBaseStat("items", this.classid, "2handed") === 1;
+		}
+	},
+	oneOrTwoHanded: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return getBaseStat("items", this.classid, "1or2handed") === 1;
+		}
+	},
+	strictlyTwoHanded: {
+		get: function () {
+			return this.twoHanded && !this.oneOrTwoHanded;
 		}
 	},
 	runeword: {
