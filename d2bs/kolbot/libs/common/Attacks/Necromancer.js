@@ -41,63 +41,40 @@ const ClassAttack = {
 	canCurse: function (unit, curseID) {
 		if (unit === undefined || unit.dead || !Skill.canUse(curseID)) return false;
 
-		let state = 0;
+		let state = (() => {
+			switch (curseID) {
+			case sdk.skills.AmplifyDamage:
+				return sdk.states.AmplifyDamage;
+			case sdk.skills.DimVision:
+				// dim doesn't work on oblivion knights
+				if ([sdk.monsters.OblivionKnight1, sdk.monsters.OblivionKnight2, sdk.monsters.OblivionKnight3].includes(unit.classid)) return false;
+				return sdk.states.DimVision;
+			case sdk.skills.Weaken:
+				return sdk.states.Weaken;
+			case sdk.skills.IronMaiden:
+				return sdk.states.IronMaiden;
+			case sdk.skills.Terror:
+				return unit.scareable ? sdk.states.Terror : false;
+			case sdk.skills.Confuse:
+				// doens't work on specials
+				return unit.scareable ? sdk.states.Confuse : false;
+			case sdk.skills.LifeTap:
+				return sdk.states.LifeTap;
+			case sdk.skills.Attract:
+				// doens't work on specials
+				return unit.scareable ? sdk.states.Attract : false;
+			case sdk.skills.Decrepify:
+				return sdk.states.Decrepify;
+			case sdk.skills.LowerResist:
+				return sdk.states.LowerResist;
+			default:
+				console.warn("(ÿc9canCurse) :: ÿc1Invalid Curse ID: " + curseID);
+				
+				return false;
+			}
+		})();
 
-		switch (curseID) {
-		case sdk.skills.AmplifyDamage:
-			state = sdk.states.AmplifyDamage;
-
-			break;
-		case sdk.skills.DimVision:
-			// dim doesn't work on oblivion knights
-			if ([sdk.monsters.OblivionKnight1, sdk.monsters.OblivionKnight2, sdk.monsters.OblivionKnight3].includes(unit.classid)) return false;
-			state = sdk.states.DimVision;
-
-			break;
-		case sdk.skills.Weaken:
-			state = sdk.states.Weaken;
-
-			break;
-		case sdk.skills.IronMaiden:
-			state = sdk.states.IronMaiden;
-
-			break;
-		case sdk.skills.Terror:
-			if (!unit.scareable) return false;
-			state = sdk.states.Terror;
-
-			break;
-		case sdk.skills.Confuse:
-			// doens't work on specials
-			if (!unit.scareable) return false;
-			state = sdk.states.Confuse;
-
-			break;
-		case sdk.skills.LifeTap:
-			state = sdk.states.LifeTap;
-
-			break;
-		case sdk.skills.Attract:
-			// doens't work on specials
-			if (!unit.scareable) return false;
-			state = sdk.states.Attract;
-
-			break;
-		case sdk.skills.Decrepify:
-			state = sdk.states.Decrepify;
-
-			break;
-		case sdk.skills.LowerResist:
-			state = sdk.states.LowerResist;
-
-			break;
-		default:
-			print("(ÿc9canCurse) :: ÿc1Invalid Curse ID: " + curseID);
-			
-			return false;
-		}
-
-		return !unit.getState(state);
+		return state ? !unit.getState(state) : false;
 	},
 
 	getCustomCurse: function (unit) {
@@ -127,12 +104,10 @@ const ClassAttack = {
 		if (!unit || unit.dead) return Attack.Result.SUCCESS;
 
 		let mercRevive = 0;
-		let timedSkill = -1;
-		let untimedSkill = -1;
-		let customCurse = -1;
 		let gid = unit.gid;
-		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 		let classid = unit.classid;
+		let [timedSkill, untimedSkill, customCurse] = [-1, -1, -1];
+		const index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 
 		if (Config.MercWatch && Town.needMerc()) {
 			print("mercwatch");
