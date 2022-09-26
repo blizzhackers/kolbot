@@ -2725,6 +2725,7 @@ Object.prototype.test = function (key, last = false) {
 	if (this === undefined) return false;
 	return this[key] !== undefined ? this[key] : last ? null : {};
 };
+Object.defineProperty(Object.prototype, "test", { enumerable: false });
 
 PresetUnit.prototype.realCoords = function () {
 	return {
