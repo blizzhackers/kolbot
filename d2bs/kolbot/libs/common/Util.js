@@ -5,8 +5,9 @@
 *
 */
 
+includeIfNotIncluded("Polyfill.js");
 // torn on if these include functions should be here or in polyfill - not exactly polyfill functions but sorta?
-const includeIfNotIncluded = (file = "") => {
+const includeIfNotIncluded = function (file = "") {
 	if (!isIncluded(file)) {
 		if (!include(file)) {
 			console.error("Failed to include " + file);
@@ -16,8 +17,7 @@ const includeIfNotIncluded = (file = "") => {
 	return true;
 };
 
-const includeCommonLibs = () => {
-	includeIfNotIncluded("Polyfill.js");
+const includeCommonLibs = function () {
 	let files = dopen("libs/common/").getFiles();
 	if (!files.length) throw new Error("Failed to find my files");
 	if (!files.includes("Pather.js")) {
@@ -37,8 +37,7 @@ const includeCommonLibs = () => {
 		});
 };
 
-const includeOOGLibs = () => {
-	includeIfNotIncluded("Polyfill.js");
+const includeOOGLibs = function () {
 	let files = dopen("libs/oog/").getFiles();
 	if (!files.length) throw new Error("Failed to find my files");
 	if (!files.includes("DataFile.js")) {
@@ -62,7 +61,7 @@ const includeOOGLibs = () => {
  * @param args
  * @returns Unit[]
  */
-const getUnits = (...args) => {
+const getUnits = function (...args) {
 	let units = [], unit = getUnit.apply(null, args);
 
 	if (!unit) {
@@ -74,7 +73,7 @@ const getUnits = (...args) => {
 	return units;
 };
 
-const clickItemAndWait = (...args) => {
+const clickItemAndWait = function (...args) {
 	let timeout = getTickCount(), timedOut;
 	let before = !me.itemoncursor;
 
@@ -101,7 +100,7 @@ const clickItemAndWait = (...args) => {
  *		as a result of us clicking it.
  * @returns boolean
  */
-const clickUnitAndWait = (button, shift, unit) => {
+const clickUnitAndWait = function (button, shift, unit) {
 	if (typeof (unit) !== "object") throw new Error("clickUnitAndWait: Third arg must be a Unit.");
 
 	let before = unit.mode;
