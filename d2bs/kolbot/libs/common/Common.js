@@ -197,10 +197,7 @@ const Common = {
 
 				if (result) {
 					Pather.moveTo(result[0], result[1], 3);
-
-					if (!Attack.clear(30)) {
-						return false;
-					}
+					if (!Attack.clear(30)) return false;
 				}
 			}
 
@@ -306,7 +303,7 @@ const Common = {
 		},
 
 		clearStrays: function () {
-			let oldPos = {x: me.x, y: me.y};
+			let oldPos = { x: me.x, y: me.y };
 			let monster = Game.getMonster();
 
 			if (monster) {
@@ -358,10 +355,10 @@ const Common = {
 		},
 
 		openSeal: function (classid) {
+			let seal;
 			let warn = Config.PublicMode && [sdk.objects.DiabloSealVizier, sdk.objects.DiabloSealSeis, sdk.objects.DiabloSealInfector].includes(classid) && Loader.scriptName() === "Diablo";
 			let usetk = (Skill.haveTK && (classid !== sdk.objects.DiabloSealSeis || this.seisLayout !== 1));
 			let seisSeal = classid === sdk.objects.DiabloSealSeis;
-			let seal;
 
 			for (let i = 0; i < 5; i++) {
 				if (!seal) {
@@ -548,7 +545,7 @@ const Common = {
 			if (me.paladin && Config.AttackSkill[1] === sdk.skills.BlessedHammer) {
 				let target = Game.getMonster(name);
 
-				if (!target) return;
+				if (!target || !target.attackable) return true;
 
 				let positions = [[6, 11], [0, 8], [8, -1], [-9, 2], [0, -11], [8, -8]];
 
@@ -562,29 +559,28 @@ const Common = {
 							Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Left);
 						}
 
-						return;
+						return true;
 					}
 				}
 			}
+			
+			return false;
 		},
 
 		preattack: function (id) {
-			let coords = [];
-
-			switch (id) {
-			case getLocaleString(sdk.locale.monsters.GrandVizierofChaos):
-				coords = Common.Diablo.vizLayout === 1 ? [7676, 5295] : [7684, 5318];
-
-				break;
-			case getLocaleString(sdk.locale.monsters.LordDeSeis):
-				coords = Common.Diablo.seisLayout === 1 ? [7778, 5216] : [7775, 5208];
-
-				break;
-			case getLocaleString(sdk.locale.monsters.InfectorofSouls):
-				coords = Common.Diablo.infLayout === 1 ? [7913, 5292] : [7915, 5280];
-
-				break;
-			}
+			let coords = (() => {
+				switch (id) {
+				case getLocaleString(sdk.locale.monsters.GrandVizierofChaos):
+					return Common.Diablo.vizLayout === 1 ? [7676, 5295] : [7684, 5318];
+				case getLocaleString(sdk.locale.monsters.LordDeSeis):
+					return Common.Diablo.seisLayout === 1 ? [7778, 5216] : [7775, 5208];
+				case getLocaleString(sdk.locale.monsters.InfectorofSouls):
+					return Common.Diablo.infLayout === 1 ? [7913, 5292] : [7915, 5280];
+				default:
+					return [];
+				}
+			})();
+			if (!coords.length) return false;
 
 			switch (me.classid) {
 			case sdk.player.class.Sorceress:
@@ -597,9 +593,7 @@ const Common = {
 
 				break;
 			case sdk.player.class.Paladin:
-				this.hammerdinPreAttack(id, 8);
-
-				break;
+				return this.hammerdinPreAttack(id, 8);
 			case sdk.player.class.Assassin:
 				if (Config.UseTraps) {
 					let trapCheck = ClassAttack.checkTraps({x: coords[0], y: coords[1]});
