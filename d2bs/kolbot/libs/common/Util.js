@@ -5,7 +5,7 @@
 *
 */
 
-!isIncluded("Polyfill.js") && !include("Polyfill.js");
+!isIncluded("Polyfill.js") && include("Polyfill.js");
 // torn on if these include functions should be here or in polyfill - not exactly polyfill functions but sorta?
 const includeIfNotIncluded = function (file = "") {
 	if (!isIncluded(file)) {
