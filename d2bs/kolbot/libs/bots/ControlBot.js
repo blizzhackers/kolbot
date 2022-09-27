@@ -391,34 +391,26 @@ function ControlBot() {
 		}
 
 		let act = Misc.getPlayerAct(nick);
-		let wpList = (() => {
-			switch (act) {
-			case 1:
-				return [
-					sdk.areas.ColdPlains, sdk.areas.StonyField, sdk.areas.DarkWood, sdk.areas.BlackMarsh,
-					sdk.areas.OuterCloister, sdk.areas.JailLvl1, sdk.areas.InnerCloister, sdk.areas.CatacombsLvl2
-				];
-			case 2:
-				return [
-					sdk.areas.A2SewersLvl2, sdk.areas.DryHills, sdk.areas.HallsoftheDeadLvl2, sdk.areas.FarOasis,
-					sdk.areas.LostCity, sdk.areas.PalaceCellarLvl1, sdk.areas.ArcaneSanctuary, sdk.areas.CanyonofMagic
-				];
-			case 3:
-				return [
-					sdk.areas.SpiderForest, sdk.areas.GreatMarsh, sdk.areas.FlayerJungle, sdk.areas.LowerKurast,
-					sdk.areas.KurastBazaar, sdk.areas.UpperKurast, sdk.areas.Travincal, sdk.areas.DuranceofHateLvl2
-				];
-			case 4:
-				return [sdk.areas.CityoftheDamned, sdk.areas.RiverofFlame];
-			case 5:
-				return [
-					sdk.areas.FrigidHighlands, sdk.areas.ArreatPlateau, sdk.areas.CrystalizedPassage,
-					sdk.areas.GlacialTrail, sdk.areas.FrozenTundra, sdk.areas.AncientsWay, sdk.areas.WorldstoneLvl2
-				];
-			default:
-				return [];
-			}
-		})();
+		const wps = {
+			1: [
+				sdk.areas.ColdPlains, sdk.areas.StonyField, sdk.areas.DarkWood, sdk.areas.BlackMarsh,
+				sdk.areas.OuterCloister, sdk.areas.JailLvl1, sdk.areas.InnerCloister, sdk.areas.CatacombsLvl2
+			],
+			2: [
+				sdk.areas.A2SewersLvl2, sdk.areas.DryHills, sdk.areas.HallsoftheDeadLvl2, sdk.areas.FarOasis,
+				sdk.areas.LostCity, sdk.areas.PalaceCellarLvl1, sdk.areas.ArcaneSanctuary, sdk.areas.CanyonofMagic
+			],
+			3: [
+				sdk.areas.SpiderForest, sdk.areas.GreatMarsh, sdk.areas.FlayerJungle, sdk.areas.LowerKurast,
+				sdk.areas.KurastBazaar, sdk.areas.UpperKurast, sdk.areas.Travincal, sdk.areas.DuranceofHateLvl2
+			],
+			4: [sdk.areas.CityoftheDamned, sdk.areas.RiverofFlame],
+			5: [
+				sdk.areas.FrigidHighlands, sdk.areas.ArreatPlateau, sdk.areas.CrystalizedPassage,
+				sdk.areas.GlacialTrail, sdk.areas.FrozenTundra, sdk.areas.AncientsWay, sdk.areas.WorldstoneLvl2
+			]
+		};
+		let wpList = wps[act];
 
 		for (let i = 0; i < wpList.length; i++) {
 			if (this.checkHostiles()) {
