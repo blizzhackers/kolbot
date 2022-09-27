@@ -101,7 +101,7 @@ const Precast = new function () {
 	};
 
 	this.precastCTA = function (force = false) {
-		if (this.haveCTA === -1 || me.classic || me.barbarian || me.inTown || me.shapeshifted) return false;
+		if (!Config.UseCta || this.haveCTA === -1 || me.classic || me.barbarian || me.inTown || me.shapeshifted) return false;
 		if (!force && me.getState(sdk.states.BattleOrders)) return true;
 
 		if (this.haveCTA > -1) {
@@ -482,7 +482,7 @@ const Precast = new function () {
 
 			if (needShout || needBo || needBc) {
 				let primary = Attack.getPrimarySlot();
-				let {x, y} = me;
+				let { x, y } = me;
 				(needBo || needBc) && me.switchWeapons(this.getBetterSlot(sdk.skills.BattleOrders));
 
 				needBc && this.cast(sdk.skills.BattleCommand, x, y, true);

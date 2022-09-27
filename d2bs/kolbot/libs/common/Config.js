@@ -293,6 +293,8 @@ let Config = {
 	// GameData
 	ChampionBias: 60,
 
+	UseCta: true,
+
 	// Attack specific
 	Dodge: false,
 	DodgeRange: 15,
