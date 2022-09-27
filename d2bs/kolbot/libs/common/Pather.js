@@ -1733,6 +1733,9 @@ const Pather = {
 			} else if (currArea === sdk.areas.Harrogath && targetArea === sdk.areas.NihlathaksTemple) {
 				// Harrogath -> Nihlathak's Temple
 				Town.move(NPC.Anya);
+				if (!Pather.getPortal(sdk.areas.NihlathaksTemple) && Misc.checkQuest(sdk.quest.id.PrisonofIce, sdk.quest.states.ReqComplete)) {
+					Town.npcInteract("Anya");
+				}
 				this.usePortal(sdk.areas.NihlathaksTemple);
 			} else if (currArea === sdk.areas.FrigidHighlands && targetArea === sdk.areas.Abaddon) {
 				// Abaddon
