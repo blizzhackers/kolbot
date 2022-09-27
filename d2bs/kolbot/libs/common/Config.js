@@ -366,6 +366,10 @@ let Config = {
 	// Custom Attack
 	CustomClassAttack: "", // If set it loads common/Attack/[CustomClassAttack].js
 
+	MapMode: {
+		UseOwnItemFilter: false,
+	},
+
 	// Script specific
 	MFLeader: false,
 	Mausoleum: {
