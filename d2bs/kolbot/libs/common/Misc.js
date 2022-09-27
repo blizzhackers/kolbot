@@ -226,47 +226,26 @@ const Skill = {
 			return typeof this.all[skill] !== "undefined" && this.all[skill].have();
 		},
 		reset: function () {
-			let min = 0, max = 999;
-
-			switch (me.classid) {
-			case sdk.player.class.Amazon:
-				min = sdk.skills.MagicArrow;
-				max = sdk.skills.LightningFury;
-				
-				break;
-			case sdk.player.class.Sorceress:
-				min = sdk.skills.FireBolt;
-				max = sdk.skills.ColdMastery;
-				
-				break;
-			case sdk.player.class.Necromancer:
-				min = sdk.skills.AmplifyDamage;
-				max = sdk.skills.Revive;
-				
-				break;
-			case sdk.player.class.Paladin:
-				min = sdk.skills.Sacrifice;
-				max = sdk.skills.Salvation;
-				
-				break;
-			case sdk.player.class.Barbarian:
-				min = sdk.skills.Bash;
-				max = sdk.skills.BattleCommand;
-				
-				break;
-			case sdk.player.class.Druid:
-				min = sdk.skills.Raven;
-				max = sdk.skills.Hurricane;
-				
-				break;
-			case sdk.player.class.Assassin:
-				min = sdk.skills.FireBlast;
-				max = sdk.skills.PhoenixStrike;
-				
-				break;
-			default:
-				break;
-			}
+			let [min, max] = (() => {
+				switch (me.classid) {
+				case sdk.player.class.Amazon:
+					return [sdk.skills.MagicArrow, sdk.skills.LightningFury];
+				case sdk.player.class.Sorceress:
+					return [sdk.skills.FireBolt, sdk.skills.ColdMastery];
+				case sdk.player.class.Necromancer:
+					return [sdk.skills.AmplifyDamage, sdk.skills.Revive];
+				case sdk.player.class.Paladin:
+					return [sdk.skills.Sacrifice, sdk.skills.Salvation];
+				case sdk.player.class.Barbarian:
+					return [sdk.skills.Bash, sdk.skills.BattleCommand];
+				case sdk.player.class.Druid:
+					return [sdk.skills.Raven, sdk.skills.Hurricane];
+				case sdk.player.class.Assassin:
+					return [sdk.skills.FireBlast, sdk.skills.PhoenixStrike];
+				default:
+					return [0, 0];
+				}
+			})();
 
 			for (let i = min; i <= max; i++) {
 				if (typeof this.all[i] !== "undefined" && !this.all[i].hardpoints) {
@@ -280,13 +259,15 @@ const Skill = {
 	init: function () {
 		// reset check values
 		!Skill.skills.initialized ? Skill.skills.init() : Skill.skills.reset();
+		// reset mana values
+		Skill.manaCostList = {};
 
 		switch (me.classid) {
 		case sdk.player.class.Amazon:
 			break;
 		case sdk.player.class.Sorceress:
 			if (Config.UseColdArmor === true) {
-				Precast.precastables.coldArmor.best = (function () {
+				Precast.skills.coldArmor.best = (function () {
 					let coldArmor = [
 						{skillId: sdk.skills.ShiverArmor, level: me.getSkill(sdk.skills.ShiverArmor, sdk.skills.subindex.SoftPoints)},
 						{skillId: sdk.skills.ChillingArmor, level: me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.SoftPoints)},
@@ -294,13 +275,17 @@ const Skill = {
 					].filter(skill => !!skill.level && skill.level > 0).sort((a, b) => b.level - a.level).first();
 					return coldArmor !== undefined ? coldArmor.skillId : false;
 				})();
-				Precast.precastables.coldArmor.duration = this.getDuration(Precast.precastables.coldArmor.best);
+				Precast.skills.coldArmor.duration = this.getDuration(Precast.skills.coldArmor.best);
 			} else {
-				Precast.precastables.coldArmor.duration = this.getDuration(Config.UseColdArmor);
+				Precast.skills.coldArmor.duration = this.getDuration(Config.UseColdArmor);
 			}
 
 			break;
 		case sdk.player.class.Necromancer:
+			{
+				let bMax = me.getStat(sdk.stats.SkillBoneArmorMax);
+				bMax > 0 && (Precast.skills.boneArmor.max = bMax);
+			}
 			if (!!Config.Golem && Config.Golem !== "None") {
 				// todo: change Config.Golem to use skillid instead of 0, 1, 2, and 3
 			}
@@ -309,13 +294,13 @@ const Skill = {
 			// how to handle if someone manually equips a shield during game play, don't want to build entire item list if we don't need to
 			// maybe store gid of shield, would still require doing me.getItem(-1, 1, gid) everytime we wanted to cast but that's still less involved
 			// than getting every item we have and finding shield, for now keeping this. Checks during init if we have a shield or not
-			Precast.precastables.HolyShield.canUse = me.usingShield();
+			Precast.skills.holyShield.canUse = me.usingShield();
 
 			break;
 		case sdk.player.class.Barbarian:
-			Skill.canUse(sdk.skills.Shout) && (Precast.precastables.Shout.duration = this.getDuration(sdk.skills.Shout));
-			Skill.canUse(sdk.skills.BattleOrders) && (Precast.precastables.BattleOrders.duration = this.getDuration(sdk.skills.BattleOrders));
-			Skill.canUse(sdk.skills.BattleCommand) && (Precast.precastables.BattleCommand.duration = this.getDuration(sdk.skills.BattleCommand));
+			Skill.canUse(sdk.skills.Shout) && (Precast.skills.shout.duration = this.getDuration(sdk.skills.Shout));
+			Skill.canUse(sdk.skills.BattleOrders) && (Precast.skills.battleOrders.duration = this.getDuration(sdk.skills.BattleOrders));
+			Skill.canUse(sdk.skills.BattleCommand) && (Precast.skills.battleCommand.duration = this.getDuration(sdk.skills.BattleCommand));
 			
 			break;
 		case sdk.player.class.Druid:
@@ -1121,7 +1106,7 @@ const Misc = {
 			// don't use tk if we are right next to it
 			let useTK = (unit.distance > 5 && Skill.useTK(unit) && i < 3);
 			if (useTK) {
-				unit.distance > 13 && Attack.getIntoPosition(unit, 13, sdk.collision.Ranged);
+				unit.distance > 13 && Attack.getIntoPosition(unit, 13, sdk.collision.WallOrRanged);
 				if (!Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit)) {
 					console.debug("Failed to tk: attempt: " + i);
 					continue;
@@ -1433,136 +1418,83 @@ const Misc = {
 	getItemCode: function (unit) {
 		if (unit === undefined) return "";
 		
-		let code = "";
-		
-		switch (unit.quality) {
-		case sdk.items.quality.Set:
-			switch (unit.classid) {
-			case sdk.items.Sabre:
-				code = "inv9sbu";
-
-				break;
-			case sdk.items.ShortWarBow:
-				code = "invswbu";
-
-				break;
-			case sdk.items.Helm:
-				code = "invhlmu";
-
-				break;
-			case sdk.items.LargeShield:
-				code = "invlrgu";
-
-				break;
-			case sdk.items.LongSword:
-			case sdk.items.CrypticSword:
-				code = "invlsdu";
-
-				break;
-			case sdk.items.SmallShield:
-				code = "invsmlu";
-
-				break;
-			case sdk.items.Buckler:
-				code = "invbucu";
-
-				break;
-			case sdk.items.Cap:
-				code = "invcapu";
-
-				break;
-			case sdk.items.BroadSword:
-				code = "invbsdu";
-
-				break;
-			case sdk.items.FullHelm:
-				code = "invfhlu";
-
-				break;
-			case sdk.items.GothicShield:
-				code = "invgtsu";
-
-				break;
-			case sdk.items.AncientArmor:
-			case sdk.items.SacredArmor:
-				code = "invaaru";
-
-				break;
-			case sdk.items.KiteShield:
-				code = "invkitu";
-
-				break;
-			case sdk.items.TowerShield:
-				code = "invtowu";
-
-				break;
-			case sdk.items.FullPlateMail:
-				code = "invfulu";
-
-				break;
-			case sdk.items.MilitaryPick:
-				code = "invmpiu";
-
-				break;
-			case sdk.items.JaggedStar:
-				code = "invmstu";
-
-				break;
-			case sdk.items.ColossusBlade:
-				code = "invgsdu";
-
-				break;
-			case sdk.items.OrnatePlate:
-				code = "invxaru";
-
-				break;
-			case sdk.items.Cuirass:
-			case sdk.items.ReinforcedMace:
-			case sdk.items.Ward:
-			case sdk.items.SpiredHelm:
-				code = "inv" + unit.code + "s";
-
-				break;
-			case sdk.items.GrandCrown:
-				code = "invxrnu";
-
-				break;
-			case sdk.items.ScissorsSuwayyah:
-				code = "invskru";
-
-				break;
-			case sdk.items.GrimHelm:
-			case sdk.items.BoneVisage:
-				code = "invbhmu";
-
-				break;
-			case sdk.items.ElderStaff:
-				code = "invcstu";
-
-				break;
-			case sdk.items.RoundShield:
-				code = "invxmlu";
-
-				break;
-			case sdk.items.BoneWand:
-				code = "invbwnu";
-
-				break;
-			}
-
-			break;
-		case sdk.items.quality.Unique:
-			for (let i = 0; i < 401; i += 1) {
-				if (unit.code === getBaseStat("uniqueitems", i, 4).trim()
-					&& unit.fname.split("\n").reverse()[0].includes(getLocaleString(getBaseStat("uniqueitems", i, 2)))) {
-					code = getBaseStat("uniqueitems", i, "invfile");
-
-					break;
+		let code = (() => {
+			switch (unit.quality) {
+			case sdk.items.quality.Set:
+				switch (unit.classid) {
+				case sdk.items.Sabre:
+					return "inv9sbu";
+				case sdk.items.ShortWarBow:
+					return "invswbu";
+				case sdk.items.Helm:
+					return "invhlmu";
+				case sdk.items.LargeShield:
+					return "invlrgu";
+				case sdk.items.LongSword:
+				case sdk.items.CrypticSword:
+					return "invlsdu";
+				case sdk.items.SmallShield:
+					return "invsmlu";
+				case sdk.items.Buckler:
+					return "invbucu";
+				case sdk.items.Cap:
+					return "invcapu";
+				case sdk.items.BroadSword:
+					return "invbsdu";
+				case sdk.items.FullHelm:
+					return "invfhlu";
+				case sdk.items.GothicShield:
+					return "invgtsu";
+				case sdk.items.AncientArmor:
+				case sdk.items.SacredArmor:
+					return "invaaru";
+				case sdk.items.KiteShield:
+					return "invkitu";
+				case sdk.items.TowerShield:
+					return "invtowu";
+				case sdk.items.FullPlateMail:
+					return "invfulu";
+				case sdk.items.MilitaryPick:
+					return "invmpiu";
+				case sdk.items.JaggedStar:
+					return "invmstu";
+				case sdk.items.ColossusBlade:
+					return "invgsdu";
+				case sdk.items.OrnatePlate:
+					return "invxaru";
+				case sdk.items.Cuirass:
+				case sdk.items.ReinforcedMace:
+				case sdk.items.Ward:
+				case sdk.items.SpiredHelm:
+					return "inv" + unit.code + "s";
+				case sdk.items.GrandCrown:
+					return "invxrnu";
+				case sdk.items.ScissorsSuwayyah:
+					return "invskru";
+				case sdk.items.GrimHelm:
+				case sdk.items.BoneVisage:
+					return "invbhmu";
+				case sdk.items.ElderStaff:
+					return "invcstu";
+				case sdk.items.RoundShield:
+					return "invxmlu";
+				case sdk.items.BoneWand:
+					return "invbwnu";
+				default:
+					return "";
 				}
+			case sdk.items.quality.Unique:
+				for (let i = 0; i < 401; i += 1) {
+					if (unit.code === getBaseStat("uniqueitems", i, 4).trim()
+						&& unit.fname.split("\n").reverse()[0].includes(getLocaleString(getBaseStat("uniqueitems", i, 2)))) {
+						return getBaseStat("uniqueitems", i, "invfile");
+					}
+				}
+				return "";
+			default:
+				return "";
 			}
-
-			break;
-		}
+		})();
 
 		if (!code) {
 			// Tiara/Diadem
@@ -1739,63 +1671,32 @@ const Misc = {
 
 	// skip low items: MuleLogger
 	skipItem: function (id) {
-		switch (id) {
-		case sdk.items.HandAxe:
-		case sdk.items.Wand:
-		case sdk.items.Club:
-		case sdk.items.ShortSword:
-		case sdk.items.Javelin:
-		case sdk.items.ShortStaff:
-		case sdk.items.Katar:
-		case sdk.items.Buckler:
-		case sdk.items.StaminaPotion:
-		case sdk.items.AntidotePotion:
-		case sdk.items.RejuvenationPotion:
-		case sdk.items.FullRejuvenationPotion:
-		case sdk.items.ThawingPotion:
-		case sdk.items.TomeofTownPortal:
-		case sdk.items.TomeofIdentify:
-		case sdk.items.ScrollofIdentify:
-		case sdk.items.ScrollofTownPortal:
-		case sdk.items.Key:
-		case sdk.items.MinorHealingPotion:
-		case sdk.items.LightHealingPotion:
-		case sdk.items.HealingPotion:
-		case sdk.items.GreaterHealingPotion:
-		case sdk.items.SuperHealingPotion:
-		case sdk.items.MinorManaPotion:
-		case sdk.items.LightManaPotion:
-		case sdk.items.ManaPotion:
-		case sdk.items.GreaterManaPotion:
-		case sdk.items.SuperManaPotion:
-			return true;
-		}
-
-		return false;
+		return [
+			sdk.items.HandAxe, sdk.items.Wand, sdk.items.Club, sdk.items.ShortSword, sdk.items.Javelin, sdk.items.ShortStaff, sdk.items.Katar,
+			sdk.items.Buckler, sdk.items.StaminaPotion, sdk.items.AntidotePotion, sdk.items.RejuvenationPotion, sdk.items.FullRejuvenationPotion,
+			sdk.items.ThawingPotion, sdk.items.TomeofTownPortal, sdk.items.TomeofIdentify, sdk.items.ScrollofIdentify, sdk.items.ScrollofTownPortal,
+			sdk.items.Key, sdk.items.MinorHealingPotion, sdk.items.LightHealingPotion, sdk.items.HealingPotion, sdk.items.GreaterHealingPotion,
+			sdk.items.SuperHealingPotion, sdk.items.MinorManaPotion, sdk.items.LightManaPotion, sdk.items.ManaPotion, sdk.items.GreaterManaPotion,
+			sdk.items.SuperManaPotion
+		].includes(id);
 	},
 
 	// Change into werewolf or werebear
 	shapeShift: function (mode) {
-		let skill, state;
-
-		switch (mode.toString().toLowerCase()) {
-		case "0":
-			return false;
-		case "1":
-		case "werewolf":
-			state = sdk.states.Wearwolf;
-			skill = sdk.skills.Werewolf;
-
-			break;
-		case "2":
-		case "werebear":
-			state = sdk.states.Wearbear;
-			skill = sdk.skills.Werebear;
-
-			break;
-		default:
-			throw new Error("shapeShift: Invalid parameter");
-		}
+		let [skill, state] = (() => {
+			switch (mode.toString().toLowerCase()) {
+			case "0":
+				return [-1, -1];
+			case "1":
+			case "werewolf":
+				return [sdk.skills.Werewolf, sdk.states.Wearwolf];
+			case "2":
+			case "werebear":
+				return [sdk.skills.Werebear, sdk.states.Wearbear];
+			default:
+				throw new Error("shapeShift: Invalid parameter");
+			}
+		})();
 
 		// don't have wanted skill
 		if (!Skill.canUse(skill)) return false;
@@ -1892,8 +1793,7 @@ const Misc = {
 		let unit = getUnit(-1, name);
 
 		if (!unit) {
-			print("player not found");
-
+			console.warn("player not found");
 			return false;
 		}
 
@@ -2023,10 +1923,7 @@ const Misc = {
 		}
 
 		let lines = getDialogLines();
-
-		if (!lines) {
-			return false;
-		}
+		if (!lines) return false;
 
 		for (let i = 0; i < lines.length; i += 1) {
 			if (lines[i].selectable && lines[i].text.includes(getLocaleString(id))) {
@@ -2051,7 +1948,6 @@ const Misc = {
 		// Handle Date
 		if (obj instanceof Date) {
 			copy = new Date();
-
 			copy.setTime(obj.getTime());
 
 			return copy;
@@ -2135,7 +2031,6 @@ const Misc = {
 	checkQuest: function (id, state) {
 		Packet.questRefresh();
 		delay(500);
-
 		return me.getQuest(id, state);
 	},
 
@@ -2319,7 +2214,6 @@ const Packet = {
 				if (unit.itemcount > 0) {
 					delay(200);
 					console.info(false, "Successfully started " + mode + " at " + unit.name);
-
 					return true;
 				}
 			}
@@ -2358,6 +2252,41 @@ const Packet = {
 		return false;
 	},
 
+	buyScroll: function (unit, tome, shiftBuy) {
+		let oldGold = me.gold;
+		let itemCount = me.itemcount;
+		let npc = getInteractedNPC();
+		tome === undefined && (tome = me.findItem(
+			(unit.classid === sdk.items.ScrollofTownPortal ? sdk.items.TomeofTownPortal : sdk.items.TomeofIdentify),
+			sdk.items.mode.inStorage, sdk.storage.Inventory
+		));
+		let preCount = !!tome ? tome.getStat(sdk.stats.Quantity) : 0;
+
+		try {
+			if (!npc) throw new Error("buyItem: No NPC menu open.");
+
+			// Can we afford the item?
+			if (oldGold < unit.getItemCost(sdk.items.cost.ToBuy)) return false;
+
+			for (let i = 0; i < 3; i += 1) {
+				sendPacket(1, sdk.packets.send.NPCBuy, 4, npc.gid, 4, unit.gid, 4, shiftBuy ? 0x80000000 : 0x0, 4, 0);
+
+				let tick = getTickCount();
+
+				while (getTickCount() - tick < Math.max(2000, me.ping * 2 + 500)) {
+					if (shiftBuy && me.gold < oldGold) return true;
+					if (itemCount !== me.itemcount) return true;
+					if (tome && tome.getStat(sdk.stats.Quantity) > preCount) return true;
+					delay(10);
+				}
+			}
+		} catch (e) {
+			console.error(e);
+		}
+
+		return false;
+	},
+
 	sellItem: function (unit) {
 		// Check if it's an item we want to buy
 		if (unit.type !== sdk.unittype.Item) throw new Error("Unit.sell: Must be used on items.");
@@ -2377,10 +2306,7 @@ const Packet = {
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 2000) {
-				if (me.itemcount !== itemCount) {
-					return true;
-				}
-
+				if (me.itemcount !== itemCount) return true;
 				delay(10);
 			}
 		}
@@ -2418,7 +2344,6 @@ const Packet = {
 			while (getTickCount() - tick < 2000) {
 				if (unit.identified) {
 					delay(50);
-
 					return true;
 				}
 
@@ -2447,10 +2372,7 @@ const Packet = {
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < Math.max(500, me.ping * 2 + 200)) {
-				if (me.itemoncursor) {
-					return true;
-				}
-
+				if (me.itemoncursor) return true;
 				delay(10);
 			}
 		}
@@ -2467,10 +2389,7 @@ const Packet = {
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < Math.max(500, me.ping * 2 + 200)) {
-				if (!me.itemoncursor) {
-					return true;
-				}
-
+				if (!me.itemoncursor) return true;
 				delay(10);
 			}
 		}
@@ -2500,9 +2419,14 @@ const Packet = {
 		return false;
 	},
 
-	click: function (who) {
+	placeInBelt: function (item, xLoc) {
+		item.toCursor(true) && new PacketBuilder().byte(sdk.packets.send.ItemToBelt).dword(item.gid).dword(xLoc).send();
+		return Misc.poll(() => item.isInBelt, 500, 100);
+	},
+
+	click: function (who, toCursor = false) {
 		if (!who || !copyUnit(who).x) return false;
-		sendPacket(1, sdk.packets.send.PickupItem, 4, 0x4, 4, who.gid, 4, 0);
+		new PacketBuilder().byte(sdk.packets.send.PickupItem).dword(sdk.unittype.Item).dword(who.gid).dword(toCursor ? 1 : 0).send();
 		return true;
 	},
 

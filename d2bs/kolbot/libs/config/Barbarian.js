@@ -103,6 +103,7 @@ function LoadConfig() {
 		Config.Hephasto.ClearRiver = false; // Clear river after killing Hephasto
 		Config.Hephasto.ClearType = 0xF; // 0xF = skip normal, 0x7 = champions/bosses, 0 = all
 	Scripts.Diablo = false;
+		Config.Diablo.ClearRadius = 30; // Range cleared while following path to seals
 		Config.Diablo.WalkClear = false; // Disable teleport while clearing to protect leechers
 		Config.Diablo.Entrance = true; // Start from entrance
 		Config.Diablo.JustViz = false; // Intended for classic sorc, kills Vizier only.
@@ -193,6 +194,7 @@ function LoadConfig() {
 
 	Scripts.DiabloHelper = false; // Chaos helper, kills monsters and doesn't open seals on its own.
 		Config.DiabloHelper.Wait = 5; // minutes to wait for a runner to be in Chaos. If Config.Leader is set, it will wait only for the leader.
+		Config.DiabloHelper.ClearRadius = 30; // Range cleared while following path to seals
 		Config.DiabloHelper.Entrance = true; // Start from entrance. Set to false to start from star.
 		Config.DiabloHelper.SkipTP = false; // Don't wait for town portal and directly head to chaos. It will clear monsters around chaos entrance and wait for the runner.
 		Config.DiabloHelper.SkipIfBaal = false; // End script if there are party members in a Baal run.
@@ -543,6 +545,7 @@ function LoadConfig() {
 	// ############################ //
 	Config.FindItem = false; // Use Find Item skill on corpses after clearing.
 	Config.FindItemSwitch = false; // Switch to non-primary slot when using Find Item skills
+	Config.UseWarcries = true; // use battle orders, battle command, and shout if we have them
 
 	// ########################### //
 	/* ##### Gamble SETTINGS ##### */

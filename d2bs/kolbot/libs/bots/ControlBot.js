@@ -208,8 +208,8 @@ function ControlBot() {
 	};
 
 	this.getLeg = function () {
-		if (me.getItem(sdk.items.quest.WirtsLeg)) {
-			return me.getItem(sdk.items.quest.WirtsLeg);
+		if (me.getItem(sdk.quest.item.WirtsLeg)) {
+			return me.getItem(sdk.quest.item.WirtsLeg);
 		}
 
 		let leg, gid, wrongLeg;
@@ -273,10 +273,7 @@ function ControlBot() {
 
 		if (tpTome.length < 2) {
 			let npc = Town.initNPC("Shop", "buyTpTome");
-
-			if (!getInteractedNPC()) {
-				throw new Error("Failed to find npc");
-			}
+			if (!getInteractedNPC()) throw new Error("Failed to find npc");
 
 			let tome = npc.getItem(sdk.items.TomeofTownPortal);
 
@@ -308,34 +305,17 @@ function ControlBot() {
 
 	this.openPortal = function (nick) {
 		if (!Config.ControlBot.Cows.MakeCows) return false;
-		if (!Misc.inMyParty(nick)) {
-			say("Accept party invite, noob.");
-
-			return true;
-		}
-
-		if (Pather.getPortal(sdk.areas.MooMooFarm)) {
-			say("Cow portal already open.");
-
-			return true;
-		}
-
-		// king dead or cain not saved
-		if (me.cows) {
-			say("Can't open the portal because I killed Cow King.");
-
-			return false;
-		}
-
-		if (Config.ControlBot.Cows.GetLeg && !me.tristram && !!Config.Leader && !getParty(Config.Leader)) {
-			say("Can't get leg because I don't have Cain quest.");
-
-			return false;
-		}
-
-		if (!me.diffCompleted) {
-			say("Final quest incomplete.");
-
+		try {
+			if (!Misc.inMyParty(nick)) throw new Error("Accept party invite, noob.");
+			if (Pather.getPortal(sdk.areas.MooMooFarm)) throw new Error("Cow portal already open.");
+			// king dead or cain not saved
+			if (me.cows) throw new Error("Can't open the portal because I killed Cow King.");
+			if (Config.ControlBot.Cows.GetLeg && !me.tristram && !!Config.Leader && !getParty(Config.Leader)) {
+				throw new Error("Can't get leg because I don't have Cain quest.");
+			}
+			if (!me.diffCompleted) throw new Error("Final quest incomplete.");
+		} catch (e) {
+			say(e.message ? e.message : e);
 			return false;
 		}
 
@@ -410,43 +390,27 @@ function ControlBot() {
 			break;
 		}
 
-		let wpList;
 		let act = Misc.getPlayerAct(nick);
-
-		switch (act) {
-		case 1:
-			wpList = [
+		const wps = {
+			1: [
 				sdk.areas.ColdPlains, sdk.areas.StonyField, sdk.areas.DarkWood, sdk.areas.BlackMarsh,
 				sdk.areas.OuterCloister, sdk.areas.JailLvl1, sdk.areas.InnerCloister, sdk.areas.CatacombsLvl2
-			];
-
-			break;
-		case 2:
-			wpList = [
+			],
+			2: [
 				sdk.areas.A2SewersLvl2, sdk.areas.DryHills, sdk.areas.HallsoftheDeadLvl2, sdk.areas.FarOasis,
 				sdk.areas.LostCity, sdk.areas.PalaceCellarLvl1, sdk.areas.ArcaneSanctuary, sdk.areas.CanyonofMagic
-			];
-
-			break;
-		case 3:
-			wpList = [
+			],
+			3: [
 				sdk.areas.SpiderForest, sdk.areas.GreatMarsh, sdk.areas.FlayerJungle, sdk.areas.LowerKurast,
 				sdk.areas.KurastBazaar, sdk.areas.UpperKurast, sdk.areas.Travincal, sdk.areas.DuranceofHateLvl2
-			];
-
-			break;
-		case 4:
-			wpList = [sdk.areas.CityoftheDamned, sdk.areas.RiverofFlame];
-
-			break;
-		case 5:
-			wpList = [
+			],
+			4: [sdk.areas.CityoftheDamned, sdk.areas.RiverofFlame],
+			5: [
 				sdk.areas.FrigidHighlands, sdk.areas.ArreatPlateau, sdk.areas.CrystalizedPassage,
 				sdk.areas.GlacialTrail, sdk.areas.FrozenTundra, sdk.areas.AncientsWay, sdk.areas.WorldstoneLvl2
-			];
-
-			break;
-		}
+			]
+		};
+		let wpList = wps[act];
 
 		for (let i = 0; i < wpList.length; i++) {
 			if (this.checkHostiles()) {
@@ -455,11 +419,7 @@ function ControlBot() {
 
 			try {
 				Pather.useWaypoint(wpList[i], true);
-
-				if (Config.ControlBot.Wps.SecurePortal) {
-					Attack.securePosition(me.x, me.y, 20, 1000);
-				}
-
+				Config.ControlBot.Wps.SecurePortal && Attack.securePosition(me.x, me.y, 20, 1000);
 				Pather.makePortal();
 				say(Pather.getAreaName(me.area) + " TP up");
 
@@ -587,10 +547,7 @@ function ControlBot() {
 	Town.goToTown(1);
 	Town.move("portalspot");
 
-	let spot = {
-		x: me.x,
-		y: me.y
-	};
+	let spot = { x: me.x, y: me.y };
 
 	while (true) {
 		while (greet.length > 0) {
@@ -618,7 +575,7 @@ function ControlBot() {
 
 				break;
 			case "timeleft":
-				let tick = Config.ControlBot.GameLength * 6e4 - getTickCount() + startTime;
+				let tick = Time.minutes(Config.ControlBot.GameLength) - getTickCount() + startTime;
 				let m = Math.floor(tick / 60000);
 				let s = Math.floor((tick / 1000) % 60);
 
@@ -668,7 +625,7 @@ function ControlBot() {
 		me.act > 1 && Town.goToTown(1);
 		Config.ControlBot.Chant.AutoEnchant && this.autoChant();
 
-		if (getTickCount() - startTime >= Config.ControlBot.GameLength * 6e4) {
+		if (getTickCount() - startTime >= Time.minutes(Config.ControlBot.GameLength)) {
 			say((Config.ControlBot.EndMessage ? Config.ControlBot.EndMessage : "Bye"));
 			delay(1000);
 

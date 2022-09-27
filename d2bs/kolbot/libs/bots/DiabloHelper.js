@@ -8,6 +8,7 @@
 function DiabloHelper() {
 	this.Leader = Config.Leader;
 	Common.Diablo.waitForGlow = true;
+	Common.Diablo.clearRadius = Config.DiabloHelper.ClearRadius;
 	Town.doChores();
 	const Worker = require("../modules/Worker");
 
@@ -129,6 +130,7 @@ function DiabloHelper() {
 		}
 
 		try {
+			!Common.Diablo.diabloSpawned && (Common.Diablo.diaWaitTime += Time.minutes(1));
 			console.log("Attempting to find Diablo");
 			Common.Diablo.diabloPrep();
 		} catch (error) {

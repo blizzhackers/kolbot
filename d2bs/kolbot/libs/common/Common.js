@@ -197,10 +197,7 @@ const Common = {
 
 				if (result) {
 					Pather.moveTo(result[0], result[1], 3);
-
-					if (!Attack.clear(30)) {
-						return false;
-					}
+					if (!Attack.clear(30)) return false;
 				}
 			}
 
@@ -210,6 +207,8 @@ const Common = {
 
 	Diablo: {
 		diabloSpawned: false,
+		diaWaitTime: Time.seconds(30),
+		clearRadius: 30,
 		done: false,
 		waitForGlow: false,
 		sealOrder: [],
@@ -238,25 +237,16 @@ const Common = {
 		sort: function (a, b) {
 			if (Config.BossPriority) {
 				if ((a.isSuperUnique) && (b.isSuperUnique)) return getDistance(me, a) - getDistance(me, b);
-
 				if (a.isSuperUnique) return -1;
 				if (b.isSuperUnique) return 1;
 			}
 
 			// Entrance to Star / De Seis
-			if (me.y > 5325 || me.y < 5260) {
-				return (a.y > b.y ? -1 : 1);
-			}
-
+			if (me.y > 5325 || me.y < 5260) return (a.y > b.y ? -1 : 1);
 			// Vizier
-			if (me.x < 7765) {
-				return (a.x > b.x ? -1 : 1);
-			}
-
+			if (me.x < 7765) return (a.x > b.x ? -1 : 1);
 			// Infector
-			if (me.x > 7825) {
-				return (!checkCollision(me, a, sdk.collision.BlockWall) && a.x < b.x ? -1 : 1);
-			}
+			if (me.x > 7825) return (!checkCollision(me, a, sdk.collision.BlockWall) && a.x < b.x ? -1 : 1);
 
 			return getDistance(me, a) - getDistance(me, b);
 		},
@@ -299,7 +289,7 @@ const Common = {
 				}
 
 				Pather.moveTo(path[i], path[i + 1], 3, getDistance(me, path[i], path[i + 1]) > 50);
-				Attack.clear(30, 0, false, Common.Diablo.sort);
+				Attack.clear(this.clearRadius, 0, false, Common.Diablo.sort);
 
 				// Push cleared positions so they can be checked for strays
 				this.cleared.push([path[i], path[i + 1]]);
@@ -313,7 +303,7 @@ const Common = {
 		},
 
 		clearStrays: function () {
-			let oldPos = {x: me.x, y: me.y};
+			let oldPos = { x: me.x, y: me.y };
 			let monster = Game.getMonster();
 
 			if (monster) {
@@ -365,10 +355,10 @@ const Common = {
 		},
 
 		openSeal: function (classid) {
+			let seal;
 			let warn = Config.PublicMode && [sdk.objects.DiabloSealVizier, sdk.objects.DiabloSealSeis, sdk.objects.DiabloSealInfector].includes(classid) && Loader.scriptName() === "Diablo";
 			let usetk = (Skill.haveTK && (classid !== sdk.objects.DiabloSealSeis || this.seisLayout !== 1));
 			let seisSeal = classid === sdk.objects.DiabloSealSeis;
-			let seal;
 
 			for (let i = 0; i < 5; i++) {
 				if (!seal) {
@@ -555,7 +545,7 @@ const Common = {
 			if (me.paladin && Config.AttackSkill[1] === sdk.skills.BlessedHammer) {
 				let target = Game.getMonster(name);
 
-				if (!target) return;
+				if (!target || !target.attackable) return true;
 
 				let positions = [[6, 11], [0, 8], [8, -1], [-9, 2], [0, -11], [8, -8]];
 
@@ -569,29 +559,28 @@ const Common = {
 							Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Left);
 						}
 
-						return;
+						return true;
 					}
 				}
 			}
+			
+			return false;
 		},
 
 		preattack: function (id) {
-			let coords = [];
-
-			switch (id) {
-			case getLocaleString(sdk.locale.monsters.GrandVizierofChaos):
-				coords = Common.Diablo.vizLayout === 1 ? [7676, 5295] : [7684, 5318];
-
-				break;
-			case getLocaleString(sdk.locale.monsters.LordDeSeis):
-				coords = Common.Diablo.seisLayout === 1 ? [7778, 5216] : [7775, 5208];
-
-				break;
-			case getLocaleString(sdk.locale.monsters.InfectorofSouls):
-				coords = Common.Diablo.infLayout === 1 ? [7913, 5292] : [7915, 5280];
-
-				break;
-			}
+			let coords = (() => {
+				switch (id) {
+				case getLocaleString(sdk.locale.monsters.GrandVizierofChaos):
+					return Common.Diablo.vizLayout === 1 ? [7676, 5295] : [7684, 5318];
+				case getLocaleString(sdk.locale.monsters.LordDeSeis):
+					return Common.Diablo.seisLayout === 1 ? [7778, 5216] : [7775, 5208];
+				case getLocaleString(sdk.locale.monsters.InfectorofSouls):
+					return Common.Diablo.infLayout === 1 ? [7913, 5292] : [7915, 5280];
+				default:
+					return [];
+				}
+			})();
+			if (!coords.length) return false;
 
 			switch (me.classid) {
 			case sdk.player.class.Sorceress:
@@ -604,9 +593,7 @@ const Common = {
 
 				break;
 			case sdk.player.class.Paladin:
-				this.hammerdinPreAttack(id, 8);
-
-				break;
+				return this.hammerdinPreAttack(id, 8);
 			case sdk.player.class.Assassin:
 				if (Config.UseTraps) {
 					let trapCheck = ClassAttack.checkTraps({x: coords[0], y: coords[1]});
@@ -678,12 +665,12 @@ const Common = {
 				Pather.moveTo(7788, 5292);
 			}
 
-			let tick = getTickCount();
-
 			this.moveToStar();
 
-			while (getTickCount() - tick < 30000) {
-				if (getTickCount() - tick >= 8000) {
+			let tick = getTickCount();
+
+			while (getTickCount() - tick < this.diaWaitTime) {
+				if (getTickCount() - tick >= Time.seconds(8)) {
 					switch (me.classid) {
 					case sdk.player.class.Sorceress:
 						if ([sdk.skills.Meteor, sdk.skills.Blizzard, sdk.skills.FrozenOrb, sdk.skills.FireWall].includes(Config.AttackSkill[1])) {

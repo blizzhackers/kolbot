@@ -161,6 +161,7 @@ function LoadConfig() {
 	// Class specific config
 	Config.FindItem = false; // Use Find Item skill on corpses after clearing.
 	Config.FindItemSwitch = false; // Switch to non-primary slot when using Find Item skills
+	Config.UseWarcries = true; // use battle orders, battle command, and shout if we have them
 
 	/* AutoSkill builds character based on array defined by the user and it replaces AutoBuild's skill system.
 	 * AutoSkill will automatically spend skill points and it can also allocate any prerequisite skills as required.

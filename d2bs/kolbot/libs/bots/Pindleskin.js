@@ -6,7 +6,7 @@
 */
 
 function Pindleskin() {
-	Town.goToTown(Config.Pindleskin.UseWaypoint ? undefined : 5);
+	Town.goToTown((Config.Pindleskin.UseWaypoint ? undefined : 5));
 	Town.doChores();
 
 	if (Config.Pindleskin.UseWaypoint) {
@@ -17,14 +17,7 @@ function Pindleskin() {
 			throw new Error("Failed to move to Nihlahak's Temple");
 		}
 	} else {
-		Town.move(NPC.Anya);
-
-		if (!Pather.getPortal(sdk.areas.NihlathaksTemple) && me.getQuest(sdk.quest.id.PrisonofIce, sdk.quest.states.ReqComplete)) {
-			Town.npcInteract("Anya");
-		}
-
-		if (!Pather.usePortal(sdk.areas.NihlathaksTemple)) throw new Error("Failed to use portal.");
-
+		if (!Pather.journeyTo(sdk.areas.NihlathaksTemple)) throw new Error("Failed to use portal.");
 		Precast.doPrecast(true);
 	}
 

@@ -117,6 +117,10 @@ const Town = {
 				return true;
 			}
 
+			// if we have no belt what should qualify is to go to town at this point?
+			// we've confirmed having at least some potions in the above check
+			// if (!me.inTown && Storage.BeltSize() === 1) return false;
+
 			// should we check the actual amount in the column?
 			// For now just keeping the way it was and checking if a column is empty
 			for (let i = 0; i < 4; i += 1) {
@@ -152,15 +156,12 @@ const Town = {
 		console.info(true);
 
 		!me.inTown && this.goToTown();
-
-		if (!Misc.poll(() => me.gameReady && me.inTown, 2000, 250)) {
-			throw new Error("Failed to go to town for chores");
-		}
+		if (!Misc.poll(() => me.gameReady && me.inTown, 2000, 250)) throw new Error("Failed to go to town for chores");
 
 		let preAct = me.act;
 
 		// Burst of speed while in town
-		if (me.inTown && Skill.canUse(sdk.skills.BurstofSpeed) && !me.getState(sdk.states.BurstofSpeed)) {
+		if (Skill.canUse(sdk.skills.BurstofSpeed) && !me.getState(sdk.states.BurstofSpeed)) {
 			Skill.cast(sdk.skills.BurstofSpeed, sdk.skills.hand.Right);
 		}
 
@@ -320,16 +321,28 @@ const Town = {
 		delay(250);
 
 		let npc = this.lastInteractedNPC.get();
+		let justUseClosest = (["clearInventory", "sell"].includes(reason) && !Town.getUnids());
 
 		try {
 			if (!!npc) {
-				if ((npc.name.toLowerCase() !== this.tasks[me.act - 1][task])
+				if (!justUseClosest && ((npc.name.toLowerCase() !== this.tasks[me.act - 1][task])
 					// Jamella gamble fix
-					|| (task === "Gamble" && npc.name.toLowerCase() === NPC.Jamella)) {
+					|| (task === "Gamble" && npc.name.toLowerCase() === NPC.Jamella))) {
 					me.cancelUIFlags();
 					npc = null;
 					this.lastInteractedNPC.reset();
 				}
+			}
+
+			// we are just trying to clear our inventory, use the closest npc
+			// what if we have unid items? Should we use cain if he is closer than the npc with scrolls?
+			// for now it won't get here with unids
+			// need to also take into account what our next task is
+			if (justUseClosest) {
+				let npcs = this.tasks[me.act - 1];
+				npc = getUnits(sdk.unittype.NPC)
+					.sort((a, b) => a.distance - b.distance)
+					.find(unit => [npcs.Shop, npcs.Repair].includes(unit.name.toLowerCase()));
 			}
 
 			if (!npc) {
@@ -427,51 +440,39 @@ const Town = {
 		// Ain't got money fo' dat shyt
 		if (me.gold < 1000) return false;
 
-		let needPots = false;
-		let needBuffer = true;
-		let buffer = {
-			hp: 0,
-			mp: 0
-		};
-
 		this.clearBelt();
-		let beltSize = Storage.BeltSize();
+		const buffer = { hp: 0, mp: 0 };
+		const beltSize = Storage.BeltSize();
+		let [needPots, needBuffer, specialCheck] = [false, true, false];
 		let col = this.checkColumns(beltSize);
 
-		// HP/MP Buffer
-		if (Config.HPBuffer > 0 || Config.MPBuffer > 0) {
+		const getNeededBuffer = () => {
+			[buffer.hp, buffer.mp] = [0, 0];
 			me.getItemsEx().filter(function (p) {
 				return p.isInInventory && [sdk.items.type.HealingPotion, sdk.items.type.ManaPotion].includes(p.itemType);
 			}).forEach(function (p) {
 				switch (p.itemType) {
 				case sdk.items.type.HealingPotion:
-					buffer.hp++;
-
-					break;
+					return (buffer.hp++);
 				case sdk.items.type.ManaPotion:
-					buffer.mp++;
-
-					break;
+					return (buffer.mp++);
 				}
+				return false;
 			});
-		}
+		};
+
+		// HP/MP Buffer
+		(Config.HPBuffer > 0 || Config.MPBuffer > 0) && getNeededBuffer();
 
 		// Check if we need to buy potions based on Config.MinColumn
-		for (let i = 0; i < 4; i += 1) {
-			if (["hp", "mp"].includes(Config.BeltColumn[i]) && col[i] > (beltSize - Math.min(Config.MinColumn[i], beltSize))) {
-				needPots = true;
-			}
+		if (Config.BeltColumn.some((c, i) => ["hp", "mp"].includes(c) && col[i] > (beltSize - Math.min(Config.MinColumn[i], beltSize)))) {
+			needPots = true;
 		}
 
 		// Check if we need any potions for buffers
 		if (buffer.mp < Config.MPBuffer || buffer.hp < Config.HPBuffer) {
-			for (let i = 0; i < 4; i += 1) {
-				// We can't buy potions because they would go into belt instead
-				if (col[i] >= beltSize && (!needPots || Config.BeltColumn[i] === "rv")) {
-					needBuffer = false;
-
-					break;
-				}
+			if (Config.BeltColumn.some((c, i) => col[i] >= beltSize && (!needPots || c === "rv"))) {
+				specialCheck = true;
 			}
 		}
 
@@ -486,6 +487,25 @@ const Town = {
 
 		let npc = this.initNPC("Shop", "buyPotions");
 		if (!npc) return false;
+
+		// special check, sometimes our rejuv slot is empty but we do still need buffer. Check if we can buy something to slot there
+		if (specialCheck && Config.BeltColumn.some((c, i) => c === "rv" && col[i] >= beltSize)) {
+			let pots = [sdk.items.ThawingPotion, sdk.items.AntidotePotion, sdk.items.StaminaPotion];
+			Config.BeltColumn.forEach((c, i) => {
+				if (c === "rv" && col[i] >= beltSize && pots.length) {
+					let usePot = pots[0];
+					let pot = npc.getItem(usePot);
+					if (pot) {
+						Storage.Inventory.CanFit(pot) && Packet.buyItem(pot, false);
+						pot = me.getItemsEx(usePot, sdk.items.mode.inStorage).filter(i => i.isInInventory).first();
+						!!pot && Packet.placeInBelt(pot, i);
+						pots.shift();
+					} else {
+						needBuffer = false; // we weren't able to find any pots to buy
+					}
+				}
+			});
+		}
 
 		for (let i = 0; i < 4; i += 1) {
 			if (col[i] > 0) {
@@ -507,6 +527,9 @@ const Town = {
 
 			col = this.checkColumns(beltSize); // Re-initialize columns (needed because 1 shift-buy can fill multiple columns)
 		}
+		
+		// re-check
+		!needBuffer && (Config.HPBuffer > 0 || Config.MPBuffer > 0) && getNeededBuffer();
 
 		if (needBuffer && buffer.hp < Config.HPBuffer) {
 			for (let i = 0; i < Config.HPBuffer - buffer.hp; i += 1) {
@@ -1147,6 +1170,10 @@ const Town = {
 		}
 
 		let pot = npc.getItem(type);
+		if (!pot) {
+			console.warn("Couldn't find " + type + " from " + npc.name);
+			return false;
+		}
 		let name = (pot.name || "");
 
 		console.info(null, "Buying " + quantity + " " + name + "s");
@@ -1524,7 +1551,7 @@ const Town = {
 				}
 
 				// "You do not have enough gold for that."
-				if (dialog[lines].text.match(getLocaleString(sdk.locale.text.SellValue), "gi")) {
+				if (dialog[lines].text.match(getLocaleString(sdk.locale.dialog.youDoNotHaveEnoughGoldForThat), "gi")) {
 					return false;
 				}
 			}
@@ -1558,7 +1585,7 @@ const Town = {
 	},
 
 	needMerc: function () {
-		if (me.classic || !Config.UseMerc || me.gold < me.mercrevivecost || !me.mercrevivecost) return false;
+		if (me.classic || !Config.UseMerc || me.gold < me.mercrevivecost || me.mercrevivecost === 0) return false;
 
 		Misc.poll(() => me.gameReady, 1000, 100);
 		// me.getMerc() might return null if called right after taking a portal, that's why there's retry attempts
@@ -1800,6 +1827,10 @@ const Town = {
 					}
 
 					break;
+				case sdk.items.type.StaminaPotion:
+				case sdk.items.type.AntidotePotion:
+				case sdk.items.type.ThawingPotion:
+					clearList.push(copyUnit(item));
 				}
 			} while (item.getNext());
 
@@ -1921,7 +1952,7 @@ const Town = {
 					// prevents shift-clicking potion into wrong column
 					if (freeSpace[i] === beltSize || freeSpace.some((spot) => spot === beltSize)) {
 						let x = freeSpace[i] === beltSize ? i : (beltCapRef[i] - (freeSpace[i] * 4));
-						p.toCursor(true) && new PacketBuilder().byte(sdk.packets.send.ItemToBelt).dword(p.gid).dword(x).send();
+						Packet.placeInBelt(p, x);
 					} else {
 						clickItemAndWait(sdk.clicktypes.click.ShiftLeft, p.x, p.y, p.location);
 					}
@@ -2298,10 +2329,10 @@ const Town = {
 			try {
 				if (!Pather.makePortal(true)) {
 					console.warn("Town.goToTown: Failed to make TP");
-					if (!me.inTown && !Pather.usePortal(null, me.name)) {
-						console.warn("Town.goToTown: Failed to take TP");
-						if (!me.inTown && !Pather.usePortal(sdk.areas.townOf(me.area))) throw new Error("Town.goToTown: Failed to take TP");
-					}
+				}
+				if (!me.inTown && !Pather.usePortal(null, me.name)) {
+					console.warn("Town.goToTown: Failed to take TP");
+					if (!me.inTown && !Pather.usePortal(sdk.areas.townOf(me.area))) throw new Error("Town.goToTown: Failed to take TP");
 				}
 			} catch (e) {
 				let tpTool = Town.getTpTool();
@@ -2309,10 +2340,18 @@ const Town = {
 					Misc.errorReport(new Error("Town.goToTown: Failed to go to town and no tps available. Restart."));
 					scriptBroadcast("quit");
 				} else {
-					let p = Game.getObject("portal");
-					console.debug(p);
-					!!p && Misc.click(0, 0, p) && delay(100);
-					console.debug("inTown? " + me.inTown);
+					if (!Misc.poll(() => {
+						if (me.inTown) return true;
+						let p = Game.getObject("portal");
+						console.debug(p);
+						!!p && Misc.click(0, 0, p) && delay(100);
+						Misc.poll(() => me.idle, 1000, 100);
+						console.debug("inTown? " + me.inTown);
+						return me.inTown;
+					}, 700, 100)) {
+						Misc.errorReport(new Error("Town.goToTown: Failed to go to town. Quiting."));
+						scriptBroadcast("quit");
+					}
 				}
 			}
 		}

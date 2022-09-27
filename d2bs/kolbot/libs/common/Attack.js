@@ -9,8 +9,11 @@ const Attack = {
 	infinity: false,
 	auradin: false,
 	monsterObjects: [
+		sdk.monsters.Turret1, sdk.monsters.Turret2, sdk.monsters.Turret3, sdk.monsters.MummyGenerator,
+		sdk.monsters.GargoyleTrap, sdk.monsters.LightningSpire, sdk.monsters.FireTower,
 		sdk.monsters.BarricadeDoor1, sdk.monsters.BarricadeDoor2, sdk.monsters.BarricadeWall1, sdk.monsters.BarricadeWall2,
-		sdk.monsters.BarricadeTower, sdk.monsters.PrisonDoor
+		sdk.monsters.CatapultS, sdk.monsters.CatapultE, sdk.monsters.CatapultSiege, sdk.monsters.CatapultW,
+		sdk.monsters.BarricadeTower, sdk.monsters.PrisonDoor, sdk.monsters.DiablosBoneCage, sdk.monsters.Hut,
 	],
 	Result: {
 		FAILED: 0,
@@ -384,12 +387,10 @@ const Attack = {
 		if (typeof (range) !== "number") throw new Error("Attack.clear: range must be a number.");
 
 		let i, boss, orgx, orgy, start, skillCheck;
-		let tick = getTickCount();
-		let killedBoss = false;
-		let logged = false;
-		let retry = 0;
 		let gidAttack = [];
-		let attackCount = 0;
+		let tick = getTickCount();
+		let [killedBoss, logged] = [false, false];
+		let [retry, attackCount] = [0, 0];
 
 		if (bossId) {
 			boss = Misc.poll(function () {
@@ -510,7 +511,7 @@ const Attack = {
 					}
 
 					if (target.dead || Config.FastPick) {
-						if (boss && boss.gid === target.gid) {
+						if (boss && boss.gid === target.gid && target.dead) {
 							killedBoss = true;
 							console.log("ÿc7Cleared ÿc0:: " + (!!target.name ? target.name : bossId) + "ÿc0 - ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
 						}

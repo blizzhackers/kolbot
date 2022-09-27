@@ -204,7 +204,7 @@ function main() {
 			}
 
 			// Mode 3 - Spam entrance (still experimental)
-			if (Config.HostileAction === 3 && hostiles.length > 0 && me.area === sdk.areas.ThroneofDestruction) {
+			if (Config.HostileAction === 3 && hostiles.length > 0 && me.inArea(sdk.areas.ThroneofDestruction)) {
 				switch (me.classid) {
 				case sdk.player.class.Sorceress:
 					prevPos = {x: me.x, y: me.y};

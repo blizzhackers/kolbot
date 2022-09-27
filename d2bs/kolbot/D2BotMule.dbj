@@ -6,6 +6,10 @@
 */
 include("StarterConfig.js");
 
+/**
+ * @todo redo how muleing is handled, really dislike how it's handled here
+ */
+
 // D2BotMule specific settings - for global settings see libs/StarterConfig.js
 Starter.Config.MinGameTime = 30; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
 Starter.Config.MaxGameTime = 60; // Maximum game length in minutes, only for continuous muling
@@ -25,71 +29,16 @@ include("automule.js");
 include("mulelogger.js");
 include("torchsystem.js");
 include("NTItemParser.dbl");
-include("common/attack.js");
-include("common/storage.js");
-include("common/pickit.js");
-include("common/town.js");
-include("common/pather.js");
-include("common/misc.js");
+include("NTItemAlias.dbl");
 include("common/util.js");
-include("common/config.js");
-include("common/prototypes.js");
-include("common/collmap.js");
+includeCommonLibs();
 let Controls = require("./modules/Control");
 let Overrides = require("./modules/Override");
 
 let master, muleMode, muleFilename, muleObj, maxCharCount;
-let checkOnJoin = false;
-let clearedJunk = false;
-let continuousMule = false;
-let makeNext = false;
+let [checkOnJoin, makeNext] = [false, false];
 let status = "loading";
-let masterStatus = {
-	status: ""
-};
-
-new Overrides.Override (Starter, Starter.receiveCopyData, function (orignal, mode, msg) {
-	if (mode === 3) return;
-	// automule specific
-	// master/mule communication function
-	switch (mode) {
-	case 10: // mule request
-		let obj = JSON.parse(msg);
-
-		if (continuousMule && me.ingame) {
-			sendCopyData(null, obj.profile, 10, JSON.stringify({status: "ready"}));
-		} else {
-			if (!master) {
-				let masterInfo = AutoMule.getMaster(obj);
-
-				if (masterInfo) {
-					master = masterInfo.profile;
-					muleMode = masterInfo.mode;
-				}
-			} else {
-				if (obj.profile === master) {
-					sendCopyData(null, master, 10, JSON.stringify({status: status}));
-				} else {
-					sendCopyData(null, obj.profile, 10, JSON.stringify({status: "busy"}));
-				}
-			}
-		}
-
-		break;
-	case 11: // begin item pickup
-		status = "begin";
-
-		break;
-	case 12: // get master's status
-		masterStatus = JSON.parse(msg);
-
-		break;
-	default:
-		orignal(mode, msg);
-
-		break;
-	}
-}).apply();
+let masterStatus = { status: "" };
 
 // Mule Data object manipulates external mule datafile
 const MuleData = {
@@ -121,219 +70,304 @@ const MuleData = {
 	write: function (obj) {
 		let string = JSON.stringify(obj);
 		FileTools.writeText(muleFilename, string);
-	}
+	},
+
+	// set next account - increase account number in mule datafile
+	nextAccount: function () {
+		let obj = MuleData.read();
+
+		obj.accNum = obj.accNum + 1;
+		obj.account = muleObj.accountPrefix + obj.accNum;
+		obj.character = "";
+		obj.charNum = 0;
+		obj.fullChars = [];
+		obj.torchChars = [];
+
+		MuleData.write(obj);
+
+		return obj.account;
+	},
+
+	nextChar: function () {
+		checkOnJoin = true;
+		let charSuffix = "";
+		let charNumbers = "abcdefghijklmnopqrstuvwxyz";
+		let obj = MuleData.read();
+
+		// dirty
+		obj.charNum > 25 && (obj.charNum = 0);
+		let num = obj.accNum.toString();
+
+		for (let i = 0; i < num.length; i++) {
+			charSuffix += charNumbers[parseInt(num[i], 10)];
+		}
+
+		charSuffix += charNumbers[obj.charNum];
+		obj.charNum = obj.charNum + 1;
+		obj.character = muleObj.charPrefix + charSuffix;
+
+		MuleData.write(obj);
+
+		return obj.character;
+	},
 };
 
-function cursorCheck () {
-	let cursorItem = Game.getCursorUnit();
-
-	if (cursorItem) {
-		if (!Storage.Inventory.CanFit(cursorItem) || !Storage.Inventory.MoveTo(cursorItem)) {
-			cursorItem.drop();
-		}
-	}
+const Mule = {
+	continuousMule: false,
+	clearedJunk: false,
 	
-	return true;
-}
+	quit: function () {
+		["default.dbj", "tools/AntiIdle.js", "tools/AreaWatcher.js"].forEach(thread => {
+			let script = getScript(thread);
+			!!script && script.running && script.stop();
+			delay(100);
+		});
+		Mule.cursorCheck();
+		quit();
 
-// stash picked items
-function stashItems () {
-	let items = me.findItems(-1, sdk.items.mode.inStorage, sdk.storage.Inventory);
+		return true;
+	},
 
-	// stash large items first by sorting items by size in descending order
-	items.sort((a, b) => (b.sizex * b.sizey - a.sizex * a.sizey));
-
-	for (let i = 0; i < items.length; i++) {
-		Storage.Stash.MoveTo(items[i]);
-	}
-
-	return true;
-}
-
-// pick items from ground
-function pickItems () {
-	let waitTick = getTickCount();
-	let i, items, canFit, item;
-	let rval = "fail";
-	let list = [];
-
-	while (!me.name || !me.gameReady) {
-		if (!me.ingame) {
-			return rval;
+	gameRefresh: function () {
+		if (!this.continuousMule) return this.quit();
+		console.log("MaxGameTime Reached");
+		Mule.quit();
+						
+		while (me.ingame) {
+			delay(100);
 		}
+						
+		Starter.firstLogin = true;
+		console.log("updating runs");
+		D2Bot.updateRuns();
+		status = "ready";
+		Starter.inGame = false;
+						
+		delay(1000);
+		Controls.LobbyQuit.click(); // Quit from Lobby
+		ControlAction.timeoutDelay("Refresh game", 330 * 1000); // 5.5 minutes
+		return true;
+	},
 
-		delay(100);
-	}
+	ingameTimeout: function (time) {
+		let tick = getTickCount();
 
-	if (!clearedJunk) {
-		items = me.findItems(-1, sdk.items.mode.inStorage, sdk.storage.Inventory);
+		while (getTickCount() - tick < time) {
+			if (me.ingame && me.gameReady) return true;
 
-		if (items) {
-			for (i = 0; i < items.length; i++) {
-				// drop trash (id/tp scroll primarily)
-				if (items[i].isInInventory && Town.ignoredItemTypes.includes(items[i].itemType)
-						// don't drop ID scroll with torch/anni mules
-						&& (muleMode === 0 || items[i].classid !== sdk.items.ScrollofIdentify)) {
-					try {
-						items[i].drop();
-					} catch (dropError) {
-						print("Failed to drop an item.");
-					}
-				}
-			}
-		}
-
-		clearedJunk = true; // only do this once
-	}
-
-	while (me.gameReady) {
-		if (masterStatus.status === "done" || continuousMule || checkOnJoin) {
-			checkOnJoin && (checkOnJoin = false);
-			item = Game.getItem();
-
-			if (item) {
-				do {
-					// don't pick up trash
-					if (item.distance < 20 && item.onGroundOrDropping && Town.ignoredItemTypes.indexOf(item.itemType) === -1) {
-						list.push(copyUnit(item));
-					}
-				} while (item.getNext());
-			}
-
-			// If and only if there is nothing left are we "done"
-			if (!continuousMule && list.length === 0) {
-				rval = "done";
-
+			// game doesn't exist, might need more locs
+			if (getLocation() === 28) {
 				break;
 			}
 
-			// pick large items first by sorting items by size in descending order and move gheed's charm to the end of the list
-			list.sort(function(a, b) {
-				if (a.classid === sdk.items.GrandCharm && a.unique && !Pickit.canPick(a)) return 1;
-				if (b.classid === sdk.items.GrandCharm && b.unique && !Pickit.canPick(b)) return -1;
+			delay(100);
+		}
 
-				return (b.sizex * b.sizey - a.sizex * a.sizey);
+		return me.ingame && me.gameReady;
+	},
+
+	foreverAlone: function () {
+		let party = getParty();
+
+		if (party) {
+			do {
+				if (party.name !== me.name) return false;
+			} while (party.getNext());
+		}
+
+		return true;
+	},
+
+	checkAnniTorch: function () {
+		while (!me.gameReady) {
+			delay(500);
+		}
+
+		return me.getItemsEx()
+			.filter(i => i.isInStorage && i.unique && [sdk.items.SmallCharm, sdk.items.LargeCharm].includes(i.classid))
+			.some(i => [sdk.items.SmallCharm, sdk.items.LargeCharm].includes(i.classid));
+	},
+
+	stashItems: function () {
+		me.getItemsEx()
+			.filter(item => item.isInInventory)
+			.sort((a, b) => (b.sizex * b.sizey - a.sizex * a.sizey))
+			.forEach(item => {
+				Storage.Stash.CanFit(item) && Storage.Stash.MoveTo(item);
 			});
 
-			while (list.length > 0) {
-				item = list.shift();
-				canFit = Storage.Inventory.CanFit(item);
+		return true;
+	},
 
-				// Torch handling
-				if (muleMode > 0 && item.classid === sdk.items.LargeCharm && item.unique && !Pickit.canPick(item)) {
-					D2Bot.printToConsole("Mule already has a Torch.", sdk.colors.D2Bot.DarkGold);
+	cursorCheck: function () {
+		let cursorItem = Game.getCursorUnit();
 
-					rval = "next";
-				}
+		if (cursorItem) {
+			if (!Storage.Inventory.CanFit(cursorItem) || !Storage.Inventory.MoveTo(cursorItem)) {
+				cursorItem.drop();
+			}
+		}
+		
+		return true;
+	},
 
-				// Anni handling
-				if (muleMode > 0 && item.classid === sdk.items.SmallCharm && item.unique && !Pickit.canPick(item)) {
-					D2Bot.printToConsole("Mule already has an Anni.", sdk.colors.D2Bot.DarkGold);
+	pickItems: function () {
+		let waitTick = getTickCount();
+		let canFit, item;
+		let rval = "fail";
+		let list = [];
 
-					rval = "next";
-				}
+		while (!me.name || !me.gameReady) {
+			if (!me.ingame) return rval;
+			delay(100);
+		}
 
-				// Gheed's Fortune handling
-				if (item.classid === sdk.items.GrandCharm && item.unique && !Pickit.canPick(item)) {
-					D2Bot.printToConsole("Mule already has Gheed's.", sdk.colors.D2Bot.DarkGold);
-
-					rval = "next";
-				}
-
-				if (!canFit) {
-					stashItems();
-
-					canFit = Storage.Inventory.CanFit(item);
-				}
-
-				if (canFit) {
-					Pickit.pickItem(item);
-
-					if (muleMode > 0 && continuousMule && item.unique
-						&& ([sdk.items.SmallCharm, sdk.items.LargeCharm, sdk.items.GrandCharm].includes(item.classid))) {
-						rval = "next";
+		if (!Mule.clearedJunk) {
+			me.getItemsEx()
+				.filter(item => {
+					item.isInInventory && Town.ignoredItemTypes.includes(item.itemType) && (muleMode === 0 || item.classid !== sdk.items.ScrollofIdentify);
+				})
+				.forEach(item => {
+					try {
+						item.drop();
+					} catch (e) {
+						console.warn("Failed to drop an item.");
 					}
-				} else {
-					rval = "next";
-				}
-			}
+				});
+			Mule.clearedJunk = true; // only do this once
+		}
 
-			if (rval === "next" || continuousMule) {
-				break;
-			}
-		} else {
-			if (!continuousMule) {
-				sendCopyData(null, master, 10, JSON.stringify({status: "report"}));
-			} else {
-				if (getTickCount() - waitTick > 10 * 60 * 1000) {
+		while (me.gameReady) {
+			if (masterStatus.status === "done" || Mule.continuousMule || checkOnJoin) {
+				checkOnJoin && (checkOnJoin = false);
+				item = Game.getItem();
+
+				if (item) {
+					do {
+					// don't pick up trash
+						if (item.distance < 20 && item.onGroundOrDropping && Town.ignoredItemTypes.indexOf(item.itemType) === -1) {
+							list.push(copyUnit(item));
+						}
+					} while (item.getNext());
+				}
+
+				// If and only if there is nothing left are we "done"
+				if (!Mule.continuousMule && list.length === 0) {
+					rval = "done";
+
 					break;
 				}
+
+				// pick large items first by sorting items by size in descending order and move gheed's charm to the end of the list
+				list.sort(function(a, b) {
+					if (a.classid === sdk.items.GrandCharm && a.unique && !Pickit.canPick(a)) return 1;
+					if (b.classid === sdk.items.GrandCharm && b.unique && !Pickit.canPick(b)) return -1;
+
+					return (b.sizex * b.sizey - a.sizex * a.sizey);
+				});
+
+				while (list.length > 0) {
+					item = list.shift();
+					canFit = Storage.Inventory.CanFit(item);
+
+					// Torch handling
+					if (muleMode > 0 && item.classid === sdk.items.LargeCharm && item.unique && !Pickit.canPick(item)) {
+						D2Bot.printToConsole("Mule already has a Torch.", sdk.colors.D2Bot.DarkGold);
+
+						rval = "next";
+					}
+
+					// Anni handling
+					if (muleMode > 0 && item.classid === sdk.items.SmallCharm && item.unique && !Pickit.canPick(item)) {
+						D2Bot.printToConsole("Mule already has an Anni.", sdk.colors.D2Bot.DarkGold);
+
+						rval = "next";
+					}
+
+					// Gheed's Fortune handling
+					if (item.classid === sdk.items.GrandCharm && item.unique && !Pickit.canPick(item)) {
+						D2Bot.printToConsole("Mule already has Gheed's.", sdk.colors.D2Bot.DarkGold);
+
+						rval = "next";
+					}
+
+					if (!canFit && Mule.stashItems()) {
+						canFit = Storage.Inventory.CanFit(item);
+					}
+
+					if (canFit) {
+						Pickit.pickItem(item);
+
+						if (muleMode > 0 && Mule.continuousMule && item.unique
+						&& ([sdk.items.SmallCharm, sdk.items.LargeCharm, sdk.items.GrandCharm].includes(item.classid))) {
+							rval = "next";
+						}
+					} else {
+						rval = "next";
+					}
+				}
+
+				if (rval === "next" || Mule.continuousMule) {
+					break;
+				}
+			} else {
+				if (!Mule.continuousMule) {
+					sendCopyData(null, master, 10, JSON.stringify({ status: "report" }));
+				} else {
+					if (getTickCount() - waitTick > Time.minutes(10)) {
+						break;
+					}
+				}
+			}
+
+			delay(500);
+		}
+
+		return rval;
+	},
+};
+
+new Overrides.Override (Starter, Starter.receiveCopyData, function (orignal, mode, msg) {
+	if (mode === 3) return;
+	// master/mule communication function
+	switch (mode) {
+	case 10: // mule request
+		let obj = JSON.parse(msg);
+
+		if (Mule.continuousMule && me.ingame) {
+			sendCopyData(null, obj.profile, 10, JSON.stringify({ status: "ready" }));
+		} else {
+			if (!master) {
+				let masterInfo = AutoMule.getMaster(obj);
+
+				if (masterInfo) {
+					master = masterInfo.profile;
+					muleMode = masterInfo.mode;
+				}
+			} else {
+				if (obj.profile === master) {
+					sendCopyData(null, master, 10, JSON.stringify({ status: status }));
+				} else {
+					sendCopyData(null, obj.profile, 10, JSON.stringify({ status: "busy" }));
+				}
 			}
 		}
 
-		delay(500);
+		break;
+	case 11: // begin item pickup
+		status = "begin";
+
+		break;
+	case 12: // get master's status
+		masterStatus = JSON.parse(msg);
+
+		break;
+	default:
+		orignal(mode, msg);
+
+		break;
 	}
-
-	return rval;
-}
-
-// set next account - increase account number in mule datafile
-function nextAccount () {
-	let obj = MuleData.read();
-
-	obj.accNum = obj.accNum + 1;
-	obj.account = muleObj.accountPrefix + obj.accNum;
-	obj.character = "";
-	obj.charNum = 0;
-	obj.fullChars = [];
-	obj.torchChars = [];
-
-	MuleData.write(obj);
-
-	return obj.account;
-}
-
-// set next character - increase character number in mule datafile
-function nextChar () {
-	let charSuffix = "";
-	let charNumbers = "abcdefghijklmnopqrstuvwxyz";
-	let obj = MuleData.read();
-
-	// dirty
-	obj.charNum > 25 && (obj.charNum = 0);
-	let num = obj.accNum.toString();
-
-	for (let i = 0; i < num.length; i++) {
-		charSuffix += charNumbers[parseInt(num[i], 10)];
-	}
-
-	charSuffix += charNumbers[obj.charNum];
-	obj.charNum = obj.charNum + 1;
-	obj.character = muleObj.charPrefix + charSuffix;
-
-	MuleData.write(obj);
-
-	return obj.character;
-}
-
-function ingameTimeout (time) {
-	let tick = getTickCount();
-
-	while (getTickCount() - tick < time) {
-		if (me.ingame && me.gameReady) {
-			return true;
-		}
-
-		// game doesn't exist, might need more locs
-		if (getLocation() === 28) {
-			break;
-		}
-
-		delay(100);
-	}
-
-	return me.ingame && me.gameReady;
-}
+}).apply();
 
 new Overrides.Override (Starter, Starter.updateCount, function () {
 	D2Bot.updateCount();
@@ -352,29 +386,6 @@ new Overrides.Override (Starter, Starter.updateCount, function () {
 	delay(1000);
 	Controls.CharSelectExit.click();
 }).apply();
-
-function checkAnniTorch () {
-	while (!me.gameReady) {
-		delay(500);
-	}
-
-	return (me.findItem(sdk.items.SmallCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique)
-		|| me.findItem(sdk.items.LargeCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique));
-}
-
-function foreverAlone () {
-	let party = getParty();
-
-	if (party) {
-		do {
-			if (party.name !== me.name) {
-				return false;
-			}
-		} while (party.getNext());
-	}
-
-	return true;
-}
 
 function locationAction (location) {
 	let i, obj, info, string, text;
@@ -424,7 +435,7 @@ function locationAction (location) {
 		}
 
 		createGame(muleObj.muleGameName[0], muleObj.muleGameName[1]);
-		ingameTimeout(5000);
+		Mule.ingameTimeout(5000);
 
 		status = "pending";
 
@@ -442,7 +453,7 @@ function locationAction (location) {
 			D2Bot.updateRuns();
 		}
 
-		if (!continuousMule) {
+		if (!Mule.continuousMule) {
 			D2Bot.requestGame(master);
 			delay(100);
 		}
@@ -457,7 +468,7 @@ function locationAction (location) {
 
 		!Starter.firstLogin && (status = "pending");
 
-		ingameTimeout(5000);
+		Mule.ingameTimeout(5000);
 		print("Ingame timeout done.");
 
 		// could not join game
@@ -474,7 +485,7 @@ function locationAction (location) {
 		obj = MuleData.read();
 
 		if (!obj.account || obj.account.indexOf(muleObj.accountPrefix) < 0) {
-			nextAccount();
+			MuleData.nextAccount();
 			obj = MuleData.read();
 		}
 
@@ -584,7 +595,7 @@ function locationAction (location) {
 		if (makeNext) {
 			if (obj.fullChars.length >= maxCharCount || (muleMode > 0 && obj.torchChars.length >= maxCharCount)) {
 				Controls.CharSelectExit.click();
-				nextAccount();
+				MuleData.nextAccount();
 
 				break;
 			}
@@ -593,7 +604,7 @@ function locationAction (location) {
 		}
 
 		if (!obj.character || obj.character.indexOf(muleObj.charPrefix) < 0) {
-			nextChar();
+			MuleData.nextChar();
 
 			obj = MuleData.read();
 		}
@@ -608,7 +619,7 @@ function locationAction (location) {
 		};
 
 		if (muleMode > 0 && obj.torchChars.includes(info.charName)) {
-			nextChar();
+			MuleData.nextChar();
 
 			break;
 		}
@@ -619,14 +630,14 @@ function locationAction (location) {
 			// premade account that's already full
 			if (ControlAction.getCharacters().length >= maxCharCount) {
 				Controls.CharSelectExit.click();
-				nextAccount();
+				MuleData.nextAccount();
 
 				break;
 			}
 
 			if (!ControlAction.makeCharacter(info)) {
 				// TODO: check if acc is full and cancel location 15 and 29 if true
-				nextChar();
+				MuleData.nextChar();
 
 				break;
 			}
@@ -744,9 +755,9 @@ function main () {
 	D2Bot.updateRuns(); // we need the mule to swap keys somehow after all
 	delay(1000);
 
-	continuousMule = AutoMule.isContinousMule();
+	Mule.continuousMule = AutoMule.isContinousMule();
 
-	if (continuousMule) {
+	if (Mule.continuousMule) {
 		muleMode = AutoMule.getMuleMode();
 		muleObj = AutoMule.getMuleObject(muleMode, "", true);
 		muleFilename = AutoMule.getMuleFilename(muleMode, "", true);
@@ -765,7 +776,7 @@ function main () {
 
 	print("Mule filename: " + muleFilename);
 
-	let obj, tick, idleTick, statusString = "";
+	let obj, tick, statusString = "";
 
 	try {
 		// ugly solution to uglier problem - pickItem area update
@@ -777,8 +788,8 @@ function main () {
 		obj = MuleData.read();
 		obj.account && obj.account.indexOf(muleObj.accountPrefix) < 0 && MuleData.create();
 	} catch (e) {
-		print("Caught exception creating data files.");
-		print(e);
+		console.warn("Caught exception creating data files.");
+		console.error(e);
 		D2Bot.printToConsole("DataFileException: " + e.message + " (" + e.fileName.substring(e.fileName.lastIndexOf("\\") + 1, e.fileName.length) + " #" + e.lineNumber + ")");
 	}
 
@@ -798,27 +809,24 @@ function main () {
 						delay(200);
 					}
 
-					if (!me.ingame || !me.gameReady || !me.inTown) {
-						continue;
-					}
-
 					Town.goToTown(1);
 					Town.move("stash");
+
+					// Move away from stash so we don't block muler
+					let coord = CollMap.getRandCoordinate(me.x, -6, 6, me.y, -6, 6);
+					!!coord && Attack.validSpot(coord.x, coord.y) && Pather.moveTo(coord.x, coord.y);
+					
 					Storage.Init();
 					checkOnJoin && (status = "begin");
-					idleTick = getTickCount() + rand(1200, 1500) * 1000;
 					Starter.inGame = true;
-
-					if (continuousMule && !muleObj.onlyLogWhenFull) {
-						MuleLogger.logChar();
-					}
+					Mule.continuousMule && !muleObj.onlyLogWhenFull && MuleLogger.logChar();
 				}
 
-				if (!continuousMule) {
-					print("Waiting for muler");
+				if (!Mule.continuousMule) {
+					console.log("Waiting for muler");
 					tick = getTickCount();
 
-					while (getTickCount() - tick < 60000) {
+					while (getTickCount() - tick < Time.minutes(1)) {
 						if (status === "begin") {
 							break;
 						}
@@ -830,30 +838,27 @@ function main () {
 						D2Bot.printToConsole("Nobody joined - stopping.", sdk.colors.D2Bot.Red);
 						D2Bot.stop(me.profile, true);
 					}
+
+					me.overhead("begin");
 				}
 
-				!continuousMule && me.overhead("begin");
-
-				if (status === "begin" && !checkOnJoin && foreverAlone()) {
-					status = "ready";
-					print("Error somewhere, no one is here but I was set to pick items");
-				}
+				D2Bot.updateStatus(statusString + Starter.timer(me.gamestarttime));
 
 				if (status === "begin") {
-					switch (pickItems()) {
+					switch (Mule.pickItems()) {
 					// done picking, tell the master to leave game and kill mule profile
 					case "done":
 						!muleObj.onlyLogWhenFull && MuleLogger.logChar();
 
 						obj = MuleData.read();
 
-						if (checkAnniTorch() && obj.torchChars.indexOf(me.name) === -1) {
+						if (Mule.checkAnniTorch() && obj.torchChars.indexOf(me.name) === -1) {
 							obj.torchChars.push(me.name);
 						}
 
 						MuleData.write(obj);
 						D2Bot.printToConsole("Done muling.", sdk.colors.D2Bot.DarkGold);
-						sendCopyData(null, master, 10, JSON.stringify({status: "quit"}));
+						sendCopyData(null, master, 10, JSON.stringify({ status: "quit" }));
 						D2Bot.stop(me.profile, true);
 
 						return;
@@ -862,17 +867,16 @@ function main () {
 						MuleLogger.logChar();
 						delay(500);
 
-						makeNext = true;
-						checkOnJoin = true;
+						[makeNext, checkOnJoin] = [true, true];
 						obj = MuleData.read();
 
-						if (checkAnniTorch() && obj.torchChars.indexOf(me.name) === -1) {
+						if (Mule.checkAnniTorch() && obj.torchChars.indexOf(me.name) === -1) {
 							obj.torchChars.push(me.name);
 						}
 
 						obj.fullChars.push(me.name);
 						MuleData.write(obj);
-						nextChar();
+						MuleData.nextChar();
 						D2Bot.printToConsole("Mule full, getting next character.", sdk.colors.D2Bot.DarkGold);
 
 						if (Starter.Config.MinGameTime && getTickCount() - tick < Starter.Config.MinGameTime * 1000) {
@@ -882,8 +886,7 @@ function main () {
 							}
 						}
 
-						cursorCheck();
-						quit();
+						Mule.quit();
 
 						// TODO: see whether a for loop is better
 						while (me.ingame) {
@@ -897,38 +900,11 @@ function main () {
 					}
 				}
 
-				if (continuousMule) {
-					if (Starter.Config.MaxGameTime > 0 && getTickCount() - me.gamestarttime > Starter.Config.MaxGameTime * 60 * 1000 && foreverAlone()) {
-						print("MaxGameTime Reached");
-						cursorCheck();
-						quit();
-						
-						while (me.ingame) {
-							delay(100);
-						}
-						
-						Starter.firstLogin = true;
-						print("updating runs");
-						D2Bot.updateRuns();
-						status = "ready";
-						Starter.inGame = false;
-						
-						delay(1000);
-						Controls.LobbyQuit.click(); // Quit from Lobby
-						ControlAction.timeoutDelay("Refresh game", 330 * 1000); // 5.5 minutes						
-						
-						continue;
+				if (Mule.continuousMule && Starter.Config.MaxGameTime > 0) {
+					if (getTickCount() - me.gamestarttime > Time.minutes(Starter.Config.MaxGameTime) && Mule.foreverAlone()) {
+						Mule.gameRefresh();
 					}
 				}
-
-				// anti-idle
-				if (getTickCount() - idleTick > 0) {
-					Packet.questRefresh();
-					idleTick += rand(1200, 1500) * 1000;
-					print("Sent anti-idle packet, next refresh in: (" + Time.format(idleTick - getTickCount()) + ")");
-				}
-
-				D2Bot.updateStatus(statusString + Starter.timer(me.gamestarttime));
 			}
 
 			if (!me.ingame) {
@@ -936,8 +912,8 @@ function main () {
 				locationAction(getLocation());
 			}
 		} catch (e2) {
-			print("Caught an exception in the main loop.");
-			print(e2);
+			console.warn("Caught an exception in the main loop.");
+			console.error(e2);
 			D2Bot.printToConsole("MainLoopException: " + e2.message + " (" + e2.fileName.substring(e2.fileName.lastIndexOf("\\") + 1, e2.fileName.length) + " #" + e2.lineNumber + ")");
 		}
 

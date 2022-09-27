@@ -88,6 +88,7 @@ let Config = {
 
 		try {
 			LoadConfig.call();
+			Config.Loaded = true;
 		} catch (e2) {
 			if (notify) {
 				print("ÿc8Error in " + e2.fileName.substring(e2.fileName.lastIndexOf("\\") + 1, e2.fileName.length) + "(line " + e2.lineNumber + "): " + e2.message);
@@ -113,6 +114,7 @@ let Config = {
 	},
 
 	// dev
+	Loaded: false,
 	DebugMode: false,
 
 	// Time
@@ -291,6 +293,8 @@ let Config = {
 	// GameData
 	ChampionBias: 60,
 
+	UseCta: true,
+
 	// Attack specific
 	Dodge: false,
 	DodgeRange: 15,
@@ -340,6 +344,7 @@ let Config = {
 	// Barbarian specific
 	FindItem: false,
 	FindItemSwitch: false,
+	UseWarcries: true,
 
 	// Druid specific
 	Wereform: 0,
@@ -362,6 +367,10 @@ let Config = {
 
 	// Custom Attack
 	CustomClassAttack: "", // If set it loads common/Attack/[CustomClassAttack].js
+
+	MapMode: {
+		UseOwnItemFilter: false,
+	},
 
 	// Script specific
 	MFLeader: false,
@@ -471,6 +480,7 @@ let Config = {
 		EntranceTP: "Entrance TP up",
 		StarTP: "Star TP up",
 		DiabloMsg: "Diablo",
+		ClearRadius: 30,
 		SealOrder: ["vizier", "seis", "infector"]
 	},
 	DiabloHelper: {
@@ -480,6 +490,7 @@ let Config = {
 		SkipTP: false,
 		OpenSeals: false,
 		SafePrecast: true,
+		ClearRadius: 30,
 		SealOrder: ["vizier", "seis", "infector"],
 		RecheckSeals: false
 	},

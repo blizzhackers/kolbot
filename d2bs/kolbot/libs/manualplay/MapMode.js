@@ -22,6 +22,7 @@ const MapMode = {
 	},
 
 	generalSettings: function () {
+		Config.MapMode.UseOwnItemFilter = false; // set to true if you want to start with your own nip files as the loot filter vs starting with default.
 		// General
 		Config.WaypointMenu = true;
 		Config.MiniShopBot = false; // Scan items in NPC shops.

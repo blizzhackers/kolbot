@@ -11,6 +11,7 @@
 
 function Diablo() {
 	Pather._teleport = Pather.teleport;
+	Common.Diablo.clearRadius = Config.Diablo.ClearRadius;
 
 	// START
 	Town.doChores();

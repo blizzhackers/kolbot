@@ -107,6 +107,10 @@ function main() {
 	Pickit.init(true);
 	Hooks.init();
 
+	if (Config.MapMode.UseOwnItemFilter) {
+		ItemHooks.pickitEnabled = true;
+	}
+
 	const Worker = require("../../modules/Worker");
 
 	Worker.runInBackground.unitInfo = function () {
@@ -205,6 +209,11 @@ function main() {
 		case "hide":
 			hideConsole();
 			HelpMenu.hideMenu();
+			TextHooks.displayTitle = false;
+			{
+				let tHook = TextHooks.getHook("title", TextHooks.hooks);
+				!!tHook && tHook.hook.remove();
+			}
 
 			break;
 		case "make":
