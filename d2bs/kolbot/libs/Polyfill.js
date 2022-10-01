@@ -520,6 +520,18 @@ String.prototype.repeat = function(count) {
 	return rpt;
 };
 
+if (!Object.values) {
+	Object.values = function (source) {
+		return Object.keys(source).map(function (k) { return source[k]; });
+	};
+}
+
+if (!Object.entries) {
+	Object.entries = function (source) {
+		return Object.keys(source).map(function (k) { return [k, source[k]]; });
+	};
+}
+
 (function (global, print) {
 	global.console = global.console || (function () {
 		const console = {};
