@@ -70,7 +70,7 @@ function ControlBot() {
 
 		let unit = Game.getPlayer(nick);
 
-		if (unit.distance > 35) {
+		if (unit && unit.distance > 35) {
 			say("Get closer.");
 
 			return false;
@@ -82,7 +82,7 @@ function ControlBot() {
 			// wait until party area is readable?
 			if (partyUnit.inTown) {
 				say("Wait for me at waypoint.");
-				Town.goToTown(sdk.areas.townOf(partyUnit.area));
+				Town.goToTown(sdk.areas.actOf(partyUnit.area));
 
 				unit = Game.getPlayer(nick);
 			} else {
