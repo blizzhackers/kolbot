@@ -125,7 +125,7 @@ function Cows() {
 		typeof e === "object" && e.message && e.message !== "NOT PORTAL MAKER" && console.error(e);
 
 		if (Misc.getPlayerCount() > 1) {
-			!me.inTown && Town.goToTown(1);
+			Town.goToTown(1);
 			Town.move("stash");
 			console.log("ÿc9(Cows) :: ÿc0Waiting 1 minute to see if anyone else opens the cow portal");
 
