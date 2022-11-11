@@ -155,9 +155,9 @@ function OrgTorch () {
 
 			Pather.moveTo(7811, 5872);
 				
-			if (fadeItem.have && fadeItem.item.isOnSwap && me.weaponswitch !== 1) {
+			if (fadeItem.have && fadeItem.item.isOnSwap && me.weaponswitch !== sdk.player.slot.Secondary) {
 				mainSlot = me.weaponswitch;
-				me.switchWeapons(1);
+				me.switchWeapons(sdk.player.slot.Secondary);
 			}
 
 			Skill.canUse(sdk.skills.Salvation) && Skill.setSkill(sdk.skills.Salvation, sdk.skills.hand.Right);

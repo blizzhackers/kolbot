@@ -922,7 +922,7 @@ const Town = {
 
 		CursorLoop:
 		for (let i = 0; i < 3; i += 1) {
-			clickItem(sdk.clicktypes.click.Right, tome);
+			clickItem(sdk.clicktypes.click.item.Right, tome);
 
 			let tick = getTickCount();
 
@@ -941,7 +941,7 @@ const Town = {
 
 		for (let i = 0; i < 3; i += 1) {
 			if (getCursorType() === sdk.cursortype.Identify) {
-				clickItem(sdk.clicktypes.click.Left, unit);
+				clickItem(sdk.clicktypes.click.item.Left, unit);
 			}
 
 			let tick = getTickCount();
@@ -1369,7 +1369,7 @@ const Town = {
 
 				if (me.itemoncursor) {
 					for (let i = 0; i < 3; i += 1) {
-						clickItem(sdk.clicktypes.click.Left, bodyLoc);
+						clickItem(sdk.clicktypes.click.item.Left, bodyLoc);
 						delay(me.ping * 2 + 500);
 
 						if (cubeItems[0].bodylocation === bodyLoc) {
@@ -1787,14 +1787,14 @@ const Town = {
 			shard.toCursor();
 
 			while (me.itemoncursor) {
-				clickItem(sdk.clicktypes.click.Left, sdk.body.RightArm);
+				clickItem(sdk.clicktypes.click.item.Left, sdk.body.RightArm);
 				delay(500);
 			}
 		} else if (!check.left) {
 			shard.toCursor();
 
 			while (me.itemoncursor) {
-				clickItem(sdk.clicktypes.click.Left, sdk.body.LeftArm);
+				clickItem(sdk.clicktypes.click.item.Left, sdk.body.LeftArm);
 				delay(500);
 			}
 		}
@@ -1859,7 +1859,7 @@ const Town = {
 				if (tpTome && tpTome.getStat(sdk.stats.Quantity) < 20) {
 					currQuantity = tpTome.getStat(sdk.stats.Quantity);
 					if (scrolls[i].toCursor()) {
-						clickItemAndWait(sdk.clicktypes.click.Left, tpTome.x, tpTome.y, tpTome.location);
+						clickItemAndWait(sdk.clicktypes.click.item.Left, tpTome.x, tpTome.y, tpTome.location);
 
 						if (tpTome.getStat(sdk.stats.Quantity) > currQuantity) {
 							console.info(null, "Placed scroll in tp tome");
@@ -1874,7 +1874,7 @@ const Town = {
 				if (idTome && idTome.getStat(sdk.stats.Quantity) < 20) {
 					currQuantity = idTome.getStat(sdk.stats.Quantity);
 					if (scrolls[i].toCursor()) {
-						clickItemAndWait(sdk.clicktypes.click.Left, idTome.x, idTome.y, idTome.location);
+						clickItemAndWait(sdk.clicktypes.click.item.Left, idTome.x, idTome.y, idTome.location);
 
 						if (idTome.getStat(sdk.stats.Quantity) > currQuantity) {
 							console.info(null, "Placed scroll in id tome");
@@ -1954,7 +1954,7 @@ const Town = {
 						let x = freeSpace[i] === beltSize ? i : (beltCapRef[i] - (freeSpace[i] * 4));
 						Packet.placeInBelt(p, x);
 					} else {
-						clickItemAndWait(sdk.clicktypes.click.ShiftLeft, p.x, p.y, p.location);
+						clickItemAndWait(sdk.clicktypes.click.item.ShiftLeft, p.x, p.y, p.location);
 					}
 					Misc.poll(() => !me.itemoncursor, 300, 30);
 					moved = Town.checkColumns(beltSize)[i] === freeSpace[i] - 1;

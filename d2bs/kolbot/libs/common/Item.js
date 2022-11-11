@@ -30,7 +30,7 @@ const Item = {
 
 		for (let i = 0; i < 3; i += 1) {
 			if (item.toCursor()) {
-				clickItemAndWait(sdk.clicktypes.click.Left, bodyLoc);
+				clickItemAndWait(sdk.clicktypes.click.item.Left, bodyLoc);
 
 				if (item.bodylocation === bodyLoc) {
 					if (getCursorType() === 3) {

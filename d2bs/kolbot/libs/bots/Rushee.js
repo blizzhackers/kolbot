@@ -79,7 +79,7 @@ function Rushee() {
 	this.useScrollOfRes = function () {
 		let scroll = me.scrollofresistance;
 		if (scroll) {
-			clickItem(sdk.clicktypes.click.Right, scroll);
+			clickItem(sdk.clicktypes.click.item.Right, scroll);
 			print("Using scroll of resistance");
 		}
 	};
@@ -396,7 +396,7 @@ function Rushee() {
 
 							if (target) {
 								print("Using book of skill");
-								clickItem(sdk.clicktypes.click.Right, target);
+								clickItem(sdk.clicktypes.click.item.Right, target);
 
 								break;
 							}

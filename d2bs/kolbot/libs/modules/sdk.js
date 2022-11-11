@@ -62,11 +62,21 @@ item: {
 
 		clicktypes: {
 			click: {
-				Left: 0,
-				Right: 1,
-				ShiftLeft: 2, // For belt
-				MercFromBelt: 3, // For belt
-				Mercenary: 4 // Give to merc
+				item: {
+					Left: 0,
+					Right: 1,
+					ShiftLeft: 2, // For belt
+					MercFromBelt: 3, // For belt
+					Mercenary: 4 // Give to merc
+				},
+				map: {
+					LeftDown: 0,
+					LeftHold: 1,
+					LeftUp: 2,
+					RightDown: 3,
+					RightHold: 4,
+					RightUp: 5,
+				},
 			},
 			shift: {
 				NoShift: 0,

@@ -224,9 +224,7 @@ const Mule = {
 
 		if (!Mule.clearedJunk) {
 			me.getItemsEx()
-				.filter(item => {
-					item.isInInventory && Town.ignoredItemTypes.includes(item.itemType) && (muleMode === 0 || item.classid !== sdk.items.ScrollofIdentify);
-				})
+				.filter(item => item.isInInventory && Town.ignoredItemTypes.includes(item.itemType) && (muleMode === 0 || item.classid !== sdk.items.ScrollofIdentify))
 				.forEach(item => {
 					try {
 						item.drop();
