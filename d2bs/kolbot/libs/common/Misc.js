@@ -693,31 +693,19 @@ const Skill = {
 				break;
 			}
 		} else {
-			let clickType, shift;
-
-			// todo - get a better idea of clickType in reference to clickMap
-			switch (hand) {
-			case sdk.skills.hand.Right: // Right hand + No Shift
-				clickType = 3;
-				shift = sdk.clicktypes.shift.NoShift;
-
-				break;
-			case sdk.skills.hand.Left: // Left hand + Shift
-				clickType = 0;
-				shift = sdk.clicktypes.shift.Shift;
-
-				break;
-			case sdk.skills.hand.LeftNoShift: // Left hand + No Shift
-				clickType = 0;
-				shift = sdk.clicktypes.shift.NoShift;
-
-				break;
-			case sdk.skills.hand.RightShift: // Right hand + Shift
-				clickType = 3;
-				shift = sdk.clicktypes.shift.Shift;
-
-				break;
-			}
+			let [clickType, shift] = (() => {
+				switch (hand) {
+				case sdk.skills.hand.Left: // Left hand + Shift
+					return [sdk.clicktypes.click.map.LeftDown, sdk.clicktypes.shift.Shift];
+				case sdk.skills.hand.LeftNoShift: // Left hand + No Shift
+					return [sdk.clicktypes.click.map.LeftDown, sdk.clicktypes.shift.NoShift];
+				case sdk.skills.hand.RightShift: // Right hand + Shift
+					return [sdk.clicktypes.click.map.RightDown, sdk.clicktypes.shift.Shift];
+				case sdk.skills.hand.Right: // Right hand + No Shift
+				default:
+					return [sdk.clicktypes.click.map.RightDown, sdk.clicktypes.shift.NoShift];
+				}
+			})();
 
 			MainLoop:
 			for (let n = 0; n < 3; n += 1) {

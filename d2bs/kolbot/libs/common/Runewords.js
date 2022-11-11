@@ -284,7 +284,7 @@ const Runewords = {
 		if (!rune.toCursor()) return false;
 
 		for (let i = 0; i < 3; i += 1) {
-			clickItem(sdk.clicktypes.click.Left, base.x, base.y, base.location);
+			clickItem(sdk.clicktypes.click.item.Left, base.x, base.y, base.location);
 
 			let tick = getTickCount();
 

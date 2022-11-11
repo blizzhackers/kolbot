@@ -202,7 +202,7 @@ let Container = function (name, width, height, location) {
 						sendPacket(1, sdk.packets.send.ItemToBelt, 4, cItem.gid, 4, nPos.y);
 					}
 				} else {
-					clickItemAndWait(sdk.clicktypes.click.Left, nPos.y, nPos.x, this.location);
+					clickItemAndWait(sdk.clicktypes.click.item.Left, nPos.y, nPos.x, this.location);
 				}
 
 				nDelay = getTickCount();
