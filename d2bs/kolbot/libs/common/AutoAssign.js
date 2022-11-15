@@ -237,9 +237,12 @@ const AutoAssign = {
 	updateNames: function (quitter) {
 		if (this.recursion) {
 			this.recursion = false;
-			quitter && this.removeNames(quitter);
-			this.getNames();
-			this.recursion = true;
+			try {
+				quitter && this.removeNames(quitter);
+				this.getNames();
+			} finally {
+				this.recursion = true;
+			}
 		}
 		return true;
 	}
