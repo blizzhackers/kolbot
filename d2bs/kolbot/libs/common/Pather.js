@@ -265,9 +265,12 @@ const Pather = {
 					if (!me.inTown) {
 						if (this.recursion) {
 							this.recursion = false;
-							NodeAction.go(settings.clearSettings);
-							node.distance > 5 && this.moveTo(node.x, node.y);
-							this.recursion = true;
+							try {
+								NodeAction.go(settings.clearSettings);
+								node.distance > 5 && this.moveTo(node.x, node.y);
+							} finally {
+								this.recursion = true;
+							}
 						}
 
 						settings.allowTown && Misc.townCheck();

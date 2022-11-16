@@ -339,14 +339,15 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
 				if (!me.inTown) {
 					if (this.recursion) {
 						this.recursion = false;
+						try {
+							NodeAction.go(clearSettings);
 
-						NodeAction.go(clearSettings);
-
-						if (getDistance(me, node.x, node.y) > 5) {
-							this.moveTo(node.x, node.y);
+							if (getDistance(me, node.x, node.y) > 5) {
+								this.moveTo(node.x, node.y);
+							}
+						} finally {
+							this.recursion = true;
 						}
-
-						this.recursion = true;
 					}
 
 					Misc.townCheck();

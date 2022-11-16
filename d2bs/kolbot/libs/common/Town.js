@@ -1205,7 +1205,6 @@ const Town = {
 			chugs.forEach(function (pot) {
 				if (!!pot && pot.use()) {
 					quantity++;
-					delay(100 + pingDelay);
 				}
 			});
 
