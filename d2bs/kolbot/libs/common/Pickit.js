@@ -298,7 +298,7 @@ const Pickit = {
 		if (Runewords.checkItem(unit)) return resultObj(Pickit.Result.RUNEWORD);
 
 		if (rval.result === Pickit.Result.UNWANTED && !getBaseStat("items", unit.classid, "quest") && !Town.ignoredItemTypes.includes(unit.itemType)
-			&& !unit.questItem && (unit.isInInventory || (me.gold < Config.LowGold || (me.gold < 500000 && Config.PickitFiles.length === 0)))) {
+			&& ((unit.isInInventory && (me.inTown || !Config.FieldID.Enabled)) || (me.gold < Config.LowGold || (me.gold < 500000 && Config.PickitFiles.length === 0)))) {
 			// Gold doesn't take up room, just pick it up
 			if (unit.classid === sdk.items.Gold) return resultObj(Pickit.Result.TRASH);
 
