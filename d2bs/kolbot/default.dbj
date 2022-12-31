@@ -23,6 +23,13 @@ function main () {
 	D2Bot.init(); // Get D2Bot# handle
 	D2Bot.ingame();
 
+	(function (global, original) {
+		global.load = function (...args) {
+			original.apply(this, args);
+			delay(500);
+		};
+	})([].filter.constructor("return this")(), load);
+
 	// wait until game is ready
 	while (!me.gameReady) {
 		delay(50);
@@ -71,6 +78,7 @@ function main () {
 	let startTime = getTickCount();
 
 	this.scriptEvent = function (msg) {
+		if (msg === "quit") return;
 		if (typeof msg === "string" && msg === "soj") {
 			sojPause = true;
 			sojCounter = 0;
@@ -242,6 +250,8 @@ function main () {
 		}
 	}
 
+	removeEventListener("scriptmsg", this.scriptEvent);
+
 	AutoMule.muleCheck() && scriptBroadcast("mule");
 	CraftingSystem.checkFullSets() && scriptBroadcast("crafting");
 	TorchSystem.keyCheck() && scriptBroadcast("torch");
@@ -252,6 +262,8 @@ function main () {
 	if (anni && !Storage.Inventory.IsLocked(anni, Config.Inventory) && AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
 		scriptBroadcast("muleAnni");
 	}
+
+	removeEventListener("copydata", this.copyDataEvent);
 
 	scriptBroadcast("quit");
 

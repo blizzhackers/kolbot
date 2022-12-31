@@ -145,9 +145,11 @@ if (!Array.prototype.remove) {
 	};
 }
 
-String.prototype.startsWith = function (prefix) {
-	return !prefix || this.substring(0, prefix.length) === prefix;
-};
+if (!String.prototype.startsWith) {
+	String.prototype.startsWith = function (prefix) {
+		return !prefix || this.substring(0, prefix.length) === prefix;
+	};
+}
 
 if (!String.prototype.endsWith) {
 	String.prototype.endsWith = function (search, this_len) {
@@ -157,6 +159,20 @@ if (!String.prototype.endsWith) {
 		return this.substring(this_len - search.length, this_len) === search;
 	};
 }
+
+if (!String.isEqual) {
+	/**
+	 * Check if two strings are equal
+	 * @static
+	 * @param {string} str1 
+	 * @param {string} str2 
+	 * @returns {boolean}
+	 */
+	String.isEqual = function (str1, str2) {
+		return str1.toLowerCase() === str2.toLowerCase();
+	};
+}
+
 // Production steps of ECMA-262, Edition 6, 22.1.2.1
 if (!Array.from) {
 	Array.from = (function () {
@@ -241,46 +257,69 @@ if (!Array.from) {
 }
 
 // Filter null or undefined objects in array
-Array.prototype.filterNull = function () {
-	return this.filter(x => x);
-};
+if (!Array.prototype.filterNull) {
+	Array.prototype.filterNull = function () {
+		return this.filter(x => x);
+	};
+}
 
 // Map the objects with the callback function and filter null values after mapping.
-Array.prototype.compactMap = function (callback) {
-	return this.map((x, i, array) => {
-		if (x == null) {
-			return null;
-		}
-		return callback(x, i, array);
-	})
-		.filterNull();
-};
+if (!Array.prototype.compactMap) {
+	Array.prototype.compactMap = function (callback) {
+		return this.map((x, i, array) => {
+			if (x == null) {
+				return null;
+			}
+			return callback(x, i, array);
+		})
+			.filterNull();
+	};
+}
 
 // Returns a random object in array
-Array.prototype.random = function () {
-	return this[Math.floor((Math.random() * this.length))];
-};
+if (!Array.prototype.random) {
+	Array.prototype.random = function () {
+		return this[Math.floor((Math.random() * this.length))];
+	};
+}
 
-Array.prototype.includes = function (e) {
-	return this.indexOf(e) > -1;
-};
+if (!Array.prototype.includes) {
+	Array.prototype.includes = function (e) {
+		return this.indexOf(e) > -1;
+	};
+}
+
+if (!Array.prototype.at) {
+	Array.prototype.at = function (pos) {
+		if (pos < 0) {
+			pos += this.length;
+		}
+		if (pos < 0 || pos >= this.length) return undefined;
+		return this[pos];
+	};
+}
 
 Array.prototype.contains = Array.prototype.includes;
 
-Array.prototype.intersection = function (other) {
-	return this.filter(e => other.includes(e));
-};
+if (!Array.prototype.intersection) {
+	Array.prototype.intersection = function (other) {
+		return this.filter(e => other.includes(e));
+	};
+}
 
-Array.prototype.difference = function (other) {
-	return this.filter(e => !other.includes(e));
-};
+if (!Array.prototype.difference) {
+	Array.prototype.difference = function (other) {
+		return this.filter(e => !other.includes(e));
+	};
+}
 
-Array.prototype.symmetricDifference = function (other) {
-	return this
-		.filter(e => !other.includes(e))
-		.concat(other.filter(e => !this.includes(e)));
-};
-
+if (!Array.prototype.symmetricDifference) {
+	Array.prototype.symmetricDifference = function (other) {
+		return this
+			.filter(e => !other.includes(e))
+			.concat(other.filter(e => !this.includes(e)));
+	};
+}
 
 // Returns a random integer between start and end included.
 Math.randomIntBetween = function (start, end) {
@@ -291,31 +330,35 @@ Math.randomIntBetween = function (start, end) {
 
 // Shuffle Array
 // http://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array-in-javascript
-Array.prototype.shuffle = function () {
-	let temp, index,
-		counter = this.length;
+if (!Array.prototype.shuffle) {
+	Array.prototype.shuffle = function () {
+		let temp, index;
+		let counter = this.length;
 
-	// While there are elements in the array
-	while (counter > 0) {
-		// Pick a random index
-		index = Math.floor(Math.random() * counter);
+		// While there are elements in the array
+		while (counter > 0) {
+			// Pick a random index
+			index = Math.floor(Math.random() * counter);
 
-		// Decrease counter by 1
-		counter -= 1;
+			// Decrease counter by 1
+			counter -= 1;
 
-		// And swap the last element with it
-		temp = this[counter];
-		this[counter] = this[index];
-		this[index] = temp;
-	}
+			// And swap the last element with it
+			temp = this[counter];
+			this[counter] = this[index];
+			this[index] = temp;
+		}
 
-	return this;
-};
+		return this;
+	};
+}
 
 // Trim String
-String.prototype.trim = function () {
-	return this.replace(/^\s+|\s+$/g, "");
-};
+if (!String.prototype.trim) {
+	String.prototype.trim = function () {
+		return this.replace(/^\s+|\s+$/g, "");
+	};
+}
 
 // Object.assign polyfill from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
 if (typeof Object.assign !== "function") {
