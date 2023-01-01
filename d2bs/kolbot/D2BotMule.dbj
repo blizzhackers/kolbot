@@ -253,7 +253,7 @@ const Mule = {
 				// pick large items first by sorting items by size in descending order and move gheed's charm to the end of the list
 				list.sort(function(a, b) {
 					if (a.isGheeds && !Pickit.canPick(a)) return 1;
-					if (b.isGheeds && b.unique && !Pickit.canPick(b)) return -1;
+					if (b.isGheeds && !Pickit.canPick(b)) return -1;
 
 					return (b.sizex * b.sizey - a.sizex * a.sizey);
 				});
@@ -768,6 +768,7 @@ function main () {
 		D2Bot.printToConsole("DataFileException: " + e.message + " (" + e.fileName.substring(e.fileName.lastIndexOf("\\") + 1, e.fileName.length) + " #" + e.lineNumber + ")");
 	}
 
+	MainLoop:
 	while (true) {
 		try {
 			if (me.ingame && me.gameReady) {
@@ -870,7 +871,8 @@ function main () {
 							delay(100);
 						}
 
-						break;
+						// should fix hitting gameRefresh when making a new character
+						continue MainLoop;
 					case "fail":
 						// Try again
 						break;
