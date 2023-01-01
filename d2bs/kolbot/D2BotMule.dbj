@@ -244,8 +244,8 @@ const Mule = {
 				}
 
 				// If and only if there is nothing left are we "done"
-				if (!Mule.continuousMule && list.length === 0) {
-					rval = "done";
+				if (list.length === 0) {
+					rval = Mule.continuousMule ? "ready" : "done";
 
 					break;
 				}
@@ -270,7 +270,7 @@ const Mule = {
 					}
 
 					// Gheed's Fortune handling
-					if (item.isGheeds && item.unique && !Pickit.canPick(item)) {
+					if (item.isGheeds && !Pickit.canPick(item)) {
 						D2Bot.printToConsole("Mule already has Gheed's.", sdk.colors.D2Bot.DarkGold);
 						rval = "next";
 					}
@@ -281,17 +281,12 @@ const Mule = {
 
 					if (canFit) {
 						Pickit.pickItem(item);
-
-						if (muleMode > 0 && Mule.continuousMule && item.unique
-						&& ([sdk.items.SmallCharm, sdk.items.LargeCharm, sdk.items.GrandCharm].includes(item.classid))) {
-							rval = "next";
-						}
 					} else {
 						rval = "next";
 					}
 				}
 
-				if (rval === "next" || Mule.continuousMule) {
+				if (rval === "next") {
 					break;
 				}
 			} else {
@@ -752,6 +747,7 @@ function main () {
 	print("Mule filename: " + muleFilename);
 
 	let obj, tick, statusString = "";
+	let recheckTick;
 
 	try {
 		// ugly solution to uglier problem - pickItem area update
@@ -780,6 +776,7 @@ function main () {
 					D2Bot.updateStatus(statusString + " Status: " + status);
 					D2Bot.printToConsole(statusString, sdk.colors.D2Bot.DarkGold);
 					tick = getTickCount();
+					recheckTick = getTickCount();
 
 					while ((getLocation() !== null || !me.area) && getTickCount() - tick < 5000) {
 						delay(200);
@@ -873,15 +870,22 @@ function main () {
 
 						// should fix hitting gameRefresh when making a new character
 						continue MainLoop;
+					case "ready":
+						recheckTick = getTickCount();
+
+						break;
 					case "fail":
 						// Try again
 						break;
 					}
 				}
 
-				if (Mule.continuousMule && Starter.Config.MaxGameTime > 0) {
-					if (getTickCount() - me.gamestarttime > Time.minutes(Starter.Config.MaxGameTime) && Mule.foreverAlone()) {
+				if (Mule.continuousMule) {
+					if (Starter.Config.MaxGameTime > 0 && getTickCount() - me.gamestarttime > Time.minutes(Starter.Config.MaxGameTime) && Mule.foreverAlone()) {
 						Mule.gameRefresh();
+					} else if (getTickCount() - recheckTick > Time.minutes(10)) {
+						// recheck every 10 minutes?
+						status = "begin";
 					}
 				}
 			}

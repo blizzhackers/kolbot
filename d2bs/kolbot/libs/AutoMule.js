@@ -82,6 +82,7 @@ const AutoMule = {
 	inGame: false,
 	check: false,
 	torchAnniCheck: false,
+	gids: [],
 
 	// *** Master functions ***
 	getInfo: function () {
@@ -163,8 +164,10 @@ const AutoMule = {
 		}
 
 		let stopCheck = false;
+		let once = false;
 		let muleInfo = {status: ""};
 		let failCount = 0;
+		let Controls = require("./modules/Control");
 
 		if (!muleObj.continuousMule || !muleObj.skipMuleResponse) {
 			addEventListener("copydata", muleCheckEvent);
@@ -238,6 +241,18 @@ const AutoMule = {
 					}
 				}
 
+				if (!once && getLocation() === sdk.game.locations.GameIsFull) {
+					Controls.CreateGameWindow.click();
+					Starter.LocationEvents.openJoinGameWindow();
+					// how long should we wait?
+					once = true;
+					let date = new Date();
+					let dateString = "[" + new Date(
+						date.getTime() + Time.minutes(3) - (date.getTimezoneOffset() * 60000)
+					).toISOString().slice(0, -5).replace(/-/g, "/").replace("T", " ") + "]";
+					console.log("Game is full so lets hangout for a bit before we try again. Next attempt at " + dateString);
+				}
+
 				if (muleObj.continuousMule && muleObj.skipMuleResponse && !me.ingame) {
 					D2Bot.printToConsole("Unable to join mule game", sdk.colors.D2Bot.Red);
 
@@ -286,7 +301,7 @@ const AutoMule = {
 	inGameCheck: function () {
 		let muleObj, tick;
 		let begin = false;
-		let timeout = 150 * 1000; // Ingame mule timeout
+		let timeout = Time.minutes(4); // Ingame mule timeout
 		let status = "muling";
 
 		// Single player
@@ -402,15 +417,23 @@ const AutoMule = {
 				}
 
 				if (getTickCount() - tick > timeout) {
-					D2Bot.printToConsole("Mule didn't rejoin. Picking up items.", sdk.colors.D2Bot.Red);
-					Misc.useItemLog = false; // Don't log items picked back up in town.
-					Pickit.pickItems();
+					if (Misc.getPlayerCount() > 1) {
+						// we aren't alone currently so chill for a bit longer
+						tick = getTickCount();
+						Packet.questRefresh(); // to prevent disconnect from idleing
+					} else {
+						D2Bot.printToConsole("Mule didn't rejoin. Picking up items.", sdk.colors.D2Bot.Red);
+						Misc.useItemLog = false; // Don't log items picked back up in town.
+						Pickit.pickItems();
 
-					break;
+						break;
+					}
 				}
 
 				delay(500);
 			}
+			
+			return true;
 		} catch (e) {
 			console.error(e);
 
@@ -428,8 +451,6 @@ const AutoMule = {
 			delay(2000);
 			quit();
 		}
-
-		return true;
 	},
 
 	// finished if no items are on ground
@@ -438,12 +459,15 @@ const AutoMule = {
 
 		if (item) {
 			do {
-				// exclude trash
-				if (getDistance(me, item) < 20 && item.onGroundOrDropping && Town.ignoredItemTypes.indexOf(item.itemType) === -1) {
+				// check if the items we dropped are on the ground still
+				if (getDistance(me, item) < 20 && item.onGroundOrDropping && AutoMule.gids.includes(item.gid)) {
 					return false;
 				}
 			} while (item.getNext());
 		}
+
+		// we are finished so reset gid list
+		AutoMule.gids.length = 0;
 
 		return true;
 	},
@@ -475,6 +499,7 @@ const AutoMule = {
 
 		let items = (this.getMuleItems() || []);
 		if (items.length === 0) return false;
+		AutoMule.gids = items.map(i => i.gid);
 
 		D2Bot.printToConsole("AutoMule: Transfering " + items.length + " items.", sdk.colors.D2Bot.DarkGold);
 		
