@@ -34,13 +34,17 @@ include("common/util.js");
 includeCommonLibs();
 let Controls = require("./modules/Control");
 let Overrides = require("./modules/Override");
+const Worker = require("../../modules/Worker");
 
+/** @global */
 let master, muleMode, muleFilename, muleObj, maxCharCount;
 let [checkOnJoin, makeNext] = [false, false];
 let status = "loading";
 let masterStatus = { status: "" };
 
-// Mule Data object manipulates external mule datafile
+/**
+ * Mule Data object manipulates external mule datafile
+ */
 const MuleData = {
 	_default: {
 		account: "",
@@ -109,27 +113,181 @@ const MuleData = {
 const Mule = {
 	continuousMule: false,
 	clearedJunk: false,
+	startTick: 0,
+	idleTick: 0,
+	areaTick: 0,
+	recheckTick: 0,
+	statusString: "",
+
+	/**
+	 * @description background worker to prevent idle disconnect
+	 */
+	antiIdle: function () {
+		if (!Starter.inGame) return true;
+		if (!me.ingame || getTickCount() - me.gamestarttime < Time.minutes(1) || !me.gameReady) return true;
+		if (Mule.idleTick === 0) {
+			Mule.idleTick = getTickCount() + Time.seconds(rand(1200, 1500));
+			console.log("Game start, anti-idle refresh in: (" + Time.format(Mule.idleTick - getTickCount()) + ")");
+		}
+		if (me.gameReady) {
+			if (getTickCount() - Mule.idleTick > 0) {
+				Packet.questRefresh();
+				Mule.idleTick += Time.seconds(rand(1200, 1500));
+				console.log("Sent anti-idle packet, next refresh in: (" + Time.format(Mule.idleTick - getTickCount()) + ")");
+			}
+		} else if (getLocation() !== null) {
+			Mule.idleTick = 0;
+		}
+
+		return true;
+	},
+
+	/**
+	 * @description background worker to prevent suicide walks
+	 * @todo figure out why this bugs out when used
+	 */
+	areaWatcher: function () {
+		if (!Starter.inGame) return true;
+		// run area check every half second
+		if (getTickCount() - Mule.areaTick < 500) return true;
+		Mule.areaTick = getTickCount();
+		// check that we are actually in game and that we've been there longer than a minute
+		if (getLocation() !== null || getTickCount() - me.gamestarttime < Time.minutes(1)) return true;
+		console.debug("Check Area: " + me.area);
+
+		if (me.ingame && me.gameReady && me.area > 0) {
+			if (me.area !== sdk.areas.RogueEncampment) {
+				console.warn("Preventing Suicide Walk! Current Area: " + me.area);
+				console.trace();
+
+				Mule.quit();
+			}
+		}
+
+		return true;
+	},
+
+	init: function () {
+		Starter.firstLogin ? (Starter.firstLogin = false) : (status = "begin");
+		status !== "begin" && (status = "ready");
+		Mule.statusString = "In " + (muleMode === 2 ? "anni " : muleMode === 1 ? "torch " : "") + "mule game.";
+
+		D2Bot.updateStatus(Mule.statusString + " Status: " + status);
+		D2Bot.printToConsole(Mule.statusString, sdk.colors.D2Bot.DarkGold);
+		Mule.startTick = getTickCount();
+		Mule.recheckTick = getTickCount();
+
+		while ((getLocation() !== null || !me.area) && getTickCount() - Mule.startTick < 5000) {
+			delay(200);
+		}
+
+		if (!me.ingame || !me.gameReady || !me.inTown) {
+			return false;
+		}
+
+		Town.goToTown(1);
+		Town.move("stash");
+
+		// Move away from stash so we don't block muler
+		let coord = {};
+		do {
+			coord = CollMap.getRandCoordinate(me.x, -6, 6, me.y, -6, 6);
+		} while (!Attack.validSpot(coord.x, coord.y));
+
+		Pather.moveToUnit(coord);
+					
+		Storage.Init();
+		checkOnJoin && (status = "begin");
+		Starter.inGame = true;
+		Mule.continuousMule && !muleObj.onlyLogWhenFull && MuleLogger.logChar();
+		// Worker.runInBackground.areaWatcher = Mule.areaWatcher; // bugs for some reason, quits game then on re-join d2bot spams In mule game for ~30seconds
+		Worker.runInBackground.antiIdle = Mule.antiIdle;
+
+		return true;
+	},
+
+	waitForMaster: function () {
+		console.log("Waiting for muler");
+		// forever alone check?
+		Misc.poll(() => status === "begin", Time.minutes(3), 100);
+
+		if (status !== "begin") {
+			D2Bot.printToConsole("Nobody joined - stopping.", sdk.colors.D2Bot.Red);
+			D2Bot.stop(me.profile, true);
+		}
+
+		me.overhead("begin");
+	},
+
+	/**
+	 * @todo check if there are any other profiles that need to mule while we are already in game?
+	 */
+	done: function () {
+		!muleObj.onlyLogWhenFull && MuleLogger.logChar();
+
+		obj = MuleData.read();
+
+		if (Mule.checkAnniTorch() && obj.torchChars.indexOf(me.name) === -1) {
+			obj.torchChars.push(me.name);
+		}
+
+		MuleData.write(obj);
+		D2Bot.printToConsole("Done muling.", sdk.colors.D2Bot.DarkGold);
+		sendCopyData(null, master, 10, JSON.stringify({ status: "quit" }));
+		D2Bot.stop(me.profile, true);
+	},
+
+	next: function () {
+		MuleLogger.logChar();
+		delay(500);
+
+		[makeNext, checkOnJoin] = [true, true];
+		obj = MuleData.read();
+
+		if (Mule.checkAnniTorch() && obj.torchChars.indexOf(me.name) === -1) {
+			obj.torchChars.push(me.name);
+		}
+
+		obj.fullChars.push(me.name);
+		MuleData.write(obj);
+		MuleData.nextChar();
+		D2Bot.printToConsole("Mule full, getting next character.", sdk.colors.D2Bot.DarkGold);
+
+		if (Starter.Config.MinGameTime && getTickCount() - Mule.startTick < Starter.Config.MinGameTime * 1000) {
+			while (getTickCount() - Mule.startTick < Starter.Config.MinGameTime * 1000) {
+				me.overhead("Stalling for " + Math.round(((Mule.startTick + (Starter.Config.MinGameTime * 1000)) - getTickCount()) / 1000) + " Seconds");
+				delay(1000);
+			}
+		}
+
+		Mule.quit();
+	},
 	
 	quit: function () {
 		["default.dbj", "tools/AntiIdle.js", "tools/AreaWatcher.js"].forEach(thread => {
 			let script = getScript(thread);
-			!!script && script.running && script.stop();
-			delay(100);
+			if (script && script.running && script.stop()) {
+				delay(100);
+			}
 		});
 		Mule.cursorCheck();
-		quit();
+		console.log("ÿc8Mule game duration ÿc2" + (Time.format(getTickCount() - me.gamestarttime)));
+
+		try {
+			quit();
+		} finally {
+			while (me.ingame) {
+				delay(100);
+			}
+		}
 
 		return true;
 	},
 
 	gameRefresh: function () {
 		if (!this.continuousMule) return this.quit();
-		console.log("MaxGameTime Reached");
+		console.log("MaxGameTime Reached: ");
 		Mule.quit();
-						
-		while (me.ingame) {
-			delay(100);
-		}
 						
 		Starter.firstLogin = true;
 		console.log("updating runs");
@@ -140,6 +298,7 @@ const Mule = {
 		delay(1000);
 		Controls.LobbyQuit.click(); // Quit from Lobby
 		ControlAction.timeoutDelay("Refresh game", 330 * 1000); // 5.5 minutes
+
 		return true;
 	},
 
@@ -207,7 +366,6 @@ const Mule = {
 
 	pickItems: function () {
 		let waitTick = getTickCount();
-		let canFit, item;
 		let rval = "fail";
 		let list = [];
 
@@ -218,7 +376,7 @@ const Mule = {
 
 		if (!Mule.clearedJunk) {
 			me.getItemsEx()
-				.filter(item => item.isInInventory && Town.ignoredItemTypes.includes(item.itemType) && (muleMode === 0 || item.classid !== sdk.items.ScrollofIdentify))
+				.filter(item => item.isInInventory && Town.ignoreType(item.itemType) && (muleMode === 0 || item.classid !== sdk.items.ScrollofIdentify))
 				.forEach(item => {
 					try {
 						item.drop();
@@ -232,12 +390,12 @@ const Mule = {
 		while (me.gameReady) {
 			if (masterStatus.status === "done" || Mule.continuousMule || checkOnJoin) {
 				checkOnJoin && (checkOnJoin = false);
-				item = Game.getItem();
+				let item = Game.getItem();
 
 				if (item) {
 					do {
 					// don't pick up trash
-						if (item.distance < 20 && item.onGroundOrDropping && Town.ignoredItemTypes.indexOf(item.itemType) === -1) {
+						if (item.distance < 20 && item.onGroundOrDropping && !Town.ignoreType(item.itemType)) {
 							list.push(copyUnit(item));
 						}
 					} while (item.getNext());
@@ -259,8 +417,8 @@ const Mule = {
 				});
 
 				while (list.length > 0) {
-					item = list.shift();
-					canFit = Storage.Inventory.CanFit(item);
+					const item = list.shift();
+					let canFit = Storage.Inventory.CanFit(item);
 
 					// Torch and Anni handling
 					if (muleMode > 0 && item.unique && [sdk.items.SmallCharm, sdk.items.LargeCharm].includes(item.classid) && !Pickit.canPick(item)) {
@@ -431,6 +589,13 @@ function locationAction (location) {
 		if (!Mule.continuousMule) {
 			D2Bot.requestGame(master);
 			delay(100);
+		}
+
+		if (Starter.inGame) {
+			print("updating runs");
+			D2Bot.updateRuns();
+			status = "ready";
+			Starter.inGame = false;
 		}
 
 		delay(2000);
@@ -706,6 +871,7 @@ function gameEvent (mode, param1, param2, name1, name2) {
 }
 
 function main () {
+	// basics -- don't touch
 	addEventListener("copydata", Starter.receiveCopyData);
 
 	while (!Starter.handle) {
@@ -724,6 +890,7 @@ function main () {
 	D2Bot.updateRuns(); // we need the mule to swap keys somehow after all
 	delay(1000);
 
+	// mule/master data initialization block 
 	Mule.continuousMule = AutoMule.isContinousMule();
 
 	if (Mule.continuousMule) {
@@ -738,16 +905,15 @@ function main () {
 			delay(100);
 		}
 
-		print("Master found: " + master);
+		console.log("Master found: " + master);
 
 		muleObj = AutoMule.getMuleObject(muleMode, master);
 		muleFilename = AutoMule.getMuleFilename(muleMode, master);
 	}
 
-	print("Mule filename: " + muleFilename);
+	console.log("Mule filename: " + muleFilename);
 
-	let obj, tick, statusString = "";
-	let recheckTick;
+	let obj;
 
 	try {
 		// ugly solution to uglier problem - pickItem area update
@@ -764,114 +930,39 @@ function main () {
 		D2Bot.printToConsole("DataFileException: " + e.message + " (" + e.fileName.substring(e.fileName.lastIndexOf("\\") + 1, e.fileName.length) + " #" + e.lineNumber + ")");
 	}
 
+	// begin
 	MainLoop:
 	while (true) {
 		try {
 			if (me.ingame && me.gameReady) {
 				if (!Starter.inGame) {
-					Starter.firstLogin ? (Starter.firstLogin = false) : (status = "begin");
-					status !== "begin" && (status = "ready");
-					statusString = "In " + (muleMode === 2 ? "anni " : muleMode === 1 ? "torch " : "") + "mule game.";
-
-					D2Bot.updateStatus(statusString + " Status: " + status);
-					D2Bot.printToConsole(statusString, sdk.colors.D2Bot.DarkGold);
-					tick = getTickCount();
-					recheckTick = getTickCount();
-
-					while ((getLocation() !== null || !me.area) && getTickCount() - tick < 5000) {
-						delay(200);
-					}
-
-					if (!me.ingame || !me.gameReady || !me.inTown) {
+					if (!Mule.init()) {
+						console.debug("Failed to init. Trying again.");
 						continue;
 					}
-
-					Town.goToTown(1);
-					Town.move("stash");
-
-					// Move away from stash so we don't block muler
-					let coord = {};
-					do {
-						coord = CollMap.getRandCoordinate(me.x, -6, 6, me.y, -6, 6);
-					} while (!Attack.validSpot(coord.x, coord.y));
-
-					Pather.moveTo(coord.x, coord.y);
-					
-					Storage.Init();
-					checkOnJoin && (status = "begin");
-					Starter.inGame = true;
-					Mule.continuousMule && !muleObj.onlyLogWhenFull && MuleLogger.logChar();
 				}
 
 				if (!Mule.continuousMule) {
-					console.log("Waiting for muler");
-					// forever alone check?
-					Misc.poll(() => status === "begin", Time.minutes(3), 100);
-
-					if (status !== "begin") {
-						D2Bot.printToConsole("Nobody joined - stopping.", sdk.colors.D2Bot.Red);
-						D2Bot.stop(me.profile, true);
-					}
-
-					me.overhead("begin");
+					Mule.waitForMaster();
 				}
 
-				D2Bot.updateStatus(statusString + " Status: " + status + Starter.timer(me.gamestarttime));
+				D2Bot.updateStatus(Mule.statusString + " Status: " + status + Starter.timer(me.gamestarttime));
 
 				if (status === "begin") {
 					switch (Mule.pickItems()) {
 					// done picking, tell the master to leave game and kill mule profile
 					case "done":
-						!muleObj.onlyLogWhenFull && MuleLogger.logChar();
-
-						obj = MuleData.read();
-
-						if (Mule.checkAnniTorch() && obj.torchChars.indexOf(me.name) === -1) {
-							obj.torchChars.push(me.name);
-						}
-
-						MuleData.write(obj);
-						// check if there are any other profiles that need to mule while we are already in game?
-						D2Bot.printToConsole("Done muling.", sdk.colors.D2Bot.DarkGold);
-						sendCopyData(null, master, 10, JSON.stringify({ status: "quit" }));
-						D2Bot.stop(me.profile, true);
+						Mule.done();
 
 						return;
 					// can't fit more items, get to next character or account
 					case "next":
-						MuleLogger.logChar();
-						delay(500);
-
-						[makeNext, checkOnJoin] = [true, true];
-						obj = MuleData.read();
-
-						if (Mule.checkAnniTorch() && obj.torchChars.indexOf(me.name) === -1) {
-							obj.torchChars.push(me.name);
-						}
-
-						obj.fullChars.push(me.name);
-						MuleData.write(obj);
-						MuleData.nextChar();
-						D2Bot.printToConsole("Mule full, getting next character.", sdk.colors.D2Bot.DarkGold);
-
-						if (Starter.Config.MinGameTime && getTickCount() - tick < Starter.Config.MinGameTime * 1000) {
-							while (getTickCount() - tick < Starter.Config.MinGameTime * 1000) {
-								me.overhead("Stalling for " + Math.round(((tick + (Starter.Config.MinGameTime * 1000)) - getTickCount()) / 1000) + " Seconds");
-								delay(1000);
-							}
-						}
-
-						Mule.quit();
-
-						// TODO: see whether a for loop is better
-						while (me.ingame) {
-							delay(100);
-						}
+						Mule.next();
 
 						// should fix hitting gameRefresh when making a new character
 						continue MainLoop;
 					case "ready":
-						recheckTick = getTickCount();
+						Mule.recheckTick = getTickCount();
 
 						break;
 					case "fail":
@@ -888,9 +979,7 @@ function main () {
 						status = "begin";
 					}
 				}
-			}
-
-			if (!me.ingame) {
+			} else if (!me.ingame) {
 				delay(1000);
 				locationAction(getLocation());
 			}

@@ -2190,6 +2190,12 @@ Object.defineProperties(Unit.prototype, {
 			return this.unique && this.itemType === sdk.items.type.GrandCharm;
 		},
 	},
+	prettyPrint: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return this.name;
+			return this.fname.split("\n").reverse().join(" ");
+		}
+	},
 });
 
 Unit.prototype.hasEnchant = function (...enchants) {

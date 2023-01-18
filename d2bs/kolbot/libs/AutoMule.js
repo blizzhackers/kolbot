@@ -502,6 +502,7 @@ const AutoMule = {
 		AutoMule.gids = items.map(i => i.gid);
 
 		D2Bot.printToConsole("AutoMule: Transfering " + items.length + " items.", sdk.colors.D2Bot.DarkGold);
+		D2Bot.printToConsole("AutoMule: " + JSON.stringify(items.map(i => i.prettyPrint)), sdk.colors.D2Bot.DarkGold);
 		
 		items.forEach(item => item.drop());
 		delay(1000);
