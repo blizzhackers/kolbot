@@ -284,6 +284,9 @@ const Mule = {
 		return true;
 	},
 
+	/**
+	 * @todo handle when a bot wants to mule while we are refreshing the game
+	 */
 	gameRefresh: function () {
 		if (!this.continuousMule) return this.quit();
 		console.log("MaxGameTime Reached: ");
@@ -302,6 +305,9 @@ const Mule = {
 		return true;
 	},
 
+	/**
+	 * @param {number} time 
+	 */
 	ingameTimeout: function (time) {
 		let tick = getTickCount();
 
@@ -357,6 +363,7 @@ const Mule = {
 
 		if (cursorItem) {
 			if (!Storage.Inventory.CanFit(cursorItem) || !Storage.Inventory.MoveTo(cursorItem)) {
+				console.warn("Can't place " + cursorItem.prettyPrint + " in inventory");
 				cursorItem.drop();
 			}
 		}
@@ -417,7 +424,7 @@ const Mule = {
 				});
 
 				while (list.length > 0) {
-					const item = list.shift();
+					item = list.shift();
 					let canFit = Storage.Inventory.CanFit(item);
 
 					// Torch and Anni handling
@@ -523,7 +530,7 @@ new Overrides.Override (Starter, Starter.updateCount, function () {
 }).apply();
 
 function locationAction (location) {
-	let i, obj, info, string, text;
+	let obj, info, string, text;
 
 	switch (location) {
 	case sdk.game.locations.PreSplash:
@@ -677,7 +684,7 @@ function locationAction (location) {
 		text = Controls.CharSelectError.getText();
 
 		if (text) {
-			for (i = 0; i < text.length; i++) {
+			for (let i = 0; i < text.length; i++) {
 				string += text[i];
 
 				if (i !== text.length - 1) {
@@ -913,8 +920,6 @@ function main () {
 
 	console.log("Mule filename: " + muleFilename);
 
-	let obj;
-
 	try {
 		// ugly solution to uglier problem - pickItem area update
 		!FileTools.exists("data/" + me.profile + ".json") && DataFile.create();
@@ -922,9 +927,10 @@ function main () {
 		// create mule datafile if it doesn't exist
 		!FileTools.exists(muleFilename) && MuleData.create();
 
-		obj = MuleData.read();
+		let obj = MuleData.read();
 		obj.account && obj.account.indexOf(muleObj.accountPrefix) < 0 && MuleData.create();
 	} catch (e) {
+		// probably should try again if fails to make file or shut down instead of continuing loop
 		console.warn("Caught exception creating data files.");
 		console.error(e);
 		D2Bot.printToConsole("DataFileException: " + e.message + " (" + e.fileName.substring(e.fileName.lastIndexOf("\\") + 1, e.fileName.length) + " #" + e.lineNumber + ")");
@@ -974,7 +980,7 @@ function main () {
 				if (Mule.continuousMule) {
 					if (Starter.Config.MaxGameTime > 0 && getTickCount() - me.gamestarttime > Time.minutes(Starter.Config.MaxGameTime) && Mule.foreverAlone()) {
 						Mule.gameRefresh();
-					} else if (getTickCount() - recheckTick > Time.minutes(10)) {
+					} else if (getTickCount() - Mule.recheckTick > Time.minutes(10)) {
 						// recheck every 10 minutes?
 						status = "begin";
 					}
