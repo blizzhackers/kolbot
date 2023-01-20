@@ -32,9 +32,10 @@ include("NTItemParser.dbl");
 include("NTItemAlias.dbl");
 include("common/util.js");
 includeCommonLibs();
+
 let Controls = require("./modules/Control");
 let Overrides = require("./modules/Override");
-const Worker = require("../../modules/Worker");
+const Worker = require("./modules/Worker");
 
 /** @global */
 let master, muleMode, muleFilename, muleObj, maxCharCount;
@@ -168,22 +169,23 @@ const Mule = {
 	},
 
 	init: function () {
+		Mule.startTick = getTickCount();
+
+		while ((getLocation() !== null) && !!me.area && getTickCount() - Mule.startTick < Time.seconds(10)) {
+			delay(200);
+		}
+
+		if (getLocation() !== null || !me.ingame || !me.gameReady || !me.inTown) {
+			return false;
+		}
+
 		Starter.firstLogin ? (Starter.firstLogin = false) : (status = "begin");
 		status !== "begin" && (status = "ready");
 		Mule.statusString = "In " + (muleMode === 2 ? "anni " : muleMode === 1 ? "torch " : "") + "mule game.";
 
 		D2Bot.updateStatus(Mule.statusString + " Status: " + status);
 		D2Bot.printToConsole(Mule.statusString, sdk.colors.D2Bot.DarkGold);
-		Mule.startTick = getTickCount();
 		Mule.recheckTick = getTickCount();
-
-		while ((getLocation() !== null || !me.area) && getTickCount() - Mule.startTick < 5000) {
-			delay(200);
-		}
-
-		if (!me.ingame || !me.gameReady || !me.inTown) {
-			return false;
-		}
 
 		Town.goToTown(1);
 		Town.move("stash");
@@ -191,6 +193,7 @@ const Mule = {
 		// Move away from stash so we don't block muler
 		let coord = {};
 		do {
+			delay(1000);
 			coord = CollMap.getRandCoordinate(me.x, -6, 6, me.y, -6, 6);
 		} while (!Attack.validSpot(coord.x, coord.y));
 
@@ -201,7 +204,9 @@ const Mule = {
 		Starter.inGame = true;
 		Mule.continuousMule && !muleObj.onlyLogWhenFull && MuleLogger.logChar();
 		// Worker.runInBackground.areaWatcher = Mule.areaWatcher; // bugs for some reason, quits game then on re-join d2bot spams In mule game for ~30seconds
-		Worker.runInBackground.antiIdle = Mule.antiIdle;
+		if (Worker.runInBackground.antiIdle === undefined) {
+			Worker.runInBackground.antiIdle = Mule.antiIdle;
+		}
 
 		return true;
 	},
@@ -225,7 +230,7 @@ const Mule = {
 	done: function () {
 		!muleObj.onlyLogWhenFull && MuleLogger.logChar();
 
-		obj = MuleData.read();
+		let obj = MuleData.read();
 
 		if (Mule.checkAnniTorch() && obj.torchChars.indexOf(me.name) === -1) {
 			obj.torchChars.push(me.name);
@@ -242,7 +247,7 @@ const Mule = {
 		delay(500);
 
 		[makeNext, checkOnJoin] = [true, true];
-		obj = MuleData.read();
+		let obj = MuleData.read();
 
 		if (Mule.checkAnniTorch() && obj.torchChars.indexOf(me.name) === -1) {
 			obj.torchChars.push(me.name);
@@ -312,17 +317,17 @@ const Mule = {
 		let tick = getTickCount();
 
 		while (getTickCount() - tick < time) {
-			if (me.ingame && me.gameReady) return true;
+			if (me.ingame && me.gameReady && !!me.area) break;
 
 			// game doesn't exist, might need more locs
-			if (getLocation() === 28) {
+			if (getLocation() === sdk.game.locations.GameDoesNotExist) {
 				break;
 			}
 
 			delay(100);
 		}
 
-		return me.ingame && me.gameReady;
+		return (me.ingame && me.gameReady && !!me.area);
 	},
 
 	foreverAlone: function () {
@@ -575,8 +580,11 @@ function locationAction (location) {
 		}
 
 		createGame(muleObj.muleGameName[0], muleObj.muleGameName[1]);
-		Mule.ingameTimeout(5000);
-
+		if (!Mule.ingameTimeout(Time.minutes(1))) {
+			console.debug("Failed to get in game, current location: " + getLocation() + " inGame? " + me.ingame + " area? " + me.area);
+			break;
+		}
+		
 		status = "pending";
 
 		break;
@@ -615,8 +623,9 @@ function locationAction (location) {
 
 		!Starter.firstLogin && (status = "pending");
 
-		Mule.ingameTimeout(5000);
-		print("Ingame timeout done.");
+		if (Mule.ingameTimeout(Time.minutes(1))) {
+			console.debug("Ingame timeout done.");
+		}
 
 		// could not join game
 		getLocation() === sdk.game.locations.Lobby && !me.ingame && Controls.CreateGameWindow.click();
@@ -863,13 +872,15 @@ function gameEvent (mode, param1, param2, name1, name2) {
 	case 0x00: // "%Name1(%Name2) dropped due to time out."
 	case 0x01: // "%Name1(%Name2) dropped due to errors."
 	case 0x03: // "%Name1(%Name2) left our world. Diablo's minions weaken."
-		print("Waiting");
-		status = "ready";
+		if (Mule.foreverAlone()) {
+			console.log("Waiting");
+			status = "ready";
+		}
 
 		break;
 	case 0x02: // "%Name1(%Name2) joined our world. Diablo's minions grow stronger."
 		if (name1.trim() !== me.name.trim()) {
-			print("begin");
+			console.log("begin");
 			status = "begin";
 		}
 
@@ -943,7 +954,8 @@ function main () {
 			if (me.ingame && me.gameReady) {
 				if (!Starter.inGame) {
 					if (!Mule.init()) {
-						console.debug("Failed to init. Trying again.");
+						console.debug("Failed to init. Trying again. Ingame and ready? " + (me.ingame && me.gameReady && !!me.area));
+						delay(1000);
 						continue;
 					}
 				}
