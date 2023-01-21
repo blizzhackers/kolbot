@@ -1633,9 +1633,12 @@ const Starter = {
 
 			break;
 		case 3: // Game request
+			// in case someone is using a lightweight entry like blank/map to play manually and these aren't included
+			if (typeof AutoMule !== "undefined") {
 			// Don't let others join mule/torch/key/gold drop game
-			if (AutoMule.inGame || Gambling.inGame || TorchSystem.inGame || CraftingSystem.inGame) {
-				break;
+				if (AutoMule.inGame || Gambling.inGame || TorchSystem.inGame || CraftingSystem.inGame) {
+					break;
+				}
 			}
 
 			if (Object.keys(Starter.gameInfo).length) {
