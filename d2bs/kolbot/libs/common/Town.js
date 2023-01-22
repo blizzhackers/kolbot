@@ -89,6 +89,10 @@ const Town = {
 		sdk.items.type.AntidotePotion, sdk.items.type.ThawingPotion
 	],
 
+	ignoreType: function (type) {
+		return Town.ignoredItemTypes.includes(type);
+	},
+
 	needPotions: function () {
 		// we aren't using MinColumn if none of the values are set
 		if (!Config.MinColumn.some(el => el > 0)) return false;

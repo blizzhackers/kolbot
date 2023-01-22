@@ -2172,6 +2172,30 @@ Object.defineProperties(Unit.prototype, {
 			return [sdk.items.type.Shield, sdk.items.type.AuricShields, sdk.items.type.VoodooHeads].includes(this.itemType);
 		},
 	},
+	isAnni: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.unique && this.itemType === sdk.items.type.SmallCharm;
+		},
+	},
+	isTorch: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.unique && this.itemType === sdk.items.type.LargeCharm;
+		},
+	},
+	isGheeds: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return false;
+			return this.unique && this.itemType === sdk.items.type.GrandCharm;
+		},
+	},
+	prettyPrint: {
+		get: function () {
+			if (this.type !== sdk.unittype.Item) return this.name;
+			return this.fname.split("\n").reverse().join(" ");
+		}
+	},
 });
 
 Unit.prototype.hasEnchant = function (...enchants) {

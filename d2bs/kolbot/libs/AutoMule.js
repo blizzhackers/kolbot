@@ -82,6 +82,7 @@ const AutoMule = {
 	inGame: false,
 	check: false,
 	torchAnniCheck: false,
+	gids: [],
 
 	// *** Master functions ***
 	getInfo: function () {
@@ -93,6 +94,8 @@ const AutoMule = {
 					if (this.Mules[i].enabledProfiles[j].toLowerCase() === me.profile.toLowerCase()) {
 						!info && (info = {});
 						info.muleInfo = this.Mules[i];
+
+						break;
 					}
 				}
 			}
@@ -104,6 +107,8 @@ const AutoMule = {
 					if (this.TorchAnniMules[i].enabledProfiles[j].toLowerCase() === me.profile.toLowerCase()) {
 						!info && (info = {});
 						info.torchMuleInfo = this.TorchAnniMules[i];
+
+						break;
 					}
 				}
 			}
@@ -159,8 +164,10 @@ const AutoMule = {
 		}
 
 		let stopCheck = false;
+		let once = false;
 		let muleInfo = {status: ""};
 		let failCount = 0;
+		let Controls = require("./modules/Control");
 
 		if (!muleObj.continuousMule || !muleObj.skipMuleResponse) {
 			addEventListener("copydata", muleCheckEvent);
@@ -182,7 +189,7 @@ const AutoMule = {
 			// If nothing received our copy data start the mule profile
 			} else if (!sendCopyData(null, muleObj.muleProfile, 10, JSON.stringify({profile: me.profile, mode: this.torchAnniCheck || 0})) && !muleObj.continuousMule) {
 				// if the mule profile isn't already running and there is a profile to be stopped, stop it before starting the mule profile
-				if (!stopCheck && muleObj.stopProfile && me.profile.toLowerCase() !== muleObj.stopProfile.toLowerCase()) {
+				if (!stopCheck && muleObj.stopProfile && !String.isEqual(me.profile, muleObj.stopProfile)) {
 					D2Bot.stop(muleObj.stopProfile, muleObj.stopProfileKeyRelease);
 					stopCheck = true;
 					delay(2000); // prevents cd-key in use error if using -skiptobnet on mule profile
@@ -195,7 +202,7 @@ const AutoMule = {
 
 			switch (muleInfo.status) {
 			case "loading":
-				if (!muleObj.continuousMule && !stopCheck && muleObj.stopProfile && me.profile.toLowerCase() !== muleObj.stopProfile.toLowerCase()) {
+				if (!muleObj.continuousMule && !stopCheck && muleObj.stopProfile && !String.isEqual(me.profile, muleObj.stopProfile)) {
 					D2Bot.stop(muleObj.stopProfile, muleObj.stopProfileKeyRelease);
 
 					stopCheck = true;
@@ -234,6 +241,18 @@ const AutoMule = {
 					}
 				}
 
+				if (!once && getLocation() === sdk.game.locations.GameIsFull) {
+					Controls.CreateGameWindow.click();
+					Starter.LocationEvents.openJoinGameWindow();
+					// how long should we wait?
+					once = true;
+					let date = new Date();
+					let dateString = "[" + new Date(
+						date.getTime() + Time.minutes(3) - (date.getTimezoneOffset() * 60000)
+					).toISOString().slice(0, -5).replace(/-/g, "/").replace("T", " ") + "]";
+					console.log("Game is full so lets hangout for a bit before we try again. Next attempt at " + dateString);
+				}
+
 				if (muleObj.continuousMule && muleObj.skipMuleResponse && !me.ingame) {
 					D2Bot.printToConsole("Unable to join mule game", sdk.colors.D2Bot.Red);
 
@@ -254,9 +273,7 @@ const AutoMule = {
 			}
 		}
 
-		if (!muleObj.continuousMule || !muleObj.skipMuleResponse) {
-			removeEventListener("copydata", muleCheckEvent);
-		}
+		removeEventListener("copydata", muleCheckEvent);
 
 		while (me.ingame) {
 			delay(1000);
@@ -284,7 +301,7 @@ const AutoMule = {
 	inGameCheck: function () {
 		let muleObj, tick;
 		let begin = false;
-		let timeout = 150 * 1000; // Ingame mule timeout
+		let timeout = Time.minutes(4); // Ingame mule timeout
 		let status = "muling";
 
 		// Single player
@@ -296,8 +313,8 @@ const AutoMule = {
 		if (!info) return false;
 
 		// Profile is not in mule or torch mule game
-		if (!((info.hasOwnProperty("muleInfo") && me.gamename.toLowerCase() === info.muleInfo.muleGameName[0].toLowerCase())
-				|| (info.hasOwnProperty("torchMuleInfo") && me.gamename.toLowerCase() === info.torchMuleInfo.muleGameName[0].toLowerCase()))) {
+		if (!((info.hasOwnProperty("muleInfo") && String.isEqual(me.gamename, info.muleInfo.muleGameName[0]))
+				|| (info.hasOwnProperty("torchMuleInfo") && String.isEqual(me.gamename, info.torchMuleInfo.muleGameName[0])))) {
 			return false;
 		}
 
@@ -319,122 +336,121 @@ const AutoMule = {
 		function muleModeEvent (msg) {
 			switch (msg) {
 			case "2":
-				AutoMule.torchAnniCheck = 2;
-
-				break;
 			case "1":
-				AutoMule.torchAnniCheck = 1;
+				AutoMule.torchAnniCheck = Number(msg);
 
 				break;
 			case "0":
 				AutoMule.check = true;
-
-				break;
 			}
 		}
 
-		addEventListener("scriptmsg", muleModeEvent);
-		scriptBroadcast("getMuleMode");
-		delay(500);
+		try {
+			addEventListener("scriptmsg", muleModeEvent);
+			scriptBroadcast("getMuleMode");
+			delay(500);
 
-		if (!this.check && !this.torchAnniCheck) {
-			print("Error - Unable to determine mule mode");
-			quit();
+			if (!this.check && !this.torchAnniCheck) {
+				throw new Error("Error - Unable to determine mule mode");
+			}
 
-			return false;
-		}
+			muleObj = this.getMule();
+			me.maxgametime = 0;
 
-		muleObj = this.getMule();
-		me.maxgametime = 0;
+			!muleObj.continuousMule && addEventListener("copydata", dropStatusEvent);
 
-		!muleObj.continuousMule && addEventListener("copydata", dropStatusEvent);
+			if (!Town.goToTown(1)) {
+				throw new Error("Error - Failed to go to Act 1");
+			}
 
-		if (!Town.goToTown(1)) {
-			print("Error - Failed to go to Act 1");
-			quit();
+			Town.move("stash");
 
-			return false;
-		}
+			if (muleObj.continuousMule) {
+				print("ÿc4AutoMuleÿc0: Looking for valid mule");
+				tick = getTickCount();
 
-		Town.move("stash");
+				while (getTickCount() - tick < timeout) {
+					if (this.verifyMulePrefix(muleObj.charPrefix)) {
+						print("ÿc4AutoMuleÿc0: Found valid mule");
+						begin = true;
 
-		if (muleObj.continuousMule) {
-			print("ÿc4AutoMuleÿc0: Looking for valid mule");
+						break;
+					}
+
+					delay(2000);
+				}
+
+				if (!begin) {
+					throw new Error("Error - Unable to find mule character");
+				}
+			} else {
+				sendCopyData(null, muleObj.muleProfile, 11, "begin");
+			}
+
+			let gameType = this.torchAnniCheck === 2 ? " anni" : this.torchAnniCheck === 1 ? " torch" : "";
+			print("ÿc4AutoMuleÿc0: In" + gameType + " mule game.");
+			D2Bot.updateStatus("AutoMule: In" + gameType + " mule game.");
+			
+			if (this.torchAnniCheck === 2) {
+				this.dropCharm(true);
+			} else if (this.torchAnniCheck === 1) {
+				this.dropCharm(false);
+			} else {
+				this.dropStuff();
+			}
+
+			status = "done";
 			tick = getTickCount();
 
-			while (getTickCount() - tick < timeout) {
-				if (this.verifyMulePrefix(muleObj.charPrefix)) {
-					print("ÿc4AutoMuleÿc0: Found valid mule");
-					begin = true;
+			while (true) {
+				if (muleObj.continuousMule) {
+					if (this.isFinished()) {
+						D2Bot.printToConsole("Done muling.", sdk.colors.D2Bot.DarkGold);
+						status = "quit";
+					} else {
+						delay(5000);
+					}
+				}
 
+				if (status === "quit") {
 					break;
 				}
 
-				delay(2000);
-			}
+				if (getTickCount() - tick > timeout) {
+					if (Misc.getPlayerCount() > 1) {
+						// we aren't alone currently so chill for a bit longer
+						tick = getTickCount();
+						Packet.questRefresh(); // to prevent disconnect from idleing
+					} else {
+						D2Bot.printToConsole("Mule didn't rejoin. Picking up items.", sdk.colors.D2Bot.Red);
+						Misc.useItemLog = false; // Don't log items picked back up in town.
+						Pickit.pickItems();
 
-			if (!begin) {
-				print("Error - Unable to find mule character");
-				delay(2000);
-				quit();
-			}
-		} else {
-			sendCopyData(null, muleObj.muleProfile, 11, "begin");
-		}
-
-		if (this.torchAnniCheck === 2) {
-			print("ÿc4AutoMuleÿc0: In anni mule game.");
-			D2Bot.updateStatus("AutoMule: In game.");
-			this.dropCharm(true);
-		} else if (this.torchAnniCheck === 1) {
-			print("ÿc4AutoMuleÿc0: In torch mule game.");
-			D2Bot.updateStatus("AutoMule: In game.");
-			this.dropCharm(false);
-		} else {
-			print("ÿc4AutoMuleÿc0: In mule game.");
-			D2Bot.updateStatus("AutoMule: In game.");
-			this.dropStuff();
-		}
-
-		status = "done";
-		tick = getTickCount();
-
-		while (true) {
-			if (muleObj.continuousMule) {
-				if (this.isFinished()) {
-					D2Bot.printToConsole("Done muling.", sdk.colors.D2Bot.DarkGold);
-					status = "quit";
-				} else {
-					delay(5000);
+						break;
+					}
 				}
+
+				delay(500);
 			}
+			
+			return true;
+		} catch (e) {
+			console.error(e);
 
-			if (status === "quit") {
-				break;
-			}
-
-			if (getTickCount() - tick > timeout) {
-				D2Bot.printToConsole("Mule didn't rejoin. Picking up items.", sdk.colors.D2Bot.Red);
-				Misc.useItemLog = false; // Don't log items picked back up in town.
-				Pickit.pickItems();
-
-				break;
-			}
-
-			delay(500);
-		}
-
-		if (!muleObj.continuousMule) {
+			return false;
+		} finally {
+			removeEventListener("scriptmsg", muleModeEvent);
 			removeEventListener("copydata", dropStatusEvent);
-			D2Bot.stop(muleObj.muleProfile, true);
-			delay(1000);
-			muleObj.stopProfile && D2Bot.start(muleObj.stopProfile);
+			
+			if (!muleObj.continuousMule) {
+				D2Bot.stop(muleObj.muleProfile, true);
+				delay(1000);
+				muleObj.stopProfile && D2Bot.start(muleObj.stopProfile);
+			}
+
+			delay(2000);
+			quit();
 		}
-
-		delay(2000);
-		quit();
-
-		return true;
 	},
 
 	// finished if no items are on ground
@@ -443,12 +459,15 @@ const AutoMule = {
 
 		if (item) {
 			do {
-				// exclude trash
-				if (getDistance(me, item) < 20 && item.onGroundOrDropping && Town.ignoredItemTypes.indexOf(item.itemType) === -1) {
+				// check if the items we dropped are on the ground still
+				if (getDistance(me, item) < 20 && item.onGroundOrDropping && AutoMule.gids.includes(item.gid)) {
 					return false;
 				}
 			} while (item.getNext());
 		}
+
+		// we are finished so reset gid list
+		AutoMule.gids.length = 0;
 
 		return true;
 	},
@@ -480,13 +499,12 @@ const AutoMule = {
 
 		let items = (this.getMuleItems() || []);
 		if (items.length === 0) return false;
+		AutoMule.gids = items.map(i => i.gid);
 
-		D2Bot.printToConsole("AutoMule: Transfering items.", sdk.colors.D2Bot.DarkGold);
-
-		for (let i = 0; i < items.length; i += 1) {
-			items[i].drop();
-		}
-
+		D2Bot.printToConsole("AutoMule: Transfering " + items.length + " items.", sdk.colors.D2Bot.DarkGold);
+		D2Bot.printToConsole("AutoMule: " + JSON.stringify(items.map(i => i.prettyPrint)), sdk.colors.D2Bot.DarkGold);
+		
+		items.forEach(item => item.drop());
 		delay(1000);
 		me.cancel();
 
@@ -529,8 +547,8 @@ const AutoMule = {
 				if (Town.ignoredItemTypes.indexOf(item.itemType) === -1
 						&& (Pickit.checkItem(item).result > 0 || (item.isInStash && info.muleInfo.hasOwnProperty("muleOrphans") && info.muleInfo.muleOrphans))
 						&& item.classid !== sdk.quest.item.Cube // Don't drop Horadric Cube
-						&& (item.classid !== sdk.items.SmallCharm || item.quality !== sdk.items.quality.Unique) // Don't drop Annihilus
-						&& (item.classid !== sdk.items.LargeCharm || item.quality !== sdk.items.quality.Unique) // Don't drop Hellfire Torch
+						&& (!item.isAnni) // Don't drop Annihilus
+						&& (!item.isTorch) // Don't drop Hellfire Torch
 						&& (item.isInStash || (item.isInInventory && !Storage.Inventory.IsLocked(item, Config.Inventory))) // Don't drop items in locked slots
 						&& ((!TorchSystem.getFarmers() && !TorchSystem.isFarmer()) || [sdk.quest.item.KeyofTerror, sdk.quest.item.KeyofHate, sdk.quest.item.KeyofDestruction].indexOf(item.classid) === -1)) { // Don't drop Keys if part of TorchSystem
 					// Always drop items on Force or Trigger list
@@ -583,33 +601,29 @@ const AutoMule = {
 	dropCharm: function (dropAnni) {
 		if (!Town.openStash()) return false;
 
+		let item;
+
 		if (dropAnni) {
-			let item = me.findItem(sdk.items.SmallCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique);
+			item = me.findItem(sdk.items.SmallCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique);
 
 			if (item && !Storage.Inventory.IsLocked(item, Config.Inventory)) {
 				D2Bot.printToConsole("AutoMule: Transfering Anni.", sdk.colors.D2Bot.DarkGold);
-				item.drop();
-				delay(1000);
-				me.cancel();
-
-				return true;
+			} else {
+				return false;
 			}
+		} else {
+			item = me.findItem(sdk.items.LargeCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique);
 
-			return false;
+			if (item) {
+				D2Bot.printToConsole("AutoMule: Transfering Torch.", sdk.colors.D2Bot.DarkGold);
+			} else {
+				return false;
+			}
 		}
 
-		let item = me.findItem(sdk.items.LargeCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique);
-
-		if (item) {
-			D2Bot.printToConsole("AutoMule: Transfering Torch.", sdk.colors.D2Bot.DarkGold);
-			item.drop();
-			delay(1000);
-			me.cancel();
-
-			return true;
-		}
-
-		me.cancel();
+		item.drop();
+		delay(1000);
+		me.cancel() && me.cancel();
 
 		return true;
 	},
@@ -623,7 +637,7 @@ const AutoMule = {
 				for (let j in muleObj[i]) {
 					if (muleObj[i].hasOwnProperty(j) && j === "enabledProfiles") {
 						for (let k = 0; k < muleObj[i][j].length; k += 1) {
-							if (muleObj[i][j][k].toLowerCase() === info.profile.toLowerCase()) {
+							if (String.isEqual(muleObj[i][j][k], info.profile)) {
 								return {
 									profile: muleObj[i][j][k],
 									mode: info.mode
@@ -638,14 +652,20 @@ const AutoMule = {
 		return false;
 	},
 
+	/**
+	 * @param {number} mode - mule mode
+	 * @param {string} master - profile that whats to mule
+	 * @param {boolean} continuous - whether we are continuous or not
+	 * @returns {muleObj | boolean}
+	 */
 	getMuleObject: function (mode, master, continuous = false) {
 		mode = mode || 0;
 		let mule = mode > 0 ? this.TorchAnniMules : this.Mules;
 
 		for (let i in mule) {
 			if (mule.hasOwnProperty(i)) {
-				if (mule[i].muleProfile && mule[i].enabledProfiles &&
-						mule[i].muleProfile.toLowerCase() === me.profile.toLowerCase() && (continuous || mule[i].enabledProfiles.includes(master))) {
+				if (mule[i].muleProfile && mule[i].enabledProfiles && String.isEqual(mule[i].muleProfile, me.profile)
+					&& (continuous || mule[i].enabledProfiles.includes(master))) {
 					return mule[i];
 				}
 			}
@@ -663,7 +683,7 @@ const AutoMule = {
 		for (let i in mule) {
 			if (mule.hasOwnProperty(i)) {
 				// Mule profile matches config
-				if (mule[i].muleProfile && mule[i].muleProfile.toLowerCase() === me.profile.toLowerCase() && (continuous || mule[i].enabledProfiles.includes(master))) {
+				if (mule[i].muleProfile && String.isEqual(mule[i].muleProfile, me.profile) && (continuous || mule[i].enabledProfiles.includes(master))) {
 					file = mode === 0 ? "logs/AutoMule." + i + ".json" : "logs/TorchMule." + i + ".json";
 					
 					// If file exists check for valid info
@@ -695,7 +715,7 @@ const AutoMule = {
 	getMuleMode: function() {
 		for (let i in this.Mules) {
 			if (this.Mules.hasOwnProperty(i)) {
-				if (this.Mules[i].muleProfile && this.Mules[i].muleProfile.toLowerCase() === me.profile.toLowerCase()) {
+				if (this.Mules[i].muleProfile && String.isEqual(this.Mules[i].muleProfile, me.profile)) {
 					return 0;
 				}
 			}
@@ -703,7 +723,7 @@ const AutoMule = {
 		
 		for (let i in this.TorchAnniMules) {
 			if (this.TorchAnniMules.hasOwnProperty(i)) {
-				if (this.TorchAnniMules[i].muleProfile && this.TorchAnniMules[i].muleProfile.toLowerCase() === me.profile.toLowerCase()) {
+				if (this.TorchAnniMules[i].muleProfile && String.isEqual(this.TorchAnniMules[i].muleProfile, me.profile)) {
 					return 1;
 				}
 			}
@@ -715,7 +735,7 @@ const AutoMule = {
 	isContinousMule: function () {
 		for (let i in this.Mules) {
 			if (this.Mules.hasOwnProperty(i)) {
-				if (this.Mules[i].muleProfile && this.Mules[i].muleProfile.toLowerCase() === me.profile.toLowerCase()) {
+				if (this.Mules[i].muleProfile && String.isEqual(this.Mules[i].muleProfile, me.profile)) {
 					return this.Mules[i].continuousMule;
 				}
 			}
@@ -723,7 +743,7 @@ const AutoMule = {
 		
 		for (let i in this.TorchAnniMules) {
 			if (this.TorchAnniMules.hasOwnProperty(i)) {
-				if (this.TorchAnniMules[i].muleProfile && this.TorchAnniMules[i].muleProfile.toLowerCase() === me.profile.toLowerCase()) {
+				if (this.TorchAnniMules[i].muleProfile && String.isEqual(this.TorchAnniMules[i].muleProfile, me.profile)) {
 					return this.TorchAnniMules[i].continuousMule;
 				}
 			}
