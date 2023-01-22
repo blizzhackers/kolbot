@@ -851,7 +851,7 @@ function locationAction (location) {
 
 		break;
 	default:
-		if (location !== undefined) {
+		if (location !== undefined && location !== null) {
 			D2Bot.printToConsole("Unhandled location " + location);
 			delay(500);
 			D2Bot.restart();
