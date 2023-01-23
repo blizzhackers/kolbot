@@ -39,10 +39,10 @@ function TravincalLeech () {
 	}));
 
 	if (leader) {
-		const Worker = require("../modules/Worker");
-		addEventListener("chatmsg", chatEvent);
-
 		try {
+			const Worker = require("../modules/Worker");
+			addEventListener("chatmsg", chatEvent);
+
 			Common.Leecher.killLeaderTracker = false;
 			Common.Leecher.leader = leader;
 			Common.Leecher.currentScript = Loader.scriptName();

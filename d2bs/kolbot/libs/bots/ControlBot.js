@@ -7,8 +7,18 @@
 */
 
 function ControlBot() {
+	const startTime = getTickCount();
+	
+	/**
+	 * @type {Object.<string, { firstCmd: number, commands: number, ignored: boolean | number }>}
+	 */
+	this.cmdNicks = {};
+	/**
+	 * @type {Object.<string, { timer: number, requests: number }>}
+	 */
+	this.wpNicks = {};
+
 	let command, nick;
-	let startTime = getTickCount();
 	let shitList = [];
 	let greet = [];
 
@@ -346,8 +356,6 @@ function ControlBot() {
 	};
 
 	this.getWpNick = function (nick) {
-		!this.wpNicks && (this.wpNicks = {});
-
 		if (this.wpNicks.hasOwnProperty(nick)) {
 			if (this.wpNicks[nick].requests > 4) {
 				return "maxrequests";
@@ -474,14 +482,12 @@ function ControlBot() {
 
 	this.floodCheck = function (command) {
 		if (!command || command.length < 2) return false;
-		let cmd = command[0], nick = command[1];
+		let [cmd, nick] = command;
 			
 		// ignore overhead messages
 		if (!nick) return true;
 		// ignore messages not related to our commands
 		if (controlCommands.indexOf(cmd.toLowerCase()) === -1) return false;
-
-		!this.cmdNicks && (this.cmdNicks = {});
 
 		if (!this.cmdNicks.hasOwnProperty(nick)) {
 			this.cmdNicks[nick] = {
@@ -541,98 +547,103 @@ function ControlBot() {
 	// START
 	Config.ShitList && (shitList = ShitList.read());
 
-	addEventListener("chatmsg", chatEvent);
-	addEventListener("gameevent", gameEvent);
-	Town.doChores();
-	Town.goToTown(1);
-	Town.move("portalspot");
+	try {
+		addEventListener("chatmsg", chatEvent);
+		addEventListener("gameevent", gameEvent);
+		Town.doChores();
+		Town.goToTown(1);
+		Town.move("portalspot");
 
-	let spot = { x: me.x, y: me.y };
+		const spot = { x: me.x, y: me.y };
 
-	while (true) {
-		while (greet.length > 0) {
-			nick = greet.shift();
+		while (true) {
+			while (greet.length > 0) {
+				nick = greet.shift();
 
-			if (shitList.indexOf(nick) === -1) {
-				say("Welcome, " + nick + "! For a list of commands say 'help'");
+				if (shitList.indexOf(nick) === -1) {
+					say("Welcome, " + nick + "! For a list of commands say 'help'");
+				}
 			}
-		}
 
-		spot && spot.distance > 10 && Pather.moveTo(spot.x, spot.y);
+			spot.distance > 10 && Pather.moveTo(spot.x, spot.y);
 
-		if (command && !this.floodCheck(command)) {
-			let hostile = this.checkHostiles();
+			if (command && !this.floodCheck(command)) {
+				let hostile = this.checkHostiles();
 
-			switch (command[0].toLowerCase()) {
-			case "help":
-				let str = "";
-				controlCommands.forEach((cmd) => {
-					str += (cmd + " (" + commandDesc[cmd] + "), ");
-				});
+				switch (command[0].toLowerCase()) {
+				case "help":
+					let str = "";
+					controlCommands.forEach((cmd) => {
+						str += (cmd + " (" + commandDesc[cmd] + "), ");
+					});
 
-				say("Commands:");
-				say(str);
+					say("Commands:");
+					say(str);
 
-				break;
-			case "timeleft":
-				let tick = Time.minutes(Config.ControlBot.GameLength) - getTickCount() + startTime;
-				let m = Math.floor(tick / 60000);
-				let s = Math.floor((tick / 1000) % 60);
+					break;
+				case "timeleft":
+					let tick = Time.minutes(Config.ControlBot.GameLength) - getTickCount() + startTime;
+					let m = Math.floor(tick / 60000);
+					let s = Math.floor((tick / 1000) % 60);
 
-				say("Time left: " + (m ? m + " minute" + (m > 1 ? "s" : "") + ", " : "") + s + " second" + (s > 1 ? "s." : "."));
+					say("Time left: " + (m ? m + " minute" + (m > 1 ? "s" : "") + ", " : "") + s + " second" + (s > 1 ? "s." : "."));
 
-				break;
-			case "chant":
-				this.enchant(command[1]);
+					break;
+				case "chant":
+					this.enchant(command[1]);
 
-				break;
-			case "cows":
-				if (hostile) {
-					say("Command disabled because of hostiles.");
+					break;
+				case "cows":
+					if (hostile) {
+						say("Command disabled because of hostiles.");
+
+						break;
+					}
+
+					this.openPortal(command[1]);
+					me.cancel();
+
+					break;
+				case "wps":
+					if (hostile) {
+						say("Command disabled because of hostiles.");
+
+						break;
+					}
+
+					this.giveWps(command[1]);
+
+					break;
+				case "bo":
+					if (hostile) {
+						say("Command disabled because of hostiles.");
+
+						break;
+					}
+
+					this.bo(command[1]);
 
 					break;
 				}
+			}
 
-				this.openPortal(command[1]);
-				me.cancel();
+			command = "";
 
-				break;
-			case "wps":
-				if (hostile) {
-					say("Command disabled because of hostiles.");
+			me.act > 1 && Town.goToTown(1);
+			Config.ControlBot.Chant.AutoEnchant && this.autoChant();
 
-					break;
-				}
-
-				this.giveWps(command[1]);
-
-				break;
-			case "bo":
-				if (hostile) {
-					say("Command disabled because of hostiles.");
-
-					break;
-				}
-
-				this.bo(command[1]);
+			if (getTickCount() - startTime >= Time.minutes(Config.ControlBot.GameLength)) {
+				say((Config.ControlBot.EndMessage ? Config.ControlBot.EndMessage : "Bye"));
+				delay(1000);
 
 				break;
 			}
+
+			delay(200);
 		}
-
-		command = "";
-
-		me.act > 1 && Town.goToTown(1);
-		Config.ControlBot.Chant.AutoEnchant && this.autoChant();
-
-		if (getTickCount() - startTime >= Time.minutes(Config.ControlBot.GameLength)) {
-			say((Config.ControlBot.EndMessage ? Config.ControlBot.EndMessage : "Bye"));
-			delay(1000);
-
-			break;
-		}
-
-		delay(200);
+	} finally {
+		removeEventListener("chatmsg", chatEvent);
+		removeEventListener("gameevent", gameEvent);
 	}
 
 	return true;
