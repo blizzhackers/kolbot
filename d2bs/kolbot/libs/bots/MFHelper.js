@@ -64,7 +64,7 @@ function MFHelper() {
 			}
 
 			Town.move("portalspot");
-			print("revived!");
+			console.log("revived!");
 		}
 
 		if (player) {
@@ -84,7 +84,7 @@ function MFHelper() {
 				if (command.includes("quit")) {
 					break;
 				} else if (command.includes("goto")) {
-					print("ÿc4MFHelperÿc0: Goto");
+					console.log("ÿc4MFHelperÿc0: Goto");
 					split = command.substr(6);
 
 					try {
@@ -95,7 +95,7 @@ function MFHelper() {
 						Town.goToTown(split, true);
 						Town.move("portalspot");
 					} catch (townerror) {
-						print(townerror);
+						console.log(townerror);
 					}
 
 					delay(500 + me.ping);
@@ -108,17 +108,12 @@ function MFHelper() {
 
 					delay(500 + me.ping);
 				} else if (command.includes("cows")) {
-					print("ÿc4MFHelperÿc0: Clear Cows");
+					console.log("ÿc4MFHelperÿc0: Clear Cows");
 
-					for (let i = 0; i < 5; i += 1) {
-						if (Town.goToTown(1) && Pather.usePortal(39)) {
-							break;
-						}
-
-						delay(500 + me.ping);
-					}
-
-					if (me.inArea(sdk.areas.MooMooFarm)) {
+					if (Misc.poll(() => {
+						Town.goToTown(1) && Pather.usePortal(sdk.areas.MooMooFarm);
+						return me.inArea(sdk.areas.MooMooFarm);
+					}, Time.minutes(1), 500 + me.ping)) {
 						Precast.doPrecast(false);
 						Common.Cows.clearCowLevel();
 						delay(1000);
@@ -127,16 +122,12 @@ function MFHelper() {
 							Town.goToTown();
 						}
 					} else {
-						print("Failed to use portal.");
+						console.warn("Failed to use portal. Currently in area: " + me.area);
 					}
 				} else {
-					for (let i = 0; i < 5; i += 1) {
-						if (Pather.usePortal(player.area, player.name)) {
-							break;
-						}
-
-						delay(500 + me.ping);
-					}
+					// check that we are in the town of the players act so we can take their portal
+					!me.inArea(sdk.areas.townOf(player.area)) && Town.goToTown(sdk.areas.actOf(player.area));
+					Misc.poll(() => Pather.usePortal(player.area, player.name), Time.seconds(15), 500 + me.ping);
 
 					delay(1000); // delay to make sure leader's area is accurate
 
@@ -144,7 +135,7 @@ function MFHelper() {
 						Precast.doPrecast(true);
 
 						if (command.includes("kill")) {
-							print("ÿc4MFHelperÿc0: Kill");
+							console.log("ÿc4MFHelperÿc0: Kill");
 							split = command.split("kill ")[1];
 
 							try {
@@ -155,14 +146,14 @@ function MFHelper() {
 								Attack.kill(split);
 								Pickit.pickItems();
 							} catch (killerror) {
-								print(killerror);
+								console.error(killerror);
 							}
 						} else if (command.includes("clearlevel")) {
-							print("ÿc4MFHelperÿc0: Clear Level " + getArea().name);
+							console.log("ÿc4MFHelperÿc0: Clear Level " + getArea().name);
 							Precast.doPrecast(true);
 							Attack.clearLevel(Config.ClearType);
 						} else if (command.indexOf("clear") > -1) {
-							print("ÿc4MFHelperÿc0: Clear");
+							console.log("ÿc4MFHelperÿc0: Clear");
 							split = command.split("clear ")[1];
 
 							try {
@@ -172,10 +163,10 @@ function MFHelper() {
 
 								Attack.clear(15, 0, split);
 							} catch (killerror2) {
-								print(killerror2);
+								console.error(killerror2);
 							}
 						} else if (command.includes("council")) {
-							print("ÿc4MFHelperÿc0: Kill Council");
+							console.log("ÿc4MFHelperÿc0: Kill Council");
 							Attack.clearList(Attack.getMob([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3], 0, 40));
 						}
 
@@ -184,6 +175,8 @@ function MFHelper() {
 						if (!Pather.getPortal(null, player.name) || !Pather.usePortal(null, player.name)) {
 							Town.goToTown();
 						}
+					} else if (!me.inTown && !me.inArea(player.area)) {
+						Town.goToTown(sdk.areas.actOf(player.area));
 					}
 				}
 			}
