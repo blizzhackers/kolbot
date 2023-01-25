@@ -219,69 +219,72 @@ function DeveloperMode() {
 		return false;
 	};
 
-	let copiedConfig = Misc.copy(Config);
-	print("starting developermode");
-	me.overhead("Started developer mode");
-	addEventListener("gamepacketsent", packetSent);
-	addEventListener("gamepacket", packetReceived);
-	Config.Silence = false;
+	const copiedConfig = Misc.copy(Config);
 
-	while (!done) {
-		if (action) {
-			includeIfNotIncluded("bots/" + action + ".js");
+	try {
+		console.log("starting developermode");
+		me.overhead("Started developer mode");
+		addEventListener("gamepacketsent", packetSent);
+		addEventListener("gamepacket", packetReceived);
+		Config.Silence = false;
 
-			if (!UnitInfo.cleared) {
-				UnitInfo.remove();
-				userAddon = false;
-			}
+		while (!done) {
+			if (action) {
+				includeIfNotIncluded("bots/" + action + ".js");
 
-			if (isIncluded("bots/" + action + ".js")) {
-				try {
-					Loader.runScript(action);
-				} catch (e) {
-					print(e);
+				if (!UnitInfo.cleared) {
+					UnitInfo.remove();
+					userAddon = false;
 				}
-			} else {
-				print("Failed to include: " + action);
+
+				if (isIncluded("bots/" + action + ".js")) {
+					try {
+						Loader.runScript(action);
+					} catch (e) {
+						console.error(e);
+					}
+				} else {
+					console.warn("Failed to include: " + action);
+				}
+
+				me.overhead("Done with action");
+				action = false;
 			}
 
-			me.overhead("Done with action");
-			action = false;
-		}
+			if (command) {
+				if (!UnitInfo.cleared) {
+					UnitInfo.remove();
+					userAddon = false;
+				}
 
-		if (command) {
-			if (!UnitInfo.cleared) {
-				UnitInfo.remove();
-				userAddon = false;
+				try {
+					eval(command);
+				} catch (e) {
+					console.error(e);
+				}
+
+				me.overhead("Done with action");
+				command = false;
 			}
 
-			try {
-				eval(command);
-			} catch (e) {
-				print(e);
+			if (userAddon) {
+				!UnitInfo.cleared && !Game.getSelectedUnit() && UnitInfo.remove();
+				unitInfo = Game.getSelectedUnit();
+				UnitInfo.createInfo(unitInfo);
 			}
 
-			me.overhead("Done with action");
-			command = false;
-		}
+			if (test) {
+				me.overhead("done");
+				test = false;
+			}
 
-		if (userAddon) {
-			!UnitInfo.cleared && !Game.getSelectedUnit() && UnitInfo.remove();
-			unitInfo = Game.getSelectedUnit();
-			UnitInfo.createInfo(unitInfo);
+			delay(100);
 		}
-
-		if (test) {
-			me.overhead("done");
-			test = false;
-		}
-
-		delay(100);
+	} finally {
+		removeEventListener("gamepacketsent", packetSent);
+		removeEventListener("gamepacket", packetReceived);
+		Config = copiedConfig;
 	}
-
-	removeEventListener("gamepacketsent", packetSent);
-	removeEventListener("gamepacket", packetReceived);
-	Config = copiedConfig;
 	
 	return true;
 }
