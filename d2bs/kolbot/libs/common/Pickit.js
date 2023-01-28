@@ -297,6 +297,12 @@ const Pickit = {
 		if (Cubing.checkItem(unit)) return resultObj(Pickit.Result.CUBING);
 		if (Runewords.checkItem(unit)) return resultObj(Pickit.Result.RUNEWORD);
 
+		// if Gemhunting, pick Item for Cubing, if no other system needs it
+		if ((Scripts.GemHunter || Config.ScanShrines.includes(sdk.shrines.Gem)) //gemhunter active
+			&& rval.result === Pickit.Result.UNWANTED // no other subsystem needs it
+			&& Config.GemHunter.GemList.some((p) => [unit.classid - 1, unit.classid].includes(p)) // base and upgraded gem will be kept
+		) return resultObj(Pickit.Result.CUBING);
+
 		if (rval.result === Pickit.Result.UNWANTED && !getBaseStat("items", unit.classid, "quest") && !Town.ignoredItemTypes.includes(unit.itemType)
 			&& ((unit.isInInventory && (me.inTown || !Config.FieldID.Enabled)) || (me.gold < Config.LowGold || (me.gold < 500000 && Config.PickitFiles.length === 0)))) {
 			// Gold doesn't take up room, just pick it up
