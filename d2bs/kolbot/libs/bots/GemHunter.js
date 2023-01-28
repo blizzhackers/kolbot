@@ -12,10 +12,6 @@ function GemHunter () {
 		return false;
 	}
 
-	// let GemHunter Pick the shrines and not the Pather
-	let initalScanShrines = Config.ScanShrines;
-	Config.ScanShrines = Config.ScanShrines.filter((p) => p !== sdk.shrines.Gem);
-
 	for (let i = 0; i < Config.GemHunter.AreaList.length; i++) {
 		if (Town.getGemsInInv().length > 0) {
 			print("ÿc4GemHunterÿc0: Moving to " + Pather.getAreaName(Config.GemHunter.AreaList[i]));
@@ -31,6 +27,5 @@ function GemHunter () {
 			}
 		}
 	}
-	Config.ScanShrines = initalScanShrines;
 	return true;
 }
