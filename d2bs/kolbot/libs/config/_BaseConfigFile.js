@@ -306,6 +306,18 @@
 	Scripts.ClearAnyArea = false; // Clear any area. Uses Config.ClearType to determine which type of monsters to kill.
 		Config.ClearAnyArea.AreaList = []; // List of area ids to clear. See sdk/areas.txt
 
+	Scripts.GemHunter = false; // Hunt for Gem Shrines. add the upgraded gems to your pickit. Upgraded version of gems will be auto-picked
+		// List of are ids to hunt in. See sdk/areas.txt or use sdk.areas.AreaName see -> \kolbot\libs\modules\sdk.js
+		Config.GemHunter.AreaList = [
+			sdk.areas.ColdPlains, sdk.areas.StonyField, sdk.areas.UndergroundPassageLvl1, sdk.areas.DarkWood,
+			sdk.areas.BlackMarsh, sdk.areas.TamoeHighland
+		];
+		// Priority List for Gems to keep in inventory. highest priority first. see \kolbot\libs\modules\sdk.js for gem types
+		Config.GemHunter.GemList = [
+			sdk.items.gems.Flawless.Ruby, sdk.items.gems.Flawless.Amethyst, sdk.items.gems.Flawless.Sapphire, sdk.items.gems.Flawless.Topaz,
+			sdk.items.gems.Flawless.Emerald, sdk.items.gems.Flawless.Diamond, sdk.items.gems.Flawless.Skull
+		];
+		
 	// ############################ //
 	/* #### CHARACTER SETTINGS #### */
 	// ############################ //
