@@ -539,18 +539,31 @@ const AutoMule = {
 
 		if (!info || !info.hasOwnProperty("muleInfo")) return false;
 
-		let item = me.getItem(-1, sdk.items.mode.inStorage);
 		let items = [];
+		let item = me.getItem(-1, sdk.items.mode.inStorage);
+		const muleOrphans = !!(info.muleInfo.hasOwnProperty("muleOrphans") && info.muleInfo.muleOrphans);
+
+		/**
+		 * @param {ItemUnit} item 
+		 */
+		const isAKey = (item) => [sdk.items.quest.KeyofTerror, sdk.items.quest.KeyofHate, sdk.items.quest.KeyofDestruction].includes(item.classid);
+		
+		/**
+		 * check if wanted by any of the systems
+		 * @param {ItemUnit} item
+		 * @returns {boolean} if item is wanted by various systems
+		 */
+		const isWanted = (item) => (AutoMule.cubingIngredient(item) || AutoMule.runewordIngredient(item) || AutoMule.utilityIngredient(item));
 
 		if (item) {
 			do {
 				if (Town.ignoredItemTypes.indexOf(item.itemType) === -1
-						&& (Pickit.checkItem(item).result > 0 || (item.isInStash && info.muleInfo.hasOwnProperty("muleOrphans") && info.muleInfo.muleOrphans))
+						&& (![Pickit.Result.UNID, Pickit.Result.UNWANTED, Pickit.Result.TRASH].includes(Pickit.checkItem(item).result) || (item.isInStash && muleOrphans))
 						&& item.classid !== sdk.quest.item.Cube // Don't drop Horadric Cube
 						&& (!item.isAnni) // Don't drop Annihilus
 						&& (!item.isTorch) // Don't drop Hellfire Torch
 						&& (item.isInStash || (item.isInInventory && !Storage.Inventory.IsLocked(item, Config.Inventory))) // Don't drop items in locked slots
-						&& ((!TorchSystem.getFarmers() && !TorchSystem.isFarmer()) || [sdk.quest.item.KeyofTerror, sdk.quest.item.KeyofHate, sdk.quest.item.KeyofDestruction].indexOf(item.classid) === -1)) { // Don't drop Keys if part of TorchSystem
+						&& ((!TorchSystem.getFarmers() && !TorchSystem.isFarmer()) || isAKey(item))) { // Don't drop Keys if part of TorchSystem
 					// Always drop items on Force or Trigger list
 					if (this.matchItem(item, Config.AutoMule.Force.concat(Config.AutoMule.Trigger))
 						// Don't drop Excluded items or Runeword/Cubing/CraftingSystem ingredients
