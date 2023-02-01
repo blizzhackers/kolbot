@@ -24,12 +24,11 @@ const ItemHooks = {
 
 	addToCodeByClassIdAndQuality: function (id, setName = "", uniqueName = "") {
 		if (!id) return;
+		if (!this.itemCodeByClassIdAndQuality[id]) this.itemCodeByClassIdAndQuality[id] = [];
 		if (setName) {
-			this.itemCodeByClassIdAndQuality[id] = [sdk.items.quality.Set];
 			this.itemCodeByClassIdAndQuality[id][sdk.items.quality.Set] = setName;
 		}
 		if (uniqueName) {
-			this.itemCodeByClassIdAndQuality[id] = [sdk.items.quality.Unique];
 			this.itemCodeByClassIdAndQuality[id][sdk.items.quality.Unique] = uniqueName;
 		}
 	},
@@ -164,7 +163,7 @@ const ItemHooks = {
 					
 					break;
 				default:
-					code += (!!this.itemCodeByClassIdAndQuality[item.classid] ? this.itemCodeByClassIdAndQuality[item.classid][item.quality] : item.name);
+					code += ((!!this.itemCodeByClassIdAndQuality[item.classid] && !!this.itemCodeByClassIdAndQuality[item.classid][item.quality]) ? this.itemCodeByClassIdAndQuality[item.classid][item.quality] : item.name);
 					
 					break;
 				}
