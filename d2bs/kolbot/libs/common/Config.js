@@ -644,5 +644,9 @@ let Config = {
 		Template: "",
 		Verbose: false,
 		DebugMode: false
+	},
+	GemHunter: {
+		AreaList: [],
+		GemList: []
 	}
 };

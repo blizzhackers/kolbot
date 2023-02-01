@@ -185,6 +185,7 @@ const Town = {
 		Cubing.doCubing();
 		Runewords.makeRunewords();
 		this.stash(true);
+		this.storeGem();
 		!!me.getItem(sdk.items.TomeofTownPortal) && this.clearScrolls();
 
 		me.act !== preAct && this.goToTown(preAct);
@@ -1609,7 +1610,68 @@ const Town = {
 	canStash: function (item) {
 		// Some quest items that have to be in inventory or equipped
 		let questClassids = [sdk.items.quest.HoradricStaff, sdk.items.quest.KhalimsWill];
-		return !(this.ignoredItemTypes.includes(item.itemType) || questClassids.includes(item.classid) || !Storage.Stash.CanFit(item));
+		return !(this.ignoredItemTypes.includes(item.itemType) || questClassids.includes(item.classid) || !Storage.Stash.CanFit(item) || !this.canStashGem(item));
+	},
+
+	/**
+	 * get ordered list of gems in inventory to use with Gem Hunter Script
+	 * @returns {ItemUnit[]} ordered list of relevant gems
+	 */
+	getGemsInInv: function () {
+		let GemList = Config.GemHunter.GemList;
+		return me.getItemsEx()
+			.filter((p) => p.isInInventory && GemList.includes(p.classid))
+			.sort((a, b) => GemList.indexOf(a.classid) - GemList.indexOf(b.classid));
+	},
+
+	/**
+	 * get ordered list of gems in stash to use with Gem Hunter Script
+	 * @returns {ItemUnit[]} ordered list of relevant gems
+	 */
+	getGemsInStash: function () {
+		let GemList = Config.GemHunter.GemList;
+		return me.getItemsEx()
+			.filter((p) => p.isInStash && GemList.includes(p.classid))
+			.sort((a, b) => GemList.indexOf(a.classid) - GemList.indexOf(b.classid));
+	},
+
+	/**
+	 * gem check for use with Gem Hunter Script
+	 * @param {ItemUnit} item 
+	 * @returns {boolean} if we should stash this gem
+	 */
+	canStashGem: function (item) {
+		// we aren't using the gem hunter script or we aren't scanning for the gem shrines while moving
+		if (!(Scripts.GemHunter || Config.ScanShrines.includes(sdk.shrines.Gem))) return true;
+		// not in our list
+		if (Config.GemHunter.GemList.indexOf(item.classid) === -1) return true;
+
+		let GemList = Config.GemHunter.GemList;
+		let gemsInStash = Town.getGemsInStash();
+		let bestGeminStash = gemsInStash.length > 0 ? gemsInStash.first().classid : -1;
+		let gemsInInvo = Town.getGemsInInv();
+		let bestGeminInv = gemsInInvo.length > 0 ? gemsInInvo.first().classid : -1;
+
+		return (
+			(GemList.indexOf(bestGeminStash) < GemList.indexOf(bestGeminInv)) // better one in stash
+			|| (GemList.indexOf(bestGeminInv) < GemList.indexOf(item.classid)) // better one in inv
+			|| (gemsInInvo.filter((p) => p.classid === item.classid).length > 1));  // another one in inv
+	},
+
+	/**
+	 * move best gem from stash to inventory, if none in inventrory
+	 * to use with Gem Hunter Script
+	 * @returns {boolean} if any gem has been moved
+	 */
+	storeGem: function () {
+		if (Scripts.GemHunter || Config.ScanShrines.includes(sdk.shrines.Gem)) {
+			if (this.getGemsInInv().length === 0 && this.getGemsInStash().length > 0) {
+				let gem = this.getGemsInStash().first();
+				Storage.Inventory.MoveTo(gem) && Misc.itemLogger("Inventoried", gem);
+				return true;
+			}
+		}
+		return false;
 	},
 
 	stash: function (stashGold = true) {
