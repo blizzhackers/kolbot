@@ -567,7 +567,7 @@ const AutoMule = {
 					// Always drop items on Force or Trigger list
 					if (this.matchItem(item, Config.AutoMule.Force.concat(Config.AutoMule.Trigger))
 						// Don't drop Excluded items or Runeword/Cubing/CraftingSystem ingredients
-						|| (!this.matchItem(item, Config.AutoMule.Exclude) && (!this.cubingIngredient(item) && !this.runewordIngredient(item) && !this.utilityIngredient(item)))) {
+						|| (!this.matchItem(item, Config.AutoMule.Exclude) && !isWanted(item))) {
 						items.push(copyUnit(item));
 					}
 				}
