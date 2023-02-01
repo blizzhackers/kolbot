@@ -212,42 +212,35 @@ const ActionHooks = {
 				if (this.blockKeyEventFlags.some((flag) => getUIFlag(flag))) {
 					break;
 				}
-
-				TextHooks.getHook("itemStatus", TextHooks.statusHooks).hook.text = "ÿc4Key 7ÿc0: " + (ItemHooks.enabled ? "Enable" : "Disable") + " Item Filter";
 				ItemHooks.enabled = !ItemHooks.enabled;
+				if (!!TextHooks.getHook("itemStatus", TextHooks.statusHooks)) TextHooks.getHook("itemStatus", TextHooks.statusHooks).hook.text = "ÿc4Key 7ÿc0: " + (ItemHooks.enabled ? "Disable" : "Enable") + " Item Filter";
 
 				break;
 			case sdk.keys.Eight:
 				if (this.blockKeyEventFlags.some((flag) => getUIFlag(flag))) {
 					break;
 				}
-
-				TextHooks.getHook("monsterStatus", TextHooks.statusHooks).hook.text = "ÿc4Key 8ÿc0: " + (MonsterHooks.enabled ? "Enable" : "Disable") + " Monsters";
 				MonsterHooks.enabled = !MonsterHooks.enabled;
+				if (!!TextHooks.getHook("monsterStatus", TextHooks.statusHooks)) TextHooks.getHook("monsterStatus", TextHooks.statusHooks).hook.text = "ÿc4Key 8ÿc0: " + (MonsterHooks.enabled ? "Disable" : "Enable") + " Monsters";
 
 				break;
 			case sdk.keys.Nine:
 				if (this.blockKeyEventFlags.some((flag) => getUIFlag(flag))) {
 					break;
 				}
-
-				TextHooks.getHook("vectorStatus", TextHooks.statusHooks).hook.text = "ÿc4Key 9ÿc0: " + (VectorHooks.enabled ? "Enable" : "Disable") + " Vectors";
 				VectorHooks.enabled = !VectorHooks.enabled;
+				if (!!TextHooks.getHook("vectorStatus", TextHooks.statusHooks)) TextHooks.getHook("vectorStatus", TextHooks.statusHooks).hook.text = "ÿc4Key 9ÿc0: " + (VectorHooks.enabled ? "Disable" : "Enable") + " Vectors";
 
 				break;
 			case sdk.keys.NumpadDash:
 				if (this.blockKeyEventFlags.some((flag) => getUIFlag(flag))) {
 					break;
 				}
-
 				if (ItemHooks.pickitEnabled) {
 					ItemHooks.pickitEnabled = false;
-					TextHooks.getHook("pickitStatus", TextHooks.statusHooks).hook.text = "ÿc4Num -ÿc0: ÿc1Default Filter";
 				} else {
 					ItemHooks.pickitEnabled = true;
 					ItemHooks.flush();
-					TextHooks.getHook("pickitStatus", TextHooks.statusHooks).hook.text = "ÿc4Num -ÿc0: ÿc<Your Filter";
-
 					if (!Hooks.saidMessage) {
 						showConsole();
 						print("ÿc<Notify :: ÿc0Item filter has switched to using your Pickit files, this is just to notify you of that. If you didn't add any nip files you probably should switch back.");
@@ -255,6 +248,7 @@ const ActionHooks = {
 						Hooks.saidMessage = true;
 					}
 				}
+				if (!!TextHooks.getHook("pickitStatus", TextHooks.statusHooks)) TextHooks.getHook("pickitStatus", TextHooks.statusHooks).hook.text = "ÿc4N-Pad - ÿc0: " + (ItemHooks.pickitEnabled ? "ÿc<Your Filter" : "ÿc1Default Filter");
 
 				break;
 			case sdk.keys.Insert:
