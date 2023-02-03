@@ -3,36 +3,24 @@
 *  @author      jaenster, theBGuy
 *  @desc        development tool for readability
 *  @format      sdk.objprop.objprop.ObjProp (excludes functions which use sdk.objprop.camelCase)
+*  @type        UMD module
 *
 */
 
-// todo: break this up to make more sense. Example
-/*
-item: {
-	mode: {
-
-	},
-	class: {
-
-	},
-	quality: {
-
-	},
-	type: {
-
-	},
-	classid: {
-
-	},
-	locale: {
-
-	},
-	body and storage? It onlys applies to items
-	or would it make more sense for player.body?
-}
-*/
-
-(function (module) {
+(function (root, factory) {
+	if (typeof module === "object" && typeof module.exports === "object") {
+		const v = factory();
+		if (v !== undefined) module.exports = v;
+	} else if (typeof define === "function" && define.amd) {
+		define([], factory);
+	} else {
+		root.sdk = factory();
+	}
+}(this, function () {
+	"use strict";
+	/**
+	 * @exports sdk
+	 */
 	const sdk = {
 		waypoints: {
 			Ids: [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539],
@@ -4771,6 +4759,7 @@ item: {
 				ReassignPlayer: 0x15,
 				SetSkill: 0x23,
 				Chat: 0x26,
+				UniqueEvents: 0x89,
 				WeaponSwitch: 0x97,
 			}
 		}
@@ -4878,5 +4867,5 @@ item: {
 		},
 	};
 
-	module.exports = sdk;
-})(module);
+	return sdk;
+}));

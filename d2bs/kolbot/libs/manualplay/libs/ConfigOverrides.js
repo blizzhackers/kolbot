@@ -5,7 +5,7 @@
 *
 */
 
-includeIfNotIncluded("common/Config.js");
+includeIfNotIncluded("core/Config.js");
 
 let original = Config.init;
 
@@ -103,11 +103,11 @@ Config.init = function (notify) {
 	}
 
 	try {
-		if (Config.AutoBuild.Enabled === true && !isIncluded("common/AutoBuild.js") && include("common/AutoBuild.js")) {
+		if (Config.AutoBuild.Enabled === true && !isIncluded("core/Auto/AutoBuild.js") && include("core/Auto/AutoBuild.js")) {
 			AutoBuild.initialize();
 		}
 	} catch (e3) {
-		print("ÿc8Error in libs/common/AutoBuild.js (AutoBuild system is not active!)");
+		print("ÿc8Error in libs/core/AutoBuild.js (AutoBuild system is not active!)");
 		print(e3.toSource());
 	}
 };

@@ -1,0 +1,43 @@
+{
+  "compilerOptions": {
+		"module": "None",
+		"lib": [
+			"ES2015",
+			"es2015.collection",
+			"ES2015.Promise",
+			"ES2016.Array.Include",
+			"ES2017.Object",
+			"ScriptHost",
+		],
+		"target": "ES6",
+		"allowJs": true,
+		"checkJs": false,
+		"moduleResolution": "classic",
+		"allowUmdGlobalAccess": true,
+		"esModuleInterop": true,
+		"noImplicitAny": true,
+		"noEmit": true,
+		"strict": true,
+		// "declaration": true,
+		// "emitDeclarationOnly": true,
+		"baseUrl": "./d2bs/kolbot/",
+		"rootDir": "./d2bs/kolbot/",
+		// "outDir": "./d2bs/kolbot/sdk/types/",
+		"outFile": "./d2bs/kolbot/data/out.js",
+		"typeRoots": [
+			"./d2bs/kolbot/sdk/global.d.ts",
+			"./d2bs/kolbot/sdk/types/",
+			"./d2bs/kolbot/libs/SoloPlay/index.d.ts",
+		],
+  },
+  "include": [
+		"./d2bs/kolbot/*.dbj",
+		"./d2bs/kolbot/**/*.js",
+		"**/*.dbl",
+  ],
+  "exclude": [
+		"node_modules",
+		"**/node_modules/*",
+		"**/data/",
+	],
+}

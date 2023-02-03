@@ -21,7 +21,7 @@ function LoadConfig() {
 	 * If you want to change the order of the scripts, just change the order of their lines by using cut and paste.
 	 */
 
-	// User addon script. Read the description in libs/bots/UserAddon.js
+	// User addon script. Read the description in libs/scripts/UserAddon.js
 	Scripts.UserAddon = true; // !!!YOU MUST SET THIS TO FALSE IF YOU WANT TO RUN BOSS/AREA SCRIPTS!!!
 
 	// Battle orders script - Use this for 2+ characters (for example BO barb + sorc)
@@ -301,7 +301,7 @@ function LoadConfig() {
 	
 	// ##### EXTRA SCRIPTS ##### //
 	Scripts.GhostBusters = false; // Kill ghosts in most areas that contain them (rune hunting)
-	Scripts.ChestMania = false; // Open chests in configured areas. See sdk/areas.txt or use sdk.areas.AreaName see -> \kolbot\libs\modules\sdk.js
+	Scripts.ChestMania = false; // Open chests in configured areas. See sdk/txt/areas.txt or use sdk.areas.AreaName see -> \kolbot\libs\modules\sdk.js
 		// List of act 1 areas to open chests in
 		Config.ChestMania.Act1 = [
 			sdk.areas.CaveLvl2, sdk.areas.UndergroundPassageLvl2, sdk.areas.HoleLvl2, sdk.areas.PitLvl2, sdk.areas.Crypt, sdk.areas.Mausoleum
@@ -323,10 +323,10 @@ function LoadConfig() {
 			sdk.areas.GlacialTrail, sdk.areas.DrifterCavern, sdk.areas.IcyCellar, sdk.areas.Abaddon, sdk.areas.PitofAcheron, sdk.areas.InfernalPit
 		];
 	Scripts.ClearAnyArea = false; // Clear any area. Uses Config.ClearType to determine which type of monsters to kill.
-		Config.ClearAnyArea.AreaList = []; // List of area ids to clear. See sdk/areas.txt
+		Config.ClearAnyArea.AreaList = []; // List of area ids to clear. See sdk/txt/areas.txt
 
 	Scripts.GemHunter = false; // Hunt for Gem Shrines. add the upgraded gems to your pickit. Upgraded version of gems will be auto-picked
-		// List of are ids to hunt in. See sdk/areas.txt or use sdk.areas.AreaName see -> \kolbot\libs\modules\sdk.js
+		// List of are ids to hunt in. See sdk/txt/areas.txt or use sdk.areas.AreaName see -> \kolbot\libs\modules\sdk.js
 		Config.GemHunter.AreaList = [
 			sdk.areas.ColdPlains, sdk.areas.StonyField, sdk.areas.UndergroundPassageLvl1, sdk.areas.DarkWood,
 			sdk.areas.BlackMarsh, sdk.areas.TamoeHighland
@@ -382,7 +382,7 @@ function LoadConfig() {
 	Config.FieldID.PacketID = true; // use packets to speed up id process (recommended to use this)
 	Config.FieldID.UsedSpace = 80; // how much space has been used before trying to field id, set to 0 to id after every item picked
 	Config.DroppedItemsAnnounce.Enable = false;	// Announce Dropped Items to in-game newbs
-	Config.DroppedItemsAnnounce.Quality = []; // Quality of item to announce. See NTItemAlias.dbl for values. Example: Config.DroppedItemsAnnounce.Quality = [6, 7, 8];
+	Config.DroppedItemsAnnounce.Quality = []; // Quality of item to announce. See core/Data/NTItemAlias.js for values. Example: Config.DroppedItemsAnnounce.Quality = [6, 7, 8];
 
 	// Potion settings
 	Config.UseHP = 75; // Drink a healing potion if life is under designated percent.
@@ -426,7 +426,7 @@ function LoadConfig() {
 	/* ##### PICKIT SETTINGS ##### */
 	// ########################### //
 	// Default folder is kolbot/pickit.
-	// Item name and classids located in NTItemAlias.dbl or modules/sdk.js
+	// Item name and classids located in core/Data/NTItemAlias.js or modules/sdk.js
 
 	//Config.PickitFiles.push("kolton.nip");
 	//Config.PickitFiles.push("LLD.nip");
@@ -434,7 +434,7 @@ function LoadConfig() {
 	Config.FastPick = false; // Check and pick items between attacks
 	Config.OpenChests.Enabled = false; // Open chests. Controls key buying.
 	Config.OpenChests.Range = 15; // radius to scan for chests while pathing
-	Config.OpenChests.Types = ["chest", "chest3", "armorstand", "weaponrack"]; // which chests to open, use "all" to open all chests. See sdk/chests.txt for full list of chest names
+	Config.OpenChests.Types = ["chest", "chest3", "armorstand", "weaponrack"]; // which chests to open, use "all" to open all chests. See sdk/txt/chests.txt for full list of chest names
 
 	// ########################### //
 	/* ##### PUBLIC SETTINGS ##### */
@@ -467,7 +467,7 @@ function LoadConfig() {
 	Config.LastMessage = ""; // Message or array of messages to say at the end of the run. Use $nextgame to say next game - "Next game: $nextgame" (works with lead entry point)
 
 	// Shrine Scanner - scan for shrines while moving.
-	// Put the shrine types in order of priority (from highest to lowest). For a list of types, see sdk/shrines.txt
+	// Put the shrine types in order of priority (from highest to lowest). For a list of types, see sdk/txt/shrines.txt
 	Config.ScanShrines = [];
 
 	// DClone config
@@ -570,7 +570,7 @@ function LoadConfig() {
 	Config.GambleGoldStart = 1000000;
 	Config.GambleGoldStop = 500000;
 
-	// List of item names or classids for gambling. Check libs/NTItemAlias.dbl file for other item classids.
+	// List of item names or classids for gambling. Check libs/core/Data/NTItemAlias.js file for other item classids.
 	Config.GambleItems.push("Amulet");
 	Config.GambleItems.push("Ring");
 	Config.GambleItems.push("Circlet");
@@ -579,13 +579,13 @@ function LoadConfig() {
 	// ########################### //
 	/* ##### CUBING SETTINGS ##### */
 	// ########################### //
-	/* All recipe names are available in Templates/Cubing.txt. For item names/classids check NTItemAlias.dbl
+	/* All recipe names are available in Templates/Cubing.txt. For item names/classids check core/Data/NTItemAlias.js
 	 * The format is Config.Recipes.push([recipe_name, item_name_or_classid, etherealness]). Etherealness is optional and only applies to some recipes.
 	 */
 	Config.Cubing = false; // Set to true to enable cubing.
 	Config.ShowCubingInfo = true; // Show cubing messages on console
 
-	// Ingredients for the following recipes will be auto-picked, for classids check libs/NTItemAlias.dbl
+	// Ingredients for the following recipes will be auto-picked, for classids check libs/core/Data/NTItemAlias.js
 
 	//Config.Recipes.push([Recipe.Gem, "Flawless Amethyst"]); // Make Perfect Amethyst
 	//Config.Recipes.push([Recipe.Gem, "Flawless Topaz"]); // Make Perfect Topaz
@@ -671,7 +671,7 @@ function LoadConfig() {
 	// ############################### //
 	// Additional item info log settings. All info goes to \logs\ItemLog.txt
 	Config.ItemInfo = false; // Log stashed, skipped (due to no space) or sold items.
-	Config.ItemInfoQuality = []; // The quality of sold items to log. See NTItemAlias.dbl for values. Example: Config.ItemInfoQuality = [6, 7, 8];
+	Config.ItemInfoQuality = []; // The quality of sold items to log. See core/Data/NTItemAlias.js for values. Example: Config.ItemInfoQuality = [6, 7, 8];
 
 	// Manager Item Log Screen
 	Config.LogKeys = false; // Log keys on item viewer
@@ -691,7 +691,7 @@ function LoadConfig() {
 	 * AutoSkill will automatically spend skill points and it can also allocate any prerequisite skills as required.
 	 *
 	 * Format: Config.AutoSkill.Build = [[skillID, count, satisfy], [skillID, count, satisfy], ... [skillID, count, satisfy]];
-	 *	skill - skill id number (see /sdk/skills.txt)
+	 *	skill - skill id number (see /sdk/txt/skills.txt)
 	 *	count - maximum number of skill points to allocate for that skill
 	 *	satisfy - boolean value to stop(true) or continue(false) further allocation until count is met. Defaults to true if not specified.
 	 *

@@ -3,19 +3,47 @@
  * @author Jaenster, theBGuy(added the rest of the controls)
  */
 (function (module) {
-
 	/**
-     * @constructor - Not callable as a function
-     *
-     * @method Control.click(targetx, targety)
-     * @method Control.setText(text)
-     * @method Control.getText(text)
-     */
+	 * Not callable as a function
+	 * @constructor
+	 * @method Control.click(targetx, targety)
+	 * @method Control.setText(text)
+	 * @method Control.getText(text)
+	 * @param {number} type
+	 * @param {number} x
+	 * @param {number} y
+	 * @param {number} xsize
+	 * @param {number} ysize
+	 */
 	function Control(type, x, y, xsize, ysize) {
+		/**
+		 * @private
+		 * @type {number}
+		 */
 		this.type = type;
+
+		/**
+		 * @private
+		 * @type {number}
+		 */
 		this.x = x;
+
+		/**
+		 * @private
+		 * @type {number}
+		 */
 		this.y = y;
+
+		/**
+		 * @private
+		 * @type {number}
+		 */
 		this.xsize = xsize;
+
+		/**
+		 * @private
+		 * @type {number}
+		 */
 		this.ysize = ysize;
 
 		return new Proxy(this, {

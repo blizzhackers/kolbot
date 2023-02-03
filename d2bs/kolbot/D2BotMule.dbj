@@ -3,16 +3,19 @@
 *  @author      kolton, theBGuy
 *  @desc        Entry script for AutoMule.js
 *
+*  @typedef {import("./sdk/globals")}
 */
-include("StarterConfig.js");
+js_strict(true);
+include("critical.js"); // required
 
 /**
  * @todo redo how muleing is handled, really dislike how it's handled here
  */
 
-// D2BotMule specific settings - for global settings see libs/StarterConfig.js
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// D2BotMule specific settings - for global settings see libs/starter/StarterConfig.js
 Starter.Config.MinGameTime = 30; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
-Starter.Config.MaxGameTime = 60; // Maximum game length in minutes, only for continuous muling
+Starter.Config.MaxGameTime = 10; // Maximum game length in minutes, only for continuous muling
 Starter.Config.CreateGameDelay = 5; // Seconds to wait before creating a new game
 Starter.Config.SwitchKeyDelay = 0; // Seconds to wait before switching a used/banned key or after realm down
 Starter.Config.ExitToMenu = false; // Set to true to wait out restriction in main menu or false to wait in lobby.
@@ -22,16 +25,13 @@ Starter.Config.MakeAccountOnFailure = true;
 // Override default values for StarterConfig under here by following format
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
-// No touchy!
-include("json2.js");
-include("oog.js");
-include("automule.js");
-include("mulelogger.js");
-include("torchsystem.js");
-include("NTItemParser.dbl");
-include("NTItemAlias.dbl");
-include("common/util.js");
-includeCommonLibs();
+// globals needed for core gameplay
+includeCoreLibs();
+
+// system libs
+includeSystemLibs();
+include("systems/mulelogger/MuleLogger.js");
+include("systems/gameaction/GameAction.js");
 
 let Controls = require("./modules/Control");
 let Overrides = require("./modules/Override");
@@ -202,7 +202,10 @@ const Mule = {
 		Storage.Init();
 		checkOnJoin && (status = "begin");
 		Starter.inGame = true;
-		Mule.continuousMule && !muleObj.onlyLogWhenFull && MuleLogger.logChar();
+		if (Mule.continuousMule) {
+			!muleObj.onlyLogWhenFull && MuleLogger.logChar();
+			addEventListener("gameevent", gameEvent);
+		}
 		// Worker.runInBackground.areaWatcher = Mule.areaWatcher; // bugs for some reason, quits game then on re-join d2bot spams In mule game for ~30seconds
 		if (Worker.runInBackground.antiIdle === undefined) {
 			Worker.runInBackground.antiIdle = Mule.antiIdle;
@@ -269,7 +272,7 @@ const Mule = {
 	},
 	
 	quit: function () {
-		["default.dbj", "tools/AntiIdle.js", "tools/AreaWatcher.js"].forEach(thread => {
+		["default.dbj", "threads/AntiIdle.js", "threads/AreaWatcher.js"].forEach(thread => {
 			let script = getScript(thread);
 			if (script && script.running && script.stop()) {
 				delay(100);
@@ -295,6 +298,7 @@ const Mule = {
 	gameRefresh: function () {
 		if (!this.continuousMule) return this.quit();
 		console.log("MaxGameTime Reached: ");
+		removeEventListener("gameevent", gameEvent);
 		Mule.quit();
 						
 		Starter.firstLogin = true;
@@ -898,13 +902,13 @@ function main () {
 
 	DataFile.updateStats("handle", Starter.handle);
 	D2Bot.init();
-	load("tools/heartbeat.js");
+	load("threads/heartbeat.js");
 
 	while (!Object.keys(Starter.gameInfo).length) {
 		D2Bot.requestGameInfo();
 		delay(500);
 	}
-	
+
 	D2Bot.updateRuns(); // we need the mule to swap keys somehow after all
 	delay(1000);
 
@@ -916,7 +920,6 @@ function main () {
 		muleMode = AutoMule.getMuleMode();
 		muleObj = AutoMule.getMuleObject(muleMode, "", true);
 		muleFilename = AutoMule.getMuleFilename(muleMode, "", true);
-		addEventListener("gameevent", gameEvent);
 	} else {
 		// Wait for master before login = give room to determine muling mode (normal or torch)
 		while (!master) {
@@ -951,53 +954,61 @@ function main () {
 	MainLoop:
 	while (true) {
 		try {
-			if (me.ingame && me.gameReady) {
-				if (!Starter.inGame) {
-					if (!Mule.init()) {
-						console.debug("Failed to init. Trying again. Ingame and ready? " + (me.ingame && me.gameReady && !!me.area));
-						delay(1000);
-						continue;
+			while (me.ingame) {
+				if (me.gameReady) {
+					if (!Starter.inGame) {
+						if (!Mule.init()) {
+							console.debug("Failed to init. Trying again. Ingame and ready? " + (me.ingame && me.gameReady && !!me.area));
+							delay(1000);
+							continue;
+						}
+					}
+
+					if (!Mule.continuousMule) {
+						Mule.waitForMaster();
+					}
+
+					D2Bot.updateStatus(Mule.statusString + " Status: " + status + Starter.timer(me.gamestarttime));
+
+					if (status === "begin") {
+						switch (Mule.pickItems()) {
+						// done picking, tell the master to leave game and kill mule profile
+						case "done":
+							Mule.done();
+
+							return;
+						// can't fit more items, get to next character or account
+						case "next":
+							Mule.next();
+
+							// should fix hitting gameRefresh when making a new character
+							continue MainLoop;
+						case "ready":
+							Mule.recheckTick = getTickCount();
+
+							break;
+						case "fail":
+							// Try again
+							break;
+						}
+					}
+
+					if (Mule.continuousMule) {
+						if (Starter.Config.MaxGameTime > 0 && getTickCount() - me.gamestarttime > Time.minutes(Starter.Config.MaxGameTime) && Mule.foreverAlone()) {
+							Mule.gameRefresh();
+
+							break;
+						} else if (getTickCount() - Mule.recheckTick > Time.minutes(10)) {
+							// recheck every 10 minutes?
+							status = "begin";
+						}
 					}
 				}
 
-				if (!Mule.continuousMule) {
-					Mule.waitForMaster();
-				}
+				delay(1000);
+			}
 
-				D2Bot.updateStatus(Mule.statusString + " Status: " + status + Starter.timer(me.gamestarttime));
-
-				if (status === "begin") {
-					switch (Mule.pickItems()) {
-					// done picking, tell the master to leave game and kill mule profile
-					case "done":
-						Mule.done();
-
-						return;
-					// can't fit more items, get to next character or account
-					case "next":
-						Mule.next();
-
-						// should fix hitting gameRefresh when making a new character
-						continue MainLoop;
-					case "ready":
-						Mule.recheckTick = getTickCount();
-
-						break;
-					case "fail":
-						// Try again
-						break;
-					}
-				}
-
-				if (Mule.continuousMule) {
-					if (Starter.Config.MaxGameTime > 0 && getTickCount() - me.gamestarttime > Time.minutes(Starter.Config.MaxGameTime) && Mule.foreverAlone()) {
-						Mule.gameRefresh();
-					} else if (getTickCount() - Mule.recheckTick > Time.minutes(10)) {
-						// recheck every 10 minutes?
-						status = "begin";
-					}
-				}
-			} else if (!me.ingame) {
+			if (!me.ingame) {
 				delay(1000);
 				locationAction(getLocation());
 			}

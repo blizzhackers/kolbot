@@ -6,30 +6,32 @@
 *
 */
 js_strict(true);
+include("critical.js"); // required
 
-include("json2.js");
-include("NTItemParser.dbl");
-include("OOG.js");
-include("AutoMule.js");
-include("Gambling.js");
-include("CraftingSystem.js");
-include("TorchSystem.js");
-include("MuleLogger.js");
-include("common/util.js");
+// globals needed for core gameplay
+includeCoreLibs();
+include("core/Common/Tools.js");
 
-includeCommonLibs();
+// system libs
+includeSystemLibs();
+include("systems/mulelogger/MuleLogger.js");
+include("systems/gameaction/GameAction.js");
 
 // MapMode
 include("manualplay/MapMode.js");
 MapMode.include();
 
 function main() {
+	// getUnit test
+	getUnit(-1) === null && console.warn("getUnit bug detected");
+	
+	console.log("ÿc9MapToolsThread loaded");
+
 	let ironGolem, debugInfo = {area: 0, currScript: "no entry"};
 	let quitFlag = false;
 	let quitListDelayTime;
 	let canQuit = true;
 
-	console.log("ÿc9MapToolsThread loaded");
 	D2Bot.init();
 	Config.init(false);
 	Pickit.init(false);
@@ -49,12 +51,12 @@ function main() {
 
 	// General functions
 	Common.Toolsthread.pauseScripts = [
-		"default.dbj", "tools/townchicken.js", "libs/manualplay/threads/pickthread.js",
-		"tools/antihostile.js", "tools/party.js", "libs/manualplay/threads/maphelper.js",
+		"default.dbj", "threads/townchicken.js", "libs/manualplay/threads/pickthread.js",
+		"threads/antihostile.js", "threads/party.js", "libs/manualplay/threads/maphelper.js",
 	];
 	Common.Toolsthread.stopScripts = [
-		"default.dbj", "tools/townchicken.js", "libs/manualplay/threads/pickthread.js",
-		"tools/antihostile.js", "tools/party.js", "libs/manualplay/threads/maphelper.js",
+		"default.dbj", "threads/townchicken.js", "libs/manualplay/threads/pickthread.js",
+		"threads/antihostile.js", "threads/party.js", "libs/manualplay/threads/maphelper.js",
 	];
 
 	// Event functions
@@ -112,13 +114,13 @@ function main() {
 		case 0x00: // "%Name1(%Name2) dropped due to time out."
 		case 0x01: // "%Name1(%Name2) dropped due to errors."
 		case 0x03: // "%Name1(%Name2) left our world. Diablo's minions weaken."
-			if ((typeof Config.QuitList === "string" && Config.QuitList.toLowerCase() === "any")
-				|| (Array.isArray(Config.QuitList) && Config.QuitList.includes(name1))) {
-				print(name1 + (mode === 0 ? " timed out" : " left"));
+			if (Config.QuitList.includes(name1) || Config.QuitList.some(str => String.isEqual(str, "all"))) {
+				console.log(name1 + (mode === 0 ? " timed out" : " left"));
 
-				if (typeof Config.QuitListDelay !== "undefined" && typeof quitListDelayTime === "undefined" && Config.QuitListDelay.length > 0) {
-					Config.QuitListDelay.sort((a, b) => a - b);
-					quitListDelayTime = getTickCount() + rand(Config.QuitListDelay[0] * 1e3, Config.QuitListDelay[1] * 1e3);
+				if (typeof quitListDelayTime === "undefined" && Config.QuitListDelay.length > 0) {
+					let [min, max] = Config.QuitListDelay.sort((a, b) => a - b).map(s => Time.seconds(s));
+
+					quitListDelayTime = getTickCount() + rand(min, max);
 				} else {
 					quitListDelayTime = getTickCount();
 				}
@@ -154,7 +156,7 @@ function main() {
 
 			if (Config.SoJWaitTime && me.expansion) {
 				!!me.realm && D2Bot.printToConsole(param1 + " Stones of Jordan Sold to Merchants on IP " + me.gameserverip.split(".")[3], sdk.colors.D2Bot.DarkGold);
-				Messaging.sendToScript("default.dbj", "soj");
+				// Messaging.sendToScript("default.dbj", "soj");
 			}
 
 			break;
@@ -179,20 +181,15 @@ function main() {
 	};
 
 	// Cache variables to prevent a bug where d2bs loses the reference to Config object
-	Config = Misc.copy(Config);
+	Config = copyObj(Config);
 	let tick = getTickCount();
 
 	addEventListener("keyup", this.keyEvent);
 	addEventListener("gameevent", this.gameEvent);
 	addEventListener("scriptmsg", this.scriptEvent);
 
-	// Load Fastmod
-	// Packet.changeStat(105, Config.FCR);
-	// Packet.changeStat(99, Config.FHR);
-	// Packet.changeStat(102, Config.FBR);
-	// Packet.changeStat(93, Config.IAS);
-
 	Config.QuitListMode > 0 && Common.Toolsthread.initQuitList();
+	!Array.isArray(Config.QuitList) && (Config.QuitList = [Config.QuitList]); // make it an array for simpler checks
 
 	// Start
 	while (true) {
@@ -204,7 +201,7 @@ function main() {
 				if (Config.LifeChicken > 0 && me.hpPercent <= Config.LifeChicken) {
 					// takes a moment sometimes for townchicken to actually get to town so re-check that we aren't in town before quitting
 					if (!me.inTown) {
-						D2Bot.printToConsole("Life Chicken (" + me.hp + "/" + me.hpmax + ")" + Attack.getNearestMonster() + " in " + Pather.getAreaName(me.area) + ". Ping: " + me.ping, sdk.colors.D2Bot.Red);
+						D2Bot.printToConsole("Life Chicken (" + me.hp + "/" + me.hpmax + ")" + Attack.getNearestMonster() + " in " + getAreaName(me.area) + ". Ping: " + me.ping, sdk.colors.D2Bot.Red);
 						Common.Toolsthread.exit(true);
 
 						break;
@@ -215,7 +212,7 @@ function main() {
 				Config.UseRejuvMP > 0 && me.mpPercent < Config.UseRejuvMP && Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.Rejuv);
 
 				if (Config.ManaChicken > 0 && me.mpPercent <= Config.ManaChicken) {
-					D2Bot.printToConsole("Mana Chicken: (" + me.mp + "/" + me.mpmax + ") in " + Pather.getAreaName(me.area), sdk.colors.D2Bot.Red);
+					D2Bot.printToConsole("Mana Chicken: (" + me.mp + "/" + me.mpmax + ") in " + getAreaName(me.area), sdk.colors.D2Bot.Red);
 					Common.Toolsthread.exit(true);
 
 					break;
@@ -229,7 +226,7 @@ function main() {
 					if (ironGolem) {
 						// ironGolem.hpmax is bugged with BO
 						if (ironGolem.hp <= Math.floor(128 * Config.IronGolemChicken / 100)) {
-							D2Bot.printToConsole("Irom Golem Chicken in " + Pather.getAreaName(me.area), sdk.colors.D2Bot.Red);
+							D2Bot.printToConsole("Irom Golem Chicken in " + getAreaName(me.area), sdk.colors.D2Bot.Red);
 							Common.Toolsthread.exit(true);
 
 							break;
@@ -244,7 +241,7 @@ function main() {
 
 						if (mercHP > 0 && merc.mode !== sdk.monsters.mode.Dead) {
 							if (mercHP < Config.MercChicken) {
-								D2Bot.printToConsole("Merc Chicken in " + Pather.getAreaName(me.area), sdk.colors.D2Bot.Red);
+								D2Bot.printToConsole("Merc Chicken in " + getAreaName(me.area), sdk.colors.D2Bot.Red);
 								Common.Toolsthread.exit(true);
 
 								break;
@@ -271,15 +268,19 @@ function main() {
 			quitFlag = true;
 		}
 
-		if (quitFlag && canQuit && (typeof quitListDelayTime === "undefined" || getTickCount() >= quitListDelayTime)) {
+		if (quitFlag && canQuit) {
+			if (typeof quitListDelayTime !== "undefined" && getTickCount() < quitListDelayTime) {
+				me.overhead("Quitting in " + Math.round((quitListDelayTime - getTickCount()) / 1000) + " Seconds");
+				continue;
+			}
 			Common.Toolsthread.checkPing(false); // In case of quitlist triggering first
 			Common.Toolsthread.exit();
 
 			break;
 		}
 
-		if (debugInfo.area !== Pather.getAreaName(me.area)) {
-			debugInfo.area = Pather.getAreaName(me.area);
+		if (debugInfo.area !== getAreaName(me.area)) {
+			debugInfo.area = getAreaName(me.area);
 			DataFile.updateStats("debugInfo", JSON.stringify(debugInfo));
 		}
 

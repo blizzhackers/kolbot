@@ -5,7 +5,7 @@
 *
 */
 
-includeIfNotIncluded("common/Pather.js");
+includeIfNotIncluded("core/Pather.js");
 
 Pather.stop = false;
 Pather.stopEvent = function (key) {

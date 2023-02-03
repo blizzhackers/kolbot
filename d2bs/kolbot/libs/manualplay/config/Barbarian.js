@@ -78,7 +78,7 @@ function LoadConfig() {
 
 	// If Config.Leader is set, the bot will only accept invites from leader. If Config.PublicMode is not 0, Baal and Diablo script will open Town Portals.
 	// If set on true, it simply parties.
-	Config.PublicMode = 0; // 1 = invite and accept, 2 = accept only, 3 = invite only, 0 = disable.
+	Config.PublicMode = 1; // 1 = invite and accept, 2 = accept only, 3 = invite only, 0 = disable.
 
 	// General config
 	Config.TeleSwitch = false; // Switch to secondary (non-primary) slot when teleporting more than 5 nodes.
@@ -86,7 +86,7 @@ function LoadConfig() {
 	Config.PingQuit = [{Ping: 0, Duration: 0}]; // Quit if ping is over the given value for over the given time period in seconds.
 
 	// Shrine Scanner - scan for shrines while moving.
-	// Put the shrine types in order of priority (from highest to lowest). For a list of types, see sdk/shrines.txt
+	// Put the shrine types in order of priority (from highest to lowest). For a list of types, see sdk/txt/shrines.txt
 	Config.ScanShrines = [];
 
 	// MF Switch
@@ -167,7 +167,7 @@ function LoadConfig() {
 	 * AutoSkill will automatically spend skill points and it can also allocate any prerequisite skills as required.
 	 *
 	 * Format: Config.AutoSkill.Build = [[skillID, count, satisfy], [skillID, count, satisfy], ... [skillID, count, satisfy]];
-	 *	skill - skill id number (see /sdk/skills.txt)
+	 *	skill - skill id number (see /sdk/txt/skills.txt)
 	 *	count - maximum number of skill points to allocate for that skill
 	 *	satisfy - boolean value to stop(true) or continue(false) further allocation until count is met. Defaults to true if not specified.
 	 *

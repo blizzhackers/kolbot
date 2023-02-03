@@ -1,7 +1,7 @@
 /**
 *  @filename    Polyfill.js
 *  @author      Jaenster (probably)
-*  @desc        Some polyfills since we run an old spidermonkey
+*  @desc        Some polyfills since we run old spidermonkey (61f7ebb)
 *
 */
 
@@ -10,14 +10,15 @@ String.prototype.lcsGraph = function (compareToThis) {
 		return null;
 	}
 
-	let stringA = this.toString().toLowerCase(), stringB = compareToThis.toLowerCase(), graph = Array(this.length), x,
-		y;
+	let stringA = this.toString().toLowerCase();
+	let stringB = compareToThis.toLowerCase();
+	let graph = Array(this.length);
 	let check = (i, j) => (i < 0 || j < 0 || i >= stringA.length || j >= stringB.length) ? 0 : graph[i][j];
 
-	for (x = 0; x < stringA.length; x++) {
+	for (let x = 0; x < stringA.length; x++) {
 		graph[x] = new Uint16Array(stringB.length);
 
-		for (y = 0; y < stringB.length; y++) {
+		for (let y = 0; y < stringB.length; y++) {
 			if (stringA[x] === stringB[y]) {
 				graph[x][y] = check(x - 1, y - 1) + 1;
 			} else {
@@ -172,6 +173,26 @@ if (!String.isEqual) {
 		return str1.toLowerCase() === str2.toLowerCase();
 	};
 }
+
+/**
+ * Use since we don't have template literals
+ * Replaces placeholders in a string with provided values.
+ *
+ * @param {Array<Array<string, (number|string|boolean)>>} pairs - An array of arrays,
+ * where the first item in each inner array is a placeholder in the form of "$placeholder",
+ * and the second item is the value to replace it with.
+ * @returns {string} The formatted string.
+ */
+String.prototype.format = function (...pairs) {
+	if (!pairs.length) return this;
+	let newString = this;
+	pairs.forEach(pair => {
+		let [match, replace] = pair;
+		if (match === undefined || replace === undefined) return;
+		newString = newString.replace(match, replace);
+	});
+	return newString;
+};
 
 // Production steps of ECMA-262, Edition 6, 22.1.2.1
 if (!Array.from) {
@@ -432,6 +453,7 @@ Array.prototype.fill = function (value, start = 0, end = undefined) {
 	for (let i = start; i < stop; i++) {
 		this[i] = value;
 	}
+	return this;
 };
 
 /**
@@ -479,15 +501,17 @@ if (!Array.prototype.flat) {
 	});
 }
 // eslint-disable-next-line block-scoped-var
-if (typeof global === "undefined") {
-	// eslint-disable-next-line no-var
-	var global = this;
-}
+// if (typeof global === "undefined") {
+// 	var global = this;
+// }
 
-// eslint-disable-next-line block-scoped-var
+// eslint-disable-next-line no-var
+if (typeof global === "undefined") var global = [].filter.constructor("return this")();
+// eslint-disable-next-line dot-notation
+global["globalThis"] = [].filter.constructor("return this")();
+
 if (!global.hasOwnProperty("require")) {
 	let cache;
-	// eslint-disable-next-line block-scoped-var
 	Object.defineProperty(global, "require", {
 		get: function () {
 			if (cache) return cache;
@@ -664,7 +688,207 @@ if (!Object.entries) {
 			this.log(logInfo);
 		};
 
+		/**
+		 * @param {object | any[]} data 
+		 * @param {string[]} [columns] 
+		 */
+		console.table = function (data, columns) {
+			if (data === undefined) return;
+
+			let output = "";
+			let table = [];
+			let row = [];
+
+			// Create table headers
+			if (!columns) {
+				columns = Object.keys(data[0]);
+			}
+			row = columns;
+			table.push(row);
+
+			// Create table rows
+			for (let i = 0; i < data.length; i++) {
+				row = [];
+				for (let j = 0; j < columns.length; j++) {
+					row.push(data[i][columns[j]]);
+				}
+				table.push(row);
+			}
+
+			// todo - get longest element and adjust the output of that column to stay within the header bars
+			let maxLengths = new Array(table[0].length).fill(0);
+
+			for (let i = 0; i < table.length; i++) {
+				for (let j = 0; j < table[i].length; j++) {
+					maxLengths[j] = Math.max(maxLengths[j], table[i][j].toString().length);
+				}
+			}
+			console.log(maxLengths);
+
+			// Create table output
+			for (let i = 0; i < table.length; i++) {
+				for (let j = 0; j < table[i].length; j++) {
+					// output += "| " + table[i][j] + " ";
+					output += "| " + table[i][j].toString().padEnd(maxLengths[j]) + " ";
+				}
+				output += "|\n";
+			}
+
+			// // Log table to console
+			console.log(output);
+
+			// for (let i = 0; i < data.length; i++) {
+			// 	let row = "|";
+			// 	for (let j = 0; j < data[i].length; j++) {
+			// 		row += " " + data[i][j].toString().padEnd(maxLengths[j]) + " |";
+			// 	}
+			// 	console.log(row);
+			// }
+		};
+
 		return console;
 
 	})();
 })([].filter.constructor("return this")(), print);
+
+if (!global.hasOwnProperty("sdk") && typeof require !== "undefined") {
+	Object.defineProperty(global, "sdk", {
+		value: require("../modules/sdk"),
+		enumerable: true,
+	});
+}
+
+if (!global.hasOwnProperty("includeIfNotIncluded")) {
+	Object.defineProperty(global, "includeIfNotIncluded", {
+		/**
+		 * @param {string} file
+		 */
+		value: function (file = "") {
+			if (!isIncluded(file)) {
+				if (!include(file)) {
+					console.error("Failed to include " + file);
+					console.trace();
+					return false;
+				}
+			}
+			return true;
+		},
+	});
+}
+
+if (!global.hasOwnProperty("includeCoreLibs")) {
+	Object.defineProperty(global, "includeCoreLibs", {
+		/**
+		 * @description includes all files from libs/core/ folder
+		 * @param {string[]} ignoreFiles
+		 */
+		value: function (obj = { exclude: [] }) {
+			/** @type {string[]} */
+			let files = dopen("libs/core/").getFiles();
+			if (!files.length) throw new Error("Failed to find my files");
+			if (!files.includes("Pather.js")) {
+				console.warn("Incorrect Files?", files);
+				// something went wrong?
+				while (!files.includes("Pather.js")) {
+					files = dopen("libs/core/").getFiles();
+					delay(50);
+				}
+			}
+			// always include util first
+			includeIfNotIncluded("core/Util.js");
+			files.filter(file => file.endsWith(".js") && !obj.exclude.includes(file) && !file.match("util.js", "gi"))
+				.forEach(function (x) {
+					if (!includeIfNotIncluded("core/" + x)) {
+						throw new Error("Failed to include core/" + x);
+					}
+				});
+			return true;
+		},
+	});
+}
+
+if (!global.hasOwnProperty("includeSystemLibs")) {
+	Object.defineProperty(global, "includeSystemLibs", {
+		/**
+		 * @description includes system driver files from libs/systems/ folder
+		 */
+		value: function () {
+			include("systems/automule/automule.js");
+			include("systems/crafting/CraftingSystem.js");
+			include("systems/gambling/Gambling.js");
+			include("systems/torch/TorchSystem.js");
+			return true;
+		},
+	});
+}
+
+if (!global.hasOwnProperty("clone")) {
+	Object.defineProperty(global, "clone", {
+		/**
+		 * @param {Date | any[] | object} obj 
+		 * @returns {ThisParameterType} deep copy of parameter
+		 */
+		value: function (obj) {
+			let copy;
+
+			// Handle the 3 simple types, and null or undefined
+			if (null === obj || "object" !== typeof obj) {
+				return obj;
+			}
+
+			// Handle Date
+			if (obj instanceof Date) {
+				copy = new Date();
+				copy.setTime(obj.getTime());
+
+				return copy;
+			}
+
+			// Handle Array
+			if (obj instanceof Array) {
+				copy = [];
+
+				for (let i = 0; i < obj.length; i += 1) {
+					copy[i] = clone(obj[i]);
+				}
+
+				return copy;
+			}
+
+			// Handle Object
+			if (obj instanceof Object) {
+				copy = {};
+
+				for (let attr in obj) {
+					if (obj.hasOwnProperty(attr)) {
+						copy[attr] = clone(obj[attr]);
+					}
+				}
+
+				return copy;
+			}
+
+			throw new Error("Unable to copy obj! Its type isn't supported.");
+		},
+	});
+}
+
+if (!global.hasOwnProperty("copyObj")) {
+	Object.defineProperty(global, "copyObj", {
+		/**
+		 * @param {object} from 
+		 * @returns {object} deep copy
+		 */
+		value: function (from) {
+			let obj = {};
+
+			for (let i in from) {
+				if (from.hasOwnProperty(i)) {
+					obj[i] = clone(from[i]);
+				}
+			}
+
+			return obj;
+		},
+	});
+}

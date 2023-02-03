@@ -5,23 +5,27 @@
 *  @desc        MapHelper used in conjuction with MapThread.js
 *
 */
-include("json2.js");
-include("NTItemParser.dbl");
-include("OOG.js");
-include("AutoMule.js");
-include("Gambling.js");
-include("TorchSystem.js");
-include("CraftingSystem.js");
-include("MuleLogger.js");
-include("common/util.js");
+js_strict(true);
+include("critical.js"); // required
 
-includeCommonLibs();
+// globals needed for core gameplay
+includeCoreLibs();
+
+// system libs
+includeSystemLibs();
+include("systems/mulelogger/MuleLogger.js");
+include("systems/gameaction/GameAction.js");
 
 // MapMode
 include("manualplay/MapMode.js");
 MapMode.include();
 
 function main() {
+	// getUnit test
+	getUnit(-1) === null && console.warn("getUnit bug detected");
+	
+	console.log("ÿc9MapHelper loaded");
+
 	let obj = {type: false, dest: false, action: false};
 	let action, fail = 0, x, y;
 	let mapThread = getScript("libs/manualplay/threads/mapthread.js");
@@ -45,7 +49,6 @@ function main() {
 		25: [12948, 9128],
 	};
 
-	console.log("ÿc9MapHelper loaded");
 	Config.init();
 	Attack.init(true);
 	Pickit.init();
@@ -57,7 +60,7 @@ function main() {
 	this.togglePickThread = function () {
 		if (!Config.ManualPlayPick) return;
 
-		let pickThread = getScript("tools/pickthread.js");
+		const pickThread = getScript("threads/pickthread.js");
 
 		if (pickThread) {
 			if (pickThread.running) {
@@ -100,7 +103,6 @@ function main() {
 		if (getUIFlag(sdk.uiflags.EscMenu)) {
 			delay(100);
 			mapThread.running && this.togglePause();
-
 		} else {
 			if (!mapThread.running) {
 				if (!this.togglePause()) {

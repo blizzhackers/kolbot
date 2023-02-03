@@ -28,15 +28,15 @@ const TextHooks = {
 	modifier: 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename) + Number(!!me.gameserverip && !me.realm)),
 
 	getScale: function (hkLen) {
-		if (!!this.yLocMapScale[hkLen]) {
-			this.frameYSizeScale = (-1 * this.yLocMapScale[hkLen]);
-			this.frameYLocScale = this.yLocMapScale[hkLen];
+		if (!!TextHooks.yLocMapScale[hkLen]) {
+			TextHooks.frameYSizeScale = (-1 * this.yLocMapScale[hkLen]);
+			TextHooks.frameYLocScale = this.yLocMapScale[hkLen];
 		} else {
-			this.frameYSizeScale = 0;
-			this.frameYLocScale = 0;
+			TextHooks.frameYSizeScale = 0;
+			TextHooks.frameYLocScale = 0;
 		}
 
-		this.settingsModifer = Math.max(0, hkLen - 3);
+		TextHooks.settingsModifer = Math.max(0, hkLen - 3);
 	},
 
 	check: function () {
@@ -49,8 +49,8 @@ const TextHooks = {
 		if (!this.frameworkDisplayed) {
 			!this.getHook("credits", this.hooks) && this.add("credits");
 			!!me.gameserverip && !this.getHook("ip", this.hooks) && this.add("ip");
-			this.lastAct = 0; // sorta hacky solution, but works this will cause qolBoard to update after being flushed from a uiflag
-			this.frameworkDisplayed = true;
+			TextHooks.lastAct = 0; // sorta hacky solution, but works this will cause qolBoard to update after being flushed from a uiflag
+			TextHooks.frameworkDisplayed = true;
 		}
 
 		this.displaySettings ? !this.getHook("showSettings", this.statusHooks) && this.add("showSettings") : !this.getHook("hideSettings", this.statusHooks) && this.add("hideSettings");
@@ -176,9 +176,9 @@ const TextHooks = {
 
 			break;
 		case "qolBoard":
-			this.qolFrameYSize = 50;
-			this.lastAct = me.act;
-			this.wasInTown = me.inTown;
+			TextHooks.qolFrameYSize = 50;
+			TextHooks.lastAct = me.act;
+			TextHooks.wasInTown = me.inTown;
 
 			while (this.qolHooks.length) {
 				this.qolHooks.shift().hook.remove();
@@ -230,7 +230,7 @@ const TextHooks = {
 
 			break;
 		case "showSettings":
-			this.statusFrameYSize = 0;
+			TextHooks.statusFrameYSize = 0;
 
 			while (this.statusHooks.length) {
 				this.statusHooks.shift().hook.remove();
@@ -295,7 +295,7 @@ const TextHooks = {
 				this.hooks.shift().hook.remove();
 			}
 
-			this.frameworkDisplayed = false;
+			TextHooks.frameworkDisplayed = false;
 		}
 
 		while (this.statusHooks.length) {

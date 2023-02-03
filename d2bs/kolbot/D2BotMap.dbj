@@ -4,13 +4,14 @@
 *  @desc        Entry script for running map mode
 *
 */
-include("json2.js");
-include("polyfill.js");
-include("OOG.js");
-include("common/misc.js");
-include("common/util.js");
 
 function main () {
+	include("critical.js"); // required
+	
+	if (!FileTools.exists("data/" + me.profile + ".json")) {
+		DataFile.create();
+	}
+
 	addEventListener("copydata", Starter.receiveCopyData);
 
 	while (!Starter.handle) {
@@ -20,7 +21,7 @@ function main () {
 	DataFile.updateStats("handle", Starter.handle);
 	delay(500);
 	D2Bot.init();
-	load("tools/heartbeat.js");
+	load("threads/heartbeat.js");
 
 	while (!Object.keys(Starter.gameInfo).length) {
 		D2Bot.requestGameInfo();

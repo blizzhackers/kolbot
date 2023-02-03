@@ -4,9 +4,10 @@
 *  @desc        Entry script for following bots using channels
 *
 */
-include("StarterConfig.js");
 
-// D2BotChannel specific settings - for global settings see libs/StarterConfig.js
+include("critical.js"); // required
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// D2BotChannel specific settings - for global settings see libs/starter/StarterConfig.js
 Starter.Config.Games = [""]; // List of games to look for. Example: Games: ["some baal-", "chaos run-"],
 Starter.Config.Passwords = [""]; // List of game passwords. Each array in Games array should have a matching element in Passwords. Use "" for blank pw.
 Starter.Config.JoinDelay = 10; // Seconds to wait between announcement and clicking join
@@ -20,25 +21,18 @@ Starter.Config.Follow = []; // leader's in game character name, only use this if
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds 
 // Starter.Config.JoinChannel = ""; // Default channel.
 
-// todo: figure out a way to check if player who announced game is still in channel
 
-// No touchy!
-include("json2.js");
-include("polyfill.js");
-include("OOG.js");
-include("automule.js");
-include("gambling.js");
-include("torchsystem.js");
-include("craftingsystem.js");
-include("common/misc.js");
-include("common/util.js");
-include("common/prototypes.js");
-let sdk = require("./modules/sdk");
+// the only things we really need from these are their oog checks
+includeSystemLibs();
+
 let Controls = require("./modules/Control");
 let Overrides = require("./modules/Override");
 
-if (typeof AdvancedConfig[me.profile] === "object") {
-	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
+if (typeof Starter.AdvancedConfig[me.profile] === "object") {
+	Object.assign(Starter.Config, Starter.AdvancedConfig[me.profile]);
+} else {
+	// no need to carry around the reference
+	delete Starter.AdvancedConfig;
 }
 
 let channelTick = getTickCount();
@@ -132,11 +126,7 @@ function locationAction (location) {
 
 		if (!ControlAction.mutedKey && (!Starter.chatActionsDone || getTickCount() - channelTick >= 120e3)) {
 			if (Starter.Config.JoinChannel !== "") {
-				if (typeof AdvancedConfig[me.profile] === "object" && typeof AdvancedConfig[me.profile].JoinChannel === "string") {
-					joinInfo.joinChannel = AdvancedConfig[me.profile].JoinChannel;
-				} else {
-					joinInfo.joinChannel = Starter.Config.JoinChannel;
-				}
+				joinInfo.joinChannel = Starter.Config.JoinChannel;
 
 				if (joinInfo.joinChannel) {
 					if (ControlAction.joinChannel(joinInfo.joinChannel)) {
@@ -366,24 +356,20 @@ function locationAction (location) {
 			Controls.JoinGameName.setText(joinInfo.gameName);
 			Controls.JoinGamePass.setText(joinInfo.gamePass);
 
-			if (typeof AdvancedConfig[me.profile] === "object" && typeof AdvancedConfig[me.profile].AnnounceGame === "boolean" && typeof AdvancedConfig[me.profile].AnnounceMessage === "string") {
-				Starter.sayMsg(AdvancedConfig[me.profile].AnnounceMessage + " " + joinInfo.gameName);
+			if (Starter.Config.AnnounceGames && Starter.Config.AnnounceMessage) {
+				Starter.sayMsg(Starter.Config.AnnounceMessage + " " + joinInfo.gameName);
 			}
 
 			// Only delay on first join - the rest is handled by GameDoesNotExistTimeout. Any other case is instant fail (ie. full game).
 			if (retry === 0 || Starter.lastGameStatus === "pending") {
-				if (typeof AdvancedConfig[me.profile] === "object" && typeof AdvancedConfig[me.profile].JoinDelay === "number") {
-					ControlAction.timeoutDelay("Custom Join Delay", AdvancedConfig[me.profile].JoinDelay * 1e3);
-				} else if (Starter.Config.JoinDelay) {
-					ControlAction.timeoutDelay("Join Game Delay", Starter.Config.JoinDelay * 1e3);
-				}
+				ControlAction.timeoutDelay("Join Game Delay", Starter.Config.JoinDelay * 1e3);
 			}
 
-			me.blockmouse = true;
+			me.blockMouse = true;
 
 			Controls.JoinGame.click();
 
-			me.blockmouse = false;
+			me.blockMouse = false;
 			Starter.lastGameStatus = "pending";
 
 			Starter.locationTimeout(5000, location);
@@ -491,7 +477,7 @@ function main() {
 
 	DataFile.updateStats("handle", Starter.handle);
 	D2Bot.init();
-	load("tools/heartbeat.js");
+	load("threads/heartbeat.js");
 
 	while (!Object.keys(Starter.gameInfo).length) {
 		D2Bot.requestGameInfo();

@@ -26,10 +26,9 @@ function removeRelativePath(test) {
 }
 global.require = (function (include, isIncluded, print, notify) {
 
-
 	let depth = 0;
 	const modules = {};
-	const obj = function require(field, path) {
+	const obj = function require(field, path, log = true) {
 		const stack = new Error().stack.match(/[^\r\n]+/g);
 		let directory = stack[1].match(/.*?@.*?d2bs\\(kolbot\\?.*)\\.*(\.js|\.dbj):/)[1].replace("\\", "/") + "/";
 		let filename = stack[1].match(/.*?@.*?d2bs\\kolbot\\?(.*)(\.js|\.dbj):/)[1];
@@ -51,7 +50,6 @@ global.require = (function (include, isIncluded, print, notify) {
 			directory = "../" + directory; // Add a extra recursive path, as we start out of the lib directory
 		}
 
-
 		path = path || directory;
 
 		let fullpath = removeRelativePath((path + field).replace(/\\/, "/")).toLowerCase();
@@ -67,11 +65,20 @@ global.require = (function (include, isIncluded, print, notify) {
 			return modules[packageName] = File.open("libs/" + path + field, 0).readAllLines();
 		}
 
-		const moduleNameShort = (fullpath + ".js").match(/.*?\/(\w*).js$/)[1];
+		let nameShort;
+		try {
+			nameShort = (fullpath + ".js").match(/.*?\/(\w*).js$/)[1];
+		} catch (e) {
+			// file in libs folder same as us
+			nameShort = (fullpath + ".js").match(/.*?\/?(\w*).js$/)[0];
+		}
+		const moduleNameShort = nameShort;
 
 		if (!isIncluded(fullpath + ".js") && !modules.hasOwnProperty(moduleNameShort)) {
-			depth && notify && print("ÿc2Kolbotÿc0 ::    - loading dependency of " + filename + ": " + moduleNameShort);
-			!depth && notify && print("ÿc2Kolbotÿc0 :: Loading module: " + moduleNameShort);
+			if (log) {
+				depth && notify && print("ÿc2Kolbotÿc0 ::    - loading dependency of " + filename + ": " + moduleNameShort);
+				!depth && notify && print("ÿc2Kolbotÿc0 :: Loading module: " + moduleNameShort);
+			}
 
 			let oldModule = Object.create(global["module"]);
 			let oldExports = Object.create(global["exports"]);

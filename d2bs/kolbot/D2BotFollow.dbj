@@ -4,14 +4,18 @@
 *  @desc        Entry script for following bots running on the same pc
 *
 */
-include("StarterConfig.js");
 
-// D2BotFollow specific settings - for global settings see libs/StarterConfig.js
+include("critical.js"); // required
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// D2BotFollow specific settings - for global settings see libs/starter/StarterConfig.js
 Starter.Config.JoinRetryDelay = 5; // Time in seconds to wait before next join attempt
 
 // Override default values for StarterConfig under here by following format
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
+/**
+ * @todo this section should be in it's own config leaving this file only containing core logic
+ */
 /* Join game settings
 	Format: "leader's profile": ["leecher 1 profile", "leecher 2 profile", ...]
 	If you want everyone to join the same leader, use "leader's profile": ["all"]
@@ -26,29 +30,25 @@ Starter.Config.JoinRetryDelay = 5; // Time in seconds to wait before next join a
 
 const JoinSettings = {
 	"Leader": ["Leecher"],
+	"map": ["all"]
 };
 
-// No touchy!
-include("json2.js");
-include("polyfill.js");
-include("OOG.js");
-include("automule.js");
-include("gambling.js");
-include("craftingsystem.js");
-include("torchsystem.js");
-include("common/misc.js");
-include("common/util.js");
-let sdk = require("./modules/sdk");
+// the only things we really need from these are their oog checks
+includeSystemLibs();
+
 let Controls = require("./modules/Control");
 let Overrides = require("./modules/Override");
 
-if (typeof AdvancedConfig[me.profile] === "object") {
-	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
+if (typeof Starter.AdvancedConfig[me.profile] === "object") {
+	Object.assign(Starter.Config, Starter.AdvancedConfig[me.profile]);
+} else {
+	// no need to carry around the reference
+	delete Starter.AdvancedConfig;
 }
 
-let lastGameTick, leader = "",
-	announced = false,
-	lastGame = [];
+let lastGameTick, leader = "";
+let announced = false;
+let lastGame = [];
 
 if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 	Starter.firstRun = true;
@@ -220,8 +220,8 @@ function locationAction (location) {
 
 					print("joining game " + Starter.joinInfo.gameName);
 
-					if (typeof AdvancedConfig[me.profile] === "object" && typeof AdvancedConfig[me.profile].JoinDelay === "number") {
-						ControlAction.timeoutDelay("Custom Join Delay", AdvancedConfig[me.profile].JoinDelay * 1e3);
+					if (typeof Starter.Config.JoinDelay === "number") {
+						ControlAction.timeoutDelay("Custom Join Delay", Starter.Config.JoinDelay * 1e3);
 					}
 
 					me.blockMouse = true;
@@ -385,7 +385,9 @@ function main () {
 
 	DataFile.updateStats("handle", Starter.handle);
 	D2Bot.init();
-	load("tools/heartbeat.js");
+	load("threads/heartbeat.js");
+
+	require("./modules/OOGGuard");
 
 	while (!Object.keys(Starter.gameInfo).length) {
 		D2Bot.requestGameInfo();

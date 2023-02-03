@@ -39,7 +39,7 @@ const MonsterHooks = {
 		}
 	},
 
-	// credit DetectiveSquirrel from his maphack https://github.com/DetectiveSquirrel/Kolbot-MapThread/blob/9c721a72a934518cfca1d1a05211b5e03b5b624f/kolbot/tools/MapThread.js#L2353
+	// credit DetectiveSquirrel from his maphack https://github.com/DetectiveSquirrel/Kolbot-MapThread/blob/9c721a72a934518cfca1d1a05211b5e03b5b624f/kolbot/threads/MapThread.js#L2353
 	specTypeColor: function (unit) {
 		switch (unit.spectype) {
 		case sdk.monsters.spectype.Minion:

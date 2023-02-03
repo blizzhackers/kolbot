@@ -53,6 +53,12 @@ const ActionHooks = {
 		sdk.uiflags.TradePrompt, sdk.uiflags.Msgs, sdk.uiflags.Stash, sdk.uiflags.Cube, sdk.uiflags.Help, sdk.uiflags.MercScreen
 	].some((flag) => getUIFlag(flag)),
 
+	/**
+	 * Set action based on key input
+	 * @param {number} keycode 
+	 * @returns {void}
+	 * @todo this would probably be better as pushing to an action stack and implementing a timeout to prevent spamming the same action
+	 */
 	event: function (keycode) {
 		if ([sdk.keys.Shift, sdk.keys.Alt].some(k => k === keycode)) {
 			return;
@@ -121,6 +127,7 @@ const ActionHooks = {
 							}
 						}
 
+						console.debug(TextHooks.displaySettings, ItemHooks.pickitEnabled);
 						if (TextHooks.displaySettings) {
 							TextHooks.getHook("pickitStatus", TextHooks.statusHooks).hook.text = "ÿc4N-Pad - ÿc0: " + (ItemHooks.pickitEnabled ? "ÿc<Your Filter" : "ÿc1Default Filter");
 						}
@@ -276,7 +283,7 @@ const ActionHooks = {
 			} catch (e) {
 				console.error(e);
 			} finally {
-				this.action = null;
+				ActionHooks.action = null;
 			}
 		}
 	},
@@ -295,7 +302,7 @@ const ActionHooks = {
 
 			this.add(me.area);
 			TextHooks.update(this.hooks.length);
-			this.currArea = me.area;
+			ActionHooks.currArea = me.area;
 		}
 	},
 
@@ -325,11 +332,15 @@ const ActionHooks = {
 			name: name,
 			type: type,
 			dest: dest,
-			hook: new Text(hookTxt + Pather.getAreaName(dest), Hooks.dashBoard.x + 5, this.yHookLoc())
+			hook: new Text(hookTxt + getAreaName(dest), Hooks.dashBoard.x + 5, this.yHookLoc())
 		});
 		return hookObj;
 	},
 
+	/**
+	 * Creates new action hook based on our current area
+	 * @param {number} area 
+	 */
 	add: function (area) {
 		let i, exits, wp, poi, nextCheck, infSeal, seisSeal, vizSeal, bossX;
 		let nextAreas = [];
@@ -370,7 +381,7 @@ const ActionHooks = {
 						name: "POI" + (i - 3),
 						type: "area",
 						dest: curr.target,
-						hook: new Text("ÿc<Num " + i + ": " + Pather.getAreaName(curr.target), Hooks.dashBoard.x + 5, this.yHookLoc())
+						hook: new Text("ÿc<Num " + i + ": " + getAreaName(curr.target), Hooks.dashBoard.x + 5, this.yHookLoc())
 					});
 				}
 
@@ -382,7 +393,7 @@ const ActionHooks = {
 					name: "POI",
 					type: "area",
 					dest: curr.target,
-					hook: new Text("ÿc<Num 3: " + Pather.getAreaName(curr.target), Hooks.dashBoard.x + 5, this.yHookLoc())
+					hook: new Text("ÿc<Num 3: " + getAreaName(curr.target), Hooks.dashBoard.x + 5, this.yHookLoc())
 				});
 			}
 
@@ -628,7 +639,7 @@ const ActionHooks = {
 				type: "unit",
 				action: {do: "usePortal", id: sdk.areas.Harrogath},
 				dest: {x: 10071, y: 13305},
-				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(sdk.areas.Harrogath), Hooks.dashBoard.x + 5, this.yHookLoc())
+				hook: new Text("ÿc1Num 1: " + getAreaName(sdk.areas.Harrogath), Hooks.dashBoard.x + 5, this.yHookLoc())
 			});
 
 			break;
@@ -660,7 +671,7 @@ const ActionHooks = {
 				type: "unit",
 				action: {do: "usePortal", id: sdk.areas.Harrogath},
 				dest: entrance,
-				hook: new Text("ÿc1Num 1: " + Pather.getAreaName(sdk.areas.Harrogath), Hooks.dashBoard.x + 5, this.yHookLoc())
+				hook: new Text("ÿc1Num 1: " + getAreaName(sdk.areas.Harrogath), Hooks.dashBoard.x + 5, this.yHookLoc())
 			});
 
 			break;
@@ -712,24 +723,17 @@ const ActionHooks = {
 		}
 	},
 
+	/**
+	 * @param {number} seal 
+	 * @returns {{ x: number, y: number, area: number }}
+	 */
 	getDiabloSeals: function (seal) {
-		let unit = Game.getPresetObject(sdk.areas.ChaosSanctuary, seal);
-
-		if (unit) {
-			if (unit instanceof PresetUnit) {
-				return {
-					x: unit.roomx * 5 + unit.x,
-					y: unit.roomy * 5 + unit.y,
-				};
-			}
-			
-			return {
-				x: unit.x,
-				y: unit.y,
-			};
+		try {
+			let unit = Game.getPresetObject(sdk.areas.ChaosSanctuary, seal);
+			return unit.realCoords();
+		} catch (e) {
+			return false;
 		}
-
-		return false;
 	},
 
 	getHook: function (name) {

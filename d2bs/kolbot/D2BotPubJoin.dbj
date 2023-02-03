@@ -4,9 +4,10 @@
 *  @desc        Entry script for following public games
 *
 */
-include("StarterConfig.js");
 
-// D2BotPubJoin specific settings - for global settings see libs/StarterConfig.js
+include("critical.js"); // required
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// D2BotPubJoin specific settings - for global settings see libs/starter/StarterConfig.js
 Starter.Config.MinGameTime = 0; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
 Starter.Config.ResetCount = 0; // Reset game count back to 1 every X games.
 Starter.Config.JoinDelay = 10; // Seconds to wait between join attempts
@@ -16,6 +17,9 @@ Starter.Config.AttemptNextGameRetrys = 5;
 // Override default values for StarterConfig under here by following format
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
+/**
+ * @todo this section should be in it's own config leaving this file only containing core logic
+ */
 /**
 	IncludeFilter config:
 
@@ -90,22 +94,17 @@ function excludeCheck (game) {
 	return true;
 }
 
-// No touchy!
-include("json2.js");
-include("polyfill.js");
-include("OOG.js");
-include("automule.js");
-include("gambling.js");
-include("craftingsystem.js");
-include("torchsystem.js");
-include("common/misc.js");
-include("common/util.js");
-let sdk = require("./modules/sdk");
+// the only things we really need from these are their oog checks
+includeSystemLibs();
+
 let Controls = require("./modules/Control");
 let Overrides = require("./modules/Override");
 
-if (typeof AdvancedConfig[me.profile] === "object") {
-	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
+if (typeof Starter.AdvancedConfig[me.profile] === "object") {
+	Object.assign(Starter.Config, Starter.AdvancedConfig[me.profile]);
+} else {
+	// no need to carry around the reference
+	delete Starter.AdvancedConfig;
 }
 
 new Overrides.Override(Starter, Starter.setNextGame, function (orignal, gameName) {
@@ -113,7 +112,7 @@ new Overrides.Override(Starter, Starter.setNextGame, function (orignal, gameName
 		return text.replace(/(\d*)$/, (_, t) => (+t + 1).toString().padStart(t.length, 0));
 	}
 
-	let nextGame = (gameName || this.randomString(null, true));
+	let nextGame = (gameName || Starter.randomString(null, true));
 	nextGame = incrementString(nextGame);
 
 	DataFile.updateStats("nextGame", nextGame);
@@ -239,7 +238,7 @@ function locationAction (location) {
 		if (gameList) {
 			doneGames = [];
 			gameToJoin = false;
-			FileTools.exists("logs/doneGames.json") && (doneGames = JSON.parse(Misc.fileAction("logs/doneGames.json", 0)));
+			FileTools.exists("logs/doneGames.json") && (doneGames = JSON.parse(FileAction.read("logs/doneGames.json")));
 
 			gameList.sort(function (a, b) {
 				return b.players - a.players;
@@ -257,7 +256,7 @@ function locationAction (location) {
 			if (gameToJoin) {
 				doneGames.length >= 20 && doneGames.shift();
 				doneGames.push(gameToJoin);
-				Misc.fileAction("logs/doneGames.json", 1, JSON.stringify(doneGames));
+				FileAction.write("logs/doneGames.json", JSON.stringify(doneGames));
 
 				me.blockMouse = true;
 
@@ -378,7 +377,7 @@ function main() {
 	DataFile.updateStats("handle", Starter.handle);
 	delay(500);
 	D2Bot.init();
-	load("tools/heartbeat.js");
+	load("threads/heartbeat.js");
 
 	while (!Object.keys(Starter.gameInfo).length) {
 		D2Bot.requestGameInfo();

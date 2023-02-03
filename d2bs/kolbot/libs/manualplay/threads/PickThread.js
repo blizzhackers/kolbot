@@ -6,20 +6,26 @@
 */
 js_strict(true);
 
-include("json2.js");
-include("NTItemParser.dbl");
-include("OOG.js");
-include("CraftingSystem.js");
-include("common/util.js");
+include("json2.js");     // required?
+include("polyfill.js");  // required
+include("oog/D2Bot.js"); // required
 
-includeCommonLibs();
+// globals needed for core gameplay
+// todo - figure out what here is actually needed for mapmode vs what is only required for bot mode
+include("core/NTItemParser.js");
+include("core/Util");
+includeCoreLibs();
+
+// system libs - same for here
+includeSystemLibs();
+include("systems/mulelogger/MuleLogger.js");
 
 // MapMode
 include("manualplay/MapMode.js");
 MapMode.include();
 
 function main() {
-	print("ÿc9Pick Thread Loaded.");
+	console.log("ÿc9Pick Thread Loaded.");
 	Config.init(false);
 	Pickit.init(false);
 	Attack.init();

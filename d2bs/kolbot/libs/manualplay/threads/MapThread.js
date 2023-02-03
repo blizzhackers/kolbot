@@ -5,17 +5,19 @@
 *  @desc        MapThread used with D2BotMap.dbj
 *
 */
-include("json2.js");
-include("NTItemParser.dbl");
-include("OOG.js");
-include("AutoMule.js");
-include("Gambling.js");
-include("CraftingSystem.js");
-include("TorchSystem.js");
-include("MuleLogger.js");
-include("UnitInfo.js");
-include("common/util.js");
-includeCommonLibs();
+js_strict(true);
+include("critical.js"); // required
+
+// globals needed for core gameplay
+includeCoreLibs();
+
+// system libs
+includeSystemLibs();
+include("systems/mulelogger/MuleLogger.js");
+include("systems/gameaction/GameAction.js");
+
+// main thread specific
+const LocalChat = require("../../modules/LocalChat");
 
 include("manualplay/MapMode.js");
 MapMode.include();
@@ -50,7 +52,7 @@ const Hooks = {
 		}
 
 		if (!this.enabled) {
-			this.enabled = getUIFlag(sdk.uiflags.AutoMap);
+			Hooks.enabled = getUIFlag(sdk.uiflags.AutoMap);
 
 			return;
 		}
@@ -68,7 +70,7 @@ const Hooks = {
 		if (Hooks.flushed === flag) return true;
 
 		if (flag === true) {
-			this.enabled = false;
+			Hooks.enabled = false;
 
 			MonsterHooks.flush();
 			ShrineHooks.flush();
@@ -101,29 +103,66 @@ const Hooks = {
 };
 
 function main() {
-	print("ÿc9Map Thread Loaded.");
-	Config.init(false);
+	D2Bot.init(); // Get D2Bot# handle
+	D2Bot.ingame();
+
+	(function (global, original) {
+		global.load = function (...args) {
+			original.apply(this, args);
+			delay(500);
+		};
+	})([].filter.constructor("return this")(), load);
+
+	// wait until game is ready
+	while (!me.gameReady) {
+		delay(50);
+	}
+
+	clearAllEvents(); // remove any event listeners from game crash
+
+	// load heartbeat if it isn't already running
+	!getScript("threads/heartbeat.js") && load("threads/heartbeat.js");
+
+	console.log("ÿc9Map Thread Loaded.");
+	MapMode.include();
+	Config.init(true);
+	LocalChat.init();
 	Storage.Init();
 	Pickit.init(true);
 	Hooks.init();
 
-	if (Config.MapMode.UseOwnItemFilter) {
-		ItemHooks.pickitEnabled = true;
-	}
+	// load threads
+	me.automap = true;
+	load("libs/manualplay/threads/maphelper.js");
+	load("libs/manualplay/threads/maptoolsthread.js");
+	Config.ManualPlayPick && load("libs/manualplay/threads/pickthread.js");
+	Config.PublicMode && load("threads/party.js");
 
 	const Worker = require("../../modules/Worker");
+	const UnitInfo = new (require("../../modules/UnitInfo"));
 
 	Worker.runInBackground.unitInfo = function () {
-		if (!Hooks.userAddon || (!UnitInfo.cleared && !Game.getSelectedUnit())) {
-			UnitInfo.remove();
+		// always, maybe a timeout would be good though
+		UnitInfo.check();
+
+		// not being used atm - keep looping
+		if (!Hooks.userAddon) {
 			return true;
 		}
-
-		let unit = Game.getSelectedUnit();
-		!!unit && UnitInfo.createInfo(unit);
+		
+		UnitInfo.createInfo(Game.getSelectedUnit());
 
 		return true;
 	};
+
+	const log = (msg = "") => {
+		me.overhead(msg);
+		console.log(msg);
+	};
+
+	if (Config.MapMode.UseOwnItemFilter) {
+		ItemHooks.pickitEnabled = true;
+	}
 
 	const hideFlags = [
 		sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.QuickSkill, sdk.uiflags.SkillWindow, sdk.uiflags.ChatBox,
@@ -148,9 +187,7 @@ function main() {
 
 	// Run commands from chat
 	this.runCommand = function (msg) {
-		if (msg.length <= 1) {
-			return true;
-		}
+		if (msg.length <= 1) return true;
 
 		msg = msg.toLowerCase();
 		let cmd = msg.split(" ")[0].split(".")[1];
@@ -160,12 +197,11 @@ function main() {
 		switch (cmd) {
 		case "useraddon":
 			Hooks.userAddon = !Hooks.userAddon;
-			me.overhead("userAddon set to " + Hooks.userAddon);
+			log("userAddon set to " + Hooks.userAddon);
 
 			break;
 		case "me":
-			print("Character Level: " + me.charlvl + " | Area: " + me.area + " | x: " + me.x + ", y: " + me.y);
-			me.overhead("Character Level: " + me.charlvl + " | Area: " + me.area + " | x: " + me.x + ", y: " + me.y);
+			log("Character Level: " + me.charlvl + " | Area: " + me.area + " | x: " + me.x + ", y: " + me.y);
 
 			break;
 		case "stash":
@@ -202,7 +238,7 @@ function main() {
 		case "help":
 			if (HelpMenu.cleared) {
 				HelpMenu.showMenu();
-				me.overhead("Click each command for more info");
+				log("Click each command for more info");
 			}
 
 			break;
@@ -217,11 +253,13 @@ function main() {
 
 			break;
 		case "make":
-			if (!FileTools.exists("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js")) {
-				FileTools.copy("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + ".js", "libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js");
-				D2Bot.printToConsole("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
-				print("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
-				me.overhead("libs/manualplay/config/" + sdk.player.class.nameOf(me.classid) + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+			{
+				let className = sdk.player.class.nameOf(me.classid);
+				if (!FileTools.exists("libs/manualplay/config/" + className + "." + me.name + ".js")) {
+					FileTools.copy("libs/manualplay/config/" + className + ".js", "libs/manualplay/config/" + className + "." + me.name + ".js");
+					D2Bot.printToConsole("libs/manualplay/config/" + className + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+					log("libs/manualplay/config/" + className + "." + me.name + ".js has been created. Configure the bot and reload to apply changes");
+				}
 			}
 
 			break;

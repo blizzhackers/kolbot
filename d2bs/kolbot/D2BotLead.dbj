@@ -4,28 +4,25 @@
 *  @author      kolton, theBGuy
 *  @desc        Entry script for leader
 *
+*  @typedef {import("./sdk/globals")}
 */
-include("StarterConfig.js");
 
-// - for global settings see libs/StarterConfig.js
+include("critical.js"); // required
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// - for global settings @see libs/starter/StarterConfig.js
 // Override default values for StarterConfig under here by following format
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
-// No touchy!
-include("json2.js");
-include("OOG.js");
-include("automule.js");
-include("gambling.js");
-include("craftingsystem.js");
-include("torchsystem.js");
-include("Polyfill.js");
-include("common/misc.js");
-include("common/util.js");
-let sdk = require("./modules/sdk");
+// the only things we really need from these are their oog checks
+includeSystemLibs();
+
 let Controls = require("./modules/Control");
 
-if (typeof AdvancedConfig[me.profile] === "object") {
-	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
+if (typeof Starter.AdvancedConfig[me.profile] === "object") {
+	Object.assign(Starter.Config, Starter.AdvancedConfig[me.profile]);
+} else {
+	// no need to carry around the reference then
+	delete Starter.AdvancedConfig;
 }
 
 if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
@@ -53,7 +50,7 @@ function locationAction (location) {
 			Starter.pingQuit = false;
 		}
 
-		if (Starter.Config.JoinChannel !== "" || (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].JoinChannel !== "")) {
+		if (Starter.Config.JoinChannel !== "") {
 			Controls.LobbyEnterChat.click();
 
 			break;
@@ -121,11 +118,7 @@ function locationAction (location) {
 				DataFile.updateStats("runs", Starter.gameCount);
 			}
 
-			if (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].hasOwnProperty("AfterGameMessage")) {
-				Starter.chanInfo.afterMsg = AdvancedConfig[me.profile].AfterGameMessage;
-			} else {
-				Starter.chanInfo.afterMsg = Starter.Config.AfterGameMessage;
-			}
+			Starter.chanInfo.afterMsg = Starter.Config.AfterGameMessage;
 
 			// check that we are in the channel we are supposed to be in
 			if (Starter.chanInfo.joinChannel.length) {
@@ -149,18 +142,8 @@ function locationAction (location) {
 
 		if (!Starter.chatActionsDone) {
 			Starter.chatActionsDone = true;
-
-			if (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].hasOwnProperty("JoinChannel")) {
-				Starter.chanInfo.joinChannel = AdvancedConfig[me.profile].JoinChannel;
-			} else {
-				Starter.chanInfo.joinChannel = Starter.Config.JoinChannel;
-			}
-
-			if (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].hasOwnProperty("FirstJoinMessage")) {
-				Starter.chanInfo.firstMsg = AdvancedConfig[me.profile].FirstJoinMessage;
-			} else {
-				Starter.chanInfo.firstMsg = Starter.Config.FirstJoinMessage;
-			}
+			Starter.chanInfo.joinChannel = Starter.Config.JoinChannel;
+			Starter.chanInfo.firstMsg = Starter.Config.FirstJoinMessage;
 
 			if (Starter.chanInfo.joinChannel) {
 				typeof Starter.chanInfo.joinChannel === "string" && (Starter.chanInfo.joinChannel = [Starter.chanInfo.joinChannel]);
@@ -185,11 +168,7 @@ function locationAction (location) {
 		}
 
 		// Announce game
-		if (AdvancedConfig[me.profile] && AdvancedConfig[me.profile].hasOwnProperty("AnnounceGames")) {
-			Starter.chanInfo.announce = AdvancedConfig[me.profile].AnnounceGames;
-		} else {
-			Starter.chanInfo.announce = Starter.Config.AnnounceGames;
-		}
+		Starter.chanInfo.announce = Starter.Config.AnnounceGames;
 
 		Starter.LocationEvents.openCreateGameWindow();
 
@@ -342,7 +321,7 @@ function main () {
 	DataFile.updateStats("handle", Starter.handle);
 	delay(500);
 	D2Bot.init();
-	load("tools/heartbeat.js");
+	load("threads/heartbeat.js");
 
 	while (!Object.keys(Starter.gameInfo).length) {
 		D2Bot.requestGameInfo();

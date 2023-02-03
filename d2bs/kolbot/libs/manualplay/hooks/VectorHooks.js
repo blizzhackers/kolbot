@@ -11,6 +11,20 @@ const VectorHooks = {
 	lastLoc: {x: 0, y: 0},
 	names: [],
 	hooks: [],
+	nextAreas: (function() {
+		let nextAreas = [];
+
+		// Specific area override
+		nextAreas[sdk.areas.TamoeHighland] = sdk.areas.MonasteryGate;
+		nextAreas[sdk.areas.SpiderForest] = sdk.areas.FlayerJungle;
+		nextAreas[sdk.areas.GreatMarsh] = sdk.areas.FlayerJungle;
+		nextAreas[sdk.areas.CrystalizedPassage] = sdk.areas.GlacialTrail;
+		nextAreas[sdk.areas.GlacialTrail] = sdk.areas.FrozenTundra;
+		nextAreas[sdk.areas.AncientsWay] = sdk.areas.ArreatSummit;
+		nextAreas[sdk.areas.ThroneofDestruction] = sdk.areas.WorldstoneChamber;
+
+		return nextAreas;
+	})(),
 
 	check: function () {
 		if (!this.enabled) {
@@ -24,28 +38,17 @@ const VectorHooks = {
 
 			if (!me.area || !me.gameReady) return;
 
-			let nextAreas = [];
-
-			// Specific area override
-			nextAreas[sdk.areas.TamoeHighland] = sdk.areas.MonasteryGate;
-			nextAreas[sdk.areas.SpiderForest] = sdk.areas.FlayerJungle;
-			nextAreas[sdk.areas.GreatMarsh] = sdk.areas.FlayerJungle;
-			nextAreas[sdk.areas.CrystalizedPassage] = sdk.areas.GlacialTrail;
-			nextAreas[sdk.areas.GlacialTrail] = sdk.areas.FrozenTundra;
-			nextAreas[sdk.areas.AncientsWay] = sdk.areas.ArreatSummit;
-			nextAreas[sdk.areas.ThroneofDestruction] = sdk.areas.WorldstoneChamber;
-
 			try {
 				let exits = getArea().exits;
-				this.currArea = me.area;
+				VectorHooks.currArea = me.area;
 
 				if (exits) {
 					for (let i = 0; i < exits.length; i++) {
 						if (me.inArea(sdk.areas.CanyonofMagic)) {
 							this.add(exits[i].x, exits[i].y, exits[i].target === getRoom().correcttomb ? 0x69 : 0x99);
-						} else if (exits[i].target === nextAreas[me.area] && nextAreas[me.area]) {
+						} else if (exits[i].target === this.nextAreas[me.area] && this.nextAreas[me.area]) {
 							this.add(exits[i].x, exits[i].y, 0x1F);
-						} else if (exits[i].target === ActionHooks.prevAreas.indexOf(me.area) && nextAreas[me.area]) {
+						} else if (exits[i].target === ActionHooks.prevAreas.indexOf(me.area) && this.nextAreas[me.area]) {
 							this.add(exits[i].x, exits[i].y, 0x99);
 						} else if (exits[i].target === ActionHooks.prevAreas.indexOf(me.area)) {
 							this.add(exits[i].x, exits[i].y, 0x1F);
@@ -76,11 +79,11 @@ const VectorHooks = {
 	},
 
 	addNames: function (area) {
-		this.names.push(new Text(Pather.getAreaName(area.target), area.x, area.y, 0, 6, 2, true));
+		this.names.push(new Text(getAreaName(area.target), area.x, area.y, 0, 6, 2, true));
 	},
 
 	update: function () {
-		this.lastLoc = {x: me.x, y: me.y};
+		VectorHooks.lastLoc = {x: me.x, y: me.y};
 
 		for (let i = 0; i < this.hooks.length; i++) {
 			this.hooks[i].x = me.x;
@@ -97,7 +100,7 @@ const VectorHooks = {
 			this.names.shift().remove();
 		}
 
-		this.currArea = 0;
+		VectorHooks.currArea = 0;
 	},
 
 	getWP: function () {
@@ -107,10 +110,7 @@ const VectorHooks = {
 			let preset = Game.getPresetObject(me.area, sdk.waypoints.Ids[i]);
 
 			if (preset) {
-				return {
-					x: preset.roomx * 5 + preset.x,
-					y: preset.roomy * 5 + preset.y
-				};
+				return preset.realCoords();
 			}
 		}
 
@@ -384,14 +384,8 @@ const VectorHooks = {
 
 		if (unit) {
 			name && !poi.name && (poi.name = name);
-			
-			if (unit instanceof PresetUnit) {
-				poi.x = unit.roomx * 5 + unit.x;
-				poi.y = unit.roomy * 5 + unit.y;
-			} else {
-				poi.x = unit.x;
-				poi.y = unit.y;
-			}
+			(unit instanceof PresetUnit) && (unit = unit.realCoords());
+			[poi.x, poi.y] = [unit.x, unit.y];
 
 			return poi;
 		}

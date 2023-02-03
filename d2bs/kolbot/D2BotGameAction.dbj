@@ -4,9 +4,10 @@
 *  @desc        Entry script for limedrop
 *
 */
-include("StarterConfig.js");
 
-// D2BotGameAction specific settings - for global settings see libs/StarterConfig.js
+include("critical.js"); // required
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// D2BotGameAction specific settings - for global settings see libs/starter/StarterConfig.js
 Starter.Config.MinGameTime = 0; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
 Starter.Config.CreateGameDelay = 5; // Seconds to wait before creating a new game
 Starter.Config.SwitchKeyDelay = 0; // Seconds to wait before switching a used/banned key or after realm down
@@ -14,15 +15,11 @@ Starter.Config.SwitchKeyDelay = 0; // Seconds to wait before switching a used/ba
 // Override default values for StarterConfig under here by following format
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
-// No touchy!
-include("json2.js");
-include("polyfill.js");
-include("OOG.js");
-include("GameAction.js");
-include("MuleLogger.js");
-include("common/misc.js");
-include("common/util.js");
-let sdk = require("./modules/sdk");
+// system libs
+includeSystemLibs();
+include("systems/mulelogger/MuleLogger.js");
+include("systems/gameaction/GameAction.js");
+
 let Controls = require("./modules/Control");
 let Overrides = require("./modules/Override");
 
@@ -30,9 +27,9 @@ if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 	Starter.firstRun = true;
 }
 
-let tag, charList,
-	ftj = 0,
-	creatingActions = ["doMule"];
+let tag, charList;
+let ftj = 0;
+let creatingActions = ["doMule"];
 
 new Overrides.Override(Starter, Starter.receiveCopyData, function(orignal, mode, msg) {
 	if (mode === 3) return;
@@ -340,7 +337,7 @@ function main () {
 	DataFile.updateStats("handle", Starter.handle);
 	delay(500);
 	D2Bot.init();
-	load("tools/heartbeat.js");
+	load("threads/heartbeat.js");
 
 	while (!Object.keys(Starter.gameInfo).length) {
 		D2Bot.requestGameInfo();

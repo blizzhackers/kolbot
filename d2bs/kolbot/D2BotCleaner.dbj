@@ -4,11 +4,14 @@
 *  @credits     Whoever did the original D2BotAccountCleaner.dbj
 *  @desc        The purpose of this entryscript is to clean/remove characters and/or files easily
 *
+*  @typedef {import("./sdk/globals")}
 */
-include("StarterConfig.js");
 
-// D2BotCleaner settings
-// New Stuff - DataCleaner to delete old files associated with running kolbot or SoloPlay
+include("critical.js"); // required
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// D2BotCleaner settings - for global settings @see libs/starter/StarterConfig.js
+// New Stuff:
+// DataCleaner - to delete old files associated with running kolbot or SoloPlay
 // SaveFiles - to save important SoloPlay files to SoloPlay/Data/ for performance review
 //***********************************************************************************************************************//
 //	DataCleaner and SaveFiles can both be used for cleaning/saving files without having to delete associated characters  //
@@ -22,6 +25,9 @@ Starter.Config.DelayBetweenAccounts = rand(15, 30); //Seconds to wait before cle
 // Override default values for StarterConfig under here by following format
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
+/**
+ * @todo this section should be in it's own config leaving this file only containing core logic
+ */
 const AccountsToClean = {
 	/* Format:
 		"account1/password1/realm": ["charname1", "charname2"],
@@ -93,14 +99,6 @@ const AdvancedCleanerConfig = {
 	rangeStop: 10
 };
 
-// No touchy!
-include("json2.js");
-include("polyfill.js");
-include("OOG.js");
-include("common/misc.js");
-include("common/prototypes.js");
-include("common/util.js");
-let sdk = require("./modules/sdk");
 let Controls = require("./modules/Control");
 
 if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
@@ -469,7 +467,7 @@ function main () {
 
 	DataFile.updateStats("handle", Starter.handle);
 	D2Bot.init();
-	load("tools/heartbeat.js");
+	load("threads/heartbeat.js");
 
 	while (!Object.keys(Starter.gameInfo).length) {
 		D2Bot.requestGameInfo();

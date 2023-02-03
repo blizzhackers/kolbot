@@ -5,16 +5,16 @@
 *
 */
 
-includeIfNotIncluded("common/Attack.js");
+includeIfNotIncluded("core/Attack.js");
 
 Attack.init = function (notify = false) {
 	if (Config.Wereform) {
-		include("common/Attacks/wereform.js");
-	} else if (Config.CustomClassAttack && FileTools.exists("libs/common/Attacks/" + Config.CustomClassAttack + ".js")) {
+		include("core/Attacks/wereform.js");
+	} else if (Config.CustomClassAttack && FileTools.exists("libs/core/Attacks/" + Config.CustomClassAttack + ".js")) {
 		print("Loading custom attack file");
-		include("common/Attacks/" + Config.CustomClassAttack + ".js");
+		include("core/Attacks/" + Config.CustomClassAttack + ".js");
 	} else {
-		include("common/Attacks/" + sdk.player.class.nameOf(me.classid) + ".js");
+		include("core/Attacks/" + sdk.player.class.nameOf(me.classid) + ".js");
 	}
 
 	if (Config.AttackSkill[1] < 0 || Config.AttackSkill[3] < 0) {

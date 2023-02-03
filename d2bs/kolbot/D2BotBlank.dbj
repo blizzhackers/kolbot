@@ -1,15 +1,18 @@
 /**
 *  @filename    D2BotBlank.dbj
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        Entry script for testing
 *
 */
-function main() {
-	include("json2.js");
-	include("OOG.js");
-	include("common/util.js");
-	include("common/misc.js");
 
+
+function main() {
+	include("critical.js"); // required
+
+	if (!FileTools.exists("data/" + me.profile + ".json")) {
+		DataFile.create();
+	}
+	
 	addEventListener("copydata", Starter.receiveCopyData);
 
 	while (!Starter.handle) {
@@ -19,14 +22,23 @@ function main() {
 	DataFile.updateStats("handle", Starter.handle);
 	delay(500);
 	D2Bot.init();
-	load("tools/heartbeat.js");
+	load("threads/heartbeat.js");
 
-	if (!FileTools.exists("data/" + me.profile + ".json")) {
-		DataFile.create();
+	while (!Object.keys(Starter.gameInfo).length) {
+		D2Bot.requestGameInfo();
+		delay(500);
 	}
 
 	while (true) {
-		Starter.isUp = me.ingame ? "yes" : "no";
+		delay(1000);
+		
+		if (me.gameReady) {
+			Starter.isUp === "no" && (Starter.isUp = "yes");
+			me.ingame && D2Bot.updateStatus("(Char: " + me.charname + ") (Game: " + (me.gamename || "singleplayer") + ") (Level: " + me.charlvl + ")");
+		} else {
+			D2Bot.updateStatus("Out of Game");
+			Starter.isUp = "no";
+		}
 
 		delay(1000);
 	}

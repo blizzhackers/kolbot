@@ -68,6 +68,9 @@ function LoadConfig() {
 	Config.ManualPlayPick = false; // If set to true and D2BotMap entry script is used, will enable picking in manual play.
 
 	// Public game options
+	Config.QuitList = ["unfairsocks"];
+	Config.QuitListMode = 0; // 0 = use character names; 1 = use profile names (all profiles must run on the same computer).
+	Config.QuitListDelay = [15, 30];
 
 	// If LocalChat is enabled, chat can be sent via 'sendCopyData' instead of BNET
 	// To allow 'say' to use BNET, use 'say("msg", true)', the 2nd parameter will force BNET
@@ -86,7 +89,7 @@ function LoadConfig() {
 	Config.PingQuit = [{Ping: 0, Duration: 0}]; // Quit if ping is over the given value for over the given time period in seconds.
 
 	// Shrine Scanner - scan for shrines while moving.
-	// Put the shrine types in order of priority (from highest to lowest). For a list of types, see sdk/shrines.txt
+	// Put the shrine types in order of priority (from highest to lowest). For a list of types, see sdk/txt/shrines.txt
 	Config.ScanShrines = [];
 
 	// MF Switch
@@ -170,7 +173,7 @@ function LoadConfig() {
 	 * AutoSkill will automatically spend skill points and it can also allocate any prerequisite skills as required.
 	 *
 	 * Format: Config.AutoSkill.Build = [[skillID, count, satisfy], [skillID, count, satisfy], ... [skillID, count, satisfy]];
-	 *	skill - skill id number (see /sdk/skills.txt)
+	 *	skill - skill id number (see /sdk/txt/skills.txt)
 	 *	count - maximum number of skill points to allocate for that skill
 	 *	satisfy - boolean value to stop(true) or continue(false) further allocation until count is met. Defaults to true if not specified.
 	 *

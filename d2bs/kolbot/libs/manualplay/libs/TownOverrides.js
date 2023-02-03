@@ -5,7 +5,7 @@
 *
 */
 
-includeIfNotIncluded("common/Town.js");
+includeIfNotIncluded("core/Town.js");
 
 Town.stash = function (stashGold = true) {
 	me.cancel();
@@ -29,7 +29,7 @@ Town.stash = function (stashGold = true) {
 	if (items) {
 		for (let i = 0; i < items.length; i++) {
 			if (this.canStash(items[i])) {
-				Misc.itemLogger("Stashed", items[i]);
+				Item.logger("Stashed", items[i]);
 				Storage.Stash.MoveTo(items[i]);
 			}
 		}

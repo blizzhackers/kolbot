@@ -5,7 +5,7 @@
 *
 */
 
-includeIfNotIncluded("common/Misc.js");
+includeIfNotIncluded("core/Misc.js");
 
 Misc.openRedPortal = function (portalID) {
 	if (!me.getItem(sdk.quest.item.Cube)) return;

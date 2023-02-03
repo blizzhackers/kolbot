@@ -1,23 +1,22 @@
 /**
 *  @filename    default.dbj
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        gets executed upon gamejoin, main thread for bot
 *
 */
 js_strict(true);
+include("critical.js"); // required
 
-include("json2.js");
-include("NTItemParser.dbl");
-include("OOG.js");
-include("AutoMule.js");
-include("Gambling.js");
-include("CraftingSystem.js");
-include("TorchSystem.js");
-include("MuleLogger.js");
-include("GameAction.js");
-include("common/util.js");
+// globals needed for core gameplay
+includeCoreLibs();
 
-includeCommonLibs();
+// system libs
+includeSystemLibs();
+include("systems/mulelogger/MuleLogger.js");
+include("systems/gameaction/GameAction.js");
+
+// main thread specific
+const LocalChat = require("./libs/modules/LocalChat");
 
 function main () {
 	D2Bot.init(); // Get D2Bot# handle
@@ -38,25 +37,18 @@ function main () {
 	clearAllEvents(); // remove any event listeners from game crash
 
 	// load heartbeat if it isn't already running
-	!getScript("tools/heartbeat.js") && load("tools/heartbeat.js");
+	!getScript("threads/heartbeat.js") && load("threads/heartbeat.js");
 
+	// SoloPlay runs in it's own thread - check to ensure it exists in the files
+	if (getScript("D2BotSoloPlay.dbj") && FileTools.exists("libs/SoloPlay/SoloPlay.js")) {
+		load("libs/SoloPlay/SoloPlay.js");
+		return true;
+	}
+
+	// map mode runs in it's own thread
 	if (getScript("d2botmap.dbj")) {
-		include("manualplay/MapMode.js");
-		MapMode.include();
-		Config.init(true);
-		LocalChat.init();
-
-		// load threads
-		me.automap = true;
 		load("libs/manualplay/threads/mapthread.js");
-		load("libs/manualplay/threads/maphelper.js");
-		load("libs/manualplay/threads/maptoolsthread.js");
-		Config.ManualPlayPick && load("libs/manualplay/threads/pickthread.js");
-		Config.PublicMode && load("tools/party.js");
-
-		while (true) {
-			delay(1000);
-		}
+		return true;
 	}
 	
 	// MuleLogger handler
@@ -65,7 +57,7 @@ function main () {
 	// don't load default for dropper/mules
 	if (getScript("D2BotDropper.dbj") || getScript("D2BotMule.dbj")) {
 		FileTools.exists("libs/ItemDB.js") && include("ItemDB.js");
-		load("tools/AreaWatcher.js");
+		load("threads/AreaWatcher.js");
 		
 		while (true) {
 			delay(1000);
@@ -143,14 +135,18 @@ function main () {
 	DataFile.updateStats(["experience", "name"]);
 
 	// Load threads
-	load("tools/ToolsThread.js");
-	(Config.TownCheck || Config.TownHP > 0 || Config.TownMP > 0) && load("tools/TownChicken.js");
+	load("threads/ToolsThread.js");
+	(Config.TownCheck || Config.TownHP > 0 || Config.TownMP > 0) && load("threads/TownChicken.js");
+
+	if (Config.DebugMode && FileTools.exists("libs/modules/Guard")) {
+		require("libs/modules/Guard");
+	}
 
 	if (Config.PublicMode) {
-		Config.PublicMode === true ? require("libs/modules/SimpleParty") : load("tools/Party.js");
+		Config.PublicMode === true ? require("libs/modules/SimpleParty") : load("threads/Party.js");
 	}
 	
-	Config.AntiHostile && load("tools/AntiHostile.js");
+	Config.AntiHostile && load("threads/AntiHostile.js");
 
 	if (Config.FastPick) {
 		print("ÿc2Fast pickit active.");
@@ -173,13 +169,9 @@ function main () {
 
 		if (Config.DebugMode) {
 			delay(2000);
-			let script = getScript();
-
-			if (script) {
-				do {
-					console.log(script);
-				} while (script.getNext());
-			}
+			getThreads()
+				.sort((a, b) => b.memory - a.memory)
+				.forEach(thread => console.debug(thread));
 		}
 	}
 
@@ -189,11 +181,11 @@ function main () {
 	TorchSystem.keyCheck() && scriptBroadcast("torch");
 
 	// Auto skill and stat
-	if (Config.AutoSkill.Enabled && include("common/AutoSkill.js")) {
+	if (Config.AutoSkill.Enabled && include("core/Auto/AutoSkill.js")) {
 		AutoSkill.init(Config.AutoSkill.Build, Config.AutoSkill.Save);
 	}
 
-	if (Config.AutoStat.Enabled && include("common/AutoStat.js")) {
+	if (Config.AutoStat.Enabled && include("core/Auto/AutoStat.js")) {
 		AutoStat.init(Config.AutoStat.Build, Config.AutoStat.Save, Config.AutoStat.BlockChance, Config.AutoStat.UseBulk);
 	}
 

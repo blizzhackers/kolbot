@@ -5,7 +5,7 @@
 *
 */
 
-includeIfNotIncluded("common/Pickit.js");
+includeIfNotIncluded("core/Pickit.js");
 
 Pickit.basicPickItems = function () {
 	let itemList = [];
