@@ -320,10 +320,12 @@ const Pickit = {
 		if (Runewords.checkItem(unit)) return resultObj(Pickit.Result.RUNEWORD);
 
 		// if Gemhunting, pick Item for Cubing, if no other system needs it
-		if ((Scripts.GemHunter || Config.ScanShrines.includes(sdk.shrines.Gem)) //gemhunter active
+		if ((Scripts.GemHunter) // gemhunter active
 			&& rval.result === Pickit.Result.UNWANTED // no other subsystem needs it
 			&& Config.GemHunter.GemList.some((p) => [unit.classid - 1, unit.classid].includes(p)) // base and upgraded gem will be kept
-		) return resultObj(Pickit.Result.CUBING);
+			&& me.getItemsEx(unit.classid, sdk.items.mode.inStorage)
+				.filter(i => i.gid !== unit.gid && (!CraftingSystem.checkItem(i) && !Cubing.checkItem(i) && !Runewords.checkItem(i))).length === 0 // bit annoying for now but force only keeping max 1 gem for gemhunter
+		) return resultObj(Pickit.Result.WANTED, "GemHunter");
 
 		if (rval.result === Pickit.Result.UNWANTED && !Town.ignoreType(unit.itemType) && !unit.questItem
 			&& ((unit.isInInventory && (me.inTown || !Config.FieldID.Enabled)) || (me.gold < Config.LowGold || (me.gold < 500000 && Config.PickitFiles.length === 0)))) {

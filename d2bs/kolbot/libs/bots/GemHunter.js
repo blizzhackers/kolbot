@@ -5,8 +5,15 @@
 *
 */
 
+/**
+ * @todo If this script is going to be run, and we run across a gem shrine in a different one we should:
+ * - Call check if we have an gems to upgrade in the stash instead of always keep some in invo as that takes up space.
+ * If we do, go get the gem from the stash before activating shrine.
+ * - We should also then keep track of where the shrine was, (I don't remember if gem shrines regen, so check this)
+ */
 function GemHunter () {
 	Town.doChores();
+	Town.getGem();
 	if (Town.getGemsInInv().length === 0) {
 		print("ÿc4GemHunterÿc0: no gems in inventory - aborting.");
 		return false;

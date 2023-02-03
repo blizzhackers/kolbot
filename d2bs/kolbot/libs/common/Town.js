@@ -185,7 +185,6 @@ const Town = {
 		Cubing.doCubing();
 		Runewords.makeRunewords();
 		this.stash(true);
-		this.storeGem();
 		!!me.getItem(sdk.items.TomeofTownPortal) && this.clearScrolls();
 
 		me.act !== preAct && this.goToTown(preAct);
@@ -1607,10 +1606,19 @@ const Town = {
 		return true;
 	},
 
+	/**
+	 * @param {ItemUnit} item 
+	 */
 	canStash: function (item) {
-		// Some quest items that have to be in inventory or equipped
-		let questClassids = [sdk.items.quest.HoradricStaff, sdk.items.quest.KhalimsWill];
-		return !(this.ignoredItemTypes.includes(item.itemType) || questClassids.includes(item.classid) || !Storage.Stash.CanFit(item) || !this.canStashGem(item));
+		if (Town.ignoreType(item.itemType)
+			|| [sdk.items.quest.HoradricStaff, sdk.items.quest.KhalimsWill].includes(item.classid)
+			|| !Town.canStashGem(item)) {
+			return false;
+		}
+		/**
+		 * @todo add sorting here first if we can't fit the item
+		 */
+		return Storage.Stash.CanFit(item);
 	},
 
 	/**
@@ -1642,7 +1650,8 @@ const Town = {
 	 */
 	canStashGem: function (item) {
 		// we aren't using the gem hunter script or we aren't scanning for the gem shrines while moving
-		if (!(Scripts.GemHunter || Config.ScanShrines.includes(sdk.shrines.Gem))) return true;
+		// for now we are only going to keep a gem in our invo while the script is active
+		if (Loader.scriptName() !== "GemHunter") return true;
 		// not in our list
 		if (Config.GemHunter.GemList.indexOf(item.classid) === -1) return true;
 
@@ -1663,8 +1672,8 @@ const Town = {
 	 * to use with Gem Hunter Script
 	 * @returns {boolean} if any gem has been moved
 	 */
-	storeGem: function () {
-		if (Scripts.GemHunter || Config.ScanShrines.includes(sdk.shrines.Gem)) {
+	getGem: function () {
+		if (Loader.scriptName() === "GemHunter") {
 			if (this.getGemsInInv().length === 0 && this.getGemsInStash().length > 0) {
 				let gem = this.getGemsInStash().first();
 				Storage.Inventory.MoveTo(gem) && Misc.itemLogger("Inventoried", gem);
