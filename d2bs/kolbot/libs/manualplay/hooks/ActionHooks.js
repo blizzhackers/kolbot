@@ -48,10 +48,10 @@ const ActionHooks = {
 		},
 		3: "sellItem"
 	},
-	blockKeyEventFlags: [
+	blockKeyEvent: () => [
 		sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.ChatBox, sdk.uiflags.EscMenu, sdk.uiflags.Shop, sdk.uiflags.Quest, sdk.uiflags.Waypoint,
 		sdk.uiflags.TradePrompt, sdk.uiflags.Msgs, sdk.uiflags.Stash, sdk.uiflags.Cube, sdk.uiflags.Help, sdk.uiflags.MercScreen
-	],
+	].some((flag) => getUIFlag(flag)),
 
 	event: function (keycode) {
 		if ([sdk.keys.Shift, sdk.keys.Alt].some(k => k === keycode)) {
@@ -80,195 +80,204 @@ const ActionHooks = {
 		let qolObj = { type: "qol", dest: false, action: false };
 
 		if (this.action) {
-			switch (this.action) {
-			case sdk.keys.Numpad0:
-				hook = this.getHook("Next Area");
-
-				break;
-			case sdk.keys.Numpad1:
-				hook = this.getHook("Previous Area");
-
-				break;
-			case sdk.keys.Numpad2:
-				hook = this.getHook("Waypoint");
-
-				break;
-			case sdk.keys.Numpad3:
-				hook = this.getHook("POI");
-
-				break;
-			case sdk.keys.Numpad4:
-				hook = this.getHook("Side Area");
-
-				break;
-			case sdk.keys.Numpad5:
-				switch (me.area) {
-				case sdk.areas.RogueEncampment:
-				case sdk.areas.Tristram:
-				case sdk.areas.CanyonofMagic:
-				case sdk.areas.SpiderForest:
-				case sdk.areas.FlayerJungle:
-				case sdk.areas.KurastBazaar:
-				case sdk.areas.UpperKurast:
-				case sdk.areas.KurastCauseway:
-				case sdk.areas.ChaosSanctuary:
-					hook = this.getHook("POI2");
-
-					break;
-				case sdk.areas.Harrogath:
-					hook = this.getPortalHook("Matron's Den");
-
-					break;
-				}
-
-				break;
-			case sdk.keys.Numpad6:
-				switch (me.area) {
-				case sdk.areas.CanyonofMagic:
-				case sdk.areas.SpiderForest:
-				case sdk.areas.UpperKurast:
-				case sdk.areas.KurastCauseway:
-				case sdk.areas.ChaosSanctuary:
-					hook = this.getHook("POI3");
-
-					break;
-				case sdk.areas.Harrogath:
-					hook = this.getPortalHook("Sands");
-
-					break;
-				}
-
-				break;
-			case sdk.keys.Numpad7:
-				switch (me.area) {
-				case sdk.areas.CanyonofMagic:
-				case sdk.areas.ChaosSanctuary:
-					hook = this.getHook("POI4");
-
-					break;
-				case sdk.areas.Harrogath:
-					hook = this.getPortalHook("Furnace");
-
-					break;
-				}
-				
-				break;
-			case sdk.keys.Numpad8:
-				hook = me.inArea(sdk.areas.CanyonofMagic) ? this.getHook("POI5") : this.getPortalHook("Uber Tristam");
-
-				break;
-			case 188: // shift <
-				hook = TextHooks.getHook("Previous Act", TextHooks.qolHooks);
-
-				break;
-			case 190: // shift >
-				hook = TextHooks.getHook("Next Act", TextHooks.qolHooks);
-
-				break;
-			case sdk.keys.Ctrl:
-				unit = Game.getSelectedUnit();
-
-				if (!!unit) {
-					screenLoc = this.getOnScreenLocation();
-
-					switch (screenLoc) {
-					case 0: // Trade screen
-					case 1: // Stash
-					case 2: // Cube
-						qolObj.action = this.ctrlObj[screenLoc][unit.location];
+			try {
+				// quick ones first - ends checkAction if one of these was true
+				if ([sdk.keys.Seven, sdk.keys.Eight, sdk.keys.Nine, sdk.keys.NumpadDash].includes(this.action)) {
+					if (this.blockKeyEvent()) return;
+					switch (this.action) {
+					case sdk.keys.Seven:
+						if (TextHooks.displaySettings) {
+							TextHooks.getHook("itemStatus", TextHooks.statusHooks).hook.text = "ÿc4Key 7ÿc0: " + (ItemHooks.enabled ? "Enable" : "Disable") + " Item Filter";
+						}
+						ItemHooks.enabled = !ItemHooks.enabled;
 
 						break;
-					case 3: // Shop
-						qolObj.action = "sellItem";
+					case sdk.keys.Eight:
+						if (TextHooks.displaySettings) {
+							TextHooks.getHook("monsterStatus", TextHooks.statusHooks).hook.text = "ÿc4Key 8ÿc0: " + (MonsterHooks.enabled ? "Enable" : "Disable") + " Monsters";
+						}
+						MonsterHooks.enabled = !MonsterHooks.enabled;
 
 						break;
-					default:
+					case sdk.keys.Nine:
+						if (TextHooks.displaySettings) {
+							TextHooks.getHook("vectorStatus", TextHooks.statusHooks).hook.text = "ÿc4Key 9ÿc0: " + (VectorHooks.enabled ? "Enable" : "Disable") + " Vectors";
+						}
+						VectorHooks.enabled = !VectorHooks.enabled;
+
+						break;
+					case sdk.keys.NumpadDash:
+						if (ItemHooks.pickitEnabled) {
+							ItemHooks.pickitEnabled = false;
+						} else {
+							ItemHooks.pickitEnabled = true;
+							ItemHooks.flush();
+							
+							if (!Hooks.saidMessage) {
+								showConsole();
+								print("ÿc<Notify :: ÿc0Item filter has switched to using your Pickit files, this is just to notify you of that. If you didn't add any nip files you probably should switch back.");
+								print("ÿc<Notify :: ÿc0Close this console by pressing Home. You will not see this message again.");
+								Hooks.saidMessage = true;
+							}
+						}
+
+						if (TextHooks.displaySettings) {
+							TextHooks.getHook("pickitStatus", TextHooks.statusHooks).hook.text = "ÿc4N-Pad - ÿc0: " + (ItemHooks.pickitEnabled ? "ÿc<Your Filter" : "ÿc1Default Filter");
+						}
+
 						break;
 					}
-				}
-
-				break;
-			case sdk.keys.Five:
-				if (!me.inTown) {
-					Town.getTpTool() && (qolObj.action = "makePortal");
-				} else if (me.inTown) {
-					if (!getUIFlag(sdk.uiflags.Stash) && !getUIFlag(sdk.uiflags.TradePrompt) && !getUIFlag(sdk.uiflags.Inventory)) {
-						qolObj.action = "heal";
-					}
-				}
-
-				break;
-			case sdk.keys.Six:
-				if (!me.inTown) {
-					Town.getTpTool() && (qolObj.action = "takePortal");
-				} else if (me.inTown) {
-					if (!getUIFlag(sdk.uiflags.Stash) && !getUIFlag(sdk.uiflags.TradePrompt) && !getUIFlag(sdk.uiflags.Inventory)) {
-						qolObj.action = "openStash";
-					}
-				}
-
-				break;
-			case sdk.keys.Seven:
-				if (this.blockKeyEventFlags.some((flag) => getUIFlag(flag))) {
-					break;
-				}
-				ItemHooks.enabled = !ItemHooks.enabled;
-				if (!!TextHooks.getHook("itemStatus", TextHooks.statusHooks)) TextHooks.getHook("itemStatus", TextHooks.statusHooks).hook.text = "ÿc4Key 7ÿc0: " + (ItemHooks.enabled ? "Disable" : "Enable") + " Item Filter";
-
-				break;
-			case sdk.keys.Eight:
-				if (this.blockKeyEventFlags.some((flag) => getUIFlag(flag))) {
-					break;
-				}
-				MonsterHooks.enabled = !MonsterHooks.enabled;
-				if (!!TextHooks.getHook("monsterStatus", TextHooks.statusHooks)) TextHooks.getHook("monsterStatus", TextHooks.statusHooks).hook.text = "ÿc4Key 8ÿc0: " + (MonsterHooks.enabled ? "Disable" : "Enable") + " Monsters";
-
-				break;
-			case sdk.keys.Nine:
-				if (this.blockKeyEventFlags.some((flag) => getUIFlag(flag))) {
-					break;
-				}
-				VectorHooks.enabled = !VectorHooks.enabled;
-				if (!!TextHooks.getHook("vectorStatus", TextHooks.statusHooks)) TextHooks.getHook("vectorStatus", TextHooks.statusHooks).hook.text = "ÿc4Key 9ÿc0: " + (VectorHooks.enabled ? "Disable" : "Enable") + " Vectors";
-
-				break;
-			case sdk.keys.NumpadDash:
-				if (this.blockKeyEventFlags.some((flag) => getUIFlag(flag))) {
-					break;
-				}
-				if (ItemHooks.pickitEnabled) {
-					ItemHooks.pickitEnabled = false;
 				} else {
-					ItemHooks.pickitEnabled = true;
-					ItemHooks.flush();
-					if (!Hooks.saidMessage) {
-						showConsole();
-						print("ÿc<Notify :: ÿc0Item filter has switched to using your Pickit files, this is just to notify you of that. If you didn't add any nip files you probably should switch back.");
-						print("ÿc<Notify :: ÿc0Close this console by pressing Home. You will not see this message again.");
-						Hooks.saidMessage = true;
+					switch (this.action) {
+					case sdk.keys.Numpad0:
+						hook = this.getHook("Next Area");
+
+						break;
+					case sdk.keys.Numpad1:
+						hook = this.getHook("Previous Area");
+
+						break;
+					case sdk.keys.Numpad2:
+						hook = this.getHook("Waypoint");
+
+						break;
+					case sdk.keys.Numpad3:
+						hook = this.getHook("POI");
+
+						break;
+					case sdk.keys.Numpad4:
+						hook = this.getHook("Side Area");
+
+						break;
+					case sdk.keys.Numpad5:
+						switch (me.area) {
+						case sdk.areas.RogueEncampment:
+						case sdk.areas.Tristram:
+						case sdk.areas.CanyonofMagic:
+						case sdk.areas.SpiderForest:
+						case sdk.areas.FlayerJungle:
+						case sdk.areas.KurastBazaar:
+						case sdk.areas.UpperKurast:
+						case sdk.areas.KurastCauseway:
+						case sdk.areas.ChaosSanctuary:
+							hook = this.getHook("POI2");
+
+							break;
+						case sdk.areas.Harrogath:
+							hook = this.getPortalHook("Matron's Den");
+
+							break;
+						}
+
+						break;
+					case sdk.keys.Numpad6:
+						switch (me.area) {
+						case sdk.areas.CanyonofMagic:
+						case sdk.areas.SpiderForest:
+						case sdk.areas.UpperKurast:
+						case sdk.areas.KurastCauseway:
+						case sdk.areas.ChaosSanctuary:
+							hook = this.getHook("POI3");
+
+							break;
+						case sdk.areas.Harrogath:
+							hook = this.getPortalHook("Sands");
+
+							break;
+						}
+
+						break;
+					case sdk.keys.Numpad7:
+						switch (me.area) {
+						case sdk.areas.CanyonofMagic:
+						case sdk.areas.ChaosSanctuary:
+							hook = this.getHook("POI4");
+
+							break;
+						case sdk.areas.Harrogath:
+							hook = this.getPortalHook("Furnace");
+
+							break;
+						}
+						
+						break;
+					case sdk.keys.Numpad8:
+						hook = me.inArea(sdk.areas.CanyonofMagic) ? this.getHook("POI5") : this.getPortalHook("Uber Tristam");
+
+						break;
+					case 188: // shift <
+						hook = TextHooks.getHook("Previous Act", TextHooks.qolHooks);
+
+						break;
+					case 190: // shift >
+						hook = TextHooks.getHook("Next Act", TextHooks.qolHooks);
+
+						break;
+					case sdk.keys.Ctrl:
+						unit = Game.getSelectedUnit();
+
+						if (!!unit) {
+							screenLoc = this.getOnScreenLocation();
+
+							switch (screenLoc) {
+							case 0: // Trade screen
+							case 1: // Stash
+							case 2: // Cube
+								qolObj.action = this.ctrlObj[screenLoc][unit.location];
+
+								break;
+							case 3: // Shop
+								qolObj.action = "sellItem";
+
+								break;
+							default:
+								break;
+							}
+						}
+
+						break;
+					case sdk.keys.Five:
+						if (!me.inTown) {
+							me.getTpTool() && (qolObj.action = "makePortal");
+						} else if (me.inTown) {
+							if (!getUIFlag(sdk.uiflags.Stash) && !getUIFlag(sdk.uiflags.TradePrompt) && !getUIFlag(sdk.uiflags.Inventory)) {
+								qolObj.action = "heal";
+							}
+						}
+
+						break;
+					case sdk.keys.Six:
+						if (!me.inTown) {
+							me.getTpTool() && (qolObj.action = "takePortal");
+						} else if (me.inTown) {
+							if (!getUIFlag(sdk.uiflags.Stash) && !getUIFlag(sdk.uiflags.TradePrompt) && !getUIFlag(sdk.uiflags.Inventory)) {
+								qolObj.action = "openStash";
+							}
+						}
+
+						break;
+					case sdk.keys.Insert:
+						if (me.inTown) {
+							break;
+						}
+
+						qolObj.action = "clear";
+
+						break;
 					}
 				}
-				if (!!TextHooks.getHook("pickitStatus", TextHooks.statusHooks)) TextHooks.getHook("pickitStatus", TextHooks.statusHooks).hook.text = "ÿc4N-Pad - ÿc0: " + (ItemHooks.pickitEnabled ? "ÿc<Your Filter" : "ÿc1Default Filter");
 
-				break;
-			case sdk.keys.Insert:
-				if (me.inTown) {
-					break;
+				if (hook) {
+					Object.assign(obj, hook);
+					Messaging.sendToScript(MapMode.mapHelperFilePath, JSON.stringify(obj));
+				} else if (qolObj.action) {
+					Messaging.sendToScript(MapMode.mapHelperFilePath, JSON.stringify(qolObj));
 				}
-
-				qolObj.action = "clear";
-
-				break;
+			} catch (e) {
+				console.error(e);
+			} finally {
+				this.action = null;
 			}
-
-			if (hook) {
-				Object.assign(obj, hook);
-				Messaging.sendToScript(MapMode.mapHelperFilePath, JSON.stringify(obj));
-			} else if (qolObj.action) {
-				Messaging.sendToScript(MapMode.mapHelperFilePath, JSON.stringify(qolObj));
-			}
-
-			this.action = null;
 		}
 	},
 
