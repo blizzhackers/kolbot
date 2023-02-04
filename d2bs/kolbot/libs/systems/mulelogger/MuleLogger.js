@@ -149,7 +149,7 @@ const MuleLogger = {
 		});
 
 		for (let i = 0; i < items.length; i += 1) {
-			if ((this.LogEquipped || items[i].isInStorage) && (items[i].quality > sdk.items.quality.Normal || !Misc.skipItem(items[i].classid))) {
+			if ((this.LogEquipped || items[i].isInStorage) && (items[i].quality > sdk.items.quality.Normal || !Item.skipItem(items[i].classid))) {
 				let parsedItem = this.logItem(items[i], logIlvl);
 
 				// Log names to saved image
