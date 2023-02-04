@@ -387,8 +387,6 @@ function main () {
 	D2Bot.init();
 	load("threads/heartbeat.js");
 
-	require("./modules/OOGGuard");
-
 	while (!Object.keys(Starter.gameInfo).length) {
 		D2Bot.requestGameInfo();
 		delay(500);
