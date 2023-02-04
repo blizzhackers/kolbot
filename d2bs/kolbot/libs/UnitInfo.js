@@ -129,7 +129,7 @@ const UnitInfo = new function () {
 
 		let xpos = 60;
 		let ypos = (me.getMerc() ? 80 : 20) + (-1 * this.resfix.y);
-		let frameYsize = 50;
+		let frameYsize = 65;
 
 		this.hooks.push(new Text("Code: ÿc0" + unit.code, xpos, ypos + 0, 4, 13, 2));
 		this.hooks.push(new Text("Classid: ÿc0" + unit.classid, xpos, ypos + 15, 4, 13, 2));
@@ -139,9 +139,9 @@ const UnitInfo = new function () {
 		this.cleared = false;
 		this.socketedItems = unit.getItems();
 
-		if (this.socketedItems) {
+		if (this.socketedItems && unit.sockets) {
 			this.hooks.push(new Text("Socketed with:", xpos, ypos + 60, 4, 13, 2));
-			frameYsize += 30;
+			frameYsize += 15;
 
 			for (let i = 0; i < this.socketedItems.length; i += 1) {
 				this.hooks.push(new Text(this.socketedItems[i].fname.split("\n").reverse().join(" "), xpos, ypos + (i + 5) * 15, 0, 13, 2));
