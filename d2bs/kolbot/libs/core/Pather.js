@@ -8,9 +8,15 @@
 // TODO: this needs to be re-worked
 // Perform certain actions after moving to each node
 const NodeAction = {
+	/**
+	 * @type {number[]}
+	 */
 	shrinesToIgnore: [],
 
-	// Run all the functions within NodeAction (except for itself)
+	/**
+	 * Run all the functions within NodeAction (except for itself)
+	 * @param {clearSettings} arg 
+	 */
 	go: function (arg) {
 		for (let i in this) {
 			if (this.hasOwnProperty(i) && typeof this[i] === "function" && i !== "go") {
@@ -19,7 +25,11 @@ const NodeAction = {
 		}
 	},
 
-	// Kill monsters while pathing
+	/**
+	 * Kill monsters while pathing
+	 * @param {clearSettings} arg 
+	 * @returns {void}
+	 */
 	killMonsters: function (arg = {}) {
 		const settings = Object.assign({}, {
 			clearPath: false,
@@ -55,23 +65,35 @@ const NodeAction = {
 		}
 	},
 
-	// Open chests while pathing
+	/**
+	 * Open chests while pathing
+	 */
 	popChests: function () {
 		// fastPick check? should only open chests if surrounding monsters have been cleared or if fastPick is active
 		// note: clear of surrounding monsters of the spectype we are set to clear
 		Config.OpenChests.Enabled && Misc.openChests(Config.OpenChests.Range);
 	},
 
-	// Scan shrines while pathing
+	/**
+	 * Scan shrines while pathing
+	 */
 	getShrines: function () {
 		Config.ScanShrines.length > 0 && Misc.scanShrines(null, this.shrinesToIgnore);
 	}
 };
 
 const PathDebug = {
+	/**
+	 * @type {Line[]}
+	 */
 	hooks: [],
 	enableHooks: false,
 
+	/**
+	 * Draw our path on the screen
+	 * @param {PathNode[]} path 
+	 * @returns {void}
+	 */
 	drawPath: function (path) {
 		if (!this.enableHooks) return;
 
@@ -92,6 +114,13 @@ const PathDebug = {
 		PathDebug.hooks = [];
 	},
 
+	/**
+	 * Check if a set of coords are a set path
+	 * @param {PathNode[]} path 
+	 * @param {number} x 
+	 * @param {number} y 
+	 * @returns {boolean}
+	 */
 	coordsInPath: function (path, x, y) {
 		for (let i = 0; i < path.length; i += 1) {
 			if (getDistance(x, y, path[i].x, path[i].y) < 5) {
@@ -137,11 +166,11 @@ const Pather = {
 
 	init: function () {
 		if (!this.initialized) {
-			me.classic && (this.nonTownWpAreas = this.nonTownWpAreas.filter((wp) => wp < sdk.areas.Harrogath));
+			me.classic && (Pather.nonTownWpAreas = this.nonTownWpAreas.filter((wp) => wp < sdk.areas.Harrogath));
 			if (!Config.WaypointMenu) {
 				!getWaypoint(1) && this.getWP(me.area);
 				me.cancelUIFlags();
-				this.initialized = true;
+				Pather.initialized = true;
 			}
 		}
 	},
@@ -156,6 +185,18 @@ const Pather = {
 		return !me.inTown && !Config.NoTele && !me.shapeshifted && this.canTeleport() && numberOfTeleport > 2;
 	},
 
+	/**
+	 * @typedef {object} spotOnDistanceSettings
+	 * @property {number} [area]
+	 * @property {number} [reductionType]
+	 * @property {number} [coll]
+	 * @property {boolean} [returnSpotOnError] 
+	 *
+	 * @param {PathNode} spot 
+	 * @param {number} distance 
+	 * @param {spotOnDistanceSettings} givenSettings 
+	 * @returns {PathNode}
+	 */
 	spotOnDistance: function (spot, distance, givenSettings = {}) {
 		const settings = Object.assign({}, {
 			area: me.area,
@@ -189,7 +230,9 @@ const Pather = {
 	 * @property {boolean} [pop]
 	 * @property {boolean} [returnSpotOnError]
 	 * @property {Function} [callback]
-	 * @property {object} [clearSettings]
+	 * @property {clearSettings} [clearSettings]
+	 * 
+	 * @typedef {object} clearSettings
 	 * @property {boolean} [clearSettings.clearPath]
 	 * @property {number} [clearSettings.range]
 	 * @property {number} [clearSettings.specType]
@@ -587,11 +630,12 @@ const Pather = {
 		return (!me.dead && getDistance(me.x, me.y, x, y) <= minDist);
 	},
 
-	/*
-		Pather.openDoors(x, y);
-		x - the x coord of the node close to the door
-		y - the y coord of the node close to the door
-	*/
+	/**
+	 * If there is a door in our path, open it so we can continue moving
+	 * @param {number} x - the x coord of the node close to the door
+	 * @param {number} y - the y coord of the node close to the door
+	 * @returns {boolean} true if we opened any doors that were in our way
+	 */
 	openDoors: function (x, y) {
 		if (me.inTown && me.act !== 5) return false;
 
@@ -663,11 +707,12 @@ const Pather = {
 		return false;
 	},
 
-	/*
-		Pather.kickBarrels(x, y);
-		x - the x coord of the node close to the barrel
-		y - the y coord of the node close to the barrel
-	*/
+	/**
+	 * Small and annoying things like barrels can block our path, open them if they are near us
+	 * @param {number} x - the x coord of the node close to the barrel
+	 * @param {number} y - the y coord of the node close to the barrel
+	 * @returns {boolean} true if we kicked any barrels that were in our way
+	 */
 	kickBarrels: function (x, y) {
 		if (me.inTown) return false;
 
@@ -823,8 +868,6 @@ const Pather = {
 
 	/**
 	 * @todo
-	 * moveTo/NearPresetMonster
-	 * moveTo/NearPresetObject
 	 * moveTo/NearPresetTile
 	 */
 	
@@ -863,7 +906,7 @@ const Pather = {
 	 * @param {number} unitId 
 	 * @param {pathSettings} givenSettings 
 	 */
-	moveToPresetMonster: function () {
+	moveToPresetMonster: function (area, unitId, givenSettings = {}) {
 		if (area === undefined || unitId === undefined) {
 			throw new Error("moveToPreset: Invalid parameters.");
 		}
@@ -1010,6 +1053,11 @@ const Pather = {
 		return (use && finalDest ? me.area === finalDest : true);
 	},
 
+	/**
+	 * @param {number} area 
+	 * @param {number} exit 
+	 * @returns {number}
+	 */
 	getDistanceToExit: function (area, exit) {
 		area === undefined && (area = me.area);
 		exit === undefined && (exit = me.area + 1);
@@ -1022,6 +1070,11 @@ const Pather = {
 		return loc ? [loc.x, loc.y].distance : Infinity;
 	},
 
+	/**
+	 * @param {number} area 
+	 * @param {number} exit 
+	 * @returns {PathNode | false}
+	 */
 	getExitCoords: function (area, exit) {
 		area === undefined && (area = me.area);
 		exit === undefined && (exit = me.area + 1);
@@ -1034,10 +1087,11 @@ const Pather = {
 		return loc ? {x: loc.x, y: loc.y} : false;
 	},
 
-	/*
-		Pather.getNearestRoom(area);
-		area - the id of area to search for the room nearest to the player character
-	*/
+
+	/**
+	 * @param {number} area - the id of area to search for the room nearest to the player character
+	 * @returns {[number, number] | false}
+	 */
 	getNearestRoom: function (area) {
 		let startTick = getTickCount();
 		let x, y, minDist = 10000;
@@ -1069,10 +1123,10 @@ const Pather = {
 		return [x, y];
 	},
 
-	/*
-		Pather.openExit(targetArea);
-		targetArea - area id of where the unit leads to
-	*/
+	/**
+	 * @param {number} targetArea - area id of where the unit leads to
+	 * @returns {boolean}
+	 */
 	openExit: function (targetArea) {
 		switch (true) {
 		case targetArea === sdk.areas.AncientTunnels:
@@ -1096,11 +1150,11 @@ const Pather = {
 		return false;
 	},
 
-	/*
-		Pather.openUnit(id);
-		type - type of the unit to open
-		id - id of the unit to open
-	*/
+	/**
+	 * @param {UnitType} type - type of the unit to open
+	 * @param {number} id - id of the unit to open
+	 * @returns {boolean}
+	 */
 	openUnit: function (type, id) {
 		let unit = Misc.poll(() => getUnit(type, id), 1000, 200);
 		if (!unit) throw new Error("openUnit: Unit not found. ID: " + unit);
@@ -1125,13 +1179,13 @@ const Pather = {
 		return false;
 	},
 
-	/*
-		Pather.useUnit(type, id, targetArea);
-		type - type of the unit to use
-		id - id of the unit to use
-		targetArea - area id of where the unit leads to
-	*/
-	// should use an object as param, or be changed to able to take an already found unit as a param
+	/**
+	 * @param {UnitType} type - type of the unit to use
+	 * @param {number} id - id of the unit to use
+	 * @param {number} targetArea - area id of where the unit leads to
+	 * @returns {boolean}
+	 * @todo should use an object as param, or be changed to able to take an already found unit as a param
+	 */
 	useUnit: function (type, id, targetArea) {
 		let unit = Misc.poll(() => getUnit(type, id), 2000, 200);
 		let preArea = me.area;
@@ -1268,10 +1322,10 @@ const Pather = {
 		return targetArea ? me.area === targetArea : me.area !== preArea;
 	},
 
-	/*
-		Pather.broadcastIntent(targetArea);
-		targetArea - area id
-	*/
+	/**
+	 * Meant for use as a MfLeader to let MfHelpers know where to go next
+	 * @param {number} targetArea - area id
+	 */
 	broadcastIntent: function broadcastIntent(targetArea) {
 		if (Config.MFLeader) {
 			let targetAct = sdk.areas.actOf(targetArea);
@@ -1279,11 +1333,11 @@ const Pather = {
 		}
 	},
 
-	/*
-		Pather.moveTo(targetArea, check);
-		targetArea - id of the area to enter
-		check - force the waypoint menu
-	*/
+	/**
+	 * @param {number} targetArea - id of the area to enter
+	 * @param {boolean} check - force the waypoint menu
+	 * @returns {boolean}
+	 */
 	useWaypoint: function useWaypoint(targetArea, check = false) {
 		switch (targetArea) {
 		case undefined:
@@ -1419,15 +1473,6 @@ const Pather = {
 							delay((1500 + (pingDelay * i)));
 							console.info(false, "ÿc7targetArea: ÿc0" + getAreaName(targetArea) + " ÿc7myArea: ÿc0" + getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (Time.format(getTickCount() - wpTick)));
 
-							// if (!me.inTown && Config.ForcePrecast && !(new Error().stack.match("precast.js"))) {
-							// 	let coord = CollMap.getRandCoordinate(me.x, -6, 6, me.y, -6, 6);
-
-							// 	// Keep bots from getting stuck trying to summon
-							// 	if (!!coord && Attack.validSpot(coord.x, coord.y)) {
-							// 		Pather.moveTo(coord.x, coord.y);
-							// 		Precast.doPrecast(false, true);
-							// 	}
-							// }
 							return true;
 						}
 
@@ -1458,25 +1503,16 @@ const Pather = {
 			// delay to allow act to init - helps with crashes
 			delay(500);
 			console.info(false, "ÿc7targetArea: ÿc0" + getAreaName(targetArea) + " ÿc7myArea: ÿc0" + getAreaName(me.area) + "ÿc0 - ÿc7Duration: ÿc0" + (Time.format(getTickCount() - wpTick)));
-			// if (!me.inTown && Config.ForcePrecast && !(new Error().stack.match("precast.js"))) {
-			// 	let coord = CollMap.getRandCoordinate(me.x, -6, 6, me.y, -6, 6);
-
-			// 	// Keep bots from getting stuck trying to summon
-			// 	if (!!coord && Attack.validSpot(coord.x, coord.y)) {
-			// 		Pather.moveTo(coord.x, coord.y);
-			// 		Precast.doPrecast(false, true);
-			// 	}
-			// }
 			return true;
 		}
 
 		throw new Error("useWaypoint: Failed to use waypoint");
 	},
 
-	/*
-		Pather.makePortal(use);
-		use - use the portal that was made
-	*/
+	/**
+	 * @param {boolean} use - use the portal that was made
+	 * @returns {Unit | boolean}
+	 */
 	makePortal: function (use = false) {
 		if (me.inTown) return true;
 
