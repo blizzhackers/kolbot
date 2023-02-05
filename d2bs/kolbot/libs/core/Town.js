@@ -68,17 +68,17 @@ const Town = {
 			try {
 				if (!!this.unit && getTickCount() - this.tick < Time.seconds(15)
 					&& this.unit.name.toLowerCase() !== "an evil force" && this.unit.area === me.area) {
-					Config.DebugMode && console.debug("used stored value");
+					Config.DebugMode.Town && console.debug("used stored value");
 					return this.unit;
 				} else {
 					this.reset();
-					Config.DebugMode && console.debug("getting new npc");
+					Config.DebugMode.Town && console.debug("getting new npc");
 					return getInteractedNPC();
 				}
 			} catch (e) {
-				Config.DebugMode && console.error(e);
+				Config.DebugMode.Town && console.error(e);
 				this.reset();
-				Config.DebugMode && console.debug("getting new npc");
+				Config.DebugMode.Town && console.debug("getting new npc");
 				return getInteractedNPC();
 			}
 		},
@@ -337,7 +337,7 @@ const Town = {
 				let myAct = me.act;
 				let potentialActs = [1, 2, 3, 4, 5].filter(a => a <= highestAct && a !== myAct);
 				let goTo = potentialActs[rand(0, potentialActs.length - 1)];
-				Config.DebugMode && console.debug("Going to Act " + goTo + " to see if it fixes getUnit bug");
+				Config.DebugMode.Town && console.debug("Going to Act " + goTo + " to see if it fixes getUnit bug");
 				Town.goToTown(goTo);
 			}
 
@@ -348,7 +348,7 @@ const Town = {
 		this.lastInteractedNPC.set(npc);
 
 		if (task === "Heal") {
-			Config.DebugMode && console.debug("Checking if we are frozen");
+			Config.DebugMode.Town && console.debug("Checking if we are frozen");
 			if (me.getState(sdk.states.Frozen)) {
 				console.log("We are frozen, lets unfreeze real quick with some thawing pots");
 				Town.buyPots(2, sdk.items.ThawingPotion, true, true, npc);
@@ -1907,7 +1907,7 @@ const Town = {
 			.filter((p) => p.isInInventory && [sdk.items.type.HealingPotion, sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion].includes(p.itemType))
 			.sort((a, b) => a.itemType - b.itemType);
 
-		Config.DebugMode && potsInInventory.length > 0 && console.debug("clearInventory: start pots clean-up");
+		Config.DebugMode.Town && potsInInventory.length > 0 && console.debug("clearInventory: start pots clean-up");
 		// Start interating over all the pots we have in our inventory
 		potsInInventory.forEach(function (p) {
 			let moved = false;
@@ -1932,7 +1932,7 @@ const Town = {
 		});
 
 		// Cleanup remaining potions
-		Config.DebugMode && console.debug("clearInventory: start clean-up remaining pots");
+		Config.DebugMode.Town && console.debug("clearInventory: start clean-up remaining pots");
 		let sellOrDrop = [];
 		potsInInventory = me.getItemsEx()
 			.filter((p) => p.isInInventory && [
@@ -1984,7 +1984,7 @@ const Town = {
 		}
 
 		// Any leftover items from a failed ID (crashed game, disconnect etc.)
-		Config.DebugMode && console.debug("clearInventory: start invo clean-up");
+		Config.DebugMode.Town && console.debug("clearInventory: start invo clean-up");
 		let ignoreTypes = [
 			sdk.items.type.Book, sdk.items.type.Key, sdk.items.type.HealingPotion, sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion
 		];

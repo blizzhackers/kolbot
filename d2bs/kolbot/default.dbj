@@ -138,7 +138,7 @@ function main () {
 	load("threads/ToolsThread.js");
 	(Config.TownCheck || Config.TownHP > 0 || Config.TownMP > 0) && load("threads/TownChicken.js");
 
-	if (Config.DebugMode && FileTools.exists("libs/modules/Guard")) {
+	if (Config.DebugMode.Stack && FileTools.exists("libs/modules/Guard.js")) {
 		require("libs/modules/Guard");
 	}
 
@@ -167,7 +167,7 @@ function main () {
 		Pickit.pickItems();
 		me.hpPercent <= 10 && Town.heal() && me.cancelUIFlags();
 
-		if (Config.DebugMode) {
+		if (Config.DebugMode.Memory) {
 			delay(2000);
 			getThreads()
 				.sort((a, b) => b.memory - a.memory)

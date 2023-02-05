@@ -1686,7 +1686,7 @@ const Attack = {
 								return Pather.moveToEx(coords[i].x, coords[i].y, { retry: 1, allowPicking: !force });
 							}
 						})()) {
-							if (Config.DebugMode && force) {
+							if (Config.DebugMode.Path && force) {
 								console.debug("Sucessfully got into position. orginal Loc: " + orgX + "/" + orgY + " new loc " + me.x + "/" + me.y + " distance: " + [orgX, orgY].distance);
 							}
 							return true;

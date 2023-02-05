@@ -216,7 +216,7 @@ const Precast = new function () {
 			if ([sdk.skills.Shout, sdk.skills.BattleOrders, sdk.skills.BattleCommand].includes(skillId)) return this.warCries(skillId, x, y);
 
 			if (Config.PacketCasting > 1 || usePacket) {
-				Config.DebugMode && console.debug("Packet casting: " + skillId);
+				Config.DebugMode.Skill && console.debug("Packet casting: " + skillId);
 				
 				switch (typeof x) {
 				case "number":

@@ -108,7 +108,13 @@ let Config = {
 
 	// dev
 	Loaded: false,
-	DebugMode: false,
+	DebugMode: {
+		Path: false,
+		Stack: false,
+		Memory: false,
+		Skill: false,
+		Town: false,
+	},
 
 	// Time
 	StartDelay: 0,

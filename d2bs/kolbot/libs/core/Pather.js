@@ -907,9 +907,9 @@ const Pather = {
 
 			console.info(null, "ÿc0Moving from: " + getAreaName(me.area) + " to " + getAreaName(areas[i]));
 			
-			Config.DebugMode && console.time("getArea");
+			Config.DebugMode.Path && console.time("getArea");
 			let area = Misc.poll(() => getArea(me.area));
-			Config.DebugMode && console.timeEnd("getArea");
+			Config.DebugMode.Path && console.timeEnd("getArea");
 
 			if (!area) throw new Error("moveToExit: error in getArea()");
 
@@ -919,12 +919,12 @@ const Pather = {
 			let checkExits = [];
 
 			if (!exits.length) return false;
-			Config.DebugMode && console.log("Took: " + (getTickCount() - t2) + " to assign vars");
+			Config.DebugMode.Path && console.log("Took: " + (getTickCount() - t2) + " to assign vars");
 
 			let t3 = getTickCount();
 			for (let j = 0; j < exits.length; j += 1) {
 				if (!exits[j].hasOwnProperty("target") || exits[j].target !== currTarget) continue;
-				Config.DebugMode && console.debug(exits[j]);
+				Config.DebugMode.Path && console.debug(exits[j]);
 				let currCheckExit = {
 					x: exits[j].x,
 					y: exits[j].y,
@@ -935,10 +935,10 @@ const Pather = {
 
 				currCheckExit.target === currTarget && checkExits.push(currCheckExit);
 			}
-			Config.DebugMode && console.log("Took: " + (getTickCount() - t3) + " to find all exits");
+			Config.DebugMode.Path && console.log("Took: " + (getTickCount() - t3) + " to find all exits");
 
 			if (checkExits.length > 0) {
-				Config.DebugMode && console.debug(checkExits);
+				Config.DebugMode.Path && console.debug(checkExits);
 				let t4 = getTickCount();
 				// if there are multiple exits to the same location find the closest one
 				let currExit = checkExits.length > 1
@@ -957,10 +957,10 @@ const Pather = {
 						//checkExits.sort((a, b) => getDistance(me.x, me.y, a.x, a.y) - getDistance(me.x, me.y, b.x, b.y)).first()
 					})()
 					: checkExits[0];
-				Config.DebugMode && console.log("Took: " + (getTickCount() - t4) + " to pick exit", currExit);
+				Config.DebugMode.Path && console.log("Took: " + (getTickCount() - t4) + " to pick exit", currExit);
 				let t5 = getTickCount();
 				let dest = this.getNearestWalkable(currExit.x, currExit.y, 5, 1);
-				Config.DebugMode && console.log("Took: " + (getTickCount() - t5) + " to find nearest walkable");
+				Config.DebugMode.Path && console.log("Took: " + (getTickCount() - t5) + " to find nearest walkable");
 
 				if (!dest) return false;
 
@@ -1056,16 +1056,16 @@ const Pather = {
 		} while (room.getNext());
 
 		room = getRoom(area, x, y);
-		!!Config.DebugMode && console.log(room);
+		!!Config.DebugMode.Path && console.log(room);
 
 		if (room) {
 			CollMap.addRoom(room);
 
-			!!Config.DebugMode && console.log("ÿc7End ÿc8(getNearestOld) ÿc0 - ÿc7Duration: ÿc0" + (getTickCount() - startTick));
+			!!Config.DebugMode.Path && console.log("ÿc7End ÿc8(getNearestOld) ÿc0 - ÿc7Duration: ÿc0" + (getTickCount() - startTick));
 			return this.getNearestWalkable(x, y, 20, 4);
 		}
 
-		!!Config.DebugMode && console.log("ÿc7End ÿc8(getNearestOld) ÿc0 - ÿc7Duration: ÿc0" + (getTickCount() - startTick));
+		!!Config.DebugMode.Path && console.log("ÿc7End ÿc8(getNearestOld) ÿc0 - ÿc7Duration: ÿc0" + (getTickCount() - startTick));
 		return [x, y];
 	},
 
