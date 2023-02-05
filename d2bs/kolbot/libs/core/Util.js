@@ -22,6 +22,15 @@
 		});
 	}
 }(this, function() {
+	function ScriptError(message) {
+		this.name = "ScriptError";
+		this.message = message || "";
+		this.stack = (new Error()).stack;
+	}
+
+	ScriptError.prototype = Object.create(Error.prototype);
+	ScriptError.prototype.constructor = ScriptError;
+
 	/**
 	* get all running threads and return them as an array
 	* @returns {Script[]}
@@ -605,5 +614,6 @@
 		Game: Game,
 		Sort: Sort,
 		Messaging: Messaging,
+		ScriptError: ScriptError,
 	};
 }));
