@@ -32,13 +32,13 @@ function Pindleskin() {
 	if (Config.Pindleskin.KillNihlathak) {
 		if (!Pather.moveToExit([sdk.areas.HallsofAnguish, sdk.areas.HallsofPain, sdk.areas.HallsofVaught], true)) throw new Error("Failed to move to Halls of Vaught");
 
-		Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.NihlathaksPlatform, 10, 10);
-
-		if (Config.Pindleskin.ViperQuit && Game.getMonster(sdk.monsters.TombViper2)) {
-			console.log("Tomb Vipers found.");
-
-			return true;
-		}
+		// faster detection of TombVipers
+		Pather.moveToPresetObject(me.area, sdk.objects.NihlathaksPlatform, { offX: 10, offY: 10, callback: () => {
+			if (Config.Pindleskin.ViperQuit && Game.getMonster(sdk.monsters.TombViper2)) {
+				console.log("Tomb Vipers found.");
+				throw new ScriptError("Tomb Vipers found.");
+			}
+		}});
 
 		Config.Pindleskin.ClearVipers && Attack.clearList(Attack.getMob(sdk.monsters.TombViper2, 0, 20));
 

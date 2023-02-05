@@ -149,7 +149,9 @@ const Loader = {
 						}
 					}
 				} catch (error) {
-					Misc.errorReport(error, script);
+					if (!(error instanceof ScriptError)) {
+						Misc.errorReport(error, script);
+					}
 				} finally {
 					// Dont run for last script as that will clear everything anyway
 					if (this.scriptIndex < this.scriptList.length) {
@@ -222,7 +224,9 @@ const Loader = {
 					}
 				}
 			} catch (error) {
-				Misc.errorReport(error, script);
+				if (!(error instanceof ScriptError)) {
+					Misc.errorReport(error, script);
+				}
 				failed = true;
 			} finally {
 				// Dont run for last script as that will clear everything anyway

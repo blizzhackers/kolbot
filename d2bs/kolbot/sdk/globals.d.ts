@@ -81,6 +81,9 @@ declare global {
 		objtype: number;
 	}
 
+	class ScriptError extends Error {
+	}
+
 	type actType = { initialized: boolean, spot: { [data: string]: [number, number] } };
 	type potType = 'hp' | 'mp' | 'rv';
 

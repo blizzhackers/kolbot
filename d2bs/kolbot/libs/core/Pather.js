@@ -827,6 +827,64 @@ const Pather = {
 	 * moveTo/NearPresetObject
 	 * moveTo/NearPresetTile
 	 */
+	
+	/**
+	 * 
+	 * @param {number} area 
+	 * @param {number} unitId 
+	 * @param {pathSettings} givenSettings 
+	 */
+	moveToPresetObject: function (area, unitId, givenSettings = {}) {
+		if (area === undefined || unitId === undefined) {
+			throw new Error("moveToPreset: Invalid parameters.");
+		}
+
+		let offX = givenSettings.hasOwnProperty("offX") ? givenSettings.offX : 0;
+		let offY = givenSettings.hasOwnProperty("offY") ? givenSettings.offY : 0;
+
+		me.area !== area && Pather.journeyTo(area);
+		let presetUnit = Game.getPresetObject(area, unitId);
+
+		if (!presetUnit) {
+			throw new Error("moveToPresetObject: Couldn't find preset unit - id: " + unitId + " in area: " + getAreaName(area));
+		}
+
+		let realCoords = presetUnit.realCoords();
+
+		delay(40);
+		Misc.poll(() => me.gameReady, 500, 100);
+
+		return this.moveToEx(realCoords.x + offX, realCoords.y + offY, givenSettings);
+	},
+
+	/**
+	 * 
+	 * @param {number} area 
+	 * @param {number} unitId 
+	 * @param {pathSettings} givenSettings 
+	 */
+	moveToPresetMonster: function () {
+		if (area === undefined || unitId === undefined) {
+			throw new Error("moveToPreset: Invalid parameters.");
+		}
+
+		let offX = givenSettings.hasOwnProperty("offX") ? givenSettings.offX : 0;
+		let offY = givenSettings.hasOwnProperty("offY") ? givenSettings.offY : 0;
+
+		me.area !== area && Pather.journeyTo(area);
+		let presetUnit = Game.getPresetMonster(area, unitId);
+
+		if (!presetUnit) {
+			throw new Error("moveToPresetMonster: Couldn't find preset unit - id: " + unitId + " in area: " + getAreaName(area));
+		}
+
+		let realCoords = presetUnit.realCoords();
+
+		delay(40);
+		Misc.poll(() => me.gameReady, 500, 100);
+
+		return this.moveToEx(realCoords.x + offX, realCoords.y + offY, givenSettings);
+	},
 
 	/**
 	 * @param {number} targetArea - area id or array of area ids to move to

@@ -19,13 +19,13 @@ function Nihlathak() {
 
 	if (!Pather.moveToExit(sdk.areas.HallsofVaught, true)) throw new Error("Failed to go to Nihlathak");
 
-	Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.NihlathaksPlatform, 0, 0, false, true);
-
-	if (Config.Nihlathak.ViperQuit && Game.getMonster(sdk.monsters.TombViper2)) {
-		print("Tomb Vipers found.");
-
-		return true;
-	}
+	// faster detection of TombVipers
+	Pather.moveToPresetObject(me.area, sdk.objects.NihlathaksPlatform, { callback: () => {
+		if (Config.Nihlathak.ViperQuit && Game.getMonster(sdk.monsters.TombViper2)) {
+			console.log("Tomb Vipers found.");
+			throw new ScriptError("Tomb Vipers found.");
+		}
+	}});
 
 	Attack.kill(sdk.monsters.Nihlathak);
 	Pickit.pickItems();
