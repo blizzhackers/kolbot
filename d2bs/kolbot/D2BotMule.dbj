@@ -15,7 +15,7 @@ include("critical.js"); // required
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 // D2BotMule specific settings - for global settings see libs/starter/StarterConfig.js
 Starter.Config.MinGameTime = 30; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
-Starter.Config.MaxGameTime = 10; // Maximum game length in minutes, only for continuous muling
+Starter.Config.MaxGameTime = 60; // Maximum game length in minutes, only for continuous muling
 Starter.Config.CreateGameDelay = 5; // Seconds to wait before creating a new game
 Starter.Config.SwitchKeyDelay = 0; // Seconds to wait before switching a used/banned key or after realm down
 Starter.Config.ExitToMenu = false; // Set to true to wait out restriction in main menu or false to wait in lobby.

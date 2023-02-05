@@ -858,6 +858,7 @@ declare global {
 
 	interface StarterConfig {
 		MinGameTime: number,
+		MaxGameTime?: number,
 		PingQuitDelay: number,
 		CreateGameDelay: number,
 		ResetCount: number
