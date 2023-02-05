@@ -5,21 +5,13 @@
 *
 */
 js_strict(true);
-
-include("json2.js");     // required?
-include("polyfill.js");  // required
-include("oog/D2Bot.js"); // required
+include("critical.js");	// required
 
 // globals needed for core gameplay
-include("core/NTItemParser.js");
-include("core/Util.js");
 includeCoreLibs();
 
 // system libs
-include("systems/automule/AutoMule.js");
-include("systems/gambling/Gambling.js");
-include("systems/crafting/CraftingSystem.js");
-include("systems/torch/TorchSystem.js");
+includeSystemLibs();
 include("systems/mulelogger/MuleLogger.js");
 include("systems/gameaction/GameAction.js");
 
@@ -31,6 +23,8 @@ function main() {
 
 	// AntiHostile gets game event info from ToolsThread
 	this.scriptEvent = function (msg) {
+		if (!msg || typeof msg !== "string") return;
+		
 		switch (msg.split(" ")[0]) {
 		case "remove": // Remove a hostile player that left the game
 			if (hostiles.indexOf(msg.split(" ")[1]) > -1) {
