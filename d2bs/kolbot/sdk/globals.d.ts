@@ -77,10 +77,6 @@ declare global {
 		setPrototypeOf(obj: object, proto: object)
 	}
 
-	interface ObjectUnit extends Unit {
-		objtype: number;
-	}
-
 	class ScriptError extends Error {
 	}
 
@@ -340,6 +336,15 @@ declare global {
 
 	class MercUnit extends Monster {
 		equip(destination: number | undefined, item: ItemUnit)
+	}
+
+	interface ObjectUnit extends Unit {
+	}
+
+	type ObjectType = 2;
+	class ObjectUnit extends Unit {
+		public type: ObjectType;
+		objtype: number;
 	}
 
 	type MissileType = 3;

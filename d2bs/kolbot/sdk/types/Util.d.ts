@@ -81,6 +81,16 @@ declare global {
 	}
 
 	function getThreads(): Script[];
+	function getUnits(type: MonsterType, name?: string, mode?: number, unitId?: number): Monster[];
+	function getUnits(type: MonsterType, classId?: number, mode?: number, unitId?: number): Monster[];
+	function getUnits(type: ObjectType, name?: string, mode?: number, unitId?: number): ObjectUnit[];
+	function getUnits(type: ObjectType, classId?: number, mode?: number, unitId?: number): ObjectUnit[];
+	function getUnit(type?: MissileType, name?: string, mode?: number, unitId?: number): Missile[]
+	function getUnit(type?: MissileType, classId?: number, mode?: number, unitId?: number): Missile[]
+	function getUnits(type: ItemType, name?: string, mode?: number, unitId?: number): ItemUnit[];
+	function getUnits(type: ItemType, classId?: number, mode?: number, unitId?: number): ItemUnit[];
+	function getUnits(type: TileType, name?: string, mode?: number, unitId?: number): Tile[];
+	function getUnits(type: TileType, classId?: number, mode?: number, unitId?: number): Tile[];
 	function getUnits(...args: any[]): Unit[];
 	function clickItemAndWait(...args: Args[]): boolean;
 	function clickUnitAndWait(button: number, shift: 0 | 1, unit: Unit): boolean;

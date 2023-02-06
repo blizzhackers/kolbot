@@ -33,15 +33,17 @@ includeSystemLibs();
 include("systems/mulelogger/MuleLogger.js");
 include("systems/gameaction/GameAction.js");
 
-let Controls = require("./modules/Control");
-let Overrides = require("./modules/Override");
+const Controls = require("./modules/Control");
+const Overrides = require("./modules/Override");
 const Worker = require("./modules/Worker");
 
 /** @global */
-let master, muleMode, muleFilename, muleObj, maxCharCount;
+let master, muleMode, muleFilename, maxCharCount;
 let [checkOnJoin, makeNext] = [false, false];
 let status = "loading";
 let masterStatus = { status: "" };
+/** @type {muleObj} */
+let muleObj;
 
 /**
  * Mule Data object manipulates external mule datafile
@@ -225,6 +227,7 @@ const Mule = {
 		}
 
 		me.overhead("begin");
+		console.log("begin");
 	},
 
 	/**
@@ -241,6 +244,7 @@ const Mule = {
 
 		MuleData.write(obj);
 		D2Bot.printToConsole("Done muling.", sdk.colors.D2Bot.DarkGold);
+		console.log("Done muling");
 		sendCopyData(null, master, 10, JSON.stringify({ status: "quit" }));
 		D2Bot.stop(me.profile, true);
 	},
@@ -401,6 +405,14 @@ const Mule = {
 					}
 				});
 			Mule.clearedJunk = true; // only do this once
+		}
+
+		const getItems = () => getUnits(sdk.unittype.Item).filter(i => i.distance < 20 && i.onGroundOrDropping && !Town.ignoreType(i.itemType));
+		console.debug(masterStatus, checkOnJoin);
+		if (Mule.foreverAlone()) {
+			if (!Misc.poll(() => !Mule.foreverAlone() && getItems.length > 0, Time.seconds(2), 500)) {
+				return rval;
+			}
 		}
 
 		while (me.gameReady) {
