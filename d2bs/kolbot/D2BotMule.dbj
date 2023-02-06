@@ -39,7 +39,7 @@ const Worker = require("./modules/Worker");
 
 /** @global */
 let master, muleMode, muleFilename, maxCharCount;
-let [checkOnJoin, makeNext] = [false, false];
+let [makeNext] = [false];
 let status = "loading";
 let masterStatus = { status: "" };
 /** @type {muleObj} */
@@ -90,7 +90,6 @@ const MuleData = {
 	},
 
 	nextChar: function () {
-		checkOnJoin = true;
 		let charSuffix = "";
 		let charNumbers = "abcdefghijklmnopqrstuvwxyz";
 		let obj = MuleData.read();
@@ -202,7 +201,6 @@ const Mule = {
 		Pather.moveToUnit(coord);
 					
 		Storage.Init();
-		checkOnJoin && (status = "begin");
 		Starter.inGame = true;
 		if (Mule.continuousMule) {
 			!muleObj.onlyLogWhenFull && MuleLogger.logChar();
@@ -227,7 +225,7 @@ const Mule = {
 		}
 
 		me.overhead("begin");
-		console.log("begin");
+		console.debug("begin");
 	},
 
 	/**
@@ -253,7 +251,7 @@ const Mule = {
 		MuleLogger.logChar();
 		delay(500);
 
-		[makeNext, checkOnJoin] = [true, true];
+		[makeNext] = [true];
 		let obj = MuleData.read();
 
 		if (Mule.checkAnniTorch() && obj.torchChars.indexOf(me.name) === -1) {
@@ -388,6 +386,7 @@ const Mule = {
 		let waitTick = getTickCount();
 		let rval = "fail";
 		let list = [];
+		let override = false;
 
 		while (!me.name || !me.gameReady) {
 			if (!me.ingame) return rval;
@@ -408,25 +407,20 @@ const Mule = {
 		}
 
 		const getItems = () => getUnits(sdk.unittype.Item).filter(i => i.distance < 20 && i.onGroundOrDropping && !Town.ignoreType(i.itemType));
-		console.debug(masterStatus, checkOnJoin);
+		console.debug(masterStatus, Starter.firstLogin);
 		if (Mule.foreverAlone()) {
-			if (!Misc.poll(() => !Mule.foreverAlone() && getItems.length > 0, Time.seconds(2), 500)) {
+			if (!Misc.poll(() => !Mule.foreverAlone() && getItems().length > 0, Time.seconds(2), 500)) {
 				return rval;
 			}
 		}
 
 		while (me.gameReady) {
-			if (masterStatus.status === "done" || Mule.continuousMule || checkOnJoin) {
-				checkOnJoin && (checkOnJoin = false);
+			if (masterStatus.status === "done" || Mule.continuousMule || override) {
+				override = false;
 				let item = Game.getItem();
 
 				if (item) {
-					do {
-					// don't pick up trash
-						if (item.distance < 20 && item.onGroundOrDropping && !Town.ignoreType(item.itemType)) {
-							list.push(copyUnit(item));
-						}
-					} while (item.getNext());
+					list = getItems();
 				}
 
 				// If and only if there is nothing left are we "done"
@@ -482,6 +476,12 @@ const Mule = {
 					if (getTickCount() - waitTick > Time.minutes(10)) {
 						break;
 					}
+				}
+				// safety check
+				if (getTickCount() - waitTick > Time.minutes(3) && getItems().length) {
+					// why are there items on the ground but we haven't recieved the go ahead?
+					console.debug("Anyone in game? " + Mule.foreverAlone(), masterStatus, Starter.firstLogin);
+					override = true;
 				}
 			}
 
@@ -889,14 +889,14 @@ function gameEvent (mode, param1, param2, name1, name2) {
 	case 0x01: // "%Name1(%Name2) dropped due to errors."
 	case 0x03: // "%Name1(%Name2) left our world. Diablo's minions weaken."
 		if (Mule.foreverAlone()) {
-			console.log("Waiting");
+			console.debug("Waiting");
 			status = "ready";
 		}
 
 		break;
 	case 0x02: // "%Name1(%Name2) joined our world. Diablo's minions grow stronger."
 		if (name1.trim() !== me.name.trim()) {
-			console.log("begin");
+			console.debug("begin");
 			status = "begin";
 		}
 
