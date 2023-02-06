@@ -603,7 +603,11 @@ const Misc = {
 	errorConsolePrint: true,
 	screenshotErrors: true,
 
-	// Report script errors to logs/ScriptErrorLog.txt
+	/**
+	 * Report script errors to logs/ScriptErrorLog.txt
+	 * @param {Error | string} error 
+	 * @param {string} [script] 
+	 */
 	errorReport: function (error, script) {
 		let msg, oogmsg, filemsg, source, stack;
 		let stackLog = "";
@@ -649,7 +653,7 @@ const Misc = {
 		this.errorConsolePrint && D2Bot.printToConsole(oogmsg, sdk.colors.D2Bot.Gray);
 		showConsole();
 		console.log(msg);
-		FileAction.read("logs/ScriptErrorLog.txt", filemsg);
+		FileAction.append("logs/ScriptErrorLog.txt", filemsg);
 
 		if (this.screenshotErrors) {
 			takeScreenshot();
