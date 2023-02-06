@@ -96,6 +96,10 @@ const ClassAttack = {
 		
 		switch (attackSkill) {
 		case sdk.skills.Whirlwind:
+			/**
+			 * @todo we sometimes struggle getting into position because of monsters which is dumb since we can
+			 * just whirl through them, so that needs to be fixed
+			 */
 			if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, sdk.collision.BlockWall)) {
 				if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.BlockWall, 2)) {
 					return Attack.Result.FAILED;
@@ -179,7 +183,7 @@ const ClassAttack = {
 				}
 
 				corpseList.sort(Sort.units);
-				let check = corpseList.shift();
+				const check = corpseList.shift();
 				let attempted = false;
 				let invalidated = false;
 				// get the actual corpse rather than the copied unit
@@ -192,10 +196,13 @@ const ClassAttack = {
 					CorpseLoop:
 					for (let j = 0; j < 3; j += 1) {
 						// sometimes corpse can become invalidated - necro summoned from it or baal wave clearing, ect
-						if (!corpse || !copyUnit(corpse).x) {
-							console.debug("We lost reference to the corpse");
-							invalidated = true;
-							break;
+						// this still doesn't seem to capture baal wave clearing
+						if (j > 0) {
+							corpse = Game.getMonster(check.classid, sdk.monsters.mode.Dead, check.gid);
+							if (!this.checkCorpse(corpse)) {
+								invalidated = true;
+								break;
+							}
 						}
 						// see if we can find a new position if we failed the first time - sometimes findItem is bugged
 						j > 0 && Attack.getIntoPosition(corpse, 5, sdk.collision.BlockWall, Pather.useTeleport(), true);
@@ -206,7 +213,7 @@ const ClassAttack = {
 
 							while (getTickCount() - tick < 1000) {
 								if (corpse.getState(sdk.states.CorpseNoSelect)) {
-									Pickit.fastPick();
+									Config.FastPick ? Pickit.fastPick() : Pickit.pickItems(range);
 
 									break CorpseLoop;
 								}
@@ -217,7 +224,6 @@ const ClassAttack = {
 					}
 
 					if (attempted && !invalidated && corpse && !corpse.getState(sdk.states.CorpseNoSelect)) {
-						!me.inArea(sdk.areas.ThroneofDestruction) && D2Bot.printToConsole("Failed to hork " + JSON.stringify(corpse) + " at " + getAreaName(me.area));
 						console.debug("Failed to hork " + JSON.stringify(corpse) + " at " + getAreaName(me.area));
 					}
 				}
@@ -229,13 +235,17 @@ const ClassAttack = {
 		}
 
 		Config.FindItemSwitch && me.switchWeapons(Attack.getPrimarySlot());
-		Pickit.pickItems();
 
 		return true;
 	},
 
+	/**
+	 * Check if corpse is horkable
+	 * @param {Monster} unit 
+	 * @returns {boolean}
+	 */
 	checkCorpse: function (unit) {
-		if (!unit || unit.mode !== sdk.monsters.mode.Death && unit.mode !== sdk.monsters.mode.Dead) return false;
+		if (!unit || !copyUnit(unit).x || (unit.mode !== sdk.monsters.mode.Death && unit.mode !== sdk.monsters.mode.Dead)) return false;
 		if ([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3].indexOf(unit.classid) === -1
 			&& unit.spectype === sdk.monsters.spectype.All) {
 			return false;
