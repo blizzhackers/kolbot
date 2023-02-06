@@ -858,6 +858,12 @@ Unit.prototype.use = function () {
 	let iType = this.itemType;
 	let checkQuantity = false;
 
+	if (me.mode === sdk.player.mode.SkillActionSequence) {
+		while (me.mode === sdk.player.mode.SkillActionSequence) {
+			delay (25);
+		}
+	}
+
 	switch (this.location) {
 	case sdk.storage.Stash:
 	case sdk.storage.Inventory:
