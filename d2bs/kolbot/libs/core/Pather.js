@@ -5,8 +5,10 @@
 *
 */
 
-// TODO: this needs to be re-worked
-// Perform certain actions after moving to each node
+/**
+ * Perform certain actions after moving to each node
+ * @todo this needs to be re-worked
+ */
 const NodeAction = {
 	/**
 	 * @type {number[]}
@@ -31,7 +33,9 @@ const NodeAction = {
 	 * @returns {void}
 	 */
 	killMonsters: function (arg = {}) {
-		const settings = Object.assign({}, {
+		if (arg.hasOwnProperty("allowClearing") && !arg.allowClearing) return;
+
+		const killSettings = Object.assign({}, {
 			clearPath: false,
 			specType: sdk.monsters.spectype.All,
 			range: 10,
@@ -43,7 +47,7 @@ const NodeAction = {
 			monList.length > 0 && Attack.clearList(monList);
 		}
 
-		if ((typeof Config.ClearPath === "number" || typeof Config.ClearPath === "object") && settings.clearPath === false && !settings.overrideConfig) {
+		if ((typeof Config.ClearPath === "number" || typeof Config.ClearPath === "object") && killSettings.clearPath === false && !killSettings.overrideConfig) {
 			switch (typeof Config.ClearPath) {
 			case "number":
 				Attack.clear(30, Config.ClearPath);
@@ -60,8 +64,8 @@ const NodeAction = {
 			return;
 		}
 
-		if (settings.clearPath !== false) {
-			Attack.clear(settings.range, settings.specType);
+		if (killSettings.clearPath !== false) {
+			Attack.clear(killSettings.range, killSettings.specType);
 		}
 	},
 
@@ -175,6 +179,9 @@ const Pather = {
 		}
 	},
 
+	/**
+	 * @todo Handle rare bug where teleport skill dissapears from enigma
+	 */
 	canTeleport: function () {
 		return this.teleport && (Skill.canUse(sdk.skills.Teleport) || me.getStat(sdk.stats.OSkill, sdk.skills.Teleport));
 	},
@@ -198,25 +205,25 @@ const Pather = {
 	 * @returns {PathNode}
 	 */
 	spotOnDistance: function (spot, distance, givenSettings = {}) {
-		const settings = Object.assign({}, {
+		const spotSettings = Object.assign({}, {
 			area: me.area,
 			reductionType: 2,
 			coll: (sdk.collision.BlockWalk),
 			returnSpotOnError: true
 		}, givenSettings);
 
-		let nodes = (getPath(settings.area, me.x, me.y, spot.x, spot.y, settings.reductionType, 4) || []);
+		let nodes = (getPath(spotSettings.area, me.x, me.y, spot.x, spot.y, spotSettings.reductionType, 4) || []);
 		
 		if (!nodes.length) {
-			if (settings.reductionType === 2) {
+			if (spotSettings.reductionType === 2) {
 				// try again with walking reduction
-				nodes = getPath(settings.area, me.x, me.y, spot.x, spot.y, 0, 4);
+				nodes = getPath(spotSettings.area, me.x, me.y, spot.x, spot.y, 0, 4);
 			}
-			if (!nodes.length) return (settings.returnSpotOnError ? spot : { x: me.x, y: me.y });
+			if (!nodes.length) return (spotSettings.returnSpotOnError ? spot : { x: me.x, y: me.y });
 		}
 
-		return (nodes.find((node) => getDistance(spot.x, spot.y, node.x, node.y) < distance && Pather.checkSpot(node.x, node.y, settings.coll))
-			|| (settings.returnSpotOnError ? spot : { x: me.x, y: me.y }));
+		return (nodes.find((node) => getDistance(spot.x, spot.y, node.x, node.y) < distance && Pather.checkSpot(node.x, node.y, spotSettings.coll))
+			|| (spotSettings.returnSpotOnError ? spot : { x: me.x, y: me.y }));
 	},
 
 	/**
@@ -280,7 +287,7 @@ const Pather = {
 		}
 
 		let fail = 0;
-		let node = {x: target.x, y: target.y};
+		let node = { x: target.x, y: target.y };
 		const leaped = {
 			at: 0,
 			/** @type {PathNode} */
@@ -310,6 +317,10 @@ const Pather = {
 		const annoyingArea = [sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.MaggotLairLvl3].includes(me.area);
 		let path = getPath(me.area, target.x, target.y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? (annoyingArea ? 30 : this.teleDistance) : this.walkDistance);
 		if (!path) throw new Error("move: Failed to generate path.");
+
+		if (settings.retry <= 3 && target.distance > useTeleport ? 120 : 60) {
+			settings.retry = 10;
+		}
 
 		path.reverse();
 		settings.pop && path.pop();
@@ -367,6 +378,9 @@ const Pather = {
 					}
 				} else {
 					if (!me.inTown) {
+						/**
+						 * @todo I think some of this needs to be re-worked, I've noticed recursive Attacking/Picking
+						 */
 						if (!useTeleport && settings.allowClearing && me.checkForMobs({range: 10}) && Attack.clear(10, null, null, null, settings.allowPicking)) {
 							console.debug("Cleared Node");
 							continue;
@@ -459,7 +473,7 @@ const Pather = {
 	 * @returns {boolean}
 	 */
 	moveNear: function (x, y, minDist, givenSettings = {}) {
-		return Pather.move({x: x, y: y}, Object.assign({minDist: minDist}, givenSettings));
+		return Pather.move({ x: x, y: y }, Object.assign({ minDist: minDist }, givenSettings));
 	},
 
 	/**
@@ -471,7 +485,7 @@ const Pather = {
 	 * @returns {boolean}
 	 */
 	moveTo: function (x, y, retry, clearPath = false, pop = false) {
-		return Pather.move({x: x, y: y}, {retry: retry, pop: pop, allowClearing: clearPath});
+		return Pather.move({ x: x, y: y }, { retry: retry, pop: pop, allowClearing: clearPath });
 	},
 
 	/**
@@ -482,7 +496,7 @@ const Pather = {
 	 * @returns 
 	 */
 	moveToEx: function (x, y, givenSettings = {}) {
-		return Pather.move({x: x, y: y}, givenSettings);
+		return Pather.move({ x: x, y: y }, givenSettings);
 	},
 
 	/**
@@ -1017,9 +1031,10 @@ const Pather = {
 					Misc.poll(() => me.gameReady, 1000, 200);
 				}
 
-				/* i < areas.length - 1 is for crossing multiple areas.
-					In that case we must use the exit before the last area.
-				*/
+				/**
+				 * i < areas.length - 1 is for crossing multiple areas.
+				 * In that case we must use the exit before the last area.
+				 */
 				if (use || i < areas.length - 1) {
 					switch (currExit.type) {
 					case 1: // walk through
@@ -1191,9 +1206,12 @@ const Pather = {
 		let preArea = me.area;
 
 		if (!unit) {
-			throw new Error("useUnit: Unit not found. TYPE: " + type + " ID: " + id + " MyArea: " + getAreaName(me.area) + (!!targetArea ? " TargetArea: " + getAreaName(targetArea) : ""));
+			throw new Error(
+				"useUnit: Unit not found. TYPE: " + type + " ID: " + id + " MyArea: " + getAreaName(me.area) + (!!targetArea ? " TargetArea: " + getAreaName(targetArea) : "")
+			);
 		}
 
+		MainLoop:
 		for (let i = 0; i < 5; i += 1) {
 			let usetk = (i < 2 && Skill.useTK(unit));
 			
@@ -1228,9 +1246,8 @@ const Pather = {
 			while (getTickCount() - tick < 3000) {
 				if ((!targetArea && me.area !== preArea) || me.area === targetArea) {
 					delay(200);
-					//Packet.flash(me.gid);
 
-					return true;
+					break MainLoop;
 				}
 
 				delay(10);
@@ -1239,6 +1256,10 @@ const Pather = {
 			i > 2 && Packet.flash(me.gid);
 			let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 3);
 			!!coord && this.moveTo(coord.x, coord.y);
+		}
+
+		while (!me.idle && !me.gameReady) {
+			delay(40);
 		}
 
 		return targetArea ? me.area === targetArea : me.area !== preArea;
