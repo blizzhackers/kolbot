@@ -6,7 +6,10 @@
 */
 
 function Nihlathak() {
+	Town.goToTown(5);
 	Town.doChores();
+
+	!Pather.initialized && Pather.useWaypoint(null, true);
 
 	// UseWaypoint if set to or if we already have it
 	if (Config.Nihlathak.UseWaypoint || getWaypoint(Pather.wpAreas.indexOf(sdk.areas.HallsofPain))) {

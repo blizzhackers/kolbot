@@ -40,8 +40,8 @@ function Summoner () {
 			}
 
 			Packet.entityInteract(journal);
-			Misc.poll(() => getIsTalkingNPC(), 1000, 50);
-			me.cancel();
+			Misc.poll(() => getIsTalkingNPC() || Game.getObject(sdk.objects.RedPortal), 2000, 200);
+			me.cancel() && me.cancel();
 
 			if (Pather.usePortal(sdk.areas.CanyonofMagic)) {
 				break;

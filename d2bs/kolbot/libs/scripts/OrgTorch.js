@@ -27,11 +27,11 @@ function OrgTorch () {
 
 	const OrgTorchData = {
 		filePath: "logs/OrgTorch-" + me.profile + ".json",
-		default: {gamename: me.gamename, doneAreas: []},
+		_default: { gamename: me.gamename, doneAreas: [] },
 
 		create: function () {
-			FileTools.writeText(this.filePath, JSON.stringify(this.default));
-			return this.default;
+			FileTools.writeText(this.filePath, JSON.stringify(this._default));
+			return this._default;
 		},
 
 		read: function () {
@@ -40,7 +40,7 @@ function OrgTorch () {
 				let string = FileTools.readText(this.filePath);
 				obj = JSON.parse(string);
 			} catch (e) {
-				return this.default;
+				return this._default;
 			}
 
 			return obj;
@@ -57,6 +57,10 @@ function OrgTorch () {
 		}
 	};
 
+	/**
+	 * @param {ItemUnit} item 
+	 * @returns {boolean}
+	 */
 	this.getQuestItem = function (item) {
 		if (item) {
 			let id = item.classid;
@@ -81,9 +85,9 @@ function OrgTorch () {
 
 		if (!Config.OrgTorch.MakeTorch) return false;
 
-		let torch = me.checkItem({name: sdk.locale.items.HellfireTorch});
+		let torch = me.checkItem({ classid: sdk.items.LargeCharm, quality: sdk.items.quality.Unique });
 
-		if (torch.have && Pickit.checkItem(torch.item).result === 1) {
+		if (torch.have && Pickit.checkItem(torch.item).result === Pickit.Result.WANTED) {
 			if (AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
 				scriptBroadcast("muleTorch");
 				scriptBroadcast("quit");
