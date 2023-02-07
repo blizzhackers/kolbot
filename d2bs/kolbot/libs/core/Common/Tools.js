@@ -107,11 +107,19 @@
 			},
 
 			exit: function (chickenExit = false) {
-				chickenExit && D2Bot.updateChickens();
-				Config.LogExperience && Experience.log();
-				console.log("ÿc8Run duration ÿc2" + (Time.format(getTickCount() - me.gamestarttime)));
-				this.stopDefault();
-				quit();
+				try {
+					chickenExit && D2Bot.updateChickens();
+					Config.LogExperience && Experience.log();
+					console.log("ÿc8Run duration ÿc2" + (Time.format(getTickCount() - me.gamestarttime)));
+					this.stopDefault();
+					quit();
+				} finally {
+					while (me.ingame) {
+						delay(100);
+					}
+				}
+
+				return true;
 			},
 
 			getPotion: function (pottype, type) {
@@ -174,9 +182,6 @@
 					break;
 				}
 
-				// mode 18 - can't drink while leaping/whirling etc.
-				if (me.dead || me.mode === sdk.player.mode.SkillActionSequence) return false;
-
 				let pottype = (() => {
 					switch (type) {
 					case this.pots.Health:
@@ -191,8 +196,14 @@
 
 				let potion = this.getPotion(pottype, type);
 
-				if (!!potion) {
-					if (me.dead || me.mode === sdk.player.mode.SkillActionSequence) return false;
+				if (potion) {
+					if (me.dead) return false;
+
+					if (me.mode === sdk.player.mode.SkillActionSequence) {
+						while (me.mode === sdk.player.mode.SkillActionSequence) {
+							delay (25);
+						}
+					}
 
 					try {
 						type < this.pots.MercHealth ? potion.interact() : Packet.useBeltItemForMerc(potion);
