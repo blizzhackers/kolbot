@@ -17,7 +17,7 @@ includeIfNotIncluded("oog/DataFile.js");
 	} else {
 		root.D2Bot = factory();
 	}
-}(globalThis, function() {
+}([].filter.constructor("return this")(), function() {
 	const CopyData = require("../modules/CopyData");
 
 	const D2Bot = {
