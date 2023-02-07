@@ -5,24 +5,16 @@
 *
 */
 js_strict(true);
-
-include("json2.js");     // required?
-include("polyfill.js");  // required
-include("oog/D2Bot.js"); // required
+include("critical.js");	// required
 
 // globals needed for core gameplay
-include("core/NTItemParser.js");
-include("core/Util.js");
+includeCoreLibs();
 include("core/Auto/AutoBuild.js");
 include("core/Auto/AutoSkill.js");
 include("core/Auto/AutoStat.js");
-includeCoreLibs();
 
 // system libs
-include("systems/automule/AutoMule.js");
-include("systems/gambling/Gambling.js");
-include("systems/crafting/CraftingSystem.js");
-include("systems/torch/TorchSystem.js");
+includeSystemLibs();
 include("systems/mulelogger/MuleLogger.js");
 include("systems/gameaction/GameAction.js");
 

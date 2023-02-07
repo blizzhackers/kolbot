@@ -6,6 +6,11 @@
 */
 
 const Packet = {
+	/**
+	 * Interact and open the menu of an NPC
+	 * @param {NPCUnit} unit 
+	 * @returns {boolean}
+	 */
 	openMenu: function (unit) {
 		if (unit.type !== sdk.unittype.NPC) throw new Error("openMenu: Must be used on NPCs.");
 		if (getUIFlag(sdk.uiflags.NPCMenu)) return true;
@@ -40,6 +45,12 @@ const Packet = {
 		return false;
 	},
 
+	/**
+	 * Start a trade action with an NPC
+	 * @param {NPCUnit} unit 
+	 * @param {number} mode
+	 * @returns {boolean}
+	 */
 	startTrade: function (unit, mode) {
 		if (unit.type !== sdk.unittype.NPC) throw new Error("Unit.startTrade: Must be used on NPCs.");
 		if (getUIFlag(sdk.uiflags.Shop)) return true;
@@ -64,6 +75,13 @@ const Packet = {
 		return false;
 	},
 
+	/**
+	 * Buy an item from an interacted NPC
+	 * @param {NPCUnit} unit 
+	 * @param {boolean} shiftBuy
+	 * @param {boolean} gamble
+	 * @returns {boolean}
+	 */
 	buyItem: function (unit, shiftBuy, gamble) {
 		let oldGold = me.gold;
 		let itemCount = me.itemcount;
@@ -94,6 +112,14 @@ const Packet = {
 		return false;
 	},
 
+	/**
+	 * Buy scrolls from an interacted NPC, we need this as a seperate check because itemcount doesn't change
+	 * if the scroll goes into the tome automatically.
+	 * @param {NPCUnit} unit 
+	 * @param {ItemUnit} [tome]
+	 * @param {boolean} [shiftBuy]
+	 * @returns {boolean}
+	 */
 	buyScroll: function (unit, tome, shiftBuy) {
 		let oldGold = me.gold;
 		let itemCount = me.itemcount;
@@ -129,6 +155,11 @@ const Packet = {
 		return false;
 	},
 
+	/**
+	 * Sell a item to a NPC
+	 * @param {ItemUnit} unit 
+	 * @returns {boolean}
+	 */
 	sellItem: function (unit) {
 		// Check if it's an item we want to buy
 		if (unit.type !== sdk.unittype.Item) throw new Error("Unit.sell: Must be used on items.");
@@ -156,6 +187,11 @@ const Packet = {
 		return false;
 	},
 
+	/**
+	 * @param {ItemUnit} unit 
+	 * @param {ItemUnit} tome
+	 * @returns {boolean}
+	 */
 	identifyItem: function (unit, tome) {
 		if (!unit || unit.identified) return false;
 
@@ -284,9 +320,13 @@ const Packet = {
 		return true;
 	},
 
-	useBeltItemForMerc: function (who) {
-		if (!who) return false;
-		sendPacket(1, sdk.packets.send.UseBeltItem, 4, who.gid, 4, 1, 4, 0);
+	/**
+	 * @param {ItemUnit} pot 
+	 * @returns {boolean}
+	 */
+	useBeltItemForMerc: function (pot) {
+		if (!pot) return false;
+		sendPacket(1, sdk.packets.send.UseBeltItem, 4, pot.gid, 4, 1, 4, 0);
 		return true;
 	},
 
@@ -295,23 +335,41 @@ const Packet = {
 		sendPacket(1, hand, 2, wX, 2, wY);
 	},
 
+	/**
+	 * @param {number} hand
+	 * @param {Monster | ItemUnit | ObjectUnit} who 
+	 * @returns {boolean}
+	 */
 	unitCast: function (hand, who) {
 		hand = (hand === sdk.skills.hand.Right) ? sdk.packets.send.RightSkillOnEntityEx3 : sdk.packets.send.LeftSkillOnEntityEx3;
 		sendPacket(1, hand, 4, who.type, 4, who.gid);
 	},
 
+	/**
+	 * @param {Monster | ItemUnit | ObjectUnit} who 
+	 * @returns {boolean}
+	 */
 	telekinesis: function (who) {
 		if (!who || !Skill.setSkill(sdk.skills.Telekinesis, sdk.skills.hand.Right)) return false;
 		sendPacket(1, sdk.packets.send.RightSkillOnEntityEx3, 4, who.type, 4, who.gid);
 		return true;
 	},
 
+	/**
+	 * @param {Player | Monster | MercUnit} who 
+	 * @returns {boolean}
+	 */
 	enchant: function (who) {
 		if (!who || !Skill.setSkill(sdk.skills.Enchant, sdk.skills.hand.Right)) return false;
 		sendPacket(1, sdk.packets.send.RightSkillOnEntityEx3, 4, who.type, 4, who.gid);
 		return true;
 	},
 
+	/**
+	 * @param {number} wX 
+	 * @param {number} wY 
+	 * @returns {boolean}
+	 */
 	teleport: function (wX, wY) {
 		if (![wX, wY].every(n => typeof n === "number") || !Skill.setSkill(sdk.skills.Teleport, sdk.skills.hand.Right)) return false;
 		new PacketBuilder().byte(sdk.packets.send.RightSkillOnLocation).word(wX).word(wY).send();
@@ -322,6 +380,13 @@ const Packet = {
 	// 	//sendPacket(1, sdk.packets.send.MakeEntityMove, 4, npc.type, 4, npc.gid, 4, dwX, 4, dwY);
 	// },
 
+	/**
+	 * @deprecated
+	 * @param {number} x 
+	 * @param {number} y 
+	 * @param {number} maxDist 
+	 * @returns {boolean}
+	 */
 	teleWalk: function (x, y, maxDist = 5) {
 		!Packet.telewalkTick && (Packet.telewalkTick = 0);
 
@@ -349,6 +414,11 @@ const Packet = {
 		sendPacket(1, sdk.packets.send.UpdateQuests);
 	},
 
+	/**
+	 * Request entity update
+	 * @param {number} gid 
+	 * @param {number} wait 
+	 */
 	flash: function (gid, wait = 0) {
 		wait === 0 && (wait = 300 + (me.gameReady ? 2 * me.ping : 300));
 		sendPacket(1, sdk.packets.send.RequestEntityUpdate, 4, 0, 4, gid);
@@ -358,6 +428,11 @@ const Packet = {
 		}
 	},
 
+	/**
+	 * @deprecated
+	 * @param {number} stat 
+	 * @param {number} value 
+	 */
 	changeStat: function (stat, value) {
 		if (value > 0) {
 			getPacket(1, 0x1d, 1, stat, 1, value);

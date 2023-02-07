@@ -4,8 +4,9 @@
 *  @desc        suicide walk prevention
 *
 */
-include("OOG.js");
-include("core/Prototypes.js");
+js_strict(true);
+include("critical.js");
+include("core/Util.js");
 
 function main() {
 	let _default = getScript("default.dbj");

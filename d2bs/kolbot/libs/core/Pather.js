@@ -406,7 +406,7 @@ const Pather = {
 							// Leap can be helpful on long paths but make sure we don't spam it
 							if (Skill.canUse(sdk.skills.LeapAttack)) {
 								// we can use leapAttack, now lets see if we should - either haven't used it yet or it's been long enough since last time
-								if (leaped.at === 0 || getTickCount() - leaped.at > Time.seconds(3) || leaped.from.distance > 5) {
+								if (leaped.at === 0 || getTickCount() - leaped.at > Time.seconds(3) || leaped.from.distance > 5 || me.checkForMobs({ range: 6 })) {
 									// alright now if we have actually casted it set the values so we know
 									if (Skill.cast(sdk.skills.LeapAttack, sdk.skills.hand.Right, node.x, node.y)) {
 										leaped.at = getTickCount();
@@ -423,7 +423,7 @@ const Pather = {
 							 */
 							if (Skill.canUse(sdk.skills.Whirlwind)) {
 								// we can use whirlwind, now lets see if we should - either haven't used it yet or it's been long enough since last time
-								if (whirled.at === 0 || getTickCount() - whirled.at > Time.seconds(3) && whirled.from.distance > 5) {
+								if (whirled.at === 0 || getTickCount() - whirled.at > Time.seconds(3) || whirled.from.distance > 5 || me.checkForMobs({ range: 6 })) {
 									// alright now if we have actually casted it set the values so we know
 									if (Skill.cast(sdk.skills.Whirlwind, sdk.skills.hand.Right, node.x, node.y)) {
 										whirled.at = getTickCount();
@@ -945,10 +945,10 @@ const Pather = {
 
 	/**
 	 * @param {number} targetArea - area id or array of area ids to move to
-	 * @param {boolean} use - enter target area or last area in the array
-	 * @param {boolean} clearPath - kill monsters while moving
+	 * @param {boolean} [use] - enter target area or last area in the array
+	 * @param {boolean} [clearPath] - kill monsters while moving
 	 */
-	moveToExit: function (targetArea, use = false, clearPath = false) {
+	moveToExit: function (targetArea, use, clearPath) {
 		if (targetArea === undefined) return false;
 
 		console.time("moveToExit");
@@ -1589,12 +1589,12 @@ const Pather = {
 		return false;
 	},
 
-	/*
-		Pather.usePortal(targetArea, owner, unit);
-		targetArea - id of the area the portal leads to
-		owner - name of the portal's owner
-		unit - use existing portal unit
-	*/
+	/**
+	 * @param {number} [targetArea] - id of the area the portal leads to
+	 * @param {string} [owner] - name of the portal's owner
+	 * @param {ObjectUnit} [unit] - use existing portal unit
+	 * @returns {boolean}
+	 */
 	usePortal: function (targetArea, owner, unit) {
 		if (targetArea && me.area === targetArea) return true;
 
@@ -1681,11 +1681,11 @@ const Pather = {
 		return (targetArea ? me.area === targetArea : me.area !== preArea);
 	},
 
-	/*
-		Pather.getPortal(targetArea, owner, unit);
-		targetArea - id of the area the portal leads to
-		owner - name of the portal's owner
-	*/
+	/**
+	 * @param {number} targetArea - id of the area the portal leads to
+	 * @param {string} owner - name of the portal's owner
+	 * @returns {ObjectUnit | false}
+	 */
 	getPortal: function (targetArea, owner) {
 		let portal = Game.getObject("portal");
 
@@ -1719,14 +1719,15 @@ const Pather = {
 		return false;
 	},
 
-	/*
-		Pather.getNearestWalkable(x, y, range, step, coll, size);
-		x - the starting x coord
-		y - the starting y coord
-		range - maximum allowed range from the starting coords
-		step - distance between each checked dot on the grid
-		coll - collision flag to avoid
-	*/
+	/**
+	 * @param {number} x - the starting x coord
+	 * @param {number} y - the starting y coord
+	 * @param {number} range - maximum allowed range from the starting coords
+	 * @param {number} step - distance between each checked dot on the grid
+	 * @param {number} coll - collision flag to avoid
+	 * @param {number} size 
+	 * @returns {[number, number] | false}
+	 */
 	getNearestWalkable: function (x, y, range, step, coll, size) {
 		!step && (step = 1);
 		coll === undefined && (coll = sdk.collision.BlockWall);
@@ -1762,13 +1763,14 @@ const Pather = {
 		return result;
 	},
 
-	/*
-		Pather.moveTo(x, y, coll, cacheOnly);
-		x - the x coord to check
-		y - the y coord to check
-		coll - collision flag to search for
-		cacheOnly - use only cached room data
-	*/
+	/**
+	 * @param {number} x - the x coord to check
+	 * @param {number} y - the y coord to check
+	 * @param {number} coll - collision flag to search for
+	 * @param {boolean} cacheOnly - use only cached room data
+	 * @param {number} size 
+	 * @returns {boolean}
+	 */
 	checkSpot: function (x, y, coll, cacheOnly, size) {
 		coll === undefined && (coll = sdk.collision.BlockWall);
 		!size && (size = 1);
@@ -1788,10 +1790,10 @@ const Pather = {
 		return true;
 	},
 
-	/*
-		Pather.accessToAct(act);
-		act - the act number to check for access
-	*/
+	/**
+	 * @param {number} act - the act number to check for access
+	 * @returns {boolean}
+	 */
 	accessToAct: function (act) {
 		switch (act) {
 		// Act 1 is always accessible
@@ -1811,11 +1813,11 @@ const Pather = {
 		}
 	},
 
-	/*
-		Pather.getWP(area);
-		area - the id of area to get the waypoint in
-		clearPath - clear path
-	*/
+	/**
+	 * @param {number} area - the id of area to get the waypoint in
+	 * @param {boolean} [clearPath] 
+	 * @returns {boolean}
+	 */
 	getWP: function (area, clearPath) {
 		area !== me.area && this.journeyTo(area);
 
@@ -1861,10 +1863,10 @@ const Pather = {
 		return false;
 	},
 
-	/*
-		Pather.journeyTo(area);
-		area - the id of area to move to
-	*/
+	/**
+	 * @param {number} area - the id of area to move to
+	 * @returns {boolean}
+	 */
 	journeyTo: function (area) {
 		if (area === undefined) return false;
 		console.time("journeyTo");
@@ -2041,11 +2043,13 @@ const Pather = {
 
 	plotCourse_openedWpMenu: false,
 
-	/*
-		Pather.plotCourse(dest, src);
-		dest - destination area id
-		src - starting area id
-	*/
+	/**
+	 * Plot a course to a specific area
+	 * @param {number} src - starting area id
+	 * @param {number} dest - destination area id
+	 * @returns {{ course: number[], useWP: boolean } | false}
+	 * @todo this needs more checks
+	 */
 	plotCourse: function (dest, src) {
 		let node, prevArea;
 		let useWP = false;
@@ -2077,7 +2081,7 @@ const Pather = {
 		!src && (src = me.area);
 
 		if (!this.plotCourse_openedWpMenu && me.inTown && this.nextAreas[me.area] !== dest && Pather.useWaypoint(null)) {
-			this.plotCourse_openedWpMenu = true;
+			Pather.plotCourse_openedWpMenu = true;
 		}
 
 		while (toVisitNodes.length > 0) {
@@ -2140,11 +2144,13 @@ const Pather = {
 		return {course: arr, useWP: useWP};
 	},
 
-	/*
-		Pather.areasConnected(src, dest);
-		dest - destination area id
-		src - starting area id
-	*/
+	/**
+	 * Check if two areas are connected
+	 * @param {number} src - starting area id
+	 * @param {number} dest - destination area id
+	 * @returns {boolean}
+	 * @todo this needs more checks
+	 */
 	areasConnected: function (src, dest) {
 		if (src === sdk.areas.CanyonofMagic && dest === sdk.areas.ArcaneSanctuary) {
 			return false;

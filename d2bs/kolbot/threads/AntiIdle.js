@@ -4,9 +4,10 @@
 *  @desc        Prevent Idle diconnect
 *
 */
-
-include("core/Prototypes.js");
-include("core/Misc.js");
+js_strict(true);
+include("critical.js");
+include("core/Util.js");
+include("core/Packet.js");
 
 function main () {
 	console.log("ÿc3Start AntiIdle");
