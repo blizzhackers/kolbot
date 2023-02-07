@@ -1,6 +1,6 @@
 /**
 *  @filename    TownChicken.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        handle town chicken
 *
 */
@@ -15,26 +15,43 @@ includeSystemLibs();
 
 function main() {
 	let townCheck = false;
+	let scripts = ["default.dbj", "threads/antihostile.js", "threads/rushthread.js", "threads/CloneKilla.js"];
 
-	this.togglePause = function () {
-		let scripts = ["default.dbj", "threads/antihostile.js", "threads/rushthread.js", "threads/CloneKilla.js"];
-
+	this.pause = function () {
 		for (let i = 0; i < scripts.length; i += 1) {
 			let script = getScript(scripts[i]);
 
-			if (script) {
-				if (script.running) {
-					scripts[i] === "default.dbj" && print("ÿc1Pausing.");
-					script.pause();
-				} else {
-					if (scripts[i] === "default.dbj") {
-						// resume only if clonekilla isn't running
-						if (!getScript("threads/clonekilla.js")) {
-							console.log("ÿc2Resuming.");
-							script.resume();
-						}
-					} else {
+			if (scripts[i] === "default.dbj" && !script) {
+				!!getScript("threads/toolsthread.js") ? scriptBroadcast("quit") : quit();
+			}
+
+			if (script && script.running) {
+				script.pause();
+				scripts[i] === "default.dbj" && print("ÿc1Pausing.");
+			}
+		}
+
+		return true;
+	};
+
+	this.resume = function () {
+		for (let i = 0; i < scripts.length; i += 1) {
+			let script = getScript(scripts[i]);
+
+			if (script && !script.running && scripts[i] !== "default.dbj") {
+				script.resume();
+			} else if (scripts[i] === "default.dbj") {
+				// resume only if clonekilla isn't running
+				if (!getScript("threads/clonekilla.js")) {
+					if (script && !script.running) {
+						console.log("ÿc2Resuming.");
 						script.resume();
+					} else {
+						if (!script) {
+							// default has crashed? We shouldn't be running then. Is toolsthread still up?
+							// if yes try to still quit normally, otherwise quit from here
+							!!getScript("threads/toolsthread.js") ? scriptBroadcast("quit") : quit();
+						}
 					}
 				}
 			}
@@ -79,7 +96,7 @@ function main() {
 
 				continue;
 			}
-			this.togglePause();
+			this.pause();
 
 			while (!me.gameReady) {
 				if (me.dead) return;
@@ -97,7 +114,7 @@ function main() {
 
 				return;
 			} finally {
-				this.togglePause();
+				this.resume();
 
 				townCheck = false;
 			}
