@@ -358,10 +358,8 @@ const Pickit = {
 		for (let i = 0; i < retry; i += 1) {
 			if (me.dead) return false;
 			if (this.track.lastItem === gid) {
-				D2Bot.printToConsole("Attempt to pick same item detected");
 				return true;
 			}
-			
 			// can't find the item
 			if (!Game.getItem(-1, -1, gid)) {
 				return false;
@@ -369,7 +367,7 @@ const Pickit = {
 
 			if (me.getItem(item.classid, -1, item.gid)) {
 				console.debug("Already picked item");
-				break;
+				return true;
 			}
 
 			while (!me.idle) {
@@ -389,13 +387,18 @@ const Pickit = {
 				}
 			} else {
 				if (item.distance > (Config.FastPick || i < 1 ? 6 : 4) || checkCollision(me, item, sdk.collision.BlockWall)) {
-					if (!Pather.moveNearUnit(item, 4)) {
+					if (!Pather.moveToEx(item.x, item.y, { retry: 3, allowPicking: false, minDist: 4 })) {
 						continue;
 					}
 					// we had to move, lets check to see if it's still there
-					if (me.getItem(-1, -1, gid) || !Game.getItem(-1, -1, gid)) {
-						// we picked the item during another process or it's gone so don't continue
-						break;
+					if (me.getItem(-1, -1, gid)) {
+						// we picked the item during another process - recursion happened
+						// this has pontential to skip logging an item
+						return true;
+					}
+					if (!Game.getItem(-1, -1, gid)) {
+						// it's gone so don't continue, 
+						return false;
 					}
 				}
 
@@ -406,6 +409,7 @@ const Pickit = {
 			let tick = getTickCount();
 
 			while (getTickCount() - tick < 1000) {
+				// why the use of copyUnit here?
 				item = copyUnit(item);
 
 				if (stats.classid === sdk.items.Gold) {
@@ -510,10 +514,9 @@ const Pickit = {
 	},
 
 	/**
-	 * Sometimes we get in a recursion scenario with pickItems, maybe globally keep track of items instead
-	 * so when we pick the item during recursion we don't end up getting the double print. Also maybe use a Set data structure?
+	 * @type {ItemUnit[]}
 	 */
-	pickList: new Set(),
+	pickList: [],
 
 	/**
 	 * @param {number} range
@@ -523,13 +526,8 @@ const Pickit = {
 		if (me.dead) return false;
 		
 		let needMule = false;
-		/**
-		 * @type {ItemUnit[]}
-		 */
-		let pickList = [];
 
-		Town.clearBelt();
-
+		// why wait for idle?
 		while (!me.idle) {
 			delay(40);
 		}
@@ -538,21 +536,23 @@ const Pickit = {
 
 		if (item) {
 			do {
-				if (item.onGroundOrDropping && getDistance(me, item) <= range && !this.pickList.has(item.gid)) {
-					pickList.push(copyUnit(item));
-					// ensure uniqueness with set
-					this.pickList.add(item.gid);
+				if (Pickit.pickList.some(el => el.gid === item.gid)) continue;
+				if (item.onGroundOrDropping && getDistance(me, item) <= range) {
+					Pickit.pickList.push(copyUnit(item));
 				}
 			} while (item.getNext());
 		}
 
-		while (pickList.length > 0) {
+		if (Pickit.pickList.some(i => [sdk.items.type.HealingPotion, sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion].includes(i.itemType))) {
+			Town.clearBelt();
+		}
+
+		while (Pickit.pickList.length > 0) {
 			if (me.dead) return false;
-			pickList.sort(this.sortItems);
-			let check = pickList.shift();
+			Pickit.pickList.sort(this.sortItems);
+			const check = Pickit.pickList.shift();
 			// get the actual item again
 			const itemToPick = Game.getItem(check.classid, -1, check.gid);
-			const itemGid = itemToPick.gid;
 
 			// Check if the item unit is still valid and if it's on ground or being dropped
 			// Don't pick items behind walls/obstacles when walking
@@ -602,11 +602,8 @@ const Pickit = {
 
 					// Item can fit - pick it up
 					if (canFit && this.pickItem(itemToPick, status.result, status.line)) {
-						// picked it up so remove gid from set
-						this.pickList.delete(itemGid);
+						// what should we do if we failed to pick it?
 					}
-				} else {
-					this.pickList.delete(itemGid);
 				}
 			}
 		}
