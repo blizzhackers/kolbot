@@ -18,7 +18,7 @@
 */
 
 function OrgTorch () {
-	this.currentGameInfo = null;
+	let currentGameInfo = null;
 
 	const portalMode = {
 		MiniUbers: 0,
@@ -61,7 +61,7 @@ function OrgTorch () {
 	 * @param {ItemUnit} item 
 	 * @returns {boolean}
 	 */
-	this.getQuestItem = function (item) {
+	const getQuestItem = function (item) {
 		if (item) {
 			let id = item.classid;
 			let canFit = Storage.Inventory.CanFit(item);
@@ -75,7 +75,7 @@ function OrgTorch () {
 	};
 
 	// Identify & mule
-	this.checkTorch = function () {
+	const checkTorch = function () {
 		if (me.inArea(sdk.areas.UberTristram)) {
 			Pather.moveTo(25105, 5140);
 			Pather.usePortal(sdk.areas.Harrogath);
@@ -99,11 +99,15 @@ function OrgTorch () {
 		return false;
 	};
 
-	// Try to lure a monster - wait until it's close enough
-	// needs to be re-done
-	// should, lure boss AWAY from the others and to us
-	// create path to boss, move some -> wait to see if aggroed -> if yes - move back and make sure it follows until its safely away from other bosses
-	this.lure = function (bossId) {
+	/**
+	 * Try to lure a monster - wait until it's close enough
+	 * @param {number} bossId 
+	 * @returns {boolean}
+	 * @todo redo this
+	 * - should, lure boss AWAY from the others and to us
+	 * - create path to boss, move some -> wait to see if aggroed -> if yes - move back and make sure it follows until its safely away from other bosses
+	 */
+	const lure = function (bossId) {
 		let unit = Game.getMonster(bossId);
 
 		if (unit) {
@@ -121,11 +125,25 @@ function OrgTorch () {
 		return false;
 	};
 
-	// Check if we have complete sets of organs
-	this.completeSetCheck = function () {
-		let horns = me.findItems("dhn");
-		let brains = me.findItems("mbr");
-		let eyes = me.findItems("bey");
+	/**
+	 * Check if we have complete sets of organs
+	 * @returns {boolean}
+	 */
+	const completeSetCheck = function () {
+		let [horns, brains, eyes] = [0, 0, 0];
+		me.getItemsEx()
+			.filter(i => i.isInInventory && !Town.ignoreType(i.itemType) && i.quality === sdk.items.quality.Normal)
+			.forEach(i => {
+				switch (i.classid) {
+				case sdk.items.quest.DiablosHorn:
+					return (horns++);
+				case sdk.items.quest.MephistosBrain:
+					return (brains++);
+				case sdk.items.quest.BaalsEye:
+					return (eyes++);
+				default: return;
+				}
+			});
 
 		if (!horns || !brains || !eyes) {
 			return false;
@@ -133,17 +151,24 @@ function OrgTorch () {
 
 		// We just need one set to make a torch
 		if (Config.OrgTorch.MakeTorch) {
-			return horns.length && brains.length && eyes.length;
+			return horns > 0 && brains > 0 && eyes > 0;
 		}
 
-		return horns.length === brains.length && horns.length === eyes.length && brains.length === eyes.length;
+		return horns === brains && horns === eyes && brains === eyes;
 	};
 
-	// Get fade in River of Flames - only works if we are wearing an item with ctc Fade
-	// todo - equipping an item from storage if we have it
-	this.getFade = function () {
+	/**
+	 * Get fade in River of Flames - only works if we are wearing an item with ctc Fade
+	 * @returns {boolean}
+	 * @todo equipping an item from storage if we have it
+	 */
+	const getFade = function () {
 		if (Config.OrgTorch.GetFade && !me.getState(sdk.states.Fade)
-			&& me.haveSome([{name: sdk.locale.items.Treachery, equipped: true}, {name: sdk.locale.items.LastWish, equipped: true}, {name: sdk.locale.items.SpiritWard, equipped: true}])) {
+			&& me.haveSome([
+				{ name: sdk.locale.items.Treachery, equipped: true },
+				{ name: sdk.locale.items.LastWish, equipped: true },
+				{ name: sdk.locale.items.SpiritWard, equipped: true }
+			])) {
 			console.log(sdk.colors.Orange + "OrgTorch :: " + sdk.colors.White + "Getting Fade");
 			// lets figure out what fade item we have before we leave town
 			let fadeItem = me.findFirst([
@@ -178,8 +203,12 @@ function OrgTorch () {
 		return true;
 	};
 
-	// Open a red portal. Mode 0 = mini ubers, mode 1 = Tristram
-	this.openPortal = function (mode) {
+	/**
+	 * Open a red portal. Mode 0 = mini ubers, mode 1 = Tristram
+	 * @param {number} mode 
+	 * @returns {ObjectUnit | false}
+	 */
+	const openPortal = function (mode) {
 		let item1 = mode === portalMode.MiniUbers ? me.findItem("pk1", sdk.items.mode.inStorage) : me.findItem("dhn", sdk.items.mode.inStorage);
 		let item2 = mode === portalMode.MiniUbers ? me.findItem("pk2", sdk.items.mode.inStorage) : me.findItem("bey", sdk.items.mode.inStorage);
 		let item3 = mode === portalMode.MiniUbers ? me.findItem("pk3", sdk.items.mode.inStorage) : me.findItem("mbr", sdk.items.mode.inStorage);
@@ -205,7 +234,7 @@ function OrgTorch () {
 					switch (mode) {
 					case portalMode.MiniUbers:
 						if ([sdk.areas.MatronsDen, sdk.areas.ForgottenSands, sdk.areas.FurnaceofPain].includes(portal.objtype)
-							&& this.currentGameInfo.doneAreas.indexOf(portal.objtype) === -1) {
+							&& currentGameInfo.doneAreas.indexOf(portal.objtype) === -1) {
 							return copyUnit(portal);
 						}
 
@@ -224,21 +253,21 @@ function OrgTorch () {
 		return false;
 	};
 
-	this.matronsDen = function () {
+	const matronsDen = function () {
 		let dHorns = me.findItems(sdk.items.quest.DiablosHorn, sdk.items.mode.inStorage).length;
 
 		Precast.doPrecast(true);
 		Pather.moveToPreset(sdk.areas.MatronsDen, sdk.unittype.Object, sdk.objects.SmallSparklyChest, 2, 2);
 		Attack.kill(sdk.monsters.Lilith);
 		Pickit.pickItems();
-		this.getQuestItem(Game.getItem(sdk.items.quest.DiablosHorn));
+		getQuestItem(Game.getItem(sdk.items.quest.DiablosHorn));
 		Town.goToTown();
 
 		// we sucessfully picked up the horn
 		return (me.findItems(sdk.items.quest.DiablosHorn, sdk.items.mode.inStorage).length > dHorns);
 	};
 
-	this.forgottenSands = function () {
+	const forgottenSands = function () {
 		let bEyes = me.findItems(sdk.items.quest.BaalsEye, sdk.items.mode.inStorage).length;
 
 		Precast.doPrecast(true);
@@ -272,7 +301,7 @@ function OrgTorch () {
 
 			Attack.kill(sdk.monsters.UberDuriel);
 			Pickit.pickItems();
-			this.getQuestItem(Game.getItem(sdk.items.quest.BaalsEye));
+			getQuestItem(Game.getItem(sdk.items.quest.BaalsEye));
 			Town.goToTown();
 		} catch (e) {
 			//
@@ -282,22 +311,24 @@ function OrgTorch () {
 		return (me.findItems(sdk.items.quest.BaalsEye, sdk.items.mode.inStorage).length > bEyes);
 	};
 
-	this.furnance = function () {
+	const furnance = function () {
 		let mBrain = me.findItems(sdk.items.quest.MephistosBrain, sdk.items.mode.inStorage).length;
 
 		Precast.doPrecast(true);
 		Pather.moveToPreset(sdk.areas.FurnaceofPain, sdk.unittype.Object, sdk.objects.SmallSparklyChest, 2, 2);
 		Attack.kill(sdk.monsters.UberIzual);
 		Pickit.pickItems();
-		this.getQuestItem(Game.getItem(sdk.items.quest.MephistosBrain));
+		getQuestItem(Game.getItem(sdk.items.quest.MephistosBrain));
 		Town.goToTown();
 
 		// we sucessfully picked up the brain
 		return (me.findItems(sdk.items.quest.MephistosBrain, sdk.items.mode.inStorage).length > mBrain);
 	};
 
-	// re-write this, lure doesn't always work and other classes can do ubers
-	this.uberTrist = function () {
+	/**
+	 * @todo re-write this, lure doesn't always work and other classes can do ubers
+	 */
+	const uberTrist = function () {
 		let skillBackup;
 		let useSalvation = Config.OrgTorch.UseSalvation && Skill.canUse(sdk.skills.Salvation);
 
@@ -315,10 +346,10 @@ function OrgTorch () {
 		}
 
 		useSalvation && Skill.setSkill(sdk.skills.Salvation, sdk.skills.hand.Right);
-		this.lure(sdk.monsters.UberMephisto);
+		lure(sdk.monsters.UberMephisto);
 		Pather.moveTo(25129, 5198);
 		useSalvation && Skill.setSkill(sdk.skills.Salvation, sdk.skills.hand.Right);
-		this.lure(sdk.monsters.UberMephisto);
+		lure(sdk.monsters.UberMephisto);
 
 		if (!Game.getMonster(sdk.monsters.UberMephisto)) {
 			Pather.moveTo(25122, 5170);
@@ -354,39 +385,45 @@ function OrgTorch () {
 
 		Attack.kill(sdk.monsters.UberBaal);
 		Pickit.pickItems();
-		this.currentGameInfo.doneAreas.push(sdk.areas.UberTristram) && OrgTorchData.update(this.currentGameInfo);
-		this.checkTorch();
+		currentGameInfo.doneAreas.push(sdk.areas.UberTristram) && OrgTorchData.update(currentGameInfo);
+		checkTorch();
 	};
 
-	// Do mini ubers or Tristram based on area we're already in
-	this.pandemoniumRun = function (portalId) {
+	/**
+	 * Do mini ubers or Tristram based on area we're already in
+	 * @param {number} portalId 
+	 */
+	const pandemoniumRun = function (portalId) {
 		switch (me.area) {
 		case sdk.areas.MatronsDen:
-			if (this.matronsDen()) {
-				this.currentGameInfo.doneAreas.push(portalId) && OrgTorchData.update(this.currentGameInfo);
+			if (matronsDen()) {
+				currentGameInfo.doneAreas.push(portalId) && OrgTorchData.update(currentGameInfo);
 			}
 
 			break;
 		case sdk.areas.ForgottenSands:
-			if (this.forgottenSands()) {
-				this.currentGameInfo.doneAreas.push(portalId) && OrgTorchData.update(this.currentGameInfo);
+			if (forgottenSands()) {
+				currentGameInfo.doneAreas.push(portalId) && OrgTorchData.update(currentGameInfo);
 			}
 
 			break;
 		case sdk.areas.FurnaceofPain:
-			if (this.furnance()) {
-				this.currentGameInfo.doneAreas.push(portalId) && OrgTorchData.update(this.currentGameInfo);
+			if (furnance()) {
+				currentGameInfo.doneAreas.push(portalId) && OrgTorchData.update(currentGameInfo);
 			}
 
 			break;
 		case sdk.areas.UberTristram:
-			this.uberTrist();
+			uberTrist();
 
 			break;
 		}
 	};
 
-	this.runEvent = function (portal) {
+	/**
+	 * @param {ObjectUnit} portal 
+	 */
+	runEvent = function (portal) {
 		if (portal) {
 			if (Config.OrgTorch.PreGame.Antidote.At.includes(portal.objtype) && Config.OrgTorch.PreGame.Antidote.Drink > 0) {
 				Town.buyPots(Config.OrgTorch.PreGame.Antidote.Drink, "Antidote", true, true);
@@ -397,24 +434,24 @@ function OrgTorch () {
 			Town.move("stash");
 			console.log("taking portal: " + portal.objtype);
 			Pather.usePortal(null, null, portal);
-			this.pandemoniumRun(portal.objtype);
+			pandemoniumRun(portal.objtype);
 		}
 	};
 
-	this.juvCheck = function () {
-		let needJuvs = 0;
-		let col = Town.checkColumns(Storage.BeltSize());
+	// const juvCheck = function () {
+	// 	let needJuvs = 0;
+	// 	let col = Town.checkColumns(Storage.BeltSize());
 
-		for (let i = 0; i < 4; i += 1) {
-			if (Config.BeltColumn[i] === "rv") {
-				needJuvs += col[i];
-			}
-		}
+	// 	for (let i = 0; i < 4; i += 1) {
+	// 		if (Config.BeltColumn[i] === "rv") {
+	// 			needJuvs += col[i];
+	// 		}
+	// 	}
 
-		print("Need " + needJuvs + " juvs.");
+	// 	print("Need " + needJuvs + " juvs.");
 
-		return needJuvs;
-	};
+	// 	return needJuvs;
+	// };
 
 	// ################# //
 	/* ##### START ##### */
@@ -423,22 +460,38 @@ function OrgTorch () {
 	// make sure we are picking the organs
 	Config.PickitFiles.length === 0 && NTIP.OpenFile("pickit/keyorg.nip", true);
 
-	FileTools.exists(OrgTorchData.filePath) && (this.currentGameInfo = OrgTorchData.read());
+	FileTools.exists(OrgTorchData.filePath) && (currentGameInfo = OrgTorchData.read());
 
-	if (!this.currentGameInfo || this.currentGameInfo.gamename !== me.gamename) {
-		this.currentGameInfo = OrgTorchData.create();
+	if (!currentGameInfo || currentGameInfo.gamename !== me.gamename) {
+		currentGameInfo = OrgTorchData.create();
 	}
 
 	let portal;
-	let tkeys = me.findItems("pk1", sdk.items.mode.inStorage).length || 0;
-	let hkeys = me.findItems("pk2", sdk.items.mode.inStorage).length || 0;
-	let dkeys = me.findItems("pk3", sdk.items.mode.inStorage).length || 0;
-	let brains = me.findItems("mbr", sdk.items.mode.inStorage).length || 0;
-	let eyes = me.findItems("bey", sdk.items.mode.inStorage).length || 0;
-	let horns = me.findItems("dhn", sdk.items.mode.inStorage).length || 0;
+	let [tkeys, hkeys, dkeys] = [0, 0, 0];
+	let [brains, eyes, horns] = [0, 0, 0];
+	
+	me.getItemsEx()
+		.filter(i => i.isInInventory && !Town.ignoreType(i.itemType) && i.quality === sdk.items.quality.Normal)
+		.forEach(i => {
+			switch (i.classid) {
+			case sdk.items.quest.KeyofTerror:
+				return (tkeys++);
+			case sdk.items.quest.KeyofHate:
+				return (hkeys++);
+			case sdk.items.quest.KeyofDestruction:
+				return (dkeys++);
+			case sdk.items.quest.DiablosHorn:
+				return (horns++);
+			case sdk.items.quest.MephistosBrain:
+				return (brains++);
+			case sdk.items.quest.BaalsEye:
+				return (eyes++);
+			default: return;
+			}
+		});
 
 	// Do town chores and quit if MakeTorch is true and we have a torch.
-	this.checkTorch();
+	checkTorch();
 
 	// Wait for other bots to drop off their keys. This works only if TorchSystem.js is configured properly.
 	Config.OrgTorch.WaitForKeys && TorchSystem.waitForKeys();
@@ -463,7 +516,7 @@ function OrgTorch () {
 		});
 	} else {
 		// possible same game name but different day and data file never got deleted
-		this.currentGameInfo.doneAreas.length > 0 && (this.currentGameInfo = OrgTorchData.create());
+		currentGameInfo.doneAreas.length > 0 && (currentGameInfo = OrgTorchData.create());
 	}
 
 	// End the script if we don't have enough keys nor organs
@@ -478,7 +531,7 @@ function OrgTorch () {
 
 	// We have enough keys, do mini ubers
 	if (tkeys >= keySetsReq && hkeys >= keySetsReq && dkeys >= keySetsReq) {
-		this.getFade();
+		getFade();
 		Town.goToTown(5);
 		console.log("Making organs.");
 		D2Bot.printToConsole("OrgTorch: Making organs.", sdk.colors.D2Bot.DarkGold);
@@ -491,7 +544,7 @@ function OrgTorch () {
 				if ([sdk.areas.MatronsDen, sdk.areas.ForgottenSands, sdk.areas.FurnaceofPain].includes(redPortals[i].objtype)
 					&& !currentGameInfo.doneAreas.includes(redPortals[i].objtype)) {
 					portal = redPortals[i];
-					this.runEvent(portal);
+					runEvent(portal);
 				}
 			}
 		}
@@ -499,17 +552,17 @@ function OrgTorch () {
 		for (let i = 0; i < keySetsReq; i += 1) {
 			// Abort if we have a complete set of organs
 			// If Config.OrgTorch.MakeTorch is false, check after at least one portal is made
-			if ((Config.OrgTorch.MakeTorch || i > 0) && this.completeSetCheck()) {
+			if ((Config.OrgTorch.MakeTorch || i > 0) && completeSetCheck()) {
 				break;
 			}
 
-			portal = this.openPortal(portalMode.MiniUbers);
-			this.runEvent(portal);
+			portal = openPortal(portalMode.MiniUbers);
+			runEvent(portal);
 		}
 	}
 
 	// Don't make torches if not configured to OR if the char already has one
-	if (!Config.OrgTorch.MakeTorch || this.checkTorch()) {
+	if (!Config.OrgTorch.MakeTorch || checkTorch()) {
 		OrgTorchData.remove();
 
 		return true;
@@ -523,19 +576,19 @@ function OrgTorch () {
 	// We have enough organs, do Tristram - or trist is open we may have chickened and came back so check it
 	// if trist was already open when we joined should we run that first?
 	if ((brains && eyes && horns) || tristOpen) {
-		this.getFade();
+		getFade();
 		Town.goToTown(5);
 		Town.move("stash");
 
 		if (!tristOpen) {
 			console.log("Making torch");
 			D2Bot.printToConsole("OrgTorch: Making torch.", sdk.colors.D2Bot.DarkGold);
-			portal = this.openPortal(portalMode.UberTristram);
+			portal = openPortal(portalMode.UberTristram);
 		} else {
 			portal = Pather.getPortal(sdk.areas.UberTristram);
 		}
 
-		this.runEvent(portal);
+		runEvent(portal);
 		OrgTorchData.remove();
 	}
 

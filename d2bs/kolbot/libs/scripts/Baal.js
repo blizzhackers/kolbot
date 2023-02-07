@@ -7,7 +7,7 @@
 
 function Baal() {
 	include("core/Common/Baal.js");
-	this.announce = function () {
+	const announce = function () {
 		let count, string, souls, dolls;
 		let monster = Game.getMonster();
 
@@ -54,22 +54,20 @@ function Baal() {
 		throw new Error("Failed to move to Throne of Destruction.");
 	}
 
-	Pather.moveTo(15095, 5029);
+	Pather.moveToEx(15095, 5029, { callback: () => {
+		if (Config.Baal.DollQuit && Game.getMonster(sdk.monsters.SoulKiller)) {
+			say("Dolls found! NG.");
+			throw new ScriptError("Dolls found! NG.");
+		}
 
-	if (Config.Baal.DollQuit && Game.getMonster(sdk.monsters.SoulKiller)) {
-		say("Dolls found! NG.");
-
-		return true;
-	}
-
-	if (Config.Baal.SoulQuit && Game.getMonster(sdk.monsters.BurningSoul1)) {
-		say("Souls found! NG.");
-
-		return true;
-	}
+		if (Config.Baal.SoulQuit && Game.getMonster(sdk.monsters.BurningSoul1)) {
+			say("Souls found! NG.");
+			throw new ScriptError("Souls found! NG.");
+		}
+	}});
 
 	if (Config.PublicMode) {
-		this.announce();
+		announce();
 		Pather.moveTo(15118, 5002);
 		Pather.makePortal();
 		say(Config.Baal.HotTPMessage);
