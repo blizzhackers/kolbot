@@ -55,7 +55,7 @@ function Questing () {
 		log("starting cain");
 
 		Town.doChores();
-		Common.Questing.cain();
+		Common.Cain.run();
 
 		return true;
 	};
