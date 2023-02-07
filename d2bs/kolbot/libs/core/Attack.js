@@ -468,10 +468,10 @@ const Attack = {
 				return Attack.clear(10);
 			}
 
-			({orgx, orgy} = {orgx: boss.x, orgy: boss.y});
+			({orgx, orgy} = { orgx: boss.x, orgy: boss.y });
 			Config.MFLeader && !!bossId && Pather.makePortal() && say("clear " + bossId);
 		} else {
-			({orgx, orgy} = {orgx: me.x, orgy: me.y});
+			({orgx, orgy} = { orgx: me.x, orgy: me.y });
 		}
 
 		let monsterList = [];
@@ -623,23 +623,42 @@ const Attack = {
 	 * @description clear all monsters based on classid arguments
 	 * @param  {...number} ids 
 	 * @returns {boolean}
+	 * @todo
+	 * - Should there be a range parameter for this?
+	 * - Should we keep track of where we started from?
 	 */
 	clearClassids: function (...ids) {
-		let monster = Game.getMonster();
+		// lets keep track of where we started from and move back when done
+		const { x, y } = me;
+		let cleared = false;
 
-		if (monster) {
-			let list = [];
+		for (let i = 0; i < 3; i++) {
+			let monster = Game.getMonster();
 
-			do {
-				if (ids.includes(monster.classid) && monster.attackable) {
-					list.push(copyUnit(monster));
+			if (monster) {
+				let list = [];
+
+				do {
+					if (ids.includes(monster.classid) && monster.attackable) {
+						list.push(copyUnit(monster));
+					}
+				} while (monster.getNext());
+
+				if (!list.length) {
+					break;
 				}
-			} while (monster.getNext());
-
-			Attack.clearList(list);
+				// if we cleared, return to our starting position
+				if (Attack.clearList(list)) {
+					Pather.moveTo(x, y);
+					cleared = true;
+				}
+			} else {
+				// if no monsters were found should that be a pass or fail?
+				return false; // fail for now
+			}
 		}
 
-		return true;
+		return cleared;
 	},
 
 	/**
@@ -698,10 +717,11 @@ const Attack = {
 	 * @returns {boolean}
 	 */
 	clearList: function (mainArg, sortFunc, refresh) {
-		let i, target, monsterList;
-		let retry = 0;
+		/** @type {Monster[]} */
+		let monsterList;
+		/** @type {{ gid: number, attacks: number }[]} */
 		let gidAttack = [];
-		let attackCount = 0;
+		let [retry, attackCount] = [0, 0];
 
 		switch (typeof mainArg) {
 		case "function":
@@ -721,20 +741,20 @@ const Attack = {
 		!sortFunc && (sortFunc = this.sortMonsters);
 
 		while (monsterList.length > 0 && attackCount < Config.MaxAttackCount) {
+			if (me.dead) return false;
+
 			if (refresh && attackCount > 0 && attackCount % refresh === 0) {
 				monsterList = mainArg.call();
 			}
 
-			if (me.dead) return false;
-
 			monsterList.sort(sortFunc);
-			target = copyUnit(monsterList[0]);
+			let target = copyUnit(monsterList[0]);
 
 			if (target.x !== undefined && target.attackable) {
 				Config.Dodge && me.hpPercent <= Config.DodgeHP && this.deploy(target, Config.DodgeRange, 5, 9);
 				Misc.townCheck();
-				//me.overhead("attacking " + target.name + " spectype " + target.spectype + " id " + target.classid);
-
+				// me.overhead("attacking " + target.name + " spectype " + target.spectype + " id " + target.classid);
+				let i;
 				let result = ClassAttack.doAttack(target, attackCount % 15 === 0);
 
 				if (result) {

@@ -7,6 +7,12 @@
 
 (function (Common) {
 	typeof Common !== "object" && (Common = {});
+	/**
+	 * @todo
+	 * - keep track of seals opened and bosses killed to
+	 * - improve targetting when using getBoss, sometimes we run to the location we want to attack from while running past the boss
+	 * I see this mostly with viz, also have seen seis fail due to not being close enough, even though he spawned
+	 */
 	Object.defineProperty(Common, "Diablo", {
 		value: {
 			diabloSpawned: false,
@@ -15,6 +21,7 @@
 			done: false,
 			waitForGlow: false,
 			sealOrder: [],
+			openedSeals: [],
 			vizLayout: -1,
 			seisLayout: -1,
 			infLayout: -1,
@@ -88,6 +95,11 @@
 				return 2;
 			},
 
+			/**
+			 * - VizLayout - 1 = "Y", 2 = "L"
+			 * - SeisLayout - 1 = "2", 2 = "5"
+			 * - InfLayout - 1 = "I", 2 = "J"
+			 */
 			initLayout: function () {
 				// 1 = "Y", 2 = "L"
 				Common.Diablo.vizLayout = this.getLayout(sdk.objects.DiabloSealVizier, 5275);
@@ -157,6 +169,10 @@
 				return true;
 			},
 
+			/**
+			 * @param {number[] | string[]} sealOrder 
+			 * @param {boolean} openSeals 
+			 */
 			runSeals: function (sealOrder, openSeals = true) {
 				print("seal order: " + sealOrder);
 				Common.Diablo.sealOrder = sealOrder;
@@ -171,6 +187,11 @@
 				sealOrder.forEach(seal => {seals[seal]();});
 			},
 
+			/**
+			 * Attempt casting telekinesis on seal to activate it
+			 * @param {Unit} seal 
+			 * @returns {boolean}
+			 */
 			tkSeal: function (seal) {
 				if (!Skill.useTK(seal)) return false;
 
@@ -185,6 +206,11 @@
 				return !!seal.mode;
 			},
 
+			/**
+			 * Open one of diablos seals
+			 * @param {number} classid 
+			 * @returns {boolean}
+			 */
 			openSeal: function (classid) {
 				let seal;
 				let warn = Config.PublicMode && [sdk.objects.DiabloSealVizier, sdk.objects.DiabloSealSeis, sdk.objects.DiabloSealInfector].includes(classid) && Loader.scriptName() === "Diablo";
@@ -255,6 +281,10 @@
 				return (!!seal && seal.mode);
 			},
 
+			/**
+			 * @param {boolean} openSeal 
+			 * @returns {boolean}
+			 */
 			vizierSeal: function (openSeal = true) {
 				print("Viz layout " + Common.Diablo.vizLayout);
 				let path = (Common.Diablo.vizLayout === 1 ? this.starToVizA : this.starToVizB);
@@ -284,6 +314,10 @@
 				return true;
 			},
 
+			/**
+			 * @param {boolean} openSeal 
+			 * @returns {boolean}
+			 */
 			seisSeal: function (openSeal = true) {
 				print("Seis layout " + Common.Diablo.seisLayout);
 				let path = (Common.Diablo.seisLayout === 1 ? this.starToSeisA : this.starToSeisB);
@@ -299,13 +333,28 @@
 
 				if (openSeal && !Common.Diablo.openSeal(sdk.objects.DiabloSealSeis)) throw new Error("Failed to open de Seis seal.");
 				Common.Diablo.seisLayout === 1 ? Pather.moveTo(7798, 5194) : Pather.moveTo(7796, 5155);
-				if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.LordDeSeis))) throw new Error("Failed to kill de Seis");
+				try {
+					if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.LordDeSeis))) throw new Error("Failed to kill de Seis");
+				} catch (e) {
+					/**
+					 * sometimes we fail just because we aren't in range,
+					 * @todo better fix for this
+					 */
+					Pather.moveToEx(this.starCoords.x, this.starCoords.y, { minDist: 15, callback: () => {
+						let seis = Game.getMonster(getLocaleString(sdk.locale.monsters.LordDeSeis));
+						return seis && (seis.distance < 30 || seis.dead);
+					}});
+				}
 
 				Config.Diablo.SealLeader && say("out");
 
 				return true;
 			},
 
+			/**
+			 * @param {boolean} openSeal 
+			 * @returns {boolean}
+			 */
 			infectorSeal: function (openSeal = true) {
 				Precast.doPrecast(true);
 				print("Inf layout " + Common.Diablo.infLayout);
