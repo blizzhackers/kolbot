@@ -10,7 +10,7 @@ const ClassAttack = {
 	lightFuryTick: 0,
 
 	decideSkill: function (unit) {
-		let skills = {timed: -1, untimed: -1};
+		let skills = { timed: -1, untimed: -1 };
 		if (!unit) return skills;
 
 		let index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
@@ -49,6 +49,7 @@ const ClassAttack = {
 
 	doAttack: function (unit, preattack) {
 		if (!unit) return Attack.Result.SUCCESS;
+		Config.TeleSwitch && me.switchToPrimary();
 		let gid = unit.gid;
 		let needRepair = Town.needRepair();
 
@@ -159,6 +160,7 @@ const ClassAttack = {
 	doCast: function (unit, timedSkill = -1, untimedSkill = -1) {
 		// No valid skills can be found
 		if (timedSkill < 0 && untimedSkill < 0) return Attack.Result.CANTATTACK;
+		Config.TeleSwitch && me.switchToPrimary();
 		
 		// Arrow/bolt check
 		if (this.bowCheck) {

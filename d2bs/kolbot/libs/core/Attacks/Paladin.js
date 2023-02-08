@@ -15,6 +15,7 @@ const ClassAttack = {
 	 */
 	doAttack: function (unit, preattack) {
 		if (!unit) return Attack.Result.SUCCESS;
+		Config.TeleSwitch && me.switchToPrimary();
 		let gid = unit.gid;
 
 		if (Config.MercWatch && Town.needMerc()) {
@@ -155,6 +156,7 @@ const ClassAttack = {
 		if (attackSkill < 0) return Attack.Result.CANTATTACK;
 		// unit became invalidated
 		if (!unit || !unit.attackable) return Attack.Result.SUCCESS;
+		Config.TeleSwitch && me.switchToPrimary();
 		
 		switch (attackSkill) {
 		case sdk.skills.BlessedHammer:

@@ -503,6 +503,7 @@ declare global {
 
 		inArea(area: number): boolean;
 		switchWeapons(slot: 0 | 1): void;
+		switchToPrimary(): boolean;
 		checkItem(itemInfo: {
 			classid?: number;
 			itemtype?: number;
@@ -565,7 +566,7 @@ declare global {
 		send(): void;
 	}
 
-	function getScript(name?: string): Script | false
+	function getScript(name?: string | boolean): Script | false
 	function getScripts(): Script | false
 
 	class Room {

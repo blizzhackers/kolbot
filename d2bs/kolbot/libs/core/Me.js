@@ -354,6 +354,11 @@ me.fieldID = function () {
 	return true;
 };
 
+me.switchToPrimary = function () {
+	if (me.classic) return true;
+	return me.switchWeapons(Attack.getPrimarySlot());
+};
+
 Object.defineProperties(me, {
 	maxNearMonsters: {
 		get: function () {

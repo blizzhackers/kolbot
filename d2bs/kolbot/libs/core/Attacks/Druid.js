@@ -8,6 +8,7 @@
 const ClassAttack = {
 	doAttack: function (unit, preattack = false) {
 		if (!unit) return Attack.Result.SUCCESS;
+		Config.TeleSwitch && me.switchToPrimary();
 		let gid = unit.gid;
 
 		if (Config.MercWatch && Town.needMerc()) {
@@ -122,6 +123,7 @@ const ClassAttack = {
 		if (timedSkill < 0 && untimedSkill < 0) return Attack.Result.CANTATTACK;
 		// unit became invalidated
 		if (!unit || !unit.attackable) return Attack.Result.SUCCESS;
+		Config.TeleSwitch && me.switchToPrimary();
 		
 		let walk;
 		let classid = unit.classid;

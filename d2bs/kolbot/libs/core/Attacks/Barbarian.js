@@ -19,6 +19,7 @@ const ClassAttack = {
 	 */
 	doAttack: function (unit, preattack = false) {
 		if (!unit) return Attack.Result.SUCCESS;
+		Config.TeleSwitch && me.switchToPrimary();
 		let gid = unit.gid;
 		let needRepair = Town.needRepair();
 
@@ -93,6 +94,7 @@ const ClassAttack = {
 		if (attackSkill < 0) return Attack.Result.CANTATTACK;
 		// check if unit became invalidated
 		if (!unit || !unit.attackable) return Attack.Result.SUCCESS;
+		Config.TeleSwitch && me.switchToPrimary();
 		
 		switch (attackSkill) {
 		case sdk.skills.Whirlwind:
@@ -224,6 +226,7 @@ const ClassAttack = {
 					}
 
 					if (attempted && !invalidated && corpse && !corpse.getState(sdk.states.CorpseNoSelect)) {
+						!me.inArea(sdk.areas.ThroneofDestruction) && D2Bot.printToConsole("Failed to hork " + JSON.stringify(corpse) + " at " + getAreaName(me.area));
 						console.debug("Failed to hork " + JSON.stringify(corpse) + " at " + getAreaName(me.area));
 					}
 				}
