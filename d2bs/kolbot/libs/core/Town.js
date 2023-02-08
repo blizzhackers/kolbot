@@ -1722,6 +1722,8 @@ const Town = {
 		}
 
 		me.classic && this.checkShard();
+		// re-init skills since we started off without our body
+		Skill.init();
 
 		return true;
 	},
