@@ -91,13 +91,13 @@ me.cancelUIFlags = function () {
 	}
 };
 
+/**
+ * @param {number} slot - 0 (Primary) or 1 (Secondary)
+ * @returns {boolean}
+ */
 me.switchWeapons = function (slot) {
 	if (this.gametype === sdk.game.gametype.Classic || (slot !== undefined && this.weaponswitch === slot)) {
 		return true;
-	}
-
-	while (typeof me !== "object") {
-		delay(10);
 	}
 
 	while (!me.gameReady) {
@@ -112,6 +112,11 @@ me.switchWeapons = function (slot) {
 		for (let i = 0; i < 10; i += 1) {
 			for (let j = 10; --j && me.idle;) {
 				delay(3);
+			}
+			if (me.mode === sdk.player.mode.SkillActionSequence) {
+				while (me.mode === sdk.player.mode.SkillActionSequence) {
+					delay(3);
+				}
 			}
 
 			i > 0 && delay(10);
