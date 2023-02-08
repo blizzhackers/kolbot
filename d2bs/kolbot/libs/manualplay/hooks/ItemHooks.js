@@ -175,7 +175,7 @@ const ItemHooks = {
 			default:
 				{
 					let check = this.codeByIdAndQuality.get(item.classid);
-					code += (check.get(item.quality) || item.name);
+					code += ((check && check.get(item.quality)) || item.name);
 				}
 				
 				break;
@@ -277,7 +277,9 @@ const ItemHooks = {
 	}
 };
 
-// have to be set after ItemHooks is created
+/**
+ * Unique Items
+ */
 ItemHooks.codeById.set(sdk.items.BattleAxe, "The Chieftain");
 ItemHooks.codeById.set(sdk.items.Falchion, "Gleamscythe");
 ItemHooks.codeById.set(sdk.items.BurntWand, "Suicide Branch");
@@ -342,12 +344,19 @@ ItemHooks.codeById.set(sdk.items.SmallCharm, "Annihilus");
 ItemHooks.codeById.set(sdk.items.LargeCharm, "Hellfire Torch");
 ItemHooks.codeById.set(sdk.items.GrandCharm, "Gheed's");
 ItemHooks.codeById.set(sdk.items.Jewel, "Facet");
+
+/**
+ * Misc Items
+ */
 ItemHooks.codeById.set(sdk.items.quest.TokenofAbsolution, "ÿc8Token");
 ItemHooks.codeById.set(sdk.items.quest.TwistedEssenceofSuffering, "ÿc3Ess-Of-Suffering");
 ItemHooks.codeById.set(sdk.items.quest.ChargedEssenceofHatred, "ÿc7Ess-Of-Hatred");
 ItemHooks.codeById.set(sdk.items.quest.BurningEssenceofTerror, "ÿc1Ess-Of-Terror");
 ItemHooks.codeById.set(sdk.items.quest.FesteringEssenceofDestruction, "ÿc3Ess-Of-Destruction");
 
+/**
+ * Set/Unique Items
+ */
 ItemHooks.addToCodeByClassIdAndQuality(sdk.items.JaggedStar, "Aldur's Wep", "Moonfall");
 ItemHooks.addToCodeByClassIdAndQuality(sdk.items.HuntersGuise, "Aldur's Helm");
 ItemHooks.addToCodeByClassIdAndQuality(sdk.items.ShadowPlate, "Aldur's Armor", "Steel Carapace");
@@ -419,6 +428,18 @@ ItemHooks.addToCodeByClassIdAndQuality(sdk.items.ShortWarBow, "Artic's Bow", "He
 ItemHooks.addToCodeByClassIdAndQuality(sdk.items.DoubleAxe, "Beserker's Axe", "Bladebone");
 ItemHooks.addToCodeByClassIdAndQuality(sdk.items.SplintMail, "Beserker's Armor", "Iceblink");
 ItemHooks.addToCodeByClassIdAndQuality(sdk.items.Helm, "Beserker's Helm", "Coif of Glory");
+
+/**
+ * Tancred's
+ */
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.BoneHelm, "Tancred's Skull", "Wormskull");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.FullPlateMail, "Tancred's Spine", "Goldskin");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.MilitaryPick, "Tancred's Crowbill", "Skull Splitter");
+ItemHooks.addToCodeByClassIdAndQuality(sdk.items.Boots, "Tancred's Hobnails", "Hotspur");
+
+/**
+ * @todo the rest of the sets/uniques
+ */
 
 ItemHooks.itemColorCode[sdk.items.quality.Magic] = { color: 0x97, code: "ÿc3" };
 ItemHooks.itemColorCode[sdk.items.quality.Set] = { color: 0x84, code: "ÿc2" };
