@@ -1601,6 +1601,7 @@ const Pather = {
 
 		me.cancelUIFlags();
 
+
 		let preArea = me.area;
 
 		for (let i = 0; i < 10; i += 1) {
@@ -1610,6 +1611,10 @@ const Pather = {
 			let portal = unit ? copyUnit(unit) : this.getPortal(targetArea, owner);
 
 			if (portal) {
+				if (portal.objtype === sdk.areas.DuranceofHateLvl3 && portal.getParent() !== me.name
+					&& !Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, sdk.quest.states.Completed)) {
+					throw new Error("Cannot access meph through someone elses portal without first completing Travincal");
+				}
 				let redPortal = portal.classid === sdk.objects.RedPortal;
 
 				if (portal.area === me.area) {
