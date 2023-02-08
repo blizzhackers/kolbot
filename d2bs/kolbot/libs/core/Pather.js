@@ -1343,6 +1343,7 @@ const Pather = {
 		return targetArea ? me.area === targetArea : me.area !== preArea;
 	},
 
+	allowBroadcast: true,
 	/**
 	 * Meant for use as a MfLeader to let MfHelpers know where to go next
 	 * @param {number} targetArea - area id
@@ -1375,7 +1376,7 @@ const Pather = {
 			break;
 		}
 
-		this.broadcastIntent(targetArea);
+		Pather.allowBroadcast && Pather.broadcastIntent(targetArea);
 		console.info(true, "ÿc7targetArea: ÿc0" + getAreaName(targetArea) + " ÿc7myArea: ÿc0" + getAreaName(me.area));
 		let wpTick = getTickCount();
 

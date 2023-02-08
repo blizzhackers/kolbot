@@ -15,7 +15,10 @@ includeSystemLibs();
 
 function main() {
 	let townCheck = false;
-	let scripts = ["default.dbj", "threads/antihostile.js", "threads/rushthread.js", "threads/CloneKilla.js"];
+	const scripts = ["default.dbj", "threads/antihostile.js", "threads/rushthread.js", "threads/CloneKilla.js"];
+
+	// override broadCastIntent - shouldn't be called at all in this thread
+	Pather.broadcastIntent = () => null;
 
 	this.pause = function () {
 		for (let i = 0; i < scripts.length; i += 1) {
