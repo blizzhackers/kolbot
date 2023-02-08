@@ -16,7 +16,7 @@ include("critical.js"); // required
 // the only things we really need from these are their oog checks
 includeSystemLibs();
 
-let Controls = require("./modules/Control");
+const Controls = require("./libs/modules/Control");
 
 if (typeof Starter.AdvancedConfig[me.profile] === "object") {
 	Object.assign(Starter.Config, Starter.AdvancedConfig[me.profile]);
@@ -328,6 +328,12 @@ function main () {
 		delay(500);
 	}
 
+	while (!Object.keys(Starter.profileInfo).length) {
+		D2Bot.getProfile();
+		console.log("Getting Profile");
+		delay(500);
+	}
+
 	Starter.gameCount = (DataFile.getStats().runs + 1 || 1);
 
 	if (Starter.gameInfo.error) {
@@ -343,12 +349,6 @@ function main () {
 	}
 
 	DataFile.updateStats("debugInfo", JSON.stringify({currScript: "none", area: "out of game"}));
-
-	while (!Object.keys(Starter.profileInfo).length) {
-		D2Bot.getProfile();
-		print("Getting Profile");
-		delay(500);
-	}
 
 	while (true) {
 		// returns true before actually in game so we can't only use this check

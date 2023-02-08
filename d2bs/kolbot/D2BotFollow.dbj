@@ -36,8 +36,8 @@ const JoinSettings = {
 // the only things we really need from these are their oog checks
 includeSystemLibs();
 
-let Controls = require("./modules/Control");
-let Overrides = require("./modules/Override");
+const Controls = require("./libs/modules/Control");
+const Overrides = require("./libs/modules/Override");
 
 if (typeof Starter.AdvancedConfig[me.profile] === "object") {
 	Object.assign(Starter.Config, Starter.AdvancedConfig[me.profile]);
@@ -73,6 +73,8 @@ function joinCheck (leader) {
 
 	if (!Starter.joinInfo.inGame || (lastGame.length && lastGame.indexOf(Starter.joinInfo.gameName) === -1)) {
 		D2Bot.printToConsole("Game is finished. Stopping join delay.");
+		Starter.gameInfo.gameName = "";
+		Starter.gameInfo.gamePass = "";
 
 		return true;
 	}
