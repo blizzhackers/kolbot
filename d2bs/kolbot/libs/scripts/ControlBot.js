@@ -12,18 +12,18 @@ function ControlBot() {
 	/**
 	 * @type {Object.<string, { firstCmd: number, commands: number, ignored: boolean | number }>}
 	 */
-	this.cmdNicks = {};
+	const cmdNicks = {};
 	/**
 	 * @type {Object.<string, { timer: number, requests: number }>}
 	 */
-	this.wpNicks = {};
+	const wpNicks = {};
 
 	let command, nick;
 	let shitList = [];
-	let greet = [];
+	const greet = [];
 
 	let controlCommands = ["help", "timeleft", "cows", "wps", "chant", "bo"];
-	let commandDesc = {
+	const commandDesc = {
 		"help": "Display commands",
 		"timeleft": "Remaining time left for this game",
 		"cows": "Open cow level",
@@ -69,7 +69,11 @@ function ControlBot() {
 		}
 	}
 
-	this.enchant = function (nick) {
+	/**
+	 * @param {string} nick 
+	 * @returns {boolean}
+	 */
+	const enchant = function (nick) {
 		if (!Config.ControlBot.Chant.Enchant) return false;
 
 		if (!Misc.inMyParty(nick)) {
@@ -135,7 +139,11 @@ function ControlBot() {
 		return true;
 	};
 
-	this.bo = function (nick) {
+	/**
+	 * @param {string} nick 
+	 * @returns {boolean}
+	 */
+	const bo = function (nick) {
 		if (!Config.ControlBot.Bo) return false;
 
 		if (!Misc.inMyParty(nick)) {
@@ -187,7 +195,13 @@ function ControlBot() {
 		return true;
 	};
 
-	this.autoChant = function () {
+	/**
+	 * @type {Map<string, { lastChant: number }}
+	 */
+	const chantList = new Map();
+	const chantDuration = Config.ControlBot.Chant.Enchant ? Skill.getDuration(sdk.skills.Enchant) : 0;
+
+	const autoChant = function () {
 		if (!Config.ControlBot.Chant.Enchant) return false;
 
 		let chanted = [];
@@ -195,10 +209,15 @@ function ControlBot() {
 
 		if (unit) {
 			do {
-				if (unit.name !== me.name && !unit.dead && shitList.indexOf(unit.name) === -1 && Misc.inMyParty(unit.name) && !unit.getState(sdk.states.Enchant) && unit.distance <= 40) {
-					Packet.enchant(unit);
-					delay(500);
-					chanted.push(unit.name);
+				if (unit.name !== me.name && !unit.dead && shitList.indexOf(unit.name) === -1 && Misc.inMyParty(unit.name) && unit.distance <= 40) {
+					// allow rechanting someone if it's going to run out soon for them
+					if ((!unit.getState(sdk.states.Enchant) || (chantList.has(unit.name) && getTickCount() - chantList.get(unit.name).lastChant) >= chantDuration - Time.minutes(1))) {
+						Packet.enchant(unit);
+						if (Misc.poll(() => unit.getState(sdk.states.Enchant), 500, 50)) {
+							chanted.push(unit.name);
+							chantList.set(unit.name, { lastChant: getTickCount() });
+						}
+					}
 				}
 			} while (unit.getNext());
 		}
@@ -209,7 +228,10 @@ function ControlBot() {
 			do {
 				if (unit.getParent() && chanted.includes(unit.getParent().name) && !unit.getState(sdk.states.Enchant) && unit.distance <= 40) {
 					Packet.enchant(unit);
-					delay(500);
+					// not going to re-enchant the minions for now though, will think on how best to handle that later
+					if (Misc.poll(() => unit.getState(sdk.states.Enchant), 500, 50)) {
+						chanted.push(unit.name);
+					}
 				}
 			} while (unit.getNext());
 		}
@@ -217,7 +239,7 @@ function ControlBot() {
 		return true;
 	};
 
-	this.getLeg = function () {
+	const getLeg = function () {
 		if (me.getItem(sdk.quest.item.WirtsLeg)) {
 			return me.getItem(sdk.quest.item.WirtsLeg);
 		}
@@ -278,7 +300,7 @@ function ControlBot() {
 		return false;
 	};
 
-	this.getTome = function () {
+	const getTome = function () {
 		let tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.items.mode.inStorage, sdk.storage.Inventory);
 
 		if (tpTome.length < 2) {
@@ -313,7 +335,11 @@ function ControlBot() {
 		return tpTome.last();
 	};
 
-	this.openPortal = function (nick) {
+	/**
+	 * @param {string} nick 
+	 * @returns {boolean}
+	 */
+	const openPortal = function (nick) {
 		if (!Config.ControlBot.Cows.MakeCows) return false;
 		try {
 			if (!Misc.inMyParty(nick)) throw new Error("Accept party invite, noob.");
@@ -329,10 +355,10 @@ function ControlBot() {
 			return false;
 		}
 
-		let leg = this.getLeg();
+		let leg = getLeg();
 		if (!leg) return false;
 
-		let tome = this.getTome();
+		let tome = getTome();
 		if (!tome) return false;
 
 		if (!Town.openStash() || !Cubing.emptyCube() || !Storage.Cube.MoveTo(leg) || !Storage.Cube.MoveTo(tome) || !Cubing.openCube()) {
@@ -355,13 +381,17 @@ function ControlBot() {
 		return false;
 	};
 
-	this.getWpNick = function (nick) {
-		if (this.wpNicks.hasOwnProperty(nick)) {
-			if (this.wpNicks[nick].requests > 4) {
+	/**
+	 * @param {string} nick 
+	 * @returns {string | boolean}
+	 */
+	const getWpNick = function (nick) {
+		if (wpNicks.hasOwnProperty(nick)) {
+			if (wpNicks[nick].requests > 4) {
 				return "maxrequests";
 			}
 
-			if (getTickCount() - this.wpNicks[nick].timer < 60000) {
+			if (getTickCount() - wpNicks[nick].timer < 60000) {
 				return "mintime";
 			}
 
@@ -371,11 +401,19 @@ function ControlBot() {
 		return false;
 	};
 
-	this.addWpNick = function (nick) {
-		this.wpNicks[nick] = {timer: getTickCount(), requests: 0};
+	/**
+	 * @param {string} nick 
+	 * @returns {void}
+	 */
+	const addWpNick = function (nick) {
+		wpNicks[nick] = { timer: getTickCount(), requests: 0 };
 	};
 
-	this.giveWps = function (nick) {
+	/**
+	 * @param {string} nick 
+	 * @returns {boolean}
+	 */
+	const giveWps = function (nick) {
 		if (!Config.ControlBot.Wps.GiveWps) return false;
 		if (!Misc.inMyParty(nick)) {
 			say("Accept party invite, noob.");
@@ -383,7 +421,7 @@ function ControlBot() {
 			return false;
 		}
 
-		switch (this.getWpNick(nick)) {
+		switch (getWpNick(nick)) {
 		case "maxrequests":
 			say(nick + ", you have spent all your waypoint requests for this game.");
 
@@ -393,7 +431,7 @@ function ControlBot() {
 
 			return false;
 		case false:
-			this.addWpNick(nick);
+			addWpNick(nick);
 
 			break;
 		}
@@ -421,7 +459,7 @@ function ControlBot() {
 		let wpList = wps[act];
 
 		for (let i = 0; i < wpList.length; i++) {
-			if (this.checkHostiles()) {
+			if (checkHostiles()) {
 				break;
 			}
 
@@ -455,13 +493,13 @@ function ControlBot() {
 		Town.goToTown(1);
 		Town.move("portalspot");
 
-		this.wpNicks[nick].requests += 1;
-		this.wpNicks[nick].timer = getTickCount();
+		wpNicks[nick].requests += 1;
+		wpNicks[nick].timer = getTickCount();
 
 		return true;
 	};
 
-	this.checkHostiles = function () {
+	const checkHostiles = function () {
 		let rval = false;
 		let party = getParty();
 
@@ -480,7 +518,11 @@ function ControlBot() {
 		return rval;
 	};
 
-	this.floodCheck = function (command) {
+	/**
+	 * @param {string} command 
+	 * @returns {boolean}
+	 */
+	const floodCheck = function (command) {
 		if (!command || command.length < 2) return false;
 		let [cmd, nick] = command;
 			
@@ -489,40 +531,45 @@ function ControlBot() {
 		// ignore messages not related to our commands
 		if (controlCommands.indexOf(cmd.toLowerCase()) === -1) return false;
 
-		if (!this.cmdNicks.hasOwnProperty(nick)) {
-			this.cmdNicks[nick] = {
+		if (!cmdNicks.hasOwnProperty(nick)) {
+			cmdNicks[nick] = {
 				firstCmd: getTickCount(),
 				commands: 0,
 				ignored: false
 			};
 		}
 
-		if (this.cmdNicks[nick].ignored) {
-			if (getTickCount() - this.cmdNicks[nick].ignored < 60000) {
+		if (cmdNicks[nick].ignored) {
+			if (getTickCount() - cmdNicks[nick].ignored < 60000) {
 				return true; // ignore flooder
 			}
 
 			// unignore flooder
-			this.cmdNicks[nick].ignored = false;
-			this.cmdNicks[nick].commands = 0;
+			cmdNicks[nick].ignored = false;
+			cmdNicks[nick].commands = 0;
 		}
 
-		this.cmdNicks[nick].commands += 1;
+		cmdNicks[nick].commands += 1;
 
-		if (getTickCount() - this.cmdNicks[nick].firstCmd < 10000) {
-			if (this.cmdNicks[nick].commands > 5) {
-				this.cmdNicks[nick].ignored = getTickCount();
+		if (getTickCount() - cmdNicks[nick].firstCmd < 10000) {
+			if (cmdNicks[nick].commands > 5) {
+				cmdNicks[nick].ignored = getTickCount();
 
 				say(nick + ", you are being ignored for 60 seconds because of flooding.");
 			}
 		} else {
-			this.cmdNicks[nick].firstCmd = getTickCount();
-			this.cmdNicks[nick].commands = 0;
+			cmdNicks[nick].firstCmd = getTickCount();
+			cmdNicks[nick].commands = 0;
 		}
 
 		return false;
 	};
 
+	/**
+	 * @param {string} nick 
+	 * @param {string} msg
+	 * @returns {boolean}
+	 */
 	function chatEvent(nick, msg) {
 		if (shitList.includes(nick)) {
 			say("No commands for the shitlisted.");
@@ -545,6 +592,7 @@ function ControlBot() {
 	}
 
 	// START
+	include("oog/ShitList.js");
 	Config.ShitList && (shitList = ShitList.read());
 
 	try {
@@ -567,8 +615,8 @@ function ControlBot() {
 
 			spot.distance > 10 && Pather.moveTo(spot.x, spot.y);
 
-			if (command && !this.floodCheck(command)) {
-				let hostile = this.checkHostiles();
+			if (command && !floodCheck(command)) {
+				let hostile = checkHostiles();
 
 				switch (command[0].toLowerCase()) {
 				case "help":
@@ -590,7 +638,7 @@ function ControlBot() {
 
 					break;
 				case "chant":
-					this.enchant(command[1]);
+					enchant(command[1]);
 
 					break;
 				case "cows":
@@ -600,7 +648,7 @@ function ControlBot() {
 						break;
 					}
 
-					this.openPortal(command[1]);
+					openPortal(command[1]);
 					me.cancel();
 
 					break;
@@ -611,7 +659,7 @@ function ControlBot() {
 						break;
 					}
 
-					this.giveWps(command[1]);
+					giveWps(command[1]);
 
 					break;
 				case "bo":
@@ -621,7 +669,7 @@ function ControlBot() {
 						break;
 					}
 
-					this.bo(command[1]);
+					bo(command[1]);
 
 					break;
 				}
@@ -630,7 +678,7 @@ function ControlBot() {
 			command = "";
 
 			me.act > 1 && Town.goToTown(1);
-			Config.ControlBot.Chant.AutoEnchant && this.autoChant();
+			Config.ControlBot.Chant.AutoEnchant && autoChant();
 
 			if (getTickCount() - startTime >= Time.minutes(Config.ControlBot.GameLength)) {
 				say((Config.ControlBot.EndMessage ? Config.ControlBot.EndMessage : "Bye"));
