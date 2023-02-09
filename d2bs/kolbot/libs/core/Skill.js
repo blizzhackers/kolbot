@@ -92,7 +92,9 @@
 		},
 
 		skills: {
-			/** @type {Object.<number, SkillData>} */
+			/**
+			 * @type {Object.<number, SkillData>}
+			 */
 			all: {},
 			initialized: false,
 
@@ -131,6 +133,8 @@
 			!Skill.skills.initialized ? Skill.skills.init() : Skill.skills.reset();
 			// reset mana values
 			Skill.manaCostList = {};
+			// redo cta check
+			Precast.checkCTA();
 
 			switch (me.classid) {
 			case sdk.player.class.Amazon:
@@ -192,6 +196,10 @@
 			}
 		},
 
+		/**
+		 * @param {number} skillId 
+		 * @returns {boolean}
+		 */
 		canUse: function (skillId = -1) {
 			try {
 				if (skillId === -1) return false;
@@ -204,6 +212,10 @@
 			}
 		},
 
+		/**
+		 * @param {number} skillId 
+		 * @returns {number}
+		 */
 		getDuration: function (skillId = -1) {
 			return Time.seconds((() => {
 				switch (skillId) {
@@ -246,9 +258,11 @@
 			})());
 		},
 
+		/**
+		 * @param {number} skillId 
+		 * @returns {number}
+		 */
 		getMaxSummonCount: function (skillId) {
-			let skillNum = 0;
-
 			switch (skillId) {
 			case sdk.skills.Raven:
 				return Math.min(me.getSkill(skillId, sdk.skills.subindex.SoftPoints), 5);
@@ -258,7 +272,7 @@
 				return Math.min(me.getSkill(skillId, sdk.skills.subindex.SoftPoints), 3);
 			case sdk.skills.RaiseSkeleton:
 			case sdk.skills.RaiseSkeletalMage:
-				skillNum = me.getSkill(skillId, sdk.skills.subindex.SoftPoints);
+				let skillNum = me.getSkill(skillId, sdk.skills.subindex.SoftPoints);
 				return skillNum < 4 ? skillNum : (Math.floor(skillNum / 3) + 2);
 			case sdk.skills.Revive:
 				return me.getSkill(sdk.skills.Revive, sdk.skills.subindex.SoftPoints);
@@ -276,11 +290,15 @@
 			case sdk.skills.FireGolem:
 			case sdk.skills.Valkyrie:
 				return 1;
+			default:
+				return 0;
 			}
-
-			return 0;
 		},
 
+		/**
+		 * @param {number} skillId 
+		 * @returns {number}
+		 */
 		getRange: function (skillId) {
 			switch (skillId) {
 			case sdk.skills.Attack:
@@ -410,6 +428,10 @@
 			return !!this.usePvpRange ? 30 : 20;
 		},
 
+		/**
+		 * @param {number} skillId 
+		 * @returns {number}
+		 */
 		getHand: function (skillId) {
 			switch (skillId) {
 			case sdk.skills.MagicArrow:
@@ -499,7 +521,11 @@
 			return sdk.skills.hand.Right;
 		},
 
-		// Get mana cost of the skill (mBot)
+		/**
+		 * Get mana cost of the skill (mBot)
+		 * @param {number} skillId 
+		 * @returns {number}
+		 */
 		getManaCost: function (skillId) {
 			if (skillId < sdk.skills.MagicArrow) return 0;
 			if (this.manaCostList.hasOwnProperty(skillId)) return this.manaCostList[skillId];
@@ -531,7 +557,11 @@
 			return (me.setSkill(skillId, hand, item));
 		},
 
-		// Timed skills
+		/**
+		 * Timed skills
+		 * @param {number} skillId 
+		 * @returns {boolean}
+		 */
 		isTimed: function (skillId) {
 			return [
 				sdk.skills.PoisonJavelin, sdk.skills.PlagueJavelin, sdk.skills.ImmolationArrow, sdk.skills.FireWall, sdk.skills.Meteor, sdk.skills.Blizzard,
@@ -541,7 +571,11 @@
 			].includes(skillId);
 		},
 
-		// Skills that cn be cast in town
+		/**
+		 * Skills that cn be cast in town
+		 * @param {number} skillId 
+		 * @returns {boolean}
+		 */
 		townSkill: function (skillId = -1) {
 			return [
 				sdk.skills.Valkyrie, sdk.skills.FrozenArmor, sdk.skills.Telekinesis, sdk.skills.ShiverArmor, sdk.skills.Enchant, sdk.skills.ThunderStorm, sdk.skills.EnergyShield, sdk.skills.ChillingArmor,
@@ -551,7 +585,11 @@
 			].includes(skillId);
 		},
 
-		// Wereform skill check
+		/**
+		 * Wereform skill check
+		 * @param {number} skillId 
+		 * @returns {number}
+		 */
 		wereFormCheck: function (skillId) {
 			// we don't even have the skills to transform or we aren't transformed - add handler for wereform given by an item that is on switch
 			if (!Skill.canUse(sdk.skills.Werewolf) && !Skill.canUse(sdk.skills.Werebear)) return true;
