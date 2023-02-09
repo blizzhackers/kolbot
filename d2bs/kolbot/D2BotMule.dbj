@@ -407,12 +407,6 @@ const Mule = {
 		}
 
 		const getItems = () => getUnits(sdk.unittype.Item).filter(i => i.distance < 20 && i.onGroundOrDropping && !Town.ignoreType(i.itemType));
-		console.debug(masterStatus, Starter.firstLogin);
-		if (Mule.foreverAlone()) {
-			if (!Misc.poll(() => !Mule.foreverAlone() && getItems().length > 0, Time.seconds(2), 500)) {
-				return rval;
-			}
-		}
 
 		while (me.gameReady) {
 			if (masterStatus.status === "done" || Mule.continuousMule || override) {
@@ -472,6 +466,7 @@ const Mule = {
 			} else {
 				if (!Mule.continuousMule) {
 					sendCopyData(null, master, 10, JSON.stringify({ status: "report" }));
+					Misc.poll(() => masterStatus.status === "done", Time.seconds(5), 50);
 				} else {
 					if (getTickCount() - waitTick > Time.minutes(10)) {
 						break;
@@ -525,6 +520,7 @@ new Overrides.Override (Starter, Starter.receiveCopyData, function (orignal, mod
 		break;
 	case 12: // get master's status
 		masterStatus = JSON.parse(msg);
+		console.debug(msg);
 
 		break;
 	default:
