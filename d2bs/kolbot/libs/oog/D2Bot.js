@@ -155,12 +155,21 @@ includeIfNotIncluded("oog/DataFile.js");
 			this.sendWinMsg(0x001c, 0x0000);
 		},
 
-		// Profile to profile communication
-		joinMe: function (profile, gameName, gameCount, gamePass, isUp) {
+		/**
+		 * Profile to profile communication
+		 * @param {string} profile 
+		 * @param {string} gameName 
+		 * @param {number} gameCount 
+		 * @param {string} gamePass 
+		 * @param {string} isUp 
+		 * @param {number} delay 
+		 */
+		joinMe: function (profile, gameName, gameCount, gamePass, isUp, delay) {
 			let obj = {
-				gameName: gameName + gameCount,
-				gamePass: gamePass,
-				inGame: isUp === "yes"
+				gameName: (gameName + gameCount).toLowerCase(),
+				gamePass: (gamePass).toLowerCase(),
+				inGame: isUp === "yes",
+				delay: (delay || 0),
 			};
 
 			sendCopyData(null, profile, 1, JSON.stringify(obj));

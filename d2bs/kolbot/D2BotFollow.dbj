@@ -212,6 +212,9 @@ function locationAction (location) {
 					}
 
 					if (!Starter.joinInfo.inGame) {
+						if (Starter.joinInfo.delay) {
+							ControlAction.timeoutDelay("Leader Delay", Starter.joinInfo.delay);
+						}
 						continue;
 					}
 

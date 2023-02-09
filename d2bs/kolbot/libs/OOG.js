@@ -33,12 +33,14 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 		timeoutDelay: function (text, time, stopfunc, arg) {
 			let currTime = 0;
 			let endTime = getTickCount() + time;
+			Starter.delay = time;
 
 			while (getTickCount() < endTime) {
 				if (typeof stopfunc === "function" && stopfunc(arg)) {
 					break;
 				}
 
+				Starter.delay = Math.max(0, (endTime - getTickCount()));
 				if (currTime !== Math.floor((endTime - getTickCount()) / 1000)) {
 					currTime = Math.floor((endTime - getTickCount()) / 1000);
 
@@ -47,6 +49,8 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
 				delay(10);
 			}
+
+			Starter.delay = 0;
 		},
 
 		click: function (type, x, y, xsize, ysize, targetx, targety) {
@@ -938,6 +942,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 		firstLogin: true,
 		firstRun: false,
 		isUp: "no",
+		delay: 0,
 		loginRetry: 0,
 		deadCheck: false,
 		chatActionsDone: false,
@@ -1045,6 +1050,11 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 			}
 		},
 
+		/**
+		 * Handle copy data event
+		 * @param {number} mode 
+		 * @param {object | string} msg 
+		 */
 		receiveCopyData: function (mode, msg) {
 			let obj;
 
@@ -1053,34 +1063,38 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 			switch (mode) {
 			case 1: // JoinInfo
 				obj = JSON.parse(msg);
+				console.debug("Recieved Join Info :: ", obj);
 				Object.assign(Starter.joinInfo, obj);
 
 				break;
 			case 2: // Game info
-				print("Recieved Game Info");
 				obj = JSON.parse(msg);
+				console.debug("Recieved Game Info :: ");
 				Object.assign(Starter.gameInfo, obj);
 
 				break;
 			case 3: // Game request
 				// in case someone is using a lightweight entry like blank/map to play manually and these aren't included
 				if (typeof AutoMule !== "undefined") {
-				// Don't let others join mule/torch/key/gold drop game
+					// Don't let others join mule/torch/key/gold drop game
 					if (AutoMule.inGame || Gambling.inGame || TorchSystem.inGame || CraftingSystem.inGame) {
 						break;
 					}
 				}
 
-				if (Object.keys(Starter.gameInfo).length) {
+				if (Starter.gameInfo.hasOwnProperty("gameName")) {
 					obj = JSON.parse(msg);
+					console.debug("Recieved Game Request :: ", obj.profile);
 
 					if ([sdk.game.profiletype.TcpIpHost, sdk.game.profiletype.TcpIpJoin].includes(Profile().type)) {
 						me.gameReady && D2Bot.joinMe(obj.profile, me.gameserverip.toString(), "", "", Starter.isUp);
 					} else {
 						if (me.gameReady) {
-							D2Bot.joinMe(obj.profile, me.gamename.toLowerCase(), "", me.gamepassword.toLowerCase(), Starter.isUp);
+							D2Bot.joinMe(obj.profile, me.gamename, "", me.gamepassword, Starter.isUp);
 						} else {
-							D2Bot.joinMe(obj.profile, Starter.gameInfo.gameName.toLowerCase(), Starter.gameCount, Starter.gameInfo.gamePass.toLowerCase(), Starter.isUp);
+							// If we haven't made it to the lobby yet but are already getting game requests, stop the spam by telling followers to delay
+							let delay = (Starter.delay === 0 && !me.ingame && getLocation() !== sdk.game.locations.CreateGame) ? 3000 : Starter.delay;
+							D2Bot.joinMe(obj.profile, Starter.gameInfo.gameName, Starter.gameCount, Starter.gameInfo.gamePass, Starter.isUp, delay);
 						}
 					}
 				}
