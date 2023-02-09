@@ -6,7 +6,11 @@
 */
 js_strict(true);
 include("critical.js");
-include("core/Util.js");
+includeCoreLibs();
+
+/**
+ * @todo redo this, feels messy
+ */
 
 function main() {
 	let _default = getScript("default.dbj");

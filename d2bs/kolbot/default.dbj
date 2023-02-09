@@ -59,9 +59,10 @@ function main () {
 		FileTools.exists("libs/ItemDB.js") && include("ItemDB.js");
 		load("threads/AreaWatcher.js");
 		
-		while (true) {
-			delay(1000);
+		while (me.ingame) {
+			delay(10000);
 		}
+		return true;
 	}
 
 	let sojPause;

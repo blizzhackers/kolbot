@@ -471,7 +471,7 @@ function OrgTorch () {
 	let [brains, eyes, horns] = [0, 0, 0];
 	
 	me.getItemsEx()
-		.filter(i => i.isInInventory && !Town.ignoreType(i.itemType) && i.quality === sdk.items.quality.Normal)
+		.filter(i => i.isInStorage && !Town.ignoreType(i.itemType) && i.quality === sdk.items.quality.Normal)
 		.forEach(i => {
 			switch (i.classid) {
 			case sdk.items.quest.KeyofTerror:
