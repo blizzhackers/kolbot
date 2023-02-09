@@ -141,7 +141,7 @@ function OrgTorch () {
 					return (brains++);
 				case sdk.items.quest.BaalsEye:
 					return (eyes++);
-				default: return;
+				default: return 0;
 				}
 			});
 
@@ -423,7 +423,7 @@ function OrgTorch () {
 	/**
 	 * @param {ObjectUnit} portal 
 	 */
-	runEvent = function (portal) {
+	const runEvent = function (portal) {
 		if (portal) {
 			if (Config.OrgTorch.PreGame.Antidote.At.includes(portal.objtype) && Config.OrgTorch.PreGame.Antidote.Drink > 0) {
 				Town.buyPots(Config.OrgTorch.PreGame.Antidote.Drink, "Antidote", true, true);
@@ -486,7 +486,7 @@ function OrgTorch () {
 				return (brains++);
 			case sdk.items.quest.BaalsEye:
 				return (eyes++);
-			default: return;
+			default: return 0;
 			}
 		});
 
