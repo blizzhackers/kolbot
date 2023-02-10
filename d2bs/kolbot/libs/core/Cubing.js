@@ -151,9 +151,9 @@ const Cubing = {
 
 	getCube: function () {
 		// Don't activate from townchicken
-		if (getScript(true).name === "tools\\townchicken.js") {
-			return false;
-		}
+		if (getScript(true).name === "tools\\townchicken.js") return false;
+		// Can't get the cube if we can't access the act
+		if (!Pather.accessToAct(2)) return false;
 
 		console.log("Getting cube");
 		me.overhead("Getting cube");
