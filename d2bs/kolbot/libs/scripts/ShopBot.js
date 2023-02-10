@@ -6,7 +6,7 @@
 */
 
 function ShopBot() {
-	let overlayText = {
+	const overlayText = {
 		title: new Text("kolbot shopbot", 50, 245, 2, 1),
 		cycles: new Text("Cycles in last minute:", 50, 260, 2, 1),
 		frequency: new Text("Valid item frequency:", 50, 275, 2, 1),
@@ -19,12 +19,12 @@ function ShopBot() {
 	let totalCycles = 0;
 
 	Pather.teleport = false;
-	this.pickEntries = [];
-	this.npcs = {};
+	const pickEntries = [];
+	const npcs = {};
 
-	this.buildPickList = function () {
-		let nipfile, filepath = "pickit/shopbot.nip",
-			filename = filepath.substring(filepath.lastIndexOf("/") + 1, filepath.length);
+	const buildPickList = function () {
+		let nipfile, filepath = "pickit/shopbot.nip";
+		let filename = filepath.substring(filepath.lastIndexOf("/") + 1, filepath.length);
 
 		if (!FileTools.exists(filepath)) {
 			Misc.errorReport("ÿc1NIP file doesn't exist: ÿc0" + filepath);
@@ -50,13 +50,18 @@ function ShopBot() {
 			};
 
 			let line = NTIP.ParseLineInt(lines[i], info);
-			line && this.pickEntries.push(line);
+			line && pickEntries.push(line);
 		}
 
 		return true;
 	};
 
-	this.openMenu = function (npc) {
+	/**
+	 * Interact and open the menu of an NPC unit
+	 * @param {NPCUnit} npc 
+	 * @returns {boolean}
+	 */
+	const openMenu = function (npc) {
 		if (!npc || npc.type !== sdk.unittype.NPC) throw new Error("Unit.openMenu: Must be used on NPCs.");
 
 		let interactedNPC = getInteractedNPC();
@@ -92,10 +97,15 @@ function ShopBot() {
 		return false;
 	};
 
-	this.shopItems = function (npc, menuId) {
+	/**
+	 * @param {NPCUnit} npc 
+	 * @param {number} menuId 
+	 * @returns {boolean}
+	 */
+	const shopItems = function (npc, menuId) {
 		let bought;
 
-		if (!Storage.Inventory.CanFit({sizex: 2, sizey: 4}) && AutoMule.getMuleItems().length > 0) {
+		if (!Storage.Inventory.CanFit({ sizex: 2, sizey: 4 }) && AutoMule.getMuleItems().length > 0) {
 			D2Bot.printToConsole("Mule triggered");
 			scriptBroadcast("mule");
 			scriptBroadcast("quit");
@@ -128,7 +138,7 @@ function ShopBot() {
 		for (let i = 0; i < items.length; i += 1) {
 			if (Storage.Inventory.CanFit(items[i]) && Pickit.canPick(items[i]) &&
 					me.gold >= items[i].getItemCost(sdk.items.cost.ToBuy) &&
-					NTIP.CheckItem(items[i], this.pickEntries)
+					NTIP.CheckItem(items[i], pickEntries)
 			) {
 				beep();
 				D2Bot.printToConsole("Match found!", sdk.colors.D2Bot.DarkGold);
@@ -152,7 +162,11 @@ function ShopBot() {
 		return true;
 	};
 
-	this.shopAtNPC = function (name) {
+	/**
+	 * @param {string} name 
+	 * @returns {boolean}
+	 */
+	const shopAtNPC = function (name) {
 		let wp, menuId = "Shop";
 
 		switch (name) {
@@ -199,20 +213,19 @@ function ShopBot() {
 			throw new Error("Invalid NPC");
 		}
 
-		if (!Pather.useWaypoint(wp)) return false;
+		if (!me.inArea(wp) && !Pather.useWaypoint(wp)) return false;
 
-		let npc = this.npcs[name] || Game.getNPC(name);
+		let npc = npcs[name] || Game.getNPC(name);
 
-		if (!npc || npc.distance > 5) {
-			Town.move(name);
-			npc = Game.getNPC(name);
+		if (!npc || npc.type !== sdk.unittype.NPC || npc.distance > 5) {
+			npc = Town.npcInteract(name);
 		}
 
 		if (!npc) return false;
 
-		!this.npcs[name] && (this.npcs[name] = copyUnit(npc));
+		!npcs[name] && (npcs[name] = copyUnit(npc));
 		Config.ShopBot.CycleDelay && delay(Config.ShopBot.CycleDelay);
-		this.openMenu(npc) && this.shopItems(npc, menuId);
+		openMenu(npc) && shopItems(npc, menuId);
 
 		return true;
 	};
@@ -238,8 +251,8 @@ function ShopBot() {
 
 	if (Config.ShopBot.MinGold && me.gold < Config.ShopBot.MinGold) return true;
 
-	this.buildPickList();
-	print("Shopbot: Pickit entries: " + this.pickEntries.length);
+	buildPickList();
+	print("Shopbot: Pickit entries: " + pickEntries.length);
 	Town.doChores();
 
 	tickCount = getTickCount();
@@ -253,7 +266,7 @@ function ShopBot() {
 		}
 
 		for (let i = 0; i < Config.ShopBot.ShopNPC.length; i += 1) {
-			this.shopAtNPC(Config.ShopBot.ShopNPC[i]);
+			shopAtNPC(Config.ShopBot.ShopNPC[i]);
 		}
 
 		if (me.inTown) {
