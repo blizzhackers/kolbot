@@ -15,7 +15,7 @@
 		root.CopyData = factory();
 		console.trace();
 	}
-}(globalThis, function() {
+}([].filter.constructor("return this")(), function() {
 	/**
 	* @class
 	* @classdesc A class for creating and sending copy data packets.
