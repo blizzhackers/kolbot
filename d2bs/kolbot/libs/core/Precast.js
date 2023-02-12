@@ -46,6 +46,13 @@ const Precast = new function () {
 		},
 	};
 
+	/**
+	 * Easier Shout/Bo/Bc casting with state checks to ensure it was casted
+	 * @param {number} skillId 
+	 * @param {number | Unit} x 
+	 * @param {number} [y] 
+	 * @returns {boolean}
+	 */
 	this.warCries = function (skillId, x, y) {
 		if (!skillId || x === undefined) return false;
 		const states = {};
@@ -56,7 +63,9 @@ const Precast = new function () {
 
 		for (let i = 0; i < 3; i++) {
 			try {
-				if (me.getSkill(sdk.skills.get.RightId) !== skillId && !me.setSkill(skillId, sdk.skills.hand.Right)) throw new Error("Failed to set " + getSkillById(skillId) + " on hand");
+				if (me.getSkill(sdk.skills.get.RightId) !== skillId && !me.setSkill(skillId, sdk.skills.hand.Right)) {
+					throw new Error("Failed to set " + getSkillById(skillId) + " on hand");
+				}
 				// Right hand + No Shift
 				let clickType = 3, shift = sdk.clicktypes.shift.NoShift;
 
@@ -91,7 +100,7 @@ const Precast = new function () {
 	this.checkCTA = function () {
 		if (this.haveCTA > -1) return true;
 
-		let check = me.checkItem({name: sdk.locale.items.CalltoArms, equipped: true});
+		let check = me.checkItem({ name: sdk.locale.items.CalltoArms, equipped: true });
 
 		if (check.have) {
 			this.haveCTA = check.item.isOnSwap ? 1 : 0;
@@ -100,13 +109,17 @@ const Precast = new function () {
 		return this.haveCTA > -1;
 	};
 
+	/**
+	 * @param {boolean} force 
+	 * @returns {boolean}
+	 */
 	this.precastCTA = function (force = false) {
 		if (!Config.UseCta || this.haveCTA === -1 || me.classic || me.barbarian || me.inTown || me.shapeshifted) return false;
 		if (!force && me.getState(sdk.states.BattleOrders)) return true;
 
 		if (this.haveCTA > -1) {
 			let slot = me.weaponswitch;
-			let {x, y} = me;
+			let { x, y } = me;
 
 			me.switchWeapons(this.haveCTA);
 			this.cast(sdk.skills.BattleCommand, x, y, true);
@@ -125,8 +138,12 @@ const Precast = new function () {
 		return false;
 	};
 
-	// should be done in init function?
-	// should this be part of the skill class instead?
+	/**
+	 * Check which slot (primary or secondary) gives us the most skillpoints in a skill
+	 * @param {number} skillId 
+	 * @returns {0 | 1} best slot to give us the most skillpoints in a skill
+	 * @todo Move this to be part of the SkillData class
+	 */
 	this.getBetterSlot = function (skillId) {
 		if (this.bestSlot[skillId] !== undefined) return this.bestSlot[skillId];
 
@@ -544,6 +561,8 @@ const Precast = new function () {
 				switch (Config.SummonSpirit) {
 				case 1:
 				case "Oak Sage":
+					// to prevent false chickens when we cast oak before getting bo-ed
+					if (me.hardcore && !me.getState(sdk.states.BattleOrders) && me.inTown) return buffSummons;
 					return (this.summon(sdk.skills.OakSage, sdk.summons.type.Spirit) || buffSummons);
 				case 2:
 				case "Heart of Wolverine":
