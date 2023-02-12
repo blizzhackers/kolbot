@@ -56,13 +56,18 @@ function Follower() {
 	let openContainers = true;
 	let action = "";
 
-	this.announce = function (msg = "") {
+	const announce = function (msg = "") {
 		if (!allowSay) return;
 		say(msg);
 	};
 
-	// Change areas to where leader is
-	this.checkExit = function (unit, area) {
+	/**
+	 * Change areas to where leader is
+	 * @param {Player} unit 
+	 * @param {number} area 
+	 * @returns {boolean}
+	 */
+	const checkExit = function (unit, area) {
 		if (unit.inTown) return false;
 
 		let target;
@@ -123,16 +128,20 @@ function Follower() {
 		return false;
 	};
 
-	// Talk to a NPC
-	this.talk = function (name) {
+	/**
+	 * Talk to a NPC
+	 * @param {string} name 
+	 * @returns {boolean}
+	 */
+	const talk = function (name) {
 		if (!me.inTown) {
-			this.announce("I'm not in town!");
+			announce("I'm not in town!");
 
 			return false;
 		}
 
 		if (typeof name !== "string") {
-			this.announce("No NPC name given.");
+			announce("No NPC name given.");
 
 			return false;
 		}
@@ -140,7 +149,7 @@ function Follower() {
 		try {
 			Town.npcInteract(name);
 		} catch (e) {
-			this.announce((typeof e === "object" && e.message ? e.message : typeof e === "string" ? e : "Failed to talk to " + name));
+			announce((typeof e === "object" && e.message ? e.message : typeof e === "string" ? e : "Failed to talk to " + name));
 		}
 
 		Town.move("portalspot");
@@ -148,12 +157,16 @@ function Follower() {
 		return false;
 	};
 
-	// Change act after completing last act quest
-	this.changeAct = function (act) {
+	/**
+	 * Change act after completing last act quest
+	 * @param {number} act 
+	 * @returns {boolean}
+	 */
+	const changeAct = function (act) {
 		let preArea = me.area;
 
 		if (me.area >= sdk.areas.townOfAct(act)) {
-			this.announce("My current act is higher than " + act);
+			announce("My current act is higher than " + act);
 			return false;
 		}
 
@@ -203,19 +216,19 @@ function Follower() {
 		if (me.area === preArea) {
 			me.cancel();
 			Town.move("portalspot");
-			this.announce("Act change failed.");
+			announce("Act change failed.");
 
 			return false;
 		}
 
 		Town.move("portalspot");
-		this.announce("Act change successful.");
-		act === 2 && this.announce("Don't forget to talk to Drognan after getting the Viper Amulet!");
+		announce("Act change successful.");
+		act === 2 && announce("Don't forget to talk to Drognan after getting the Viper Amulet!");
 
 		return true;
 	};
 
-	this.pickPotions = function (range = 5) {
+	const pickPotions = function (range = 5) {
 		if (me.dead) return false;
 
 		Town.clearBelt();
@@ -252,7 +265,12 @@ function Follower() {
 		return true;
 	};
 
-	this.chatEvent = function (nick, msg) {
+	/**
+	 * 
+	 * @param {string} nick 
+	 * @param {string} msg 
+	 */
+	const chatEvent = function (nick, msg) {
 		if (msg && nick === Config.Leader) {
 			switch (msg) {
 			case "tele":
@@ -260,11 +278,11 @@ function Follower() {
 				if (Pather.teleport) {
 					Pather.teleport = false;
 
-					this.announce("Teleport off.");
+					announce("Teleport off.");
 				} else {
 					Pather.teleport = true;
 
-					this.announce("Teleport on.");
+					announce("Teleport on.");
 				}
 
 				break;
@@ -272,14 +290,14 @@ function Follower() {
 			case me.name + " tele off":
 				Pather.teleport = false;
 
-				this.announce("Teleport off.");
+				announce("Teleport off.");
 
 				break;
 			case "tele on":
 			case me.name + " tele on":
 				Pather.teleport = true;
 
-				this.announce("Teleport on.");
+				announce("Teleport on.");
 
 				break;
 			case "a":
@@ -287,11 +305,11 @@ function Follower() {
 				if (attack) {
 					attack = false;
 
-					this.announce("Attack off.");
+					announce("Attack off.");
 				} else {
 					attack = true;
 
-					this.announce("Attack on.");
+					announce("Attack on.");
 				}
 
 				break;
@@ -307,14 +325,14 @@ function Follower() {
 			case me.name + " aoff":
 				attack = false;
 
-				this.announce("Attack off.");
+				announce("Attack off.");
 
 				break;
 			case "aon":
 			case me.name + " aon":
 				attack = true;
 
-				this.announce("Attack on.");
+				announce("Attack on.");
 
 				break;
 			case "quit":
@@ -327,11 +345,11 @@ function Follower() {
 				if (stop) {
 					stop = false;
 
-					this.announce("Resuming.");
+					announce("Resuming.");
 				} else {
 					stop = true;
 
-					this.announce("Stopping.");
+					announce("Stopping.");
 				}
 
 				break;
@@ -347,14 +365,14 @@ function Follower() {
 						skill = parseInt(msg.split(" ")[2], 10);
 
 						if (me.getSkill(skill, sdk.skills.subindex.SoftPoints)) {
-							this.announce("Active aura is: " + skill);
+							announce("Active aura is: " + skill);
 
 							Config.AttackSkill[2] = skill;
 							Config.AttackSkill[4] = skill;
 
 							Skill.setSkill(skill, sdk.skills.hand.Right);
 						} else {
-							this.announce("I don't have that aura.");
+							announce("I don't have that aura.");
 						}
 					}
 
@@ -368,12 +386,12 @@ function Follower() {
 						skill = parseInt(msg.split(" ")[2], 10);
 
 						if (me.getSkill(skill, sdk.skills.subindex.SoftPoints)) {
-							this.announce("Attack skill is: " + skill);
+							announce("Attack skill is: " + skill);
 
 							Config.AttackSkill[1] = skill;
 							Config.AttackSkill[3] = skill;
 						} else {
-							this.announce("I don't have that skill.");
+							announce("I don't have that skill.");
 						}
 					}
 
@@ -394,7 +412,7 @@ function Follower() {
 					commanders.push(piece);
 				}
 
-				this.announce("Switching leader to " + piece);
+				announce("Switching leader to " + piece);
 
 				Config.Leader = piece;
 				leader = Misc.findPlayer(Config.Leader);
@@ -405,7 +423,7 @@ function Follower() {
 
 
 	// START
-	addEventListener("chatmsg", this.chatEvent);
+	addEventListener("chatmsg", chatEvent);
 	openContainers && Config.OpenChests.enabled && Config.OpenChests.Types.push("all");
 	
 	// Override config values that use TP
@@ -416,18 +434,18 @@ function Follower() {
 	leader = Misc.poll(() => Misc.findPlayer(Config.Leader), Time.seconds(20), Time.seconds(1));
 
 	if (!leader) {
-		this.announce("Leader not found.");
+		announce("Leader not found.");
 		delay(1000);
 		quit();
 	} else {
-		this.announce("Leader found.");
+		announce("Leader found.");
 	}
 
 	while (!Misc.inMyParty(Config.Leader)) {
 		delay(500);
 	}
 
-	this.announce("Partied.");
+	announce("Partied.");
 
 	me.inTown && Town.move("portalspot");
 
@@ -440,7 +458,7 @@ function Follower() {
 			}
 
 			Town.move("portalspot");
-			this.announce("I'm alive!");
+			announce("I'm alive!");
 		}
 
 		while (stop) {
@@ -452,7 +470,7 @@ function Follower() {
 				leaderUnit = Misc.getPlayerUnit(Config.Leader);
 
 				if (leaderUnit) {
-					this.announce("Leader unit found.");
+					announce("Leader unit found.");
 				}
 			}
 
@@ -478,7 +496,7 @@ function Follower() {
 
 			if (attack) {
 				Attack.clear(20, false, false, false, true);
-				this.pickPotions(20);
+				pickPotions(20);
 			}
 
 			me.paladin && Config.AttackSkill[2] > 0 && Skill.setSkill(Config.AttackSkill[2], sdk.skills.hand.Right);
@@ -488,27 +506,27 @@ function Follower() {
 					delay(100);
 				}
 
-				result = this.checkExit(leader, leader.area);
+				result = checkExit(leader, leader.area);
 
 				switch (result) {
 				case 1:
-					this.announce("Taking exit.");
+					announce("Taking exit.");
 					delay(500);
 					Pather.moveToExit(leader.area, true);
 
 					break;
 				case 2:
-					this.announce("Taking portal.");
+					announce("Taking portal.");
 
 					break;
 				case 3:
-					this.announce("Taking waypoint.");
+					announce("Taking waypoint.");
 					delay(500);
 					Pather.useWaypoint(leader.area, true);
 
 					break;
 				case 4:
-					this.announce("Special transit.");
+					announce("Special transit.");
 
 					break;
 				}
@@ -525,7 +543,7 @@ function Follower() {
 		case "cow":
 			if (me.inArea(sdk.areas.RogueEncampment)) {
 				Town.move("portalspot");
-				!Pather.usePortal(sdk.areas.MooMooFarm) && this.announce("Failed to use cow portal.");
+				!Pather.usePortal(sdk.areas.MooMooFarm) && announce("Failed to use cow portal.");
 			}
 
 			break;
@@ -547,12 +565,12 @@ function Follower() {
 			if (unit) {
 				for (i = 0; i < 3; i += 1) {
 					if (Pather.getWP(me.area)) {
-						this.announce("Got wp.");
+						announce("Got wp.");
 						break;
 					}
 				}
 
-				i === 3 && this.announce("Failed to get wp.");
+				i === 3 && announce("Failed to get wp.");
 			}
 
 			me.cancel();
@@ -563,19 +581,19 @@ function Follower() {
 
 			break;
 		case "p":
-			this.announce("!Picking items.");
+			announce("!Picking items.");
 			Pickit.pickItems();
 			openContainers && Misc.openChests(20);
-			this.announce("!Done picking.");
+			announce("!Done picking.");
 
 			break;
 		case "1":
 			if (me.inTown && leader.inTown && Misc.getPlayerAct(Config.Leader) !== me.act) {
-				this.announce("Going to leader's town.");
+				announce("Going to leader's town.");
 				Town.goToTown(Misc.getPlayerAct(Config.Leader));
 				Town.move("portalspot");
 			} else if (me.inTown) {
-				this.announce("Going outside.");
+				announce("Going outside.");
 				Town.goToTown(Misc.getPlayerAct(Config.Leader));
 				Town.move("portalspot");
 
@@ -593,17 +611,17 @@ function Follower() {
 		case "2":
 			if (!me.inTown) {
 				delay(150);
-				this.announce("Going to town.");
+				announce("Going to town.");
 				Pather.usePortal(null, leader.name);
 			}
 
 			break;
 		case "3":
 			if (me.inTown) {
-				this.announce("Running town chores");
+				announce("Running town chores");
 				Town.doChores();
 				Town.move("portalspot");
-				this.announce("Ready");
+				announce("Ready");
 			}
 
 			break;
@@ -620,7 +638,7 @@ function Follower() {
 		case "a3":
 		case "a4":
 		case "a5":
-			this.changeAct(parseInt(action[1], 10));
+			changeAct(parseInt(action[1], 10));
 
 			break;
 		case me.name + " tp":
@@ -632,13 +650,13 @@ function Follower() {
 				break;
 			}
 
-			this.announce("No TP scrolls or tomes.");
+			announce("No TP scrolls or tomes.");
 
 			break;
 		}
 
-		if (action.indexOf("talk") > -1) {
-			this.talk(action.split(" ")[1]);
+		if (action.includes("talk")) {
+			talk(action.split(" ")[1]);
 		}
 
 		action = "";

@@ -54,27 +54,27 @@ const Town = {
 	lastInteractedNPC: {
 		tick: 0,
 		/**
-		 * @type {NPCUnit}
+		 * @type {{ name: string, gid: number, area: number}}
 		 */
-		unit: null,
+		unit: {},
 		/**
 		 * @param {NPCUnit} npc
 		 */
 		set: function (npc) {
-			Town.lastInteractedNPC.unit = npc;
-			Town.lastInteractedNPC.tick = getTickCount();
+			if (npc.hasOwnProperty("name") && Object.values(NPC).includes(npc.name)) {
+				// valid npc
+				Town.lastInteractedNPC.unit.name = npc.name.toLowerCase();
+				Town.lastInteractedNPC.unit.gid = npc.gid;
+				Town.lastInteractedNPC.unit.area = me.area;
+				Town.lastInteractedNPC.tick = getTickCount();
+			}
 		},
 		get: function () {
 			try {
-				if (!!this.unit && getTickCount() - this.tick < Time.seconds(15)
-					&& this.unit.name.toLowerCase() !== "an evil force" && this.unit.area === me.area) {
-					Config.DebugMode.Town && console.debug("used stored value");
-					return this.unit;
-				} else {
-					this.reset();
-					Config.DebugMode.Town && console.debug("getting new npc");
-					return getInteractedNPC();
-				}
+				if (!this.unit.hasOwnProperty("name")) return getInteractedNPC();
+				if (getTickCount() - this.tick > Time.seconds(15)) return getInteractedNPC();
+				if (this.unit.area !== me.area) return getInteractedNPC();
+				return this.unit;
 			} catch (e) {
 				Config.DebugMode.Town && console.error(e);
 				this.reset();
@@ -83,7 +83,7 @@ const Town = {
 			}
 		},
 		reset: function () {
-			Town.lastInteractedNPC.unit = null;
+			Town.lastInteractedNPC.unit = {};
 			Town.lastInteractedNPC.tick = 0;
 		}
 	},
@@ -121,6 +121,10 @@ const Town = {
 
 		console.time("doChores");
 		console.info(true);
+
+		/**
+		 * @todo Pre-build task list so we can more efficiently peform our chores
+		 */
 
 		!me.inTown && this.goToTown();
 		if (!Misc.poll(() => me.gameReady && me.inTown, 2000, 250)) throw new Error("Failed to go to town for chores");
@@ -168,12 +172,19 @@ const Town = {
 	 * @returns {boolean | Unit}
 	 */
 	npcInteract: function (name = "", cancel = true) {
-		name = name.includes("_") ? "Qual_Kehk" : name.capitalize(true);
+		// name = name.includes("_") ? "Qual_Kehk" : name.capitalize(true);
+		// what about finding the closest name in case someone mispells it?
+		let npcKey = Object.keys(NPC).find(key => String.isEqual(key, name));
+		if (!npcKey) {
+			console.warn("Couldn't find " + name + " in NPC object");
+			return false;
+		}
+		const npcName = NPC[npcKey];
 
 		!me.inTown && Town.goToTown();
 		me.cancelUIFlags();
 
-		switch (NPC[name]) {
+		switch (npcName) {
 		case NPC.Jerhyn:
 			!Game.getNPC(NPC.Jerhyn) && Town.move("palace");
 			break;
@@ -184,16 +195,16 @@ const Town = {
 			}
 			// eslint-disable-next-line no-fallthrough
 		default:
-			Town.move(NPC[name]);
+			Town.move(npcName);
 		}
 
-		let npc = Game.getNPC(NPC[name]);
+		let npc = Game.getNPC(npcName);
 
 		// In case Jerhyn is by Warriv
-		if (name === "Jerhyn" && !npc) {
+		if (npcName === NPC.Jerhyn && !npc) {
 			me.cancel();
 			Pather.moveTo(5166, 5206);
-			npc = Game.getNPC(NPC[name]);
+			npc = Game.getNPC(npcName);
 		}
 
 		Packet.flash(me.gid);
@@ -201,7 +212,7 @@ const Town = {
 
 		if (npc && npc.openMenu()) {
 			cancel && me.cancel();
-			this.lastInteractedNPC.set(npc);
+			// this.lastInteractedNPC.set(npc);
 			return npc;
 		}
 
@@ -266,17 +277,20 @@ const Town = {
 
 		delay(250);
 
-		let npc = this.lastInteractedNPC.get();
+		let npc = null;
 		let justUseClosest = (["clearInventory", "sell"].includes(reason) && !me.getUnids());
+		if (getUIFlag(sdk.uiflags.NPCMenu)) {
+			npc = getInteractedNPC();
+		}
 
 		try {
-			if (!!npc) {
+			if (npc) {
 				if (!justUseClosest && ((npc.name.toLowerCase() !== this.tasks[me.act - 1][task])
 					// Jamella gamble fix
 					|| (task === "Gamble" && npc.name.toLowerCase() === NPC.Jamella))) {
 					me.cancelUIFlags();
 					npc = null;
-					this.lastInteractedNPC.reset();
+					// this.lastInteractedNPC.reset();
 				}
 			}
 
@@ -347,7 +361,6 @@ const Town = {
 		}
 
 		Misc.poll(() => me.gameReady, 2000, 250);
-		this.lastInteractedNPC.set(npc);
 
 		if (task === "Heal") {
 			Config.DebugMode.Town && console.debug("Checking if we are frozen");
@@ -1032,21 +1045,21 @@ const Town = {
 			break;
 		}
 
-		npc = !!npc ? npc : Town.lastInteractedNPC.get();
+		// npc = !!npc ? npc : Town.lastInteractedNPC.get();
 
 		try {
 			if (!!npc && npc.name.toLowerCase() === NPC[potDealer] && !getUIFlag(sdk.uiflags.Shop)) {
 				if (!npc.startTrade("Shop")) throw new Error("Failed to open " + npc.name + " trade menu");
 			} else {
 				me.cancelUIFlags();
-				npc = null;
-				Town.lastInteractedNPC.reset();
+				// npc = null;
+				// Town.lastInteractedNPC.reset();
 
 				Town.move(NPC[potDealer]);
 				npc = Game.getNPC(NPC[potDealer]);
 
 				if (!npc || !npc.openMenu() || !npc.startTrade("Shop")) throw new Error("Failed to open " + npc.name + " trade menu");
-				Town.lastInteractedNPC.set(npc);
+				// Town.lastInteractedNPC.set(npc);
 			}
 		} catch (e) {
 			console.error(e);
