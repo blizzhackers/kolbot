@@ -25,10 +25,11 @@ const FileAction = {
 
 				if (contents) return contents;
 			} catch (e) {
-				console.error(e);
+				// console.error(e, path);
 			}
 
-			delay(100);
+			// incremental delay
+			delay(100 + ((i % 5) * 100));
 		}
 
 		return contents;
@@ -45,10 +46,10 @@ const FileAction = {
 
 				break;
 			} catch (e) {
-				console.error(e);
+				// console.error(e, path);
 			}
 
-			delay(100);
+			delay(100 + ((i % 5) * 100));
 		}
 
 		return true;
@@ -65,10 +66,10 @@ const FileAction = {
 
 				break;
 			} catch (e) {
-				console.error(e);
+				// console.error(e, path);
 			}
 
-			delay(100);
+			delay(100 + ((i % 5) * 100));
 		}
 
 		return true;
@@ -87,7 +88,7 @@ const FileAction = {
 				return JSON.parse(contents);
 			}
 		} catch (e) {
-			console.error(e);
+			console.error(e, path);
 		}
 
 		return contents;
