@@ -37,18 +37,54 @@ function BaalHelper() {
 
 		if (!Pather.moveToExit([sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction], false)) throw new Error("Failed to move to WSK3.");
 		if (!Pather.moveToExit(sdk.areas.ThroneofDestruction, true)) throw new Error("Failed to move to Throne of Destruction.");
-		if (!Pather.moveTo(15113, 5040)) D2Bot.printToConsole("path fail");
+		Pather.moveToEx(15113, 5040, { callback: () => {
+			if (Config.BaalHelper.DollQuit && Game.getMonster(sdk.monsters.SoulKiller)) {
+				console.log("Undead Soul Killers found, ending script.");
+				throw new ScriptError("Undead Soul Killers found, ending script.");
+			}
+
+			if (Config.BaalHelper.SoulQuit && Game.getMonster(sdk.monsters.BurningSoul1)) {
+				console.log("Burning Souls found, ending script.");
+				throw new ScriptError("Burning Souls found, ending script.");
+			}
+		}});
 	} else {
 		Town.goToTown(5);
 		Town.move("portalspot");
 
-		if (!Misc.poll(() => {
-			if (Pather.getPortal(sdk.areas.ThroneofDestruction, Config.Leader || null) && Pather.usePortal(sdk.areas.ThroneofDestruction, Config.Leader || null)) {
-				return true;
-			}
+		let quitFlag = false;
 
-			return false;
-		}, Time.minutes(Config.BaalHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
+		const chatEvent = function (nick, msg) {
+			if (nick === Config.Leader) {
+				if ((Config.BaalHelper.DollQuit && msg === "Dolls found! NG.")
+					|| (Config.BaalHelper.SoulQuit && msg === "Souls found! NG.")) {
+					quitFlag = true;
+				}
+			}
+		};
+
+		if (Config.BaalHelper.DollQuit || Config.BaalHelper.SoulQuit) {
+			addEventListener("chatmsg", chatEvent);
+		}
+
+		try {
+			if (!Misc.poll(() => {
+				if (Pather.getPortal(sdk.areas.ThroneofDestruction, Config.Leader || null)) {
+					if (quitFlag) throw new ScriptError("Burning Souls or Dolls found, ending script.");
+					if (Pather.usePortal(sdk.areas.ThroneofDestruction, Config.Leader || null)) {
+						return true;
+					}
+				}
+
+				return false;
+			}, Time.minutes(Config.BaalHelper.Wait), 1000)) throw new Error("Player wait timed out (" + (Config.Leader ? "No leader" : "No player") + " portals found)");
+		} catch (e) {
+			console.log(e.message);
+
+			return true;
+		} finally {
+			removeEventListener("chatmsg", chatEvent);
+		}
 	}
 
 	if (Config.BaalHelper.DollQuit && Game.getMonster(sdk.monsters.SoulKiller)) {

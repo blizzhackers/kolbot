@@ -17,6 +17,7 @@ function BaalAssistant () {
 	let Leader = Config.Leader;
 	let Helper = Config.BaalAssistant.Helper;
 	let firstAttempt = true;
+	let quitFlag = false;
 	let [hotCheck, safeCheck, baalCheck, ngCheck, baalIsDead] = [false, false, false, false, false];
 	let [ShrineStatus, secondAttempt, throneStatus, killTracker] = [false, false, false, false];
 
@@ -39,6 +40,13 @@ function BaalAssistant () {
 
 	const chatEvent = function (nick, msg) {
 		if (nick === Leader) {
+			if ((Config.BaalAssistant.DollQuit && msg === "Dolls found! NG.")
+				|| (Config.BaalAssistant.SoulQuit && msg === "Souls found! NG.")) {
+				quitFlag = true;
+
+				return;
+			}
+
 			msg = msg.toLowerCase();
 
 			for (let i = 0; i < Config.BaalAssistant.HotTPMessage.length; i += 1) {
@@ -264,12 +272,17 @@ function BaalAssistant () {
 
 								if (!Pather.moveToExit(sdk.areas.WorldstoneLvl3, true) || !Pather.moveTo(15118, 5002)) throw new Error("Failed to move to Throne of Destruction.");
 
-								Pather.moveTo(15095, 5029);
+								Pather.moveToEx(15095, 5029, { callback: () => {
+									if (Config.BaalAssistant.DollQuit && Game.getMonster(sdk.monsters.SoulKiller)) {
+										console.log("Undead Soul Killers found, ending script.");
+										throw new ScriptError("Undead Soul Killers found, ending script.");
+									}
 
-								if ((Config.BaalAssistant.SoulQuit && Game.getMonster(sdk.monsters.BurningSoul1)) || (Config.BaalAssistant.DollQuit && Game.getMonster(sdk.monsters.SoulKiller))) {
-									print("Burning Souls or Undead Soul Killers found, ending script.");
-									return true;
-								}
+									if (Config.BaalAssistant.SoulQuit && Game.getMonster(sdk.monsters.BurningSoul1)) {
+										console.log("Burning Souls found, ending script.");
+										throw new ScriptError("Burning Souls found, ending script.");
+									}
+								}});
 
 								Pather.moveTo(15118, 5002);
 								Helper ? Attack.clear(15) && Pather.moveTo(15118, 5002) : Pather.moveTo(15117, 5045);
@@ -292,12 +305,16 @@ function BaalAssistant () {
 									throw new Error("No safe TP message.");
 								}
 
+								if ((Config.BaalAssistant.SoulQuit || Config.BaalAssistant.DollQuit) && quitFlag) {
+									throw new ScriptError("Burning Souls or Undead Soul Killers found, ending script.");
+								}
+
 								if (!Misc.poll(() => Pather.usePortal(sdk.areas.ThroneofDestruction, null), Time.seconds(Config.BaalAssistant.Wait), 1000)) {
 									throw new Error("No portals to Throne.");
 								}
 
 								if ((Config.BaalAssistant.SoulQuit && Game.getMonster(sdk.monsters.BurningSoul1)) || (Config.BaalAssistant.DollQuit && Game.getMonster(sdk.monsters.SoulKiller))) {
-									throw new Error("Burning Souls or Undead Soul Killers found, ending script.");
+									throw new ScriptError("Burning Souls or Undead Soul Killers found, ending script.");
 								}
 
 								Helper ? Attack.clear(15) && Pather.moveTo(15118, 5002) : Pather.moveTo(15117, 5045);

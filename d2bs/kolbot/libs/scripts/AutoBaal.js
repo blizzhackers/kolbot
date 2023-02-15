@@ -202,7 +202,7 @@ function AutoBaal() {
 					Town.getCorpse();
 				}
 
-				!baalCheck && me.inArea(sdk.areas.ThroneofDestruction) && Config.AutoBaal.LongRangeSupport && this.longRangeSupport();
+				!baalCheck && me.inArea(sdk.areas.ThroneofDestruction) && Config.AutoBaal.LongRangeSupport && longRangeSupport();
 
 				// wait for baal signal - leader's baal message
 				if (baalCheck && me.inArea(sdk.areas.ThroneofDestruction)) {
