@@ -16,7 +16,7 @@ includeSystemLibs();
 include("systems/mulelogger/MuleLogger.js");
 include("systems/gameaction/GameAction.js");
 
-let Overrides = require("../modules/Override");
+let Overrides = require("../libs/modules/Override");
 
 new Overrides.Override(Attack, Attack.getNearestMonster, function (orignal) {
 	let monster = orignal({skipBlocked: false, skipImmune: false});
@@ -27,8 +27,8 @@ function main() {
 	// getUnit test
 	getUnit(-1) === null && console.warn("getUnit bug detected");
 	
-	let ironGolem, debugInfo = {area: 0, currScript: "no entry"};
-	let [quitFlag, antiIdle] = [false, false];
+	let ironGolem, debugInfo = { area: 0, currScript: "no entry" };
+	let [quitFlag, antiIdle, townChicken] = [false, false, false];
 	let quitListDelayTime;
 	let idleTick = 0;
 	let canQuit = true;
@@ -64,8 +64,8 @@ function main() {
 	// Event functions
 	this.keyEvent = function (key) {
 		switch (key) {
-		case sdk.keys.PauseBreak: // pause default.dbj
-			Common.Toolsthread.togglePause();
+		case sdk.keys.PauseBreak: // pause running threads
+			Common.Toolsthread.togglePause(townChicken);
 
 			break;
 		case sdk.keys.Delete: // quit current game
@@ -172,7 +172,7 @@ function main() {
 		case 0x00: // "%Name1(%Name2) dropped due to time out."
 		case 0x01: // "%Name1(%Name2) dropped due to errors."
 		case 0x03: // "%Name1(%Name2) left our world. Diablo's minions weaken."
-			Config.DebugMode && mode === 0 && D2Bot.printToConsole(name1 + " timed out, check their logs");
+			Config.DebugMode.Stack && mode === 0 && D2Bot.printToConsole(name1 + " timed out, check their logs");
 
 			if (Config.QuitList.includes(name1) || Config.QuitList.some(str => String.isEqual(str, "all"))) {
 				console.log(name1 + (mode === 0 ? " timed out" : " left"));
@@ -254,11 +254,20 @@ function main() {
 	this.scriptEvent = function (msg) {
 		if (!!msg && typeof msg === "string") {
 			switch (msg) {
+			case "townChickenOn":
+				townChicken = true;
+
+				break;
+			case "townChickenOff":
+				townChicken = false;
+
+				break;
 			case "toggleQuitlist":
 				canQuit = !canQuit;
 
 				break;
 			case "quit":
+				console.debug("Quiting");
 				quitFlag = true;
 
 				break;
@@ -312,12 +321,6 @@ function main() {
 	addEventListener("gameevent", this.gameEvent);
 	addEventListener("scriptmsg", this.scriptEvent);
 
-	// Load Fastmod - patched
-	// Packet.changeStat(105, Config.FCR);
-	// Packet.changeStat(99, Config.FHR);
-	// Packet.changeStat(102, Config.FBR);
-	// Packet.changeStat(93, Config.IAS);
-
 	Config.QuitListMode > 0 && Common.Toolsthread.initQuitList();
 	!Array.isArray(Config.QuitList) && (Config.QuitList = [Config.QuitList]); // make it an array for simpler checks
 
@@ -328,6 +331,9 @@ function main() {
 				Config.UseHP > 0 && me.hpPercent < Config.UseHP && Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.Health);
 				Config.UseRejuvHP > 0 && me.hpPercent < Config.UseRejuvHP && Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.Rejuv);
 
+				/**
+				 * Feel like potting and lifechicken should actually be seperate threads
+				 */
 				if (Config.LifeChicken > 0 && me.hpPercent <= Config.LifeChicken) {
 					// takes a moment sometimes for townchicken to actually get to town so re-check that we aren't in town before quitting
 					if (!me.inTown) {
@@ -411,6 +417,11 @@ function main() {
 			quitFlag = true;
 		}
 
+		if (debugInfo.area !== getAreaName(me.area)) {
+			debugInfo.area = getAreaName(me.area);
+			DataFile.updateStats("debugInfo", JSON.stringify(debugInfo));
+		}
+
 		if (quitFlag && canQuit) {
 			if (typeof quitListDelayTime !== "undefined" && getTickCount() < quitListDelayTime) {
 				me.overhead("Quitting in " + Math.round((quitListDelayTime - getTickCount()) / 1000) + " Seconds");
@@ -419,12 +430,7 @@ function main() {
 			Common.Toolsthread.checkPing(false); // In case of quitlist triggering first
 			Common.Toolsthread.exit();
 
-			break;
-		}
-
-		if (debugInfo.area !== getAreaName(me.area)) {
-			debugInfo.area = getAreaName(me.area);
-			DataFile.updateStats("debugInfo", JSON.stringify(debugInfo));
+			return true;
 		}
 
 		delay(20);

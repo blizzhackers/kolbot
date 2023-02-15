@@ -20,7 +20,7 @@ function main() {
 	// override broadCastIntent - shouldn't be called at all in this thread
 	Pather.broadcastIntent = () => null;
 
-	this.pause = function () {
+	const pause = function () {
 		for (let i = 0; i < scripts.length; i += 1) {
 			let script = getScript(scripts[i]);
 
@@ -37,7 +37,7 @@ function main() {
 		return true;
 	};
 
-	this.resume = function () {
+	const resume = function () {
 		for (let i = 0; i < scripts.length; i += 1) {
 			let script = getScript(scripts[i]);
 
@@ -67,11 +67,12 @@ function main() {
 		function (msg) {
 			if (typeof msg === "string" && msg === "townCheck") {
 				townCheck = true;
+				// maybe check for quit broadcast as well? If we are preparing to quit we shouldn't really be townchickening
 			}
 		});
 
 	// Init config and attacks
-	print("ÿc3Start TownChicken thread");
+	console.log("ÿc3Start TownChicken thread");
 	D2Bot.init();
 	Config.init();
 	Pickit.init();
@@ -99,7 +100,7 @@ function main() {
 
 				continue;
 			}
-			this.pause();
+			pause();
 
 			while (!me.gameReady) {
 				if (me.dead) return;
@@ -108,8 +109,9 @@ function main() {
 			}
 
 			try {
-				console.log("(TownChicken) :: Going to town");
-				me.overhead("Going to town");
+				Messaging.sendToScript("threads/Toolsthread.js", "townChickenOn");
+				console.log("ÿc8(TownChicken) :: ÿc0Going to town");
+				me.overhead("ÿc8(TownChicken) :: ÿc0Going to town");
 				Town.visitTown();
 			} catch (e) {
 				Misc.errorReport(e, "TownChicken.js");
@@ -117,9 +119,10 @@ function main() {
 
 				return;
 			} finally {
-				this.resume();
+				resume();
 
 				townCheck = false;
+				Messaging.sendToScript("threads/Toolsthread.js", "townChickenOff");
 			}
 		}
 

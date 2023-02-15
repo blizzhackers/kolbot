@@ -22,6 +22,10 @@
 			timerLastDrink: [],
 			cloneWalked: false,
 
+			/**
+			 * @param {boolean} print 
+			 * @returns {boolean}
+			 */
 			checkPing: function (print = true) {
 				// Quit after at least 5 seconds in game
 				if (getTickCount() - me.gamestarttime < 5000 || !me.gameReady) return false;
@@ -71,7 +75,7 @@
 				Config.QuitList = temp.slice(0);
 			},
 
-			togglePause: function () {
+			togglePause: function (townChicken = false) {
 				for (let i = 0; i < this.pauseScripts.length; i++) {
 					let script = getScript(this.pauseScripts[i]);
 
@@ -84,7 +88,10 @@
 								script.pause();
 							}
 						} else {
-							this.pauseScripts[i] === "default.dbj" && console.log("ÿc2Resuming.");
+							if (this.pauseScripts[i] === "default.dbj") {
+								if (townChicken) continue; // don't resume default if we are in the middle of townChicken
+								console.log("ÿc2Resuming.");
+							}
 							script.resume();
 						}
 					}
@@ -122,6 +129,11 @@
 				return true;
 			},
 
+			/**
+			 * @param {number} pottype 
+			 * @param {number} type 
+			 * @returns {ItemUnit | false}
+			 */
 			getPotion: function (pottype, type) {
 				if (!pottype) return false;
 
@@ -148,6 +160,11 @@
 				return false;
 			},
 
+			/**
+			 * @param {number} type 
+			 * @returns {boolean}
+			 * @todo add stamina/thawing/antidote pot drinking here
+			 */
 			drinkPotion: function (type) {
 				if (type === undefined) return false;
 				let tNow = getTickCount();
@@ -270,6 +287,10 @@
 				return id || "";
 			},
 
+			/**
+			 * @param {MeType | MercUnit} unit 
+			 * @returns {string}
+			 */
 			getStatsString: function (unit) {
 				let realFCR = unit.getStat(sdk.stats.FCR);
 				let realIAS = unit.getStat(sdk.stats.IAS);
