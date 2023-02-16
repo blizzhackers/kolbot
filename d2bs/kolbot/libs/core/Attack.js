@@ -24,7 +24,8 @@ const Attack = {
 		FAILED: 0,
 		SUCCESS: 1,
 		CANTATTACK: 2, // need to fix the ambiguity between this result and Failed
-		NEEDMANA: 3
+		NEEDMANA: 3,
+		NOOP: 4, // used for clearing, if we didn't find any monsters to clear it's not exactly a success or fail
 	},
 
 	// Initialize attacks
@@ -1015,7 +1016,7 @@ const Attack = {
 			let result = Pather.getNearestWalkable(room[0], room[1], 18, 3);
 
 			if (result) {
-				Pather.moveTo(result[0], result[1], 3, spectype);
+				Pather.moveToEx(result[0], result[1], { retry: 3, clearSettings: { specType: spectype, clearPath: (!Pather.canTeleport()) } });
 				previousArea = result;
 
 				if (!this.clear(40, spectype)) {
@@ -1023,7 +1024,7 @@ const Attack = {
 				}
 			} else if (currentArea !== getArea().id) {
 				// Make sure bot does not get stuck in different area.
-				Pather.moveTo(previousArea[0], previousArea[1], 3, spectype);
+				Pather.moveToEx(previousArea[0], previousArea[1], { retry: 3, clearSettings: { specType: spectype, clearPath: (!Pather.canTeleport()) } });
 			}
 		}
 
@@ -1646,6 +1647,10 @@ const Attack = {
 
 		force && console.debug("Forcing new position");
 
+		/**
+		 * @todo If we've disabled tele for walking clear, allow use of tele specifically for repositioning
+		 */
+
 		if (distance < 4 && (!unit.hasOwnProperty("mode") || !unit.dead)) {
 			//me.overhead("Short range");
 
@@ -1683,7 +1688,7 @@ const Attack = {
 				}
 			}
 
-			//print("ÿc9potential spots: ÿc2" + coords.length);
+			// print("ÿc9potential spots: ÿc2" + coords.length);
 
 			if (coords.length > 0) {
 				coords.sort(Sort.units);
@@ -1691,7 +1696,7 @@ const Attack = {
 				for (let i = 0; i < coords.length; i += 1) {
 					// Valid position found
 					if (!CollMap.checkColl({x: coords[i].x, y: coords[i].y}, unit, coll, 1)) {
-						//print("ÿc9optimal pos build time: ÿc2" + (getTickCount() - t) + " ÿc9distance from target: ÿc2" + getDistance(cx, cy, unit.x, unit.y));
+						// print("ÿc9optimal pos build time: ÿc2" + (getTickCount() - t) + " ÿc9distance from target: ÿc2" + getDistance(cx, cy, unit.x, unit.y));
 						if ((() => {
 							switch (walk) {
 							case 1:
