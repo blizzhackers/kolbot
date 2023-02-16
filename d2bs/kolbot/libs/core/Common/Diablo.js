@@ -173,7 +173,7 @@
 			 * @param {number[] | string[]} sealOrder 
 			 * @param {boolean} openSeals 
 			 */
-			runSeals: function (sealOrder, openSeals = true) {
+			runSeals: function (sealOrder, openSeals = true, recheck = false) {
 				print("seal order: " + sealOrder);
 				Common.Diablo.sealOrder = sealOrder;
 				let seals = {
@@ -184,7 +184,19 @@
 					"seis": () => this.seisSeal(openSeals),
 					"infector": () => this.infectorSeal(openSeals),
 				};
-				sealOrder.forEach(seal => {seals[seal]();});
+				try {
+					recheck && addEventListener("gamepacket", Common.Diablo.diabloLightsEvent);
+					sealOrder.forEach(seal => {
+						if (recheck && Common.Diablo.diabloSpawned) throw new ScriptError("Diablo spawned");
+						seals[seal]();
+					});
+				} catch (e) {
+					if (!(e instanceof ScriptError)) {
+						throw e; // it wasn't the custom error so throw it to the next handler
+					}
+				} finally {
+					recheck && removeEventListener("gamepacket", Common.Diablo.diabloLightsEvent);
+				}
 			},
 
 			/**
@@ -303,7 +315,17 @@
 				}
 
 				delay(1 + me.ping);
-				Common.Diablo.vizLayout === 1 ? Pather.moveTo(7691, 5292) : Pather.moveTo(7695, 5316);
+				let cb = () => {
+					let viz = Game.getMonster(getLocaleString(sdk.locale.monsters.GrandVizierofChaos));
+					return viz && (viz.distance < Skill.getRange(Config.AttackSkill[1]) || viz.dead);
+				};
+				/**
+				 * @todo better coords or maybe a delay, viz appears in different locations and sometimes its right where we are moving to
+				 * which is okay for hammerdins or melee chars but not for soft chars like sorcs
+				 */
+				Common.Diablo.vizLayout === 1
+					? Pather.moveToEx(7691, 5292, { callback: cb })
+					: Pather.moveToEx(7695, 5316, { callback: cb });
 
 				if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.GrandVizierofChaos))) {
 					throw new Error("Failed to kill Vizier");
@@ -332,14 +354,17 @@
 				distCheck.distance > 30 && this.followPath(Common.Diablo.seisLayout === 1 ? this.starToSeisA : this.starToSeisB);
 
 				if (openSeal && !Common.Diablo.openSeal(sdk.objects.DiabloSealSeis)) throw new Error("Failed to open de Seis seal.");
-				Common.Diablo.seisLayout === 1 ? Pather.moveTo(7798, 5194) : Pather.moveTo(7796, 5155);
+				let cb = () => {
+					let seis = Game.getMonster(getLocaleString(sdk.locale.monsters.LordDeSeis));
+					return seis && (seis.distance < Skill.getRange(Config.AttackSkill[1]) || seis.dead);
+				};
+				Common.Diablo.seisLayout === 1
+					? Pather.moveToEx(7798, 5194, { callback: cb })
+					: Pather.moveToEx(7796, 5155, { callback: cb });
 				try {
 					if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.LordDeSeis))) throw new Error("Failed to kill de Seis");
 				} catch (e) {
-					/**
-					 * sometimes we fail just because we aren't in range,
-					 * @todo better fix for this
-					 */
+					// sometimes we fail just because we aren't in range,
 					Pather.moveToEx(this.starCoords.x, this.starCoords.y, { minDist: 15, callback: () => {
 						let seis = Game.getMonster(getLocaleString(sdk.locale.monsters.LordDeSeis));
 						return seis && (seis.distance < 30 || seis.dead);
@@ -369,29 +394,30 @@
 
 				distCheck.distance > 70 && this.followPath(Common.Diablo.infLayout === 1 ? this.starToInfA : this.starToInfB);
 				
-				if (Config.Diablo.Fast) {
-					if (openSeal && !Common.Diablo.openSeal(sdk.objects.DiabloSealInfector2)) throw new Error("Failed to open Infector seals.");
-					if (openSeal && !Common.Diablo.openSeal(sdk.objects.DiabloSealInfector)) throw new Error("Failed to open Infector seals.");
+				let cb = () => {
+					let inf = Game.getMonster(getLocaleString(sdk.locale.monsters.InfectorofSouls));
+					return inf && (inf.distance < Skill.getRange(Config.AttackSkill[1]) || inf.dead);
+				};
 
+				let moveToLoc = () => {
 					if (Common.Diablo.infLayout === 1) {
-						(me.sorceress || me.assassin) && Pather.moveTo(7876, 5296);
+						(me.sorceress || me.assassin) && Pather.moveToEx(7876, 5296, { callback: cb });
 						delay(1 + me.ping);
 					} else {
 						delay(1 + me.ping);
-						Pather.moveTo(7928, 5295);
+						Pather.moveToEx(7928, 5295, { callback: cb });
 					}
+				};
+
+				if (Config.Diablo.Fast) {
+					if (openSeal && !Common.Diablo.openSeal(sdk.objects.DiabloSealInfector2)) throw new Error("Failed to open Infector seals.");
+					if (openSeal && !Common.Diablo.openSeal(sdk.objects.DiabloSealInfector)) throw new Error("Failed to open Infector seals.");
+					moveToLoc();
 
 					if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.InfectorofSouls))) throw new Error("Failed to kill Infector");
 				} else {
 					if (openSeal && !Common.Diablo.openSeal(sdk.objects.DiabloSealInfector)) throw new Error("Failed to open Infector seals.");
-
-					if (Common.Diablo.infLayout === 1) {
-						(me.sorceress || me.assassin) && Pather.moveTo(7876, 5296);
-						delay(1 + me.ping);
-					} else {
-						delay(1 + me.ping);
-						Pather.moveTo(7928, 5295);
-					}
+					moveToLoc();
 
 					if (!Common.Diablo.getBoss(getLocaleString(sdk.locale.monsters.InfectorofSouls))) throw new Error("Failed to kill Infector");
 					if (openSeal && !Common.Diablo.openSeal(sdk.objects.DiabloSealInfector2)) throw new Error("Failed to open Infector seals.");

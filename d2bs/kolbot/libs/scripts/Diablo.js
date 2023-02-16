@@ -69,7 +69,7 @@ function Diablo() {
 			Common.Diablo.diabloPrep();
 		} catch (error) {
 			console.warn("Diablo wasn't found. Checking seals.");
-			Common.Diablo.runSeals(Config.Diablo.SealOrder);
+			Common.Diablo.runSeals(Config.Diablo.SealOrder, true, true);
 			Common.Diablo.diabloPrep();
 		}
 
