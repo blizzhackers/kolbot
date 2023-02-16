@@ -279,7 +279,7 @@ const Pather = {
 		// set settings.clearSettings equal to the now properly asssigned clearSettings
 		settings.clearSettings = clearSettings;
 
-		!settings.allowClearing && (settings.clearSettings.allowClearing = false);
+		!settings.allowClearing && settings.allowClearing !== undefined && (settings.clearSettings.allowClearing = false);
 		(target instanceof PresetUnit) && (target = target.realCoords());
 
 		if (settings.minDist > 3) {
@@ -381,9 +381,16 @@ const Pather = {
 						/**
 						 * @todo I think some of this needs to be re-worked, I've noticed recursive Attacking/Picking
 						 */
-						if (!useTeleport && settings.allowClearing && me.checkForMobs({range: 10}) && Attack.clear(10, null, null, null, settings.allowPicking)) {
-							console.debug("Cleared Node");
-							continue;
+						if (!useTeleport && settings.allowClearing) {
+							let tempRange = (annoyingArea ? 5 : 10);
+							// allowed to clear so lets see if any mobs are around us
+							if (me.checkForMobs({ range: tempRange, coll: sdk.collision.BlockWalk })) {
+								// there are at least some, but lets only continue to next iteration if we actually killed something
+								if (Attack.clear(tempRange, null, null, null, settings.allowPicking) === Attack.Result.SUCCESS) {
+									console.debug("Cleared Node");
+									continue;
+								}
+							}
 						}
 						if (!useTeleport && (this.kickBarrels(node.x, node.y) || this.openDoors(node.x, node.y))) {
 							continue;
@@ -484,7 +491,7 @@ const Pather = {
 	 * @param {boolean} pop - remove last node
 	 * @returns {boolean}
 	 */
-	moveTo: function (x, y, retry, clearPath = false, pop = false) {
+	moveTo: function (x, y, retry, clearPath, pop) {
 		return Pather.move({ x: x, y: y }, { retry: retry, pop: pop, allowClearing: clearPath });
 	},
 
