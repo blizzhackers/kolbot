@@ -1178,7 +1178,9 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 				let cdkeyError = false;
 				let defaultPrint = true;
 				let string = "";
-				let text = (Controls.LoginErrorText.getText() || Controls.LoginInvalidCdKey.getText());
+				let text = getLocation() === sdk.game.locations.LoginError
+					? Controls.LoginErrorText.getText()
+					: Controls.LoginInvalidCdKey.getText();
 
 				if (text) {
 					for (let i = 0; i < text.length; i += 1) {
@@ -1228,6 +1230,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 						D2Bot.printToConsole("Disconnected");
 						Controls.OkCentered.click();
 						Controls.LoginErrorOk.click();
+						ControlAction.timeoutDelay("Disconnected", Time.minutes(rand(3, 5)));
 
 						return;
 					case getLocaleString(sdk.locale.text.CdKeyIntendedForAnotherProduct):
