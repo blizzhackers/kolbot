@@ -470,7 +470,7 @@ const Attack = {
 			}
 
 			({orgx, orgy} = { orgx: boss.x, orgy: boss.y });
-			Config.MFLeader && !!bossId && Pather.makePortal() && say("clear " + bossId);
+			Config.MFLeader && !!bossId && Pather.makePortal() && say("clear " + (["number", "string"].includes(typeof bossId) ? bossId : bossId.name));
 		} else {
 			({orgx, orgy} = { orgx: me.x, orgy: me.y });
 		}
@@ -978,12 +978,8 @@ const Attack = {
 		
 		if (Config.MFLeader && rooms.length > 0) {
 			Pather.makePortal();
-			// tombs exception
-			if (me.area >= sdk.areas.TalRashasTomb1 && me.area <= sdk.areas.TalRashasTomb7) {
-				say("clearlevel " + me.area);
-			} else {
-				say("clearlevel " + getAreaName(currentArea));
-			}
+			console.log("clearlevel " + getAreaName(currentArea));
+			say("clearlevel " + me.area);
 		}
 
 		while (rooms.length > 0) {

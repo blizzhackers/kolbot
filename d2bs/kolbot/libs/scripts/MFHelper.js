@@ -1,33 +1,40 @@
 /**
 *  @filename    MFHelper.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        help another player kill bosses or clear areas
 *
 */
 
 function MFHelper() {
+	/**
+	 * @todo We should be able to handle Diablo scripts then resume MFHelper, not sure how yet but doesn't make sense to have
+	 * helper just idle if leader does any of the a5 scripts before baal. I guess could re-order them in the configs but having
+	 * it broken up by act flows better
+	 */
 	let player, playerAct, split;
-	let oldCommand = "";
-	let command = "";
+	let lastPrecast;
 
+	/** @type {{ task: string, msg: string, at: number, area: number }[]} */
+	const taskList = [];
+	const tasks = ["kill", "clearlevel", "clear", "quit", "cows", "council", "goto", "nextup"];
+
+	/**
+	 * @param {string} name 
+	 * @param {string} msg 
+	 */
 	function chatEvent (name, msg) {
+		if (!msg) return;
+		let msgShort = msg && msg.length ? msg.split(" ")[0] : "";
+		if (!tasks.includes(msgShort)) return;
+
 		if (!player) {
-			let match = [
-				"kill", "clearlevel", "clear", "quit", "cows", "council", "goto", "nextup"
-			];
-
-			if (msg) {
-				for (let i = 0; i < match.length; i += 1) {
-					if (msg.match(match[i])) {
-						player = Misc.findPlayer(name);
-
-						break;
-					}
-				}
-			}
+			// anything else we need to consider here?
+			player = Misc.findPlayer(name);
 		}
 
-		player && name === player.name && (command = msg);
+		if (player && name === player.name) {
+			taskList.push({ task: msgShort, msg: msg, at: getTickCount(), area: player.area });
+		}
 	}
 
 	addEventListener("chatmsg", chatEvent);
@@ -57,7 +64,16 @@ function MFHelper() {
 
 	// START
 	while (true) {
-		if (me.softcore && me.mode === sdk.player.mode.Dead) {
+		if (me.dead) {
+			while (me.mode === sdk.player.mode.Death) {
+				delay(3);
+			}
+
+			if (me.hardcore) {
+				D2Bot.printToConsole("(MFHelper) :: " + me.charname + " has died at level " + me.charlvl + ". Shutting down profile...", sdk.colors.D2Bot.Red);
+				D2Bot.stop();
+			}
+
 			while (!me.inTown) {
 				me.revive();
 				delay(1000);
@@ -68,8 +84,7 @@ function MFHelper() {
 		}
 
 		if (player) {
-			if (Config.LifeChicken > 0 && me.hpPercent <= Config.LifeChicken) {
-				Town.heal();
+			if (me.needHealing() && Town.heal()) {
 				Town.move("portalspot");
 			}
 
@@ -78,16 +93,48 @@ function MFHelper() {
 				break;
 			}
 
-			if (command !== oldCommand) {
-				oldCommand = command;
-				
-				if (command.includes("quit")) {
-					break;
-				} else if (command.includes("goto")) {
-					console.log("ÿc4MFHelperÿc0: Goto");
-					split = command.substr(6);
+			if (taskList.length) {
+				console.debug("Leader area :: " + player.area);
 
+				if (taskList[0].task === "quit") return true;
+				// check if any message is telling us to quit
+				if (taskList.find(el => el.task === "quit")) return true;
+				
+				// check if any message is telling us that nextup is diablo/baal
+				if (taskList.some(el => {
+					if (el.task === "nextup") {
+						let script = el.msg.split("nextup ")[1];
+
+						if (script && ["Diablo", "Baal"].includes(script)) {
+							console.log("ÿc4MFHelperÿc0: Ending script");
+							return true;
+						}
+					}
+
+					return false;
+				})) return true;
+
+				// handled pre-reqs, now perform normal checks
+				let { task, msg, at, area } = taskList.shift();
+
+				switch (task) {
+				case "goto":
 					try {
+						// lets see if the task list contains any other goto messages, in case we were late
+						{
+							let gt = taskList.findIndex(el => el.task === "goto");
+							if (gt > -1) {
+								// alright there is another so lets see where we should actually be going
+								for (let i = 0; i < gt - 1; i++) {
+									// feels hacky but this should remove all elements up to the next goto message, while preserving the order of list
+									({ task, msg, at, area } = taskList.shift());
+								}
+							}
+						}
+
+						split = msg.substr(6);
+						console.log("ÿc4MFHelperÿc0: Goto " + split);
+						
 						if (!!parseInt(split, 10)) {
 							split = parseInt(split, 10);
 						}
@@ -98,16 +145,13 @@ function MFHelper() {
 						console.log(townerror);
 					}
 
-					delay(500 + me.ping);
-				} else if (command.includes("nextup")) {
-					split = command.split("nextup ")[1];
+					break;
+				case "nextup":
+					split = msg.split("nextup ")[1];
+					console.log("ÿc4MFHelperÿc0: NextUp " + split);
 
-					if (split && ["Diablo", "Baal"].includes(split)) {
-						break;
-					}
-
-					delay(500 + me.ping);
-				} else if (command.includes("cows")) {
+					break;
+				case "cows":
 					console.log("ÿc4MFHelperÿc0: Clear Cows");
 
 					if (Misc.poll(() => {
@@ -118,66 +162,114 @@ function MFHelper() {
 						Precast.doPrecast(false);
 						Common.Cows.clearCowLevel();
 						delay(1000);
-
-						if (!Pather.getPortal(null, player.name) || !Pather.usePortal(null, player.name)) {
-							Town.goToTown();
-						}
 					} else {
 						console.warn("Failed to use portal. Currently in area: " + me.area);
 					}
-				} else {
-					// check that we are in the town of the players act so we can take their portal
-					!me.inArea(sdk.areas.townOf(player.area)) && Town.goToTown(sdk.areas.actOf(player.area));
-					Misc.poll(() => Pather.usePortal(player.area, player.name), Time.seconds(15), 500 + me.ping);
 
-					delay(1000); // delay to make sure leader's area is accurate
+					break;
+				case "council":
+					if (!me.inArea(sdk.areas.Travincal) && Town.goToTown(3)) {
+						Town.move("portalspot");
+						Misc.poll(() => Pather.usePortal(sdk.areas.Travincal, player.name), Time.seconds(15), 500 + me.ping);
+					}
+					console.log("ÿc4MFHelperÿc0: Kill Council");
+					Attack.clearClassids(sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3);
 
-					if (!me.inTown && me.area === player.area) {
-						Precast.doPrecast(true);
+					break;
+				default:
+					// alright first lets check how long its been since the command was given
+					// this probably needs to be adjusted but for now 3 minutes on any of theses tasks is probably too long
+					if (getTickCount() - at > Time.minutes(3)) continue;
 
-						if (command.includes("kill")) {
-							console.log("ÿc4MFHelperÿc0: Kill");
-							split = command.split("kill ")[1];
+					/**
+					 * @todo still think this section needs to be done better, we are using a snapshot of the player's area at the time
+					 * of the message but sometimes the area hasn't been updated yet, causing us to do dumb things like attempt to kill
+					 * while still in town. We can't just use the players area though because of towncheck/chicken. Feel like best solution
+					 * would be adding area into leaders message and just always parsing it from there
+					 */
+					try {
+						split = msg.split(task + " ")[1];
+						if (parseInt(split, 10)) {
+							split = parseInt(split, 10);
+						}
+					} catch (e) {
+						console.warn(e.message || "Failed to get id from message split");
+						break;
+					}
 
-							try {
-								if (!!parseInt(split, 10)) {
-									split = parseInt(split, 10);
-								}
+					if (me.area !== area) {
+						!me.inTown && Town.goToTown();
 
-								Attack.kill(split);
-								Pickit.pickItems();
-							} catch (killerror) {
-								console.error(killerror);
-							}
-						} else if (command.includes("clearlevel")) {
-							console.log("ÿc4MFHelperÿc0: Clear Level " + getArea().name);
-							Precast.doPrecast(true);
-							Attack.clearLevel(Config.ClearType);
-						} else if (command.indexOf("clear") > -1) {
-							console.log("ÿc4MFHelperÿc0: Clear");
-							split = command.split("clear ")[1];
-
-							try {
-								if (!!parseInt(split, 10)) {
-									split = parseInt(split, 10);
-								}
-
-								Attack.clear(15, 0, split);
-							} catch (killerror2) {
-								console.error(killerror2);
-							}
-						} else if (command.includes("council")) {
-							console.log("ÿc4MFHelperÿc0: Kill Council");
-							Attack.clearList(Attack.getMob([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3], 0, 40));
+						if (me.act !== sdk.areas.actOf(area)) {
+							Town.goToTown(sdk.areas.actOf(area));
+							Town.move("portalspot");
 						}
 
-						delay(100);
+						String.isEqual(task, "clearlevel")
+							? (area = split)
+							: (player.area !== area && !player.inTown) && (area = player.area);
 
-						if (!Pather.getPortal(null, player.name) || !Pather.usePortal(null, player.name)) {
-							Town.goToTown();
+						try {
+							Misc.poll(() => Pather.usePortal(null, player.name), Time.seconds(15), 500 + me.ping);
+						} catch (e) {
+							console.warn(e.message || "Failed to take leader portal");
+							continue;
 						}
+					}
+
+					if (!me.inTown && me.area === area) {
+						let forceCast = false;
+						(!lastPrecast || getTickCount() - lastPrecast > Time.minutes(2)) && (forceCast = true) && (lastPrecast = getTickCount());
+						Precast.doPrecast(forceCast);
 					} else if (!me.inTown && !me.inArea(player.area)) {
 						Town.goToTown(sdk.areas.actOf(player.area));
+						continue;
+					}
+
+					switch (task) {
+					case "kill":
+						console.log("ÿc4MFHelperÿc0: Kill " + split);
+
+						try {
+							Attack.kill(split);
+							Pickit.pickItems();
+						} catch (killerror) {
+							console.error(killerror);
+						}
+
+						break;
+					case "clearlevel":
+						try {
+							console.log("ÿc4MFHelperÿc0: Clear Level " + getAreaName(split));
+
+							if (me.area !== split) {
+								console.debug("I am in the wrong area? My Area: " + getAreaName(me.area) + " Wanted Area :: " + getAreaName(split));
+								Town.goToTown(sdk.areas.actOf(split));
+								Town.move("portalspot");
+								if (!Misc.poll(() => Pather.usePortal(split, player.name), Time.seconds(15), 500 + me.ping)) {
+									throw new Error("Failed to move to clearlevel area");
+								}
+							}
+							Attack.clearLevel(Config.ClearType);
+						} catch (killerror2) {
+							console.error(killerror2);
+						}
+
+						break;
+					case "clear":
+						console.log("ÿc4MFHelperÿc0: Clear " + split);
+
+						try {
+							Attack.clear(15, 0, split);
+						} catch (killerror2) {
+							console.error(killerror2);
+						}
+
+						break;
+					}
+
+					if (!Pather.getPortal(sdk.areas.townOf(me.act)) || !Pather.usePortal(sdk.areas.townOf(me.act))) {
+						Town.goToTown();
 					}
 				}
 			}

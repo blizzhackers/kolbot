@@ -37,6 +37,8 @@ function Summoner () {
 			if (!journal) {
 				Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.Journal);
 				continue;
+			} else if (journal && journal.distance > (18 - i)) {
+				Pather.moveNearUnit(journal, 13);
 			}
 
 			Packet.entityInteract(journal);

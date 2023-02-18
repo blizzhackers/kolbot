@@ -424,13 +424,17 @@ function main() {
 
 		if (quitFlag && canQuit) {
 			if (typeof quitListDelayTime !== "undefined" && getTickCount() < quitListDelayTime) {
-				me.overhead("Quitting in " + Math.round((quitListDelayTime - getTickCount()) / 1000) + " Seconds");
-				continue;
-			}
-			Common.Toolsthread.checkPing(false); // In case of quitlist triggering first
-			Common.Toolsthread.exit();
+				// should there be a check if we are in the middle of interacting with an npc? Seems quitting game in the middle causes crashes
+				// only ancedotal evidence currently
+				if (getTickCount() < quitListDelayTime - 4000) {
+					me.overhead("Quitting in " + Math.round((quitListDelayTime - getTickCount()) / 1000) + " Seconds");
+				}
+			} else {
+				Common.Toolsthread.checkPing(false); // In case of quitlist triggering first
+				Common.Toolsthread.exit();
 
-			return true;
+				return true;
+			}
 		}
 
 		delay(20);

@@ -35,7 +35,8 @@ const Packet = {
 				delay(100);
 			}
 
-			sendPacket(1, sdk.packets.send.NPCInit, 4, 1, 4, unit.gid);
+			// sendPacket(1, sdk.packets.send.NPCInit, 4, 1, 4, unit.gid);
+			new PacketBuilder().byte(sdk.packets.send.NPCInit).dword(1).dword(unit.gid).send();
 			delay(pingDelay + 1 * 2);
 			Packet.cancelNPC(unit);
 			delay(pingDelay + 1 * 2);
@@ -308,15 +309,23 @@ const Packet = {
 		return true;
 	},
 
+	/**
+	 * @param {Unit} who 
+	 * @returns {boolean}
+	 */
 	entityInteract: function (who) {
 		if (!who || !copyUnit(who).x) return false;
-		sendPacket(1, sdk.packets.send.InteractWithEntity, 4, who.type, 4, who.gid);
+		new PacketBuilder().byte(sdk.packets.send.InteractWithEntity).dword(who.type).dword(who.gid).send();
 		return true;
 	},
 
+	/**
+	 * @param {NPCUnit} who 
+	 * @returns {boolean}
+	 */
 	cancelNPC: function (who) {
 		if (!who || !copyUnit(who).x) return false;
-		sendPacket(1, sdk.packets.send.NPCCancel, 4, who.type, 4, who.gid);
+		new PacketBuilder().byte(sdk.packets.send.NPCCancel).dword(who.type).dword(who.gid).send();
 		return true;
 	},
 

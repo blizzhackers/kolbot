@@ -171,6 +171,40 @@ declare global {
 		decideSkill(unit: Monster, skipSkill?: number[]): [number, number]
 	}
 
+	/**
+	 * @todo Figure out what each of these actually returns to properly document them
+	 */
+	class File {
+		readable: boolean;
+		writable: boolean;
+		seekable: boolean;
+		mode: number;
+		binaryMode: boolean;
+		length: number;
+		path: string;
+		position: number;
+		eof: boolean;
+		accessed: number;
+		created: number;
+		modified: number;
+		autoflush: boolean;
+
+		static open(path: string, mode: number): File;
+		close(): File;
+		reopen(): File;
+		read(count: number): string[];
+		read(count: number): ArrayBuffer[];
+		readLine(): string;
+		readAllLines(): string[];
+		readAll(): string;
+		write(): void;
+		seek(n: number): any;
+		seek(n: number, isLines: boolean, fromStart: boolean): any;
+		flush(): void;
+		reset(): void;
+		end(): void;
+	}
+
 	const FileTools: {
 		readText(filename: string)
 		writeText(filename: string, data: string)
@@ -522,6 +556,7 @@ declare global {
 		findItems(param: number, number?: number, number2?: number): ItemUnit[];
 		usingShield(): boolean;
 		cancelUIFlags(): boolean;
+		getTome(id: number): ItemUnit | null;
 	}
 
 	const me: MeType

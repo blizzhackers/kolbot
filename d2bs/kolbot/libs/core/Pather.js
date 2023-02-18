@@ -1407,6 +1407,15 @@ const Pather = {
 					}
 				}
 
+				/**
+				 * @todo If we start in a3 and want to go to a2, use Meshif
+				 * somehow need to take into account reason for wanting to change act though, e.g. If we were
+				 * going to a2 to revive a merc then running to the a3 waypoint takes us close to our goal.
+				 * On the other hand though if we are going to a2 to take a portal then using meshif makes sense
+				 * extending so far as not just starting next to him but finishing chores anywhere around ormus/wp
+				 * if we are all the way at Alkor then it wouldn't make sense
+				 */
+
 				!getUIFlag(sdk.uiflags.Waypoint) && Town.getDistance("waypoint") > (Skill.haveTK ? 20 : 5) && Town.move("waypoint");
 			}
 
@@ -1440,7 +1449,7 @@ const Pather = {
 						// Waypoint screen is open
 						if (getUIFlag(sdk.uiflags.Waypoint)) {
 							delay(500);
-							!this.initialized && (this.initialized = true);
+							!Pather.initialized && (Pather.initialized = true);
 
 							switch (targetArea) {
 							case "random":
@@ -1879,6 +1888,7 @@ const Pather = {
 	/**
 	 * @param {number} area - the id of area to move to
 	 * @returns {boolean}
+	 * @todo refactor this, it's rather messy
 	 */
 	journeyTo: function (area) {
 		if (area === undefined) return false;
@@ -1889,7 +1899,7 @@ const Pather = {
 		if (area !== sdk.areas.DurielsLair) {
 			target = this.plotCourse(area, me.area);
 		} else {
-			target = {course: [sdk.areas.CanyonofMagic, sdk.areas.DurielsLair], useWP: false};
+			target = { course: [sdk.areas.CanyonofMagic, sdk.areas.DurielsLair], useWP: false };
 			this.wpAreas.indexOf(me.area) === -1 && (target.useWP = true);
 		}
 
@@ -1967,6 +1977,14 @@ const Pather = {
 				if (!unit || !this.usePortal(null, null, unit)) {
 					for (let i = 0; i < 5; i++) {
 						unit = Game.getObject(sdk.objects.Journal);
+
+						// couldnt find journal? Move to it's preset
+						if (!unit) {
+							Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.Journal);
+							continue;
+						} else if (unit && unit.distance > 20) {
+							Pather.moveNearUnit(unit, 13);
+						}
 
 						Packet.entityInteract(unit);
 						Misc.poll(() => getIsTalkingNPC(), 1000, 50);
