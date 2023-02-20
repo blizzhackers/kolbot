@@ -1230,7 +1230,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 						D2Bot.printToConsole("Disconnected");
 						Controls.OkCentered.click();
 						Controls.LoginErrorOk.click();
-						ControlAction.timeoutDelay("Disconnected", Time.minutes(rand(3, 5)));
+						ControlAction.timeoutDelay("Disconnected", (rand(3, 5)) * 60000);
 
 						return;
 					case getLocaleString(sdk.locale.text.CdKeyIntendedForAnotherProduct):
