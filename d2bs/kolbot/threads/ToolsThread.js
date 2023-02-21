@@ -134,6 +134,10 @@ function main() {
 				let itemToCheck = Game.getSelectedUnit();
 
 				if (!!itemToCheck) {
+					Cubing.update();
+					Runewords.buildLists();
+					CraftingSystem.buildLists();
+
 					let pResult = Pickit.checkItem(itemToCheck);
 					let pString = "ÿc4Pickit: ÿc0" + pResult.result + " ÿc7Line: ÿc0" + pResult.line + "\n";
 					let nResult = NTIP.CheckItem(itemToCheck, false, true);
