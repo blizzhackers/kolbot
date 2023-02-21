@@ -181,7 +181,7 @@ const Cubing = {
 	},
 
 	buildRecipes: function () {
-		this.recipes = [];
+		Cubing.recipes = [];
 
 		for (let i = 0; i < Config.Recipes.length; i += 1) {
 			if (typeof Config.Recipes[i] !== "object" || (Config.Recipes[i].length > 2 && typeof Config.Recipes[i][2] !== "number") || Config.Recipes[i].length < 1) {
@@ -571,8 +571,8 @@ const Cubing = {
 	buildLists: function () {
 		CraftingSystem.checkSubrecipes();
 
-		this.validIngredients = [];
-		this.neededIngredients = [];
+		Cubing.validIngredients = [];
+		Cubing.neededIngredients = [];
 		let items = me.findItems(-1, sdk.items.mode.inStorage);
 
 		for (let i = 0; i < this.recipes.length; i += 1) {
@@ -661,7 +661,7 @@ const Cubing = {
 
 	// Remove unneeded flawless gem recipes
 	clearSubRecipes: function () {
-		this.subRecipes = [];
+		Cubing.subRecipes = [];
 
 		for (let i = 0; i < this.recipes.length; i += 1) {
 			if (this.recipes[i].hasOwnProperty("MainRecipe")) {
@@ -799,9 +799,9 @@ const Cubing = {
 			case upgradeUnique && unit.unique && ntipResult === Pickit.Result.WANTED: // Unique item matching pickit entry
 			case upgradeRare && unit.rare && ntipResult === Pickit.Result.WANTED: // Rare item matching pickit entry
 			case socketNormal && unit.normal && unit.sockets === 0: // Normal item matching pickit entry, no sockets
+				if (recipe.Ethereal === undefined) return ntipResult === Pickit.Result.WANTED;
 				switch (recipe.Ethereal) {
 				case Roll.All:
-				case undefined:
 					return ntipResult === Pickit.Result.WANTED;
 				case Roll.Eth:
 					return unit.ethereal && ntipResult === Pickit.Result.WANTED;
