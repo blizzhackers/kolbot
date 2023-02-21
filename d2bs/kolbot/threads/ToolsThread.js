@@ -134,10 +134,15 @@ function main() {
 				let itemToCheck = Game.getSelectedUnit();
 
 				if (!!itemToCheck) {
+					let pResult = Pickit.checkItem(itemToCheck);
+					let pString = "ÿc4Pickit: ÿc0" + pResult.result + " ÿc7Line: ÿc0" + pResult.line + "\n";
+					let nResult = NTIP.CheckItem(itemToCheck, false, true);
+					let nString = "ÿc4NTIP.CheckItem: ÿc0" + nResult.result + " ÿc7Line: ÿc0" + nResult.line + "\n";
+
 					itemString = "ÿc4ItemName: ÿc0" + itemToCheck.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, "")
 						+ "\nÿc4ItemType: ÿc0" + itemToCheck.itemType + "| ÿc4Classid: ÿc0" + itemToCheck.classid + "| ÿc4Quality: ÿc0" + itemToCheck.quality + "| ÿc4Gid: ÿc0" + itemToCheck.gid
 						+ "\nÿc4ItemMode: ÿc0" + itemToCheck.mode + "| ÿc4Location: ÿc0" + itemToCheck.location + "| ÿc4Bodylocation: ÿc0" + itemToCheck.bodylocation;
-					generalString = "ÿc4Pickit: ÿc0" + Pickit.checkItem(itemToCheck).result + " | ÿc4NTIP.CheckItem: ÿc0" + NTIP.CheckItem(itemToCheck, false, true).result
+					generalString = pString + nString
 						+ "\nÿc4Cubing Item: ÿc0" + Cubing.keepItem(itemToCheck) + " | ÿc4Runeword Item: ÿc0" + Runewords.keepItem(itemToCheck) + " | ÿc4Crafting Item: ÿc0" + CraftingSystem.keepItem(itemToCheck);
 				}
 				
@@ -199,9 +204,13 @@ function main() {
 			}
 
 			break;
-		case 0x07:
-			if (Config.AntiHostile && param2 === 0x03) { // "%Player has declared hostility towards you."
+		case 0x07: // "%Player has declared hostility towards you."
+			if (Config.AntiHostile && param2 === 0x03) {
 				scriptBroadcast("findHostiles");
+			}
+
+			if (Config.PublicMode) {
+				scriptBroadcast("hostileCheck");
 			}
 
 			break;
