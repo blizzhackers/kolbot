@@ -438,21 +438,6 @@ function OrgTorch () {
 		}
 	};
 
-	// const juvCheck = function () {
-	// 	let needJuvs = 0;
-	// 	let col = Town.checkColumns(Storage.BeltSize());
-
-	// 	for (let i = 0; i < 4; i += 1) {
-	// 		if (Config.BeltColumn[i] === "rv") {
-	// 			needJuvs += col[i];
-	// 		}
-	// 	}
-
-	// 	print("Need " + needJuvs + " juvs.");
-
-	// 	return needJuvs;
-	// };
-
 	// ################# //
 	/* ##### START ##### */
 	// ################# //

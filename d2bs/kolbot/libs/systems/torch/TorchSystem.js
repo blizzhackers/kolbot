@@ -247,6 +247,21 @@ const TorchSystem = {
 			return (Misc.getPlayerCount() <= 1);
 		};
 
+		const juvCheck = function () {
+			let needJuvs = 0;
+			let col = Town.checkColumns(Storage.BeltSize());
+
+			for (let i = 0; i < 4; i += 1) {
+				if (Config.BeltColumn[i] === "rv") {
+					needJuvs += col[i];
+				}
+			}
+
+			console.log("Need " + needJuvs + " juvs.");
+
+			return needJuvs;
+		};
+
 		// Check if current character is the farmer
 		let farmer = TorchSystem.isFarmer();
 
@@ -280,7 +295,7 @@ const TorchSystem = {
 								print("Got key count request from: " + obj.profile);
 
 								// Get the number of needed keys
-								neededItems = {pk1: 3 - tkeys, pk2: 3 - hkeys, pk3: 3 - dkeys, rv: this.juvCheck()};
+								neededItems = {pk1: 3 - tkeys, pk2: 3 - hkeys, pk3: 3 - dkeys, rv: juvCheck()};
 								sendCopyData(null, obj.profile, 6, JSON.stringify({name: "neededItems", value: neededItems}));
 							}
 
@@ -328,7 +343,7 @@ const TorchSystem = {
 						delay(100);
 					}
 
-					if (getTickCount() - busyTick > 30000 || this.aloneInGame()) {
+					if (getTickCount() - busyTick > 30000 || aloneInGame()) {
 						busy = false;
 					}
 				}
