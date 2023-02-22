@@ -24,7 +24,7 @@ If you want to contribute to d2bs/d2bot#, come to irc.synirc.net/d2bs and ask ar
 
 [**Join the Forums!**](https://blizzhackers.discourse.group)
 
-[**Join the Discord Channel!**](https://discord.gg/FuBG8N2)
+[**Join the Discord Channel!**](https://discord.gg/z844XRhxFC)
 
 [**Documentation Repo**](https://github.com/blizzhackers/documentation#diablo-2-botting-system-d2bs)
 
@@ -33,15 +33,15 @@ If you want to contribute to d2bs/d2bot#, come to irc.synirc.net/d2bs and ask ar
 - [Microsoft .NET Framework 4.0 (or higher)](https://dotnet.microsoft.com/download/dotnet-framework)
 
 ## Getting Started
-- [download d2bot-with-kolbot](https://github.com/blizzhackers/documentation/blob/master/d2bot/Download.md#download)
+- [download kolbot](https://github.com/blizzhackers/documentation/blob/master/d2bot/Download.md#download)
 - [d2bot manager setup](https://github.com/blizzhackers/documentation/blob/master/d2bot/ManagerSetup.md/#manager-setup)
-- [notepad++ syntax highlighting](https://github.com/blizzhackers/documentation/blob/master/kolbot/Notepad++.md/#syntax-highlighting-in-np)
+- [IDE-Setup](IDES.md/#code-editors-ides): How to set up your IDE for syntax highlighting
 - [FAQ](https://github.com/blizzhackers/documentation/blob/master/kolbot/FAQ.md/#faq)
 
 ## Guides
 - [manual playing](https://github.com/blizzhackers/documentation/blob/master/kolbot/ManualPlay.md/#manual-playing)
 - [multi botting](https://github.com/blizzhackers/documentation/blob/master/kolbot/MultiBotting.md/#multi-botting)
-- [auto leveling SoloPlay](https://github.com/blizzhackers/kolbot-SoloPlay)
+- [kolbot-SoloPlay](https://github.com/blizzhackers/kolbot-SoloPlay)
 - [character config](https://github.com/blizzhackers/documentation/blob/master/kolbot/CharacterConfig.md/#character-configuration)
 - [TCP/IP Games](https://github.com/blizzhackers/documentation/blob/master/kolbot/TCP-IP%20games.md#tcpip-games)
 
