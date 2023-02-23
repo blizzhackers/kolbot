@@ -583,21 +583,22 @@ function LoadConfig() {
 
 	// Ingredients for the following recipes will be auto-picked, for classids check libs/core/Data/NTItemAlias.js
 
-	//Config.Recipes.push([Recipe.Gem, "Flawless Amethyst"]); // Make Perfect Amethyst
-	//Config.Recipes.push([Recipe.Gem, "Flawless Topaz"]); // Make Perfect Topaz
-	//Config.Recipes.push([Recipe.Gem, "Flawless Sapphire"]); // Make Perfect Sapphire
-	//Config.Recipes.push([Recipe.Gem, "Flawless Emerald"]); // Make Perfect Emerald
-	//Config.Recipes.push([Recipe.Gem, "Flawless Ruby"]); // Make Perfect Ruby
-	//Config.Recipes.push([Recipe.Gem, "Flawless Diamond"]); // Make Perfect Diamond
-	//Config.Recipes.push([Recipe.Gem, "Flawless Skull"]); // Make Perfect Skull
+	// Config.Recipes.push([Recipe.Gem, "Perfect Amethyst"]); // Make Perfect Amethyst
+	// Config.Recipes.push([Recipe.Gem, "Perfect Topaz"]); // Make Perfect Topaz
+	// Config.Recipes.push([Recipe.Gem, "Perfect Sapphire"]); // Make Perfect Sapphire
+	// Config.Recipes.push([Recipe.Gem, "Perfect Emerald"]); // Make Perfect Emerald
+	// Config.Recipes.push([Recipe.Gem, "Perfect Ruby"]); // Make Perfect Ruby
+	// Config.Recipes.push([Recipe.Gem, "Perfect Diamond"]); // Make Perfect Diamond
+	// Config.Recipes.push([Recipe.Gem, "Perfect Skull"]); // Make Perfect Skull
 
 	//Config.Recipes.push([Recipe.Token]); // Make Token of Absolution
 
-	//Config.Recipes.push([Recipe.Rune, "Pul Rune"]); // Upgrade Pul to Um
-	//Config.Recipes.push([Recipe.Rune, "Um Rune"]); // Upgrade Um to Mal
-	//Config.Recipes.push([Recipe.Rune, "Mal Rune"]); // Upgrade Mal to Ist
-	//Config.Recipes.push([Recipe.Rune, "Ist Rune"]); // Upgrade Ist to Gul
-	//Config.Recipes.push([Recipe.Rune, "Gul Rune"]); // Upgrade Gul to Vex
+	// Config.Recipes.push([Recipe.Rune, "Pul Rune"]); // Upgrade Lem to Pul
+	// Config.Recipes.push([Recipe.Rune, "Um Rune"]); // Upgrade Pul to Um
+	// Config.Recipes.push([Recipe.Rune, "Mal Rune"]); // Upgrade Um to Mal
+	// Config.Recipes.push([Recipe.Rune, "Ist Rune"]); // Upgrade Mal to Ist
+	// Config.Recipes.push([Recipe.Rune, "Gul Rune"]); // Upgrade Ist to Gul
+	// Config.Recipes.push([Recipe.Rune, "Vex Rune"]); // Upgrade Gul to Vex
 
 	//Config.Recipes.push([Recipe.Caster.Amulet]); // Craft Caster Amulet
 	//Config.Recipes.push([Recipe.Blood.Ring]); // Craft Blood Ring

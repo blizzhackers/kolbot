@@ -1,6 +1,6 @@
 /**
 *  @filename    Cubing.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        transmute Horadric Cube recipes
 *
 */
@@ -96,18 +96,211 @@ const Recipe = {
 	}
 };
 
+/**
+ * @memberof Recipe
+ * @function ingredients
+ * @returns {number[]}
+ */
+Object.defineProperty(Recipe, "ingredients", {
+	/**
+	 * Get list of ingredients needed for certain recipe
+	 * @param {number} index - Index of recipe to check
+	 * @param {number} [keyItem] - Key item in cubing recipe
+	 * @returns {number[]}
+	 */
+	value: function (index, keyItem) {
+		switch (index) {
+		case Recipe.Gem:
+			return [keyItem - 1, keyItem - 1, keyItem - 1];
+		case Recipe.HitPower.Helm:
+			return [keyItem, sdk.items.runes.Ith, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire];
+		case Recipe.HitPower.Boots:
+			return [keyItem, sdk.items.runes.Ral, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire];
+		case Recipe.HitPower.Gloves:
+			return [keyItem, sdk.items.runes.Ort, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire];
+		case Recipe.HitPower.Belt:
+			return [keyItem, sdk.items.runes.Tal, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire];
+		case Recipe.HitPower.Shield:
+			return [keyItem, sdk.items.runes.Eth, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire];
+		case Recipe.HitPower.Body:
+			return [keyItem, sdk.items.runes.Nef, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire];
+		case Recipe.HitPower.Amulet:
+			return [sdk.items.Amulet, sdk.items.runes.Thul, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire];
+		case Recipe.HitPower.Ring:
+			return [sdk.items.Ring, sdk.items.runes.Amn, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire];
+		case Recipe.HitPower.Weapon:
+			return [keyItem, sdk.items.runes.Tir, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire];
+		case Recipe.Blood.Helm:
+			return [keyItem, sdk.items.runes.Ral, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby];
+		case Recipe.Blood.Boots:
+			return [keyItem, sdk.items.runes.Eth, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby];
+		case Recipe.Blood.Gloves:
+			return [keyItem, sdk.items.runes.Nef, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby];
+		case Recipe.Blood.Belt:
+			return [keyItem, sdk.items.runes.Tal, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby];
+		case Recipe.Blood.Shield:
+			return [keyItem, sdk.items.runes.Ith, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby];
+		case Recipe.Blood.Body:
+			return [keyItem, sdk.items.runes.Thul, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby];
+		case Recipe.Blood.Amulet:
+			return [sdk.items.Amulet, sdk.items.runes.Amn, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby];
+		case Recipe.Blood.Ring:
+			return [sdk.items.Ring, sdk.items.runes.Sol, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby];
+		case Recipe.Blood.Weapon:
+			return [keyItem, sdk.items.runes.Ort, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby];
+		case Recipe.Caster.Helm:
+			return [keyItem, sdk.items.runes.Nef, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst];
+		case Recipe.Caster.Boots:
+			return [keyItem, sdk.items.runes.Thul, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst];
+		case Recipe.Caster.Gloves:
+			return [keyItem, sdk.items.runes.Ort, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst];
+		case Recipe.Caster.Belt:
+			return [keyItem, sdk.items.runes.Ith, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst];
+		case Recipe.Caster.Shield:
+			return [keyItem, sdk.items.runes.Eth, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst];
+		case Recipe.Caster.Body:
+			return [keyItem, sdk.items.runes.Tal, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst];
+		case Recipe.Caster.Amulet:
+			return [sdk.items.Amulet, sdk.items.runes.Ral, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst];
+		case Recipe.Caster.Ring:
+			return [sdk.items.Ring, sdk.items.runes.Amn, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst];
+		case Recipe.Caster.Weapon:
+			return [keyItem, sdk.items.runes.Tir, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst];
+		case Recipe.Safety.Helm:
+			return [keyItem, sdk.items.runes.Ith, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald];
+		case Recipe.Safety.Boots:
+			return [keyItem, sdk.items.runes.Ort, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald];
+		case Recipe.Safety.Gloves:
+			return [keyItem, sdk.items.runes.Ral, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald];
+		case Recipe.Safety.Belt:
+			return [keyItem, sdk.items.runes.Tal, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald];
+		case Recipe.Safety.Shield:
+			return [keyItem, sdk.items.runes.Nef, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald];
+		case Recipe.Safety.Body:
+			return [keyItem, sdk.items.runes.Eth, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald];
+		case Recipe.Safety.Amulet:
+			return [sdk.items.Amulet, sdk.items.runes.Thul, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald];
+		case Recipe.Safety.Ring:
+			return [sdk.items.Ring, sdk.items.runes.Amn, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald];
+		case Recipe.Safety.Weapon:
+			return [keyItem, sdk.items.runes.Sol, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald];
+		case Recipe.Unique.Weapon.ToExceptional:
+			return [keyItem, sdk.items.runes.Ral, sdk.items.runes.Sol, sdk.items.gems.Perfect.Emerald];
+		case Recipe.Unique.Weapon.ToElite: // Ladder only
+			return [keyItem, sdk.items.runes.Lum, sdk.items.runes.Pul, sdk.items.gems.Perfect.Emerald];
+		case Recipe.Unique.Armor.ToExceptional:
+			return [keyItem, sdk.items.runes.Tal, sdk.items.runes.Shael, sdk.items.gems.Perfect.Diamond];
+		case Recipe.Unique.Armor.ToElite: // Ladder only
+			return [keyItem, sdk.items.runes.Lem, sdk.items.runes.Ko, sdk.items.gems.Perfect.Diamond];
+		case Recipe.Rare.Weapon.ToExceptional:
+			return [keyItem, sdk.items.runes.Ort, sdk.items.runes.Amn, sdk.items.gems.Perfect.Sapphire];
+		case Recipe.Rare.Weapon.ToElite:
+			return [keyItem, sdk.items.runes.Fal, sdk.items.runes.Um, sdk.items.gems.Perfect.Sapphire];
+		case Recipe.Rare.Armor.ToExceptional:
+			return [keyItem, sdk.items.runes.Ral, sdk.items.runes.Thul, sdk.items.gems.Perfect.Amethyst];
+		case Recipe.Rare.Armor.ToElite:
+			return [keyItem, sdk.items.runes.Ko, sdk.items.runes.Pul, sdk.items.gems.Perfect.Amethyst];
+		case Recipe.Socket.Shield:
+			return [keyItem, sdk.items.runes.Tal, sdk.items.runes.Amn, sdk.items.gems.Perfect.Ruby];
+		case Recipe.Socket.Weapon:
+			return [keyItem, sdk.items.runes.Ral, sdk.items.runes.Amn, sdk.items.gems.Perfect.Amethyst];
+		case Recipe.Socket.Armor:
+			return [keyItem, sdk.items.runes.Tal, sdk.items.runes.Thul, sdk.items.gems.Perfect.Topaz];
+		case Recipe.Socket.Helm:
+			return [keyItem, sdk.items.runes.Ral, sdk.items.runes.Thul, sdk.items.gems.Perfect.Sapphire];
+		case Recipe.Reroll.Magic: // Hacky solution ftw
+			return [keyItem, "pgem", "pgem", "pgem"];
+		case Recipe.Reroll.Rare:
+			return [keyItem, sdk.items.gems.Perfect.Skull, sdk.items.gems.Perfect.Skull, sdk.items.gems.Perfect.Skull, sdk.items.gems.Perfect.Skull, sdk.items.gems.Perfect.Skull, sdk.items.gems.Perfect.Skull];
+		case Recipe.Reroll.HighRare:
+			return [keyItem, sdk.items.gems.Perfect.Skull, sdk.items.Ring];
+		case Recipe.LowToNorm.Weapon:
+			return [keyItem, sdk.items.runes.Eld, "cgem"];
+		case Recipe.LowToNorm.Armor:
+			return [keyItem, sdk.items.runes.El, "cgem"];
+		case Recipe.Rune:
+			switch (keyItem) {
+			case sdk.items.runes.Eld:
+			case sdk.items.runes.Tir:
+			case sdk.items.runes.Nef:
+			case sdk.items.runes.Eth:
+			case sdk.items.runes.Ith:
+			case sdk.items.runes.Tal:
+			case sdk.items.runes.Ral:
+			case sdk.items.runes.Ort:
+				return [keyItem - 1, keyItem - 1, keyItem - 1];
+			case sdk.items.runes.Amn: // thul->amn
+				return [sdk.items.runes.Thul, sdk.items.runes.Thul, sdk.items.runes.Thul, sdk.items.gems.Chipped.Topaz];
+			case sdk.items.runes.Sol: // amn->sol
+				return [sdk.items.runes.Amn, sdk.items.runes.Amn, sdk.items.runes.Amn, sdk.items.gems.Chipped.Amethyst];
+			case sdk.items.runes.Shael: // sol->shael
+				return [sdk.items.runes.Sol, sdk.items.runes.Sol, sdk.items.runes.Sol, sdk.items.gems.Chipped.Sapphire];
+			case sdk.items.runes.Dol: // shael->dol
+				return [sdk.items.runes.Shael, sdk.items.runes.Shael, sdk.items.runes.Shael, sdk.items.gems.Chipped.Ruby];
+			case sdk.items.runes.Hel: // dol->hel
+				return [sdk.items.runes.Dol, sdk.items.runes.Dol, sdk.items.runes.Dol, sdk.items.gems.Chipped.Emerald];
+			case sdk.items.runes.Io: // hel->io
+				return [sdk.items.runes.Hel, sdk.items.runes.Hel, sdk.items.runes.Hel, sdk.items.gems.Chipped.Diamond];
+			case sdk.items.runes.Lum: // io->lum
+				return [sdk.items.runes.Io, sdk.items.runes.Io, sdk.items.runes.Io, sdk.items.gems.Flawed.Topaz];
+			case sdk.items.runes.Ko: // lum->ko
+				return [sdk.items.runes.Lum, sdk.items.runes.Lum, sdk.items.runes.Lum, sdk.items.gems.Flawed.Amethyst];
+			case sdk.items.runes.Fal: // ko->fal
+				return [sdk.items.runes.Ko, sdk.items.runes.Ko, sdk.items.runes.Ko, sdk.items.gems.Flawed.Sapphire];
+			case sdk.items.runes.Lem: // fal->lem
+				return [sdk.items.runes.Fal, sdk.items.runes.Fal, sdk.items.runes.Fal, sdk.items.gems.Flawed.Ruby];
+			case sdk.items.runes.Pul: // lem->pul
+				return [sdk.items.runes.Lem, sdk.items.runes.Lem, sdk.items.runes.Lem, sdk.items.gems.Flawed.Emerald];
+			case sdk.items.runes.Um: // pul->um
+				return [sdk.items.runes.Pul, sdk.items.runes.Pul, sdk.items.gems.Flawed.Diamond];
+			case sdk.items.runes.Mal: // um->mal
+				return [sdk.items.runes.Um, sdk.items.runes.Um, sdk.items.gems.Normal.Topaz];
+			case sdk.items.runes.Ist: // mal->ist
+				return [sdk.items.runes.Mal, sdk.items.runes.Mal, sdk.items.gems.Normal.Amethyst];
+			case sdk.items.runes.Gul: // ist->gul
+				return [sdk.items.runes.Ist, sdk.items.runes.Ist, sdk.items.gems.Normal.Sapphire];
+			case sdk.items.runes.Vex: // gul->vex
+				return [sdk.items.runes.Gul, sdk.items.runes.Gul, sdk.items.gems.Normal.Ruby];
+			case sdk.items.runes.Ohm: // vex->ohm
+				return [sdk.items.runes.Vex, sdk.items.runes.Vex, sdk.items.gems.Normal.Emerald];
+			case sdk.items.runes.Lo: // ohm->lo
+				return [sdk.items.runes.Ohm, sdk.items.runes.Ohm, sdk.items.gems.Normal.Diamond];
+			case sdk.items.runes.Sur: // lo->sur
+				return [sdk.items.runes.Lo, sdk.items.runes.Lo, sdk.items.gems.Flawless.Topaz];
+			case sdk.items.runes.Ber: // sur->ber
+				return [sdk.items.runes.Sur, sdk.items.runes.Sur, sdk.items.gems.Flawless.Amethyst];
+			case sdk.items.runes.Jah: // ber->jah
+				return [sdk.items.runes.Ber, sdk.items.runes.Ber, sdk.items.gems.Flawless.Sapphire];
+			case sdk.items.runes.Cham: // jah->cham
+				return [sdk.items.runes.Jah, sdk.items.runes.Jah, sdk.items.gems.Flawless.Ruby];
+			case sdk.items.runes.Zod: // cham->zod
+				return [sdk.items.runes.Cham, sdk.items.runes.Cham, sdk.items.gems.Flawless.Emerald];
+			}
+
+			break;
+		case Recipe.Token:
+			return [sdk.quest.item.TwistedEssenceofSuffering, sdk.quest.item.ChargedEssenceofHatred, sdk.quest.item.BurningEssenceofTerror, sdk.quest.item.FesteringEssenceofDestruction];
+		}
+		return [];
+	},
+	enumerable: false,
+});
+
 const Cubing = {
 	recipes: [],
 	gemList: [],
-	chippedGems: [
-		sdk.items.gems.Chipped.Amethyst, sdk.items.gems.Chipped.Topaz, sdk.items.gems.Chipped.Sapphire, sdk.items.gems.Chipped.Emerald,
-		sdk.items.gems.Chipped.Ruby, sdk.items.gems.Chipped.Diamond, sdk.items.gems.Chipped.Skull
-	],
+	gems: (() => ({
+		chipped: Object.values(sdk.items.gems.Chipped),
+		flawed: Object.values(sdk.items.gems.Flawed),
+		normal: Object.values(sdk.items.gems.Normal),
+		flawless: Object.values(sdk.items.gems.Flawless),
+		perfect: Object.values(sdk.items.gems.Perfect),
+	}))(),
 
 	init: function () {
 		if (!Config.Cubing) return;
 
-		//print("We have " + Config.Recipes.length + " cubing recipe(s).");
+		// print("We have " + Config.Recipes.length + " cubing recipe(s).");
 
 		for (let i = 0; i < Config.Recipes.length; i += 1) {
 			if (Config.Recipes[i].length > 1 && isNaN(Config.Recipes[i][1])) {
@@ -128,10 +321,7 @@ const Cubing = {
 	},
 
 	buildGemList: function () {
-		let gemList = [
-			sdk.items.gems.Perfect.Amethyst, sdk.items.gems.Perfect.Topaz, sdk.items.gems.Perfect.Sapphire,
-			sdk.items.gems.Perfect.Emerald, sdk.items.gems.Perfect.Ruby, sdk.items.gems.Perfect.Diamond, sdk.items.gems.Perfect.Skull
-		];
+		let gemList = Cubing.gems.perfect.slice();
 
 		for (let i = 0; i < this.recipes.length; i += 1) {
 			// Skip gems and other magic rerolling recipes
@@ -144,42 +334,15 @@ const Cubing = {
 			}
 		}
 
-		this.gemList = gemList.slice(0);
+		Cubing.gemList = gemList.slice(0);
 
 		return true;
 	},
 
-	getCube: function () {
-		// Don't activate from townchicken
-		if (getScript(true).name === "tools\\townchicken.js") return false;
-		// Can't get the cube if we can't access the act
-		if (!Pather.accessToAct(2)) return false;
-
-		console.log("Getting cube");
-		me.overhead("Getting cube");
-		let cube;
-
-		Pather.useWaypoint(sdk.areas.HallsoftheDeadLvl2, true);
-		Precast.doPrecast(true);
-
-		if (Pather.moveToExit(sdk.areas.HallsoftheDeadLvl3, true) && Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricCubeChest)) {
-			let chest = Game.getObject(sdk.quest.chest.HoradricCubeChest);
-
-			if (chest) {
-				Misc.openChest(chest);
-				Misc.poll(function () {
-					cube = Game.getItem(sdk.quest.item.Cube);
-					return !!cube && Pickit.pickItem(cube);
-				}, 1000, 2000);
-			}
-		}
-
-		Town.goToTown();
-		cube = me.getItem(sdk.quest.item.Cube);
-
-		return (!!cube && Storage.Stash.MoveTo(cube));
-	},
-
+	/**
+	 * @todo
+	 * - Allow passing in ilvl
+	 */
 	buildRecipes: function () {
 		Cubing.recipes = [];
 
@@ -188,230 +351,209 @@ const Cubing = {
 				throw new Error("Cubing.buildRecipes: Invalid recipe format.");
 			}
 
-			switch (Config.Recipes[i][0]) {
+			/** @type {number[]} */
+			let [index, keyItem] = Config.Recipes[i];
+			const ingredients = Recipe.ingredients(index, keyItem);
+
+			switch (index) {
 			case Recipe.Gem:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], Config.Recipes[i][1], Config.Recipes[i][1]], Index: Recipe.Gem, AlwaysEnabled: true});
+				this.recipes.push({Ingredients: ingredients, Index: index, AlwaysEnabled: true});
 
 				break;
 			case Recipe.HitPower.Helm:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ith, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire], Level: 84, Index: Recipe.HitPower.Helm});
+				this.recipes.push({Ingredients: ingredients, Level: 84, Index: index});
 
 				break;
 			case Recipe.HitPower.Boots:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ral, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire], Level: 71, Index: Recipe.HitPower.Boots});
+				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
 
 				break;
 			case Recipe.HitPower.Gloves:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ort, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire], Level: 79, Index: Recipe.HitPower.Gloves});
+				this.recipes.push({Ingredients: ingredients, Level: 79, Index: index});
 
 				break;
 			case Recipe.HitPower.Belt:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Tal, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire], Level: 71, Index: Recipe.HitPower.Belt});
+				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
 
 				break;
 			case Recipe.HitPower.Shield:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Eth, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire], Level: 82, Index: Recipe.HitPower.Shield});
+				this.recipes.push({Ingredients: ingredients, Level: 82, Index: index});
 
 				break;
 			case Recipe.HitPower.Body:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Nef, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire], Level: 85, Index: Recipe.HitPower.Body});
+				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
 
 				break;
 			case Recipe.HitPower.Amulet:
-				this.recipes.push({Ingredients: [sdk.items.Amulet, sdk.items.runes.Thul, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire], Level: 90, Index: Recipe.HitPower.Amulet});
+				this.recipes.push({Ingredients: ingredients, Level: 90, Index: index});
 
 				break;
 			case Recipe.HitPower.Ring:
-				this.recipes.push({Ingredients: [sdk.items.Ring, sdk.items.runes.Amn, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire], Level: 77, Index: Recipe.HitPower.Ring});
+				this.recipes.push({Ingredients: ingredients, Level: 77, Index: index});
 
 				break;
 			case Recipe.HitPower.Weapon:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Tir, sdk.items.Jewel, sdk.items.gems.Perfect.Sapphire], Level: 85, Index: Recipe.HitPower.Weapon});
+				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
 
 				break;
 			case Recipe.Blood.Helm:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ral, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby], Level: 84, Index: Recipe.Blood.Helm});
+				this.recipes.push({Ingredients: ingredients, Level: 84, Index: index});
 
 				break;
 			case Recipe.Blood.Boots:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Eth, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby], Level: 71, Index: Recipe.Blood.Boots});
+				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
 
 				break;
 			case Recipe.Blood.Gloves:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Nef, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby], Level: 79, Index: Recipe.Blood.Gloves});
+				this.recipes.push({Ingredients: ingredients, Level: 79, Index: index});
 
 				break;
 			case Recipe.Blood.Belt:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Tal, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby], Level: 71, Index: Recipe.Blood.Belt});
+				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
 
 				break;
 			case Recipe.Blood.Shield:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ith, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby], Level: 82, Index: Recipe.Blood.Shield});
+				this.recipes.push({Ingredients: ingredients, Level: 82, Index: index});
 
 				break;
 			case Recipe.Blood.Body:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Thul, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby], Level: 85, Index: Recipe.Blood.Body});
+				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
 
 				break;
 			case Recipe.Blood.Amulet:
-				this.recipes.push({Ingredients: [sdk.items.Amulet, sdk.items.runes.Amn, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby], Level: 90, Index: Recipe.Blood.Amulet});
+				this.recipes.push({Ingredients: ingredients, Level: 90, Index: index});
 
 				break;
 			case Recipe.Blood.Ring:
-				this.recipes.push({Ingredients: [sdk.items.Ring, sdk.items.runes.Sol, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby], Level: 77, Index: Recipe.Blood.Ring});
+				this.recipes.push({Ingredients: ingredients, Level: 77, Index: index});
 
 				break;
 			case Recipe.Blood.Weapon:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ort, sdk.items.Jewel, sdk.items.gems.Perfect.Ruby], Level: 85, Index: Recipe.Blood.Weapon});
+				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
 
 				break;
 			case Recipe.Caster.Helm:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Nef, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst], Level: 84, Index: Recipe.Caster.Helm});
+				this.recipes.push({Ingredients: ingredients, Level: 84, Index: index});
 
 				break;
 			case Recipe.Caster.Boots:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Thul, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst], Level: 71, Index: Recipe.Caster.Boots});
+				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
 
 				break;
 			case Recipe.Caster.Gloves:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ort, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst], Level: 79, Index: Recipe.Caster.Gloves});
+				this.recipes.push({Ingredients: ingredients, Level: 79, Index: index});
 
 				break;
 			case Recipe.Caster.Belt:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ith, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst], Level: 71, Index: Recipe.Caster.Belt});
+				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
 
 				break;
 			case Recipe.Caster.Shield:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Eth, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst], Level: 82, Index: Recipe.Caster.Shield});
+				this.recipes.push({Ingredients: ingredients, Level: 82, Index: index});
 
 				break;
 			case Recipe.Caster.Body:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Tal, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst], Level: 85, Index: Recipe.Caster.Body});
+				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
 
 				break;
 			case Recipe.Caster.Amulet:
-				this.recipes.push({Ingredients: [sdk.items.Amulet, sdk.items.runes.Ral, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst], Level: 90, Index: Recipe.Caster.Amulet});
+				this.recipes.push({Ingredients: ingredients, Level: 90, Index: index});
 
 				break;
 			case Recipe.Caster.Ring:
-				this.recipes.push({Ingredients: [sdk.items.Ring, sdk.items.runes.Amn, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst], Level: 77, Index: Recipe.Caster.Ring});
+				this.recipes.push({Ingredients: ingredients, Level: 77, Index: index});
 
 				break;
 			case Recipe.Caster.Weapon:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Tir, sdk.items.Jewel, sdk.items.gems.Perfect.Amethyst], Level: 85, Index: Recipe.Caster.Weapon});
+				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
 
 				break;
 			case Recipe.Safety.Helm:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ith, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald], Level: 84, Index: Recipe.Safety.Helm});
+				this.recipes.push({Ingredients: ingredients, Level: 84, Index: index});
 
 				break;
 			case Recipe.Safety.Boots:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ort, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald], Level: 71, Index: Recipe.Safety.Boots});
+				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
 
 				break;
 			case Recipe.Safety.Gloves:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ral, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald], Level: 79, Index: Recipe.Safety.Gloves});
+				this.recipes.push({Ingredients: ingredients, Level: 79, Index: index});
 
 				break;
 			case Recipe.Safety.Belt:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Tal, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald], Level: 71, Index: Recipe.Safety.Belt});
+				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
 
 				break;
 			case Recipe.Safety.Shield:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Nef, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald], Level: 82, Index: Recipe.Safety.Shield});
+				this.recipes.push({Ingredients: ingredients, Level: 82, Index: index});
 
 				break;
 			case Recipe.Safety.Body:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Eth, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald], Level: 85, Index: Recipe.Safety.Body});
+				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
 
 				break;
 			case Recipe.Safety.Amulet:
-				this.recipes.push({Ingredients: [sdk.items.Amulet, sdk.items.runes.Thul, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald], Level: 90, Index: Recipe.Safety.Amulet});
+				this.recipes.push({Ingredients: ingredients, Level: 90, Index: index});
 
 				break;
 			case Recipe.Safety.Ring:
-				this.recipes.push({Ingredients: [sdk.items.Ring, sdk.items.runes.Amn, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald], Level: 77, Index: Recipe.Safety.Ring});
+				this.recipes.push({Ingredients: ingredients, Level: 77, Index: index});
 
 				break;
 			case Recipe.Safety.Weapon:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Sol, sdk.items.Jewel, sdk.items.gems.Perfect.Emerald], Level: 85, Index: Recipe.Safety.Weapon});
+				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
 
 				break;
 			case Recipe.Unique.Weapon.ToExceptional:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ral, sdk.items.runes.Sol, sdk.items.gems.Perfect.Emerald], Index: Recipe.Unique.Weapon.ToExceptional, Ethereal: Config.Recipes[i][2]});
+				this.recipes.push({Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2]});
 
 				break;
 			case Recipe.Unique.Weapon.ToElite: // Ladder only
 				if (me.ladder) {
-					this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Lum, sdk.items.runes.Pul, sdk.items.gems.Perfect.Emerald], Index: Recipe.Unique.Weapon.ToElite, Ethereal: Config.Recipes[i][2]});
+					this.recipes.push({Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2]});
 				}
 
 				break;
 			case Recipe.Unique.Armor.ToExceptional:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Tal, sdk.items.runes.Shael, sdk.items.gems.Perfect.Diamond], Index: Recipe.Unique.Armor.ToExceptional, Ethereal: Config.Recipes[i][2]});
+				this.recipes.push({Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2]});
 
 				break;
 			case Recipe.Unique.Armor.ToElite: // Ladder only
 				if (me.ladder) {
-					this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Lem, sdk.items.runes.Ko, sdk.items.gems.Perfect.Diamond], Index: Recipe.Unique.Armor.ToElite, Ethereal: Config.Recipes[i][2]});
+					this.recipes.push({Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2]});
 				}
 
 				break;
 			case Recipe.Rare.Weapon.ToExceptional:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ort, sdk.items.runes.Amn, sdk.items.gems.Perfect.Sapphire], Index: Recipe.Rare.Weapon.ToExceptional, Ethereal: Config.Recipes[i][2]});
-
-				break;
 			case Recipe.Rare.Weapon.ToElite:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Fal, sdk.items.runes.Um, sdk.items.gems.Perfect.Sapphire], Index: Recipe.Rare.Weapon.ToElite, Ethereal: Config.Recipes[i][2]});
-
-				break;
 			case Recipe.Rare.Armor.ToExceptional:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ral, sdk.items.runes.Thul, sdk.items.gems.Perfect.Amethyst], Index: Recipe.Rare.Armor.ToExceptional, Ethereal: Config.Recipes[i][2]});
-
-				break;
 			case Recipe.Rare.Armor.ToElite:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ko, sdk.items.runes.Pul, sdk.items.gems.Perfect.Amethyst], Index: Recipe.Rare.Armor.ToElite, Ethereal: Config.Recipes[i][2]});
-
-				break;
 			case Recipe.Socket.Shield:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Tal, sdk.items.runes.Amn, sdk.items.gems.Perfect.Ruby], Index: Recipe.Socket.Shield, Ethereal: Config.Recipes[i][2]});
-
-				break;
 			case Recipe.Socket.Weapon:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ral, sdk.items.runes.Amn, sdk.items.gems.Perfect.Amethyst], Index: Recipe.Socket.Weapon, Ethereal: Config.Recipes[i][2]});
-
-				break;
 			case Recipe.Socket.Armor:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Tal, sdk.items.runes.Thul, sdk.items.gems.Perfect.Topaz], Index: Recipe.Socket.Armor, Ethereal: Config.Recipes[i][2]});
-
-				break;
 			case Recipe.Socket.Helm:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Ral, sdk.items.runes.Thul, sdk.items.gems.Perfect.Sapphire], Index: Recipe.Socket.Helm, Ethereal: Config.Recipes[i][2]});
+				this.recipes.push({Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2]});
 
 				break;
 			case Recipe.Reroll.Magic: // Hacky solution ftw
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], "pgem", "pgem", "pgem"], Level: 91, Index: Recipe.Reroll.Magic});
+				this.recipes.push({Ingredients: ingredients, Level: 91, Index: index});
 
 				break;
 			case Recipe.Reroll.Rare:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.gems.Perfect.Skull, sdk.items.gems.Perfect.Skull, sdk.items.gems.Perfect.Skull, sdk.items.gems.Perfect.Skull, sdk.items.gems.Perfect.Skull, sdk.items.gems.Perfect.Skull], Index: Recipe.Reroll.Rare});
+				this.recipes.push({Ingredients: ingredients, Index: index});
 
 				break;
 			case Recipe.Reroll.HighRare:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.gems.Perfect.Skull, sdk.items.Ring], Index: Recipe.Reroll.HighRare, Enabled: false});
+				this.recipes.push({Ingredients: ingredients, Index: index, Enabled: false});
 
 				break;
 			case Recipe.LowToNorm.Weapon:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.Eld, "cgem"], Index: Recipe.LowToNorm.Weapon});
-
-				break;
 			case Recipe.LowToNorm.Armor:
-				this.recipes.push({Ingredients: [Config.Recipes[i][1], sdk.items.runes.El, "cgem"], Index: Recipe.LowToNorm.Armor});
+				this.recipes.push({Ingredients: ingredients, Index: index});
 
 				break;
 			case Recipe.Rune:
 				switch (Config.Recipes[i][1]) {
-				case sdk.items.runes.El:
 				case sdk.items.runes.Eld:
 				case sdk.items.runes.Tir:
 				case sdk.items.runes.Nef:
@@ -420,136 +562,38 @@ const Cubing = {
 				case sdk.items.runes.Tal:
 				case sdk.items.runes.Ral:
 				case sdk.items.runes.Ort:
-					this.recipes.push({Ingredients: [Config.Recipes[i][1], Config.Recipes[i][1], Config.Recipes[i][1]], Index: Recipe.Rune, AlwaysEnabled: true});
+					this.recipes.push({Ingredients: ingredients, Index: index, AlwaysEnabled: true});
 
 					break;
-				case sdk.items.runes.Thul: // thul->amn
-					this.recipes.push({Ingredients: [sdk.items.runes.Thul, sdk.items.runes.Thul, sdk.items.runes.Thul, sdk.items.gems.Chipped.Topaz], Index: Recipe.Rune});
+				case sdk.items.runes.Thul:
+				case sdk.items.runes.Amn:
+				case sdk.items.runes.Sol:
+				case sdk.items.runes.Shael:
+				case sdk.items.runes.Dol:
+					this.recipes.push({Ingredients: ingredients, Index: index});
 
 					break;
-				case sdk.items.runes.Amn: // amn->sol
-					this.recipes.push({Ingredients: [sdk.items.runes.Amn, sdk.items.runes.Amn, sdk.items.runes.Amn, sdk.items.gems.Chipped.Amethyst], Index: Recipe.Rune});
-
-					break;
-				case sdk.items.runes.Sol: // sol->shael
-					this.recipes.push({Ingredients: [sdk.items.runes.Sol, sdk.items.runes.Sol, sdk.items.runes.Sol, sdk.items.gems.Chipped.Sapphire], Index: Recipe.Rune});
-
-					break;
-				case sdk.items.runes.Shael: // shael->dol
-					this.recipes.push({Ingredients: [sdk.items.runes.Shael, sdk.items.runes.Shael, sdk.items.runes.Shael, sdk.items.gems.Chipped.Ruby], Index: Recipe.Rune});
-
-					break;
-				case sdk.items.runes.Dol: // dol->hel
+				case sdk.items.runes.Hel:
+				case sdk.items.runes.Io:
+				case sdk.items.runes.Lum:
+				case sdk.items.runes.Ko:
+				case sdk.items.runes.Fal:
+				case sdk.items.runes.Lem:
+				case sdk.items.runes.Pul:
+				case sdk.items.runes.Um:
+				case sdk.items.runes.Mal:
+				case sdk.items.runes.Ist:
+				case sdk.items.runes.Gul:
+				case sdk.items.runes.Vex:
+				case sdk.items.runes.Ohm:
+				case sdk.items.runes.Lo:
+				case sdk.items.runes.Sur:
+				case sdk.items.runes.Ber:
+				case sdk.items.runes.Jah:
+				case sdk.items.runes.Cham:
+				case sdk.items.runes.Zod:
 					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Dol, sdk.items.runes.Dol, sdk.items.runes.Dol, sdk.items.gems.Chipped.Emerald], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Hel: // hel->io
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Hel, sdk.items.runes.Hel, sdk.items.runes.Hel, sdk.items.gems.Chipped.Diamond], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Io: // io->lum
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Io, sdk.items.runes.Io, sdk.items.runes.Io, sdk.items.gems.Flawed.Topaz], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Lum: // lum->ko
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Lum, sdk.items.runes.Lum, sdk.items.runes.Lum, sdk.items.gems.Flawed.Amethyst], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Ko: // ko->fal
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Ko, sdk.items.runes.Ko, sdk.items.runes.Ko, sdk.items.gems.Flawed.Sapphire], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Fal: // fal->lem
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Fal, sdk.items.runes.Fal, sdk.items.runes.Fal, sdk.items.gems.Flawed.Ruby], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Lem: // lem->pul
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Lem, sdk.items.runes.Lem, sdk.items.runes.Lem, sdk.items.gems.Flawed.Emerald], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Pul: // pul->um
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Pul, sdk.items.runes.Pul, sdk.items.gems.Flawed.Diamond], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Um: // um->mal
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Um, sdk.items.runes.Um, sdk.items.gems.Normal.Topaz], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Mal: // mal->ist
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Mal, sdk.items.runes.Mal, sdk.items.gems.Normal.Amethyst], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Ist: // ist->gul
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Ist, sdk.items.runes.Ist, sdk.items.gems.Normal.Sapphire], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Gul: // gul->vex
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Gul, sdk.items.runes.Gul, sdk.items.gems.Normal.Ruby], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Vex: // vex->ohm
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Vex, sdk.items.runes.Vex, sdk.items.gems.Normal.Emerald], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Ohm: // ohm->lo
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Ohm, sdk.items.runes.Ohm, sdk.items.gems.Normal.Diamond], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Lo: // lo->sur
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Lo, sdk.items.runes.Lo, sdk.items.gems.Flawless.Topaz], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Sur: // sur->ber
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Sur, sdk.items.runes.Sur, sdk.items.gems.Flawless.Amethyst], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Ber: // ber->jah
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Ber, sdk.items.runes.Ber, sdk.items.gems.Flawless.Sapphire], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Jah: // jah->cham
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Jah, sdk.items.runes.Jah, sdk.items.gems.Flawless.Ruby], Index: Recipe.Rune});
-					}
-
-					break;
-				case sdk.items.runes.Cham: // cham->zod
-					if (me.ladder) {
-						this.recipes.push({Ingredients: [sdk.items.runes.Cham, sdk.items.runes.Cham, sdk.items.gems.Flawless.Emerald], Index: Recipe.Rune});
+						this.recipes.push({Ingredients: ingredients, Index: index});
 					}
 
 					break;
@@ -557,7 +601,7 @@ const Cubing = {
 
 				break;
 			case Recipe.Token:
-				this.recipes.push({Ingredients: [sdk.quest.item.TwistedEssenceofSuffering, sdk.quest.item.ChargedEssenceofHatred, sdk.quest.item.BurningEssenceofTerror, sdk.quest.item.FesteringEssenceofDestruction], Index: Recipe.Token, AlwaysEnabled: true});
+				this.recipes.push({Ingredients: ingredients, Index: index, AlwaysEnabled: true});
 
 				break;
 			}
@@ -583,15 +627,14 @@ const Cubing = {
 			for (let j = 0; j < this.recipes[i].Ingredients.length; j += 1) {
 				for (let k = 0; k < items.length; k += 1) {
 					if (((this.recipes[i].Ingredients[j] === "pgem" && this.gemList.includes(items[k].classid))
-						|| (this.recipes[i].Ingredients[j] === "cgem" && this.chippedGems.includes(items[k].classid))
+						|| (this.recipes[i].Ingredients[j] === "cgem" && this.gems.chipped.includes(items[k].classid))
 						|| items[k].classid === this.recipes[i].Ingredients[j]) && this.validItem(items[k], this.recipes[i])) {
 
 						// push the item's info into the valid ingredients array. this will be used to find items when checking recipes
-						this.validIngredients.push({classid: items[k].classid, gid: items[k].gid});
+						this.validIngredients.push({ classid: items[k].classid, gid: items[k].gid });
 
 						// Remove from item list to prevent counting the same item more than once
 						items.splice(k, 1);
-
 						k -= 1;
 
 						// Enable recipes for gem/jewel pickup
@@ -605,55 +648,23 @@ const Cubing = {
 				}
 
 				// add the item to needed list - enable pickup
-				this.neededIngredients.push({classid: this.recipes[i].Ingredients[j], recipe: this.recipes[i]});
+				this.neededIngredients.push({ classid: this.recipes[i].Ingredients[j], recipe: this.recipes[i] });
 
 				// skip flawless gems adding if we don't have the main item (Recipe.Gem and Recipe.Rune for el-ort are always enabled)
 				if (!this.recipes[i].Enabled) {
 					break;
 				}
 
-				// if the recipe is enabled (we have the main item), add flawless gem recipes (if needed)
-
-				// Make perf amethyst
-				if (this.subRecipes.indexOf(sdk.items.gems.Perfect.Amethyst) === -1 && (this.recipes[i].Ingredients[j] === sdk.items.gems.Perfect.Amethyst || (this.recipes[i].Ingredients[j] === "pgem" && this.gemList.indexOf(sdk.items.gems.Perfect.Amethyst) > -1))) {
-					this.recipes.push({Ingredients: [sdk.items.gems.Flawless.Amethyst, sdk.items.gems.Flawless.Amethyst, sdk.items.gems.Flawless.Amethyst], Index: Recipe.Gem, AlwaysEnabled: true, MainRecipe: this.recipes[i].Index});
-					this.subRecipes.push(sdk.items.gems.Perfect.Amethyst);
-				}
-
-				// Make perf topaz
-				if (this.subRecipes.indexOf(sdk.items.gems.Perfect.Topaz) === -1 && (this.recipes[i].Ingredients[j] === sdk.items.gems.Perfect.Topaz || (this.recipes[i].Ingredients[j] === "pgem" && this.gemList.indexOf(sdk.items.gems.Perfect.Topaz) > -1))) {
-					this.recipes.push({Ingredients: [sdk.items.gems.Flawless.Topaz, sdk.items.gems.Flawless.Topaz, sdk.items.gems.Flawless.Topaz], Index: Recipe.Gem, AlwaysEnabled: true, MainRecipe: this.recipes[i].Index});
-					this.subRecipes.push(sdk.items.gems.Perfect.Topaz);
-				}
-
-				// Make perf sapphire
-				if (this.subRecipes.indexOf(sdk.items.gems.Perfect.Sapphire) === -1 && (this.recipes[i].Ingredients[j] === sdk.items.gems.Perfect.Sapphire || (this.recipes[i].Ingredients[j] === "pgem" && this.gemList.indexOf(sdk.items.gems.Perfect.Sapphire) > -1))) {
-					this.recipes.push({Ingredients: [sdk.items.gems.Flawless.Sapphire, sdk.items.gems.Flawless.Sapphire, sdk.items.gems.Flawless.Sapphire], Index: Recipe.Gem, AlwaysEnabled: true, MainRecipe: this.recipes[i].Index});
-					this.subRecipes.push(sdk.items.gems.Perfect.Sapphire);
-				}
-
-				// Make perf emerald
-				if (this.subRecipes.indexOf(sdk.items.gems.Perfect.Emerald) === -1 && (this.recipes[i].Ingredients[j] === sdk.items.gems.Perfect.Emerald || (this.recipes[i].Ingredients[j] === "pgem" && this.gemList.indexOf(sdk.items.gems.Perfect.Emerald) > -1))) {
-					this.recipes.push({Ingredients: [sdk.items.gems.Flawless.Emerald, sdk.items.gems.Flawless.Emerald, sdk.items.gems.Flawless.Emerald], Index: Recipe.Gem, AlwaysEnabled: true, MainRecipe: this.recipes[i].Index});
-					this.subRecipes.push(sdk.items.gems.Perfect.Emerald);
-				}
-
-				// Make perf ruby
-				if (this.subRecipes.indexOf(sdk.items.gems.Perfect.Ruby) === -1 && (this.recipes[i].Ingredients[j] === sdk.items.gems.Perfect.Ruby || (this.recipes[i].Ingredients[j] === "pgem" && this.gemList.indexOf(sdk.items.gems.Perfect.Ruby) > -1))) {
-					this.recipes.push({Ingredients: [sdk.items.gems.Flawless.Ruby, sdk.items.gems.Flawless.Ruby, sdk.items.gems.Flawless.Ruby], Index: Recipe.Gem, AlwaysEnabled: true, MainRecipe: this.recipes[i].Index});
-					this.subRecipes.push(sdk.items.gems.Perfect.Ruby);
-				}
-
-				// Make perf diamond
-				if (this.subRecipes.indexOf(sdk.items.gems.Perfect.Diamond) === -1 && (this.recipes[i].Ingredients[j] === sdk.items.gems.Perfect.Diamond || (this.recipes[i].Ingredients[j] === "pgem" && this.gemList.indexOf(sdk.items.gems.Perfect.Diamond) > -1))) {
-					this.recipes.push({Ingredients: [sdk.items.gems.Flawless.Diamond, sdk.items.gems.Flawless.Diamond, sdk.items.gems.Flawless.Diamond], Index: Recipe.Gem, AlwaysEnabled: true, MainRecipe: this.recipes[i].Index});
-					this.subRecipes.push(sdk.items.gems.Perfect.Diamond);
-				}
-
-				// Make perf skull
-				if (this.subRecipes.indexOf(sdk.items.gems.Perfect.Skull) === -1 && (this.recipes[i].Ingredients[j] === sdk.items.gems.Perfect.Skull || (this.recipes[i].Ingredients[j] === "pgem" && this.gemList.indexOf(sdk.items.gems.Perfect.Skull) > -1))) {
-					this.recipes.push({Ingredients: [sdk.items.gems.Flawless.Skull, sdk.items.gems.Flawless.Skull, sdk.items.gems.Flawless.Skull], Index: Recipe.Gem, AlwaysEnabled: true, MainRecipe: this.recipes[i].Index});
-					this.subRecipes.push(sdk.items.gems.Perfect.Skull);
+				// if the recipe is enabled (we have the main item), add gem recipes (if needed)
+				for (let gType of Object.values(Cubing.gems)) {
+					// skip over cgems - can't cube them
+					if (gType.includes(sdk.items.gems.Chipped.Amethyst)) continue;
+					for (let gem of gType) {
+						if (this.subRecipes.indexOf(gem) === -1 && (this.recipes[i].Ingredients[j] === gem || (this.recipes[i].Ingredients[j] === "pgem" && Cubing.gemList.includes(gem)))) {
+							this.recipes.push({ Ingredients: [gem - 1, gem - 1, gem - 1], Index: Recipe.Gem, AlwaysEnabled: true, MainRecipe: this.recipes[i].Index });
+							this.subRecipes.push(gem);
+						}
+					}
 				}
 			}
 		}
@@ -686,7 +697,7 @@ const Cubing = {
 				if (usedGids.indexOf(this.validIngredients[j].gid) === -1 && (
 					this.validIngredients[j].classid === recipe.Ingredients[i]
 						|| (recipe.Ingredients[i] === "pgem" && this.gemList.includes(this.validIngredients[j].classid))
-						|| (recipe.Ingredients[i] === "cgem" && this.chippedGems.includes(this.validIngredients[j].classid))
+						|| (recipe.Ingredients[i] === "cgem" && this.gems.chipped.includes(this.validIngredients[j].classid))
 				)) {
 					let item = me.getItem(this.validIngredients[j].classid, -1, this.validIngredients[j].gid);
 
@@ -710,7 +721,11 @@ const Cubing = {
 		return matchList;
 	},
 
-	// debug function - get what each recipe needs
+	/**
+	 * debug function - get what each recipe needs
+	 * @param {number} index 
+	 * @returns {string}
+	 */
 	getRecipeNeeds: function (index) {
 		let rval = " [";
 
@@ -725,7 +740,11 @@ const Cubing = {
 		return rval;
 	},
 
-	// Check an item on ground for pickup
+	/**
+	 *  Check an item on ground for pickup
+	 * @param {ItemUnit} unit 
+	 * @returns {boolean}
+	 */
 	checkItem: function (unit) {
 		if (!Config.Cubing) return false;
 		if (this.keepItem(unit)) return true;
@@ -740,7 +759,11 @@ const Cubing = {
 		return false;
 	},
 
-	// Don't drop an item from inventory if it's a part of cubing recipe
+	/**
+	 * Don't drop an item from inventory if it's a part of cubing recipe
+	 * @param {ItemUnit} unit 
+	 * @returns {boolean}
+	 */
 	keepItem: function (unit) {
 		if (!Config.Cubing) return false;
 
@@ -753,6 +776,12 @@ const Cubing = {
 		return false;
 	},
 
+	/**
+	 * Check if this item is valid for a given recipe
+	 * @param {ItemUnit} unit 
+	 * @param {*} recipe 
+	 * @returns {boolean}
+	 */
 	validItem: function (unit, recipe) {
 		// Excluded items
 		// Don't use items in locked inventory space - or wanted by other systems
@@ -847,7 +876,7 @@ const Cubing = {
 
 	doCubing: function () {
 		if (!Config.Cubing) return false;
-		if (!me.getItem(sdk.quest.item.Cube) && !this.getCube()) return false;
+		if (!me.getItem(sdk.quest.item.Cube)) return false;
 
 		this.update();
 		// Randomize the recipe array to prevent recipe blocking (multiple caster items etc.)
@@ -883,21 +912,32 @@ const Cubing = {
 
 				if (items) {
 					for (let j = 0; j < cubeItems.length; j += 1) {
-						let result = Pickit.checkItem(cubeItems[j]);
+						let cubeItem = cubeItems[j];
+						let result = Pickit.checkItem(cubeItem);
+
+						/**
+						 * @todo
+						 * - build better method of updating cubelist so if a item we cube is wanted by cubing we
+						 * can update our list without clearing and rebuilding the whole thing
+						 */
 
 						switch (result.result) {
 						case Pickit.Result.UNWANTED:
-							Item.logger("Dropped", cubeItems[j], "doCubing");
-							cubeItems[j].drop();
+							Item.logger("Dropped", cubeItem, "doCubing");
+							cubeItem.drop();
 
 							break;
 						case Pickit.Result.WANTED:
-							Item.logger("Cubing Kept", cubeItems[j]);
-							Item.logItem("Cubing Kept", cubeItems[j], result.line);
+							Item.logger("Cubing Kept", cubeItem);
+							Item.logItem("Cubing Kept", cubeItem, result.line);
+
+							break;
+						case Pickit.Result.RUNEWORD:
+							Runewords.update(cubeItem.classid, cubeItem.gid);
 
 							break;
 						case Pickit.Result.CRAFTING:
-							CraftingSystem.update(cubeItems[j]);
+							CraftingSystem.update(cubeItem);
 
 							break;
 						}
@@ -908,6 +948,17 @@ const Cubing = {
 					break;
 				}
 			}
+		}
+
+		/**
+		 * For now, until I write a better update method, give a recursive call to doCubing if after building list
+		 * we find we can still cube
+		 */
+		Cubing.update();
+		let checkList = this.recipes.slice().shuffle();
+		if (checkList.some(r => Cubing.checkRecipe(r))) {
+			// we can still cube so recursive call to doCubing
+			return Cubing.doCubing();
 		}
 
 		if (getUIFlag(sdk.uiflags.Cube) || getUIFlag(sdk.uiflags.Stash)) {

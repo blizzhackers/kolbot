@@ -5,8 +5,6 @@
 *
 */
 
-let global = this;
-
 const Loader = {
 	fileList: [],
 	scriptList: [],
@@ -95,6 +93,12 @@ const Loader = {
 			if (Scripts.hasOwnProperty(s) && Scripts[s]) {
 				Loader.scriptList.push(s);
 			}
+		}
+
+		// handle getting cube here instead of from Cubing.doCubing
+		if (Config.Cubing && !me.getItem(sdk.quest.item.Cube) && Pather.accessToAct(2)) {
+			// we can actually get the cube - fixes bug causing level 1's to crash
+			Loader.runScript("GetCube");
 		}
 
 		for (Loader.scriptIndex = 0; Loader.scriptIndex < Loader.scriptList.length; Loader.scriptIndex++) {
