@@ -233,6 +233,10 @@ const Packet = {
 		return false;
 	},
 
+	/**
+	 * @param {ItemUnit} item 
+	 * @returns {boolean}
+	 */
 	itemToCursor: function (item) {
 		// Something already on cursor
 		if (me.itemoncursor) {
@@ -246,7 +250,11 @@ const Packet = {
 
 		for (let i = 0; i < 15; i += 1) {
 			// equipped
-			item.isEquipped ? sendPacket(1, sdk.packets.send.PickupBodyItem, 2, item.bodylocation) : sendPacket(1, sdk.packets.send.PickupBufferItem, 4, item.gid);
+			item.isEquipped
+				? sendPacket(1, sdk.packets.send.PickupBodyItem, 2, item.bodylocation)
+				: item.isInBelt
+					? new PacketBuilder().byte(sdk.packets.send.RemoveBeltItem).dword(item.gid).send()
+					: sendPacket(1, sdk.packets.send.PickupBufferItem, 4, item.gid);
 
 			let tick = getTickCount();
 
@@ -259,6 +267,10 @@ const Packet = {
 		return false;
 	},
 
+	/**
+	 * @param {ItemUnit} item 
+	 * @returns {boolean}
+	 */
 	dropItem: function (item) {
 		if (!this.itemToCursor(item)) return false;
 
@@ -276,6 +288,10 @@ const Packet = {
 		return false;
 	},
 
+	/**
+	 * @param {ItemUnit} item 
+	 * @returns {boolean}
+	 */
 	givePotToMerc: function (item) {
 		if (!!item
 			&& [sdk.items.type.HealingPotion, sdk.items.type.RejuvPotion, sdk.items.type.ThawingPotion, sdk.items.type.AntidotePotion].includes(item.itemType)) {
@@ -298,11 +314,21 @@ const Packet = {
 		return false;
 	},
 
+	/**
+	 * @param {ItemUnit} item 
+	 * @param {number} xLoc
+	 * @returns {boolean}
+	 */
 	placeInBelt: function (item, xLoc) {
 		item.toCursor(true) && new PacketBuilder().byte(sdk.packets.send.ItemToBelt).dword(item.gid).dword(xLoc).send();
 		return Misc.poll(() => item.isInBelt, 500, 100);
 	},
 
+	/**
+	 * @param {ItemUnit} who 
+	 * @param {boolean} toCursor 
+	 * @returns {boolean}
+	 */
 	click: function (who, toCursor = false) {
 		if (!who || !copyUnit(who).x) return false;
 		new PacketBuilder().byte(sdk.packets.send.PickupItem).dword(sdk.unittype.Item).dword(who.gid).dword(toCursor ? 1 : 0).send();
@@ -342,6 +368,19 @@ const Packet = {
 	castSkill: function (hand, wX, wY) {
 		hand = (hand === sdk.skills.hand.Right) ? sdk.packets.send.RightSkillOnLocation : sdk.packets.send.LeftSkillOnLocation;
 		sendPacket(1, hand, 2, wX, 2, wY);
+	},
+
+	castAndHoldSkill: function (hand, wX, wY, duration = 1000) {
+		let nHand = (hand === sdk.skills.hand.Right) ? sdk.packets.send.RightSkillOnLocation : sdk.packets.send.LeftSkillOnLocation;
+		hand = (hand === sdk.skills.hand.Right) ? sdk.packets.send.RightSkillOnLocationEx : sdk.packets.send.LeftSkillOnLocationEx;
+		
+		let endT = getTickCount() + duration;
+		// has to be cast normally first with a click before held packet is sent
+		sendPacket(1, nHand, 2, wX, 2, wY);
+		while (getTickCount() < endT) {
+			sendPacket(1, hand, 2, wX, 2, wY);
+			delay(25);
+		}
 	},
 
 	/**
