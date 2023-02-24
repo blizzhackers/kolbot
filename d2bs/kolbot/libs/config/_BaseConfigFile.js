@@ -642,6 +642,7 @@
 	 */
 	Config.Cubing = false; // Set to true to enable cubing.
 	Config.ShowCubingInfo = true; // Show cubing messages on console
+
 	// Ingredients for the following recipes will be auto-picked, for classids check libs/core/Data/NTItemAlias.js
 
 	// Config.Recipes.push([Recipe.Gem, "Flawed Amethyst"]); // make Flawed Amethyst
@@ -677,6 +678,9 @@
 	// Config.Recipes.push([Recipe.Gem, "Perfect Skull"]); // Make Perfect Skull
 
 	// Config.Recipes.push([Recipe.Token]); // Make Token of Absolution
+
+	// Config.Recipes.push([Recipe.Rejuv]); // Make Rejuv
+	// Config.Recipes.push([Recipe.FullRejuv]); // Make Full Rejuv
 
 	// Ingredients for the following recipes will be auto-picked, for classids check libs/core/Data/NTItemAlias.js
 
@@ -753,8 +757,11 @@
 
 	// The gems not used by other recipes will be used for magic item rerolling.
 
-	// Config.Recipes.push([Recipe.Reroll.Magic, "Diadem"]); // Reroll magic Diadem
+	// Config.Recipes.push([Recipe.Reroll.Magic, "Diadem"]); // Reroll magic Diadem (ilvl 91+)
 	// Config.Recipes.push([Recipe.Reroll.Magic, "Grand Charm"]); // Reroll magic Grand Charm (ilvl 91+)
+	// Config.Recipes.push([Recipe.Reroll.Charm.Small]); // Reroll magic Small Charm (ilvl 94+)
+	// Config.Recipes.push([Recipe.Reroll.Charm.Large]); // Reroll magic Large Charm (ilvl 76+)
+	// Config.Recipes.push([Recipe.Reroll.Charm.Grand]); // Reroll magic Grand Charm (ilvl 77+)
 
 	// the cubing formula: 6 Perfect Skulls + 1 Rare Item = 1 random low quality rare item of the same type
 	// Config.Recipes.push([Recipe.Reroll.Rare, "Diadem"]); // Reroll rare Diadem
@@ -770,6 +777,11 @@
 	// Config.Recipes.push([Recipe.Socket.Weapon, "Cryptic Axe", Roll.Eth]); // Socket ethereal Cryptic Axe
 	// Config.Recipes.push([Recipe.Socket.Armor, "Sacred Armor", Roll.Eth]); // Socket ethereal Sacred Armor
 	// Config.Recipes.push([Recipe.Socket.Armor, "Archon Plate", Roll.Eth]); // Socket ethereal Archon Plate
+
+	// Config.Recipes.push([Recipe.Socket.Magic.LowWeapon, "Bone Wand"]); // Socket magic Bone Wand (ilvl < 30)
+	// Config.Recipes.push([Recipe.Socket.Magic.HighWeapon, "Swirling Crystal"]); // Socket magic Swirling Crystal (ilvl >= 30)
+
+	// Config.Recipes.push([Recipe.Socket.Rare, "Diadem"]); // Socket rare Diadem
 
 	// Config.Recipes.push([Recipe.Unique.Armor.ToExceptional, "Heavy Gloves", Roll.NonEth]); // Upgrade Bloodfist to Exceptional
 	// Config.Recipes.push([Recipe.Unique.Armor.ToExceptional, "Light Gauntlets", Roll.NonEth]); // Upgrade Magefist to Exceptional
