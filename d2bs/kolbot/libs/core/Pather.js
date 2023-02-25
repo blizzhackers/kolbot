@@ -283,7 +283,7 @@ const Pather = {
 		(target instanceof PresetUnit) && (target = target.realCoords());
 
 		if (settings.minDist > 3) {
-			target = this.spotOnDistance(target, settings.minDist, {returnSpotOnError: settings.returnSpotOnError, reductionType: (me.inTown ? 0 : 2)});
+			target = this.spotOnDistance(target, settings.minDist, { returnSpotOnError: settings.returnSpotOnError, reductionType: (me.inTown ? 0 : 2) });
 		}
 
 		let fail = 0;
@@ -400,7 +400,7 @@ const Pather = {
 							// if we are allowed to clear
 							if (settings.allowClearing) {
 								// Don't go berserk on longer paths - also check that there are even mobs blocking us
-								if (cleared.at === 0 || getTickCount() - cleared.at > Time.seconds(3) && cleared.where.distance > 5 && me.checkForMobs({range: 10})) {
+								if (cleared.at === 0 || getTickCount() - cleared.at > Time.seconds(3) && cleared.where.distance > 5 && me.checkForMobs({ range: 10 })) {
 									// only set that we cleared if we actually killed at least 1 mob
 									if (Attack.clear(10, null, null, null, settings.allowPicking)) {
 										console.debug("Cleared Node");
@@ -563,7 +563,7 @@ const Pather = {
 			// the less stamina you have, the more you wait to recover
 			let recover = me.staminaMaxDuration < 30 ? 80 : 50;
 			(me.walking && me.staminaPercent >= recover) && me.run();
-			if (Skill.canUse(sdk.skills.Charge) && me.paladin && me.mp >= 9 && getDistance(me.x, me.y, x, y) > 8 && Skill.setSkill(sdk.skills.Charge, sdk.skills.hand.Left)) {
+			if (Skill.canUse(sdk.skills.Charge) && me.paladin && me.mp >= 9 && [x, y].distance > 8 && Skill.setSkill(sdk.skills.Charge, sdk.skills.hand.Left)) {
 				if (Skill.canUse(sdk.skills.Vigor)) {
 					Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right);
 				} else if (!Config.Vigor && !Attack.auradin && Skill.canUse(sdk.skills.HolyFreeze)) {
@@ -574,6 +574,10 @@ const Pather = {
 				while (!me.idle) {
 					delay(40);
 				}
+			}
+
+			if (Skill.canUse(sdk.skills.Blaze) && me.mp > (Skill.getManaCost(sdk.skills.Blaze) * 2) && !me.getState(sdk.states.Blaze)) {
+				Skill.cast(sdk.skills.Blaze);
 			}
 		} else {
 			me.walking && me.run();
@@ -590,7 +594,7 @@ const Pather = {
 				return true;
 			}
 
-			if (attemptCount > 1 && CollMap.checkColl(me, {x: x, y: y}, sdk.collision.BlockWall | sdk.collision.ClosedDoor)) {
+			if (attemptCount > 1 && CollMap.checkColl(me, { x: x, y: y }, sdk.collision.BlockWall | sdk.collision.ClosedDoor)) {
 				this.openDoors(me.x, me.y);
 			}
 
@@ -660,7 +664,7 @@ const Pather = {
 	openDoors: function (x, y) {
 		if (me.inTown && me.act !== 5) return false;
 
-		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
+		(typeof x !== "number" || typeof y !== "number") && ({ x, y } = me);
 
 		// Regular doors
 		let door = Game.getObject("door", sdk.objects.mode.Inactive);
@@ -737,7 +741,7 @@ const Pather = {
 	kickBarrels: function (x, y) {
 		if (me.inTown) return false;
 
-		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
+		(typeof x !== "number" || typeof y !== "number") && ({ x, y } = me);
 
 		// anything small and annoying really
 		let barrels = getUnits(sdk.unittype.Object)
@@ -1106,7 +1110,7 @@ const Pather = {
 		if (!exits.length) throw new Error("Failed to find exits");
 		let loc = exits.find(a => a.target === exit);
 		console.debug(area, exit, loc);
-		return loc ? {x: loc.x, y: loc.y} : false;
+		return loc ? { x: loc.x, y: loc.y } : false;
 	},
 
 
@@ -1617,12 +1621,11 @@ const Pather = {
 
 		me.cancelUIFlags();
 
-
 		let preArea = me.area;
 
 		for (let i = 0; i < 10; i += 1) {
 			if (me.dead) return false;
-			i > 0 && owner && me.inTown && Town.move("portalspot");
+			i > 0 && me.inTown && Town.move("portalspot");
 
 			let portal = unit ? copyUnit(unit) : this.getPortal(targetArea, owner);
 
@@ -1716,7 +1719,7 @@ const Pather = {
 				if (typeof targetArea !== "number" || portal.objtype === targetArea) {
 					switch (owner) {
 					case undefined: // Pather.usePortal(area) - red portal
-						if (!portal.getParent()) {
+						if (!portal.getParent() || portal.getParent() === me.name) {
 							return copyUnit(portal);
 						}
 
@@ -2107,7 +2110,7 @@ const Pather = {
 			sdk.areas.WorldstoneLvl2, sdk.areas.WorldstoneLvl3, sdk.areas.ThroneofDestruction, sdk.areas.Harrogath, sdk.areas.Harrogath, sdk.areas.Harrogath, sdk.areas.Harrogath
 		];
 		let visitedNodes = [];
-		let toVisitNodes = [{from: dest, to: null}];
+		let toVisitNodes = [{ from: dest, to: null }];
 
 		!src && (src = me.area);
 
@@ -2142,13 +2145,13 @@ const Pather = {
 					}
 
 					if ((prevArea = previousAreas[node.from]) !== 0 && visitedNodes.indexOf(prevArea) === -1) {
-						toVisitNodes.push({from: prevArea, to: node.from});
+						toVisitNodes.push({ from: prevArea, to: node.from });
 					}
 
 					for (prevArea = 1; prevArea < previousAreas.length; prevArea += 1) {
 						// Only interested in those connected to node
 						if (previousAreas[prevArea] === node.from && visitedNodes.indexOf(prevArea) === -1) {
-							toVisitNodes.push({from: prevArea, to: node.from});
+							toVisitNodes.push({ from: prevArea, to: node.from });
 						}
 					}
 				}
@@ -2172,7 +2175,7 @@ const Pather = {
 			return false;
 		}
 
-		return {course: arr, useWP: useWP};
+		return { course: arr, useWP: useWP };
 	},
 
 	/**
