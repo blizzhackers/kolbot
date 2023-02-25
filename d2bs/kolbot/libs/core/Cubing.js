@@ -727,7 +727,6 @@ const Cubing = {
 						if (this.recipes[i].Index !== Recipe.Rune || ([Recipe.Rune, Recipe.Rejuv, Recipe.FullRejuv].includes(this.recipes[i].Index) && j >= 1)) {
 							// Enable rune recipe after 2 bases are found
 							this.recipes[i].Enabled = true;
-							console.debug("Here?", this.recipes[i].Index);
 						}
 
 						continue IngredientLoop;
@@ -743,13 +742,16 @@ const Cubing = {
 				}
 
 				// if the recipe is enabled (we have the main item), add gem recipes (if needed)
-				for (let gType of Object.values(Cubing.gems)) {
-					// skip over cgems - can't cube them
-					if (gType.includes(sdk.items.gems.Chipped.Amethyst)) continue;
-					for (let gem of gType) {
-						if (this.subRecipes.indexOf(gem) === -1 && (this.recipes[i].Ingredients[j] === gem || (this.recipes[i].Ingredients[j] === "pgem" && Cubing.gemList.includes(gem)))) {
-							this.recipes.push({ Ingredients: [gem - 1, gem - 1, gem - 1], Index: Recipe.Gem, AlwaysEnabled: true, MainRecipe: this.recipes[i].Index });
-							this.subRecipes.push(gem);
+				if (!this.recipes[i].hasOwnProperty("MainRecipe")) {
+					// make sure we don't add a subrecipe to a subrecipe
+					for (let gType of Object.values(Cubing.gems)) {
+						// skip over cgems - can't cube them
+						if (gType.includes(sdk.items.gems.Chipped.Amethyst)) continue;
+						for (let gem of gType) {
+							if (this.subRecipes.indexOf(gem) === -1 && (this.recipes[i].Ingredients[j] === gem || (this.recipes[i].Ingredients[j] === "pgem" && Cubing.gemList.includes(gem)))) {
+								this.recipes.push({ Ingredients: [gem - 1, gem - 1, gem - 1], Index: Recipe.Gem, AlwaysEnabled: true, MainRecipe: this.recipes[i].Index });
+								this.subRecipes.push(gem);
+							}
 						}
 					}
 				}
@@ -887,11 +889,17 @@ const Cubing = {
 
 		// Pots and Gems - for Rejuv recipes
 		if ([Recipe.Rejuv, Recipe.FullRejuv].includes(recipe.Index)) {
+			/**
+			 * @todo do this better, hacky fix for now
+			 */
 			if (!recipe.Enabled) {
 				if (recipe.Index === Recipe.Rejuv && this.gems.chipped.includes(unit.classid)) return true;
 				if (recipe.Index === Recipe.FullRejuv && this.gems.normal.includes(unit.classid)) return true;
 				return false;
 			}
+			
+			if (recipe.Index === Recipe.Rejuv && this.gems.chipped.includes(unit.classid)) return true;
+			if (recipe.Index === Recipe.FullRejuv && this.gems.normal.includes(unit.classid)) return true;
 			if ([].concat(Cubing.pots.healing, Cubing.pots.mana).includes(unit.classid)) {
 				return true;
 			}
