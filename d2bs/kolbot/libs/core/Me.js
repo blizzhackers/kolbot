@@ -293,7 +293,7 @@ me.getUnids = function () {
 	let list = [];
 	let item = me.getItem(-1, sdk.items.mode.inStorage);
 
-	if (!item) return false;
+	if (!item) return [];
 
 	do {
 		if (item.isInInventory && !item.identified) {
@@ -301,7 +301,7 @@ me.getUnids = function () {
 		}
 	} while (item.getNext());
 
-	return list.length ? list : false;
+	return list;
 };
 
 // Identify items while in the field if we have a id tome
