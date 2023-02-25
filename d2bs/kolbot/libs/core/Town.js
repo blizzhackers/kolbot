@@ -42,6 +42,36 @@ const NPC = {
 	Cain: getLocaleString(sdk.locale.npcs.DeckardCain).toLowerCase()
 };
 
+Object.defineProperty(NPC, "getAct", {
+	/**
+	 * Returns the act(s) where the given NPC can be found.
+	 *
+	 * @memberof NPC
+	 * @method getAct
+	 * @param {string} name - The name of the NPC.
+	 * @returns {Array<number>} An array of act numbers where the NPC can be found.
+	 */
+	value: function (name) {
+		if (name === NPC.Cain) return [me.act];
+		if (name === NPC.Warriv) return [1, 2];
+		if (name === NPC.Meshif) return [2, 3];
+		switch (true) {
+		case [NPC.Akara, NPC.Gheed, NPC.Charsi, NPC.Kashya, NPC.Warriv].includes(name):
+			return [1];
+		case [NPC.Fara, NPC.Drognan, NPC.Elzix, NPC.Greiz, NPC.Lysander, NPC.Jerhyn, NPC.Atma].includes(name):
+			return [2];
+		case [NPC.Ormus, NPC.Alkor, NPC.Hratli, NPC.Asheara].includes(name):
+			return [3];
+		case [NPC.Jamella, NPC.Halbu, NPC.Tyrael].includes(name):
+			return [4];
+		case [NPC.Malah, NPC.Anya, NPC.Larzuk, NPC.Qual_Kehk, NPC.Nihlathak].includes(name):
+			return [2];
+		}
+		return [];
+	},
+	enumerable: false,
+});
+
 /**
  * @namespace
  */
@@ -89,11 +119,11 @@ const Town = {
 	},
 
 	tasks: [
-		{Heal: NPC.Akara, Shop: NPC.Akara, Gamble: NPC.Gheed, Repair: NPC.Charsi, Merc: NPC.Kashya, Key: NPC.Akara, CainID: NPC.Cain},
-		{Heal: NPC.Fara, Shop: NPC.Drognan, Gamble: NPC.Elzix, Repair: NPC.Fara, Merc: NPC.Greiz, Key: NPC.Lysander, CainID: NPC.Cain},
-		{Heal: NPC.Ormus, Shop: NPC.Ormus, Gamble: NPC.Alkor, Repair: NPC.Hratli, Merc: NPC.Asheara, Key: NPC.Hratli, CainID: NPC.Cain},
-		{Heal: NPC.Jamella, Shop: NPC.Jamella, Gamble: NPC.Jamella, Repair: NPC.Halbu, Merc: NPC.Tyrael, Key: NPC.Jamella, CainID: NPC.Cain},
-		{Heal: NPC.Malah, Shop: NPC.Malah, Gamble: NPC.Anya, Repair: NPC.Larzuk, Merc: NPC.Qual_Kehk, Key: NPC.Malah, CainID: NPC.Cain}
+		{ Heal: NPC.Akara, Shop: NPC.Akara, Gamble: NPC.Gheed, Repair: NPC.Charsi, Merc: NPC.Kashya, Key: NPC.Akara, CainID: NPC.Cain },
+		{ Heal: NPC.Fara, Shop: NPC.Drognan, Gamble: NPC.Elzix, Repair: NPC.Fara, Merc: NPC.Greiz, Key: NPC.Lysander, CainID: NPC.Cain },
+		{ Heal: NPC.Ormus, Shop: NPC.Ormus, Gamble: NPC.Alkor, Repair: NPC.Hratli, Merc: NPC.Asheara, Key: NPC.Hratli, CainID: NPC.Cain },
+		{ Heal: NPC.Jamella, Shop: NPC.Jamella, Gamble: NPC.Jamella, Repair: NPC.Halbu, Merc: NPC.Tyrael, Key: NPC.Jamella, CainID: NPC.Cain },
+		{ Heal: NPC.Malah, Shop: NPC.Malah, Gamble: NPC.Anya, Repair: NPC.Larzuk, Merc: NPC.Qual_Kehk, Key: NPC.Malah, CainID: NPC.Cain }
 	],
 
 	ignoredItemTypes: [
@@ -153,6 +183,7 @@ const Town = {
 		Cubing.doCubing();
 		Runewords.makeRunewords();
 		this.stash(true);
+		this.checkQuestItems();
 		!!me.getItem(sdk.items.TomeofTownPortal) && this.clearScrolls();
 
 		me.act !== preAct && this.goToTown(preAct);
@@ -182,6 +213,11 @@ const Town = {
 		const npcName = NPC[npcKey];
 
 		!me.inTown && Town.goToTown();
+		
+		if (!NPC.getAct(npcName).includes(me.act)) {
+			Town.goToTown(NPC.getAct(npcName)[0]);
+		}
+
 		me.cancelUIFlags();
 
 		switch (npcName) {
@@ -212,7 +248,6 @@ const Town = {
 
 		if (npc && npc.openMenu()) {
 			cancel && me.cancel();
-			// this.lastInteractedNPC.set(npc);
 			return npc;
 		}
 
@@ -278,7 +313,7 @@ const Town = {
 		delay(250);
 
 		let npc = null;
-		let justUseClosest = (["clearInventory", "sell"].includes(reason) && !me.getUnids());
+		let justUseClosest = (["clearInventory", "sell"].includes(reason) && !me.getUnids().length);
 		if (getUIFlag(sdk.uiflags.NPCMenu)) {
 			npc = getInteractedNPC();
 		}
@@ -290,7 +325,6 @@ const Town = {
 					|| (task === "Gamble" && npc.name.toLowerCase() === NPC.Jamella))) {
 					me.cancelUIFlags();
 					npc = null;
-					// this.lastInteractedNPC.reset();
 				}
 			}
 
@@ -421,6 +455,10 @@ const Town = {
 			}
 		}
 
+		/**
+		 * @todo If we are set to cube rejuvs, allow buying potions once we have our gem
+		 */
+
 		// We have enough potions in inventory
 		(buffer.mp >= Config.MPBuffer && buffer.hp >= Config.HPBuffer) && (needBuffer = false);
 
@@ -458,7 +496,7 @@ const Town = {
 				let pot = this.getPotion(npc, Config.BeltColumn[i]);
 
 				if (pot) {
-					//print("ÿc2column ÿc0" + i + "ÿc2 needs ÿc0" + col[i] + " ÿc2potions");
+					//console.log("ÿc2column ÿc0" + i + "ÿc2 needs ÿc0" + col[i] + " ÿc2potions");
 					// Shift+buy will trigger if there's no empty columns or if only the current column is empty
 					if (useShift) {
 						pot.buy(true);
@@ -589,7 +627,7 @@ const Town = {
 				try {
 					tome.buy();
 				} catch (e1) {
-					print(e1);
+					console.log(e1);
 					// Couldn't buy the tome, don't spam the scrolls
 					return false;
 				}
@@ -604,7 +642,7 @@ const Town = {
 		try {
 			scroll.buy(true);
 		} catch (e2) {
-			print(e2.message);
+			console.log(e2.message);
 
 			return false;
 		}
@@ -858,20 +896,25 @@ const Town = {
 		let items = npc.getItemsEx().filter((item) => !Town.ignoreType(item.itemType));
 		if (!items.length) return false;
 
-		print("ÿc4MiniShopBotÿc0: Scanning " + npc.itemcount + " items.");
+		console.log("ÿc4MiniShopBotÿc0: Scanning " + npc.itemcount + " items.");
 
 		for (let i = 0; i < items.length; i += 1) {
-			let result = Pickit.checkItem(items[i]);
+			let item = items[i];
+			let result = Pickit.checkItem(item);
 
-			if (result.result === Pickit.Result.WANTED) {
+			switch (result.result) {
+			case Pickit.Result.WANTED:
+			case Pickit.Result.CUBING:
+			case Pickit.Result.CRAFTING:
+			case Pickit.Result.RUNEWORD:
 				try {
-					if (Storage.Inventory.CanFit(items[i]) && me.gold >= items[i].getItemCost(sdk.items.cost.ToBuy)) {
-						Item.logger("Shopped", items[i]);
-						Item.logItem("Shopped", items[i], result.line);
-						items[i].buy();
+					if (Storage.Inventory.CanFit(item) && me.gold >= item.getItemCost(sdk.items.cost.ToBuy)) {
+						Item.logger("Shopped", item);
+						Item.logItem("Shopped", item, result.line);
+						item.buy();
 					}
 				} catch (e) {
-					print(e);
+					console.error(e);
 				}
 			}
 
@@ -1144,7 +1187,7 @@ const Town = {
 	},
 
 	checkKeys: function () {
-		if (!Config.OpenChests.Enabled || me.assassin || me.gold < 540 || (!me.getItem("key") && !Storage.Inventory.CanFit({sizex: 1, sizey: 1}))) {
+		if (!Config.OpenChests.Enabled || me.assassin || me.gold < 540 || (!me.getItem("key") && !Storage.Inventory.CanFit({ sizex: 1, sizey: 1 }))) {
 			return 12;
 		}
 
@@ -1278,8 +1321,8 @@ const Town = {
 						delay(me.ping * 2 + 500);
 
 						if (cubeItems[0].bodylocation === bodyLoc) {
-							print(cubeItems[0].fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, "").trim() + " successfully repaired and equipped.");
-							D2Bot.printToConsole(cubeItems[0].fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, "").trim() + " successfully repaired and equipped.", sdk.colors.D2Bot.Green);
+							console.log(cubeItems[0].fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, "").trim() + " successfully repaired and equipped.");
+							D2Bot.console.logToConsole(cubeItems[0].fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, "").trim() + " successfully repaired and equipped.", sdk.colors.D2Bot.Green);
 
 							return true;
 						}
@@ -1727,7 +1770,7 @@ const Town = {
 			}
 
 			if (getTickCount() - timer > 30000) {
-				D2Bot.printToConsole("Failed to get corpse, stopping.", sdk.colors.D2Bot.Red);
+				D2Bot.console.logToConsole("Failed to get corpse, stopping.", sdk.colors.D2Bot.Red);
 				D2Bot.stop();
 			}
 
@@ -1743,7 +1786,7 @@ const Town = {
 
 	checkShard: function () {
 		let shard;
-		let check = {left: false, right: false};
+		let check = { left: false, right: false };
 		let item = me.getItem("bld", sdk.items.mode.inStorage);
 
 		if (item) {
@@ -1894,7 +1937,6 @@ const Town = {
 	clearInventory: function () {
 		console.info(true);
 		console.time("clearInventory");
-		this.checkQuestItems(); // only golden bird quest for now
 
 		// If we are at an npc already, open the window otherwise moving potions around fails
 		if (getUIFlag(sdk.uiflags.NPCMenu) && !getUIFlag(sdk.uiflags.Shop)) {
@@ -2086,7 +2128,7 @@ const Town = {
 	act: [{}, {}, {}, {}, {}],
 
 	initialize: function () {
-		//print("Initialize town " + me.act);
+		//console.log("Initialize town " + me.act);
 
 		switch (me.act) {
 		case 1:
