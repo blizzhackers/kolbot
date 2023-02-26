@@ -1,30 +1,26 @@
-## Rules
+[**Join the Forums!**](https://blizzhackers.discourse.group)
+
+[**Join the Slack Channel!**](https://join.slack.com/t/blizzhackers/shared_invite/zt-qahq0w11-uzETJNgKmS9DdApJSRQqaw)
+
+## General
 
 1. D2BS, D2Bot and kolbot # are educational tools with an open source developer community. These tools are meant to be used offline or on private servers that explicitly allow them. These tools are not meant to be abused on battle.net (a Blizzard Entertainment entity).
 
-2. D2BS, D2Bot and kolbot # are FREE software. If you paid or are asked to pay for these, you have been scammed.
+2. D2BS, D2Bot # and kolbot are provided as is and for FREE. If you paid or are asked to pay for these tools, d.
 
-3. do not discuss cheating, maliciously exploiting, or illegal use of software.
-
-4. selling or discussing illegal software or cheating tools are strictly prohibited in all repositories.
+3. These tools are not inteded for cheating, maliciously exploiting, or illegal use of software.
 
 ## kolbot
 
 * this name is better known than others, even it is just a part of d2bs (diablo 2 botting system) which contain 3 distinct components:
-	* D2BS - core
+	* D2BS - core (C++)
 	* D2Bot# - manager (C#)
 	* kolbot - script library (JS)
 
-* use the master(trunk) branch
+* use the mainline (trunk) branch
 
 If you want to contribute to kolbot code, make sure you use [ESLint options for kolbot code](https://gist.githubusercontent.com/Nishimura-Katsuo/2d6866666c7acf10047c486a15a7fe60/raw/99ef9c2995929c492ef856772ff346e0f19709cd/.eslintrc.js) or [JSLint options for kolbot code](https://gist.githubusercontent.com/noah-/d917342e52281d54c404e0b2c18b0c6e/raw/fbade95e38b103d2654b90d85ef62a51c4295153/jslint.config) for final polish.
 If you want to contribute to d2bs/d2bot#, come to irc.synirc.net/d2bs and ask around.
-
-# D2BS is NOT SAFE from DETECTION!
-
-[**Join the Forums!**](https://blizzhackers.discourse.group)
-
-[**Join the Discord Channel!**](https://discord.gg/z844XRhxFC)
 
 [**Documentation Repo**](https://github.com/blizzhackers/documentation#diablo-2-botting-system-d2bs)
 
