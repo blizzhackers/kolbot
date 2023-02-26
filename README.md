@@ -1,5 +1,5 @@
 [**Join the Forums!**](https://blizzhackers.discourse.group)
-[**Join the Discord Channel!**](https://discord.gg/FuBG8N2)
+
 [**Join the Slack Channel!**](https://join.slack.com/t/blizzhackers/shared_invite/zt-qahq0w11-uzETJNgKmS9DdApJSRQqaw)
 
 ## General
