@@ -2435,7 +2435,10 @@ const Town = {
 			return true;
 		}
 
-		if (!me.canTpToTown()) return false;
+		if (!me.canTpToTown()) {
+			console.warn("Unable to visit town");
+			return false;
+		}
 
 		let preArea = me.area;
 		let preAct = me.act;

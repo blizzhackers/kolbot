@@ -248,7 +248,7 @@ const Pickit = {
 
 	/**
 	 * @param {ItemUnit} unit
-	 * @returns {PickitResult}
+	 * @returns { { result: PickitResult, line: string } }
 	 *	-1 : Needs iding,
 	 *	 0 : Unwanted,
 	 *	 1 : NTIP wants,
@@ -526,6 +526,7 @@ const Pickit = {
 		if (me.dead) return false;
 		
 		let needMule = false;
+		let canUseMule = AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("muleInfo");
 
 		// why wait for idle?
 		while (!me.idle) {
@@ -584,16 +585,17 @@ const Pickit = {
 							}
 
 							// Town visit failed - abort
-							console.log("ÿc7Not enough room for " + Item.color(itemToPick) + itemToPick.name);
+							console.warn("Failed to visit town. ÿc7Not enough room for " + Item.color(itemToPick) + itemToPick.name);
 
 							return false;
 						}
 
 						// Can't make room - trigger automule
 						Item.logger("No room for", itemToPick);
-						console.log("ÿc7Not enough room for " + Item.color(itemToPick) + itemToPick.name);
+						console.warn("ÿc7Not enough room for " + Item.color(itemToPick) + itemToPick.name);
 						
 						if (copyUnit(itemToPick).x !== undefined) {
+							canUseMule && console.debug("Attempt to trigger automule");
 							needMule = true;
 
 							break;
@@ -601,15 +603,15 @@ const Pickit = {
 					}
 
 					// Item can fit - pick it up
-					if (canFit && this.pickItem(itemToPick, status.result, status.line)) {
-						// what should we do if we failed to pick it?
+					if (canFit && !this.pickItem(itemToPick, status.result, status.line)) {
+						console.warn("Failed to pick item " + item.prettyPrint);
 					}
 				}
 			}
 		}
 
 		// Quit current game and transfer the items to mule
-		if (needMule && AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("muleInfo") && AutoMule.getMuleItems().length > 0) {
+		if (needMule && canUseMule && AutoMule.getMuleItems().length > 0) {
 			scriptBroadcast("mule");
 			scriptBroadcast("quit");
 		}
