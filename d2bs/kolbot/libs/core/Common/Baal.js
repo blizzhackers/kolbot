@@ -9,6 +9,16 @@
 	typeof Common !== "object" && (Common = {});
 	Object.defineProperty(Common, "Baal", {
 		value: {
+			throneCoords: {
+				bottomLeft: { x: 15072, y: 5073 },
+				bottomRight: { x: 15118, y: 5073 },
+				bottomCenter: { x: 15093, y: 5073 },
+				entraceArchway: { x: 15097, y: 5099 },
+				topLeft: { x: 15072, y: 5002 },
+				topRight: { x: 15118, y: 5002 },
+				baal: { x: 15090, y: 5014 },
+			},
+
 			checkHydra: function () {
 				let hydra = Game.getMonster(getLocaleString(sdk.locale.monsters.Hydra));
 				if (hydra) {
@@ -35,7 +45,9 @@
 
 				if (monster) {
 					do {
-						if (monster.attackable && monster.y < 5080) {
+						if (monster.attackable
+							&& monster.y < 5080
+							&& (monster.x > 15072 && monster.x < 15118)) {
 							switch (monster.classid) {
 							case sdk.monsters.WarpedFallen:
 							case sdk.monsters.WarpedShaman:
@@ -94,7 +106,7 @@
 				];
 				return pos.forEach((node) => {
 					// no mobs at that next, skip it
-					if ([node.x, node.y].distance < 35 && [node.x, node.y].mobCount({range: 30}) === 0) {
+					if ([node.x, node.y].distance < 35 && [node.x, node.y].mobCount({ range: 30 }) === 0) {
 						return;
 					}
 					Pather.moveTo(node.x, node.y);
@@ -132,10 +144,10 @@
 					break;
 				case sdk.player.class.Assassin:
 					if (Config.UseTraps) {
-						let check = ClassAttack.checkTraps({x: 15094, y: 5028});
+						let check = ClassAttack.checkTraps({ x: 15094, y: 5028 });
 
 						if (check) {
-							return ClassAttack.placeTraps({x: 15094, y: 5028}, 5);
+							return ClassAttack.placeTraps({ x: 15094, y: 5028 }, 5);
 						}
 					}
 
@@ -256,12 +268,12 @@
 			killBaal: function () {
 				if (me.inArea(sdk.areas.ThroneofDestruction)) {
 					Config.PublicMode && Loader.scriptName() === "Baal" && say(Config.Baal.BaalMessage);
-					me.checkForMobs({range: 30}) && this.clearWaves(); // ensure waves are actually done
+					me.checkForMobs({ range: 30 }) && this.clearWaves(); // ensure waves are actually done
 					Pather.moveTo(15090, 5008);
 					delay(5000);
 					Precast.doPrecast(true);
 					Misc.poll(() => {
-						if (me.mode === sdk.player.mode.GettingHit || me.checkForMobs({range: 15})) {
+						if (me.mode === sdk.player.mode.GettingHit || me.checkForMobs({ range: 15 })) {
 							Common.Baal.clearThrone();
 							Pather.moveTo(15090, 5008);
 						}
