@@ -1642,6 +1642,8 @@ const Town = {
 		let items = Storage.Inventory.Compare(Config.Inventory);
 
 		if (items) {
+			Config.SortSettings.SortStash && Storage.Stash.SortItems();
+			
 			for (let i = 0; i < items.length; i += 1) {
 				if (this.canStash(items[i])) {
 					let result = false;

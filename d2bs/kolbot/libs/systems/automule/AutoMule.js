@@ -116,7 +116,7 @@ const AutoMule = {
 
 		let stopCheck = false;
 		let once = false;
-		let muleInfo = {status: ""};
+		let muleInfo = { status: "" };
 		let failCount = 0;
 		let Controls = require("../../modules/Control");
 
@@ -138,7 +138,7 @@ const AutoMule = {
 				muleInfo.status = "ready";
 				
 			// If nothing received our copy data start the mule profile
-			} else if (!sendCopyData(null, muleObj.muleProfile, 10, JSON.stringify({profile: me.profile, mode: this.torchAnniCheck || 0})) && !muleObj.continuousMule) {
+			} else if (!sendCopyData(null, muleObj.muleProfile, 10, JSON.stringify({ profile: me.profile, mode: this.torchAnniCheck || 0 })) && !muleObj.continuousMule) {
 				// if the mule profile isn't already running and there is a profile to be stopped, stop it before starting the mule profile
 				if (!stopCheck && muleObj.stopProfile && !String.isEqual(me.profile, muleObj.stopProfile)) {
 					D2Bot.stop(muleObj.stopProfile, muleObj.stopProfileKeyRelease);
@@ -273,7 +273,7 @@ const AutoMule = {
 			if (mode === 10) {
 				switch (JSON.parse(msg).status) {
 				case "report": // reply to status request
-					sendCopyData(null, muleObj.muleProfile, 12, JSON.stringify({status: status}));
+					sendCopyData(null, muleObj.muleProfile, 12, JSON.stringify({ status: status }));
 
 					break;
 				case "quit": // quit command
@@ -335,6 +335,7 @@ const AutoMule = {
 					throw new Error("Error - Unable to find mule character");
 				}
 			} else {
+				console.debug("MuleProfile :: " + muleObj.muleProfile);
 				sendCopyData(null, muleObj.muleProfile, 11, "begin");
 			}
 
@@ -468,25 +469,8 @@ const AutoMule = {
 		delay(1000);
 		me.cancel();
 
-		// handle sort - for now quick and dirty method
-		Town.openStash() && me.getItemsEx(-1, sdk.items.mode.inStorage)
-			.filter(i => i.isInStash && i.classid !== sdk.quest.item.Cube)
-			.sort((a, b) => b.sizex * b.sizey - a.sizex * a.sizey || b.x - a.x || b.y - a.y)
-			.forEach(item => {
-				let spot = Storage.Stash.FindSpot(item);
-				if (spot) {
-					[spot.x, spot.y] = [spot.y, spot.x]; // remember it's backwards
-					if (spot.x > item.x) return;
-					if (spot.y > item.y && spot.x === item.x) return;
-					if (spot.x === item.x && spot.y === item.y) return;
-					
-					if (!Storage.Stash.MoveTo(item)) {
-						return;
-					}
-					
-					Storage.Reload();
-				}
-			});
+		// clean up stash
+		Storage.Stash.SortItems();
 		me.cancelUIFlags();
 
 		return true;
@@ -771,8 +755,6 @@ const AutoMule = {
 	 * Get whether this is a normal mule or continous mule
 	 */
 	isContinousMule: function () {
-		console.debug(this.Mules);
-		console.debug(this.TorchAnniMules);
 		for (let i in this.Mules) {
 			if (this.Mules.hasOwnProperty(i)) {
 				if (this.Mules[i].muleProfile && String.isEqual(this.Mules[i].muleProfile, me.profile)) {

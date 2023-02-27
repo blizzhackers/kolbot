@@ -183,6 +183,29 @@ let Config = {
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 	],
+	SortSettings: {
+		SortInventory: true,
+		SortStash: true,
+		PlugYStash: false,
+		ItemsSortedFromLeft: [], // default: everything not in Config.ItemsSortedFromRight
+		ItemsSortedFromRight: [
+			// (NOTE: default pickit is fastest if the left side is open)
+			sdk.items.SmallCharm, sdk.items.LargeCharm, sdk.items.GrandCharm, // sort charms from the right
+			sdk.items.TomeofIdentify, sdk.items.TomeofTownPortal, sdk.items.Key, // sort tomes and keys to the right
+			// sort all inventory potions from the right
+			sdk.items.RejuvenationPotion, sdk.items.FullRejuvenationPotion,
+			sdk.items.MinorHealingPotion, sdk.items.LightHealingPotion, sdk.items.HealingPotion, sdk.items.GreaterHealingPotion, sdk.items.SuperHealingPotion,
+			sdk.items.MinorManaPotion, sdk.items.LightManaPotion, sdk.items.ManaPotion, sdk.items.GreaterManaPotion, sdk.items.SuperManaPotion
+		],
+		PrioritySorting: true,
+		ItemsSortedFromLeftPriority: [/*605, 604, 603, 519, 518*/], // (NOTE: the earlier in the index, the further to the Left)
+		ItemsSortedFromRightPriority: [
+			// (NOTE: the earlier in the index, the further to the Right)
+			// sort charms from the right, GC > LC > SC
+			sdk.items.GrandCharm, sdk.items.LargeCharm, sdk.items.SmallCharm,
+			sdk.items.TomeofIdentify, sdk.items.TomeofTownPortal, sdk.items.Key
+		],
+	},
 	LocalChat: {
 		Enabled: false,
 		Toggle: false,
@@ -266,7 +289,7 @@ let Config = {
 	PrimarySlot: -1,
 	LogExperience: false,
 	TownCheck: false,
-	PingQuit: [{Ping: 0, Duration: 0}],
+	PingQuit: [{ Ping: 0, Duration: 0 }],
 	PacketShopping: false,
 
 	// Fastmod
@@ -393,6 +416,7 @@ let Config = {
 	},
 	Tombs: {
 		KillDuriel: false,
+		WalkClear: false,
 	},
 	Eldritch: {
 		OpenChest: false,
@@ -575,14 +599,19 @@ let Config = {
 		GetFade: false,
 		MakeTorch: true,
 		PreGame: {
-			Thawing: {Drink: 0, At: []},
-			Antidote: {Drink: 0, At: []},
+			Thawing: { Drink: 0, At: [] },
+			Antidote: { Drink: 0, At: [] },
 		}
 	},
 	Synch: {
 		WaitFor: []
 	},
 	TristramLeech: {
+		Leader: "",
+		Helper: false,
+		Wait: 5
+	},
+	TombLeech: {
 		Leader: "",
 		Helper: false,
 		Wait: 5
