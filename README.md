@@ -6,7 +6,7 @@
 
 1. D2BS, D2Bot and kolbot # are educational tools with an open source developer community. These tools are meant to be used offline or on private servers that explicitly allow them. These tools are not meant to be abused on battle.net (a Blizzard Entertainment entity).
 
-2. D2BS, D2Bot # and kolbot are provided as is and for FREE. If you paid or are asked to pay for these tools, d.
+2. D2BS, D2Bot # and kolbot are provided as is and for FREE. If you paid or are asked to pay for these tools, do not proceed.
 
 3. These tools are not inteded for cheating, maliciously exploiting, or illegal use of software.
 
