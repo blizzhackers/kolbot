@@ -65,7 +65,7 @@ Object.defineProperty(NPC, "getAct", {
 		case [NPC.Jamella, NPC.Halbu, NPC.Tyrael].includes(name):
 			return [4];
 		case [NPC.Malah, NPC.Anya, NPC.Larzuk, NPC.Qual_Kehk, NPC.Nihlathak].includes(name):
-			return [2];
+			return [5];
 		}
 		return [];
 	},
