@@ -36,7 +36,7 @@ const CollMap = new function () {
 		let coll = !!room ? room.getCollision() : null;
 
 		if (coll) {
-			this.rooms.push({x: room.x, y: room.y, xsize: room.xsize, ysize: room.ysize});
+			this.rooms.push({ x: room.x, y: room.y, xsize: room.xsize, ysize: room.ysize });
 			this.maps.push(coll);
 
 			return true;
@@ -134,7 +134,7 @@ const CollMap = new function () {
 			for (let a = 0; a < collision.length; a++) {
 				for (let b = 0; b < collision[a].length; b++) {
 					if (!(collision[a][b] & 1)) {
-						validTiles.push({x: roomx + b - bMid, y: roomy + a - aMid, distance: getDistance(0, 0, a - aMid, b - bMid)});
+						validTiles.push({ x: roomx + b - bMid, y: roomy + a - aMid, distance: getDistance(0, 0, a - aMid, b - bMid) });
 					}
 				}
 			}
@@ -148,7 +148,7 @@ const CollMap = new function () {
 			return null;
 		}
 
-		return {x: roomx, y: roomy, distance: 0};
+		return { x: roomx, y: roomy, distance: 0 };
 	};
 
 	this.getRandCoordinate = function (cX, xmin, xmax, cY, ymin, ymax, factor = 1) {
@@ -177,6 +177,6 @@ const CollMap = new function () {
 		} while (getCollision(me.area, coordX, coordY) & 1);
 
 		// print("Move " + retry + " from (" + cX + ", " + cY + ") to (" + coordX + ", " + coordY + ")");
-		return {x: coordX, y: coordY};
+		return { x: coordX, y: coordY };
 	};
 };

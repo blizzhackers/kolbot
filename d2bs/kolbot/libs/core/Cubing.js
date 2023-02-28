@@ -407,172 +407,172 @@ const Cubing = {
 
 			switch (index) {
 			case Recipe.Gem:
-				this.recipes.push({Ingredients: ingredients, Index: index, AlwaysEnabled: true});
+				this.recipes.push({ Ingredients: ingredients, Index: index, AlwaysEnabled: true });
 
 				break;
 			// Crafting Recipes--------------------------------------------------------------//
 			case Recipe.HitPower.Helm:
-				this.recipes.push({Ingredients: ingredients, Level: 84, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 84, Index: index });
 
 				break;
 			case Recipe.HitPower.Boots:
-				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 71, Index: index });
 
 				break;
 			case Recipe.HitPower.Gloves:
-				this.recipes.push({Ingredients: ingredients, Level: 79, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 79, Index: index });
 
 				break;
 			case Recipe.HitPower.Belt:
-				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 71, Index: index });
 
 				break;
 			case Recipe.HitPower.Shield:
-				this.recipes.push({Ingredients: ingredients, Level: 82, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 82, Index: index });
 
 				break;
 			case Recipe.HitPower.Body:
-				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 85, Index: index });
 
 				break;
 			case Recipe.HitPower.Amulet:
-				this.recipes.push({Ingredients: ingredients, Level: 90, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 90, Index: index });
 
 				break;
 			case Recipe.HitPower.Ring:
-				this.recipes.push({Ingredients: ingredients, Level: 77, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 77, Index: index });
 
 				break;
 			case Recipe.HitPower.Weapon:
-				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 85, Index: index });
 
 				break;
 			case Recipe.Blood.Helm:
-				this.recipes.push({Ingredients: ingredients, Level: 84, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 84, Index: index });
 
 				break;
 			case Recipe.Blood.Boots:
-				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 71, Index: index });
 
 				break;
 			case Recipe.Blood.Gloves:
-				this.recipes.push({Ingredients: ingredients, Level: 79, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 79, Index: index });
 
 				break;
 			case Recipe.Blood.Belt:
-				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 71, Index: index });
 
 				break;
 			case Recipe.Blood.Shield:
-				this.recipes.push({Ingredients: ingredients, Level: 82, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 82, Index: index });
 
 				break;
 			case Recipe.Blood.Body:
-				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 85, Index: index });
 
 				break;
 			case Recipe.Blood.Amulet:
-				this.recipes.push({Ingredients: ingredients, Level: 90, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 90, Index: index });
 
 				break;
 			case Recipe.Blood.Ring:
-				this.recipes.push({Ingredients: ingredients, Level: 77, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 77, Index: index });
 
 				break;
 			case Recipe.Blood.Weapon:
-				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 85, Index: index });
 
 				break;
 			case Recipe.Caster.Helm:
-				this.recipes.push({Ingredients: ingredients, Level: 84, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 84, Index: index });
 
 				break;
 			case Recipe.Caster.Boots:
-				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 71, Index: index });
 
 				break;
 			case Recipe.Caster.Gloves:
-				this.recipes.push({Ingredients: ingredients, Level: 79, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 79, Index: index });
 
 				break;
 			case Recipe.Caster.Belt:
-				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 71, Index: index });
 
 				break;
 			case Recipe.Caster.Shield:
-				this.recipes.push({Ingredients: ingredients, Level: 82, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 82, Index: index });
 
 				break;
 			case Recipe.Caster.Body:
-				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 85, Index: index });
 
 				break;
 			case Recipe.Caster.Amulet:
-				this.recipes.push({Ingredients: ingredients, Level: 90, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 90, Index: index });
 
 				break;
 			case Recipe.Caster.Ring:
-				this.recipes.push({Ingredients: ingredients, Level: 77, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 77, Index: index });
 
 				break;
 			case Recipe.Caster.Weapon:
-				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 85, Index: index });
 
 				break;
 			case Recipe.Safety.Helm:
-				this.recipes.push({Ingredients: ingredients, Level: 84, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 84, Index: index });
 
 				break;
 			case Recipe.Safety.Boots:
-				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 71, Index: index });
 
 				break;
 			case Recipe.Safety.Gloves:
-				this.recipes.push({Ingredients: ingredients, Level: 79, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 79, Index: index });
 
 				break;
 			case Recipe.Safety.Belt:
-				this.recipes.push({Ingredients: ingredients, Level: 71, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 71, Index: index });
 
 				break;
 			case Recipe.Safety.Shield:
-				this.recipes.push({Ingredients: ingredients, Level: 82, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 82, Index: index });
 
 				break;
 			case Recipe.Safety.Body:
-				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 85, Index: index });
 
 				break;
 			case Recipe.Safety.Amulet:
-				this.recipes.push({Ingredients: ingredients, Level: 90, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 90, Index: index });
 
 				break;
 			case Recipe.Safety.Ring:
-				this.recipes.push({Ingredients: ingredients, Level: 77, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 77, Index: index });
 
 				break;
 			case Recipe.Safety.Weapon:
-				this.recipes.push({Ingredients: ingredients, Level: 85, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Level: 85, Index: index });
 
 				break;
 			// Upgrading Recipes------------------------------------------------------------------------//
 			case Recipe.Unique.Weapon.ToExceptional:
-				this.recipes.push({Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2]});
+				this.recipes.push({ Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2] });
 
 				break;
 			case Recipe.Unique.Weapon.ToElite: // Ladder only
 				if (me.ladder) {
-					this.recipes.push({Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2]});
+					this.recipes.push({ Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2] });
 				}
 
 				break;
 			case Recipe.Unique.Armor.ToExceptional:
-				this.recipes.push({Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2]});
+				this.recipes.push({ Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2] });
 
 				break;
 			case Recipe.Unique.Armor.ToElite: // Ladder only
 				if (me.ladder) {
-					this.recipes.push({Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2]});
+					this.recipes.push({ Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2] });
 				}
 
 				break;
@@ -585,17 +585,17 @@ const Cubing = {
 			case Recipe.Socket.Armor:
 			case Recipe.Socket.Helm:
 			case Recipe.Socket.Rare:
-				this.recipes.push({Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2]});
+				this.recipes.push({ Ingredients: ingredients, Index: index, Ethereal: Config.Recipes[i][2] });
 
 				break;
 			case Recipe.Socket.Magic.LowWeapon:
 				// ilvl < 30
-				this.recipes.push({Ingredients: ingredients, Level: 30, Index: index, Ethereal: Config.Recipes[i][2]});
+				this.recipes.push({ Ingredients: ingredients, Level: 30, Index: index, Ethereal: Config.Recipes[i][2] });
 
 				break;
 			case Recipe.Socket.Magic.HighWeapon:
 				// ilvl >= 30
-				this.recipes.push({Ingredients: ingredients, Level: 30, Index: index, Ethereal: Config.Recipes[i][2]});
+				this.recipes.push({ Ingredients: ingredients, Level: 30, Index: index, Ethereal: Config.Recipes[i][2] });
 
 				break;
 			case Recipe.Reroll.Charm.Small:
@@ -617,16 +617,16 @@ const Cubing = {
 
 				break;
 			case Recipe.Reroll.Rare:
-				this.recipes.push({Ingredients: ingredients, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Index: index });
 
 				break;
 			case Recipe.Reroll.HighRare:
-				this.recipes.push({Ingredients: ingredients, Index: index, Enabled: false});
+				this.recipes.push({ Ingredients: ingredients, Index: index, Enabled: false });
 
 				break;
 			case Recipe.LowToNorm.Weapon:
 			case Recipe.LowToNorm.Armor:
-				this.recipes.push({Ingredients: ingredients, Index: index});
+				this.recipes.push({ Ingredients: ingredients, Index: index });
 
 				break;
 			case Recipe.Rune:
@@ -639,7 +639,7 @@ const Cubing = {
 				case sdk.items.runes.Tal:
 				case sdk.items.runes.Ral:
 				case sdk.items.runes.Ort:
-					this.recipes.push({Ingredients: ingredients, Index: index, AlwaysEnabled: true});
+					this.recipes.push({ Ingredients: ingredients, Index: index, AlwaysEnabled: true });
 
 					break;
 				case sdk.items.runes.Thul:
@@ -647,7 +647,7 @@ const Cubing = {
 				case sdk.items.runes.Sol:
 				case sdk.items.runes.Shael:
 				case sdk.items.runes.Dol:
-					this.recipes.push({Ingredients: ingredients, Index: index});
+					this.recipes.push({ Ingredients: ingredients, Index: index });
 
 					break;
 				case sdk.items.runes.Hel:
@@ -670,7 +670,7 @@ const Cubing = {
 				case sdk.items.runes.Cham:
 				case sdk.items.runes.Zod:
 					if (me.ladder) {
-						this.recipes.push({Ingredients: ingredients, Index: index});
+						this.recipes.push({ Ingredients: ingredients, Index: index });
 					}
 
 					break;
@@ -678,7 +678,7 @@ const Cubing = {
 
 				break;
 			case Recipe.Token:
-				this.recipes.push({Ingredients: ingredients, Index: index, AlwaysEnabled: true});
+				this.recipes.push({ Ingredients: ingredients, Index: index, AlwaysEnabled: true });
 
 				break;
 			case Recipe.Rejuv:
@@ -1222,7 +1222,7 @@ const Cubing = {
 		revpots.forEach(function (pot, index) {
 
 			// Add this to the original location array
-			origin.push({location: pot.location, x: pot.x, y: pot.y});
+			origin.push({ location: pot.location, x: pot.x, y: pot.y });
 
 			Town.openStash();
 

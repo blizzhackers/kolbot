@@ -19,7 +19,7 @@ include("systems/gameaction/GameAction.js");
 let Overrides = require("../libs/modules/Override");
 
 new Overrides.Override(Attack, Attack.getNearestMonster, function (orignal) {
-	let monster = orignal({skipBlocked: false, skipImmune: false});
+	let monster = orignal({ skipBlocked: false, skipImmune: false });
 	return (monster ? " to " + monster.name : "");
 }).apply();
 

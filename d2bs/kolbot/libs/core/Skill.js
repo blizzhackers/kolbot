@@ -10,13 +10,15 @@
 	 * @constructor
 	 * @param {number} skillId
 	 */
-	function SkillData(skillId) {
+	function SkillData (skillId) {
 		/** @type {boolean} */
 		this.hardpoints = false;
 		/** @type {boolean} */
 		this.checked = false;
 		/** @type {number} */
 		this.manaCost = null;
+		/** @type {number} */
+		this.lvlReq = null;
 		// this part feels kinda ugly to me, todo is figure out a better method for conditon
 		/** @type {Function} */
 		this.condition = typeof skillConditions[skillId] === "function"
@@ -143,9 +145,9 @@
 				if (Config.UseColdArmor === true) {
 					Precast.skills.coldArmor.best = (function () {
 						let coldArmor = [
-							{skillId: sdk.skills.ShiverArmor, level: me.getSkill(sdk.skills.ShiverArmor, sdk.skills.subindex.SoftPoints)},
-							{skillId: sdk.skills.ChillingArmor, level: me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.SoftPoints)},
-							{skillId: sdk.skills.FrozenArmor, level: me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.SoftPoints)},
+							{ skillId: sdk.skills.ShiverArmor, level: me.getSkill(sdk.skills.ShiverArmor, sdk.skills.subindex.SoftPoints) },
+							{ skillId: sdk.skills.ChillingArmor, level: me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.SoftPoints) },
+							{ skillId: sdk.skills.FrozenArmor, level: me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.SoftPoints) },
 						].filter(skill => !!skill.level && skill.level > 0).sort((a, b) => b.level - a.level).first();
 						return coldArmor !== undefined ? coldArmor.skillId : false;
 					})();

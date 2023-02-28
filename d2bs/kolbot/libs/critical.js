@@ -5,8 +5,6 @@
 * 
 */
 
-(() => {
-	include("json2.js"); // I don't know if this one is actually critical but including it
-	include("polyfill.js");
-	me.ingame ? include("oog/D2Bot.js") : include("OOG.js");
-})();
+include("json2.js"); // I don't know if this one is actually critical but including it
+include("polyfill.js");
+me.ingame ? include("oog/D2Bot.js") : include("OOG.js");

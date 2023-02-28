@@ -8,27 +8,27 @@
 function GetKeys() {
 	Town.doChores();
 
-	if (!me.findItems("pk1") || me.findItems("pk1").length < 3) {
+	if (me.getItemsEx(sdk.items.quest.KeyofTerror, sdk.items.mode.inStorage).length < 3) {
 		try {
 			Loader.runScript("Countess");
-		} catch (countessError) {
-			print("ÿc1Countess failed");
+		} catch (e) {
+			console.error("ÿc1Countess failed :: ", e);
 		}
 	}
 
-	if (!me.findItems("pk2") || me.findItems("pk2").length < 3) {
+	if (me.getItemsEx(sdk.items.quest.KeyofHate, sdk.items.mode.inStorage).length < 3) {
 		try {
 			Loader.runScript("Summoner", () => Config.Summoner.FireEye = false);
-		} catch (summonerError) {
-			print("ÿc1Summoner failed");
+		} catch (e) {
+			console.error("ÿc1Summoner failed :: ", e);
 		}
 	}
 
-	if (!me.findItems("pk3") || me.findItems("pk3").length < 3) {
+	if (me.getItemsEx(sdk.items.quest.KeyofDestruction, sdk.items.mode.inStorage).length < 3) {
 		try {
 			Loader.runScript("Nihlathak");
-		} catch (nihlathakError) {
-			print("ÿc1Nihlathak failed");
+		} catch (e) {
+			console.error("ÿc1Nihlathak failed :: ", e);
 		}
 	}
 

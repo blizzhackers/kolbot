@@ -905,7 +905,7 @@ Unit.prototype.use = function () {
  * @returns Unit[]
  */
 Unit.prototype.checkItem = function (itemInfo) {
-	if (this === undefined || this.type > 1 || typeof itemInfo !== "object") return {have: false, item: null};
+	if (this === undefined || this.type > 1 || typeof itemInfo !== "object") return { have: false, item: null };
 
 	const itemObj = Object.assign({}, {
 		classid: -1,
@@ -962,8 +962,8 @@ Unit.prototype.checkItem = function (itemInfo) {
  * @returns Unit[]
  */
 Unit.prototype.findFirst = function (itemInfo = []) {
-	if (this === undefined || this.type > 1) return {have: false, item: null};
-	if (!Array.isArray(itemInfo) || typeof itemInfo[0] !== "object") return {have: false, item: null};
+	if (this === undefined || this.type > 1) return { have: false, item: null };
+	if (!Array.isArray(itemInfo) || typeof itemInfo[0] !== "object") return { have: false, item: null };
 	let itemList = this.getItemsEx();
 
 	for (let i = 0; i < itemInfo.length; i++) {
@@ -1897,12 +1897,12 @@ Unit.prototype.equip = function (destLocation = undefined) {
 		let tempspot = Storage.Stash.FindSpot(item);
 
 		if (getUIFlag(sdk.uiflags.Stash) && tempspot) {
-			return {location: Storage.Stash.location, coord: tempspot};
+			return { location: Storage.Stash.location, coord: tempspot };
 		}
 
 		tempspot = Storage.Inventory.FindSpot(item);
 
-		return tempspot ? {location: Storage.Inventory.location, coord: tempspot} : false;
+		return tempspot ? { location: Storage.Inventory.location, coord: tempspot } : false;
 	};
 	const doubleHanded = [
 		sdk.items.type.Staff, sdk.items.type.Bow, sdk.items.type.Polearm, sdk.items.type.Crossbow,
@@ -1947,7 +1947,7 @@ Unit.prototype.equip = function (destLocation = undefined) {
 			// Last item, so swap instead of putting off first
 			if (index === (currentEquiped.length - 1)) {
 				print("swap " + this.name + " for " + item.name);
-				let oldLoc = {x: this.x, y: this.y, location: this.location};
+				let oldLoc = { x: this.x, y: this.y, location: this.location };
 				clickItemAndWait(sdk.clicktypes.click.item.Left, this); // Pick up current item
 				clickItemAndWait(sdk.clicktypes.click.item.Left, destLocation.first()); // the swap of items
 				// Find a spot for the current item
@@ -2083,7 +2083,7 @@ Unit.prototype.getRes = function (type, difficulty) {
 					return mon.attackable && getDistance(x, y, mon.x, mon.y) < settings.range
 						&& (!settings.type || (settings.type & mon.spectype))
 						&& (settings.ignoreClassids.indexOf(mon.classid) === -1)
-						&& !CollMap.checkColl({x: x, y: y}, mon, settings.coll, 1);
+						&& !CollMap.checkColl({ x: x, y: y }, mon, settings.coll, 1);
 				}).length;
 		}
 	});

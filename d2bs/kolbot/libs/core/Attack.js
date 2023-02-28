@@ -208,10 +208,10 @@ const Attack = {
 		Config.UseMerc && !me.mercrevivecost && (merc = Misc.poll(() => me.getMerc(), 1000, 100));
 
 		// Check merc infinity
-		!!merc && (Attack.infinity = merc.checkItem({name: sdk.locale.items.Infinity}).have);
+		!!merc && (Attack.infinity = merc.checkItem({ name: sdk.locale.items.Infinity }).have);
 
 		// Check player infinity - only check if merc doesn't have
-		!Attack.infinity && (Attack.infinity = me.checkItem({name: sdk.locale.items.Infinity, equipped: true}).have);
+		!Attack.infinity && (Attack.infinity = me.checkItem({ name: sdk.locale.items.Infinity, equipped: true }).have);
 
 		return Attack.infinity;
 	},
@@ -222,8 +222,8 @@ const Attack = {
 	 */
 	checkAuradin: function () {
 		Attack.auradin = me.haveSome([
-			{name: sdk.locale.items.Dragon, equipped: true}, {name: sdk.locale.items.Dream, equipped: true},
-			{name: sdk.locale.items.HandofJustice, equipped: true}, {name: sdk.locale.items.Ice, equipped: true},
+			{ name: sdk.locale.items.Dragon, equipped: true }, { name: sdk.locale.items.Dream, equipped: true },
+			{ name: sdk.locale.items.HandofJustice, equipped: true }, { name: sdk.locale.items.Ice, equipped: true },
 		]);
   
 		return Attack.auradin;
@@ -274,7 +274,7 @@ const Attack = {
 		let errorInfo = "";
 		let attackCount = 0;
 
-		let lastLoc = {x: me.x, y: me.y};
+		let lastLoc = { x: me.x, y: me.y };
 		let tick = getTickCount();
 		console.log("ÿc7Kill ÿc0:: " + who);
 		Config.MFLeader && Pather.makePortal() && say("kill " + classId);
@@ -321,7 +321,7 @@ const Attack = {
 				retry = 0;
 			}
 
-			lastLoc = {x: me.x, y: me.y};
+			lastLoc = { x: me.x, y: me.y };
 			attackCount++;
 		}
 
@@ -469,10 +469,10 @@ const Attack = {
 				return Attack.clear(10);
 			}
 
-			({orgx, orgy} = { orgx: boss.x, orgy: boss.y });
+			({ orgx, orgy } = { orgx: boss.x, orgy: boss.y });
 			Config.MFLeader && !!bossId && Pather.makePortal() && say("clear " + (["number", "string"].includes(typeof bossId) ? bossId : bossId.name));
 		} else {
-			({orgx, orgy} = { orgx: me.x, orgy: me.y });
+			({ orgx, orgy } = { orgx: me.x, orgy: me.y });
 		}
 
 		let monsterList = [];
@@ -494,7 +494,7 @@ const Attack = {
 		while (start && monsterList.length > 0 && attackCount < Config.MaxAttackCount) {
 			if (me.dead) return false;
 			
-			boss && (({orgx, orgy} = { orgx: boss.x, orgy: boss.y }));
+			boss && (({ orgx, orgy } = { orgx: boss.x, orgy: boss.y }));
 			monsterList.sort(sortfunc);
 			// target = copyUnit(monsterList[0]);
 			target = Game.getMonster(-1, -1, monsterList[0].gid);
@@ -531,7 +531,7 @@ const Attack = {
 					}
 
 					if (i === gidAttack.length) {
-						gidAttack.push({gid: target.gid, attacks: 0, name: target.name});
+						gidAttack.push({ gid: target.gid, attacks: 0, name: target.name });
 					}
 
 					gidAttack[i].attacks += 1;
@@ -776,7 +776,7 @@ const Attack = {
 					}
 
 					if (i === gidAttack.length) {
-						gidAttack.push({gid: target.gid, attacks: 0});
+						gidAttack.push({ gid: target.gid, attacks: 0 });
 					}
 
 					gidAttack[i].attacks += 1;
@@ -848,7 +848,7 @@ const Attack = {
 	securePosition: function (x, y, range = 15, timer = 3000, skipBlocked = true, special = false) {
 		let tick;
 
-		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
+		(typeof x !== "number" || typeof y !== "number") && ({ x, y } = me);
 		skipBlocked === true && (skipBlocked = sdk.collision.Ranged);
 
 		while (true) {
@@ -1169,7 +1169,7 @@ const Attack = {
 	 */
 	openChests: function (range, x, y) {
 		if (!Config.OpenChests.Enabled) return false;
-		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
+		(typeof x !== "number" || typeof y !== "number") && ({ x, y } = me);
 		range === undefined && (range = 10);
 
 		let list = [];
@@ -1239,7 +1239,7 @@ const Attack = {
 		grid.sort((a, b) => getDistance(b.x, b.y, unit.x, unit.y) - getDistance(a.x, a.y, unit.x, unit.y));
 
 		for (let i = 0; i < grid.length; i += 1) {
-			if (!(CollMap.getColl(grid[i].x, grid[i].y, true) & sdk.collision.BlockWall) && !CollMap.checkColl(unit, {x: grid[i].x, y: grid[i].y}, sdk.collision.Ranged)) {
+			if (!(CollMap.getColl(grid[i].x, grid[i].y, true) & sdk.collision.BlockWall) && !CollMap.checkColl(unit, { x: grid[i].x, y: grid[i].y }, sdk.collision.Ranged)) {
 				let currCount = this.getMonsterCount(grid[i].x, grid[i].y, range, monList);
 
 				if (currCount < count) {
@@ -1307,7 +1307,7 @@ const Attack = {
 				let coll = CollMap.getColl(i, j, true);
 
 				if (typeof coll === "number") {
-					grid.push({x: i, y: j, coll: coll});
+					grid.push({ x: i, y: j, coll: coll });
 				}
 			}
 		}
@@ -1680,7 +1680,7 @@ const Attack = {
 				// ignore this spot as it's too close to our current position when we are forcing a new location
 				if (force && [cx, cy].distance < distance) continue;
 				if (Pather.checkSpot(cx, cy, sdk.collision.BlockWall, false)) {
-					coords.push({x: cx, y: cy});
+					coords.push({ x: cx, y: cy });
 				}
 			}
 
@@ -1691,7 +1691,7 @@ const Attack = {
 
 				for (let i = 0; i < coords.length; i += 1) {
 					// Valid position found
-					if (!CollMap.checkColl({x: coords[i].x, y: coords[i].y}, unit, coll, 1)) {
+					if (!CollMap.checkColl({ x: coords[i].x, y: coords[i].y }, unit, coll, 1)) {
 						// print("ÿc9optimal pos build time: ÿc2" + (getTickCount() - t) + " ÿc9distance from target: ÿc2" + getDistance(cx, cy, unit.x, unit.y));
 						if ((() => {
 							switch (walk) {
@@ -1802,7 +1802,7 @@ const Attack = {
 		for (let i = 0; i < angles.length; i += 1) {
 			let coords = [Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * 4 + unit.x), Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * 4 + unit.y)];
 
-			if (!CollMap.checkColl(me, {x: coords[0], y: coords[1]}, sdk.collision.BlockWall, 1)) {
+			if (!CollMap.checkColl(me, { x: coords[0], y: coords[1] }, sdk.collision.BlockWall, 1)) {
 				return Skill.cast(sdk.skills.Whirlwind, sdk.skills.hand.Right, coords[0], coords[1]);
 			}
 		}

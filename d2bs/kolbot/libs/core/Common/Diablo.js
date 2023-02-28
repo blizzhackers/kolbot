@@ -14,6 +14,13 @@
 	 * I see this mostly with viz, also have seen seis fail due to not being close enough, even though he spawned
 	 */
 	Object.defineProperty(Common, "Diablo", {
+		/**
+		 * @namespace Common
+		 * 
+		 * @typedef Diablo
+		 * @property {boolean} diabloSpawned
+		 * 
+		 */
 		value: {
 			diabloSpawned: false,
 			diaWaitTime: Time.seconds(30),
@@ -25,8 +32,8 @@
 			vizLayout: -1,
 			seisLayout: -1,
 			infLayout: -1,
-			entranceCoords: {x: 7790, y: 5544},
-			starCoords: {x: 7791, y: 5293},
+			entranceCoords: { x: 7790, y: 5544 },
+			starCoords: { x: 7791, y: 5293 },
 			// path coordinates
 			entranceToStar: [
 				[7794, 5517], [7791, 5491], [7768, 5459],
@@ -261,8 +268,8 @@
 
 						if (classid === sdk.objects.DiabloSealInfector && me.assassin && this.infLayout === 1) {
 							if (Config.UseTraps) {
-								let check = ClassAttack.checkTraps({x: 7899, y: 5293});
-								check && ClassAttack.placeTraps({x: 7899, y: 5293}, check);
+								let check = ClassAttack.checkTraps({ x: 7899, y: 5293 });
+								check && ClassAttack.placeTraps({ x: 7899, y: 5293 }, check);
 							}
 						}
 
@@ -368,7 +375,7 @@
 					Pather.moveToEx(this.starCoords.x, this.starCoords.y, { minDist: 15, callback: () => {
 						let seis = Game.getMonster(getLocaleString(sdk.locale.monsters.LordDeSeis));
 						return seis && (seis.distance < 30 || seis.dead);
-					}});
+					} });
 				}
 
 				Config.Diablo.SealLeader && say("out");
@@ -493,10 +500,10 @@
 					return this.hammerdinPreAttack(id, 8);
 				case sdk.player.class.Assassin:
 					if (Config.UseTraps) {
-						let trapCheck = ClassAttack.checkTraps({x: coords[0], y: coords[1]});
+						let trapCheck = ClassAttack.checkTraps({ x: coords[0], y: coords[1] });
 
 						if (trapCheck) {
-							ClassAttack.placeTraps({x: coords[0], y: coords[1]}, 5);
+							ClassAttack.placeTraps({ x: coords[0], y: coords[1] }, 5);
 
 							return true;
 						}
@@ -530,7 +537,7 @@
 
 					if (boss) {
 						Common.Diablo.hammerdinPreAttack(name, 8);
-						return (Config.Diablo.Fast ? Attack.kill(name) : Attack.clear(40, 0, name, this.sort));
+						return (Config.Diablo.Fast ? Attack.kill(boss) : Attack.clear(40, 0, boss, this.sort));
 					}
 
 					delay(250);
@@ -545,7 +552,7 @@
 				case sdk.player.class.Sorceress:
 				case sdk.player.class.Necromancer:
 				case sdk.player.class.Assassin:
-					return Pather.moveNear(7791, 5293, (me.sorceress ? 35 : 25), {returnSpotOnError: true});
+					return Pather.moveNear(7791, 5293, (me.sorceress ? 35 : 25), { returnSpotOnError: true });
 				case sdk.player.class.Paladin:
 				case sdk.player.class.Druid:
 				case sdk.player.class.Barbarian:
@@ -594,8 +601,8 @@
 							break;
 						case sdk.player.class.Assassin:
 							if (Config.UseTraps) {
-								let trapCheck = ClassAttack.checkTraps({x: 7793, y: 5293});
-								trapCheck && ClassAttack.placeTraps({x: 7793, y: 5293, classid: sdk.monsters.Diablo}, trapCheck);
+								let trapCheck = ClassAttack.checkTraps({ x: 7793, y: 5293 });
+								trapCheck && ClassAttack.placeTraps({ x: 7793, y: 5293, classid: sdk.monsters.Diablo }, trapCheck);
 							}
 
 							Config.AttackSkill[1] === sdk.skills.ShockWeb && Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Right, 7793, 5293);

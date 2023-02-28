@@ -187,7 +187,7 @@ const ClassAttack = {
 					}
 
 					if (!unit.dead && Skill.cast(timedSkill, Skill.getHand(timedSkill), unit)) {
-						this.lightFuryTick = getTickCount();
+						ClassAttack.lightFuryTick = getTickCount();
 					}
 
 					return Attack.Result.SUCCESS;

@@ -1,6 +1,6 @@
 /**
 *  @filename    Eldritch.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        kill Eldritch the Rectifier, optionally kill Shenk the Overseer, Dac Farren and open chest
 *
 */
@@ -9,7 +9,7 @@ function Eldritch() {
 	Town.doChores();
 	Pather.useWaypoint(sdk.areas.FrigidHighlands);
 	Precast.doPrecast(true);
-	let {x, y} = me;
+	let { x, y } = me;
 	Pather.moveTo(3745, 5084);
 	Attack.kill(getLocaleString(sdk.locale.monsters.EldritchtheRectifier));
 	
@@ -19,7 +19,7 @@ function Eldritch() {
 		if (Config.Eldritch.OpenChest && Pather.moveNearPreset(sdk.areas.FrigidHighlands, sdk.unittype.Object, sdk.objects.LargeSparklyChest, 10)) {
 			Misc.openChest(sdk.objects.FrigidHighlandsChest) && Pickit.pickItems();
 			// check distance from current location to shenk and if far tp to town and use wp instead
-			[x, y].distance > 120 && Town.goToTown() && Pather.useWaypoint(sdk.areas.FrigidHighlands);
+			([x, y].distance > 120 || !Pather.canTeleport()) && Town.goToTown() && Pather.useWaypoint(sdk.areas.FrigidHighlands);
 		}
 	} catch (e) {
 		console.warn("(Eldritch) :: Failed to open chest. " + e);

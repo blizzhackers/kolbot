@@ -7,7 +7,14 @@
 */
 
 const Misc = {
-	// Click something
+	/**
+	 * Click something
+	 * @param {number} button 
+	 * @param {number} shift 
+	 * @param {number | Unit} [x] 
+	 * @param {number} [y] 
+	 * @returns {boolean}
+	 */
 	click: function (button, shift, x, y) {
 		if (arguments.length < 2) throw new Error("Misc.click: Needs at least 2 arguments.");
 
@@ -47,7 +54,11 @@ const Misc = {
 		return true;
 	},
 
-	// Check if a player is in your party
+	/**
+	 * Check if a player is in your party
+	 * @param {string} name 
+	 * @returns {boolean}
+	 */
 	inMyParty: function (name) {
 		if (me.name === name) return true;
 
@@ -200,13 +211,21 @@ const Misc = {
 		return !!unit ? unit.area : 0;
 	},
 
-	// autoleader by Ethic - refactored by theBGuy
+	/**
+	 * autoleader by Ethic - refactored by theBGuy
+	 * Autodetect leader for leech scripts by looking to see who first enters a certain area
+	 * @param {{ destination: number | number[], quitIf?: Function, timeout?: number }} givenSettings 
+	 * @returns 
+	 */
 	autoLeaderDetect: function (givenSettings = {}) {
 		const settings = Object.assign({}, {
 			destination: -1,
 			quitIf: false,
 			timeout: Infinity
 		}, givenSettings);
+
+		// make destination an array so it's easier to handle both cases
+		!Array.isArray(settings.destination) && (settings.destination = [settings.destination]);
 
 		let leader;
 		let startTick = getTickCount();
@@ -222,7 +241,7 @@ const Misc = {
 				if (check && settings.quitIf(suspect.area)) return false;
 
 				// first player not hostile found in destination area...
-				if (suspect.area === settings.destination && !getPlayerFlag(me.gid, suspect.gid, 8)) {
+				if (settings.destination.includes(suspect.area) && !getPlayerFlag(me.gid, suspect.gid, 8)) {
 					leader = suspect.name; // ... is our leader
 					console.log("ÿc4Autodetected " + leader);
 
@@ -491,8 +510,9 @@ const Misc = {
 	 * @param {number} type 
 	 * @param {boolean} use 
 	 * @returns {boolean} Sucesfully found shrine(s)
-	 * @todo If we are trying to find a specific shrine then generate path and perform callback after each node to see if we are within range
-	 * of getUnit and can see the shrine type so we know whether to continue moving to it or not.
+	 * @todo 
+	 * - Sometimes it seems like calling getPresetObjects to quickly after taking an exit causes a crash, only anecdotal evidence though. Test delays
+	 * - Add the rest of the preset shrine id's to look for
 	 */
 	getShrinesInArea: function (area, type, use) {
 		let shrineLocs = [];
@@ -661,13 +681,20 @@ const Misc = {
 		}
 	},
 
+	/**
+	 * @param {string} msg 
+	 * @returns {void}
+	 */
 	debugLog: function (msg) {
 		if (!Config.Debug) return;
 		debugLog(me.profile + ": " + msg);
 	},
 
-	// Use a NPC menu. Experimental function, subject to change
-	// id = string number (with exception of Ressurect merc).
+	/**
+	 * Use a NPC menu. Experimental function, subject to change
+	 * @param {number} id - string number (with exception of Ressurect merc).
+	 * @returns {boolean}
+	 */
 	useMenu: function (id) {
 		//print("useMenu " + getLocaleString(id));
 
@@ -703,6 +730,12 @@ const Misc = {
 		return false;
 	},
 
+	/**
+	 * @param {Function} check 
+	 * @param {number} timeout 
+	 * @param {number} sleep 
+	 * @returns {boolean}
+	 */
 	poll: function (check, timeout = 6000, sleep = 40) {
 		let ret, start = getTickCount();
 
@@ -717,7 +750,10 @@ const Misc = {
 		return false;
 	},
 
-	// returns array of UI flags that are set, or null if none are set
+	/**
+	 * @param {number[]} excluded 
+	 * @returns {number[] | null} array of UI flags that are set, or null if none are set
+	 */
 	getUIFlags: function (excluded = []) {
 		if (!me.gameReady) return null;
 
@@ -739,12 +775,21 @@ const Misc = {
 		return flags.length ? flags : null;
 	},
 
+	/**
+	 * @param {number} id 
+	 * @param {number} state 
+	 * @returns {0 | 1}
+	 */
 	checkQuest: function (id, state) {
 		Packet.questRefresh();
 		delay(500);
 		return me.getQuest(id, state);
 	},
 
+	/**
+	 * @param {number} questID 
+	 * @returns {number[]} List of set quest states
+	 */
 	getQuestStates: function (questID) {
 		if (!me.gameReady) return [];
 		Packet.questRefresh();

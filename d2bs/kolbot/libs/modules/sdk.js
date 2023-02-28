@@ -2548,6 +2548,12 @@
 			A5Barb: 561,
 		},
 
+		missiles: {
+			DiabloLightning: 172,
+			FissureCrack1: 462,
+			FissureCrack2: 463,
+		},
+
 		storage: {
 			Equipped: 1,
 			Belt: 2,

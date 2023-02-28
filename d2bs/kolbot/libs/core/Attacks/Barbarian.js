@@ -159,7 +159,6 @@ const ClassAttack = {
 	findItem: function (range = 10) {
 		if (!Skill.canUse(sdk.skills.FindItem)) return false;
 
-		let retry = false;
 		let corpseList = [];
 		const { x: orgX, y: orgY } = me;
 
@@ -231,10 +230,6 @@ const ClassAttack = {
 					}
 				}
 			}
-		}
-
-		if (retry) {
-			return this.findItem(me.inArea(sdk.areas.Travincal) ? 60 : 20);
 		}
 
 		Config.FindItemSwitch && me.switchWeapons(Attack.getPrimarySlot());

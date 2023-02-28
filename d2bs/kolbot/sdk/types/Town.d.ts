@@ -2,6 +2,7 @@
 declare global {
 	type NPC = string;
 	export namespace NPC {
+		function getAct(name: string): number[];
 		const Akara: string;
 		const Gheed: string;
 		const Charsi: string;

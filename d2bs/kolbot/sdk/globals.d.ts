@@ -267,34 +267,36 @@ declare global {
 		readonly poisonRes: number;
 		readonly hpPercent: number;
 		readonly prettyPrint: string;
-
-		getStatEx(one: number, sub?: number): number;
+		
+		// D2BS built in
 		getNext(): Unit | false;
-		cancel(number?: number): boolean;
-		repair(): boolean;
-		useMenu(): boolean;
 		interact(): boolean;
 		interact(area: number): boolean;
 		getItem(classId?: number, mode?: number, unitId?: number): ItemUnit | false;
 		getItem(name?: string, mode?: number, unitId?: number): ItemUnit | false;
 		getItems(...args: any[]): ItemUnit[] | false;
-		getItemsEx(classId?: number, mode?: number, unitId?: number): ItemUnit[];
-		getItemsEx(name?: string, mode?: number, unitId?: number): ItemUnit[];
 		getMerc(): MercUnit;
 		getMercHP(): number | false;
-
-		// me.getSkill(0-4); //
-		getSkill(type: 0 | 1 | 2 | 3 | 4): number;
+		/**
+		 * @param type -
+		 * - `me.getSkill(0)` : Name of skill on right hand
+		 * - `me.getSkill(1)` : Name of skill on left hand
+		 * - `me.getSkill(2)` : ID of skill on right hand
+		 * - `me.getSkill(3)` : ID of skill on left hand
+		 * - `me.getSkill(4)` : Array of all skills in format [skillId, hardPoints, softPoints, ...repeat]
+		 */
+		getSkill(type: 0 | 1 | 2 | 3 | 4): number | number[];
 		getSkill(skillId: number, type: 0 | 1, item?: ItemUnit): number;
-
-		getParent(): Unit | string;
-		overhead(msg: string): void;
 		getStat(index: number, subid?: number, extra?: number): number;
 		getState(index: number, subid?: number): boolean;
-		setSkill(): boolean;
-		move(x: number, y: number): boolean;
 		getQuest(quest: number, subid: number): number
+		getParent(): Unit | string;
 		getMinionCount(): number;
+
+		// additions from kolbot		
+		getStatEx(one: number, sub?: number): number;
+		getItemsEx(classId?: number, mode?: number, unitId?: number): ItemUnit[];
+		getItemsEx(name?: string, mode?: number, unitId?: number): ItemUnit[];
 		inArea(area: number): boolean;
 		checkForMobs(givenSettings: {
 			range?: number;
@@ -311,7 +313,6 @@ declare global {
 
 	type MonsterType = 1;
 	interface Monster extends Unit {
-
 	}
 
 	class Monster extends Unit {
@@ -365,6 +366,7 @@ declare global {
 		readonly itemcount: number;
 
 		openMenu(): boolean;
+		useMenu(): boolean;
 		startTrade: (mode: any) => (any | boolean);
 	}
 
@@ -461,6 +463,7 @@ declare global {
 		buy(shift?: boolean, gamble?: boolean): boolean;
 		sellOrDrop():void
 		toCursor():boolean
+		use(): boolean;
 	}
 
 	type TileType = 5;
@@ -535,6 +538,12 @@ declare global {
 		readonly inShop: boolean;
 		readonly skillDelay: boolean;
 
+		overhead(msg: string): void;
+		repair(): boolean;
+		revive(): void;
+		move(x: number, y: number): boolean;
+		setSkill(): boolean;
+		cancel(number?: number): boolean;
 		inArea(area: number): boolean;
 		switchWeapons(slot: 0 | 1): void;
 		switchToPrimary(): boolean;
@@ -551,7 +560,6 @@ declare global {
 		equip(destination: number | undefined, item: ItemUnit);
 		findItem(id?: number | string, mode?: number, location?: number, quality?: number): ItemUnit | boolean;
 		findItems(id?: number | string, mode?: number, location?: number): ItemUnit[];
-		revive(): void;
 		getRepairCost(): number;
 		findItems(param: number, number?: number, number2?: number): ItemUnit[];
 		usingShield(): boolean;

@@ -6,7 +6,7 @@
 */
 
 function Duriel () {
-	this.killDuriel = function () {
+	const killDuriel = function () {
 		let target = Misc.poll(() => Game.getMonster(sdk.monsters.Duriel), 1000, 200);
 		if (!target) throw new Error("Duriel not found.");
 
@@ -41,14 +41,14 @@ function Duriel () {
 		}, 1000, 200);
 	}
 
-	if (!me.inArea(sdk.areas.DurielsLair) && (!unit || !Pather.useUnitEx({unit: unit}, sdk.areas.DurielsLair))) {
+	if (!me.inArea(sdk.areas.DurielsLair) && (!unit || !Pather.useUnitEx({ unit: unit }, sdk.areas.DurielsLair))) {
 		Attack.clear(10);
 		Pather.useUnit(sdk.unittype.Object, sdk.objects.PortaltoDurielsLair, sdk.areas.DurielsLair);
 	}
 
 	if (!me.inArea(sdk.areas.DurielsLair)) throw new Error("Failed to move to Duriel");
 
-	me.sorceress && me.classic ? this.killDuriel() : Attack.kill(sdk.monsters.Duriel);
+	me.sorceress && me.classic ? killDuriel() : Attack.kill(sdk.monsters.Duriel);
 	Pickit.pickItems();
 
 	return true;

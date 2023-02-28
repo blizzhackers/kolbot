@@ -18,7 +18,7 @@ function main() {
 	const scripts = ["default.dbj", "threads/antihostile.js", "threads/rushthread.js", "threads/CloneKilla.js"];
 
 	// override broadCastIntent - shouldn't be called at all in this thread
-	Pather.broadcastIntent = () => null;
+	Pather.broadcastIntent = () => {};
 
 	const pause = function () {
 		for (let i = 0; i < scripts.length; i += 1) {

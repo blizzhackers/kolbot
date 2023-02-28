@@ -284,7 +284,7 @@ const ClassAttack = {
 
 			if (Attack.validSpot(unit.x + cx, unit.y + cy)) {
 				// don't clear while trying to reposition
-				return Pather.moveToEx(unit.x + cx, unit.y + cy, {clearSettings: {allowClearing: false}});
+				return Pather.moveToEx(unit.x + cx, unit.y + cy, { clearSettings: { allowClearing: false } });
 			}
 		}
 

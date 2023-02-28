@@ -6,9 +6,7 @@
 */
 
 function main() {
-	include("json2.js");     // required?
-	include("polyfill.js");  // required
-	include("oog/D2Bot.js"); // required
+	include("critical.js");	// required
 	D2Bot.init();
 	console.log("Heartbeat loaded");
 

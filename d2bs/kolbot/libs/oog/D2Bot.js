@@ -10,7 +10,7 @@ includeIfNotIncluded("oog/DataFile.js");
 
 (function (root, factory) {
 	if (typeof module === "object" && typeof module.exports === "object") {
-		const v = factory();
+		let v = factory();
 		if (v !== undefined) module.exports = v;
 	} else if (typeof define === "function" && define.amd) {
 		define(["require", "../modules/CopyData"], factory);

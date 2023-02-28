@@ -39,9 +39,9 @@
 	if (threadType === "thread") {
 		print("ÿc2Kolbotÿc0 :: Team thread started");
 
-		Messaging.on("Team", data => {
-			return typeof data === "object" && data && data.hasOwnProperty("call") && Team[data.call].apply(Team, data.hasOwnProperty("args") && data.args || []);
-		});
+		Messaging.on("Team", data => (
+			typeof data === "object" && data && data.hasOwnProperty("call") && Team[data.call].apply(Team, data.hasOwnProperty("args") && data.args || [])
+		));
 
 		Worker.runInBackground.copydata = (new function () {
 			const workBench = [];
@@ -123,22 +123,18 @@
 		}
 
 	} else {
-		(function (module, require) {
+		(function (module) {
 			const localTeam = module.exports = Team; // <-- some get overridden, but this still works for auto completion in your IDE
 
 			// Filter out all Team functions that are linked to myEvent
 			Object.keys(Team)
 				.filter(key => !myEvents.hasOwnProperty(key) && typeof Team[key] === "function")
-				.forEach(key => {
-					return module.exports[key] = (...args) => {
-						return Messaging.send({
-							Team: {
-								call: key,
-								args: args
-							}
-						});
-					};
-				});
+				.forEach(key => module.exports[key] = (...args) => Messaging.send({
+					Team: {
+						call: key,
+						args: args
+					}
+				}));
 
 			Messaging.on("Team", msg =>
 				typeof msg === "object"
@@ -161,7 +157,7 @@
 					});
 				})
 			);
-		})(module, require);
+		})(module);
 	}
 
 
