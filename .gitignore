@@ -1,4 +1,6 @@
-
+data/
+images/
+logs/
 d2bs/kolbot/data/secure/*.txt
 d2bs/kolbot/data/*.json
 d2bs/kolbot/logs/*.json
@@ -7,4 +9,6 @@ d2bs/kolbot/logs/**/**
 d2bs/kolbot/mules/**/*.txt
 d2bs/logs/*.log
 d2bs/kolbot/libs/manualplay/config/*.*.js
+d2bs/kolbot/libs/soloplay/**
 d2bs/kolbot/libs/config/*.*.js
+d2bs/kolbot/D2BotSoloPlay.dbj
