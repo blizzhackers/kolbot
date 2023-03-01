@@ -26,11 +26,9 @@ declare global {
 		checkBelt: () => boolean
 		canPick: (unit: ItemUnit) => boolean
 		checkItem: (unit: ItemUnit) => { result: PickitResult, line: null | number }
-		pickItem: (unit: ItemUnit, status?: PickitResult, keptLine?: any, retry?: number) => boolean
+		pickItem: (unit: ItemUnit, status?: PickitResult, keptLine?: any, retry?: number) => { result: PickitResult, line: string | null };
 		canMakeRoom: () => boolean
 		pickItems: (range?: number) => boolean
 		fastPick: () => boolean
-		itemQualityToName: (quality: any) => string
-		itemColor: (unit: Unit, type?: boolean) => string
 	}
 }

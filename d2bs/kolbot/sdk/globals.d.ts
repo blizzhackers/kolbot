@@ -9,26 +9,13 @@
 /// <reference path="./types/Pather.d.ts" />
 /// <reference path="./types/Skill.d.ts" />
 /// <reference path="./types/Pickit.d.ts" />
+/// <reference path="./types/Item.d.ts" />
 /// <reference path="./types/Storage.d.ts" />
 /// <reference path="./types/Cubing.d.ts" />
 /// <reference path="./types/Runewords.d.ts" />
 /// <reference path="./types/NTIP.d.ts" />
 /// <reference path="./types/AutoMule.d.ts" />
 /// <reference path="./types/OOG.d.ts" />
-// import sdk from "./types/sdk";
-// import { NPC, Town } from "./types/Town";
-// import * as Attack from "./types/Attack";
-// import * as Loader from "./types/Loader";
-// import * as Pather from "./types/Pather";
-// // import * as Misc from "./types/Misc";
-// import * as Skill from "./types/Skill";
-// import * as Pickit from "./types/Pickit";
-// import { Container, Storage } from "./types/Storage";
-// import * as Cubing from "./types/Cubing";
-// import { Runeword, Runewords, Roll } from "./types/Runewords";
-// import * as NTIP from "./types/NTIP";
-// import * as AutoMule from "./types/AutoMule";
-// import { D2Bot, DataFile, ControlAction } from "./types/OOG";
 
 declare global {
 	interface Array<T> {
