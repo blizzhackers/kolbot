@@ -5,21 +5,13 @@
 *
 */
 js_strict(true);
-
-include("json2.js");     // required?
-include("polyfill.js");  // required
-include("oog/D2Bot.js"); // required
+include("critical.js");
 
 // globals needed for core gameplay
-include("core/NTItemParser.js");
-include("core/Util.js");
 includeCoreLibs();
 
 // system libs
-include("systems/automule/AutoMule.js");
-include("systems/gambling/Gambling.js");
-include("systems/crafting/CraftingSystem.js");
-include("systems/torch/TorchSystem.js");
+includeSystemLibs();
 include("systems/mulelogger/MuleLogger.js");
 include("systems/gameaction/GameAction.js");
 
@@ -29,9 +21,16 @@ include("oog/ShitList.js");
 function main() {
 	Config.init();
 
-	let myPartyId, player, shitList, currScript, scriptList;
+	/** @type {string[][]} */
+	let [shitList, scriptList] = [[], []];
+	let myPartyId, player, currScript;
 	let playerLevels = {};
 	let partyTick = getTickCount();
+
+	if (!me.gameserverip) {
+		console.log("Shutting down party thread, it's not needed on single player");
+		return true;
+	}
 
 	/**
 	 * Format the event message here to prevent repetitive code
@@ -85,27 +84,47 @@ function main() {
 		addEventListener("gameevent", gameEvent);
 	}
 
-	addEventListener("scriptmsg",
-		function (msg) {
-			let obj;
+	let quitting = false;
+	let partyCheck = false;
 
-			try {
-				obj = JSON.parse(msg);
+	const scriptEvent = function (msg) {
+		if (!!msg && typeof msg === "string") {
+			switch (msg) {
+			case "hostileCheck":
+				partyCheck = true;
+
+				break;
+			case "quit":
+				console.debug("Quiting");
+				quitting = true;
+
+				break;
+			default:
+				let obj;
+
+				try {
+					obj = JSON.parse(msg);
+				} catch (e) {
+					return;
+				}
 
 				if (obj && obj.hasOwnProperty("currScript")) {
 					currScript = obj.currScript;
 				}
-			} catch (e3) {
-				return;
-			}
-		});
 
-	print("ÿc2Party thread loaded. Mode: " + (Config.PublicMode === 2 ? "Accept" : "Invite"));
+				break;
+			}
+		}
+	};
+
+	addEventListener("scriptmsg", scriptEvent);
+
+	console.log("ÿc2Party thread loaded. Mode: " + (Config.PublicMode === 2 ? "Accept" : "Invite"));
 
 	if (Config.ShitList || Config.UnpartyShitlisted) {
 		shitList = ShitList.read();
 
-		print(shitList.length + " entries in shit list.");
+		console.log(shitList.length + " entries in shit list.");
 	}
 
 	if (Config.PartyAfterScript) {
@@ -120,6 +139,16 @@ function main() {
 
 	// Main loop
 	while (true) {
+		if (quitting) {
+			// we intercepted quit message to toolsthread, go ahead an shut down
+			return true;
+		}
+
+		/**
+		 * @todo if we are already partied with everyone in game, then this doesn't need to keep checking unless an event happens
+		 * e.g. someone joins/leaves game or someone declares hostility
+		 * the exception to that is if we are running with Config.Congratulations, in which case we do need to constantly monitor changes
+		 */
 		if (me.gameReady && (!Config.PartyAfterScript || scriptList.indexOf(currScript) > scriptList.indexOf(Config.PartyAfterScript))) {
 			player = getParty();
 
@@ -145,7 +174,7 @@ function main() {
 							break;
 						}
 
-						if (Config.ShitList && shitList.indexOf(player.name) > -1) {
+						if (Config.ShitList && shitList.includes(player.name)) {
 							break;
 						}
 
@@ -179,9 +208,9 @@ function main() {
 							shitList.push(player.name);
 						}
 
-						if (shitList.indexOf(player.name) > -1 && myPartyId !== sdk.party.NoParty && player.partyid === myPartyId) {
+						if (shitList.includes(player.name) && myPartyId !== sdk.party.NoParty && player.partyid === myPartyId) {
 							// Only the one sending invites should say this.
-							if ([1, 3].indexOf(Config.PublicMode) > -1) {
+							if ([1, 3].includes(Config.PublicMode)) {
 								say(player.name + " is shitlisted. Do not invite them.");
 							}
 
@@ -189,14 +218,8 @@ function main() {
 							delay(100);
 						}
 					}
-				}
-			}
 
-			if (Config.Congratulations.length > 0) {
-				player = getParty();
-
-				if (player) {
-					do {
+					if (Config.Congratulations.length > 0) {
 						if (player.name !== me.name) {
 							if (!playerLevels[player.name]) {
 								playerLevels[player.name] = player.level;
@@ -209,7 +232,7 @@ function main() {
 								playerLevels[player.name] = player.level;
 							}
 						}
-					} while (player.getNext());
+					}
 				}
 			}
 		}
