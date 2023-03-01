@@ -587,8 +587,10 @@ Object.defineProperties(Unit.prototype, {
 		},
 	},
 	prettyPrint: {
+		/** @this {ItemUnit} */
 		get: function () {
 			if (this.type !== sdk.unittype.Item) return this.name;
+			if (this.fname === undefined) return typeof this.name === "string" ? this.name : "undefined";
 			return this.fname.split("\n").reverse().join(" ");
 		}
 	},
