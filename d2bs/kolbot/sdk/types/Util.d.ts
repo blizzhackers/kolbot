@@ -109,7 +109,7 @@ declare global {
 		function getSelectedUnit(): ItemUnit;
 		function getPlayer(id: any, mode: any, gid: any): Player;
 		function getMonster(id?: string | number, mode?: number, gid?: number): Monster;
-		function getNPC(id?: string | number, mode?: number, gid?: number): Monster;
+		function getNPC(id?: string | number, mode?: number, gid?: number): NPCUnit;
 		function getObject(id?: string | number, mode?: number, gid?: number): ObjectUnit;
 		function getMissile(id?: string | number, mode?: number, gid?: number): Missile;
 		function getItem(id?: string | number, mode?: number, gid?: number): ItemUnit;

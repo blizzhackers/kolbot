@@ -9,7 +9,7 @@
 
 (function (root, factory) {
 	if (typeof module === "object" && typeof module.exports === "object") {
-		const v = factory();
+		let v = factory();
 		if (v !== undefined) module.exports = v;
 	} else if (typeof define === "function" && define.amd) {
 		define([], factory);
@@ -45,7 +45,20 @@
 		},
 
 		party: {
-			NoParty: 65535
+			NoParty: 65535,
+			flag: {
+				Invite: 0,
+				InParty: 1,
+				Accept: 2,
+				Cancel: 4
+			},
+			controls: {
+				Hostile: 1,
+				InviteOrCancel: 2,
+				Leave: 3,
+				Ignore: 4,
+				Squelch: 5,
+			},
 		},
 
 		clicktypes: {
@@ -1435,6 +1448,10 @@
 		},
 
 		player: {
+			flag: {
+				Ignore: 2,
+				Hostile: 8,
+			},
 			slot: {
 				Main: 0,
 				Secondary: 1

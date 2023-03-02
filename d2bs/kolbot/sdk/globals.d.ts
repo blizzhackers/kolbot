@@ -532,7 +532,6 @@ declare global {
 		setSkill(): boolean;
 		cancel(number?: number): boolean;
 		inArea(area: number): boolean;
-		switchWeapons(slot: 0 | 1): void;
 		switchToPrimary(): boolean;
 		checkItem(itemInfo: {
 			classid?: number;
@@ -545,13 +544,28 @@ declare global {
 		}): {have: boolean; item: ItemUnit | null};
 		haveSome(arg0: { name: number; equipped: boolean; }[]): any;
 		equip(destination: number | undefined, item: ItemUnit);
-		findItem(id?: number | string, mode?: number, location?: number, quality?: number): ItemUnit | boolean;
-		findItems(id?: number | string, mode?: number, location?: number): ItemUnit[];
 		getRepairCost(): number;
 		findItems(param: number, number?: number, number2?: number): ItemUnit[];
 		usingShield(): boolean;
+		walk(): void;
+		run(): void;
+		getPingDelay(): number;
+		findItem(id?: number | string, mode?: number, location?: number, quality?: number): ItemUnit | boolean;
+		findItems(id?: number | string, mode?: number, location?: number): ItemUnit[];
 		cancelUIFlags(): boolean;
+		switchWeapons(slot: 0 | 1): boolean;
+		castingFrames(skillId: number, fcr?: number, charClass?: number): number;
+		castingDuration(skillId: number, fcr?: number, charClass?: number): number;
+		getWeaponQuantity(weaponLoc: number): number;
+		needPotions(): boolean;
+		getTpTool(): ItemUnit | null;
+		getIdTool(): ItemUnit | null;
+		canTpToTown(): boolean;
+		needHealing(): boolean;
 		getTome(id: number): ItemUnit | null;
+		getUnids(): ItemUnit[];
+		fieldID(): boolean;
+		switchToPrimary(): boolean;
 	}
 
 	const me: MeType
@@ -619,11 +633,16 @@ declare global {
 	function getRoom(): Room | false
 
 	class Party {
-		name: string;
-		gid: number;
-		level: number;
-		partyid: number;
+		x: number;
+		y: number;
 		area: number;
+		gid: number;
+		life: number;
+		partyflag: number;
+		partyid: number;
+		name: string;
+		classid: number;
+		level: number;
 		inTown: any;
 
 		getNext(): Party | false;
@@ -755,7 +774,7 @@ declare global {
 	function getControls(type?: number, x?: number, y?: number, xsize?: number, ysize?: number): Control[]
 	function getPlayerFlag(meGid: number, otherGid: number, type: number): boolean
 	function getTickCount(): number
-	function getInteractedNPC(): Monster | false
+	function getInteractedNPC(): NPCUnit | false
 	function getIsTalkingNPC(): boolean
 	function getDialogLines(): { handler() }[] | false
 	function print(what: string): void
