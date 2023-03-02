@@ -870,7 +870,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 				case sdk.game.locations.MainMenu:
 					if (Profile().type === sdk.game.profiletype.OpenBattlenet) {
 						// check we are on the correct gateway
-						let realms = {"west": 0, "east": 1, "asia": 2, "europe": 3};
+						let realms = { "west": 0, "east": 1, "asia": 2, "europe": 3 };
 						ControlAction.clickRealm(realms[Profile().gateway.toLowerCase()]);
 						try {
 							login(me.profile);
@@ -1063,13 +1063,13 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 			switch (mode) {
 			case 1: // JoinInfo
 				obj = JSON.parse(msg);
-				console.debug("Recieved Join Info :: ", obj);
+				// console.debug("Recieved Join Info :: ", obj);
 				Object.assign(Starter.joinInfo, obj);
 
 				break;
 			case 2: // Game info
 				obj = JSON.parse(msg);
-				console.debug("Recieved Game Info :: ");
+				// console.debug("Recieved Game Info :: ", obj);
 				Object.assign(Starter.gameInfo, obj);
 
 				break;
@@ -1084,7 +1084,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
 				if (Starter.gameInfo.hasOwnProperty("gameName")) {
 					obj = JSON.parse(msg);
-					console.debug("Recieved Game Request :: ", obj.profile);
+					// console.debug("Recieved Game Request :: ", obj);
 
 					if ([sdk.game.profiletype.TcpIpHost, sdk.game.profiletype.TcpIpJoin].includes(Profile().type)) {
 						me.gameReady && D2Bot.joinMe(obj.profile, me.gameserverip.toString(), "", "", Starter.isUp);

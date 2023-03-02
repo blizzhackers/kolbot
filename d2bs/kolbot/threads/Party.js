@@ -159,15 +159,15 @@ function main() {
 					switch (Config.PublicMode) {
 					case 1: // Invite others
 					case 3: // Invite others but never accept
-						if (getPlayerFlag(me.gid, player.gid, 8)) {
+						if (getPlayerFlag(me.gid, player.gid, sdk.player.flag.Hostile)) {
 							if (Config.ShitList && shitList.indexOf(player.name) === -1) {
 								say(player.name + " has been shitlisted.");
 								shitList.push(player.name);
 								ShitList.add(player.name);
 							}
 
-							if (player.partyflag === 4) {
-								clickParty(player, 2); // cancel invitation
+							if (player.partyflag === sdk.party.flag.Cancel) {
+								clickParty(player, sdk.party.controls.InviteOrCancel); // cancel invitation
 								delay(100);
 							}
 
@@ -178,8 +178,8 @@ function main() {
 							break;
 						}
 
-						if (player.partyflag !== 4 && player.partyflag !== 2 && player.partyid === sdk.party.NoParty) {
-							clickParty(player, 2);
+						if (player.partyflag !== sdk.party.flag.Cancel && player.partyflag !== sdk.party.flag.Accept && player.partyid === sdk.party.NoParty) {
+							clickParty(player, sdk.party.controls.InviteOrCancel);
 							delay(100);
 						}
 
@@ -193,8 +193,8 @@ function main() {
 								break;
 							}
 
-							if (player.partyflag === 2 && (getTickCount() - partyTick >= 2000 || Config.FastParty)) {
-								clickParty(player, 2);
+							if (player.partyflag === sdk.party.flag.Accept && (getTickCount() - partyTick >= 2000 || Config.FastParty)) {
+								clickParty(player, sdk.party.controls.InviteOrCancel);
 								delay(100);
 							}
 						}
@@ -204,7 +204,7 @@ function main() {
 
 					if (Config.UnpartyShitlisted) {
 						// Add new hostile players to temp shitlist, leader should have Config.ShitList set to true to update the permanent list.
-						if (getPlayerFlag(me.gid, player.gid, 8) && shitList.indexOf(player.name) === -1) {
+						if (getPlayerFlag(me.gid, player.gid, sdk.player.flag.Hostile) && shitList.indexOf(player.name) === -1) {
 							shitList.push(player.name);
 						}
 
@@ -214,7 +214,7 @@ function main() {
 								say(player.name + " is shitlisted. Do not invite them.");
 							}
 
-							clickParty(player, 3);
+							clickParty(player, sdk.party.controls.Leave);
 							delay(100);
 						}
 					}

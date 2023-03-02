@@ -357,13 +357,10 @@ const Pickit = {
 		MainLoop:
 		for (let i = 0; i < retry; i += 1) {
 			if (me.dead) return false;
-			if (this.track.lastItem === gid) {
-				return true;
-			}
+			// recursion appeared
+			if (this.track.lastItem === gid) return true;
 			// can't find the item
-			if (!Game.getItem(-1, -1, gid)) {
-				return false;
-			}
+			if (!Game.getItem(-1, -1, gid)) return false;
 
 			if (me.getItem(item.classid, -1, item.gid)) {
 				console.debug("Already picked item");
