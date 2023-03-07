@@ -1016,7 +1016,7 @@ const Cubing = {
 			let string = "Transmuting: ";
 			let items = this.checkRecipe(tempArray[i]);
 
-			if (items) {
+			if (Array.isArray(items) && items.length) {
 				// If cube isn't open, attempt to open stash (the function returns true if stash is already open)
 				if ((!getUIFlag(sdk.uiflags.Cube) && !Town.openStash()) || !this.emptyCube()) return false;
 
@@ -1024,10 +1024,22 @@ const Cubing = {
 
 				i = -1;
 
+				let itemsToCubeCount = items.length;
+
 				while (items.length) {
 					string += (items[0].name.trim() + (items.length > 1 ? " + " : ""));
 					Storage.Cube.MoveTo(items[0]);
 					items.shift();
+				}
+
+				let itemsInCube = me.getItemsEx().filter(el => el.isInCube);
+				if (itemsInCube.length !== itemsToCubeCount) {
+					console.warn("Failed to move all necesary items to cube");
+					itemsInCube.forEach(item => {
+						if (Storage.Inventory.CanFit(item) && Storage.Inventory.MoveTo(item)) return;
+						if (Storage.Stash.CanFit(item) && Storage.Stash.MoveTo(item)) return;
+					});
+					return false;
 				}
 
 				if (!this.openCube()) return false;
@@ -1170,13 +1182,14 @@ const Cubing = {
 
 	emptyCube: function () {
 		let cube = me.getItem(sdk.quest.item.Cube);
-		let items = me.findItems(-1, -1, sdk.storage.Cube);
-
 		if (!cube) return false;
+
+		let items = me.findItems(-1, -1, sdk.storage.Cube);
 		if (!items) return true;
 
 		while (items.length) {
 			if (!Storage.Stash.MoveTo(items[0]) && !Storage.Inventory.MoveTo(items[0])) {
+				console.warn("Failed to empty cube. Items still in cube :: ", items.map(i => i && i.prettyPrint));
 				return false;
 			}
 
