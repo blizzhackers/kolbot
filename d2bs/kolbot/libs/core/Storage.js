@@ -154,6 +154,9 @@
 
 		this.cubeSpot(this.name);
 
+		itemIdsLeft === undefined && (itemIdsLeft = Config.SortSettings.ItemsSortedFromLeft);
+		itemIdsRight === undefined && (itemIdsRight = Config.SortSettings.ItemsSortedFromRight);
+
 		let x, y, item, nPos;
 
 		for (y = this.width - 1; y >= 0; y--) {
@@ -244,14 +247,22 @@
 		 */
 
 		let x, y, nx, ny, makeSpot;
-		let startX, startY, endX, endY, xDir = 1, yDir = 1;
+		let xDir = 1, yDir = 1;
 
-		startX = 0;
-		startY = 0;
-		endX = this.width - (item.sizex - 1);
-		endY = this.height - (item.sizey - 1);
+		let startX = 0;
+		let startY = 0;
+		let endX = this.width - (item.sizex - 1);
+		let endY = this.height - (item.sizey - 1);
 
 		Storage.Reload();
+
+		if (item.sizex && item.sizey && item.gid === undefined) {
+			// fake item we are checking if we can fit a certain sized item so mock some props to it
+			item.gid = -1;
+			item.classid = -1;
+			item.quality = -1;
+			item.gfx = -1;
+		}
 
 		if (reverseX) { // right-to-left
 			startX = endX - 1;
@@ -308,12 +319,12 @@
 					}
 				}
 
-				//Loop the item size to make sure we can fit it.
+				// Loop the item size to make sure we can fit it.
 				for (nx = 0; nx < item.sizey; nx += 1) {
 					for (ny = 0; ny < item.sizex; ny += 1) {
 						if (this.buffer[x + nx][y + ny]) {
 						// ignore same gid
-							if (item.gid !== this.itemList[this.buffer[x + nx][y + ny] - 1].gid ) {
+							if (item.gid !== this.itemList[this.buffer[x + nx][y + ny] - 1].gid) {
 								continue Loop;
 							}
 						}
@@ -410,9 +421,11 @@
 	Container.prototype.MoveToSpot = function (item, mX, mY) {
 		let cItem, cube;
 
-		// Cube -> Stash, must place item in inventory first
-		if (item.location === sdk.storage.Cube && this.location === sdk.storage.Stash && !Storage.Inventory.MoveTo(item)) {
-			return false;
+		// handle opening cube
+		if (item.location === sdk.storage.Cube/*  && this.location === sdk.storage.Stash && !Storage.Inventory.MoveTo(item) */) {
+			if (!getUIFlag(sdk.uiflags.Cube) && !Cubing.openCube()) return false;
+			// Cube -> Stash, must place item in inventory first
+			if (this.location === sdk.storage.Stash && !Storage.Inventory.MoveTo(item)) return false;
 		}
 
 		// Can't deal with items on ground!

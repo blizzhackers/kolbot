@@ -1136,48 +1136,40 @@ const Cubing = {
 	},
 
 	openCube: function () {
-		let cube = me.getItem(sdk.quest.item.Cube);
-
-		if (!cube) return false;
 		if (getUIFlag(sdk.uiflags.Cube)) return true;
+
+		let cube = me.getItem(sdk.quest.item.Cube);
+		if (!cube) return false;
+
 		if (cube.isInStash && !Town.openStash()) return false;
 
-		for (let i = 0; i < 3; i += 1) {
+		for (let i = 0; i < 5 && !getUIFlag(sdk.uiflags.Cube); i++) {
 			cube.interact();
-			let tick = getTickCount();
 
-			while (getTickCount() - tick < 5000) {
-				if (getUIFlag(sdk.uiflags.Cube)) {
-					delay(100 + me.ping * 2); // allow UI to initialize
+			if (Misc.poll(() => getUIFlag(sdk.uiflags.Cube), (Time.seconds(1) * (i + 1)), 100)) {
+				delay(100 + me.ping * 2); // allow UI to initialize
 
-					return true;
-				}
-
-				delay(100);
+				return true;
 			}
 		}
 
-		return false;
+		return getUIFlag(sdk.uiflags.Cube);
 	},
 
 	closeCube: function () {
 		if (!getUIFlag(sdk.uiflags.Cube)) return true;
 
-		for (let i = 0; i < 5; i++) {
+		for (let i = 0; i < 5 && getUIFlag(sdk.uiflags.Cube); i++) {
 			me.cancel();
-			let tick = getTickCount();
 
-			while (getTickCount() - tick < 3000) {
-				if (!getUIFlag(sdk.uiflags.Cube)) {
-					delay(250 + me.ping * 2); // allow UI to initialize
-					return true;
-				}
+			if (Misc.poll(() => !getUIFlag(sdk.uiflags.Cube), (Time.seconds(1) * (i + 1)), 100)) {
+				delay(250 + me.ping * 2); // allow UI to initialize
 
-				delay(100);
+				return true;
 			}
 		}
 
-		return false;
+		return !getUIFlag(sdk.uiflags.Cube);
 	},
 
 	emptyCube: function () {
@@ -1187,14 +1179,26 @@ const Cubing = {
 		let items = me.findItems(-1, -1, sdk.storage.Cube);
 		if (!items) return true;
 
+		let sorted = false;
+
 		while (items.length) {
+			!getUIFlag(sdk.uiflags.Cube) && Cubing.openCube();
+
 			if (!Storage.Stash.MoveTo(items[0]) && !Storage.Inventory.MoveTo(items[0])) {
+				// attempt to sort inventory first then try again
+				if (!sorted && Storage.Inventory.SortItems()) {
+					sorted = true;
+					continue;
+				}
+				
 				console.warn("Failed to empty cube. Items still in cube :: ", items.map(i => i && i.prettyPrint));
 				return false;
 			}
 
 			items.shift();
 		}
+
+		this.closeCube();
 
 		return true;
 	},
