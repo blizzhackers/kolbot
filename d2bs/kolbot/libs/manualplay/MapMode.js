@@ -31,7 +31,7 @@ const MapMode = {
 		
 		// Additional item info log settings. All info goes to \logs\ItemLog.txt
 		Config.ItemInfo = false; // Log stashed, skipped (due to no space) or sold items.
-		Config.ItemInfoQuality = []; // The quality of sold items to log. See core/Data/NTItemAlias.js for values. Example: Config.ItemInfoQuality = [6, 7, 8];
+		Config.ItemInfoQuality = []; // The quality of sold items to log. See core/GameData/NTItemAlias.js for values. Example: Config.ItemInfoQuality = [6, 7, 8];
 
 		// Manager Item Log Screen
 		Config.LogKeys = false; // Log keys on item viewer
@@ -49,7 +49,7 @@ const MapMode = {
 		Config.GambleGoldStart = 1000000;
 		Config.GambleGoldStop = 500000;
 
-		// List of item names or classids for gambling. Check libs/core/Data/NTItemAlias.js file for other item classids.
+		// List of item names or classids for gambling. Check libs/core/GameData/NTItemAlias.js file for other item classids.
 		Config.GambleItems.push("Amulet");
 		Config.GambleItems.push("Ring");
 		Config.GambleItems.push("Circlet");
