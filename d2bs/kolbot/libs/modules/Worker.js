@@ -55,23 +55,38 @@
 		};
 
 		/**
-         *
-         * @param {function({Worker}):boolean} callback
-         */
-		this.runInBackground = new Proxy({processes: {}}, {
+		 *
+		 * @param {function({Worker}):boolean} callback
+		 */
+		this.runInBackground = new Proxy({ processes: {} }, {
 			set: function (target, name, callback) {
-				target.processes[name] = {callback: callback, running: true};
-
+				if (target.processes.hasOwnProperty(name)) {
+					throw new Error("Process " + name + " already exists.");
+				}
+				target.processes[name] = { callback: callback, running: true, name: name };
 				let proxyCallback = function () {
-					target.processes.running = (callback() && self.pushLowPrio(proxyCallback) > -1);
-					if (!target.processes.running) {
+					if (target.processes[name].running) {
+						target.processes[name].running = (callback() && self.pushLowPrio(proxyCallback) > -1);
+					}
+					if (!target.processes[name].running) {
 						delete target.processes[name];
 					}
 				};
-
 				self.pushLowPrio(proxyCallback);
 			},
+			deleteProperty: function (target, name) {
+				if (!target.processes.hasOwnProperty(name)) {
+					throw new Error("Process " + name + " does not exists.");
+				}
+				target.processes[name].running = false;
+				delete target.processes[name];
+				return true;
+			}
 		});
+
+		this.stopProcess = function (name) {
+			delete self.runInBackground.processes[name];
+		};
 
 		global.await = function (promise) {
 			while (delay() && !promise.stopped) {
