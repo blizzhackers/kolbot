@@ -27,7 +27,7 @@ String.prototype.lcsGraph = function (compareToThis) {
 		}
 	}
 
-	return {a: this.toString(), b: compareToThis, graph: graph};
+	return { a: this.toString(), b: compareToThis, graph: graph };
 };
 
 String.prototype.diffCount = function (stringB) {
@@ -602,7 +602,39 @@ if (!Object.entries) {
 (function (global, print) {
 	global.console = global.console || (function () {
 		const console = {};
-		const argMap = el => typeof el === "object" && el /*not null */ && JSON.stringify(el) || el;
+
+		const argMap = (el) => {
+			switch (typeof el) {
+			case "undefined":
+				return "undefined";
+			case "boolean":
+				return el ? "true" : false;
+			case "function":
+				return "function";
+			case "object":
+				if (el === null) return "null";
+				if (el instanceof Error) {
+					return JSON.stringify({
+						name: (el.name || "Error"),
+						fileName: (el.fileName || "unknown"),
+						lineNumber: (el.lineNumber || ":?"),
+						message: (el.message || ""),
+						stack: (el.stack || ""),
+					});
+				}
+				if (el instanceof Map) {
+					return el.toString();
+				}
+				if (Array.isArray(el)) {
+					// handle multidimensional arrays
+					return JSON.stringify(
+						el.map(inner => Array.isArray(inner) ? inner.map(argMap) : inner)
+					);
+				}
+				return JSON.stringify(el);
+			}
+			return el;
+		};
 
 		console.log = function (...args) {
 			// use call to avoid type errors
