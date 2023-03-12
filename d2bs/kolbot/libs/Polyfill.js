@@ -5,6 +5,26 @@
 *
 */
 
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~ String Polyfills ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * - String.prototype.lcsGraph
+ * - String.prototype.diffCount
+ * - String.prototype.includes
+ * - String.prototype.capitalize
+ * - String.prototype.padEnd
+ * - String.prototype.padStart
+ * - String.prototype.repeat
+ * - String.prototype.trim
+ * - String.prototype.startsWith
+ * - String.prototype.endsWith
+ * - String.prototype.isEqual
+ * - String.prototype.format
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ */
+
+
 String.prototype.lcsGraph = function (compareToThis) {
 	if (!this.length || !compareToThis || !compareToThis.length) {
 		return null;
@@ -68,6 +88,152 @@ if (!String.prototype.includes) {
 String.prototype.capitalize = function (downcase = false) {
 	return this.charAt(0).toUpperCase() + (downcase ? this.slice(1).toLowerCase() : this.slice(1));
 };
+
+String.prototype.padEnd = function padEnd(targetLength, padString) {
+	targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
+	padString = String(typeof padString !== "undefined" ? padString : " ");
+	if (this.length > targetLength) {
+		return String(this);
+	} else {
+		targetLength = targetLength - this.length;
+		if (targetLength > padString.length) {
+			padString += padString.repeat(targetLength / padString.length); //append to original to ensure we are longer than needed
+		}
+		return String(this) + padString.slice(0, targetLength);
+	}
+};
+
+String.prototype.padStart = function padStart(targetLength, padString) {
+	targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
+	padString = String(typeof padString !== "undefined" ? padString : " ");
+	if (this.length > targetLength) {
+		return String(this);
+	} else {
+		targetLength = targetLength - this.length;
+		if (targetLength > padString.length) {
+			padString += padString.repeat(targetLength / padString.length); //append to original to ensure we are longer than needed
+		}
+		return padString.slice(0, targetLength) + String(this);
+	}
+};
+
+String.prototype.repeat = function(count) {
+	"use strict";
+	if (this == null) throw new TypeError("can't convert " + this + " to object");
+	let str = "" + this;
+	count = +count;
+	// eslint-disable-next-line no-self-compare
+	if (count !== count) {
+		count = 0;
+	}
+	if (count < 0) throw new RangeError("repeat count must be non-negative");
+	if (count === Infinity) throw new RangeError("repeat count must be less than infinity");
+
+	count = Math.floor(count);
+	if (str.length === 0 || count === 0) {
+		return "";
+	}
+	if (str.length * count >= 1 << 28) {
+		throw new RangeError(
+			"repeat count must not overflow maximum string size"
+		);
+	}
+	let rpt = "";
+	for (;;) {
+		if ((count & 1) === 1) {
+			rpt += str;
+		}
+		count >>>= 1;
+		if (count === 0) {
+			break;
+		}
+		str += str;
+	}
+	return rpt;
+};
+
+// Trim String
+if (!String.prototype.trim) {
+	String.prototype.trim = function () {
+		return this.replace(/^\s+|\s+$/g, "");
+	};
+}
+
+if (!String.prototype.startsWith) {
+	String.prototype.startsWith = function (prefix) {
+		return !prefix || this.substring(0, prefix.length) === prefix;
+	};
+}
+
+if (!String.prototype.endsWith) {
+	String.prototype.endsWith = function (search, this_len) {
+		if (this_len === undefined || this_len > this.length) {
+			this_len = this.length;
+		}
+		return this.substring(this_len - search.length, this_len) === search;
+	};
+}
+
+if (!String.isEqual) {
+	/**
+	 * Check if two strings are equal
+	 * @static
+	 * @param {string} str1 
+	 * @param {string} str2 
+	 * @returns {boolean}
+	 */
+	String.isEqual = function (str1, str2) {
+		return str1.toLowerCase() === str2.toLowerCase();
+	};
+}
+
+/**
+ * Use since we don't have template literals
+ * Replaces placeholders in a string with provided values.
+ *
+ * @param {Array<Array<string, (number|string|boolean)>>} pairs - An array of arrays,
+ * where the first item in each inner array is a placeholder in the form of "$placeholder",
+ * and the second item is the value to replace it with.
+ * @returns {string} The formatted string.
+ */
+String.prototype.format = function (...pairs) {
+	if (!pairs.length) return this;
+	let newString = this;
+	pairs.forEach(pair => {
+		let [match, replace] = pair;
+		if (match === undefined || replace === undefined) return;
+		newString = newString.replace(match, replace);
+	});
+	return newString;
+};
+
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Array Polyfills ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * - Array.prototype.isEqual
+ * - Array.prototype.filterHighDistance
+ * - Array.prototype.findIndex
+ * - Array.prototype.remove
+ * - Array.prototype.from
+ * - Array.prototype.filterNull
+ * - Array.prototype.compactMap
+ * - Array.prototype.random
+ * - Array.prototype.shuffle
+ * - Array.prototype.includes
+ * - Array.prototype.at
+ * - Array.prototype.contains
+ * - Array.prototype.intersection
+ * - Array.prototype.difference
+ * - Array.prototype.symmetricDifference
+ * - Array.prototype.find
+ * - Array.prototype.fill
+ * - Array.prototype.first
+ * - Array.prototype.last
+ * - Array.prototype.flat
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ */
+
 
 Array.prototype.isEqual = function (t) {
 	return this.map((x, i) => t.hasOwnProperty(i) && x === t[i]).reduce((a, c) => c & a, true);
@@ -145,54 +311,6 @@ if (!Array.prototype.remove) {
 		return this;
 	};
 }
-
-if (!String.prototype.startsWith) {
-	String.prototype.startsWith = function (prefix) {
-		return !prefix || this.substring(0, prefix.length) === prefix;
-	};
-}
-
-if (!String.prototype.endsWith) {
-	String.prototype.endsWith = function (search, this_len) {
-		if (this_len === undefined || this_len > this.length) {
-			this_len = this.length;
-		}
-		return this.substring(this_len - search.length, this_len) === search;
-	};
-}
-
-if (!String.isEqual) {
-	/**
-	 * Check if two strings are equal
-	 * @static
-	 * @param {string} str1 
-	 * @param {string} str2 
-	 * @returns {boolean}
-	 */
-	String.isEqual = function (str1, str2) {
-		return str1.toLowerCase() === str2.toLowerCase();
-	};
-}
-
-/**
- * Use since we don't have template literals
- * Replaces placeholders in a string with provided values.
- *
- * @param {Array<Array<string, (number|string|boolean)>>} pairs - An array of arrays,
- * where the first item in each inner array is a placeholder in the form of "$placeholder",
- * and the second item is the value to replace it with.
- * @returns {string} The formatted string.
- */
-String.prototype.format = function (...pairs) {
-	if (!pairs.length) return this;
-	let newString = this;
-	pairs.forEach(pair => {
-		let [match, replace] = pair;
-		if (match === undefined || replace === undefined) return;
-		newString = newString.replace(match, replace);
-	});
-	return newString;
-};
 
 // Production steps of ECMA-262, Edition 6, 22.1.2.1
 if (!Array.from) {
@@ -342,13 +460,6 @@ if (!Array.prototype.symmetricDifference) {
 	};
 }
 
-// Returns a random integer between start and end included.
-Math.randomIntBetween = function (start, end) {
-	let min = Math.ceil(start);
-	let max = Math.floor(end);
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
 // Shuffle Array
 // http://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array-in-javascript
 if (!Array.prototype.shuffle) {
@@ -372,42 +483,6 @@ if (!Array.prototype.shuffle) {
 
 		return this;
 	};
-}
-
-// Trim String
-if (!String.prototype.trim) {
-	String.prototype.trim = function () {
-		return this.replace(/^\s+|\s+$/g, "");
-	};
-}
-
-// Object.assign polyfill from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
-if (typeof Object.assign !== "function") {
-	Object.defineProperty(Object, "assign", {
-		value: function assign(target) {
-			if (target === null) {
-				throw new TypeError("Cannot convert undefined or null to object");
-			}
-
-			let to = Object(target);
-
-			for (let index = 1; index < arguments.length; index++) {
-				let nextSource = arguments[index];
-
-				if (nextSource !== null) {
-					for (let nextKey in nextSource) {
-						if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-							to[nextKey] = nextSource[nextKey];
-						}
-					}
-				}
-			}
-
-			return to;
-		},
-		writable: true,
-		configurable: true
-	});
 }
 
 // Array.find polyfill from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
@@ -500,10 +575,60 @@ if (!Array.prototype.flat) {
 		writable: true
 	});
 }
-// eslint-disable-next-line block-scoped-var
-// if (typeof global === "undefined") {
-// 	var global = this;
-// }
+
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~ Object Polyfills ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * - Object.assign
+ * - Object.entries
+ * - Object.values
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ */
+
+/**
+ * @description Copy the values of all enumerable own properties from one or more source objects to a target object. Returns the target object.
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
+ */
+if (typeof Object.assign !== "function") {
+	Object.defineProperty(Object, "assign", {
+		value: function assign(target) {
+			if (target === null) {
+				throw new TypeError("Cannot convert undefined or null to object");
+			}
+
+			let to = Object(target);
+
+			for (let index = 1; index < arguments.length; index++) {
+				let nextSource = arguments[index];
+
+				if (nextSource !== null) {
+					for (let nextKey in nextSource) {
+						if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+							to[nextKey] = nextSource[nextKey];
+						}
+					}
+				}
+			}
+
+			return to;
+		},
+		writable: true,
+		configurable: true
+	});
+}
+
+if (!Object.values) {
+	Object.values = function (source) {
+		return Object.keys(source).map(function (k) { return source[k]; });
+	};
+}
+
+if (!Object.entries) {
+	Object.entries = function (source) {
+		return Object.keys(source).map(function (k) { return [k, source[k]]; });
+	};
+}
 
 // eslint-disable-next-line no-var
 if (typeof global === "undefined") var global = [].filter.constructor("return this")();
@@ -524,80 +649,206 @@ if (!global.hasOwnProperty("require")) {
 	});
 }
 
-String.prototype.padEnd = function padEnd(targetLength, padString) {
-	targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
-	padString = String(typeof padString !== "undefined" ? padString : " ");
-	if (this.length > targetLength) {
-		return String(this);
-	} else {
-		targetLength = targetLength - this.length;
-		if (targetLength > padString.length) {
-			padString += padString.repeat(targetLength / padString.length); //append to original to ensure we are longer than needed
-		}
-		return String(this) + padString.slice(0, targetLength);
-	}
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Math Polyfills ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * - Math.randomIntBetween
+ * - Math.trunc
+ * - Math.percentDifference
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ */
+
+// Returns a random integer between start and end included.
+Math.randomIntBetween = function (start, end) {
+	let min = Math.ceil(start);
+	let max = Math.floor(end);
+	return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-String.prototype.padStart = function padStart(targetLength, padString) {
-	targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
-	padString = String(typeof padString !== "undefined" ? padString : " ");
-	if (this.length > targetLength) {
-		return String(this);
-	} else {
-		targetLength = targetLength - this.length;
-		if (targetLength > padString.length) {
-			padString += padString.repeat(targetLength / padString.length); //append to original to ensure we are longer than needed
-		}
-		return padString.slice(0, targetLength) + String(this);
-	}
-};
-
-String.prototype.repeat = function(count) {
-	"use strict";
-	if (this == null) throw new TypeError("can't convert " + this + " to object");
-	let str = "" + this;
-	count = +count;
-	// eslint-disable-next-line no-self-compare
-	if (count !== count) {
-		count = 0;
-	}
-	if (count < 0) throw new RangeError("repeat count must be non-negative");
-	if (count === Infinity) throw new RangeError("repeat count must be less than infinity");
-
-	count = Math.floor(count);
-	if (str.length === 0 || count === 0) {
-		return "";
-	}
-	if (str.length * count >= 1 << 28) {
-		throw new RangeError(
-			"repeat count must not overflow maximum string size"
-		);
-	}
-	let rpt = "";
-	for (;;) {
-		if ((count & 1) === 1) {
-			rpt += str;
-		}
-		count >>>= 1;
-		if (count === 0) {
-			break;
-		}
-		str += str;
-	}
-	return rpt;
-};
-
-if (!Object.values) {
-	Object.values = function (source) {
-		return Object.keys(source).map(function (k) { return source[k]; });
+if (!Math.trunc) {
+	/**
+	 * Polyfill for Math.trunc
+	 * Static method returns the integer part of a number by removing any fractional digits.
+	 * @static
+	 * @param {number} number 
+	 * @returns {number}
+	 */
+	Math.trunc = function (number) {
+		return number < 0 ? Math.ceil(number) : Math.floor(number);
 	};
 }
 
-if (!Object.entries) {
-	Object.entries = function (source) {
-		return Object.keys(source).map(function (k) { return [k, source[k]]; });
+Math.percentDifference = function (value1, value2) {
+	const diff = Math.abs(value1 - value2);
+	const average = (value1 + value2) / 2;
+	const percentDiff = (diff / average) * 100;
+	return Math.trunc(percentDiff);
+};
+
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Map Polyfills ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * - Map.prototype.forEach
+ * - Map.prototype.toString
+ * - Map.prototype.keys
+ * - Map.prototype.values
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ */
+
+if (typeof Map.prototype.forEach !== "function") {
+	Map.prototype.forEach = function(callbackFn, thisArg) {
+		thisArg = thisArg || this;
+		for (let [key, value] of this.entries()) {
+			callbackFn.call(thisArg, value, key, this);
+		}
 	};
 }
+
+Map.prototype.toString = function() {
+	let obj = {};
+	for (let [key, value] of this.entries()) {
+		obj[key] = value;
+	}
+	return JSON.stringify(obj);
+};
+
+Map.prototype.keys = function() {
+	let keys = [];
+	// eslint-disable-next-line no-unused-vars
+	for (let [key, _value] of this.entries()) {
+		keys.push(key);
+	}
+	return keys;
+};
+
+Map.prototype.values = function() {
+	let values = [];
+	// eslint-disable-next-line no-unused-vars
+	for (let [_key, value] of this.entries()) {
+		values.push(value);
+	}
+	return values;
+};
+
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Set Polyfills ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * - Set.prototype.forEach
+ * - Set.prototype.keys
+ * - Set.prototype.values
+ * - Set.prototype.entries
+ * - Set.prototype.isSuperset
+ * - Set.prototype.union
+ * - Set.prototype.intersection
+ * - Set.prototype.difference
+ * - Set.prototype.symmetricDifference
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ */
+
+if (typeof Set.prototype.forEach !== "function") {
+	Set.prototype.forEach = function(callbackFn, thisArg) {
+		thisArg = thisArg || this;
+		for (let item of this) {
+			callbackFn.call(thisArg, item, item, this);
+		}
+	};
+}
+
+if (typeof Set.prototype.keys !== "function") {
+	Set.prototype.keys = function() {
+		let keys = [];
+		for (let item of this) {
+			keys.push(item);
+		}
+		return keys;
+	};
+}
+
+if (typeof Set.prototype.values !== "function") {
+	Set.prototype.values = function() {
+		let values = [];
+		for (let item of this) {
+			values.push(item);
+		}
+		return values;
+	};
+}
+
+if (typeof Set.prototype.entries !== "function") {
+	Set.prototype.entries = function() {
+		let entries = [];
+		for (let item of this) {
+			entries.push([item, item]);
+		}
+		return entries;
+	};
+}
+
+Set.prototype.isSuperset = function(subset) {
+	for (let item of subset) {
+		if (!this.has(item)) {
+			return false;
+		}
+	}
+	return true;
+};
+
+Set.prototype.union = function(setB) {
+	let union = new Set(this);
+	for (let item of setB) {
+		union.add(item);
+	}
+	return union;
+};
+
+Set.prototype.intersection = function(setB) {
+	let intersection = new Set();
+	for (let item of setB) {
+		if (this.has(item)) {
+			intersection.add(item);
+		}
+	}
+	return intersection;
+};
+
+Set.prototype.symmetricDifference = function(setB) {
+	let difference = new Set(this);
+	for (let item of setB) {
+		if (difference.has(item)) {
+			difference.delete(item);
+		} else {
+			difference.add(item);
+		}
+	}
+	return difference;
+};
+
+Set.prototype.difference = function(setB) {
+	let difference = new Set(this);
+	for (let item of setB) {
+		difference.delete(item);
+	}
+	return difference;
+};
+
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~ console Polyfills ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * - console.log
+ * - console.debug
+ * - console.warn
+ * - console.error
+ * - console.info
+ * - console.trace
+ * - console.time
+ * - console.timeEnd
+ * - console.table (partial)
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ */
 
 (function (global, print) {
 	global.console = global.console || (function () {
@@ -782,6 +1033,21 @@ if (!Object.entries) {
 
 	})();
 })([].filter.constructor("return this")(), print);
+
+
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~ global d2bs Polyfills ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * - sdk - sdk object @see libs/modules/sdk.js
+ * - includeIfNotIncluded - include file if not already included
+ * - includeCoreLibs - include all core libs
+ * - includeSystemLibs - include all system driver files
+ * - clone - clone object
+ * - copyObj
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ */
+
 
 if (!global.hasOwnProperty("sdk") && typeof require !== "undefined") {
 	Object.defineProperty(global, "sdk", {
