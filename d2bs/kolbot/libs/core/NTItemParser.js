@@ -20,7 +20,7 @@
 */
 
 includeIfNotIncluded("core/Prototypes.js");
-includeIfNotIncluded("core/Data/NTItemAlias.js");
+includeIfNotIncluded("core/GameData/NTItemAlias.js");
 
 /**
  * @todo clean up this file

@@ -363,7 +363,7 @@
 	Config.FieldID.PacketID = true; // use packets to speed up id process (recommended to use this)
 	Config.FieldID.UsedSpace = 80; // how much space has been used before trying to field id, set to 0 to id after every item picked
 	Config.DroppedItemsAnnounce.Enable = false;	// Announce Dropped Items to in-game newbs
-	Config.DroppedItemsAnnounce.Quality = []; // Quality of item to announce. See core/Data/NTItemAlias.js for values. Example: Config.DroppedItemsAnnounce.Quality = [6, 7, 8];
+	Config.DroppedItemsAnnounce.Quality = []; // Quality of item to announce. See core/GameData/NTItemAlias.js for values. Example: Config.DroppedItemsAnnounce.Quality = [6, 7, 8];
 
 	// Potion settings
 	Config.UseHP = 75; // Drink a healing potion if life is under designated percent.
@@ -409,7 +409,7 @@
 	/* ##### PICKIT SETTINGS ##### */
 	// ########################### //
 	// Default folder is kolbot/pickit.
-	// Item name and classids located in core/Data/NTItemAlias.js or modules/sdk.js
+	// Item name and classids located in core/GameData/NTItemAlias.js or modules/sdk.js
 
 	// Config.PickitFiles.push("kolton.nip");
 	// Config.PickitFiles.push("LLD.nip");
@@ -626,7 +626,7 @@
 	Config.GambleGoldStart = 1000000;
 	Config.GambleGoldStop = 500000;
 
-	// List of item names or classids for gambling. Check libs/core/Data/NTItemAlias.js file for other item classids.
+	// List of item names or classids for gambling. Check libs/core/GameData/NTItemAlias.js file for other item classids.
 	Config.GambleItems.push("Amulet");
 	Config.GambleItems.push("Ring");
 	Config.GambleItems.push("Circlet");
@@ -636,14 +636,14 @@
 	/* ##### CUBING SETTINGS ##### */
 	// ########################### //
 	/* 
-	 * All recipe names are available in Templates/Cubing.txt. For item names/classids check core/Data/NTItemAlias.js
+	 * All recipe names are available in Templates/Cubing.txt. For item names/classids check core/GameData/NTItemAlias.js
 	 * The format is Config.Recipes.push([recipe_name, item_name_or_classid, etherealness]).
 	 * Etherealness is optional and only applies to some recipes.
 	 */
 	Config.Cubing = false; // Set to true to enable cubing.
 	Config.ShowCubingInfo = true; // Show cubing messages on console
 
-	// Ingredients for the following recipes will be auto-picked, for classids check libs/core/Data/NTItemAlias.js
+	// Ingredients for the following recipes will be auto-picked, for classids check libs/core/GameData/NTItemAlias.js
 
 	// Config.Recipes.push([Recipe.Gem, "Flawed Amethyst"]); // make Flawed Amethyst
 	// Config.Recipes.push([Recipe.Gem, "Flawed Topaz"]); // make Flawed Topaz
@@ -682,7 +682,7 @@
 	// Config.Recipes.push([Recipe.Rejuv]); // Make Rejuv
 	// Config.Recipes.push([Recipe.FullRejuv]); // Make Full Rejuv
 
-	// Ingredients for the following recipes will be auto-picked, for classids check libs/core/Data/NTItemAlias.js
+	// Ingredients for the following recipes will be auto-picked, for classids check libs/core/GameData/NTItemAlias.js
 
 	// Config.Recipes.push([Recipe.Rune, "Eld Rune"]); // Upgrade El to Eld
 	// Config.Recipes.push([Recipe.Rune, "Tir Rune"]); // Upgrade Eld to Tir
@@ -712,7 +712,7 @@
 	// Config.Recipes.push([Recipe.Rune, "Gul Rune"]); // Upgrade Ist to Gul
 	// Config.Recipes.push([Recipe.Rune, "Vex Rune"]); // Upgrade Gul to Vex
 
-	// Ingredients for the following recipes will be auto-picked, for classids check libs/core/Data/NTItemAlias.js
+	// Ingredients for the following recipes will be auto-picked, for classids check libs/core/GameData/NTItemAlias.js
 
 	// Config.Recipes.push([Recipe.Blood.Helm, "Armet"]); // Craft Blood Helm
 	// Config.Recipes.push([Recipe.Blood.Boots, "Mirrored Boots"]); // Craft Blood Boots
@@ -857,7 +857,7 @@
 	// ############################### //
 	// Additional item info log settings. All info goes to \logs\ItemLog.txt
 	Config.ItemInfo = false; // Log stashed, skipped (due to no space) or sold items.
-	Config.ItemInfoQuality = []; // The quality of sold items to log. See core/Data/NTItemAlias.js for values. Example: Config.ItemInfoQuality = [6, 7, 8];
+	Config.ItemInfoQuality = []; // The quality of sold items to log. See core/GameData/NTItemAlias.js for values. Example: Config.ItemInfoQuality = [6, 7, 8];
 
 	// Manager Item Log Screen
 	Config.LogKeys = false; // Log keys on item viewer
