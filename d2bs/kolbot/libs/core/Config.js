@@ -277,8 +277,12 @@ let Config = {
 	RepairPercent: 40,
 	Recipes: [],
 	MakeRunewords: false,
+	/**
+	 * @type {[runeword, string | number, ?boolean][]}
+	 */
 	Runewords: [],
 	KeepRunewords: [],
+	LadderOveride: false,
 	Gamble: false,
 	GambleItems: [],
 	GambleGoldStart: 0,
