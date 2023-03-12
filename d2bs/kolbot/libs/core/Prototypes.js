@@ -866,6 +866,11 @@ Unit.prototype.use = function () {
 		}
 	}
 
+	// make sure we don't have anything on cursor
+	if (me.itemoncursor) {
+		if (!Game.getCursorUnit().drop()) return false;
+	}
+
 	switch (this.location) {
 	case sdk.storage.Stash:
 	case sdk.storage.Inventory:
