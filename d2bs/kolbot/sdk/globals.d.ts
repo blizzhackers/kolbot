@@ -18,6 +18,11 @@
 /// <reference path="./types/OOG.d.ts" />
 
 declare global {
+	interface Error {
+		fileName: string;
+		lineNumber: number;
+	}
+
 	interface Array<T> {
 		includes(searchElement: T): boolean;
 		find(predicate: (value: T, index: number, obj: Int8Array) => boolean, thisArg?: any): T | undefined;
@@ -656,6 +661,7 @@ declare global {
 		y: number;
 		roomx: number;
 		roomy: number;
+		level: number;
 
 		getNext(): PresetUnit | false;
 		realCoords(): { area: number, x: number, y: number };
