@@ -711,7 +711,7 @@ declare global {
 				const SiegeOnHarrogath: 35;
 				const RescueonMountArreat: 36;
 				const PrisonofIce: 37;
-				const BetrayalofHaggorath: 38;
+				const BetrayalofHarrogath: 38;
 				const RiteofPassage: 39;
 				const EyeofDestruction: 40;
 				const Respec: 41;

@@ -784,7 +784,7 @@
 				SiegeOnHarrogath: 35,
 				RescueonMountArreat: 36,
 				PrisonofIce: 37,
-				BetrayalofHaggorath: 38,
+				BetrayalofHarrogath: 38,
 				RiteofPassage: 39,
 				EyeofDestruction: 40,
 				Respec: 41,
