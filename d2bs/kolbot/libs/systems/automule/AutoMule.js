@@ -8,15 +8,10 @@
 */
 
 const AutoMule = {
-	// load configuration files
-	/**
-	 * @type {Object.<string, muleObj>}
-	 */
+	/** @type {Object.<string, muleObj>} */
 	Mules: Object.assign({}, require("./MuleConfig", null, false)),
 	
-	/**
-	 * @type {Object.<string, muleObj>}
-	 */
+	/** @type {Object.<string, muleObj>} */
 	TorchAnniMules: Object.assign({}, require("./TorchAnniMules", null, false)),
 
 	inGame: false,
@@ -509,11 +504,8 @@ const AutoMule = {
 	 */
 	getMuleItems: function () {
 		let info = this.getInfo();
-
 		if (!info || !info.hasOwnProperty("muleInfo")) return false;
 
-		let items = [];
-		let item = me.getItem(-1, sdk.items.mode.inStorage);
 		const muleOrphans = !!(info.muleInfo.hasOwnProperty("muleOrphans") && info.muleInfo.muleOrphans);
 
 		/**
@@ -528,24 +520,29 @@ const AutoMule = {
 		 */
 		const isWanted = (item) => (AutoMule.cubingIngredient(item) || AutoMule.runewordIngredient(item) || AutoMule.utilityIngredient(item));
 
-		if (item) {
-			do {
-				if (Town.ignoredItemTypes.indexOf(item.itemType) === -1
-						&& (![Pickit.Result.UNID, Pickit.Result.UNWANTED, Pickit.Result.TRASH].includes(Pickit.checkItem(item).result) || (item.isInStash && muleOrphans))
-						&& item.classid !== sdk.quest.item.Cube // Don't drop Horadric Cube
-						&& (!item.isAnni) // Don't drop Annihilus
-						&& (!item.isTorch) // Don't drop Hellfire Torch
-						&& (item.isInStash || (item.isInInventory && !Storage.Inventory.IsLocked(item, Config.Inventory))) // Don't drop items in locked slots
-						&& ((!TorchSystem.getFarmers() && !TorchSystem.isFarmer()) || isAKey(item))) { // Don't drop Keys if part of TorchSystem
-					// Always drop items on Force or Trigger list
-					if (this.matchItem(item, Config.AutoMule.Force.concat(Config.AutoMule.Trigger))
-						// Don't drop Excluded items or Runeword/Cubing/CraftingSystem ingredients
-						|| (!this.matchItem(item, Config.AutoMule.Exclude) && !isWanted(item))) {
-						items.push(copyUnit(item));
-					}
-				}
-			} while (item.getNext());
-		}
+		let items = me.getItemsEx()
+			.filter(function (item) {
+				// we don't mule items that are equipped or are junk
+				if (!item.isInStorage || Town.ignoreType(item.itemType)) return false;
+				// don't mule excluded items
+				if (AutoMule.matchItem(item, Config.AutoMule.Exclude)) return false;
+				// Don't mule cube/torch/annihilus
+				if (item.isAnni || item.isTorch || item.classid === sdk.quest.item.Cube) return false;
+				// don't mule items in locked spots
+				if (item.isInInventory && Storage.Inventory.IsLocked(item, Config.Inventory)) return false;
+				// don't mule items wanted by one of the various systems - checks that it's not on the force mule list
+				if (isWanted(item) && !AutoMule.matchItem(item, Config.AutoMule.Force.concat(Config.AutoMule.Trigger))) return false;
+				// don't mule keys if part of torchsystem
+				if (isAKey(item) && TorchSystem.getFarmers() && TorchSystem.isFarmer()) return false;
+				// we've gotten this far, mule items that are on the force list
+				if (AutoMule.matchItem(item, Config.AutoMule.Force.concat(Config.AutoMule.Trigger))) return true;
+				// alright that handles the basics -- now normal pickit check
+				let pResult = Pickit.checkItem(item).result;
+				// if it's a junk item, we don't want it
+				if ([Pickit.Result.UNID, Pickit.Result.UNWANTED, Pickit.Result.TRASH].includes(pResult)) return (item.isInStash && muleOrphans);
+				// we've made it this far, we want it
+				return true;
+			});
 
 		return items;
 	},
