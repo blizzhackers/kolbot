@@ -10,25 +10,25 @@ declare global {
 			CRAFTING: 5,
 			UTILITY: 6
 	};
-	const Pickit: {
-		gidList: number[],
-		invoLocked: boolean,
-		beltSize: 1 | 2 | 3 | 4,
-		ignoreLog: number[], // Ignored item types for item logging
-		Result: PickitResult,
-		tkable: number[],
-		essentials: number[],
+	namespace Pickit {
+		const gidList: number[];
+		let invoLocked: boolean;
+		let beltSize: 1 | 2 | 3 | 4;
+		const ignoreLog: number[]; // Ignored item types for item logging
+		const Result: PickitResult;
+		const tkable: number[];
+		const essentials: number[];
 
-		init: (notify: any) => void
-		itemEvent: (gid?: number, mode?: number, code?: number, global?: number) => void
-		sortItems: (unitA: Unit, unitB: Unit) => number
-		sortFastPickItems: (unitA: Unit, unitB: Unit) => number
-		checkBelt: () => boolean
-		canPick: (unit: ItemUnit) => boolean
-		checkItem: (unit: ItemUnit) => { result: PickitResult, line: null | number }
-		pickItem: (unit: ItemUnit, status?: PickitResult, keptLine?: any, retry?: number) => { result: PickitResult, line: string | null };
-		canMakeRoom: () => boolean
-		pickItems: (range?: number) => boolean
-		fastPick: () => boolean
+		function init(notify: any): void;
+		function itemEvent(gid?: number, mode?: number, code?: number, global?: number): void;
+		function sortItems(unitA: Unit, unitB: Unit): number;
+		function sortFastPickItems(unitA: Unit, unitB: Unit): number;
+		function checkBelt(): boolean;
+		function canPick(unit: ItemUnit): boolean;
+		function checkItem(unit: ItemUnit): { result: PickitResult, line: null | number };
+		function pickItem(unit: ItemUnit, status?: PickitResult, keptLine?: any, retry?: number): { result: PickitResult, line: string | null };
+		function canMakeRoom(): boolean;
+		function pickItems(range?: number): boolean;
+		function fastPick(): boolean;
 	}
 }

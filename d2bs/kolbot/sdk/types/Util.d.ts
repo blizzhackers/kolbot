@@ -127,5 +127,12 @@ declare global {
 		arg3?: number;
 		arg4?: number;
 	};
+
+	namespace Sort {
+		function units(a: Unit, b: Unit): number;
+		function presetUnits(a: PresetUnit, b: PresetUnit): number;
+		function points(a: [number, number], b: [number, number]): number;
+		function numbers(a: number, b: number): number;
+	}
 }
 export {};

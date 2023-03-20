@@ -524,12 +524,68 @@ declare global {
 		readonly gold: number;
 		readonly inTown: boolean;
 		readonly highestAct: 1 | 2 | 3 | 4 | 5;
+		readonly staminaPercent: number;
 		readonly staminaDrainPerSec: number;
 		readonly staminaTimeLeft: number;
 		readonly staminaMaxDuration: number;
 		readonly inShop: boolean;
 		readonly skillDelay: boolean;
+		readonly highestAct: 1 | 2 | 3 | 4 | 5;
+		readonly highestQuestDone: number;
+		readonly den: boolean;
+		readonly bloodraven: boolean;
+		readonly smith: boolean;
+		readonly imbue: boolean;
+		readonly cain: boolean;
+		readonly tristram: boolean;
+		readonly countess: boolean;
+		readonly andariel: boolean;
+		readonly radament: boolean;
+		readonly horadricstaff: boolean;
+		readonly summoner: boolean;
+		readonly duriel: boolean;
+		readonly goldenbird: boolean;
+		readonly lamessen: boolean;
+		readonly gidbinn: boolean;
+		readonly travincal: boolean;
+		readonly mephisto: boolean;
+		readonly izual: boolean;
+		readonly hellforge: boolean;
+		readonly diablo: boolean;
+		readonly shenk: boolean;
+		readonly larzuk: boolean;
+		readonly savebarby: boolean;
+		readonly barbrescue: boolean;
+		readonly anya: boolean;
+		readonly ancients: boolean;
+		readonly baal: boolean;
+		readonly cows: boolean;
+		readonly respec: boolean;
+		readonly diffCompleted: boolean;
+		wirtsleg: ItemUnit;
+		cube: ItemUnit;
+		shaft: ItemUnit;
+		amulet: ItemUnit;
+		staff: ItemUnit;
+		completestaff: ItemUnit;
+		eye: ItemUnit;
+		brain: ItemUnit;
+		heart: ItemUnit;
+		khalimswill: ItemUnit;
+		khalimsflail: ItemUnit;
+		malahspotion: ItemUnit;
+		scrollofresistance: ItemUnit;
+		readonly walking: boolean;
+		readonly running: boolean;
+		readonly deadOrInSequence: boolean;
+		readonly moving: boolean;
+		readonly FCR: number;
+		readonly FHR: number;
+		readonly FBR: number;
+		readonly IAS: number;
+		readonly shapeshifted: boolean;
 
+		haveWaypoint(area: number): boolean;
 		overhead(msg: string): void;
 		repair(): boolean;
 		revive(): void;
@@ -571,6 +627,7 @@ declare global {
 		getUnids(): ItemUnit[];
 		fieldID(): boolean;
 		switchToPrimary(): boolean;
+		haveWaypoint(area: number): boolean;
 	}
 
 	const me: MeType
@@ -665,6 +722,14 @@ declare global {
 
 		getNext(): PresetUnit | false;
 		realCoords(): { area: number, x: number, y: number };
+	}
+
+	type PresetObject = {
+		area: number,
+		id: number,
+		type: number,
+		x: number,
+		y: number,
 	}
 
 	function getPresetUnit(area?: number, objType?: number, classid?: number): PresetUnit | false
@@ -826,11 +891,12 @@ declare global {
 	function sqlite_version()
 	function sqlite_memusage()
 
-	function dopen(what?: string): {
+	type directory = {
 		getFiles(): string[];
 		getFolders(): string[];
 		create(what?: string): boolean;
-	} | false;
+	};
+	function dopen(what?: string): directory | false;
 	function debugLog(text: string): void
 	function showConsole(): void
 	function hideConsole(): void

@@ -779,7 +779,17 @@ declare global {
 
 		// shrine types
 		export namespace shrines {
-			const Ids: [2, 81, 83, 170, 344, 197, 202];
+			const Presets: [2, 81, 83, 170, 344, 197, 202];
+			const Ids: [
+				2, 77, 81, 83, 84, 85, 93, 96, 97, 109, 116, 123, 124,
+				133, 134, 135, 136, 150, 151, 164, 165, 166, 167, 168,
+				170, 172, 173, 184, 190, 191, 197, 199, 200, 201, 202,
+				206, 226, 231, 232, 236, 249, 260, 262, 263, 264, 265,
+				275, 276, 277, 278, 279, 280, 281, 282, 299, 300, 302,
+				303, 320, 325, 343, 344, 361, 414, 415, 421, 422, 423,
+				427, 428, 464, 465, 472, 479, 483, 484, 488, 491, 492,
+				495, 497, 499, 503, 509, 512, 520, 521, 522
+			];
 			const None: 0;
 			const Refilling: 1;
 			const Health: 2;
@@ -1575,6 +1585,11 @@ declare global {
 		}
 
 		export namespace exits {
+			namespace type {
+				const WalkThrough: 1;
+				const Stairs: 2;
+				const RedPortal: 60;
+			}
 			namespace preset {
 				const AreaEntrance: 0; // special
 				// act 1

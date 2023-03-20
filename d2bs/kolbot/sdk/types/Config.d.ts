@@ -134,7 +134,7 @@ declare global {
 		const RepairPercent: number;
 		const Recipes: any[];
 		const MakeRunewords: boolean;
-		const Runewords: any[];
+		const Runewords: any[][];
 		const KeepRunewords: any[];
 		const Gamble: boolean;
 		const GambleItems: any[];
