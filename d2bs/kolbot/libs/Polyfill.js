@@ -714,6 +714,9 @@ Map.prototype.toString = function() {
 	return JSON.stringify(obj);
 };
 
+/**
+ * @returns {Array<typeof Map.prototype.keys>}
+ */
 Map.prototype.keys = function() {
 	let keys = [];
 	// eslint-disable-next-line no-unused-vars
@@ -1034,6 +1037,24 @@ Set.prototype.difference = function(setB) {
 	})();
 })([].filter.constructor("return this")(), print);
 
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Date Polyfills ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * - Date.prototype.dateStamp
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ */
+
+if (!Date.prototype.hasOwnProperty("dateStamp")) {
+	Object.defineProperty(Date.prototype, "dateStamp", {
+		value: function () {
+			let month = this.getMonth() + 1;
+			let day = this.getDate();
+			let year = this.getFullYear();
+			return "[" + (month < 10 ? "0" + month : month) + "/" + (day < 10 ? "0" + day : day) + "/" + year + "]";
+		}
+	});
+}
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //

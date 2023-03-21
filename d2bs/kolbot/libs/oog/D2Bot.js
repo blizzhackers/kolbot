@@ -39,7 +39,7 @@ includeIfNotIncluded("oog/DataFile.js");
 
 		printToConsole: function (msg, color, tooltip, trigger) {
 			let printObj = {
-				msg: msg,
+				msg: ((new Date().dateStamp() + " ") + msg),
 				color: color || 0,
 				tooltip: tooltip || "",
 				trigger: trigger || ""
