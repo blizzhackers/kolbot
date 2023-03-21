@@ -10,7 +10,7 @@
 // noinspection ThisExpressionReferencesGlobalObjectJS <-- definition of global here
 typeof global === "undefined" && (this["global"] = this);
 
-global["module"] = {exports: undefined};
+global["module"] = { exports: undefined };
 global["exports"] = {};
 function removeRelativePath(test) {
 	return test.replace(/\\/g, "/").split("/").reduce(function (acc, cur) {
@@ -25,10 +25,11 @@ function removeRelativePath(test) {
 	}, []).join("/");
 }
 global.require = (function (include, isIncluded, print, notify) {
+	const debug = false;
 
 	let depth = 0;
 	const modules = {};
-	const obj = function require(field, path, log = true) {
+	const obj = function require(field, path) {
 		const stack = new Error().stack.match(/[^\r\n]+/g);
 		let directory = stack[1].match(/.*?@.*?d2bs\\(kolbot\\?.*)\\.*(\.js|\.dbj):/)[1].replace("\\", "/") + "/";
 		let filename = stack[1].match(/.*?@.*?d2bs\\kolbot\\?(.*)(\.js|\.dbj):/)[1];
@@ -75,7 +76,7 @@ global.require = (function (include, isIncluded, print, notify) {
 		const moduleNameShort = nameShort;
 
 		if (!isIncluded(fullpath + ".js") && !modules.hasOwnProperty(moduleNameShort)) {
-			if (log) {
+			if (debug) {
 				depth && notify && print("ÿc2Kolbotÿc0 ::    - loading dependency of " + filename + ": " + moduleNameShort);
 				!depth && notify && print("ÿc2Kolbotÿc0 :: Loading module: " + moduleNameShort);
 			}
@@ -84,7 +85,7 @@ global.require = (function (include, isIncluded, print, notify) {
 			let oldExports = Object.create(global["exports"]);
 			delete global["module"];
 			delete global["exports"];
-			global["module"] = {exports: null};
+			global["module"] = { exports: null };
 			global["exports"] = {};
 
 			// Include the file;
