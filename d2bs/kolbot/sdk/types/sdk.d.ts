@@ -4407,6 +4407,8 @@ declare global {
 				const UnableToCreateAccount: 5249;
 				const Disconnected: 5347;
 				const UnableToIndentifyVersion: 5245;
+				const BattlenetNotResponding: 5353;
+				const BattlenetNotResponding2: 5354;
 				const EnhancedDamage: 10038;
 				const LoDKeyDisabled: 10913;
 				const CdKeyInUseBy: 10914;

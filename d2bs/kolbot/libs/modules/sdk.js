@@ -1667,6 +1667,11 @@
 		},
 
 		exits: {
+			type: {
+				WalkThrough: 1,
+				Stairs: 2,
+				RedPortal: 60,
+			},
 			preset: {
 				AreaEntrance: 0, // special
 				// act 1
@@ -4483,6 +4488,8 @@
 				UnableToCreateAccount: 5249,
 				Disconnected: 5347,
 				UnableToIndentifyVersion: 5245,
+				BattlenetNotResponding: 5353,
+				BattlenetNotResponding2: 5354,
 				EnhancedDamage: 10038,
 				LoDKeyDisabled: 10913,
 				CdKeyInUseBy: 10914,

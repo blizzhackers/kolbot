@@ -1256,6 +1256,8 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
 						break;
 					case getLocaleString(sdk.locale.text.LoginError):
+					case getLocaleString(sdk.locale.text.BattlenetNotResponding):
+					case getLocaleString(sdk.locale.text.BattlenetNotResponding2):
 					case getLocaleString(sdk.locale.text.OnlyOneInstanceAtATime):
 						Controls.LoginErrorOk.click();
 						Controls.LoginExit.click();
