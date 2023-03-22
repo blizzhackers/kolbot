@@ -8,12 +8,13 @@ declare global {
 	 * @method ladderRestricted - Returns true if we are unable to make the runeword because we are not on ladder.
 	 */
 	interface runeword {
-    name: string;
-    sockets: number;
-    runes: number[];
-    itemTypes: number[];
-    _ladder: boolean;
-    ladderRestricted: () => boolean;
+		name: string;
+		sockets: number;
+		runes: number[];
+		itemTypes: number[];
+		_ladder: boolean;
+		reqLvl: number;
+		ladderRestricted: () => boolean;
 	}
 
 	namespace Runeword {

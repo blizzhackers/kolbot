@@ -55,6 +55,9 @@
 			this.runes = runes;
 			this.itemTypes = itemTypes;
 			this._ladder = ladderRws.includes(name);
+			let highestItem = runes.sort((a, b) => b - a).first();
+			let reqLvl = getBaseStat("items", highestItem, "levelreq");
+			this.reqLvl = reqLvl > 0 ? reqLvl : 1;
 		}
 
 		RunewordObj.prototype.ladderRestricted = function () {
