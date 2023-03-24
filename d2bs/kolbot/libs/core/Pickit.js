@@ -510,10 +510,10 @@ const Pickit = {
 		return false;
 	},
 
-	/**
-	 * @type {ItemUnit[]}
-	 */
+	/** @type {ItemUnit[]} */
 	pickList: [],
+	/** @type {Set<number>} */
+	ignoreList: new Set(),
 
 	/**
 	 * @param {number} range
@@ -523,7 +523,7 @@ const Pickit = {
 		if (me.dead) return false;
 		
 		let needMule = false;
-		let canUseMule = AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("muleInfo");
+		const canUseMule = AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("muleInfo");
 
 		// why wait for idle?
 		while (!me.idle) {
@@ -534,6 +534,7 @@ const Pickit = {
 
 		if (item) {
 			do {
+				if (Pickit.ignoreList.has(item.gid)) continue;
 				if (Pickit.pickList.some(el => el.gid === item.gid)) continue;
 				if (item.onGroundOrDropping && getDistance(me, item) <= range) {
 					Pickit.pickList.push(copyUnit(item));
@@ -551,6 +552,12 @@ const Pickit = {
 			const check = Pickit.pickList.shift();
 			// get the actual item again
 			const itemToPick = Game.getItem(check.classid, -1, check.gid);
+
+			if (Pickit.ignoreList.has(itemToPick.gid)) {
+				Pickit.pickList.shift();
+				
+				continue;
+			}
 
 			// Check if the item unit is still valid and if it's on ground or being dropped
 			// Don't pick items behind walls/obstacles when walking
@@ -578,6 +585,7 @@ const Pickit = {
 							if (Town.visitTown()) {
 								// Recursive check after going to town. We need to remake item list because gids can change.
 								// Called only if room can be made so it shouldn't error out or block anything.
+								Pickit.ignoreList.clear();
 								return this.pickItems();
 							}
 
@@ -588,20 +596,27 @@ const Pickit = {
 						}
 
 						// Can't make room - trigger automule
-						Item.logger("No room for", itemToPick);
-						console.warn("ÿc7Not enough room for " + Item.color(itemToPick) + itemToPick.name);
-						
 						if (copyUnit(itemToPick).x !== undefined) {
-							canUseMule && console.debug("Attempt to trigger automule");
-							needMule = true;
+							Item.logger("No room for", itemToPick);
+							console.warn("ÿc7Not enough room for " + Item.color(itemToPick) + itemToPick.name);
+							Pickit.ignoreList.add(itemToPick.gid);
+							if (canUseMule) {
+								console.debug("Attempt to trigger automule");
+								needMule = true;
+							}
 
 							break;
 						}
 					}
 
 					// Item can fit - pick it up
-					if (canFit && !this.pickItem(itemToPick, status.result, status.line)) {
-						console.warn("Failed to pick item " + item.prettyPrint);
+					if (canFit) {
+						let picked = this.pickItem(itemToPick, status.result, status.line);
+						if (!picked) {
+							console.warn("Failed to pick item " + itemToPick.prettyPrint);
+
+							break;
+						}
 					}
 				}
 			}
@@ -611,6 +626,8 @@ const Pickit = {
 		if (needMule && canUseMule && AutoMule.getMuleItems().length > 0) {
 			scriptBroadcast("mule");
 			scriptBroadcast("quit");
+
+			return false;
 		}
 
 		return true;
