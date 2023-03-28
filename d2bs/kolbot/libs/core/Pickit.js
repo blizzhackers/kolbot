@@ -553,7 +553,7 @@ const Pickit = {
 			// get the actual item again
 			const itemToPick = Game.getItem(check.classid, -1, check.gid);
 
-			if (Pickit.ignoreList.has(itemToPick.gid)) {
+			if (!itemToPick || Pickit.ignoreList.has(itemToPick.gid)) {
 				Pickit.pickList.shift();
 				
 				continue;
