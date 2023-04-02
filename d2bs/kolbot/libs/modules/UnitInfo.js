@@ -131,7 +131,7 @@ include("core/prototypes.js");
 			this.hooks.push(new Text("Equipped items:", this.x, this.y + 15, 4, 13, 2));
 			frameYsize += 15;
 
-			items.forEach(item => {
+			items.forEach((item, i) => {
 				if (item.runeword) {
 					string = item.fname.split("\n")[1] + "ÿc0 " + item.fname.split("\n")[0];
 				} else {
