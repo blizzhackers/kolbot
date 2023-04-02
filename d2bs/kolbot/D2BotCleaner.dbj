@@ -359,14 +359,14 @@ function locationAction (location) {
 		// Single Player screen fix
 		if (currAcc.toLowerCase() !== "singleplayer") {
 			if (getLocation() === sdk.game.locations.CharSelect && !Controls.CharSelectCurrentRealm.control) {
-				Controls.CharSelectExit.click();
+				Controls.BottomLeftExit.click();
 
 				break;
 			}
 		}
 		
 		if (!charList.length) {
-			Controls.CharSelectExit.click();
+			Controls.BottomLeftExit.click();
 
 			break;
 		}
@@ -401,7 +401,7 @@ function locationAction (location) {
 		if (!charList.length) {
 			accounts.shift();
 			chars.shift();
-			Controls.CharSelectExit.click();
+			Controls.BottomLeftExit.click();
 		}
 		
 		FileTools.writeText("logs/D2BotCleaner.json", JSON.stringify(obj));
@@ -413,7 +413,7 @@ function locationAction (location) {
 		break;
 	case sdk.game.locations.CharacterCreate:
 	case sdk.game.locations.NewCharSelected:
-		Controls.CharSelectExit.click();
+		Controls.BottomLeftExit.click();
 				
 		break;
 	case sdk.game.locations.CharSelectPleaseWait:

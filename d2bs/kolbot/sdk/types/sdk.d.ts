@@ -1505,6 +1505,12 @@ declare global {
 				const Active: 2;
 			}
 
+			const chestIds: [
+				5, 6, 87, 104, 105, 106, 107, 143, 140, 141, 144, 146, 147, 148, 176, 177, 181, 183, 198, 240, 241,
+				242, 243, 329, 330, 331, 332, 333, 334, 335, 336, 354, 355, 356, 371, 387, 389, 390, 391, 397, 405,
+				406, 407, 413, 420, 424, 425, 430, 431, 432, 433, 454, 455, 501, 502, 504, 505, 580, 581
+			];
+
 			// act1
 			const A1TownFire: 39;
 			const A1Waypoint: 119;
@@ -4390,6 +4396,7 @@ declare global {
 				const Energy: 4069;
 				const DoNotMeetLevelReqForThisGame: 5162;
 				const CdKeyDisabled: 5199;
+				const CdKeyInUseBy: 5200;
 				const OnlyOneInstanceAtATime: 5201;
 				const CdKeyIntendedForAnotherProduct: 5202;
 				const InvalidPassword: 5207;
@@ -4405,13 +4412,14 @@ declare global {
 				const UsernameIncludedDisallowedwords: 5233;
 				const AccountNameAlreadyExist: 5239;
 				const UnableToCreateAccount: 5249;
+				const CannotCreateGamesDeadHCChar: 5304;
 				const Disconnected: 5347;
 				const UnableToIndentifyVersion: 5245;
 				const BattlenetNotResponding: 5353;
 				const BattlenetNotResponding2: 5354;
 				const EnhancedDamage: 10038;
 				const LoDKeyDisabled: 10913;
-				const CdKeyInUseBy: 10914;
+				const LodKeyInUseBy: 10914;
 				const LoDKeyIntendedForAnotherProduct: 10915;
 				const YourPositionInLineIs: 11026;
 				const Gateway: 11049;

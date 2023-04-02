@@ -180,7 +180,7 @@ function locationAction (location) {
 		
 		// Single Player screen fix
 		if (getLocation() === sdk.game.locations.CharSelect && !Controls.CharSelectCurrentRealm.control) {
-			Controls.CharSelectExit.click();
+			Controls.BottomLeftExit.click();
 
 			break;
 		}

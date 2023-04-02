@@ -165,11 +165,11 @@ function locationAction (location) {
 		break;
 	case sdk.game.locations.CharSelect:
 		// Single Player screen fix
-		if (getLocation() === sdk.game.locations.CharSelect && !Controls.CharSelectCurrentRealm.control && Controls.CharSelectExit.click()) {
+		if (getLocation() === sdk.game.locations.CharSelect && !Controls.CharSelectCurrentRealm.control && Controls.BottomLeftExit.click()) {
 			break;
 		}
 
-		if (!charList.length && Controls.CharSelectExit.click()) {
+		if (!charList.length && Controls.BottomLeftExit.click()) {
 			break;
 		}
 
@@ -228,7 +228,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.NewCharSelected:
-		Controls.CharSelectExit.click();
+		Controls.BottomLeftExit.click();
 
 		break;
 	case sdk.game.locations.CharSelectPleaseWait:

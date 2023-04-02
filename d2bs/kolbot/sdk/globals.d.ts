@@ -46,6 +46,8 @@ declare global {
 		startsWith(a: string): boolean;
 		capitalize(downCase: boolean): string;
 		format(...pairs: Array<string, (number|string|boolean)>): string;
+		padStart(targetLength: number, padString: string): string;
+		padEnd(targetLength: number, padString: string): string;
 	}
 
 	interface StringConstructor {
@@ -126,6 +128,30 @@ declare global {
 		 * The end y coordinate of the Line.
 		 */
 		y2: number;
+	}
+
+	class Text extends Hook {
+		constructor(
+			text: string,
+			x: number,
+			y: number,
+			color: number,
+			font: number,
+			align: number,
+			automap: boolean,
+			ClickHandler?: Function,
+			HoverHandler?: Function
+		);
+		text: string;
+		/**
+		 * The x coordinate (left) of the Text.
+		 */
+		x: number;
+
+		/**
+		 * The y coordinate (top) of the Text.
+		 */
+		y: number;
 	}
 
 	class Box extends Hook {

@@ -427,7 +427,7 @@ function main () {
 		D2Bot.updateRuns();
 	}
 
-	DataFile.updateStats("debugInfo", JSON.stringify({currScript: "none", area: "out of game"}));
+	DataFile.updateStats("debugInfo", JSON.stringify({ currScript: "none", area: "out of game" }));
 
 	while (!Object.keys(Starter.profileInfo).length) {
 		D2Bot.getProfile();

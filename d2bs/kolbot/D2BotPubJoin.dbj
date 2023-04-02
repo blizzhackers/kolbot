@@ -339,7 +339,7 @@ function locationAction (location) {
 
 		break;
 	case sdk.game.locations.CharacterCreate:
-		Controls.CharSelectExit.click();
+		Controls.BottomLeftExit.click();
 
 		break;
 	case sdk.game.locations.OtherMultiplayer:

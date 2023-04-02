@@ -23,13 +23,19 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 	} else {
 		Object.assign(root, factory());
 	}
-}(this, function() {
+}([].filter.constructor("return this")(), function() {
 	const Controls = require("./modules/Control");
 
 	const ControlAction = {
 		mutedKey: false,
 		realms: { "uswest": 0, "useast": 1, "asia": 2, "europe": 3 },
 
+		/**
+		 * @param {string} text 
+		 * @param {number} time - in milliseconds 
+		 * @param {Function} [stopfunc] 
+		 * @param {*} [arg] 
+		 */
 		timeoutDelay: function (text, time, stopfunc, arg) {
 			let currTime = 0;
 			let endTime = getTickCount() + time;
@@ -53,6 +59,16 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 			Starter.delay = 0;
 		},
 
+		/**
+		 * @param {number} type 
+		 * @param {number} x 
+		 * @param {number} y 
+		 * @param {number} xsize 
+		 * @param {number} ysize 
+		 * @param {number} targetx 
+		 * @param {number} targety 
+		 * @returns {boolean}
+		 */
 		click: function (type, x, y, xsize, ysize, targetx, targety) {
 			let control = getControl(type, x, y, xsize, ysize);
 
@@ -67,6 +83,15 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 			return true;
 		},
 
+		/**
+		 * @param {number} type 
+		 * @param {number} x 
+		 * @param {number} y 
+		 * @param {number} xsize 
+		 * @param {number} ysize 
+		 * @param {string} text 
+		 * @returns {boolean}
+		 */
 		setText: function (type, x, y, xsize, ysize, text) {
 			if (!text) return false;
 
@@ -87,10 +112,585 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 			return true;
 		},
 
+		/**
+		 * @param {number} type 
+		 * @param {number} x 
+		 * @param {number} y 
+		 * @param {number} xsize 
+		 * @param {number} ysize 
+		 * @returns {string[] | false}
+		 */
 		getText: function (type, x, y, xsize, ysize) {
 			let control = getControl(type, x, y, xsize, ysize);
 
 			return (!!control ? control.getText() : false);
+		},
+
+		// ~~~ Start of general functions ~~~ //
+		scrollDown: function () {
+			me.blockMouse = true;
+			for (let i = 0; i < 4; i++) {
+				sendKey(sdk.keys.code.DownArrow);
+			}
+			me.blockMouse = false;
+		},
+
+		clickRealm: function (realm) {
+			if (realm === undefined || typeof realm !== "number" || realm < 0 || realm > 3) {
+				throw new Error("clickRealm: Invalid realm!");
+			}
+
+			let retry = 0;
+
+			me.blockMouse = true;
+
+			MainLoop:
+			while (true) {
+				switch (getLocation()) {
+				case sdk.game.locations.MainMenu:
+					let control = Controls.Gateway.control;
+					if (!control) {
+						if (retry > 3) return false;
+						retry++;
+
+						break;
+					}
+
+					let gateText = getLocaleString(sdk.locale.text.Gateway);
+					let currentRealm = (() => {
+						switch (control.text.split(gateText.substring(0, gateText.length - 2))[1]) {
+						case "U.S. WEST":
+							return 0;
+						case "ASIA":
+							return 2;
+						case "EUROPE":
+							return 3;
+						case "U.S. EAST":
+						default:
+							return 1;
+						}
+					})();
+
+					if (currentRealm === realm) {
+						break MainLoop;
+					}
+
+					Controls.Gateway.click();
+
+					break;
+				case sdk.game.locations.GatewaySelect:
+					this.click(4, 257, 500, 292, 160, 403, 350 + realm * 25);
+					Controls.GatewayOk.click();
+
+					break;
+				}
+
+				delay(500);
+			}
+
+			me.blockMouse = false;
+
+			return true;
+		},
+
+		/**
+		 * @typedef {Object} CharacterInfo
+		 * @property {string} charName
+		 * @property {string} charClass
+		 * @property {number} charLevel
+		 * @property {boolean} expansion
+		 * @property {boolean} hardcore
+		 * @property {boolean} ladder
+		 */
+
+		/**
+		 * @param {CharacterInfo} info 
+		 * @param {boolean} [startFromTop]
+		 * @returns {Control | false}
+		 */
+		findCharacter: function (info, startFromTop = true) {
+			let count = 0;
+			let tick = getTickCount();
+
+			while (getLocation() !== sdk.game.locations.CharSelect) {
+				if (getTickCount() - tick >= 5000) {
+					break;
+				}
+
+				delay(25);
+			}
+
+			// start from beginning of the char list
+			startFromTop && sendKey(sdk.keys.code.Home);
+
+			while (getLocation() === sdk.game.locations.CharSelect && count < 24) {
+				let control = Controls.CharSelectCharInfo0.control;
+
+				if (control) {
+					do {
+						let text = control.getText();
+
+						if (text instanceof Array && typeof text[1] === "string") {
+							count++;
+
+							if (String.isEqual(text[1], info.charName)) {
+								return control;
+							}
+						}
+					} while (count < 24 && control.getNext());
+				}
+
+				// check for additional characters up to 24
+				if (count === 8 || count === 16) {
+					Controls.CharSelectChar6.click() && this.scrollDown();
+				} else {
+					// no further check necessary
+					break;
+				}
+			}
+
+			return false;
+		},
+
+		getCharacters: function () {
+			let count = 0;
+			let list = [];
+
+			// start from beginning of the char list
+			sendKey(sdk.keys.code.Home);
+
+			while (getLocation() === sdk.game.locations.CharSelect && count < 24) {
+				let control = Controls.CharSelectCharInfo0.control;
+
+				if (control) {
+					do {
+						let text = control.getText();
+
+						if (text instanceof Array && typeof text[1] === "string") {
+							count++;
+
+							if (list.indexOf(text[1]) === -1) {
+								list.push(text[1]);
+							}
+						}
+					} while (count < 24 && control.getNext());
+				}
+
+				// check for additional characters up to 24
+				if (count === 8 || count === 16) {
+					Controls.CharSelectChar6.click() && this.scrollDown();
+				} else {
+					// no further check necessary
+					break;
+				}
+			}
+
+			// back to beginning of the char list
+			sendKey(sdk.keys.code.Home);
+
+			return list;
+		},
+
+		/**
+		 * @param {CharacterInfo} info 
+		 * @returns {boolean}
+		 */
+		getPermStatus: function (info) {
+			let expireStr = getLocaleString(sdk.locale.text.ExpiresIn);
+			expireStr = expireStr.slice(0, expireStr.indexOf("%")).trim();
+
+			let control = this.findCharacter(info);
+			if (!control) return false;
+
+			let text = control.getText();
+			if (!Array.isArray(text) || typeof text[1] !== "string") return false;
+
+			return !text.some(el => el.includes(expireStr));
+		},
+
+		/**
+		 * get character position - useless? this doesn't take any arguments to even check the character
+		 * @returns {number}
+		 */
+		getPosition: function () {
+			let position = 0;
+
+			if (getLocation() === sdk.game.locations.CharSelect) {
+				let control = Controls.CharSelectCharInfo0.control;
+
+				if (control) {
+					do {
+						let text = control.getText();
+
+						if (text instanceof Array && typeof text[1] === "string") {
+							position += 1;
+						}
+					} while (control.getNext());
+				}
+			}
+
+			return position;
+		},
+
+		/**
+		 * @param {CharacterInfo} info 
+		 * @returns {boolean}
+		 */
+		makeCharacter: function (info) {
+			me.blockMouse = true;
+			!info.charClass && (info.charClass = "barbarian");
+			(!info.charName || info.charName.length < 2 || info.charName.length > 15) && (info.charName = Starter.randomString(8, false));
+			info.charName.match(/\d+/g) && (info.charName.replace(/\d+/g, ""));
+			!info.expansion && ["druid", "assassin"].includes(info.charClass) && (info.expansion = true);
+
+			let clickCoords = [];
+			/** @type {Map<string, [number, number]} */
+			const coords = new Map();
+			coords.set("barbarian", [400, 280]);
+			coords.set("amazon", [100, 280]);
+			coords.set("necromancer", [300, 290]);
+			coords.set("sorceress", [620, 270]);
+			coords.set("assassin", [200, 280]);
+			coords.set("druid", [700, 280]);
+			coords.set("paladin", [521, 260]);
+
+			// cycle until in lobby
+			while (getLocation() !== sdk.game.locations.Lobby) {
+				switch (getLocation()) {
+				case sdk.game.locations.CharSelect:
+				case sdk.game.locations.CharSelectNoChars:
+					// Create Character greyed out
+					if (Controls.CharSelectCreate.disabled === sdk.game.controls.Disabled) {
+						me.blockMouse = false;
+
+						return false;
+					}
+
+					Controls.CharSelectCreate.click();
+
+					break;
+				case sdk.game.locations.CharacterCreate:
+					clickCoords = coords.get(info.charClass.toLowerCase()) || coords.get("paladin");
+					getControl().click(clickCoords[0], clickCoords[1]);
+					delay(500);
+
+					break;
+				case sdk.game.locations.NewCharSelected:
+					if (Controls.CharCreateHCWarningOk.control) {
+						Controls.CharCreateHCWarningOk.click();
+					} else {
+						Controls.CharCreateCharName.setText(info.charName);
+
+						!info.expansion && Controls.CharCreateExpansion.click();
+						!info.ladder && Controls.CharCreateLadder.click();
+						info.hardcore && Controls.CharCreateHardcore.click();
+
+						Controls.BottomRightOk.click();
+					}
+
+					break;
+				case sdk.game.locations.OkCenteredErrorPopUp:
+					// char name exists (text box 4, 268, 320, 264, 120)
+					Controls.OkCentered.click();
+					Controls.BottomLeftExit.click();
+
+					me.blockMouse = false;
+
+					return false;
+				default:
+					break;
+				}
+
+				// Singleplayer loop break fix.
+				if (me.ingame) {
+					break;
+				}
+
+				delay(500);
+			}
+
+			me.blockMouse = false;
+
+			return true;
+		},
+
+		/**
+		 * @param {CharacterInfo} info 
+		 * @returns {boolean}
+		 */
+		deleteCharacter: function (info) {
+			let control = this.findCharacter(info);
+			if (!control) return false;
+
+			try {
+				me.blockMouse = true;
+				console.log("delete character " + info.charName);
+				control.click();
+				Controls.CharSelectDelete.click();
+				delay(500);
+				Controls.PopupYes.click();
+				delay(500);
+
+				return true;
+			} catch (e) {
+				console.error(e);
+
+				return false;
+			} finally {
+				me.blockMouse = false;
+			}
+		},
+
+		/**
+		 * @param {CharacterInfo} info 
+		 * @returns {boolean}
+		 */
+		convertCharacter: function (info) {
+			let control = this.findCharacter(info);
+			if (!control) return false;
+
+			if (control.getText().find(el => el.toLowerCase().includes("expansion"))) {
+				console.warn(info.charName + " already expansion");
+				console.debug(control, "\n", control.getText());
+				
+				return false;
+			}
+
+			try {
+				me.blockMouse = true;
+				console.log("converting character to expansion " + info.charName);
+				control.click();
+				Controls.CharSelectConvert.click();
+				delay(500);
+				Controls.PopupYes.click();
+				delay(500);
+
+				return true;
+			} catch (e) {
+				console.error(e);
+
+				return false;
+			} finally {
+				me.blockMouse = false;
+			}
+		},
+
+		/**
+		 * @param {CharacterInfo} info 
+		 * @param {boolean} startFromTop
+		 * @returns {boolean}
+		 */
+		loginCharacter: function (info, startFromTop = true) {
+			me.blockMouse = true;
+			
+			try {
+				MainLoop:
+				// cycle until in lobby or in game
+				while (getLocation() !== sdk.game.locations.Lobby) {
+					switch (getLocation()) {
+					case sdk.game.locations.CharSelect:
+						let control = this.findCharacter(info, startFromTop);
+						if (!control) return false;
+						
+						control.click();
+						Controls.BottomRightOk.click();
+						Starter.locationTimeout(sdk.game.locations.CharSelect, 5000);
+
+						return getLocation() === sdk.game.locations.SelectDifficultySP
+							? login(info.profile)
+							: true;
+					case sdk.game.locations.CharSelectNoChars:
+						Controls.BottomLeftExit.click();
+
+						break;
+					case sdk.game.locations.Disconnected:
+					case sdk.game.locations.OkCenteredErrorPopUp:
+						break MainLoop;
+					default:
+						break;
+					}
+
+					delay(100);
+				}
+
+				return true;
+			} catch (e) {
+				console.error(e);
+
+				return false;
+			} finally {
+				me.blockMouse = false;
+			}
+		},
+
+		setEmail: function (email = "", domain = "@email.com") {
+			if (getLocation() !== sdk.game.locations.RegisterEmail) return false;
+			if (!email || !email.length) {
+				email = Starter.randomString(null, true);
+			}
+			
+			while (getLocation() !== sdk.game.locations.CharSelect) {
+				switch (getLocation()) {
+				case sdk.game.locations.RegisterEmail:
+					if (Controls.EmailSetEmail.setText(email + domain) && Controls.EmailVerifyEmail.setText(email + domain)) {
+						Controls.EmailRegister.click();
+						delay(100);
+					}
+
+					break;
+				case sdk.game.locations.LoginError:
+					// todo test what conditions get here other than email not matching
+					D2Bot.printToConsole("Failed to set email");
+					Controls.LoginErrorOk.click();
+					
+					return false;
+				case sdk.game.locations.CharSelectNoChars:
+					// fresh acc
+					return true;
+				}
+			}
+
+			return true;
+		},
+
+		makeAccount: function (info) {
+			me.blockMouse = true;
+
+			let openBnet = Profile().type === sdk.game.profiletype.OpenBattlenet;
+			
+			// cycle until in empty char screen
+			MainLoop:
+			while (getLocation() !== sdk.game.locations.CharSelectNoChars) {
+				switch (getLocation()) {
+				case sdk.game.locations.MainMenu:
+					ControlAction.clickRealm(this.realms[info.realm]);
+					if (openBnet) {
+						Controls.OtherMultiplayer.click() && Controls.OpenBattleNet.click();
+					} else {
+						Controls.BattleNet.click();
+					}
+
+					break;
+				case sdk.game.locations.Login:
+					Controls.CreateNewAccount.click();
+
+					break;
+				case sdk.game.locations.SplashScreen:
+					Controls.SplashScreen.click();
+
+					break;
+				case sdk.game.locations.CharacterCreate:
+					Controls.BottomLeftExit.click();
+
+					break;
+				case sdk.game.locations.TermsOfUse:
+					Controls.TermsOfUseAgree.click();
+
+					break;
+				case sdk.game.locations.CreateNewAccount:
+					Controls.EnterAccountName.setText(info.account);
+					Controls.EnterAccountPassword.setText(info.password);
+					Controls.ConfirmPassword.setText(info.password);
+					Controls.BottomRightOk.click();
+
+					break;
+				case sdk.game.locations.PleaseRead:
+					Controls.PleaseReadOk.click();
+
+					break;
+				case sdk.game.locations.RegisterEmail:
+					Controls.EmailDontRegisterContinue.control ? Controls.EmailDontRegisterContinue.click() : Controls.EmailDontRegister.click();
+
+					break;
+				case sdk.game.locations.CharSelect:
+					if (openBnet) {
+						break MainLoop;
+					}
+
+					break;
+				default:
+					break;
+				}
+
+				delay(100);
+			}
+
+			me.blockMouse = false;
+
+			return true;
+		},
+
+		loginAccount: function (info) {
+			me.blockMouse = true;
+
+			let locTick;
+			let tick = getTickCount();
+
+			MainLoop:
+			while (true) {
+				switch (getLocation()) {
+				case sdk.game.locations.PreSplash:
+					break;
+				case sdk.game.locations.MainMenu:
+					info.realm && ControlAction.clickRealm(this.realms[info.realm]);
+					Controls.BattleNet.click();
+
+					break;
+				case sdk.game.locations.Login:
+					Controls.EnterAccountName.setText(info.account);
+					Controls.EnterAccountPassword.setText(info.password);
+					Controls.Login.click();
+
+					break;
+				case sdk.game.locations.LoginUnableToConnect:
+				case sdk.game.locations.RealmDown:
+					// Unable to connect, let the caller handle it.
+					me.blockMouse = false;
+
+					return false;
+				case sdk.game.locations.CharSelect:
+					break MainLoop;
+				case sdk.game.locations.SplashScreen:
+					Controls.SplashScreen.click();
+
+					break;
+				case sdk.game.locations.CharSelectPleaseWait:
+				case sdk.game.locations.MainMenuConnecting:
+				case sdk.game.locations.CharSelectConnecting:
+					break;
+				case sdk.game.locations.CharSelectNoChars:
+					// make sure we're not on connecting screen
+					locTick = getTickCount();
+
+					while (getTickCount() - locTick < 3000 && getLocation() === sdk.game.locations.CharSelectNoChars) {
+						delay(25);
+					}
+
+					if (getLocation() === sdk.game.locations.CharSelectConnecting) {
+						break;
+					}
+
+					break MainLoop; // break if we're sure we're on empty char screen
+				default:
+					print(getLocation());
+
+					me.blockMouse = false;
+
+					return false;
+				}
+
+				if (getTickCount() - tick >= 20000) {
+					return false;
+				}
+
+				delay(100);
+			}
+
+			delay(1000);
+
+			me.blockMouse = false;
+
+			return getLocation() === sdk.game.locations.CharSelect || getLocation() === sdk.game.locations.CharSelectNoChars;
 		},
 
 		joinChannel: function (channel) {
@@ -186,582 +786,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
 			me.blockMouse = false;
 		},
-
-		clickRealm: function (realm) {
-			if (realm === undefined || typeof realm !== "number" || realm < 0 || realm > 3) {
-				throw new Error("clickRealm: Invalid realm!");
-			}
-
-			let retry = 0;
-
-			me.blockMouse = true;
-
-			MainLoop:
-			while (true) {
-				switch (getLocation()) {
-				case sdk.game.locations.MainMenu:
-					let control = Controls.Gateway.control;
-					if (!control) {
-						if (retry > 3) return false;
-						retry++;
-
-						break;
-					}
-
-					let gateText = getLocaleString(sdk.locale.text.Gateway);
-					let currentRealm = (() => {
-						switch (control.text.split(gateText.substring(0, gateText.length - 2))[1]) {
-						case "U.S. WEST":
-							return 0;
-						case "ASIA":
-							return 2;
-						case "EUROPE":
-							return 3;
-						case "U.S. EAST":
-						default:
-							return 1;
-						}
-					})();
-
-					if (currentRealm === realm) {
-						break MainLoop;
-					}
-
-					Controls.Gateway.click();
-
-					break;
-				case sdk.game.locations.GatewaySelect:
-					this.click(4, 257, 500, 292, 160, 403, 350 + realm * 25);
-					Controls.GatewayOk.click();
-
-					break;
-				}
-
-				delay(500);
-			}
-
-			me.blockMouse = false;
-
-			return true;
-		},
-
-		loginAccount: function (info) {
-			me.blockMouse = true;
-
-			let locTick;
-			let tick = getTickCount();
-
-			MainLoop:
-			while (true) {
-				switch (getLocation()) {
-				case sdk.game.locations.PreSplash:
-					break;
-				case sdk.game.locations.MainMenu:
-					info.realm && ControlAction.clickRealm(this.realms[info.realm]);
-					Controls.BattleNet.click();
-
-					break;
-				case sdk.game.locations.Login:
-					Controls.LoginUsername.setText(info.account);
-					Controls.LoginPassword.setText(info.password);
-					Controls.Login.click();
-
-					break;
-				case sdk.game.locations.LoginUnableToConnect:
-				case sdk.game.locations.RealmDown:
-					// Unable to connect, let the caller handle it.
-					me.blockMouse = false;
-
-					return false;
-				case sdk.game.locations.CharSelect:
-					break MainLoop;
-				case sdk.game.locations.SplashScreen:
-					Controls.SplashScreen.click();
-
-					break;
-				case sdk.game.locations.CharSelectPleaseWait:
-				case sdk.game.locations.MainMenuConnecting:
-				case sdk.game.locations.CharSelectConnecting:
-					break;
-				case sdk.game.locations.CharSelectNoChars:
-					// make sure we're not on connecting screen
-					locTick = getTickCount();
-
-					while (getTickCount() - locTick < 3000 && getLocation() === sdk.game.locations.CharSelectNoChars) {
-						delay(25);
-					}
-
-					if (getLocation() === sdk.game.locations.CharSelectConnecting) {
-						break;
-					}
-
-					break MainLoop; // break if we're sure we're on empty char screen
-				default:
-					print(getLocation());
-
-					me.blockMouse = false;
-
-					return false;
-				}
-
-				if (getTickCount() - tick >= 20000) {
-					return false;
-				}
-
-				delay(100);
-			}
-
-			delay(1000);
-
-			me.blockMouse = false;
-
-			return getLocation() === sdk.game.locations.CharSelect || getLocation() === sdk.game.locations.CharSelectNoChars;
-		},
-
-		setEmail: function (email = "", domain = "@email.com") {
-			if (getLocation() !== sdk.game.locations.RegisterEmail) return false;
-			if (!email || !email.length) {
-				email = Starter.randomString(null, true);
-			}
-			
-			while (getLocation() !== sdk.game.locations.CharSelect) {
-				switch (getLocation()) {
-				case sdk.game.locations.RegisterEmail:
-					if (Controls.EmailSetEmail.setText(email + domain) && Controls.EmailVerifyEmail.setText(email + domain)) {
-						Controls.EmailRegister.click();
-						delay(100);
-					}
-
-					break;
-				case sdk.game.locations.LoginError:
-					// todo test what conditions get here other than email not matching
-					D2Bot.printToConsole("Failed to set email");
-					Controls.LoginErrorOk.click();
-					
-					return false;
-				case sdk.game.locations.CharSelectNoChars:
-					// fresh acc
-					return true;
-				}
-			}
-
-			return true;
-		},
-
-		makeAccount: function (info) {
-			me.blockMouse = true;
-
-			let openBnet = Profile().type === sdk.game.profiletype.OpenBattlenet;
-			
-			// cycle until in empty char screen
-			MainLoop:
-			while (getLocation() !== sdk.game.locations.CharSelectNoChars) {
-				switch (getLocation()) {
-				case sdk.game.locations.MainMenu:
-					ControlAction.clickRealm(this.realms[info.realm]);
-					if (openBnet) {
-						Controls.OtherMultiplayer.click() && Controls.OpenBattleNet.click();
-					} else {
-						Controls.BattleNet.click();
-					}
-
-					break;
-				case sdk.game.locations.Login:
-					Controls.CreateNewAccount.click();
-
-					break;
-				case sdk.game.locations.SplashScreen:
-					Controls.SplashScreen.click();
-
-					break;
-				case sdk.game.locations.CharacterCreate:
-					Controls.CharSelectExit.click();
-
-					break;
-				case sdk.game.locations.TermsOfUse:
-					Controls.TermsOfUseAgree.click();
-
-					break;
-				case sdk.game.locations.CreateNewAccount:
-					Controls.CreateNewAccountName.setText(info.account);
-					Controls.CreateNewAccountPassword.setText(info.password);
-					Controls.CreateNewAccountConfirmPassword.setText(info.password);
-					Controls.CreateNewAccountOk.click();
-
-					break;
-				case sdk.game.locations.PleaseRead:
-					Controls.PleaseReadOk.click();
-
-					break;
-				case sdk.game.locations.RegisterEmail:
-					Controls.EmailDontRegisterContinue.control ? Controls.EmailDontRegisterContinue.click() : Controls.EmailDontRegister.click();
-
-					break;
-				case sdk.game.locations.CharSelect:
-					if (openBnet) {
-						break MainLoop;
-					}
-
-					break;
-				default:
-					break;
-				}
-
-				delay(100);
-			}
-
-			me.blockMouse = false;
-
-			return true;
-		},
-
-		scrollDown: function () {
-			me.blockMouse = true;
-			for (let i = 0; i < 4; i++) {
-				sendKey(sdk.keys.code.DownArrow);
-			}
-			me.blockMouse = false;
-		},
-
-		findCharacter: function (info) {
-			let count = 0;
-			let tick = getTickCount();
-
-			while (getLocation() !== sdk.game.locations.CharSelect) {
-				if (getTickCount() - tick >= 5000) {
-					break;
-				}
-
-				delay(25);
-			}
-
-			// start from beginning of the char list
-			sendKey(sdk.keys.code.Home);
-
-			while (getLocation() === sdk.game.locations.CharSelect && count < 24) {
-				let control = Controls.CharSelectCharInfo0.control;
-
-				if (control) {
-					do {
-						let text = control.getText();
-
-						if (text instanceof Array && typeof text[1] === "string") {
-							count++;
-
-							if (String.isEqual(text[1], info.charName)) {
-								return true;
-							}
-						}
-					} while (count < 24 && control.getNext());
-				}
-
-				// check for additional characters up to 24
-				if (count === 8 || count === 16) {
-					Controls.CharSelectChar6.click() && this.scrollDown();
-				} else {
-					// no further check necessary
-					break;
-				}
-			}
-
-			return false;
-		},
-
-		// get all characters
-		getCharacters: function () {
-			let count = 0;
-			let list = [];
-
-			// start from beginning of the char list
-			sendKey(sdk.keys.code.Home);
-
-			while (getLocation() === sdk.game.locations.CharSelect && count < 24) {
-				let control = Controls.CharSelectCharInfo0.control;
-
-				if (control) {
-					do {
-						let text = control.getText();
-
-						if (text instanceof Array && typeof text[1] === "string") {
-							count++;
-
-							if (list.indexOf(text[1]) === -1) {
-								list.push(text[1]);
-							}
-						}
-					} while (count < 24 && control.getNext());
-				}
-
-				// check for additional characters up to 24
-				if (count === 8 || count === 16) {
-					Controls.CharSelectChar6.click() && this.scrollDown();
-				} else {
-					// no further check necessary
-					break;
-				}
-			}
-
-			// back to beginning of the char list
-			sendKey(sdk.keys.code.Home);
-
-			return list;
-		},
-
-		getPermStatus: function (info) {
-			let count = 0;
-			let tick = getTickCount();
-			let expireStr = getLocaleString(sdk.locale.text.ExpiresIn);
-			expireStr = expireStr.slice(0, expireStr.indexOf("%")).trim();
-
-			while (getLocation() !== sdk.game.locations.CharSelect) {
-				if (getTickCount() - tick >= 5000) {
-					break;
-				}
-
-				delay(25);
-			}
-
-			// start from beginning of the char list
-			sendKey(sdk.keys.code.Home);
-
-			while (getLocation() === sdk.game.locations.CharSelect && count < 24) {
-				let control = Controls.CharSelectCharInfo0.control;
-
-				if (control) {
-					do {
-						let text = control.getText();
-
-						if (text instanceof Array && typeof text[1] === "string") {
-							count++;
-
-							if (String.isEqual(text[1], info.charName)) {
-								return !text.some(el => el.includes(expireStr));
-							}
-						}
-					} while (count < 24 && control.getNext());
-				}
-
-				// check for additional characters up to 24
-				if (count === 8 || count === 16) {
-					Controls.CharSelectChar6.click() && this.scrollDown();
-				} else {
-					// no further check necessary
-					break;
-				}
-			}
-
-			return false;
-		},
-
-		// get character position
-		getPosition: function () {
-			let position = 0;
-
-			if (getLocation() === sdk.game.locations.CharSelect) {
-				let control = Controls.CharSelectCharInfo0.control;
-
-				if (control) {
-					do {
-						let text = control.getText();
-
-						if (text instanceof Array && typeof text[1] === "string") {
-							position += 1;
-						}
-					} while (control.getNext());
-				}
-			}
-
-			return position;
-		},
-
-		loginCharacter: function (info, startFromTop = true) {
-			me.blockMouse = true;
-
-			let count = 0;
-
-			// start from beginning of the char list
-			startFromTop && sendKey(sdk.keys.code.Home);
-
-			MainLoop:
-			// cycle until in lobby or in game
-			while (getLocation() !== sdk.game.locations.Lobby) {
-				switch (getLocation()) {
-				case sdk.game.locations.CharSelect:
-					let control = Controls.CharSelectCharInfo0.control;
-
-					if (control) {
-						do {
-							let text = control.getText();
-
-							if (text instanceof Array && typeof text[1] === "string") {
-								count++;
-
-								if (String.isEqual(text[1], info.charName)) {
-									control.click();
-									Controls.CreateNewAccountOk.click();
-									me.blockMouse = false;
-
-									if (getLocation() === sdk.game.locations.SelectDifficultySP) {
-										try {
-											login(info.profile);
-										} catch (err) {
-											break MainLoop;
-										}
-
-										if (me.ingame) {
-											return true;
-										}
-									}
-
-									return true;
-								}
-							}
-						} while (control.getNext());
-					}
-
-					// check for additional characters up to 24
-					if (count === 8 || count === 16) {
-						Controls.CharSelectChar6.click() && this.scrollDown();
-					} else {
-						// no further check necessary
-						break MainLoop;
-					}
-
-					break;
-				case sdk.game.locations.CharSelectNoChars:
-					Controls.CharSelectExit.click();
-
-					break;
-				case sdk.game.locations.Disconnected:
-				case sdk.game.locations.OkCenteredErrorPopUp:
-					break MainLoop;
-				default:
-					break;
-				}
-
-				delay(100);
-			}
-
-			me.blockMouse = false;
-
-			return false;
-		},
-
-		makeCharacter: function (info) {
-			me.blockMouse = true;
-			!info.charClass && (info.charClass = "barbarian");
-			
-			if (info.charName.match(/\d+/g)) {
-				console.warn("Invalid character name, cannot contain numbers");
-
-				return false;
-			}
-
-			let clickCoords = [];
-
-			// cycle until in lobby
-			while (getLocation() !== sdk.game.locations.Lobby) {
-				switch (getLocation()) {
-				case sdk.game.locations.CharSelect:
-				case sdk.game.locations.CharSelectNoChars:
-					// Create Character greyed out
-					if (Controls.CharSelectCreate.disabled === sdk.game.controls.Disabled) {
-						me.blockMouse = false;
-
-						return false;
-					}
-
-					Controls.CharSelectCreate.click();
-
-					break;
-				case sdk.game.locations.CharacterCreate:
-					clickCoords = (() => {
-						switch (info.charClass) {
-						case "barbarian":
-							return [400, 280];
-						case "amazon":
-							return [100, 280];
-						case "necromancer":
-							return [300, 290];
-						case "sorceress":
-							return [620, 270];
-						case "assassin":
-							return [200, 280];
-						case "druid":
-							return [700, 280];
-						case "paladin":
-						default:
-							return [521, 260];
-						}
-					})();
-
-					// coords:
-					// zon: 100, 280
-					// barb: 400, 280
-					// necro: 300, 290
-					// sin: 200, 280
-					// paladin: 521 260
-					// sorc: 620, 270
-					// druid: 700, 280
-
-					getControl().click(clickCoords[0], clickCoords[1]);
-					delay(500);
-
-					break;
-				case sdk.game.locations.NewCharSelected:
-					if (Controls.CharCreateHCWarningOk.control) {
-						Controls.CharCreateHCWarningOk.click();
-					} else {
-						Controls.CharCreateCharName.setText(info.charName);
-
-						if (!info.expansion) {
-							switch (info.charClass) {
-							case "druid":
-							case "assassin":
-								D2Bot.printToConsole("Error in profile name. Expansion characters cannot be made in classic", sdk.colors.D2Bot.Red);
-								D2Bot.stop();
-
-								break;
-							default:
-								break;
-							}
-
-							Controls.CharCreateExpansion.click();
-						}
-
-						!info.ladder && Controls.CharCreateLadder.click();
-						info.hardcore && Controls.CharCreateHardcore.click();
-
-						Controls.CreateNewAccountOk.click();
-					}
-
-					break;
-				case sdk.game.locations.OkCenteredErrorPopUp:
-					// char name exists (text box 4, 268, 320, 264, 120)
-					Controls.OkCentered.click();
-					Controls.CharSelectExit.click();
-
-					me.blockMouse = false;
-
-					return false;
-				default:
-					break;
-				}
-
-				// Singleplayer loop break fix.
-				if (me.ingame) {
-					break;
-				}
-
-				delay(500);
-			}
-
-			me.blockMouse = false;
-
-			return true;
-		},
-
-		// Test version - modified core only
+		
 		getGameList: function () {
 			let text = Controls.JoinGameList.getText();
 
@@ -777,56 +802,6 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
 				return gameList;
 			}
-
-			return false;
-		},
-
-		deleteCharacter: function (info) {
-			me.blockMouse = true;
-
-			// start from beginning of the char list
-			sendKey(sdk.keys.code.Home);
-			
-			// cycle until in lobby
-			while (getLocation() === sdk.game.locations.CharSelect) {
-				let count = 0;
-				let control = Controls.CharSelectCharInfo0.control;
-
-				if (control) {
-					do {
-						let text = control.getText();
-
-						if (text instanceof Array && typeof text[1] === "string") {
-							count++;
-
-							if (String.isEqual(text[1], info.charName)) {
-								print("delete character " + info.charName);
-								
-								control.click();
-								Controls.CharSelectDelete.click();
-								delay(500);
-								Controls.CharDeleteYes.click();
-								delay(500);
-								me.blockMouse = false;
-								
-								return true;
-							}
-						}
-					} while (control.getNext());
-				}
-
-				// check for additional characters up to 24
-				if (count === 8 || count === 16) {
-					Controls.CharSelectChar6.click() && this.scrollDown();
-				} else {
-					// no further check necessary
-					break;
-				}
-
-				delay(100);
-			}
-
-			me.blockMouse = false;
 
 			return false;
 		},
@@ -851,7 +826,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 				case sdk.game.locations.CharSelect:
 					if (Controls.CharSelectCurrentRealm.control) {
 						console.log("Not in single player character select screen");
-						Controls.CharSelectExit.click();
+						Controls.BottomLeftExit.click();
 
 						break;
 					}
@@ -1007,7 +982,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 			}
 
 			delay(1000);
-			Controls.CharSelectExit.click();
+			Controls.BottomLeftExit.click();
 		},
 
 		scriptMsgEvent: function (msg) {
@@ -1058,18 +1033,21 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 		receiveCopyData: function (mode, msg) {
 			let obj;
 
+			if (msg === "Handle") {
+				console.debug("Recieved Handle :: ", mode);
+			}
 			msg === "Handle" && typeof mode === "number" && (Starter.handle = mode);
 
 			switch (mode) {
 			case 1: // JoinInfo
 				obj = JSON.parse(msg);
-				// console.debug("Recieved Join Info :: ", obj);
+				console.debug("Recieved Join Info :: ", obj);
 				Object.assign(Starter.joinInfo, obj);
 
 				break;
 			case 2: // Game info
 				obj = JSON.parse(msg);
-				// console.debug("Recieved Game Info :: ", obj);
+				console.debug("Recieved Game Info :: ");
 				Object.assign(Starter.gameInfo, obj);
 
 				break;
@@ -1084,7 +1062,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
 				if (Starter.gameInfo.hasOwnProperty("gameName")) {
 					obj = JSON.parse(msg);
-					// console.debug("Recieved Game Request :: ", obj);
+					console.debug("Recieved Game Request :: ", obj.profile);
 
 					if ([sdk.game.profiletype.TcpIpHost, sdk.game.profiletype.TcpIpJoin].includes(Profile().type)) {
 						me.gameReady && D2Bot.joinMe(obj.profile, me.gameserverip.toString(), "", "", Starter.isUp);
@@ -1180,7 +1158,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 				let string = "";
 				let text = getLocation() === sdk.game.locations.LoginError
 					? Controls.LoginErrorText.getText()
-					: Controls.LoginInvalidCdKey.getText();
+					: Controls.LoginCdKeyInUseBy.getText();
 
 				if (text) {
 					for (let i = 0; i < text.length; i += 1) {
@@ -1241,7 +1219,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
 						break;
 					case getLocaleString(sdk.locale.text.CdKeyInUseBy):
-						string += (" " + Controls.LoginCdKeyInUseBy.getText());
+						string += (" " + Controls.LoginLodKeyInUseBy.getText());
 						D2Bot.printToConsole(Starter.gameInfo.mpq + " " + string, sdk.colors.D2Bot.Gold);
 						D2Bot.CDKeyInUse();
 
@@ -1260,7 +1238,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 					case getLocaleString(sdk.locale.text.BattlenetNotResponding2):
 					case getLocaleString(sdk.locale.text.OnlyOneInstanceAtATime):
 						Controls.LoginErrorOk.click();
-						Controls.LoginExit.click();
+						Controls.BottomLeftExit.click();
 						D2Bot.printToConsole(string);
 						ControlAction.timeoutDelay("Login Error Delay", 5 * 6e4);
 						D2Bot.printToConsole("Login Error - Restart");
@@ -1290,7 +1268,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
 					Controls.LoginErrorOk.click();
 					delay(1000);
-					Controls.CharSelectExit.click();
+					Controls.BottomLeftExit.click();
 			
 					while (true) {
 						delay(1000);
@@ -1328,12 +1306,12 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 					Controls.CharSelectCreate.click();
 					delay(1000);
 					
-					Controls.CharSelectExit.click();
+					Controls.BottomLeftExit.click();
 					delay(1000);
 					
 					if (getLocation() !== sdk.game.locations.CharSelectConnecting) return true;
 					
-					Controls.CharSelectExit.click();
+					Controls.BottomLeftExit.click();
 					Starter.gameInfo.rdBlocker && D2Bot.restart();
 
 					return false;
@@ -1346,7 +1324,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 				D2Bot.updateStatus("Realm Down");
 				delay(1000);
 
-				if (!Controls.CharSelectExit.click()) return;
+				if (!Controls.BottomLeftExit.click()) return;
 
 				Starter.updateCount();
 				ControlAction.timeoutDelay("Realm Down", Starter.Config.RealmDownDelay * 6e4);
@@ -1393,7 +1371,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 							if (Starter.Config.WaitOutQueueExitToMenu) {
 								Controls.LobbyQuit.click();
 								delay(1000);
-								Controls.CharSelectExit.click();
+								Controls.BottomLeftExit.click();
 							}
 
 							// Wait out each queue as 1 sec and add extra 10 min
@@ -1553,14 +1531,14 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 					hideConsole(); // seems to fix odd crash with single-player characters if the console is open to type in
 					if ((Profile().type === sdk.game.profiletype.Battlenet && !Controls.CharSelectCurrentRealm.control)
 						|| ((Profile().type !== sdk.game.profiletype.Battlenet && Controls.CharSelectCurrentRealm.control))) {
-						Controls.CharSelectExit.click();
+						Controls.BottomLeftExit.click();
 					
 						return false;
 					}
 				}
 
 				// Multiple realm botting fix in case of R/D or disconnect
-				Starter.firstLogin && getLocation() === sdk.game.locations.Login && Controls.CharSelectExit.click();
+				Starter.firstLogin && getLocation() === sdk.game.locations.Login && Controls.BottomLeftExit.click();
 		
 				D2Bot.updateStatus("Logging In");
 						

@@ -10,7 +10,7 @@ includeIfNotIncluded("oog/FileAction.js");
 
 (function (root, factory) {
 	if (typeof module === "object" && typeof module.exports === "object") {
-		const v = factory();
+		let v = factory();
 		if (v !== undefined) module.exports = v;
 	} else if (typeof define === "function" && define.amd) {
 		define([], factory);
@@ -50,6 +50,7 @@ includeIfNotIncluded("oog/FileAction.js");
 			} catch (e) {
 				// If we failed, file might be corrupted, so create a new one
 				obj = this.create();
+				obj.handle = D2Bot.handle;
 			}
 
 			if (obj) {
@@ -63,7 +64,6 @@ includeIfNotIncluded("oog/FileAction.js");
 
 		getStats: function () {
 			let obj = this.getObj();
-
 			return clone(obj);
 		},
 

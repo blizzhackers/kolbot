@@ -543,7 +543,7 @@ new Overrides.Override (Starter, Starter.updateCount, function () {
 	MuleLogger.save(md5(info.realm.toLowerCase() + info.account.toLowerCase()), info.password);
 	ControlAction.loginAccount(info);
 	delay(1000);
-	Controls.CharSelectExit.click();
+	Controls.BottomLeftExit.click();
 }).apply();
 
 function locationAction (location) {
@@ -730,7 +730,7 @@ function locationAction (location) {
 		// Single Player screen fix
 		// TODO: see if this is still needed. d2bs doesn't load scripts twice anymore
 		if (getLocation() === sdk.game.locations.CharSelect && !Controls.CharSelectCurrentRealm.control) {
-			Controls.CharSelectExit.click();
+			Controls.BottomLeftExit.click();
 
 			break;
 		}
@@ -740,7 +740,7 @@ function locationAction (location) {
 			D2Bot.updateStatus("Realm Down");
 			delay(1000);
 
-			if (!Controls.CharSelectExit.click()) {
+			if (!Controls.BottomLeftExit.click()) {
 				break;
 			}
 
@@ -762,7 +762,7 @@ function locationAction (location) {
 
 		if (makeNext) {
 			if (obj.fullChars.length >= maxCharCount || (muleMode > 0 && obj.torchChars.length >= maxCharCount)) {
-				Controls.CharSelectExit.click();
+				Controls.BottomLeftExit.click();
 				MuleData.nextAccount();
 
 				break;
@@ -797,7 +797,7 @@ function locationAction (location) {
 		} else {
 			// premade account that's already full
 			if (ControlAction.getCharacters().length >= maxCharCount) {
-				Controls.CharSelectExit.click();
+				Controls.BottomLeftExit.click();
 				MuleData.nextAccount();
 
 				break;
@@ -846,7 +846,7 @@ function locationAction (location) {
 		break;
 	case sdk.game.locations.OkCenteredErrorPopUp:
 		Controls.OkCentered.click();
-		Controls.CharSelectExit.click();
+		Controls.BottomLeftExit.click();
 
 		break;
 	case sdk.game.locations.ServerDown:
