@@ -76,9 +76,9 @@
 		 */
 		Quest.prototype.checkState = function (state, complete = true) {
 			// handle the ones we already know
-			if (state === sdk.quest.states.Completed && this.completed) return sdk.quest.states.Completed;
-			if (state === sdk.quest.states.CannotComplete && this.cannotComplete) return sdk.quest.states.CannotComplete;
-			if (state === sdk.quest.states.ReqComplete && this.reqComplete) return sdk.quest.states.ReqComplete;
+			if (state === sdk.quest.states.Completed && this.completed) return complete;
+			if (state === sdk.quest.states.CannotComplete && this.cannotComplete) return complete;
+			if (state === sdk.quest.states.ReqComplete && this.reqComplete) return complete;
 
 			refresh();
 			let val = me.getQuest(this.id, state);
@@ -104,6 +104,7 @@
 			return this.states;
 		};
 
+		/** @type {Map<number, Quest>} */
 		const questMap = new Map();
 		[
 			[
@@ -116,7 +117,7 @@
 			],
 			[
 				sdk.quest.id.AbleToGotoActIII, sdk.quest.id.SpokeToHratli, sdk.quest.id.TheGoldenBird, sdk.quest.id.BladeoftheOldReligion,
-				sdk.quest.id.KhalimsWill, sdk.quest.id.TheBlackenedTemple, sdk.quest.id.TheGuardian,
+				sdk.quest.id.LamEsensTome, sdk.quest.id.KhalimsWill, sdk.quest.id.TheBlackenedTemple, sdk.quest.id.TheGuardian,
 			],
 			[
 				sdk.quest.id.AbleToGotoActIV, sdk.quest.id.TheFallenAngel, sdk.quest.id.SpokeToTyrael, sdk.quest.id.HellsForge, sdk.quest.id.TerrorsEnd,
@@ -132,10 +133,18 @@
 		});
 		
 		return {
+			/**
+			 * @param {number} questId 
+			 * @returns {Quest | undefined}
+			 */
 			get: function (questId) {
 				return questMap.get(questId);
 			},
 
+			/**
+			 * @param {number} questId 
+			 * @returns {boolean}
+			 */
 			has: function (questId) {
 				return questMap.has(questId);
 			},
@@ -146,6 +155,10 @@
 				console.timeEnd("QuestData.init");
 			},
 
+			/**
+			 * @param {number} questId 
+			 * @returns {number}
+			 */
 			getActForQuest: function (questId) {
 				return questMap.get(questId).act;
 			},
