@@ -1091,5 +1091,16 @@ declare global {
 	}
 
 	const Starter: StarterInterface;
+
+	namespace Time {
+		function seconds(seconds: number): number;
+		function minutes(minutes: number): number;
+		function format(ms: number): string;
+		function toSeconds(ms: number): number;
+		function toMinutes(ms: number): number;
+		function toHours(ms: number): number;
+		function toDays(ms: number): number;
+		function elapsed(start: number): number;
+	}
 }
 export {};

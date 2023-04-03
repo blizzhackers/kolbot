@@ -1,6 +1,6 @@
 /**
 *  @filename    Polyfill.js
-*  @author      Jaenster (probably)
+*  @author      Jaenster, theBGuy
 *  @desc        Some polyfills since we run old spidermonkey (61f7ebb)
 *
 */
@@ -1211,3 +1211,32 @@ if (!global.hasOwnProperty("copyObj")) {
 		},
 	});
 }
+
+const Time = {
+	seconds: function (seconds = 0) {
+		if (typeof seconds !== "number") return 0;
+		return (seconds * 1000);
+	},
+	minutes: function (minutes = 0) {
+		if (typeof minutes !== "number") return 0;
+		return (minutes * 60000);
+	},
+	format: function (ms = 0) {
+		return (new Date(ms).toISOString().slice(11, -5));
+	},
+	toSeconds: function (ms = 0) {
+		return (ms / 1000);
+	},
+	toMinutes: function (ms = 0) {
+		return (ms / 60000);
+	},
+	toHours: function (ms = 0) {
+		return (ms / 3600000);
+	},
+	toDays: function (ms = 0) {
+		return (ms / 86400000);
+	},
+	elapsed: function (ms = 0) {
+		return (getTickCount() - ms);
+	}
+};

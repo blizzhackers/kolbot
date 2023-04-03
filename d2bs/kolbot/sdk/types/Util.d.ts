@@ -97,11 +97,6 @@ declare global {
 	const LocalChat: object;
 	const areaNames: string[];
 	function getAreaName(area: number): string;
-	namespace Time {
-		function seconds(seconds: number): number;
-		function minutes(minutes: number): number;
-		function format(ms: number): string;
-	}
 	namespace Game {
 		function getDistance(...args: any[]): number;
 		
