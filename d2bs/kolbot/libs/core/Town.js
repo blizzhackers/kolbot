@@ -207,6 +207,7 @@ const Town = {
 		// what about finding the closest name in case someone mispells it?
 		let npcKey = Object.keys(NPC).find(key => String.isEqual(key, name));
 		if (!npcKey) {
+			// @todo handle if NPC object key is used instead of common name
 			console.warn("Couldn't find " + name + " in NPC object");
 			return false;
 		}
@@ -258,44 +259,60 @@ const Town = {
 	 * @description handle quest consumables if we have them
 	 */
 	checkQuestItems: function () {
+		// Act 1
+		// Tools of the trade
+		if (!me.smith) {
+			let malus = me.getItem(sdk.items.quest.HoradricMalus);
+			!!malus && Town.goToTown(1) && Town.npcInteract("charsi");
+		}
+
+		// Act 2
 		// Radament skill book
-		let book = me.getItem(sdk.quest.item.BookofSkill);
-		if (book) {
-			book.isInStash && this.openStash() && delay(300 + me.ping);
-			book.use();
+		if (!me.radament) {
+			let book = me.getItem(sdk.quest.item.BookofSkill);
+			if (book) {
+				book.isInStash && this.openStash() && delay(300 + me.ping);
+				book.use();
+			}
 		}
 
 		// Act 3
 		// Figurine -> Golden Bird
-		if (me.getItem(sdk.quest.item.AJadeFigurine)) {
-			Town.goToTown(3) && Town.npcInteract("meshif");
-		}
+		if (!me.goldenbird) {
+			if (me.getItem(sdk.quest.item.AJadeFigurine)) {
+				Town.goToTown(3) && Town.npcInteract("meshif");
+			}
 
-		// Golden Bird -> Ashes
-		if (me.getItem(sdk.items.quest.TheGoldenBird)) {
-			Town.goToTown(3) && Town.npcInteract("alkor");
-		}
+			// Golden Bird -> Ashes
+			if (me.getItem(sdk.items.quest.TheGoldenBird)) {
+				Town.goToTown(3) && Town.npcInteract("alkor");
+			}
 
-		// Potion of life
-		let pol = me.getItem(sdk.quest.item.PotofLife);
-		if (pol) {
-			pol.isInStash && this.openStash() && delay(300 + me.ping);
-			pol.use();
+			// Potion of life
+			let pol = me.getItem(sdk.quest.item.PotofLife);
+			if (pol) {
+				pol.isInStash && this.openStash() && delay(300 + me.ping);
+				pol.use();
+			}
 		}
 
 		// LamEssen's Tome
-		let tome = me.getItem(sdk.quest.item.LamEsensTome);
-		if (tome) {
-			!me.inTown && Town.goToTown(3);
-			tome.isInStash && Town.openStash() && Storage.Inventory.MoveTo(tome);
-			Town.npcInteract("alkor");
+		if (!me.lamessen) {
+			let tome = me.getItem(sdk.quest.item.LamEsensTome);
+			if (tome) {
+				!me.inTown && Town.goToTown(3);
+				tome.isInStash && Town.openStash() && Storage.Inventory.MoveTo(tome);
+				Town.npcInteract("alkor");
+			}
 		}
 
 		// Scroll of resistance
-		let sor = me.getItem(sdk.items.quest.ScrollofResistance);
-		if (sor) {
-			sor.isInStash && this.openStash() && delay(300 + me.ping);
-			sor.use();
+		if (!me.anya) {
+			let sor = me.getItem(sdk.items.quest.ScrollofResistance);
+			if (sor) {
+				sor.isInStash && this.openStash() && delay(300 + me.ping);
+				sor.use();
+			}
 		}
 	},
 
@@ -312,17 +329,22 @@ const Town = {
 
 		delay(250);
 
+		/** @type {NPCUnit} */
 		let npc = null;
+		let wantedNpc = this.tasks[me.act - 1][task] !== undefined ? this.tasks[me.act - 1][task] : "undefined";
 		let justUseClosest = (["clearInventory", "sell"].includes(reason) && !me.getUnids().length);
+		
 		if (getUIFlag(sdk.uiflags.NPCMenu)) {
+			console.debug("Currently interacting with an npc");
 			npc = getInteractedNPC();
 		}
 
 		try {
 			if (npc) {
-				if (!justUseClosest && ((npc.name.toLowerCase() !== this.tasks[me.act - 1][task])
+				let npcName = npc.name.toLowerCase();
+				if (!justUseClosest && ((npcName !== wantedNpc)
 					// Jamella gamble fix
-					|| (task === "Gamble" && npc.name.toLowerCase() === NPC.Jamella))) {
+					|| (task === "Gamble" && npcName === NPC.Jamella))) {
 					me.cancelUIFlags();
 					npc = null;
 				}
@@ -339,12 +361,11 @@ const Town = {
 					.find(unit => [npcs.Shop, npcs.Repair].includes(unit.name.toLowerCase()));
 			}
 
-			if (!npc) {
-				npc = Game.getNPC(this.tasks[me.act - 1][task]);
+			if (!npc && wantedNpc !== "undefined") {
+				npc = Game.getNPC(wantedNpc);
 
-				if (!npc) {
-					this.move(this.tasks[me.act - 1][task]);
-					npc = Game.getNPC(this.tasks[me.act - 1][task]);
+				if (!npc && this.move(wantedNpc)) {
+					npc = Game.getNPC(wantedNpc);
 				}
 			}
 
@@ -572,6 +593,7 @@ const Town = {
 	 * @returns {[number, number, number, number]}
 	 */
 	checkColumns: function (beltSize) {
+		(typeof beltSize !== "number" || beltSize < 0 || beltSize > 4) && (beltSize = Storage.BeltSize());
 		let col = [beltSize, beltSize, beltSize, beltSize];
 		let pot = me.getItem(-1, sdk.items.mode.inBelt);
 
@@ -1088,21 +1110,15 @@ const Town = {
 			break;
 		}
 
-		// npc = !!npc ? npc : Town.lastInteractedNPC.get();
-
 		try {
 			if (!!npc && npc.name.toLowerCase() === NPC[potDealer] && !getUIFlag(sdk.uiflags.Shop)) {
 				if (!npc.startTrade("Shop")) throw new Error("Failed to open " + npc.name + " trade menu");
 			} else {
 				me.cancelUIFlags();
-				// npc = null;
-				// Town.lastInteractedNPC.reset();
-
 				Town.move(NPC[potDealer]);
 				npc = Game.getNPC(NPC[potDealer]);
 
 				if (!npc || !npc.openMenu() || !npc.startTrade("Shop")) throw new Error("Failed to open " + npc.name + " trade menu");
-				// Town.lastInteractedNPC.set(npc);
 			}
 		} catch (e) {
 			console.error(e);

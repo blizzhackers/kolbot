@@ -255,13 +255,12 @@ me.getIdTool = function () {
 me.canTpToTown = function () {
 	// can't tp if dead
 	if (me.dead) return false;
-	const myArea = me.area;
 	let badAreas = [
 		sdk.areas.RogueEncampment, sdk.areas.LutGholein, sdk.areas.KurastDocktown,
 		sdk.areas.PandemoniumFortress, sdk.areas.Harrogath, sdk.areas.ArreatSummit, sdk.areas.UberTristram
 	];
 	// can't tp from town or Uber Trist, and shouldn't tp from arreat summit
-	if (badAreas.includes(myArea)) return false;
+	if (badAreas.includes(me.area)) return false;
 	// If we made it this far, we can only tp if we even have a tp
 	return !!me.getTpTool();
 };
@@ -359,11 +358,15 @@ me.switchToPrimary = function () {
 	return me.switchWeapons(Attack.getPrimarySlot());
 };
 
+/**
+ * Misc functions, stats/modes/states/ etc
+ */
 Object.defineProperties(me, {
 	maxNearMonsters: {
 		get: function () {
 			return Math.floor((4 * (1 / me.hpmax * me.hp)) + 1);
-		}
+		},
+		configurable: true
 	},
 	inShop: {
 		get: function () {
@@ -391,32 +394,6 @@ Object.defineProperties(me, {
 	moving: {
 		get: function () {
 			return [sdk.player.mode.Walking, sdk.player.mode.Running, sdk.player.mode.WalkingInTown].includes(me.mode);
-		}
-	},
-	highestAct: {
-		get: function () {
-			let acts = [true,
-				me.getQuest(sdk.quest.id.AbleToGotoActII, sdk.quest.states.Completed),
-				me.getQuest(sdk.quest.id.AbleToGotoActIII, sdk.quest.states.Completed),
-				me.getQuest(sdk.quest.id.AbleToGotoActIV, sdk.quest.states.Completed),
-				me.getQuest(sdk.quest.id.AbleToGotoActV, sdk.quest.states.Completed)];
-			let index = acts.findIndex((i) => !i); // find first false, returns between 1 and 5
-			return index === -1 ? 5 : index;
-		}
-	},
-	highestQuestDone: {
-		get: function () {
-			for (let i = sdk.quest.id.Respec; i >= sdk.quest.id.SpokeToWarriv; i--) {
-				if (me.getQuest(i, sdk.quest.states.Completed)) {
-					return i;
-				}
-
-				// check if we've completed main part but not used our reward
-				if ([sdk.quest.id.RescueonMountArreat, sdk.quest.id.SiegeOnHarrogath, sdk.quest.id.ToolsoftheTrade].includes(i) && me.getQuest(i, sdk.quest.states.ReqComplete)) {
-					return i;
-				}
-			}
-			return undefined;
 		}
 	},
 	staminaPercent: {
@@ -476,6 +453,12 @@ Object.defineProperties(me, {
 			return me.getState(sdk.states.SkillDelay);
 		}
 	},
+});
+
+/**
+ * Game type, difficulty, classtype, etc
+ */
+Object.defineProperties(me, {
 	classic: {
 		get: function () {
 			return me.gametype === sdk.game.gametype.Classic;
@@ -546,7 +529,12 @@ Object.defineProperties(me, {
 			return me.classid === sdk.player.class.Assassin;
 		}
 	},
-	// quest items
+});
+
+/**
+ * Quest items
+ */
+Object.defineProperties(me, {
 	wirtsleg: {
 		get: function () {
 			return me.getItem(sdk.quest.item.WirtsLeg);
@@ -612,152 +600,193 @@ Object.defineProperties(me, {
 			return me.getItem(sdk.quest.item.ScrollofResistance);
 		}
 	},
-	// quests
-	den: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.DenofEvil, sdk.quest.states.Completed);
-		}
-	},
-	bloodraven: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.SistersBurialGrounds, sdk.quest.states.Completed);
-		}
-	},
-	smith: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.ToolsoftheTrade, sdk.quest.states.Completed);
-		}
-	},
-	cain: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.TheSearchForCain, sdk.quest.states.Completed);
-		}
-	},
-	tristram: {
-		get: function () {
-			// update where this is used and change the state to be portal opened and me.cain to be quest completed
-			return me.getQuest(sdk.quest.id.TheSearchForCain, sdk.quest.states.Completed);
-		}
-	},
-	countess: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.ForgottenTower, sdk.quest.states.Completed);
-		}
-	},
-	andariel: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.AbleToGotoActII, sdk.quest.states.Completed);
-		}
-	},
-	radament: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.RadamentsLair, sdk.quest.states.Completed);
-		}
-	},
-	horadricstaff: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.TheHoradricStaff, sdk.quest.states.Completed);
-		}
-	},
-	summoner: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.TheSummoner, sdk.quest.states.Completed);
-		}
-	},
-	duriel: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.AbleToGotoActIII, sdk.quest.states.Completed);
-		}
-	},
-	goldenbird: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.TheGoldenBird, sdk.quest.states.Completed);
-		}
-	},
-	lamessen: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.LamEsensTome, sdk.quest.states.Completed);
-		}
-	},
-	gidbinn: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.BladeoftheOldReligion, sdk.quest.states.Completed);
-		}
-	},
-	travincal: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.KhalimsWill, sdk.quest.states.Completed);
-		}
-	},
-	mephisto: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.AbleToGotoActIV, sdk.quest.states.Completed);
-		}
-	},
-	izual: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.TheFallenAngel, sdk.quest.states.Completed);
-		}
-	},
-	hellforge: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.HellsForge, sdk.quest.states.Completed);
-		}
-	},
-	diablo: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.TerrorsEnd, sdk.quest.states.Completed);
-		}
-	},
-	shenk: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.SiegeOnHarrogath, sdk.quest.states.Completed);
-		}
-	},
-	larzuk: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.SiegeOnHarrogath, sdk.quest.states.ReqComplete);
-		}
-	},
-	savebarby: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.RescueonMountArreat, sdk.quest.states.Completed);
-		}
-	},
-	barbrescue: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.RescueonMountArreat, sdk.quest.states.Completed);
-		}
-	},
-	anya: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.PrisonofIce, sdk.quest.states.Completed);
-		}
-	},
-	ancients: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.Completed);
-		}
-	},
-	baal: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.EyeofDestruction, sdk.quest.states.Completed);
-		}
-	},
-	// Misc
-	cows: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.TheSearchForCain, 10);
-		}
-	},
-	respec: {
-		get: function () {
-			return me.getQuest(sdk.quest.id.Respec, sdk.quest.states.Completed);
-		}
-	},
-	diffCompleted: {
-		get: function () {
-			return !!((me.classic && me.diablo) || me.baal);
-		}
-	},
 });
+
+/**
+ * Quests
+ */
+(function () {
+	const QuestData = require("./GameData/QuestData");
+
+	Object.defineProperties(me, {
+		highestAct: {
+			get: function () {
+				let acts = [true,
+					QuestData.get(sdk.quest.id.AbleToGotoActII).complete(),
+					QuestData.get(sdk.quest.id.AbleToGotoActIII).complete(),
+					QuestData.get(sdk.quest.id.AbleToGotoActIV).complete(),
+					QuestData.get(sdk.quest.id.AbleToGotoActV).complete()];
+				let index = acts.findIndex((i) => !i); // find first false, returns between 1 and 5
+				return index === -1 ? 5 : index;
+			}
+		},
+		highestQuestDone: {
+			get: function () {
+				for (let i = sdk.quest.id.Respec; i >= sdk.quest.id.SpokeToWarriv; i--) {
+					if (QuestData.get(i).complete()) {
+						return i;
+					}
+
+					// check if we've completed main part but not used our reward
+					if ([sdk.quest.id.RescueonMountArreat, sdk.quest.id.SiegeOnHarrogath, sdk.quest.id.ToolsoftheTrade].includes(i)
+						&& QuestData.get(i).complete(true)) {
+						return i;
+					}
+				}
+				return undefined;
+			}
+		},
+		den: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.DenofEvil).complete();
+			}
+		},
+		bloodraven: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.SistersBurialGrounds).complete();
+			}
+		},
+		smith: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.ToolsoftheTrade).complete();
+			}
+		},
+		imbue: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.ToolsoftheTrade).checkState(sdk.quest.states.ReqComplete, true);
+			}
+		},
+		cain: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.TheSearchForCain).complete();
+			}
+		},
+		tristram: {
+			get: function () {
+				// update where this is used and change the state to be portal opened and me.cain to be quest completed
+				return QuestData.get(sdk.quest.id.TheSearchForCain).complete();
+			}
+		},
+		countess: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.ForgottenTower).complete();
+			}
+		},
+		andariel: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.AbleToGotoActII).complete();
+			}
+		},
+		radament: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.RadamentsLair).complete();
+			}
+		},
+		horadricstaff: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.TheHoradricStaff).complete();
+			}
+		},
+		summoner: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.TheSummoner).complete();
+			}
+		},
+		duriel: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.AbleToGotoActIII).complete();
+			}
+		},
+		goldenbird: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.TheGoldenBird).complete();
+			}
+		},
+		lamessen: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.LamEsensTome).complete();
+			}
+		},
+		gidbinn: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.BladeoftheOldReligion).complete();
+			}
+		},
+		travincal: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.KhalimsWill).complete();
+			}
+		},
+		mephisto: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.AbleToGotoActIV).complete();
+			}
+		},
+		izual: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.TheFallenAngel).complete();
+			}
+		},
+		hellforge: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.HellsForge).complete();
+			}
+		},
+		diablo: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.TerrorsEnd).complete();
+			}
+		},
+		shenk: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.SiegeOnHarrogath).complete(true);
+			}
+		},
+		larzuk: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.SiegeOnHarrogath).checkState(sdk.quest.states.ReqComplete, true);
+			}
+		},
+		savebarby: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.RescueonMountArreat).complete();
+			}
+		},
+		barbrescue: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.RescueonMountArreat).complete();
+			}
+		},
+		anya: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.PrisonofIce).complete();
+			}
+		},
+		ancients: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.RiteofPassage).complete();
+			}
+		},
+		baal: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.EyeofDestruction).complete();
+			}
+		},
+		// Misc
+		cows: {
+			get: function () {
+				return me.getQuest(sdk.quest.id.TheSearchForCain, 10);
+			}
+		},
+		respec: {
+			get: function () {
+				return QuestData.get(sdk.quest.id.Respec).complete();
+			}
+		},
+		diffCompleted: {
+			get: function () {
+				return !!((me.classic && me.diablo) || me.baal);
+			}
+		},
+	});
+})();
