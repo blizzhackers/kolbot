@@ -127,7 +127,7 @@ const Loader = {
 
 					if (this.skipTown.includes(script) || Town.goToTown()) {
 						print("ÿc2Starting script: ÿc9" + script);
-						Messaging.sendToScript("threads/toolsthread.js", JSON.stringify({currScript: script}));
+						Messaging.sendToScript("threads/toolsthread.js", JSON.stringify({ currScript: script }));
 						reconfiguration = typeof Scripts[script] === "object";
 
 						if (reconfiguration) {
@@ -136,6 +136,7 @@ const Loader = {
 						}
 
 						let tick = getTickCount();
+						let exp = me.getStat(sdk.stats.Experience);
 
 						if (me.inTown) {
 							Config.StackThawingPots.enabled && Town.buyPots(Config.StackThawingPots.quantity, sdk.items.ThawingPotion, true);
@@ -149,7 +150,15 @@ const Loader = {
 						}
 
 						if (global[script]()) {
-							console.log("ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (Time.format(getTickCount() - tick)));
+							let gain = Math.max(me.getStat(sdk.stats.Experience) - exp, 0);
+							let duration = Time.elapsed(tick);
+							console.log(
+								"ÿc7" + script + " :: ÿc0Complete\n"
+								+ "ÿc2 Statistics:\n"
+								+ "ÿc7 - Duration: ÿc0" + (Time.format(duration)) + "\n"
+								+ "ÿc7 - Experience Gained: ÿc0" + gain + "\n"
+								+ "ÿc7 - Exp/minute: ÿc0" + (gain / (duration / 60000)).toFixed(2)
+							);
 						}
 					}
 				} catch (error) {
@@ -207,7 +216,7 @@ const Loader = {
 					let mainScriptStr = (mainScript !== script ? buildScriptMsg() : "");
 					this.tempList.push(script);
 					print(mainScriptStr + "ÿc2Starting script: ÿc9" + script);
-					Messaging.sendToScript("threads/toolsthread.js", JSON.stringify({currScript: script}));
+					Messaging.sendToScript("threads/toolsthread.js", JSON.stringify({ currScript: script }));
 
 					reconfiguration = typeof Scripts[script] === "object";
 
@@ -222,9 +231,19 @@ const Loader = {
 					}
 
 					let tick = getTickCount();
+					let exp = me.getStat(sdk.stats.Experience);
 
 					if (global[script]()) {
 						console.log(mainScriptStr + "ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (Time.format(getTickCount() - tick)));
+						let gain = Math.max(me.getStat(sdk.stats.Experience) - exp, 0);
+						let duration = Time.elapsed(tick);
+						console.log(
+							mainScriptStr + "ÿc7" + script + " :: ÿc0Complete\n"
+							+ "ÿc2 Statistics:\n"
+							+ "ÿc7 - Duration: ÿc0" + (Time.format(duration)) + "\n"
+							+ "ÿc7 - Experience Gained: ÿc0" + gain + "\n"
+							+ "ÿc7 - Exp/minute: ÿc0" + (gain / (duration / 60000)).toFixed(2)
+						);
 					}
 				}
 			} catch (error) {
