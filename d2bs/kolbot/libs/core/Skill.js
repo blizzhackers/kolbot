@@ -72,7 +72,7 @@
 							{ skillId: sdk.skills.ChillingArmor, level: me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.SoftPoints) },
 							{ skillId: sdk.skills.FrozenArmor, level: me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.SoftPoints) },
 						].filter(skill => !!skill.level && skill.level > 0).sort((a, b) => b.level - a.level).first();
-						return coldArmor !== undefined ? coldArmor.skillId : false;
+						return coldArmor !== undefined ? coldArmor.skillId : -1;
 					})();
 					Precast.skills.coldArmor.duration = this.getDuration(Precast.skills.coldArmor.best);
 				} else {
@@ -126,7 +126,7 @@
 		 * @returns {boolean}
 		 */
 		canUse: function (skillId = -1) {
-			if (skillId === -1) return false;
+			if (skillId < 0) return false;
 			if (skillId <= sdk.skills.LeftHandSwing) return true;
 			return _SkillData.get(skillId).have();
 		},
@@ -136,6 +136,7 @@
 		 * @returns {number}
 		 */
 		getDuration: function (skillId = -1) {
+			if (skillId < 0) return 0;
 			return _SkillData.get(skillId).duration();
 		},
 
@@ -144,6 +145,7 @@
 		 * @returns {number}
 		 */
 		getMaxSummonCount: function (skillId) {
+			if (skillId < 0) return 0;
 			return _SkillData.get(skillId).summonCount();
 		},
 
@@ -152,6 +154,7 @@
 		 * @returns {number}
 		 */
 		getRange: function (skillId) {
+			if (skillId < 0) return 0;
 			return _SkillData.get(skillId).range(this.usePvpRange);
 		},
 
@@ -160,6 +163,7 @@
 		 * @returns {number}
 		 */
 		getHand: function (skillId) {
+			if (skillId < 0) return -1;
 			return _SkillData.get(skillId).hand;
 		},
 
@@ -168,6 +172,7 @@
 		 * @returns {number}
 		 */
 		getState: function (skillId) {
+			if (skillId < 0) return 0;
 			return _SkillData.get(skillId).state;
 		},
 
@@ -176,6 +181,7 @@
 		 * @returns {number}
 		 */
 		getCharClass: function (skillId) {
+			if (skillId < 0) return 0;
 			return _SkillData.get(skillId).charClass;
 		},
 
@@ -195,6 +201,7 @@
 		 * @returns {boolean}
 		 */
 		isTimed: function (skillId) {
+			if (skillId < 0) return false;
 			return _SkillData.get(skillId).timed;
 		},
 
@@ -204,6 +211,7 @@
 		 * @returns {boolean}
 		 */
 		townSkill: function (skillId = -1) {
+			if (skillId < 0) return false;
 			return _SkillData.get(skillId).townSkill;
 		},
 
@@ -212,6 +220,7 @@
 		 * @returns {boolean}
 		 */
 		missileSkill: function (skillId = -1) {
+			if (skillId < 0) return false;
 			return _SkillData.get(skillId).missleSkill;
 		},
 
