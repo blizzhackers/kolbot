@@ -126,7 +126,7 @@
 		 * @returns {boolean}
 		 */
 		canUse: function (skillId = -1) {
-			if (skillId < 0) return false;
+			if (!_SkillData.has(skillId)) return false;
 			if (skillId <= sdk.skills.LeftHandSwing) return true;
 			return _SkillData.get(skillId).have();
 		},
@@ -136,7 +136,7 @@
 		 * @returns {number}
 		 */
 		getDuration: function (skillId = -1) {
-			if (skillId < 0) return 0;
+			if (!_SkillData.has(skillId)) return 0;
 			return _SkillData.get(skillId).duration();
 		},
 
@@ -145,7 +145,7 @@
 		 * @returns {number}
 		 */
 		getMaxSummonCount: function (skillId) {
-			if (skillId < 0) return 0;
+			if (!_SkillData.has(skillId)) return 0;
 			return _SkillData.get(skillId).summonCount();
 		},
 
@@ -154,7 +154,7 @@
 		 * @returns {number}
 		 */
 		getRange: function (skillId) {
-			if (skillId < 0) return 0;
+			if (!_SkillData.has(skillId)) return 0;
 			return _SkillData.get(skillId).range(this.usePvpRange);
 		},
 
@@ -162,8 +162,17 @@
 		 * @param {number} skillId 
 		 * @returns {number}
 		 */
+		getAoE: function (skillId) {
+			if (!_SkillData.has(skillId)) return 0;
+			return _SkillData.get(skillId).AoE();
+		},
+
+		/**
+		 * @param {number} skillId 
+		 * @returns {number}
+		 */
 		getHand: function (skillId) {
-			if (skillId < 0) return -1;
+			if (!_SkillData.has(skillId)) return -1;
 			return _SkillData.get(skillId).hand;
 		},
 
@@ -172,7 +181,7 @@
 		 * @returns {number}
 		 */
 		getState: function (skillId) {
-			if (skillId < 0) return 0;
+			if (!_SkillData.has(skillId)) return 0;
 			return _SkillData.get(skillId).state;
 		},
 
@@ -181,7 +190,7 @@
 		 * @returns {number}
 		 */
 		getCharClass: function (skillId) {
-			if (skillId < 0) return 0;
+			if (!_SkillData.has(skillId)) return 0;
 			return _SkillData.get(skillId).charClass;
 		},
 
@@ -191,6 +200,7 @@
 		 * @returns {number}
 		 */
 		getManaCost: function (skillId) {
+			if (!_SkillData.has(skillId)) return 0;
 			if (skillId < sdk.skills.MagicArrow) return 0;
 			return _SkillData.get(skillId).manaCost();
 		},
@@ -201,7 +211,7 @@
 		 * @returns {boolean}
 		 */
 		isTimed: function (skillId) {
-			if (skillId < 0) return false;
+			if (!_SkillData.has(skillId)) return false;
 			return _SkillData.get(skillId).timed;
 		},
 
@@ -211,7 +221,7 @@
 		 * @returns {boolean}
 		 */
 		townSkill: function (skillId = -1) {
-			if (skillId < 0) return false;
+			if (!_SkillData.has(skillId)) return false;
 			return _SkillData.get(skillId).townSkill;
 		},
 
@@ -220,7 +230,7 @@
 		 * @returns {boolean}
 		 */
 		missileSkill: function (skillId = -1) {
-			if (skillId < 0) return false;
+			if (!_SkillData.has(skillId)) return false;
 			return _SkillData.get(skillId).missleSkill;
 		},
 
