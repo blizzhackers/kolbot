@@ -175,7 +175,8 @@
 		skillMap.set(sdk.skills.FreezingArrow, {
 			hand: sdk.skills.hand.Left,
 			missile: true,
-			range: 20,
+			range: 30,
+			AoE: () => 3,
 		});
 		skillMap.set(sdk.skills.Valkyrie, {
 			hand: sdk.skills.hand.Right,
@@ -337,6 +338,8 @@
 		skillMap.set(sdk.skills.Hydra, {
 			hand: sdk.skills.hand.Right,
 			range: 30,
+			duration: () => 10,
+			AoE: () => 14,
 		});
 		skillMap.set(sdk.skills.LightningMastery, {
 			hand: -1,
@@ -360,6 +363,8 @@
 			hand: sdk.skills.hand.Right,
 			range: 40,
 			state: sdk.states.AmplifyDamage,
+			duration: () => (5 + (3 * me.getSkill(sdk.skills.AmplifyDamage, sdk.skills.subindex.SoftPoints))),
+			AoE: () => ((4 + (2 * me.getSkill(sdk.skills.AmplifyDamage, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.Teeth, {
 			hand: sdk.skills.hand.Left,
@@ -386,11 +391,24 @@
 			hand: sdk.skills.hand.Right,
 			range: 40,
 			state: sdk.states.DimVision,
+			duration: () => {
+				switch (me.diff) {
+				case sdk.difficulty.Normal:
+					return (5 + (2 * me.getSkill(sdk.skills.DimVision, sdk.skills.subindex.SoftPoints)));
+				case sdk.difficulty.Nightmare:
+					return ((125 + (50 * me.getSkill(sdk.skills.DimVision, sdk.skills.subindex.SoftPoints))) * 0.5) / 25;
+				default:
+					return ((125 + (50 * me.getSkill(sdk.skills.DimVision, sdk.skills.subindex.SoftPoints))) * 0.25) / 25;
+				}
+			},
+			AoE: () => ((6 + (2 * me.getSkill(sdk.skills.DimVision, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.Weaken, {
 			hand: sdk.skills.hand.Right,
 			range: 40,
 			state: sdk.states.Weaken,
+			duration: () => (11.6 + (2.4 * me.getSkill(sdk.skills.Weaken, sdk.skills.subindex.SoftPoints))),
+			AoE: () => ((16 + (2 * me.getSkill(sdk.skills.Weaken, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.PoisonDagger, {
 			hand: sdk.skills.hand.Left,
@@ -399,6 +417,7 @@
 		skillMap.set(sdk.skills.CorpseExplosion, {
 			hand: sdk.skills.hand.Right,
 			range: 40,
+			AoE: () => (((7 + me.getSkill(sdk.skills.AmplifyDamage, sdk.skills.subindex.SoftPoints)) / 2) * (2 / 3)),
 		});
 		skillMap.set(sdk.skills.ClayGolem, {
 			hand: sdk.skills.hand.Right,
@@ -409,11 +428,24 @@
 			hand: sdk.skills.hand.Right,
 			range: 40,
 			state: sdk.states.IronMaiden,
+			duration: () => (9.6 + (2.4 * me.getSkill(sdk.skills.IronMaiden, sdk.skills.subindex.SoftPoints))),
+			AoE: () => 4,
 		});
 		skillMap.set(sdk.skills.Terror, {
 			hand: sdk.skills.hand.Right,
 			range: 40,
 			state: sdk.states.Terror,
+			duration: () => {
+				switch (me.diff) {
+				case sdk.difficulty.Normal:
+					return (7 + me.getSkill(sdk.skills.Terror, sdk.skills.subindex.SoftPoints));
+				case sdk.difficulty.Nightmare:
+					return ((175 + (25 * me.getSkill(sdk.skills.Terror, sdk.skills.subindex.SoftPoints))) * 0.5) / 25;
+				default:
+					return ((175 + (25 * me.getSkill(sdk.skills.Terror, sdk.skills.subindex.SoftPoints))) * 0.25) / 25;
+				}
+			},
+			AoE: () => 2.66,
 		});
 		skillMap.set(sdk.skills.BoneWall, {
 			hand: sdk.skills.hand.Right,
@@ -435,15 +467,29 @@
 			hand: sdk.skills.hand.Right,
 			range: 40,
 			state: sdk.states.Confuse,
+			duration: () => {
+				switch (me.diff) {
+				case sdk.difficulty.Normal:
+					return (8 + (2 * me.getSkill(sdk.skills.Confuse, sdk.skills.subindex.SoftPoints)));
+				case sdk.difficulty.Nightmare:
+					return ((200 + (50 * me.getSkill(sdk.skills.Confuse, sdk.skills.subindex.SoftPoints))) * 0.5) / 25;
+				default:
+					return ((200 + (50 * me.getSkill(sdk.skills.Confuse, sdk.skills.subindex.SoftPoints))) * 0.25) / 25;
+				}
+			},
+			AoE: () => ((10 + (2 * me.getSkill(sdk.skills.Confuse, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.LifeTap, {
 			hand: sdk.skills.hand.Right,
 			range: 40,
 			state: sdk.states.LifeTap,
+			duration: () => (13.6 + (2.4 * me.getSkill(sdk.skills.LifeTap, sdk.skills.subindex.SoftPoints))),
+			AoE: () => ((6 + (2 * me.getSkill(sdk.skills.LifeTap, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.PoisonExplosion, {
 			hand: sdk.skills.hand.Right,
 			range: 40,
+			AoE: () => 2,
 		});
 		skillMap.set(sdk.skills.BoneSpear, {
 			hand: sdk.skills.hand.Left,
@@ -459,11 +505,24 @@
 			hand: sdk.skills.hand.Right,
 			range: 40,
 			state: sdk.states.Attract,
+			duration: () => {
+				switch (me.diff) {
+				case sdk.difficulty.Normal:
+					return (8.4 + (3.6 * me.getSkill(sdk.skills.Attract, sdk.skills.subindex.SoftPoints)));
+				case sdk.difficulty.Nightmare:
+					return ((210 + (90 * me.getSkill(sdk.skills.Attract, sdk.skills.subindex.SoftPoints))) * 0.5) / 25;
+				default:
+					return ((210 + (90 * me.getSkill(sdk.skills.Attract, sdk.skills.subindex.SoftPoints))) * 0.25) / 25;
+				}
+			},
+			AoE: () => 6,
 		});
 		skillMap.set(sdk.skills.Decrepify, {
 			hand: sdk.skills.hand.Right,
 			range: 40,
 			state: sdk.states.Decrepify,
+			duration: () => (3.4 + (0.6 * me.getSkill(sdk.skills.Decrepify, sdk.skills.subindex.SoftPoints))),
+			AoE: () => 4,
 		});
 		skillMap.set(sdk.skills.BonePrison, {
 			hand: sdk.skills.hand.Right,
@@ -482,11 +541,14 @@
 			hand: sdk.skills.hand.Right,
 			range: 40,
 			state: sdk.states.LowerResist,
+			duration: () => (18 + (2 * me.getSkill(sdk.skills.LowerResist, sdk.skills.subindex.SoftPoints))),
+			AoE: () => ((12 + (2 * me.getSkill(sdk.skills.LowerResist, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.PoisonNova, {
 			hand: sdk.skills.hand.Right,
 			range: 20,
 			state: sdk.states.Poison,
+			AoE: () => 11,
 		});
 		skillMap.set(sdk.skills.BoneSpirit, {
 			hand: sdk.skills.hand.Left,
@@ -518,16 +580,19 @@
 			hand: sdk.skills.hand.Right,
 			range: 1,
 			state: sdk.states.Might,
+			AoE: () => ((28 + (4 * me.getSkill(sdk.skills.Might, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.Prayer, {
 			hand: sdk.skills.hand.Right,
 			range: 1,
 			state: sdk.states.Prayer,
+			AoE: () => ((28 + (4 * me.getSkill(sdk.skills.Prayer, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.ResistFire, {
 			hand: sdk.skills.hand.Right,
 			range: 1,
 			state: sdk.states.ResistFire,
+			AoE: () => ((28 + (4 * me.getSkill(sdk.skills.ResistFire, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.HolyBolt, {
 			hand: sdk.skills.hand.Left,
@@ -538,21 +603,25 @@
 			hand: sdk.skills.hand.Right,
 			range: 1,
 			state: sdk.states.HolyFire,
+			AoE: () => ((10 + (2 * me.getSkill(sdk.skills.HolyFire, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.Thorns, {
 			hand: sdk.skills.hand.Right,
 			range: 1,
 			state: sdk.states.Thorns,
+			AoE: () => ((28 + (4 * me.getSkill(sdk.skills.Thorns, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.Defiance, {
 			hand: sdk.skills.hand.Right,
 			range: 1,
 			state: sdk.states.Defiance,
+			AoE: () => ((28 + (4 * me.getSkill(sdk.skills.Defiance, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.ResistCold, {
 			hand: sdk.skills.hand.Right,
 			range: 1,
 			state: sdk.states.ResistCold,
+			AoE: () => ((28 + (4 * me.getSkill(sdk.skills.ResistCold, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.Zeal, {
 			hand: sdk.skills.hand.LeftNoShift,
@@ -567,15 +636,18 @@
 			hand: sdk.skills.hand.Right,
 			range: 1,
 			state: sdk.states.BlessedAim,
+			AoE: () => ((28 + (4 * me.getSkill(sdk.skills.BlessedHammer, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.Cleansing, {
 			hand: sdk.skills.hand.Right,
 			range: 1,
 			state: sdk.states.Cleansing,
+			AoE: () => ((28 + (4 * me.getSkill(sdk.skills.Cleansing, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.ResistLightning, {
 			range: 1,
 			state: sdk.states.ResistLightning,
+			AoE: () => ((28 + (4 * me.getSkill(sdk.skills.ResistLightning, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.Vengeance, {
 			hand: sdk.skills.hand.LeftNoShift,
@@ -584,23 +656,28 @@
 		skillMap.set(sdk.skills.BlessedHammer, {
 			hand: sdk.skills.hand.Left,
 			range: 3,
+			AoE: () => 10,
 		});
 		skillMap.set(sdk.skills.Concentration, {
 			range: 1,
 			state: sdk.states.Concentration,
+			AoE: () => ((28 + (4 * me.getSkill(sdk.skills.Concentration, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.HolyFreeze, {
 			range: 1,
 			state: sdk.states.HolyFreeze,
+			AoE: () => ((10 + (2 * me.getSkill(sdk.skills.HolyFreeze, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.Vigor, {
 			range: 1,
 			state: sdk.states.Stamina,
 			condition: () => Config.Vigor || me.inTown,
+			AoE: () => ((26 + (6 * me.getSkill(sdk.skills.Vigor, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.Conversion, {
 			hand: sdk.skills.hand.LeftNoShift,
 			range: 3,
+			duration: () => 16,
 		});
 		skillMap.set(sdk.skills.HolyShield, {
 			range: 1,
@@ -610,14 +687,17 @@
 		skillMap.set(sdk.skills.HolyShock, {
 			range: 1,
 			state: sdk.states.HolyShock,
+			AoE: () => ((10 + (2 * me.getSkill(sdk.skills.HolyShock, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.Sanctuary, {
 			range: 1,
 			state: sdk.states.Sanctuary,
+			AoE: () => ((8 + (2 * me.getSkill(sdk.skills.Sanctuary, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.Meditation, {
 			range: 1,
 			state: sdk.states.Meditation,
+			AoE: () => ((28 + (4 * me.getSkill(sdk.skills.Meditation, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.FistoftheHeavens, {
 			hand: sdk.skills.hand.Left,
@@ -626,18 +706,22 @@
 		skillMap.set(sdk.skills.Fanaticism, {
 			range: 1,
 			state: sdk.states.Fanaticism,
+			AoE: () => ((20 + (2 * me.getSkill(sdk.skills.Fanaticism, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 		skillMap.set(sdk.skills.Conviction, {
 			range: 1,
 			state: sdk.states.Conviction,
+			AoE: () => 13,
 		});
 		skillMap.set(sdk.skills.Redemption, {
 			range: 1,
 			state: sdk.states.Redemption,
+			AoE: () => 10,
 		});
 		skillMap.set(sdk.skills.Salvation, {
 			range: 1,
 			state: sdk.states.ResistAll,
+			AoE: () => ((28 + (4 * me.getSkill(sdk.skills.Salvation, sdk.skills.subindex.SoftPoints)) / 3)),
 		});
 	}
 	// ~~~ start of barbarian skills ~~~ //
@@ -664,6 +748,7 @@
 		skillMap.set(sdk.skills.Howl, {
 			range: 5,
 			state: sdk.states.Terror,
+			duration: () => (2 + me.getSkill(sdk.skills.Howl, sdk.skills.subindex.SoftPoints)),
 		});
 		skillMap.set(sdk.skills.FindPotion, {
 			hand: sdk.skills.hand.RightShift,
@@ -713,6 +798,13 @@
 			hand: sdk.skills.hand.LeftNoShift,
 			range: 3,
 			state: sdk.states.Stunned,
+			duration: () => {
+				let skLvl = me.getSkill(sdk.skills.Stun, sdk.skills.subindex.SoftPoints);
+				let wcSkAddition = (me.getSkill(sdk.skills.WarCry, sdk.skills.subindex.HardPoints) * 5);
+				return skLvl < 16
+					? 1 + (skLvl * 0.2) + wcSkAddition
+					: Math.min(2.92 + (skLvl * 0.08) + wcSkAddition, 10);
+			},
 		});
 		skillMap.set(sdk.skills.DoubleThrow, {
 			hand: sdk.skills.hand.Left,
@@ -775,6 +867,7 @@
 			range: 40,
 			state: sdk.states.Terror,
 			duration: () => 40,
+			AoE: () => (2 + me.getSkill(sdk.skills.GrimWard, sdk.skills.subindex.SoftPoints) * (2 / 3)),
 		});
 		skillMap.set(sdk.skills.Whirlwind, {
 			hand: sdk.skills.hand.Left,
@@ -908,6 +1001,7 @@
 			hand: sdk.skills.hand.LeftNoShift,
 			range: 3,
 			state: sdk.states.FeralRage,
+			duration: () => 20,
 		});
 		skillMap.set(sdk.skills.Maul, {
 			hand: sdk.skills.hand.LeftNoShift,
@@ -945,6 +1039,7 @@
 			hand: sdk.skills.hand.LeftNoShift,
 			range: 3,
 			state: sdk.states.Rabies,
+			duration: () => (3.6 + me.getSkill(sdk.skills.Rabies, sdk.skills.subindex.SoftPoints) * 0.4),
 		});
 		skillMap.set(sdk.skills.FireClaws, {
 			hand: sdk.skills.hand.LeftNoShift,
@@ -970,6 +1065,7 @@
 		skillMap.set(sdk.skills.ShockWave, {
 			hand: sdk.skills.hand.Left,
 			range: 8,
+			duration: () => Math.min(1 + me.getSkill(sdk.skills.ShockWave, sdk.skills.subindex.SoftPoints) * 0.6, 10),
 		});
 		skillMap.set(sdk.skills.Volcano, {
 			hand: sdk.skills.hand.Right,
@@ -1007,12 +1103,14 @@
 			range: 10,
 			state: sdk.states.Armageddon,
 			duration: () => (10 + me.getSkill(sdk.skills.Fissure, sdk.skills.subindex.HardPoints) * 2),
+			AoE: () => 11,
 		});
 		skillMap.set(sdk.skills.Hurricane, {
 			hand: sdk.skills.hand.Right,
 			range: 10,
 			state: sdk.states.Hurricane,
 			duration: () => (10 + me.getSkill(sdk.skills.CycloneArmor, sdk.skills.subindex.HardPoints) * 2),
+			AoE: () => 6,
 		});
 	}
 	// ~~~ start of assassin skills ~~~ //
@@ -1042,6 +1140,11 @@
 		skillMap.set(sdk.skills.ShockWeb, {
 			hand: sdk.skills.hand.Left,
 			range: 15,
+			AoE: () => {
+				let baseMissiles = Math.floor((6 + me.getSkill(sdk.skills.ShockWeb, sdk.skills.subindex.SoftPoints)) / 4);
+				let extraMissiles = Math.floor(me.getSkill(sdk.skills.FireBlast, sdk.skills.subindex.HardPoints) / 3);
+				return ((((baseMissiles + extraMissiles) / 4) + 1) * (2 / 3));
+			},
 		});
 		skillMap.set(sdk.skills.BladeSentinel, {
 			hand: sdk.skills.hand.Left,
@@ -1125,6 +1228,7 @@
 		skillMap.set(sdk.skills.MindBlast, {
 			hand: sdk.skills.hand.Right,
 			range: 40,
+			AoE: () => 2.66,
 		});
 		skillMap.set(sdk.skills.BladesofIce, {
 			hand: sdk.skills.hand.Left,
@@ -1223,6 +1327,11 @@
 		 * @private
 		 * @type {() => number}
 		 */
+		this._AoE = (_skillData.AoE || (() => 0));
+		/**
+		 * @private
+		 * @type {() => number}
+		 */
 		this._duration = (_skillData.duration || (() => 0));
 		/**
 		 * @private
@@ -1317,6 +1426,14 @@
 	 */
 	Skill.prototype.range = function (pvpRange = false) {
 		return typeof this._range === "function" ? this._range(pvpRange) : this._range;
+	};
+
+	/**
+	 * @this Skill
+	 * @returns {number}
+	 */
+	Skill.prototype.AoE = function () {
+		return this._AoE();
 	};
 
 	/**
