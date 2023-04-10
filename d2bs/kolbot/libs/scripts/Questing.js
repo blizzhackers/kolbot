@@ -13,6 +13,10 @@ function Questing () {
 		console.log("ÿc9(Questing) :: " + (errorMsg ? "ÿc1" : "ÿc0") + msg);
 	};
 
+	/**
+	 * @param {ItemUnit} item 
+	 * @returns {boolean}
+	 */
 	const getQuestItem = (item) => {
 		if (item) {
 			let id = item.classid;
@@ -29,25 +33,17 @@ function Questing () {
 	const den = function () {
 		log("starting den");
 
-		if (!Town.goToTown(1) || !Pather.moveToExit([sdk.areas.BloodMoor, sdk.areas.DenofEvil], true)) {
-			throw new Error();
-		}
-
+		Town.doChores();
+		if (!Pather.journeyTo(sdk.areas.DenofEvil)) throw new Error("den failed");
 		Precast.doPrecast(true);
 		Attack.clearLevel();
-		Town.goToTown();
-		Town.npcInteract("Akara");
-
-		return true;
+		Town.goToTown() && Town.npcInteract("Akara");
 	};
 
 	const smith = function () {
-		if (Misc.checkQuest(sdk.quest.id.ToolsoftheTrade, sdk.quest.states.ReqComplete)) return true;
-
 		log("starting smith");
 		include("core/Common/Smith.js");
-
-		return Common.Smith();
+		Common.Smith();
 	};
 
 	const cain = function () {
@@ -56,25 +52,19 @@ function Questing () {
 
 		Town.doChores();
 		Common.Cain.run();
-
-		return true;
 	};
 
 	const andy = function () {
 		log("starting andy");
 
 		Town.doChores();
-		Pather.useWaypoint(sdk.areas.CatacombsLvl2, true);
-		Precast.doPrecast(true);
-
-		if (!Pather.moveToExit([sdk.areas.CatacombsLvl3, sdk.areas.CatacombsLvl4], true) || !Pather.moveTo(22582, 9612)) {
-			throw new Error("andy failed");
-		}
+		if (!Pather.journeyTo(sdk.areas.CatacombsLvl4)) throw new Error("andy failed");
+		Pather.moveTo(22582, 9612);
 
 		let coords = [
-			{x: 22572, y: 9635}, {x: 22554, y: 9618},
-			{x: 22542, y: 9600}, {x: 22572, y: 9582},
-			{x: 22554, y: 9566}
+			{ x: 22572, y: 9635 }, { x: 22554, y: 9618 },
+			{ x: 22542, y: 9600 }, { x: 22572, y: 9582 },
+			{ x: 22554, y: 9566 }
 		];
 
 		if (Pather.useTeleport()) {
@@ -97,17 +87,13 @@ function Questing () {
 		Town.goToTown();
 		Town.npcInteract("Warriv", false);
 		Misc.useMenu(sdk.menu.GoEast);
-
-		return true;
 	};
 
 	const radament = function () {
-		if (!Pather.accessToAct(2)) return false;
-
 		log("starting radament");
 
 		if (!Pather.journeyTo(sdk.areas.A2SewersLvl3)) {
-			throw new Error();
+			throw new Error("radament failed");
 		}
 
 		Precast.doPrecast(true);
@@ -123,13 +109,9 @@ function Questing () {
 
 		Town.goToTown();
 		Town.npcInteract("Atma");
-
-		return true;
 	};
 
 	const lamEssen = function () {
-		if (!Pather.accessToAct(3)) return false;
-
 		log("starting lam essen");
 
 		if (!Pather.journeyTo(sdk.areas.RuinedTemple)) {
@@ -147,25 +129,16 @@ function Questing () {
 		getQuestItem(book);
 		Town.goToTown();
 		Town.npcInteract("Alkor");
-
-		return true;
 	};
 
 	const izual = function () {
-		if (!Pather.accessToAct(4)) return false;
-		
 		log("starting izual");
-		if (!Loader.runScript("Izual")) throw new Error();
+		if (!Loader.runScript("Izual")) throw new Error("izual failed");
 		Town.goToTown();
 		Town.npcInteract("Tyrael");
-
-		return true;
 	};
 
 	const diablo = function () {
-		if (!Pather.accessToAct(4)) return false;
-		if (Misc.checkQuest(sdk.quest.id.TerrorsEnd, sdk.quest.states.Completed)) return true;
-
 		log("starting diablo");
 		if (!Loader.runScript("Diablo")) throw new Error();
 		Town.goToTown(4);
@@ -173,43 +146,32 @@ function Questing () {
 		Game.getObject(sdk.objects.RedPortalToAct5)
 			? Pather.useUnit(sdk.unittype.Object, sdk.objects.RedPortalToAct5, sdk.areas.Harrogath)
 			: Town.npcInteract("Tyrael", false) && Misc.useMenu(sdk.menu.TravelToHarrogath);
-
-		return true;
 	};
 
 	const shenk = function () {
-		if (!Pather.accessToAct(5)) return false;
-		if (Misc.checkQuest(sdk.quest.id.SiegeOnHarrogath, sdk.quest.states.ReqComplete)) return true;
-
 		log("starting shenk");
 
-		if (!Town.goToTown() || !Pather.useWaypoint(sdk.areas.FrigidHighlands, true)) {
-			throw new Error();
+		if (!Pather.useWaypoint(sdk.areas.FrigidHighlands, true)) {
+			throw new Error("shenk failed");
 		}
 
 		Precast.doPrecast(true);
 		Pather.moveTo(3883, 5113);
 		Attack.kill(getLocaleString(sdk.locale.monsters.ShenktheOverseer));
 		Town.goToTown();
-
-		return true;
+		Town.npcInteract("Larzuk");
 	};
 
 	const barbs = function () {
-		if (!Pather.accessToAct(5)) return false;
-
 		log("starting barb rescue");
 
-		Pather.journeyTo(sdk.areas.FrigidHighlands);
+		if (!Pather.useWaypoint(sdk.areas.FrigidHighlands, true)) {
+			throw new Error("barbs failed");
+		}
 		Precast.doPrecast(true);
 
 		let barbs = (Game.getPresetObjects(me.area, sdk.quest.chest.BarbCage) || []);
-
-		if (!barbs.length) {
-			log("Couldn't find the barbs");
-			
-			return false;
-		}
+		if (!barbs.length) throw new Error("Couldn't find the barbs");
 
 		let coords = [];
 
@@ -235,80 +197,115 @@ function Questing () {
 		}
 
 		Town.npcInteract("qual_kehk");
-
-		return !!Misc.checkQuest(sdk.quest.id.RescueonMountArreat, sdk.quest.states.Completed);
 	};
 
 	const anya = function () {
-		if (!Pather.accessToAct(5)) return false;
-		if (Misc.checkQuest(sdk.quest.id.PrisonofIce, sdk.quest.states.ReqComplete)) return true;
-
 		log("starting anya");
 
-		if (!Pather.journeyTo(sdk.areas.CrystalizedPassage)) {
-			throw new Error();
+		if (!Misc.checkQuest(sdk.quest.id.PrisonofIce, 8/** Recieved the scroll */)) {
+			if (!Pather.journeyTo(sdk.areas.FrozenRiver)) {
+				throw new Error("anya failed");
+			}
+
+			Precast.doPrecast(true);
+
+			if (!Pather.moveToPreset(sdk.areas.FrozenRiver, sdk.unittype.Object, sdk.objects.FrozenAnyasPlatform)) {
+				throw new Error("Anya quest failed");
+			}
+
+			delay(1000);
+
+			let frozenanya = Game.getObject(sdk.objects.FrozenAnya);
+
+			/**
+			 * Here we have issues sometimes
+			 * Including a check for her unfreezing in case we already have malah's potion
+			 * @todo
+			 * - tele char can lure frozenstein away from anya as he can be hard to kill
+			 * aggro the pack then move back until there isn't any monster around anya (note) we can only detect mobs around 40 yards of us
+			 * then should use a static location behind anya as our destination to tele to
+			 */
+			if (frozenanya) {
+				if (me.sorceress && Skill.haveTK) {
+					Attack.getIntoPosition(frozenanya, 15, sdk.collision.LineOfSight, Pather.canTeleport(), true);
+					Packet.telekinesis(frozenanya);
+				} else {
+					Pather.moveToUnit(frozenanya);
+					Packet.entityInteract(frozenanya);
+				}
+				Misc.poll(() => getIsTalkingNPC() || frozenanya.mode, 2000, 50);
+				me.cancel() && me.cancel();
+			}
+
+			Town.npcInteract("malah");
+
+			/**
+			 * Now this should prevent us from re-entering if we either failed to interact with anya in the first place
+			 * or if we had malah's potion because this is our second attempt and we managed to unfreeze her
+			 */
+			if (me.getItem(sdk.quest.item.MalahsPotion)) {
+				console.log("Got potion, lets go unfreeze anya");
+
+				if (!Misc.poll(() => {
+					Pather.usePortal(sdk.areas.FrozenRiver, me.name);
+					return me.inArea(sdk.areas.FrozenRiver);
+				}, Time.seconds(30), 1000)) throw new Error("Anya quest failed - Failed to return to frozen river");
+
+				frozenanya = Game.getObject(sdk.objects.FrozenAnya);	// Check again in case she's no longer there from first intereaction
+				
+				if (frozenanya) {
+					for (let i = 0; i < 3; i++) {
+						frozenanya.distance > 5 && Pather.moveToUnit(frozenanya, 1, 2);
+						Packet.entityInteract(frozenanya);
+						if (Misc.poll(() => frozenanya.mode, Time.seconds(2), 50)) {
+							me.cancel() && me.cancel();
+							break;
+						}
+						if (getIsTalkingNPC()) {
+							// in case we failed to interact the first time this prevent us from crashing if her dialog is going
+							me.cancel() && me.cancel();
+						}
+					}
+				}
+			}
 		}
 
-		Precast.doPrecast(true);
+		/**
+		 * Now lets handle completing the quest as we have freed anya
+		 */
+		if (Misc.checkQuest(sdk.quest.id.PrisonofIce, sdk.quest.states.ReqComplete)) {
+			/**
+			 * Here we haven't talked to malah to recieve the scroll yet so lets do that
+			 */
+			if (!Misc.checkQuest(sdk.quest.id.PrisonofIce, 8/** Recieved the scroll */)) {
+				Town.npcInteract("malah");
+			}
 
-		if (!Pather.moveToPreset(sdk.areas.FrozenRiver, sdk.unittype.Object, sdk.objects.FrozenAnyasPlatform)) {
-			throw new Error("Anya quest failed");
+			/**
+			 * Here we haven't talked to anya to open the red portal
+			 */
+			if (!Misc.checkQuest(sdk.quest.id.PrisonofIce, 9/** Talk to anya in town */)) {
+				Town.npcInteract("anya");
+			}
+
+			/** Handles using the scroll, no need to repeat the same code here */
+			let scroll = me.scrollofresistance;
+			!!scroll && scroll.use();
 		}
-
-		delay(1000);
-
-		let anya = Game.getObject(sdk.objects.FrozenAnya);
-
-		// talk to anya, then cancel her speech
-		if (anya) {
-			Pather.moveToUnit(anya);
-			Packet.entityInteract(anya);
-			Misc.poll(() => getIsTalkingNPC(), 2000, 50);
-			me.cancel();
-		}
-
-		// get pot from malah, then return to anya
-		Town.goToTown();
-		Town.npcInteract("Malah");
-		if (!Misc.poll(() => {
-			Pather.usePortal(sdk.areas.FrozenRiver, me.name);
-			return me.inArea(sdk.areas.FrozenRiver);
-		}, Time.seconds(30), 1000)) throw new Error("Anya quest failed - Failed to return to frozen river");
-
-		// unfreeze her, cancel her speech again
-		if (anya) {
-			Pather.moveToUnit(anya, 1, 2);
-			Packet.entityInteract(anya);
-			Misc.poll(() => getIsTalkingNPC() || anya.mode, 2000, 50);
-			me.cancel() && me.cancel();
-		}
-
-		// get reward
-		Town.goToTown();
-		Town.npcInteract("Malah");
-
-		let scroll = me.scrollofresistance;
-		!!scroll && scroll.use();
-
-		return true;
 	};
 
 	// @theBGuy
 	const ancients = function () {
 		include("core/Common/Ancients.js");
-		Town.doChores();
 		log("starting ancients");
+		Town.doChores();
 
-		Pather.useWaypoint(sdk.areas.AncientsWay);
-		Precast.doPrecast(true);
-		Pather.moveToExit(sdk.areas.ArreatSummit, true);
-
-		// failed to move to Arreat Summit
-		if (!me.inArea(sdk.areas.ArreatSummit)) return false;
+		if (!Pather.journeyTo(sdk.areas.ArreatSummit)) throw new Error("ancients failed");
 
 		// ancients prep
 		Town.doChores();
-		[sdk.items.StaminaPotion, sdk.items.AntidotePotion, sdk.items.ThawingPotion].forEach(p => Town.buyPots(10, p, true));
+		[sdk.items.StaminaPotion, sdk.items.AntidotePotion, sdk.items.ThawingPotion]
+			.forEach(p => Town.buyPots(10, p, true));
 
 		let tempConfig = copyObj(Config); // save and update config settings
 		let townChicken = getScript("threads/townchicken.js");
@@ -358,8 +355,6 @@ function Questing () {
 		} catch (err) {
 			log("Cleared Ancients. Failed to get WSK Waypoint", true);
 		}
-
-		return true;
 	};
 
 	const baal = function () {
@@ -367,98 +362,48 @@ function Questing () {
 		// just run baal script? I mean why re-invent the wheel here
 		Loader.runScript("Baal");
 		Town.goToTown(5);
-
-		return true;
 	};
 
-	const index = {
-		"den": {
-			id: sdk.quest.id.DenofEvil,
-			run: () => den(),
-		},
-		"smith": {
-			id: sdk.quest.id.ToolsoftheTrade,
-			run: () => smith(),
-		},
-		"cain": {
-			id: sdk.quest.id.TheSearchForCain,
-			run: () => cain(),
-		},
-		"andy": {
-			id: sdk.quest.id.SistersToTheSlaughter,
-			run: () => andy(),
-		},
-		"radament": {
-			id: sdk.quest.id.RadamentsLair,
-			run: () => radament(),
-		},
-		"lamEssen": {
-			id: sdk.quest.id.LamEsensTome,
-			run: () => lamEssen(),
-		},
-		"izual": {
-			id: sdk.quest.id.TheFallenAngel,
-			run: () => izual(),
-		},
-		"diablo": {
-			id: sdk.quest.id.TerrorsEnd,
-			run: () => diablo(),
-		},
-		"shenk": {
-			id: sdk.quest.id.SiegeOnHarrogath,
-			run: () => shenk(),
-		},
-		"barbs": {
-			id: sdk.quest.id.RescueonMountArreat,
-			run: () => barbs(),
-		},
-		"anya": {
-			id: sdk.quest.id.PrisonofIce,
-			run: () => anya(),
-		},
-		"ancients": {
-			id: sdk.quest.id.RiteofPassage,
-			run: () => ancients(),
-		},
-		"baal": {
-			id: sdk.quest.id.EyeofDestruction,
-			run: () => baal(),
-		},
-	};
-
-	Object.defineProperty(index, "complete", {
-		value: function () {
-			return !!Misc.checkQuest(this.id, sdk.quest.states.Completed);
+	const tasks = (function () {
+		/**
+		 * @constructor
+		 * @param {function(): void} task 
+		 * @param {() => boolean} preReq 
+		 * @param {() => boolean} complete 
+		 */
+		function Task (task, preReq, complete) {
+			this.run = task;
+			this.preReq = (preReq || (() => true));
+			this.complete = (complete || (() => false));
 		}
-	});
+		return [
+			new Task(den, () => true, () => me.den),
+			new Task(smith, () => me.charlvl > 9, () => me.smith || me.imbue),
+			new Task(cain, () => true, () => me.cain),
+			new Task(andy, () => true, () => me.andariel),
+			new Task(radament, () => me.accessToAct(2), () => me.radament),
+			new Task(lamEssen, () => me.accessToAct(3), () => me.lamessen),
+			new Task(izual, () => me.accessToAct(4), () => me.izual),
+			new Task(diablo, () => me.accessToAct(4), () => me.diablo),
+			new Task(shenk, () => me.accessToAct(5), () => me.shenk || me.larzuk),
+			new Task(barbs, () => me.accessToAct(5), () => me.barbrescue),
+			new Task(anya, () => me.accessToAct(5), () => me.anya),
+			new Task(ancients, () => me.accessToAct(5) && me.charlvl > [20, 40, 60][me.diff], () => me.ancients),
+			new Task(baal, () => me.accessToAct(5) && me.ancients, () => me.baal),
+		];
+	})();
 
-	let didTask = false;
-	me.inTown && Town.doChores();
+	!me.inTown && Town.doChores();
 
-	Object.keys(index).forEach(quest => {
-		didTask && me.inTown && Town.doChores();
-		let j;
-
-		for (j = 0; j < 3; j += 1) {
-			if (!index[quest].complete()) {
-				try {
-					if (index[quest].run()) {
-						didTask = true;
-						
-						break;
-					}
-				} catch (e) {
-					continue;
-				}
-			} else {
-				didTask = false;
-
-				break;
+	for (let task of tasks) {
+		if (task.preReq() && !task.complete()) {
+			try {
+				task.run();
+			} catch (e) {
+				console.error(e);
 			}
 		}
-
-		j === 3 && D2Bot.printToConsole("Questing :: " + quest + " quest failed.", sdk.colors.D2Bot.Red);
-	});
+	}
 
 	if (Config.Questing.StopProfile || Loader.scriptList.length === 1) {
 		D2Bot.printToConsole("All quests done. Stopping profile.", sdk.colors.D2Bot.Green);
