@@ -107,8 +107,9 @@ me.switchWeapons = function (slot) {
 	let originalSlot = this.weaponswitch;
 	let switched = false;
 	let packetHandler = (bytes) => bytes.length > 0 && bytes[0] === sdk.packets.recv.WeaponSwitch && (switched = true) && false; // false to not block
-	addEventListener("gamepacket", packetHandler);
 	try {
+		addEventListener("gamepacket", packetHandler);
+
 		for (let i = 0; i < 10; i += 1) {
 			for (let j = 10; --j && me.idle;) {
 				delay(3);
@@ -131,7 +132,6 @@ me.switchWeapons = function (slot) {
 
 				delay(3);
 			}
-			// Retry
 		}
 	} finally {
 		removeEventListener("gamepacket", packetHandler);
@@ -283,30 +283,25 @@ me.needHealing = function () {
 	].some((state) => me.getState(state)));
 };
 
+/**
+ * @param {number} id 
+ * @returns {ItemUnit | null}
+ */
 me.getTome = function (id) {
-	const tome = me.findItem(id, sdk.items.mode.inStorage, sdk.storage.Inventory);
+	if (!id) return null;
+	let tome = me.findItem(id, sdk.items.mode.inStorage, sdk.storage.Inventory);
 	return tome ? tome : null;
 };
 
 me.getUnids = function () {
-	let list = [];
-	let item = me.getItem(-1, sdk.items.mode.inStorage);
-
-	if (!item) return [];
-
-	do {
-		if (item.isInInventory && !item.identified) {
-			list.push(copyUnit(item));
-		}
-	} while (item.getNext());
-
-	return list;
+	return me.getItemsEx(-1, sdk.items.mode.inStorage)
+		.filter((item) => item.isInInventory && !item.identified);
 };
 
 // Identify items while in the field if we have a id tome
 me.fieldID = function () {
 	let list = me.getUnids();
-	if (!list) return false;
+	if (!list.length) return false;
 
 	let tome = me.getTome(sdk.items.TomeofIdentify);
 	if (!tome || tome.getStat(sdk.stats.Quantity) < list.length) return false;
@@ -608,6 +603,15 @@ Object.defineProperties(me, {
 (function () {
 	const QuestData = require("./GameData/QuestData");
 
+	/**
+	 * @param {number} act 
+	 * @returns {boolean}
+	 */
+	me.accessToAct = function (act) {
+		if (act === 1) return true;
+		return me.highestAct >= act;
+	};
+
 	Object.defineProperties(me, {
 		highestAct: {
 			get: function () {
@@ -623,9 +627,7 @@ Object.defineProperties(me, {
 		highestQuestDone: {
 			get: function () {
 				for (let i = sdk.quest.id.Respec; i >= sdk.quest.id.SpokeToWarriv; i--) {
-					if (QuestData.get(i).complete()) {
-						return i;
-					}
+					if (QuestData.get(i).complete()) return i;
 
 					// check if we've completed main part but not used our reward
 					if ([sdk.quest.id.RescueonMountArreat, sdk.quest.id.SiegeOnHarrogath, sdk.quest.id.ToolsoftheTrade].includes(i)
