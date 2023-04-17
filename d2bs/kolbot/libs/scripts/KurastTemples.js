@@ -1,6 +1,6 @@
 /**
 *  @filename    KurastTemples.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        clear Kurast Temples
 *
 */
@@ -8,25 +8,28 @@
 function KurastTemples() {
 	Town.doChores();
 	Pather.useWaypoint(sdk.areas.KurastBazaar);
-	Precast.doPrecast(true);
 
-	let areas = [
-		sdk.areas.RuinedTemple, sdk.areas.DisusedFane, sdk.areas.ForgottenReliquary,
-		sdk.areas.ForgottenTemple, sdk.areas.RuinedFane, sdk.areas.DisusedReliquary
-	];
+	[
+		{ base: sdk.areas.KurastBazaar, temples: [sdk.areas.RuinedTemple, sdk.areas.DisusedFane] },
+		{ base: sdk.areas.UpperKurast, temples: [sdk.areas.ForgottenReliquary, sdk.areas.ForgottenTemple] },
+		{ base: sdk.areas.KurastCauseway, temples: [sdk.areas.RuinedFane, sdk.areas.DisusedReliquary] },
+	].forEach(area => {
+		try {
+			if (!me.inArea(area.base)) {
+				// maybe journeyTo instead?
+				if (!Pather.moveToExit(area.base, true)) throw new Error("Failed to change area");
+			}
+			let precastTimeout = getTickCount() + Time.minutes(2);
+			// @todo sort by distance
+			area.temples.forEach(temple => {
+				if (!Pather.moveToExit(temple, true)) throw new Error("Failed to move to the temple");
+				Attack.clearLevel(Config.ClearType);
+				if (!Pather.moveToExit(area.base, true)) throw new Error("Failed to move out of the temple");
+				Precast.doPrecast((getTickCount() > precastTimeout));
+			});
 
-	areas.forEach((area, i) => {
-		if (!me.inArea(sdk.areas.KurastBazaar) + Math.floor(i / 2)) {
-			if (!Pather.moveToExit(sdk.areas.KurastBazaar + Math.floor(i / 2), true)) throw new Error("Failed to change area");
-		}
-
-		if (!Pather.moveToExit(area, true)) throw new Error("Failed to move to the temple");
-
-		i === 3 && Precast.doPrecast(true);
-		Attack.clearLevel(Config.ClearType);
-
-		if (i < 5 && !Pather.moveToExit(sdk.areas.KurastBazaar + Math.floor(i / 2), true)) {
-			throw new Error("Failed to move out of the temple");
+		} catch (e) {
+			console.error(e);
 		}
 	});
 
