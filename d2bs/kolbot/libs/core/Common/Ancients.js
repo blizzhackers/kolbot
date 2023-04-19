@@ -9,7 +9,7 @@
 	typeof Common !== "object" && (Common = {});
 	Object.defineProperty(Common, "Ancients", {
 		value: {
-			altarSpot: {x: 10047, y: 12622},
+			altarSpot: { x: 10047, y: 12622 },
 
 			canAttack: function () {
 				let ancient = Game.getMonster();
@@ -27,22 +27,17 @@
 			},
 
 			touchAltar: function () {
-				let tick = getTickCount();
-
-				while (getTickCount() - tick < 5000) {
-					if (Game.getObject(sdk.objects.AncientsAltar)) {
-						break;
-					}
-
-					delay(20 + me.ping);
-				}
-
-				let altar = Game.getObject(sdk.objects.AncientsAltar);
+				let altar = Misc.poll(() => Game.getObject(sdk.objects.AncientsAltar), 5000, 100);
 
 				if (altar) {
 					while (altar.mode !== sdk.objects.mode.Active) {
-						Pather.moveToUnit(altar);
-						altar.interact();
+						if (Skill.haveTK) {
+							Attack.getIntoPosition(altar, 19, sdk.collision.LineOfSight, !Pather.useTeleport(), true);
+							Packet.telekinesis(altar);
+						} else {
+							Pather.moveToUnit(altar);
+							altar.interact();
+						}
 						delay(200 + me.ping);
 						me.cancel();
 					}
@@ -53,6 +48,8 @@
 					}
 
 					return true;
+				} else {
+					Pather.moveNearUnit(this.altarSpot, (Skill.haveTK ? 19 : 5));
 				}
 
 				return false;
@@ -76,7 +73,7 @@
 				if (!this.checkStatues()) {
 					return pos.forEach((node) => {
 						// no mobs at that next, skip it
-						if ([node.x, node.y].distance < 35 && [node.x, node.y].mobCount({range: 30}) === 0) {
+						if ([node.x, node.y].distance < 35 && [node.x, node.y].mobCount({ range: 30 }) === 0) {
 							return;
 						}
 						Pather.moveTo(node.x, node.y);
@@ -89,7 +86,8 @@
 
 			killAncients: function (checkQuest = false) {
 				let retry = 0;
-				Pather.moveToUnit(this.altarSpot);
+				let attackRange = Skill.getRange(Config.AttackSkill[1]);
+				Pather.moveNearUnit(this.altarSpot, attackRange);
 
 				while (!this.checkStatues()) {
 					if (retry > 5) {
@@ -97,16 +95,17 @@
 						
 						break;
 					}
-
+					/**
+					 * @todo - far cast pwning the ancients
+					 */
 					Attack.clearClassids(sdk.monsters.KorlictheProtector, sdk.monsters.TalictheDefender, sdk.monsters.MadawctheGuardian);
 					delay(1000);
 
 					if (checkQuest) {
 						if (Misc.checkQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.Completed)) {
 							break;
-						} else {
-							console.log("Failed to kill anicents. Attempt: " + retry);
 						}
+						console.log("Failed to kill anicents. Attempt: " + retry);
 					}
 
 					this.checkCorners();
@@ -124,13 +123,11 @@
 
 			startAncients: function (preTasks = false, checkQuest = false) {
 				let retry = 0;
-				Pather.moveToUnit(this.altarSpot);
 				this.touchAltar();
 
 				while (!this.canAttack()) {
 					if (retry > 10) throw new Error("I think I'm unable to complete ancients, I've rolled them 10 times");
 					preTasks ? this.ancientsPrep() : Pather.makePortal();
-					Pather.moveToUnit(this.altarSpot);
 					this.touchAltar();
 					retry++;
 				}
