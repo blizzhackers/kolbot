@@ -745,6 +745,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 		createGame: function (name, pass, diff, delay) {
 			Controls.CreateGameName.setText(name);
 			Controls.CreateGamePass.setText(pass);
+			Controls.CreateGameDescription.setText(Starter.Config.GameDescription);
 
 			switch (diff) {
 			case "Normal":

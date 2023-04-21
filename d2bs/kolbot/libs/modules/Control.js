@@ -216,6 +216,7 @@
 		Control.CreateGame = new Control(sdk.controls.Button, 594, 433, 172, 32);
 		Control.CreateGameName = new Control(sdk.controls.TextBox, 432, 162, 158, 20);
 		Control.CreateGamePass = new Control(sdk.controls.TextBox, 432, 217, 158, 20);
+		Control.CreateGameDescription = new Control(sdk.controls.TextBox, 432, 268, 333, 20);
 		Control.CharacterDifferenceButton = new Control(sdk.controls.Button, 431, 341, 15, 16);
 		Control.CharacterDifference = new Control(sdk.controls.TextBox, 657, 342, 27, 20);
 		Control.MaxPlayerCount = new Control(sdk.controls.TextBox, 657, 308, 27, 20);

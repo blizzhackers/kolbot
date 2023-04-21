@@ -14,6 +14,7 @@
 		ResetCount: 999, // Reset game count back to 1 every X games.
 		CharacterDifference: 99, // Character level difference. Set to false to disable character difference.
 		MaxPlayerCount: 8, // Max amount of players in game between 1 and 8
+		GameDescription: "", // Game description when creating a game
 		StopOnDeadHardcore: true, // Stop profile character has died on hardcore mode
 
 		// ChannelConfig can override these options for individual profiles.
