@@ -133,7 +133,10 @@ NTIP.Clear = function () {
 	stringArray = [];
 };
 
-/** @return {function({Unit} item)} */
+/**
+ * @param {string} tierType 
+ * @returns {(item: ItemUnit) => number}
+ */
 NTIP.generateTierFunc = function (tierType) {
 	return function (item) {
 		let tier = -1;
@@ -183,12 +186,18 @@ NTIP.generateTierFunc = function (tierType) {
 	};
 };
 
-/**@function
- * @param item */
+/**
+ * @function
+ * @param {ItemUnit} item
+ * @returns {number}
+ */
 NTIP.GetTier = NTIP.generateTierFunc("Tier");
 
-/**@function
- * @param item */
+/**
+ * @function
+ * @param {ItemUnit} item
+ * @returns {number}
+ */
 NTIP.GetMercTier = NTIP.generateTierFunc("Merctier");
 
 NTIP.CheckItem = function (item, entryList, verbose) {
@@ -421,6 +430,10 @@ NTIP.ParseLineInt = function (input, info) {
 				break;
 			case "classic":
 				p_result[0] += "(!me.gametype)";
+
+				break;
+			case "distance":
+				p_result[0] += "(item.onGroundOrDropping && item.distance || Infinity)";
 
 				break;
 			default:
