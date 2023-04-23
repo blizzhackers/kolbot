@@ -991,18 +991,44 @@ declare global {
 		}
 
 		export namespace enchant {
+			const RandName: 1;
+			const HpMultiply: 2;
+			const AddLightRadius: 3;
+			const AddMLvl: 4;
 			const ExtraStrong: 5;
 			const ExtraFast: 6;
 			const Cursed: 7;
 			const MagicResistant: 8;
 			const FireEnchanted: 9;
+			const PoisonDeath: 10;
+			const InsectDeath: 11;
+			const ChainLightingDeath: 12;
+			const IgnoreTargetDefense: 13;
+			const UnknownMod: 14;
+			const KillMinionsDeath: 15;
+			const ChampMods: 16;
 			const LightningEnchanted: 17;
 			const ColdEnchanted: 18;
+			const UnusedMercMod: 19;
+			const ChargedBoltWhenStruck: 20;
+			const TempSummoned: 21;
+			const QuestMod: 22;
+			const PoisonField: 23;
+			const Thief: 24;
 			const ManaBurn: 25;
 			const Teleportation: 26;
 			const SpectralHit: 27;
 			const StoneSkin: 28;
 			const MultipleShots: 29;
+			const Aura: 30;
+			const CorpseExplosion: 31;
+			const FireExplosionOnDeath: 32; // not sure what the difference is between this and 9
+			const FreezeOnDeath: 33;
+			const SelfResurrect: 34;
+			const IceShatter: 35;
+			const ChampStoned: 36;
+			const ChampStats: 37;
+			const ChampCurseImmune: 38;
 		}
 
 		// unit stats
@@ -1512,6 +1538,7 @@ declare global {
 			];
 
 			// act1
+			const MoldyTome: 8;
 			const A1TownFire: 39;
 			const A1Waypoint: 119;
 			const StoneAlpha: 17;
