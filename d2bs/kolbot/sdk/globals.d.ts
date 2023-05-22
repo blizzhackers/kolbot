@@ -23,6 +23,19 @@ declare global {
 		lineNumber: number;
 	}
 
+	interface ArrayConstructor {
+		/**
+		 * Creates a new Array instance with a variable number of elements passed as arguments.
+		 *
+		 * @param {...T[]} items The elements to include in the array.
+		 * ```ts
+		 * const arr = Array.of(1, 2, 3, 4, 5);
+		 * ```
+		 * @returns {Array<T>} A new array with the provided elements.
+		 */
+		of<T>(...items: T[]): T[];
+	}
+
 	interface Array<T> {
 		includes(searchElement: T): boolean;
 		find(predicate: (value: T, index: number, obj: Int8Array) => boolean, thisArg?: any): T | undefined;
@@ -38,6 +51,34 @@ declare global {
 		isEqual(t: T[]): boolean
 		remove(val: T): T[]
 		random(): T;
+		/**
+		 * Creates a new array by sorting the elements of the original array.
+		 *
+		 * @param {(function(a: any, b: any): number) | undefined} compareFn Function used to determine the order of the elements.
+		 * It is expected to return a negative value if the first argument is less than the second argument, zero if they're equal, and a positive
+		 * value otherwise. If omitted, the elements are sorted in ascending, ASCII character order.
+		 * ```ts
+		 * [11,2,22,1].toSorted((a, b) => a - b)
+		 * ```
+		 * @returns {Array} A new array with the sorted elements, leaving the orignal intact.
+		 */
+		toSorted(compareFn?: ((a: T, b: T) => number) | undefined): T[];
+		/**
+		 * Creates a new array with the elements of the original array in reversed order.
+		 * Without mutating the original array.
+		 *
+		 * @returns {Array<T>} A new array with the reversed elements.
+		 */
+		toReversed(): T[];
+		/**
+		 * Creates a new array by removing and/or adding elements from/to the original array.
+		 *
+		 * @param {number} start The index at which to start changing the array.
+		 * @param {number} deleteCount The number of elements to remove starting from the `start` index.
+		 * @param {...T[]} items The elements to add to the array.
+		 * @returns {Array<T>} A new array with the removed elements and optionally added elements.
+		 */
+		toSpliced(start: number, deleteCount?: number, ...items: T[]): T[];
 	}
 
 	interface String {

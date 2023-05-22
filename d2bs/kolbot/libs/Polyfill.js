@@ -231,6 +231,10 @@ String.prototype.format = function (...pairs) {
  * - Array.prototype.first
  * - Array.prototype.last
  * - Array.prototype.flat
+ * - Array.of
+ * - Array.prototype.toSorted
+ * - Array.prototype.toReversed
+ * - Array.prototype.toSpliced
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
  */
 
@@ -574,6 +578,68 @@ if (!Array.prototype.flat) {
 		configurable: true,
 		writable: true
 	});
+}
+
+/**
+ * @description The Array.of() static method creates a new Array instance from a
+ * variable number of arguments, regardless of number or type of the arguments.
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/of
+ * @return {Array<...args>}
+ */
+if (!Array.of) {
+	Object.defineProperty(Array, "of", {
+		value: function of() {
+			return Array.prototype.slice.call(arguments);
+		},
+		configurable: true,
+		writable: true
+	});
+}
+
+/**
+ * @description The toReversed() method of Array instances is the copying counterpart of the reverse()
+ * method. It returns a new array with the elements in reversed order.
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toReversed
+ * @return {Array}
+ */
+if (!Array.prototype.toReversed) {
+	Array.prototype.toReversed = function() {
+		return this.slice().reverse();
+	};
+}
+
+/**
+ * Creates a new array with the elements of the original array sorted in ascending order.
+ *
+ * @param {Function} [compareFunction] A function that defines the sort order.
+ * If omitted, the elements are sorted in ascending order based on their string conversion.
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted
+ * @returns {Array} A new array with the elements sorted in ascending order.
+ */
+if (!Array.prototype.toSorted) {
+	Array.prototype.toSorted = function(compareFunction) {
+		return this.slice().sort(compareFunction);
+	};
+}
+
+/**
+ * Creates a new array by removing or replacing elements from the original array.
+ *
+ * @param {number} start The index at which to start changing the array.
+ * If negative, it is treated as `array.length + start`.
+ * @param {number} [deleteCount] The number of elements to remove from the array.
+ * If omitted or greater than `array.length - start`, all elements from `start` to the end of the array are deleted.
+ * @param {...*} [items] The elements to add to the array starting from the `start` index.
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSpliced
+ * @returns {Array} A new array with the modified elements.
+ */
+if (!Array.prototype.toSpliced) {
+	Array.prototype.toSpliced = function(start, deleteCount) {
+		const newArr = this.slice();
+		const items = Array.prototype.slice.call(arguments, 2);
+		Array.prototype.splice.apply(newArr, [start, deleteCount].concat(items));
+		return newArr;
+	};
 }
 
 /**
