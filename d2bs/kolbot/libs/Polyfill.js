@@ -991,16 +991,24 @@ Set.prototype.difference = function(setB) {
 			this.log("[ÿc1Errorÿc0] " + msg);
 		};
 
-		const timers = {};
+		/** @type {Map<string, number>} */
+		const timers = new Map();
+
+		/**
+		 * @param {string} name 
+		 */
 		console.time = function (name) {
-			name && (timers[name] = getTickCount());
+			name && timers.set(name, getTickCount());
 		};
 
+		/**
+		 * @param {string} name 
+		 */
 		console.timeEnd = function (name) {
-			let currTimer = timers[name];
+			let currTimer = timers.get(name);
 			if (currTimer) {
 				this.log("[ÿc7Timerÿc0] :: ÿc8" + name + " - ÿc4Durationÿc0: " + (getTickCount() - currTimer) + "ms");
-				delete timers[name];
+				timers.delete(name);
 			}
 		};
 
@@ -1023,18 +1031,24 @@ Set.prototype.difference = function(setB) {
 		};
 
 		console.info = function (start = false, msg = "", timer = "") {
-			let stack = new Error().stack.match(/[^\r\n]+/g);
+			const stack = new Error().stack.match(/[^\r\n]+/g);
 			let funcName = stack[1].substr(0, stack[1].indexOf("@"));
-			let logInfo = start === true ? "[ÿc2Start " : start === false ? "[ÿc1End " : "[ÿc8";
+			let logInfo = start === true
+				? "[ÿc2Start "
+				: start === false
+					? "[ÿc1End "
+					: "[ÿc8";
 			logInfo += (funcName + "ÿc0] :: " + (msg ? msg : ""));
 			if (timer) {
-				let currTimer = timers[timer];
+				let currTimer = timers.get(timer);
 				if (currTimer) {
 					let tFormat = (getTickCount() - currTimer);
 					// if less than 1 second, display in ms
 					tFormat > 1000 ? (tFormat = Time.format(tFormat)) : (tFormat += " ms");
 					logInfo += (" - ÿc4Durationÿc0: " + tFormat);
-					delete timers[timer];
+					timers.delete(timer);
+				} else {
+					this.time(timer);
 				}
 			}
 			this.log(logInfo);
