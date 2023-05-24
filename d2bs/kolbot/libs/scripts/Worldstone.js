@@ -1,6 +1,6 @@
 /**
 *  @filename    Worldstone.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        Clear Worldstone levels
 *
 */

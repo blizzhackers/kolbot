@@ -28,7 +28,8 @@
 *  @Skills *** refer to skills.txt ***
 *      all skill <skillid> - change skill for all. refer to skills.txt
 *      <charname> skill <skillid> - change skill for <charname>
-*      <class> skill <skillid> - change skill for all characters of certain class *** any part of class name will do *** for example: "sorc skill 36", "zon skill 0", "din skill 106"
+*      <class> skill <skillid> - change skill for all characters of certain class
+*      *** any part of class name will do *** for example: "sorc skill 36", "zon skill 0", "din skill 106"
 *      Auras: *** refer to skills.txt ***
 *      all aura <skillid> - change aura for all paladins
 *      <charname> aura <skillid> - change aura for <charname>
@@ -45,15 +46,19 @@
 *      move - move in a random direction (use if you're stuck by followers)
 *      reload - reload script. Use only in case of emergency, or after editing character config.
 *      quit - exit game
+*  @todo
+*      run <scriptname> - run a script
+* 		 <charname> run <scriptname> - run a script on <charname>
+*      skills - list current attack skills
+*      <charname> skills - list current attack skills for <charname>
 *
 */
 
 function Follower() {
-	let i, stop, leader, leaderUnit, charClass, piece, skill, result, unit, player, coord;
-	let commanders = [Config.Leader];
-	let allowSay = true;
-	let attack = true;
-	let openContainers = true;
+	const commanders = [Config.Leader];
+	let piece, skill;
+	let [allowSay, attack, openContainers, stop] = [true, true, true, false];
+	let [leader, leaderUnit] = [null, null];
 	let action = "";
 
 	const announce = function (msg = "") {
@@ -134,27 +139,20 @@ function Follower() {
 	 * @returns {boolean}
 	 */
 	const talk = function (name) {
-		if (!me.inTown) {
-			announce("I'm not in town!");
-
-			return false;
-		}
-
-		if (typeof name !== "string") {
-			announce("No NPC name given.");
-
-			return false;
-		}
-
 		try {
+			if (!me.inTown) throw new Error("I'm not in town!");
+			if (typeof name !== "string") throw new Error("No NPC name given.");
 			Town.npcInteract(name);
+
+			return true;
 		} catch (e) {
+			console.error(e);
 			announce((typeof e === "object" && e.message ? e.message : typeof e === "string" ? e : "Failed to talk to " + name));
+
+			return false;
+		} finally {
+			Town.move("portalspot");
 		}
-
-		Town.move("portalspot");
-
-		return false;
 	};
 
 	/**
@@ -242,7 +240,8 @@ function Follower() {
 
 		if (item) {
 			do {
-				if (item.onGroundOrDropping && item.itemType >= sdk.items.type.HealingPotion && item.itemType <= sdk.items.type.RejuvPotion && item.distance <= range) {
+				if (item.onGroundOrDropping && item.itemType >= sdk.items.type.HealingPotion
+					&& item.itemType <= sdk.items.type.RejuvPotion && item.distance <= range) {
 					pickList.push(copyUnit(item));
 				}
 			} while (item.getNext());
@@ -266,7 +265,6 @@ function Follower() {
 	};
 
 	/**
-	 * 
 	 * @param {string} nick 
 	 * @param {string} msg 
 	 */
@@ -275,42 +273,26 @@ function Follower() {
 			switch (msg) {
 			case "tele":
 			case me.name + " tele":
-				if (Pather.teleport) {
-					Pather.teleport = false;
-
-					announce("Teleport off.");
-				} else {
-					Pather.teleport = true;
-
-					announce("Teleport on.");
-				}
+				Pather.teleport = !Pather.teleport;
+				announce("Teleport " + (Pather.teleport ? "on" : "off"));
 
 				break;
 			case "tele off":
 			case me.name + " tele off":
 				Pather.teleport = false;
-
 				announce("Teleport off.");
 
 				break;
 			case "tele on":
 			case me.name + " tele on":
 				Pather.teleport = true;
-
 				announce("Teleport on.");
 
 				break;
 			case "a":
 			case me.name + " a":
-				if (attack) {
-					attack = false;
-
-					announce("Attack off.");
-				} else {
-					attack = true;
-
-					announce("Attack on.");
-				}
+				attack = !attack;
+				announce("Attack " + (attack ? "on" : "off"));
 
 				break;
 			case "flash":
@@ -324,14 +306,12 @@ function Follower() {
 			case "aoff":
 			case me.name + " aoff":
 				attack = false;
-
 				announce("Attack off.");
 
 				break;
 			case "aon":
 			case me.name + " aon":
 				attack = true;
-
 				announce("Attack on.");
 
 				break;
@@ -342,15 +322,8 @@ function Follower() {
 				break;
 			case "s":
 			case me.name + " s":
-				if (stop) {
-					stop = false;
-
-					announce("Resuming.");
-				} else {
-					stop = true;
-
-					announce("Stopping.");
-				}
+				stop = !stop;
+				announce((stop ? "Stopping." : "Resuming."));
 
 				break;
 			case "r":
@@ -430,7 +403,7 @@ function Follower() {
 	Config.TownCheck = false;
 	Config.TownHP = 0;
 	Config.TownMP = 0;
-	charClass = sdk.player.class.nameOf(me.classid).toLowerCase();
+	const charClass = sdk.player.class.nameOf(me.classid).toLowerCase();
 	leader = Misc.poll(() => Misc.findPlayer(Config.Leader), Time.seconds(20), Time.seconds(1));
 
 	if (!leader) {
@@ -475,7 +448,7 @@ function Follower() {
 			}
 
 			if (!leaderUnit) {
-				player = Game.getPlayer();
+				let player = Game.getPlayer();
 
 				if (player) {
 					do {
@@ -506,7 +479,7 @@ function Follower() {
 					delay(100);
 				}
 
-				result = checkExit(leader, leader.area);
+				let result = checkExit(leader, leader.area);
 
 				switch (result) {
 				case 1:
@@ -539,6 +512,7 @@ function Follower() {
 			}
 		}
 
+		MainSwitch:
 		switch (action) {
 		case "cow":
 			if (me.inArea(sdk.areas.RogueEncampment)) {
@@ -548,7 +522,7 @@ function Follower() {
 
 			break;
 		case "move":
-			coord = CollMap.getRandCoordinate(me.x, -5, 5, me.y, -5, 5);
+			let coord = CollMap.getRandCoordinate(me.x, -5, 5, me.y, -5, 5);
 			Pather.moveTo(coord.x, coord.y);
 
 			break;
@@ -560,17 +534,15 @@ function Follower() {
 
 			delay(rand(1, 3) * 500);
 
-			unit = Game.getObject("waypoint");
-
-			if (unit) {
-				for (i = 0; i < 3; i += 1) {
+			if (Game.getObject("waypoint")) {
+				for (let retry = 0; retry < 3; retry++) {
 					if (Pather.getWP(me.area)) {
 						announce("Got wp.");
-						break;
+						break MainSwitch;
 					}
 				}
 
-				i === 3 && announce("Failed to get wp.");
+				announce("Failed to get wp.");
 			}
 
 			me.cancel();
@@ -642,15 +614,9 @@ function Follower() {
 
 			break;
 		case me.name + " tp":
-			unit = me.getTpTool();
-
-			if (unit) {
-				unit.interact();
-
-				break;
+			if (!Pather.makePortal()) {
+				announce("No TP scrolls or tomes.");
 			}
-
-			announce("No TP scrolls or tomes.");
 
 			break;
 		}

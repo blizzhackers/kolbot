@@ -9,14 +9,15 @@ function Tombs() {
 	Town.doChores();
 	Pather.useWaypoint(sdk.areas.CanyonofMagic);
 	Precast.doPrecast(true);
+	const correctTomb = getRoom().correcttomb;
 
-	for (let i = sdk.areas.TalRashasTomb1; i <= sdk.areas.TalRashasTomb7; i += 1) {
+	for (let i = sdk.areas.TalRashasTomb1; i <= sdk.areas.TalRashasTomb7; i++) {
 		try {
 			if (!Pather.journeyTo(i, true)) throw new Error("Failed to move to tomb");
 	
 			Attack.clearLevel(Config.ClearType);
 	
-			if (Config.Tombs.KillDuriel && me.area === getRoom().correcttomb) {
+			if (Config.Tombs.KillDuriel && me.inArea(correctTomb)) {
 				Pather.journeyTo(sdk.areas.DurielsLair) && Attack.kill(sdk.monsters.Duriel);
 				Pather.journeyTo(sdk.areas.CanyonofMagic);
 			}
