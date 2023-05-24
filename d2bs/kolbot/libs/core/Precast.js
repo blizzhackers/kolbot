@@ -5,16 +5,16 @@
 *
 */
 
-const Precast = new function () {
-	this.enabled = true;
-	this.haveCTA = -1;
-	this.bestSlot = {};
+const Precast = {
+	enabled: true,
+	haveCTA: -1,
+	bestSlot: {},
 
 	// TODO: build better method of keeping track of duration based skills so we can reduce resource usage
 	// build obj -> figure out which skills we have -> calc duration -> assign tick of last casted -> track tick (background worker maybe?)
 	// would reduce checking have skill and state calls, just let tick = getTickCount(); -> obj.some((el) => tick - el.lastTick > el.duration) -> true then cast
 	// would probably make sense to just re-cast everything (except summons) if one of our skills is about to run out rather than do this process again 3 seconds later
-	this.skills = {
+	skills: {
 		// Not sure how I want to handle cold armors
 		coldArmor: {
 			best: false,
@@ -44,7 +44,7 @@ const Precast = new function () {
 			duration: 0,
 			tick: 0
 		},
-	};
+	},
 
 	/**
 	 * Easier Shout/Bo/Bc casting with state checks to ensure it was casted
@@ -53,7 +53,7 @@ const Precast = new function () {
 	 * @param {number} [y] 
 	 * @returns {boolean}
 	 */
-	this.warCries = function (skillId, x, y) {
+	warCries: function (skillId, x, y) {
 		if (!skillId || x === undefined) return false;
 		const states = {};
 		states[sdk.skills.Shout] = sdk.states.Shout;
@@ -95,25 +95,25 @@ const Precast = new function () {
 			}
 		}
 		return false;
-	};
+	},
 
-	this.checkCTA = function () {
+	checkCTA: function () {
 		if (this.haveCTA > -1) return true;
 
 		let check = me.checkItem({ name: sdk.locale.items.CalltoArms, equipped: true });
 
 		if (check.have) {
-			this.haveCTA = check.item.isOnSwap ? 1 : 0;
+			Precast.haveCTA = check.item.isOnSwap ? 1 : 0;
 		}
 
 		return this.haveCTA > -1;
-	};
+	},
 
 	/**
 	 * @param {boolean} force 
 	 * @returns {boolean}
 	 */
-	this.precastCTA = function (force = false) {
+	precastCTA: function (force = false) {
 		if (!Config.UseCta || this.haveCTA === -1 || me.classic || me.barbarian || me.inTown || me.shapeshifted) return false;
 		if (!force && me.getState(sdk.states.BattleOrders)) return true;
 
@@ -136,7 +136,7 @@ const Precast = new function () {
 		}
 
 		return false;
-	};
+	},
 
 	/**
 	 * Check which slot (primary or secondary) gives us the most skillpoints in a skill
@@ -144,7 +144,7 @@ const Precast = new function () {
 	 * @returns {0 | 1} best slot to give us the most skillpoints in a skill
 	 * @todo Move this to be part of the SkillData class
 	 */
-	this.getBetterSlot = function (skillId) {
+	getBetterSlot: function (skillId) {
 		if (this.bestSlot[skillId] !== undefined) return this.bestSlot[skillId];
 
 		let [classid, skillTab] = (() => {
@@ -211,9 +211,9 @@ const Precast = new function () {
 			});
 		this.bestSlot[skillId] = (sumSwap > sumCurr) ? me.weaponswitch ^ 1 : me.weaponswitch;
 		return this.bestSlot[skillId];
-	};
+	},
 
-	this.cast = function (skillId, x = me.x, y = me.y, dontSwitch = false) {
+	cast: function (skillId, x = me.x, y = me.y, dontSwitch = false) {
 		if (!skillId || !Skill.wereFormCheck(skillId) || (me.inTown && !Skill.townSkill(skillId))) return false;
 		if (Skill.getManaCost(skillId) > me.mp) return false;
 
@@ -225,7 +225,7 @@ const Precast = new function () {
 			sdk.skills.IronGolem, sdk.skills.Revive, sdk.skills.Werewolf, sdk.skills.Werebear, sdk.skills.OakSage, sdk.skills.SpiritWolf, sdk.skills.PoisonCreeper, sdk.skills.BattleOrders,
 			sdk.skills.SummonDireWolf, sdk.skills.Grizzly, sdk.skills.HeartofWolverine, sdk.skills.SpiritofBarbs, sdk.skills.ShadowMaster, sdk.skills.ShadowWarrior, sdk.skills.BattleCommand,
 		].indexOf(skillId) === -1);
-		(typeof x !== "number" || typeof y !== "number") && ({x, y} = me);
+		(typeof x !== "number" || typeof y !== "number") && ({ x, y } = me);
 
 		try {
 			!dontSwitch && me.switchWeapons(this.getBetterSlot(skillId));
@@ -288,9 +288,9 @@ const Precast = new function () {
 		!dontSwitch && me.switchWeapons(swap);
 
 		return success;
-	};
+	},
 
-	this.summon = function (skillId, minionType) {
+	summon: function (skillId, minionType) {
 		if (!Skill.canUse(skillId)) return false;
 
 		let rv, retry = 0;
@@ -348,9 +348,9 @@ const Precast = new function () {
 		}
 
 		return !!rv;
-	};
+	},
 
-	this.enchant = function () {
+	enchant: function () {
 		let unit, slot = me.weaponswitch, chanted = [];
 
 		me.switchWeapons(this.getBetterSlot(sdk.skills.Enchant));
@@ -381,7 +381,7 @@ const Precast = new function () {
 		me.switchWeapons(slot);
 
 		return true;
-	};
+	},
 
 	// should the config check still be included even though its part of Skill.init?
 	/**
@@ -391,7 +391,7 @@ const Precast = new function () {
 	 * @returns {boolean} sucessfully casted
 	 * @todo durations
 	 */
-	this.doPrecast = function (force = false, partial = false) {
+	doPrecast: function (force = false, partial = false) {
 		if (!this.enabled) return false;
 
 		while (!me.gameReady) {
@@ -617,13 +617,13 @@ const Precast = new function () {
 		me.switchWeapons(Attack.getPrimarySlot());
 
 		return true;
-	};
+	},
 
-	this.needOutOfTownCast = function () {
+	needOutOfTownCast: function () {
 		return Skill.canUse(sdk.skills.Shout) || Skill.canUse(sdk.skills.BattleOrders) || Precast.checkCTA();
-	};
+	},
 
-	this.doRandomPrecast = function (force = false, goToWhenDone = undefined) {
+	doRandomPrecast: function (force = false, goToWhenDone = undefined) {
 		let returnTo = (goToWhenDone && typeof goToWhenDone === "number" ? goToWhenDone : me.area);
 
 		try {
@@ -643,5 +643,5 @@ const Precast = new function () {
 		}
 
 		return (me.area === returnTo);
-	};
+	},
 };

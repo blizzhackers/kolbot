@@ -1197,15 +1197,16 @@ const Attack = {
 
 	/**
 	 * @description build list of attackable monsters currently around us
+	 * @param {function(): boolean} check - callback function to build list
 	 * @returns {Array<Monster> | []}
 	 */
-	buildMonsterList: function () {
+	buildMonsterList: function (check = () => true) {
 		let monList = [];
 		let monster = Game.getMonster();
 
 		if (monster) {
 			do {
-				if (monster.attackable) {
+				if (monster.attackable && check(monster)) {
 					monList.push(copyUnit(monster));
 				}
 			} while (monster.getNext());

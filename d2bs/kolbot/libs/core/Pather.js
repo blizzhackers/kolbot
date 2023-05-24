@@ -14,12 +14,14 @@ const NodeAction = {
 	 * @type {number[]}
 	 */
 	shrinesToIgnore: [],
+	enabled: true,
 
 	/**
 	 * Run all the functions within NodeAction (except for itself)
 	 * @param {clearSettings} arg 
 	 */
 	go: function (arg) {
+		if (!this.enabled) return;
 		for (let i in this) {
 			if (this.hasOwnProperty(i) && typeof this[i] === "function" && i !== "go") {
 				this[i](arg);
@@ -286,24 +288,19 @@ const Pather = {
 			target = this.spotOnDistance(target, settings.minDist, { returnSpotOnError: settings.returnSpotOnError, reductionType: (me.inTown ? 0 : 2) });
 		}
 
+		/** @constructor */
+		function PathAction () {
+			this.at = 0;
+			/** @type {PathNode} */
+			this.from = { x: null, y: null };
+		}
+
 		let fail = 0;
+		let invalidCheck = false;
 		let node = { x: target.x, y: target.y };
-		const leaped = {
-			at: 0,
-			/** @type {PathNode} */
-			from: { x: null, y: null }
-		};
-		const whirled = {
-			at: 0,
-			/** @type {PathNode} */
-			from: { x: null, y: null }
-		};
-		const cleared = {
-			at: 0,
-			/** @type {PathNode} */
-			where: { x: null, y: null }
-		};
-		let [invalidCheck] = [false];
+		const leaped = new PathAction();
+		const whirled = new PathAction();
+		const cleared = new PathAction();
 
 		for (let i = 0; i < this.cancelFlags.length; i += 1) {
 			getUIFlag(this.cancelFlags[i]) && me.cancel();

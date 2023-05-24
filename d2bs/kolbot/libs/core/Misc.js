@@ -539,7 +539,7 @@ const Misc = {
 				Pather.moveToEx(coords[0], coords[1], { minDist: Skill.haveTK ? 20 : 5, callback: () => {
 					let shrine = Game.getObject("shrine");
 					return !!shrine && shrine.x === coords[0] && shrine.y === coords[1];
-				}});
+				} });
 
 				let shrine = Game.getObject("shrine");
 
@@ -731,10 +731,11 @@ const Misc = {
 	},
 
 	/**
-	 * @param {Function} check 
-	 * @param {number} timeout 
-	 * @param {number} sleep 
-	 * @returns {boolean}
+	 * @template T
+	 * @param {function(): T} check 
+	 * @param {number} [timeout=6000] 
+	 * @param {number} [sleep=40] 
+	 * @returns {T | false}
 	 */
 	poll: function (check, timeout = 6000, sleep = 40) {
 		let ret, start = getTickCount();
