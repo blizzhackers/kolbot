@@ -10,7 +10,7 @@
 *      c - get corpse
 *      p - pick items
 *      s - toggle stop
-*      <charname> s - toggle stop <charname>
+*      <charname> <action> - tell specific character to perform action
 *  @Attack
 *      a - attack toggle for all
 *      <charname> a - attack toggle for <charname>
@@ -398,10 +398,11 @@ function Follower() {
 
 				break;
 			default:
-				if (me.paladin && msg.includes("aura ")) {
-					piece = msg.split(" ")[0];
+				let piecewise = msg.split(" ");
+				let who = piecewise.length > 1 && piecewise.first() || "";
 
-					if (piece === me.name || piece === "all") {
+				if (me.paladin && msg.includes("aura ")) {
+					if (who === me.name || piece === "all") {
 						skill = parseInt(msg.split(" ")[2], 10);
 
 						if (me.getSkill(skill, sdk.skills.subindex.SoftPoints)) {
@@ -415,14 +416,8 @@ function Follower() {
 							announce("I don't have that aura.");
 						}
 					}
-
-					break;
-				}
-
-				if (msg.includes("skill ")) {
-					piece = msg.split(" ")[0];
-
-					if (charClass.includes(piece) || piece === me.name || piece === "all") {
+				} else if (msg.includes("skill ")) {
+					if (charClass.includes(who) || who === me.name || who === "all") {
 						skill = parseInt(msg.split(" ")[2], 10);
 
 						if (me.getSkill(skill, sdk.skills.subindex.SoftPoints)) {
@@ -434,11 +429,13 @@ function Follower() {
 							announce("I don't have that skill.");
 						}
 					}
-
-					break;
+				} else {
+					if (who && who !== me.name && who !== "all") {
+						return;
+					}
+					who && (msg = msg.replace(who, "").trim());
+					action = msg;
 				}
-
-				action = msg;
 
 				break;
 			}
