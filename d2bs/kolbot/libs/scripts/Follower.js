@@ -55,7 +55,9 @@
 */
 
 function Follower() {
-	const commanders = [Config.Leader];
+	const QuestData = require("../core/GameData/QuestData");
+	const commanders = [];
+	Config.Leader && commanders.push(Config.Leader);
 	let piece, skill;
 	let [allowSay, attack, openContainers, stop] = [true, true, true, false];
 	let [leader, leaderUnit] = [null, null];
@@ -147,7 +149,13 @@ function Follower() {
 			return true;
 		} catch (e) {
 			console.error(e);
-			announce((typeof e === "object" && e.message ? e.message : typeof e === "string" ? e : "Failed to talk to " + name));
+			announce(
+				(typeof e === "object" && e.message
+					? e.message
+					: typeof e === "string"
+						? e
+						: "Failed to talk to " + name)
+			);
 
 			return false;
 		} finally {
@@ -168,47 +176,106 @@ function Follower() {
 			return false;
 		}
 
-		switch (act) {
-		case 2:
-			Town.npcInteract("Warriv", false) && Misc.useMenu(sdk.menu.GoEast);
+		const npcTravel = new Map([
+			[1, ["Warriv", sdk.areas.RogueEncampment]],
+			[2, [(me.act === 1 ? "Warriv" : "Meshif"), sdk.areas.LutGholein]],
+			[3, ["Meshif", sdk.areas.KurastDocktown]],
+			[4, ["", sdk.areas.PandemoniumFortress]],
+			[5, ["Tyrael", sdk.areas.Harrogath]],
+		]);
 
-			break;
-		case 3:
-			Town.npcInteract("Jerhyn");
-			Town.move("Meshif") && Misc.useMenu(sdk.menu.SailEast);
+		const preCheck = new Map([
+			[
+				2,
+				() => QuestData.get(sdk.quest.id.SistersToTheSlaughter).complete(true)
+			],
+			[
+				3,
+				() => {
+					if (QuestData.get(sdk.quest.id.TheSevenTombs).complete()) return true;
+					if (!QuestData.get(sdk.quest.id.TheSevenTombs).checkState(4/*talked to jerhyn*/)) {
+						Town.npcInteract("Jerhyn");
+						if (me.getTpTool()) {
+							Pather.moveToExit(sdk.areas.HaremLvl1, true);
+							Pather.usePortal(null) || Pather.makePortal(true);
+						}
+					}
+					return QuestData.get(sdk.quest.id.TheSevenTombs).checkState(4/*talked to jerhyn*/);
+				}
+			],
+			[
+				4,
+				() => {
+					if (me.inTown) {
+						if (!QuestData.get(sdk.quest.id.TheBlackenedTemple).complete()) {
+							Town.npcInteract("Cain");
+						}
+						Town.move("portalspot");
+						Pather.usePortal(sdk.areas.DuranceofHateLvl3, null);
+					}
+					return me.inArea(sdk.areas.DuranceofHateLvl3);
+				}
+			],
+			[
+				5,
+				() => {
+					if (!QuestData.get(sdk.quest.id.TerrorsEnd).checkState(9/*talked to tyrael*/)) {
+						Town.npcInteract("Tyrael");
+					}
+					return QuestData.get(sdk.quest.id.TerrorsEnd).checkState(9/*talked to tyrael*/);
+				}
+			]
+		]);
 
-			break;
-		case 4:
-			if (me.inTown) {
-				Town.npcInteract("Cain");
-				Town.move("portalspot");
-				Pather.usePortal(sdk.areas.DuranceofHateLvl3, null);
-			}
+		if (!preCheck.get(act)()) {
+			announce("Failed act " + act + " precheck");
+			return false;
+		}
 
-			delay(1500);
+		if (act !== 4) {
+			let [npc, loc] = npcTravel.get(act);
+			if (!npc) return false;
 
-			let target = Game.getObject(sdk.objects.RedPortalToAct4);
-			target && Pather.moveTo(target.x - 3, target.y - 1);
+			!me.inTown && Town.goToTown();
+			let npcUnit = Town.npcInteract(npc);
+			let timeout = getTickCount() + 3000;
+			let pingDelay = me.getPingDelay();
 
-			Pather.usePortal(null);
-
-			break;
-		case 5:
-			if (Town.npcInteract("Tyrael")) {
-				try {
-					Pather.useUnit(sdk.unittype.Object, sdk.objects.RedPortalToAct5, sdk.areas.Harrogath);
-				} catch (a5e) {
-					break;
+			if (!npcUnit) {
+				while (!npcUnit && timeout < getTickCount()) {
+					Town.move(NPC[npc]);
+					Packet.flash(me.gid, pingDelay);
+					delay(pingDelay * 2 + 100);
+					npcUnit = Game.getNPC(npc);
 				}
 			}
 
-			break;
+			if (npcUnit) {
+				for (let i = 0; i < 5; i++) {
+					new PacketBuilder()
+						.byte(sdk.packets.send.EntityAction)
+						.dword(0)
+						.dword(npcUnit.gid)
+						.dword(loc)
+						.send();
+					delay(1000);
+
+					if (me.act === act) {
+						break;
+					}
+				}
+			}
+		} else {
+			if (me.inArea(sdk.areas.DuranceofHateLvl3)) {
+				let target = Game.getObject(sdk.objects.RedPortalToAct4);
+				target && Pather.moveTo(target.x - 3, target.y - 1);
+
+				Pather.usePortal(null);
+			}
 		}
 
-		delay(2000);
-
-		while (!me.area) {
-			delay(500);
+		while (!me.gameReady) {
+			delay(100);
 		}
 
 		if (me.area === preArea) {
@@ -377,7 +444,7 @@ function Follower() {
 			}
 		}
 
-		if (msg && msg.split(" ")[0] === "leader" && commanders.indexOf(nick) > -1) {
+		if (msg && msg.split(" ")[0] === "leader" && (commanders.includes(nick) || !commanders.length)) {
 			piece = msg.split(" ")[1];
 
 			if (typeof piece === "string") {
