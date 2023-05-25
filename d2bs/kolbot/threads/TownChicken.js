@@ -95,6 +95,12 @@ function main() {
 			// We would then be able to remove all game interaction checks until we get a townCheck msg
 			|| ((checkHP && me.hpPercent < Config.TownHP) || (checkMP && me.mpPercent < Config.TownMP)))) {
 			// canTpToTown should maybe be overrided here to quit if we can't tp to town but isn't just because we are in non-tp-able area
+			if (me.dead && Config.LifeChicken <= 0) {
+				console.log("ÿc1TownChicken :: ÿc0We are dead and LifeChicken is set to 0");
+				while (me.dead) delay(100);
+
+				continue;
+			}
 			if (!me.canTpToTown()) {
 				townCheck = false;
 
