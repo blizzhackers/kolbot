@@ -2400,7 +2400,9 @@ const Town = {
 				}
 				if (!me.inTown && !Pather.usePortal(null, me.name)) {
 					console.warn("Town.goToTown: Failed to take TP");
-					if (!me.inTown && !Pather.usePortal(sdk.areas.townOf(me.area))) throw new Error("Town.goToTown: Failed to take TP");
+					if (!me.inTown && !Pather.usePortal(sdk.areas.townOf(me.area))) {
+						throw new Error("Town.goToTown: Failed to take TP");
+					}
 				}
 			} catch (e) {
 				let tpTool = me.getTpTool();
@@ -2409,16 +2411,17 @@ const Town = {
 					scriptBroadcast("quit");
 				} else {
 					if (!Misc.poll(() => {
-						if (me.inTown) return true;
+						if (me.inTown || me.dead) return true;
 						let p = Game.getObject("portal");
-						console.debug(p);
 						!!p && Misc.click(0, 0, p) && delay(100);
 						Misc.poll(() => me.idle, 1000, 100);
-						console.debug("inTown? " + me.inTown);
 						return me.inTown;
 					}, 700, 100)) {
-						Misc.errorReport(new Error("Town.goToTown: Failed to go to town. Quiting."));
-						scriptBroadcast("quit");
+						// don't quit if this is a character that is allowed to die
+						if (Config.LifeChicken > 0) {
+							Misc.errorReport(new Error("Town.goToTown: Failed to go to town. Quiting."));
+							scriptBroadcast("quit");
+						}
 					}
 				}
 			}
