@@ -38,6 +38,11 @@
 *  @Town
 *      a2-5 - move to appropriate act (after quest) !NOTE: Disable 'no sound' or game will crash!
 *      talk <npc name> - talk to a npc in town
+*      chug <type> <amount> - buy and drink special potions potions from Akara
+*      *** type can be: a, antidote, t, thawing, s, stamina ***
+*      *** amount is optional, default is 10 ***
+*      *** example: "chug a 20" will buy and drink 20 antidote potions ***
+*      *** <charname> can be used to specify a character ***
 *  @Misc
 *      quiet - stop announcing in chat
 *      cow - enter red cow portal
@@ -50,7 +55,7 @@
 *      quit - exit game
 *  @todo
 *      run <scriptname> - run a script
-* 		 <charname> run <scriptname> - run a script on <charname>
+*      <charname> run <scriptname> - run a script on <charname>
 *      skills - list current attack skills
 *      <charname> skills - list current attack skills for <charname>
 *
@@ -689,11 +694,26 @@ function Follower() {
       }
 
       break;
+    default:
+      if (action.includes("talk")) {
+        talk(action.split(" ")[1]);
+      } else if (action.includes("chug")) {
+        let temp = action.toLowerCase().split(" ");
+        let [, type, amount] = temp;
+        amount === undefined && (amount = 10);
+        typeof amount === "string" && (amount = parseInt(amount, 10));
+
+        if (type === "a" || type === "antidote") {
+          Town.buyPots(amount, sdk.items.AntidotePotion, true, true);
+        } else if (type === "t" || type === "thawing") {
+          Town.buyPots(amount, sdk.items.ThawingPotion, true, true);
+        } else if (type === "s" || type === "stamina") {
+          Town.buyPots(amount, sdk.items.StaminaPotion, true, true);
+        }
+      }
+
     }
 
-    if (action.includes("talk")) {
-      talk(action.split(" ")[1]);
-    }
 
     action = "";
 
