@@ -6,16 +6,16 @@
 */
 
 function Endugu() {
-	Town.doChores();
-	Pather.useWaypoint(sdk.areas.FlayerJungle);
-	Precast.doPrecast(true);
+  Town.doChores();
+  Pather.useWaypoint(sdk.areas.FlayerJungle);
+  Precast.doPrecast(true);
 
-	if (!Pather.moveToExit([sdk.areas.FlayerDungeonLvl1, sdk.areas.FlayerDungeonLvl2, sdk.areas.FlayerDungeonLvl3], true)
+  if (!Pather.moveToExit([sdk.areas.FlayerDungeonLvl1, sdk.areas.FlayerDungeonLvl2, sdk.areas.FlayerDungeonLvl3], true)
 		|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.KhalimsBrainChest)) {
-		throw new Error("Failed to move to Endugu");
-	}
+    throw new Error("Failed to move to Endugu");
+  }
 
-	Attack.kill(getLocaleString(sdk.locale.monsters.WitchDoctorEndugu));
+  Attack.kill(getLocaleString(sdk.locale.monsters.WitchDoctorEndugu));
 
-	return true;
+  return true;
 }

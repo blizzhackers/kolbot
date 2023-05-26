@@ -6,279 +6,291 @@
 */
 
 const Loader = {
-	fileList: [],
-	scriptList: [],
-	scriptIndex: -1,
-	skipTown: ["Test", "Follower"],
+  fileList: [],
+  scriptList: [],
+  scriptIndex: -1,
+  skipTown: ["Test", "Follower"],
 
-	init: function () {
-		this.getScripts();
-		this.loadScripts();
-	},
+  init: function () {
+    this.getScripts();
+    this.loadScripts();
+  },
 
-	getScripts: function () {
-		let fileList = dopen("libs/scripts/").getFiles();
+  getScripts: function () {
+    let fileList = dopen("libs/scripts/").getFiles();
 
-		for (let i = 0; i < fileList.length; i += 1) {
-			if (fileList[i].indexOf(".js") > -1) {
-				this.fileList.push(fileList[i].substring(0, fileList[i].indexOf(".js")));
-			}
-		}
-	},
+    for (let i = 0; i < fileList.length; i += 1) {
+      if (fileList[i].indexOf(".js") > -1) {
+        this.fileList.push(fileList[i].substring(0, fileList[i].indexOf(".js")));
+      }
+    }
+  },
 
-	// see http://stackoverflow.com/questions/728360/copying-an-object-in-javascript#answer-728694
-	clone: function (obj) {
-		let copy;
+  // see http://stackoverflow.com/questions/728360/copying-an-object-in-javascript#answer-728694
+  clone: function (obj) {
+    let copy;
 
-		// Handle the 3 simple types, and null or undefined
-		if (null === obj || "object" !== typeof obj) {
-			return obj;
-		}
+    // Handle the 3 simple types, and null or undefined
+    if (null === obj || "object" !== typeof obj) {
+      return obj;
+    }
 
-		// Handle Date
-		if (obj instanceof Date) {
-			copy = new Date();
-			copy.setTime(obj.getTime());
+    // Handle Date
+    if (obj instanceof Date) {
+      copy = new Date();
+      copy.setTime(obj.getTime());
 
-			return copy;
-		}
+      return copy;
+    }
 
-		// Handle Array
-		if (obj instanceof Array) {
-			copy = [];
+    // Handle Array
+    if (obj instanceof Array) {
+      copy = [];
 
-			for (let i = 0; i < obj.length; i += 1) {
-				copy[i] = this.clone(obj[i]);
-			}
+      for (let i = 0; i < obj.length; i += 1) {
+        copy[i] = this.clone(obj[i]);
+      }
 
-			return copy;
-		}
+      return copy;
+    }
 
-		// Handle Object
-		if (obj instanceof Object) {
-			copy = {};
+    // Handle Object
+    if (obj instanceof Object) {
+      copy = {};
 
-			for (let attr in obj) {
-				if (obj.hasOwnProperty(attr)) {
-					copy[attr] = this.clone(obj[attr]);
-				}
-			}
+      for (let attr in obj) {
+        if (obj.hasOwnProperty(attr)) {
+          copy[attr] = this.clone(obj[attr]);
+        }
+      }
 
-			return copy;
-		}
+      return copy;
+    }
 
-		throw new Error("Unable to copy obj! Its type isn't supported.");
-	},
+    throw new Error("Unable to copy obj! Its type isn't supported.");
+  },
 
-	copy: function (from, to) {
-		for (let i in from) {
-			if (from.hasOwnProperty(i)) {
-				to[i] = this.clone(from[i]);
-			}
-		}
-	},
+  copy: function (from, to) {
+    for (let i in from) {
+      if (from.hasOwnProperty(i)) {
+        to[i] = this.clone(from[i]);
+      }
+    }
+  },
 
-	loadScripts: function () {
-		let reconfiguration, unmodifiedConfig = {};
+  loadScripts: function () {
+    let reconfiguration, unmodifiedConfig = {};
 
-		this.copy(Config, unmodifiedConfig);
+    this.copy(Config, unmodifiedConfig);
 
-		if (!this.fileList.length) {
-			showConsole();
+    if (!this.fileList.length) {
+      showConsole();
 
-			throw new Error("You don't have any valid scripts in bots folder.");
-		}
+      throw new Error("You don't have any valid scripts in bots folder.");
+    }
 
-		for (let s in Scripts) {
-			if (Scripts.hasOwnProperty(s) && Scripts[s]) {
-				Loader.scriptList.push(s);
-			}
-		}
+    for (let s in Scripts) {
+      if (Scripts.hasOwnProperty(s) && Scripts[s]) {
+        Loader.scriptList.push(s);
+      }
+    }
 
-		// handle getting cube here instead of from Cubing.doCubing
-		if (Config.Cubing && !me.getItem(sdk.quest.item.Cube) && Pather.accessToAct(2)) {
-			// we can actually get the cube - fixes bug causing level 1's to crash
-			Loader.runScript("GetCube");
-		}
+    // handle getting cube here instead of from Cubing.doCubing
+    if (Config.Cubing && !me.getItem(sdk.quest.item.Cube) && Pather.accessToAct(2)) {
+      // we can actually get the cube - fixes bug causing level 1's to crash
+      Loader.runScript("GetCube");
+    }
 
-		for (Loader.scriptIndex = 0; Loader.scriptIndex < Loader.scriptList.length; Loader.scriptIndex++) {
-			let script = this.scriptList[this.scriptIndex];
+    for (Loader.scriptIndex = 0; Loader.scriptIndex < Loader.scriptList.length; Loader.scriptIndex++) {
+      let script = this.scriptList[this.scriptIndex];
 
-			if (this.fileList.indexOf(script) === -1) {
-				if (FileTools.exists("scripts/" + script + ".js")) {
-					console.warn("ÿc1Something went wrong in loader, file exists in folder but didn't get included during init process. Lets ignore the error and continue to include the script by name instead");
-				} else {
-					Misc.errorReport("ÿc1Script " + script + " doesn't exist.");
+      if (this.fileList.indexOf(script) === -1) {
+        if (FileTools.exists("scripts/" + script + ".js")) {
+          console.warn(
+            "ÿc1Something went wrong in loader, file exists in folder but didn't get included during init process. "
+            + "Lets ignore the error and continue to include the script by name instead"
+          );
+        } else {
+          Misc.errorReport("ÿc1Script " + script + " doesn't exist.");
 
-					continue;
-				}
-			}
+          continue;
+        }
+      }
 
-			if (!include("scripts/" + script + ".js")) {
-				Misc.errorReport("Failed to include script: " + script);
-				continue;
-			}
+      if (!include("scripts/" + script + ".js")) {
+        Misc.errorReport("Failed to include script: " + script);
+        continue;
+      }
 
-			if (isIncluded("scripts/" + script + ".js")) {
-				try {
-					if (typeof (global[script]) !== "function") {
-						throw new Error("Invalid script function name");
-					}
+      if (isIncluded("scripts/" + script + ".js")) {
+        try {
+          if (typeof (global[script]) !== "function") {
+            throw new Error("Invalid script function name");
+          }
 
-					if (this.skipTown.includes(script) || Town.goToTown()) {
-						print("ÿc2Starting script: ÿc9" + script);
-						Messaging.sendToScript("threads/toolsthread.js", JSON.stringify({ currScript: script }));
-						reconfiguration = typeof Scripts[script] === "object";
+          if (this.skipTown.includes(script) || Town.goToTown()) {
+            print("ÿc2Starting script: ÿc9" + script);
+            Messaging.sendToScript("threads/toolsthread.js", JSON.stringify({ currScript: script }));
+            reconfiguration = typeof Scripts[script] === "object";
 
-						if (reconfiguration) {
-							print("ÿc2Copying Config properties from " + script + " object.");
-							this.copy(Scripts[script], Config);
-						}
+            if (reconfiguration) {
+              print("ÿc2Copying Config properties from " + script + " object.");
+              this.copy(Scripts[script], Config);
+            }
 
-						let tick = getTickCount();
-						let exp = me.getStat(sdk.stats.Experience);
+            let tick = getTickCount();
+            let exp = me.getStat(sdk.stats.Experience);
 
-						if (me.inTown) {
-							Config.StackThawingPots.enabled && Town.buyPots(Config.StackThawingPots.quantity, sdk.items.ThawingPotion, true);
-							Config.StackAntidotePots.enabled && Town.buyPots(Config.StackAntidotePots.quantity, sdk.items.AntidotePotion, true);
-							Config.StackStaminaPots.enabled && Town.buyPots(Config.StackStaminaPots.quantity, sdk.items.StaminaPotion, true);
-						}
+            if (me.inTown) {
+              if (Config.StackThawingPots.enabled) {
+                Town.buyPots(Config.StackThawingPots.quantity, sdk.items.ThawingPotion, true);
+              }
+              if (Config.StackAntidotePots.enabled) {
+                Town.buyPots(Config.StackAntidotePots.quantity, sdk.items.AntidotePotion, true);
+              }
+              if (Config.StackStaminaPots.enabled) {
+                Town.buyPots(Config.StackStaminaPots.quantity, sdk.items.StaminaPotion, true);
+              }
+            }
 
-						// kinda hacky, but faster for mfhelpers to stop
-						if (Config.MFLeader && Config.PublicMode && ["Diablo", "Baal"].includes(script)) {
-							say("nextup " + script);
-						}
+            // kinda hacky, but faster for mfhelpers to stop
+            if (Config.MFLeader && Config.PublicMode && ["Diablo", "Baal"].includes(script)) {
+              say("nextup " + script);
+            }
 
-						if (global[script]()) {
-							let gain = Math.max(me.getStat(sdk.stats.Experience) - exp, 0);
-							let duration = Time.elapsed(tick);
-							console.log(
-								"ÿc7" + script + " :: ÿc0Complete\n"
+            if (global[script]()) {
+              let gain = Math.max(me.getStat(sdk.stats.Experience) - exp, 0);
+              let duration = Time.elapsed(tick);
+              console.log(
+                "ÿc7" + script + " :: ÿc0Complete\n"
 								+ "ÿc2 Statistics:\n"
 								+ "ÿc7 - Duration: ÿc0" + (Time.format(duration)) + "\n"
 								+ "ÿc7 - Experience Gained: ÿc0" + gain + "\n"
 								+ "ÿc7 - Exp/minute: ÿc0" + (gain / (duration / 60000)).toFixed(2)
-							);
-						}
-					}
-				} catch (error) {
-					if (!(error instanceof ScriptError)) {
-						Misc.errorReport(error, script);
-					}
-				} finally {
-					// Dont run for last script as that will clear everything anyway
-					if (this.scriptIndex < this.scriptList.length) {
-						// remove script function from global scope, so it can be cleared by GC
-						delete global[script];
-					}
+              );
+            }
+          }
+        } catch (error) {
+          if (!(error instanceof ScriptError)) {
+            Misc.errorReport(error, script);
+          }
+        } finally {
+          // Dont run for last script as that will clear everything anyway
+          if (this.scriptIndex < this.scriptList.length) {
+            // remove script function from global scope, so it can be cleared by GC
+            delete global[script];
+          }
 					
-					if (reconfiguration) {
-						print("ÿc2Reverting back unmodified config properties.");
-						this.copy(unmodifiedConfig, Config);
-					}
-				}
-			}
-		}
-	},
+          if (reconfiguration) {
+            print("ÿc2Reverting back unmodified config properties.");
+            this.copy(unmodifiedConfig, Config);
+          }
+        }
+      }
+    }
+  },
 
-	tempList: [],
+  tempList: [],
 
-	runScript: function (script, configOverride) {
-		let reconfiguration, unmodifiedConfig = {};
-		let failed = false;
-		let mainScript = this.scriptName();
+  runScript: function (script, configOverride) {
+    let reconfiguration, unmodifiedConfig = {};
+    let failed = false;
+    let mainScript = this.scriptName();
 		
-		function buildScriptMsg () {
-			let str = "ÿc9" + mainScript + " ÿc0:: ";
+    function buildScriptMsg () {
+      let str = "ÿc9" + mainScript + " ÿc0:: ";
 
-			if (Loader.tempList.length && Loader.tempList[0] !== mainScript) {
-				Loader.tempList.forEach(s => str += "ÿc9" + s + " ÿc0:: ");
-			}
+      if (Loader.tempList.length && Loader.tempList[0] !== mainScript) {
+        Loader.tempList.forEach(s => str += "ÿc9" + s + " ÿc0:: ");
+      }
 			
-			return str;
-		}
+      return str;
+    }
 
-		this.copy(Config, unmodifiedConfig);
+    this.copy(Config, unmodifiedConfig);
 
-		if (!include("scripts/" + script + ".js")) {
-			Misc.errorReport("Failed to include script: " + script);
+    if (!include("scripts/" + script + ".js")) {
+      Misc.errorReport("Failed to include script: " + script);
 
-			return false;
-		}
+      return false;
+    }
 
-		if (isIncluded("scripts/" + script + ".js")) {
-			try {
-				if (typeof (global[script]) !== "function") {
-					throw new Error("Invalid script function name");
-				}
+    if (isIncluded("scripts/" + script + ".js")) {
+      try {
+        if (typeof (global[script]) !== "function") {
+          throw new Error("Invalid script function name");
+        }
 
-				if (this.skipTown.includes(script) || Town.goToTown()) {
-					let mainScriptStr = (mainScript !== script ? buildScriptMsg() : "");
-					this.tempList.push(script);
-					print(mainScriptStr + "ÿc2Starting script: ÿc9" + script);
-					Messaging.sendToScript("threads/toolsthread.js", JSON.stringify({ currScript: script }));
+        if (this.skipTown.includes(script) || Town.goToTown()) {
+          let mainScriptStr = (mainScript !== script ? buildScriptMsg() : "");
+          this.tempList.push(script);
+          print(mainScriptStr + "ÿc2Starting script: ÿc9" + script);
+          Messaging.sendToScript("threads/toolsthread.js", JSON.stringify({ currScript: script }));
 
-					reconfiguration = typeof Scripts[script] === "object";
+          reconfiguration = typeof Scripts[script] === "object";
 
-					if (reconfiguration) {
-						print("ÿc2Copying Config properties from " + script + " object.");
-						this.copy(Scripts[script], Config);
-					}
+          if (reconfiguration) {
+            print("ÿc2Copying Config properties from " + script + " object.");
+            this.copy(Scripts[script], Config);
+          }
 
-					if (typeof configOverride === "function") {
-						reconfiguration = true;
-						configOverride();
-					}
+          if (typeof configOverride === "function") {
+            reconfiguration = true;
+            configOverride();
+          }
 
-					let tick = getTickCount();
-					let exp = me.getStat(sdk.stats.Experience);
+          let tick = getTickCount();
+          let exp = me.getStat(sdk.stats.Experience);
 
-					if (global[script]()) {
-						console.log(mainScriptStr + "ÿc7" + script + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (Time.format(getTickCount() - tick)));
-						let gain = Math.max(me.getStat(sdk.stats.Experience) - exp, 0);
-						let duration = Time.elapsed(tick);
-						console.log(
-							mainScriptStr + "ÿc7" + script + " :: ÿc0Complete\n"
+          if (global[script]()) {
+            console.log(
+              mainScriptStr + "ÿc7" + script
+              + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (Time.format(getTickCount() - tick))
+            );
+            let gain = Math.max(me.getStat(sdk.stats.Experience) - exp, 0);
+            let duration = Time.elapsed(tick);
+            console.log(
+              mainScriptStr + "ÿc7" + script + " :: ÿc0Complete\n"
 							+ "ÿc2 Statistics:\n"
 							+ "ÿc7 - Duration: ÿc0" + (Time.format(duration)) + "\n"
 							+ "ÿc7 - Experience Gained: ÿc0" + gain + "\n"
 							+ "ÿc7 - Exp/minute: ÿc0" + (gain / (duration / 60000)).toFixed(2)
-						);
-					}
-				}
-			} catch (error) {
-				if (!(error instanceof ScriptError)) {
-					Misc.errorReport(error, script);
-				}
-				failed = true;
-			} finally {
-				// Dont run for last script as that will clear everything anyway
-				if (this.scriptIndex < this.scriptList.length) {
-					// remove script function from global scope, so it can be cleared by GC
-					delete global[script];
-				} else if (this.tempList.length) {
-					delete global[script];
-				}
+            );
+          }
+        }
+      } catch (error) {
+        if (!(error instanceof ScriptError)) {
+          Misc.errorReport(error, script);
+        }
+        failed = true;
+      } finally {
+        // Dont run for last script as that will clear everything anyway
+        if (this.scriptIndex < this.scriptList.length) {
+          // remove script function from global scope, so it can be cleared by GC
+          delete global[script];
+        } else if (this.tempList.length) {
+          delete global[script];
+        }
 
-				this.tempList.pop();
+        this.tempList.pop();
 				
-				if (reconfiguration) {
-					print("ÿc2Reverting back unmodified config properties.");
-					this.copy(unmodifiedConfig, Config);
-				}
-			}
-		}
+        if (reconfiguration) {
+          print("ÿc2Reverting back unmodified config properties.");
+          this.copy(unmodifiedConfig, Config);
+        }
+      }
+    }
 
-		return !failed;
-	},
+    return !failed;
+  },
 
-	scriptName: function (offset = 0) {
-		let index = this.scriptIndex + offset;
+  scriptName: function (offset = 0) {
+    let index = this.scriptIndex + offset;
 
-		if (index >= 0 && index < this.scriptList.length) {
-			return this.scriptList[index];
-		}
+    if (index >= 0 && index < this.scriptList.length) {
+      return this.scriptList[index];
+    }
 
-		return null;
-	}
+    return null;
+  }
 };

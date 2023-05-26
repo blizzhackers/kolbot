@@ -6,15 +6,16 @@
 */
 
 function Abaddon() {
-	Town.doChores();
-	Pather.useWaypoint(sdk.areas.FrigidHighlands);
-	Precast.doPrecast(true);
+  Town.doChores();
+  Pather.useWaypoint(sdk.areas.FrigidHighlands);
+  Precast.doPrecast(true);
 
-	if (!Pather.moveToPreset(sdk.areas.FrigidHighlands, sdk.unittype.Object, sdk.objects.RedPortal) || !Pather.usePortal(sdk.areas.Abaddon)) {
-		throw new Error("Failed to move to Abaddon");
-	}
+  if (!Pather.moveToPreset(sdk.areas.FrigidHighlands, sdk.unittype.Object, sdk.objects.RedPortal)
+    || !Pather.usePortal(sdk.areas.Abaddon)) {
+    throw new Error("Failed to move to Abaddon");
+  }
 
-	Attack.clearLevel(Config.ClearType);
+  Attack.clearLevel(Config.ClearType);
 
-	return true;
+  return true;
 }

@@ -304,23 +304,27 @@ function LoadConfig() {
 	Scripts.ChestMania = false; // Open chests in configured areas. See sdk/txt/areas.txt or use sdk.areas.AreaName see -> \kolbot\libs\modules\sdk.js
 		// List of act 1 areas to open chests in
 		Config.ChestMania.Act1 = [
-			sdk.areas.CaveLvl2, sdk.areas.UndergroundPassageLvl2, sdk.areas.HoleLvl2, sdk.areas.PitLvl2, sdk.areas.Crypt, sdk.areas.Mausoleum
+			sdk.areas.CaveLvl2, sdk.areas.UndergroundPassageLvl2,
+      sdk.areas.HoleLvl2, sdk.areas.PitLvl2, sdk.areas.Crypt, sdk.areas.Mausoleum
 		];
 		// List of act 2 areas to open chests in
 		Config.ChestMania.Act2 = [
-			sdk.areas.StonyTombLvl1, sdk.areas.StonyTombLvl2, sdk.areas.AncientTunnels, sdk.areas.TalRashasTomb1, sdk.areas.TalRashasTomb2,
-			sdk.areas.TalRashasTomb3, sdk.areas.TalRashasTomb4, sdk.areas.TalRashasTomb5, sdk.areas.TalRashasTomb6, sdk.areas.TalRashasTomb7
+			sdk.areas.StonyTombLvl1, sdk.areas.StonyTombLvl2, sdk.areas.AncientTunnels,
+      sdk.areas.TalRashasTomb1, sdk.areas.TalRashasTomb2, sdk.areas.TalRashasTomb3,
+			sdk.areas.TalRashasTomb4, sdk.areas.TalRashasTomb5, sdk.areas.TalRashasTomb6, sdk.areas.TalRashasTomb7
 		];
 		// List of act 3 areas to open chests in
 		Config.ChestMania.Act3 = [
-			sdk.areas.LowerKurast, sdk.areas.KurastBazaar, sdk.areas.UpperKurast, sdk.areas.A3SewersLvl1, sdk.areas.A3SewersLvl2,
+			sdk.areas.LowerKurast, sdk.areas.KurastBazaar, sdk.areas.UpperKurast,
+      sdk.areas.A3SewersLvl1, sdk.areas.A3SewersLvl2,
 			sdk.areas.SpiderCave, sdk.areas.SpiderCavern, sdk.areas.SwampyPitLvl3
 		];
 		// List of act 4 areas to open chests in
 		Config.ChestMania.Act4 = [sdk.areas.RiverofFlame];
 		// List of act 5 areas to open chests in
 		Config.ChestMania.Act5 = [
-			sdk.areas.GlacialTrail, sdk.areas.DrifterCavern, sdk.areas.IcyCellar, sdk.areas.Abaddon, sdk.areas.PitofAcheron, sdk.areas.InfernalPit
+			sdk.areas.GlacialTrail, sdk.areas.DrifterCavern, sdk.areas.IcyCellar,
+      sdk.areas.Abaddon, sdk.areas.PitofAcheron, sdk.areas.InfernalPit
 		];
 	Scripts.ClearAnyArea = false; // Clear any area. Uses Config.ClearType to determine which type of monsters to kill.
 		Config.ClearAnyArea.AreaList = []; // List of area ids to clear. See sdk/txt/areas.txt
@@ -333,7 +337,8 @@ function LoadConfig() {
 		];
 		// Priority List for Gems to keep in inventory. highest priority first. see \kolbot\libs\modules\sdk.js for gem types
 		Config.GemHunter.GemList = [
-			sdk.items.gems.Flawless.Ruby, sdk.items.gems.Flawless.Amethyst, sdk.items.gems.Flawless.Sapphire, sdk.items.gems.Flawless.Topaz,
+			sdk.items.gems.Flawless.Ruby, sdk.items.gems.Flawless.Amethyst,
+      sdk.items.gems.Flawless.Sapphire, sdk.items.gems.Flawless.Topaz,
 			sdk.items.gems.Flawless.Emerald, sdk.items.gems.Flawless.Diamond, sdk.items.gems.Flawless.Skull
 		];
 

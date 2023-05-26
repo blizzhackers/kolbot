@@ -7,8 +7,8 @@
 */
 
 (function (module) {
-	module.exports = {
-		/* Features:
+  module.exports = {
+    /* Features:
 		Override channel for each profile, Override join delay for each profile
 		Override default values for JoinChannel, FirstJoinMessage, AnnounceGames and AfterGameMessage per profile
 
@@ -34,13 +34,13 @@
 			}
 		*/
 		
-		// Put your lines under this one. Multiple entries are separated by commas. No comma after the last one.
+    // Put your lines under this one. Multiple entries are separated by commas. No comma after the last one.
 
-		"Test": {
-			JoinChannel: "op nnqry",
-			JoinDelay: 3,
-			AnnounceGames: true,
-			AnnounceMessage: "Joining game" // output: Joining game Baals-23
-		},
-	};
+    "Test": {
+      JoinChannel: "op nnqry",
+      JoinDelay: 3,
+      AnnounceGames: true,
+      AnnounceMessage: "Joining game" // output: Joining game Baals-23
+    },
+  };
 })(module);

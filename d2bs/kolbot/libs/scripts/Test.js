@@ -6,33 +6,33 @@
 */
 
 function Test() {
-	print("ÿc8TESTING");
+  print("ÿc8TESTING");
 
-	let c;
+  let c;
 
-	function KeyDown(key) {
-		key === sdk.keys.Insert && (c = true);
-	}
+  function KeyDown(key) {
+    key === sdk.keys.Insert && (c = true);
+  }
 
-	addEventListener("keydown", KeyDown);
+  addEventListener("keydown", KeyDown);
 
-	while (true) {
-		if (c) {
-			try {
-				doTest();
-			} catch (qq) {
-				print("failed");
-				print(qq + " " + qq.fileName + " " + qq.lineNumber);
-			}
+  while (true) {
+    if (c) {
+      try {
+        doTest();
+      } catch (qq) {
+        print("failed");
+        print(qq + " " + qq.fileName + " " + qq.lineNumber);
+      }
 
-			c = false;
-		}
+      c = false;
+    }
 
-		delay(10);
-	}
+    delay(10);
+  }
 }
 
 function doTest() {
-	print("test");
-	print("done");
+  print("test");
+  print("done");
 }

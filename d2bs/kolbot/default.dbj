@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /**
 *  @filename    default.dbj
 *  @author      kolton, theBGuy
@@ -19,245 +20,245 @@ include("systems/gameaction/GameAction.js");
 const LocalChat = require("./libs/modules/LocalChat");
 
 function main () {
-	D2Bot.init(); // Get D2Bot# handle
-	D2Bot.ingame();
+  D2Bot.init(); // Get D2Bot# handle
+  D2Bot.ingame();
 
-	(function (global, original) {
-		global.load = function (...args) {
-			original.apply(this, args);
-			delay(500);
-		};
-	})([].filter.constructor("return this")(), load);
+  (function (global, original) {
+    global.load = function (...args) {
+      original.apply(this, args);
+      delay(500);
+    };
+  })([].filter.constructor("return this")(), load);
 
-	// wait until game is ready
-	while (!me.gameReady) {
-		delay(50);
-	}
+  // wait until game is ready
+  while (!me.gameReady) {
+    delay(50);
+  }
 
-	clearAllEvents(); // remove any event listeners from game crash
+  clearAllEvents(); // remove any event listeners from game crash
 
-	// load heartbeat if it isn't already running
-	!getScript("threads/heartbeat.js") && load("threads/heartbeat.js");
+  // load heartbeat if it isn't already running
+  !getScript("threads/heartbeat.js") && load("threads/heartbeat.js");
 
-	// SoloPlay runs in it's own thread - check to ensure it exists in the files
-	if (getScript("D2BotSoloPlay.dbj") && FileTools.exists("libs/SoloPlay/SoloPlay.js")) {
-		load("libs/SoloPlay/SoloPlay.js");
-		return true;
-	}
+  // SoloPlay runs in it's own thread - check to ensure it exists in the files
+  if (getScript("D2BotSoloPlay.dbj") && FileTools.exists("libs/SoloPlay/SoloPlay.js")) {
+    load("libs/SoloPlay/SoloPlay.js");
+    return true;
+  }
 
-	// map mode runs in it's own thread
-	if (getScript("d2botmap.dbj")) {
-		load("libs/manualplay/threads/mapthread.js");
-		return true;
-	}
+  // map mode runs in it's own thread
+  if (getScript("d2botmap.dbj")) {
+    load("libs/manualplay/threads/mapthread.js");
+    return true;
+  }
 	
-	// MuleLogger handler
-	if (MuleLogger.inGameCheck()) return true;
+  // MuleLogger handler
+  if (MuleLogger.inGameCheck()) return true;
 	
-	// don't load default for dropper/mules
-	if (getScript("D2BotDropper.dbj") || getScript("D2BotMule.dbj")) {
-		FileTools.exists("libs/ItemDB.js") && include("ItemDB.js");
-		load("threads/AreaWatcher.js");
+  // don't load default for dropper/mules
+  if (getScript("D2BotDropper.dbj") || getScript("D2BotMule.dbj")) {
+    FileTools.exists("libs/ItemDB.js") && include("ItemDB.js");
+    load("threads/AreaWatcher.js");
 		
-		while (me.ingame) {
-			delay(10000);
-		}
-		return true;
-	}
+    while (me.ingame) {
+      delay(10000);
+    }
+    return true;
+  }
 
-	let sojPause;
-	let sojCounter = 0;
-	let startTime = getTickCount();
+  let sojPause;
+  let sojCounter = 0;
+  let startTime = getTickCount();
 
-	this.scriptEvent = function (msg) {
-		if (msg === "quit") return;
-		if (typeof msg === "string" && msg === "soj") {
-			sojPause = true;
-			sojCounter = 0;
-		}
-	};
+  this.scriptEvent = function (msg) {
+    if (msg === "quit") return;
+    if (typeof msg === "string" && msg === "soj") {
+      sojPause = true;
+      sojCounter = 0;
+    }
+  };
 
-	this.copyDataEvent = function (mode, msg) {
-		// "Mule Profile" option from D2Bot#
-		if (mode === 0 && msg === "mule") {
-			if (AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("muleInfo")) {
-				if (AutoMule.getMuleItems().length > 0) {
-					D2Bot.printToConsole("Mule triggered");
-					scriptBroadcast("mule");
-					scriptBroadcast("quit");
-				} else {
-					D2Bot.printToConsole("No items to mule.");
-				}
-			} else {
-				D2Bot.printToConsole("Profile not enabled for muling.");
-			}
-		}
+  this.copyDataEvent = function (mode, msg) {
+    // "Mule Profile" option from D2Bot#
+    if (mode === 0 && msg === "mule") {
+      if (AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("muleInfo")) {
+        if (AutoMule.getMuleItems().length > 0) {
+          D2Bot.printToConsole("Mule triggered");
+          scriptBroadcast("mule");
+          scriptBroadcast("quit");
+        } else {
+          D2Bot.printToConsole("No items to mule.");
+        }
+      } else {
+        D2Bot.printToConsole("Profile not enabled for muling.");
+      }
+    }
 
-		// getProfile
-		if (mode === 1638) {
-			msg = JSON.parse(msg);
+    // getProfile
+    if (mode === 1638) {
+      msg = JSON.parse(msg);
 
-			if (msg.Tag) {
-				GameAction.init(msg.Tag);
-			}
-		}
-	};
+      if (msg.Tag) {
+        GameAction.init(msg.Tag);
+      }
+    }
+  };
 
-	// Initialize libs - load config variables, build pickit list, attacks, containers and cubing and runeword recipes
-	Config.init(true);
-	Pickit.init(true);
-	Attack.init();
-	Storage.Init();
-	CraftingSystem.buildLists();
-	Runewords.init();
-	Cubing.init();
-	LocalChat.init();
+  // Initialize libs - load config variables, build pickit list, attacks, containers and cubing and runeword recipes
+  Config.init(true);
+  Pickit.init(true);
+  Attack.init();
+  Storage.Init();
+  CraftingSystem.buildLists();
+  Runewords.init();
+  Cubing.init();
+  LocalChat.init();
 
-	// Load event listeners
-	addEventListener("scriptmsg", this.scriptEvent);
-	addEventListener("copydata", this.copyDataEvent);
+  // Load event listeners
+  addEventListener("scriptmsg", this.scriptEvent);
+  addEventListener("copydata", this.copyDataEvent);
 
-	// GameAction/AutoMule/TorchSystem/Gambling/Crafting handler
-	if (GameAction.inGameCheck() || AutoMule.inGameCheck() || TorchSystem.inGameCheck() || Gambling.inGameCheck() || CraftingSystem.inGameCheck()) {
-		return true;
-	}
+  // GameAction/AutoMule/TorchSystem/Gambling/Crafting handler
+  if (GameAction.inGameCheck() || AutoMule.inGameCheck() || TorchSystem.inGameCheck() || Gambling.inGameCheck() || CraftingSystem.inGameCheck()) {
+    return true;
+  }
 
-	me.maxgametime = Config.MaxGameTime * 1000;
-	let stats = DataFile.getStats();
+  me.maxgametime = Config.MaxGameTime * 1000;
+  let stats = DataFile.getStats();
 
-	// Check for experience decrease -> log death. Skip report if life chicken is disabled.
-	if (stats.name === me.name && me.getStat(sdk.stats.Experience) < stats.experience && Config.LifeChicken > 0) {
-		D2Bot.printToConsole("You died in last game. | Area :: " + stats.lastArea + " | Script :: " + stats.debugInfo.currScript, sdk.colors.D2Bot.Red);
-		D2Bot.printToConsole("Experience decreased by " + (stats.experience - me.getStat(sdk.stats.Experience)), sdk.colors.D2Bot.Red);
-		DataFile.updateStats("deaths");
-		D2Bot.updateDeaths();
-	}
+  // Check for experience decrease -> log death. Skip report if life chicken is disabled.
+  if (stats.name === me.name && me.getStat(sdk.stats.Experience) < stats.experience && Config.LifeChicken > 0) {
+    D2Bot.printToConsole("You died in last game. | Area :: " + stats.lastArea + " | Script :: " + stats.debugInfo.currScript, sdk.colors.D2Bot.Red);
+    D2Bot.printToConsole("Experience decreased by " + (stats.experience - me.getStat(sdk.stats.Experience)), sdk.colors.D2Bot.Red);
+    DataFile.updateStats("deaths");
+    D2Bot.updateDeaths();
+  }
 
-	DataFile.updateStats(["experience", "name"]);
+  DataFile.updateStats(["experience", "name"]);
 
-	// Load threads
-	load("threads/ToolsThread.js");
-	(Config.TownCheck || Config.TownHP > 0 || Config.TownMP > 0) && load("threads/TownChicken.js");
+  // Load threads
+  load("threads/ToolsThread.js");
+  (Config.TownCheck || Config.TownHP > 0 || Config.TownMP > 0) && load("threads/TownChicken.js");
 
-	if (Config.DebugMode.Stack && FileTools.exists("libs/modules/Guard.js")) {
-		require("libs/modules/Guard");
-	}
+  if (Config.DebugMode.Stack && FileTools.exists("libs/modules/Guard.js")) {
+    require("libs/modules/Guard");
+  }
 
-	if (Config.PublicMode) {
-		Config.PublicMode === true ? require("libs/modules/SimpleParty") : load("threads/Party.js");
-	}
+  if (Config.PublicMode) {
+    Config.PublicMode === true ? require("libs/modules/SimpleParty") : load("threads/Party.js");
+  }
 	
-	Config.AntiHostile && load("threads/AntiHostile.js");
+  Config.AntiHostile && load("threads/AntiHostile.js");
 
-	if (Config.FastPick) {
-		print("ÿc2Fast pickit active.");
-		addEventListener("itemaction", Pickit.itemEvent);
-	}
+  if (Config.FastPick) {
+    print("ÿc2Fast pickit active.");
+    addEventListener("itemaction", Pickit.itemEvent);
+  }
 
-	// One time maintenance - check cursor, get corpse, clear leftover items, pick items in case anything important was dropped
-	if (!Scripts.UserAddon && !Scripts.Test) {
-		// main checks
-		Cubing.cursorCheck();
-		Town.getCorpse();
-		Town.clearBelt();
-		Pather.init(); // initialize wp data
+  // One time maintenance - check cursor, get corpse, clear leftover items, pick items in case anything important was dropped
+  if (!Scripts.UserAddon && !Scripts.Test) {
+    // main checks
+    Cubing.cursorCheck();
+    Town.getCorpse();
+    Town.clearBelt();
+    Pather.init(); // initialize wp data
 		
-		let {x, y} = me;
-		Config.ClearInvOnStart && Town.clearInventory();
-		[x, y].distance > 3 && Pather.moveTo(x, y);
-		Pickit.pickItems();
-		me.hpPercent <= 10 && Town.heal() && me.cancelUIFlags();
+    let { x, y } = me;
+    Config.ClearInvOnStart && Town.clearInventory();
+    [x, y].distance > 3 && Pather.moveTo(x, y);
+    Pickit.pickItems();
+    me.hpPercent <= 10 && Town.heal() && me.cancelUIFlags();
 
-		if (Config.DebugMode.Memory) {
-			delay(2000);
-			getThreads()
-				.sort((a, b) => b.memory - a.memory)
-				.forEach(thread => console.debug(thread));
-		}
-	}
+    if (Config.DebugMode.Memory) {
+      delay(2000);
+      getThreads()
+        .sort((a, b) => b.memory - a.memory)
+        .forEach(thread => console.debug(thread));
+    }
+  }
 
-	me.automap = Config.AutoMap;
+  me.automap = Config.AutoMap;
 
-	// Next game = drop keys
-	TorchSystem.keyCheck() && scriptBroadcast("torch");
+  // Next game = drop keys
+  TorchSystem.keyCheck() && scriptBroadcast("torch");
 
-	// Auto skill and stat
-	if (Config.AutoSkill.Enabled && include("core/Auto/AutoSkill.js")) {
-		AutoSkill.init(Config.AutoSkill.Build, Config.AutoSkill.Save);
-	}
+  // Auto skill and stat
+  if (Config.AutoSkill.Enabled && include("core/Auto/AutoSkill.js")) {
+    AutoSkill.init(Config.AutoSkill.Build, Config.AutoSkill.Save);
+  }
 
-	if (Config.AutoStat.Enabled && include("core/Auto/AutoStat.js")) {
-		AutoStat.init(Config.AutoStat.Build, Config.AutoStat.Save, Config.AutoStat.BlockChance, Config.AutoStat.UseBulk);
-	}
+  if (Config.AutoStat.Enabled && include("core/Auto/AutoStat.js")) {
+    AutoStat.init(Config.AutoStat.Build, Config.AutoStat.Save, Config.AutoStat.BlockChance, Config.AutoStat.UseBulk);
+  }
 
-	// offline
-	!me.realm && D2Bot.updateRuns();
+  // offline
+  !me.realm && D2Bot.updateRuns();
 
-	// Go
-	Loader.init();
+  // Go
+  Loader.init();
 
-	if (Config.MinGameTime && getTickCount() - startTime < Config.MinGameTime * 1000) {
-		try {
-			Town.goToTown();
+  if (Config.MinGameTime && getTickCount() - startTime < Config.MinGameTime * 1000) {
+    try {
+      Town.goToTown();
 
-			while (getTickCount() - startTime < Config.MinGameTime * 1000) {
-				me.overhead("Stalling for " + Math.round(((startTime + (Config.MinGameTime * 1000)) - getTickCount()) / 1000) + " Seconds");
-				delay(1000);
-			}
-		} catch (e1) {
-			print(e1);
-		}
-	}
+      while (getTickCount() - startTime < Config.MinGameTime * 1000) {
+        me.overhead("Stalling for " + Math.round(((startTime + (Config.MinGameTime * 1000)) - getTickCount()) / 1000) + " Seconds");
+        delay(1000);
+      }
+    } catch (e1) {
+      print(e1);
+    }
+  }
 
-	DataFile.updateStats("gold");
+  DataFile.updateStats("gold");
 
-	if (sojPause) {
-		try {
-			Town.doChores();
-			me.maxgametime = 0;
+  if (sojPause) {
+    try {
+      Town.doChores();
+      me.maxgametime = 0;
 
-			while (sojCounter < Config.SoJWaitTime) {
-				me.overhead("Waiting for SoJ sales... " + (Config.SoJWaitTime - sojCounter) + " min");
-				delay(6e4);
+      while (sojCounter < Config.SoJWaitTime) {
+        me.overhead("Waiting for SoJ sales... " + (Config.SoJWaitTime - sojCounter) + " min");
+        delay(6e4);
 
-				sojCounter += 1;
-			}
-		} catch (e2) {
-			print(e2);
-		}
-	}
+        sojCounter += 1;
+      }
+    } catch (e2) {
+      print(e2);
+    }
+  }
 
-	if (Config.LastMessage) {
-		switch (typeof Config.LastMessage) {
-		case "string":
-			say(Config.LastMessage.replace("$nextgame", DataFile.getStats().nextGame, "i"));
+  if (Config.LastMessage) {
+    switch (typeof Config.LastMessage) {
+    case "string":
+      say(Config.LastMessage.replace("$nextgame", DataFile.getStats().nextGame, "i"));
 
-			break;
-		case "object":
-			for (let i = 0; i < Config.LastMessage.length; i += 1) {
-				say(Config.LastMessage[i].replace("$nextgame", DataFile.getStats().nextGame, "i"));
-			}
+      break;
+    case "object":
+      for (let i = 0; i < Config.LastMessage.length; i += 1) {
+        say(Config.LastMessage[i].replace("$nextgame", DataFile.getStats().nextGame, "i"));
+      }
 
-			break;
-		}
-	}
+      break;
+    }
+  }
 
-	removeEventListener("scriptmsg", this.scriptEvent);
+  removeEventListener("scriptmsg", this.scriptEvent);
 
-	AutoMule.muleCheck() && scriptBroadcast("mule");
-	CraftingSystem.checkFullSets() && scriptBroadcast("crafting");
-	TorchSystem.keyCheck() && scriptBroadcast("torch");
+  AutoMule.muleCheck() && scriptBroadcast("mule");
+  CraftingSystem.checkFullSets() && scriptBroadcast("crafting");
+  TorchSystem.keyCheck() && scriptBroadcast("torch");
 
-	// Anni handler. Mule Anni if it's in unlocked space and profile is set to mule torch/anni.
-	let anni = me.findItem(sdk.items.SmallCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique);
+  // Anni handler. Mule Anni if it's in unlocked space and profile is set to mule torch/anni.
+  let anni = me.findItem(sdk.items.SmallCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique);
 
-	if (anni && !Storage.Inventory.IsLocked(anni, Config.Inventory) && AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
-		scriptBroadcast("muleAnni");
-	}
+  if (anni && !Storage.Inventory.IsLocked(anni, Config.Inventory) && AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
+    scriptBroadcast("muleAnni");
+  }
 
-	removeEventListener("copydata", this.copyDataEvent);
+  removeEventListener("copydata", this.copyDataEvent);
 
-	scriptBroadcast("quit");
+  scriptBroadcast("quit");
 
-	return true;
+  return true;
 }

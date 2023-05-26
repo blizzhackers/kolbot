@@ -6,15 +6,15 @@
 */
 
 function UndergroundPassage() {
-	Town.doChores();
-	Pather.useWaypoint(sdk.areas.StonyField);
-	Precast.doPrecast(true);
+  Town.doChores();
+  Pather.useWaypoint(sdk.areas.StonyField);
+  Precast.doPrecast(true);
 
-	if (!Pather.moveToExit([sdk.areas.UndergroundPassageLvl1, sdk.areas.UndergroundPassageLvl2], true)) {
-		throw new Error("Failed to move to Underground passage level 2");
-	}
+  if (!Pather.moveToExit([sdk.areas.UndergroundPassageLvl1, sdk.areas.UndergroundPassageLvl2], true)) {
+    throw new Error("Failed to move to Underground passage level 2");
+  }
 
-	Attack.clearLevel();
+  Attack.clearLevel();
 
-	return true;
+  return true;
 }

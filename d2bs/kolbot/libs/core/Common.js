@@ -6,6 +6,6 @@
 */
 
 const Common = {
-	// each common functionality is loaded into this object when it's needed
-	// for the actual function files @see core/Common/
+  // each common functionality is loaded into this object when it's needed
+  // for the actual function files @see core/Common/
 };

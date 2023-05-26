@@ -7,39 +7,44 @@
 
 
 function main() {
-	include("critical.js"); // required
+  include("critical.js"); // required
 
-	if (!FileTools.exists("data/" + me.profile + ".json")) {
-		DataFile.create();
-	}
+  if (!FileTools.exists("data/" + me.profile + ".json")) {
+    DataFile.create();
+  }
 	
-	addEventListener("copydata", Starter.receiveCopyData);
+  addEventListener("copydata", Starter.receiveCopyData);
 
-	while (!Starter.handle) {
-		delay(100);
-	}
+  while (!Starter.handle) {
+    delay(100);
+  }
 
-	DataFile.updateStats("handle", Starter.handle);
-	delay(500);
-	D2Bot.init();
-	load("threads/heartbeat.js");
+  DataFile.updateStats("handle", Starter.handle);
+  delay(500);
+  D2Bot.init();
+  load("threads/heartbeat.js");
 
-	while (!Object.keys(Starter.gameInfo).length) {
-		D2Bot.requestGameInfo();
-		delay(500);
-	}
+  while (!Object.keys(Starter.gameInfo).length) {
+    D2Bot.requestGameInfo();
+    delay(500);
+  }
 
-	while (true) {
-		delay(1000);
+  while (true) {
+    delay(1000);
 		
-		if (me.gameReady) {
-			Starter.isUp === "no" && (Starter.isUp = "yes");
-			me.ingame && D2Bot.updateStatus("(Char: " + me.charname + ") (Game: " + (me.gamename || "singleplayer") + ") (Level: " + me.charlvl + ")");
-		} else {
-			D2Bot.updateStatus("Out of Game");
-			Starter.isUp = "no";
-		}
+    if (me.gameReady) {
+      Starter.isUp === "no" && (Starter.isUp = "yes");
+      if (me.ingame) {
+        D2Bot.updateStatus(
+          "(Char: " + me.charname + ") (Game: "
+          + (me.gamename || "singleplayer") + ") (Level: " + me.charlvl + ")"
+        );
+      }
+    } else {
+      D2Bot.updateStatus("Out of Game");
+      Starter.isUp = "no";
+    }
 
-		delay(1000);
-	}
+    delay(1000);
+  }
 }

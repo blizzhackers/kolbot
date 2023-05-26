@@ -6,16 +6,16 @@
 */
 
 function Izual() {
-	Town.doChores();
-	Pather.useWaypoint(sdk.areas.CityoftheDamned);
-	Precast.doPrecast(true);
+  Town.doChores();
+  Pather.useWaypoint(sdk.areas.CityoftheDamned);
+  Precast.doPrecast(true);
 
-	if (!Pather.moveToPreset(sdk.areas.PlainsofDespair, sdk.unittype.Monster, sdk.monsters.Izual)) {
-		throw new Error("Failed to move to Izual.");
-	}
+  if (!Pather.moveToPreset(sdk.areas.PlainsofDespair, sdk.unittype.Monster, sdk.monsters.Izual)) {
+    throw new Error("Failed to move to Izual.");
+  }
 
-	Attack.kill(sdk.monsters.Izual);
-	Pickit.pickItems();
+  Attack.kill(sdk.monsters.Izual);
+  Pickit.pickItems();
 
-	return true;
+  return true;
 }

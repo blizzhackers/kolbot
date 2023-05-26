@@ -6,8 +6,8 @@
 */
 
 (function (module) {
-	module.exports = {
-		/**
+  module.exports = {
+    /**
 			Setting up:
 
 			"Gamble Team 1": { // Put a unique team name here.
@@ -25,13 +25,13 @@
 
 			Once set up properly, the gold finders will run their own games and join gamblers' games when they're out of gold.
 		*/
-		"Gamble Team 1": {
-			goldFinders: [""],
-			gamblers: [""],
-			gambleGames: [""],
+    "Gamble Team 1": {
+      goldFinders: [""],
+      gamblers: [""],
+      gambleGames: [""],
 
-			goldTrigger: 2500000,
-			goldReserve: 200000
-		},
-	};
+      goldTrigger: 2500000,
+      goldReserve: 200000
+    },
+  };
 })(module);

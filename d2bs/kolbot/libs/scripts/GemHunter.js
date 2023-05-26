@@ -13,28 +13,28 @@
  * - Take into account the next area and sort the shrines to bring us to the exit if its connected
  */
 function GemHunter () {
-	Town.doChores();
-	Town.getGem();
-	if (Town.getGemsInInv().length === 0) {
-		print("ÿc4GemHunterÿc0: no gems in inventory - aborting.");
-		return false;
-	}
+  Town.doChores();
+  Town.getGem();
+  if (Town.getGemsInInv().length === 0) {
+    print("ÿc4GemHunterÿc0: no gems in inventory - aborting.");
+    return false;
+  }
 
-	for (let i = 0; i < Config.GemHunter.AreaList.length; i++) {
-		if (Town.getGemsInInv().length > 0) {
-			print("ÿc4GemHunterÿc0: Moving to " + getAreaName(Config.GemHunter.AreaList[i]));
-			Pather.journeyTo(Config.GemHunter.AreaList[i]);
-			if (i % 2 === 0) Precast.doPrecast(true);
-			if (Misc.getShrinesInArea(Config.GemHunter.AreaList[i], sdk.shrines.Gem, true)) {
-				Pickit.pickItems();
-				print("ÿc4GemHunterÿc0: found a gem Shrine");
-				if ((Town.getGemsInInv().length === 0) && (Town.getGemsInStash().length > 0)) {
-					print("ÿc4GemHunterÿc0: Getting a new Gem in Town.");
-					Town.visitTown(); // Go to Town and do chores. Will throw an error if it fails to return from Town.
-					Town.getGem();
-				}
-			}
-		}
-	}
-	return true;
+  for (let i = 0; i < Config.GemHunter.AreaList.length; i++) {
+    if (Town.getGemsInInv().length > 0) {
+      print("ÿc4GemHunterÿc0: Moving to " + getAreaName(Config.GemHunter.AreaList[i]));
+      Pather.journeyTo(Config.GemHunter.AreaList[i]);
+      if (i % 2 === 0) Precast.doPrecast(true);
+      if (Misc.getShrinesInArea(Config.GemHunter.AreaList[i], sdk.shrines.Gem, true)) {
+        Pickit.pickItems();
+        print("ÿc4GemHunterÿc0: found a gem Shrine");
+        if ((Town.getGemsInInv().length === 0) && (Town.getGemsInStash().length > 0)) {
+          print("ÿc4GemHunterÿc0: Getting a new Gem in Town.");
+          Town.visitTown(); // Go to Town and do chores. Will throw an error if it fails to return from Town.
+          Town.getGem();
+        }
+      }
+    }
+  }
+  return true;
 }

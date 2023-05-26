@@ -14,83 +14,83 @@
  */
 
 const FileAction = {
-	read: function (path = "") {
-		if (!path) throw new Error("No path provided");
+  read: function (path = "") {
+    if (!path) throw new Error("No path provided");
 
-		let contents = "";
+    let contents = "";
 
-		for (let i = 0; i < 30; i++) {
-			try {
-				contents = FileTools.readText(path);
+    for (let i = 0; i < 30; i++) {
+      try {
+        contents = FileTools.readText(path);
 
-				if (contents) return contents;
-			} catch (e) {
-				// console.error(e, path);
-			}
+        if (contents) return contents;
+      } catch (e) {
+        // console.error(e, path);
+      }
 
-			// incremental delay
-			delay(100 + ((i % 5) * 100));
-		}
+      // incremental delay
+      delay(100 + ((i % 5) * 100));
+    }
 
-		return contents;
-	},
+    return contents;
+  },
 
-	write: function (path = "", msg = "") {
-		if (!path) throw new Error("No path provided");
+  write: function (path = "", msg = "") {
+    if (!path) throw new Error("No path provided");
 
-		// do we read the file to see if it has changed?
-		// for now keep the orginal behavior
-		for (let i = 0; i < 30; i++) {
-			try {
-				FileTools.writeText(path, msg);
+    // do we read the file to see if it has changed?
+    // for now keep the orginal behavior
+    for (let i = 0; i < 30; i++) {
+      try {
+        FileTools.writeText(path, msg);
 
-				break;
-			} catch (e) {
-				// console.error(e, path);
-			}
+        break;
+      } catch (e) {
+        // console.error(e, path);
+      }
 
-			delay(100 + ((i % 5) * 100));
-		}
+      delay(100 + ((i % 5) * 100));
+    }
 
-		return true;
-	},
+    return true;
+  },
 
-	append: function (path = "", msg = "") {
-		if (!path) throw new Error("No path provided");
+  append: function (path = "", msg = "") {
+    if (!path) throw new Error("No path provided");
 
-		// do we read the file to see if it has changed?
-		// for now keep the orginal behavior
-		for (let i = 0; i < 30; i++) {
-			try {
-				FileTools.appendText(path, msg);
+    // do we read the file to see if it has changed?
+    // for now keep the orginal behavior
+    for (let i = 0; i < 30; i++) {
+      try {
+        FileTools.appendText(path, msg);
 
-				break;
-			} catch (e) {
-				// console.error(e, path);
-			}
+        break;
+      } catch (e) {
+        // console.error(e, path);
+      }
 
-			delay(100 + ((i % 5) * 100));
-		}
+      delay(100 + ((i % 5) * 100));
+    }
 
-		return true;
-	},
+    return true;
+  },
 
-	parse: function (path = "") {
-		if (!path) throw new Error("No path provided");
-		if (!FileTools.exists(path)) throw new Error("Can't parse file that doesn't exist");
+  parse: function (path = "") {
+    if (!path) throw new Error("No path provided");
+    if (!FileTools.exists(path)) throw new Error("Can't parse file that doesn't exist");
 
-		let contents = "";
+    let contents = "";
 
-		try {
-			contents = FileAction.read(path);
+    try {
+      contents = FileAction.read(path);
 
-			if (contents) {
-				return JSON.parse(contents);
-			}
-		} catch (e) {
-			console.error(e, path);
-		}
+      if (contents) {
+        return JSON.parse(contents);
+      }
+    } catch (e) {
+      console.error(e, path);
+    }
 
-		return contents;
-	},
+    return contents;
+  },
 };

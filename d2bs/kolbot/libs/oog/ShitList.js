@@ -9,51 +9,51 @@
 includeIfNotIncluded("oog/FileAction.js");
 
 const ShitList = {
-	_default: {
-		shitlist: []
-	},
-	create: function () {
-		let string = JSON.stringify(this._default);
+  _default: {
+    shitlist: []
+  },
+  create: function () {
+    let string = JSON.stringify(this._default);
 
-		FileAction.write("shitlist.json", string);
+    FileAction.write("shitlist.json", string);
 
-		return obj;
-	},
+    return obj;
+  },
 
-	getObj: function () {
-		let obj;
-		let string = FileAction.read("shitlist.json");
+  getObj: function () {
+    let obj;
+    let string = FileAction.read("shitlist.json");
 
-		try {
-			obj = JSON.parse(string);
-		} catch (e) {
-			obj = this.create();
-		}
+    try {
+      obj = JSON.parse(string);
+    } catch (e) {
+      obj = this.create();
+    }
 
-		if (obj) {
-			return obj;
-		}
+    if (obj) {
+      return obj;
+    }
 
-		console.warn("Failed to read ShitList. Using null values");
+    console.warn("Failed to read ShitList. Using null values");
 
-		return this._default;
-	},
+    return this._default;
+  },
 
-	read: function () {
-		!FileTools.exists("shitlist.json") && this.create();
+  read: function () {
+    !FileTools.exists("shitlist.json") && this.create();
 		
-		let obj = this.getObj();
+    let obj = this.getObj();
 
-		return obj.shitlist;
-	},
+    return obj.shitlist;
+  },
 
-	add: function (name) {
-		let obj = this.getObj();
+  add: function (name) {
+    let obj = this.getObj();
 
-		obj.shitlist.push(name);
+    obj.shitlist.push(name);
 
-		let string = JSON.stringify(obj);
+    let string = JSON.stringify(obj);
 
-		FileAction.write("shitlist.json", string);
-	}
+    FileAction.write("shitlist.json", string);
+  }
 };

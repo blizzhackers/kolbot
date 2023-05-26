@@ -9,90 +9,92 @@
 */
 
 function UserAddon () {
-	let i, title, dummy, command = "";
-	const UnitInfo = new (require("../modules/UnitInfo"));
-	const className = sdk.player.class.nameOf(me.classid);
-	const flags = [
-		sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.QuickSkill, sdk.uiflags.SkillWindow, sdk.uiflags.ChatBox,
-		sdk.uiflags.Quest, sdk.uiflags.Msgs, sdk.uiflags.Stash, sdk.uiflags.Shop, sdk.uiflags.EscMenu, sdk.uiflags.Cube
-	];
+  let i, title, dummy, command = "";
+  const UnitInfo = new (require("../modules/UnitInfo"));
+  const className = sdk.player.class.nameOf(me.classid);
+  const flags = [
+    sdk.uiflags.Inventory, sdk.uiflags.StatsWindow,
+    sdk.uiflags.QuickSkill, sdk.uiflags.SkillWindow, sdk.uiflags.ChatBox,
+    sdk.uiflags.Quest, sdk.uiflags.Msgs, sdk.uiflags.Stash,
+    sdk.uiflags.Shop, sdk.uiflags.EscMenu, sdk.uiflags.Cube
+  ];
 
-	const keyEvent = function (key) {
-		switch (key) {
-		case sdk.keys.Spacebar:
-			FileTools.copy("libs/config/" + className + ".js", "libs/config/" + className + "." + me.name + ".js");
-			D2Bot.printToConsole("libs/config/" + className + "." + me.name + ".js has been created.");
-			D2Bot.printToConsole("Please configure your bot and start it again.");
-			D2Bot.stop();
+  const keyEvent = function (key) {
+    switch (key) {
+    case sdk.keys.Spacebar:
+      FileTools.copy("libs/config/" + className + ".js", "libs/config/" + className + "." + me.name + ".js");
+      D2Bot.printToConsole("libs/config/" + className + "." + me.name + ".js has been created.");
+      D2Bot.printToConsole("Please configure your bot and start it again.");
+      D2Bot.stop();
 
-			break;
-		}
-	};
+      break;
+    }
+  };
 
-	const onChatInput = (speaker, msg) => {
-		if (msg.length && msg[0] === ".") {
-			command = str.split(" ")[0].split(".")[1];
+  const onChatInput = (speaker, msg) => {
+    if (msg.length && msg[0] === ".") {
+      command = str.split(" ")[0].split(".")[1];
 
-			return true;
-		}
+      return true;
+    }
 
-		return false;
-	};
+    return false;
+  };
 
-	try {
-		// Make sure the item event is loaded - why though?
-		!Config.FastPick && addEventListener("itemaction", Pickit.itemEvent);
-		addEventListener("chatinputblocker", onChatInput);
+  try {
+    // Make sure the item event is loaded - why though?
+    !Config.FastPick && addEventListener("itemaction", Pickit.itemEvent);
+    addEventListener("chatinputblocker", onChatInput);
 
-		if (!FileTools.exists("libs/config/" + className + "." + me.name + ".js")) {
-			console.log("ÿc4UserAddonÿc0: Press HOME and then press SPACE if you want to create character config.");
-			addEventListener("keyup", keyEvent);
-			showConsole();
-		}
+    if (!FileTools.exists("libs/config/" + className + "." + me.name + ".js")) {
+      console.log("ÿc4UserAddonÿc0: Press HOME and then press SPACE if you want to create character config.");
+      addEventListener("keyup", keyEvent);
+      showConsole();
+    }
 
-		while (true) {
-			for (i = 0; i < flags.length; i += 1) {
-				if (getUIFlag(flags[i])) {
-					if (title) {
-						title.remove();
-						dummy.remove();
+    while (true) {
+      for (i = 0; i < flags.length; i += 1) {
+        if (getUIFlag(flags[i])) {
+          if (title) {
+            title.remove();
+            dummy.remove();
 
-						title = false;
-						dummy = false;
-					}
+            title = false;
+            dummy = false;
+          }
 
-					break;
-				}
-			}
+          break;
+        }
+      }
 
-			if (i === flags.length && !title) {
-				title = new Text(":: kolbot user addon ::", 400, 525, 4, 0, 2);
-				dummy = new Text("`", 1, 1); // Prevents crash
-			}
+      if (i === flags.length && !title) {
+        title = new Text(":: kolbot user addon ::", 400, 525, 4, 0, 2);
+        dummy = new Text("`", 1, 1); // Prevents crash
+      }
 
-			UnitInfo.check();
+      UnitInfo.check();
 
-			if (command && command.toLowerCase() === "done") {
-				console.log("ÿc4UserAddon ÿc1ended");
+      if (command && command.toLowerCase() === "done") {
+        console.log("ÿc4UserAddon ÿc1ended");
 
-				return true;
-			} else {
-				console.log(command);
-				command = "";
-			}
+        return true;
+      } else {
+        console.log(command);
+        command = "";
+      }
 
-			Pickit.fastPick();
-			UnitInfo.createInfo(Game.getSelectedUnit());
+      Pickit.fastPick();
+      UnitInfo.createInfo(Game.getSelectedUnit());
 
-			delay(20);
-		}
-	} finally {
-		removeEventListener("keyup", keyEvent);
-		removeEventListener("itemaction", Pickit.itemEvent);
-		removeEventListener("chatinputblocker", onChatInput);
-		// ensure hooks are properly disposed of
-		!!title && title.remove();
-		dummy && dummy.remove();
-		UnitInfo.remove();
-	}
+      delay(20);
+    }
+  } finally {
+    removeEventListener("keyup", keyEvent);
+    removeEventListener("itemaction", Pickit.itemEvent);
+    removeEventListener("chatinputblocker", onChatInput);
+    // ensure hooks are properly disposed of
+    !!title && title.remove();
+    dummy && dummy.remove();
+    UnitInfo.remove();
+  }
 }

@@ -18,32 +18,32 @@ include("systems/mulelogger/MuleLogger.js");
 include("systems/gameaction/GameAction.js");
 
 function main() {
-	D2Bot.init();
-	Config.init();
-	Pickit.init();
-	Attack.init();
-	Storage.Init();
-	CraftingSystem.buildLists();
-	Runewords.init();
-	Cubing.init();
-	include("scripts/KillDclone.js");
+  D2Bot.init();
+  Config.init();
+  Pickit.init();
+  Attack.init();
+  Storage.Init();
+  CraftingSystem.buildLists();
+  Runewords.init();
+  Cubing.init();
+  include("scripts/KillDclone.js");
 
-	if (typeof KillDclone === "function") {
-		try {
-			D2Bot.printToConsole("Trying to kill DClone.", sdk.colors.D2Bot.DarkGold);
-			KillDclone.call();
-		} catch (e) {
-			Misc.errorReport(e, "CloneKilla.js");
-		}
-	}
+  if (typeof KillDclone === "function") {
+    try {
+      D2Bot.printToConsole("Trying to kill DClone.", sdk.colors.D2Bot.DarkGold);
+      KillDclone.call();
+    } catch (e) {
+      Misc.errorReport(e, "CloneKilla.js");
+    }
+  }
 
-	try {
-		quit();
-	} finally {
-		while (me.ingame) {
-			delay(100);
-		}
-	}
+  try {
+    quit();
+  } finally {
+    while (me.ingame) {
+      delay(100);
+    }
+  }
 
-	return true;
+  return true;
 }

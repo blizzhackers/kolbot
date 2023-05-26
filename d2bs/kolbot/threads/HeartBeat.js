@@ -6,48 +6,48 @@
 */
 
 function main() {
-	include("critical.js");	// required
-	D2Bot.init();
-	console.log("Heartbeat loaded");
+  include("critical.js");	// required
+  D2Bot.init();
+  console.log("Heartbeat loaded");
 
-	function togglePause() {
-		let script = getScript();
+  function togglePause() {
+    let script = getScript();
 
-		if (script) {
-			do {
-				if (script.name.includes(".dbj")) {
-					if (script.running) {
-						console.log("ÿc1Pausing ÿc0" + script.name);
-						script.pause();
-					} else {
-						console.log("ÿc2Resuming ÿc0" + script.name);
-						script.resume();
-					}
-				}
-			} while (script.getNext());
-		}
+    if (script) {
+      do {
+        if (script.name.includes(".dbj")) {
+          if (script.running) {
+            console.log("ÿc1Pausing ÿc0" + script.name);
+            script.pause();
+          } else {
+            console.log("ÿc2Resuming ÿc0" + script.name);
+            script.resume();
+          }
+        }
+      } while (script.getNext());
+    }
 
-		return true;
-	}
+    return true;
+  }
 
-	// Event functions
-	function KeyEvent(key) {
-		switch (key) {
-		case sdk.keys.PauseBreak:
-			if (me.ingame) {
-				break;
-			}
+  // Event functions
+  function KeyEvent(key) {
+    switch (key) {
+    case sdk.keys.PauseBreak:
+      if (me.ingame) {
+        break;
+      }
 
-			togglePause();
+      togglePause();
 
-			break;
-		}
-	}
+      break;
+    }
+  }
 
-	addEventListener("keyup", KeyEvent);
+  addEventListener("keyup", KeyEvent);
 
-	while (true) {
-		D2Bot.heartBeat();
-		delay(1000);
-	}
+  while (true) {
+    D2Bot.heartBeat();
+    delay(1000);
+  }
 }

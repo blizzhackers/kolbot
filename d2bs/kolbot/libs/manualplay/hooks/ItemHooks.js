@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /**
 *  @filename    ItemHooks.js
 *  @author      theBGuy
@@ -7,274 +8,274 @@
 
 // todo - clean up all the map stuff
 const ItemHooks = {
-	enabled: true,
-	pickitEnabled: false,
-	modifier: 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)),
-	hooks: [],
-	ignoreItemTypes: [
-		sdk.items.type.Gold, sdk.items.type.BowQuiver, sdk.items.type.CrossbowQuiver, sdk.items.type.Book, sdk.items.type.Gem, sdk.items.type.Scroll,
-		sdk.items.type.MissilePotion, sdk.items.type.Key, sdk.items.type.Boots, sdk.items.type.Gloves, sdk.items.type.ThrowingKnife, sdk.items.type.ThrowingAxe,
-		sdk.items.type.HealingPotion, sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion, sdk.items.type.StaminaPotion, sdk.items.type.AntidotePotion,
-		sdk.items.type.ThawingPotion, sdk.items.type.ChippedGem, sdk.items.type.FlawedGem, sdk.items.type.StandardGem, sdk.items.type.FlawlessGem, sdk.items.type.PerfectgGem,
-		sdk.items.type.Amethyst, sdk.items.type.Diamond, sdk.items.type.Emerald, sdk.items.type.Ruby, sdk.items.type.Sapphire, sdk.items.type.Topaz, sdk.items.type.Skull
-	],
-	codeById: new Map(),
-	codeByIdAndQuality: new Map(),
-	itemColorCode: [],
+  enabled: true,
+  pickitEnabled: false,
+  modifier: 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename)),
+  hooks: [],
+  ignoreItemTypes: [
+    sdk.items.type.Gold, sdk.items.type.BowQuiver, sdk.items.type.CrossbowQuiver, sdk.items.type.Book, sdk.items.type.Gem, sdk.items.type.Scroll,
+    sdk.items.type.MissilePotion, sdk.items.type.Key, sdk.items.type.Boots, sdk.items.type.Gloves, sdk.items.type.ThrowingKnife, sdk.items.type.ThrowingAxe,
+    sdk.items.type.HealingPotion, sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion, sdk.items.type.StaminaPotion, sdk.items.type.AntidotePotion,
+    sdk.items.type.ThawingPotion, sdk.items.type.ChippedGem, sdk.items.type.FlawedGem, sdk.items.type.StandardGem, sdk.items.type.FlawlessGem, sdk.items.type.PerfectgGem,
+    sdk.items.type.Amethyst, sdk.items.type.Diamond, sdk.items.type.Emerald, sdk.items.type.Ruby, sdk.items.type.Sapphire, sdk.items.type.Topaz, sdk.items.type.Skull
+  ],
+  codeById: new Map(),
+  codeByIdAndQuality: new Map(),
+  itemColorCode: [],
 
-	/**
+  /**
 	 * @param {number} id - classID of item 
 	 * @param {string} setName 
 	 * @param {string} uniqueName 
 	 */
-	addToCodeByClassIdAndQuality: function (id, setName = "", uniqueName = "") {
-		if (!id || (!setName && !uniqueName)) return;
-		// create our map structure
-		if (!this.codeByIdAndQuality.get(id)) {
-			let temp = [];
-			setName && temp.push([sdk.items.quality.Set, setName]);
-			uniqueName && temp.push([sdk.items.quality.Unique, uniqueName]);
-			this.codeByIdAndQuality.set(id, new Map(temp));
-		}
-	},
+  addToCodeByClassIdAndQuality: function (id, setName = "", uniqueName = "") {
+    if (!id || (!setName && !uniqueName)) return;
+    // create our map structure
+    if (!this.codeByIdAndQuality.get(id)) {
+      let temp = [];
+      setName && temp.push([sdk.items.quality.Set, setName]);
+      uniqueName && temp.push([sdk.items.quality.Unique, uniqueName]);
+      this.codeByIdAndQuality.set(id, new Map(temp));
+    }
+  },
 
-	check: function () {
-		if (!this.enabled) {
-			this.flush();
+  check: function () {
+    if (!this.enabled) {
+      this.flush();
 
-			return;
-		}
+      return;
+    }
 
-		for (let i = 0; i < this.hooks.length; i++) {
-			if (!copyUnit(this.hooks[i].item).x) {
-				for (let j = 0; j < this.hooks[i].hook.length; j++) {
-					this.hooks[i].hook[j].remove();
-				}
+    for (let i = 0; i < this.hooks.length; i++) {
+      if (!copyUnit(this.hooks[i].item).x) {
+        for (let j = 0; j < this.hooks[i].hook.length; j++) {
+          this.hooks[i].hook[j].remove();
+        }
 
-				this.hooks[i].name[0] && this.hooks[i].name[0].remove();
-				this.hooks[i].vector[0] && this.hooks[i].vector[0].remove();
-				this.hooks.splice(i, 1);
-				i -= 1;
-				this.flush();
-			}
-		}
+        this.hooks[i].name[0] && this.hooks[i].name[0].remove();
+        this.hooks[i].vector[0] && this.hooks[i].vector[0].remove();
+        this.hooks.splice(i, 1);
+        i -= 1;
+        this.flush();
+      }
+    }
 
-		let item = Game.getItem();
+    let item = Game.getItem();
 
-		if (item) {
-			try {
-				do {
-					if (item.area === ActionHooks.currArea && item.onGroundOrDropping
+    if (item) {
+      try {
+        do {
+          if (item.area === ActionHooks.currArea && item.onGroundOrDropping
 						&& (item.quality >= sdk.items.quality.Magic || ((item.normal || item.superior) && !this.ignoreItemTypes.includes(item.itemType)))) {
-						if (this.pickitEnabled) {
-							if ([Pickit.Result.UNWANTED, Pickit.Result.TRASH].indexOf(Pickit.checkItem(item).result) === -1) {
-								!this.getHook(item) && this.add(item);
-							}
-						} else {
-							!this.getHook(item) && this.add(item);
-						}
+            if (this.pickitEnabled) {
+              if ([Pickit.Result.UNWANTED, Pickit.Result.TRASH].indexOf(Pickit.checkItem(item).result) === -1) {
+                !this.getHook(item) && this.add(item);
+              }
+            } else {
+              !this.getHook(item) && this.add(item);
+            }
 
-						this.getHook(item) && this.update();
-					} else {
-						this.remove(item);
-					}
-				} while (item.getNext());
-			} catch (e) {
-				console.error(e);
-				this.flush();
-			}
-		}
-	},
+            this.getHook(item) && this.update();
+          } else {
+            this.remove(item);
+          }
+        } while (item.getNext());
+      } catch (e) {
+        console.error(e);
+        this.flush();
+      }
+    }
+  },
 
-	update: function () {
-		for (let i = 0; i < this.hooks.length; i++) {
-			this.hooks[i].vector[0].x = me.x;
-			this.hooks[i].vector[0].y = me.y;
-		}
-	},
+  update: function () {
+    for (let i = 0; i < this.hooks.length; i++) {
+      this.hooks[i].vector[0].x = me.x;
+      this.hooks[i].vector[0].y = me.y;
+    }
+  },
 
-	/**
+  /**
 	 * @param {ItemUnit} item 
 	 * @returns {string}
 	 */
-	getName: function (item) {
-		let abbr = item.name.split(" ");
-		let abbrName = "";
+  getName: function (item) {
+    let abbr = item.name.split(" ");
+    let abbrName = "";
 
-		if (abbr[1]) {
-			abbrName += abbr[0] + "-";
+    if (abbr[1]) {
+      abbrName += abbr[0] + "-";
 
-			for (let i = 1; i < abbr.length; i++) {
-				abbrName += abbr[i].substring(0, 1);
-			}
-		}
+      for (let i = 1; i < abbr.length; i++) {
+        abbrName += abbr[i].substring(0, 1);
+      }
+    }
 
-		return !!abbrName ? abbrName : item.name;
-	},
+    return !!abbrName ? abbrName : item.name;
+  },
 
-	/**
+  /**
 	 * @description Create a new hook for a item with custom color and code based on type/quality/classid
 	 * @param {ItemUnit} item 
 	 * @todo maybe make class wrappers for hooks and turn the hook array into a map?
 	 */
-	newHook: function (item) {
-		let color = 0, code = "", arr = [], name = [], vector = [];
-		let eth = (item.ethereal ? "Eth: " : "");
+  newHook: function (item) {
+    let color = 0, code = "", arr = [], name = [], vector = [];
+    let eth = (item.ethereal ? "Eth: " : "");
 
-		switch (item.quality) {
-		case sdk.items.quality.Normal:
-		case sdk.items.quality.Superior:
-			switch (item.itemType) {
-			case sdk.items.type.Quest:
-				color = 0x9A;
-				code += (this.codeById.get(item.classid) || "ÿc8" + item.fname);
+    switch (item.quality) {
+    case sdk.items.quality.Normal:
+    case sdk.items.quality.Superior:
+      switch (item.itemType) {
+      case sdk.items.type.Quest:
+        color = 0x9A;
+        code += (this.codeById.get(item.classid) || "ÿc8" + item.fname);
 
-				break;
-			case sdk.items.type.Rune:
-				if (item.classid >= sdk.items.runes.Vex) {
-					[color, code] = [0x9B, "ÿc;" + item.fname];
-				} else if (item.classid >= sdk.items.runes.Lum) {
-					[color, code] = [0x9A, "ÿc8" + item.fname];
-				} else {
-					[color, code] = [0xA1, item.fname];
-				}
+        break;
+      case sdk.items.type.Rune:
+        if (item.classid >= sdk.items.runes.Vex) {
+          [color, code] = [0x9B, "ÿc;" + item.fname];
+        } else if (item.classid >= sdk.items.runes.Lum) {
+          [color, code] = [0x9A, "ÿc8" + item.fname];
+        } else {
+          [color, code] = [0xA1, item.fname];
+        }
 
-				break;
-			default:
-				if (item.name && item.sockets !== 1) {
-					color = 0x20;
+        break;
+      default:
+        if (item.name && item.sockets !== 1) {
+          color = 0x20;
 
-					if (item.runeword) {
-						code = item.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, "");
-					} else {
-						code = "ÿc0" + (item.sockets > 0 ? "[" + item.sockets + "]" : "");
-						code += this.getName(item);
-						item.itemType === sdk.items.type.AuricShields && (code += "[R: " + item.getStat(sdk.stats.FireResist) + "]");
-						code += "(" + item.ilvl + ")";
-					}
-				}
+          if (item.runeword) {
+            code = item.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, "");
+          } else {
+            code = "ÿc0" + (item.sockets > 0 ? "[" + item.sockets + "]" : "");
+            code += this.getName(item);
+            item.itemType === sdk.items.type.AuricShields && (code += "[R: " + item.getStat(sdk.stats.FireResist) + "]");
+            code += "(" + item.ilvl + ")";
+          }
+        }
 
-				break;
-			}
+        break;
+      }
 
-			break;
-		case sdk.items.quality.Set:
-		case sdk.items.quality.Unique:
-			({color, code} = this.itemColorCode[item.quality]);
+      break;
+    case sdk.items.quality.Set:
+    case sdk.items.quality.Unique:
+      ({ color, code } = this.itemColorCode[item.quality]);
 
-			if (this.codeById.has(item.classid)) {
-				code += this.codeById.get(item.classid);
-			}
+      if (this.codeById.has(item.classid)) {
+        code += this.codeById.get(item.classid);
+      }
 
-			switch (item.classid) {
-			case sdk.items.Ring:
-			case sdk.items.Amulet:
-				code += item.name + "(" + item.ilvl + ")";
+      switch (item.classid) {
+      case sdk.items.Ring:
+      case sdk.items.Amulet:
+        code += item.name + "(" + item.ilvl + ")";
 				
-				break;
-			default:
-				{
-					let check = this.codeByIdAndQuality.get(item.classid);
-					code += ((check && check.get(item.quality)) || item.name);
-				}
+        break;
+      default:
+        {
+          let check = this.codeByIdAndQuality.get(item.classid);
+          code += ((check && check.get(item.quality)) || item.name);
+        }
 				
-				break;
-			}
+        break;
+      }
 
-			break;
-		case sdk.items.quality.Magic:
-		case sdk.items.quality.Rare:
-			if (item.name) {
-				({color, code} = this.itemColorCode[item.quality]);
+      break;
+    case sdk.items.quality.Magic:
+    case sdk.items.quality.Rare:
+      if (item.name) {
+        ({ color, code } = this.itemColorCode[item.quality]);
 
-				code += (item.sockets > 0 ? "[" + item.sockets + "]" : "");
-				code += this.getName(item);
-				code += "(" + item.ilvl + ")";
-			}
+        code += (item.sockets > 0 ? "[" + item.sockets + "]" : "");
+        code += this.getName(item);
+        code += "(" + item.ilvl + ")";
+      }
 			
-			break;
-		}
+      break;
+    }
 
-		!!code && name.push(new Text(eth + code, 665 + Hooks.resfix.x, 104 + this.modifier + (this.hooks.length * 14), color, 0, 0));
-		vector.push(new Line(me.x, me.y, item.x, item.y, color, true));
-		arr.push(new Line(item.x - 3, item.y, item.x + 3, item.y, color, true));
-		arr.push(new Line(item.x, item.y - 3, item.x, item.y + 3, color, true));
+    !!code && name.push(new Text(eth + code, 665 + Hooks.resfix.x, 104 + this.modifier + (this.hooks.length * 14), color, 0, 0));
+    vector.push(new Line(me.x, me.y, item.x, item.y, color, true));
+    arr.push(new Line(item.x - 3, item.y, item.x + 3, item.y, color, true));
+    arr.push(new Line(item.x, item.y - 3, item.x, item.y + 3, color, true));
 
-		return {
-			itemLoc: arr,
-			itemName: name,
-			vector: vector,
-		};
-	},
+    return {
+      itemLoc: arr,
+      itemName: name,
+      vector: vector,
+    };
+  },
 
-	/**
+  /**
 	 * Add new item hook to our hook array
 	 * @param {ItemUnit} item 
 	 */
-	add: function (item) {
-		if (item === undefined || !item.classid) {
-			return;
-		}
+  add: function (item) {
+    if (item === undefined || !item.classid) {
+      return;
+    }
 
-		let temp = this.newHook(item);
+    let temp = this.newHook(item);
 
-		this.hooks.push({
-			item: copyUnit(item),
-			area: item.area,
-			hook: temp.itemLoc,
-			name: temp.itemName,
-			vector: temp.vector,
-		});
-	},
+    this.hooks.push({
+      item: copyUnit(item),
+      area: item.area,
+      hook: temp.itemLoc,
+      name: temp.itemName,
+      vector: temp.vector,
+    });
+  },
 
-	/**
+  /**
 	 * Get item hook if it exists based on item parameters gid
 	 * @param {ItemUnit} item 
 	 * @returns {{ item: ItemUnit, area: number, hook: Line, name: Text, vector: Line} | false}
 	 */
-	getHook: function (item) {
-		for (let i = 0; i < this.hooks.length; i++) {
-			if (this.hooks[i].item.gid === item.gid) {
-				return this.hooks[i].hook;
-			}
-		}
+  getHook: function (item) {
+    for (let i = 0; i < this.hooks.length; i++) {
+      if (this.hooks[i].item.gid === item.gid) {
+        return this.hooks[i].hook;
+      }
+    }
 
-		return false;
-	},
+    return false;
+  },
 
-	/**
+  /**
 	 * @param {ItemUnit} item 
 	 * @returns {boolean}
 	 */
-	remove: function (item) {
-		for (let i = 0; i < this.hooks.length; i++) {
-			if (this.hooks[i].item.gid === item.gid) {
-				for (let j = 0; j < this.hooks[i].hook.length; j++) {
-					this.hooks[i].hook[j].remove();
-				}
+  remove: function (item) {
+    for (let i = 0; i < this.hooks.length; i++) {
+      if (this.hooks[i].item.gid === item.gid) {
+        for (let j = 0; j < this.hooks[i].hook.length; j++) {
+          this.hooks[i].hook[j].remove();
+        }
 				
-				this.hooks[i].name[0] && this.hooks[i].name[0].remove();
-				this.hooks[i].vector[0] && this.hooks[i].vector[0].remove();
-				this.hooks.splice(i, 1);
+        this.hooks[i].name[0] && this.hooks[i].name[0].remove();
+        this.hooks[i].vector[0] && this.hooks[i].vector[0].remove();
+        this.hooks.splice(i, 1);
 
-				return true;
-			}
-		}
+        return true;
+      }
+    }
 
-		return false;
-	},
+    return false;
+  },
 
-	flush: function () {
-		while (this.hooks.length) {
-			for (let j = 0; j < this.hooks[0].hook.length; j++) {
-				this.hooks[0].hook[j].remove();
-			}
+  flush: function () {
+    while (this.hooks.length) {
+      for (let j = 0; j < this.hooks[0].hook.length; j++) {
+        this.hooks[0].hook[j].remove();
+      }
 
-			this.hooks[0].name[0] && this.hooks[0].name[0].remove();
-			this.hooks[0].vector[0] && this.hooks[0].vector[0].remove();
-			this.hooks.shift();
-		}
-	}
+      this.hooks[0].name[0] && this.hooks[0].name[0].remove();
+      this.hooks[0].vector[0] && this.hooks[0].vector[0].remove();
+      this.hooks.shift();
+    }
+  }
 };
 
 /**
