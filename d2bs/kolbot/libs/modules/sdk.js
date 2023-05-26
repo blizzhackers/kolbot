@@ -19,8 +19,8 @@
 }(this, function () {
   "use strict";
   /**
-	 * @exports sdk
-	 */
+   * @exports sdk
+   */
   const sdk = {
     waypoints: {
       Ids: [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539],
@@ -85,12 +85,12 @@
       }
     },
     /**
-		*  @notes
-		*   - I get cursortype 3 when I swap an item that is equipped, but I get 4 if I just unequip an item
-		*   - I get cursortype 3 if I pick an item from my inventory then hover it over another item
-		*   - I get cursortype 4 if I pick and item from my inventory and don't hover it over another item
-		*     - If I then hover it over an item it turns to 3 then stays 3
-		*/
+    *  @notes
+    *   - I get cursortype 3 when I swap an item that is equipped, but I get 4 if I just unequip an item
+    *   - I get cursortype 3 if I pick an item from my inventory then hover it over another item
+    *   - I get cursortype 4 if I pick and item from my inventory and don't hover it over another item
+    *     - If I then hover it over an item it turns to 3 then stays 3
+    */
     cursortype: {
       Empty: 1,
       ItemOnUnitHover: 3, // see notes
@@ -2807,7 +2807,7 @@
         Topaz: 101,
         Skull: 102,
       },
-			
+      
       // Weapons
       "HandAxe": 0,
       "Axe": 1,

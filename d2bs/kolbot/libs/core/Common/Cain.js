@@ -58,7 +58,7 @@
             Pickit.pickItem(scroll);
             Town.goToTown();
             Town.npcInteract("Akara");
-					
+          
             break;
           case Game.getItem(sdk.quest.item.ScrollofInifuss):
             Town.goToTown(1);
@@ -107,7 +107,7 @@
             while (getTickCount() - tick < Time.minutes(2)) {
               if (Pather.getPortal(sdk.areas.Tristram)) {
                 Pather.usePortal(sdk.areas.Tristram);
-									
+                  
                 break;
               }
             }

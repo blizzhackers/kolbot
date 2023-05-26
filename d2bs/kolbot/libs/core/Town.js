@@ -44,13 +44,13 @@ const NPC = {
 
 Object.defineProperty(NPC, "getAct", {
   /**
-	 * Returns the act(s) where the given NPC can be found.
-	 *
-	 * @memberof NPC
-	 * @method getAct
-	 * @param {string} name - The name of the NPC.
-	 * @returns {Array<number>} An array of act numbers where the NPC can be found.
-	 */
+   * Returns the act(s) where the given NPC can be found.
+   *
+   * @memberof NPC
+   * @method getAct
+   * @param {string} name - The name of the NPC.
+   * @returns {Array<number>} An array of act numbers where the NPC can be found.
+   */
   value: function (name) {
     if (name === NPC.Cain) return [me.act];
     if (name === NPC.Warriv) return [1, 2];
@@ -79,17 +79,17 @@ const Town = {
   telekinesis: true,
   sellTimer: getTickCount(), // shop speedup test
   /**
-	 * @namespace
-	 */
+   * @namespace
+   */
   lastInteractedNPC: {
     tick: 0,
     /**
-		 * @type {{ name: string, gid: number, area: number}}
-		 */
+     * @type {{ name: string, gid: number, area: number}}
+     */
     unit: {},
     /**
-		 * @param {NPCUnit} npc
-		 */
+     * @param {NPCUnit} npc
+     */
     set: function (npc) {
       if (npc.hasOwnProperty("name") && Object.values(NPC).includes(npc.name)) {
         // valid npc
@@ -139,17 +139,17 @@ const Town = {
   ],
 
   /**
-	 * @description Check if item type is included in the ignore types list
-	 * @param {number} type 
-	 * @returns {boolean} If it is an item in the list
-	 */
+   * @description Check if item type is included in the ignore types list
+   * @param {number} type 
+   * @returns {boolean} If it is an item in the list
+   */
   ignoreType: function (type) {
     return Town.ignoredItemTypes.includes(type);
   },
 
   /**
-	 * @param {boolean} repair
-	 */
+   * @param {boolean} repair
+   */
   doChores: function (repair = false) {
     delay(250);
 
@@ -157,8 +157,8 @@ const Town = {
     console.info(true);
 
     /**
-		 * @todo Pre-build task list so we can more efficiently peform our chores
-		 */
+     * @todo Pre-build task list so we can more efficiently peform our chores
+     */
 
     !me.inTown && this.goToTown();
     if (!Misc.poll(() => me.gameReady && me.inTown, 2000, 250)) throw new Error("Failed to go to town for chores");
@@ -202,10 +202,10 @@ const Town = {
   },
 
   /**
-	 * @param {string} name 
-	 * @param {boolean} cancel 
-	 * @returns {boolean | Unit}
-	 */
+   * @param {string} name 
+   * @param {boolean} cancel 
+   * @returns {boolean | Unit}
+   */
   npcInteract: function (name = "", cancel = true) {
     // name = name.includes("_") ? "Qual_Kehk" : name.capitalize(true);
     // what about finding the closest name in case someone mispells it?
@@ -218,7 +218,7 @@ const Town = {
     const npcName = NPC[npcKey];
 
     !me.inTown && Town.goToTown();
-		
+    
     if (!NPC.getAct(npcName).includes(me.act)) {
       Town.goToTown(NPC.getAct(npcName)[0]);
     }
@@ -260,8 +260,8 @@ const Town = {
   },
 
   /**
-	 * @description handle quest consumables if we have them
-	 */
+   * @description handle quest consumables if we have them
+   */
   checkQuestItems: function () {
     // Act 1
     // Tools of the trade
@@ -321,11 +321,11 @@ const Town = {
   },
 
   /**
-	 * @description Start a task and return the NPC Unit
-	 * @param {string} task 
-	 * @param {string} reason 
-	 * @returns {boolean | Unit}
-	 */
+   * @description Start a task and return the NPC Unit
+   * @param {string} task 
+   * @param {string} reason 
+   * @returns {boolean | Unit}
+   */
   initNPC: function (task = "", reason = "undefined") {
     console.time("initNPC");
     console.info(true, reason);
@@ -337,7 +337,7 @@ const Town = {
     let npc = null;
     let wantedNpc = this.tasks[me.act - 1][task] !== undefined ? this.tasks[me.act - 1][task] : "undefined";
     let justUseClosest = (["clearInventory", "sell"].includes(reason) && !me.getUnids().length);
-		
+    
     if (getUIFlag(sdk.uiflags.NPCMenu)) {
       console.debug("Currently interacting with an npc");
       npc = getInteractedNPC();
@@ -347,8 +347,8 @@ const Town = {
       if (npc) {
         let npcName = npc.name.toLowerCase();
         if (!justUseClosest && ((npcName !== wantedNpc)
-					// Jamella gamble fix
-					|| (task === "Gamble" && npcName === NPC.Jamella))) {
+          // Jamella gamble fix
+          || (task === "Gamble" && npcName === NPC.Jamella))) {
           me.cancelUIFlags();
           npc = null;
         }
@@ -433,8 +433,8 @@ const Town = {
   },
 
   /**
-	 * @description Go to a town healer if we are below certain hp/mp percent or have a status effect
-	 */
+   * @description Go to a town healer if we are below certain hp/mp percent or have a status effect
+   */
   heal: function () {
     if (!me.needHealing()) return true;
     return !!(this.initNPC("Heal", "heal"));
@@ -482,8 +482,8 @@ const Town = {
     }
 
     /**
-		 * @todo If we are set to cube rejuvs, allow buying potions once we have our gem
-		 */
+     * @todo If we are set to cube rejuvs, allow buying potions once we have our gem
+     */
 
     // We have enough potions in inventory
     (buffer.mp >= Config.MPBuffer && buffer.hp >= Config.HPBuffer) && (needBuffer = false);
@@ -536,7 +536,7 @@ const Town = {
 
       col = this.checkColumns(beltSize); // Re-initialize columns (needed because 1 shift-buy can fill multiple columns)
     }
-		
+    
     // re-check
     !needBuffer && (Config.HPBuffer > 0 || Config.MPBuffer > 0) && getNeededBuffer();
 
@@ -558,10 +558,10 @@ const Town = {
   },
 
   /**
-	 * @description Check when to shift-buy potions
-	 * @param {number} col 
-	 * @param {0 | 1 | 2 | 3 | 4} beltSize 
-	 */
+   * @description Check when to shift-buy potions
+   * @param {number} col 
+   * @param {0 | 1 | 2 | 3 | 4} beltSize 
+   */
   shiftCheck: function (col, beltSize) {
     let fillType;
 
@@ -593,10 +593,10 @@ const Town = {
   },
 
   /**
-	 * @description Return column status (needed potions in each column)
-	 * @param {0 | 1 | 2 | 3 | 4} beltSize 
-	 * @returns {[number, number, number, number]}
-	 */
+   * @description Return column status (needed potions in each column)
+   * @param {0 | 1 | 2 | 3 | 4} beltSize 
+   * @returns {[number, number, number, number]}
+   */
   checkColumns: function (beltSize) {
     (typeof beltSize !== "number" || beltSize < 0 || beltSize > 4) && (beltSize = Storage.BeltSize());
     let col = [beltSize, beltSize, beltSize, beltSize];
@@ -613,12 +613,12 @@ const Town = {
   },
 
   /**
-	 * @description Get the highest potion from current npc
-	 * @param {Unit} npc 
-	 * @param {"hp" | "mp"} type 
-	 * @param {1 | 2 | 3 | 4 | 5} highestPot 
-	 * @returns {boolean | ItemUnit}
-	 */
+   * @description Get the highest potion from current npc
+   * @param {Unit} npc 
+   * @param {"hp" | "mp"} type 
+   * @param {1 | 2 | 3 | 4 | 5} highestPot 
+   * @returns {boolean | ItemUnit}
+   */
   getPotion: function (npc, type, highestPot = 5) {
     if (!type) return false;
 
@@ -636,8 +636,8 @@ const Town = {
   },
 
   /** 
-	 * @param {number} classid
-	 */
+   * @param {number} classid
+   */
   fillTome: function (classid) {
     if (me.gold < 450) return false;
     if (this.checkScrolls(classid) >= 13) return true;
@@ -681,9 +681,9 @@ const Town = {
   },
 
   /**
-	 * @param {number} id 
-	 * @returns {number} quantity of scrolls in tome
-	 */
+   * @param {number} id 
+   * @returns {number} quantity of scrolls in tome
+   */
   checkScrolls: function (id) {
     let tome = me.getTome(id);
 
@@ -704,7 +704,7 @@ const Town = {
   identify: function () {
     !me.inShop && me.cancelUIFlags();
     if (Town.cainID()) return true;
-		
+    
     let list = (Storage.Inventory.Compare(Config.Inventory) || []);
     if (list.length === 0) return false;
 
@@ -864,11 +864,11 @@ const Town = {
   },
 
   /**
-	 * @param {ItemUnit} unit 
-	 * @param {ItemUnit} tome 
-	 * @param {Boolean} packetID 
-	 * @returns {boolean}
-	 */
+   * @param {ItemUnit} unit 
+   * @param {ItemUnit} tome 
+   * @param {Boolean} packetID 
+   * @returns {boolean}
+   */
   identifyItem: function (unit, tome, packetID = false) {
     if (Config.PacketShopping || packetID) return Packet.identifyItem(unit, tome);
     if (!unit || unit.identified) return false;
@@ -919,7 +919,7 @@ const Town = {
 
   shopItems: function () {
     if (!Config.MiniShopBot) return true;
-		
+    
     let npc = getInteractedNPC();
     if (!npc || !npc.itemcount) return false;
 
@@ -955,8 +955,8 @@ const Town = {
   },
 
   /**
-	 * @type {number[]}
-	 */
+   * @type {number[]}
+   */
   gambleIds: [],
 
   gamble: function () {
@@ -1058,8 +1058,8 @@ const Town = {
   },
 
   /**
-	 * @param {ItemUnit[]} list 
-	 */
+   * @param {ItemUnit[]} list 
+   */
   getGambledItem: function (list = []) {
     let items = me.findItems(-1, sdk.items.mode.inStorage, sdk.storage.Inventory);
 
@@ -1081,15 +1081,15 @@ const Town = {
   },
 
   /**
-	 * @param {number} quantity 
-	 * @param {number | string} type 
-	 * @param {boolean} [drink=false] 
-	 * @param {boolean} [force=false] 
-	 * @param {Unit} [npc=null] 
-	 */
+   * @param {number} quantity 
+   * @param {number | string} type 
+   * @param {boolean} [drink=false] 
+   * @param {boolean} [force=false] 
+   * @param {Unit} [npc=null] 
+   */
   buyPots: function (quantity = 0, type = undefined, drink = false, force = false, npc = null) {
     if (!quantity || !type) return false;
-		
+    
     // convert to classid if isn't one
     typeof type === "string" && (type = (sdk.items[type.capitalize(true) + "Potion"] || false));
     if (!type) return false;
@@ -1161,10 +1161,10 @@ const Town = {
   },
 
   /**
-	 * @param {number | string} type 
-	 * @param {boolean} [log=true] 
-	 * @returns {{ potName: string, quantity: number }}
-	 */
+   * @param {number | string} type 
+   * @param {boolean} [log=true] 
+   * @returns {{ potName: string, quantity: number }}
+   */
   drinkPots: function (type = undefined, log = true) {
     // convert to classid if isn't one
     typeof type === "string" && (type = (sdk.items[type.capitalize(true) + "Potion"] || false));
@@ -1219,7 +1219,7 @@ const Town = {
 
   checkKeys: function () {
     if (!Config.OpenChests.Enabled || me.assassin || me.gold < 540
-			|| (!me.getItem("key") && !Storage.Inventory.CanFit({ sizex: 1, sizey: 1 }))) {
+      || (!me.getItem("key") && !Storage.Inventory.CanFit({ sizex: 1, sizey: 1 }))) {
       return 12;
     }
 
@@ -1237,8 +1237,8 @@ const Town = {
   },
 
   /**
-	 * @param {ItemUnit} item - Rune
-	 */
+   * @param {ItemUnit} item - Rune
+   */
   repairIngredientCheck: function (item) {
     if (!Config.CubeRepair) return false;
 
@@ -1297,9 +1297,9 @@ const Town = {
   },
 
   /**
-	 * @param {ItemUnit} item 
-	 * @returns {boolean}
-	 */
+   * @param {ItemUnit} item 
+   * @returns {boolean}
+   */
   cubeRepairItem: function (item) {
     if (!item.isInStorage) return false;
 
@@ -1366,8 +1366,8 @@ const Town = {
   },
 
   /**
-	 * @param {boolean} [force=false] 
-	 */
+   * @param {boolean} [force=false] 
+   */
   repair: function (force = false) {
     if (this.cubeRepair()) return true;
 
@@ -1393,7 +1393,7 @@ const Town = {
           let quiver = bowCheck === "bow" ? "aqv" : "cqv";
           let myQuiver = me.getItem(quiver, sdk.items.mode.Equipped);
           !!myQuiver && myQuiver.drop();
-					
+          
           npc = this.initNPC("Repair", "repair");
           if (!npc) return false;
 
@@ -1446,10 +1446,10 @@ const Town = {
   },
 
   /**
-	 * @param {number} repairPercent 
-	 * @param {boolean} chargedItems 
-	 * @returns {ItemUnit[]}
-	 */
+   * @param {number} repairPercent 
+   * @param {boolean} chargedItems 
+   * @returns {ItemUnit[]}
+   */
   getItemsForRepair: function (repairPercent, chargedItems) {
     let itemList = [];
     let item = me.getItem(-1, sdk.items.mode.Equipped);
@@ -1585,24 +1585,24 @@ const Town = {
   },
 
   /**
-	 * @param {ItemUnit} item 
-	 */
+   * @param {ItemUnit} item 
+   */
   canStash: function (item) {
     if (Town.ignoreType(item.itemType)
-			|| [sdk.items.quest.HoradricStaff, sdk.items.quest.KhalimsWill].includes(item.classid)
-			|| !Town.canStashGem(item)) {
+      || [sdk.items.quest.HoradricStaff, sdk.items.quest.KhalimsWill].includes(item.classid)
+      || !Town.canStashGem(item)) {
       return false;
     }
     /**
-		 * @todo add sorting here first if we can't fit the item
-		 */
+     * @todo add sorting here first if we can't fit the item
+     */
     return Storage.Stash.CanFit(item);
   },
 
   /**
-	 * get ordered list of gems in inventory to use with Gem Hunter Script
-	 * @returns {ItemUnit[]} ordered list of relevant gems
-	 */
+   * get ordered list of gems in inventory to use with Gem Hunter Script
+   * @returns {ItemUnit[]} ordered list of relevant gems
+   */
   getGemsInInv: function () {
     let GemList = Config.GemHunter.GemList;
     return me.getItemsEx()
@@ -1611,9 +1611,9 @@ const Town = {
   },
 
   /**
-	 * get ordered list of gems in stash to use with Gem Hunter Script
-	 * @returns {ItemUnit[]} ordered list of relevant gems
-	 */
+   * get ordered list of gems in stash to use with Gem Hunter Script
+   * @returns {ItemUnit[]} ordered list of relevant gems
+   */
   getGemsInStash: function () {
     let GemList = Config.GemHunter.GemList;
     return me.getItemsEx()
@@ -1622,10 +1622,10 @@ const Town = {
   },
 
   /**
-	 * gem check for use with Gem Hunter Script
-	 * @param {ItemUnit} item 
-	 * @returns {boolean} if we should stash this gem
-	 */
+   * gem check for use with Gem Hunter Script
+   * @param {ItemUnit} item 
+   * @returns {boolean} if we should stash this gem
+   */
   canStashGem: function (item) {
     // we aren't using the gem hunter script or we aren't scanning for the gem shrines while moving
     // for now we are only going to keep a gem in our invo while the script is active
@@ -1641,15 +1641,15 @@ const Town = {
 
     return (
       (GemList.indexOf(bestGeminStash) < GemList.indexOf(bestGeminInv)) // better one in stash
-			|| (GemList.indexOf(bestGeminInv) < GemList.indexOf(item.classid)) // better one in inv
-			|| (gemsInInvo.filter((p) => p.classid === item.classid).length > 1));  // another one in inv
+      || (GemList.indexOf(bestGeminInv) < GemList.indexOf(item.classid)) // better one in inv
+      || (gemsInInvo.filter((p) => p.classid === item.classid).length > 1));  // another one in inv
   },
 
   /**
-	 * move best gem from stash to inventory, if none in inventrory
-	 * to use with Gem Hunter Script
-	 * @returns {boolean} if any gem has been moved
-	 */
+   * move best gem from stash to inventory, if none in inventrory
+   * to use with Gem Hunter Script
+   * @returns {boolean} if any gem has been moved
+   */
   getGem: function () {
     if (Loader.scriptName() === "GemHunter") {
       if (this.getGemsInInv().length === 0 && this.getGemsInStash().length > 0) {
@@ -1662,9 +1662,9 @@ const Town = {
   },
 
   /**
-	 * @param {boolean} [stashGold=true] 
-	 * @returns {boolean}
-	 */
+   * @param {boolean} [stashGold=true] 
+   * @returns {boolean}
+   */
   stash: function (stashGold = true) {
     if (!this.needStash()) return true;
 
@@ -1674,12 +1674,12 @@ const Town = {
 
     if (items) {
       Config.SortSettings.SortStash && Storage.Stash.SortItems();
-			
+      
       for (let i = 0; i < items.length; i += 1) {
         if (this.canStash(items[i])) {
           let result = false;
           let pickResult = Pickit.checkItem(items[i]).result;
-					
+          
           switch (true) {
           case pickResult > Pickit.Result.UNWANTED && pickResult < Pickit.Result.TRASH:
           case Cubing.keepItem(items[i]):
@@ -1982,7 +1982,7 @@ const Town = {
         me.cancelUIFlags();
       }
     }
-		
+    
     // Remove potions in the wrong slot of our belt
     this.clearBelt();
 
@@ -1990,11 +1990,11 @@ const Town = {
     const beltSize = Storage.BeltSize();
     // belt 4x4 locations
     /**
-		 * 12 13 14 15
-		 * 8  9  10 11
-		 * 4  5  6  7
-		 * 0  1  2  3
-		 */
+     * 12 13 14 15
+     * 8  9  10 11
+     * 4  5  6  7
+     * 0  1  2  3
+     */
     const beltMax = (beltSize * 4);
     const beltCapRef = [(0 + beltMax), (1 + beltMax), (2 + beltMax), (3 + beltMax)];
     let potsInInventory = me.getItemsEx()
@@ -2091,7 +2091,7 @@ const Town = {
         // Don't drop tomes, keys or potions or quest-items
         // Don't throw cubing/runeword/crafting ingredients
         if (ignoreTypes.indexOf(item.itemType) === -1 && item.sellable
-					&& !Cubing.keepItem(item) && !Runewords.keepItem(item) && !CraftingSystem.keepItem(item)) {
+          && !Cubing.keepItem(item) && !Runewords.keepItem(item) && !CraftingSystem.keepItem(item)) {
           return true;
         }
         return false;
@@ -2162,8 +2162,8 @@ const Town = {
   },
 
   /**
-	 * @todo figure out how to typedef this.
-	 */
+   * @todo figure out how to typedef this.
+   */
   act: [{}, {}, {}, {}, {}],
 
   initialize: function () {
@@ -2256,9 +2256,9 @@ const Town = {
   },
 
   /**
-	 * @param {string} spot 
-	 * @returns {number} distance to town location
-	 */
+   * @param {string} spot 
+   * @returns {number} distance to town location
+   */
   getDistance: function (spot = "") {
     !me.inTown && this.goToTown();
     !this.act[me.act - 1].initialized && this.initialize();
@@ -2276,10 +2276,10 @@ const Town = {
   },
 
   /**
-	 * @param {string} spot 
-	 * @param {boolean} [allowTK] 
-	 * @returns {boolean}
-	 */
+   * @param {string} spot 
+   * @param {boolean} [allowTK] 
+   * @returns {boolean}
+   */
   move: function (spot = "", allowTK = true) {
     !me.inTown && this.goToTown();
     !this.act[me.act - 1].initialized && this.initialize();
@@ -2289,7 +2289,7 @@ const Town = {
     if (me.act === 5) {
       let path = [];
       let returnWhenDone = false;
-			
+      
       // Act 5 wp->portalspot override - ActMap.cpp crash
       if (spot === "portalspot" && getDistance(me.x, me.y, 5113, 5068) <= 8) {
         path = [5113, 5068, 5108, 5051, 5106, 5046, 5104, 5041, 5102, 5027, 5098, 5018];
@@ -2328,10 +2328,10 @@ const Town = {
   },
 
   /**
-	 * @param {string} spot 
-	 * @param {boolean} [allowTK] 
-	 * @returns {boolean}
-	 */
+   * @param {string} spot 
+   * @param {boolean} [allowTK] 
+   * @returns {boolean}
+   */
   moveToSpot: function (spot = "", allowTK = true) {
     let townSpot;
     let longRange = (!Skill.haveTK && spot === "waypoint");
@@ -2409,10 +2409,10 @@ const Town = {
   },
 
   /**
-	 * @param {1 | 2 | 3 | 4 | 5} act 
-	 * @param {boolean} [wpmenu=false] 
-	 * @returns {boolean}
-	 */
+   * @param {1 | 2 | 3 | 4 | 5} act 
+   * @param {boolean} [wpmenu=false] 
+   * @returns {boolean}
+   */
   goToTown: function (act = 0, wpmenu = false) {
     if (!me.inTown) {
       try {
@@ -2464,9 +2464,9 @@ const Town = {
   },
 
   /**
-	 * @param {boolean} [repair] 
-	 * @returns {boolean}
-	 */
+   * @param {boolean} [repair] 
+   * @returns {boolean}
+   */
   visitTown: function (repair = false) {
     console.info(true);
 

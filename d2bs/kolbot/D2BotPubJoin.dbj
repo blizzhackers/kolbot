@@ -22,23 +22,23 @@ Starter.Config.AttemptNextGameRetrys = 5;
  * @todo this section should be in it's own config leaving this file only containing core logic
  */
 /**
-	IncludeFilter config:
+  IncludeFilter config:
 
-	Multiple entries in the same array mean AND:
-	["baal", "-"] = game has to contain "baal" and "-"
+  Multiple entries in the same array mean AND:
+  ["baal", "-"] = game has to contain "baal" and "-"
 
-	Different entries mean OR:
-	["baal"],
-	["diablo"]
-	will join games with either "baal" or "diablo" in their name
+  Different entries mean OR:
+  ["baal"],
+  ["diablo"]
+  will join games with either "baal" or "diablo" in their name
 
-	Similar rules apply to ExcludeFilter:
+  Similar rules apply to ExcludeFilter:
 
-	["somebaal", "-"] ignores games with "somebaal" and "-" in the game name
+  ["somebaal", "-"] ignores games with "somebaal" and "-" in the game name
 
-	["somebaal"],
-	["somediablo"]
-	this will ignore all games with "somebaal" or "somediablo" in their names
+  ["somebaal"],
+  ["somediablo"]
+  this will ignore all games with "somebaal" or "somediablo" in their names
 */
 
 const IncludeFilter = [

@@ -7,10 +7,10 @@
 
 const Packet = {
   /**
-	 * Interact and open the menu of an NPC
-	 * @param {NPCUnit} unit 
-	 * @returns {boolean}
-	 */
+   * Interact and open the menu of an NPC
+   * @param {NPCUnit} unit 
+   * @returns {boolean}
+   */
   openMenu: function (unit) {
     if (unit.type !== sdk.unittype.NPC) throw new Error("openMenu: Must be used on NPCs.");
     if (getUIFlag(sdk.uiflags.NPCMenu)) return true;
@@ -48,11 +48,11 @@ const Packet = {
   },
 
   /**
-	 * Start a trade action with an NPC
-	 * @param {NPCUnit} unit 
-	 * @param {number} mode
-	 * @returns {boolean}
-	 */
+   * Start a trade action with an NPC
+   * @param {NPCUnit} unit 
+   * @param {number} mode
+   * @returns {boolean}
+   */
   startTrade: function (unit, mode) {
     if (unit.type !== sdk.unittype.NPC) throw new Error("Unit.startTrade: Must be used on NPCs.");
     if (getUIFlag(sdk.uiflags.Shop)) return true;
@@ -78,12 +78,12 @@ const Packet = {
   },
 
   /**
-	 * Buy an item from an interacted NPC
-	 * @param {NPCUnit} unit 
-	 * @param {boolean} shiftBuy
-	 * @param {boolean} gamble
-	 * @returns {boolean}
-	 */
+   * Buy an item from an interacted NPC
+   * @param {NPCUnit} unit 
+   * @param {boolean} shiftBuy
+   * @param {boolean} gamble
+   * @returns {boolean}
+   */
   buyItem: function (unit, shiftBuy, gamble) {
     let oldGold = me.gold;
     let itemCount = me.itemcount;
@@ -122,13 +122,13 @@ const Packet = {
   },
 
   /**
-	 * Buy scrolls from an interacted NPC, we need this as a seperate check because itemcount doesn't change
-	 * if the scroll goes into the tome automatically.
-	 * @param {NPCUnit} unit 
-	 * @param {ItemUnit} [tome]
-	 * @param {boolean} [shiftBuy]
-	 * @returns {boolean}
-	 */
+   * Buy scrolls from an interacted NPC, we need this as a seperate check because itemcount doesn't change
+   * if the scroll goes into the tome automatically.
+   * @param {NPCUnit} unit 
+   * @param {ItemUnit} [tome]
+   * @param {boolean} [shiftBuy]
+   * @returns {boolean}
+   */
   buyScroll: function (unit, tome, shiftBuy) {
     let oldGold = me.gold;
     let itemCount = me.itemcount;
@@ -165,10 +165,10 @@ const Packet = {
   },
 
   /**
-	 * Sell a item to a NPC
-	 * @param {ItemUnit} unit 
-	 * @returns {boolean}
-	 */
+   * Sell a item to a NPC
+   * @param {ItemUnit} unit 
+   * @returns {boolean}
+   */
   sellItem: function (unit) {
     // Check if it's an item we want to buy
     if (unit.type !== sdk.unittype.Item) throw new Error("Unit.sell: Must be used on items.");
@@ -197,10 +197,10 @@ const Packet = {
   },
 
   /**
-	 * @param {ItemUnit} unit 
-	 * @param {ItemUnit} tome
-	 * @returns {boolean}
-	 */
+   * @param {ItemUnit} unit 
+   * @param {ItemUnit} tome
+   * @returns {boolean}
+   */
   identifyItem: function (unit, tome) {
     if (!unit || unit.identified) return false;
 
@@ -244,9 +244,9 @@ const Packet = {
   },
 
   /**
-	 * @param {ItemUnit} item 
-	 * @returns {boolean}
-	 */
+   * @param {ItemUnit} item 
+   * @returns {boolean}
+   */
   itemToCursor: function (item) {
     // Something already on cursor
     if (me.itemoncursor) {
@@ -278,9 +278,9 @@ const Packet = {
   },
 
   /**
-	 * @param {ItemUnit} item 
-	 * @returns {boolean}
-	 */
+   * @param {ItemUnit} item 
+   * @returns {boolean}
+   */
   dropItem: function (item) {
     if (!this.itemToCursor(item)) return false;
 
@@ -299,9 +299,9 @@ const Packet = {
   },
 
   /**
-	 * @param {ItemUnit} item 
-	 * @returns {boolean}
-	 */
+   * @param {ItemUnit} item 
+   * @returns {boolean}
+   */
   givePotToMerc: function (item) {
     if (!item) return false;
     if (![
@@ -320,20 +320,20 @@ const Packet = {
   },
 
   /**
-	 * @param {ItemUnit} item 
-	 * @param {number} xLoc
-	 * @returns {boolean}
-	 */
+   * @param {ItemUnit} item 
+   * @param {number} xLoc
+   * @returns {boolean}
+   */
   placeInBelt: function (item, xLoc) {
     item.toCursor(true) && new PacketBuilder().byte(sdk.packets.send.ItemToBelt).dword(item.gid).dword(xLoc).send();
     return Misc.poll(() => item.isInBelt, 500, 100);
   },
 
   /**
-	 * @param {ItemUnit} who 
-	 * @param {boolean} toCursor 
-	 * @returns {boolean}
-	 */
+   * @param {ItemUnit} who 
+   * @param {boolean} toCursor 
+   * @returns {boolean}
+   */
   click: function (who, toCursor = false) {
     if (!who || !copyUnit(who).x) return false;
     new PacketBuilder()
@@ -346,9 +346,9 @@ const Packet = {
   },
 
   /**
-	 * @param {Unit} who 
-	 * @returns {boolean}
-	 */
+   * @param {Unit} who 
+   * @returns {boolean}
+   */
   entityInteract: function (who) {
     if (!who || !copyUnit(who).x) return false;
     new PacketBuilder().byte(sdk.packets.send.InteractWithEntity).dword(who.type).dword(who.gid).send();
@@ -356,9 +356,9 @@ const Packet = {
   },
 
   /**
-	 * @param {NPCUnit} who 
-	 * @returns {boolean}
-	 */
+   * @param {NPCUnit} who 
+   * @returns {boolean}
+   */
   cancelNPC: function (who) {
     if (!who || !copyUnit(who).x) return false;
     new PacketBuilder().byte(sdk.packets.send.NPCCancel).dword(who.type).dword(who.gid).send();
@@ -366,9 +366,9 @@ const Packet = {
   },
 
   /**
-	 * @param {ItemUnit} pot 
-	 * @returns {boolean}
-	 */
+   * @param {ItemUnit} pot 
+   * @returns {boolean}
+   */
   useBeltItemForMerc: function (pot) {
     if (!pot) return false;
     sendPacket(1, sdk.packets.send.UseBeltItem, 4, pot.gid, 4, 1, 4, 0);
@@ -389,7 +389,7 @@ const Packet = {
     hand = (hand === sdk.skills.hand.Right)
       ? sdk.packets.send.RightSkillOnLocationEx
       : sdk.packets.send.LeftSkillOnLocationEx;
-		
+    
     let endT = getTickCount() + duration;
     // has to be cast normally first with a click before held packet is sent
     sendPacket(1, nHand, 2, wX, 2, wY);
@@ -400,10 +400,10 @@ const Packet = {
   },
 
   /**
-	 * @param {number} hand
-	 * @param {Monster | ItemUnit | ObjectUnit} who 
-	 * @returns {boolean}
-	 */
+   * @param {number} hand
+   * @param {Monster | ItemUnit | ObjectUnit} who 
+   * @returns {boolean}
+   */
   unitCast: function (hand, who) {
     hand = (hand === sdk.skills.hand.Right)
       ? sdk.packets.send.RightSkillOnEntityEx3
@@ -412,9 +412,9 @@ const Packet = {
   },
 
   /**
-	 * @param {Monster | ItemUnit | ObjectUnit} who 
-	 * @returns {boolean}
-	 */
+   * @param {Monster | ItemUnit | ObjectUnit} who 
+   * @returns {boolean}
+   */
   telekinesis: function (who) {
     if (!who || !Skill.setSkill(sdk.skills.Telekinesis, sdk.skills.hand.Right)) return false;
     sendPacket(1, sdk.packets.send.RightSkillOnEntityEx3, 4, who.type, 4, who.gid);
@@ -422,9 +422,9 @@ const Packet = {
   },
 
   /**
-	 * @param {Player | Monster | MercUnit} who 
-	 * @returns {boolean}
-	 */
+   * @param {Player | Monster | MercUnit} who 
+   * @returns {boolean}
+   */
   enchant: function (who) {
     if (!who || !Skill.setSkill(sdk.skills.Enchant, sdk.skills.hand.Right)) return false;
     sendPacket(1, sdk.packets.send.RightSkillOnEntityEx3, 4, who.type, 4, who.gid);
@@ -432,10 +432,10 @@ const Packet = {
   },
 
   /**
-	 * @param {number} wX 
-	 * @param {number} wY 
-	 * @returns {boolean}
-	 */
+   * @param {number} wX 
+   * @param {number} wY 
+   * @returns {boolean}
+   */
   teleport: function (wX, wY) {
     if (![wX, wY].every(n => typeof n === "number")) return false;
     if (!Skill.setSkill(sdk.skills.Teleport, sdk.skills.hand.Right)) return false;
@@ -448,12 +448,12 @@ const Packet = {
   // },
 
   /**
-	 * @deprecated
-	 * @param {number} x 
-	 * @param {number} y 
-	 * @param {number} maxDist 
-	 * @returns {boolean}
-	 */
+   * @deprecated
+   * @param {number} x 
+   * @param {number} y 
+   * @param {number} maxDist 
+   * @returns {boolean}
+   */
   teleWalk: function (x, y, maxDist = 5) {
     !Packet.telewalkTick && (Packet.telewalkTick = 0);
 
@@ -482,10 +482,10 @@ const Packet = {
   },
 
   /**
-	 * Request entity update
-	 * @param {number} gid 
-	 * @param {number} wait 
-	 */
+   * Request entity update
+   * @param {number} gid 
+   * @param {number} wait 
+   */
   flash: function (gid, wait = 0) {
     wait === 0 && (wait = 300 + (me.gameReady ? 2 * me.ping : 300));
     sendPacket(1, sdk.packets.send.RequestEntityUpdate, 4, 0, 4, gid);
@@ -496,10 +496,10 @@ const Packet = {
   },
 
   /**
-	 * @deprecated
-	 * @param {number} stat 
-	 * @param {number} value 
-	 */
+   * @deprecated
+   * @param {number} stat 
+   * @param {number} value 
+   */
   changeStat: function (stat, value) {
     if (value > 0) {
       getPacket(1, 0x1d, 1, stat, 1, value);

@@ -15,7 +15,7 @@ includeCoreLibs();
 function main() {
   let _default = getScript("default.dbj");
   console.log("ÿc3Start AreaWatcher");
-	
+  
   while (true) {
     try {
       if (me.gameReady && me.ingame && !me.inTown) {

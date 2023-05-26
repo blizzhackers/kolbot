@@ -27,12 +27,12 @@ function IPHunter() {
     while (true) {
 
       /* // remove comment if you want beeps at every movement
-			for (let i = 12; i != 0; i -= 1) {
-				me.overhead(":D IP found! - [" + ip + "]" + (i-1) + " beep left");
-				beep(); // works if windows sounds are enabled
-				delay(250);
-			}
-			*/
+      for (let i = 12; i != 0; i -= 1) {
+        me.overhead(":D IP found! - [" + ip + "]" + (i-1) + " beep left");
+        beep(); // works if windows sounds are enabled
+        delay(250);
+      }
+      */
 
       me.overhead(":D IP found! - [" + ip + "]");
       try {

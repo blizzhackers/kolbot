@@ -47,12 +47,12 @@ const Precast = {
   },
 
   /**
-	 * Easier Shout/Bo/Bc casting with state checks to ensure it was casted
-	 * @param {number} skillId 
-	 * @param {number | Unit} x 
-	 * @param {number} [y] 
-	 * @returns {boolean}
-	 */
+   * Easier Shout/Bo/Bc casting with state checks to ensure it was casted
+   * @param {number} skillId 
+   * @param {number | Unit} x 
+   * @param {number} [y] 
+   * @returns {boolean}
+   */
   warCries: function (skillId, x, y) {
     if (!skillId || x === undefined) return false;
     const states = {};
@@ -110,9 +110,9 @@ const Precast = {
   },
 
   /**
-	 * @param {boolean} force 
-	 * @returns {boolean}
-	 */
+   * @param {boolean} force 
+   * @returns {boolean}
+   */
   precastCTA: function (force = false) {
     if (!Config.UseCta || this.haveCTA === -1 || me.classic || me.barbarian || me.inTown || me.shapeshifted) {
       return false;
@@ -143,11 +143,11 @@ const Precast = {
   },
 
   /**
-	 * Check which slot (primary or secondary) gives us the most skillpoints in a skill
-	 * @param {number} skillId 
-	 * @returns {0 | 1} best slot to give us the most skillpoints in a skill
-	 * @todo Move this to be part of the SkillData class
-	 */
+   * Check which slot (primary or secondary) gives us the most skillpoints in a skill
+   * @param {number} skillId 
+   * @returns {0 | 1} best slot to give us the most skillpoints in a skill
+   * @todo Move this to be part of the SkillData class
+   */
   getBetterSlot: function (skillId) {
     if (this.bestSlot[skillId] !== undefined) return this.bestSlot[skillId];
 
@@ -196,8 +196,8 @@ const Precast = {
     let [sumCurr, sumSwap] = [0, 0];
     const sumStats = function (item) {
       return (item.getStat(sdk.stats.AllSkills)
-				+ item.getStat(sdk.stats.AddClassSkills, classid) + item.getStat(sdk.stats.AddSkillTab, skillTab)
-				+ item.getStat(sdk.stats.SingleSkill, skillId) + item.getStat(sdk.stats.NonClassSkill, skillId));
+        + item.getStat(sdk.stats.AddClassSkills, classid) + item.getStat(sdk.stats.AddSkillTab, skillTab)
+        + item.getStat(sdk.stats.SingleSkill, skillId) + item.getStat(sdk.stats.NonClassSkill, skillId));
     };
 
     me.getItemsEx()
@@ -249,7 +249,7 @@ const Precast = {
 
       if (Config.PacketCasting > 1 || usePacket) {
         Config.DebugMode.Skill && console.debug("Packet casting: " + skillId);
-				
+        
         switch (typeof x) {
         case "number":
           Packet.castSkill(sdk.skills.hand.Right, x, y);
@@ -400,12 +400,12 @@ const Precast = {
 
   // should the config check still be included even though its part of Skill.init?
   /**
-	 * @description Handle precast related skills
-	 * @param {boolean} force - force re-cast of all precast skills
-	 * @param {boolean} partial - force re-cast of all state related precast skills
-	 * @returns {boolean} sucessfully casted
-	 * @todo durations
-	 */
+   * @description Handle precast related skills
+   * @param {boolean} force - force re-cast of all precast skills
+   * @param {boolean} partial - force re-cast of all state related precast skills
+   * @returns {boolean} sucessfully casted
+   * @todo durations
+   */
   doPrecast: function (force = false, partial = false) {
     if (!this.enabled) return false;
 
@@ -418,8 +418,8 @@ const Precast = {
     // Force BO 30 seconds before it expires
     if (Precast.haveCTA > -1) {
       forceBo = (force || partial
-				|| (getTickCount() - Precast.skills.battleOrders.tick >= Precast.skills.battleOrders.duration - 30000)
-				|| !me.getState(sdk.states.BattleCommand));
+        || (getTickCount() - Precast.skills.battleOrders.tick >= Precast.skills.battleOrders.duration - 30000)
+        || !me.getState(sdk.states.BattleCommand));
       forceBo && this.precastCTA(forceBo);
     }
 
@@ -443,7 +443,7 @@ const Precast = {
         let choosenSkill = (typeof Config.UseColdArmor === "number" && Skill.canUse(Config.UseColdArmor)
           ? Config.UseColdArmor
           : (Precast.skills.coldArmor.best || -1));
-				
+        
         if (Precast.skills.coldArmor.tick > 0 && Precast.skills.coldArmor.duration > Time.seconds(45)) {
           if (getTickCount() - Precast.skills.coldArmor.tick >= Precast.skills.coldArmor.duration - Time.seconds(30)) {
             force = true;
@@ -480,7 +480,7 @@ const Precast = {
       break;
     case sdk.player.class.Necromancer:
       if (Skill.canUse(sdk.skills.BoneArmor)
-				&& (force || this.skills.boneArmor.armorPercent() < 75 || !me.getState(sdk.states.BoneArmor))) {
+        && (force || this.skills.boneArmor.armorPercent() < 75 || !me.getState(sdk.states.BoneArmor))) {
         this.cast(sdk.skills.BoneArmor);
         this.skills.boneArmor.max === 0 && (this.skills.boneArmor.max = me.getStat(sdk.stats.SkillBoneArmorMax));
       }

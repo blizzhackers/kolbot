@@ -281,8 +281,8 @@ let Config = {
   Recipes: [],
   MakeRunewords: false,
   /**
-	 * @type {[runeword, string | number, ?boolean][]}
-	 */
+   * @type {[runeword, string | number, ?boolean][]}
+   */
   Runewords: [],
   KeepRunewords: [],
   LadderOveride: false,

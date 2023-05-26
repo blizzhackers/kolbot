@@ -16,39 +16,39 @@ function ClassicChaosAssistant() {
       switch (key) {
       case sdk.keys.Numpad1:
         stargo = true;
-					
+          
         break;
       case sdk.keys.Numpad2:
         infgo = true;
-					
+          
         break;
       case sdk.keys.Numpad3:
         infseal = true;
-					
+          
         break;
       case sdk.keys.Numpad4:
         seisgo = true;
-					
+          
         break;
       case sdk.keys.Numpad5:
         seisseal = true;
-					
+          
         break;
       case sdk.keys.Numpad6:
         vizgo = true;
-					
+          
         break;
       case sdk.keys.Numpad7:
         vizseal = true;
-					
+          
         break;
       case sdk.keys.Numpad8: // (Open last seal, teleport to star and pickup for 30 seconds)
         diablopickup = true;
-					
+          
         break;
       case sdk.keys.Numpad9: // (Pickup at current location)
         normalpickup = true;
-					
+          
         break;
       default:
         break;
@@ -124,7 +124,7 @@ function ClassicChaosAssistant() {
 
       break;
     }
-		
+    
     delay(10);
   }
 }

@@ -24,10 +24,10 @@ const ItemHooks = {
   itemColorCode: [],
 
   /**
-	 * @param {number} id - classID of item 
-	 * @param {string} setName 
-	 * @param {string} uniqueName 
-	 */
+   * @param {number} id - classID of item 
+   * @param {string} setName 
+   * @param {string} uniqueName 
+   */
   addToCodeByClassIdAndQuality: function (id, setName = "", uniqueName = "") {
     if (!id || (!setName && !uniqueName)) return;
     // create our map structure
@@ -66,7 +66,7 @@ const ItemHooks = {
       try {
         do {
           if (item.area === ActionHooks.currArea && item.onGroundOrDropping
-						&& (item.quality >= sdk.items.quality.Magic || ((item.normal || item.superior) && !this.ignoreItemTypes.includes(item.itemType)))) {
+            && (item.quality >= sdk.items.quality.Magic || ((item.normal || item.superior) && !this.ignoreItemTypes.includes(item.itemType)))) {
             if (this.pickitEnabled) {
               if ([Pickit.Result.UNWANTED, Pickit.Result.TRASH].indexOf(Pickit.checkItem(item).result) === -1) {
                 !this.getHook(item) && this.add(item);
@@ -95,9 +95,9 @@ const ItemHooks = {
   },
 
   /**
-	 * @param {ItemUnit} item 
-	 * @returns {string}
-	 */
+   * @param {ItemUnit} item 
+   * @returns {string}
+   */
   getName: function (item) {
     let abbr = item.name.split(" ");
     let abbrName = "";
@@ -114,10 +114,10 @@ const ItemHooks = {
   },
 
   /**
-	 * @description Create a new hook for a item with custom color and code based on type/quality/classid
-	 * @param {ItemUnit} item 
-	 * @todo maybe make class wrappers for hooks and turn the hook array into a map?
-	 */
+   * @description Create a new hook for a item with custom color and code based on type/quality/classid
+   * @param {ItemUnit} item 
+   * @todo maybe make class wrappers for hooks and turn the hook array into a map?
+   */
   newHook: function (item) {
     let color = 0, code = "", arr = [], name = [], vector = [];
     let eth = (item.ethereal ? "Eth: " : "");
@@ -171,14 +171,14 @@ const ItemHooks = {
       case sdk.items.Ring:
       case sdk.items.Amulet:
         code += item.name + "(" + item.ilvl + ")";
-				
+        
         break;
       default:
         {
           let check = this.codeByIdAndQuality.get(item.classid);
           code += ((check && check.get(item.quality)) || item.name);
         }
-				
+        
         break;
       }
 
@@ -192,7 +192,7 @@ const ItemHooks = {
         code += this.getName(item);
         code += "(" + item.ilvl + ")";
       }
-			
+      
       break;
     }
 
@@ -209,9 +209,9 @@ const ItemHooks = {
   },
 
   /**
-	 * Add new item hook to our hook array
-	 * @param {ItemUnit} item 
-	 */
+   * Add new item hook to our hook array
+   * @param {ItemUnit} item 
+   */
   add: function (item) {
     if (item === undefined || !item.classid) {
       return;
@@ -229,10 +229,10 @@ const ItemHooks = {
   },
 
   /**
-	 * Get item hook if it exists based on item parameters gid
-	 * @param {ItemUnit} item 
-	 * @returns {{ item: ItemUnit, area: number, hook: Line, name: Text, vector: Line} | false}
-	 */
+   * Get item hook if it exists based on item parameters gid
+   * @param {ItemUnit} item 
+   * @returns {{ item: ItemUnit, area: number, hook: Line, name: Text, vector: Line} | false}
+   */
   getHook: function (item) {
     for (let i = 0; i < this.hooks.length; i++) {
       if (this.hooks[i].item.gid === item.gid) {
@@ -244,16 +244,16 @@ const ItemHooks = {
   },
 
   /**
-	 * @param {ItemUnit} item 
-	 * @returns {boolean}
-	 */
+   * @param {ItemUnit} item 
+   * @returns {boolean}
+   */
   remove: function (item) {
     for (let i = 0; i < this.hooks.length; i++) {
       if (this.hooks[i].item.gid === item.gid) {
         for (let j = 0; j < this.hooks[i].hook.length; j++) {
           this.hooks[i].hook[j].remove();
         }
-				
+        
         this.hooks[i].name[0] && this.hooks[i].name[0].remove();
         this.hooks[i].vector[0] && this.hooks[i].vector[0].remove();
         this.hooks.splice(i, 1);

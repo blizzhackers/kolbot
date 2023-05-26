@@ -34,7 +34,7 @@ let chars = [];
 
 function parseInfo() {
   usingDroper && parseDropperAccounts(accounts, chars);
-	
+  
   for (let i in MuleLogger.LogAccounts) {
     if (MuleLogger.LogAccounts.hasOwnProperty(i) && typeof i === "string") {
       accounts.push(i);
@@ -178,7 +178,7 @@ function locationAction (location) {
 
     if (FileTools.exists("logs/MuleLog.json")) {
       obj = JSON.parse(FileTools.readText("logs/MuleLog.json"));
-			
+      
       if (obj.currChar) {
         for (i = 0; i < charList.length; i += 1) {
           if (charList[i] === obj.currChar) {

@@ -7,10 +7,10 @@
 
 function MFHelper() {
   /**
-	 * @todo We should be able to handle Diablo scripts then resume MFHelper, not sure how yet but doesn't make sense to have
-	 * helper just idle if leader does any of the a5 scripts before baal. I guess could re-order them in the configs but having
-	 * it broken up by act flows better
-	 */
+   * @todo We should be able to handle Diablo scripts then resume MFHelper, not sure how yet but doesn't make sense to have
+   * helper just idle if leader does any of the a5 scripts before baal. I guess could re-order them in the configs but having
+   * it broken up by act flows better
+   */
   let player, playerAct, split;
   let lastPrecast;
 
@@ -19,9 +19,9 @@ function MFHelper() {
   const tasks = ["kill", "clearlevel", "clear", "quit", "cows", "council", "goto", "nextup"];
 
   /**
-	 * @param {string} name 
-	 * @param {string} msg 
-	 */
+   * @param {string} name 
+   * @param {string} msg 
+   */
   function chatEvent (name, msg) {
     if (!msg) return;
     let msgShort = msg && msg.length ? msg.split(" ")[0] : "";
@@ -105,7 +105,7 @@ function MFHelper() {
         if (taskList[0].task === "quit") return true;
         // check if any message is telling us to quit
         if (taskList.find(el => el.task === "quit")) return true;
-				
+        
         // check if any message is telling us that nextup is diablo/baal
         if (taskList.some(el => {
           if (el.task === "nextup") {
@@ -140,7 +140,7 @@ function MFHelper() {
 
             split = msg.substr(6);
             console.log("ÿc4MFHelperÿc0: Goto " + split);
-						
+            
             if (!!parseInt(split, 10)) {
               split = parseInt(split, 10);
             }
@@ -188,11 +188,11 @@ function MFHelper() {
           if (getTickCount() - at > Time.minutes(3)) continue;
 
           /**
-					 * @todo still think this section needs to be done better, we are using a snapshot of the player's area at the time
-					 * of the message but sometimes the area hasn't been updated yet, causing us to do dumb things like attempt to kill
-					 * while still in town. We can't just use the players area though because of towncheck/chicken. Feel like best solution
-					 * would be adding area into leaders message and just always parsing it from there
-					 */
+           * @todo still think this section needs to be done better, we are using a snapshot of the player's area at the time
+           * of the message but sometimes the area hasn't been updated yet, causing us to do dumb things like attempt to kill
+           * while still in town. We can't just use the players area though because of towncheck/chicken. Feel like best solution
+           * would be adding area into leaders message and just always parsing it from there
+           */
           try {
             split = msg.split(task + " ")[1];
             if (parseInt(split, 10)) {

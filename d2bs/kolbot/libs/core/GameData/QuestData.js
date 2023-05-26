@@ -7,8 +7,8 @@
 
 (function (module) {
   /**
-	 * @todo Fill out more, items for quests, npcs, etc
-	 */
+   * @todo Fill out more, items for quests, npcs, etc
+   */
   const QuestData = (function () {
     let _lastRefresh = 0;
 
@@ -27,12 +27,12 @@
         _lastRefresh = getTickCount();
       }
     };
-		
+    
     /**
-		 * @constructor
-		 * @param {number} questId 
-		 * @param {number} act 
-		 */
+     * @constructor
+     * @param {number} questId 
+     * @param {number} act 
+     */
     function Quest (questId, act) {
       this.id = questId;
       this.act = act;
@@ -72,10 +72,10 @@
     };
 
     /**
-		 * @param {number} state - quest state (0 - 15)
-		 * @param {boolean} complete - if true, will check if state bit is 1 (active) otherwise 0 (inactive)
-		 * @returns {boolean}
-		 */
+     * @param {number} state - quest state (0 - 15)
+     * @param {boolean} complete - if true, will check if state bit is 1 (active) otherwise 0 (inactive)
+     * @returns {boolean}
+     */
     Quest.prototype.checkState = function (state, complete = true) {
       // handle the ones we already know
       if (state === sdk.quest.states.Completed && this.completed) return complete;
@@ -141,20 +141,20 @@
         questMap.set(questId, new Quest(questId, act + 1));
       }
     });
-		
+    
     return {
       /**
-			 * @param {number} questId 
-			 * @returns {Quest | undefined}
-			 */
+       * @param {number} questId 
+       * @returns {Quest | undefined}
+       */
       get: function (questId) {
         return questMap.get(questId);
       },
 
       /**
-			 * @param {number} questId 
-			 * @returns {boolean}
-			 */
+       * @param {number} questId 
+       * @returns {boolean}
+       */
       has: function (questId) {
         return questMap.has(questId);
       },
@@ -166,9 +166,9 @@
       },
 
       /**
-			 * @param {number} questId 
-			 * @returns {number}
-			 */
+       * @param {number} questId 
+       * @returns {number}
+       */
       getActForQuest: function (questId) {
         return questMap.get(questId).act;
       },

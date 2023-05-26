@@ -32,9 +32,9 @@
   ScriptError.prototype.constructor = ScriptError;
 
   /**
-	 * get all running threads and return them as an array
-	 * @returns {Script[]}
-	 */
+   * get all running threads and return them as an array
+   * @returns {Script[]}
+   */
   const getThreads = function () {
     let threads = [];
     let script = getScript();
@@ -49,9 +49,9 @@
   };
 
   /**
-	 * @param {...args}
-	 * @returns {Unit[]}
-	 */
+   * @param {...args}
+   * @returns {Unit[]}
+   */
   const getUnits = function (...args) {
     let units = [], unit = getUnit.apply(null, args);
 
@@ -65,14 +65,14 @@
   };
 
   /**
-	 * @typedef {Object} Args
-	 * @property {0 | 1 | 2} arg1 - where
-	 * @property {number | ItemUnit} arg2 - bodyLoc to click, item to click, x coord
-	 * @property {number} [arg3] - y coord
-	 * @property {number} [arg4] - location
-	 *
-	 * @param  {...Args} args
-	 */
+   * @typedef {Object} Args
+   * @property {0 | 1 | 2} arg1 - where
+   * @property {number | ItemUnit} arg2 - bodyLoc to click, item to click, x coord
+   * @property {number} [arg3] - y coord
+   * @property {number} [arg4] - location
+   *
+   * @param  {...Args} args
+   */
   const clickItemAndWait = function (...args) {
     let timeout = getTickCount(), timedOut;
     let before = !me.itemoncursor;
@@ -96,13 +96,13 @@
   };
 
   /**
-	 * @description clickMap doesn't return if we sucessfully clicked a unit just that a click was sent, this checks and returns that a units mode has changed
-	 * as a result of us clicking it.
-	 * @param {number} button
-	 * @param {0 | 1} shift
-	 * @param {Unit} unit
-	 * @returns {boolean} If a units mode has changed as a result of clicking it
-	 */
+   * @description clickMap doesn't return if we sucessfully clicked a unit just that a click was sent, this checks and returns that a units mode has changed
+   * as a result of us clicking it.
+   * @param {number} button
+   * @param {0 | 1} shift
+   * @param {Unit} unit
+   * @returns {boolean} If a units mode has changed as a result of clicking it
+   */
   const clickUnitAndWait = function (button, shift, unit) {
     if (typeof (unit) !== "object") throw new Error("clickUnitAndWait: Third arg must be a Unit.");
 
@@ -113,13 +113,13 @@
     delay(Math.max(me.ping * 2, 250));
     clickMap(button + 2, shift, unit);
     me.blockMouse = false;
-		
+    
     let waitTick = getTickCount();
     let timeOut = Math.min(1000, 100 + (me.ping * 4));
 
     while (getTickCount() - waitTick < timeOut) {
       delay(30);
-			
+      
       // quit the loop if mode has changed
       if (before !== unit.mode) {
         break;
@@ -132,15 +132,15 @@
   };
 
   /**
-	 * @class
-	 * @description new PacketBuilder() - create new packet object
-	 * @example <caption>(Spoof 'reassign player' packet to client):</caption>
-	 * new PacketBuilder().byte(sdk.packets.recv.ReassignPlayer).byte(0).dword(me.gid).word(x).word(y).byte(1).get();
-	 * @example <caption>(Spoof 'player move' packet to server):</caption>
-	 * new PacketBuilder().byte(sdk.packets.send.RunToLocation).word(x).word(y).send();
-	 * @todo pass the inital byte into the constructor so we don't always have to do `new PacketBuilder().byte(sdk.packets.recv.ReassignPlayer)...`
-	 * it would just be `new PacketBuilder(sdk.packets.recv.ReassignPlayer)...`
-	 */
+   * @class
+   * @description new PacketBuilder() - create new packet object
+   * @example <caption>(Spoof 'reassign player' packet to client):</caption>
+   * new PacketBuilder().byte(sdk.packets.recv.ReassignPlayer).byte(0).dword(me.gid).word(x).word(y).byte(1).get();
+   * @example <caption>(Spoof 'player move' packet to server):</caption>
+   * new PacketBuilder().byte(sdk.packets.send.RunToLocation).word(x).word(y).send();
+   * @todo pass the inital byte into the constructor so we don't always have to do `new PacketBuilder().byte(sdk.packets.recv.ReassignPlayer)...`
+   * it would just be `new PacketBuilder(sdk.packets.recv.ReassignPlayer)...`
+   */
   function PacketBuilder () {
     // globals DataView ArrayBuffer
     if (this.__proto__.constructor !== PacketBuilder) {
@@ -378,130 +378,130 @@
       }
     },
     /**
-		 * @returns {ItemUnit | undefined} item on cursor
-		 */
+     * @returns {ItemUnit | undefined} item on cursor
+     */
     getCursorUnit: function () {
       return getUnit(100);
     },
     /**
-		 * @returns {ItemUnit | undefined} item cursor is hovering over
-		 */
+     * @returns {ItemUnit | undefined} item cursor is hovering over
+     */
     getSelectedUnit: function () {
       return getUnit(101);
     },
     /**
-		 * @param {number | string} [id] 
-		 * @param {number} [mode] 
-		 * @param {number} [gid] 
-		 * @returns {Player}
-		 */
+     * @param {number | string} [id] 
+     * @param {number} [mode] 
+     * @param {number} [gid] 
+     * @returns {Player}
+     */
     getPlayer: function (id, mode, gid) {
       return getUnit(sdk.unittype.Player, id, mode, gid);
     },
     /**
-		 * @param {number | string} [id] 
-		 * @param {number} [mode] 
-		 * @param {number} [gid] 
-		 * @returns {Monster}
-		 */
+     * @param {number | string} [id] 
+     * @param {number} [mode] 
+     * @param {number} [gid] 
+     * @returns {Monster}
+     */
     getMonster: function (id, mode, gid) {
       return getUnit(sdk.unittype.Monster, id, mode, gid);
     },
     /**
-		 * @param {number | string} [id] 
-		 * @param {number} [mode] 
-		 * @param {number} [gid] 
-		 * @returns {Monster}
-		 */
+     * @param {number | string} [id] 
+     * @param {number} [mode] 
+     * @param {number} [gid] 
+     * @returns {Monster}
+     */
     getNPC: function (id, mode, gid) {
       return getUnit(sdk.unittype.NPC, id, mode, gid);
     },
     /**
-		 * @param {number | string} [id] 
-		 * @param {number} [mode] 
-		 * @param {number} [gid] 
-		 * @returns {ObjectUnit}
-		 */
+     * @param {number | string} [id] 
+     * @param {number} [mode] 
+     * @param {number} [gid] 
+     * @returns {ObjectUnit}
+     */
     getObject: function (id, mode, gid) {
       return getUnit(sdk.unittype.Object, id, mode, gid);
     },
     /**
-		 * @param {number | string} [id] 
-		 * @param {number} [mode] 
-		 * @param {number} [gid] 
-		 * @returns {Missile}
-		 */
+     * @param {number | string} [id] 
+     * @param {number} [mode] 
+     * @param {number} [gid] 
+     * @returns {Missile}
+     */
     getMissile: function (id, mode, gid) {
       return getUnit(sdk.unittype.Missile, id, mode, gid);
     },
     /**
-		 * @param {number | string} [id] 
-		 * @param {number} [mode] 
-		 * @param {number} [gid] 
-		 * @returns {ItemUnit}
-		 */
+     * @param {number | string} [id] 
+     * @param {number} [mode] 
+     * @param {number} [gid] 
+     * @returns {ItemUnit}
+     */
     getItem: function (id, mode, gid) {
       return getUnit(sdk.unittype.Item, id, mode, gid);
     },
     /**
-		 * @param {number | string} [id] 
-		 * @param {number} [mode] 
-		 * @param {number} [gid] 
-		 * @returns {Tile}
-		 */
+     * @param {number | string} [id] 
+     * @param {number} [mode] 
+     * @param {number} [gid] 
+     * @returns {Tile}
+     */
     getStairs: function (id, mode, gid) {
       return getUnit(sdk.unittype.Stairs, id, mode, gid);
     },
     /**
-		 * @param {number} area 
-		 * @param {number} id 
-		 * @returns {PresetUnit} 
-		 */
+     * @param {number} area 
+     * @param {number} id 
+     * @returns {PresetUnit} 
+     */
     getPresetMonster: function (area, id) {
       !area && (area = me.area);
       return getPresetUnit(area, sdk.unittype.Monster, id);
     },
     /**
-		 * @param {number} area 
-		 * @param {number} id 
-		 * @returns {PresetUnit[]} 
-		 */
+     * @param {number} area 
+     * @param {number} id 
+     * @returns {PresetUnit[]} 
+     */
     getPresetMonsters: function (area, id) {
       !area && (area = me.area);
       return getPresetUnits(area, sdk.unittype.Monster, id);
     },
     /**
-		 * @param {number} area 
-		 * @param {number} id 
-		 * @returns {PresetUnit} 
-		 */
+     * @param {number} area 
+     * @param {number} id 
+     * @returns {PresetUnit} 
+     */
     getPresetObject: function (area, id) {
       !area && (area = me.area);
       return getPresetUnit(area, sdk.unittype.Object, id);
     },
     /**
-		 * @param {number} area 
-		 * @param {number} id 
-		 * @returns {PresetUnit[]} 
-		 */
+     * @param {number} area 
+     * @param {number} id 
+     * @returns {PresetUnit[]} 
+     */
     getPresetObjects: function (area, id) {
       !area && (area = me.area);
       return getPresetUnits(area, sdk.unittype.Object, id);
     },
     /**
-		 * @param {number} area 
-		 * @param {number} id 
-		 * @returns {PresetUnit} 
-		 */
+     * @param {number} area 
+     * @param {number} id 
+     * @returns {PresetUnit} 
+     */
     getPresetStair: function (area, id) {
       !area && (area = me.area);
       return getPresetUnit(area, sdk.unittype.Stairs, id);
     },
     /**
-		 * @param {number} area 
-		 * @param {number} id 
-		 * @returns {PresetUnit[]} 
-		 */
+     * @param {number} area 
+     * @param {number} id 
+     * @returns {PresetUnit[]} 
+     */
     getPresetStairs: function (area, id) {
       !area && (area = me.area);
       return getPresetUnits(area, sdk.unittype.Stairs, id);

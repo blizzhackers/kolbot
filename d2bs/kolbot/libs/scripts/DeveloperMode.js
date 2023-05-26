@@ -277,6 +277,6 @@ function DeveloperMode() {
     Config = copiedConfig;
     UnitInfo.remove();
   }
-	
+  
   return true;
 }

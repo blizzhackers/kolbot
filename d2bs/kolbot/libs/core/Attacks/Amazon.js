@@ -145,7 +145,7 @@ const ClassAttack = {
         }
 
         let closeMob = Attack.getNearestMonster({ skipGid: gid });
-				
+        
         if (!!closeMob) {
           let findSkill = this.decideSkill(closeMob);
           if (this.doCast(closeMob, findSkill.timed, findSkill.untimed) !== Attack.Result.SUCCESS) {
@@ -176,7 +176,7 @@ const ClassAttack = {
     // No valid skills can be found
     if (timedSkill < 0 && untimedSkill < 0) return Attack.Result.CANTATTACK;
     Config.TeleSwitch && me.switchToPrimary();
-		
+    
     // Arrow/bolt check
     if (this.bowCheck) {
       switch (true) {

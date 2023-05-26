@@ -9,13 +9,13 @@ function TristramLeech () {
   include("core/Common/Leecher.js");
   let done = false;
   let whereisleader, leader;
-	
+  
   const chatEvent = function (nick, msg) {
     if (nick === leader && msg.toLowerCase() === "tristdone") {
       done = true;
     }
   };
-	
+  
   Town.doChores();
   Town.goToTown(1);
   Town.move("portalspot");
@@ -67,7 +67,7 @@ function TristramLeech () {
 
         return false;
       }, Time.minutes(3), 1000);
-			
+      
       while (true) {
         if (done) return true;
 

@@ -18,15 +18,15 @@ Starter.Config.JoinRetryDelay = 5; // Time in seconds to wait before next join a
  * @todo this section should be in it's own config leaving this file only containing core logic
  */
 /* Join game settings
-	Format: "leader's profile": ["leecher 1 profile", "leecher 2 profile", ...]
-	If you want everyone to join the same leader, use "leader's profile": ["all"]
-	NOTE: Use PROFILE names (profile matches window title), NOT character/account names
-	leader:leecher groups need to be divided by a comma
-	example:
-		let JoinSettings = {
-			"lead1": ["follow1", "follow2"],
-			"lead2": ["follow3", "follow4"]
-		};
+  Format: "leader's profile": ["leecher 1 profile", "leecher 2 profile", ...]
+  If you want everyone to join the same leader, use "leader's profile": ["all"]
+  NOTE: Use PROFILE names (profile matches window title), NOT character/account names
+  leader:leecher groups need to be divided by a comma
+  example:
+    let JoinSettings = {
+      "lead1": ["follow1", "follow2"],
+      "lead2": ["follow3", "follow4"]
+    };
 */
 
 const JoinSettings = {
@@ -200,9 +200,9 @@ function locationAction (location) {
         }
 
         /**
-				 * @todo handle rejoin, need to keep track of game averages and when requesting game from a leader who's game we left get the current game time
-				 * and see if there is x amount of time left that makes it worth it vs waiting for next.
-				 */
+         * @todo handle rejoin, need to keep track of game averages and when requesting game from a leader who's game we left get the current game time
+         * and see if there is x amount of time left that makes it worth it vs waiting for next.
+         */
 
         if (lastGame.indexOf(Starter.joinInfo.gameName) === -1 || Starter.lastGameStatus === "pending") {
           Controls.JoinGameName.setText(Starter.joinInfo.gameName);
@@ -375,8 +375,8 @@ function locationAction (location) {
       }
 
       if (Controls.IPAdress.setText(Object.keys(Starter.joinInfo).length ? Starter.joinInfo.gameName : "localhost")
-				&& Controls.IPAdressOk.click()
-				&& Starter.locationTimeout(2e3, sdk.game.locations.TcpIpEnterIp)) {
+        && Controls.IPAdressOk.click()
+        && Starter.locationTimeout(2e3, sdk.game.locations.TcpIpEnterIp)) {
         getLocation() === sdk.game.locations.CharSelect && login(me.profile);
       }
     } catch (e) {

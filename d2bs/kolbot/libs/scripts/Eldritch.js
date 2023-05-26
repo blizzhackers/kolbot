@@ -12,7 +12,7 @@ function Eldritch() {
   let { x, y } = me;
   Pather.moveTo(3745, 5084);
   Attack.kill(getLocaleString(sdk.locale.monsters.EldritchtheRectifier));
-	
+  
   try {
     // FrigidHighlands returns invalid size with getBaseStat('leveldefs', 111, ['SizeX', 'SizeX(N)', 'SizeX(H)'][me.diff]);
     // Could this be causing crashes here?

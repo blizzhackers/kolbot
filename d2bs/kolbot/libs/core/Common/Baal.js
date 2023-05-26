@@ -46,8 +46,8 @@
         if (monster) {
           do {
             if (monster.attackable
-							&& monster.y < 5080
-							&& (monster.x > 15072 && monster.x < 15118)) {
+              && monster.y < 5080
+              && (monster.x > 15072 && monster.x < 15118)) {
               switch (monster.classid) {
               case sdk.monsters.WarpedFallen:
               case sdk.monsters.WarpedShaman:
@@ -235,7 +235,7 @@
           case sdk.player.class.Paladin:
             if (Config.AttackSkill[3] === sdk.skills.BlessedHammer) {
               [15094, 5029].distance > 3 && Pather.moveTo(15094, 5029);
-							
+              
               break;
             }
             // eslint-disable-next-line no-fallthrough
@@ -248,7 +248,7 @@
 
             if (Config.AttackSkill[3] === sdk.skills.Tornado) {
               [15094, 5029].distance > 3 && Pather.moveTo(15106, 5041);
-							
+              
               break;
             }
             // eslint-disable-next-line no-fallthrough

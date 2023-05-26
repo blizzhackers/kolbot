@@ -10,22 +10,22 @@ const AutoSkill = new function () {
   this.save = 0;
 
   /*	skillBuildOrder - array of skill points to spend in order
-		save - number of skill points that will not be spent and saved
+    save - number of skill points that will not be spent and saved
 
-		skillBuildOrder Settings
-		Set skillBuildOrder in the array form: [[skill, count, satisfy], [skill, count, satisfy], ... [skill, count, satisfy]]
-		 skill - skill id number (see /sdk/txt/skills.txt)
-		 count - maximum number of skill points to allocate for that skill
-		 satisfy - boolean value to stop(true) or continue(false) further allocation until count is met. Defaults to true if not specified.
+    skillBuildOrder Settings
+    Set skillBuildOrder in the array form: [[skill, count, satisfy], [skill, count, satisfy], ... [skill, count, satisfy]]
+     skill - skill id number (see /sdk/txt/skills.txt)
+     count - maximum number of skill points to allocate for that skill
+     satisfy - boolean value to stop(true) or continue(false) further allocation until count is met. Defaults to true if not specified.
 
-		skillBuildOrder = [
-			[37, 1, true], [42, 1, true], [54, 1, true], //warmth, static, teleport
-			[59, 1, false], [55, 7, true], [45, 13, true], //blizzard, glacial spike, ice blast
-			[59, 7, false], [65, 1, true], //blizzard, cold mastery
-			[59, 20, false], [65, 20, true], //max blizzard, max cold mastery
-			[55, 20, true], [45, 20, true], //max glacial spike, max ice blast
-		];
-	*/
+    skillBuildOrder = [
+      [37, 1, true], [42, 1, true], [54, 1, true], //warmth, static, teleport
+      [59, 1, false], [55, 7, true], [45, 13, true], //blizzard, glacial spike, ice blast
+      [59, 7, false], [65, 1, true], //blizzard, cold mastery
+      [59, 20, false], [65, 20, true], //max blizzard, max cold mastery
+      [55, 20, true], [45, 20, true], //max glacial spike, max ice blast
+    ];
+  */
 
   //a function to return false if have all prereqs or a skill if not
   this.needPreReq = function (skillid) {

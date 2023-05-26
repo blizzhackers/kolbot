@@ -15,7 +15,7 @@ function DiabloHelper() {
 
   try {
     addEventListener("gamepacket", Common.Diablo.diabloLightsEvent);
-		
+    
     if (Config.DiabloHelper.SkipIfBaal) {
       let leadTick = getTickCount();
 

@@ -55,10 +55,10 @@ const Attack = {
   },
 
   /**
-	 * @description check if slot has items
-	 * @param {0 | 1} slot 
-	 * @returns {boolean} If weapon slot has an item equipped
-	 */
+   * @description check if slot has items
+   * @param {0 | 1} slot 
+   * @returns {boolean} If weapon slot has an item equipped
+   */
   checkSlot: function (slot = me.weaponswitch) {
     let item = me.getItem(-1, sdk.items.mode.Equipped);
 
@@ -80,9 +80,9 @@ const Attack = {
   },
 
   /**
-	 * @description Automatically determine primary weapon slot, Weapon slot with items that isn't a CTA
-	 * @returns {0 | 1 | -1} Primary weapon slot
-	 */
+   * @description Automatically determine primary weapon slot, Weapon slot with items that isn't a CTA
+   * @returns {0 | 1 | -1} Primary weapon slot
+   */
   getPrimarySlot: function () {
     // determine primary slot if not set
     if (Config.PrimarySlot === -1) {
@@ -114,17 +114,17 @@ const Attack = {
   },
 
   /**
-	 * 
-	 * @param {Monster} unit 
-	 * @returns {[number, number] | boolean}
-	 * @todo add checking for other options than just name/classid
-	 *  - option for based on spectype
-	 *  - option for based on enchant/aura
-	 */
+   * 
+   * @param {Monster} unit 
+   * @returns {[number, number] | boolean}
+   * @todo add checking for other options than just name/classid
+   *  - option for based on spectype
+   *  - option for based on enchant/aura
+   */
   getCustomAttack: function (unit) {
     // Check if unit got invalidated
     if (!unit || !unit.name || !copyUnit(unit).x) return false;
-		
+    
     for (let i in Config.CustomAttack) {
       if (Config.CustomAttack.hasOwnProperty(i)) {
         // if it contains numbers but is a string, convert to an int
@@ -152,10 +152,10 @@ const Attack = {
   },
 
   /**
-	 * @depreciated
-	 * @description Get items with charges - isn't used anywhere
-	 * @returns {boolean}
-	 */
+   * @depreciated
+   * @description Get items with charges - isn't used anywhere
+   * @returns {boolean}
+   */
   getCharges: function () {
     !Skill.charges && (Skill.charges = []);
 
@@ -197,9 +197,9 @@ const Attack = {
   },
 
   /**
-	 * @description Check if player or his merc are using Infinity, and adjust resistance checks based on that
-	 * @returns {boolean}
-	 */
+   * @description Check if player or his merc are using Infinity, and adjust resistance checks based on that
+   * @returns {boolean}
+   */
   checkInfinity: function () {
     if (me.classic) return false;
 
@@ -217,9 +217,9 @@ const Attack = {
   },
 
   /**
-	 * @description Check if player is using Dragon, Dream, HoJ, or Ice, and adjust resistance checks based on that
-	 * @returns {boolean}
-	 */
+   * @description Check if player is using Dragon, Dream, HoJ, or Ice, and adjust resistance checks based on that
+   * @returns {boolean}
+   */
   checkAuradin: function () {
     Attack.auradin = me.haveSome([
       { name: sdk.locale.items.Dragon, equipped: true }, { name: sdk.locale.items.Dream, equipped: true },
@@ -230,10 +230,10 @@ const Attack = {
   },
 
   /**
-	 * @description check if we can telestomp a unit
-	 * @param {Unit} unit 
-	 * @returns {boolean}
-	 */
+   * @description check if we can telestomp a unit
+   * @param {Unit} unit 
+   * @returns {boolean}
+   */
   canTeleStomp: function (unit) {
     if (!unit || !unit.attackable) return false;
     return Config.TeleStomp && Config.UseMerc && Pather.canTeleport()
@@ -241,10 +241,10 @@ const Attack = {
   },
 
   /**
-	 * @description Kill a monster based on its classId, can pass a unit as well
-	 * @param {Unit | number} classId 
-	 * @returns {boolean} If we managed to kill the unit
-	 */
+   * @description Kill a monster based on its classId, can pass a unit as well
+   * @param {Unit | number} classId 
+   * @returns {boolean} If we managed to kill the unit
+   */
   kill: function (classId) {
     if (!classId || Config.AttackSkill[1] < 0) return false;
     let target = (typeof classId === "object" ? classId : Misc.poll(() => Game.getMonster(classId), 2000, 100));
@@ -282,7 +282,7 @@ const Attack = {
 
     while (attackCount < Config.MaxAttackCount && target.attackable && !this.skipCheck(target)) {
       Misc.townCheck();
-			
+      
       // Check if unit got invalidated, happens if necro raises a skeleton from the boss's corpse.
       if (!target || !copyUnit(target).x) {
         target = Game.getMonster(-1, -1, gid);
@@ -341,11 +341,11 @@ const Attack = {
   },
 
   /**
-	 * @description hurt a unit to a certain percentage of life left
-	 * @param {string | number | Unit} classId 
-	 * @param {number} percent 
-	 * @returns {boolean}
-	 */
+   * @description hurt a unit to a certain percentage of life left
+   * @param {string | number | Unit} classId 
+   * @param {number} percent 
+   * @returns {boolean}
+   */
   hurt: function (classId, percent) {
     if (!classId || !percent) return false;
     let target = (typeof classId === "object" ? classId : Misc.poll(() => Game.getMonster(classId), 2000, 100));
@@ -395,10 +395,10 @@ const Attack = {
   },
 
   /**
-	 * @description Determine scariness of monster for monster sorting
-	 * @param {Unit} unit 
-	 * @returns {number} scariness
-	 */
+   * @description Determine scariness of monster for monster sorting
+   * @param {Unit} unit 
+   * @returns {number} scariness
+   */
   getScarinessLevel: function (unit) {
     // todo - define summonertype prototype
     let scariness = 0;
@@ -430,15 +430,15 @@ const Attack = {
   },
 
   /**
-	 * @description Clear monsters in a section based on range and spectype or clear monsters around a boss monster
-	 * @param {number} [range=25] 
-	 * @param {number} [spectype=0] 
-	 * @param {number | Unit} [bossId] 
-	 * @param {Function} [sortfunc] 
-	 * @param {boolean} [pickit] 
-	 * @returns {boolean}
-	 * @todo change to passing an object
-	 */
+   * @description Clear monsters in a section based on range and spectype or clear monsters around a boss monster
+   * @param {number} [range=25] 
+   * @param {number} [spectype=0] 
+   * @param {number | Unit} [bossId] 
+   * @param {Function} [sortfunc] 
+   * @param {boolean} [pickit] 
+   * @returns {boolean}
+   * @todo change to passing an object
+   */
   clear: function (range, spectype, bossId, sortfunc, pickit = true) {
     while (!me.gameReady) {
       delay(40);
@@ -504,7 +504,7 @@ const Attack = {
 
     while (start && monsterList.length > 0 && attackCount < Config.MaxAttackCount) {
       if (me.dead) return false;
-			
+      
       boss && (({ orgx, orgy } = { orgx: boss.x, orgy: boss.y }));
       monsterList.sort(sortfunc);
       // target = copyUnit(monsterList[0]);
@@ -512,7 +512,7 @@ const Attack = {
 
       if (target && target.x !== undefined && (getDistance(target, orgx, orgy) <= range
         || (this.getScarinessLevel(target) > 7 && target.distance <= range))
-				&& target.attackable) {
+        && target.attackable) {
         Config.Dodge && me.hpPercent <= Config.DodgeHP && this.deploy(target, Config.DodgeRange, 5, 9);
         Misc.townCheck();
         tick = getTickCount();
@@ -554,7 +554,7 @@ const Attack = {
           let hammerCheck = me.paladin && checkSkill === sdk.skills.BlessedHammer;
 
           if (Config.AttackSkill[secAttack] > -1 && (!Attack.checkResist(target, checkSkill)
-							|| (hammerCheck && !ClassAttack.getHammerPosition(target)))) {
+              || (hammerCheck && !ClassAttack.getHammerPosition(target)))) {
             skillCheck = Config.AttackSkill[secAttack];
           } else {
             skillCheck = checkSkill;
@@ -587,8 +587,8 @@ const Attack = {
           }
 
           /**
-					 * @todo allow for more aggressive horking here
-					 */
+           * @todo allow for more aggressive horking here
+           */
           if (target.dead || Config.FastPick || Config.FastFindItem) {
             if (boss && boss.gid === target.gid && target.dead) {
               killedBoss = true;
@@ -642,13 +642,13 @@ const Attack = {
   },
 
   /**
-	 * @description clear all monsters based on classid arguments
-	 * @param  {...number} ids 
-	 * @returns {boolean}
-	 * @todo
-	 * - Should there be a range parameter for this?
-	 * - Should we keep track of where we started from?
-	 */
+   * @description clear all monsters based on classid arguments
+   * @param  {...number} ids 
+   * @returns {boolean}
+   * @todo
+   * - Should there be a range parameter for this?
+   * - Should we keep track of where we started from?
+   */
   clearClassids: function (...ids) {
     // lets keep track of where we started from and move back when done
     const { x, y } = me;
@@ -684,13 +684,13 @@ const Attack = {
   },
 
   /**
-	 * @description Filter monsters based on classId, spectype and range
-	 * @param {number} classid 
-	 * @param {number} spectype 
-	 * @param {number} range 
-	 * @param {Unit | {x: number, y: number}} center 
-	 * @returns {Monster[]}
-	 */
+   * @description Filter monsters based on classId, spectype and range
+   * @param {number} classid 
+   * @param {number} spectype 
+   * @param {number} range 
+   * @param {Unit | {x: number, y: number}} center 
+   * @returns {Monster[]}
+   */
   getMob: function (classid, spectype, range, center) {
     let monsterList = [];
     let monster = Game.getMonster();
@@ -706,7 +706,7 @@ const Attack = {
       if (monster) {
         do {
           if (getDistance(center.x, center.y, monster.x, monster.y) <= range
-							&& (!spectype || (monster.spectype & spectype)) && monster.attackable) {
+              && (!spectype || (monster.spectype & spectype)) && monster.attackable) {
             monsterList.push(copyUnit(monster));
           }
         } while (monster.getNext());
@@ -719,7 +719,7 @@ const Attack = {
       if (monster) {
         do {
           if (classid.includes(monster.classid) && getDistance(center.x, center.y, monster.x, monster.y) <= range
-							&& (!spectype || (monster.spectype & spectype)) && monster.attackable) {
+              && (!spectype || (monster.spectype & spectype)) && monster.attackable) {
             monsterList.push(copyUnit(monster));
           }
         } while (monster.getNext());
@@ -732,12 +732,12 @@ const Attack = {
   },
 
   /**
-	 * @description Clear an already formed array of monstas
-	 * @param {Function | Array<Unit>} mainArg 
-	 * @param {Function} [sortFunc] 
-	 * @param {boolean} [refresh] 
-	 * @returns {boolean}
-	 */
+   * @description Clear an already formed array of monstas
+   * @param {Function | Array<Unit>} mainArg 
+   * @param {Function} [sortFunc] 
+   * @param {boolean} [refresh] 
+   * @returns {boolean}
+   */
   clearList: function (mainArg, sortFunc, refresh) {
     /** @type {Monster[]} */
     let monsterList;
@@ -859,14 +859,14 @@ const Attack = {
   },
 
   /**
-	 * @param {number} x 
-	 * @param {number} y 
-	 * @param {number} [range=15] 
-	 * @param {number} [timer=3000] - time in ms 
-	 * @param {boolean} [skipBlocked=true] 
-	 * @param {boolean} [special=false] 
-	 * @returns {void}
-	 */
+   * @param {number} x 
+   * @param {number} y 
+   * @param {number} [range=15] 
+   * @param {number} [timer=3000] - time in ms 
+   * @param {boolean} [skipBlocked=true] 
+   * @param {boolean} [special=false] 
+   * @returns {void}
+   */
   securePosition: function (x, y, range = 15, timer = 3000, skipBlocked = true, special = false) {
     let tick;
 
@@ -882,8 +882,8 @@ const Attack = {
       if (monster) {
         do {
           if (getDistance(monster, x, y) <= range && monster.attackable && this.canAttack(monster)
-							&& (!skipBlocked || !checkCollision(me, monster, skipBlocked))
-							&& (Pather.canTeleport() || !checkCollision(me, monster, sdk.collision.BlockWall))) {
+              && (!skipBlocked || !checkCollision(me, monster, skipBlocked))
+              && (Pather.canTeleport() || !checkCollision(me, monster, sdk.collision.BlockWall))) {
             monList.push(copyUnit(monster));
           }
         } while (monster.getNext());
@@ -915,10 +915,10 @@ const Attack = {
   },
 
   /**
-	 * @description Draw lines around a room on minimap
-	 * @param {Room} room 
-	 * @param {number} color 
-	 */
+   * @description Draw lines around a room on minimap
+   * @param {Room} room 
+   * @param {number} color 
+   */
   markRoom: function (room, color) {
     let arr = [];
     const [rX, rY] = [room.x * 5, room.y * 5];
@@ -930,8 +930,8 @@ const Attack = {
   },
 
   /**
-	 * @description Count uniques in current area within getUnit range
-	 */
+   * @description Count uniques in current area within getUnit range
+   */
   countUniques: function () {
     !Attack.uniques && (Attack.uniques = 0);
     !Attack.ignoredGids && (Attack.ignoredGids = []);
@@ -949,9 +949,9 @@ const Attack = {
   },
 
   /**
-	 * @description Store average unique monsters counted in area during run
-	 * @param {number} area 
-	 */
+   * @description Store average unique monsters counted in area during run
+   * @param {number} area 
+   */
   storeStatistics: function (area) {
     !FileTools.exists("statistics.json") && FileAction.write("statistics.json", "{}");
 
@@ -978,10 +978,10 @@ const Attack = {
   },
 
   /**
-	 * @description Clear an entire area based on monster spectype
-	 * @param {number} spectype 
-	 * @returns {boolean}
-	 */
+   * @description Clear an entire area based on monster spectype
+   * @param {number} spectype 
+   * @returns {boolean}
+   */
   clearLevel: function (spectype = 0) {
     function RoomSort(a, b) {
       return getDistance(myRoom[0], myRoom[1], a[0], a[1]) - getDistance(myRoom[0], myRoom[1], b[0], b[1]);
@@ -1002,7 +1002,7 @@ const Attack = {
     do {
       rooms.push([room.x * 5 + room.xsize / 2, room.y * 5 + room.ysize / 2]);
     } while (room.getNext());
-		
+    
     if (Config.MFLeader && rooms.length > 0) {
       Pather.makePortal();
       console.log("clearlevel " + getAreaName(currentArea));
@@ -1064,13 +1064,13 @@ const Attack = {
   },
 
   /**
-	 * @description Sort monsters based on distance, spectype and classId (summoners are attacked first)
-	 * @param {Unit} unitA 
-	 * @param {Unit} unitB 
-	 * @returns {boolean}
-	 * @todo Think this needs a collison check included for non tele chars, might prevent choosing 
-	 * closer mob that is actually behind a wall vs the one we pass trying to get behind the wall
-	 */
+   * @description Sort monsters based on distance, spectype and classId (summoners are attacked first)
+   * @param {Unit} unitA 
+   * @param {Unit} unitB 
+   * @returns {boolean}
+   * @todo Think this needs a collison check included for non tele chars, might prevent choosing 
+   * closer mob that is actually behind a wall vs the one we pass trying to get behind the wall
+   */
   sortMonsters: function (unitA, unitB) {
     // No special sorting for were-form
     if (Config.Wereform) return getDistance(me, unitA) - getDistance(me, unitB);
@@ -1149,23 +1149,23 @@ const Attack = {
   },
 
   /**
-	 * @description Check if a set of coords is valid/accessable
-	 * @param {number} x 
-	 * @param {number} y 
-	 * @param {number} [skill=-1] 
-	 * @param {number} [unitid=0] 
-	 * @returns {boolean} If the spot is a valid location for walking/casting/attack
-	 * @todo re-work this for more info:
-	 *  - casting skills can go over non-floors - excluding bliz/meteor - not sure if any others
-	 *  - physical skills can't, need to exclude monster objects though
-	 *  - splash skills can go through some objects, however some objects are cast blockers
-	 */
+   * @description Check if a set of coords is valid/accessable
+   * @param {number} x 
+   * @param {number} y 
+   * @param {number} [skill=-1] 
+   * @param {number} [unitid=0] 
+   * @returns {boolean} If the spot is a valid location for walking/casting/attack
+   * @todo re-work this for more info:
+   *  - casting skills can go over non-floors - excluding bliz/meteor - not sure if any others
+   *  - physical skills can't, need to exclude monster objects though
+   *  - splash skills can go through some objects, however some objects are cast blockers
+   */
   validSpot: function (x, y, skill = -1, unitid = 0) {
     // Just in case
     if (!me.area || !x || !y) return false;
     // for now this just returns true and we leave getting into position to the actual class attack files
     if (Skill.missileSkills.includes(skill)
-			|| ([sdk.skills.Blizzard, sdk.skills.Meteor].includes(skill)
+      || ([sdk.skills.Blizzard, sdk.skills.Meteor].includes(skill)
       && unitid > 0 && !getBaseStat("monstats", unitid, "flying"))) {
       return true;
     }
@@ -1210,12 +1210,12 @@ const Attack = {
   },
 
   /**
-	 * @description Open chests when clearing
-	 * @param {number} range 
-	 * @param {number} [x=me.x] 
-	 * @param {number} [y=me.y] 
-	 * @returns {boolean}
-	 */
+   * @description Open chests when clearing
+   * @param {number} range 
+   * @param {number} [x=me.x] 
+   * @param {number} [y=me.y] 
+   * @returns {boolean}
+   */
   openChests: function (range, x, y) {
     if (!Config.OpenChests.Enabled) return false;
     (typeof x !== "number" || typeof y !== "number") && ({ x, y } = me);
@@ -1245,10 +1245,10 @@ const Attack = {
   },
 
   /**
-	 * @description build list of attackable monsters currently around us
-	 * @param {function(): boolean} check - callback function to build list
-	 * @returns {Array<Monster> | []}
-	 */
+   * @description build list of attackable monsters currently around us
+   * @param {function(): boolean} check - callback function to build list
+   * @returns {Array<Monster> | []}
+   */
   buildMonsterList: function (check = () => true) {
     let monList = [];
     let monster = Game.getMonster();
@@ -1265,12 +1265,12 @@ const Attack = {
   },
 
   /**
-	 * @param {Unit} unit 
-	 * @param {number} distance 
-	 * @param {number} spread 
-	 * @param {number} range 
-	 * @returns {{x: number, y: number}} x/y coords of safe spot
-	 */
+   * @param {Unit} unit 
+   * @param {number} distance 
+   * @param {number} spread 
+   * @param {number} range 
+   * @returns {{x: number, y: number}} x/y coords of safe spot
+   */
   findSafeSpot: function (unit, distance, spread, range) {
     if (arguments.length < 4) throw new Error("deploy: Not enough arguments supplied");
 
@@ -1368,10 +1368,10 @@ const Attack = {
   },
 
   /**
-	* @description checks if we should skip a monster
-	* @param {Unit} unit
-	* @returns {Boolean} If we should skip this monster
-	*/
+  * @description checks if we should skip a monster
+  * @param {Unit} unit
+  * @returns {Boolean} If we should skip this monster
+  */
   skipCheck: function (unit) {
     if (me.inArea(sdk.areas.ThroneofDestruction)) return false;
     if (unit.isSpecial && Config.SkipException && Config.SkipException.includes(unit.name)) {
@@ -1477,10 +1477,10 @@ const Attack = {
   },
 
   /**
-	 * @description Get element by skill number
-	 * @param {number} skillId 
-	 * @returns {"physical" | "fire" | "lightning" | "magic" | "cold" | "poison" | "holybolt" | "none" | false}
-	 */
+   * @description Get element by skill number
+   * @param {number} skillId 
+   * @returns {"physical" | "fire" | "lightning" | "magic" | "cold" | "poison" | "holybolt" | "none" | false}
+   */
   getSkillElement: function (skillId) {
     let elements = ["physical", "fire", "lightning", "magic", "cold", "poison", "none"];
 
@@ -1509,11 +1509,11 @@ const Attack = {
   },
 
   /**
-	 * @description Get a monster's resistance to specified element
-	 * @param {Unit | Monster} unit 
-	 * @param {"physical" | "fire" | "lightning" | "magic" | "cold" | "poison" | "holybolt" | "none"} type 
-	 * @returns {number}
-	 */
+   * @description Get a monster's resistance to specified element
+   * @param {Unit | Monster} unit 
+   * @param {"physical" | "fire" | "lightning" | "magic" | "cold" | "poison" | "holybolt" | "none"} type 
+   * @returns {number}
+   */
   getResist: function (unit, type) {
     // some scripts pass empty units in throne room
     if (!unit || !unit.getStat) return 100;
@@ -1631,10 +1631,10 @@ const Attack = {
   },
 
   /**
-	 * Check if we have valid skills to attack a monster
-	 * @param {Monster} unit 
-	 * @returns {boolean}
-	 */
+   * Check if we have valid skills to attack a monster
+   * @param {Monster} unit 
+   * @returns {boolean}
+   */
   canAttack: function (unit) {
     if (unit.isMonster) {
       // Unique/Champion
@@ -1660,9 +1660,9 @@ const Attack = {
   },
 
   /**
-	 * Detect use of bows/crossbows
-	 * @returns {string | false}
-	 */
+   * Detect use of bows/crossbows
+   * @returns {string | false}
+   */
   usingBow: function () {
     let item = me.getItem(-1, sdk.items.mode.Equipped);
 
@@ -1684,14 +1684,14 @@ const Attack = {
   },
 
   /**
-	 * Find an optimal attack position and move or walk to it
-	 * @param {Unit} unit 
-	 * @param {number} distance 
-	 * @param {number} coll 
-	 * @param {boolean} walk 
-	 * @param {boolean} force 
-	 * @returns {boolean} sucessfully found and moved into position
-	 */
+   * Find an optimal attack position and move or walk to it
+   * @param {Unit} unit 
+   * @param {number} distance 
+   * @param {number} coll 
+   * @param {boolean} walk 
+   * @param {boolean} force 
+   * @returns {boolean} sucessfully found and moved into position
+   */
   getIntoPosition: function (unit, distance, coll, walk, force) {
     if (!unit || !unit.x || !unit.y) return false;
 
@@ -1700,8 +1700,8 @@ const Attack = {
     force && console.debug("Forcing new position");
 
     /**
-		 * @todo If we've disabled tele for walking clear, allow use of tele specifically for repositioning
-		 */
+     * @todo If we've disabled tele for walking clear, allow use of tele specifically for repositioning
+     */
 
     if (distance < 4 && (!unit.hasOwnProperty("mode") || !unit.dead)) {
       if (walk) {
@@ -1760,7 +1760,7 @@ const Attack = {
             if (Config.DebugMode.Path && force) {
               console.debug(
                 "Sucessfully got into position. orginal Loc: " + orgX + "/" + orgY
-								+ " new loc " + me.x + "/" + me.y + " distance: " + [orgX, orgY].distance
+                + " new loc " + me.x + "/" + me.y + " distance: " + [orgX, orgY].distance
               );
             }
             return true;
@@ -1775,10 +1775,10 @@ const Attack = {
   },
 
   /**
-	 * Find the nearest monster to us with optional exception parameters
-	 * @param {{ skipBlocked?: boolean, skipImmune?: boolean, skipGid?: number}} givenSettings 
-	 * @returns {Monster | false}
-	 */
+   * Find the nearest monster to us with optional exception parameters
+   * @param {{ skipBlocked?: boolean, skipImmune?: boolean, skipGid?: number}} givenSettings 
+   * @returns {Monster | false}
+   */
   getNearestMonster: function (givenSettings = {}) {
     const settings = Object.assign({}, {
       skipBlocked: true,
@@ -1796,9 +1796,9 @@ const Attack = {
           let distance = getDistance(me, monster);
 
           if (distance < range
-						&& (settings.skipGid === -1 || monster.gid !== settings.skipGid)
-						&& (!settings.skipBlocked || !checkCollision(me, monster, sdk.collision.WallOrRanged))
-						&& (!settings.skipImmune || Attack.canAttack(monster))) {
+            && (settings.skipGid === -1 || monster.gid !== settings.skipGid)
+            && (!settings.skipBlocked || !checkCollision(me, monster, sdk.collision.WallOrRanged))
+            && (!settings.skipImmune || Attack.canAttack(monster))) {
             range = distance;
             gid = monster.gid;
           }
@@ -1810,10 +1810,10 @@ const Attack = {
   },
 
   /**
-	 * Check valid corpse for Redemption/Horking/Summoning
-	 * @param {Monster} unit 
-	 * @returns {boolean} valid corpse
-	 */
+   * Check valid corpse for Redemption/Horking/Summoning
+   * @param {Monster} unit 
+   * @returns {boolean} valid corpse
+   */
   checkCorpse: function (unit) {
     if (!unit || (unit.mode !== sdk.monsters.mode.Death && unit.mode !== sdk.monsters.mode.Dead)) return false;
     if (unit.classid <= sdk.monsters.BurningDeadArcher2 && !getBaseStat("monstats2", unit.classid, "corpseSel")) {
@@ -1826,11 +1826,11 @@ const Attack = {
   },
 
   /**
-	 * Get valid corpses for Redemption/Horking/Summoning
-	 * @param {Monster} unit 
-	 * @param {number} range 
-	 * @returns {Monster[]}
-	 */
+   * Get valid corpses for Redemption/Horking/Summoning
+   * @param {Monster} unit 
+   * @param {number} range 
+   * @returns {Monster[]}
+   */
   checkNearCorpses: function (unit, range = 15) {
     let corpses = getUnits(sdk.unittype.Monster).filter(function (corpse) {
       return getDistance(corpse, unit) <= range && Attack.checkCorpse(corpse);
@@ -1839,9 +1839,9 @@ const Attack = {
   },
 
   /**
-	 * @param {Monster} unit 
-	 * @returns {boolean}
-	 */
+   * @param {Monster} unit 
+   * @returns {boolean}
+   */
   whirlwind: function (unit) {
     if (!unit.attackable) return true;
 

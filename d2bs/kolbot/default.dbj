@@ -51,15 +51,15 @@ function main () {
     load("libs/manualplay/threads/mapthread.js");
     return true;
   }
-	
+  
   // MuleLogger handler
   if (MuleLogger.inGameCheck()) return true;
-	
+  
   // don't load default for dropper/mules
   if (getScript("D2BotDropper.dbj") || getScript("D2BotMule.dbj")) {
     FileTools.exists("libs/ItemDB.js") && include("ItemDB.js");
     load("threads/AreaWatcher.js");
-		
+    
     while (me.ingame) {
       delay(10000);
     }
@@ -147,7 +147,7 @@ function main () {
   if (Config.PublicMode) {
     Config.PublicMode === true ? require("libs/modules/SimpleParty") : load("threads/Party.js");
   }
-	
+  
   Config.AntiHostile && load("threads/AntiHostile.js");
 
   if (Config.FastPick) {
@@ -162,7 +162,7 @@ function main () {
     Town.getCorpse();
     Town.clearBelt();
     Pather.init(); // initialize wp data
-		
+    
     let { x, y } = me;
     Config.ClearInvOnStart && Town.clearInventory();
     [x, y].distance > 3 && Pather.moveTo(x, y);

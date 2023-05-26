@@ -33,11 +33,11 @@ function main() {
   }
 
   /**
-	 * Format the event message here to prevent repetitive code
-	 * @param {string[]} arr 
-	 * @param {Player | string} player
-	 * @param {string} [killer] 
-	 */
+   * Format the event message here to prevent repetitive code
+   * @param {string[]} arr 
+   * @param {Player | string} player
+   * @param {string} [killer] 
+   */
   const eventMsg = (arr, player, killer) => {
     try {
       typeof player === "string" && (player = getParty(player));
@@ -145,10 +145,10 @@ function main() {
     }
 
     /**
-		 * @todo if we are already partied with everyone in game, then this doesn't need to keep checking unless an event happens
-		 * e.g. someone joins/leaves game or someone declares hostility
-		 * the exception to that is if we are running with Config.Congratulations, in which case we do need to constantly monitor changes
-		 */
+     * @todo if we are already partied with everyone in game, then this doesn't need to keep checking unless an event happens
+     * e.g. someone joins/leaves game or someone declares hostility
+     * the exception to that is if we are running with Config.Congratulations, in which case we do need to constantly monitor changes
+     */
     if (me.gameReady
       && (!Config.PartyAfterScript || scriptList.indexOf(currScript) > scriptList.indexOf(Config.PartyAfterScript))) {
       player = getParty();
@@ -232,7 +232,7 @@ function main() {
               if (player.level > playerLevels[player.name]) {
                 let msg = eventMsg(Config.Congratulations, player);
                 msg && say(msg);
-								
+                
                 playerLevels[player.name] = player.level;
               }
             }

@@ -19,9 +19,9 @@
       );
 
       /**
-			* @constructor
-			* @param {function():string} callback
-			*/
+      * @constructor
+      * @param {function():string} callback
+      */
       function UpdateableText(callback) {
         let element = new Text(callback(), self.x + 15, self.y + (7 * self.hooks.length), 0, 12, 0);
         self.hooks.push(element);

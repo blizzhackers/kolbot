@@ -73,7 +73,7 @@ const TextHooks = {
     function sortHooks(h1, h2) {
       return Math.abs(h1.hook.y - y) - Math.abs(h2.hook.y - y);
     }
-		
+    
     if (click === 0) {
       TextHooks.statusHooks.sort(sortHooks);
 
@@ -89,7 +89,7 @@ const TextHooks = {
 
   add: function (name, hookArr = []) {
     let orginalLen = hookArr.length;
-		
+    
     switch (name) {
     case "credits":
       this.hooks.push({

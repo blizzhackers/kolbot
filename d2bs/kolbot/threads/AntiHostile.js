@@ -25,7 +25,7 @@ function main() {
   // AntiHostile gets game event info from ToolsThread
   this.scriptEvent = function (msg) {
     if (!msg || typeof msg !== "string") return;
-		
+    
     switch (msg.split(" ")[0]) {
     case "remove": // Remove a hostile player that left the game
       if (hostiles.indexOf(msg.split(" ")[1]) > -1) {

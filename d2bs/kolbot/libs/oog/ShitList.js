@@ -41,7 +41,7 @@ const ShitList = {
 
   read: function () {
     !FileTools.exists("shitlist.json") && this.create();
-		
+    
     let obj = this.getObj();
 
     return obj.shitlist;

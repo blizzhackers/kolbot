@@ -327,7 +327,7 @@ const Item = {
 
   getItemCode: function (unit) {
     if (unit === undefined) return "";
-		
+    
     let code = (() => {
       switch (unit.quality) {
       case sdk.items.quality.Set:
@@ -396,7 +396,7 @@ const Item = {
       case sdk.items.quality.Unique:
         for (let i = 0; i < 401; i += 1) {
           if (unit.code === getBaseStat("uniqueitems", i, 4).trim()
-						&& unit.fname.split("\n").reverse()[0].includes(getLocaleString(getBaseStat("uniqueitems", i, 2)))) {
+            && unit.fname.split("\n").reverse()[0].includes(getLocaleString(getBaseStat("uniqueitems", i, 2)))) {
             return getBaseStat("uniqueitems", i, "invfile");
           }
         }

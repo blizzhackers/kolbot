@@ -78,7 +78,7 @@ NTIP.OpenFile = function (filepath, notify) {
       if (!lines[i].toLowerCase().match("tier")) {
         NTIP_CheckListNoTier.push(line);
       }
-			
+      
       stringArray.push(info);
     }
   }

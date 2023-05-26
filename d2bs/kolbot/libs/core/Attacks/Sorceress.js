@@ -60,7 +60,7 @@ const ClassAttack = {
     if (Config.MercWatch && Town.needMerc()) {
       if (Town.visitTown()) {
         print("mercwatch");
-				
+        
         if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
           console.debug("Lost reference to unit");
           return Attack.Result.SUCCESS;
@@ -172,7 +172,7 @@ const ClassAttack = {
         }
 
         let closeMob = Attack.getNearestMonster({ skipGid: gid });
-				
+        
         if (!!closeMob) {
           let findSkill = this.decideSkill(closeMob);
           if (this.doCast(closeMob, findSkill.timed, findSkill.untimed) !== Attack.Result.SUCCESS) {
@@ -198,7 +198,7 @@ const ClassAttack = {
     // unit became invalidated
     if (!unit || !unit.attackable) return Attack.Result.SUCCESS;
     Config.TeleSwitch && me.switchToPrimary();
-		
+    
     let walk, noMana = false;
     let classid = unit.classid;
 

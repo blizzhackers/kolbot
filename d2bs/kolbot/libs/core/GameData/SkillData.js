@@ -8,14 +8,14 @@
 
 (function (module) {
   /**
-	 * @typedef {Object} SkillInterface
-	 * @property {number} hand
-	 * @property {boolean} [missile]
-	 * @property {number | () => number} range
-	 * @property {number} [state]
-	 * @property {() => boolean} [condition]
-	 * @property {() => number} [summonCount]
-	 */
+   * @typedef {Object} SkillInterface
+   * @property {number} hand
+   * @property {boolean} [missile]
+   * @property {number | () => number} range
+   * @property {number} [state]
+   * @property {() => boolean} [condition]
+   * @property {() => number} [summonCount]
+   */
 
   /** @type {Map<number, SkillInterface>} */
   const skillMap = new Map();
@@ -226,7 +226,7 @@
       range: 1,
       duration: () => (
         ((12 * me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.SoftPoints) + 108)
-				+ ((me.getSkill(sdk.skills.ShiverArmor, sdk.skills.subindex.HardPoints)
+        + ((me.getSkill(sdk.skills.ShiverArmor, sdk.skills.subindex.HardPoints)
         + me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.HardPoints)) * 10))
       ),
     });
@@ -276,7 +276,7 @@
       range: 1,
       duration: () => (
         ((12 * me.getSkill(sdk.skills.ShiverArmor, sdk.skills.subindex.SoftPoints) + 108)
-				+ ((me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.HardPoints)
+        + ((me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.HardPoints)
         + me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.HardPoints)) * 10))
       ),
     });
@@ -329,7 +329,7 @@
       range: 1,
       duration: () => (
         ((6 * me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.SoftPoints) + 138)
-				+ ((me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.HardPoints)
+        + ((me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.HardPoints)
         + me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.HardPoints)) * 10))
       ),
     });
@@ -794,7 +794,7 @@
       state: sdk.states.Shout,
       duration: () => (
         ((10 + me.getSkill(sdk.skills.Shout, sdk.skills.subindex.SoftPoints) * 10)
-				+ ((me.getSkill(sdk.skills.BattleOrders, sdk.skills.subindex.HardPoints)
+        + ((me.getSkill(sdk.skills.BattleOrders, sdk.skills.subindex.HardPoints)
         + me.getSkill(sdk.skills.BattleCommand, sdk.skills.subindex.HardPoints)) * 5))
       ),
     });
@@ -863,7 +863,7 @@
       state: sdk.states.BattleOrders,
       duration: () => (
         ((20 + me.getSkill(sdk.skills.BattleOrders, sdk.skills.subindex.SoftPoints) * 10)
-				+ ((me.getSkill(sdk.skills.Shout, sdk.skills.subindex.HardPoints)
+        + ((me.getSkill(sdk.skills.Shout, sdk.skills.subindex.HardPoints)
         + me.getSkill(sdk.skills.BattleCommand, sdk.skills.subindex.HardPoints)) * 5))
       ),
     });
@@ -902,7 +902,7 @@
       state: sdk.states.BattleCommand,
       duration: () => (
         ((10 * me.getSkill(sdk.skills.BattleCommand, sdk.skills.subindex.SoftPoints) - 5)
-				+ ((me.getSkill(sdk.skills.Shout, sdk.skills.subindex.HardPoints)
+        + ((me.getSkill(sdk.skills.Shout, sdk.skills.subindex.HardPoints)
         + me.getSkill(sdk.skills.BattleOrders, sdk.skills.subindex.HardPoints)) * 5))
       ),
     });
@@ -991,7 +991,7 @@
         let range = Math.floor(((33 + (2 * skLvl)) / 4) * (2 / 3));
         // Druid using this on physical immunes needs the monsters to be within range of hurricane
         range > 6 && Config.AttackSkill[5] === sdk.skills.ArcticBlast && (range = 6);
-			
+      
         return range;
       },
     });
@@ -1283,9 +1283,9 @@
   ];
 
   /**
-	 * @constructor
-	 * @param {number} skillId 
-	 */
+   * @constructor
+   * @param {number} skillId 
+   */
   function Skill (skillId) {
     let _skillData = skillMap.get(skillId);
     /** @type {number} */
@@ -1325,85 +1325,85 @@
     this.damageType = damageTypes[getBaseStat("skills", skillId, "EType")];
 
     /**
-		 * @private
-		 * @type {number | () => number}
-		 */
+     * @private
+     * @type {number | () => number}
+     */
     this._range = (_skillData.range || 1);
     /**
-		 * @private
-		 * @type {() => number}
-		 */
+     * @private
+     * @type {() => number}
+     */
     this._AoE = (_skillData.AoE || (() => 0));
     /**
-		 * @private
-		 * @type {() => number}
-		 */
+     * @private
+     * @type {() => number}
+     */
     this._duration = (_skillData.duration || (() => 0));
     /**
-		 * @private
-		 * @type {number}
-		 */
+     * @private
+     * @type {number}
+     */
     this._manaCost = Infinity;
     /**
-		 * @private
-		 * @type {number}
-		 */
+     * @private
+     * @type {number}
+     */
     this._mana = getBaseStat("skills", this.skillId, "mana");
     /**
-		 * @private
-		 * @type {number}
-		 */
+     * @private
+     * @type {number}
+     */
     this._minMana = getBaseStat("skills", this.skillId, "minmana");
     /**
-		 * @private
-		 * @type {number}
-		 */
+     * @private
+     * @type {number}
+     */
     this._lvlMana = getBaseStat("skills", this.skillId, "lvlmana");
     let effectiveShift = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024];
     /**
-		 * @private
-		 * @type {number}
-		 */
+     * @private
+     * @type {number}
+     */
     this._manaShift = (effectiveShift[getBaseStat("skills", this.skillId, "manashift")] / 256);
     /**
-		 * @private
-		 * @type {number}
-		 */
+     * @private
+     * @type {number}
+     */
     this._bestSlot = 0;
     /**
-		 * @private
-		 * @type {number}
-		 */
+     * @private
+     * @type {number}
+     */
     this._dmg = 0;
     /**
-		 * @private
-		 * @type {number}
-		 */
+     * @private
+     * @type {number}
+     */
     this._hardPoints = 0;
     /**
-		 * @private
-		 * @type {number}
-		 */
+     * @private
+     * @type {number}
+     */
     this._softPoints = 0;
     /**
-		 * @private
-		 * @type {boolean}
-		 */
+     * @private
+     * @type {boolean}
+     */
     this._checked = false;
   }
 
   /**
-	 * @this Skill
-	 * @returns {number}
-	 */
+   * @this Skill
+   * @returns {number}
+   */
   Skill.prototype.duration = function () {
     return Time.seconds(this._duration());
   };
 
   /**
-	 * @this Skill
-	 * @returns {number}
-	 */
+   * @this Skill
+   * @returns {number}
+   */
   Skill.prototype.manaCost = function () {
     if (this._manaCost !== Infinity) return this._manaCost;
     if (this.skillId < sdk.skills.MagicArrow) {
@@ -1426,26 +1426,26 @@
   };
 
   /**
-	 * @this Skill
-	 * @property {boolean} pvpRange
-	 * @returns {number}
-	 */
+   * @this Skill
+   * @property {boolean} pvpRange
+   * @returns {number}
+   */
   Skill.prototype.range = function (pvpRange = false) {
     return typeof this._range === "function" ? this._range(pvpRange) : this._range;
   };
 
   /**
-	 * @this Skill
-	 * @returns {number}
-	 */
+   * @this Skill
+   * @returns {number}
+   */
   Skill.prototype.AoE = function () {
     return this._AoE();
   };
 
   /**
-	 * @this Skill
-	 * @returns {boolean}
-	 */
+   * @this Skill
+   * @returns {boolean}
+   */
   Skill.prototype.have = function () {
     if (!this.condition()) return false;
     if (this._hardPoints > 0) return true;
@@ -1466,8 +1466,8 @@
   };
 
   /**
-	 * @todo Damage calculations, best slot, etc.
-	 */
+   * @todo Damage calculations, best slot, etc.
+   */
 
   /** @type {Map<number, Skill} */
   const SkillData = new Map();

@@ -41,15 +41,15 @@ Pather.changeAct = function (act) {
   }
 
   !me.inTown && Town.goToTown();
-	
+  
   if (npc) {
     npcUnit = Game.getNPC(NPC[npc]);
     wp = Game.getObject("waypoint");
 
     if (Pather.accessToAct(act)
-			&& ((wp && !npcUnit)
-				|| (wp && npcUnit && getDistance(me, wp) < getDistance(me, npcUnit))
-				|| (Town.getDistance("waypoint") < Town.getDistance(NPC[npc])))) {
+      && ((wp && !npcUnit)
+        || (wp && npcUnit && getDistance(me, wp) < getDistance(me, npcUnit))
+        || (Town.getDistance("waypoint") < Town.getDistance(NPC[npc])))) {
       useWp = true;
     }
   } else {
@@ -299,7 +299,7 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
     // Abort if dead
     if (me.dead || Pather.stop) {
       Pather.stop = false;	// Reset value
-			
+      
       return false;
     }
 
@@ -310,8 +310,8 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
     node = path.shift();
 
     /* Right now getPath's first node is our own position so it's not necessary to take it into account
-			This will be removed if getPath changes
-		*/
+      This will be removed if getPath changes
+    */
     if (getDistance(me, node) > 2) {
       fail >= 3 && fail % 3 === 0 && !Attack.validSpot(node.x, node.y) && (invalidCheck = true);
       // Make life in Maggot Lair easier - should this include arcane as well?
@@ -336,7 +336,7 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
         if (Pather.stop) {
           continue; // stops on next interation
         }
-				
+        
         if (!me.inTown) {
           if (this.recursion) {
             this.recursion = false;

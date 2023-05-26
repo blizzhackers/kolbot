@@ -11,7 +11,7 @@ function Corpsefire() {
   Precast.doPrecast(true);
 
   if (!Pather.moveToExit([sdk.areas.BloodMoor, sdk.areas.DenofEvil], true)
-		|| !Pather.moveToPreset(me.area, sdk.unittype.Monster, sdk.monsters.preset.Corpsefire, 0, 0, false, true)) {
+    || !Pather.moveToPreset(me.area, sdk.unittype.Monster, sdk.monsters.preset.Corpsefire, 0, 0, false, true)) {
     throw new Error("Failed to move to Corpsefire");
   }
 

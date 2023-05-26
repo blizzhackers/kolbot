@@ -38,7 +38,7 @@ function Synch2() {
       party = getParty(Config.Synch.WaitFor[j]);
       if (!party) {
         D2Bot.printToConsole("WaitFor not in game: " +
-						Config.Synch.WaitFor[j] + " so quitting.");
+            Config.Synch.WaitFor[j] + " so quitting.");
 
         removeEventListener("chatmsg", messageHandler2);
         quit();

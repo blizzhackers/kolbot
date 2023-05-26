@@ -69,7 +69,7 @@ function Wakka () {
           while (!boss.dead) {
             delay(500);
           }
-					
+          
           return true;
         }
 
@@ -330,7 +330,7 @@ function Wakka () {
                   console.debug("Failed to move to seis");
                   break;
                 }
-								
+                
                 if (checkBoss(getLocaleString(sdk.locale.monsters.LordDeSeis))) {
                   log("seis dead");
                   internals.seisClear = true;

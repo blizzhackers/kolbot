@@ -32,11 +32,11 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
     realms: { "uswest": 0, "useast": 1, "asia": 2, "europe": 3 },
 
     /**
-		 * @param {string} text 
-		 * @param {number} time - in milliseconds 
-		 * @param {Function} [stopfunc] 
-		 * @param {*} [arg] 
-		 */
+     * @param {string} text 
+     * @param {number} time - in milliseconds 
+     * @param {Function} [stopfunc] 
+     * @param {*} [arg] 
+     */
     timeoutDelay: function (text, time, stopfunc, arg) {
       let currTime = 0;
       let endTime = getTickCount() + time;
@@ -61,15 +61,15 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
     },
 
     /**
-		 * @param {number} type 
-		 * @param {number} x 
-		 * @param {number} y 
-		 * @param {number} xsize 
-		 * @param {number} ysize 
-		 * @param {number} targetx 
-		 * @param {number} targety 
-		 * @returns {boolean}
-		 */
+     * @param {number} type 
+     * @param {number} x 
+     * @param {number} y 
+     * @param {number} xsize 
+     * @param {number} ysize 
+     * @param {number} targetx 
+     * @param {number} targety 
+     * @returns {boolean}
+     */
     click: function (type, x, y, xsize, ysize, targetx, targety) {
       let control = getControl(type, x, y, xsize, ysize);
 
@@ -85,14 +85,14 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
     },
 
     /**
-		 * @param {number} type 
-		 * @param {number} x 
-		 * @param {number} y 
-		 * @param {number} xsize 
-		 * @param {number} ysize 
-		 * @param {string} text 
-		 * @returns {boolean}
-		 */
+     * @param {number} type 
+     * @param {number} x 
+     * @param {number} y 
+     * @param {number} xsize 
+     * @param {number} ysize 
+     * @param {string} text 
+     * @returns {boolean}
+     */
     setText: function (type, x, y, xsize, ysize, text) {
       if (!text) return false;
 
@@ -114,13 +114,13 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
     },
 
     /**
-		 * @param {number} type 
-		 * @param {number} x 
-		 * @param {number} y 
-		 * @param {number} xsize 
-		 * @param {number} ysize 
-		 * @returns {string[] | false}
-		 */
+     * @param {number} type 
+     * @param {number} x 
+     * @param {number} y 
+     * @param {number} xsize 
+     * @param {number} ysize 
+     * @returns {string[] | false}
+     */
     getText: function (type, x, y, xsize, ysize) {
       let control = getControl(type, x, y, xsize, ysize);
 
@@ -195,20 +195,20 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
     },
 
     /**
-		 * @typedef {Object} CharacterInfo
-		 * @property {string} charName
-		 * @property {string} charClass
-		 * @property {number} charLevel
-		 * @property {boolean} expansion
-		 * @property {boolean} hardcore
-		 * @property {boolean} ladder
-		 */
+     * @typedef {Object} CharacterInfo
+     * @property {string} charName
+     * @property {string} charClass
+     * @property {number} charLevel
+     * @property {boolean} expansion
+     * @property {boolean} hardcore
+     * @property {boolean} ladder
+     */
 
     /**
-		 * @param {CharacterInfo} info 
-		 * @param {boolean} [startFromTop]
-		 * @returns {Control | false}
-		 */
+     * @param {CharacterInfo} info 
+     * @param {boolean} [startFromTop]
+     * @returns {Control | false}
+     */
     findCharacter: function (info, startFromTop = true) {
       let count = 0;
       let tick = getTickCount();
@@ -293,9 +293,9 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
     },
 
     /**
-		 * @param {CharacterInfo} info 
-		 * @returns {boolean}
-		 */
+     * @param {CharacterInfo} info 
+     * @returns {boolean}
+     */
     getPermStatus: function (info) {
       let expireStr = getLocaleString(sdk.locale.text.ExpiresIn);
       expireStr = expireStr.slice(0, expireStr.indexOf("%")).trim();
@@ -310,9 +310,9 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
     },
 
     /**
-		 * get character position - useless? this doesn't take any arguments to even check the character
-		 * @returns {number}
-		 */
+     * get character position - useless? this doesn't take any arguments to even check the character
+     * @returns {number}
+     */
     getPosition: function () {
       let position = 0;
 
@@ -334,9 +334,9 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
     },
 
     /**
-		 * @param {CharacterInfo} info 
-		 * @returns {boolean}
-		 */
+     * @param {CharacterInfo} info 
+     * @returns {boolean}
+     */
     makeCharacter: function (info) {
       me.blockMouse = true;
       !info.charClass && (info.charClass = "barbarian");
@@ -416,9 +416,9 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
     },
 
     /**
-		 * @param {CharacterInfo} info 
-		 * @returns {boolean}
-		 */
+     * @param {CharacterInfo} info 
+     * @returns {boolean}
+     */
     deleteCharacter: function (info) {
       let control = this.findCharacter(info);
       if (!control) return false;
@@ -443,9 +443,9 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
     },
 
     /**
-		 * @param {CharacterInfo} info 
-		 * @returns {boolean}
-		 */
+     * @param {CharacterInfo} info 
+     * @returns {boolean}
+     */
     convertCharacter: function (info) {
       let control = this.findCharacter(info);
       if (!control) return false;
@@ -453,7 +453,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
       if (control.getText().find(el => el.toLowerCase().includes("expansion"))) {
         console.warn(info.charName + " already expansion");
         console.debug(control, "\n", control.getText());
-				
+        
         return false;
       }
 
@@ -477,13 +477,13 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
     },
 
     /**
-		 * @param {CharacterInfo} info 
-		 * @param {boolean} startFromTop
-		 * @returns {boolean}
-		 */
+     * @param {CharacterInfo} info 
+     * @param {boolean} startFromTop
+     * @returns {boolean}
+     */
     loginCharacter: function (info, startFromTop = true) {
       me.blockMouse = true;
-			
+      
       try {
         MainLoop:
         // cycle until in lobby or in game
@@ -492,7 +492,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
           case sdk.game.locations.CharSelect:
             let control = this.findCharacter(info, startFromTop);
             if (!control) return false;
-						
+            
             control.click();
             Controls.BottomRightOk.click();
             Starter.locationTimeout(sdk.game.locations.CharSelect, 5000);
@@ -529,7 +529,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
       if (!email || !email.length) {
         email = Starter.randomString(null, true);
       }
-			
+      
       while (getLocation() !== sdk.game.locations.CharSelect) {
         switch (getLocation()) {
         case sdk.game.locations.RegisterEmail:
@@ -543,7 +543,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
           // todo test what conditions get here other than email not matching
           D2Bot.printToConsole("Failed to set email");
           Controls.LoginErrorOk.click();
-					
+          
           return false;
         case sdk.game.locations.CharSelectNoChars:
           // fresh acc
@@ -558,7 +558,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
       me.blockMouse = true;
 
       let openBnet = Profile().type === sdk.game.profiletype.OpenBattlenet;
-			
+      
       // cycle until in empty char screen
       MainLoop:
       while (getLocation() !== sdk.game.locations.CharSelectNoChars) {
@@ -788,7 +788,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
       me.blockMouse = false;
     },
-		
+    
     getGameList: function () {
       let text = Controls.JoinGameList.getText();
 
@@ -838,7 +838,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
           break;
         case sdk.game.locations.SelectDifficultySP:
           Starter.LocationEvents.selectDifficultySP();
-					
+          
           break;
         case sdk.game.locations.SplashScreen:
           ControlAction.click();
@@ -857,7 +857,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
             break;
           }
-					
+          
           Controls.OtherMultiplayer.click();
 
           break;
@@ -888,7 +888,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
           if (me.charname !== Starter.profileInfo.charName) {
             Controls.LobbyQuit.click();
-						
+            
             break;
           }
 
@@ -904,7 +904,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
           break;
         }
       }
-			
+      
       // handling Enter Ip inside entry for now so that location === sucess
       return (me.ingame || getLocation() === [sdk.game.locations.TcpIpEnterIp]);
     }
@@ -962,7 +962,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
     setNextGame: function (gameInfo = {}) {
       let nextGame = (gameInfo.gameName || this.randomString(null, true));
-			
+      
       if ((this.gameCount + 1 >= Starter.Config.ResetCount) || (nextGame.length + this.gameCount + 1 > 15)) {
         nextGame += "1";
       } else {
@@ -1028,10 +1028,10 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
     },
 
     /**
-		 * Handle copy data event
-		 * @param {number} mode 
-		 * @param {object | string} msg 
-		 */
+     * Handle copy data event
+     * @param {number} mode 
+     * @param {object | string} msg 
+     */
     receiveCopyData: function (mode, msg) {
       let obj;
 
@@ -1230,7 +1230,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
             } else {
               Controls.UnableToConnectOk.click();
               ControlAction.timeoutDelay("LoD key in use", Starter.Config.CDKeyInUseDelay * 6e4);
-							
+              
               return;
             }
 
@@ -1271,7 +1271,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
           Controls.LoginErrorOk.click();
           delay(1000);
           Controls.BottomLeftExit.click();
-			
+      
           while (true) {
             delay(1000);
           }
@@ -1307,12 +1307,12 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
           // Click create char button on infinite "connecting" screen
           Controls.CharSelectCreate.click();
           delay(1000);
-					
+          
           Controls.BottomLeftExit.click();
           delay(1000);
-					
+          
           if (getLocation() !== sdk.game.locations.CharSelectConnecting) return true;
-					
+          
           Controls.BottomLeftExit.click();
           Starter.gameInfo.rdBlocker && D2Bot.restart();
 
@@ -1433,17 +1433,17 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
                 i !== text.length - 1 && (string += " ");
               }
             }
-						
+            
             switch (string) {
             case getLocaleString(sdk.locale.text.UnableToIndentifyVersion):
               Controls.UnableToConnectOk.click();
               ControlAction.timeoutDelay("Version error", Starter.Config.VersionErrorDelay * 1000);
-							
+              
               break;
             default: // Regular UTC and everything else
               Controls.UnableToConnectOk.click();
               ControlAction.timeoutDelay("Unable to Connect", Starter.Config.UnableToConnectDelay * 1000 * 60);
-							
+              
               break;
             }
 
@@ -1522,8 +1522,8 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
         if (getLocation() === sdk.game.locations.MainMenu) {
           if (Profile().type === sdk.game.profiletype.SinglePlayer
-						&& Starter.firstRun
-						&& Controls.SinglePlayer.click()) {
+            && Starter.firstRun
+            && Controls.SinglePlayer.click()) {
             return true;
           }
         }
@@ -1532,18 +1532,18 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
         if (getLocation() === sdk.game.locations.CharSelect) {
           hideConsole(); // seems to fix odd crash with single-player characters if the console is open to type in
           if ((Profile().type === sdk.game.profiletype.Battlenet && !Controls.CharSelectCurrentRealm.control)
-						|| ((Profile().type !== sdk.game.profiletype.Battlenet && Controls.CharSelectCurrentRealm.control))) {
+            || ((Profile().type !== sdk.game.profiletype.Battlenet && Controls.CharSelectCurrentRealm.control))) {
             Controls.BottomLeftExit.click();
-					
+          
             return false;
           }
         }
 
         // Multiple realm botting fix in case of R/D or disconnect
         Starter.firstLogin && getLocation() === sdk.game.locations.Login && Controls.BottomLeftExit.click();
-		
+    
         D2Bot.updateStatus("Logging In");
-						
+            
         try {
           login(me.profile);
         } catch (e) {

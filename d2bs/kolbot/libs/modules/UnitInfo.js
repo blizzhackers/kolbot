@@ -19,45 +19,45 @@ include("core/prototypes.js");
   }
 }(this, function () {
   /**
-	 * @constructor
-	 */
+   * @constructor
+   */
   function UnitInfo () {
     /**
-		 * screen coordinate for info box
-		 * @private
-		 * @type {number}
-		 */
+     * screen coordinate for info box
+     * @private
+     * @type {number}
+     */
     this.x = 200;
 
     /**
-		 * screen coordinate for info box
-		 * @private
-		 * @type {number}
-		 */
+     * screen coordinate for info box
+     * @private
+     * @type {number}
+     */
     this.y = 250;
 
     /**
-		 * @private
-		 * @type {any[]}
-		 */
+     * @private
+     * @type {any[]}
+     */
     this.hooks = [];
 
     /**
-		 * @private
-		 * @type {number | null}
-		 */
+     * @private
+     * @type {number | null}
+     */
     this.currentGid = null;
 
     /**
-		 * @private
-		 * @type {boolean}
-		 */
+     * @private
+     * @type {boolean}
+     */
     this.cleared = true;
 
     /**
-		 * @private
-		 * @type {{ x: number, y: number }}
-		 */
+     * @private
+     * @type {{ x: number, y: number }}
+     */
     this.resfix = {
       x: (me.screensize ? 0 : -160),
       y: (me.screensize ? 0 : -120)
@@ -65,9 +65,9 @@ include("core/prototypes.js");
   }
 
   /**
-	 * Create info based on unit type
-	 * @param {Unit} unit 
-	 */
+   * Create info based on unit type
+   * @param {Unit} unit 
+   */
   UnitInfo.prototype.createInfo = function (unit) {
     if (typeof unit === "undefined") {
       this.remove();
@@ -103,8 +103,8 @@ include("core/prototypes.js");
   };
 
   /**
-	 * Check that selected unit is still valid
-	 */
+   * Check that selected unit is still valid
+   */
   UnitInfo.prototype.check = function () {
     // make sure things got cleaned up properly if we are supposedly cleared
     if (this.hooks.length === 0 && this.cleared) return;
@@ -117,9 +117,9 @@ include("core/prototypes.js");
   };
 
   /**
-	 * @private
-	 * @param {Player} unit 
-	 */
+   * @private
+   * @param {Player} unit 
+   */
   UnitInfo.prototype.playerInfo = function (unit) {
     let string;
     let frameXsize = 0;
@@ -155,9 +155,9 @@ include("core/prototypes.js");
   };
 
   /**
-	 * @private
-	 * @param {Monster} unit 
-	 */
+   * @private
+   * @param {Monster} unit 
+   */
   UnitInfo.prototype.monsterInfo = function (unit) {
     let frameYsize = 125;
 
@@ -178,9 +178,9 @@ include("core/prototypes.js");
   };
 
   /**
-	 * @private
-	 * @param {ItemUnit} unit 
-	 */
+   * @private
+   * @param {ItemUnit} unit 
+   */
   UnitInfo.prototype.itemInfo = function (unit) {
     let xpos = 60;
     let ypos = (me.getMerc() ? 80 : 20) + (-1 * this.resfix.y);
@@ -224,9 +224,9 @@ include("core/prototypes.js");
   };
 
   /**
-	 * @private
-	 * @param {ObjectUnit} unit 
-	 */
+   * @private
+   * @param {ObjectUnit} unit 
+   */
   UnitInfo.prototype.objectInfo = function (unit) {
     let frameYsize = 35;
 
@@ -245,7 +245,7 @@ include("core/prototypes.js");
     this.hooks.push(new Frame(this.x, this.y - 15, 120, frameYsize, 2));
     this.hooks[this.hooks.length - 2].zorder = 0;
   };
-	
+  
   UnitInfo.prototype.remove = function () {
     while (this.hooks.length > 0) {
       this.hooks.shift().remove();

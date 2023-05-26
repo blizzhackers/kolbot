@@ -138,7 +138,7 @@ const ClassAttack = {
     // unit became invalidated
     if (!unit || !unit.attackable) return Attack.Result.SUCCESS;
     Config.TeleSwitch && me.switchToPrimary();
-		
+    
     let walk;
     let classid = unit.classid;
 

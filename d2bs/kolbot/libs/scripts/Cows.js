@@ -7,7 +7,7 @@
 
 function Cows() {
   include("core/Common/Cows.js");
-	
+  
   const getLeg = function () {
     if (me.wirtsleg) return me.wirtsleg;
 
@@ -118,7 +118,7 @@ function Cows() {
       if (Config.Cows.DontMakePortal) throw new Error("NOT PORTAL MAKER");
       if (!me.tristram) throw new Error("Cain quest incomplete");
       if (me.cows) throw new Error("Already killed the Cow King.");
-			
+      
       let leg = getLeg();
       let tome = getTome();
       openPortal(leg, tome);

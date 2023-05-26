@@ -76,7 +76,7 @@ function locationAction (location) {
         D2Bot.stop(me.profile, true);
         break;
       }
-			
+      
       if (!Starter.LocationEvents.openCreateGameWindow()) {
         break;
       }
@@ -103,7 +103,7 @@ function locationAction (location) {
       D2Bot.stop(me.profile, true);
       break;
     }
-	
+  
     D2Bot.updateStatus("Creating Game");
 
     // remove level restriction
@@ -129,7 +129,7 @@ function locationAction (location) {
     Starter.locationTimeout(5000, location);
 
     Starter.lastGameStatus = "pending";
-		
+    
     break;
   case sdk.game.locations.JoinGame: // Join Game
     D2Bot.updateStatus("Join Game");
@@ -178,7 +178,7 @@ function locationAction (location) {
   case sdk.game.locations.CharSelect: // Character Select
     // Reset ftj counter
     ftj = 0;
-		
+    
     // Single Player screen fix
     if (getLocation() === sdk.game.locations.CharSelect && !Controls.CharSelectCurrentRealm.control) {
       Controls.BottomLeftExit.click();

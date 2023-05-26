@@ -156,14 +156,14 @@ includeIfNotIncluded("oog/DataFile.js");
     },
 
     /**
-		 * Profile to profile communication
-		 * @param {string} profile 
-		 * @param {string} gameName 
-		 * @param {number} gameCount 
-		 * @param {string} gamePass 
-		 * @param {string} isUp 
-		 * @param {number} delay 
-		 */
+     * Profile to profile communication
+     * @param {string} profile 
+     * @param {string} gameName 
+     * @param {number} gameCount 
+     * @param {string} gamePass 
+     * @param {string} isUp 
+     * @param {number} delay 
+     */
     joinMe: function (profile, gameName, gameCount, gamePass, isUp, delay) {
       let obj = {
         gameName: (gameName + gameCount).toLowerCase(),

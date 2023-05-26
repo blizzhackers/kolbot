@@ -14,9 +14,9 @@ function Questing () {
   };
 
   /**
-	 * @param {ItemUnit} item 
-	 * @returns {boolean}
-	 */
+   * @param {ItemUnit} item 
+   * @returns {boolean}
+   */
   const getQuestItem = (item) => {
     if (item) {
       let id = item.classid;
@@ -218,13 +218,13 @@ function Questing () {
       let frozenanya = Game.getObject(sdk.objects.FrozenAnya);
 
       /**
-			 * Here we have issues sometimes
-			 * Including a check for her unfreezing in case we already have malah's potion
-			 * @todo
-			 * - tele char can lure frozenstein away from anya as he can be hard to kill
-			 * aggro the pack then move back until there isn't any monster around anya (note) we can only detect mobs around 40 yards of us
-			 * then should use a static location behind anya as our destination to tele to
-			 */
+       * Here we have issues sometimes
+       * Including a check for her unfreezing in case we already have malah's potion
+       * @todo
+       * - tele char can lure frozenstein away from anya as he can be hard to kill
+       * aggro the pack then move back until there isn't any monster around anya (note) we can only detect mobs around 40 yards of us
+       * then should use a static location behind anya as our destination to tele to
+       */
       if (frozenanya) {
         if (me.sorceress && Skill.haveTK) {
           Attack.getIntoPosition(frozenanya, 15, sdk.collision.LineOfSight, Pather.canTeleport(), true);
@@ -240,9 +240,9 @@ function Questing () {
       Town.npcInteract("malah");
 
       /**
-			 * Now this should prevent us from re-entering if we either failed to interact with anya in the first place
-			 * or if we had malah's potion because this is our second attempt and we managed to unfreeze her
-			 */
+       * Now this should prevent us from re-entering if we either failed to interact with anya in the first place
+       * or if we had malah's potion because this is our second attempt and we managed to unfreeze her
+       */
       if (me.getItem(sdk.quest.item.MalahsPotion)) {
         console.log("Got potion, lets go unfreeze anya");
 
@@ -252,7 +252,7 @@ function Questing () {
         }, Time.seconds(30), 1000)) throw new Error("Anya quest failed - Failed to return to frozen river");
 
         frozenanya = Game.getObject(sdk.objects.FrozenAnya);	// Check again in case she's no longer there from first intereaction
-				
+        
         if (frozenanya) {
           for (let i = 0; i < 3; i++) {
             frozenanya.distance > 5 && Pather.moveToUnit(frozenanya, 1, 2);
@@ -271,19 +271,19 @@ function Questing () {
     }
 
     /**
-		 * Now lets handle completing the quest as we have freed anya
-		 */
+     * Now lets handle completing the quest as we have freed anya
+     */
     if (Misc.checkQuest(sdk.quest.id.PrisonofIce, sdk.quest.states.ReqComplete)) {
       /**
-			 * Here we haven't talked to malah to recieve the scroll yet so lets do that
-			 */
+       * Here we haven't talked to malah to recieve the scroll yet so lets do that
+       */
       if (!Misc.checkQuest(sdk.quest.id.PrisonofIce, 8/** Recieved the scroll */)) {
         Town.npcInteract("malah");
       }
 
       /**
-			 * Here we haven't talked to anya to open the red portal
-			 */
+       * Here we haven't talked to anya to open the red portal
+       */
       if (!Misc.checkQuest(sdk.quest.id.PrisonofIce, 9/** Talk to anya in town */)) {
         Town.npcInteract("anya");
       }
@@ -327,7 +327,7 @@ function Questing () {
       log("Failed to take portal back to Arreat Summit", true);
       Pather.journeyTo(sdk.areas.ArreatSummit);
     }
-		
+    
     Precast.doPrecast(true);
 
     // move to altar
@@ -337,7 +337,7 @@ function Questing () {
 
     Common.Ancients.touchAltar();
     Common.Ancients.startAncients(true);
-		
+    
     me.cancel();
     Config = tempConfig;
     log("restored settings");
@@ -368,11 +368,11 @@ function Questing () {
 
   const tasks = (function () {
     /**
-		 * @constructor
-		 * @param {function(): void} task 
-		 * @param {() => boolean} preReq 
-		 * @param {() => boolean} complete 
-		 */
+     * @constructor
+     * @param {function(): void} task 
+     * @param {() => boolean} preReq 
+     * @param {() => boolean} complete 
+     */
     function Task (task, preReq, complete) {
       this.run = task;
       this.preReq = (preReq || (() => true));

@@ -30,7 +30,7 @@ Misc.openRedPortal = function (portalID) {
           tpTome.forEach(function (book) {
             while (book.getStat(sdk.stats.Quantity) < 20) {
               scroll = npc.getItem(sdk.items.ScrollofTownPortal);
-							
+              
               if (!!scroll && scroll.getItemCost(sdk.items.cost.ToBuy) < me.gold) {
                 scroll.buy();
               } else {
@@ -148,7 +148,7 @@ Misc.dropItems = function (fromLoc) {
         let item = items.shift();
 
         if (item.classid === sdk.quest.item.Cube
-					|| (item.isEquippedCharm && Storage.Inventory.IsLocked(item, Config.Inventory))) {
+          || (item.isEquippedCharm && Storage.Inventory.IsLocked(item, Config.Inventory))) {
           continue;
         } else {
           item.drop();

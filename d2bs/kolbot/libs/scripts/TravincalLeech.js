@@ -50,7 +50,7 @@ function TravincalLeech () {
       Common.Leecher.leader = leader;
       Common.Leecher.currentScript = Loader.scriptName();
       Worker.runInBackground.leaderTracker = Common.Leecher.leaderTracker;
-			
+      
       while (Misc.inMyParty(Common.Leecher.leader)) {
         if (done) return true;
 
@@ -58,7 +58,7 @@ function TravincalLeech () {
           Pather.usePortal(sdk.areas.Travincal, Common.Leecher.leader);
           Town.getCorpse();
         }
-				
+        
         if (me.mode === sdk.player.mode.Dead) {
           me.revive();
 

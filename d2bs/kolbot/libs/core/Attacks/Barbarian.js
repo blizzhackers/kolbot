@@ -13,10 +13,10 @@
 
 const ClassAttack = {
   /**
-	 * @param {Monster} unit 
-	 * @param {boolean} preattack 
-	 * @returns {AttackResult}
-	 */
+   * @param {Monster} unit 
+   * @param {boolean} preattack 
+   * @returns {AttackResult}
+   */
   doAttack: function (unit, preattack = false) {
     if (!unit) return Attack.Result.SUCCESS;
     Config.TeleSwitch && me.switchToPrimary();
@@ -64,11 +64,11 @@ const ClassAttack = {
       && Attack.checkResist(unit, Config.LowManaSkill[0])) {
       attackSkill = Config.LowManaSkill[0];
     }
-		
+    
     // low weapon-quantity -> use secondary skill if we can
     if (attackSkill === sdk.skills.DoubleThrow
       && (me.getWeaponQuantity() <= 3 || me.getWeaponQuantity(sdk.body.LeftArm) <= 3)
-			&& Skill.canUse(Config.AttackSkill[index + 1]) && Attack.checkResist(unit, Config.AttackSkill[index + 1])) {
+      && Skill.canUse(Config.AttackSkill[index + 1]) && Attack.checkResist(unit, Config.AttackSkill[index + 1])) {
       attackSkill = Config.AttackSkill[index + 1];
     }
 
@@ -77,9 +77,9 @@ const ClassAttack = {
   },
 
   /**
-	 * Check if we need to precast, repair items, or perform findItem
-	 * @param {boolean} pickit - determines if we use findItem or not
-	 */
+   * Check if we need to precast, repair items, or perform findItem
+   * @param {boolean} pickit - determines if we use findItem or not
+   */
   afterAttack: function (pickit = true) {
     Precast.doPrecast(false);
 
@@ -91,22 +91,22 @@ const ClassAttack = {
   },
 
   /**
-	 * @param {Monster} unit 
-	 * @param {number} attackSkill 
-	 * @returns {AttackResult}
-	 */
+   * @param {Monster} unit 
+   * @param {number} attackSkill 
+   * @returns {AttackResult}
+   */
   doCast: function (unit, attackSkill = -1) {
     if (attackSkill < 0) return Attack.Result.CANTATTACK;
     // check if unit became invalidated
     if (!unit || !unit.attackable) return Attack.Result.SUCCESS;
     Config.TeleSwitch && me.switchToPrimary();
-		
+    
     switch (attackSkill) {
     case sdk.skills.Whirlwind:
       /**
-			 * @todo we sometimes struggle getting into position because of monsters which is dumb since we can
-			 * just whirl through them, so that needs to be fixed
-			 */
+       * @todo we sometimes struggle getting into position because of monsters which is dumb since we can
+       * just whirl through them, so that needs to be fixed
+       */
       if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, sdk.collision.BlockWall)) {
         if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.BlockWall, 2)) {
           return Attack.Result.FAILED;
@@ -139,10 +139,10 @@ const ClassAttack = {
   },
 
   /**
-	 * Check whether there are any monsters in range that are attackable
-	 * @param {number} range 
-	 * @returns {boolean}
-	 */
+   * Check whether there are any monsters in range that are attackable
+   * @param {number} range 
+   * @returns {boolean}
+   */
   checkCloseMonsters: function (range = 10) {
     const [mainAttElm, secAttElm] = [
       Attack.getSkillElement(Config.AttackSkill[1]),
@@ -153,8 +153,8 @@ const ClassAttack = {
     if (monster) {
       do {
         if (monster.distance <= range && monster.attackable && !checkCollision(me, monster, sdk.collision.Ranged)
-						&& (Attack.checkResist(monster, monster.isSpecial ? mainAttElm : secAttElm))
-							|| (Config.AttackSkill[3] > -1 && Attack.checkResist(monster, secAttElm))) {
+            && (Attack.checkResist(monster, monster.isSpecial ? mainAttElm : secAttElm))
+              || (Config.AttackSkill[3] > -1 && Attack.checkResist(monster, secAttElm))) {
           return true;
         }
       } while (monster.getNext());
@@ -164,10 +164,10 @@ const ClassAttack = {
   },
 
   /**
-	 * Use findItem skill to hork bodies
-	 * @param {number} range 
-	 * @returns {boolean}
-	 */
+   * Use findItem skill to hork bodies
+   * @param {number} range 
+   * @returns {boolean}
+   */
   findItem: function (range = 10) {
     if (!Skill.canUse(sdk.skills.FindItem)) return false;
 
@@ -254,17 +254,17 @@ const ClassAttack = {
   },
 
   /**
-	 * Check if corpse is horkable
-	 * @param {Monster} unit 
-	 * @returns {boolean}
-	 */
+   * Check if corpse is horkable
+   * @param {Monster} unit 
+   * @returns {boolean}
+   */
   checkCorpse: function (unit) {
     if (!unit || !copyUnit(unit).x
       || (unit.mode !== sdk.monsters.mode.Death && unit.mode !== sdk.monsters.mode.Dead)) {
       return false;
     }
     if ([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3].indexOf(unit.classid) === -1
-			&& unit.spectype === sdk.monsters.spectype.All) {
+      && unit.spectype === sdk.monsters.spectype.All) {
       return false;
     }
 

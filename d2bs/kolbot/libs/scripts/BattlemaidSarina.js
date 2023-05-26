@@ -11,7 +11,7 @@ function BattlemaidSarina() {
   Precast.doPrecast(true);
 
   if (!Pather.moveToExit(sdk.areas.RuinedTemple, true)
-		|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.LamEsensTomeHolder)) {
+    || !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.LamEsensTomeHolder)) {
     throw new Error("Failed to move near Sarina");
   }
 

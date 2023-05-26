@@ -18,10 +18,10 @@
       CraftingGames: [],
 
       /*	BaseItems - list of base item class ids
-			*	Ingredients - list of recipe ingredients
-			*	SetAmount - number of full sets to gather before transfering
-			*	Type - the type of recipe. Available options: "crafting", "runewords", "cubing"
-			*/
+      *	Ingredients - list of recipe ingredients
+      *	SetAmount - number of full sets to gather before transfering
+      *	Type - the type of recipe. Available options: "crafting", "runewords", "cubing"
+      */
       Sets: [
         // LLD Crafting
 

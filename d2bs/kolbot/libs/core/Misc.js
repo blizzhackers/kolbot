@@ -8,13 +8,13 @@
 
 const Misc = {
   /**
-	 * Click something
-	 * @param {number} button 
-	 * @param {number} shift 
-	 * @param {number | Unit} [x] 
-	 * @param {number} [y] 
-	 * @returns {boolean}
-	 */
+   * Click something
+   * @param {number} button 
+   * @param {number} shift 
+   * @param {number | Unit} [x] 
+   * @param {number} [y] 
+   * @returns {boolean}
+   */
   click: function (button, shift, x, y) {
     if (arguments.length < 2) throw new Error("Misc.click: Needs at least 2 arguments.");
 
@@ -55,10 +55,10 @@ const Misc = {
   },
 
   /**
-	 * Check if a player is in your party
-	 * @param {string} name 
-	 * @returns {boolean}
-	 */
+   * Check if a player is in your party
+   * @param {string} name 
+   * @returns {boolean}
+   */
   inMyParty: function (name) {
     if (me.name === name) return true;
 
@@ -171,7 +171,7 @@ const Misc = {
 
     if (party) {
       let myPartyId = party.partyid;
-			
+      
       do {
         if (party.partyid !== sdk.party.NoParty && party.partyid === myPartyId && party.name !== me.name) {
           print(party.name);
@@ -213,11 +213,11 @@ const Misc = {
   },
 
   /**
-	 * autoleader by Ethic - refactored by theBGuy
-	 * Autodetect leader for leech scripts by looking to see who first enters a certain area
-	 * @param {{ destination: number | number[], quitIf?: Function, timeout?: number }} givenSettings 
-	 * @returns 
-	 */
+   * autoleader by Ethic - refactored by theBGuy
+   * Autodetect leader for leech scripts by looking to see who first enters a certain area
+   * @param {{ destination: number | number[], quitIf?: Function, timeout?: number }} givenSettings 
+   * @returns 
+   */
   autoLeaderDetect: function (givenSettings = {}) {
     const settings = Object.assign({}, {
       destination: -1,
@@ -262,13 +262,13 @@ const Misc = {
   },
 
   /**
-	* @description Open a chest Unit (takes chestID or unit)
-	* @param {Unit | number} unit 
-	* @returns {boolean} If we opened the chest
-	*/
+  * @description Open a chest Unit (takes chestID or unit)
+  * @param {Unit | number} unit 
+  * @returns {boolean} If we opened the chest
+  */
   openChest: function (unit) {
     typeof unit === "number" && (unit = Game.getObject(unit));
-		
+    
     // Skip invalid/open and Countess chests
     if (!unit || unit.x === 12526 || unit.x === 12565 || unit.mode) return false;
     // locked chest, no keys
@@ -309,7 +309,7 @@ const Misc = {
   openChestsInArea: function (area, chestIds = []) {
     !area && (area = me.area);
     area !== me.area && Pather.journeyTo(area);
-		
+    
     let presetUnits = Game.getPresetObjects(area);
     if (!presetUnits) return false;
 
@@ -520,15 +520,15 @@ const Misc = {
   },
 
   /**
-	 * Check all shrines in area and get the first one of specified type
-	 * @param {number} area 
-	 * @param {number} type 
-	 * @param {boolean} use 
-	 * @returns {boolean} Sucesfully found shrine(s)
-	 * @todo 
-	 * - Sometimes it seems like calling getPresetObjects to quickly after taking an exit causes a crash, only anecdotal evidence though. Test delays
-	 * - Add the rest of the preset shrine id's to look for
-	 */
+   * Check all shrines in area and get the first one of specified type
+   * @param {number} area 
+   * @param {number} type 
+   * @param {boolean} use 
+   * @returns {boolean} Sucesfully found shrine(s)
+   * @todo 
+   * - Sometimes it seems like calling getPresetObjects to quickly after taking an exit causes a crash, only anecdotal evidence though. Test delays
+   * - Add the rest of the preset shrine id's to look for
+   */
   getShrinesInArea: function (area, type, use) {
     let shrineLocs = [];
     let shrineIds = [2, 81, 83];
@@ -639,10 +639,10 @@ const Misc = {
   screenshotErrors: true,
 
   /**
-	 * Report script errors to logs/ScriptErrorLog.txt
-	 * @param {Error | string} error 
-	 * @param {string} [script] 
-	 */
+   * Report script errors to logs/ScriptErrorLog.txt
+   * @param {Error | string} error 
+   * @param {string} [script] 
+   */
   errorReport: function (error, script) {
     let msg, oogmsg, filemsg, source, stack;
     let stackLog = "";
@@ -702,19 +702,19 @@ const Misc = {
   },
 
   /**
-	 * @param {string} msg 
-	 * @returns {void}
-	 */
+   * @param {string} msg 
+   * @returns {void}
+   */
   debugLog: function (msg) {
     if (!Config.Debug) return;
     debugLog(me.profile + ": " + msg);
   },
 
   /**
-	 * Use a NPC menu. Experimental function, subject to change
-	 * @param {number} id - string number (with exception of Ressurect merc).
-	 * @returns {boolean}
-	 */
+   * Use a NPC menu. Experimental function, subject to change
+   * @param {number} id - string number (with exception of Ressurect merc).
+   * @returns {boolean}
+   */
   useMenu: function (id) {
     //print("useMenu " + getLocaleString(id));
 
@@ -751,12 +751,12 @@ const Misc = {
   },
 
   /**
-	 * @template T
-	 * @param {function(): T} check 
-	 * @param {number} [timeout=6000] 
-	 * @param {number} [sleep=40] 
-	 * @returns {T | false}
-	 */
+   * @template T
+   * @param {function(): T} check 
+   * @param {number} [timeout=6000] 
+   * @param {number} [sleep=40] 
+   * @returns {T | false}
+   */
   poll: function (check, timeout = 6000, sleep = 40) {
     let ret, start = getTickCount();
 
@@ -772,9 +772,9 @@ const Misc = {
   },
 
   /**
-	 * @param {number[]} excluded 
-	 * @returns {number[] | null} array of UI flags that are set, or null if none are set
-	 */
+   * @param {number[]} excluded 
+   * @returns {number[] | null} array of UI flags that are set, or null if none are set
+   */
   getUIFlags: function (excluded = []) {
     if (!me.gameReady) return null;
 
@@ -797,10 +797,10 @@ const Misc = {
   },
 
   /**
-	 * @param {number} id 
-	 * @param {number} state 
-	 * @returns {0 | 1}
-	 */
+   * @param {number} id 
+   * @param {number} state 
+   * @returns {0 | 1}
+   */
   checkQuest: function (id, state) {
     Packet.questRefresh();
     delay(500);
@@ -808,9 +808,9 @@ const Misc = {
   },
 
   /**
-	 * @param {number} questID 
-	 * @returns {number[]} List of set quest states
-	 */
+   * @param {number} questID 
+   * @returns {number[]} List of set quest states
+   */
   getQuestStates: function (questID) {
     if (!me.gameReady) return [];
     Packet.questRefresh();

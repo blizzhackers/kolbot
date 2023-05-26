@@ -12,7 +12,7 @@ include("core/Packet.js");
 function main () {
   console.log("ÿc3Start AntiIdle");
   let idleTick = Time.seconds(getTickCount() + rand(1200, 1500));
-	
+  
   while (true) {
     if (me.ingame && me.gameReady) {
       if (getTickCount() - idleTick > 0) {

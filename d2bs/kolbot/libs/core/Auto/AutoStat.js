@@ -13,22 +13,22 @@ const AutoStat = new function () {
   this.bulkStat = true;
 
   /*	statBuildOrder - array of stat points to spend in order
-		save - remaining stat points that will not be spent and saved.
-		block - an integer value set to desired block chance. This is ignored in classic.
-		bulkStat - set true to spend multiple stat points at once (up to 100), or false to spend 1 point at a time.
+    save - remaining stat points that will not be spent and saved.
+    block - an integer value set to desired block chance. This is ignored in classic.
+    bulkStat - set true to spend multiple stat points at once (up to 100), or false to spend 1 point at a time.
 
-		statBuildOrder Settings
-		The script will stat in the order of precedence. You may want to stat strength or dexterity first.
+    statBuildOrder Settings
+    The script will stat in the order of precedence. You may want to stat strength or dexterity first.
 
-		Set stats to desired integer value, and it will stat *hard points up to the desired value.
-		You can also set to string value "all", and it will spend all the remaining points.
-		Dexterity can be set to "block" and it will stat dexterity up the the desired block value specified in arguemnt (ignored in classic).
+    Set stats to desired integer value, and it will stat *hard points up to the desired value.
+    You can also set to string value "all", and it will spend all the remaining points.
+    Dexterity can be set to "block" and it will stat dexterity up the the desired block value specified in arguemnt (ignored in classic).
 
-		statBuildOrder = [
-			["strength", 25], ["energy", 75], ["vitality", 75],
-			["strength", 55], ["vitality", "all"]
-		];
-	*/
+    statBuildOrder = [
+      ["strength", 25], ["energy", 75], ["vitality", 75],
+      ["strength", 55], ["vitality", "all"]
+    ];
+  */
 
   this.getBlock = function () {
     if (!me.usingShield()) return this.block;
@@ -614,7 +614,7 @@ const AutoStat = new function () {
 
   this.addStatPoint = function () {
     this.remaining = me.getStat(sdk.stats.StatPts);
-		
+    
     let hardStats;
 
     for (let i = 0; i < this.statBuildOrder.length; i += 1) {

@@ -50,19 +50,19 @@ const Runewords = {
   },
 
   /**
-	 * Ensures this item isn't wanted by the CraftingSystem
-	 * @param {ItemUnit} item 
-	 * @returns {boolean}
-	 * @todo Why only the crafting system?
-	 */
+   * Ensures this item isn't wanted by the CraftingSystem
+   * @param {ItemUnit} item 
+   * @returns {boolean}
+   * @todo Why only the crafting system?
+   */
   validItem: function (item) {
     return CraftingSystem.validGids.indexOf(item.gid) === -1;
   },
 
   /**
-	 * build a list of needed runes. won't count runes until the base item is found for a given runeword
-	 * @returns {void}
-	 */
+   * build a list of needed runes. won't count runes until the base item is found for a given runeword
+   * @returns {void}
+   */
   buildLists: function () {
     Runewords.validGids = [];
     Runewords.needList = [];
@@ -114,9 +114,9 @@ const Runewords = {
   },
 
   /**
-	 * @param {number} classid 
-	 * @param {number} gid 
-	 */
+   * @param {number} classid 
+   * @param {number} gid 
+   */
   update: function (classid, gid) {
     for (let i = 0; i < this.needList.length; i += 1) {
       if (this.needList[i] === classid) {
@@ -132,9 +132,9 @@ const Runewords = {
   },
 
   /**
-	 * returns an array of items that make a runeword if found, false if we don't have enough items for any
-	 * @returns {ItemUnit[] | boolean}
-	 */
+   * returns an array of items that make a runeword if found, false if we don't have enough items for any
+   * @returns {ItemUnit[] | boolean}
+   */
   checkRunewords: function () {
     // keep a const reference of our items so failed checks don't remove items from the list
     const itemsRef = me.findItems(-1, sdk.items.mode.inStorage);
@@ -177,32 +177,32 @@ const Runewords = {
   },
 
   /**
-	 * for pickit
-	 * @param {ItemUnit} unit 
-	 * @returns {boolean}
-	 */
+   * for pickit
+   * @param {ItemUnit} unit 
+   * @returns {boolean}
+   */
   checkItem: function (unit) {
     if (!Config.MakeRunewords) return false;
     return (unit.itemType === sdk.items.type.Rune && this.needList.includes(unit.classid));
   },
 
   /**
-	 * for clearInventory - don't drop runes that are a part of runeword recipe
-	 * @param {ItemUnit} unit 
-	 * @returns {boolean}
-	 */
+   * for clearInventory - don't drop runes that are a part of runeword recipe
+   * @param {ItemUnit} unit 
+   * @returns {boolean}
+   */
   keepItem: function (unit) {
     return this.validGids.includes(unit.gid);
   },
 
   /**
-	 * Get the base item based on classid and runeword recipe
-	 * @param {runeword} runeword 
-	 * @param {ItemUnit | number} base - item or classid
-	 * @param {number} [ethFlag] 
-	 * @param {boolean} [reroll] - optional reroll argument = gets a runeword that needs rerolling
-	 * @returns {ItemUnit | false}
-	 */
+   * Get the base item based on classid and runeword recipe
+   * @param {runeword} runeword 
+   * @param {ItemUnit | number} base - item or classid
+   * @param {number} [ethFlag] 
+   * @param {boolean} [reroll] - optional reroll argument = gets a runeword that needs rerolling
+   * @returns {ItemUnit | false}
+   */
   getBase: function (runeword, base, ethFlag, reroll) {
     let item = typeof base === "object"
       ? base
@@ -211,11 +211,11 @@ const Runewords = {
     if (item) {
       do {
         if (item && item.quality < sdk.items.quality.Magic
-					&& item.sockets === runeword.sockets && runeword.itemTypes.includes(item.itemType)) {
+          && item.sockets === runeword.sockets && runeword.itemTypes.includes(item.itemType)) {
           /**
-					 * check if item has items socketed in it
-					 * better check than getFlag(sdk.items.flags.Runeword) because randomly socketed items return false for it
-					 */
+           * check if item has items socketed in it
+           * better check than getFlag(sdk.items.flags.Runeword) because randomly socketed items return false for it
+           */
 
           if ((!reroll && !item.getItem()) || (reroll && item.getItem() && !NTIP.CheckItem(item, this.pickitEntries))) {
             if (!ethFlag || (ethFlag === Roll.Eth && item.ethereal) || (ethFlag === Roll.NonEth && !item.ethereal)) {
@@ -230,10 +230,10 @@ const Runewords = {
   },
 
   /** 
-	 * @param {ItemUnit} base 
-	 * @param {ItemUnit} rune 
-	 * @returns {boolean}
-	 */
+   * @param {ItemUnit} base 
+   * @param {ItemUnit} rune 
+   * @returns {boolean}
+   */
   socketItem: function (base, rune) {
     if (!rune.toCursor()) return false;
 

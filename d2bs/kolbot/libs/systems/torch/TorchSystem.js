@@ -72,7 +72,7 @@ const TorchSystem = {
         }
 
         delay(5000);
-				
+        
         try {
           quit();
         } finally {
@@ -96,7 +96,7 @@ const TorchSystem = {
     function keyCheckEvent(mode, msg) {
       if (mode === 6) {
         let obj = JSON.parse(msg);
-				
+        
         if (obj.name === "neededItems") {
           let item;
 
@@ -331,9 +331,9 @@ const TorchSystem = {
 
         // Stop the loop if we have enough keys or if wait time expired
         if (((tkeys >= 3 && hkeys >= 3 && dkeys >= 3)
-					|| (Config.OrgTorch.WaitTimeout
+          || (Config.OrgTorch.WaitTimeout
           && (getTickCount() - timer > Time.minutes(Config.OrgTorch.WaitTimeout))))
-					&& aloneInGame()) {
+          && aloneInGame()) {
 
           break;
         }

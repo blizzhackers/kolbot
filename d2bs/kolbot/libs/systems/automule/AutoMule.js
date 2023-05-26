@@ -11,7 +11,7 @@
 const AutoMule = {
   /** @type {Object.<string, muleObj>} */
   Mules: Object.assign({}, require("./MuleConfig", null, false)),
-	
+  
   /** @type {Object.<string, muleObj>} */
   TorchAnniMules: Object.assign({}, require("./TorchAnniMules", null, false)),
 
@@ -25,9 +25,9 @@ const AutoMule = {
   // ################################## //
 
   /**
-	 * Get mule and torchanni mule info if it exists
-	 * @returns {muleObj | {}}
-	 */
+   * Get mule and torchanni mule info if it exists
+   * @returns {muleObj | {}}
+   */
   getInfo: function () {
     let info;
 
@@ -67,8 +67,8 @@ const AutoMule = {
       let items = this.getMuleItems();
 
       if (info.muleInfo.hasOwnProperty("usedStashTrigger") && info.muleInfo.hasOwnProperty("usedInventoryTrigger")
-				&& Storage.Inventory.UsedSpacePercent() >= info.muleInfo.usedInventoryTrigger
-				&& Storage.Stash.UsedSpacePercent() >= info.muleInfo.usedStashTrigger && items.length > 0) {
+        && Storage.Inventory.UsedSpacePercent() >= info.muleInfo.usedInventoryTrigger
+        && Storage.Stash.UsedSpacePercent() >= info.muleInfo.usedStashTrigger && items.length > 0) {
         D2Bot.printToConsole("MuleCheck triggered!", sdk.colors.D2Bot.DarkGold);
 
         return true;
@@ -86,9 +86,9 @@ const AutoMule = {
   },
 
   /**
-	 * Find a mule that matches our wanted check
-	 * @returns {muleObj | false}
-	 */
+   * Find a mule that matches our wanted check
+   * @returns {muleObj | false}
+   */
   getMule: function () {
     let info = this.getInfo();
 
@@ -132,7 +132,7 @@ const AutoMule = {
       // Set status to ready if using continuous mule with no response check
       if (muleObj.continuousMule && muleObj.skipMuleResponse) {
         muleInfo.status = "ready";
-				
+        
         // If nothing received our copy data start the mule profile
       } else if (!sendCopyData(null, muleObj.muleProfile, 10, JSON.stringify({ profile: me.profile, mode: this.torchAnniCheck || 0 })) && !muleObj.continuousMule) {
         // if the mule profile isn't already running and there is a profile to be stopped, stop it before starting the mule profile
@@ -261,7 +261,7 @@ const AutoMule = {
 
     // Profile is not in mule or torch mule game
     if (!((info.hasOwnProperty("muleInfo") && String.isEqual(me.gamename, info.muleInfo.muleGameName[0]))
-				|| (info.hasOwnProperty("torchMuleInfo") && String.isEqual(me.gamename, info.torchMuleInfo.muleGameName[0])))) {
+        || (info.hasOwnProperty("torchMuleInfo") && String.isEqual(me.gamename, info.torchMuleInfo.muleGameName[0])))) {
       return false;
     }
 
@@ -338,7 +338,7 @@ const AutoMule = {
       let gameType = this.torchAnniCheck === 2 ? " anni" : this.torchAnniCheck === 1 ? " torch" : "";
       print("ÿc4AutoMuleÿc0: In" + gameType + " mule game.");
       D2Bot.updateStatus("AutoMule: In" + gameType + " mule game.");
-			
+      
       if (this.torchAnniCheck === 2) {
         this.dropCharm(true);
       } else if (this.torchAnniCheck === 1) {
@@ -380,7 +380,7 @@ const AutoMule = {
 
         delay(500);
       }
-			
+      
       return true;
     } catch (e) {
       console.error(e);
@@ -389,7 +389,7 @@ const AutoMule = {
     } finally {
       removeEventListener("scriptmsg", muleModeEvent);
       removeEventListener("copydata", dropStatusEvent);
-			
+      
       if (!muleObj.continuousMule) {
         D2Bot.stop(muleObj.muleProfile, true);
         delay(1000);
@@ -402,8 +402,8 @@ const AutoMule = {
   },
 
   /**
-	 * finished if no items are on ground
-	 */
+   * finished if no items are on ground
+   */
   isFinished: function () {
     let item = Game.getItem();
 
@@ -423,9 +423,9 @@ const AutoMule = {
   },
 
   /**
-	 * make sure mule character is in game
-	 * @param {string} mulePrefix 
-	 */
+   * make sure mule character is in game
+   * @param {string} mulePrefix 
+   */
   verifyMulePrefix: function (mulePrefix) {
     try {
       let player = getParty();
@@ -448,9 +448,9 @@ const AutoMule = {
   },
 
   /**
-	 * Transfer items to waiting mule
-	 * @returns {boolean}
-	 */
+   * Transfer items to waiting mule
+   * @returns {boolean}
+   */
   dropStuff: function () {
     if (!Town.openStash()) return false;
 
@@ -460,7 +460,7 @@ const AutoMule = {
 
     D2Bot.printToConsole("AutoMule: Transfering " + items.length + " items.", sdk.colors.D2Bot.DarkGold);
     D2Bot.printToConsole("AutoMule: " + JSON.stringify(items.map(i => i.prettyPrint)), sdk.colors.D2Bot.DarkGold);
-		
+    
     items.forEach(item => item.drop());
     delay(1000);
     me.cancel();
@@ -473,10 +473,10 @@ const AutoMule = {
   },
 
   /**
-	 * @param {ItemUnit} item 
-	 * @param {string[] | number[]} list 
-	 * @returns {boolean}
-	 */
+   * @param {ItemUnit} item 
+   * @param {string[] | number[]} list 
+   * @returns {boolean}
+   */
   matchItem: function (item, list) {
     let parsedPickit = [], classIDs = [];
 
@@ -500,9 +500,9 @@ const AutoMule = {
   },
 
   /**
-	 * get a list of items to mule
-	 * @returns {ItemUnit[] | false}
-	 */
+   * get a list of items to mule
+   * @returns {ItemUnit[] | false}
+   */
   getMuleItems: function () {
     let info = this.getInfo();
     if (!info || !info.hasOwnProperty("muleInfo")) return false;
@@ -510,15 +510,15 @@ const AutoMule = {
     const muleOrphans = !!(info.muleInfo.hasOwnProperty("muleOrphans") && info.muleInfo.muleOrphans);
 
     /**
-		 * @param {ItemUnit} item 
-		 */
+     * @param {ItemUnit} item 
+     */
     const isAKey = (item) => [sdk.items.quest.KeyofTerror, sdk.items.quest.KeyofHate, sdk.items.quest.KeyofDestruction].includes(item.classid);
-		
+    
     /**
-		 * check if wanted by any of the systems
-		 * @param {ItemUnit} item
-		 * @returns {boolean} if item is wanted by various systems
-		 */
+     * check if wanted by any of the systems
+     * @param {ItemUnit} item
+     * @returns {boolean} if item is wanted by various systems
+     */
     const isWanted = (item) => (AutoMule.cubingIngredient(item) || AutoMule.runewordIngredient(item) || AutoMule.utilityIngredient(item));
 
     let items = me.getItemsEx()
@@ -549,19 +549,19 @@ const AutoMule = {
   },
 
   /**
-	 * Wanted by CraftingSystem
-	 * @param {ItemUnit} item 
-	 * @returns {boolean}
-	 */
+   * Wanted by CraftingSystem
+   * @param {ItemUnit} item 
+   * @returns {boolean}
+   */
   utilityIngredient: function (item) {
     return (!!item && CraftingSystem.validGids.includes(item.gid));
   },
 
   /**
-	 * check if an item is a cubing ingredient
-	 * @param {ItemUnit} item 
-	 * @returns {boolean}
-	 */
+   * check if an item is a cubing ingredient
+   * @param {ItemUnit} item 
+   * @returns {boolean}
+   */
   cubingIngredient: function (item) {
     if (!item) return false;
 
@@ -575,10 +575,10 @@ const AutoMule = {
   },
 
   /**
-	 * check if an item is a runeword ingrediend - rune, empty base or bad rolled base
-	 * @param {ItemUnit} item 
-	 * @returns {boolean}
-	 */
+   * check if an item is a runeword ingrediend - rune, empty base or bad rolled base
+   * @param {ItemUnit} item 
+   * @returns {boolean}
+   */
   runewordIngredient: function (item) {
     if (!item) return false;
     if (Runewords.validGids.includes(item.gid)) return true;
@@ -596,10 +596,10 @@ const AutoMule = {
   },
 
   /**
-	 * Drop Anni or Gheeds
-	 * @param {boolean} dropAnni 
-	 * @returns {boolean}
-	 */
+   * Drop Anni or Gheeds
+   * @param {boolean} dropAnni 
+   * @returns {boolean}
+   */
   dropCharm: function (dropAnni) {
     if (!Town.openStash()) return false;
 
@@ -635,9 +635,9 @@ const AutoMule = {
   // ################################## //
 
   /**
-	 * @param {{ profile: string, mode: number }} info 
-	 * @returns {{ profile: string, mode: number }} master info
-	 */
+   * @param {{ profile: string, mode: number }} info 
+   * @returns {{ profile: string, mode: number }} master info
+   */
   getMaster: function (info) {
     let muleObj = info.mode === 1 ? this.TorchAnniMules : this.Mules;
 
@@ -662,10 +662,10 @@ const AutoMule = {
   },
 
   /**
-	 * @param {number} mode - mule mode
-	 * @param {string} master - profile that whats to mule
-	 * @param {boolean} continuous - whether we are continuous or not
-	 */
+   * @param {number} mode - mule mode
+   * @param {string} master - profile that whats to mule
+   * @param {boolean} continuous - whether we are continuous or not
+   */
   getMuleObject: function (mode, master, continuous = false) {
     mode = mode || 0;
     let mule = mode > 0 ? this.TorchAnniMules : this.Mules;
@@ -673,7 +673,7 @@ const AutoMule = {
     for (let i in mule) {
       if (mule.hasOwnProperty(i)) {
         if (mule[i].muleProfile && mule[i].enabledProfiles && String.isEqual(mule[i].muleProfile, me.profile)
-					&& (continuous || mule[i].enabledProfiles.includes(master))) {
+          && (continuous || mule[i].enabledProfiles.includes(master))) {
           return mule[i];
         }
       }
@@ -683,11 +683,11 @@ const AutoMule = {
   },
 
   /**
-	 * @param {number} mode 
-	 * @param {string} master 
-	 * @param {boolean} continuous 
-	 * @returns {string}
-	 */
+   * @param {number} mode 
+   * @param {string} master 
+   * @param {boolean} continuous 
+   * @returns {string}
+   */
   getMuleFilename: function (mode, master, continuous = false) {
     mode = mode || 0;
     let mule = mode > 0 ? this.TorchAnniMules : this.Mules;
@@ -699,7 +699,7 @@ const AutoMule = {
         // Mule profile matches config
         if (mule[i].muleProfile && String.isEqual(mule[i].muleProfile, me.profile) && (continuous || mule[i].enabledProfiles.includes(master))) {
           file = mode === 0 ? "logs/AutoMule." + i + ".json" : "logs/TorchMule." + i + ".json";
-					
+          
           // If file exists check for valid info
           if (FileTools.exists(file)) {
             try {
@@ -727,8 +727,8 @@ const AutoMule = {
   },
 
   /**
-	 * Get whether this is a regular mule or a torch/anni mule
-	 */
+   * Get whether this is a regular mule or a torch/anni mule
+   */
   getMuleMode: function() {
     for (let i in this.Mules) {
       if (this.Mules.hasOwnProperty(i)) {
@@ -737,7 +737,7 @@ const AutoMule = {
         }
       }
     }
-		
+    
     for (let i in this.TorchAnniMules) {
       if (this.TorchAnniMules.hasOwnProperty(i)) {
         if (this.TorchAnniMules[i].muleProfile && String.isEqual(this.TorchAnniMules[i].muleProfile, me.profile)) {
@@ -750,8 +750,8 @@ const AutoMule = {
   },
 
   /**
-	 * Get whether this is a normal mule or continous mule
-	 */
+   * Get whether this is a normal mule or continous mule
+   */
   isContinousMule: function () {
     for (let i in this.Mules) {
       if (this.Mules.hasOwnProperty(i)) {
@@ -760,7 +760,7 @@ const AutoMule = {
         }
       }
     }
-		
+    
     for (let i in this.TorchAnniMules) {
       if (this.TorchAnniMules.hasOwnProperty(i)) {
         if (this.TorchAnniMules[i].muleProfile && String.isEqual(this.TorchAnniMules[i].muleProfile, me.profile)) {

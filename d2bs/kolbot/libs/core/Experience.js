@@ -8,9 +8,9 @@
 
 const Experience = {
   /**
-	 * @todo combine this and nextExp into key-value pairs 1-99
-	 * Experience[me.charlvl].total and Experience[me.charlvl].next
-	 */
+   * @todo combine this and nextExp into key-value pairs 1-99
+   * Experience[me.charlvl].total and Experience[me.charlvl].next
+   */
   totalExp: [
     0, 0, 500, 1500, 3750, 7875, 14175, 22680, 32886, 44396, 57715, 72144, 90180, 112725,
     140906, 176132, 220165, 275207, 344008, 430010, 537513, 671891, 839864, 1049830, 1312287,
@@ -55,43 +55,43 @@ const Experience = {
     [7933, 51344, 77016], [8037, 52250, 78375], [8141, 53156, 79734], [8245, 54062, 81093], [8349, 54968, 82452], [8453, 55874, 83811], [160000, 160000, 160000]
   ],
   /**
-	 * Percent progress into the current level. Format: xx.xx%
-	 */
+   * Percent progress into the current level. Format: xx.xx%
+   */
   progress: function () {
     return me.getStat(sdk.stats.Level) === 99 ? 0 : (((me.getStat(sdk.stats.Experience) - this.totalExp[me.getStat(sdk.stats.Level)]) / this.nextExp[me.getStat(sdk.stats.Level)]) * 100).toFixed(2);
   },
 
   /**
-	 * Total experience gained in current run
-	 */
+   * Total experience gained in current run
+   */
   gain: function () {
     return (me.getStat(sdk.stats.Experience) - DataFile.getStats().experience);
   },
 
   /**
-	 * Percent experience gained in current run
-	 */
+   * Percent experience gained in current run
+   */
   gainPercent: function () {
     return me.getStat(sdk.stats.Level) === 99 ? 0 : (this.gain() * 100 / this.nextExp[me.getStat(sdk.stats.Level)]).toFixed(6);
   },
 
   /**
-	 * Runs until next level
-	 */
+   * Runs until next level
+   */
   runsToLevel: function () {
     return Math.round(((100 - this.progress()) / 100) * this.nextExp[me.getStat(sdk.stats.Level)] / this.gain());
   },
 
   /**
-	 * Total runs needed for next level (not counting current progress)
-	 */
+   * Total runs needed for next level (not counting current progress)
+   */
   totalRunsToLevel: function () {
     return Math.round(this.nextExp[me.getStat(sdk.stats.Level)] / this.gain());
   },
 
   /**
-	 * Total time till next level
-	 */
+   * Total time till next level
+   */
   timeToLevel: function () {
     let tTLrawSeconds = (Math.floor((getTickCount() - me.gamestarttime) / 1000)).toString();
     let tTLrawtimeToLevel = this.runsToLevel() * tTLrawSeconds;
@@ -106,8 +106,8 @@ const Experience = {
   },
 
   /**
-	 * Get Game Time
-	 */
+   * Get Game Time
+   */
   getGameTime: function () {
     let rawMinutes = Math.floor((getTickCount() - me.gamestarttime) / 60000).toString();
     let rawSeconds = (Math.floor((getTickCount() - me.gamestarttime) / 1000) % 60).toString();
@@ -119,8 +119,8 @@ const Experience = {
   },
 
   /**
-	 * Log to manager
-	 */
+   * Log to manager
+   */
   log: function () {
     let gain = this.gain();
     let progress = this.progress();

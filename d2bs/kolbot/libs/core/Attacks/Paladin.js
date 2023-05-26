@@ -9,10 +9,10 @@ const ClassAttack = {
   attackAuras: [sdk.skills.HolyFire, sdk.skills.HolyFreeze, sdk.skills.HolyShock],
 
   /**
-	 * @param {Unit} unit 
-	 * @param {boolean} [preattack] 
-	 * @returns {AttackResult}
-	 */
+   * @param {Unit} unit 
+   * @param {boolean} [preattack] 
+   * @returns {AttackResult}
+   */
   doAttack: function (unit, preattack) {
     if (!unit) return Attack.Result.SUCCESS;
     Config.TeleSwitch && me.switchToPrimary();
@@ -140,14 +140,14 @@ const ClassAttack = {
     // only proceed with other checks if we can use redemption and the config values aren't 0
     if (Skill.canUse(sdk.skills.Redemption) && Config.Redemption.some(v => v > 0)) {
       if ((me.hpPercent < Config.Redemption[0] || me.mpPercent < Config.Redemption[1])
-				&& Attack.checkNearCorpses(me) > 2 && Skill.setSkill(sdk.skills.Redemption, sdk.skills.hand.Right)) {
+        && Attack.checkNearCorpses(me) > 2 && Skill.setSkill(sdk.skills.Redemption, sdk.skills.hand.Right)) {
         delay(1500);
       }
     }
 
     /**
-		 * @todo add config options for these and possibly add to Pather.walkTo 
-		 */
+     * @todo add config options for these and possibly add to Pather.walkTo 
+     */
     // if (Skill.canUse(sdk.skills.Cleansing)
     // 	&& ([sdk.states.AmplifyDamage, sdk.states.Decrepify].some(s => me.getState(s)) || me.hpPercent < 70 && me.getState(sdk.states.Poison))
     // 	&& !me.checkForMobs({range: 12, coll: sdk.collision.BlockWall}) && Skill.setSkill(sdk.skills.Cleansing, sdk.skills.hand.Right)) {
@@ -166,7 +166,7 @@ const ClassAttack = {
     // unit became invalidated
     if (!unit || !unit.attackable) return Attack.Result.SUCCESS;
     Config.TeleSwitch && me.switchToPrimary();
-		
+    
     switch (attackSkill) {
     case sdk.skills.BlessedHammer:
       // todo: add doll avoid to other classes
@@ -250,7 +250,7 @@ const ClassAttack = {
       if (!Attack.validSpot(unit.x, unit.y, attackSkill, unit.classid)) {
         return Attack.Result.FAILED;
       }
-			
+      
       // 3591 - wall/line of sight/ranged/items/objects/closeddoor 
       if (unit.distance > 3 || checkCollision(me, unit, sdk.collision.WallOrRanged)) {
         if (!Attack.getIntoPosition(unit, 3, sdk.collision.WallOrRanged, true)) {
@@ -346,7 +346,7 @@ const ClassAttack = {
         return true;
       } else if (!canTele && ([check.x, check.y].distance < 1
         && !CollMap.checkColl(unit, check, sdk.collision.BlockWalk, 0))
-				|| ([check.x, check.y].distance <= 4 && me.getMobCount(6) > 2)) {
+        || ([check.x, check.y].distance <= 4 && me.getMobCount(6) > 2)) {
         return true;
       }
     }

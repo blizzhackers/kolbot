@@ -93,7 +93,7 @@ function spendStatPoints () {
   if (len > unusedStatPoints) {
     len = unusedStatPoints;
     AutoBuild.print("Warning: Number of stats specified in your build template at level " + me.charlvl + " exceeds the available unused stat points"
-			+ "\nOnly the first " + len + " stats " + stats.slice(0, len).join(", ") + " will be added");
+      + "\nOnly the first " + len + " stats " + stats.slice(0, len).join(", ") + " will be added");
   }
 
   // We silently ignore stats set to -1
@@ -116,7 +116,7 @@ function spendStatPoints () {
       }
     } else {
       throw new Error("Stat id must be one of the following:\n0:" + STAT_ID_TO_NAME[0]
-				+ ",\t1:" + STAT_ID_TO_NAME[1] + ",\t2:" + STAT_ID_TO_NAME[2] + ",\t3:" + STAT_ID_TO_NAME[3] + errorMessage);
+        + ",\t1:" + STAT_ID_TO_NAME[1] + ",\t2:" + STAT_ID_TO_NAME[2] + ",\t3:" + STAT_ID_TO_NAME[3] + errorMessage);
     }
   }
 
@@ -185,7 +185,7 @@ function spendSkillPoints () {
   if (len > unusedSkillPoints) {
     len = unusedSkillPoints;
     AutoBuild.print("Warning: Number of skills specified in your build template at level " + me.charlvl + " exceeds the available unused skill points" +
-			"\nOnly the first " + len + " skills " + skills.slice(0, len).join(", ") + " will be added");
+      "\nOnly the first " + len + " skills " + skills.slice(0, len).join(", ") + " will be added");
   }
 
   // We silently ignore skills set to -1

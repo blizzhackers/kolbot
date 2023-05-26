@@ -123,8 +123,8 @@ const Mule = {
   statusString: "",
 
   /**
-	 * @description background worker to prevent idle disconnect
-	 */
+   * @description background worker to prevent idle disconnect
+   */
   antiIdle: function () {
     if (!Starter.inGame) return true;
     if (!me.ingame || getTickCount() - me.gamestarttime < Time.minutes(1) || !me.gameReady) return true;
@@ -146,9 +146,9 @@ const Mule = {
   },
 
   /**
-	 * @description background worker to prevent suicide walks
-	 * @todo figure out why this bugs out when used
-	 */
+   * @description background worker to prevent suicide walks
+   * @todo figure out why this bugs out when used
+   */
   areaWatcher: function () {
     if (!Starter.inGame) return true;
     // run area check every half second
@@ -200,7 +200,7 @@ const Mule = {
     } while (!Attack.validSpot(coord.x, coord.y));
 
     Pather.moveToUnit(coord);
-					
+          
     Storage.Init();
     Starter.inGame = true;
     if (Mule.continuousMule) {
@@ -230,8 +230,8 @@ const Mule = {
   },
 
   /**
-	 * @todo check if there are any other profiles that need to mule while we are already in game?
-	 */
+   * @todo check if there are any other profiles that need to mule while we are already in game?
+   */
   done: function () {
     !muleObj.onlyLogWhenFull && MuleLogger.logChar();
 
@@ -273,7 +273,7 @@ const Mule = {
 
     Mule.quit();
   },
-	
+  
   quit: function () {
     ["default.dbj", "threads/AntiIdle.js", "threads/AreaWatcher.js"].forEach(thread => {
       let script = getScript(thread);
@@ -296,20 +296,20 @@ const Mule = {
   },
 
   /**
-	 * @todo handle when a bot wants to mule while we are refreshing the game
-	 */
+   * @todo handle when a bot wants to mule while we are refreshing the game
+   */
   gameRefresh: function () {
     if (!this.continuousMule) return this.quit();
     console.log("MaxGameTime Reached: ");
     removeEventListener("gameevent", gameEvent);
     Mule.quit();
-						
+            
     Starter.firstLogin = true;
     console.log("updating runs");
     D2Bot.updateRuns();
     status = "ready";
     Starter.inGame = false;
-						
+            
     delay(1000);
     Controls.LobbyQuit.click(); // Quit from Lobby
     ControlAction.timeoutDelay("Refresh game", 330 * 1000); // 5.5 minutes
@@ -318,8 +318,8 @@ const Mule = {
   },
 
   /**
-	 * @param {number} time 
-	 */
+   * @param {number} time 
+   */
   ingameTimeout: function (time) {
     let tick = getTickCount();
 
@@ -379,7 +379,7 @@ const Mule = {
         cursorItem.drop();
       }
     }
-		
+    
     return true;
   },
 
@@ -597,7 +597,7 @@ function locationAction (location) {
       console.debug("Failed to get in game, current location: " + getLocation() + " inGame? " + me.ingame + " area? " + me.area);
       break;
     }
-		
+    
     status = "pending";
 
     break;

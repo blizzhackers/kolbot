@@ -258,10 +258,10 @@ function Rushee() {
             break;
           }
         }
-				
+        
         Pather.usePortal(sdk.areas.HaremLvl1, Config.Leader);
         Pather.moveToExit(sdk.areas.LutGholein, true);
-				
+        
         if (!Town.npcInteract("Jerhyn")) {
           Pather.moveTo(5166, 5206);
 
@@ -478,7 +478,7 @@ function Rushee() {
 
           // make sure we talk to cain to access durance
           leader.area === sdk.areas.DuranceofHateLvl2 && (!Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, sdk.quest.states.Completed)) && Town.npcInteract("Cain");
-					
+          
           // we aren't the quester but need to talk to npcs in order to be able to get wps from certain areas 
           (!Config.Rushee.Quester && !this.nonQuesterNPCTalk) && (this.nonQuesterNPCTalk = true);
 
@@ -490,7 +490,7 @@ function Rushee() {
             let p = Game.getObject("portal");
             let preArea = me.area;
             if (!!p && Misc.click(0, 0, p) && Misc.poll(() => me.area !== preArea, 1000, 100)
-							&& Pather.getWP(me.area) && (Pather.usePortal(sdk.areas.townOf(me.area), Config.Leader) || Pather.useWaypoint(sdk.areas.townOf(me.area)))) {
+              && Pather.getWP(me.area) && (Pather.usePortal(sdk.areas.townOf(me.area), Config.Leader) || Pather.useWaypoint(sdk.areas.townOf(me.area)))) {
               me.inTown && Config.LocalChat.Enabled && say("gotwp");
             } else {
               this.log("Failed to get wp", Config.LocalChat.Enabled);
@@ -593,7 +593,7 @@ function Rushee() {
             while (getTickCount() - tick < Time.minutes(2)) {
               if (Pather.getPortal(sdk.areas.Tristram)) {
                 Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader);
-								
+                
                 break;
               }
             }
@@ -610,7 +610,7 @@ function Rushee() {
             this.getQuestItem(sdk.items.quest.ScrollofInifuss, sdk.quest.chest.InifussTree);
             delay(500);
             Pather.usePortal(sdk.areas.RogueEncampment, Config.Leader);
-						
+            
             if (Town.npcInteract("Akara")) {
               this.log("Akara done", Config.LocalChat.Enabled);
             }
@@ -670,7 +670,7 @@ function Rushee() {
             Pather.usePortal(sdk.areas.ClawViperTempleLvl2, Config.Leader);
             this.getQuestItem(sdk.quest.item.ViperAmulet, sdk.quest.chest.ViperAmuletChest);
             Pather.usePortal(sdk.areas.LutGholein, Config.Leader);
-						
+            
             if (Town.npcInteract("Drognan")) {
               actions.shift();
               say("drognan done", Config.LocalChat.Enabled);

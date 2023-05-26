@@ -8,7 +8,7 @@
   let instances = 0;
 
   /** @constructor
-	 * @class Delta */
+   * @class Delta */
   module.exports = function (trackers) {
     let active = true;
     this.values = (Array.isArray(trackers) && (Array.isArray(trackers.first()) && trackers || [trackers])) || [];

@@ -71,11 +71,11 @@ function Follower() {
   };
 
   /**
-	 * Change areas to where leader is
-	 * @param {Player} unit 
-	 * @param {number} area 
-	 * @returns {boolean}
-	 */
+   * Change areas to where leader is
+   * @param {Player} unit 
+   * @param {number} area 
+   * @returns {boolean}
+   */
   const checkExit = function (unit, area) {
     if (unit.inTown) return false;
 
@@ -110,7 +110,7 @@ function Follower() {
 
     // Arcane<->Cellar portal
     if ((me.inArea(sdk.areas.ArcaneSanctuary) && area === sdk.areas.PalaceCellarLvl3)
-			|| (me.inArea(sdk.areas.PalaceCellarLvl3) && area === sdk.areas.ArcaneSanctuary)) {
+      || (me.inArea(sdk.areas.PalaceCellarLvl3) && area === sdk.areas.ArcaneSanctuary)) {
       Pather.usePortal(null);
 
       return 4;
@@ -138,10 +138,10 @@ function Follower() {
   };
 
   /**
-	 * Talk to a NPC
-	 * @param {string} name 
-	 * @returns {boolean}
-	 */
+   * Talk to a NPC
+   * @param {string} name 
+   * @returns {boolean}
+   */
   const talk = function (name) {
     try {
       if (!me.inTown) throw new Error("I'm not in town!");
@@ -166,10 +166,10 @@ function Follower() {
   };
 
   /**
-	 * Change act after completing last act quest
-	 * @param {number} act 
-	 * @returns {boolean}
-	 */
+   * Change act after completing last act quest
+   * @param {number} act 
+   * @returns {boolean}
+   */
   const changeAct = function (act) {
     let preArea = me.area;
 
@@ -310,7 +310,7 @@ function Follower() {
     if (item) {
       do {
         if (item.onGroundOrDropping && item.itemType >= sdk.items.type.HealingPotion
-					&& item.itemType <= sdk.items.type.RejuvPotion && item.distance <= range) {
+          && item.itemType <= sdk.items.type.RejuvPotion && item.distance <= range) {
           pickList.push(copyUnit(item));
         }
       } while (item.getNext());
@@ -334,9 +334,9 @@ function Follower() {
   };
 
   /**
-	 * @param {string} nick 
-	 * @param {string} msg 
-	 */
+   * @param {string} nick 
+   * @param {string} msg 
+   */
   const chatEvent = function (nick, msg) {
     if (msg && nick === Config.Leader) {
       switch (msg) {
@@ -464,7 +464,7 @@ function Follower() {
   // START
   addEventListener("chatmsg", chatEvent);
   openContainers && Config.OpenChests.enabled && Config.OpenChests.Types.push("all");
-	
+  
   // Override config values that use TP
   Config.TownCheck = false;
   Config.TownHP = 0;

@@ -55,11 +55,11 @@ const ActionHooks = {
   ].some((flag) => getUIFlag(flag)),
 
   /**
-	 * Set action based on key input
-	 * @param {number} keycode 
-	 * @returns {void}
-	 * @todo this would probably be better as pushing to an action stack and implementing a timeout to prevent spamming the same action
-	 */
+   * Set action based on key input
+   * @param {number} keycode 
+   * @returns {void}
+   * @todo this would probably be better as pushing to an action stack and implementing a timeout to prevent spamming the same action
+   */
   event: function (keycode) {
     if ([sdk.keys.Shift, sdk.keys.Alt].some(k => k === keycode)) {
       return;
@@ -119,7 +119,7 @@ const ActionHooks = {
             } else {
               ItemHooks.pickitEnabled = true;
               ItemHooks.flush();
-							
+              
               if (!Hooks.saidMessage) {
                 showConsole();
                 print("ÿc<Notify :: ÿc0Item filter has switched to using your Pickit files, this is just to notify you of that. If you didn't add any nip files you probably should switch back.");
@@ -207,7 +207,7 @@ const ActionHooks = {
 
               break;
             }
-						
+            
             break;
           case sdk.keys.Numpad8:
             hook = me.inArea(sdk.areas.CanyonofMagic) ? this.getHook("POI5") : this.getPortalHook("Uber Tristam");
@@ -328,7 +328,7 @@ const ActionHooks = {
         return "";
       }
     })();
-	
+  
     let hookObj = Object.assign({}, {
       name: name,
       type: type,
@@ -339,9 +339,9 @@ const ActionHooks = {
   },
 
   /**
-	 * Creates new action hook based on our current area
-	 * @param {number} area 
-	 */
+   * Creates new action hook based on our current area
+   * @param {number} area 
+   */
   add: function (area) {
     let i, exits, wp, poi, nextCheck, infSeal, seisSeal, vizSeal, bossX;
     let nextAreas = [];
@@ -374,7 +374,7 @@ const ActionHooks = {
           .sort(function(a, b) {
             return a.target - b.target;
           }).reverse();
-				
+        
         let curr;
         for (let i = 8; i > 4; i--) {
           curr = currExits.shift();
@@ -725,9 +725,9 @@ const ActionHooks = {
   },
 
   /**
-	 * @param {number} seal 
-	 * @returns {{ x: number, y: number, area: number }}
-	 */
+   * @param {number} seal 
+   * @returns {{ x: number, y: number, area: number }}
+   */
   getDiabloSeals: function (seal) {
     try {
       let unit = Game.getPresetObject(sdk.areas.ChaosSanctuary, seal);

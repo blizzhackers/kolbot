@@ -178,7 +178,7 @@ me.needPotions = function () {
   if (!Config.MinColumn.some(el => el > 0)) return false;
   // no hp pots or mp pots in Config.BeltColumn (who uses only rejuv pots?)
   if (!Config.BeltColumn.some(el => ["hp", "mp"].includes(el))) return false;
-	
+  
   // Start
   if (me.charlvl > 2 && me.gold > 1000) {
     const pots = {
@@ -197,7 +197,7 @@ me.needPotions = function () {
 
     // quick check
     if ((Config.BeltColumn.includes("hp") && !pots.hp.length)
-			|| (Config.BeltColumn.includes("mp") && !pots.mp.length)) {
+      || (Config.BeltColumn.includes("mp") && !pots.mp.length)) {
       return true;
     }
 
@@ -611,9 +611,9 @@ Object.defineProperties(me, {
   const QuestData = require("./GameData/QuestData");
 
   /**
-	 * @param {number} act 
-	 * @returns {boolean}
-	 */
+   * @param {number} act 
+   * @returns {boolean}
+   */
   me.accessToAct = function (act) {
     if (act === 1) return true;
     return me.highestAct >= act;

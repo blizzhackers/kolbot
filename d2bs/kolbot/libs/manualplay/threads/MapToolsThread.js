@@ -25,7 +25,7 @@ MapMode.include();
 function main() {
   // getUnit test
   getUnit(-1) === null && console.warn("getUnit bug detected");
-	
+  
   console.log("ÿc9MapToolsThread loaded");
 
   let ironGolem, debugInfo = { area: 0, currScript: "no entry" };
@@ -105,7 +105,7 @@ function main() {
         Precast.doPrecast(true);
         Skill.setSkill(preSkill, sdk.skills.hand.Right);
       }
-			
+      
       break;
     }
   };

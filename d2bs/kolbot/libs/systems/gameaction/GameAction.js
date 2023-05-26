@@ -37,7 +37,7 @@ const GameAction = {
 
   update: function (action, data) {
     if (typeof action !== "string") throw new Error("Action must be a string!");
-		
+    
     typeof data !== "string" && (data = JSON.stringify(data));
 
     D2Bot.printToConsole(data);

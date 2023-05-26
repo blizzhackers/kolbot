@@ -8,19 +8,19 @@
 (function (Common) {
   typeof Common !== "object" && (Common = {});
   /**
-	 * @todo
-	 * - keep track of seals opened and bosses killed to
-	 * - improve targetting when using getBoss, sometimes we run to the location we want to attack from while running past the boss
-	 * I see this mostly with viz, also have seen seis fail due to not being close enough, even though he spawned
-	 */
+   * @todo
+   * - keep track of seals opened and bosses killed to
+   * - improve targetting when using getBoss, sometimes we run to the location we want to attack from while running past the boss
+   * I see this mostly with viz, also have seen seis fail due to not being close enough, even though he spawned
+   */
   Object.defineProperty(Common, "Diablo", {
     /**
-		 * @namespace Common
-		 * 
-		 * @typedef Diablo
-		 * @property {boolean} diabloSpawned
-		 * 
-		 */
+     * @namespace Common
+     * 
+     * @typedef Diablo
+     * @property {boolean} diabloSpawned
+     * 
+     */
     value: {
       diabloSpawned: false,
       diaWaitTime: Time.seconds(30),
@@ -96,7 +96,7 @@
         if (!seal) throw new Error("Seal preset not found. Can't continue.");
 
         if (sealPreset.roomy * 5 + sealPreset.y === value
-					|| sealPreset.roomx * 5 + sealPreset.x === value) {
+          || sealPreset.roomx * 5 + sealPreset.x === value) {
           return 1;
         }
 
@@ -104,10 +104,10 @@
       },
 
       /**
-			 * - VizLayout - 1 = "Y", 2 = "L"
-			 * - SeisLayout - 1 = "2", 2 = "5"
-			 * - InfLayout - 1 = "I", 2 = "J"
-			 */
+       * - VizLayout - 1 = "Y", 2 = "L"
+       * - SeisLayout - 1 = "2", 2 = "5"
+       * - InfLayout - 1 = "I", 2 = "J"
+       */
       initLayout: function () {
         // 1 = "Y", 2 = "L"
         Common.Diablo.vizLayout = this.getLayout(sdk.objects.DiabloSealVizier, 5275);
@@ -118,10 +118,10 @@
       },
 
       /**
-			 * Follow static path
-			 * @param {number[][]} path 
-			 * @returns {void}
-			 */
+       * Follow static path
+       * @param {number[][]} path 
+       * @returns {void}
+       */
       followPath: function (path) {
         if (Config.Diablo.Fast) {
           let last = path.last();
@@ -129,7 +129,7 @@
           Pather.moveToUnit(lastNode);
           return;
         }
-				
+        
         for (let i = 0; i < path.length; i++) {
           this.cleared.length > 0 && this.clearStrays();
 
@@ -179,9 +179,9 @@
       },
 
       /**
-			 * @param {number[] | string[]} sealOrder 
-			 * @param {boolean} openSeals 
-			 */
+       * @param {number[] | string[]} sealOrder 
+       * @param {boolean} openSeals 
+       */
       runSeals: function (sealOrder, openSeals = true, recheck = false) {
         print("seal order: " + sealOrder);
         Common.Diablo.sealOrder = sealOrder;
@@ -209,16 +209,16 @@
       },
 
       /**
-			 * Attempt casting telekinesis on seal to activate it
-			 * @param {Unit} seal 
-			 * @returns {boolean}
-			 */
+       * Attempt casting telekinesis on seal to activate it
+       * @param {Unit} seal 
+       * @returns {boolean}
+       */
       tkSeal: function (seal) {
         if (!Skill.useTK(seal)) return false;
 
         for (let i = 0; i < 5; i++) {
           seal.distance > 20 && Attack.getIntoPosition(seal, 18, sdk.collision.WallOrRanged);
-					
+          
           if (Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, seal)
             && Misc.poll(() => seal.mode, 1000, 100)) {
             break;
@@ -229,10 +229,10 @@
       },
 
       /**
-			 * Open one of diablos seals
-			 * @param {number} classid 
-			 * @returns {boolean}
-			 */
+       * Open one of diablos seals
+       * @param {number} classid 
+       * @returns {boolean}
+       */
       openSeal: function (classid) {
         let seal;
         const mainSeal = [
@@ -312,9 +312,9 @@
       },
 
       /**
-			 * @param {boolean} openSeal 
-			 * @returns {boolean}
-			 */
+       * @param {boolean} openSeal 
+       * @returns {boolean}
+       */
       vizierSeal: function (openSeal = true) {
         print("Viz layout " + Common.Diablo.vizLayout);
         let path = (Common.Diablo.vizLayout === 1 ? this.starToVizA : this.starToVizB);
@@ -339,9 +339,9 @@
           return viz && (viz.distance < Skill.getRange(Config.AttackSkill[1]) || viz.dead);
         };
         /**
-				 * @todo better coords or maybe a delay, viz appears in different locations and sometimes its right where we are moving to
-				 * which is okay for hammerdins or melee chars but not for soft chars like sorcs
-				 */
+         * @todo better coords or maybe a delay, viz appears in different locations and sometimes its right where we are moving to
+         * which is okay for hammerdins or melee chars but not for soft chars like sorcs
+         */
         Common.Diablo.vizLayout === 1
           ? Pather.moveToEx(7691, 5292, { callback: cb })
           : Pather.moveToEx(7695, 5316, { callback: cb });
@@ -356,9 +356,9 @@
       },
 
       /**
-			 * @param {boolean} openSeal 
-			 * @returns {boolean}
-			 */
+       * @param {boolean} openSeal 
+       * @returns {boolean}
+       */
       seisSeal: function (openSeal = true) {
         print("Seis layout " + Common.Diablo.seisLayout);
         let path = (Common.Diablo.seisLayout === 1 ? this.starToSeisA : this.starToSeisB);
@@ -402,9 +402,9 @@
       },
 
       /**
-			 * @param {boolean} openSeal 
-			 * @returns {boolean}
-			 */
+       * @param {boolean} openSeal 
+       * @returns {boolean}
+       */
       infectorSeal: function (openSeal = true) {
         Precast.doPrecast(true);
         print("Inf layout " + Common.Diablo.infLayout);
@@ -418,7 +418,7 @@
         }
 
         distCheck.distance > 70 && this.followPath(Common.Diablo.infLayout === 1 ? this.starToInfA : this.starToInfB);
-				
+        
         let cb = () => {
           let inf = Game.getMonster(getLocaleString(sdk.locale.monsters.InfectorofSouls));
           return inf && (inf.distance < Skill.getRange(Config.AttackSkill[1]) || inf.dead);
@@ -497,7 +497,7 @@
             }
           }
         }
-				
+        
         return false;
       },
 

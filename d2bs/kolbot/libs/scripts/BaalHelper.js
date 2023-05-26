@@ -73,7 +73,7 @@ function BaalHelper() {
     const chatEvent = function (nick, msg) {
       if (nick === Config.Leader) {
         if ((Config.BaalHelper.DollQuit && msg === "Dolls found! NG.")
-					|| (Config.BaalHelper.SoulQuit && msg === "Souls found! NG.")) {
+          || (Config.BaalHelper.SoulQuit && msg === "Souls found! NG.")) {
           quitFlag = true;
         }
       }
@@ -114,7 +114,7 @@ function BaalHelper() {
   Precast.doPrecast(false);
   Attack.clear(15);
   Common.Baal.clearThrone();
-	
+  
   if (!Common.Baal.clearWaves()) {
     throw new Error("Couldn't clear baal waves");
   }

@@ -23,7 +23,7 @@ MapMode.include();
 function main() {
   // getUnit test
   getUnit(-1) === null && console.warn("getUnit bug detected");
-	
+  
   console.log("ÿc9MapHelper loaded");
 
   let obj = { type: false, dest: false, action: false };
@@ -85,7 +85,7 @@ function main() {
 
           if (fail % 5 === 0 && !getScript("libs/manualplay/threads/mapthread.js")) {
             print("MapThread shut down, exiting MapHelper");
-						
+            
             return false;
           }
         }
@@ -115,7 +115,7 @@ function main() {
       try {
         let temp = JSON.parse(action);
         temp && Object.assign(obj, temp);
-				
+        
         addEventListener("keyup", Pather.stopEvent);
         this.togglePickThread();
 
@@ -146,7 +146,7 @@ function main() {
             break;
           case "unit":
             if (me.inArea(sdk.areas.MooMooFarm)
-							|| (me.inArea(sdk.areas.DurielsLair) && Misc.talkToTyrael())) {
+              || (me.inArea(sdk.areas.DurielsLair) && Misc.talkToTyrael())) {
               break;
             }
 
@@ -192,7 +192,7 @@ function main() {
           case "portal":
             if (obj.dest === sdk.areas.WorldstoneChamber && Game.getMonster(sdk.monsters.ThroneBaal)) {
               me.overhead("Can't enter Worldstone Chamber yet. Baal still in area");
-							
+              
               break;
             } else if (obj.dest === sdk.areas.WorldstoneChamber && !Game.getMonster(sdk.monsters.ThroneBaal)) {
               redPortal = Game.getObject(sdk.objects.WorldstonePortal);
@@ -256,7 +256,7 @@ function main() {
               break;
             default:
               Pather.usePortal(obj.dest);
-							
+              
               break;
             }
 
@@ -383,7 +383,7 @@ function main() {
             switch (obj.action) {
             case "invo":
               Misc.dropItems(sdk.storage.Inventory);
-							
+              
               break;
             case "stash":
               Misc.dropItems(sdk.storage.Stash);
@@ -396,7 +396,7 @@ function main() {
             switch (obj.action) {
             case "thawing":
               Town.buyPots(10, "Thawing", true, true);
-							
+              
               break;
             case "antidote":
               Town.buyPots(10, "Antidote", true, true);

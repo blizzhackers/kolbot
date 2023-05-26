@@ -21,7 +21,7 @@
       Pickit.pickItem(malus);
       Town.goToTown();
       Town.npcInteract("Charsi");
-			
+      
       return !!Misc.checkQuest(sdk.quest.id.ToolsoftheTrade, sdk.quest.states.ReqComplete);
     },
     configurable: true,

@@ -96,7 +96,7 @@ function BattleOrders () {
     // more players might be showing up, give a moment and lets wait until the nearby player count is static
     let nearPlayers = 0;
     let tick = getTickCount();
-		
+    
     // if we haven't already given a bo, lets wait to see if more players show up
     if (!BattleOrders.gaveBo) {
       nearPlayers = Misc.getNearbyPlayerCount();

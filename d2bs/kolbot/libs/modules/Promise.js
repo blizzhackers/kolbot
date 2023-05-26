@@ -7,10 +7,10 @@
 (function (module, require) {
   const Worker = require("Worker");
   /**
-	 *
-	 * @param {function({resolve},{reject}):boolean} callback
-	 * @constructor
-	 */
+   *
+   * @param {function({resolve},{reject}):boolean} callback
+   * @constructor
+   */
   const Promise = module.exports = function (callback) {
     typeof Promise.__promiseCounter === "undefined" && (Promise.__promiseCounter = 0);
 
@@ -84,9 +84,9 @@
   };
 
   /**
-	 * @description wait for an array of promises to be ran.
-	 * @param promises Array
-	 */
+   * @description wait for an array of promises to be ran.
+   * @param promises Array
+   */
   Promise.all = function (promises) {
     while (promises.some(x => !x.stopped)) {
       delay();

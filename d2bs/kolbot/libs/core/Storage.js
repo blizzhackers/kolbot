@@ -8,12 +8,12 @@
 
 (function() {
   /**
-	 * @constructor
-	 * @param {string} name - container name 
-	 * @param {number} width - container width 
-	 * @param {number} height - container height
-	 * @param {number} location - container location
-	 */
+   * @constructor
+   * @param {string} name - container name 
+   * @param {number} width - container width 
+   * @param {number} height - container height
+   * @param {number} location - container location
+   */
   function Container(name, width, height, location) {
     this.name = name;
     this.width = width;
@@ -35,8 +35,8 @@
   }
 
   /**
-	 * @param {ItemUnit} item 
-	 */
+   * @param {ItemUnit} item 
+   */
   Container.prototype.Mark = function (item) {
     let x, y;
 
@@ -61,9 +61,9 @@
   };
 
   /**
-	 * @param {ItemUnit} item 
-	 * @param {number[][]} baseRef 
-	 */
+   * @param {ItemUnit} item 
+   * @param {number[][]} baseRef 
+   */
   Container.prototype.IsLocked = function (item, baseRef) {
     let h, w;
     let reference = baseRef.slice(0);
@@ -116,8 +116,8 @@
   };
 
   /**
-	 * @param {string} name 
-	 */
+   * @param {string} name 
+   */
   Container.prototype.cubeSpot = function (name) {
     if (name !== "Stash") return true;
 
@@ -142,16 +142,16 @@
   };
 
   /**
-	 * @param {ItemUnit} item 
-	 */
+   * @param {ItemUnit} item 
+   */
   Container.prototype.CanFit = function (item) {
     return (!!this.FindSpot(item));
   };
 
   /**
-	 * @param {number[]} itemIdsLeft 
-	 * @param {number[]} itemIdsRight 
-	 */
+   * @param {number[]} itemIdsLeft 
+   * @param {number[]} itemIdsRight 
+   */
   Container.prototype.SortItems = function (itemIdsLeft, itemIdsRight) {
     Storage.Reload();
 
@@ -176,7 +176,7 @@
         if (item.classid === sdk.quest.item.Cube && item.isInStash && item.x === 0 && item.y === 0) {
           continue; // dont touch the cube
         }
-				
+        
         let [ix, iy] = [item.y, item.x]; // x and y are backwards!
 
         if (this.location !== item.location) {
@@ -236,18 +236,18 @@
   };
 
   /**
-	 * @param {ItemUnit} item 
-	 * @param {boolean} reverseX 
-	 * @param {boolean} reverseY 
-	 * @param {number[]} priorityClassIds 
-	 */
+   * @param {ItemUnit} item 
+   * @param {boolean} reverseX 
+   * @param {boolean} reverseY 
+   * @param {number[]} priorityClassIds 
+   */
   Container.prototype.FindSpot = function (item, reverseX, reverseY, priorityClassIds) {
     // Make sure it's a valid item
     if (!item) return false;
 
     /**
-		 * @todo review this to see why it sometimes fails when there is actually enough room
-		 */
+     * @todo review this to see why it sometimes fails when there is actually enough room
+     */
 
     let x, y, nx, ny, makeSpot;
     let xDir = 1, yDir = 1;
@@ -293,16 +293,16 @@
           let bufferItemQuality = this.itemList[this.buffer[x][y] - 1].quality;
 
           if (Config.SortSettings.PrioritySorting && priorityClassIds && priorityClassIds.includes(item.classid)
-						&& !this.IsLocked(this.itemList[this.buffer[x][y] - 1], Config.Inventory) // don't try to make a spot by moving locked items! TODO: move this to the start of loop
-						&& (priorityClassIds.indexOf(bufferItemClass) === -1
-						|| priorityClassIds.indexOf(item.classid) < priorityClassIds.indexOf(bufferItemClass))) { // item in this spot needs to move!
+            && !this.IsLocked(this.itemList[this.buffer[x][y] - 1], Config.Inventory) // don't try to make a spot by moving locked items! TODO: move this to the start of loop
+            && (priorityClassIds.indexOf(bufferItemClass) === -1
+            || priorityClassIds.indexOf(item.classid) < priorityClassIds.indexOf(bufferItemClass))) { // item in this spot needs to move!
             makeSpot = this.MakeSpot(item, { x: x, y: y }); // NOTE: passing these in buffer order [h/x][w/y]
 
             if (item.classid !== bufferItemClass // higher priority item
-							|| (item.classid === bufferItemClass && item.quality > bufferItemQuality) // same class, higher quality item
-							|| (item.classid === bufferItemClass && item.quality === bufferItemQuality && item.gfx > bufferItemGfx) // same quality, higher graphic item
-							|| (Config.AutoEquip && item.classid === bufferItemClass && item.quality === bufferItemQuality && item.gfx === bufferItemGfx // same graphic, higher tier item
-								&& NTIP.GetTier(item) > NTIP.GetTier(this.itemList[this.buffer[x][y] - 1]))) {
+              || (item.classid === bufferItemClass && item.quality > bufferItemQuality) // same class, higher quality item
+              || (item.classid === bufferItemClass && item.quality === bufferItemQuality && item.gfx > bufferItemGfx) // same quality, higher graphic item
+              || (Config.AutoEquip && item.classid === bufferItemClass && item.quality === bufferItemQuality && item.gfx === bufferItemGfx // same graphic, higher tier item
+                && NTIP.GetTier(item) > NTIP.GetTier(this.itemList[this.buffer[x][y] - 1]))) {
               makeSpot = this.MakeSpot(item, { x: x, y: y }); // NOTE: passing these in buffer order [h/x][w/y]
 
               if (makeSpot) {
@@ -342,10 +342,10 @@
   };
 
   /**
-	 * @param {ItemUnit} item 
-	 * @param {{x: number, y: number}} location 
-	 * @param {boolean} force 
-	 */
+   * @param {ItemUnit} item 
+   * @param {{x: number, y: number}} location 
+   * @param {boolean} force 
+   */
   Container.prototype.MakeSpot = function (item, location, force) {
     let x, y, endx, endy, tmpLocation;
     let [itemsToMove, itemsMoved] = [[], []];
@@ -355,16 +355,16 @@
 
     // Make sure it's a valid item and item is in a priority sorting list
     if (!item || !item.classid
-			|| (Config.SortSettings.ItemsSortedFromRightPriority.indexOf(item.classid) === -1
-			&& Config.SortSettings.ItemsSortedFromLeftPriority.indexOf(item.classid) === -1
-			&& !force)) {
+      || (Config.SortSettings.ItemsSortedFromRightPriority.indexOf(item.classid) === -1
+      && Config.SortSettings.ItemsSortedFromLeftPriority.indexOf(item.classid) === -1
+      && !force)) {
       return false; // only continue if the item is in the priority sort list
     }
 
     // Make sure the item could even fit at the desired location
     if (!location //|| !(location.x >= 0) || !(location.y >= 0)
-			|| ((location.y + (item.sizex - 1)) > (this.width - 1))
-			|| ((location.x + (item.sizey - 1)) > (this.height - 1))) {
+      || ((location.y + (item.sizex - 1)) > (this.width - 1))
+      || ((location.x + (item.sizey - 1)) > (this.height - 1))) {
       return false; // location invalid or item could not ever fit in the location
     }
 
@@ -417,10 +417,10 @@
   };
 
   /**
-	 * @param {ItemUnit} item 
-	 * @param {number} mX 
-	 * @param {number} mY 
-	 */
+   * @param {ItemUnit} item 
+   * @param {number} mX 
+   * @param {number} mY 
+   */
   Container.prototype.MoveToSpot = function (item, mX, mY) {
     let cItem, cube;
 
@@ -489,8 +489,8 @@
   };
 
   /**
-	 * @param {ItemUnit} item 
-	 */
+   * @param {ItemUnit} item 
+   */
   Container.prototype.MoveTo = function (item) {
     let nPos;
 
@@ -543,8 +543,8 @@
   };
 
   /**
-	 * @param {number[][]} baseRef 
-	 */
+   * @param {number[][]} baseRef 
+   */
   Container.prototype.Compare = function (baseRef) {
     let h, w, n, item, itemList, reference;
 
@@ -592,8 +592,8 @@
   };
 
   /**
-	 * @type {storage} Storage
-	 */
+   * @type {storage} Storage
+   */
   const Storage = new function () {
     this.Init = () => {
       this.StashY = me.classic ? 4 : Config.SortSettings.PlugYStash ? 10 : 8;
@@ -603,10 +603,10 @@
       this.Belt = new Container("Belt", 4 * this.BeltSize(), 1, 2);
 
       /**
-			 * @description Return column status (needed potions in each column)
-			 * @param {0 | 1 | 2 | 3 | 4} beltSize 
-			 * @returns {[number, number, number, number]}
-			 */
+       * @description Return column status (needed potions in each column)
+       * @param {0 | 1 | 2 | 3 | 4} beltSize 
+       * @returns {[number, number, number, number]}
+       */
       this.Belt.checkColumns = function (beltSize) {
         beltSize === undefined && (beltSize = this.width / 4);
         let col = [beltSize, beltSize, beltSize, beltSize];

@@ -55,9 +55,9 @@
     };
 
     /**
-		 *
-		 * @param {function({Worker}):boolean} callback
-		 */
+     *
+     * @param {function({Worker}):boolean} callback
+     */
     this.runInBackground = new Proxy({ processes: {} }, {
       set: function (target, name, callback) {
         if (target.processes.hasOwnProperty(name)) {

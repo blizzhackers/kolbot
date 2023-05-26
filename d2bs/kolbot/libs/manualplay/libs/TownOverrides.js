@@ -13,16 +13,16 @@ Town.stash = function (stashGold = true) {
   let items = me.getItemsEx()
     .filter(function (item) {
       return item.isInInventory
-				&& !(item.isEquippedCharm && (item.unique || Storage.Inventory.IsLocked(item, Config.Inventory)));
+        && !(item.isEquippedCharm && (item.unique || Storage.Inventory.IsLocked(item, Config.Inventory)));
     })
     .sort(function (a, b) {
       if ((a.itemType >= sdk.items.type.Amethyst
-				&& a.itemType <= sdk.items.type.Skull) || a.itemType === sdk.items.type.Rune || a.unique) {
+        && a.itemType <= sdk.items.type.Skull) || a.itemType === sdk.items.type.Rune || a.unique) {
         return -1;
       }
 
       if ((b.itemType >= sdk.items.type.Amethyst
-				&& b.itemType <= sdk.items.type.Skull) || b.itemType === sdk.items.type.Rune || b.unique) {
+        && b.itemType <= sdk.items.type.Skull) || b.itemType === sdk.items.type.Rune || b.unique) {
         return 1;
       }
 

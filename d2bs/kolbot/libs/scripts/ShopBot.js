@@ -57,10 +57,10 @@ function ShopBot() {
   };
 
   /**
-	 * Interact and open the menu of an NPC unit
-	 * @param {NPCUnit} npc 
-	 * @returns {boolean}
-	 */
+   * Interact and open the menu of an NPC unit
+   * @param {NPCUnit} npc 
+   * @returns {boolean}
+   */
   const openMenu = function (npc) {
     if (!npc || npc.type !== sdk.unittype.NPC) throw new Error("Unit.openMenu: Must be used on NPCs.");
 
@@ -98,10 +98,10 @@ function ShopBot() {
   };
 
   /**
-	 * @param {NPCUnit} npc 
-	 * @param {number} menuId 
-	 * @returns {boolean}
-	 */
+   * @param {NPCUnit} npc 
+   * @param {number} menuId 
+   * @returns {boolean}
+   */
   const shopItems = function (npc, menuId) {
     let bought;
 
@@ -137,8 +137,8 @@ function ShopBot() {
 
     for (let i = 0; i < items.length; i += 1) {
       if (Storage.Inventory.CanFit(items[i]) && Pickit.canPick(items[i]) &&
-					me.gold >= items[i].getItemCost(sdk.items.cost.ToBuy) &&
-					NTIP.CheckItem(items[i], pickEntries)
+          me.gold >= items[i].getItemCost(sdk.items.cost.ToBuy) &&
+          NTIP.CheckItem(items[i], pickEntries)
       ) {
         beep();
         D2Bot.printToConsole("Match found!", sdk.colors.D2Bot.DarkGold);
@@ -163,9 +163,9 @@ function ShopBot() {
   };
 
   /**
-	 * @param {string} name 
-	 * @returns {boolean}
-	 */
+   * @param {string} name 
+   * @returns {boolean}
+   */
   const shopAtNPC = function (name) {
     let wp, menuId = "Shop";
 
@@ -289,7 +289,7 @@ function ShopBot() {
       }
 
       if ([sdk.areas.RogueEncampment, sdk.areas.Harrogath].includes(me.area) && !!redPortal && redPortal.distance < 20
-				&& Pather.usePortal(null, null, redPortal)) {
+        && Pather.usePortal(null, null, redPortal)) {
         delay(3000);
         Pather.usePortal(sdk.areas.townOf(me.area));
 

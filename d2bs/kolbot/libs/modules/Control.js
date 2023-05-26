@@ -4,46 +4,46 @@
  */
 (function (module) {
   /**
-	 * Not callable as a function
-	 * @constructor
-	 * @method Control.click(targetx, targety)
-	 * @method Control.setText(text)
-	 * @method Control.getText(text)
-	 * @param {number} type
-	 * @param {number} x
-	 * @param {number} y
-	 * @param {number} xsize
-	 * @param {number} ysize
-	 */
+   * Not callable as a function
+   * @constructor
+   * @method Control.click(targetx, targety)
+   * @method Control.setText(text)
+   * @method Control.getText(text)
+   * @param {number} type
+   * @param {number} x
+   * @param {number} y
+   * @param {number} xsize
+   * @param {number} ysize
+   */
   function Control(type, x, y, xsize, ysize) {
     /**
-		 * @private
-		 * @type {number}
-		 */
+     * @private
+     * @type {number}
+     */
     this.type = type;
 
     /**
-		 * @private
-		 * @type {number}
-		 */
+     * @private
+     * @type {number}
+     */
     this.x = x;
 
     /**
-		 * @private
-		 * @type {number}
-		 */
+     * @private
+     * @type {number}
+     */
     this.y = y;
 
     /**
-		 * @private
-		 * @type {number}
-		 */
+     * @private
+     * @type {number}
+     */
     this.xsize = xsize;
 
     /**
-		 * @private
-		 * @type {number}
-		 */
+     * @private
+     * @type {number}
+     */
     this.ysize = ysize;
 
     return new Proxy(this, {
@@ -252,7 +252,7 @@
     Control.LobbyChannelChar9 = new Control(sdk.controls.Button, 580, 591, 60, 100);
     Control.LobbyChannelChar10 = new Control(sdk.controls.Button, 640, 591, 60, 100);
   }
-	
+  
   // Single Player Difficulty Controls
   {
     Control.HellSP = new Control(-1, 264, 383, 272, 35);

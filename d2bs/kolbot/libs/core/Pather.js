@@ -11,15 +11,15 @@
  */
 const NodeAction = {
   /**
-	 * @type {number[]}
-	 */
+   * @type {number[]}
+   */
   shrinesToIgnore: [],
   enabled: true,
 
   /**
-	 * Run all the functions within NodeAction (except for itself)
-	 * @param {clearSettings} arg 
-	 */
+   * Run all the functions within NodeAction (except for itself)
+   * @param {clearSettings} arg 
+   */
   go: function (arg) {
     if (!this.enabled) return;
     for (let i in this) {
@@ -30,10 +30,10 @@ const NodeAction = {
   },
 
   /**
-	 * Kill monsters while pathing
-	 * @param {clearSettings} arg 
-	 * @returns {void}
-	 */
+   * Kill monsters while pathing
+   * @param {clearSettings} arg 
+   * @returns {void}
+   */
   killMonsters: function (arg = {}) {
     if (arg.hasOwnProperty("allowClearing") && !arg.allowClearing) return;
 
@@ -77,8 +77,8 @@ const NodeAction = {
   },
 
   /**
-	 * Open chests while pathing
-	 */
+   * Open chests while pathing
+   */
   popChests: function () {
     // fastPick check? should only open chests if surrounding monsters have been cleared or if fastPick is active
     // note: clear of surrounding monsters of the spectype we are set to clear
@@ -86,8 +86,8 @@ const NodeAction = {
   },
 
   /**
-	 * Scan shrines while pathing
-	 */
+   * Scan shrines while pathing
+   */
   getShrines: function () {
     Config.ScanShrines.length > 0 && Misc.scanShrines(null, this.shrinesToIgnore);
   }
@@ -95,16 +95,16 @@ const NodeAction = {
 
 const PathDebug = {
   /**
-	 * @type {Line[]}
-	 */
+   * @type {Line[]}
+   */
   hooks: [],
   enableHooks: false,
 
   /**
-	 * Draw our path on the screen
-	 * @param {PathNode[]} path 
-	 * @returns {void}
-	 */
+   * Draw our path on the screen
+   * @param {PathNode[]} path 
+   * @returns {void}
+   */
   drawPath: function (path) {
     if (!this.enableHooks) return;
 
@@ -126,12 +126,12 @@ const PathDebug = {
   },
 
   /**
-	 * Check if a set of coords are a set path
-	 * @param {PathNode[]} path 
-	 * @param {number} x 
-	 * @param {number} y 
-	 * @returns {boolean}
-	 */
+   * Check if a set of coords are a set path
+   * @param {PathNode[]} path 
+   * @param {number} x 
+   * @param {number} y 
+   * @returns {boolean}
+   */
   coordsInPath: function (path, x, y) {
     for (let i = 0; i < path.length; i += 1) {
       if (getDistance(x, y, path[i].x, path[i].y) < 5) {
@@ -199,8 +199,8 @@ const Pather = {
   },
 
   /**
-	 * @todo Handle rare bug where teleport skill dissapears from enigma
-	 */
+   * @todo Handle rare bug where teleport skill dissapears from enigma
+   */
   canTeleport: function () {
     return this.teleport && (Skill.canUse(sdk.skills.Teleport) || me.getStat(sdk.stats.OSkill, sdk.skills.Teleport));
   },
@@ -212,17 +212,17 @@ const Pather = {
   },
 
   /**
-	 * @typedef {object} spotOnDistanceSettings
-	 * @property {number} [area]
-	 * @property {number} [reductionType]
-	 * @property {number} [coll]
-	 * @property {boolean} [returnSpotOnError] 
-	 *
-	 * @param {PathNode} spot 
-	 * @param {number} distance 
-	 * @param {spotOnDistanceSettings} givenSettings 
-	 * @returns {PathNode}
-	 */
+   * @typedef {object} spotOnDistanceSettings
+   * @property {number} [area]
+   * @property {number} [reductionType]
+   * @property {number} [coll]
+   * @property {boolean} [returnSpotOnError] 
+   *
+   * @param {PathNode} spot 
+   * @param {number} distance 
+   * @param {spotOnDistanceSettings} givenSettings 
+   * @returns {PathNode}
+   */
   spotOnDistance: function (spot, distance, givenSettings = {}) {
     const spotSettings = Object.assign({}, {
       area: me.area,
@@ -232,7 +232,7 @@ const Pather = {
     }, givenSettings);
 
     let nodes = (getPath(spotSettings.area, me.x, me.y, spot.x, spot.y, spotSettings.reductionType, 4) || []);
-		
+    
     if (!nodes.length) {
       if (spotSettings.reductionType === 2) {
         // try again with walking reduction
@@ -243,39 +243,39 @@ const Pather = {
 
     return (nodes.find((node) => getDistance(spot.x, spot.y, node.x, node.y) < distance
       && Pather.checkSpot(node.x, node.y, spotSettings.coll))
-			|| (spotSettings.returnSpotOnError ? spot : { x: me.x, y: me.y }));
+      || (spotSettings.returnSpotOnError ? spot : { x: me.x, y: me.y }));
   },
 
   /**
-	 * @typedef {object} pathSettings
-	 * @property {boolean} [allowTeleport]
-	 * @property {boolean} [allowClearing]
-	 * @property {boolean} [allowTown]
-	 * @property {boolean} [allowPicking]
-	 * @property {number} [minDist]
-	 * @property {number} [retry]
-	 * @property {boolean} [pop]
-	 * @property {boolean} [returnSpotOnError]
-	 * @property {Function} [callback]
-	 * @property {clearSettings} [clearSettings]
-	 * 
-	 * @typedef {object} clearSettings
-	 * @property {boolean} [clearSettings.clearPath]
-	 * @property {number} [clearSettings.range]
-	 * @property {number} [clearSettings.specType]
-	 * @property {Function} [clearSettings.sort]
-	 *
-	 * @param {PathNode | Unit | PresetUnit} target 
-	 * @param {pathSettings} givenSettings 
-	 * @returns {boolean}
-	 */
+   * @typedef {object} pathSettings
+   * @property {boolean} [allowTeleport]
+   * @property {boolean} [allowClearing]
+   * @property {boolean} [allowTown]
+   * @property {boolean} [allowPicking]
+   * @property {number} [minDist]
+   * @property {number} [retry]
+   * @property {boolean} [pop]
+   * @property {boolean} [returnSpotOnError]
+   * @property {Function} [callback]
+   * @property {clearSettings} [clearSettings]
+   * 
+   * @typedef {object} clearSettings
+   * @property {boolean} [clearSettings.clearPath]
+   * @property {number} [clearSettings.range]
+   * @property {number} [clearSettings.specType]
+   * @property {Function} [clearSettings.sort]
+   *
+   * @param {PathNode | Unit | PresetUnit} target 
+   * @param {pathSettings} givenSettings 
+   * @returns {boolean}
+   */
   move: function (target, givenSettings = {}) {
     // Abort if dead
     if (me.dead) return false;
     /**
-		 * assign settings
-		 * @type {pathSettings}
-		 */
+     * assign settings
+     * @type {pathSettings}
+     */
     const settings = Object.assign({}, {
       clearSettings: {
       },
@@ -408,8 +408,8 @@ const Pather = {
         } else {
           if (!me.inTown) {
             /**
-						 * @todo I think some of this needs to be re-worked, I've noticed recursive Attacking/Picking
-						 */
+             * @todo I think some of this needs to be re-worked, I've noticed recursive Attacking/Picking
+             */
             if (!useTeleport && settings.allowClearing) {
               let tempRange = (annoyingArea ? 5 : 10);
               // allowed to clear so lets see if any mobs are around us
@@ -454,11 +454,11 @@ const Pather = {
               }
 
               /**
-							 * whirlwind can be useful as well, implement it.
-							 * Things to consider:
-							 * 1) Can we cast whirlwind on the node? Is it blocked by something other than monsters.
-							 * 2) If we can't cast on that node, is there another node between us and it that would work?
-							 */
+               * whirlwind can be useful as well, implement it.
+               * Things to consider:
+               * 1) Can we cast whirlwind on the node? Is it blocked by something other than monsters.
+               * 2) If we can't cast on that node, is there another node between us and it that would work?
+               */
               if (Skill.canUse(sdk.skills.Whirlwind)) {
                 // we can use whirlwind, now lets see if we should - either haven't used it yet or it's been long enough since last time
                 if (whirled.at === 0 || getTickCount() - whirled.at > Time.seconds(3)
@@ -510,47 +510,47 @@ const Pather = {
   },
 
   /**
-	 * 
-	 * @param {number} x 
-	 * @param {number} y 
-	 * @param {number} minDist 
-	 * @param {pathSettings} givenSettings 
-	 * @returns {boolean}
-	 */
+   * 
+   * @param {number} x 
+   * @param {number} y 
+   * @param {number} minDist 
+   * @param {pathSettings} givenSettings 
+   * @returns {boolean}
+   */
   moveNear: function (x, y, minDist, givenSettings = {}) {
     return Pather.move({ x: x, y: y }, Object.assign({ minDist: minDist }, givenSettings));
   },
 
   /**
-	 * @param {number} x - the x coord to move to
-	 * @param {number} y - the y coord to move to
-	 * @param {number} retry - number of attempts before aborting
-	 * @param {boolean} clearPath - kill monsters while moving
-	 * @param {boolean} pop - remove last node
-	 * @returns {boolean}
-	 */
+   * @param {number} x - the x coord to move to
+   * @param {number} y - the y coord to move to
+   * @param {number} retry - number of attempts before aborting
+   * @param {boolean} clearPath - kill monsters while moving
+   * @param {boolean} pop - remove last node
+   * @returns {boolean}
+   */
   moveTo: function (x, y, retry, clearPath, pop) {
     return Pather.move({ x: x, y: y }, { retry: retry, pop: pop, allowClearing: clearPath });
   },
 
   /**
-	 * 
-	 * @param {number} x 
-	 * @param {number} y 
-	 * @param {pathSettings} givenSettings 
-	 * @returns 
-	 */
+   * 
+   * @param {number} x 
+   * @param {number} y 
+   * @param {pathSettings} givenSettings 
+   * @returns 
+   */
   moveToEx: function (x, y, givenSettings = {}) {
     return Pather.move({ x: x, y: y }, givenSettings);
   },
 
   /**
-	 * @param {number} x - the x coord to teleport to
-	 * @param {number} y - the y coord to teleport to
-	 * @param {number} [maxRange] - max acceptable distance from node
-	 * @returns {boolean}
-	 * @todo does this need a validLocation check? - maybe if we fail once check the spot
-	 */
+   * @param {number} x - the x coord to teleport to
+   * @param {number} y - the y coord to teleport to
+   * @param {number} [maxRange] - max acceptable distance from node
+   * @returns {boolean}
+   * @todo does this need a validLocation check? - maybe if we fail once check the spot
+   */
   teleportTo: function (x, y, maxRange = 5) {
     for (let i = 0; i < 3; i += 1) {
       Config.PacketCasting > 0 ? Packet.teleport(x, y) : Skill.cast(sdk.skills.Teleport, sdk.skills.hand.Right, x, y);
@@ -570,11 +570,11 @@ const Pather = {
   },
 
   /**
-	 * @param {number} x - the x coord to teleport to
-	 * @param {number} y - the y coord to teleport to
-	 * @param {number} [minDist] - minimal distance from x/y before returning true
-	 * @returns {boolean} - sucessfully moved within minDist
-	 */
+   * @param {number} x - the x coord to teleport to
+   * @param {number} y - the y coord to teleport to
+   * @param {number} [minDist] - minimal distance from x/y before returning true
+   * @returns {boolean} - sucessfully moved within minDist
+   */
   walkTo: function (x, y, minDist) {
     while (!me.gameReady) {
       delay(100);
@@ -587,8 +587,8 @@ const Pather = {
     let [nFail, attemptCount] = [0, 0];
 
     /**
-		 * @todo add cleansing/meditation here as well
-		 */
+     * @todo add cleansing/meditation here as well
+     */
     // credit @Jaenster
     // Stamina handler and Charge
     if (!me.inTown) {
@@ -703,11 +703,11 @@ const Pather = {
   },
 
   /**
-	 * If there is a door in our path, open it so we can continue moving
-	 * @param {number} x - the x coord of the node close to the door
-	 * @param {number} y - the y coord of the node close to the door
-	 * @returns {boolean} true if we opened any doors that were in our way
-	 */
+   * If there is a door in our path, open it so we can continue moving
+   * @param {number} x - the x coord of the node close to the door
+   * @param {number} y - the y coord of the node close to the door
+   * @returns {boolean} true if we opened any doors that were in our way
+   */
   openDoors: function (x, y) {
     if (me.inTown && me.act !== 5) return false;
 
@@ -766,7 +766,7 @@ const Pather = {
     }
 
     let monstawall = Game.getMonster("barricade");
-		
+    
     if (monstawall) {
       do {
         if (monstawall.hp > 0 && (getDistance(monstawall, x, y) < 4
@@ -782,11 +782,11 @@ const Pather = {
   },
 
   /**
-	 * Small and annoying things like barrels can block our path, open them if they are near us
-	 * @param {number} x - the x coord of the node close to the barrel
-	 * @param {number} y - the y coord of the node close to the barrel
-	 * @returns {boolean} true if we kicked any barrels that were in our way
-	 */
+   * Small and annoying things like barrels can block our path, open them if they are near us
+   * @param {number} x - the x coord of the node close to the barrel
+   * @param {number} y - the y coord of the node close to the barrel
+   * @returns {boolean} true if we kicked any barrels that were in our way
+   */
   kickBarrels: function (x, y) {
     if (me.inTown) return false;
 
@@ -801,8 +801,8 @@ const Pather = {
     let barrels = getUnits(sdk.unittype.Object)
       .filter(function (el) {
         return (el.name && el.mode === sdk.objects.mode.Inactive
-				&& _things.includes(el.name.toLowerCase())
-				&& ((getDistance(el, x, y) < 4 && el.distance < 9) || el.distance < 4));
+        && _things.includes(el.name.toLowerCase())
+        && ((getDistance(el, x, y) < 4 && el.distance < 9) || el.distance < 4));
       });
     let brokeABarrel = false;
 
@@ -830,14 +830,14 @@ const Pather = {
   },
 
   /**
-	 * Move to unit
-	 * @param {Unit} unit - unit to move to
-	 * @param {number} [offX] - offset from unit's x coord
-	 * @param {number} [offY] - offset from unit's x coord
-	 * @param {boolean} [clearPath] - kill monsters while moving
-	 * @param {boolean} [pop] - remove last node
-	 * @returns {boolean} Sucessfully moved to unit
-	 */
+   * Move to unit
+   * @param {Unit} unit - unit to move to
+   * @param {number} [offX] - offset from unit's x coord
+   * @param {number} [offY] - offset from unit's x coord
+   * @param {boolean} [clearPath] - kill monsters while moving
+   * @param {boolean} [pop] - remove last node
+   * @returns {boolean} Sucessfully moved to unit
+   */
   moveToUnit: function (unit, offX, offY, clearPath, pop) {
     const useTeleport = this.useTeleport();
 
@@ -860,12 +860,12 @@ const Pather = {
   },
 
   /**
-	 * Move near unit
-	 * @param {Unit} unit - unit to move near
-	 * @param {boolean} [clearPath] - kill monsters while moving
-	 * @param {boolean} [pop] - remove last node
-	 * @returns {boolean} Sucessfully moved near unit
-	 */
+   * Move near unit
+   * @param {Unit} unit - unit to move near
+   * @param {boolean} [clearPath] - kill monsters while moving
+   * @param {boolean} [pop] - remove last node
+   * @returns {boolean} Sucessfully moved near unit
+   */
   moveNearUnit: function (unit, minDist, clearPath, pop = false) {
     const useTeleport = this.useTeleport();
     minDist === undefined && (minDist = me.inTown ? 2 : 5);
@@ -883,15 +883,15 @@ const Pather = {
   },
 
   /**
-	 * Move near preset unit
-	 * @param {number} area - area of the preset unit
-	 * @param {number} unitType - type of the preset unit
-	 * @param {number} unitId - preset unit id
-	 * @param {number} [minDist] - minimum distance from unit
-	 * @param {boolean} [clearPath] - kill monsters while moving
-	 * @param {boolean} [pop] - remove last node
-	 * @returns {boolean} Sucessfully moved near unit
-	 */
+   * Move near preset unit
+   * @param {number} area - area of the preset unit
+   * @param {number} unitType - type of the preset unit
+   * @param {number} unitId - preset unit id
+   * @param {number} [minDist] - minimum distance from unit
+   * @param {boolean} [clearPath] - kill monsters while moving
+   * @param {boolean} [pop] - remove last node
+   * @returns {boolean} Sucessfully moved near unit
+   */
   moveNearPreset: function (area, unitType, unitId, minDist, clearPath = false, pop = false) {
     if (area === undefined || unitType === undefined || unitId === undefined) {
       throw new Error("moveNearPreset: Invalid parameters.");
@@ -916,16 +916,16 @@ const Pather = {
   },
 
   /**
-	 * Move to preset unit
-	 * @param {number} area - area of the preset unit
-	 * @param {number} unitType - type of the preset unit
-	 * @param {number} unitId - preset unit id
-	 * @param {number} [offX] - offset from unit's x coord
-	 * @param {number} [offY] - offset from unit's x coord
-	 * @param {boolean} [clearPath] - kill monsters while moving
-	 * @param {boolean} [pop] - remove last node
-	 * @returns {boolean} Sucessfully moved to unit
-	 */
+   * Move to preset unit
+   * @param {number} area - area of the preset unit
+   * @param {number} unitType - type of the preset unit
+   * @param {number} unitId - preset unit id
+   * @param {number} [offX] - offset from unit's x coord
+   * @param {number} [offY] - offset from unit's x coord
+   * @param {boolean} [clearPath] - kill monsters while moving
+   * @param {boolean} [pop] - remove last node
+   * @returns {boolean} Sucessfully moved to unit
+   */
   moveToPreset: function (area, unitType, unitId, offX, offY, clearPath, pop) {
     if (area === undefined || unitType === undefined || unitId === undefined) {
       throw new Error("moveToPreset: Invalid parameters.");
@@ -954,16 +954,16 @@ const Pather = {
   },
 
   /**
-	 * @todo
-	 * moveTo/NearPresetTile
-	 */
-	
+   * @todo
+   * moveTo/NearPresetTile
+   */
+  
   /**
-	 * 
-	 * @param {number} area 
-	 * @param {number} unitId 
-	 * @param {pathSettings} givenSettings 
-	 */
+   * 
+   * @param {number} area 
+   * @param {number} unitId 
+   * @param {pathSettings} givenSettings 
+   */
   moveToPresetObject: function (area, unitId, givenSettings = {}) {
     if (area === undefined || unitId === undefined) {
       throw new Error("moveToPreset: Invalid parameters.");
@@ -990,11 +990,11 @@ const Pather = {
   },
 
   /**
-	 * 
-	 * @param {number} area 
-	 * @param {number} unitId 
-	 * @param {pathSettings} givenSettings 
-	 */
+   * 
+   * @param {number} area 
+   * @param {number} unitId 
+   * @param {pathSettings} givenSettings 
+   */
   moveToPresetMonster: function (area, unitId, givenSettings = {}) {
     if (area === undefined || unitId === undefined) {
       throw new Error("moveToPreset: Invalid parameters.");
@@ -1021,10 +1021,10 @@ const Pather = {
   },
 
   /**
-	 * @param {number} targetArea - area id or array of area ids to move to
-	 * @param {boolean} [use] - enter target area or last area in the array
-	 * @param {pathSettings} givenSettings
-	 */
+   * @param {number} targetArea - area id or array of area ids to move to
+   * @param {boolean} [use] - enter target area or last area in the array
+   * @param {pathSettings} givenSettings
+   */
   moveToExit: function (targetArea, use, givenSettings = {}) {
     if (targetArea === undefined) return false;
 
@@ -1110,10 +1110,10 @@ const Pather = {
   },
 
   /**
-	 * @param {number} area 
-	 * @param {number} exit 
-	 * @returns {number}
-	 */
+   * @param {number} area 
+   * @param {number} exit 
+   * @returns {number}
+   */
   getDistanceToExit: function (area, exit) {
     area === undefined && (area = me.area);
     exit === undefined && (exit = me.area + 1);
@@ -1127,10 +1127,10 @@ const Pather = {
   },
 
   /**
-	 * @param {number} area 
-	 * @param {number} exit 
-	 * @returns {PathNode | false}
-	 */
+   * @param {number} area 
+   * @param {number} exit 
+   * @returns {PathNode | false}
+   */
   getExitCoords: function (area, exit) {
     area === undefined && (area = me.area);
     exit === undefined && (exit = me.area + 1);
@@ -1145,9 +1145,9 @@ const Pather = {
 
 
   /**
-	 * @param {number} area - the id of area to search for the room nearest to the player character
-	 * @returns {[number, number] | false}
-	 */
+   * @param {number} area - the id of area to search for the room nearest to the player character
+   * @returns {[number, number] | false}
+   */
   getNearestRoom: function (area) {
     let x, y, minDist = 10000;
 
@@ -1177,9 +1177,9 @@ const Pather = {
   },
 
   /**
-	 * @param {number} targetArea - area id of where the unit leads to
-	 * @returns {boolean}
-	 */
+   * @param {number} targetArea - area id of where the unit leads to
+   * @returns {boolean}
+   */
   openExit: function (targetArea) {
     switch (true) {
     case targetArea === sdk.areas.AncientTunnels:
@@ -1204,10 +1204,10 @@ const Pather = {
   },
 
   /**
-	 * @param {UnitType} type - type of the unit to open
-	 * @param {number} id - id of the unit to open
-	 * @returns {boolean}
-	 */
+   * @param {UnitType} type - type of the unit to open
+   * @param {number} id - id of the unit to open
+   * @returns {boolean}
+   */
   openUnit: function (type, id) {
     let unit = Misc.poll(() => getUnit(type, id), 1000, 200);
     if (!unit) throw new Error("openUnit: Unit not found. ID: " + unit);
@@ -1233,12 +1233,12 @@ const Pather = {
   },
 
   /**
-	 * @param {UnitType} type - type of the unit to use
-	 * @param {number} id - id of the unit to use
-	 * @param {number} targetArea - area id of where the unit leads to
-	 * @returns {boolean}
-	 * @todo should use an object as param, or be changed to able to take an already found unit as a param
-	 */
+   * @param {UnitType} type - type of the unit to use
+   * @param {number} id - id of the unit to use
+   * @param {number} targetArea - area id of where the unit leads to
+   * @returns {boolean}
+   * @todo should use an object as param, or be changed to able to take an already found unit as a param
+   */
   useUnit: function (type, id, targetArea) {
     let unit = Misc.poll(() => getUnit(type, id), 2000, 200);
     let preArea = me.area;
@@ -1254,7 +1254,7 @@ const Pather = {
     MainLoop:
     for (let i = 0; i < 5; i += 1) {
       let usetk = (i < 2 && Skill.useTK(unit));
-			
+      
       if (unit.distance > 5) {
         usetk ? this.moveNearUnit(unit, 20) : this.moveToUnit(unit);
         // try to activate it once
@@ -1280,7 +1280,7 @@ const Pather = {
       }
 
       if (type === sdk.unittype.Object && id === sdk.objects.RedPortalToAct4 && me.inArea(sdk.areas.DuranceofHateLvl3)
-				&& targetArea === sdk.areas.PandemoniumFortress
+        && targetArea === sdk.areas.PandemoniumFortress
         && me.getQuest(sdk.quest.id.TheGuardian, sdk.quest.states.Completed) !== 1) {
         throw new Error("useUnit: Incomplete quest. TargetArea: " + getAreaName(targetArea));
       }
@@ -1319,9 +1319,9 @@ const Pather = {
 
   allowBroadcast: true,
   /**
-	 * Meant for use as a MfLeader to let MfHelpers know where to go next
-	 * @param {number} targetArea - area id
-	 */
+   * Meant for use as a MfLeader to let MfHelpers know where to go next
+   * @param {number} targetArea - area id
+   */
   broadcastIntent: function broadcastIntent(targetArea) {
     if (Config.MFLeader && Pather.allowBroadcast) {
       let targetAct = sdk.areas.actOf(targetArea);
@@ -1330,10 +1330,10 @@ const Pather = {
   },
 
   /**
-	 * @param {number} targetArea - id of the area to enter
-	 * @param {boolean} check - force the waypoint menu
-	 * @returns {boolean}
-	 */
+   * @param {number} targetArea - id of the area to enter
+   * @param {boolean} check - force the waypoint menu
+   * @returns {boolean}
+   */
   useWaypoint: function useWaypoint(targetArea, check = false) {
     switch (targetArea) {
     case undefined:
@@ -1377,13 +1377,13 @@ const Pather = {
         }
 
         /**
-				 * @todo If we start in a3 and want to go to a2, use Meshif
-				 * somehow need to take into account reason for wanting to change act though, e.g. If we were
-				 * going to a2 to revive a merc then running to the a3 waypoint takes us close to our goal.
-				 * On the other hand though if we are going to a2 to take a portal then using meshif makes sense
-				 * extending so far as not just starting next to him but finishing chores anywhere around ormus/wp
-				 * if we are all the way at Alkor then it wouldn't make sense
-				 */
+         * @todo If we start in a3 and want to go to a2, use Meshif
+         * somehow need to take into account reason for wanting to change act though, e.g. If we were
+         * going to a2 to revive a merc then running to the a3 waypoint takes us close to our goal.
+         * On the other hand though if we are going to a2 to take a portal then using meshif makes sense
+         * extending so far as not just starting next to him but finishing chores anywhere around ormus/wp
+         * if we are all the way at Alkor then it wouldn't make sense
+         */
 
         if (!getUIFlag(sdk.uiflags.Waypoint) && Town.getDistance("waypoint") > (Skill.haveTK ? 20 : 5)) {
           Town.move("waypoint");
@@ -1518,9 +1518,9 @@ const Pather = {
   },
 
   /**
-	 * @param {boolean} use - use the portal that was made
-	 * @returns {Unit | boolean}
-	 */
+   * @param {boolean} use - use the portal that was made
+   * @returns {Unit | boolean}
+   */
   makePortal: function (use = false) {
     if (me.inTown) return true;
 
@@ -1538,7 +1538,7 @@ const Pather = {
         .first();
 
       !!oldPortal && (oldGid = oldPortal.gid);
-			
+      
       if (tpTool.use() || Game.getObject("portal")) {
         let tick = getTickCount();
 
@@ -1577,11 +1577,11 @@ const Pather = {
   },
 
   /**
-	 * @param {number} [targetArea] - id of the area the portal leads to
-	 * @param {string} [owner] - name of the portal's owner
-	 * @param {ObjectUnit} [unit] - use existing portal unit
-	 * @returns {boolean}
-	 */
+   * @param {number} [targetArea] - id of the area the portal leads to
+   * @param {string} [owner] - name of the portal's owner
+   * @param {ObjectUnit} [unit] - use existing portal unit
+   * @returns {boolean}
+   */
   usePortal: function (targetArea, owner, unit) {
     if (targetArea && me.area === targetArea) return true;
 
@@ -1597,7 +1597,7 @@ const Pather = {
 
       if (portal) {
         if (portal.objtype === sdk.areas.DuranceofHateLvl3 && portal.getParent() !== me.name
-					&& !Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, sdk.quest.states.Completed)) {
+          && !Misc.checkQuest(sdk.quest.id.TheBlackenedTemple, sdk.quest.states.Completed)) {
           throw new Error("Cannot access meph through someone elses portal without first completing Travincal");
         }
         let redPortal = portal.classid === sdk.objects.RedPortal;
@@ -1632,7 +1632,7 @@ const Pather = {
             } else {
               let timeTillNextPortal = Math.max(3, Math.round(2500 - (getTickCount() - this.lastPortalTick)));
               delay(timeTillNextPortal);
-							
+              
               continue;
             }
           }
@@ -1677,10 +1677,10 @@ const Pather = {
   },
 
   /**
-	 * @param {number} targetArea - id of the area the portal leads to
-	 * @param {string} owner - name of the portal's owner
-	 * @returns {ObjectUnit | false}
-	 */
+   * @param {number} targetArea - id of the area the portal leads to
+   * @param {string} owner - name of the portal's owner
+   * @returns {ObjectUnit | false}
+   */
   getPortal: function (targetArea, owner) {
     let portal = Game.getObject("portal");
 
@@ -1715,14 +1715,14 @@ const Pather = {
   },
 
   /**
-	 * @param {number} x - the starting x coord
-	 * @param {number} y - the starting y coord
-	 * @param {number} range - maximum allowed range from the starting coords
-	 * @param {number} step - distance between each checked dot on the grid
-	 * @param {number} coll - collision flag to avoid
-	 * @param {number} size 
-	 * @returns {[number, number] | false}
-	 */
+   * @param {number} x - the starting x coord
+   * @param {number} y - the starting y coord
+   * @param {number} range - maximum allowed range from the starting coords
+   * @param {number} step - distance between each checked dot on the grid
+   * @param {number} coll - collision flag to avoid
+   * @param {number} size 
+   * @returns {[number, number] | false}
+   */
   getNearestWalkable: function (x, y, range, step, coll, size) {
     !step && (step = 1);
     coll === undefined && (coll = sdk.collision.BlockWall);
@@ -1759,13 +1759,13 @@ const Pather = {
   },
 
   /**
-	 * @param {number} x - the x coord to check
-	 * @param {number} y - the y coord to check
-	 * @param {number} coll - collision flag to search for
-	 * @param {boolean} cacheOnly - use only cached room data
-	 * @param {number} size 
-	 * @returns {boolean}
-	 */
+   * @param {number} x - the x coord to check
+   * @param {number} y - the y coord to check
+   * @param {number} coll - collision flag to search for
+   * @param {boolean} cacheOnly - use only cached room data
+   * @param {number} size 
+   * @returns {boolean}
+   */
   checkSpot: function (x, y, coll, cacheOnly, size) {
     coll === undefined && (coll = sdk.collision.BlockWall);
     !size && (size = 1);
@@ -1786,9 +1786,9 @@ const Pather = {
   },
 
   /**
-	 * @param {number} act - the act number to check for access
-	 * @returns {boolean}
-	 */
+   * @param {number} act - the act number to check for access
+   * @returns {boolean}
+   */
   accessToAct: function (act) {
     switch (act) {
     // Act 1 is always accessible
@@ -1809,10 +1809,10 @@ const Pather = {
   },
 
   /**
-	 * @param {number} area - the id of area to get the waypoint in
-	 * @param {boolean} [clearPath] 
-	 * @returns {boolean}
-	 */
+   * @param {number} area - the id of area to get the waypoint in
+   * @param {boolean} [clearPath] 
+   * @returns {boolean}
+   */
   getWP: function (area, clearPath) {
     area !== me.area && this.journeyTo(area);
 
@@ -1859,10 +1859,10 @@ const Pather = {
   },
 
   /**
-	 * @param {number} area - the id of area to move to
-	 * @returns {boolean}
-	 * @todo refactor this, it's rather messy
-	 */
+   * @param {number} area - the id of area to move to
+   * @returns {boolean}
+   * @todo refactor this, it's rather messy
+   */
   journeyTo: function (area) {
     if (area === undefined) return false;
     console.time("journeyTo");
@@ -1912,7 +1912,7 @@ const Pather = {
 
       if (!me.inTown) {
         Precast.doPrecast(false);
-				
+        
         if (this.wpAreas.includes(currArea) && !getWaypoint(this.wpAreas.indexOf(currArea))) {
           this.getWP(currArea);
         }
@@ -2054,12 +2054,12 @@ const Pather = {
   plotCourse_openedWpMenu: false,
 
   /**
-	 * Plot a course to a specific area
-	 * @param {number} src - starting area id
-	 * @param {number} dest - destination area id
-	 * @returns {{ course: number[], useWP: boolean } | false}
-	 * @todo this needs more checks
-	 */
+   * Plot a course to a specific area
+   * @param {number} src - starting area id
+   * @param {number} dest - destination area id
+   * @returns {{ course: number[], useWP: boolean } | false}
+   * @todo this needs more checks
+   */
   plotCourse: function (dest, src) {
     let node, prevArea;
     let useWP = false;
@@ -2133,9 +2133,9 @@ const Pather = {
         if (this.areasConnected(node.from, node.to)) {
           // If we have this wp we can start from there
           if ((me.inTown // check wp in town
-						|| ((src !== previousAreas[dest] && dest !== previousAreas[src]) // check wp if areas aren't linked
-							&& previousAreas[src] !== previousAreas[dest])) // check wp if areas aren't linked with a common area
-							&& Pather.wpAreas.indexOf(node.from) > 0 && getWaypoint(Pather.wpAreas.indexOf(node.from))
+            || ((src !== previousAreas[dest] && dest !== previousAreas[src]) // check wp if areas aren't linked
+              && previousAreas[src] !== previousAreas[dest])) // check wp if areas aren't linked with a common area
+              && Pather.wpAreas.indexOf(node.from) > 0 && getWaypoint(Pather.wpAreas.indexOf(node.from))
           ) {
             if (node.from !== src) {
               useWP = true;
@@ -2184,12 +2184,12 @@ const Pather = {
   },
 
   /**
-	 * Check if two areas are connected
-	 * @param {number} src - starting area id
-	 * @param {number} dest - destination area id
-	 * @returns {boolean}
-	 * @todo this needs more checks
-	 */
+   * Check if two areas are connected
+   * @param {number} src - starting area id
+   * @param {number} dest - destination area id
+   * @returns {boolean}
+   * @todo this needs more checks
+   */
   areasConnected: function (src, dest) {
     if (src === sdk.areas.CanyonofMagic && dest === sdk.areas.ArcaneSanctuary) {
       return false;

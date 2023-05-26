@@ -12,7 +12,7 @@ function main() {
   if (!FileTools.exists("data/" + me.profile + ".json")) {
     DataFile.create();
   }
-	
+  
   addEventListener("copydata", Starter.receiveCopyData);
 
   while (!Starter.handle) {
@@ -31,7 +31,7 @@ function main() {
 
   while (true) {
     delay(1000);
-		
+    
     if (me.gameReady) {
       Starter.isUp === "no" && (Starter.isUp = "yes");
       if (me.ingame) {

@@ -254,10 +254,10 @@ function locationAction (location) {
       let newLines = lines
         .map((line, index) => {
           if (index > 0
-						// eslint-disable-next-line no-useless-escape
-						&& !line.match(/\<.*\>/, "gi")
-						&& !line.match(" has left", "gi")
-						&& !line.match(" has joined", "gi")) {
+            // eslint-disable-next-line no-useless-escape
+            && !line.match(/\<.*\>/, "gi")
+            && !line.match(" has left", "gi")
+            && !line.match(" has joined", "gi")) {
             line = lines[index - 1] + line;
           }
           return line;

@@ -41,7 +41,7 @@ includeIfNotIncluded("oog/FileAction.js");
 
     getObj: function () {
       !FileTools.exists("data/" + me.profile + ".json") && DataFile.create();
-			
+      
       let obj;
       let string = FileAction.read("data/" + me.profile + ".json");
 

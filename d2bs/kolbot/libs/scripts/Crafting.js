@@ -173,7 +173,7 @@ function updateInfo() {
         // This is not a perfect check, it might not handle every case
         for (let j = 0; j < items.length; j += 1) {
           if (info.Sets[i].BaseItems.includes(items[j].classid) // Item is on the bases list
-							&& AutoMule.cubingIngredient(items[j])) { // Item is a valid Cubing ingredient
+              && AutoMule.cubingIngredient(items[j])) { // Item is a valid Cubing ingredient
             print("Base found: " + items[j].classid);
 
             info.Sets[i].Enabled = true;
@@ -194,7 +194,7 @@ function updateInfo() {
         // This is not a perfect check, it might not handle every case
         for (let j = 0; j < items.length; j += 1) {
           if (info.Sets[i].BaseItems.includes(items[j].classid) // Item is on the bases list
-							&& runewordIngredient(items[j])) { // Item is a valid Runeword ingredient
+              && runewordIngredient(items[j])) { // Item is a valid Runeword ingredient
             print("Base found: " + items[j].classid);
 
             info.Sets[i].Enabled = true;
@@ -222,7 +222,7 @@ function runewordIngredient(item) {
 
   for (let i = 0; i < Config.Runewords.length; i += 1) {
     let base = (Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0))
-			|| Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0), true));
+      || Runewords.getBase(Config.Runewords[i][0], Config.Runewords[i][1], (Config.Runewords[i][2] || 0), true));
 
     base && baseGids.push(base.gid);
   }
@@ -350,9 +350,9 @@ function shopStuff(npcId, classids, amount) {
       if (items.length) {
         for (let i = 0; i < items.length; i += 1) {
           if (Storage.Inventory.CanFit(items[i])
-							&& Pickit.canPick(items[i])
-							&& me.gold >= items[i].getItemCost(sdk.items.cost.ToBuy)
-							&& classids.includes(items[i].classid)) {
+              && Pickit.canPick(items[i])
+              && me.gold >= items[i].getItemCost(sdk.items.cost.ToBuy)
+              && classids.includes(items[i].classid)) {
 
             //print("Bought " + items[i].name);
             items[i].buy();
@@ -375,7 +375,7 @@ function shopStuff(npcId, classids, amount) {
   switch (npcId.toLowerCase()) {
   case "fara":
     if (!Town.goToTown(2) || !Town.move(NPC.Fara)) throw new Error("Failed to get to NPC");
-		
+    
     wpArea = sdk.areas.A2SewersLvl2;
     town = sdk.areas.LutGholein;
     path = [5112, 5094, 5092, 5096, 5078, 5098, 5070, 5085];
@@ -395,7 +395,7 @@ function shopStuff(npcId, classids, amount) {
     break;
   case "drognan":
     if (!Town.goToTown(2) || !Town.move(NPC.Drognan)) throw new Error("Failed to get to NPC");
-		
+    
     wpArea = sdk.areas.A2SewersLvl2;
     town = sdk.areas.LutGholein;
     path = [5093, 5049, 5088, 5060, 5093, 5079, 5078, 5087, 5070, 5085];
@@ -405,7 +405,7 @@ function shopStuff(npcId, classids, amount) {
     break;
   case "ormus":
     if (!Town.goToTown(3) || !Town.move(NPC.Ormus)) throw new Error("Failed to get to NPC");
-		
+    
     wpArea = sdk.areas.DuranceofHateLvl2;
     town = sdk.areas.KurastDocktown;
     path = [5147, 5089, 5156, 5075, 5157, 5063, 5160, 5050];
@@ -415,7 +415,7 @@ function shopStuff(npcId, classids, amount) {
     break;
   case "anya":
     if (!Town.goToTown(5) || !Town.move(NPC.Anya)) throw new Error("Failed to get to NPC");
-		
+    
     wpArea = sdk.areas.WorldstoneLvl2;
     town = sdk.areas.Harrogath;
     path = [5122, 5119, 5129, 5105, 5123, 5087, 5115, 5068];
@@ -425,7 +425,7 @@ function shopStuff(npcId, classids, amount) {
     break;
   case "malah":
     if (!Town.goToTown(5) || !Town.move(NPC.Malah)) throw new Error("Failed to get to NPC");
-		
+    
     wpArea = sdk.areas.CrystalizedPassage;
     town = sdk.areas.Harrogath;
     path = [5077, 5032, 5089, 5025, 5100, 5021, 5106, 5051, 5116, 5071];

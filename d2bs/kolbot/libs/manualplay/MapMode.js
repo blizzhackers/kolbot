@@ -9,7 +9,7 @@ const MapMode = {
   mapHelperFilePath: "libs/manualplay/threads/maphelper.js",
   include: function () {
     let files = dopen("libs/manualplay/libs/").getFiles();
-		
+    
     Array.isArray(files) && files
       .filter(file => file.endsWith(".js"))
       .forEach(function (x) {
@@ -28,7 +28,7 @@ const MapMode = {
     Config.MiniShopBot = false; // Scan items in NPC shops.
     Config.PacketShopping = true; // Use packets to shop. Improves shopping speed.
     Config.TownCheck = false; // Go to town if out of potions
-		
+    
     // Additional item info log settings. All info goes to \logs\ItemLog.txt
     Config.ItemInfo = false; // Log stashed, skipped (due to no space) or sold items.
     Config.ItemInfoQuality = []; // The quality of sold items to log. See core/GameData/NTItemAlias.js for values. Example: Config.ItemInfoQuality = [6, 7, 8];

@@ -27,7 +27,7 @@ new Overrides.Override(Attack, Attack.getNearestMonster, function (orignal) {
 function main() {
   // getUnit test
   getUnit(-1) === null && console.warn("getUnit bug detected");
-	
+  
   let ironGolem, debugInfo = { area: 0, currScript: "no entry" };
   let [quitFlag, antiIdle, townChicken] = [false, false, false];
   let quitListDelayTime;
@@ -145,12 +145,12 @@ function main() {
           let nString = "ÿc4NTIP.CheckItem: ÿc0" + nResult.result + " ÿc7Line: ÿc0" + nResult.line + "\n";
 
           itemString = "ÿc4ItemName: ÿc0" + itemToCheck.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, "")
-						+ "\nÿc4ItemType: ÿc0" + itemToCheck.itemType + "| ÿc4Classid: ÿc0" + itemToCheck.classid + "| ÿc4Quality: ÿc0" + itemToCheck.quality + "| ÿc4Gid: ÿc0" + itemToCheck.gid
-						+ "\nÿc4ItemMode: ÿc0" + itemToCheck.mode + "| ÿc4Location: ÿc0" + itemToCheck.location + "| ÿc4Bodylocation: ÿc0" + itemToCheck.bodylocation;
+            + "\nÿc4ItemType: ÿc0" + itemToCheck.itemType + "| ÿc4Classid: ÿc0" + itemToCheck.classid + "| ÿc4Quality: ÿc0" + itemToCheck.quality + "| ÿc4Gid: ÿc0" + itemToCheck.gid
+            + "\nÿc4ItemMode: ÿc0" + itemToCheck.mode + "| ÿc4Location: ÿc0" + itemToCheck.location + "| ÿc4Bodylocation: ÿc0" + itemToCheck.bodylocation;
           generalString = pString + nString
-						+ "\nÿc4Cubing Item: ÿc0" + Cubing.keepItem(itemToCheck) + " | ÿc4Runeword Item: ÿc0" + Runewords.keepItem(itemToCheck) + " | ÿc4Crafting Item: ÿc0" + CraftingSystem.keepItem(itemToCheck);
+            + "\nÿc4Cubing Item: ÿc0" + Cubing.keepItem(itemToCheck) + " | ÿc4Runeword Item: ÿc0" + Runewords.keepItem(itemToCheck) + " | ÿc4Crafting Item: ÿc0" + CraftingSystem.keepItem(itemToCheck);
         }
-				
+        
         console.log("ÿc2*************Item Info Start*************");
         console.log(itemString);
         console.log("ÿc2Systems Info Start");
@@ -346,8 +346,8 @@ function main() {
         Config.UseRejuvHP > 0 && me.hpPercent < Config.UseRejuvHP && Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.Rejuv);
 
         /**
-				 * Feel like potting and lifechicken should actually be seperate threads
-				 */
+         * Feel like potting and lifechicken should actually be seperate threads
+         */
         if (Config.LifeChicken > 0 && me.hpPercent <= Config.LifeChicken) {
           // takes a moment sometimes for townchicken to actually get to town so re-check that we aren't in town before quitting
           if (!me.inTown) {

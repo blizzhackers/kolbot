@@ -8,14 +8,14 @@
 
 function ControlBot() {
   const startTime = getTickCount();
-	
+  
   /**
-	 * @type {Object.<string, { firstCmd: number, commands: number, ignored: boolean | number }>}
-	 */
+   * @type {Object.<string, { firstCmd: number, commands: number, ignored: boolean | number }>}
+   */
   const cmdNicks = {};
   /**
-	 * @type {Object.<string, { timer: number, requests: number }>}
-	 */
+   * @type {Object.<string, { timer: number, requests: number }>}
+   */
   const wpNicks = {};
 
   let command, nick;
@@ -72,9 +72,9 @@ function ControlBot() {
   }
 
   /**
-	 * @param {string} nick 
-	 * @returns {boolean}
-	 */
+   * @param {string} nick 
+   * @returns {boolean}
+   */
   const enchant = function (nick) {
     if (!Config.ControlBot.Chant.Enchant) return false;
 
@@ -142,9 +142,9 @@ function ControlBot() {
   };
 
   /**
-	 * @param {string} nick 
-	 * @returns {boolean}
-	 */
+   * @param {string} nick 
+   * @returns {boolean}
+   */
   const bo = function (nick) {
     if (!Config.ControlBot.Bo) return false;
 
@@ -198,8 +198,8 @@ function ControlBot() {
   };
 
   /**
-	 * @type {Map<string, { lastChant: number }}
-	 */
+   * @type {Map<string, { lastChant: number }}
+   */
   const chantList = new Map();
   const chantDuration = Config.ControlBot.Chant.Enchant ? Skill.getDuration(sdk.skills.Enchant) : 0;
 
@@ -346,9 +346,9 @@ function ControlBot() {
   };
 
   /**
-	 * @param {string} nick 
-	 * @returns {boolean}
-	 */
+   * @param {string} nick 
+   * @returns {boolean}
+   */
   const openPortal = function (nick) {
     if (!Config.ControlBot.Cows.MakeCows) return false;
     try {
@@ -396,9 +396,9 @@ function ControlBot() {
   };
 
   /**
-	 * @param {string} nick 
-	 * @returns {string | boolean}
-	 */
+   * @param {string} nick 
+   * @returns {string | boolean}
+   */
   const getWpNick = function (nick) {
     if (wpNicks.hasOwnProperty(nick)) {
       if (wpNicks[nick].requests > 4) {
@@ -416,17 +416,17 @@ function ControlBot() {
   };
 
   /**
-	 * @param {string} nick 
-	 * @returns {void}
-	 */
+   * @param {string} nick 
+   * @returns {void}
+   */
   const addWpNick = function (nick) {
     wpNicks[nick] = { timer: getTickCount(), requests: 0 };
   };
 
   /**
-	 * @param {string} nick 
-	 * @returns {boolean}
-	 */
+   * @param {string} nick 
+   * @returns {boolean}
+   */
   const giveWps = function (nick) {
     if (!Config.ControlBot.Wps.GiveWps) return false;
     if (!Misc.inMyParty(nick)) {
@@ -533,13 +533,13 @@ function ControlBot() {
   };
 
   /**
-	 * @param {string} command 
-	 * @returns {boolean}
-	 */
+   * @param {string} command 
+   * @returns {boolean}
+   */
   const floodCheck = function (command) {
     if (!command || command.length < 2) return false;
     let [cmd, nick] = command;
-			
+      
     // ignore overhead messages
     if (!nick) return true;
     // ignore messages not related to our commands
@@ -580,10 +580,10 @@ function ControlBot() {
   };
 
   /**
-	 * @param {string} nick 
-	 * @param {string} msg
-	 * @returns {boolean}
-	 */
+   * @param {string} nick 
+   * @param {string} msg
+   * @returns {boolean}
+   */
   function chatEvent(nick, msg) {
     if (shitList.includes(nick)) {
       say("No commands for the shitlisted.");

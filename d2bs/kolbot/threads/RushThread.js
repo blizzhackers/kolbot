@@ -81,7 +81,7 @@ new Overrides.Override(Pather, Pather.useWaypoint, function(orignal, targetArea,
     return (Config.Rusher.GiveWps && giveWP()) || true;
   } else {
     print("failed");
-		
+    
     return false;
   }
 }).apply();
@@ -138,7 +138,7 @@ function main () {
     Pather.useWaypoint(sdk.areas.CatacombsLvl2, true) && Precast.doPrecast(true);
 
     if (!Pather.moveToExit([sdk.areas.CatacombsLvl3, sdk.areas.CatacombsLvl4], true)
-			|| !Pather.moveTo(22582, 9612)) {
+      || !Pather.moveTo(22582, 9612)) {
       throw new Error("andy failed");
     }
 
@@ -177,7 +177,7 @@ function main () {
       Precast.doPrecast(true);
 
       if (!Pather.moveToExit(sdk.areas.HallsoftheDeadLvl3, true)
-				|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricCubeChest)) {
+        || !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricCubeChest)) {
         throw new Error("cube failed");
       }
 
@@ -205,7 +205,7 @@ function main () {
     Pather.useWaypoint(sdk.areas.LostCity, true) && Precast.doPrecast(true);
 
     if (!Pather.moveToExit([sdk.areas.ValleyofSnakes, sdk.areas.ClawViperTempleLvl1, sdk.areas.ClawViperTempleLvl2], true)
-			|| !Pather.moveTo(15044, 14045)) {
+      || !Pather.moveTo(15044, 14045)) {
       throw new Error("amulet failed");
     }
 
@@ -233,7 +233,7 @@ function main () {
     Pather.useWaypoint(sdk.areas.FarOasis, true) && Precast.doPrecast(true);
 
     if (!Pather.moveToExit([sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.MaggotLairLvl3], true)
-			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.ShaftoftheHoradricStaffChest)) {
+      || !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.ShaftoftheHoradricStaffChest)) {
       throw new Error("staff failed");
     }
 
@@ -345,7 +345,7 @@ function main () {
     Precast.doPrecast(true);
 
     if (!Pather.moveToExit(getRoom().correcttomb, true)
-			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricStaffHolder)) {
+      || !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricStaffHolder)) {
       throw new Error("duriel failed");
     }
 
@@ -507,11 +507,11 @@ function main () {
     Pather.useWaypoint(sdk.areas.RiverofFlame);
     Precast.doPrecast(true);
     if (!Pather.moveToExit(sdk.areas.ChaosSanctuary, true) && !Pather.moveTo(7790, 5544)) throw new Error("Failed to move to Chaos Sanctuary");
-		
+    
     Common.Diablo.initLayout();
     Config.Diablo.Fast = true;
     Config.Diablo.SealLeader = false;
-		
+    
     try {
       Common.Diablo.runSeals(Config.Diablo.SealOrder);
       print("Attempting to find Diablo");
@@ -851,7 +851,7 @@ function main () {
     Precast.doPrecast(false);
 
     if (!Pather.moveToExit(sdk.areas.RuinedTemple, true)
-			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.LamEsensTomeHolder)) {
+      || !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.LamEsensTomeHolder)) {
       throw new Error("Lam Essen quest failed");
     }
 
@@ -992,7 +992,7 @@ function main () {
     Precast.doPrecast(false);
 
     if (!Pather.moveToExit(sdk.areas.FrozenRiver, true)
-			|| !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.FrozenAnyasPlatform)) {
+      || !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.FrozenAnyasPlatform)) {
       throw new Error("Anya quest failed");
     }
 

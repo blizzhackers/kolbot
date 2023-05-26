@@ -35,7 +35,7 @@
     shrineMap.set(sdk.shrines.Monster, new Shrine());
     shrineMap.set(sdk.shrines.Exploding, new Shrine());
     shrineMap.set(sdk.shrines.Poison, new Shrine());
-		
+    
     return {
       get: function (shrineType) {
         return shrineMap.get(shrineType);

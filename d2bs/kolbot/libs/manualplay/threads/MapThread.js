@@ -35,7 +35,7 @@ const Hooks = {
 
   init: function () {
     let files = dopen("libs/manualplay/hooks/").getFiles();
-		
+    
     Array.isArray(files) && files
       .filter(file => file.endsWith(".js"))
       .forEach(function (x) {
@@ -150,7 +150,7 @@ function main() {
     if (!Hooks.userAddon) {
       return true;
     }
-		
+    
     UnitInfo.createInfo(Game.getSelectedUnit());
 
     return true;
@@ -176,11 +176,11 @@ function main() {
 
     if (this.revealedAreas.indexOf(area) === -1) {
       delay(500);
-			
+      
       if (!getRoom()) {
         return;
       }
-			
+      
       revealLevel(true);
       this.revealedAreas.push(area);
     }
@@ -296,7 +296,7 @@ function main() {
     let hideFlagFound = false;
 
     this.revealArea(me.area);
-		
+    
     for (let i = 0; i < hideFlags.length; i++) {
       if (getUIFlag(hideFlags[i])) {
         Hooks.flush(hideFlags[i]);

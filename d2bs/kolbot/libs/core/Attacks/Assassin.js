@@ -59,7 +59,7 @@ const ClassAttack = {
     if (checkTraps) {
       if (unit.distance > this.trapRange || checkCollision(me, unit, sdk.collision.Ranged)) {
         if (!Attack.getIntoPosition(unit, this.trapRange, sdk.collision.Ranged)
-					|| (checkCollision(me, unit, sdk.collision.BlockWall)
+          || (checkCollision(me, unit, sdk.collision.BlockWall)
           && (getCollision(me.area, unit.x, unit.y) & sdk.collision.BlockWall))) {
           return Attack.Result.FAILED;
         }
@@ -162,7 +162,7 @@ const ClassAttack = {
     // unit became invalidated
     if (!unit || !unit.attackable) return Attack.Result.SUCCESS;
     Config.TeleSwitch && me.switchToPrimary();
-		
+    
     let walk;
     let classid = unit.classid;
 
@@ -234,7 +234,7 @@ const ClassAttack = {
     // getDistance crashes when using an object with x, y props, that's why it's unit.x, unit.y and not unit
     // is this still a thing ^^? todo: test it
     if (me.getMinionCount(sdk.summons.type.AssassinTrap) === 0 || !this.lastTrapPos.hasOwnProperty("x")
-			|| getDistance(unit.x, unit.y, this.lastTrapPos.x, this.lastTrapPos.y) > 15) {
+      || getDistance(unit.x, unit.y, this.lastTrapPos.x, this.lastTrapPos.y) > 15) {
       return 5;
     }
 
@@ -260,7 +260,7 @@ const ClassAttack = {
             && [
               sdk.monsters.Duriel, sdk.monsters.Mephisto, sdk.monsters.Diablo, sdk.monsters.Baal
             ].includes(unit.classid))
-						|| (unit.hasOwnProperty("type") && unit.isPlayer)) {
+            || (unit.hasOwnProperty("type") && unit.isPlayer)) {
             if (traps >= Config.BossTraps.length) return true;
 
             Skill.cast(Config.BossTraps[traps], sdk.skills.hand.Right, unit.x + i, unit.y + j);

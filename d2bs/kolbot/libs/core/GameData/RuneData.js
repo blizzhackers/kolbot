@@ -41,14 +41,14 @@
         return [iType];
       }
     }
-		
+    
     /**
-		 * @constructor
-		 * @param {string} name - The name of the recipe.
-		 * @param {number} sockets - The number of sockets required for the recipe.
-		 * @param {number[]} runes - Array of insertable IDs required for the recipe.
-		 * @param {number[]} itemTypes - Array of item type IDs the recipe can be applied to.
-		 */
+     * @constructor
+     * @param {string} name - The name of the recipe.
+     * @param {number} sockets - The number of sockets required for the recipe.
+     * @param {number[]} runes - Array of insertable IDs required for the recipe.
+     * @param {number[]} itemTypes - Array of item type IDs the recipe can be applied to.
+     */
     function RunewordObj (name, sockets, runes, itemTypes) {
       this.name = name;
       this.sockets = sockets;
@@ -70,40 +70,40 @@
     };
 
     /**
-		 * Finds a runeword by name.
-		 * @param {string} name - The name of the runeword.
-		 * @returns {Runeword} - The runeword object.
-		 */
+     * Finds a runeword by name.
+     * @param {string} name - The name of the runeword.
+     * @returns {Runeword} - The runeword object.
+     */
     const findByName = function (name) {
       return runewords.find(r => String.isEqual(r.name, name));
     };
 
     /**
-		 * Find all runewords that have the given rune.
-		 * @param {number} rune - classid of rune
-		 * @returns {Array<runeword>}
-		 */
+     * Find all runewords that have the given rune.
+     * @param {number} rune - classid of rune
+     * @returns {Array<runeword>}
+     */
     const findByRune = function (rune) {
       return runewords.filter(r => r.runes.includes(rune));
     };
 
     /**
-		 * Find all runewords that can be applied to the given item type.
-		 * @param {number} type - item type
-		 * @returns {Array<runeword>}
-		 */
+     * Find all runewords that can be applied to the given item type.
+     * @param {number} type - item type
+     * @returns {Array<runeword>}
+     */
     const findByType = function (type) {
       return runewords.filter(r => r.itemTypes.includes(type));
     };
 
     /**
-		 * Create a new non standard runeword.
-		 * @param {string} name - The name of the recipe.
-		 * @param {number} sockets - The number of sockets required for the recipe.
-		 * @param {number[]} runes - Array of insertable IDs required for the recipe.
-		 * @param {number[]} itemTypes - Array of item type IDs the recipe can be applied to.
-		 * @returns {runeword} - The new runeword object.
-		 */
+     * Create a new non standard runeword.
+     * @param {string} name - The name of the recipe.
+     * @param {number} sockets - The number of sockets required for the recipe.
+     * @param {number[]} runes - Array of insertable IDs required for the recipe.
+     * @param {number[]} itemTypes - Array of item type IDs the recipe can be applied to.
+     * @returns {runeword} - The new runeword object.
+     */
     const addRuneword = function (name, sockets, runes, itemTypes) {
       if (!name || !sockets || !runes || !itemTypes) return false;
       !Array.isArray(runes) && (runes = [runes]);

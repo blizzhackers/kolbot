@@ -163,10 +163,10 @@ const Loader = {
               let duration = Time.elapsed(tick);
               console.log(
                 "ÿc7" + script + " :: ÿc0Complete\n"
-								+ "ÿc2 Statistics:\n"
-								+ "ÿc7 - Duration: ÿc0" + (Time.format(duration)) + "\n"
-								+ "ÿc7 - Experience Gained: ÿc0" + gain + "\n"
-								+ "ÿc7 - Exp/minute: ÿc0" + (gain / (duration / 60000)).toFixed(2)
+                + "ÿc2 Statistics:\n"
+                + "ÿc7 - Duration: ÿc0" + (Time.format(duration)) + "\n"
+                + "ÿc7 - Experience Gained: ÿc0" + gain + "\n"
+                + "ÿc7 - Exp/minute: ÿc0" + (gain / (duration / 60000)).toFixed(2)
               );
             }
           }
@@ -180,7 +180,7 @@ const Loader = {
             // remove script function from global scope, so it can be cleared by GC
             delete global[script];
           }
-					
+          
           if (reconfiguration) {
             print("ÿc2Reverting back unmodified config properties.");
             this.copy(unmodifiedConfig, Config);
@@ -196,14 +196,14 @@ const Loader = {
     let reconfiguration, unmodifiedConfig = {};
     let failed = false;
     let mainScript = this.scriptName();
-		
+    
     function buildScriptMsg () {
       let str = "ÿc9" + mainScript + " ÿc0:: ";
 
       if (Loader.tempList.length && Loader.tempList[0] !== mainScript) {
         Loader.tempList.forEach(s => str += "ÿc9" + s + " ÿc0:: ");
       }
-			
+      
       return str;
     }
 
@@ -251,10 +251,10 @@ const Loader = {
             let duration = Time.elapsed(tick);
             console.log(
               mainScriptStr + "ÿc7" + script + " :: ÿc0Complete\n"
-							+ "ÿc2 Statistics:\n"
-							+ "ÿc7 - Duration: ÿc0" + (Time.format(duration)) + "\n"
-							+ "ÿc7 - Experience Gained: ÿc0" + gain + "\n"
-							+ "ÿc7 - Exp/minute: ÿc0" + (gain / (duration / 60000)).toFixed(2)
+              + "ÿc2 Statistics:\n"
+              + "ÿc7 - Duration: ÿc0" + (Time.format(duration)) + "\n"
+              + "ÿc7 - Experience Gained: ÿc0" + gain + "\n"
+              + "ÿc7 - Exp/minute: ÿc0" + (gain / (duration / 60000)).toFixed(2)
             );
           }
         }
@@ -273,7 +273,7 @@ const Loader = {
         }
 
         this.tempList.pop();
-				
+        
         if (reconfiguration) {
           print("ÿc2Reverting back unmodified config properties.");
           this.copy(unmodifiedConfig, Config);

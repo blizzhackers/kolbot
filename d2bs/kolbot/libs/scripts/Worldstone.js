@@ -10,12 +10,12 @@ function Worldstone() {
   Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
   Precast.doPrecast(true);
   /**
-	 * Calc distances so we know whether to tp to town or not after clearing WSK1
-	 * - WP -> WSK3
-	 * - WSK1 -> WSK3
-	 * @todo Take into account walking vs tele and adjust distance check accordingly
-	 */
-	
+   * Calc distances so we know whether to tp to town or not after clearing WSK1
+   * - WP -> WSK3
+   * - WSK1 -> WSK3
+   * @todo Take into account walking vs tele and adjust distance check accordingly
+   */
+  
   /** @type {Exit[]} */
   let exits = getArea().exits;
   let WS1 = exits.find(t => t.target === sdk.areas.WorldstoneLvl1);

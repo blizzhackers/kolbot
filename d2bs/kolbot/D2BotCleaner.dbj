@@ -31,47 +31,47 @@ Starter.Config.DelayBetweenAccounts = rand(15, 30); //Seconds to wait before cle
  */
 const AccountsToClean = {
   /* Format:
-		"account1/password1/realm": ["charname1", "charname2"],
-		"account2/password2/realm": ["charnameX", "charnameY"],
-		"account3/password3/realm": ["all"]
+    "account1/password1/realm": ["charname1", "charname2"],
+    "account2/password2/realm": ["charnameX", "charnameY"],
+    "account3/password3/realm": ["all"]
 
-		To clean a full account, put "account/password/realm": ["all"]
+    To clean a full account, put "account/password/realm": ["all"]
 
-		realm = useast, uswest, europe, asia
+    realm = useast, uswest, europe, asia
 
-		for singleplayer follow format "singleplayer": ["charname1", "charname2"]
+    for singleplayer follow format "singleplayer": ["charname1", "charname2"]
 
-		Individual entries are separated with a comma.
-	*/
+    Individual entries are separated with a comma.
+  */
 
   /*	Example:
-		"MyAcc1/tempPass/useast": ["soloSorc"],
-		"singleplayer": ["solobarb"],
-	*/
+    "MyAcc1/tempPass/useast": ["soloSorc"],
+    "singleplayer": ["solobarb"],
+  */
 
   // Enter your lines under here
 
 };
 
 const CharactersToExclude = [""];
-	
+  
 // NEW STUFF - Please enter your profile name exactly as is
 const profiles = [
   /* Format. Enter in profile exactly the way it appears in D2Bot#
-		"SCL-ZON123",
-		"hcnl-pal123",
-	*/
+    "SCL-ZON123",
+    "hcnl-pal123",
+  */
   // Enter your lines under here
 
 ];
 
 /*
-	If you have a lot of profiles that are clones this can be used as an easier way to clean all of them
-	{
-		profilePrefix: this is everthing before the suffix numbers. Ex: mypal01 or sccl-pal-001, ect
-		profileSuffixStart: this is the suffix to start at, Ex: 01 or 001 or 1, all the profiles need have the same format. CANNOT HAVE scl-pal-1 and scl-pal-001
-		end: the ending profile suffix, this is used to stop the loop. If you are doing scl-pal-001 to scl-pal-100 (that'd be alot) then 100 would go here
-	}
+  If you have a lot of profiles that are clones this can be used as an easier way to clean all of them
+  {
+    profilePrefix: this is everthing before the suffix numbers. Ex: mypal01 or sccl-pal-001, ect
+    profileSuffixStart: this is the suffix to start at, Ex: 01 or 001 or 1, all the profiles need have the same format. CANNOT HAVE scl-pal-1 and scl-pal-001
+    end: the ending profile suffix, this is used to stop the loop. If you are doing scl-pal-001 to scl-pal-100 (that'd be alot) then 100 would go here
+  }
 */
 const AdvancedProfileCleanerConfig = [
   // {
@@ -83,12 +83,12 @@ const AdvancedProfileCleanerConfig = [
 ];
 
 /* Generate accounts to entirely clean ("all") 
-	to use this, set generateAccounts to true and setup the rest of the parameters
-	
-	it will generates accounts from start to stop range(included) :
-	account1/password/realm
-	account2/password/realm
-	etc...
+  to use this, set generateAccounts to true and setup the rest of the parameters
+  
+  it will generates accounts from start to stop range(included) :
+  account1/password/realm
+  account2/password/realm
+  etc...
 */
 
 const AdvancedCleanerConfig = {
@@ -191,13 +191,13 @@ function dataCleaner () {
         profileExists = true;
       }
     }
-				
+        
     if (FileTools.exists(dataFP)) {
       Starter.Config.SaveFiles && FileTools.copy(dataFP, savePath + "Old.json");
       FileTools.remove(dataFP);
       profileExists = true;
     }
-		
+    
     if (FileTools.exists(gameTimeFP)) {
       Starter.Config.SaveFiles && FileTools.copy(gameTimeFP, savePath + "-GameTimeOld.json");
       FileTools.remove(gameTimeFP);
@@ -207,7 +207,7 @@ function dataCleaner () {
       Starter.Config.SaveFiles && FileTools.copy(charDataFP, savePath + "-CharDataOld.json");
       FileTools.remove(charDataFP);
     }
-		
+    
     if (FileTools.exists(lvlPerfFP)) {
       Starter.Config.SaveFiles && FileTools.copy(lvlPerfFP, savePath + "-LevelingPerformanceOld.csv");
       FileTools.remove(lvlPerfFP);
@@ -217,7 +217,7 @@ function dataCleaner () {
       Starter.Config.SaveFiles && FileTools.copy(scrPerfFP, savePath + "-ScriptPerformanceOld.csv");
       FileTools.remove(scrPerfFP);
     }
-		
+    
     if (Starter.Config.SaveFiles && profileExists && soloplayProfile) {
       D2Bot.printToConsole("D2BotCleaner: Files saved to -> libs/SoloPlay/Data/" + charType + "/" + charClass + "/" + j, sdk.colors.D2Bot.Gold);
     }
@@ -231,7 +231,7 @@ function dataCleaner () {
 
   D2Bot.printToConsole("D2BotCleaner: Done cleaning files", sdk.colors.D2Bot.Gold);
 }
-	
+  
 function parseInfo () {
   for (let i in AccountsToClean) {
     if (AccountsToClean.hasOwnProperty(i) && typeof i === "string") {
@@ -239,7 +239,7 @@ function parseInfo () {
       chars.push(AccountsToClean[i]);
     }
   }
-	
+  
   if (AdvancedCleanerConfig.generateAccounts) {
     for (let index = rangeStart; index <= rangeStop ; index += 1) {
       accounts.push(AdvancedCleanerConfig.accountPrefix + index + "/" + AdvancedCleanerConfig.accountPassword + "/" + AdvancedCleanerConfig.accountRealm);
@@ -254,7 +254,7 @@ function parseInfo () {
     D2Bot.stop(me.profile, true);
   }
 }
-	
+  
 function deleteAllCharacters () {
   let characters = ControlAction.getCharacters();
   for (let character of characters) {
@@ -302,14 +302,14 @@ function locationAction (location) {
       D2Bot.printToConsole("D2BotCleaner: Done cleaning accounts!", sdk.colors.D2Bot.Gold);
       D2Bot.stop(me.profile, true);
     }
-		
+    
     if (!firstAccount) {
       for (i = 0 ; i < Starter.Config.DelayBetweenAccounts; i += 1) {
         D2Bot.updateStatus("Waiting " + (Starter.Config.DelayBetweenAccounts - i) + "s for next account");
         delay(1e3);
       }
     }
-		
+    
     firstAccount = false;
 
     if (FileTools.exists("logs/D2BotCleaner.json")) {
@@ -336,7 +336,7 @@ function locationAction (location) {
 
     D2Bot.printToConsole("D2BotCleaner: Cleaning account:" + currAcc + " , Character list: " + charList, sdk.colors.D2Bot.Gold);
     FileTools.writeText("logs/D2BotCleaner.json", JSON.stringify(obj));
-		
+    
     if (currAcc.toLowerCase() === "singleplayer") {
       Controls.SinglePlayer.click();
     } else if (currAccInfo.length === 3) {
@@ -365,7 +365,7 @@ function locationAction (location) {
         break;
       }
     }
-		
+    
     if (!charList.length) {
       Controls.BottomLeftExit.click();
 
@@ -389,7 +389,7 @@ function locationAction (location) {
           }
         }
       }
-			
+      
       let charInfo = { charName: charList[0] };
       CharactersToExclude.indexOf(charInfo) === -1 && ControlAction.deleteCharacter(charInfo);
       delay(500);
@@ -397,14 +397,14 @@ function locationAction (location) {
 
     currChar = charList.shift();
     obj.currChar = currChar;
-		
+    
     // last char in acc = trigger next acc
     if (!charList.length) {
       accounts.shift();
       chars.shift();
       Controls.BottomLeftExit.click();
     }
-		
+    
     FileTools.writeText("logs/D2BotCleaner.json", JSON.stringify(obj));
 
     break;
@@ -415,7 +415,7 @@ function locationAction (location) {
   case sdk.game.locations.CharacterCreate:
   case sdk.game.locations.NewCharSelected:
     Controls.BottomLeftExit.click();
-				
+        
     break;
   case sdk.game.locations.CharSelectPleaseWait:
     !Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();

@@ -21,10 +21,10 @@ function BoBarbHelper () {
 
   const shouldBuff = unit => (
     Misc.inMyParty(unit) &&
-		getDistance(me, unit) < 10 &&
-		unit.name !== me.name &&
-		!unit.dead &&
-		!unit.inTown
+    getDistance(me, unit) < 10 &&
+    unit.name !== me.name &&
+    !unit.dead &&
+    !unit.inTown
   );
 
   const giveBuff = () => {
@@ -71,7 +71,7 @@ function BoBarbHelper () {
 
   shouldHealMana(townLowMana) && Town.initNPC("Heal", "heal");
   Town.heal(); // in case our life is low as well
-	
+  
   try {
     Pather.useWaypoint(Config.BoBarbHelper.Wp);
   } catch (e) {
