@@ -255,9 +255,13 @@
       // we don't even have the skills to transform or we aren't transformed - add handler for wereform given by an item that is on switch
       if (!Skill.canUse(sdk.skills.Werewolf) && !Skill.canUse(sdk.skills.Werebear)) return true;
       const shared = new Set([
-        sdk.skills.Attack, sdk.skills.Kick, sdk.skills.Raven, sdk.skills.PoisonCreeper,
-        sdk.skills.OakSage, sdk.skills.SpiritWolf, sdk.skills.CarrionVine, sdk.skills.HeartofWolverine,
-        sdk.skills.SummonDireWolf, sdk.skills.FireClaws, sdk.skills.SolarCreeper, sdk.skills.Hunger,
+        sdk.skills.Attack, sdk.skills.Kick,
+        sdk.skills.Raven, sdk.skills.Werewolf,
+        sdk.skills.Werebear, sdk.skills.PoisonCreeper,
+        sdk.skills.OakSage, sdk.skills.SpiritWolf,
+        sdk.skills.CarrionVine, sdk.skills.HeartofWolverine,
+        sdk.skills.SummonDireWolf, sdk.skills.FireClaws,
+        sdk.skills.SolarCreeper, sdk.skills.Hunger,
         sdk.skills.SpiritofBarbs, sdk.skills.SummonGrizzly, sdk.skills.Armageddon
       ]);
       const wolfOnly = new Set([sdk.skills.FeralRage, sdk.skills.Rabies, sdk.skills.Fury]);
