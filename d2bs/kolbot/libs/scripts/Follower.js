@@ -64,6 +64,8 @@
 function Follower() {
   const QuestData = require("../core/GameData/QuestData");
   const commanders = [];
+  /** @type {Set<string>} */
+  const _players = new Set();
   Config.Leader && commanders.push(Config.Leader);
   let piece, skill;
   let [allowSay, attack, openContainers, stop] = [true, true, true, false];
@@ -73,6 +75,19 @@ function Follower() {
   const announce = function (msg = "") {
     if (!allowSay) return;
     say(msg);
+  };
+
+  const playerInGame = function (name = "") {
+    if (!name) return false;
+    if (_players.has(name.toLowerCase())) return true;
+    let player = getParty();
+
+    if (player) {
+      do {
+        _players.add(player.name.toLowerCase());
+      } while (player.getNext());
+    }
+    return _players.has(name.toLowerCase());
   };
 
   /**
@@ -437,10 +452,13 @@ function Follower() {
             }
           }
         } else {
-          if (who && who !== me.name && who !== "all") {
-            return;
+          if (who) {
+            if (who === me.name || who === "all") {
+              msg = msg.replace(who, "").trim();
+            } else if (playerInGame(who)) {
+              return;
+            }
           }
-          who && (msg = msg.replace(who, "").trim());
           action = msg;
         }
 
