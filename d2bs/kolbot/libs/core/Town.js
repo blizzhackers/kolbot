@@ -78,6 +78,7 @@ Object.defineProperty(NPC, "getAct", {
 const Town = {
   telekinesis: true,
   sellTimer: getTickCount(), // shop speedup test
+  lastChores: 0,
   /**
    * @namespace
    */
@@ -197,6 +198,7 @@ const Town = {
     delay(250);
     console.info(false, null, "doChores");
     Pather.allowBroadcast = true;
+    Town.lastChores = getTickCount();
 
     return true;
   },
@@ -2416,7 +2418,11 @@ const Town = {
   goToTown: function (act = 0, wpmenu = false) {
     if (!me.inTown) {
       try {
-        if (!Pather.makePortal(true)) {
+        // this can save us spamming portals
+        let oldPortal = Pather.getPortal(sdk.areas.townOf(me.area), me.name);
+        // if (oldPortal && Pather.usePortal(null, me.name, oldPortal))
+        if ((oldPortal && !Pather.usePortal(null, me.name, oldPortal))
+          || !Pather.makePortal(true)) {
           console.warn("Town.goToTown: Failed to make TP");
         }
         if (!me.inTown && !Pather.usePortal(null, me.name)) {
