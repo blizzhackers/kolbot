@@ -288,6 +288,7 @@
       hand: sdk.skills.hand.Right,
       range: 40,
       state: sdk.states.Enchant,
+      duration: () => (120 + (24 * me.getSkill(sdk.skills.Enchant, sdk.skills.subindex.SoftPoints))),
     });
     skillMap.set(sdk.skills.ChainLightning, {
       hand: sdk.skills.hand.Left,
