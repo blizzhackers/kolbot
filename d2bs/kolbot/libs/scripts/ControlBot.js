@@ -6,139 +6,154 @@
 *
 */
 
-function ControlBot() {
+function ControlBot () {
   const startTime = getTickCount();
+  const chantDuration = Skill.getDuration(sdk.skills.Enchant);
   
-  /**
-   * @type {Object.<string, { firstCmd: number, commands: number, ignored: boolean | number }>}
-   */
-  const cmdNicks = {};
-  /**
-   * @type {Object.<string, { timer: number, requests: number }>}
-   */
-  const wpNicks = {};
+  /** @constructor */
+  function PlayerTracker () {
+    this.firstCmd = getTickCount();
+    this.commands = 0;
+    this.ignored = false;
+  }
 
-  let command, nick;
-  let shitList = [];
-  const greet = [];
-
-  let controlCommands = ["help", "timeleft", "cows", "wps", "chant", "bo"];
-  const commandDesc = {
-    "help": "Display commands",
-    "timeleft": "Remaining time left for this game",
-    "cows": "Open cow level",
-    "chant": "Enchant. AutoChant is " + (Config.ControlBot.Chant.AutoEnchant ? "ON" : "OFF"),
-    "wps": "Give waypoints",
-    "bo": "Bo at waypoint",
+  PlayerTracker.prototype.resetCmds = function () {
+    this.firstCmd = getTickCount();
+    this.commands = 0;
   };
 
-  // remove commands we can't/aren't using
-  for (let i = 0; i < controlCommands.length; i++) {
-    switch (controlCommands[i]) {
-    case "cows":
-      if (!Config.ControlBot.Cows.MakeCows) {
-        controlCommands.splice(i, 1);
-        i--;
-      }
+  PlayerTracker.prototype.unIgnore = function () {
+    this.ignored = false;
+    this.commands = 0;
+  };
 
-      break;
-    case "chant":
-      if (!Config.ControlBot.Chant.Enchant || !me.getSkill(sdk.skills.Enchant, sdk.skills.subindex.SoftPoints)) {
-        Config.ControlBot.Chant.Enchant = false;
-        Config.ControlBot.Chant.AutoEnchant = false;
-        controlCommands.splice(i, 1);
-        i--;
-      }
-
-      break;
-    case "wps":
-      if (!Config.ControlBot.Wps.GiveWps) {
-        controlCommands.splice(i, 1);
-        i--;
-      }
-
-      break;
-    case "bo":
-      if (!Config.ControlBot.Bo
-        || (!me.getSkill(sdk.skills.BattleOrders, sdk.skills.subindex.SoftPoints)
-        && Precast.haveCTA === -1)) {
-        Config.ControlBot.Bo = false;
-        controlCommands.splice(i, 1);
-        i--;
-      }
-
-      break;
-    }
+  /** @constructor */
+  function ChantTracker () {
+    this.lastChant = getTickCount();
   }
+
+  ChantTracker.prototype.reChant = function () {
+    return getTickCount() - this.lastChant >= chantDuration - Time.minutes(1);
+  };
+
+  ChantTracker.prototype.update = function () {
+    this.lastChant = getTickCount();
+  };
+
+  /** @type {Object.<string, PlayerTracker>} */
+  const cmdNicks = {};
+  /** @type {Object.<string, { timer: number, requests: number }>} */
+  const wpNicks = {};
+  /** @type {Set<string>} */
+  const shitList = new Set();
+  /** @type {Array<string>} */
+  const greet = [];
+  /** @type {Map<string, ChantTracker} */
+  const chantList = new Map();
+
+  /** @type {Map<number, Array<number>} */
+  const wps = new Map([
+    [1, [
+      sdk.areas.ColdPlains, sdk.areas.StonyField,
+      sdk.areas.DarkWood, sdk.areas.BlackMarsh,
+      sdk.areas.OuterCloister, sdk.areas.JailLvl1,
+      sdk.areas.InnerCloister, sdk.areas.CatacombsLvl2
+    ]
+    ],
+    [2, [
+      sdk.areas.A2SewersLvl2, sdk.areas.DryHills,
+      sdk.areas.HallsoftheDeadLvl2, sdk.areas.FarOasis,
+      sdk.areas.LostCity, sdk.areas.PalaceCellarLvl1,
+      sdk.areas.ArcaneSanctuary, sdk.areas.CanyonofMagic
+    ]
+    ],
+    [3, [
+      sdk.areas.SpiderForest, sdk.areas.GreatMarsh,
+      sdk.areas.FlayerJungle, sdk.areas.LowerKurast,
+      sdk.areas.KurastBazaar, sdk.areas.UpperKurast,
+      sdk.areas.Travincal, sdk.areas.DuranceofHateLvl2
+    ]
+    ],
+    [4, [
+      sdk.areas.CityoftheDamned, sdk.areas.RiverofFlame
+    ]
+    ],
+    [5, [
+      sdk.areas.FrigidHighlands, sdk.areas.ArreatPlateau,
+      sdk.areas.CrystalizedPassage, sdk.areas.GlacialTrail,
+      sdk.areas.FrozenTundra, sdk.areas.AncientsWay, sdk.areas.WorldstoneLvl2
+    ]
+    ]
+  ]);
+
+  let command, nick;
 
   /**
    * @param {string} nick 
    * @returns {boolean}
    */
   const enchant = function (nick) {
-    if (!Config.ControlBot.Chant.Enchant) return false;
+    try {
+      if (!Misc.inMyParty(nick)) {
+        throw new Error("Accept party invite, noob.");
+      }
 
-    if (!Misc.inMyParty(nick)) {
-      say("Accept party invite, noob.");
+      let unit = Game.getPlayer(nick);
 
-      return false;
-    }
+      if (unit && unit.distance > 35) {
+        throw new Error("Get closer.");
+      }
 
-    let unit = Game.getPlayer(nick);
+      if (!unit) {
+        let partyUnit = getParty(nick);
 
-    if (unit && unit.distance > 35) {
-      say("Get closer.");
-
-      return false;
-    }
-
-    if (!unit) {
-      let partyUnit = getParty(nick);
-
-      // wait until party area is readable?
-      if (partyUnit.inTown) {
+        if (!Misc.poll(() => partyUnit.inTown, 500, 50)) {
+          throw new Error("You need to be in one of the towns.");
+        }
+        // wait until party area is readable?
         say("Wait for me at waypoint.");
         Town.goToTown(sdk.areas.actOf(partyUnit.area));
 
         unit = Game.getPlayer(nick);
-      } else {
-        say("You need to be in one of the towns.");
-
-        return false;
       }
-    }
 
-    if (unit) {
-      do {
-        // player is alive
-        if (!unit.dead) {
-          if (unit.distance >= 35) {
-            say("You went too far away.");
-
-            return false;
+      if (unit) {
+        do {
+          // player is alive
+          if (!unit.dead) {
+            if (unit.distance >= 35) {
+              throw new Error("You went too far away.");
+            }
+            Packet.enchant(unit);
+            if (Misc.poll(() => unit.getState(sdk.states.Enchant), 500, 50)) {
+              chantList.has(unit.name)
+                ? chantList.get(unit.name).update()
+                : chantList.set(unit.name, new ChantTracker());
+            }
           }
+        } while (unit.getNext());
+      } else {
+        say("I don't see you");
+      }
 
-          Packet.enchant(unit);
-          delay(500);
-        }
-      } while (unit.getNext());
-    } else {
-      say("I don't see you");
+      unit = Game.getMonster();
+
+      if (unit) {
+        do {
+          // merc or any other owned unit
+          if (unit.getParent() && unit.getParent().name === nick) {
+            Packet.enchant(unit);
+            delay(500);
+          }
+        } while (unit.getNext());
+      }
+
+      return true;
+    } catch (e) {
+      say((typeof e === "object" && e.message ? e.message : typeof e === "string" && e));
+      
+      return false;
     }
-
-    unit = Game.getMonster();
-
-    if (unit) {
-      do {
-        // merc or any other owned unit
-        if (unit.getParent() && unit.getParent().name === nick) {
-          Packet.enchant(unit);
-          delay(500);
-        }
-      } while (unit.getNext());
-    }
-
-    return true;
   };
 
   /**
@@ -148,60 +163,46 @@ function ControlBot() {
   const bo = function (nick) {
     if (!Config.ControlBot.Bo) return false;
 
-    if (!Misc.inMyParty(nick)) {
-      say("Accept party invite, noob.");
-
-      return false;
-    }
-
-    let partyUnit = getParty(nick);
-
-    // wait until party area is readable?
-    if (partyUnit.inTown) {
-      say("Can't bo you in town noob, go to a waypoint");
-
-      return false;
-    } else if (Pather.wpAreas.includes(partyUnit.area)) {
-      Pather.useWaypoint(partyUnit.area);
-    } else {
-      say("Can't find you or you're not somewhere with a waypoint");
-
-      return false;
-    }
-
-    let unit = Game.getPlayer(nick);
-
-    if (unit && unit.distance > 15) {
-      say("Get closer.");
-      let waitTick = getTickCount();
-
-      while (unit && unit.distance > 15) {
-        if (getTickCount() - waitTick > 30e3) {
-          say("You took to long. Going back to town");
-          return false;
-        }
-        delay(150);
+    try {
+      if (!Misc.inMyParty(nick)) {
+        throw new Error("Accept party invite, noob.");
       }
-    }
 
-    if (unit && unit.distance <= 15 && !unit.dead) {
-      Misc.poll(function () {
-        Precast.doPrecast(true);
-        return unit.getState(sdk.states.BattleOrders);
-      }, 5000, 1000);
-      Pather.useWaypoint(sdk.areas.RogueEncampment);
-    } else {
-      say("I don't see you");
-    }
+      let partyUnit = getParty(nick);
 
-    return true;
+      // wait until party area is readable?
+      if (!Misc.poll(() => Pather.wpAreas.includes(partyUnit.area), 500, 50)) {
+        throw new Error("Can't find you or you're not somewhere with a waypoint");
+      }
+      Pather.useWaypoint(partyUnit.area);
+
+      let unit = Game.getPlayer(nick);
+
+      if (unit && unit.distance > 15) {
+        say("Get closer.");
+        
+        if (!Misc.poll(() => unit.distance <= 15, Time.seconds(30), 50)) {
+          throw new Error("You took to long. Going back to town");
+        }
+      }
+
+      if (unit && unit.distance <= 15 && !unit.dead) {
+        Misc.poll(function () {
+          Precast.doPrecast(true);
+          return unit.getState(sdk.states.BattleOrders);
+        }, 5000, 1000);
+        Pather.useWaypoint(sdk.areas.RogueEncampment);
+      } else {
+        throw new Error("I don't see you");
+      }
+
+      return true;
+    } catch (e) {
+      say((typeof e === "object" && e.message ? e.message : typeof e === "string" && e));
+      
+      return false;
+    }
   };
-
-  /**
-   * @type {Map<string, { lastChant: number }}
-   */
-  const chantList = new Map();
-  const chantDuration = Config.ControlBot.Chant.Enchant ? Skill.getDuration(sdk.skills.Enchant) : 0;
 
   const autoChant = function () {
     if (!Config.ControlBot.Chant.Enchant) return false;
@@ -211,19 +212,18 @@ function ControlBot() {
 
     if (unit) {
       do {
-        if (unit.name !== me.name && !unit.dead
-          && shitList.indexOf(unit.name) === -1
-          && Misc.inMyParty(unit.name)
-          && unit.distance <= 40) {
-          // allow rechanting someone if it's going to run out soon for them
-          if ((!unit.getState(sdk.states.Enchant)
-            || (chantList.has(unit.name)
-            && getTickCount() - chantList.get(unit.name).lastChant) >= chantDuration - Time.minutes(1))) {
-            Packet.enchant(unit);
-            if (Misc.poll(() => unit.getState(sdk.states.Enchant), 500, 50)) {
-              chanted.push(unit.name);
-              chantList.set(unit.name, { lastChant: getTickCount() });
-            }
+        if (unit === me.name || unit.dead) continue;
+        if (shitList.has(unit.name)) continue;
+        if (!Misc.inMyParty(unit.name) || unit.distance > 40) continue;
+        // allow rechanting someone if it's going to run out soon for them
+        if (!unit.getState(sdk.states.Enchant)
+          || (chantList.has(unit.name) && chantList.get(unit.name).reChant())) {
+          Packet.enchant(unit);
+          if (Misc.poll(() => unit.getState(sdk.states.Enchant), 500, 50)) {
+            chanted.push(unit.name);
+            chantList.has(unit.name)
+              ? chantList.get(unit.name).update()
+              : chantList.set(unit.name, new ChantTracker());
           }
         }
       } while (unit.getNext());
@@ -428,89 +428,78 @@ function ControlBot() {
    * @returns {boolean}
    */
   const giveWps = function (nick) {
-    if (!Config.ControlBot.Wps.GiveWps) return false;
-    if (!Misc.inMyParty(nick)) {
-      say("Accept party invite, noob.");
-
-      return false;
-    }
-
-    switch (getWpNick(nick)) {
-    case "maxrequests":
-      say(nick + ", you have spent all your waypoint requests for this game.");
-
-      return false;
-    case "mintime":
-      say(nick + ", you may request waypoints every 60 seconds.");
-
-      return false;
-    case false:
-      addWpNick(nick);
-
-      break;
-    }
-
-    let act = Misc.getPlayerAct(nick);
-    const wps = {
-      1: [
-        sdk.areas.ColdPlains, sdk.areas.StonyField, sdk.areas.DarkWood, sdk.areas.BlackMarsh,
-        sdk.areas.OuterCloister, sdk.areas.JailLvl1, sdk.areas.InnerCloister, sdk.areas.CatacombsLvl2
-      ],
-      2: [
-        sdk.areas.A2SewersLvl2, sdk.areas.DryHills, sdk.areas.HallsoftheDeadLvl2, sdk.areas.FarOasis,
-        sdk.areas.LostCity, sdk.areas.PalaceCellarLvl1, sdk.areas.ArcaneSanctuary, sdk.areas.CanyonofMagic
-      ],
-      3: [
-        sdk.areas.SpiderForest, sdk.areas.GreatMarsh, sdk.areas.FlayerJungle, sdk.areas.LowerKurast,
-        sdk.areas.KurastBazaar, sdk.areas.UpperKurast, sdk.areas.Travincal, sdk.areas.DuranceofHateLvl2
-      ],
-      4: [sdk.areas.CityoftheDamned, sdk.areas.RiverofFlame],
-      5: [
-        sdk.areas.FrigidHighlands, sdk.areas.ArreatPlateau, sdk.areas.CrystalizedPassage,
-        sdk.areas.GlacialTrail, sdk.areas.FrozenTundra, sdk.areas.AncientsWay, sdk.areas.WorldstoneLvl2
-      ]
+    let next = false;
+    const nextWatcher = function (who, msg) {
+      if (who !== nick) return;
+      if (msg === "next") {
+        next = true;
+      }
     };
-    let wpList = wps[act];
 
-    for (let i = 0; i < wpList.length; i++) {
-      if (checkHostiles()) {
-        break;
+    try {
+      if (!Misc.inMyParty(nick)) {
+        throw new Error("Accept party invite, noob.");
       }
 
-      try {
-        Pather.useWaypoint(wpList[i], true);
-        Config.ControlBot.Wps.SecurePortal && Attack.securePosition(me.x, me.y, 20, 1000);
-        Pather.makePortal();
-        say(getAreaName(me.area) + " TP up");
+      let reqCheck = getWpNick(nick);
+      if (reqCheck) {
+        let _eMsg = reqCheck === "maxrequests"
+          ? ", you have spent all your waypoint requests for this game."
+          : ", you may request waypoints every 60 seconds.";
+        throw new Error(nick + _eMsg);
+      }
 
-        for (let timeout = 0; timeout < 20; timeout++) {
-          if (Game.getPlayer(nick)) {
-            break;
-          }
+      addWpNick(nick);
 
-          delay(1000);
-        }
+      let act = Misc.getPlayerAct(nick);
+      if (!wps.has(act)) return false;
+      addEventListener("chatmsg", nextWatcher);
 
-        if (timeout >= 20) {
-          say("Aborting wp giving.");
-
+      for (let wp of wps.get(act)) {
+        if (checkHostiles()) {
           break;
         }
 
-        delay(5000);
-      } catch (error) {
-        continue;
+        try {
+          if (next) {
+            next = false;
+            continue;
+          }
+          Pather.useWaypoint(wp, true);
+          if (Config.ControlBot.Wps.SecurePortal) {
+            Attack.securePosition(me.x, me.y, 20, 1000);
+          }
+          Pather.makePortal();
+          say(getAreaName(me.area) + " TP up");
+
+          if (!Misc.poll(() => (Game.getPlayer(nick) || next), Time.seconds(30), Time.seconds(1))) {
+            say("Aborting wp giving.");
+
+            break;
+          }
+          next = false;
+
+          delay(5000);
+        } catch (error) {
+          continue;
+        }
       }
+
+      Town.doChores();
+      Town.goToTown(1);
+      Town.move("portalspot");
+
+      wpNicks[nick].requests += 1;
+      wpNicks[nick].timer = getTickCount();
+
+      return true;
+    } catch (e) {
+      say(e.message ? e.message : e);
+      
+      return false;
+    } finally {
+      removeEventListener("chatmsg", nextWatcher);
     }
-
-    Town.doChores();
-    Town.goToTown(1);
-    Town.move("portalspot");
-
-    wpNicks[nick].requests += 1;
-    wpNicks[nick].timer = getTickCount();
-
-    return true;
   };
 
   const checkHostiles = function () {
@@ -522,8 +511,8 @@ function ControlBot() {
         if (party.name !== me.name && getPlayerFlag(me.gid, party.gid, 8)) {
           rval = true;
 
-          if (Config.ShitList && shitList.indexOf(party.name) === -1) {
-            shitList.push(party.name);
+          if (Config.ShitList && !shitList.has(party.name)) {
+            shitList.add(party.name);
           }
         }
       } while (party.getNext());
@@ -543,37 +532,31 @@ function ControlBot() {
     // ignore overhead messages
     if (!nick) return true;
     // ignore messages not related to our commands
-    if (controlCommands.indexOf(cmd.toLowerCase()) === -1) return false;
+    if (!actions.has(cmd.toLowerCase())) return false;
 
     if (!cmdNicks.hasOwnProperty(nick)) {
-      cmdNicks[nick] = {
-        firstCmd: getTickCount(),
-        commands: 0,
-        ignored: false
-      };
+      cmdNicks[nick] = new PlayerTracker();
     }
 
     if (cmdNicks[nick].ignored) {
-      if (getTickCount() - cmdNicks[nick].ignored < 60000) {
+      if (getTickCount() - cmdNicks[nick].ignored < Time.minutes(1)) {
         return true; // ignore flooder
       }
 
       // unignore flooder
-      cmdNicks[nick].ignored = false;
-      cmdNicks[nick].commands = 0;
+      cmdNicks[nick].unIgnore();
     }
 
     cmdNicks[nick].commands += 1;
 
-    if (getTickCount() - cmdNicks[nick].firstCmd < 10000) {
+    if (getTickCount() - cmdNicks[nick].firstCmd < Time.seconds(10)) {
       if (cmdNicks[nick].commands > 5) {
         cmdNicks[nick].ignored = getTickCount();
 
         say(nick + ", you are being ignored for 60 seconds because of flooding.");
       }
     } else {
-      cmdNicks[nick].firstCmd = getTickCount();
-      cmdNicks[nick].commands = 0;
+      cmdNicks[nick].resetCmds();
     }
 
     return false;
@@ -584,18 +567,16 @@ function ControlBot() {
    * @param {string} msg
    * @returns {boolean}
    */
-  function chatEvent(nick, msg) {
-    if (shitList.includes(nick)) {
+  function chatEvent (nick, msg) {
+    if (shitList.has(nick)) {
       say("No commands for the shitlisted.");
-
-      return;
+    } else {
+      command = [msg, nick];
     }
-
-    command = [msg, nick];
   }
 
   // eslint-disable-next-line no-unused-vars
-  function gameEvent(mode, param1, param2, name1, name2) {
+  function gameEvent (mode, param1, param2, name1, name2) {
     switch (mode) {
     case 0x02:
       // idle in town
@@ -605,9 +586,92 @@ function ControlBot() {
     }
   }
 
+  /** @type {Map<string, { desc: string, hostileCheck: boolean, run: function(): boolean | void }} */
+  const actions = (function () {
+    const _actions = new Map();
+
+    _actions.set("help", {
+      desc: "Display commands",
+      hostileCheck: false,
+      run: function () {
+        let str = "";
+        _actions.forEach((value, key) => {
+          str += (key + " (" + value.desc + "), ");
+        });
+        say("Commands: " + str);
+      }
+    });
+    _actions.set("timeleft", {
+      desc: "Remaining time left for this game",
+      hostileCheck: false,
+      run: function () {
+        let tick = Time.minutes(Config.ControlBot.GameLength) - getTickCount() + startTime;
+        let m = Math.floor(tick / 60000);
+        let s = Math.floor((tick / 1000) % 60);
+
+        say(
+          "Time left: "
+          + (m ? m + " minute" + (m > 1 ? "s" : "")
+          + ", " : "") + s + " second" + (s > 1 ? "s." : ".")
+        );
+      }
+    });
+
+    if (Config.ControlBot.Chant.Enchant
+      && Skill.canUse(sdk.skills.Enchant)) {
+      ["chant", "enchant"]
+        .forEach(key => _actions.set(key, {
+          desc: "Give enchant",
+          hostileCheck: false,
+          run: enchant
+        }));
+    }
+    
+    if (Config.ControlBot.Cows.MakeCows && !me.cows) {
+      _actions.set("cows", {
+        desc: "Open cow level",
+        hostileCheck: true,
+        run: openPortal
+      });
+    }
+
+    if (Config.ControlBot.Wps.GiveWps) {
+      _actions.set("wps", {
+        desc: "Give waypoints in act",
+        hostileCheck: true,
+        run: giveWps
+      });
+    }
+
+    if (Config.ControlBot.Bo
+      && (Skill.canUse(sdk.skills.BattleOrders) || Precast.haveCTA > 0)) {
+      _actions.set("bo", {
+        desc: "Bo at waypoint",
+        hostileCheck: true,
+        run: bo
+      });
+    }
+
+    return _actions;
+  })();
+
+  const runAction = function (command) {
+    if (!command || command.length < 2) return false;
+    let [cmd, nick] = command;
+
+    if (!actions.has(cmd.toLowerCase())) return false;
+    let action = actions.get(cmd.toLowerCase());
+    if (action.hostileCheck && checkHostiles()) {
+      say("Command disabled because of hostiles.");
+      return false;
+    }
+
+    return action.run(nick);
+  };
+
   // START
   include("oog/ShitList.js");
-  Config.ShitList && (shitList = ShitList.read());
+  Config.ShitList && shitList.add(ShitList.read());
 
   try {
     addEventListener("chatmsg", chatEvent);
@@ -616,81 +680,19 @@ function ControlBot() {
     Town.goToTown(1);
     Town.move("portalspot");
 
-    const spot = { x: me.x, y: me.y };
-
     while (true) {
       while (greet.length > 0) {
         nick = greet.shift();
 
-        if (shitList.indexOf(nick) === -1) {
+        if (!shitList.has(nick)) {
           say("Welcome, " + nick + "! For a list of commands say 'help'");
         }
       }
 
-      spot.distance > 10 && Pather.moveTo(spot.x, spot.y);
+      Town.getDistance("portalspot") > 5 && Town.move("portalspot");
 
       if (command && !floodCheck(command)) {
-        let hostile = checkHostiles();
-
-        switch (command[0].toLowerCase()) {
-        case "help":
-          let str = "";
-          controlCommands.forEach((cmd) => {
-            str += (cmd + " (" + commandDesc[cmd] + "), ");
-          });
-
-          say("Commands:");
-          say(str);
-
-          break;
-        case "timeleft":
-          let tick = Time.minutes(Config.ControlBot.GameLength) - getTickCount() + startTime;
-          let m = Math.floor(tick / 60000);
-          let s = Math.floor((tick / 1000) % 60);
-
-          say(
-            "Time left: "
-            + (m ? m + " minute" + (m > 1 ? "s" : "")
-            + ", " : "") + s + " second" + (s > 1 ? "s." : ".")
-          );
-
-          break;
-        case "chant":
-          enchant(command[1]);
-
-          break;
-        case "cows":
-          if (hostile) {
-            say("Command disabled because of hostiles.");
-
-            break;
-          }
-
-          openPortal(command[1]);
-          me.cancel();
-
-          break;
-        case "wps":
-          if (hostile) {
-            say("Command disabled because of hostiles.");
-
-            break;
-          }
-
-          giveWps(command[1]);
-
-          break;
-        case "bo":
-          if (hostile) {
-            say("Command disabled because of hostiles.");
-
-            break;
-          }
-
-          bo(command[1]);
-
-          break;
-        }
+        runAction(command);
       }
 
       command = "";
