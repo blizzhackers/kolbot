@@ -69,10 +69,9 @@ const AutoSkill = new function () {
       }
 
       // check to see if skill count in previous array is satisfied
-      const _prevHardPoints = me.getSkill(inputArray[i - 1][0], sdk.skills.subindex.HardPoints);
-      if (i > 0 && inputArray[i - 1][2]
-        && (!_prevHardPoints ? 0 : _prevHardPoints) < inputArray[i - 1][1]) {
-        return false;
+      if (i > 0 && inputArray[i - 1][2]) {
+        const _prevHardPoints = (me.getSkill(inputArray[i - 1][0], sdk.skills.subindex.HardPoints) || 0);
+        if (_prevHardPoints < inputArray[i - 1][1]) return false;
       }
 
       if (me.getSkill(inputArray[i][0], sdk.skills.subindex.HardPoints)
