@@ -1,11 +1,11 @@
 /**
 *  @filename    WPGetter.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        Get wps we don't have
 *
 */
 
-function WPGetter() {
+function WPGetter () {
   Town.doChores();
   Town.goToTown();
   Pather.getWP(me.area);
@@ -18,10 +18,11 @@ function WPGetter() {
 
   console.debug(wpsToGet);
 
-  for (let i = 0; i < wpsToGet.length; i += 1) {
-    Pather.getWP(wpsToGet[i]);
-    delay(500);
-    Town.checkScrolls(sdk.items.TomeofTownPortal) < 10 && Town.doChores();
+  for (let wp of wpsToGet) {
+    Pather.getWP(wp);
+    if (Town.checkScrolls(sdk.items.TomeofTownPortal) < 10) {
+      Town.doChores();
+    }
   }
 
   return true;

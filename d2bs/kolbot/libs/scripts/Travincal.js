@@ -5,29 +5,17 @@
 *
 */
 
-function Travincal() {
-  this.buildList = function (checkColl) {
-    let monsterList = [];
-    let monster = Game.getMonster();
-
-    if (monster) {
-      do {
-        if ([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3].includes(monster.classid)
-          && monster.attackable && (!checkColl || !checkCollision(me, monster, sdk.collision.BlockWall))) {
-          monsterList.push(copyUnit(monster));
-        }
-      } while (monster.getNext());
-    }
-
-    return monsterList;
-  };
-
+function Travincal () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.Travincal);
   Precast.doPrecast(true);
 
-  let orgX = me.x;
-  let orgY = me.y;
+  const [orgX, orgY] = [me.x, me.y];
+
+  /** @param {Monster} mon */
+  const councilMember = (mon) => (
+    [sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3].includes(mon.classid)
+  );
 
   if (Config.Travincal.PortalLeech) {
     Pather.moveTo(orgX + 85, orgY - 139);
@@ -41,18 +29,25 @@ function Travincal() {
   }
 
   if (Skill.canUse(sdk.skills.LeapAttack) && !Pather.canTeleport()) {
-    let coords = [60, -53, 64, -72, 78, -72, 74, -88];
+    const coords = [[60, -53], [64, -72], [78, -72], [74, -88]];
 
-    for (let i = 0; i < coords.length; i += 2) {
-      if (i % 4 === 0) {
-        Pather.moveTo(orgX + coords[i], orgY + coords[i + 1]);
+    for (let i = 0; i < coords.length; i++) {
+      let [x, y] = coords[i];
+
+      if (i % 2 === 0) {
+        Pather.moveTo(orgX + x, orgY + y);
       } else {
-        Skill.cast(sdk.skills.LeapAttack, sdk.skills.hand.Right, orgX + coords[i], orgY + coords[i + 1]);
-        Attack.clearList(this.buildList(1));
+        Skill.cast(sdk.skills.LeapAttack, sdk.skills.hand.Right, orgX + x, orgY + y);
+        Attack.clearList(
+          Attack.buildMonsterList(
+            /** @param {Monster} mon */
+            (mon) => councilMember(mon) && !checkCollision(me, mon, sdk.collision.BlockWall)
+          )
+        );
       }
     }
 
-    Attack.clearList(this.buildList(0));
+    Attack.clearList(Attack.buildMonsterList(councilMember));
   } else {
     Pather.moveTo(orgX + 101, orgY - 56);
 
@@ -66,7 +61,7 @@ function Travincal() {
       say("council " + me.area);
     }
 
-    Attack.clearList(this.buildList(0));
+    Attack.clearList(Attack.buildMonsterList(councilMember));
   }
 
   Config.MFLeader && Config.PublicMode && say("travdone");

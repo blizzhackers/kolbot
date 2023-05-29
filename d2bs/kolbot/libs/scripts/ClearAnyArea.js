@@ -5,12 +5,14 @@
 *
 */
 
-function ClearAnyArea() {
+function ClearAnyArea () {
   Town.doChores();
 
-  for (let i = 0; i < Config.ClearAnyArea.AreaList.length; i += 1) {
+  for (let area of Config.ClearAnyArea.AreaList) {
     try {
-      Pather.journeyTo(Config.ClearAnyArea.AreaList[i]) && Attack.clearLevel(Config.ClearType);
+      if (Pather.journeyTo(area)) {
+        Attack.clearLevel(Config.ClearType);
+      }
     } catch (e) {
       console.error(e);
     }

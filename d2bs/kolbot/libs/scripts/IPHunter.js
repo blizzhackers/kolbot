@@ -2,19 +2,19 @@
 *  @filename    IPHunter.js
 *  @author      kolton, Mercoory
 *  @desc        search for a "hot" IP and stop if the correct server is found
-*  @changes     2020.01 - more beeps and movements (anti drop measure) when IP is found; overhead messages with countdown timer; logs to D2Bot console
+*  @changes     2020.01 - more beeps and movements (anti drop measure) when IP is found
+*               overhead messages with countdown timer; logs to D2Bot console
 *
 */
 
-function IPHunter() {
-  let ip = Number(me.gameserverip.split(".")[3]);
+function IPHunter () {
+  const ip = Number(me.gameserverip.split(".")[3]);
 
-  if (Config.IPHunter.IPList.indexOf(ip) > -1) {
-    D2Bot.printToConsole(
-      "IPHunter: IP found! - [" + ip + "] Game is : " + me.gamename + "//" + me.gamepassword,
-      sdk.colors.D2Bot.DarkGold
-    );
-    print("IP found! - [" + ip + "] Game is : " + me.gamename + "//" + me.gamepassword);
+  if (Config.IPHunter.IPList.includes(ip)) {
+    load("threads/antiidle.js");
+    const foundMsg = "IPHunter: IP found! - [" + ip + "] Game is : " + me.gamename + "//" + me.gamepassword;
+    D2Bot.printToConsole(foundMsg, sdk.colors.D2Bot.DarkGold);
+    console.log(foundMsg);
     me.overhead(":D IP found! - [" + ip + "]");
     me.maxgametime = 0;
 
@@ -25,7 +25,6 @@ function IPHunter() {
     }
 
     while (true) {
-
       /* // remove comment if you want beeps at every movement
       for (let i = 12; i != 0; i -= 1) {
         me.overhead(":D IP found! - [" + ip + "]" + (i-1) + " beep left");

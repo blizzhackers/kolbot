@@ -5,7 +5,7 @@
 *
 */
 
-function Mephisto() {
+function Mephisto () {
   // eslint-disable-next-line no-unused-vars
   const killMephisto = function () {
     let pos = {};
@@ -45,7 +45,13 @@ function Mephisto() {
   };
 
   const moat = function () {
-    let count = 0;
+    /**
+     * @param {number} x 
+     * @param {number} y 
+     * @param {number} duration 
+     * @returns {{ x: number, y: number, duration: number }}
+     */
+    const _posObj = (x, y, duration) => ({ x: x, y: y, duration: duration });
 
     delay(350);
     Pather.moveTo(17563, 8072);
@@ -54,26 +60,28 @@ function Mephisto() {
     if (!mephisto) throw new Error("Mephisto not found.");
 
     delay(350);
-    Pather.moveTo(17575, 8086) && delay(350);
-    Pather.moveTo(17584, 8091) && delay(1200);
-    Pather.moveTo(17600, 8095) && delay(550);
-    Pather.moveTo(17610, 8094) && delay(2500);
+    [
+      _posObj(17575, 8086, 350), _posObj(17584, 8091, 1200),
+      _posObj(17600, 8095, 550), _posObj(17610, 8094, 2500)
+    ].forEach(pos => Pather.moveTo(pos.x, pos.y) && delay(pos.duration));
+
     Attack.clear(10);
     Pather.moveTo(17610, 8094);
 
+    const _lurePositions = [
+      _posObj(17600, 8095, 150), _posObj(17584, 8091, 150),
+      _posObj(17575, 8086, 150), _posObj(17563, 8072, 350),
+      _posObj(17575, 8086, 350), _posObj(17584, 8091, 1200),
+      _posObj(17600, 8095, 550), _posObj(17610, 8094, 2500)
+    ];
+    let count = 0;
     let distance = getDistance(me, mephisto);
 
     while (distance > 27) {
       count += 1;
 
-      Pather.moveTo(17600, 8095) && delay(150);
-      Pather.moveTo(17584, 8091) && delay(150);
-      Pather.moveTo(17575, 8086) && delay(150);
-      Pather.moveTo(17563, 8072) && delay(350);
-      Pather.moveTo(17575, 8086) && delay(350);
-      Pather.moveTo(17584, 8091) && delay(1200);
-      Pather.moveTo(17600, 8095) && delay(550);
-      Pather.moveTo(17610, 8094) && delay(2500);
+      _lurePositions
+        .forEach(pos => Pather.moveTo(pos.x, pos.y) && delay(pos.duration));
       Attack.clear(10);
       Pather.moveTo(17610, 8094);
 
@@ -88,11 +96,12 @@ function Mephisto() {
   };
 
   const killCouncil = function () {
-    let coords = [17600, 8125, 17600, 8015, 17643, 8068];
+    const councilMembers = [sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3];
+    const coords = [[17600, 8125], [17600, 8015], [17643, 8068]];
 
-    for (let i = 0; i < coords.length; i += 2) {
-      Pather.moveTo(coords[i], coords[i + 1]);
-      Attack.clearList(Attack.getMob([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3], 0, 40));
+    for (let [x, y] of coords) {
+      Pather.moveTo(x, y);
+      Attack.clearList(Attack.getMob(councilMembers, 0, 40));
     }
 
     return true;
@@ -137,7 +146,8 @@ function Mephisto() {
     let tick = getTickCount(), time = 0;
 
     // Wait until bridge is there
-    while (getCollision(me.area, 17601, 8070, 17590, 8068) !== 0 && (time = getTickCount() - tick) < 2000) {
+    while (getCollision(me.area, 17601, 8070, 17590, 8068) !== 0
+      && (time = getTickCount() - tick) < 2000) {
       Pather.moveTo(17590, 8068); // Activate it
       delay(3);
     }

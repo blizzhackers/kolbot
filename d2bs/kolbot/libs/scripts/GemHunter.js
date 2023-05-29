@@ -20,12 +20,12 @@ function GemHunter () {
     return false;
   }
 
-  for (let i = 0; i < Config.GemHunter.AreaList.length; i++) {
+  for (let area of Config.GemHunter.AreaList) {
     if (Town.getGemsInInv().length > 0) {
-      print("ÿc4GemHunterÿc0: Moving to " + getAreaName(Config.GemHunter.AreaList[i]));
-      Pather.journeyTo(Config.GemHunter.AreaList[i]);
+      print("ÿc4GemHunterÿc0: Moving to " + getAreaName(area));
+      Pather.journeyTo(area);
       if (i % 2 === 0) Precast.doPrecast(true);
-      if (Misc.getShrinesInArea(Config.GemHunter.AreaList[i], sdk.shrines.Gem, true)) {
+      if (Misc.getShrinesInArea(area, sdk.shrines.Gem, true)) {
         Pickit.pickItems();
         print("ÿc4GemHunterÿc0: found a gem Shrine");
         if ((Town.getGemsInInv().length === 0) && (Town.getGemsInStash().length > 0)) {

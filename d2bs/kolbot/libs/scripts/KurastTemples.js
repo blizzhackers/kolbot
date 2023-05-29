@@ -5,7 +5,7 @@
 *
 */
 
-function KurastTemples() {
+function KurastTemples () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.KurastBazaar);
 
@@ -20,13 +20,19 @@ function KurastTemples() {
         if (!Pather.moveToExit(area.base, true)) throw new Error("Failed to change area");
       }
       let precastTimeout = getTickCount() + Time.minutes(2);
-      // @todo sort by distance
-      area.temples.forEach(temple => {
-        if (!Pather.moveToExit(temple, true)) throw new Error("Failed to move to the temple");
-        Attack.clearLevel(Config.ClearType);
-        if (!Pather.moveToExit(area.base, true)) throw new Error("Failed to move out of the temple");
-        Precast.doPrecast((getTickCount() > precastTimeout));
-      });
+      /** @type {Map<number, { x: number, y: number }} */
+      const _temples = new Map();
+      getArea().exits
+        .filter(exit => area.temples.some(temple => temple === exit.target))
+        .forEach(exit => _temples.set(exit.target, { x: exit.x, y: exit.y }));
+      area.temples
+        .sort((a, b) => _temples.get(a).distance - _temples.get(b).distance)
+        .forEach(temple => {
+          if (!Pather.moveToExit(temple, true)) throw new Error("Failed to move to the temple");
+          Attack.clearLevel(Config.ClearType);
+          if (!Pather.moveToExit(area.base, true)) throw new Error("Failed to move out of the temple");
+          Precast.doPrecast((getTickCount() > precastTimeout));
+        });
 
     } catch (e) {
       console.error(e);
