@@ -128,6 +128,7 @@ const Town = {
       _taskObj(NPC.Fara, NPC.Drognan, NPC.Elzix, NPC.Fara, NPC.Greiz, NPC.Lysander),
       _taskObj(NPC.Ormus, NPC.Ormus, NPC.Alkor, NPC.Hratli, NPC.Asheara, NPC.Hratli),
       _taskObj(NPC.Jamella, NPC.Jamella, NPC.Jamella, NPC.Halbu, NPC.Tyrael, NPC.Jamella),
+      _taskObj(NPC.Malah, NPC.Malah, NPC.Anya, NPC.Larzuk, NPC.Qual_Kehk, NPC.Malah)
     ];
   })(),
 
