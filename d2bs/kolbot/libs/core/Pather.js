@@ -314,7 +314,7 @@ const Pather = {
     function PathAction () {
       this.at = 0;
       /** @type {PathNode} */
-      this.from = { x: null, y: null };
+      this.node = { x: null, y: null };
     }
 
     let fail = 0;
@@ -430,12 +430,12 @@ const Pather = {
               if (settings.allowClearing) {
                 // Don't go berserk on longer paths - also check that there are even mobs blocking us
                 if (cleared.at === 0 || getTickCount() - cleared.at > Time.seconds(3)
-                  && cleared.where.distance > 5 && me.checkForMobs({ range: 10 })) {
+                  && cleared.node.distance > 5 && me.checkForMobs({ range: 10 })) {
                   // only set that we cleared if we actually killed at least 1 mob
                   if (Attack.clear(10, null, null, null, settings.allowPicking)) {
                     console.debug("Cleared Node");
                     cleared.at = getTickCount();
-                    [cleared.where.x, cleared.where.y] = [node.x, node.y];
+                    [cleared.node.x, cleared.node.y] = [node.x, node.y];
                   }
                 }
               }
@@ -444,11 +444,11 @@ const Pather = {
               if (Skill.canUse(sdk.skills.LeapAttack)) {
                 // we can use leapAttack, now lets see if we should - either haven't used it yet or it's been long enough since last time
                 if (leaped.at === 0 || getTickCount() - leaped.at > Time.seconds(3)
-                  || leaped.from.distance > 5 || me.checkForMobs({ range: 6 })) {
+                  || leaped.node.distance > 5 || me.checkForMobs({ range: 6 })) {
                   // alright now if we have actually casted it set the values so we know
                   if (Skill.cast(sdk.skills.LeapAttack, sdk.skills.hand.Right, node.x, node.y)) {
                     leaped.at = getTickCount();
-                    [leaped.from.x, leaped.from.y] = [node.x, node.y];
+                    [leaped.node.x, leaped.node.y] = [node.x, node.y];
                   }
                 }
               }
@@ -462,11 +462,11 @@ const Pather = {
               if (Skill.canUse(sdk.skills.Whirlwind)) {
                 // we can use whirlwind, now lets see if we should - either haven't used it yet or it's been long enough since last time
                 if (whirled.at === 0 || getTickCount() - whirled.at > Time.seconds(3)
-                  || whirled.from.distance > 5 || me.checkForMobs({ range: 6 })) {
+                  || whirled.node.distance > 5 || me.checkForMobs({ range: 6 })) {
                   // alright now if we have actually casted it set the values so we know
                   if (Skill.cast(sdk.skills.Whirlwind, sdk.skills.hand.Right, node.x, node.y)) {
                     whirled.at = getTickCount();
-                    [whirled.from.x, whirled.from.y] = [node.x, node.y];
+                    [whirled.node.x, whirled.node.y] = [node.x, node.y];
                   }
                 }
               }
@@ -1322,7 +1322,7 @@ const Pather = {
    * Meant for use as a MfLeader to let MfHelpers know where to go next
    * @param {number} targetArea - area id
    */
-  broadcastIntent: function broadcastIntent(targetArea) {
+  broadcastIntent: function broadcastIntent (targetArea) {
     if (Config.MFLeader && Pather.allowBroadcast) {
       let targetAct = sdk.areas.actOf(targetArea);
       me.act !== targetAct && say("goto A" + targetAct);
@@ -1334,7 +1334,7 @@ const Pather = {
    * @param {boolean} check - force the waypoint menu
    * @returns {boolean}
    */
-  useWaypoint: function useWaypoint(targetArea, check = false) {
+  useWaypoint: function useWaypoint (targetArea, check = false) {
     switch (targetArea) {
     case undefined:
       throw new Error("useWaypoint: Invalid targetArea parameter: " + targetArea);
