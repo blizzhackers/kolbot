@@ -182,7 +182,7 @@
       hand: sdk.skills.hand.Right,
       range: 30,
       summonCount: () => 1,
-      condition: () => Config.UseValkyrie,
+      condition: () => Config.SummonValkyrie,
     });
     skillMap.set(sdk.skills.Pierce, {
       hand: -1,
@@ -1211,7 +1211,7 @@
     skillMap.set(sdk.skills.ShadowWarrior, {
       hand: sdk.skills.hand.Right,
       range: 30,
-      // condition: () => Config.UseValkyrie,
+      // condition: () => Config.SummonValkyrie,
       summonCount: () => 1,
     });
     skillMap.set(sdk.skills.ClawsofThunder, {
@@ -1268,7 +1268,7 @@
     skillMap.set(sdk.skills.ShadowMaster, {
       hand: sdk.skills.hand.Right,
       range: 30,
-      // condition: () => Config.UseValkyrie,
+      // condition: () => Config.SummonValkyrie,
       summonCount: () => 1,
     });
     skillMap.set(sdk.skills.RoyalStrike, {
