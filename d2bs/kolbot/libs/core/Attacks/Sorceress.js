@@ -176,7 +176,7 @@ const ClassAttack = {
         if (!!closeMob) {
           let findSkill = this.decideSkill(closeMob);
           if (this.doCast(closeMob, findSkill.timed, findSkill.untimed) !== Attack.Result.SUCCESS) {
-            (Skill.haveTK && Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit));
+            (Skill.haveTK && Packet.telekinesis(unit));
           }
         }
       }

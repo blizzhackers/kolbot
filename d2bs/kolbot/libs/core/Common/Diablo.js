@@ -219,7 +219,7 @@
         for (let i = 0; i < 5; i++) {
           seal.distance > 20 && Attack.getIntoPosition(seal, 18, sdk.collision.WallOrRanged);
           
-          if (Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, seal)
+          if (Packet.telekinesis(seal)
             && Misc.poll(() => seal.mode, 1000, 100)) {
             break;
           }

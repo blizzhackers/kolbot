@@ -417,7 +417,13 @@ const Packet = {
    */
   telekinesis: function (who) {
     if (!who || !Skill.setSkill(sdk.skills.Telekinesis, sdk.skills.hand.Right)) return false;
-    sendPacket(1, sdk.packets.send.RightSkillOnEntityEx3, 4, who.type, 4, who.gid);
+    if (Skill.getManaCost(sdk.skills.Telekinesis) > me.mp) return false;
+    if (me.shapeshifted) return false;
+    new PacketBuilder()
+      .byte(sdk.packets.send.RightSkillOnEntityEx3)
+      .dword(who.type)
+      .dword(who.gid)
+      .send();
     return true;
   },
 

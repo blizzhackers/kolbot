@@ -15,7 +15,7 @@
           let useTK = (stone.distance > 5 && Skill.useTK(stone) && i === 0);
           if (useTK) {
             stone.distance > 13 && Attack.getIntoPosition(stone, 13, sdk.collision.Ranged);
-            if (!Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, stone)) {
+            if (!Packet.telekinesis(stone)) {
               console.debug("Failed to tk: attempt: " + i);
               continue;
             }

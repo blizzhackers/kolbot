@@ -1259,7 +1259,7 @@ const Pather = {
         usetk ? this.moveNearUnit(unit, 20) : this.moveToUnit(unit);
         // try to activate it once
         if (usetk && i === 0 && unit.mode === sdk.objects.mode.Inactive && unit.distance < 21) {
-          Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit);
+          Packet.telekinesis(unit);
         }
       }
 
@@ -1289,7 +1289,7 @@ const Pather = {
       type === sdk.unittype.Stairs
         ? Misc.click(0, 0, unit)
         : usetk && unit.distance > 5
-          ? Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, unit)
+          ? Packet.telekinesis(unit)
           : Packet.entityInteract(unit);
       delay(300);
 
@@ -1398,7 +1398,7 @@ const Pather = {
 
         if (useTK && !getUIFlag(sdk.uiflags.Waypoint)) {
           wp.distance > 21 && Pather.moveNearUnit(wp, 20);
-          Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, wp);
+          Packet.telekinesis(wp);
         } else if (!me.inTown && wp.distance > 7) {
           this.moveToUnit(wp);
         }
@@ -1609,7 +1609,7 @@ const Pather = {
                 ? Town.move("portalspot")
                 : Pather.moveNearUnit(portal, 20);
             }
-            if (Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, portal)) {
+            if (Packet.telekinesis(portal)) {
               if (Misc.poll(() => {
                 if (me.area !== preArea) {
                   Pather.lastPortalTick = getTickCount();
@@ -1829,7 +1829,7 @@ const Pather = {
             if (!getUIFlag(sdk.uiflags.Waypoint)) {
               if (wp.distance > 5 && Skill.useTK(wp) && j < 3) {
                 wp.distance > 21 && Attack.getIntoPosition(wp, 20, sdk.collision.Ranged);
-                Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, wp);
+                Packet.telekinesis(wp);
               } else if (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint)) {
                 this.moveToUnit(wp) && Misc.click(0, 0, wp);
               }

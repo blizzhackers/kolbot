@@ -42,7 +42,7 @@ new Overrides.Override(Pather, Pather.getWP, function(orignal, area, clearPath) 
           if (!getUIFlag(sdk.uiflags.Waypoint)) {
             if (wp.distance > 5 && Skill.useTK(wp) && j < 3) {
               wp.distance > 21 && Attack.getIntoPosition(wp, 20, sdk.collision.Ranged);
-              Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, wp);
+              Packet.telekinesis(wp);
             } else if (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint)) {
               this.moveToUnit(wp) && Misc.click(0, 0, wp);
             }

@@ -1746,7 +1746,7 @@ const Town = {
           if (Skill.useTK(stash)) {
             // Fix for out of range telek
             i > 0 && stash.distance > (23 - (i * 2)) && Pather.walkTo(stash.x, stash.y, (23 - (i * 2)));
-            Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, stash);
+            Packet.telekinesis(stash);
           } else {
             Misc.click(0, 0, stash);
           }

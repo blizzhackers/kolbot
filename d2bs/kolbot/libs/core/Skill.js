@@ -34,6 +34,15 @@
       sdk.skills.Twister, sdk.skills.Tornado, sdk.skills.FireBlast
     ],
 
+    /**
+     * @param {number} skillId 
+     * @returns {SkillDataInfo}
+     */
+    get: function (skillId = -1) {
+      if (!_SkillData.has(skillId)) return null;
+      return _SkillData.get(skillId);
+    },
+    
     getClassSkillRange: function (classid = me.classid) {
       switch (classid) {
       case sdk.player.class.Amazon:
@@ -387,11 +396,6 @@
       case !item && (this.getManaCost(skillId) > me.mp || !this.canUse(skillId)):
       case !this.wereFormCheck(skillId):
         return false;
-      }
-
-      if (skillId === sdk.skills.Telekinesis && typeof x === "object" && Packet.telekinesis(x)) {
-        delay(250);
-        return true;
       }
 
       hand === undefined && (hand = this.getHand(skillId));
