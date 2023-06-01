@@ -67,7 +67,7 @@ global.require = (function (include, isIncluded, print, notify) {
 			return modules[packageName] = File.open("libs/" + path + field, 0).readAllLines();
 		}
 
-		const moduleNameShort = (fullpath + ".js").match(/.*?\/(\w*).js$/)[1];
+		const moduleNameShort = (fullpath + ".js").match(/.*?\/(\S*).js$/)[1];
 
 		if (!isIncluded(fullpath + ".js") && !modules.hasOwnProperty(moduleNameShort)) {
 			depth && notify && print("ÿc2Kolbotÿc0 ::    - loading dependency of " + filename + ": " + moduleNameShort);
