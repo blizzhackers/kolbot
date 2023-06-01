@@ -703,7 +703,7 @@ Unit.prototype.repairItem = function () {
   // lets check if we have and can afford to repair this item
   if (me.gold < this.getItemCost(2)) return false;
   let npc = getInteractedNPC();
-  if (!npc || npc.name.toLowerCase() !== Town.tasks[me.act - 1].Repair) return false;
+  if (!npc || npc.name.toLowerCase() !== Town.tasks.get(me.act).Repair) return false;
   // if (!this.startTrade("Repair")) return false;
   let preDurability = this.getStat(sdk.stats.Durability);
   new PacketBuilder()

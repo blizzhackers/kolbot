@@ -120,16 +120,24 @@ const Town = {
   },
 
   tasks: (function () {
+    /**
+     * @param {string} heal 
+     * @param {string} shop 
+     * @param {string} gamble 
+     * @param {string} repair 
+     * @param {string} merc 
+     * @param {string} key 
+     */
     let _taskObj = (heal, shop, gamble, repair, merc, key) => (
       { Heal: heal, Shop: shop, Gamble: gamble, Repair: repair, Merc: merc, Key: key, CainID: NPC.Cain }
     );
-    return [
-      _taskObj(NPC.Akara, NPC.Akara, NPC.Gheed, NPC.Charsi, NPC.Kashya, NPC.Akara),
-      _taskObj(NPC.Fara, NPC.Drognan, NPC.Elzix, NPC.Fara, NPC.Greiz, NPC.Lysander),
-      _taskObj(NPC.Ormus, NPC.Ormus, NPC.Alkor, NPC.Hratli, NPC.Asheara, NPC.Hratli),
-      _taskObj(NPC.Jamella, NPC.Jamella, NPC.Jamella, NPC.Halbu, NPC.Tyrael, NPC.Jamella),
-      _taskObj(NPC.Malah, NPC.Malah, NPC.Anya, NPC.Larzuk, NPC.Qual_Kehk, NPC.Malah)
-    ];
+    return new Map([
+      [1, _taskObj(NPC.Akara, NPC.Akara, NPC.Gheed, NPC.Charsi, NPC.Kashya, NPC.Akara)],
+      [2, _taskObj(NPC.Fara, NPC.Drognan, NPC.Elzix, NPC.Fara, NPC.Greiz, NPC.Lysander)],
+      [3, _taskObj(NPC.Ormus, NPC.Ormus, NPC.Alkor, NPC.Hratli, NPC.Asheara, NPC.Hratli)],
+      [4, _taskObj(NPC.Jamella, NPC.Jamella, NPC.Jamella, NPC.Halbu, NPC.Tyrael, NPC.Jamella)],
+      [5, _taskObj(NPC.Malah, NPC.Malah, NPC.Anya, NPC.Larzuk, NPC.Qual_Kehk, NPC.Malah)]
+    ]);
   })(),
 
   ignoredItemTypes: [
@@ -173,7 +181,7 @@ const Town = {
       Skill.cast(sdk.skills.BurstofSpeed, sdk.skills.hand.Right);
     }
 
-    me.switchWeapons(Attack.getPrimarySlot());
+    me.switchToPrimary();
 
     this.heal();
     this.identify();
@@ -212,7 +220,8 @@ const Town = {
   npcInteract: function (name = "", cancel = true) {
     // name = name.includes("_") ? "Qual_Kehk" : name.capitalize(true);
     // what about finding the closest name in case someone mispells it?
-    let npcKey = Object.keys(NPC).find(key => String.isEqual(key, name));
+    let npcKey = Object.keys(NPC)
+      .find(key => String.isEqual(key, name));
     if (!npcKey) {
       // @todo handle if NPC object key is used instead of common name
       console.warn("Couldn't find " + name + " in NPC object");
@@ -338,7 +347,9 @@ const Town = {
 
     /** @type {NPCUnit} */
     let npc = null;
-    let wantedNpc = this.tasks[me.act - 1][task] !== undefined ? this.tasks[me.act - 1][task] : "undefined";
+    let wantedNpc = Town.tasks.get(me.act)[task] !== undefined
+      ? Town.tasks.get(me.act)[task]
+      : "undefined";
     let justUseClosest = (["clearInventory", "sell"].includes(reason) && !me.getUnids().length);
     
     if (getUIFlag(sdk.uiflags.NPCMenu)) {
@@ -362,7 +373,7 @@ const Town = {
       // for now it won't get here with unids
       // need to also take into account what our next task is
       if (justUseClosest) {
-        let npcs = this.tasks[me.act - 1];
+        let npcs = Town.tasks.get(me.act);
         npc = getUnits(sdk.unittype.NPC)
           .sort((a, b) => a.distance - b.distance)
           .find(unit => [npcs.Shop, npcs.Repair].includes(unit.name.toLowerCase()));
@@ -824,7 +835,7 @@ const Town = {
 
     // Check if we're already in a shop. It would be pointless to go to Cain if so.
     let npc = getInteractedNPC();
-    if (npc && npc.name.toLowerCase() === this.tasks[me.act - 1].Shop) return false;
+    if (npc && npc.name.toLowerCase() === Town.tasks.get(me.act).Shop) return false;
 
     me.cancel();
     this.stash(false);
@@ -836,25 +847,25 @@ const Town = {
       if (unids.length < Config.CainID.MinUnids) return false;
 
       // Check if we may use Cain - kept unid items
-      for (let i = 0; i < unids.length; i += 1) {
-        if (Pickit.checkItem(unids[i]).result > 0) return false;
+      for (let item of unids) {
+        if (Pickit.checkItem(item).result > 0) return false;
       }
 
       let cain = this.initNPC("CainID", "cainID");
       if (!cain) return false;
 
-      for (let i = 0; i < unids.length; i += 1) {
-        let result = Pickit.checkItem(unids[i]);
+      for (let item of unids) {
+        let result = Pickit.checkItem(item);
 
         switch (result.result) {
         case Pickit.Result.UNWANTED:
-          Item.logger("Dropped", unids[i], "cainID");
-          unids[i].drop();
+          Item.logger("Dropped", item, "cainID");
+          item.drop();
 
           break;
         case Pickit.Result.WANTED:
-          Item.logger("Kept", unids[i]);
-          Item.logItem("Kept", unids[i], result.line);
+          Item.logger("Kept", item);
+          Item.logItem("Kept", item, result.line);
 
           break;
         default:
@@ -926,13 +937,13 @@ const Town = {
     let npc = getInteractedNPC();
     if (!npc || !npc.itemcount) return false;
 
-    let items = npc.getItemsEx().filter((item) => !Town.ignoreType(item.itemType));
+    let items = npc.getItemsEx()
+      .filter((item) => !Town.ignoreType(item.itemType));
     if (!items.length) return false;
 
     console.log("ÿc4MiniShopBotÿc0: Scanning " + npc.itemcount + " items.");
 
-    for (let i = 0; i < items.length; i += 1) {
-      let item = items[i];
+    for (let item of items) {
       let result = Pickit.checkItem(item);
 
       switch (result.result) {
@@ -957,29 +968,27 @@ const Town = {
     return true;
   },
 
-  /**
-   * @type {number[]}
-   */
-  gambleIds: [],
+  /** @type {Set<number>} */
+  gambleIds: new Set(),
 
   gamble: function () {
     if (!this.needGamble() || Config.GambleItems.length === 0) return true;
-    if (this.gambleIds.length === 0) {
+    if (this.gambleIds.size === 0) {
       // change text to classid
-      for (let i = 0; i < Config.GambleItems.length; i += 1) {
-        if (isNaN(Config.GambleItems[i])) {
-          if (NTIPAliasClassID.hasOwnProperty(Config.GambleItems[i].replace(/\s+/g, "").toLowerCase())) {
-            this.gambleIds.push(NTIPAliasClassID[Config.GambleItems[i].replace(/\s+/g, "").toLowerCase()]);
+      for (let item of Config.GambleItems) {
+        if (isNaN(item)) {
+          if (NTIPAliasClassID.hasOwnProperty(item.replace(/\s+/g, "").toLowerCase())) {
+            this.gambleIds.add(NTIPAliasClassID[item.replace(/\s+/g, "").toLowerCase()]);
           } else {
-            Misc.errorReport("ÿc1Invalid gamble entry:ÿc0 " + Config.GambleItems[i]);
+            Misc.errorReport("ÿc1Invalid gamble entry:ÿc0 " + item);
           }
         } else {
-          this.gambleIds.push(Config.GambleItems[i]);
+          this.gambleIds.add(item);
         }
       }
     }
 
-    if (this.gambleIds.length === 0) return true;
+    if (this.gambleIds.size === 0) return true;
 
     // avoid Alkor
     me.act === 3 && this.goToTown(2);
@@ -1002,18 +1011,18 @@ const Town = {
 
       if (item) {
         do {
-          if (this.gambleIds.includes(item.classid)) {
+          if (Town.gambleIds.has(item.classid)) {
             items.push(copyUnit(item));
           }
         } while (item.getNext());
 
-        for (let i = 0; i < items.length; i += 1) {
-          if (!Storage.Inventory.CanFit(items[i])) {
+        for (let item of items) {
+          if (!Storage.Inventory.CanFit(item)) {
             return false;
           }
 
-          me.overhead("Buy: " + items[i].name);
-          items[i].buy(false, true);
+          me.overhead("Buy: " + item.name);
+          item.buy(false, true);
           let newItem = this.getGambledItem(list);
 
           if (newItem) {
@@ -1066,17 +1075,17 @@ const Town = {
   getGambledItem: function (list = []) {
     let items = me.findItems(-1, sdk.items.mode.inStorage, sdk.storage.Inventory);
 
-    for (let i = 0; i < items.length; i += 1) {
-      if (list.indexOf(items[i].gid) === -1) {
+    for (let item of items) {
+      if (list.indexOf(item.gid) === -1) {
         for (let j = 0; j < 3; j += 1) {
-          if (items[i].identified) {
+          if (item.identified) {
             break;
           }
 
           delay(100);
         }
 
-        return items[i];
+        return item;
       }
     }
 
@@ -1678,16 +1687,16 @@ const Town = {
     if (items) {
       Config.SortSettings.SortStash && Storage.Stash.SortItems();
       
-      for (let i = 0; i < items.length; i += 1) {
-        if (this.canStash(items[i])) {
+      for (let item of items) {
+        if (this.canStash(item)) {
           let result = false;
-          let pickResult = Pickit.checkItem(items[i]).result;
+          let pickResult = Pickit.checkItem(item).result;
           
           switch (true) {
           case pickResult > Pickit.Result.UNWANTED && pickResult < Pickit.Result.TRASH:
-          case Cubing.keepItem(items[i]):
-          case Runewords.keepItem(items[i]):
-          case CraftingSystem.keepItem(items[i]):
+          case Cubing.keepItem(item):
+          case Runewords.keepItem(item):
+          case CraftingSystem.keepItem(item):
             result = true;
 
             break;
@@ -1696,7 +1705,7 @@ const Town = {
           }
 
           if (result) {
-            Storage.Stash.MoveTo(items[i]) && Item.logger("Stashed", items[i]);
+            Storage.Stash.MoveTo(item) && Item.logger("Stashed", item);
           }
         }
       }
@@ -1715,19 +1724,14 @@ const Town = {
   },
 
   needStash: function () {
-    if (Config.StashGold && me.getStat(sdk.stats.Gold) >= Config.StashGold && me.getStat(sdk.stats.GoldBank) < 25e5) {
+    if (Config.StashGold
+      && me.getStat(sdk.stats.Gold) >= Config.StashGold
+      && me.getStat(sdk.stats.GoldBank) < 25e5) {
       return true;
     }
 
-    let items = Storage.Inventory.Compare(Config.Inventory);
-
-    for (let i = 0; i < items.length; i += 1) {
-      if (Storage.Stash.CanFit(items[i])) {
-        return true;
-      }
-    }
-
-    return false;
+    return (Storage.Inventory.Compare(Config.Inventory) || [])
+      .some(item => Storage.Stash.CanFit(item));
   },
 
   openStash: function () {
@@ -1745,23 +1749,19 @@ const Town = {
 
           if (Skill.useTK(stash)) {
             // Fix for out of range telek
-            i > 0 && stash.distance > (23 - (i * 2)) && Pather.walkTo(stash.x, stash.y, (23 - (i * 2)));
+            if (i > 0 && stash.distance > (23 - (i * 2))) {
+              Pather.walkTo(stash.x, stash.y, (23 - (i * 2)));
+            }
             Packet.telekinesis(stash);
           } else {
             Misc.click(0, 0, stash);
           }
 
-          let tick = getTickCount();
+          if (Misc.poll(() => getUIFlag(sdk.uiflags.Stash), Time.seconds(5), 100)) {
+            // allow UI to initialize
+            delay(100 + pingDelay * (i + 1));
 
-          while (getTickCount() - tick < 5000) {
-            if (getUIFlag(sdk.uiflags.Stash)) {
-              // allow UI to initialize
-              delay(100 + pingDelay * 2);
-
-              return true;
-            }
-
-            delay(100);
+            return true;
           }
         }
       }
