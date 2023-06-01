@@ -69,10 +69,10 @@ global.require = (function (include, isIncluded, print, notify) {
 
     let nameShort;
     try {
-      nameShort = (fullpath + ".js").match(/.*?\/(\w*).js$/)[1];
+      nameShort = (fullpath + ".js").match(/.*?\/([^/]*).js$/)[1];
     } catch (e) {
       // file in libs folder same as us
-      nameShort = (fullpath + ".js").match(/.*?\/?(\w*).js$/)[0];
+      nameShort = (fullpath + ".js").match(/.*?\/([^/]*).js$/)[0];
     }
     const moduleNameShort = nameShort;
 
