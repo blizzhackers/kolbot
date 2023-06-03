@@ -796,6 +796,10 @@ Unit.prototype.sell = function () {
   return false;
 };
 
+/**
+ * @this ItemUnit
+ * @param {boolean} usePacket 
+ */
 Unit.prototype.toCursor = function (usePacket = false) {
   if (this.type !== sdk.unittype.Item) throw new Error("Unit.toCursor: Must be used with items.");
   if (me.itemoncursor && this.mode === sdk.items.mode.onCursor) return true;
@@ -808,6 +812,10 @@ Unit.prototype.toCursor = function (usePacket = false) {
   for (let i = 0; i < 3; i += 1) {
     try {
       if (this.mode === sdk.items.mode.Equipped) {
+        if (this.isOnSwap) {
+          // fix crash when item is equipped on switch and we try to move it directly to cursor
+          me.switchWeapons(sdk.player.slot.Secondary);
+        }
         // fix for equipped items (cubing viper staff for example)
         clickItem(sdk.clicktypes.click.item.Left, this.bodylocation);
       } else {
@@ -834,7 +842,9 @@ Unit.prototype.toCursor = function (usePacket = false) {
 };
 
 Unit.prototype.drop = function () {
-  if (this.type !== sdk.unittype.Item) throw new Error("Unit.drop: Must be used with items. Unit Name: " + this.name);
+  if (this.type !== sdk.unittype.Item) {
+    throw new Error("Unit.drop: Must be used with items. Unit Name: " + this.name);
+  }
   if (!this.toCursor()) return false;
 
   let tick = getTickCount();
