@@ -1,5 +1,41 @@
 export {};
 declare global {
+  class SkillDataInfo {
+    skillId: number;
+    hand: number;
+    state: number;
+    summonCount: () => number;
+    condition: () => boolean;
+    townSkill: boolean;
+    timed: boolean;
+    missleSkill: boolean;
+    charClass: number;
+    reqLevel: number;
+    preReqs: number[];
+    damageType: string;
+    private _range: number | (() => number);
+    private _AoE: () => number;
+    private _duration: () => number;
+    private _manaCost: number;
+    private _mana: number;
+    private _minMana: number;
+    private _lvlMana: number;
+    private _manaShift: number;
+    private _bestSlot: number;
+    private _dmg: number;
+    private _hardPoints: number;
+    private _softPoints: number;
+    private _checked: boolean;
+
+    constructor(skillId: number);
+
+    duration(): number;
+    manaCost(): number;
+    range(pvpRange?: boolean): number;
+    AoE(): number;
+    have(): boolean;
+    reset(): void;
+  }
   namespace Skill {
     let usePvpRange: boolean;
     const manaCostList: object;

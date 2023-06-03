@@ -4444,10 +4444,18 @@ declare global {
 				const UnableToIndentifyVersion: 5245;
 				const BattlenetNotResponding: 5353;
 				const BattlenetNotResponding2: 5354;
+				const HcCannotPlayWithSc: 5361;
+				const ScCannotPlayWithHc: 5362;
+				const CannotPlayInHellClassic: 5363;
+				const CannotPlayInNightmareClassic: 5364;
 				const EnhancedDamage: 10038;
+				const ClassicCannotPlayWithXpac: 10101;
+				const XpacCannotPlayWithClassic: 10102;
 				const LoDKeyDisabled: 10913;
 				const LodKeyInUseBy: 10914;
 				const LoDKeyIntendedForAnotherProduct: 10915;
+				const NonLadderCannotPlayWithLadder: 10929;
+				const LadderCannotPlayWithNonLadder: 10930;
 				const YourPositionInLineIs: 11026;
 				const Gateway: 11049;
 				const Ghostly: 11084;
@@ -4456,6 +4464,8 @@ declare global {
 				const Berserker: 11087;
 				const ExpiresIn: 11133;
 				const CdKeyDisabledFromRealm: 11161;
+				const CannotPlayInHellXpac: 21793;
+				const CannotPlayInNightmareXpac: 21794;
 			}
 
 			namespace areas {
