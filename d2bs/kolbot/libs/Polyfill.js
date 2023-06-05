@@ -89,7 +89,7 @@ String.prototype.capitalize = function (downcase = false) {
   return this.charAt(0).toUpperCase() + (downcase ? this.slice(1).toLowerCase() : this.slice(1));
 };
 
-String.prototype.padEnd = function padEnd(targetLength, padString) {
+String.prototype.padEnd = function padEnd (targetLength, padString) {
   targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
   padString = String(typeof padString !== "undefined" ? padString : " ");
   if (this.length > targetLength) {
@@ -103,7 +103,7 @@ String.prototype.padEnd = function padEnd(targetLength, padString) {
   }
 };
 
-String.prototype.padStart = function padStart(targetLength, padString) {
+String.prototype.padStart = function padStart (targetLength, padString) {
   targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
   padString = String(typeof padString !== "undefined" ? padString : " ");
   if (this.length > targetLength) {
@@ -117,7 +117,7 @@ String.prototype.padStart = function padStart(targetLength, padString) {
   }
 };
 
-String.prototype.repeat = function(count) {
+String.prototype.repeat = function (count) {
   "use strict";
   if (this == null) throw new TypeError("can't convert " + this + " to object");
   let str = "" + this;
@@ -344,7 +344,7 @@ if (!Array.from) {
     };
 
     // The length property of the from method is 1.
-    return function from(arrayLike/*, mapFn, thisArg */) {
+    return function from (arrayLike/*, mapFn, thisArg */) {
       // 1. Let C be the this value.
       let C = this;
 
@@ -566,7 +566,7 @@ if (!Array.prototype.last) {
  */
 if (!Array.prototype.flat) {
   Object.defineProperty(Array.prototype, "flat", {
-    value: function flat() {
+    value: function flat () {
       let depth = arguments.length > 0 ? isNaN(arguments[0]) ? 1 : Number(arguments[0]) : 1;
 
       return depth ? Array.prototype.reduce.call(this, function (acc, cur) {
@@ -592,7 +592,7 @@ if (!Array.prototype.flat) {
  */
 if (!Array.of) {
   Object.defineProperty(Array, "of", {
-    value: function of() {
+    value: function of () {
       return Array.prototype.slice.call(arguments);
     },
     configurable: true,
@@ -607,7 +607,7 @@ if (!Array.of) {
  * @return {Array}
  */
 if (!Array.prototype.toReversed) {
-  Array.prototype.toReversed = function() {
+  Array.prototype.toReversed = function () {
     return this.slice().reverse();
   };
 }
@@ -621,7 +621,7 @@ if (!Array.prototype.toReversed) {
  * @returns {Array} A new array with the elements sorted in ascending order.
  */
 if (!Array.prototype.toSorted) {
-  Array.prototype.toSorted = function(compareFunction) {
+  Array.prototype.toSorted = function (compareFunction) {
     return this.slice().sort(compareFunction);
   };
 }
@@ -638,7 +638,7 @@ if (!Array.prototype.toSorted) {
  * @returns {Array} A new array with the modified elements.
  */
 if (!Array.prototype.toSpliced) {
-  Array.prototype.toSpliced = function(start, deleteCount) {
+  Array.prototype.toSpliced = function (start, deleteCount) {
     const newArr = this.slice();
     const items = Array.prototype.slice.call(arguments, 2);
     Array.prototype.splice.apply(newArr, [start, deleteCount].concat(items));
@@ -662,7 +662,7 @@ if (!Array.prototype.toSpliced) {
  */
 if (typeof Object.assign !== "function") {
   Object.defineProperty(Object, "assign", {
-    value: function assign(target) {
+    value: function assign (target) {
       if (target === null) {
         throw new TypeError("Cannot convert undefined or null to object");
       }
@@ -713,7 +713,7 @@ if (!global.hasOwnProperty("require")) {
       !isIncluded("require.js") && include("require.js");
       return cache; // cache is loaded by require.js
     },
-    set: function(v) {
+    set: function (v) {
       cache = v;
     }
   });
@@ -768,7 +768,7 @@ Math.percentDifference = function (value1, value2) {
  */
 
 if (typeof Map.prototype.forEach !== "function") {
-  Map.prototype.forEach = function(callbackFn, thisArg) {
+  Map.prototype.forEach = function (callbackFn, thisArg) {
     thisArg = thisArg || this;
     for (let [key, value] of this.entries()) {
       callbackFn.call(thisArg, value, key, this);
@@ -776,7 +776,7 @@ if (typeof Map.prototype.forEach !== "function") {
   };
 }
 
-Map.prototype.toString = function() {
+Map.prototype.toString = function () {
   let obj = {};
   for (let [key, value] of this.entries()) {
     obj[key] = value;
@@ -787,7 +787,7 @@ Map.prototype.toString = function() {
 /**
  * @returns {Array<typeof Map.prototype.keys>}
  */
-Map.prototype.keys = function() {
+Map.prototype.keys = function () {
   let keys = [];
   // eslint-disable-next-line no-unused-vars
   for (let [key, _value] of this.entries()) {
@@ -796,7 +796,7 @@ Map.prototype.keys = function() {
   return keys;
 };
 
-Map.prototype.values = function() {
+Map.prototype.values = function () {
   let values = [];
   // eslint-disable-next-line no-unused-vars
   for (let [_key, value] of this.entries()) {
@@ -822,7 +822,7 @@ Map.prototype.values = function() {
  */
 
 if (typeof Set.prototype.forEach !== "function") {
-  Set.prototype.forEach = function(callbackFn, thisArg) {
+  Set.prototype.forEach = function (callbackFn, thisArg) {
     thisArg = thisArg || this;
     for (let item of this) {
       callbackFn.call(thisArg, item, item, this);
@@ -831,7 +831,7 @@ if (typeof Set.prototype.forEach !== "function") {
 }
 
 if (typeof Set.prototype.keys !== "function") {
-  Set.prototype.keys = function() {
+  Set.prototype.keys = function () {
     let keys = [];
     for (let item of this) {
       keys.push(item);
@@ -841,7 +841,7 @@ if (typeof Set.prototype.keys !== "function") {
 }
 
 if (typeof Set.prototype.values !== "function") {
-  Set.prototype.values = function() {
+  Set.prototype.values = function () {
     let values = [];
     for (let item of this) {
       values.push(item);
@@ -851,7 +851,7 @@ if (typeof Set.prototype.values !== "function") {
 }
 
 if (typeof Set.prototype.entries !== "function") {
-  Set.prototype.entries = function() {
+  Set.prototype.entries = function () {
     let entries = [];
     for (let item of this) {
       entries.push([item, item]);
@@ -860,7 +860,7 @@ if (typeof Set.prototype.entries !== "function") {
   };
 }
 
-Set.prototype.isSuperset = function(subset) {
+Set.prototype.isSuperset = function (subset) {
   for (let item of subset) {
     if (!this.has(item)) {
       return false;
@@ -869,7 +869,7 @@ Set.prototype.isSuperset = function(subset) {
   return true;
 };
 
-Set.prototype.union = function(setB) {
+Set.prototype.union = function (setB) {
   let union = new Set(this);
   for (let item of setB) {
     union.add(item);
@@ -877,7 +877,7 @@ Set.prototype.union = function(setB) {
   return union;
 };
 
-Set.prototype.intersection = function(setB) {
+Set.prototype.intersection = function (setB) {
   let intersection = new Set();
   for (let item of setB) {
     if (this.has(item)) {
@@ -887,7 +887,7 @@ Set.prototype.intersection = function(setB) {
   return intersection;
 };
 
-Set.prototype.symmetricDifference = function(setB) {
+Set.prototype.symmetricDifference = function (setB) {
   let difference = new Set(this);
   for (let item of setB) {
     if (difference.has(item)) {
@@ -899,12 +899,16 @@ Set.prototype.symmetricDifference = function(setB) {
   return difference;
 };
 
-Set.prototype.difference = function(setB) {
+Set.prototype.difference = function (setB) {
   let difference = new Set(this);
   for (let item of setB) {
     difference.delete(item);
   }
   return difference;
+};
+
+Set.prototype.toString = function () {
+  return JSON.stringify(this.values());
 };
 
 /**
@@ -927,7 +931,7 @@ Set.prototype.difference = function(setB) {
   global.console = global.console || (function () {
     const console = {};
 
-    const argMap = (el) => {
+    const argMap = function (el) {
       switch (typeof el) {
       case "undefined":
         return "undefined";
@@ -948,11 +952,15 @@ Set.prototype.difference = function(setB) {
         }
         if (el instanceof Map) {
           return el.toString();
+        } else if (el instanceof Set) {
+          return el.toString();
         }
         if (Array.isArray(el)) {
           // handle multidimensional arrays
           return JSON.stringify(
-            el.map(inner => Array.isArray(inner) ? inner.map(argMap) : inner)
+            el.map(function (inner) {
+              return Array.isArray(inner) ? inner.map(argMap) : inner;
+            })
           );
         }
         return JSON.stringify(el);
