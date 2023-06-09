@@ -24,7 +24,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
   } else {
     Object.assign(root, factory());
   }
-}([].filter.constructor("return this")(), function() {
+}([].filter.constructor("return this")(), function () {
   const Controls = require("./modules/Control");
 
   const ControlAction = {
@@ -808,7 +808,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
       return false;
     },
 
-    getQueueTime: function() {
+    getQueueTime: function () {
       // You are in line to create a game.,Try joining a game to avoid waiting.,,Your position in line is: ÿc02912
       const text = Controls.CreateGameInLine.getText();
       if (text && text.indexOf(getLocaleString(sdk.locale.text.YourPositionInLineIs)) > -1) {
@@ -963,7 +963,8 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
     setNextGame: function (gameInfo = {}) {
       let nextGame = (gameInfo.gameName || this.randomString(null, true));
       
-      if ((this.gameCount + 1 >= Starter.Config.ResetCount) || (nextGame.length + this.gameCount + 1 > 15)) {
+      if ((this.gameCount + 1 >= Starter.Config.ResetCount)
+        || (nextGame.length + this.gameCount + 1 > 15)) {
         nextGame += "1";
       } else {
         nextGame += (this.gameCount + 1);
@@ -1033,23 +1034,21 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
      * @param {object | string} msg 
      */
     receiveCopyData: function (mode, msg) {
-      let obj;
+      if (msg === "Handle" && typeof mode === "number") {
+        // console.debug("Recieved Handle :: " + mode);
+        Starter.handle = mode;
 
-      if (msg === "Handle") {
-        console.debug("Recieved Handle :: ", mode);
+        return;
       }
-      msg === "Handle" && typeof mode === "number" && (Starter.handle = mode);
+
+      let obj = JSON.parse(msg);
 
       switch (mode) {
       case 1: // JoinInfo
-        obj = JSON.parse(msg);
-        console.debug("Recieved Join Info :: ", obj);
         Object.assign(Starter.joinInfo, obj);
 
         break;
       case 2: // Game info
-        obj = JSON.parse(msg);
-        console.debug("Recieved Game Info :: ");
         Object.assign(Starter.gameInfo, obj);
 
         break;
@@ -1063,7 +1062,6 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
         }
 
         if (Starter.gameInfo.hasOwnProperty("gameName")) {
-          obj = JSON.parse(msg);
           console.debug("Recieved Game Request :: ", obj.profile);
 
           if ([sdk.game.profiletype.TcpIpHost, sdk.game.profiletype.TcpIpJoin].includes(Profile().type)) {
@@ -1073,8 +1071,17 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
               D2Bot.joinMe(obj.profile, me.gamename, "", me.gamepassword, Starter.isUp);
             } else {
               // If we haven't made it to the lobby yet but are already getting game requests, stop the spam by telling followers to delay
-              let delay = (Starter.delay === 0 && !me.ingame && getLocation() !== sdk.game.locations.CreateGame) ? 3000 : Starter.delay;
-              D2Bot.joinMe(obj.profile, Starter.gameInfo.gameName, Starter.gameCount, Starter.gameInfo.gamePass, Starter.isUp, delay);
+              let delay = (Starter.delay === 0 && !me.ingame && getLocation() !== sdk.game.locations.CreateGame)
+                ? 3000
+                : Starter.delay;
+              D2Bot.joinMe(
+                obj.profile,
+                Starter.gameInfo.gameName,
+                Starter.gameCount,
+                Starter.gameInfo.gamePass,
+                Starter.isUp,
+                delay
+              );
             }
           }
         }
@@ -1085,19 +1092,20 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
         break;
       case 61732: // Cached info retreival
-        msg !== "null" && (Starter.gameInfo.crashInfo = JSON.parse(msg));
+        msg !== "null" && (Starter.gameInfo.crashInfo = obj);
 
         break;
       case 1638: // getProfile
         try {
-          obj = JSON.parse(msg);
           Starter.profileInfo.profile = me.profile;
           Starter.profileInfo.account = obj.account;
           Starter.profileInfo.charName = obj.Character;
           obj.Realm = obj.Realm.toLowerCase();
-          Starter.profileInfo.realm = ["east", "west"].includes(obj.Realm) ? "us" + obj.Realm : obj.Realm;
+          Starter.profileInfo.realm = ["east", "west"].includes(obj.Realm)
+            ? "us" + obj.Realm
+            : obj.Realm;
         } catch (e) {
-          print(e);
+          console.error(e);
         }
 
         break;
@@ -1108,7 +1116,9 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
       !len && (len = rand(5, 14));
 
       let rval = "";
-      let letters = useNumbers ? "abcdefghijklmnopqrstuvwxyz0123456789" : "abcdefghijklmnopqrstuvwxyz";
+      let letters = useNumbers
+        ? "abcdefghijklmnopqrstuvwxyz0123456789"
+        : "abcdefghijklmnopqrstuvwxyz";
 
       for (let i = 0; i < len; i += 1) {
         rval += letters[rand(0, letters.length - 1)];
@@ -1130,61 +1140,45 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
       return rval;
     },
 
-    LocationEvents: {
-      selectDifficultySP: function () {
-        let diff = (Starter.gameInfo.difficulty || "Highest");
-        diff === "Highest" && (diff = "Hell"); // starts from top with fall-through to select highest
+    LocationEvents: (function () {
+      /**
+       * @param {Control} control
+       * @returns {string}
+       */
+      const parseControlText = function (control) {
+        if (!control) return "";
+        let text = control.getText();
+        if (!text || !text.length) return "";
+        return text.join(" ");
+      };
 
-        switch (diff) {
-        case "Hell":
-          if (Controls.HellSP.click() && Starter.locationTimeout(1e3, sdk.game.locations.SelectDifficultySP)) {
-            break;
-          }
-          // eslint-disable-next-line no-fallthrough
-        case "Nightmare":
-          if (Controls.NightmareSP.click() && Starter.locationTimeout(1e3, sdk.game.locations.SelectDifficultySP)) {
-            break;
-          }
-          // eslint-disable-next-line no-fallthrough
-        case "Normal":
-          Controls.NormalSP.click();
-
-          break;
-        }
-        return Starter.locationTimeout(5e3, sdk.game.locations.SelectDifficultySP);
-      },
-
-      loginError: function () {
-        let cdkeyError = false;
-        let defaultPrint = true;
-        let string = "";
-        let text = getLocation() === sdk.game.locations.LoginError
-          ? Controls.LoginErrorText.getText()
-          : Controls.LoginCdKeyInUseBy.getText();
-
-        if (text) {
-          for (let i = 0; i < text.length; i += 1) {
-            string += text[i];
-            i !== text.length - 1 && (string += " ");
-          }
+      const _locMap = new Map([
+        [sdk.game.locations.LoginError, function () {
+          let string = parseControlText(Controls.LoginErrorText);
 
           switch (string) {
           case getLocaleString(sdk.locale.text.UsernameIncludedIllegalChars):
           case getLocaleString(sdk.locale.text.UsernameIncludedDisallowedwords):
-          case getLocaleString(sdk.locale.text.UsernameMustBeAtLeast):
-          case getLocaleString(sdk.locale.text.PasswordMustBeAtLeast):
-          case getLocaleString(sdk.locale.text.AccountMustBeAtLeast):
-          case getLocaleString(sdk.locale.text.PasswordCantBeMoreThan):
-          case getLocaleString(sdk.locale.text.AccountCantBeMoreThan):
-            D2Bot.printToConsole(string);
-            D2Bot.stop();
+          case getLocaleString(sdk.locale.text.InvalidPassword):
+          case getLocaleString(5208): // Invalid account
+            D2Bot.updateStatus("Invalid Account Name");
+            D2Bot.printToConsole("Invalid Account Name :: " + Starter.profileInfo.account);
+            D2Bot.stop(true);
 
             break;
-          case getLocaleString(sdk.locale.text.InvalidPassword):
-            D2Bot.printToConsole("Invalid Password");
-            ControlAction.timeoutDelay("Invalid password delay", Starter.Config.InvalidPasswordDelay * 6e4);
-            D2Bot.printToConsole("Invalid Password - Restart");
-            D2Bot.restart();
+          case getLocaleString(sdk.locale.text.UnableToCreateAccount):
+          case getLocaleString(5239): // An account name already exists
+            if (!Starter.accountExists) {
+              Starter.accountExists = true;
+              Controls.LoginErrorOk.click();
+              Starter.locationTimeout(1000, sdk.game.locations.LoginError);
+              Controls.BottomLeftExit.click();
+              Starter.locationTimeout(1000, sdk.game.locations.CreateNewAccount);
+              return true;
+            }
+            D2Bot.updateStatus("Account name already exists :: " + Starter.profileInfo.account);
+            D2Bot.printToConsole("Account name already exists :: " + Starter.profileInfo.account);
+            D2Bot.stop(true);
 
             break;
           case getLocaleString(sdk.locale.text.AccountDoesNotExist):
@@ -1192,107 +1186,40 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
               Starter.makeAccount = true;
               Controls.LoginErrorOk.click();
 
-              return;
+              return true;
             } else {
               D2Bot.printToConsole(string);
               D2Bot.updateStatus(string);
+              D2Bot.stop(true);
             }
 
             break;
-          case getLocaleString(sdk.locale.text.AccountIsCorrupted):
-          case getLocaleString(sdk.locale.text.UnableToCreateAccount):
-            D2Bot.printToConsole(string);
-            D2Bot.updateStatus(string);
-
-            break;
-          case getLocaleString(sdk.locale.text.Disconnected):
-            D2Bot.updateStatus("Disconnected");
-            D2Bot.printToConsole("Disconnected");
-            Controls.OkCentered.click();
-            Controls.LoginErrorOk.click();
-            ControlAction.timeoutDelay("Disconnected", (rand(3, 5)) * 60000);
-
-            return;
           case getLocaleString(sdk.locale.text.CdKeyIntendedForAnotherProduct):
           case getLocaleString(sdk.locale.text.LoDKeyIntendedForAnotherProduct):
           case getLocaleString(sdk.locale.text.CdKeyDisabled):
           case getLocaleString(sdk.locale.text.LoDKeyDisabled):
-            cdkeyError = true;
-
-            break;
-          case getLocaleString(sdk.locale.text.CdKeyInUseBy):
-            string += (" " + Controls.LoginLodKeyInUseBy.getText());
-            D2Bot.printToConsole(Starter.gameInfo.mpq + " " + string, sdk.colors.D2Bot.Gold);
-            D2Bot.CDKeyInUse();
+            D2Bot.updateStatus("Disabled CDKey");
+            D2Bot.printToConsole("Disabled CDKey: " + Starter.gameInfo.mpq, sdk.colors.D2Bot.Gold);
+            D2Bot.CDKeyDisabled();
 
             if (Starter.gameInfo.switchKeys) {
-              cdkeyError = true;
+              ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
+              D2Bot.restart(true);
             } else {
-              Controls.UnableToConnectOk.click();
-              ControlAction.timeoutDelay("LoD key in use", Starter.Config.CDKeyInUseDelay * 6e4);
-              
-              return;
+              D2Bot.stop();
             }
 
             break;
-          case getLocaleString(sdk.locale.text.LoginError):
+          case getLocaleString(sdk.locale.text.Disconnected):
+            ControlAction.timeoutDelay("Disconnected from battle.net", Time.minutes(1));
+            return Controls.LoginErrorOk.click();
           case getLocaleString(sdk.locale.text.BattlenetNotResponding):
           case getLocaleString(sdk.locale.text.BattlenetNotResponding2):
-          case getLocaleString(sdk.locale.text.OnlyOneInstanceAtATime):
-            Controls.LoginErrorOk.click();
-            Controls.BottomLeftExit.click();
-            D2Bot.printToConsole(string);
-            ControlAction.timeoutDelay("Login Error Delay", 5 * 6e4);
-            D2Bot.printToConsole("Login Error - Restart");
-            D2Bot.restart();
-
-            break;
+            ControlAction.timeoutDelay("[R/D] - " + string, Time.minutes(10));
+            return Controls.LoginErrorOk.click();
           default:
             D2Bot.updateStatus("Login Error");
             D2Bot.printToConsole("Login Error - " + string);
-            cdkeyError = true;
-            defaultPrint = false;
-
-            break;
-          }
-
-          if (cdkeyError) {
-            defaultPrint && D2Bot.printToConsole(string + Starter.gameInfo.mpq, sdk.colors.D2Bot.Gold);
-            defaultPrint && D2Bot.updateStatus(string);
-            D2Bot.CDKeyDisabled();
-            if (Starter.gameInfo.switchKeys) {
-              ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
-              D2Bot.restart(true);
-            } else {
-              D2Bot.stop();
-            }
-          }
-
-          Controls.LoginErrorOk.click();
-          delay(1000);
-          Controls.BottomLeftExit.click();
-      
-          while (true) {
-            delay(1000);
-          }
-        }
-      },
-
-      charSelectError: function () {
-        let string = "";
-        let text = Controls.CharSelectError.getText();
-        let currentLoc = getLocation();
-
-        if (text) {
-          for (let i = 0; i < text.length; i += 1) {
-            string += text[i];
-            i !== text.length - 1 && (string += " ");
-          }
-
-          if (string === getLocaleString(sdk.locale.text.CdKeyDisabledFromRealm)) {
-            D2Bot.updateStatus("Realm Disabled CDKey");
-            D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, sdk.colors.D2Bot.Gold);
-            D2Bot.CDKeyDisabled();
 
             if (Starter.gameInfo.switchKeys) {
               ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
@@ -1300,287 +1227,406 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
             } else {
               D2Bot.stop();
             }
-          }
-        }
-
-        if (!Starter.locationTimeout(Starter.Config.ConnectingTimeout * 1e3, currentLoc)) {
-          // Click create char button on infinite "connecting" screen
-          Controls.CharSelectCreate.click();
-          delay(1000);
-          
-          Controls.BottomLeftExit.click();
-          delay(1000);
-          
-          if (getLocation() !== sdk.game.locations.CharSelectConnecting) return true;
-          
-          Controls.BottomLeftExit.click();
-          Starter.gameInfo.rdBlocker && D2Bot.restart();
-
-          return false;
-        }
-
-        return true;
-      },
-
-      realmDown: function () {
-        D2Bot.updateStatus("Realm Down");
-        delay(1000);
-
-        if (!Controls.BottomLeftExit.click()) return;
-
-        Starter.updateCount();
-        ControlAction.timeoutDelay("Realm Down", Starter.Config.RealmDownDelay * 6e4);
-        D2Bot.CDKeyRD();
-
-        if (Starter.gameInfo.switchKeys && !Starter.gameInfo.rdBlocker) {
-          D2Bot.printToConsole("Realm Down - Changing CD-Key");
-          ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
-          D2Bot.restart(true);
-        } else {
-          D2Bot.printToConsole("Realm Down - Restart");
-          D2Bot.restart();
-        }
-      },
-
-      waitingInLine: function () {
-        let queue = ControlAction.getQueueTime();
-        let currentLoc = getLocation();
-
-        if (queue > 0) {
-          switch (true) {
-          case (queue < 10000):
-            D2Bot.updateStatus("Waiting line... Queue: " + queue);
-
-            // If stuck here for too long, game creation likely failed. Exit to char selection and try again.
-            if (queue < 10) {
-              if (!Starter.locationTimeout(Starter.Config.WaitInLineTimeout * 1e3, currentLoc)) {
-                print("Failed to create game");
-                Controls.CancelCreateGame.click();
-                Controls.LobbyQuit.click();
-                delay(1000);
-              }
-            }
-
-            break;
-          case (queue > 10000):
-            if (Starter.Config.WaitOutQueueRestriction) {
-              D2Bot.updateStatus("Waiting out Queue restriction: " + queue);
-            } else {
-              print("Restricted... Queue: " + queue);
-              D2Bot.printToConsole("Restricted... Queue: " + queue, sdk.colors.D2Bot.Red);
-              Controls.CancelCreateGame.click();
-
-              if (Starter.Config.WaitOutQueueExitToMenu) {
-                Controls.LobbyQuit.click();
-                delay(1000);
-                Controls.BottomLeftExit.click();
-              }
-
-              // Wait out each queue as 1 sec and add extra 10 min
-              ControlAction.timeoutDelay("Restricted", (queue + 600) * 1000);
-            }
 
             break;
           }
-        }
-      },
 
-      gameDoesNotExist: function () {
-        let currentLoc = getLocation();
-        console.log("Game doesn't exist");
+          return Controls.LoginErrorOk.click();
+        }],
+        [sdk.game.locations.OkCenteredErrorPopUp, function () {
+          let string = parseControlText(Controls.OkCenteredText);
 
-        if (Starter.gameInfo.rdBlocker) {
-          D2Bot.printToConsole(Starter.gameInfo.mpq + " is probably flagged.", sdk.colors.D2Bot.Gold);
+          switch (string) {
+          case getLocaleString(sdk.locale.text.CannotCreateGamesDeadHCChar):
+            Starter.deadCheck = true;
+            return Controls.OkCentered.click();
+          case getLocaleString(sdk.locale.text.UsernameMustBeAtLeast):
+          case getLocaleString(sdk.locale.text.PasswordMustBeAtLeast):
+          case getLocaleString(sdk.locale.text.AccountMustBeAtLeast):
+          case getLocaleString(sdk.locale.text.PasswordCantBeMoreThan):
+          case getLocaleString(sdk.locale.text.AccountCantBeMoreThan):
+          case getLocaleString(sdk.locale.text.InvalidPassword):
+            D2Bot.printToConsole(string);
+            D2Bot.stop();
 
-          if (Starter.gameInfo.switchKeys) {
-            ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
-            D2Bot.restart(true);
+            break;
+          default:
+            D2Bot.updateStatus("Error");
+            D2Bot.printToConsole("Error - " + string);
+
+            break;
           }
-        } else {
-          Starter.locationTimeout(Starter.Config.GameDoesNotExistTimeout * 1e3, currentLoc);
-        }
-
-        Starter.lastGameStatus = "ready";
-      },
-
-      unableToConnect: function () {
-        let currentLoc = getLocation();
-
-        if (getLocation() === sdk.game.locations.TcpIpUnableToConnect) {
-          D2Bot.updateStatus("Unable To Connect TCP/IP");
-          Starter.connectFail && ControlAction.timeoutDelay("Unable to Connect", Starter.Config.TCPIPNoHostDelay * 1e3);
           Controls.OkCentered.click();
-          Starter.connectFail = !Starter.connectFail;
-        } else {
-          D2Bot.updateStatus("Unable To Connect");
+          ControlAction.timeoutDelay("Error", Time.minutes(1));
 
-          if (Starter.connectFailRetry < 2) {
-            Starter.connectFailRetry++;
+          return true;
+        }],
+        [sdk.game.locations.CdKeyInUse, function () {
+          let string = parseControlText(Controls.LoginCdKeyInUseBy);
+
+          if (string === getLocaleString(sdk.locale.text.CdKeyInUseBy)) {
+            let who = Controls.LoginCdKeyInUseBy.getText();
+            D2Bot.printToConsole(Starter.gameInfo.mpq + " " + string + " " + who, sdk.colors.D2Bot.Gold);
+            D2Bot.CDKeyInUse();
             Controls.UnableToConnectOk.click();
 
-            return;
+            if (Starter.gameInfo.switchKeys) {
+              ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
+              D2Bot.restart(true);
+            } else {
+              ControlAction.timeoutDelay("Cd key in use by: " + who, Starter.Config.CDKeyInUseDelay * 6e4);
+            }
           }
+          return true;
+        }],
+        [sdk.game.locations.InvalidCdKey, function () {
+          let string = parseControlText(Controls.LoginInvalidCdKey);
 
-          Starter.connectFailRetry >= 2 && (Starter.connectFail = true);
+          if (string === getLocaleString(sdk.locale.text.CdKeyIntendedForAnotherProduct)
+            || string === getLocaleString(sdk.locale.text.LoDKeyIntendedForAnotherProduct)) {
+            D2Bot.updateStatus("Invalid CDKey");
+            D2Bot.printToConsole("Invalid CDKey: " + Starter.gameInfo.mpq, sdk.colors.D2Bot.Gold);
+            D2Bot.CDKeyDisabled();
 
-          if (Starter.connectFail && !Starter.locationTimeout(10e4, currentLoc)) {
-            let string = "";
-            let text = Controls.LoginUnableToConnect.getText();
+            if (Starter.gameInfo.switchKeys) {
+              ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
+              D2Bot.restart(true);
+            } else {
+              D2Bot.stop();
+            }
+          }
+          return true;
+        }],
+      ]);
 
-            if (text) {
-              for (let i = 0; i < text.length; i++) {
-                string += text[i];
-                i !== text.length - 1 && (string += " ");
+      return {
+        selectDifficultySP: function () {
+          let diff = (Starter.gameInfo.difficulty || "Highest");
+          diff === "Highest" && (diff = "Hell"); // starts from top with fall-through to select highest
+
+          switch (diff) {
+          case "Hell":
+            if (Controls.HellSP.click()
+              && Starter.locationTimeout(1e3, sdk.game.locations.SelectDifficultySP)) {
+              break;
+            }
+          // eslint-disable-next-line no-fallthrough
+          case "Nightmare":
+            if (Controls.NightmareSP.click()
+              && Starter.locationTimeout(1e3, sdk.game.locations.SelectDifficultySP)) {
+              break;
+            }
+          // eslint-disable-next-line no-fallthrough
+          case "Normal":
+            Controls.NormalSP.click();
+
+            break;
+          }
+          return Starter.locationTimeout(5e3, sdk.game.locations.SelectDifficultySP);
+        },
+
+        loginError: function () {
+          let _loc = getLocation();
+
+          if (_locMap.has(_loc)) {
+            _locMap.get(_loc)();
+          } else {
+            D2Bot.printToConsole("Unhandled location: " + _loc);
+            ControlAction.timeoutDelay("Unhandled location: " + _loc, Time.minutes(10));
+            D2Bot.restart();
+          }
+        },
+
+        charSelectError: function () {
+          let string = parseControlText(Controls.CharSelectError);
+          let currentLoc = getLocation();
+
+          if (string) {
+            if (string === getLocaleString(sdk.locale.text.CdKeyDisabledFromRealm)) {
+              D2Bot.updateStatus("Realm Disabled CDKey");
+              D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, sdk.colors.D2Bot.Gold);
+              D2Bot.CDKeyDisabled();
+
+              if (Starter.gameInfo.switchKeys) {
+                ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
+                D2Bot.restart(true);
+              } else {
+                D2Bot.stop();
               }
             }
+          }
+
+          if (!Starter.locationTimeout(Starter.Config.ConnectingTimeout * 1e3, currentLoc)) {
+            // Click create char button on infinite "connecting" screen
+            Controls.CharSelectCreate.click();
+            delay(1000);
             
-            switch (string) {
-            case getLocaleString(sdk.locale.text.UnableToIndentifyVersion):
-              Controls.UnableToConnectOk.click();
-              ControlAction.timeoutDelay("Version error", Starter.Config.VersionErrorDelay * 1000);
-              
-              break;
-            default: // Regular UTC and everything else
-              Controls.UnableToConnectOk.click();
-              ControlAction.timeoutDelay("Unable to Connect", Starter.Config.UnableToConnectDelay * 1000 * 60);
-              
-              break;
-            }
-
-            Starter.connectFail = false;
-          }
-
-          if (!Controls.UnableToConnectOk.click()) {
-            return;
-          }
-
-          Starter.connectFail = true;
-          Starter.connectFailRetry = 0;
-        }
-      },
-
-      openCreateGameWindow: function () {
-        let currentLoc = getLocation();
-
-        if (!Controls.CreateGameWindow.click()) {
-          return true;
-        }
-
-        // dead HardCore character
-        if (Controls.CreateGameWindow.control && Controls.CreateGameWindow.disabled === sdk.game.controls.Disabled) {
-          if (Starter.Config.StopOnDeadHardcore) {
-            D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Shutting down, better luck next time", sdk.colors.D2Bot.Gold);
-            D2Bot.stop();
-          } else {
-            D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Better luck next time", sdk.colors.D2Bot.Gold);
-            D2Bot.updateStatus(Profile().character + " has died. They shall be remembered...maybe. Better luck next time");
-            Starter.deadCheck = true;
-            Controls.LobbyQuit.click();
-          }
-
-          return false;
-        }
-
-        // in case create button gets bugged
-        if (!Starter.locationTimeout(5000, currentLoc)) {
-          if (!Controls.CreateGameWindow.click()) {
-            return true;
-          }
-
-          if (!Controls.JoinGameWindow.click()) {
-            return true;
-          }
-        }
-
-        return (getLocation() === sdk.game.locations.CreateGame);
-      },
-
-      openJoinGameWindow: function () {
-        let currentLoc = getLocation();
-
-        if (!Controls.JoinGameWindow.click()) {
-          return;
-        }
-
-        // in case create button gets bugged
-        if (!Starter.locationTimeout(5000, currentLoc)) {
-          if (!Controls.CreateGameWindow.click()) {
-            return;
-          }
-
-          if (!Controls.JoinGameWindow.click()) {
-            return;
-          }
-        }
-      },
-
-      login: function (otherMultiCheck = false) {
-        Starter.inGame && (Starter.inGame = false);
-        if (otherMultiCheck && [sdk.game.gametype.SinglePlayer, sdk.game.gametype.BattleNet].indexOf(Profile().type) === -1) {
-          return ControlAction.loginOtherMultiplayer();
-        }
-
-        if (getLocation() === sdk.game.locations.MainMenu) {
-          if (Profile().type === sdk.game.profiletype.SinglePlayer
-            && Starter.firstRun
-            && Controls.SinglePlayer.click()) {
-            return true;
-          }
-        }
-
-        // Wrong char select screen fix
-        if (getLocation() === sdk.game.locations.CharSelect) {
-          hideConsole(); // seems to fix odd crash with single-player characters if the console is open to type in
-          if ((Profile().type === sdk.game.profiletype.Battlenet && !Controls.CharSelectCurrentRealm.control)
-            || ((Profile().type !== sdk.game.profiletype.Battlenet && Controls.CharSelectCurrentRealm.control))) {
             Controls.BottomLeftExit.click();
-          
+            delay(1000);
+            
+            if (getLocation() !== sdk.game.locations.CharSelectConnecting) return true;
+            
+            Controls.BottomLeftExit.click();
+            Starter.gameInfo.rdBlocker && D2Bot.restart();
+
             return false;
           }
-        }
 
-        // Multiple realm botting fix in case of R/D or disconnect
-        Starter.firstLogin && getLocation() === sdk.game.locations.Login && Controls.BottomLeftExit.click();
-    
-        D2Bot.updateStatus("Logging In");
-            
-        try {
-          login(me.profile);
-        } catch (e) {
-          if (getLocation() === sdk.game.locations.CharSelect && Starter.loginRetry < 2) {
-            if (!ControlAction.findCharacter(Starter.profileInfo)) {
-              // dead hardcore character on sp
-              if (getLocation() === sdk.game.locations.OkCenteredErrorPopUp) {
-                // Exit from that pop-up
-                Controls.OkCentered.click();
-                D2Bot.printToConsole("Character died", sdk.colors.D2Bot.Red);
-                D2Bot.stop();
-              } else {
-                Starter.loginRetry++;
-              }
-            } else {
-              login(me.profile);
-            }
-          } else if (getLocation() === sdk.game.locations.TcpIpEnterIp && Profile().type === sdk.game.profiletype.TcpIpJoin) {
-            return true; // handled in its own case
+          return true;
+        },
+
+        realmDown: function () {
+          D2Bot.updateStatus("Realm Down");
+          delay(1000);
+
+          if (!Controls.BottomLeftExit.click()) return;
+
+          Starter.updateCount();
+          ControlAction.timeoutDelay("Realm Down", Starter.Config.RealmDownDelay * 6e4);
+          D2Bot.CDKeyRD();
+
+          if (Starter.gameInfo.switchKeys && !Starter.gameInfo.rdBlocker) {
+            D2Bot.printToConsole("Realm Down - Changing CD-Key");
+            ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
+            D2Bot.restart(true);
           } else {
-            print(e + " " + getLocation());
+            D2Bot.printToConsole("Realm Down - Restart");
+            D2Bot.restart();
+          }
+        },
+
+        waitingInLine: function () {
+          let queue = ControlAction.getQueueTime();
+          let currentLoc = getLocation();
+
+          if (queue > 0) {
+            switch (true) {
+            case (queue < 10000):
+              D2Bot.updateStatus("Waiting line... Queue: " + queue);
+
+              // If stuck here for too long, game creation likely failed. Exit to char selection and try again.
+              if (queue < 10) {
+                if (!Starter.locationTimeout(Starter.Config.WaitInLineTimeout * 1e3, currentLoc)) {
+                  print("Failed to create game");
+                  Controls.CancelCreateGame.click();
+                  Controls.LobbyQuit.click();
+                  delay(1000);
+                }
+              }
+
+              break;
+            case (queue > 10000):
+              if (Starter.Config.WaitOutQueueRestriction) {
+                D2Bot.updateStatus("Waiting out Queue restriction: " + queue);
+              } else {
+                print("Restricted... Queue: " + queue);
+                D2Bot.printToConsole("Restricted... Queue: " + queue, sdk.colors.D2Bot.Red);
+                Controls.CancelCreateGame.click();
+
+                if (Starter.Config.WaitOutQueueExitToMenu) {
+                  Controls.LobbyQuit.click();
+                  delay(1000);
+                  Controls.BottomLeftExit.click();
+                }
+
+                // Wait out each queue as 1 sec and add extra 10 min
+                ControlAction.timeoutDelay("Restricted", (queue + 600) * 1000);
+              }
+
+              break;
+            }
+          }
+        },
+
+        gameDoesNotExist: function () {
+          let currentLoc = getLocation();
+          console.log("Game doesn't exist");
+
+          if (Starter.gameInfo.rdBlocker) {
+            D2Bot.printToConsole(Starter.gameInfo.mpq + " is probably flagged.", sdk.colors.D2Bot.Gold);
+
+            if (Starter.gameInfo.switchKeys) {
+              ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
+              D2Bot.restart(true);
+            }
+          } else {
+            Starter.locationTimeout(Starter.Config.GameDoesNotExistTimeout * 1e3, currentLoc);
+          }
+
+          Starter.lastGameStatus = "ready";
+        },
+
+        unableToConnect: function () {
+          let currentLoc = getLocation();
+
+          if (getLocation() === sdk.game.locations.TcpIpUnableToConnect) {
+            D2Bot.updateStatus("Unable To Connect TCP/IP");
+            Starter.connectFail && ControlAction.timeoutDelay("Unable to Connect", Starter.Config.TCPIPNoHostDelay * 1e3);
+            Controls.OkCentered.click();
+            Starter.connectFail = !Starter.connectFail;
+          } else {
+            D2Bot.updateStatus("Unable To Connect");
+
+            if (Starter.connectFailRetry < 2) {
+              Starter.connectFailRetry++;
+              Controls.UnableToConnectOk.click();
+
+              return;
+            }
+
+            Starter.connectFailRetry >= 2 && (Starter.connectFail = true);
+
+            if (Starter.connectFail && !Starter.locationTimeout(10e4, currentLoc)) {
+              let string = parseControlText(Controls.LoginUnableToConnect);
+              
+              switch (string) {
+              case getLocaleString(sdk.locale.text.UnableToIndentifyVersion):
+                Controls.UnableToConnectOk.click();
+                ControlAction.timeoutDelay("Version error", Starter.Config.VersionErrorDelay * 1000);
+                
+                break;
+              default: // Regular UTC and everything else
+                Controls.UnableToConnectOk.click();
+                ControlAction.timeoutDelay("Unable to Connect", Starter.Config.UnableToConnectDelay * 1000 * 60);
+                
+                break;
+              }
+
+              Starter.connectFail = false;
+            }
+
+            if (!Controls.UnableToConnectOk.click()) {
+              return;
+            }
+
+            Starter.connectFail = true;
+            Starter.connectFailRetry = 0;
+          }
+        },
+
+        openCreateGameWindow: function () {
+          let currentLoc = getLocation();
+
+          if (!Controls.CreateGameWindow.click()) {
+            return true;
+          }
+
+          // dead HardCore character
+          if (Controls.CreateGameWindow.control && Controls.CreateGameWindow.disabled === sdk.game.controls.Disabled) {
+            if (Starter.Config.StopOnDeadHardcore) {
+              D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Shutting down, better luck next time", sdk.colors.D2Bot.Gold);
+              D2Bot.stop();
+            } else {
+              D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Better luck next time", sdk.colors.D2Bot.Gold);
+              D2Bot.updateStatus(Profile().character + " has died. They shall be remembered...maybe. Better luck next time");
+              Starter.deadCheck = true;
+              Controls.LobbyQuit.click();
+            }
+
+            return false;
+          }
+
+          // in case create button gets bugged
+          if (!Starter.locationTimeout(5000, currentLoc)) {
+            if (!Controls.CreateGameWindow.click()) {
+              return true;
+            }
+
+            if (!Controls.JoinGameWindow.click()) {
+              return true;
+            }
+          }
+
+          return (getLocation() === sdk.game.locations.CreateGame);
+        },
+
+        openJoinGameWindow: function () {
+          let currentLoc = getLocation();
+
+          if (!Controls.JoinGameWindow.click()) {
+            return;
+          }
+
+          // in case create button gets bugged
+          if (!Starter.locationTimeout(5000, currentLoc)) {
+            if (!Controls.CreateGameWindow.click()) {
+              return;
+            }
+
+            if (!Controls.JoinGameWindow.click()) {
+              return;
+            }
+          }
+        },
+
+        login: function (otherMultiCheck = false) {
+          Starter.inGame && (Starter.inGame = false);
+          if (otherMultiCheck && [sdk.game.gametype.SinglePlayer, sdk.game.gametype.BattleNet].indexOf(Profile().type) === -1) {
+            return ControlAction.loginOtherMultiplayer();
+          }
+
+          if (getLocation() === sdk.game.locations.MainMenu) {
+            if (Profile().type === sdk.game.profiletype.SinglePlayer
+              && Starter.firstRun
+              && Controls.SinglePlayer.click()) {
+              return true;
+            }
+          }
+
+          // Wrong char select screen fix
+          if (getLocation() === sdk.game.locations.CharSelect) {
+            hideConsole(); // seems to fix odd crash with single-player characters if the console is open to type in
+            if ((Profile().type === sdk.game.profiletype.Battlenet && !Controls.CharSelectCurrentRealm.control)
+              || ((Profile().type !== sdk.game.profiletype.Battlenet && Controls.CharSelectCurrentRealm.control))) {
+              Controls.BottomLeftExit.click();
+            
+              return false;
+            }
+          }
+
+          // Multiple realm botting fix in case of R/D or disconnect
+          Starter.firstLogin && getLocation() === sdk.game.locations.Login && Controls.BottomLeftExit.click();
+      
+          D2Bot.updateStatus("Logging In");
+              
+          try {
+            login(me.profile);
+          } catch (e) {
+            if (getLocation() === sdk.game.locations.CharSelect && Starter.loginRetry < 2) {
+              if (!ControlAction.findCharacter(Starter.profileInfo)) {
+                // dead hardcore character on sp
+                if (getLocation() === sdk.game.locations.OkCenteredErrorPopUp) {
+                  // Exit from that pop-up
+                  Controls.OkCentered.click();
+                  D2Bot.printToConsole("Character died", sdk.colors.D2Bot.Red);
+                  D2Bot.stop();
+                } else {
+                  Starter.loginRetry++;
+                }
+              } else {
+                login(me.profile);
+              }
+            } else if (getLocation() === sdk.game.locations.TcpIpEnterIp && Profile().type === sdk.game.profiletype.TcpIpJoin) {
+              return true; // handled in its own case
+            } else {
+              print(e + " " + getLocation());
+            }
+          }
+
+          return true;
+        },
+
+        otherMultiplayerSelect: function () {
+          if ([sdk.game.profiletype.TcpIpHost, sdk.game.profiletype.TcpIpJoin].includes(Profile().type)) {
+            Controls.TcpIp.click() && (Profile().type === sdk.game.profiletype.TcpIpHost ? Controls.TcpIpHost.click() : Controls.TcpIpJoin.click());
+          } else if (Profile().type === sdk.game.profiletype.OpenBattlenet) {
+            Controls.OpenBattleNet.click();
+          } else {
+            Controls.OtherMultiplayerCancel.click();
           }
         }
-
-        return true;
-      },
-
-      otherMultiplayerSelect: function () {
-        if ([sdk.game.profiletype.TcpIpHost, sdk.game.profiletype.TcpIpJoin].includes(Profile().type)) {
-          Controls.TcpIp.click() && (Profile().type === sdk.game.profiletype.TcpIpHost ? Controls.TcpIpHost.click() : Controls.TcpIpJoin.click());
-        } else if (Profile().type === sdk.game.profiletype.OpenBattlenet) {
-          Controls.OpenBattleNet.click();
-        } else {
-          Controls.OtherMultiplayerCancel.click();
-        }
-      }
-    },
+      };
+    })(),
   };
 
   return {
