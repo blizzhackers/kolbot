@@ -16,7 +16,9 @@ includeSystemLibs();
 include("systems/mulelogger/MuleLogger.js");
 include("systems/gameaction/GameAction.js");
 
-function main() {
+include("oog/ShitList.js");
+
+function main () {
   // Variables and functions
   let player, attackCount, prevPos, check, missile, outside;
   let charClass = ["Amazon", "Sorceress", "Necromancer", "Paladin", "Barbarian", "Druid", "Assassin"];
@@ -49,9 +51,14 @@ function main() {
 
     if (party) {
       do {
-        if (party.name !== me.name && getPlayerFlag(me.gid, party.gid, 8) && hostiles.indexOf(party.name) === -1) {
+        if (party.name !== me.name
+          && getPlayerFlag(me.gid, party.gid, 8)
+          && hostiles.indexOf(party.name) === -1) {
           D2Bot.printToConsole(party.name + " (Level " + party.level + " " + charClass[party.classid] + ")" + " has declared hostility.", sdk.colors.D2Bot.Orange);
           hostiles.push(party.name);
+          if (Config.ShitList) {
+            ShitList.add(party.name);
+          }
         }
       } while (party.getNext());
     }
@@ -139,7 +146,8 @@ function main() {
   Skill.usePvpRange = true;
 
   // Attack sequence adjustments - this only affects the AntiHostile thread
-  if (Skill.canUse(sdk.skills.MindBlast) && [sdk.skills.FireBlast, sdk.skills.ShockWeb].includes(Config.AttackSkill[1])) {
+  if (Skill.canUse(sdk.skills.MindBlast)
+    && [sdk.skills.FireBlast, sdk.skills.ShockWeb].includes(Config.AttackSkill[1])) {
     Config.AttackSkill[1] = sdk.skills.MindBlast;
     ClassAttack.trapRange = 40;
   }
