@@ -1,7 +1,7 @@
 export {};
 declare global {
-	const NTIP: {
-		OpenFile(string, boolean);
-		CheckItem(unit: Unit, entryList?: [] | false, verbose?: boolean)
-	}
+  namespace NTIP {
+    function OpenFile(filepath: string, notify: boolean): void;
+    function CheckItem(unit: Unit, entryList?: [] | false, verbose?: boolean): void;
+  }
 }

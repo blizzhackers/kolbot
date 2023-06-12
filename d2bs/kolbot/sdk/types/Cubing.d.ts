@@ -1,23 +1,23 @@
 export {};
 declare global {
-	const Cubing: {
-		init(): void
-		buildGemList(): void
-		getCube(): void
-		buildRecipes(): void
-		buildLists(): void
-		clearSubRecipes(): void
-		update(): void
-		checkRecipe(recipe: any): void
-		getRecipeNeeds(index: any): void
-		checkItem(unit: any): boolean
-		keepItem(unit: any): boolean
-		validItem(unit: any, recipe: any): void
-		doCubing(): void
-		cursorCheck(): void
-		openCube(): void
-		closeCube(): void
-		emptyCube(): void
-		makeRevPots(): void
-	}
+  namespace Cubing {
+    function init(): void;
+    function buildGemList(): void;
+    function getCube(): void;
+    function buildRecipes(): void;
+    function buildLists(): void;
+    function clearSubRecipes(): void;
+    function update(): void;
+    function checkRecipe(recipe: any): void;
+    function getRecipeNeeds(index: any): void;
+    function checkItem(unit: any): boolean;
+    function keepItem(unit: any): boolean;
+    function validItem(unit: any, recipe: any): void;
+    function doCubing(): void;
+    function cursorCheck(): void;
+    function openCube(): void;
+    function closeCube(): void;
+    function emptyCube(): void;
+    function makeRevPots(): void;
+  }
 }

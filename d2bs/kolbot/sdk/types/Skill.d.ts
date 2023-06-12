@@ -43,6 +43,7 @@ declare global {
     const missileSkills: number[];
     const charges: any[];
     
+    function get (skillId: number): SkillDataInfo;
     function getClassSkillRange(classid?: number): [number, number];
     function init(): void;
     function canUse(skillId: number): boolean;
