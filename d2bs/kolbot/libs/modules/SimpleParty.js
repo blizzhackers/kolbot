@@ -1,4 +1,9 @@
 (function (module, require) {
+  // party thread specific
+  include("oog/ShitList.js");
+  const shitList = (Config.ShitList || Config.UnpartyShitlisted)
+    ? ShitList.read()
+    : [];
   const Worker = require("Worker");
   const NO_PARTY = 65535;
   const PARTY_MEMBER = 1;
@@ -117,10 +122,26 @@
               || biggestPartyId === myPartyId
             )
           ) {
+            if (getPlayerFlag(me.gid, party.gid, sdk.player.flag.Hostile)) {
+              if (shitList.includes(party.name)) {
+                say(party.name + " has been shitlisted.");
+                shitList.push(party.name);
+                ShitList.add(party.name);
+              }
+
+              if (player.partyflag === sdk.party.flag.Cancel) {
+                clickParty(party, BUTTON_INVITE_ACCEPT_CANCEL); // cancel invitation
+              }
+
+              continue;
+            } else if (shitList.includes(party.name)) {
+              continue;
+            }
+            
             // if player isn't invited, invite
             clickParty(party, BUTTON_INVITE_ACCEPT_CANCEL);
           }
-
+          
           // Deal with accepting
           if (
             party.partyflag === ACCEPTABLE
@@ -137,6 +158,9 @@
               if (acceptFirst !== party.name) {
                 continue; // Ignore party acceptation
               }
+              if (shitList.includes(party.name)) {
+                continue;
+              }
             }
 
             clickParty(party, BUTTON_INVITE_ACCEPT_CANCEL);
@@ -151,6 +175,21 @@
             clickParty(party, BUTTON_LEAVE_PARTY);
           }
 
+          if (Config.UnpartyShitlisted) {
+            // Add new hostile players to temp shitlist, leader should have Config.ShitList set to true to update the permanent list.
+            if (getPlayerFlag(me.gid, party.gid, sdk.player.flag.Hostile)
+              && shitList.includes(party.name)) {
+              shitList.push(player.name);
+            }
+
+            if (shitList.includes(player.name)
+              && myPartyId !== NO_PARTY
+              && party.partyid === myPartyId) {
+              console.log("Unpartying shitlisted player: " + party.name);
+              clickParty(party, BUTTON_LEAVE_PARTY);
+              delay(100);
+            }
+          }
         }
         return true;
       };
