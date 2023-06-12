@@ -73,6 +73,7 @@ const ShitList = {
   /** @param {string} name */
   add: function (name) {
     let obj = this.getObj();
+    if (obj.shitlist.includes(name)) return;
     obj.shitlist.push(name);
     this._list.add(name);
 
