@@ -1,9 +1,9 @@
-/* eslint-disable max-len */
 /**
 *  @filename    default.dbj
 *  @author      kolton, theBGuy
 *  @desc        gets executed upon gamejoin, main thread for bot
 *
+*  @typedef {import("./sdk/globals")}
 */
 js_strict(true);
 include("critical.js"); // required
@@ -38,17 +38,22 @@ function main () {
   clearAllEvents(); // remove any event listeners from game crash
 
   // load heartbeat if it isn't already running
-  !getScript("threads/heartbeat.js") && load("threads/heartbeat.js");
+  let _heartbeat = getScript("threads/heartbeat.js");
+  if (!_heartbeat || !_heartbeat.running) {
+    load("threads/heartbeat.js");
+  }
 
   // SoloPlay runs in it's own thread - check to ensure it exists in the files
   if (getScript("D2BotSoloPlay.dbj") && FileTools.exists("libs/SoloPlay/SoloPlay.js")) {
     load("libs/SoloPlay/SoloPlay.js");
+    getScript(true).stop(); // kill this thread
     return true;
   }
 
   // map mode runs in it's own thread
   if (getScript("d2botmap.dbj")) {
     load("libs/manualplay/threads/mapthread.js");
+    getScript(true).stop(); // kill this thread
     return true;
   }
   
@@ -57,7 +62,9 @@ function main () {
   
   // don't load default for dropper/mules
   if (getScript("D2BotDropper.dbj") || getScript("D2BotMule.dbj")) {
-    FileTools.exists("libs/ItemDB.js") && include("ItemDB.js");
+    if (FileTools.exists("libs/systems/dropper/ItemDB.js")) {
+      include("systems/dropper/ItemDB.js");
+    }
     load("threads/AreaWatcher.js");
     
     while (me.ingame) {
@@ -119,7 +126,11 @@ function main () {
   addEventListener("copydata", this.copyDataEvent);
 
   // GameAction/AutoMule/TorchSystem/Gambling/Crafting handler
-  if (GameAction.inGameCheck() || AutoMule.inGameCheck() || TorchSystem.inGameCheck() || Gambling.inGameCheck() || CraftingSystem.inGameCheck()) {
+  if (GameAction.inGameCheck()
+    || AutoMule.inGameCheck()
+    || TorchSystem.inGameCheck()
+    || Gambling.inGameCheck()
+    || CraftingSystem.inGameCheck()) {
     return true;
   }
 
@@ -128,8 +139,11 @@ function main () {
 
   // Check for experience decrease -> log death. Skip report if life chicken is disabled.
   if (stats.name === me.name && me.getStat(sdk.stats.Experience) < stats.experience && Config.LifeChicken > 0) {
-    D2Bot.printToConsole("You died in last game. | Area :: " + stats.lastArea + " | Script :: " + stats.debugInfo.currScript, sdk.colors.D2Bot.Red);
-    D2Bot.printToConsole("Experience decreased by " + (stats.experience - me.getStat(sdk.stats.Experience)), sdk.colors.D2Bot.Red);
+    D2Bot.printToConsole(
+      "You died in last game. | Area :: " + stats.lastArea + "\n"
+      + "Experience decreased by " + (stats.experience - me.getStat(sdk.stats.Experience)),
+      sdk.colors.D2Bot.Red
+    );
     DataFile.updateStats("deaths");
     D2Bot.updateDeaths();
   }
@@ -138,7 +152,9 @@ function main () {
 
   // Load threads
   load("threads/ToolsThread.js");
-  (Config.TownCheck || Config.TownHP > 0 || Config.TownMP > 0) && load("threads/TownChicken.js");
+  if (Config.TownCheck || Config.TownHP > 0 || Config.TownMP > 0) {
+    load("threads/TownChicken.js");
+  }
 
   if (Config.DebugMode.Stack && FileTools.exists("libs/modules/Guard.js")) {
     require("libs/modules/Guard");
@@ -172,8 +188,12 @@ function main () {
     if (Config.DebugMode.Memory) {
       delay(2000);
       getThreads()
-        .sort((a, b) => b.memory - a.memory)
-        .forEach(thread => console.debug(thread));
+        .sort(function (a, b) {
+          return b.memory - a.memory;
+        })
+        .forEach(function (thread) {
+          console.debug(thread);
+        });
     }
   }
 
@@ -202,7 +222,10 @@ function main () {
       Town.goToTown();
 
       while (getTickCount() - startTime < Config.MinGameTime * 1000) {
-        me.overhead("Stalling for " + Math.round(((startTime + (Config.MinGameTime * 1000)) - getTickCount()) / 1000) + " Seconds");
+        me.overhead(
+          "Stalling for "
+          + Math.round(((startTime + Time.seconds(Config.MinGameTime)) - getTickCount()) / 1000) + " Seconds"
+        );
         delay(1000);
       }
     } catch (e1) {
@@ -252,7 +275,8 @@ function main () {
   // Anni handler. Mule Anni if it's in unlocked space and profile is set to mule torch/anni.
   let anni = me.findItem(sdk.items.SmallCharm, sdk.items.mode.inStorage, -1, sdk.items.quality.Unique);
 
-  if (anni && !Storage.Inventory.IsLocked(anni, Config.Inventory) && AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
+  if (anni && !Storage.Inventory.IsLocked(anni, Config.Inventory)
+		&& AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
     scriptBroadcast("muleAnni");
   }
 
