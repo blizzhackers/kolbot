@@ -51,22 +51,42 @@ const MuleLogger = {
     return false;
   },
 
+  /**
+   * Save perm status to logs/MuleLogPermInfo.json.
+   * @param {{ charname: string, perm: boolean }} charPermInfo 
+   */
   savePermedStatus: function (charPermInfo = {}) {
     FileTools.writeText("logs/MuleLogPermInfo.json", JSON.stringify(charPermInfo));
   },
 
+  /**
+   * Load perm status from logs/MuleLogPermInfo.json.
+   * @return {{ charname: string, perm: boolean }} 
+   */
   loadPermedStatus: function () {
-    if (!FileTools.exists("logs/MuleLogPermInfo.json")) throw new Error("File logs/MuleLogPermInfo.json does not exist!");
+    if (!FileTools.exists("logs/MuleLogPermInfo.json")) {
+      throw new Error("File logs/MuleLogPermInfo.json does not exist!");
+    }
     let info = (FileTools.readText("logs/MuleLogPermInfo.json"));
     return info ? JSON.parse(info) : {};
   },
 
+  /**
+   * @param {string} hash 
+   * @returns {string}
+   */
   load: function (hash) {
     let filename = "data/secure/" + hash + ".txt";
-    if (!FileTools.exists(filename)) throw new Error("File " + filename + " does not exist!");
+    if (!FileTools.exists(filename)) {
+      throw new Error("File " + filename + " does not exist!");
+    }
     return FileTools.readText(filename);
   },
 
+  /**
+   * @param {string} hash 
+   * @param {string} data 
+   */
   save: function (hash, data) {
     let filename = "data/secure/" + hash + ".txt";
     FileTools.writeText(filename, data);
@@ -77,15 +97,33 @@ const MuleLogger = {
     FileTools.remove("logs/MuleLogPermInfo.json");
   },
 
-  // Log kept item stats in the manager.
+  /**
+   * Log kept item stats in the manager.
+   * @param {ItemUnit} unit 
+   * @param {boolean} [logIlvl] 
+   */
   logItem: function (unit, logIlvl = this.LogItemLevel) {
-    if (!isIncluded("core/misc.js")) {
-      include("core/misc.js");
-    }
+    includeIfNotIncluded("core/misc.js");
 
     let header = "";
-    let name = unit.itemType + "_" + unit.fname.split("\n").reverse().join(" ").replace(/(y|ÿ)c[0-9!"+<:;.*]|\/|\\/g, "").trim();
-    let desc = Item.getItemDesc(unit, logIlvl) + "$" + unit.gid + ":" + unit.classid + ":" + unit.location + ":" + unit.x + ":" + unit.y + (unit.getFlag(sdk.items.flags.Ethereal) ? ":eth" : "");
+    let name = (
+      unit.itemType + "_"
+      + unit.fname
+        .split("\n")
+        .reverse()
+        .join(" ")
+        .replace(/(y|ÿ)c[0-9!"+<:;.*]|\/|\\/g, "")
+        .trim()
+    );
+    let desc = (
+      Item.getItemDesc(unit, logIlvl) + "$"
+      + unit.gid + ":"
+      + unit.classid + ":"
+      + unit.location + ":"
+      + unit.x + ":"
+      + unit.y
+      + (unit.getFlag(sdk.items.flags.Ethereal) ? ":eth" : "")
+    );
     let color = unit.getColor();
     let code = Item.getItemCode(unit);
     let sock = unit.getItemsEx();
@@ -109,17 +147,15 @@ const MuleLogger = {
     };
   },
 
+  /**
+   * Log character to D2Bot# itemviewer.
+   * @param {boolean} [logIlvl] 
+   * @param {boolean} [logName] 
+   * @param {boolean} [saveImg] 
+   */
   logChar: function (logIlvl = this.LogItemLevel, logName = this.LogNames, saveImg = this.SaveScreenShot) {
     while (!me.gameReady) {
       delay(100);
-    }
-
-    // try again if db is locked!! - ItemDB is from https://github.com/dzik87/D2Dropper
-    // maybe just add it to the core? It's not going to work without an update
-    if (FileTools.exists("libs/ItemDB.js") && (isIncluded("ItemDB.js") || include("ItemDB.js"))) {
-      while (!ItemDB.init(false)) {
-        delay(1000);
-      }
     }
 
     let items = me.getItemsEx();
@@ -149,9 +185,10 @@ const MuleLogger = {
       return b.location - a.location;
     });
 
-    for (let i = 0; i < items.length; i += 1) {
-      if ((this.LogEquipped || items[i].isInStorage) && (items[i].quality > sdk.items.quality.Normal || !Item.skipItem(items[i].classid))) {
-        let parsedItem = this.logItem(items[i], logIlvl);
+    for (let item of items) {
+      if ((this.LogEquipped || item.isInStorage)
+        && (item.quality > sdk.items.quality.Normal || !Item.skipItem(item.classid))) {
+        let parsedItem = this.logItem(item, logIlvl);
 
         // Log names to saved image
         logName && (parsedItem.header = (me.account || "Single Player") + " / " + me.name);
@@ -162,10 +199,10 @@ const MuleLogger = {
         // Remove itemtype_ prefix from the name
         parsedItem.title = parsedItem.title.substr(parsedItem.title.indexOf("_") + 1);
 
-        items[i].isEquipped && (parsedItem.title += (items[i].isOnSwap ? " (secondary equipped)" : " (equipped)"));
-        items[i].isInInventory && (parsedItem.title += " (inventory)");
-        items[i].isInStash && (parsedItem.title += " (stash)");
-        items[i].isInCube && (parsedItem.title += " (cube)");
+        item.isEquipped && (parsedItem.title += (item.isOnSwap ? " (secondary equipped)" : " (equipped)"));
+        item.isInInventory && (parsedItem.title += " (inventory)");
+        item.isInStash && (parsedItem.title += " (stash)");
+        item.isInCube && (parsedItem.title += " (cube)");
 
         let string = JSON.stringify(parsedItem);
         finalString += (string + "\n");
@@ -173,13 +210,15 @@ const MuleLogger = {
     }
 
     if (this.LogMerc) {
-      let merc = Misc.poll(() => me.getMerc(), 1000, 100);
+      let merc = Misc.poll(function () {
+        return me.getMerc();
+      }, 1000, 100);
 
       if (merc) {
         let mercItems = merc.getItemsEx();
 
-        for (let i = 0; i < mercItems.length; i += 1) {
-          let parsedItem = this.logItem(mercItems[i]);
+        for (let item of mercItems) {
+          let parsedItem = this.logItem(item);
           parsedItem.title += " (merc)";
           let string = JSON.stringify(parsedItem);
           finalString += (string + "\n");
@@ -190,12 +229,21 @@ const MuleLogger = {
 
     // hcl = hardcore class ladder
     // sen = softcore expan nonladder
-    FileTools.writeText("mules/" + realm + "/" + me.account + "/" + me.name + "." + ( me.playertype ? "h" : "s" ) + (me.gametype ? "e" : "c" ) + ( me.ladder > 0 ? "l" : "n" ) + ".txt", finalString);
+    FileTools.writeText(
+      "mules/" + realm + "/"
+      + me.account + "/"
+      + me.name + "."
+      + ( me.playertype ? "h" : "s" )
+      + (me.gametype ? "e" : "c" )
+      + ( me.ladder > 0 ? "l" : "n" )
+      + ".txt",
+      finalString
+    );
     print("Item logging done.");
   }
 };
 
 // load configuration file and apply settings to MuleLogger, has to be after the namespace is created
-(function() {
+(function () {
   Object.assign(MuleLogger, require("./LoggerConfig", null, false));
 })();

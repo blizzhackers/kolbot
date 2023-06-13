@@ -1,9 +1,10 @@
-/* eslint-disable max-len */
 /**
 *  @filename    D2BotMuleLogger.dbj
 *  @author      kolton, theBGuy
 *  @desc        Entry script for Mulelogger.js
 *
+*  @typedef {import("./sdk/globals")}
+*  @typedef {import("./libs/systems/mulelogger/MuleLogger")}
 */
 
 include("critical.js"); // required
@@ -17,22 +18,22 @@ Starter.Config.SwitchKeyDelay = 0; // Seconds to wait before switching a used/ba
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
 // only libs we should need here as te rest of the actions are performed from default.dbj thread
-include("DropperSetup.js");
+include("systems/dropper/DropperSetup.js");
 include("systems/mulelogger/MuleLogger.js");
 
-let Controls = require("./modules/Control");
+const Controls = require("./libs/modules/Control");
 
 if (!FileTools.exists("data/" + me.profile + ".json")) {
   DataFile.create();
 }
 
 let currAcc;
-let usingDroper = isIncluded("DropperSetup.js");
+let usingDroper = isIncluded("systems/dropper/DropperSetup.js");
 let charList = [];
 let accounts = [];
 let chars = [];
 
-function parseInfo() {
+function parseInfo () {
   usingDroper && parseDropperAccounts(accounts, chars);
   
   for (let i in MuleLogger.LogAccounts) {
@@ -166,7 +167,9 @@ function locationAction (location) {
     break;
   case sdk.game.locations.CharSelect:
     // Single Player screen fix
-    if (getLocation() === sdk.game.locations.CharSelect && !Controls.CharSelectCurrentRealm.control && Controls.BottomLeftExit.click()) {
+    if (getLocation() === sdk.game.locations.CharSelect
+      && !Controls.CharSelectCurrentRealm.control
+      && Controls.BottomLeftExit.click()) {
       break;
     }
 
@@ -295,7 +298,7 @@ function locationAction (location) {
   }
 }
 
-function main() {
+function main () {
   addEventListener("copydata", Starter.receiveCopyData);
 
   while (!Starter.handle) {
