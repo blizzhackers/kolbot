@@ -609,6 +609,10 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
           }
 
           break;
+        case sdk.game.locations.LoginError:
+          Controls.LoginErrorOk.click();
+          
+          return false;
         default:
           break;
         }
@@ -1159,8 +1163,6 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
           switch (string) {
           case getLocaleString(sdk.locale.text.UsernameIncludedIllegalChars):
           case getLocaleString(sdk.locale.text.UsernameIncludedDisallowedwords):
-          case getLocaleString(sdk.locale.text.InvalidPassword):
-          case getLocaleString(5208): // Invalid account
             D2Bot.updateStatus("Invalid Account Name");
             D2Bot.printToConsole("Invalid Account Name :: " + Starter.profileInfo.account);
             D2Bot.stop(true);
@@ -1181,6 +1183,8 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
             D2Bot.stop(true);
 
             break;
+          case getLocaleString(sdk.locale.text.InvalidPassword):
+          case getLocaleString(5208): // Invalid account
           case getLocaleString(sdk.locale.text.AccountDoesNotExist):
             if (!!Starter.Config.MakeAccountOnFailure) {
               Starter.makeAccount = true;
