@@ -20,7 +20,11 @@
   };
 
   const Worker = new (function () {
-    let work = [], workLowPrio = [], self = this;
+    const self = this;
+    const work = [];
+    const workLowPrio = [];
+    /** @private */
+    this.workDisabled = false;
 
     this.push = function (newWork) {
       return work.push(newWork);
@@ -31,8 +35,9 @@
     };
 
     const checker = function (val) {
+      if (self.workDisabled) return;
       try {
-        !self.workDisabled && val.length && val.splice(0, val.length).forEach(self.work);
+        val.length && val.splice(0, val.length).forEach(self.work);
       } catch (error) {
         if (!error.message.endsWith("too much recursion")) {
           throw error;
@@ -55,7 +60,6 @@
     };
 
     /**
-     *
      * @param {function({Worker}):boolean} callback
      */
     this.runInBackground = new Proxy({ processes: {} }, {
@@ -63,13 +67,18 @@
         if (target.processes.hasOwnProperty(name)) {
           throw new Error("Process " + name + " already exists.");
         }
-        target.processes[name] = { callback: callback, running: true, name: name };
+        target.processes[name] = {
+          callback: callback,
+          running: true,
+          name: name
+        };
         let proxyCallback = function () {
-          if (target.processes[name].running) {
-            target.processes[name].running = (callback() && self.pushLowPrio(proxyCallback) > -1);
-          }
+          if (!target.processes[name]) return;
+          target.processes[name].running = callback();
           if (!target.processes[name].running) {
             delete target.processes[name];
+          } else {
+            self.pushLowPrio(proxyCallback);
           }
         };
         self.pushLowPrio(proxyCallback);
@@ -85,24 +94,36 @@
     });
 
     this.stopProcess = function (name) {
+      if (typeof self.runInBackground === "undefined"
+        || typeof self.runInBackground.processes === "undefined") {
+        return;
+      }
+      if (typeof self.runInBackground.processes[name] === "undefined") {
+        return;
+      }
       delete self.runInBackground.processes[name];
     };
 
+    /** @param {Promise<*>} promise */
     global.await = function (promise) {
-      while (delay() && !promise.stopped) {
+      while (delay(1) && !promise.stopped) {
         //
       }
-
       return promise.value;
     };
 
-    this.workDisabled = 0;
-
     global._delay = delay; // The original delay function
+
+    /**
+     * Just makes it easier to peform a delay
+     * @param {number} amount 
+     */
+    this.timeout = function (amount) {
+      return global._delay(amount);
+    };
 
     // Override the delay function, to check for background work while we wait anyway
     global.delay = function (amount) {
-
       let recursive = recursiveCheck();
       let start = getTickCount();
       amount = amount || 0;
