@@ -60,11 +60,13 @@ function main () {
   // MuleLogger handler
   if (MuleLogger.inGameCheck()) return true;
   
+  // Dropper handler
+  if (FileTools.exists("libs/systems/dropper/ItemDB.js")) {
+    include("systems/dropper/ItemDB.js");
+  }
+  
   // don't load default for dropper/mules
   if (getScript("D2BotDropper.dbj") || getScript("D2BotMule.dbj")) {
-    if (FileTools.exists("libs/systems/dropper/ItemDB.js")) {
-      include("systems/dropper/ItemDB.js");
-    }
     load("threads/AreaWatcher.js");
     
     while (me.ingame) {
