@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /**
 *  @filename    D2BotMule.dbj
 *  @author      kolton, theBGuy
@@ -27,16 +26,16 @@ Starter.Config.MakeAccountOnFailure = true;
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
 // globals needed for core gameplay
-includeCoreLibs();
+includeCoreLibs({ exclude: ["Skill.js"] });
 
 // system libs
 includeSystemLibs();
 include("systems/mulelogger/MuleLogger.js");
 include("systems/gameaction/GameAction.js");
 
-const Controls = require("./modules/Control");
-const Overrides = require("./modules/Override");
-const Worker = require("./modules/Worker");
+const Controls = require("./libs/modules/Control");
+const Overrides = require("./libs/modules/Override");
+const Worker = require("./libs/modules/Worker");
 
 /** @global */
 let master, muleMode, muleFilename, maxCharCount;
@@ -181,6 +180,7 @@ const Mule = {
       return false;
     }
 
+    includeIfNotIncluded("core/Skill.js");
     Starter.firstLogin ? (Starter.firstLogin = false) : (status = "begin");
     status !== "begin" && (status = "ready");
     Mule.statusString = "In " + (muleMode === 2 ? "anni " : muleMode === 1 ? "torch " : "") + "mule game.";
@@ -208,9 +208,7 @@ const Mule = {
       addEventListener("gameevent", gameEvent);
     }
     // Worker.runInBackground.areaWatcher = Mule.areaWatcher; // bugs for some reason, quits game then on re-join d2bot spams In mule game for ~30seconds
-    if (Worker.runInBackground.antiIdle === undefined) {
-      Worker.runInBackground.antiIdle = Mule.antiIdle;
-    }
+    Worker.runInBackground.antiIdle = Mule.antiIdle;
 
     return true;
   },
@@ -275,6 +273,7 @@ const Mule = {
   },
   
   quit: function () {
+    Worker.stopProcess("antiIdle");
     ["default.dbj", "threads/AntiIdle.js", "threads/AreaWatcher.js"].forEach(thread => {
       let script = getScript(thread);
       if (script && script.running && script.stop()) {
@@ -396,8 +395,13 @@ const Mule = {
 
     if (!Mule.clearedJunk) {
       me.getItemsEx()
-        .filter(item => item.isInInventory && Town.ignoreType(item.itemType) && (muleMode === 0 || item.classid !== sdk.items.ScrollofIdentify))
-        .forEach(item => {
+        .filter(function (item) {
+          return (item.isInInventory
+            && Town.ignoreType(item.itemType)
+            && (muleMode === 0 || item.classid !== sdk.items.ScrollofIdentify)
+          );
+        })
+        .forEach(function (item) {
           try {
             item.drop();
           } catch (e) {
@@ -407,7 +411,12 @@ const Mule = {
       Mule.clearedJunk = true; // only do this once
     }
 
-    const getItems = () => getUnits(sdk.unittype.Item).filter(i => i.distance < 20 && i.onGroundOrDropping && !Town.ignoreType(i.itemType));
+    const getItems = function () {
+      return getUnits(sdk.unittype.Item)
+        .filter(function (i) {
+          return i.distance < 20 && i.onGroundOrDropping && !Town.ignoreType(i.itemType);
+        });
+    };
 
     while (me.gameReady) {
       if (masterStatus.status === "done" || Mule.continuousMule || override) {
@@ -426,7 +435,7 @@ const Mule = {
         }
 
         // pick large items first by sorting items by size in descending order and move gheed's charm to the end of the list
-        list.sort(function(a, b) {
+        list.sort(function (a, b) {
           if (a.isGheeds && !Pickit.canPick(a)) return 1;
           if (b.isGheeds && !Pickit.canPick(b)) return -1;
 
@@ -438,7 +447,8 @@ const Mule = {
           let canFit = Storage.Inventory.CanFit(item);
 
           // Torch and Anni handling
-          if (muleMode > 0 && item.unique && [sdk.items.SmallCharm, sdk.items.LargeCharm].includes(item.classid) && !Pickit.canPick(item)) {
+          if (muleMode > 0 && item.unique
+            && [sdk.items.SmallCharm, sdk.items.LargeCharm].includes(item.classid) && !Pickit.canPick(item)) {
             let msg = item.classid === sdk.items.LargeCharm ? "Mule already has a Torch." : "Mule already has a Anni.";
             D2Bot.printToConsole(msg, sdk.colors.D2Bot.DarkGold);
             rval = "next";
@@ -665,15 +675,38 @@ function locationAction (location) {
     };
 
     if (Starter.makeAccount) {
-      ControlAction.makeAccount(info);
-      D2Bot.printToConsole("Made account: " + info.account, sdk.colors.D2Bot.DarkGold);
-      Starter.makeAccount = false;
+      if (ControlAction.makeAccount(info)) {
+        D2Bot.printToConsole("Made account: " + info.account, sdk.colors.D2Bot.DarkGold);
+        Starter.makeAccount = false;
+      } else {
+        MuleData.nextAccount();
+      }
 
       break;
     }
 
     MuleLogger.save(md5(info.realm.toLowerCase() + info.account.toLowerCase()), info.password);
     !ControlAction.loginAccount(info) && (Starter.makeAccount = true);
+
+    break;
+  case sdk.game.locations.CreateNewAccount:
+    if (Starter.makeAccount) {
+      obj = MuleData.read();
+      info = {
+        realm: muleObj.realm,
+        account: obj.account,
+        password: muleObj.accountPassword
+      };
+
+      if (ControlAction.makeAccount(info)) {
+        D2Bot.printToConsole("Made account: " + info.account, sdk.colors.D2Bot.DarkGold);
+        Starter.makeAccount = false;
+      } else {
+        MuleData.nextAccount();
+      }
+
+      break;
+    }
 
     break;
   case sdk.game.locations.LoginError:
@@ -737,7 +770,8 @@ function locationAction (location) {
     }
 
     // Can't create character, button greyed out = high likelyhood of realm down
-    if (getLocation() === sdk.game.locations.CharSelectNoChars && Controls.CharSelectCreate.disabled === sdk.game.controls.Disabled) {
+    if (getLocation() === sdk.game.locations.CharSelectNoChars
+      && Controls.CharSelectCreate.disabled === sdk.game.controls.Disabled) {
       D2Bot.updateStatus("Realm Down");
       delay(1000);
 
@@ -986,7 +1020,7 @@ function main () {
               Mule.done();
 
               return;
-              // can't fit more items, get to next character or account
+            // can't fit more items, get to next character or account
             case "next":
               Mule.next();
 
@@ -1003,7 +1037,9 @@ function main () {
           }
 
           if (Mule.continuousMule) {
-            if (Starter.Config.MaxGameTime > 0 && getTickCount() - me.gamestarttime > Time.minutes(Starter.Config.MaxGameTime) && Mule.foreverAlone()) {
+            if (Starter.Config.MaxGameTime > 0
+              && getTickCount() - me.gamestarttime > Time.minutes(Starter.Config.MaxGameTime)
+              && Mule.foreverAlone()) {
               Mule.gameRefresh();
 
               break;
