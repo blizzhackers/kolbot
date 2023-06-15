@@ -7,7 +7,17 @@
 */
 
 const MuleLogger = {
-  // configuration file loaded at bottom
+  // ~~~ DON'T TOUCH, configuration file loaded at bottom. Use LoggerConfig.js ~~~ //
+  LogGame: ["", ""], // ["gamename", "password"]
+  LogNames: true, // Put account/character name on the picture
+  LogItemLevel: true, // Add item level to the picture
+  LogEquipped: true, // include equipped items
+  LogMerc: true, // include items merc has equipped (if alive)
+  SaveScreenShot: false, // Save pictures in jpg format (saved in 'Images' folder)
+  AutoPerm: true, // override InGameTime to perm character
+  IngameTime: 0, // (180, 210) to avoid RD, increase it to (7230, 7290) for mule perming
+  LogAccounts: {},
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
   inGameCheck: function () {
     if (getScript("D2BotMuleLog.dbj") && this.LogGame[0] && me.gamename.match(this.LogGame[0], "i")) {
       print("ÿc4MuleLoggerÿc0: Logging items on " + me.account + " - " + me.name + ".");
@@ -27,7 +37,10 @@ const MuleLogger = {
       }
 
       while ((getTickCount() - me.gamestarttime) < Time.seconds(stayInGame)) {
-        me.overhead("ÿc2Log items done. ÿc4Stay in " + "ÿc4game more:ÿc0 " + Math.floor(stayInGame - (getTickCount() - me.gamestarttime) / 1000) + " sec");
+        me.overhead(
+          "ÿc2Log items done. ÿc4Stay in " + "ÿc4game more:ÿc0 "
+          + Math.floor(stayInGame - (getTickCount() - me.gamestarttime) / 1000) + " sec"
+        );
 
         delay(1000);
 
@@ -155,7 +168,15 @@ const MuleLogger = {
    */
   logChar: function (logIlvl = this.LogItemLevel, logName = this.LogNames, saveImg = this.SaveScreenShot) {
     while (!me.gameReady) {
-      delay(100);
+      delay(3);
+    }
+
+    // Dropper handler, todo figure out another way to do this
+    if (isIncluded("systems/dropper/ItemDB.js") || include("systems/dropper/ItemDB.js")) {
+      /** @typedef {import("../dropper/ItemDB")} */
+      while (!ItemDB.init(false)) {
+        delay(1000);
+      }
     }
 
     let items = me.getItemsEx();

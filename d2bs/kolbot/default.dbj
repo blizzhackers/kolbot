@@ -4,6 +4,7 @@
 *  @desc        gets executed upon gamejoin, main thread for bot
 *
 *  @typedef {import("./sdk/globals")}
+*  @typedef {import("./libs/systems/mulelogger/MuleLogger")}
 */
 js_strict(true);
 include("critical.js"); // required
@@ -56,15 +57,10 @@ function main () {
     getScript(true).stop(); // kill this thread
     return true;
   }
-  
+
   // MuleLogger handler
   if (MuleLogger.inGameCheck()) return true;
-  
-  // Dropper handler
-  if (FileTools.exists("libs/systems/dropper/ItemDB.js")) {
-    include("systems/dropper/ItemDB.js");
-  }
-  
+
   // don't load default for dropper/mules
   if (getScript("D2BotDropper.dbj") || getScript("D2BotMule.dbj")) {
     load("threads/AreaWatcher.js");
