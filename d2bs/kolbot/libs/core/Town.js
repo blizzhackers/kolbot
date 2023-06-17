@@ -368,15 +368,45 @@ const Town = {
         }
       }
 
-      // we are just trying to clear our inventory, use the closest npc
-      // what if we have unid items? Should we use cain if he is closer than the npc with scrolls?
-      // for now it won't get here with unids
-      // need to also take into account what our next task is
+      /**
+       * we are just trying to clear our inventory, use the closest npc
+       * Things to conisder:
+       * - what if we have unid items? Should we use cain if he is closer than the npc with scrolls?
+       * - what is our next task?
+       * - would it be faster to change acts and use the closest npc?
+       */
       if (justUseClosest) {
+        let choices = new Set();
         let npcs = Town.tasks.get(me.act);
-        npc = getUnits(sdk.unittype.NPC)
-          .sort((a, b) => a.distance - b.distance)
-          .find(unit => [npcs.Shop, npcs.Repair].includes(unit.name.toLowerCase()));
+        let _needPots = me.needPotions();
+        let _needRepair = Town.needRepair().length > 0;
+        if (_needPots && _needRepair) {
+          if (me.act === 2) {
+            choices = new Set([npcs.Key, npcs.Repair]);
+          } else {
+            choices = new Set([npcs.Key, npcs.Repair, npcs.Gamble, npcs.Shop]);
+            // todo - handle when we are in normal and current act < 4
+            // if we are going to go to a4 for potions anyway we should go ahead and change act
+          }
+        } else if (!_needPots && _needRepair) {
+          choices.add(npcs.Repair);
+        } else if (!_needPots && !_needRepair) {
+          choices = new Set([npcs.Key, npcs.Repair, npcs.Gamble, npcs.Shop]);
+        }
+        if (choices.size) {
+          console.log("closest npc choices", choices);
+          wantedNpc = Array.from(choices.values()).sort(function (a, b) {
+            return Town.getDistance(a) - Town.getDistance(b);
+          }).first();
+          console.debug("Choosing closest npc", wantedNpc);
+        }
+      }
+
+      if (task === "Heal" && me.act === 2) {
+        // lets see if we are closer to Atma than Fara
+        if (Town.getDistance(NPC.Atma) < Town.getDistance(NPC.Fara)) {
+          wantedNpc = NPC.Atma;
+        }
       }
 
       if (!npc && wantedNpc !== "undefined") {
@@ -412,6 +442,10 @@ const Town = {
 
         break;
       case "Heal":
+        if (String.isEqual(npc.name, NPC.Atma)) {
+          // prevent crash due to atma not being a shoppable npc
+          me.cancelUIFlags();
+        }
         break;
       }
 
@@ -2267,7 +2301,8 @@ const Town = {
     !this.act[me.act - 1].initialized && this.initialize();
 
     // Act 5 wp->portalspot override - ActMap.cpp crash
-    if (me.act === 5 && spot === "portalspot" && getDistance(me.x, me.y, 5113, 5068) <= 8) {
+    if (me.act === 5 && spot === "portalspot"
+      && getDistance(me.x, me.y, 5113, 5068) <= 8) {
       return [5098, 5018].distance;
     }
 
