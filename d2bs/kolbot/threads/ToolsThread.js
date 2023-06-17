@@ -24,7 +24,7 @@ new Overrides.Override(Attack, Attack.getNearestMonster, function (orignal) {
   return (monster ? " to " + monster.name : "");
 }).apply();
 
-function main() {
+function main () {
   // getUnit test
   getUnit(-1) === null && console.warn("getUnit bug detected");
   
@@ -284,6 +284,13 @@ function main() {
         console.debug("Quiting");
         quitFlag = true;
 
+        break;
+      case "reload":
+        console.log("ÿc8ToolsThread :: " + sdk.colors.Red + "Stopping threads and waiting 5 seconds to restart");
+        Common.Toolsthread.stopDefault() && delay(Time.seconds(5));
+        console.log("Starting default.dbj");
+        load("default.dbj");
+        
         break;
       case "datadump":
         console.log("ÿc8Systems Data Dump: ÿc2Start");
