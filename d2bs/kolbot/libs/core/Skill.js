@@ -64,6 +64,59 @@
       }
     },
 
+    /**
+     * @description Get items with charges
+     * @returns {boolean}
+     */
+    getCharges: function () {
+      Skill.charges = [];
+      /**
+      * @typedef {Object} Charge
+      * @property {number} skill
+      * @property {number} level
+      * @property {number} charges
+      * @property {number} maxcharges
+      */
+      /**
+      * @constructor
+      * @param {Charge} charge
+      * @param {ItemUnit} unit
+      */
+      function ChargedSkill (charge, unit) {
+        this.skill = charge.skill;
+        this.level = charge.level;
+        this.charges = charge.charges;
+        this.maxcharges = charge.maxcharges;
+        this.gid = unit.gid;
+        this.unit = copyUnit(unit);
+      }
+
+      let item = me.getItem(-1, sdk.items.mode.Equipped);
+
+      if (item) {
+        do {
+          let stats = item.getStat(-2);
+          if (!stats.hasOwnProperty(sdk.stats.ChargedSkill)) continue;
+
+          /** @type {Array<Charge> | Charge} */
+          let charges = stats[sdk.stats.ChargedSkill];
+          // simplfy calc by making it an array if it isn't already
+          if (!(charges instanceof Array)) charges = [charges];
+
+          for (let charge of charges) {
+            // handle wierd case were we get undefined charge
+            if (!charge || !charge.skill) continue;
+            if (Skill.charges.find(c => c.gid === item.gid && c.skill === charge.skill)) {
+              continue;
+            }
+            Skill.charges.push(new ChargedSkill(charge, item));
+          }
+        } while (item.getNext());
+      }
+
+      return true;
+    },
+
     // initialize our skill data
     init: function () {
       // reset check values
@@ -74,8 +127,11 @@
           _SkillData.get(i).reset();
         }
       }
-      // redo cta check
-      Precast.checkCTA();
+      if (me.expansion) {
+        // redo cta check
+        Precast.checkCTA();
+        Skill.getCharges();
+      }
 
       switch (me.classid) {
       case sdk.player.class.Amazon:
@@ -111,6 +167,7 @@
         // maybe store gid of shield, would still require doing me.getItem(-1, 1, gid) everytime we wanted to cast but that's still less involved
         // than getting every item we have and finding shield, for now keeping this. Checks during init if we have a shield or not
         Precast.skills.holyShield.canUse = me.usingShield();
+        Precast.skills.holyShield.duration = this.getDuration(sdk.skills.HolyShield);
 
         break;
       case sdk.player.class.Barbarian:
@@ -478,6 +535,33 @@
       }
 
       return true;
+    },
+
+    /**
+     * Basic use of charged skill casting
+     * @param {number} skillId 
+     * @param {Unit | { x: number, y: number }} unit 
+     * @returns {boolean}
+     */
+    castCharges: function (skillId, unit) {
+      if (!Skill.charges) return false;
+      let charge = Skill.charges.find(c => c.skill === skillId);
+      if (!charge) return false;
+      let item = me.getItem(-1, sdk.items.mode.Equipped, charge.gid);
+      if (!item) return false;
+      if (!unit) unit = me;
+      const weaponSwitch = me.weaponswitch;
+      if ([sdk.body.RightArmSecondary, sdk.body.RightArmSecondary].includes(item.bodylocation)) {
+        me.switchWeapons(weaponSwitch ^ 1);
+      }
+      try {
+        return item.castChargedSkill(skillId, unit.x, unit.y);
+      } finally {
+        if (weaponSwitch !== me.weaponswitch) {
+          me.switchWeapons(weaponSwitch);
+        }
+        charge.charges--;
+      }
     },
   };
 

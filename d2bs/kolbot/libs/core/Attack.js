@@ -3,22 +3,23 @@
  *  @author      kolton, theBGuy
  *  @desc        handle player attacks
  *
- *  @typedef {import("../../sdk/globals")}
  */
 
-/**
- * Attack
- * @global
- */
+
 const Attack = {
   infinity: false,
   auradin: false,
   monsterObjects: [
-    sdk.monsters.Turret1, sdk.monsters.Turret2, sdk.monsters.Turret3, sdk.monsters.MummyGenerator,
-    sdk.monsters.GargoyleTrap, sdk.monsters.LightningSpire, sdk.monsters.FireTower,
-    sdk.monsters.BarricadeDoor1, sdk.monsters.BarricadeDoor2, sdk.monsters.BarricadeWall1, sdk.monsters.BarricadeWall2,
-    sdk.monsters.CatapultS, sdk.monsters.CatapultE, sdk.monsters.CatapultSiege, sdk.monsters.CatapultW,
-    sdk.monsters.BarricadeTower, sdk.monsters.PrisonDoor, sdk.monsters.DiablosBoneCage, sdk.monsters.Hut,
+    sdk.monsters.Turret1, sdk.monsters.Turret2,
+    sdk.monsters.Turret3, sdk.monsters.MummyGenerator,
+    sdk.monsters.GargoyleTrap, sdk.monsters.LightningSpire,
+    sdk.monsters.FireTower, sdk.monsters.BarricadeDoor1,
+    sdk.monsters.BarricadeDoor2, sdk.monsters.BarricadeWall1,
+    sdk.monsters.BarricadeWall2, sdk.monsters.CatapultS,
+    sdk.monsters.CatapultE, sdk.monsters.CatapultSiege,
+    sdk.monsters.CatapultW, sdk.monsters.BarricadeTower,
+    sdk.monsters.PrisonDoor, sdk.monsters.DiablosBoneCage,
+    sdk.monsters.DiablosBoneCage2, sdk.monsters.Hut,
   ],
   Result: {
     FAILED: 0,
@@ -41,7 +42,10 @@ const Attack = {
 
     if (Config.AttackSkill[1] < 0 || Config.AttackSkill[3] < 0) {
       showConsole();
-      console.warn("ÿc1Bad attack config. Don't expect your bot to attack.");
+      console.warn(
+        "ÿc1Bad attack config. Don't expect your bot to attack." + "\n"
+        + "ÿc0AttackSkills: ", Config.AttackSkill
+      );
     }
 
     this.getPrimarySlot();
@@ -90,7 +94,7 @@ const Attack = {
         Config.PrimarySlot = sdk.player.slot.Main;
       } else {
         // Always start on main-hand
-        me.weaponswitch !== sdk.player.slot.Main && me.switchWeapons(sdk.player.slot.Main);
+        me.switchWeapons(sdk.player.slot.Main);
         // have cta
         if ((Precast.haveCTA > -1) || Precast.checkCTA()) {
           // have item on non-cta slot - set non-cta slot as primary
@@ -152,66 +156,29 @@ const Attack = {
   },
 
   /**
-   * @depreciated
-   * @description Get items with charges - isn't used anywhere
-   * @returns {boolean}
-   */
-  getCharges: function () {
-    !Skill.charges && (Skill.charges = []);
-
-    let item = me.getItem(-1, sdk.items.mode.Equipped);
-
-    if (item) {
-      do {
-        let stats = item.getStat(-2);
-
-        if (stats.hasOwnProperty(sdk.stats.ChargedSkill)) {
-          if (stats[sdk.stats.ChargedSkill] instanceof Array) {
-            for (let i = 0; i < stats[sdk.stats.ChargedSkill].length; i += 1) {
-              if (stats[sdk.stats.ChargedSkill][i] !== undefined) {
-                Skill.charges.push({
-                  unit: copyUnit(item),
-                  gid: item.gid,
-                  skill: stats[sdk.stats.ChargedSkill][i].skill,
-                  level: stats[sdk.stats.ChargedSkill][i].level,
-                  charges: stats[sdk.stats.ChargedSkill][i].charges,
-                  maxcharges: stats[sdk.stats.ChargedSkill][i].maxcharges
-                });
-              }
-            }
-          } else {
-            Skill.charges.push({
-              unit: copyUnit(item),
-              gid: item.gid,
-              skill: stats[sdk.stats.ChargedSkill].skill,
-              level: stats[sdk.stats.ChargedSkill].level,
-              charges: stats[sdk.stats.ChargedSkill].charges,
-              maxcharges: stats[sdk.stats.ChargedSkill].maxcharges
-            });
-          }
-        }
-      } while (item.getNext());
-    }
-
-    return true;
-  },
-
-  /**
    * @description Check if player or his merc are using Infinity, and adjust resistance checks based on that
    * @returns {boolean}
    */
   checkInfinity: function () {
-    if (me.classic) return false;
+    // don't check if classic or under 63 - not possibile to either equip or have merc use
+    if (me.classic || me.charlvl < 63) return false;
 
-    let merc;
     // check if we have a merc and they aren't dead
-    Config.UseMerc && !me.mercrevivecost && (merc = Misc.poll(() => me.getMerc(), 1000, 100));
-
-    // Check merc infinity
-    !!merc && (Attack.infinity = merc.checkItem({ name: sdk.locale.items.Infinity }).have);
+    if (Config.UseMerc && me.mercrevivecost === 0) {
+      let merc = Misc.poll(function () {
+        return me.getMerc();
+      }, 1000, 100);
+      // only merc who can use it
+      if (merc && merc.classid === sdk.mercs.Guard) {
+        Attack.infinity = merc.checkItem({ name: sdk.locale.items.Infinity }).have;
+        if (Attack.infinity) return true;
+      }
+    }
 
     // Check player infinity - only check if merc doesn't have
-    !Attack.infinity && (Attack.infinity = me.checkItem({ name: sdk.locale.items.Infinity, equipped: true }).have);
+    if (!Attack.infinity) {
+      Attack.infinity = me.checkItem({ name: sdk.locale.items.Infinity, equipped: true }).have;
+    }
 
     return Attack.infinity;
   },
@@ -221,9 +188,13 @@ const Attack = {
    * @returns {boolean}
    */
   checkAuradin: function () {
+    // dragon lvl 61, dream lvl 65, hoj lvl 67, ice lvl 65
+    if (me.charlvl < 61) return false;
     Attack.auradin = me.haveSome([
-      { name: sdk.locale.items.Dragon, equipped: true }, { name: sdk.locale.items.Dream, equipped: true },
-      { name: sdk.locale.items.HandofJustice, equipped: true }, { name: sdk.locale.items.Ice, equipped: true },
+      { name: sdk.locale.items.Dragon, equipped: true },
+      { name: sdk.locale.items.Dream, equipped: true },
+      { name: sdk.locale.items.HandofJustice, equipped: true },
+      { name: sdk.locale.items.Ice, equipped: true },
     ]);
   
     return Attack.auradin;
@@ -236,8 +207,13 @@ const Attack = {
    */
   canTeleStomp: function (unit) {
     if (!unit || !unit.attackable) return false;
-    return Config.TeleStomp && Config.UseMerc && Pather.canTeleport()
-      && Attack.checkResist(unit, "physical") && !!me.getMerc() && Attack.validSpot(unit.x, unit.y);
+    return (
+      Config.TeleStomp && Config.UseMerc
+      && Pather.canTeleport()
+      && Attack.checkResist(unit, "physical")
+      && !!me.getMerc()
+      && Attack.validSpot(unit.x, unit.y)
+    );
   },
 
   /**
@@ -247,7 +223,9 @@ const Attack = {
    */
   kill: function (classId) {
     if (!classId || Config.AttackSkill[1] < 0) return false;
-    let target = (typeof classId === "object" ? classId : Misc.poll(() => Game.getMonster(classId), 2000, 100));
+    let target = (typeof classId === "object"
+      ? classId
+      : Misc.poll(() => Game.getMonster(classId), 2000, 100));
 
     if (!target) {
       console.warn("Attack.kill: Target not found");
@@ -348,7 +326,9 @@ const Attack = {
    */
   hurt: function (classId, percent) {
     if (!classId || !percent) return false;
-    let target = (typeof classId === "object" ? classId : Misc.poll(() => Game.getMonster(classId), 2000, 100));
+    let target = (typeof classId === "object"
+      ? classId
+      : Misc.poll(() => Game.getMonster(classId), 2000, 100));
 
     if (!target) {
       console.warn("Attack.hurt: Target not found");
@@ -396,7 +376,7 @@ const Attack = {
 
   /**
    * @description Determine scariness of monster for monster sorting
-   * @param {Unit} unit 
+   * @param {Monster} unit 
    * @returns {number} scariness
    */
   getScarinessLevel: function (unit) {
@@ -434,7 +414,7 @@ const Attack = {
    * @param {number} [range=25] 
    * @param {number} [spectype=0] 
    * @param {number | Unit} [bossId] 
-   * @param {Function} [sortfunc] 
+   * @param {(a: T, b: T) => number} [sortfunc] 
    * @param {boolean} [pickit] 
    * @returns {boolean}
    * @todo change to passing an object
@@ -960,15 +940,14 @@ const Attack = {
     if (obj) {
       if (obj[area] === undefined) {
         obj[area] = {
-          runs: 0,
-          averageUniques: 0
+          runs: 1,
+          averageUniques: (Attack.uniques).toFixed(4)
         };
+      } else {
+        let { averageUniques, runs } = obj[area];
+        obj[area].averageUniques = ((averageUniques * runs + Attack.uniques) / (runs + 1)).toFixed(4);
+        obj[area].runs += 1;
       }
-
-      obj[area].averageUniques = (
-        (obj[area].averageUniques * obj[area].runs + Attack.uniques) / (obj[area].runs + 1)
-      ).toFixed(4);
-      obj[area].runs += 1;
 
       FileAction.write("statistics.json", JSON.stringify(obj));
     }
@@ -983,7 +962,7 @@ const Attack = {
    * @returns {boolean}
    */
   clearLevel: function (spectype = 0) {
-    function RoomSort(a, b) {
+    function RoomSort (a, b) {
       return getDistance(myRoom[0], myRoom[1], a[0], a[1]) - getDistance(myRoom[0], myRoom[1], b[0], b[1]);
     }
 
@@ -1227,7 +1206,8 @@ const Attack = {
 
     if (unit) {
       do {
-        if (unit.name && getDistance(unit, x, y) <= range && ids.includes(unit.name.toLowerCase())) {
+        if (unit.name && getDistance(unit, x, y) <= range
+          && ids.includes(unit.name.toLowerCase())) {
           list.push(copyUnit(unit));
         }
       } while (unit.getNext());
