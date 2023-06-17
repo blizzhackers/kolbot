@@ -366,6 +366,8 @@ const Town = {
           me.cancelUIFlags();
           npc = null;
         }
+      } else {
+        me.cancelUIFlags();
       }
 
       /**
