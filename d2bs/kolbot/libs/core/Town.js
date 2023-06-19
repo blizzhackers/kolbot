@@ -2327,31 +2327,45 @@ const Town = {
     // act 5 static paths, ActMap.cpp seems to have issues with A5
     // should other towns have static paths?
     if (me.act === 5) {
+      /** @type {Array<[number, number]>} */
       let path = [];
       let returnWhenDone = false;
       
       // Act 5 wp->portalspot override - ActMap.cpp crash
       if (spot === "portalspot" && getDistance(me.x, me.y, 5113, 5068) <= 8) {
-        path = [5113, 5068, 5108, 5051, 5106, 5046, 5104, 5041, 5102, 5027, 5098, 5018];
+        path = [[5113, 5068], [5108, 5051], [5106, 5046], [5104, 5041], [5102, 5027], [5098, 5018]];
         returnWhenDone = true;
       }
 
       if (["stash", "waypoint"].includes(spot)) {
         // malah -> stash/wp
         if (getDistance(me.x, me.y, 5081, 5031) <= 10) {
-          path = [5089, 5029, 5093, 5021, 5101, 5027, 5107, 5043, 5108, 5052];
+          path = [[5089, 5029], [5093, 5021], [5101, 5027], [5107, 5043], [5108, 5052]];
         } else if (getDistance(me.x, me.y, 5099, 5020) <= 13) {
           // portalspot -> stash/wp
-          path = [5102, 5031, 5107, 5042, 5108, 5052];
+          path = [[5102, 5031], [5107, 5042], [5108, 5052]];
         }
       }
 
       if (path.length) {
-        for (let i = 0; i < path.length; i += 2) {
-          Pather.walkTo(path[i], path[i + 1]);
-        }
+        path.forEach(function (node) {
+          Pather.walkTo(node[0], node[1]);
+        });
 
         if (returnWhenDone) return true;
+      }
+    } else if (me.act === 2 && me.y < 5049 && !String.isEqual(spot, NPC.Atma)) {
+      // we are inside the building, if Atma is blocking the entrance we need the side door
+      let atma = Game.getNPC(NPC.Atma);
+      // console.debug("atma", atma);
+      // todo - might need to consider her targetx/y coords as well
+      if (atma && (atma.x === 5136 || atma.x === 5137)
+        && (atma.y >= 5048 && atma.y <= 5050)) {
+        // yup dumb lady is blocking the door, take side door
+        [[5140, 5038], [5148, 5031], [5154, 5025], [5161, 5030]].forEach(function (node) {
+          Pather.walkTo(node[0], node[1]);
+        });
+        return true;
       }
     }
 
@@ -2376,8 +2390,10 @@ const Town = {
     let townSpot;
     let longRange = (!Skill.haveTK && spot === "waypoint");
     let tkRange = (Skill.haveTK && allowTK && ["stash", "portalspot", "waypoint"].includes(spot));
+    const npcSpot = Object.values(NPC).includes(spot.toLowerCase());
 
-    if (!this.act[me.act - 1].hasOwnProperty("spot") || !this.act[me.act - 1].spot.hasOwnProperty(spot)) {
+    if (!this.act[me.act - 1].hasOwnProperty("spot")
+      || !this.act[me.act - 1].spot.hasOwnProperty(spot)) {
       return false;
     }
 
@@ -2396,23 +2412,24 @@ const Town = {
     }
 
     for (let i = 0; i < townSpot.length; i += 2) {
-      //console.debug("moveToSpot: " + spot + " from " + me.x + ", " + me.y);
+      // console.debug("moveToSpot: " + spot + " from " + me.x + ", " + me.y);
 
       if (tkRange) {
         Pather.moveNear(townSpot[0], townSpot[1], 19);
       } else if (getDistance(me, townSpot[i], townSpot[i + 1]) > 2) {
+        if (npcSpot && Game.getNPC(spot)) return true;
         Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, true);
       }
 
       switch (spot) {
       case "stash":
-        if (!!Game.getObject(sdk.objects.Stash)) {
+        if (Game.getObject(sdk.objects.Stash)) {
           return true;
         }
 
         break;
       case "palace":
-        if (!!Game.getNPC(NPC.Jerhyn)) {
+        if (Game.getNPC(NPC.Jerhyn)) {
           return true;
         }
 
@@ -2430,14 +2447,14 @@ const Town = {
         break;
       case "waypoint":
         let wp = Game.getObject("waypoint");
-        if (!!wp) {
+        if (wp) {
           !Skill.haveTK && wp.distance > 5 && Pather.moveToUnit(wp);
           return true;
         }
 
         break;
       default:
-        if (!!Game.getNPC(spot)) {
+        if (Game.getNPC(spot)) {
           return true;
         }
 
