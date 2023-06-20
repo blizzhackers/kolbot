@@ -11,11 +11,16 @@
  * @todo fix the max-len warnings + redo majority of this file
  */
 const Item = {
+  /** @param {number} quality */
   qualityToName: function (quality) {
     let qualNames = ["", "lowquality", "normal", "superior", "magic", "set", "rare", "unique", "crafted"];
     return qualNames[quality];
   },
 
+  /**
+   * @param {ItemUnit} unit 
+   * @param {boolean} [type] 
+   */
   color: function (unit, type) {
     type === undefined && (type = true);
 
@@ -50,10 +55,12 @@ const Item = {
     return "ÿc0";
   },
 
+  /** @param {ItemUnit} item */
   hasTier: function (item) {
     return Config.AutoEquip && NTIP.GetTier(item) > 0;
   },
 
+  /** @param {ItemUnit} item */
   canEquip: function (item) {
     // Not an item or unid
     if (!item || item.type !== sdk.unittype.Item || !item.identified) return false;
@@ -65,7 +72,12 @@ const Item = {
     return true;
   },
 
-  // Equips an item and throws away the old equipped item
+  /**
+   * Equips an item and throws away the old equipped item
+   * @param {ItemUnit} item 
+   * @param {number} bodyLoc 
+   * @returns {boolean}
+   */
   equip: function (item, bodyLoc) {
     if (!this.canEquip(item)) return false;
 
@@ -97,7 +109,7 @@ const Item = {
   },
 
   getEquippedItem: function (bodyLoc) {
-    let item = me.getItem();
+    let item = me.getItem(-1, sdk.items.mode.Equipped);
 
     if (item) {
       do {
@@ -117,87 +129,27 @@ const Item = {
     };
   },
 
+  /** @param {ItemUnit} item */
   getBodyLoc: function (item) {
-    let bodyLoc;
+    if (!item) return [-1];
+    let bodyLoc = item.getBodyLoc();
 
-    switch (item.itemType) {
-    case sdk.items.type.Shield:
-    case sdk.items.type.AuricShields:
-    case sdk.items.type.VoodooHeads:
-    case sdk.items.type.BowQuiver:
-    case sdk.items.type.CrossbowQuiver:
-      bodyLoc = sdk.body.LeftArm;
-
-      break;
-    case sdk.items.type.Armor:
-      bodyLoc = sdk.body.Armor;
-
-      break;
-    case sdk.items.type.Ring:
-      bodyLoc = [sdk.body.RingRight, sdk.body.RingLeft];
-
-      break;
-    case sdk.items.type.Amulet:
-      bodyLoc = sdk.body.Neck;
-
-      break;
-    case sdk.items.type.Boots:
-      bodyLoc = sdk.body.Feet;
-
-      break;
-    case sdk.items.type.Gloves:
-      bodyLoc = sdk.body.Gloves;
-
-      break;
-    case sdk.items.type.Belt:
-      bodyLoc = sdk.body.Belt;
-
-      break;
-    case sdk.items.type.Helm:
-    case sdk.items.type.PrimalHelm:
-    case sdk.items.type.Circlet:
-    case sdk.items.type.Pelt:
-      bodyLoc = sdk.body.Head;
-
-      break;
-    case sdk.items.type.Scepter:
-    case sdk.items.type.Wand:
-    case sdk.items.type.Staff:
-    case sdk.items.type.Bow:
-    case sdk.items.type.Axe:
-    case sdk.items.type.Club:
-    case sdk.items.type.Sword:
-    case sdk.items.type.Hammer:
-    case sdk.items.type.Knife:
-    case sdk.items.type.Spear:
-    case sdk.items.type.Polearm:
-    case sdk.items.type.Crossbow:
-    case sdk.items.type.Mace:
-    case sdk.items.type.ThrowingKnife:
-    case sdk.items.type.ThrowingAxe:
-    case sdk.items.type.Javelin:
-    case sdk.items.type.Orb:
-    case sdk.items.type.AmazonBow:
-    case sdk.items.type.AmazonSpear:
-    case sdk.items.type.AmazonJavelin:
-    case sdk.items.type.MissilePotion:
-      bodyLoc = me.barbarian ? [sdk.body.RightArm, sdk.body.LeftArm] : sdk.body.RightArm;
-
-      break;
-    case sdk.items.type.HandtoHand:
-    case sdk.items.type.AssassinClaw:
-      bodyLoc = me.assassin ? [sdk.body.RightArm, sdk.body.LeftArm] : sdk.body.RightArm;
-
-      break;
-    default:
-      return false;
+    if (bodyLoc.first() === sdk.body.RightArm) {
+      if (me.barbarian) {
+        if (!item.strictlyTwoHanded) {
+          return [sdk.body.RightArm, sdk.body.LeftArm];
+        }
+      } else if (me.assassin) {
+        if ([sdk.items.type.HandtoHand, sdk.items.type.AssassinClaw].includes(item.itemType)) {
+          return [sdk.body.RightArm, sdk.body.LeftArm];
+        }
+      }
     }
-
-    !Array.isArray(bodyLoc) && (bodyLoc = [bodyLoc]);
 
     return bodyLoc;
   },
 
+  /** @param {ItemUnit} item */
   autoEquipCheck: function (item) {
     if (!Config.AutoEquip) return true;
 
@@ -224,58 +176,54 @@ const Item = {
   autoEquip: function () {
     if (!Config.AutoEquip) return true;
 
-    let items = me.findItems(-1, sdk.items.mode.inStorage);
-
-    if (!items) return false;
-
-    function sortEq(a, b) {
+    function sortEq (a, b) {
       if (Item.canEquip(a)) return -1;
       if (Item.canEquip(b)) return 1;
 
       return 0;
     }
 
+    let items = me.getItemsEx(-1, sdk.items.mode.inStorage)
+      .filter(function (item) {
+        return NTIP.GetTier(item) > 0;
+      });
+    if (!items.length) return false;
+
     me.cancel();
-
-    // Remove items without tier
-    for (let i = 0; i < items.length; i += 1) {
-      if (NTIP.GetTier(items[i]) === 0) {
-        items.splice(i, 1);
-
-        i -= 1;
-      }
-    }
 
     while (items.length > 0) {
       items.sort(sortEq);
 
       let tier = NTIP.GetTier(items[0]);
+      if ((tier <= 0 || !items[0].isInStorage) && items.shift()) {
+        continue;
+      }
       let bodyLoc = this.getBodyLoc(items[0]);
 
-      if (tier > 0 && bodyLoc) {
-        for (let j = 0; j < bodyLoc.length; j += 1) {
-          // khalim's will adjustment
-          const equippedItem = this.getEquippedItem(bodyLoc[j]);
-          if (items[0].isInStorage
-            && tier > equippedItem.tier && equippedItem.classid !== sdk.items.quest.KhalimsWill) {
-            if (!items[0].identified) {
-              let tome = me.findItem(sdk.items.TomeofIdentify, sdk.items.mode.inStorage, sdk.storage.Inventory);
+      for (let loc of bodyLoc) {
+        // khalim's will adjustment
+        const equippedItem = this.getEquippedItem(loc);
+        if (equippedItem.classid === sdk.items.quest.KhalimsWill) {
+          continue;
+        }
+        if (tier > equippedItem.tier) {
+          if (!items[0].identified) {
+            let tome = me.getTome(sdk.items.TomeofIdentify);
 
-              if (tome && tome.getStat(sdk.stats.Quantity) > 0) {
-                items[0].isInStash && Town.openStash();
-                Town.identifyItem(items[0], tome);
-              }
+            if (tome && tome.getStat(sdk.stats.Quantity) > 0) {
+              items[0].isInStash && Town.openStash();
+              Town.identifyItem(items[0], tome);
             }
-
-            let gid = items[0].gid;
-            console.log(items[0].name);
-
-            if (this.equip(items[0], bodyLoc[j])) {
-              Item.logItem("Equipped", me.getItem(-1, -1, gid));
-            }
-
-            break;
           }
+
+          let gid = items[0].gid;
+          console.log(items[0].name);
+
+          if (this.equip(items[0], loc)) {
+            Item.logItem("Equipped", me.getItem(-1, -1, gid));
+          }
+
+          break;
         }
       }
 
@@ -285,6 +233,11 @@ const Item = {
     return true;
   },
 
+  /**
+   * @param {ItemUnit} unit 
+   * @param {boolean} logILvl 
+   * @returns {string}
+   */
   getItemDesc: function (unit, logILvl = true) {
     let stringColor = "";
     let desc = unit.description;
@@ -325,6 +278,7 @@ const Item = {
     return desc;
   },
 
+  /** @param {ItemUnit} unit */
   getItemCode: function (unit) {
     if (unit === undefined) return "";
     
@@ -408,18 +362,26 @@ const Item = {
 
     if (!code) {
       // Tiara/Diadem
-      code = ["ci2", "ci3"].includes(unit.code) ? unit.code : (getBaseStat("items", unit.classid, "normcode") || unit.code);
+      code = ["ci2", "ci3"].includes(unit.code)
+        ? unit.code
+        : (getBaseStat("items", unit.classid, "normcode") || unit.code);
       code = code.replace(" ", "");
-      [sdk.items.type.Ring, sdk.items.type.Amulet, sdk.items.type.Jewel, sdk.items.type.SmallCharm, sdk.items.type.LargeCharm, sdk.items.type.GrandCharm].includes(unit.itemType) && (code += (unit.gfx + 1));
+      [
+        sdk.items.type.Ring, sdk.items.type.Amulet,
+        sdk.items.type.Jewel, sdk.items.type.SmallCharm,
+        sdk.items.type.LargeCharm, sdk.items.type.GrandCharm
+      ].includes(unit.itemType) && (code += (unit.gfx + 1));
     }
 
     return code;
   },
 
+  /** @param {ItemUnit} unit */
   getItemSockets: function (unit) {
     let code;
     let sockets = unit.sockets;
     let subItems = unit.getItemsEx();
+    /** @type {ItemUnit[]} */
     let tempArray = [];
 
     if (subItems.length) {
@@ -470,7 +432,11 @@ const Item = {
       if (tempArray[i]) {
         code = tempArray[i].code;
 
-        if ([sdk.items.type.Ring, sdk.items.type.Amulet, sdk.items.type.Jewel, sdk.items.type.SmallCharm, sdk.items.type.LargeCharm, sdk.items.type.GrandCharm].includes(tempArray[i].itemType)) {
+        if ([
+          sdk.items.type.Ring, sdk.items.type.Amulet,
+          sdk.items.type.Jewel, sdk.items.type.SmallCharm,
+          sdk.items.type.LargeCharm, sdk.items.type.GrandCharm
+        ].includes(tempArray[i].itemType)) {
           code += (tempArray[i].gfx + 1);
         }
       } else {
@@ -485,6 +451,11 @@ const Item = {
 
   useItemLog: true, // Might be a bit dirty
 
+  /**
+   * @param {string} action 
+   * @param {ItemUnit} unit 
+   * @param {string} text 
+   */
   logger: function (action, unit, text) {
     if (!Config.ItemInfo || !this.useItemLog) return false;
 
@@ -521,10 +492,19 @@ const Item = {
       break;
     }
 
-    return FileAction.read("logs/ItemLog.txt", dateString + " <" + me.profile + "> <" + action + "> (" + Item.qualityToName(unit.quality) + ") " + desc + (text ? " {" + text + "}" : "") + "\n");
+    return FileAction.append(
+      "logs/ItemLog.txt",
+      dateString + " <" + me.profile + "> <" + action + "> (" + Item.qualityToName(unit.quality) + ") "
+      + desc + (text ? " {" + text + "}" : "") + "\n"
+    );
   },
 
-  // Log kept item stats in the manager.
+  /**
+   * Log kept item stats in the manager.
+   * @param {string} action 
+   * @param {ItemUnit} unit 
+   * @param {string} keptLine 
+   */
   logItem: function (action, unit, keptLine) {
     if (!this.useItemLog) return false;
     if (!Config.LogKeys && ["pk1", "pk2", "pk3"].includes(unit.code)) return false;
@@ -579,15 +559,26 @@ const Item = {
     return true;
   },
 
-  // skip low items: MuleLogger
+  /**
+   * skip low items: MuleLogger
+   * @param {number} id 
+   */
   skipItem: function (id) {
     return [
-      sdk.items.HandAxe, sdk.items.Wand, sdk.items.Club, sdk.items.ShortSword, sdk.items.Javelin, sdk.items.ShortStaff, sdk.items.Katar,
-      sdk.items.Buckler, sdk.items.StaminaPotion, sdk.items.AntidotePotion, sdk.items.RejuvenationPotion, sdk.items.FullRejuvenationPotion,
-      sdk.items.ThawingPotion, sdk.items.TomeofTownPortal, sdk.items.TomeofIdentify, sdk.items.ScrollofIdentify, sdk.items.ScrollofTownPortal,
-      sdk.items.Key, sdk.items.MinorHealingPotion, sdk.items.LightHealingPotion, sdk.items.HealingPotion, sdk.items.GreaterHealingPotion,
-      sdk.items.SuperHealingPotion, sdk.items.MinorManaPotion, sdk.items.LightManaPotion, sdk.items.ManaPotion, sdk.items.GreaterManaPotion,
-      sdk.items.SuperManaPotion
+      sdk.items.HandAxe, sdk.items.Wand, sdk.items.Club,
+      sdk.items.ShortSword, sdk.items.Javelin,
+      sdk.items.ShortStaff, sdk.items.Katar,
+      sdk.items.Buckler, sdk.items.StaminaPotion,
+      sdk.items.AntidotePotion, sdk.items.RejuvenationPotion,
+      sdk.items.FullRejuvenationPotion,
+      sdk.items.ThawingPotion, sdk.items.TomeofTownPortal,
+      sdk.items.TomeofIdentify, sdk.items.ScrollofIdentify,
+      sdk.items.ScrollofTownPortal, sdk.items.Key,
+      sdk.items.MinorHealingPotion, sdk.items.LightHealingPotion,
+      sdk.items.HealingPotion, sdk.items.GreaterHealingPotion,
+      sdk.items.SuperHealingPotion, sdk.items.MinorManaPotion,
+      sdk.items.LightManaPotion, sdk.items.ManaPotion,
+      sdk.items.GreaterManaPotion, sdk.items.SuperManaPotion
     ].includes(id);
   },
 };
