@@ -1045,14 +1045,16 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
         return;
       }
 
-      let obj = JSON.parse(msg);
+      let obj = null;
 
       switch (mode) {
       case 1: // JoinInfo
+        obj = JSON.parse(msg);
         Object.assign(Starter.joinInfo, obj);
 
         break;
       case 2: // Game info
+        obj = JSON.parse(msg);
         Object.assign(Starter.gameInfo, obj);
 
         break;
@@ -1066,6 +1068,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
         }
 
         if (Starter.gameInfo.hasOwnProperty("gameName")) {
+          obj = JSON.parse(msg);
           console.debug("Recieved Game Request :: ", obj.profile);
 
           if ([sdk.game.profiletype.TcpIpHost, sdk.game.profiletype.TcpIpJoin].includes(Profile().type)) {
@@ -1096,11 +1099,13 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
         break;
       case 61732: // Cached info retreival
+        obj = JSON.parse(msg);
         msg !== "null" && (Starter.gameInfo.crashInfo = obj);
 
         break;
       case 1638: // getProfile
         try {
+          obj = JSON.parse(msg);
           Starter.profileInfo.profile = me.profile;
           Starter.profileInfo.account = obj.account;
           Starter.profileInfo.charName = obj.Character;
