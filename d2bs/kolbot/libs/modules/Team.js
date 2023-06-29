@@ -5,8 +5,7 @@
  */
 !isIncluded("require.js") && include("require.js"); // load the require.js
 
-(function (threadType) {
-
+(function (threadType, globalThis) {
   const others = [];
 
   const myEvents = new (require("Events"));
@@ -43,7 +42,10 @@
     print("ÿc2Kolbotÿc0 :: Team thread started");
 
     Messaging.on("Team", data => (
-      typeof data === "object" && data && data.hasOwnProperty("call") && Team[data.call].apply(Team, data.hasOwnProperty("args") && data.args || [])
+      typeof data === "object" && data
+      && data.hasOwnProperty("call")
+      && Team[data.call].apply(Team, data.hasOwnProperty("args")
+      && data.args || [])
     ));
 
     Worker.runInBackground.copydata = (new function () {
@@ -121,10 +123,15 @@
       };
     }).update;
 
-    while (true) {
-      delay(1000);
-    }
+    let quiting = false;
+    addEventListener("scriptmsg", data => data === "quit" && (quiting = true));
 
+    // eslint-disable-next-line dot-notation
+    globalThis["main"] = function () {
+      while (!quiting) delay(3);
+      //@ts-ignore
+      getScript(true).stop();
+    };
   } else {
     (function (module) {
       const localTeam = module.exports = Team; // <-- some get overridden, but this still works for auto completion in your IDE
@@ -162,6 +169,4 @@
       );
     })(module);
   }
-
-
-})(getScript.startAsThread());
+})(getScript.startAsThread(), [].filter.constructor("return this")());

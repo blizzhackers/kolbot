@@ -1,4 +1,4 @@
-(function (module, require, thread) {
+(function (module, require, thread, globalThis) {
   "use strict";
   const Messaging = require("./Messaging");
   const Worker = require("./Worker");
@@ -22,7 +22,7 @@
       * @constructor
       * @param {function():string} callback
       */
-      function UpdateableText(callback) {
+      function UpdateableText (callback) {
         let element = new Text(callback(), self.x + 15, self.y + (7 * self.hooks.length), 0, 12, 0);
         self.hooks.push(element);
         this.update = () => {
@@ -66,12 +66,17 @@
     let quiting = false;
     addEventListener("scriptmsg", data => data === "quit" && (quiting = true));
 
-    while (!quiting) delay(1000);
+    // eslint-disable-next-line dot-notation
+    globalThis["main"] = function () {
+      while (!quiting) delay(3);
+      //@ts-ignore
+      getScript(true).stop();
+    };
     break;
   }
   case "started": {
     let sendStack = getTickCount();
-    Worker.push(function highPrio() {
+    Worker.push(function highPrio () {
       Worker.push(highPrio);
       if ((getTickCount() - sendStack) < 200 || (sendStack = getTickCount()) && false) return true;
       Messaging.send({ Guard: { stack: (new Error).stack } });
@@ -89,5 +94,6 @@
   null,
   typeof module === "object" && module || {},
   typeof require === "undefined" && (include("require.js") && require) || require,
-  getScript.startAsThread()
+  getScript.startAsThread(),
+  [].filter.constructor("return this")()
 );
