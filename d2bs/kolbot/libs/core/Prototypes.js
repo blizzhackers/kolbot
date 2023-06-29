@@ -393,6 +393,61 @@ Object.defineProperties(Unit.prototype, {
  * @extends ItemUnit
  */
 Object.defineProperties(Unit.prototype, {
+  strreq: {
+    /** @this {ItemUnit} */
+    get: function () {
+      if (this.type !== sdk.unittype.Item) return false;
+      let ethereal = this.getFlag(sdk.items.flags.Ethereal);
+      let reqModifier = this.getStat(sdk.stats.ReqPercent);
+      let baseReq = getBaseStat("items", this.classid, "reqstr");
+      let finalReq = baseReq + Math.floor(baseReq * reqModifier / 100) - (ethereal ? 10 : 0);
+
+      return Math.max(finalReq, 0);
+    }
+  },
+  dexreq: {
+    /** @this {ItemUnit} */
+    get: function () {
+      if (this.type !== sdk.unittype.Item) return false;
+      let ethereal = this.getFlag(sdk.items.flags.Ethereal);
+      let reqModifier = this.getStat(sdk.stats.ReqPercent);
+      let baseReq = getBaseStat("items", this.classid, "reqdex");
+      let finalReq = baseReq + Math.floor(baseReq * reqModifier / 100) - (ethereal ? 10 : 0);
+
+      return Math.max(finalReq, 0);
+    }
+  },
+  parentName: {
+    /** @this {ItemUnit} */
+    get: function () {
+      if (this.type !== sdk.unittype.Item) return false;
+      let parent = this.getParent();
+
+      return parent ? parent.name : false;
+    }
+  },
+  itemclass: {
+    /** @this {ItemUnit} */
+    get: function () {
+      if (this.type !== sdk.unittype.Item) return false;
+      const itemCode = getBaseStat("items", this.classid, "code");
+      if (itemCode === undefined) return 0;
+      if (itemCode === getBaseStat(0, this.classid, "ultracode")) return 2;
+      if (itemCode === getBaseStat(0, this.classid, "ubercode")) return 1;
+
+      return 0;
+    }
+  },
+  charclass: {
+    /** @this {ItemUnit} */
+    get: function () {
+      if (this.type !== sdk.unittype.Item) return false;
+      let charclass = getBaseStat("items", this.classid, "charclass");
+      // hacky? Essentially just using this to check if we can use the item and if the item doesn't have a specific
+      // class requirement, we'll just assume it's for our class. As this makes the actualy checks easy
+      return charclass === 255 ? me.classid : charclass;
+    }
+  },
   isEquipped: {
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
@@ -438,21 +493,29 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   isOnMain: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item || this.location !== sdk.storage.Equipped) return false;
-      return [sdk.body.RightArm, sdk.body.LeftArm].includes(this.bodylocation);
+      switch (me.weaponswitch) {
+      case sdk.player.slot.Secondary:
+        return [sdk.body.RightArmSecondary, sdk.body.LeftArmSecondary].includes(this.bodylocation);
+      case sdk.player.slot.Main:
+      default:
+        return [sdk.body.RightArm, sdk.body.LeftArm].includes(this.bodylocation);
+      }
     }
   },
   isOnSwap: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item || this.location !== sdk.storage.Equipped) return false;
       switch (me.weaponswitch) {
       case sdk.player.slot.Main:
         return [sdk.body.RightArmSecondary, sdk.body.LeftArmSecondary].includes(this.bodylocation);
       case sdk.player.slot.Secondary:
+      default:
         return [sdk.body.RightArm, sdk.body.LeftArm].includes(this.bodylocation);
       }
-      return false;
     }
   },
   identified: {
@@ -622,7 +685,12 @@ Object.defineProperties(Unit.prototype, {
   },
 });
 
-// Open NPC menu
+/**
+ * Open NPC menu
+ * @this {NPCUnit}
+ * @param {number} [addDelay] 
+ * @returns {boolean}
+ */
 Unit.prototype.openMenu = function (addDelay) {
   if (Config.PacketShopping) return Packet.openMenu(this);
   if (this.type !== sdk.unittype.NPC) throw new Error("Unit.openMenu: Must be used on NPCs.");
@@ -632,7 +700,9 @@ Unit.prototype.openMenu = function (addDelay) {
   let pingDelay = (me.gameReady ? me.ping : 125);
 
   for (let i = 0; i < 5; i += 1) {
-    getDistance(me, this) > 4 && Pather.moveToUnit(this);
+    if (getDistance(me, this) > 4) {
+      Pather.moveNearUnit(this, 4);
+    }
 
     Misc.click(0, 0, this);
     let tick = getTickCount();
@@ -661,14 +731,22 @@ Unit.prototype.openMenu = function (addDelay) {
   return false;
 };
 
-// mode = "Gamble", "Repair" or "Shop"
+/**
+ * @this {NPCUnit}
+ * @param {string} mode "Gamble", "Repair" or "Shop"
+ * @returns {boolean}
+ */
 Unit.prototype.startTrade = function (mode) {
   if (Config.PacketShopping) return Packet.startTrade(this, mode);
   if (this.type !== sdk.unittype.NPC) throw new Error("Unit.startTrade: Must be used on NPCs.");
   console.log("Starting " + mode + " at " + this.name);
   if (getUIFlag(sdk.uiflags.Shop)) return true;
 
-  let menuId = mode === "Gamble" ? sdk.menu.Gamble : mode === "Repair" ? sdk.menu.TradeRepair : sdk.menu.Trade;
+  let menuId = mode === "Gamble"
+    ? sdk.menu.Gamble
+    : mode === "Repair"
+      ? sdk.menu.TradeRepair
+      : sdk.menu.Trade;
 
   for (let i = 0; i < 3; i += 1) {
     // Incremental delay on retries
@@ -750,16 +828,6 @@ Unit.prototype.buy = function (shiftBuy, gamble) {
 
   return false;
 };
-
-// Item owner name
-Unit.prototype.__defineGetter__("parentName",
-  function () {
-    if (this.type !== sdk.unittype.Item) throw new Error("Unit.parentName: Must be used with item units.");
-
-    let parent = this.getParent();
-
-    return parent ? parent.name : false;
-  });
 
 // You MUST use a delay after Unit.sell() if using custom scripts. delay(500) works best, dynamic delay is used when identifying/selling (500 - item id time)
 Unit.prototype.sell = function () {
@@ -1134,7 +1202,7 @@ Unit.prototype.haveSome = function (itemInfo = []) {
 /**
  * @description Return the items of a player, or an empty array
  * @param args
- * @returns Unit[]
+ * @returns {ItemUnit[]}
  */
 Unit.prototype.getItems = function (...args) {
   let items = [];
@@ -1219,35 +1287,6 @@ Unit.prototype.getSuffix = function (id) {
 
   return false;
 };
-
-Unit.prototype.__defineGetter__("dexreq",
-  function () {
-    let ethereal = this.getFlag(sdk.items.flags.Ethereal);
-    let reqModifier = this.getStat(sdk.stats.ReqPercent);
-    let baseReq = getBaseStat("items", this.classid, "reqdex");
-    let finalReq = baseReq + Math.floor(baseReq * reqModifier / 100) - (ethereal ? 10 : 0);
-
-    return Math.max(finalReq, 0);
-  });
-
-Unit.prototype.__defineGetter__("strreq",
-  function () {
-    let ethereal = this.getFlag(sdk.items.flags.Ethereal);
-    let reqModifier = this.getStat(sdk.stats.ReqPercent);
-    let baseReq = getBaseStat("items", this.classid, "reqstr");
-    let finalReq = baseReq + Math.floor(baseReq * reqModifier / 100) - (ethereal ? 10 : 0);
-
-    return Math.max(finalReq, 0);
-  });
-
-Unit.prototype.__defineGetter__("itemclass",
-  function () {
-    if (getBaseStat("items", this.classid, "code") === undefined) return 0;
-    if (getBaseStat("items", this.classid, "code") === getBaseStat(0, this.classid, "ultracode")) return 2;
-    if (getBaseStat("items", this.classid, "code") === getBaseStat(0, this.classid, "ubercode")) return 1;
-
-    return 0;
-  });
 
 Unit.prototype.getStatEx = function (id, subid) {
   let temp, rval, regex;
@@ -1821,16 +1860,17 @@ Unit.prototype.getColor = function () {
 };
 
 /**
- * @description Used upon item units like ArachnidMesh.castChargedSkill([skillId]) or directly on the "me" unit me.castChargedSkill(278);
- * @param {int} skillId = undefined
- * @param {int} x = undefined
- * @param {int} y = undefined
- * @return boolean
+ * @description Used upon item units like ArachnidMesh.castChargedSkill([skillId])
+ * or directly on the "me" unit me.castChargedSkill(278);
+ * @param {number} skillId
+ * @param {number} x
+ * @param {number} y
+ * @returns {boolean}
  * @throws Error
  */
 Unit.prototype.castChargedSkill = function (...args) {
   let skillId, x, y, unit, chargedItem, charge;
-  let chargedItems = [];
+  /** @param {Charge} itemCharge */
   let validCharge = function (itemCharge) {
     return itemCharge.skill === skillId && itemCharge.charges;
   };
@@ -1879,37 +1919,21 @@ Unit.prototype.castChargedSkill = function (...args) {
   // Called the function the unit, me.
   if (this === me) {
     if (!skillId) throw Error("Must supply skillId on me.castChargedSkill");
+    if (!Skill.charges.length || !Skill.charges.some(validCharge)) {
+      // only rebuild list if we are unsure if we have the skill
+      Skill.getCharges();
+    }
+    if (!Skill.charges.length) return false;
+    let chargedItems = Skill.charges.filter(validCharge);
 
-    chargedItems = [];
+    if (chargedItems.length === 0) {
+      throw Error("Don't have the charged skill (" + skillId + "), or not enough charges");
+    }
 
-    // Item must be equipped, or a charm in inventory
-    this.getItemsEx(-1)
-      .filter(item => item && (item.isEquipped || (item.isInInventory && item.isCharm)))
-      .forEach(function (item) {
-        let stats = item.getStat(-2);
-
-        if (stats.hasOwnProperty(sdk.stats.ChargedSkill)) {
-          if (stats[sdk.stats.ChargedSkill] instanceof Array) {
-            stats = stats[sdk.stats.ChargedSkill].filter(validCharge);
-            stats.length && chargedItems.push({
-              charge: stats.first(),
-              item: item
-            });
-          } else {
-            if (stats[sdk.stats.ChargedSkill].skill === skillId && stats[sdk.stats.ChargedSkill].charges > 1) {
-              chargedItems.push({
-                charge: stats[sdk.stats.ChargedSkill].charges,
-                item: item
-              });
-            }
-          }
-        }
-      });
-
-    if (chargedItems.length === 0) throw Error("Don't have the charged skill (" + skillId + "), or not enough charges");
-
-    chargedItem = chargedItems.sort((a, b) => a.charge.level - b.charge.level).first().item;
-
+    chargedItem = chargedItems
+      .sort(function (a, b) {
+        return b.charge.level - a.charge.level;
+      }).first().unit;
     return chargedItem.castChargedSkill.apply(chargedItem, args);
   } else if (this.type === sdk.unittype.Item) {
     charge = this.getStat(-2)[sdk.stats.ChargedSkill]; // WARNING. Somehow this gives duplicates
@@ -1928,15 +1952,27 @@ Unit.prototype.castChargedSkill = function (...args) {
     if (charge) {
       // Setting skill on hand
       if (!Config.PacketCasting || Config.PacketCasting === 1 && skillId !== sdk.skills.Teleport) {
-        return Skill.cast(skillId, sdk.skills.hand.Right, x || me.x, y || me.y, this); // Non packet casting
+        // Non packet casting
+        return Skill.cast(skillId, sdk.skills.hand.Right, x || me.x, y || me.y, this);
       }
 
       // Packet casting
-      sendPacket(1, sdk.packets.send.SelectSkill, 2, charge.skill, 1, 0x0, 1, 0x00, 4, this.gid);
+      // Setting skill on hand
+      new PacketBuilder()
+        .byte(sdk.packets.send.SelectSkill)
+        .word(charge.skill)
+        .byte(0x00)
+        .byte(0x00)
+        .dword(this.gid)
+        .send();
       // No need for a delay, since its TCP, the server recv's the next statement always after the send cast skill packet
-
+      // Cast the skill
+      new PacketBuilder()
+        .byte(sdk.packets.send.RightSkillOnLocation)
+        .word(x || me.x)
+        .word(y || me.y)
+        .send();
       // The result of "successfully" casted is different, so we cant wait for it here. We have to assume it worked
-      sendPacket(1, sdk.packets.send.RightSkillOnLocation, 2, x || me.x, 2, y || me.y); // Cast the skill
 
       return true;
     }
@@ -1946,11 +1982,16 @@ Unit.prototype.castChargedSkill = function (...args) {
 };
 
 /**
+ * @this {ItemUnit}
  * @description equip an item.
+ * @param {number | number[]} [destLocation]
  */
-Unit.prototype.equip = function (destLocation = undefined) {
+Unit.prototype.equip = function (destLocation) {
   if (this.isEquipped) return true; // Item already equiped
+  /** @type {ItemUnit} */
+  const _self = this;
 
+  /** @param {ItemUnit} */
   const findspot = function (item) {
     let tempspot = Storage.Stash.FindSpot(item);
 
@@ -1962,38 +2003,33 @@ Unit.prototype.equip = function (destLocation = undefined) {
 
     return tempspot ? { location: Storage.Inventory.location, coord: tempspot } : false;
   };
-  const doubleHanded = [
-    sdk.items.type.Staff, sdk.items.type.Bow, sdk.items.type.Polearm, sdk.items.type.Crossbow,
-    sdk.items.type.HandtoHand, sdk.items.type.AmazonBow, sdk.items.type.AmazonSpear
-  ];
 
   // Not an item, or unidentified, or not enough stats
-  if (this.type !== sdk.unittype.Item || !this.getFlag(sdk.items.flags.Identified)
-    || this.getStat(sdk.stats.LevelReq) > me.getStat(sdk.stats.Level)
-    || this.dexreq > me.getStat(sdk.stats.Dexterity)
-    || this.strreq > me.getStat(sdk.stats.Strength)) {
+  if (_self.type !== sdk.unittype.Item || !_self.identified
+    || _self.lvlreq > me.getStat(sdk.stats.Level)
+    || _self.dexreq > me.getStat(sdk.stats.Dexterity)
+    || _self.strreq > me.getStat(sdk.stats.Strength)) {
     return false;
   }
 
   // If not a specific location is given, figure it out (can be useful to equip a double weapon)
-  !destLocation && (destLocation = this.getBodyLoc());
+  !destLocation && (destLocation = _self.getBodyLoc());
   // If destLocation isnt an array, make it one
   !Array.isArray(destLocation) && (destLocation = [destLocation]);
 
-  console.log("equiping " + this.name + " to bodylocation: " + destLocation.first());
+  console.log("equiping " + _self.prettyPrint + " to bodylocation: " + destLocation.first());
 
-  let currentEquiped = me.getItemsEx(-1).filter(item =>
-    destLocation.indexOf(item.bodylocation) !== -1
-    || ( // Deal with double handed weapons
-
-      (item.isOnMain)
-      && [sdk.body.RightArm, sdk.body.LeftArm].indexOf(destLocation) // in case destination is on the weapon/shield slot
-      && (
-        doubleHanded.indexOf(this.itemType) !== -1 // this item is a double handed item
-        || doubleHanded.indexOf(item.itemType) !== -1 // current item is a double handed item
-      )
-    )
-  ).sort((a, b) => b - a); // shields first
+  let currentEquiped = me.getItemsEx(-1)
+    .filter(function (item) {
+      return (destLocation.includes(item.bodylocation)
+        || ( item.isOnMain// Deal with double handed weapons
+          && [sdk.body.RightArm, sdk.body.LeftArm].indexOf(destLocation) // in case destination is on the weapon/shield slot
+          && (item.strictlyTwoHanded || _self.strictlyTwoHanded) // one of the items is strictly two handed
+        )
+      );
+    }).sort(function (a, b) {
+      return b - a;
+    }); // shields first
 
   // if nothing is equipped at the moment, just equip it
   if (!currentEquiped.length) {
@@ -2001,12 +2037,12 @@ Unit.prototype.equip = function (destLocation = undefined) {
     clickItemAndWait(sdk.clicktypes.click.item.Left, destLocation.first());
   } else {
     // unequip / swap items
-    currentEquiped.forEach((item, index) => {
+    currentEquiped.forEach(function (item, index) {
       // Last item, so swap instead of putting off first
       if (index === (currentEquiped.length - 1)) {
-        print("swap " + this.name + " for " + item.name);
-        let oldLoc = { x: this.x, y: this.y, location: this.location };
-        clickItemAndWait(sdk.clicktypes.click.item.Left, this); // Pick up current item
+        print("swap " + _self.name + " for " + item.name);
+        let oldLoc = { x: _self.x, y: _self.y, location: _self.location };
+        clickItemAndWait(sdk.clicktypes.click.item.Left, _self); // Pick up current item
         clickItemAndWait(sdk.clicktypes.click.item.Left, destLocation.first()); // the swap of items
         // Find a spot for the current item
         let	spot = findspot(item);
@@ -2040,50 +2076,60 @@ Unit.prototype.equip = function (destLocation = undefined) {
   };
 };
 
+/**
+ * @this {ItemUnit}
+ * @returns {number[]}
+ */
 Unit.prototype.getBodyLoc = function () {
-  const types = {};
-  types[sdk.body.Head] = [sdk.items.type.Helm, sdk.items.type.Pelt, sdk.items.type.PrimalHelm]; // helm
-  types[sdk.body.Neck] = [sdk.items.type.Amulet]; // amulet
-  types[sdk.body.Armor] = [sdk.items.type.Armor]; // armor
-  types[sdk.body.RightArm] = [
-    sdk.items.type.Scepter, sdk.items.type.Wand, sdk.items.type.Staff, sdk.items.type.Bow,
-    sdk.items.type.Axe, sdk.items.type.Club, sdk.items.type.Sword, sdk.items.type.Hammer,
-    sdk.items.type.Knife, sdk.items.type.Spear, sdk.items.type.Polearm, sdk.items.type.Crossbow,
-    sdk.items.type.Mace, sdk.items.type.ThrowingKnife, sdk.items.type.ThrowingAxe,
-    sdk.items.type.Javelin, sdk.items.type.HandtoHand, sdk.items.type.Orb,
-    sdk.items.type.AmazonBow, sdk.items.type.AmazonSpear, sdk.items.type.AmazonJavelin, sdk.items.type.AssassinClaw
-  ]; // weapons
-  types[sdk.body.LeftArm] = [
-    sdk.items.type.Shield, sdk.items.type.BowQuiver,
-    sdk.items.type.CrossbowQuiver, sdk.items.type.AuricShields, sdk.items.type.VoodooHeads
-  ], // shields / Arrows / bolts
-  types[sdk.body.RingRight] = [sdk.items.type.Ring]; // ring slot 1
-  types[sdk.body.RingLeft] = [sdk.items.type.Ring]; // ring slot 2
-  types[sdk.body.Belt] = [sdk.items.type.Belt]; // belt
-  types[sdk.body.Feet] = [sdk.items.type.Boots]; // boots
-  types[sdk.body.Gloves] = [sdk.items.type.Gloves]; // gloves
-  //types[sdk.body.RightArmSecondary] = types[sdk.body.RightArm];
-  //types[sdk.body.LeftArmSecondary] = types[sdk.body.LeftArm];
+  const _types = new Map([
+    [sdk.body.Head, [sdk.items.type.Helm, sdk.items.type.Pelt, sdk.items.type.PrimalHelm]],
+    [sdk.body.Neck, [sdk.items.type.Amulet]],
+    [sdk.body.Armor, [sdk.items.type.Armor]],
+    [sdk.body.RightArm, [
+      sdk.items.type.Scepter, sdk.items.type.Wand, sdk.items.type.Staff, sdk.items.type.Bow,
+      sdk.items.type.Axe, sdk.items.type.Club, sdk.items.type.Sword, sdk.items.type.Hammer,
+      sdk.items.type.Knife, sdk.items.type.Spear, sdk.items.type.Polearm, sdk.items.type.Crossbow,
+      sdk.items.type.Mace, sdk.items.type.Javelin, sdk.items.type.ThrowingKnife, sdk.items.type.ThrowingAxe,
+      sdk.items.type.MissilePotion, sdk.items.type.Javelin, sdk.items.type.Orb,
+      sdk.items.type.HandtoHand, sdk.items.type.AmazonBow,
+      sdk.items.type.AmazonSpear
+    ]], // right arm
+    [sdk.body.LeftArm, [
+      sdk.items.type.Shield, sdk.items.type.BowQuiver,
+      sdk.items.type.CrossbowQuiver, sdk.items.type.AuricShields, sdk.items.type.VoodooHeads
+    ]], // left arm
+    [sdk.body.RingRight, [sdk.items.type.Ring]],
+    [sdk.body.RingLeft, [sdk.items.type.Ring]],
+    [sdk.body.Belt, [sdk.items.type.Belt]],
+    [sdk.body.Feet, [sdk.items.type.Boots]],
+    [sdk.body.Gloves, [sdk.items.type.Gloves]],
+  ]);
   let bodyLoc = [];
-
-  for (let i in types) {
-    this.itemType && types[i].indexOf(this.itemType) !== -1 && bodyLoc.push(i);
+  
+  for (let [key, value] of _types) {
+    if (value.includes(this.itemType)) {
+      bodyLoc.push(key);
+    }
   }
 
-  // Strings are hard to calculate with, parse to int
-  return bodyLoc.map(parseInt);
+  return bodyLoc;
 };
 
 Unit.prototype.getRes = function (type, difficulty) {
   if (!type) return -1;
-  if (![sdk.stats.FireResist, sdk.stats.ColdResist, sdk.stats.PoisonResist, sdk.stats.LightningResist].includes(type)) {
+  if (![
+    sdk.stats.FireResist, sdk.stats.ColdResist,
+    sdk.stats.PoisonResist, sdk.stats.LightningResist
+  ].includes(type)) {
     return -1;
   }
   
   difficulty === undefined || difficulty < 0 && (difficulty = 0);
   difficulty > 2 && (difficulty = 2);
 
-  let modifier = me.classic ? [0, 20, 50][difficulty] : [0, 40, 100][difficulty];
+  let modifier = me.classic
+    ? [0, 20, 50][difficulty]
+    : [0, 40, 100][difficulty];
   if (this === me) {
     switch (type) {
     case sdk.stats.FireResist:
@@ -2167,9 +2213,12 @@ Unit.prototype.hasEnchant = function (...enchants) {
 Unit.prototype.usingShield = function () {
   if (this.type > sdk.unittype.Monster) return false;
   // always switch to main hand if we are checking ourselves
-  this === me && me.weaponswitch !== sdk.player.slot.Main && me.switchWeapons(sdk.player.slot.Main);
-  let shield = this.getItemsEx(-1, sdk.items.mode.Equipped).filter(s => s.isShield).first();
-  return !!shield;
+  if (this === me && me.weaponswitch !== sdk.player.slot.Main) {
+    me.switchWeapons(sdk.player.slot.Main);
+  }
+  return this.getItemsEx(-1, sdk.items.mode.Equipped)
+    .filter(s => s.isShield)
+    .first();
 };
 
 // something in here is causing demon imps in barricade towers to be skipped - todo: figure out what
@@ -2211,7 +2260,7 @@ Unit.prototype.__defineGetter__("attackable", function () {
 });
 
 Object.defineProperty(Unit.prototype, "curseable", {
-  /** @this {Unit} */
+  /** @this {Player | Monster} */
   get: function () {
     // must be player or monster
     if (this === undefined || !copyUnit(this).x || this.type > 1) return false;
@@ -2332,4 +2381,117 @@ PresetUnit.prototype.realCoords = function () {
     x: this.roomx * 5 + this.x,
     y: this.roomy * 5 + this.y,
   };
+};
+
+Unit.prototype.openUnit = function () {
+  if (this === undefined) return false;
+  if (this.type !== sdk.unittype.Object && this.type !== sdk.unittype.Stairs) {
+    return false;
+  }
+  if (this.mode !== sdk.objects.mode.Inactive) return true;
+
+  for (let i = 0; i < 3; i += 1) {
+    let usetk = (i < 2 && Skill.useTK(this));
+    
+    if (this.distance > 5) {
+      Pather.moveNearUnit(this, (usetk ? 20 : 5) - i);
+    }
+
+    delay(300);
+    // try to activate it once
+    if (usetk && i === 0 && this.distance < 21) {
+      Packet.telekinesis(this);
+    } else {
+      Packet.entityInteract(this);
+    }
+
+    const _self = this;
+    if (Misc.poll(function () {
+      return _self.mode !== sdk.objects.mode.Inactive;
+    }, 2000, 60)) {
+      delay(100);
+
+      return true;
+    }
+
+    let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 3);
+    !!coord && Pather.moveTo(coord.x, coord.y);
+  }
+
+  return false;
+};
+
+Unit.prototype.useUnit = function (targetArea) {
+  if (this === undefined) return false;
+  if (this.type !== sdk.unittype.Object && this.type !== sdk.unittype.Stairs) {
+    return false;
+  }
+  const preArea = me.area;
+
+  MainLoop:
+  for (let i = 0; i < 5; i += 1) {
+    let usetk = (i < 2 && Skill.useTK(this));
+    
+    if (this.distance > 5) {
+      Pather.moveNearUnit(this, (usetk ? 20 : 5));
+      // try to activate it once
+      if (usetk && i === 0 && this.mode === sdk.objects.mode.Inactive && this.distance < 21) {
+        Packet.telekinesis(this);
+      }
+    }
+
+    if (this.type === sdk.unittype.Object && this.mode === sdk.objects.mode.Inactive) {
+      if (me.inArea(sdk.areas.Travincal) && targetArea === sdk.areas.DuranceofHateLvl1) {
+        if (!me.blackendTemple) {
+          throw new Error("useUnit: Incomplete quest. TargetArea: " + getAreaName(targetArea));
+        }
+      } else if (me.inArea(sdk.areas.ArreatSummit) && targetArea === sdk.areas.WorldstoneLvl1) {
+        if (!me.ancients) {
+          throw new Error("useUnit: Incomplete quest. TargetArea: " + getAreaName(targetArea));
+        }
+      }
+
+      me.inArea(sdk.areas.A3SewersLvl1)
+        ? Pather.openUnit(sdk.unittype.Object, sdk.objects.SewerLever)
+        : this.openUnit();
+    }
+
+    if (this.type === sdk.unittype.Object
+      && this.classid === sdk.objects.RedPortalToAct4
+      && me.inArea(sdk.areas.DuranceofHateLvl3)
+      && targetArea === sdk.areas.PandemoniumFortress
+      && me.getQuest(sdk.quest.id.TheGuardian, sdk.quest.states.Completed) !== 1) {
+      throw new Error("useUnit: Incomplete quest. TargetArea: " + getAreaName(targetArea));
+    }
+
+    delay(300);
+    this.type === sdk.unittype.Stairs
+      ? Misc.click(0, 0, this)
+      : usetk && this.distance > 5
+        ? Packet.telekinesis(this)
+        : Packet.entityInteract(this);
+    delay(300);
+
+    let tick = getTickCount();
+
+    while (getTickCount() - tick < 3000) {
+      if ((!targetArea && me.area !== preArea) || me.area === targetArea) {
+        delay(200);
+
+        break MainLoop;
+      }
+
+      delay(10);
+    }
+
+    i > 2 && Packet.flash(me.gid);
+    let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 3);
+    !!coord && Pather.moveTo(coord.x, coord.y);
+  }
+
+  while (!me.idle && !me.gameReady) {
+    delay(40);
+  }
+
+  return targetArea ? me.area === targetArea : me.area !== preArea;
 };
