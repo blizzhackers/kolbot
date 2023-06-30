@@ -2199,96 +2199,115 @@ const Town = {
 
     return true;
   },
-
-  /**
-   * @todo figure out how to typedef this.
-   */
-  act: [{}, {}, {}, {}, {}],
+  
+  act: {
+    1: {
+      spot: (function () {
+        const _spot = {};
+        _spot.stash = [0, 0];
+        _spot[NPC.Warriv] = [0, 0];
+        _spot[NPC.Cain] = [0, 0];
+        _spot[NPC.Kashya] = [0, 0];
+        _spot[NPC.Akara] = [0, 0];
+        _spot[NPC.Charsi] = [0, 0];
+        _spot[NPC.Gheed] = [0, 0];
+        _spot.portalspot = [0, 0];
+        _spot.waypoint = [0, 0];
+        _spot.initialized = false;
+        return _spot;
+      })(),
+    },
+    2: {
+      spot: (function () {
+        const _spot = {};
+        _spot[NPC.Fara] = [5124, 5082];
+        _spot[NPC.Cain] = [5124, 5082];
+        _spot[NPC.Lysander] = [5118, 5104];
+        _spot[NPC.Greiz] = [5033, 5053];
+        _spot[NPC.Elzix] = [5032, 5102];
+        _spot[NPC.Jerhyn] = [5088, 5153];
+        _spot[NPC.Meshif] = [5205, 5058];
+        _spot[NPC.Drognan] = [5097, 5035];
+        _spot[NPC.Atma] = [5137, 5060];
+        _spot[NPC.Warriv] = [5152, 5201];
+        _spot.palace = [5088, 5153];
+        _spot.sewers = [5221, 5181];
+        _spot.portalspot = [5168, 5060];
+        _spot.stash = [5124, 5076];
+        _spot.waypoint = [5070, 5083];
+        _spot.initialized = true;
+        return _spot;
+      })(),
+    },
+    3: {
+      spot: (function () {
+        const _spot = {};
+        _spot[NPC.Meshif] = [5118, 5168];
+        _spot[NPC.Hratli] = [5223, 5048, 5127, 5172];
+        _spot[NPC.Ormus] = [5129, 5093];
+        _spot[NPC.Asheara] = [5043, 5093];
+        _spot[NPC.Alkor] = [5083, 5016];
+        _spot[NPC.Cain] = [5148, 5066];
+        _spot.stash = [5144, 5059];
+        _spot.portalspot = [5150, 5063];
+        _spot.waypoint = [5158, 5050];
+        _spot.initialized = true;
+        return _spot;
+      })(),
+    },
+    4: {
+      spot: (function () {
+        const _spot = {};
+        _spot[NPC.Cain] = [5027, 5027];
+        _spot[NPC.Halbu] = [5089, 5031];
+        _spot[NPC.Tyrael] = [5027, 5027];
+        _spot[NPC.Jamella] = [5088, 5054];
+        _spot.stash = [5022, 5040];
+        _spot.portalspot = [5045, 5042];
+        _spot.waypoint = [5043, 5018];
+        _spot.initialized = true;
+        return _spot;
+      })(),
+    },
+    5: {
+      spot: (function () {
+        const _spot = {};
+        _spot[NPC.Larzuk] = [5141, 5045];
+        _spot[NPC.Malah] = [5078, 5029];
+        _spot[NPC.Cain] = [5119, 5061];
+        _spot[NPC.Qual_Kehk] = [5066, 5083];
+        _spot[NPC.Anya] = [5112, 5120];
+        _spot[NPC.Nihlathak] = [5071, 5111];
+        _spot.stash = [5129, 5061];
+        _spot.portalspot = [5098, 5019];
+        _spot.portal = [5118, 5120];
+        _spot.waypoint = [5113, 5068];
+        _spot.initialized = true;
+        return _spot;
+      })(),
+    }
+  },
 
   initialize: function () {
-    //console.log("Initialize town " + me.act);
-
-    switch (me.act) {
-    case 1:
+    // console.log("Initialize town " + me.act);
+    if (!this.act[me.act].spot.initialized && me.act === 1) {
+      // act 1 is the only act that needs to be initialized
       let wp = Game.getPresetObject(sdk.areas.RogueEncampment, sdk.objects.A1Waypoint);
       let fireUnit = Game.getPresetObject(sdk.areas.RogueEncampment, sdk.objects.A1TownFire);
       if (!fireUnit) return false;
 
       let fire = [fireUnit.roomx * 5 + fireUnit.x, fireUnit.roomy * 5 + fireUnit.y];
-
-      this.act[0].spot = {};
-      this.act[0].spot.stash = [fire[0] - 7, fire[1] - 12];
-      this.act[0].spot[NPC.Warriv] = [fire[0] - 5, fire[1] - 2];
-      this.act[0].spot[NPC.Cain] = [fire[0] + 6, fire[1] - 5];
-      this.act[0].spot[NPC.Kashya] = [fire[0] + 14, fire[1] - 4];
-      this.act[0].spot[NPC.Akara] = [fire[0] + 56, fire[1] - 30];
-      this.act[0].spot[NPC.Charsi] = [fire[0] - 39, fire[1] - 25];
-      this.act[0].spot[NPC.Gheed] = [fire[0] - 34, fire[1] + 36];
-      this.act[0].spot.portalspot = [fire[0] + 10, fire[1] + 18];
-      this.act[0].spot.waypoint = [wp.roomx * 5 + wp.x, wp.roomy * 5 + wp.y];
-      this.act[0].initialized = true;
-
-      break;
-    case 2:
-      this.act[1].spot = {};
-      this.act[1].spot[NPC.Fara] = [5124, 5082];
-      this.act[1].spot[NPC.Cain] = [5124, 5082];
-      this.act[1].spot[NPC.Lysander] = [5118, 5104];
-      this.act[1].spot[NPC.Greiz] = [5033, 5053];
-      this.act[1].spot[NPC.Elzix] = [5032, 5102];
-      this.act[1].spot.palace = [5088, 5153];
-      this.act[1].spot.sewers = [5221, 5181];
-      this.act[1].spot[NPC.Meshif] = [5205, 5058];
-      this.act[1].spot[NPC.Drognan] = [5097, 5035];
-      this.act[1].spot[NPC.Atma] = [5137, 5060];
-      this.act[1].spot[NPC.Warriv] = [5152, 5201];
-      this.act[1].spot.portalspot = [5168, 5060];
-      this.act[1].spot.stash = [5124, 5076];
-      this.act[1].spot.waypoint = [5070, 5083];
+      this.act[1].spot.stash = [fire[0] - 7, fire[1] - 12];
+      this.act[1].spot.stash = [fire[0] - 7, fire[1] - 12];
+      this.act[1].spot[NPC.Warriv] = [fire[0] - 5, fire[1] - 2];
+      this.act[1].spot[NPC.Cain] = [fire[0] + 6, fire[1] - 5];
+      this.act[1].spot[NPC.Kashya] = [fire[0] + 14, fire[1] - 4];
+      this.act[1].spot[NPC.Akara] = [fire[0] + 56, fire[1] - 30];
+      this.act[1].spot[NPC.Charsi] = [fire[0] - 39, fire[1] - 25];
+      this.act[1].spot[NPC.Gheed] = [fire[0] - 34, fire[1] + 36];
+      this.act[1].spot.portalspot = [fire[0] + 10, fire[1] + 18];
+      this.act[1].spot.waypoint = [wp.roomx * 5 + wp.x, wp.roomy * 5 + wp.y];
       this.act[1].initialized = true;
-
-      break;
-    case 3:
-      this.act[2].spot = {};
-      this.act[2].spot[NPC.Meshif] = [5118, 5168];
-      this.act[2].spot[NPC.Hratli] = [5223, 5048, 5127, 5172];
-      this.act[2].spot[NPC.Ormus] = [5129, 5093];
-      this.act[2].spot[NPC.Asheara] = [5043, 5093];
-      this.act[2].spot[NPC.Alkor] = [5083, 5016];
-      this.act[2].spot[NPC.Cain] = [5148, 5066];
-      this.act[2].spot.stash = [5144, 5059];
-      this.act[2].spot.portalspot = [5150, 5063];
-      this.act[2].spot.waypoint = [5158, 5050];
-      this.act[2].initialized = true;
-
-      break;
-    case 4:
-      this.act[3].spot = {};
-      this.act[3].spot[NPC.Cain] = [5027, 5027];
-      this.act[3].spot[NPC.Halbu] = [5089, 5031];
-      this.act[3].spot[NPC.Tyrael] = [5027, 5027];
-      this.act[3].spot[NPC.Jamella] = [5088, 5054];
-      this.act[3].spot.stash = [5022, 5040];
-      this.act[3].spot.portalspot = [5045, 5042];
-      this.act[3].spot.waypoint = [5043, 5018];
-      this.act[3].initialized = true;
-
-      break;
-    case 5:
-      this.act[4].spot = {};
-      this.act[4].spot.portalspot = [5098, 5019];
-      this.act[4].spot.stash = [5129, 5061];
-      this.act[4].spot[NPC.Larzuk] = [5141, 5045];
-      this.act[4].spot[NPC.Malah] = [5078, 5029];
-      this.act[4].spot[NPC.Cain] = [5119, 5061];
-      this.act[4].spot[NPC.Qual_Kehk] = [5066, 5083];
-      this.act[4].spot[NPC.Anya] = [5112, 5120];
-      this.act[4].spot.portal = [5118, 5120];
-      this.act[4].spot.waypoint = [5113, 5068];
-      this.act[4].spot[NPC.Nihlathak] = [5071, 5111];
-      this.act[4].initialized = true;
-
-      break;
     }
 
     return true;
@@ -2300,7 +2319,7 @@ const Town = {
    */
   getDistance: function (spot = "") {
     !me.inTown && this.goToTown();
-    !this.act[me.act - 1].initialized && this.initialize();
+    !Town.act[me.act].initialized && this.initialize();
 
     // Act 5 wp->portalspot override - ActMap.cpp crash
     if (me.act === 5 && spot === "portalspot"
@@ -2308,8 +2327,8 @@ const Town = {
       return [5098, 5018].distance;
     }
 
-    if (typeof (this.act[me.act - 1].spot[spot]) === "object") {
-      return this.act[me.act - 1].spot[spot].distance;
+    if (typeof (Town.act[me.act].spot[spot]) === "object") {
+      return Town.act[me.act].spot[spot].distance;
     } else {
       return Infinity;
     }
@@ -2322,7 +2341,7 @@ const Town = {
    */
   move: function (spot = "", allowTK = true) {
     !me.inTown && this.goToTown();
-    !this.act[me.act - 1].initialized && this.initialize();
+    !Town.act[me.act].initialized && this.initialize();
 
     // act 5 static paths, ActMap.cpp seems to have issues with A5
     // should other towns have static paths?
@@ -2365,7 +2384,6 @@ const Town = {
         [[5140, 5038], [5148, 5031], [5154, 5025], [5161, 5030]].forEach(function (node) {
           Pather.walkTo(node[0], node[1]);
         });
-        return true;
       }
     }
 
@@ -2387,21 +2405,16 @@ const Town = {
    * @returns {boolean}
    */
   moveToSpot: function (spot = "", allowTK = true) {
-    let townSpot;
+    if (!Town.act[me.act].hasOwnProperty("spot")
+      || !Town.act[me.act].spot.hasOwnProperty(spot)
+      || typeof (Town.act[me.act].spot[spot]) !== "object") {
+      return false;
+    }
+
+    const npcSpot = Object.values(NPC).includes(spot.toLowerCase());
     let longRange = (!Skill.haveTK && spot === "waypoint");
     let tkRange = (Skill.haveTK && allowTK && ["stash", "portalspot", "waypoint"].includes(spot));
-    const npcSpot = Object.values(NPC).includes(spot.toLowerCase());
-
-    if (!this.act[me.act - 1].hasOwnProperty("spot")
-      || !this.act[me.act - 1].spot.hasOwnProperty(spot)) {
-      return false;
-    }
-
-    if (typeof (this.act[me.act - 1].spot[spot]) === "object") {
-      townSpot = this.act[me.act - 1].spot[spot];
-    } else {
-      return false;
-    }
+    let townSpot = Town.act[me.act].spot[spot];
 
     if (longRange) {
       let path = getPath(me.area, townSpot[0], townSpot[1], me.x, me.y, 1, 8);
@@ -2412,13 +2425,22 @@ const Town = {
     }
 
     for (let i = 0; i < townSpot.length; i += 2) {
-      // console.debug("moveToSpot: " + spot + " from " + me.x + ", " + me.y);
+      const [x, y] = [townSpot[i], townSpot[i + 1]];
+      // console.debug("moveToSpot: " + spot + " " + x + "/" + y + " from " + me.x + "/" + me.y);
 
       if (tkRange) {
         Pather.moveNear(townSpot[0], townSpot[1], 19);
-      } else if (getDistance(me, townSpot[i], townSpot[i + 1]) > 2) {
-        if (npcSpot && Game.getNPC(spot)) return true;
-        Pather.moveTo(townSpot[i], townSpot[i + 1], 3, false, true);
+      } else if (getDistance(me, x, y) > 2) {
+        if (npcSpot) {
+          let npc = Game.getNPC(spot);
+          if (npc && npc.distance < 5) return true;
+          Pather.move({ x: x, y: y }, { callback: function () {
+            let npc = Game.getNPC(spot);
+            return npc && npc.distance < 5;
+          } });
+        } else {
+          Pather.moveTo(x, y, 3, false);
+        }
       }
 
       switch (spot) {
@@ -2436,11 +2458,12 @@ const Town = {
         break;
       case "portalspot":
       case "sewers":
-        if (tkRange && spot === "portalspot" && getDistance(me, townSpot[0], townSpot[1]) < 21) {
+        if (tkRange && spot === "portalspot"
+          && getDistance(me, townSpot[0], townSpot[1]) < 21) {
           return true;
         }
 
-        if (getDistance(me, townSpot[i], townSpot[i + 1]) < 10) {
+        if (getDistance(me, x, y) < 10) {
           return true;
         }
 
