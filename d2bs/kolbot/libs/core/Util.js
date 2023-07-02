@@ -21,8 +21,8 @@
       }
     });
   }
-}(this, function() {
-  function ScriptError(message) {
+}(this, function () {
+  function ScriptError (message) {
     this.name = "ScriptError";
     this.message = message || "";
     this.stack = (new Error()).stack;
@@ -459,7 +459,12 @@
      */
     getPresetMonster: function (area, id) {
       !area && (area = me.area);
-      return getPresetUnit(area, sdk.unittype.Monster, id);
+      try {
+        return getPresetUnit(area, sdk.unittype.Monster, id);
+      } catch (e) {
+        e.message += " Area: " + area + " Id: " + id;
+        throw e;
+      }
     },
     /**
      * @param {number} area 
@@ -468,7 +473,12 @@
      */
     getPresetMonsters: function (area, id) {
       !area && (area = me.area);
-      return getPresetUnits(area, sdk.unittype.Monster, id);
+      try {
+        return getPresetUnits(area, sdk.unittype.Monster, id);
+      } catch (e) {
+        e.message += " Area: " + area + " Id: " + id;
+        throw e;
+      }
     },
     /**
      * @param {number} area 
@@ -477,7 +487,12 @@
      */
     getPresetObject: function (area, id) {
       !area && (area = me.area);
-      return getPresetUnit(area, sdk.unittype.Object, id);
+      try {
+        return getPresetUnit(area, sdk.unittype.Object, id);
+      } catch (e) {
+        e.message += " Area: " + area + " Id: " + id;
+        throw e;
+      }
     },
     /**
      * @param {number} area 
@@ -486,7 +501,12 @@
      */
     getPresetObjects: function (area, id) {
       !area && (area = me.area);
-      return getPresetUnits(area, sdk.unittype.Object, id);
+      try {
+        return getPresetUnits(area, sdk.unittype.Object, id);
+      } catch (e) {
+        e.message += " Area: " + area + " Id: " + id;
+        throw e;
+      }
     },
     /**
      * @param {number} area 
@@ -495,7 +515,12 @@
      */
     getPresetStair: function (area, id) {
       !area && (area = me.area);
-      return getPresetUnit(area, sdk.unittype.Stairs, id);
+      try {
+        return getPresetUnit(area, sdk.unittype.Stairs, id);
+      } catch (e) {
+        e.message += " Area: " + area + " Id: " + id;
+        throw e;
+      }
     },
     /**
      * @param {number} area 
@@ -504,7 +529,12 @@
      */
     getPresetStairs: function (area, id) {
       !area && (area = me.area);
-      return getPresetUnits(area, sdk.unittype.Stairs, id);
+      try {
+        return getPresetUnits(area, sdk.unittype.Stairs, id);
+      } catch (e) {
+        e.message += " Area: " + area + " Id: " + id;
+        throw e;
+      }
     },
   };
 
@@ -546,7 +576,7 @@
     sendToProfile: function (profileName, mode, message, getResponse = false) {
       let response;
 
-      function copyDataEvent(mode2, msg) {
+      function copyDataEvent (mode2, msg) {
         if (mode2 === mode) {
           let obj;
 
