@@ -650,6 +650,7 @@ const Pickit = {
           }
         }
       }
+      Pickit.pickList.shift();
     }
 
     // Quit current game and transfer the items to mule
