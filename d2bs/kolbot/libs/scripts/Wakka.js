@@ -326,7 +326,7 @@ function Wakka () {
                 log("hot tp");
                 Pather.usePortal(sdk.areas.PandemoniumFortress, null);
 
-                break;
+                continue;
               } else {
                 getCoords();
                 internals.safeTP = true;
