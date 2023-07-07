@@ -442,7 +442,7 @@ Object.defineProperties(Unit.prototype, {
     /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
-      let charclass = getBaseStat("items", this.classid, "charclass");
+      let charclass = getBaseStat("itemtypes", this.itemType, "class");
       // hacky? Essentially just using this to check if we can use the item and if the item doesn't have a specific
       // class requirement, we'll just assume it's for our class. As this makes the actualy checks easy
       return charclass === 255 ? me.classid : charclass;
@@ -1869,7 +1869,13 @@ Unit.prototype.getColor = function () {
  * @throws Error
  */
 Unit.prototype.castChargedSkill = function (...args) {
-  let skillId, x, y, unit, chargedItem, charge;
+  let skillId, x, y;
+  /** @type {Monster} */
+  let unit;
+  /** @type {ItemUnit} */
+  let chargedItem;
+  /** @type {Charge} */
+  let charge;
   /** @param {Charge} itemCharge */
   let validCharge = function (itemCharge) {
     return itemCharge.skill === skillId && itemCharge.charges;
