@@ -233,7 +233,7 @@
     skillMap.set(sdk.skills.Inferno, {
       hand: sdk.skills.hand.Left,
       missile: true,
-      range: () => ((17 + (me.getSkill(sdk.skills.Inferno, sdk.skills.subindex.SoftPoints) * 3) / 4) * 2 / 3),
+      range: () => (((17 + (me.getSkill(sdk.skills.Inferno, sdk.skills.subindex.SoftPoints) * 3)) / 4) * 2 / 3),
     });
     skillMap.set(sdk.skills.StaticField, {
       hand: sdk.skills.hand.Right,
