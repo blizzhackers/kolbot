@@ -9,7 +9,7 @@
  * @namespace Pickit
  */
 const Pickit = {
-  gidList: [],
+  gidList: new Set(),
   invoLocked: true,
   beltSize: 1,
   /** @enum */
@@ -63,7 +63,7 @@ const Pickit = {
   // eslint-disable-next-line no-unused-vars
   itemEvent: function (gid, mode, code, global) {
     if (gid > 0 && mode === 0) {
-      Pickit.gidList.push(gid);
+      Pickit.gidList.add(gid);
     }
   },
 
@@ -347,27 +347,26 @@ const Pickit = {
       this.picked = false;
     }
 
-    let gid = (unit.gid || -1);
+    const itemCount = me.itemcount;
     const cancelFlags = [
-      sdk.uiflags.Inventory, sdk.uiflags.NPCMenu, sdk.uiflags.Waypoint,
-      sdk.uiflags.Shop, sdk.uiflags.Stash, sdk.uiflags.Cube
+      sdk.uiflags.Inventory, sdk.uiflags.NPCMenu,
+      sdk.uiflags.Waypoint, sdk.uiflags.Shop,
+      sdk.uiflags.Stash, sdk.uiflags.Cube
     ];
-    let itemCount = me.itemcount;
-    let item = gid > -1 ? Game.getItem(-1, -1, gid) : false;
-
+    const gid = unit.gid;
+    
+    let item = Game.getItem(-1, -1, gid);
     if (!item) return false;
 
-    for (let i = 0; i < cancelFlags.length; i += 1) {
-      if (getUIFlag(cancelFlags[i])) {
-        delay(500);
-        me.cancel(0);
-
-        break;
-      }
+    if (cancelFlags.some(function (flag) { return getUIFlag(flag); })) {
+      delay(500);
+      me.cancel(0);
     }
 
-    let stats = new ItemStats(item);
-    let tkMana = stats.useTk ? Skill.getManaCost(sdk.skills.Telekinesis) * 2 : Infinity;
+    const stats = new ItemStats(item);
+    const tkMana = stats.useTk
+      ? Skill.getManaCost(sdk.skills.Telekinesis) * 2
+      : Infinity;
 
     MainLoop:
     for (let i = 0; i < retry; i += 1) {
@@ -545,6 +544,7 @@ const Pickit = {
     
     let needMule = false;
     const canUseMule = AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("muleInfo");
+    const _pots = [sdk.items.type.HealingPotion, sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion];
 
     // why wait for idle?
     while (!me.idle) {
@@ -557,26 +557,32 @@ const Pickit = {
       do {
         if (Pickit.ignoreList.has(item.gid)) continue;
         if (Pickit.pickList.some(el => el.gid === item.gid)) continue;
-        if (item.onGroundOrDropping && getDistance(me, item) <= range) {
+        if (item.onGroundOrDropping && item.distance <= range) {
           Pickit.pickList.push(copyUnit(item));
         }
       } while (item.getNext());
     }
 
-    if (Pickit.pickList.some(i => [
-      sdk.items.type.HealingPotion, sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion
-    ].includes(i.itemType))) {
+    if (Pickit.pickList.some(function (el) {
+      return _pots.includes(el.itemType);
+    })) {
       Town.clearBelt();
     }
 
     while (Pickit.pickList.length > 0) {
       if (me.dead) return false;
       Pickit.pickList.sort(this.sortItems);
-      const check = Pickit.pickList.shift();
-      // get the actual item again
-      const itemToPick = Game.getItem(check.classid, -1, check.gid);
+      const currItem = Pickit.pickList[0];
 
-      if (!itemToPick || Pickit.ignoreList.has(itemToPick.gid)) {
+      if (Pickit.ignoreList.has(currItem.gid)) {
+        Pickit.pickList.shift();
+        
+        continue;
+      }
+      
+      // get the real item
+      const _item = Game.getItem(-1, -1, currItem.gid);
+      if (!_item || copyUnit(_item).x === undefined) {
         Pickit.pickList.shift();
         
         continue;
@@ -584,28 +590,29 @@ const Pickit = {
 
       // Check if the item unit is still valid and if it's on ground or being dropped
       // Don't pick items behind walls/obstacles when walking
-      if (itemToPick && copyUnit(itemToPick).x !== undefined && itemToPick.onGroundOrDropping
-          && (Pather.useTeleport() || me.inTown || !checkCollision(me, itemToPick, sdk.collision.BlockWall))) {
+      if (_item.onGroundOrDropping
+          && (Pather.useTeleport() || me.inTown || !checkCollision(me, _item, sdk.collision.BlockWall))) {
         // Check if the item should be picked
-        let status = this.checkItem(itemToPick);
+        let status = this.checkItem(_item);
 
-        if (status.result && this.canPick(itemToPick)) {
+        if (status.result && this.canPick(_item)) {
           // Override canFit for scrolls, potions and gold
-          let canFit = (Storage.Inventory.CanFit(itemToPick) || Pickit.essentials.includes(itemToPick.itemType));
+          let canFit = (Storage.Inventory.CanFit(_item) || Pickit.essentials.includes(_item.itemType));
 
           // Field id when our used space is above a certain percent or if we are full try to make room with FieldID
           if (Config.FieldID.Enabled && (!canFit || Storage.Inventory.UsedSpacePercent() > Config.FieldID.UsedSpace)) {
-            me.fieldID() && (canFit = (itemToPick.gid !== undefined && Storage.Inventory.CanFit(itemToPick)));
+            me.fieldID() && (canFit = (_item.gid !== undefined && Storage.Inventory.CanFit(_item)));
           }
 
           // Try to make room by selling items in town
           if (!canFit) {
+            let usedSpace = Storage.Inventory.UsedSpacePercent();
             // Check if any of the current inventory items can be stashed or need to be identified and eventually sold to make room
             if (this.canMakeRoom()) {
-              console.log("ÿc7Trying to make room for " + Item.color(itemToPick) + itemToPick.name);
+              console.log("ÿc7Trying to make room for " + Item.color(_item) + _item.name);
 
               // Go to town and do town chores
-              if (Town.visitTown()) {
+              if (Town.visitTown() && Storage.Inventory.UsedSpacePercent() < usedSpace) {
                 // Recursive check after going to town. We need to remake item list because gids can change.
                 // Called only if room can be made so it shouldn't error out or block anything.
                 Pickit.ignoreList.clear();
@@ -613,16 +620,16 @@ const Pickit = {
               }
 
               // Town visit failed - abort
-              console.warn("Failed to visit town. ÿc7Not enough room for " + Item.color(itemToPick) + itemToPick.name);
+              console.warn("Failed to visit town. ÿc7Not enough room for " + Item.color(_item) + _item.name);
 
               return false;
             }
 
             // Can't make room - trigger automule
-            if (copyUnit(itemToPick).x !== undefined) {
-              Item.logger("No room for", itemToPick);
-              console.warn("ÿc7Not enough room for " + Item.color(itemToPick) + itemToPick.name);
-              Pickit.ignoreList.add(itemToPick.gid);
+            if (copyUnit(_item).x !== undefined) {
+              Item.logger("No room for", _item);
+              console.warn("ÿc7Not enough room for " + Item.color(_item) + _item.name);
+              Pickit.ignoreList.add(_item.gid);
               if (canUseMule) {
                 console.debug("Attempt to trigger automule");
                 needMule = true;
@@ -634,9 +641,9 @@ const Pickit = {
 
           // Item can fit - pick it up
           if (canFit) {
-            let picked = this.pickItem(itemToPick, status.result, status.line);
+            let picked = this.pickItem(_item, status.result, status.line);
             if (!picked) {
-              console.warn("Failed to pick item " + itemToPick.prettyPrint);
+              console.warn("Failed to pick item " + _item.prettyPrint);
 
               break;
             }
@@ -660,18 +667,24 @@ const Pickit = {
    * @param {number} retry 
    */
   fastPick: function (retry = 3) {
-    let item, itemList = [];
+    let item;
+    const _removeList = [];
+    const itemList = [];
 
-    while (this.gidList.length > 0) {
-      let gid = this.gidList.shift();
+    for (let gid of this.gidList) {
+      _removeList.push(gid);
       item = Game.getItem(-1, -1, gid);
-
       if (item && item.onGroundOrDropping
         && (!Town.ignoreType(item.itemType) || (item.itemType >= sdk.items.type.HealingPotion
         && item.itemType <= sdk.items.type.RejuvPotion))
-        && item.itemType !== sdk.items.type.Gold && getDistance(me, item) <= Config.PickRange) {
+        && item.itemType !== sdk.items.type.Gold
+        && getDistance(me, item) <= Config.PickRange) {
         itemList.push(copyUnit(item));
       }
+    }
+
+    while (_removeList.length > 0) {
+      this.gidList.delete(_removeList.shift());
     }
 
     while (itemList.length > 0) {
