@@ -10,6 +10,7 @@ const Loader = {
   scriptList: [],
   scriptIndex: -1,
   skipTown: ["Test", "Follower"],
+  doneScripts: new Set(),
 
   init: function () {
     this.getScripts();
@@ -168,6 +169,7 @@ const Loader = {
                 + "ÿc7 - Experience Gained: ÿc0" + gain + "\n"
                 + "ÿc7 - Exp/minute: ÿc0" + (gain / (duration / 60000)).toFixed(2)
               );
+              this.doneScripts.add(script);
             }
           }
         } catch (error) {
@@ -256,6 +258,7 @@ const Loader = {
               + "ÿc7 - Experience Gained: ÿc0" + gain + "\n"
               + "ÿc7 - Exp/minute: ÿc0" + (gain / (duration / 60000)).toFixed(2)
             );
+            this.doneScripts.add(script);
           }
         }
       } catch (error) {
