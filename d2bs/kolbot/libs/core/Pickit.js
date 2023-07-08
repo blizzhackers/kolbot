@@ -612,17 +612,23 @@ const Pickit = {
               console.log("ÿc7Trying to make room for " + Item.color(_item) + _item.name);
 
               // Go to town and do town chores
-              if (Town.visitTown() && Storage.Inventory.UsedSpacePercent() < usedSpace) {
+              if (Town.visitTown()) {
                 // Recursive check after going to town. We need to remake item list because gids can change.
                 // Called only if room can be made so it shouldn't error out or block anything.
-                Pickit.ignoreList.clear();
-                return this.pickItems();
+                if (Storage.Inventory.UsedSpacePercent() < usedSpace) {
+                  console.log(
+                    "ÿc7Made room for " + Item.color(_item) + _item.prettyPrint
+                    + " (" + usedSpace + "% -> " + Storage.Inventory.UsedSpacePercent() + "%)"
+                  );
+                  Pickit.ignoreList.clear();
+                  return this.pickItems();
+                }
+              } else {
+                // Town visit failed - abort
+                console.warn("Failed to visit town. ÿc7Not enough room for " + Item.color(_item) + _item.name);
+
+                return false;
               }
-
-              // Town visit failed - abort
-              console.warn("Failed to visit town. ÿc7Not enough room for " + Item.color(_item) + _item.name);
-
-              return false;
             }
 
             // Can't make room - trigger automule
