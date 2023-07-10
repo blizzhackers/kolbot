@@ -63,7 +63,7 @@ declare global {
     /**
      * A function that returns the amount of space used in this container
      */
-    UsedSpacePercent(): void
+    UsedSpacePercent(): number
     
     /**
      * A function the returns an item list in comparison to a given reference array

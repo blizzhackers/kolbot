@@ -42,7 +42,7 @@ declare global {
       function get(): any;
       function reset(): void;
     }
-    const tasks: {
+    const tasks: Map<Act, {
       Heal: NPC;
       Shop: NPC;
       Gamble: NPC;
@@ -50,16 +50,16 @@ declare global {
       Merc: NPC;
       Key: NPC;
       CainID: NPC;
-    }[];
+    }>;
     const ignoredItemTypes: any[];
     function needPotions(): boolean;
     function doChores(repair?: boolean): boolean;
-    function npcInteract(name?: string, cancel?: boolean): boolean | Unit;
+    function npcInteract(name?: string, cancel?: boolean): boolean | NPCUnit;
     function checkQuestItems(): void;
     function getTpTool(): ItemUnit;
     function getIdTool(): ItemUnit;
     function canTpToTown(): boolean;
-    function initNPC(task?: string, reason?: string): boolean | Unit;
+    function initNPC(task?: string, reason?: string): boolean | NPCUnit;
     function heal(): boolean;
     function needHealing(): boolean;
     function buyPotions(): boolean;

@@ -1,5 +1,5 @@
 // @ts-nocheck
-/// <reference path="../libs/SoloPlay/index.d.ts" />
+/// <reference path="../libs/SoloPlay/globals.d.ts" />
 /// <reference path="./types/sdk.d.ts" />
 /// <reference path="./types/Misc.d.ts" />
 /// <reference path="./types/Util.d.ts" />
@@ -122,6 +122,7 @@ declare global {
   class ScriptError extends Error {
   }
 
+  type Act = 1 | 2 | 3 | 4 | 5;
   type actType = { initialized: boolean, spot: { [data: string]: [number, number] } };
   type potType = 'hp' | 'mp' | 'rv';
 
@@ -424,6 +425,7 @@ declare global {
     readonly spectype: number;
     readonly curseable: boolean;
     readonly scareable: boolean;
+    readonly attacking: boolean;
 
     getEnchant(type: number): boolean;
     hasEnchant(...enchants: number): boolean
@@ -449,6 +451,8 @@ declare global {
   class ObjectUnit extends Unit {
     public type: ObjectType;
     objtype: number;
+    openUnit(): boolean;
+    useUnit(targetArea?: number): boolean;
   }
 
   type MissileType = 3;
@@ -459,7 +463,8 @@ declare global {
 
   type ItemType = 4;
   interface ItemUnit extends Unit {
-
+    castChargedSkill(skillId: number, target?: Unit): boolean;
+    castChargedSkill(skillId: number, x: number, y: number): boolean;
   }
 
   class ItemUnit extends Unit {
@@ -488,8 +493,9 @@ declare global {
     // additional, not from d2bs
     readonly identified: boolean;
     readonly isEquipped: boolean
-    readonly dexreq: number
-    readonly strreq: number
+    readonly dexreq: number;
+    readonly strreq: number;
+    readonly charclass: number;
     readonly isInInventory: boolean;
     readonly isInStash: boolean;
     readonly isInCube: boolean;
@@ -537,6 +543,7 @@ declare global {
   type TileType = 5;
   class Tile extends Unit {
     public type: TileType;
+    useUnit(targetArea?: number): boolean;
   }
 
   interface MeType extends Unit {
@@ -623,6 +630,7 @@ declare global {
     readonly goldenbird: boolean;
     readonly lamessen: boolean;
     readonly gidbinn: boolean;
+    readonly blackendTemple: boolean;
     readonly travincal: boolean;
     readonly mephisto: boolean;
     readonly izual: boolean;
@@ -660,6 +668,7 @@ declare global {
     readonly FBR: number;
     readonly IAS: number;
     readonly shapeshifted: boolean;
+    readonly attacking: boolean;
 
     haveWaypoint(area: number): boolean;
     overhead(msg: string): void;
@@ -704,6 +713,8 @@ declare global {
     fieldID(): boolean;
     switchToPrimary(): boolean;
     haveWaypoint(area: number): boolean;
+    castChargedSkill(skillId: number, target?: Unit): boolean;
+    castChargedSkill(skillId: number, x: number, y: number): boolean;
   }
 
   const me: MeType

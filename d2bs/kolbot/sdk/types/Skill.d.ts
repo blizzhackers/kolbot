@@ -36,15 +36,33 @@ declare global {
     have(): boolean;
     reset(): void;
   }
+
+  type Charge = {
+    skill: number;
+    level: number;
+    charges: number;
+    maxcharges: number;
+  };
+  
+  class ChargedSkill {
+    skill: number;
+    level: number;
+    charges: number;
+    maxCharges: number;
+    gid: number;
+    unit: ItemUnit;
+    update(item: ItemUnit): void;
+  }
   namespace Skill {
     let usePvpRange: boolean;
     const manaCostList: object;
     const needFloor: number[];
     const missileSkills: number[];
-    const charges: any[];
+    const charges: ChargedSkill[];
     
     function get (skillId: number): SkillDataInfo;
     function getClassSkillRange(classid?: number): [number, number];
+    function getCharges(): boolean;
     function init(): void;
     function canUse(skillId: number): boolean;
     function getDuration(skillId: number): number;
@@ -64,5 +82,6 @@ declare global {
     function useTK(unit: Unit): boolean;
     function cast(skillId: number, hand?: number, x?: number, y?: number, item?: ItemUnit | undefined): boolean;
     function cast(skillId: number, hand?: number, unit?: Unit): boolean;
+    function castCharges(skillId: number, unit: Unit | { x: number, y: number }): boolean;
   }
 }

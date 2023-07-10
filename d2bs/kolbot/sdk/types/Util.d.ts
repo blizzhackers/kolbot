@@ -123,6 +123,11 @@ declare global {
     arg4?: number;
   };
 
+  namespace Messaging {
+    function sendToScript(name: string, message: string): boolean;
+    function sendToProfile(profile: string, mode: number, msg: string, getResponse?: boolean): boolean;
+  }
+
   namespace Sort {
     function units(a: Unit, b: Unit): number;
     function presetUnits(a: PresetUnit, b: PresetUnit): number;

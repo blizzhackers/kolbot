@@ -58,7 +58,7 @@ declare global {
     timeoutDelay(text: any, time: any, stopfunc?: any, arg?: any):void
     click(type: any, x: any, y: any, xsize: any, ysize: any):void
     setText(type: any, x: any, y: any, xsize: any, ysize: any, text: any):void
-    getText(type: any, x: any, y: any, xsize: any, ysize: any):string
+    getText(type: any, x: any, y: any, xsize: any, ysize: any):string[]
     joinChannel(channel: any):void
     createGame(name: any, pass: any, diff: any, delay: any):void
     clickRealm(realm: 0|1|2|3):void

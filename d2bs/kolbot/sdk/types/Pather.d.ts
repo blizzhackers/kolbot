@@ -1,5 +1,25 @@
 export {};
 declare global {
+  interface PathSettings {
+    allowNodeActions?: boolean;
+    allowTeleport?: boolean;
+    allowClearing?: boolean;
+    allowTown?: boolean;
+    allowPicking?: boolean;
+    minDist?: number;
+    retry?: number;
+    pop?: boolean;
+    returnSpotOnError?: boolean;
+    callback?: () => void;
+    clearSettings?: ClearSettings;
+  }
+
+  interface ClearSettings {
+    clearPath?: boolean;
+    range?: number;
+    specType?: number;
+    sort?: () => void;
+  }
   namespace Pather {
     const wpAreas: number[];
     let walkDistance: number;
@@ -8,6 +28,8 @@ declare global {
     const cancelFlags: number[];
     let recursion: boolean;
     let lastPortalTick: 0;
+    let allowBroadcast: boolean;
+
     function getWalkDistance(x: number, y: number, area?: number, xx?: number, yy?: number, reductionType?: 0 | 1 | 2, radius?: number): number;
     function useTeleport(): boolean;
     function moveTo(x: number, y: number, retry?: number | undefined, clearPath?: boolean | undefined, pop?: boolean | undefined): boolean;
@@ -16,22 +38,31 @@ declare global {
     function openDoors(x: any, y: any): boolean;
     function moveToUnit(unit: PathNode, offX?: undefined, offY?: undefined, clearPath?: undefined, pop?: undefined): boolean;
     function moveToPreset(area: any, unitType: any, unitId: any, offX?: any, offY?: any, clearPath?: any, pop?: any): boolean;
-    function moveToExit(targetArea: any, use?: any, clearPath?: any): void;
-    function getNearestRoom(area: any): void;
-    function openExit(targetArea: any): void;
-    function openUnit(type: any, id: any): void;
+    function moveToPresetObject(area: number, unitId: number, givenSettings?: PathSettings): boolean;
+    function moveToPresetMonster(area: number, unitId: number, givenSettings?: PathSettings): boolean;
+    function moveToExit(targetArea: any, use?: any, givenSettings?: PathSettings): boolean;
+    function getDistanceToExit(area?: number, exit?: number): number;
+    function getExitCoords(area?: number, exit?: number): PathNode | false;
+    function getNearestRoom(area: number): [number, number] | false;
+    function openExit(targetArea: number): boolean;
+    function openUnit(type: number, id: number): void;
     function useUnit(type: any, id: any, targetArea: any): boolean;
-    function useWaypoint(targetArea: number | null, check?: boolean): boolean;
-    function makePortal(use?: boolean | undefined): void;
+    function broadcastIntent(targetArea: number): void;
+    function useWaypoint(targetArea: number | null | "random", check?: boolean): boolean;
+    function makePortal(use?: boolean | undefined): ObjectUnit | boolean;
     function usePortal(targetArea?: number | null, owner?: string | undefined, unit?: undefined): boolean;
-    function getPortal(targetArea: any, owner?: any): ObjectUnit | false;
-    function getNearestWalkable(x: any, y: any, range: any, step: any, coll: any, size?: any): [number, number] | false;
-    function checkSpot(x: any, y: any, coll: any, cacheOnly: any, size: any): void;
+    function getPortal(targetArea: number, owner?: any): ObjectUnit | false;
+    function getNearestWalkable(
+      x: number, y: number, range: number, step: number, coll: number, size?: number
+    ): [number, number] | false;
+    function checkSpot(
+      x: number, y: number, coll: number, cacheOnly: boolean, size: number
+    ): boolean;
+    /** @deprecated use `me.accessToAct(act)` instead */
     function accessToAct(act: number): boolean;
-    function getWP(area: any, clearPath?: any): boolean;
-    function journeyTo(area: any): boolean;
-    function plotCourse(dest: any, src: any): false|{course:number[]};
-    function areasConnected(src: any, dest: any): void;
-    function getAreaName(area: number): void;
+    function getWP(area: number, clearPath?: boolean): boolean;
+    function journeyTo(area: number): boolean;
+    function plotCourse(dest: number, src: number): false | { course: number[], useWP: boolean };
+    function areasConnected(src: number, dest: number): void;
   }
 }
