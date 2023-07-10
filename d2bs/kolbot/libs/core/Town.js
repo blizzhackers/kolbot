@@ -339,8 +339,7 @@ const Town = {
    * @returns {boolean | Unit}
    */
   initNPC: function (task = "", reason = "undefined") {
-    console.time("initNPC");
-    console.info(true, reason);
+    console.info(true, reason, "initNPC");
     task = task.capitalize(false);
 
     delay(250);
@@ -2373,7 +2372,9 @@ const Town = {
 
         if (returnWhenDone) return true;
       }
-    } else if (me.act === 2 && me.y < 5049 && !String.isEqual(spot, NPC.Atma)) {
+    } else if (me.act === 2
+      && me.x > 5122 && me.y < 5049
+      && !String.isEqual(spot, NPC.Atma)) {
       // we are inside the building, if Atma is blocking the entrance we need the side door
       let atma = Game.getNPC(NPC.Atma);
       // console.debug("atma", atma);
