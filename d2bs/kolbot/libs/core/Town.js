@@ -1146,7 +1146,14 @@ const Town = {
 
     // todo - change act in a3 if we are next to the wp as it's faster than going all the way to Alkor
     // todo - compare distance Ormus -> Alkor compared to Ormus -> WP -> Akara
-    let potDealer = ["Akara", "Lysander", "Alkor", "Jamella", "Malah"][me.act - 1];
+    const potDealers = new Map([
+      [1, NPC.Akara],
+      [2, NPC.Lysander],
+      [3, NPC.Alkor],
+      [4, NPC.Jamella],
+      [5, NPC.Malah],
+    ]);
+    let potDealer = potDealers.get(me.act);
 
     switch (type) {
     case sdk.items.ThawingPotion:
@@ -1168,13 +1175,18 @@ const Town = {
       break;
     }
 
+    if (potDealer === NPC.Alkor && Town.getDistance(potDealer) > 10) {
+      Town.goToTown(me.highestAct >= 4 ? 4 : 1);
+      potDealer = potDealers.get(me.act);
+    }
+
     try {
-      if (!!npc && npc.name.toLowerCase() === NPC[potDealer] && !getUIFlag(sdk.uiflags.Shop)) {
+      if (!!npc && npc.name.toLowerCase() === potDealer && !getUIFlag(sdk.uiflags.Shop)) {
         if (!npc.startTrade("Shop")) throw new Error("Failed to open " + npc.name + " trade menu");
       } else {
         me.cancelUIFlags();
-        Town.move(NPC[potDealer]);
-        npc = Game.getNPC(NPC[potDealer]);
+        Town.move(potDealer);
+        npc = Game.getNPC(potDealer);
 
         if (!npc || !npc.openMenu() || !npc.startTrade("Shop")) {
           throw new Error("Failed to open " + npc.name + " trade menu");
