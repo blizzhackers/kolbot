@@ -5,7 +5,7 @@
 *
 */
 
-function Nihlathak() {
+function Nihlathak () {
   Town.goToTown(5);
   Town.doChores();
 

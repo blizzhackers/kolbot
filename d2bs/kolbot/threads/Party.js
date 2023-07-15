@@ -18,7 +18,7 @@ include("systems/gameaction/GameAction.js");
 // party thread specific
 include("oog/ShitList.js");
 
-function main() {
+function main () {
   Config.init();
 
   /** @type {string[][]} */

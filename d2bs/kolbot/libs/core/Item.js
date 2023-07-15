@@ -109,23 +109,14 @@ const Item = {
   },
 
   getEquippedItem: function (bodyLoc) {
-    let item = me.getItem(-1, sdk.items.mode.Equipped);
+    let item = me.getItemsEx(-1, sdk.items.mode.Equipped)
+      .filter(function (item) {
+        return item.bodylocation === bodyLoc;
+      }).first();
 
-    if (item) {
-      do {
-        if (item.bodylocation === bodyLoc) {
-          return {
-            classid: item.classid,
-            tier: NTIP.GetTier(item)
-          };
-        }
-      } while (item.getNext());
-    }
-
-    // Don't have anything equipped in there
     return {
-      classid: -1,
-      tier: -1
+      classid: item ? item.classid : -1,
+      tier: item ? NTIP.GetTier(item) : -1
     };
   },
 

@@ -1310,7 +1310,7 @@
     /** @type {number} */
     this.reqLevel = getBaseStat("skills", skillId, "reqlevel");
     /** @type {number[]} */
-    this.preReqs = (() => {
+    this.preReqs = (function () {
       let preReqs = [];
 
       for (let t = sdk.stats.PreviousSkillLeft; t >= sdk.stats.PreviousSkillRight; t--) {
@@ -1478,6 +1478,46 @@
     if (!skillMap.has(i)) continue;
     SkillData.set(i, new Skill(i));
   }
+
+  /**
+   * Not an actual skill, but used for pure summoner so needs to be handled
+   */
+  SkillData.set(sdk.skills.Summoner, new function () {
+    this.skillId = sdk.skills.Summoner;
+    this.reqLevel = 1;
+    this.preReqs = [];
+    this.damageType = "physical";
+    this._range = 40;
+    this._AoE = 0;
+    this._duration = 0;
+    this._manaCost = 0;
+    this._mana = 0;
+    this._minMana = 0;
+    this._lvlMana = 0;
+    this._manaShift = 0;
+    this._bestSlot = 0;
+    this._dmg = 0;
+    this._hardPoints = 0;
+    this._softPoints = 0;
+    this._checked = false;
+
+    this.duration = function () {
+      return 0;
+    };
+    this.manaCost = function () {
+      return 0;
+    };
+    this.range = function () {
+      return 40;
+    };
+    this.AoE = function () {
+      return 0;
+    };
+    this.have = function () {
+      return true;
+    };
+    this.reset = function () {};
+  });
 
   // Export
   module.exports = SkillData;

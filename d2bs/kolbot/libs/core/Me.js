@@ -12,13 +12,17 @@
  * @desciption Set me.runwalk to 0 (walk)
  * @returns {void}
  */
-me.walk = () => me.runwalk = sdk.player.move.Walk;
+me.walk = function () {
+  me.runwalk = sdk.player.move.Walk;
+};
 
 /**
  * @desciption Set me.runwalk to 1 (run)
  * @returns {void}
  */
-me.run = () => me.runwalk = sdk.player.move.Run;
+me.run = function () {
+  me.runwalk = sdk.player.move.Run;
+};
 
 /**
  * @description Calling me.ping can bug sometimes so check if game is in ready state.
@@ -96,7 +100,8 @@ me.cancelUIFlags = function () {
  * @returns {boolean}
  */
 me.switchWeapons = function (slot) {
-  if (this.gametype === sdk.game.gametype.Classic || (slot !== undefined && this.weaponswitch === slot)) {
+  if (this.gametype === sdk.game.gametype.Classic
+    || (slot !== undefined && this.weaponswitch === slot)) {
     return true;
   }
 
@@ -106,8 +111,11 @@ me.switchWeapons = function (slot) {
 
   let originalSlot = this.weaponswitch;
   let switched = false;
-  let packetHandler = (bytes) => bytes.length > 0
-    && bytes[0] === sdk.packets.recv.WeaponSwitch && (switched = true) && false; // false to not block
+  /** @param {number[]} bytes */
+  const packetHandler = function (bytes) {
+    return bytes.length > 0
+      && bytes[0] === sdk.packets.recv.WeaponSwitch && (switched = true) && false; // false to not block
+  };
   try {
     addEventListener("gamepacket", packetHandler);
 
@@ -169,7 +177,9 @@ me.castingDuration = function (skillId, fcr = me.FCR, charClass = me.classid) {
 };
 
 me.getWeaponQuantity = function (weaponLoc = sdk.body.RightArm) {
-  let currItem = me.getItemsEx(-1, sdk.items.mode.Equipped).filter(i => i.bodylocation === weaponLoc).first();
+  let currItem = me.getItemsEx(-1, sdk.items.mode.Equipped)
+    .filter(i => i.bodylocation === weaponLoc)
+    .first();
   return !!currItem ? currItem.getStat(sdk.stats.Quantity) : 0;
 };
 
@@ -235,24 +245,42 @@ me.needPotions = function () {
 /** @returns {ItemUnit | null} */
 me.getTpTool = function () {
   const items = me.getItemsEx(-1, sdk.items.mode.inStorage)
-    .filter((item) => item.isInInventory
-      && [sdk.items.ScrollofTownPortal, sdk.items.TomeofTownPortal].includes(item.classid));
+    .filter(function (item) {
+      return item.isInInventory
+        && [
+          sdk.items.ScrollofTownPortal,
+          sdk.items.TomeofTownPortal
+        ].includes(item.classid);
+    });
   if (!items.length) return null;
-  let tome = items.find((i) => i.classid === sdk.items.TomeofTownPortal && i.getStat(sdk.stats.Quantity) > 0);
+  let tome = items.find(function (i) {
+    return i.classid === sdk.items.TomeofTownPortal && i.getStat(sdk.stats.Quantity) > 0;
+  });
   if (tome) return tome;
-  let scroll = items.find((i) => i.classid === sdk.items.ScrollofTownPortal);
+  let scroll = items.find(function (i) {
+    return i.classid === sdk.items.ScrollofTownPortal;
+  });
   return scroll ? scroll : null;
 };
 
 /** @returns {ItemUnit | null} */
 me.getIdTool = function () {
   const items = me.getItemsEx()
-    .filter((i) => i.isInInventory && [sdk.items.ScrollofIdentify, sdk.items.TomeofIdentify].includes(i.classid));
+    .filter(function (i) {
+      return i.isInInventory
+        && [
+          sdk.items.ScrollofIdentify,
+          sdk.items.TomeofIdentify
+        ].includes(i.classid);
+    });
   if (!items.length) return null;
-  let tome = items
-    .find((i) => i.isInInventory && i.classid === sdk.items.TomeofIdentify && i.getStat(sdk.stats.Quantity) > 0);
+  let tome = items.find(function (i) {
+    return i.classid === sdk.items.TomeofIdentify && i.getStat(sdk.stats.Quantity) > 0;
+  });
   if (tome) return tome;
-  let scroll = items.find((i) => i.isInInventory && i.classid === sdk.items.ScrollofIdentify);
+  let scroll = items.find(function (i) {
+    return i.classid === sdk.items.ScrollofIdentify;
+  });
   return scroll ? scroll : null;
 };
 
@@ -285,7 +313,9 @@ me.needHealing = function () {
     sdk.states.Weaken,
     sdk.states.Decrepify,
     sdk.states.LowerResist
-  ].some((state) => me.getState(state)));
+  ].some(function (state) {
+    return me.getState(state);
+  }));
 };
 
 /**
@@ -300,7 +330,9 @@ me.getTome = function (id) {
 
 me.getUnids = function () {
   return me.getItemsEx(-1, sdk.items.mode.inStorage)
-    .filter((item) => item.isInInventory && !item.identified);
+    .filter(function (item) {
+      return item.isInInventory && !item.identified;
+    });
 };
 
 // Identify items while in the field if we have a id tome
@@ -627,7 +659,9 @@ Object.defineProperties(me, {
           QuestData.get(sdk.quest.id.AbleToGotoActIII).complete(),
           QuestData.get(sdk.quest.id.AbleToGotoActIV).complete(),
           QuestData.get(sdk.quest.id.AbleToGotoActV).complete()];
-        let index = acts.findIndex((i) => !i); // find first false, returns between 1 and 5
+        let index = acts.findIndex(function (i) {
+          return !i;
+        }); // find first false, returns between 1 and 5
         return index === -1 ? 5 : index;
       }
     },
@@ -638,7 +672,9 @@ Object.defineProperties(me, {
 
           // check if we've completed main part but not used our reward
           if ([
-            sdk.quest.id.RescueonMountArreat, sdk.quest.id.SiegeOnHarrogath, sdk.quest.id.ToolsoftheTrade
+            sdk.quest.id.RescueonMountArreat,
+            sdk.quest.id.SiegeOnHarrogath,
+            sdk.quest.id.ToolsoftheTrade
           ].includes(i) && QuestData.get(i).complete(true)) {
             return i;
           }
@@ -725,6 +761,11 @@ Object.defineProperties(me, {
     travincal: {
       get: function () {
         return QuestData.get(sdk.quest.id.KhalimsWill).complete();
+      }
+    },
+    blackendTemple: {
+      get: function () {
+        return QuestData.get(sdk.quest.id.TheBlackenedTemple).complete();
       }
     },
     mephisto: {

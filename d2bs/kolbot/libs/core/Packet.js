@@ -17,7 +17,9 @@ const Packet = {
     let pingDelay = (me.gameReady ? me.ping : 125);
 
     for (let i = 0; i < 5; i += 1) {
-      unit.distance > 4 && Pather.moveToUnit(unit);
+      if (getDistance(me, unit) > 4) {
+        Pather.moveNearUnit(unit, 4);
+      }
       Packet.entityInteract(unit);
       let tick = getTickCount();
 
@@ -36,8 +38,11 @@ const Packet = {
         delay(100);
       }
 
-      // sendPacket(1, sdk.packets.send.NPCInit, 4, 1, 4, unit.gid);
-      new PacketBuilder().byte(sdk.packets.send.NPCInit).dword(1).dword(unit.gid).send();
+      new PacketBuilder()
+        .byte(sdk.packets.send.NPCInit)
+        .dword(1)
+        .dword(unit.gid)
+        .send();
       delay(pingDelay + 1 * 2);
       Packet.cancelNPC(unit);
       delay(pingDelay + 1 * 2);
@@ -179,8 +184,12 @@ const Packet = {
 
     let itemCount = me.itemcount;
     let npc = getInteractedNPC();
-
     if (!npc) return false;
+    let _npcs = Town.tasks.get(me.act);
+    if (![_npcs.Shop, _npcs.Gamble, _npcs.Repair, _npcs.Key].includes(npc.name.toLowerCase())) {
+      console.warn("Unit.sell: NPC is not a shop, gamble, repair or key NPC.");
+      return false;
+    }
 
     for (let i = 0; i < 5; i += 1) {
       sendPacket(1, sdk.packets.send.NPCSell, 4, npc.gid, 4, unit.gid, 4, 0, 4, 0);

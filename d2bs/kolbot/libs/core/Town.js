@@ -1257,7 +1257,7 @@ const Town = {
     if (!this.wantKeys()) return true;
 
     // avoid Hratli
-    me.act === 3 && this.goToTown(Pather.accessToAct(4) ? 4 : 2);
+    me.act === 3 && this.goToTown(me.accessToAct(4) ? 4 : 2);
 
     let npc = this.initNPC("Key", "buyKeys");
     if (!npc) return false;
@@ -1439,7 +1439,7 @@ const Town = {
     for (let i = 0; i < repairAction.length; i += 1) {
       switch (repairAction[i]) {
       case "repair":
-        me.act === 3 && this.goToTown(Pather.accessToAct(4) ? 4 : 2);
+        me.act === 3 && this.goToTown(me.accessToAct(4) ? 4 : 2);
         npc = this.initNPC("Repair", "repair");
         if (!npc) return false;
         me.repair();
@@ -1575,7 +1575,7 @@ const Town = {
     let preArea = me.area;
 
     // avoid Aheara
-    me.act === 3 && this.goToTown(Pather.accessToAct(4) ? 4 : 2);
+    me.act === 3 && this.goToTown(me.accessToAct(4) ? 4 : 2);
 
     let npc = this.initNPC("Merc", "reviveMerc");
     if (!npc) return false;

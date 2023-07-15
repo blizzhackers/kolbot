@@ -9,6 +9,11 @@ const ClassAttack = {
   lastTrapPos: {},
   trapRange: 20,
 
+  /**
+   * @param {Monster} unit 
+   * @param {boolean} preattack 
+   * @returns {AttackResult}
+   */
   doAttack: function (unit, preattack) {
     if (!unit) return Attack.Result.SUCCESS;
     Config.TeleSwitch && me.switchToPrimary();
@@ -75,7 +80,9 @@ const ClassAttack = {
     }
 
     // Get timed skill
-    let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
+    let checkSkill = Attack.getCustomAttack(unit)
+      ? Attack.getCustomAttack(unit)[0]
+      : Config.AttackSkill[index];
 
     if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill, classid)) {
       timedSkill = checkSkill;
@@ -86,7 +93,9 @@ const ClassAttack = {
     }
 
     // Get untimed skill
-    checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[1] : Config.AttackSkill[index + 1];
+    checkSkill = Attack.getCustomAttack(unit)
+      ? Attack.getCustomAttack(unit)[1]
+      : Config.AttackSkill[index + 1];
 
     if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill, classid)) {
       untimedSkill = checkSkill;
@@ -155,7 +164,12 @@ const ClassAttack = {
     Precast.doPrecast(false);
   },
 
-  // Returns: 0 - fail, 1 - success, 2 - no valid attack skills
+  /**
+   * @param {Monster} unit 
+   * @param {number} timedSkill 
+   * @param {number} untimedSkill 
+   * @returns {AttackResult}
+   */
   doCast: function (unit, timedSkill = -1, untimedSkill = -1) {
     // No valid skills can be found
     if (timedSkill < 0 && untimedSkill < 0) return Attack.Result.CANTATTACK;

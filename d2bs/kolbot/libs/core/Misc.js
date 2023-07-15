@@ -173,7 +173,9 @@ const Misc = {
       let myPartyId = party.partyid;
       
       do {
-        if (party.partyid !== sdk.party.NoParty && party.partyid === myPartyId && party.name !== me.name) {
+        if (party.partyid !== sdk.party.NoParty
+          && party.partyid === myPartyId
+          && party.name !== me.name) {
           print(party.name);
           count += 1;
         }
@@ -829,9 +831,3 @@ const Misc = {
     return questStates;
   }
 };
-// (function() {
-// 	// todo figure out why the Misc.d.ts file only works right if Misc is wrapped in a IEFE
-
-// 	// export to global scope
-// 	global.Misc = Misc;
-// })();

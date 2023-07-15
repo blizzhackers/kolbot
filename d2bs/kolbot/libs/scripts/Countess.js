@@ -5,7 +5,7 @@
 *
 */
 
-function Countess() {
+function Countess () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.BlackMarsh);
   Precast.doPrecast(true);

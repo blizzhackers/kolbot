@@ -147,7 +147,8 @@
       throw new Error("PacketBuilder must be called with 'new' operator!");
     }
 
-    let queue = [], count = 0;
+    let queue = [];
+    let count = 0;
 
     // accepts any number of arguments
     let enqueue = (type, size) => (...args) => {

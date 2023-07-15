@@ -5,7 +5,7 @@
 *
 */
 
-function Treehead() {
+function Treehead () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.DarkWood);
   Precast.doPrecast(true);

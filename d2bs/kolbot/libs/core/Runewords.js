@@ -18,14 +18,16 @@ const Runewords = {
     Runewords.pickitEntries = [];
 
     // initiate pickit entries
-    for (let i = 0; i < Config.KeepRunewords.length; i += 1) {
+    for (let entry of Config.KeepRunewords) {
       let info = {
         file: "Character Config",
-        line: Config.KeepRunewords[i]
+        line: entry
       };
 
-      let parsedLine = NTIP.ParseLineInt(Config.KeepRunewords[i], info);
-      parsedLine && this.pickitEntries.push(NTIP.ParseLineInt(Config.KeepRunewords[i], info));
+      let parsedLine = NTIP.ParseLineInt(entry, info);
+      if (parsedLine) {
+        this.pickitEntries.push(parsedLine);
+      }
     }
 
     // change text to classid

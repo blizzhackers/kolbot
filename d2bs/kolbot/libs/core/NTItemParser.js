@@ -91,7 +91,6 @@ NTIP.OpenFile = function (filepath, notify) {
 };
 
 NTIP.CheckQuantityOwned = function (item_type, item_stats) {
-  let item;
   let num = 0;
   let items = me.getItemsEx();
 
@@ -101,23 +100,19 @@ NTIP.CheckQuantityOwned = function (item_type, item_stats) {
     return 0;
   }
 
-  for (let i = 0; i < items.length; i += 1) {
-    if (items[i].mode === sdk.items.mode.inStorage && items[i].location === sdk.storage.Stash) {
-      item = items[i];
-
+  for (let item of items) {
+    if (item.mode === sdk.items.mode.inStorage
+      && item.location === sdk.storage.Stash) {
       if ((item_type !== null && typeof item_type === "function" && item_type(item)) || item_type === null) {
         if ((item_stats !== null && typeof item_stats === "function" && item_stats(item)) || item_stats === null) {
           num += 1;
         }
       }
-    } else if (items[i].mode === sdk.items.mode.inStorage && items[i].location === sdk.storage.Inventory) { // inv check
-      item = items[i];
-
+    } else if (item.mode === sdk.items.mode.inStorage
+      && item.location === sdk.storage.Inventory) { // inv check
       if ((item_type !== null && typeof item_type === "function" && item_type(item)) || item_type === null) {
         if ((item_stats !== null && typeof item_stats === "function" && item_stats(item)) || item_stats === null) {
-          //if (Config.Inventory[items[i].y][items[i].x] > 0) { // we check only space that is supposed to be free
           num += 1;
-          //}
         }
       }
     }
