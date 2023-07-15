@@ -19,30 +19,47 @@ const Precast = {
     coldArmor: {
       best: false,
       duration: 0,
-      tick: 0
+      tick: 0,
+      needSoon: function (seconds = 30) {
+        return (getTickCount() - this.tick) > (this.duration - Time.seconds(seconds));
+      },
     },
     boneArmor: {
       max: 0,
-      armorPercent: function () {
-        return this.max > 0 ? Math.round(me.getStat(sdk.stats.SkillBoneArmor) * 100 / this.max) : 100;
+      remaining: function () {
+        return this.max > 0
+          ? Math.round(me.getStat(sdk.stats.SkillBoneArmor) * 100 / this.max)
+          : 100;
       },
     },
     holyShield: {
       canUse: false,
       duration: 0,
-      tick: 0
+      tick: 0,
+      needSoon: function (seconds = 30) {
+        return (getTickCount() - this.tick) > (this.duration - Time.seconds(seconds));
+      },
     },
     shout: {
       duration: 0,
-      tick: 0
+      tick: 0,
+      needSoon: function (seconds = 30) {
+        return (getTickCount() - this.tick) > (this.duration - Time.seconds(seconds));
+      },
     },
     battleOrders: {
       duration: 0,
-      tick: 0
+      tick: 0,
+      needSoon: function () {
+        return (getTickCount() - this.tick) > (this.duration - Time.seconds(seconds));
+      },
     },
     battleCommand: {
       duration: 0,
-      tick: 0
+      tick: 0,
+      needSoon: function () {
+        return (getTickCount() - this.tick) > (this.duration - Time.seconds(seconds));
+      },
     },
   },
 
@@ -55,11 +72,13 @@ const Precast = {
    */
   warCries: function (skillId, x, y) {
     if (!skillId || x === undefined) return false;
-    const states = {};
-    states[sdk.skills.Shout] = sdk.states.Shout;
-    states[sdk.skills.BattleOrders] = sdk.states.BattleOrders;
-    states[sdk.skills.BattleCommand] = sdk.states.BattleCommand;
-    if (states[skillId] === undefined) return false;
+    if (![sdk.skills.Shout, sdk.skills.BattleOrders, sdk.skills.BattleCommand].includes(skillId)) {
+      return false;
+    }
+    const _state = Skill.getState(skillId);
+    const _stateCheck = function () {
+      return me.getState(_state);
+    };
 
     for (let i = 0; i < 3; i++) {
       try {
@@ -67,7 +86,8 @@ const Precast = {
           throw new Error("Failed to set " + getSkillById(skillId) + " on hand");
         }
         // Right hand + No Shift
-        let clickType = 3, shift = sdk.clicktypes.shift.NoShift;
+        let clickType = 3;
+        let shift = sdk.clicktypes.shift.NoShift;
 
         MainLoop:
         for (let n = 0; n < 3; n += 1) {
@@ -88,7 +108,7 @@ const Precast = {
           delay(10);
         }
 
-        if (Misc.poll(() => me.getState(states[skillId]), 300, 50)) return true;
+        if (Misc.poll(_stateCheck, 300, 50)) return true;
       } catch (e) {
         console.error(e);
         return false;
@@ -151,7 +171,7 @@ const Precast = {
   getBetterSlot: function (skillId) {
     if (this.bestSlot[skillId] !== undefined) return this.bestSlot[skillId];
 
-    let [classid, skillTab] = (() => {
+    let [classid, skillTab] = (function () {
       switch (skillId) {
       case sdk.skills.FrozenArmor:
       case sdk.skills.ShiverArmor:
@@ -220,7 +240,9 @@ const Precast = {
   },
 
   cast: function (skillId, x = me.x, y = me.y, dontSwitch = false) {
-    if (!skillId || !Skill.wereFormCheck(skillId) || (me.inTown && !Skill.townSkill(skillId))) return false;
+    if (!skillId || !Skill.wereFormCheck(skillId) || (me.inTown && !Skill.townSkill(skillId))) {
+      return false;
+    }
     if (Skill.getManaCost(skillId) > me.mp) return false;
 
     let swap = me.weaponswitch;
@@ -418,17 +440,21 @@ const Precast = {
     // Force BO 30 seconds before it expires
     if (Precast.haveCTA > -1) {
       forceBo = (force || partial
-        || (getTickCount() - Precast.skills.battleOrders.tick >= Precast.skills.battleOrders.duration - 30000)
+        || Precast.skills.battleOrders.needSoon()
         || !me.getState(sdk.states.BattleCommand));
       forceBo && this.precastCTA(forceBo);
     }
 
-    const needToCast = (state) => (force || partial || !me.getState(state));
+    /** @param {number} state */
+    const needToCast = function (state) {
+      return (force || partial || !me.getState(state));
+    };
 
     switch (me.classid) {
     case sdk.player.class.Amazon:
-      Skill.canUse(sdk.skills.Valkyrie) && (buffSummons = this.summon(sdk.skills.Valkyrie, sdk.summons.type.Valkyrie));
-
+      if (Skill.canUse(sdk.skills.Valkyrie)) {
+        buffSummons = Precast.summon(sdk.skills.Valkyrie, sdk.summons.type.Valkyrie);
+      }
       break;
     case sdk.player.class.Sorceress:
       if (Skill.canUse(sdk.skills.ThunderStorm) && needToCast(sdk.states.ThunderStorm)) {
@@ -444,27 +470,33 @@ const Precast = {
           ? Config.UseColdArmor
           : (Precast.skills.coldArmor.best || -1));
         
-        if (Precast.skills.coldArmor.tick > 0 && Precast.skills.coldArmor.duration > Time.seconds(45)) {
-          if (getTickCount() - Precast.skills.coldArmor.tick >= Precast.skills.coldArmor.duration - Time.seconds(30)) {
+        if (Precast.skills.coldArmor.needSoon(45)) {
+          if (Precast.skills.coldArmor.needSoon(25)) {
             force = true;
           }
         }
         switch (choosenSkill) {
         case sdk.skills.FrozenArmor:
           if (needToCast(sdk.states.FrozenArmor)) {
-            Precast.cast(sdk.skills.FrozenArmor) && (Precast.skills.coldArmor.tick = getTickCount());
+            if (Precast.cast(sdk.skills.FrozenArmor)) {
+              Precast.skills.coldArmor.tick = getTickCount();
+            }
           }
 
           break;
         case sdk.skills.ChillingArmor:
           if (needToCast(sdk.states.ChillingArmor)) {
-            Precast.cast(sdk.skills.ChillingArmor) && (Precast.skills.coldArmor.tick = getTickCount());
+            if (Precast.cast(sdk.skills.ChillingArmor)) {
+              Precast.skills.coldArmor.tick = getTickCount();
+            }
           }
 
           break;
         case sdk.skills.ShiverArmor:
           if (needToCast(sdk.states.ShiverArmor)) {
-            Precast.cast(sdk.skills.ShiverArmor) && (Precast.skills.coldArmor.tick = getTickCount());
+            if (Precast.cast(sdk.skills.ShiverArmor)) {
+              Precast.skills.coldArmor.tick = getTickCount();
+            }
           }
 
           break;
@@ -480,24 +512,24 @@ const Precast = {
       break;
     case sdk.player.class.Necromancer:
       if (Skill.canUse(sdk.skills.BoneArmor)
-        && (force || this.skills.boneArmor.armorPercent() < 75 || !me.getState(sdk.states.BoneArmor))) {
+        && (force || this.skills.boneArmor.remaining() < 75 || !me.getState(sdk.states.BoneArmor))) {
         this.cast(sdk.skills.BoneArmor);
-        this.skills.boneArmor.max === 0 && (this.skills.boneArmor.max = me.getStat(sdk.stats.SkillBoneArmorMax));
+        if (this.skills.boneArmor.max === 0) {
+          this.skills.boneArmor.max = me.getStat(sdk.stats.SkillBoneArmorMax);
+        }
       }
 
-      (() => {
+      (function () {
         switch (Config.Golem) {
         case 1:
         case "Clay":
-          return this.summon(sdk.skills.ClayGolem, sdk.summons.type.Golem);
+          return Precast.summon(sdk.skills.ClayGolem, sdk.summons.type.Golem);
         case 2:
         case "Blood":
-          return this.summon(sdk.skills.BloodGolem, sdk.summons.type.Golem);
+          return Precast.summon(sdk.skills.BloodGolem, sdk.summons.type.Golem);
         case 3:
         case "Fire":
-          return this.summon(sdk.skills.FireGolem, sdk.summons.type.Golem);
-        case 0:
-        case "None":
+          return Precast.summon(sdk.skills.FireGolem, sdk.summons.type.Golem);
         default:
           return false;
         }
@@ -508,7 +540,8 @@ const Precast = {
       break;
     case sdk.player.class.Paladin:
       if (Skill.canUse(sdk.skills.HolyShield)
-        && Precast.skills.holyShield.canUse && needToCast(sdk.states.HolyShield)) {
+        && Precast.skills.holyShield.canUse
+        && (Precast.skills.holyShield.needSoon() || needToCast(sdk.states.HolyShield))) {
         this.cast(sdk.skills.HolyShield);
       }
 
@@ -539,53 +572,53 @@ const Precast = {
         this.cast(sdk.skills.CycloneArmor);
       }
 
-      Skill.canUse(sdk.skills.Raven) && this.summon(sdk.skills.Raven, sdk.summons.type.Raven);
+      Skill.canUse(sdk.skills.Raven) && Precast.summon(sdk.skills.Raven, sdk.summons.type.Raven);
 
-      buffSummons = (() => {
+      buffSummons = (function () {
         switch (Config.SummonAnimal) {
         case 1:
         case "Spirit Wolf":
-          return (this.summon(sdk.skills.SummonSpiritWolf, sdk.summons.type.SpiritWolf) || buffSummons);
+          return (Precast.summon(sdk.skills.SummonSpiritWolf, sdk.summons.type.SpiritWolf) || buffSummons);
         case 2:
         case "Dire Wolf":
-          return (this.summon(sdk.skills.SummonDireWolf, sdk.summons.type.DireWolf) || buffSummons);
+          return (Precast.summon(sdk.skills.SummonDireWolf, sdk.summons.type.DireWolf) || buffSummons);
         case 3:
         case "Grizzly":
-          return (this.summon(sdk.skills.SummonGrizzly, sdk.summons.type.Grizzly) || buffSummons);
+          return (Precast.summon(sdk.skills.SummonGrizzly, sdk.summons.type.Grizzly) || buffSummons);
         default:
           return buffSummons;
         }
       })();
 
-      buffSummons = (() => {
+      buffSummons = (function () {
         switch (Config.SummonVine) {
         case 1:
         case "Poison Creeper":
-          return (this.summon(sdk.skills.PoisonCreeper, sdk.summons.type.Vine) || buffSummons);
+          return (Precast.summon(sdk.skills.PoisonCreeper, sdk.summons.type.Vine) || buffSummons);
         case 2:
         case "Carrion Vine":
-          return (this.summon(sdk.skills.CarrionVine, sdk.summons.type.Vine) || buffSummons);
+          return (Precast.summon(sdk.skills.CarrionVine, sdk.summons.type.Vine) || buffSummons);
         case 3:
         case "Solar Creeper":
-          return (this.summon(sdk.skills.SolarCreeper, sdk.summons.type.Vine) || buffSummons);
+          return (Precast.summon(sdk.skills.SolarCreeper, sdk.summons.type.Vine) || buffSummons);
         default:
           return buffSummons;
         }
       })();
 
-      buffSummons = (() => {
+      buffSummons = (function () {
         switch (Config.SummonSpirit) {
         case 1:
         case "Oak Sage":
           // to prevent false chickens when we cast oak before getting bo-ed
           if (me.hardcore && !me.getState(sdk.states.BattleOrders) && me.inTown) return buffSummons;
-          return (this.summon(sdk.skills.OakSage, sdk.summons.type.Spirit) || buffSummons);
+          return (Precast.summon(sdk.skills.OakSage, sdk.summons.type.Spirit) || buffSummons);
         case 2:
         case "Heart of Wolverine":
-          return (this.summon(sdk.skills.HeartofWolverine, sdk.summons.type.Spirit) || buffSummons);
+          return (Precast.summon(sdk.skills.HeartofWolverine, sdk.summons.type.Spirit) || buffSummons);
         case 3:
         case "Spirit of Barbs":
-          return this.summon(sdk.skills.SpiritofBarbs, sdk.summons.type.Spirit) || buffSummons;
+          return Precast.summon(sdk.skills.SpiritofBarbs, sdk.summons.type.Spirit) || buffSummons;
         default:
           return buffSummons;
         }
@@ -613,14 +646,14 @@ const Precast = {
         this.cast(sdk.skills.BurstofSpeed);
       }
 
-      buffSummons = (() => {
+      buffSummons = (function () {
         switch (Config.SummonShadow) {
         case 1:
         case "Warrior":
-          return this.summon(sdk.skills.ShadowWarrior, sdk.summons.type.Shadow);
+          return Precast.summon(sdk.skills.ShadowWarrior, sdk.summons.type.Shadow);
         case 2:
         case "Master":
-          return this.summon(sdk.skills.ShadowMaster, sdk.summons.type.Shadow);
+          return Precast.summon(sdk.skills.ShadowMaster, sdk.summons.type.Shadow);
         default:
           return false;
         }
