@@ -50,14 +50,14 @@ const Precast = {
     battleOrders: {
       duration: 0,
       tick: 0,
-      needSoon: function () {
+      needSoon: function (seconds = 30) {
         return (getTickCount() - this.tick) > (this.duration - Time.seconds(seconds));
       },
     },
     battleCommand: {
       duration: 0,
       tick: 0,
-      needSoon: function () {
+      needSoon: function (seconds = 30) {
         return (getTickCount() - this.tick) > (this.duration - Time.seconds(seconds));
       },
     },
