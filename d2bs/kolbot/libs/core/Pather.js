@@ -1267,10 +1267,9 @@ const Pather = {
       break;
     }
 
-    console.time("useWaypoint");
     const destName = targetArea ? getAreaName(targetArea) : targetArea;
     Pather.broadcastIntent(targetArea);
-    console.info(true, "ÿc7targetArea: ÿc0" + destName + " ÿc7myArea: ÿc0" + getAreaName(me.area));
+    console.info(true, "ÿc7targetArea: ÿc0" + destName + " ÿc7myArea: ÿc0" + getAreaName(me.area), "useWaypoint");
 
     MainLoop:
     for (let i = 0; i < 12; i += 1) {
@@ -1288,6 +1287,9 @@ const Pather = {
 
               if (!Misc.poll(() => me.gameReady && me.inArea(sdk.areas.RogueEncampment), 2000, 100)) {
                 throw new Error("Failed to go to act 1 using Warriv");
+              }
+              if (me.inArea(targetArea)) {
+                break;
               }
             }
           }
