@@ -8,7 +8,6 @@
 /**
  * @todo
  * - Add howl
- * - Fix item find bug
  */
 
 const ClassAttack = {
@@ -99,7 +98,7 @@ const ClassAttack = {
     if (attackSkill < 0) return Attack.Result.CANTATTACK;
     // check if unit became invalidated
     if (!unit || !unit.attackable) return Attack.Result.SUCCESS;
-    Config.TeleSwitch && me.switchToPrimary();
+    (Config.TeleSwitch || Config.FindItemSwitch) && me.switchToPrimary();
     
     switch (attackSkill) {
     case sdk.skills.Whirlwind:
@@ -122,7 +121,7 @@ const ClassAttack = {
       }
 
       if (unit.distance > Skill.getRange(attackSkill) || checkCollision(me, unit, sdk.collision.Ranged)) {
-        walk = (Skill.getRange(attackSkill) < 4
+        let walk = (Skill.getRange(attackSkill) < 4
           && unit.distance < 10
           && !checkCollision(me, unit, sdk.collision.BlockWall)
         );
@@ -152,9 +151,14 @@ const ClassAttack = {
 
     if (monster) {
       do {
-        if (monster.distance <= range && monster.attackable && !checkCollision(me, monster, sdk.collision.Ranged)
-            && (Attack.checkResist(monster, monster.isSpecial ? mainAttElm : secAttElm))
-              || (Config.AttackSkill[3] > -1 && Attack.checkResist(monster, secAttElm))) {
+        if (monster.distance <= range
+          && monster.attackable
+          && !checkCollision(me, monster, sdk.collision.Ranged)
+          && (
+            Attack.checkResist(monster, monster.isSpecial ? mainAttElm : secAttElm)
+            || (Config.AttackSkill[3] > -1 && Attack.checkResist(monster, secAttElm))
+          )
+        ) {
           return true;
         }
       } while (monster.getNext());
@@ -188,6 +192,7 @@ const ClassAttack = {
 
       while (corpseList.length > 0) {
         if (this.checkCloseMonsters(5)) {
+          console.debug("Monsters nearby, clearing");
           Config.FindItemSwitch && me.switchWeapons(Attack.getPrimarySlot());
           Attack.clear(10, false, false, false, false);
           Pather.moveToEx(orgX, orgY, { allowPicking: false });
@@ -259,17 +264,18 @@ const ClassAttack = {
    * @returns {boolean}
    */
   checkCorpse: function (unit) {
-    if (!unit || !copyUnit(unit).x
-      || (unit.mode !== sdk.monsters.mode.Death && unit.mode !== sdk.monsters.mode.Dead)) {
+    if (!unit || !copyUnit(unit).x || !unit.dead) {
       return false;
     }
     if ([sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3].indexOf(unit.classid) === -1
       && unit.spectype === sdk.monsters.spectype.All) {
+      // why ignore all normal monsters?
       return false;
     }
 
     // monstats2 doesn't contain guest monsters info. sigh..
-    if (unit.classid <= sdk.monsters.BurningDeadArcher2 && !getBaseStat("monstats2", unit.classid, "corpseSel")) {
+    if (unit.classid <= sdk.monsters.BurningDeadArcher2
+      && !getBaseStat("monstats2", unit.classid, "corpseSel")) {
       return false;
     }
 
@@ -278,8 +284,10 @@ const ClassAttack = {
       sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
     ];
 
-    return !!(unit.distance <= 25
+    return (unit.distance <= 25
       && !checkCollision(me, unit, sdk.collision.Ranged)
-      && states.every(state => !unit.getState(state)));
+      && states.every(function (state) {
+        return !unit.getState(state);
+      }));
   }
 };
