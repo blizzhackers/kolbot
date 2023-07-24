@@ -2,7 +2,7 @@
 
 [**Join the Discord Channel!**](https://discord.gg/z844XRhxFC)
 
-[**Join the Slack Channel!**](https://join.slack.com/t/blizzhackers/shared_invite/zt-qahq0w11-uzETJNgKmS9DdApJSRQqaw)
+[**Join the Matrix Space!**](https://matrix.to/#/#d2bs:matrix.org)
 
 ## General
 
