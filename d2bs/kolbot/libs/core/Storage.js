@@ -6,7 +6,7 @@
 *
 */
 
-(function() {
+(function () {
   /**
    * @constructor
    * @param {string} name - container name 
@@ -14,7 +14,7 @@
    * @param {number} height - container height
    * @param {number} location - container location
    */
-  function Container(name, width, height, location) {
+  function Container (name, width, height, location) {
     this.name = name;
     this.width = width;
     this.height = height;
@@ -101,10 +101,8 @@
   };
 
   Container.prototype.Reset = function () {
-    let h, w;
-
-    for (h = 0; h < this.height; h += 1) {
-      for (w = 0; w < this.width; w += 1) {
+    for (let h = 0; h < this.height; h += 1) {
+      for (let w = 0; w < this.width; w += 1) {
         this.buffer[h][w] = 0;
       }
     }
@@ -173,7 +171,10 @@
 
         item = this.itemList[this.buffer[x][y] - 1];
 
-        if (item.classid === sdk.quest.item.Cube && item.isInStash && item.x === 0 && item.y === 0) {
+        if (item.classid === sdk.quest.item.Cube
+          && item.isInStash
+          && item.x === 0
+          && item.y === 0) {
           continue; // dont touch the cube
         }
         
@@ -236,7 +237,7 @@
   };
 
   /**
-   * @param {ItemUnit} item 
+   * @param {ItemUnit | { sizex: number, sizey: number }} item 
    * @param {boolean} reverseX 
    * @param {boolean} reverseY 
    * @param {number[]} priorityClassIds 
@@ -259,7 +260,7 @@
 
     Storage.Reload();
 
-    if (item.sizex && item.sizey && item.gid === undefined) {
+    if (item.sizex && item.sizey && !(item instanceof Unit)) {
       // fake item we are checking if we can fit a certain sized item so mock some props to it
       item.gid = -1;
       item.classid = -1;
@@ -455,7 +456,9 @@
         case sdk.storage.Cube:
           cItem = Game.getCursorUnit();
           cube = me.getItem(sdk.quest.item.Cube);
-          (cItem !== null && cube !== null) && sendPacket(1, sdk.packets.send.ItemToCube, 4, cItem.gid, 4, cube.gid);
+          if (cItem !== null && cube !== null) {
+            sendPacket(1, sdk.packets.send.ItemToCube, 4, cItem.gid, 4, cube.gid);
+          }
 
           break;
         case sdk.storage.Stash:
