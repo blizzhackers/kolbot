@@ -2307,16 +2307,16 @@ const Town = {
       let fireUnit = Game.getPresetObject(sdk.areas.RogueEncampment, sdk.objects.A1TownFire);
       if (!fireUnit) return false;
 
-      let fire = [fireUnit.roomx * 5 + fireUnit.x, fireUnit.roomy * 5 + fireUnit.y];
-      this.act[1].spot.stash = [fire[0] - 7, fire[1] - 12];
-      this.act[1].spot.stash = [fire[0] - 7, fire[1] - 12];
-      this.act[1].spot[NPC.Warriv] = [fire[0] - 5, fire[1] - 2];
-      this.act[1].spot[NPC.Cain] = [fire[0] + 6, fire[1] - 5];
-      this.act[1].spot[NPC.Kashya] = [fire[0] + 14, fire[1] - 4];
-      this.act[1].spot[NPC.Akara] = [fire[0] + 56, fire[1] - 30];
-      this.act[1].spot[NPC.Charsi] = [fire[0] - 39, fire[1] - 25];
-      this.act[1].spot[NPC.Gheed] = [fire[0] - 34, fire[1] + 36];
-      this.act[1].spot.portalspot = [fire[0] + 10, fire[1] + 18];
+      const fire = fireUnit.realCoords();
+      this.act[1].spot.stash = [fire.x - 7, fire.y - 12];
+      this.act[1].spot.fire = [fire.x, fire.y];
+      this.act[1].spot[NPC.Warriv] = [fire.x - 5, fire.y - 2];
+      this.act[1].spot[NPC.Cain] = [fire.x + 6, fire.y - 5];
+      this.act[1].spot[NPC.Kashya] = [fire.x + 14, fire.y - 4];
+      this.act[1].spot[NPC.Akara] = [fire.x + 56, fire.y - 30];
+      this.act[1].spot[NPC.Charsi] = [fire.x - 39, fire.y - 25];
+      this.act[1].spot[NPC.Gheed] = [fire.x - 34, fire.y + 36];
+      this.act[1].spot.portalspot = [fire.x + 10, fire.y + 18];
       this.act[1].spot.waypoint = [wp.roomx * 5 + wp.x, wp.roomy * 5 + wp.y];
       this.act[1].initialized = true;
     }
@@ -2502,7 +2502,7 @@ const Town = {
   },
 
   /**
-   * @param {1 | 2 | 3 | 4 | 5} act 
+   * @param {Act} act 
    * @param {boolean} [wpmenu=false] 
    * @returns {boolean}
    */
