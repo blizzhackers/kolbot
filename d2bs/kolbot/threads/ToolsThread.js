@@ -54,11 +54,13 @@ function main () {
 
   // General functions
   Common.Toolsthread.pauseScripts = [
-    "default.dbj", "threads/townchicken.js", "threads/autobuildthread.js", "threads/antihostile.js",
+    "default.dbj", "threads/townchicken.js",
+    "threads/autobuildthread.js", "threads/antihostile.js",
     "threads/party.js", "threads/rushthread.js"
   ];
   Common.Toolsthread.stopScripts = [
-    "default.dbj", "threads/townchicken.js", "threads/autobuildthread.js", "threads/antihostile.js",
+    "default.dbj", "threads/townchicken.js",
+    "threads/autobuildthread.js", "threads/antihostile.js",
     "threads/party.js", "threads/rushthread.js", "libs//modules/guard.js"
   ];
 
@@ -144,11 +146,20 @@ function main () {
           let nResult = NTIP.CheckItem(itemToCheck, false, true);
           let nString = "ÿc4NTIP.CheckItem: ÿc0" + nResult.result + " ÿc7Line: ÿc0" + nResult.line + "\n";
 
-          itemString = "ÿc4ItemName: ÿc0" + itemToCheck.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, "")
-            + "\nÿc4ItemType: ÿc0" + itemToCheck.itemType + "| ÿc4Classid: ÿc0" + itemToCheck.classid + "| ÿc4Quality: ÿc0" + itemToCheck.quality + "| ÿc4Gid: ÿc0" + itemToCheck.gid
-            + "\nÿc4ItemMode: ÿc0" + itemToCheck.mode + "| ÿc4Location: ÿc0" + itemToCheck.location + "| ÿc4Bodylocation: ÿc0" + itemToCheck.bodylocation;
+          itemString = (
+            "ÿc4ItemName: ÿc0" + itemToCheck.prettyPrint
+            + "\nÿc4ItemType: ÿc0" + itemToCheck.itemType
+            + "| ÿc4Classid: ÿc0" + itemToCheck.classid
+            + "| ÿc4Quality: ÿc0" + itemToCheck.quality
+            + "| ÿc4Gid: ÿc0" + itemToCheck.gid
+            + "\nÿc4ItemMode: ÿc0" + itemToCheck.mode
+            + "| ÿc4Location: ÿc0" + itemToCheck.location
+            + "| ÿc4Bodylocation: ÿc0" + itemToCheck.bodylocation
+          );
           generalString = pString + nString
-            + "\nÿc4Cubing Item: ÿc0" + Cubing.keepItem(itemToCheck) + " | ÿc4Runeword Item: ÿc0" + Runewords.keepItem(itemToCheck) + " | ÿc4Crafting Item: ÿc0" + CraftingSystem.keepItem(itemToCheck);
+            + "\nÿc4Cubing Item: ÿc0" + Cubing.keepItem(itemToCheck)
+            + " | ÿc4Runeword Item: ÿc0" + Runewords.keepItem(itemToCheck)
+            + " | ÿc4Crafting Item: ÿc0" + CraftingSystem.keepItem(itemToCheck);
         }
         
         console.log("ÿc2*************Item Info Start*************");
@@ -349,24 +360,36 @@ function main () {
   while (true) {
     try {
       if (me.gameReady && !me.inTown) {
-        Config.UseHP > 0 && me.hpPercent < Config.UseHP && Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.Health);
-        Config.UseRejuvHP > 0 && me.hpPercent < Config.UseRejuvHP && Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.Rejuv);
+        if (Config.UseHP > 0 && me.hpPercent < Config.UseHP) {
+          Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.Health);
+        }
+        if (Config.UseRejuvHP > 0 && me.hpPercent < Config.UseRejuvHP) {
+          Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.Rejuv);
+        }
 
         /**
          * Feel like potting and lifechicken should actually be seperate threads
          */
-        if (Config.LifeChicken > 0 && me.hpPercent <= Config.LifeChicken) {
+        if (Config.LifeChicken > 0 && me.hpPercent <= Config.LifeChicken && !me.inTown) {
           // takes a moment sometimes for townchicken to actually get to town so re-check that we aren't in town before quitting
           if (!me.inTown) {
-            D2Bot.printToConsole("Life Chicken (" + me.hp + "/" + me.hpmax + ")" + Attack.getNearestMonster() + " in " + getAreaName(me.area) + ". Ping: " + me.ping, sdk.colors.D2Bot.Red);
+            D2Bot.printToConsole(
+              "Life Chicken (" + me.hp + "/" + me.hpmax + ")" + Attack.getNearestMonster()
+              + " in " + getAreaName(me.area) + ". Ping: " + me.ping,
+              sdk.colors.D2Bot.Red
+            );
             Common.Toolsthread.exit(true);
 
             break;
           }
         }
 
-        Config.UseMP > 0 && me.mpPercent < Config.UseMP && Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.Mana);
-        Config.UseRejuvMP > 0 && me.mpPercent < Config.UseRejuvMP && Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.Rejuv);
+        if (Config.UseMP > 0 && me.mpPercent < Config.UseMP) {
+          Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.Mana);
+        }
+        if (Config.UseRejuvMP > 0 && me.mpPercent < Config.UseRejuvMP) {
+          Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.Rejuv);
+        }
 
         if (Config.ManaChicken > 0 && me.mpPercent <= Config.ManaChicken) {
           D2Bot.printToConsole("Mana Chicken: (" + me.mp + "/" + me.mpmax + ") in " + getAreaName(me.area), sdk.colors.D2Bot.Red);
