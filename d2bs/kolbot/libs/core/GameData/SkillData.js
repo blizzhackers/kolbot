@@ -224,6 +224,7 @@
     skillMap.set(sdk.skills.FrozenArmor, {
       hand: sdk.skills.hand.Right,
       range: 1,
+      state: sdk.states.FrozenArmor,
       duration: () => (
         ((12 * me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.SoftPoints) + 108)
         + ((me.getSkill(sdk.skills.ShiverArmor, sdk.skills.subindex.HardPoints)
@@ -274,6 +275,7 @@
     skillMap.set(sdk.skills.ShiverArmor, {
       hand: sdk.skills.hand.Right,
       range: 1,
+      state: sdk.states.ShiverArmor,
       duration: () => (
         ((12 * me.getSkill(sdk.skills.ShiverArmor, sdk.skills.subindex.SoftPoints) + 108)
         + ((me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.HardPoints)
@@ -311,6 +313,7 @@
     skillMap.set(sdk.skills.ThunderStorm, {
       hand: sdk.skills.hand.Right,
       range: 1,
+      state: sdk.states.ThunderStorm,
       townSkill: true,
       duration: () => (24 + (8 * me.getSkill(sdk.skills.ThunderStorm, sdk.skills.subindex.SoftPoints))),
     });
@@ -328,6 +331,7 @@
     skillMap.set(sdk.skills.ChillingArmor, {
       hand: sdk.skills.hand.Right,
       range: 1,
+      state: sdk.states.ChillingArmor,
       duration: () => (
         ((6 * me.getSkill(sdk.skills.ChillingArmor, sdk.skills.subindex.SoftPoints) + 138)
         + ((me.getSkill(sdk.skills.FrozenArmor, sdk.skills.subindex.HardPoints)
