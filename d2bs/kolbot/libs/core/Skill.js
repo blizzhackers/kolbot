@@ -14,6 +14,7 @@
    */
   const Skill = {
     usePvpRange: false,
+    /** @type {ChargedSkill[]} */
     charges: [],
     needFloor: [
       sdk.skills.Blizzard, sdk.skills.Meteor, sdk.skills.Fissure,
@@ -71,17 +72,10 @@
     getCharges: function () {
       Skill.charges = [];
       /**
-      * @typedef {Object} Charge
-      * @property {number} skill
-      * @property {number} level
-      * @property {number} charges
-      * @property {number} maxcharges
-      */
-      /**
-      * @constructor
-      * @param {Charge} charge
-      * @param {ItemUnit} unit
-      */
+       * @constructor
+       * @param {Charge} charge
+       * @param {ItemUnit} unit
+       */
       function ChargedSkill (charge, unit) {
         this.skill = charge.skill;
         this.level = charge.level;
@@ -90,6 +84,23 @@
         this.gid = unit.gid;
         this.unit = copyUnit(unit);
       }
+
+      /** @param {ItemUnit} [item] */
+      ChargedSkill.prototype.update = function (item) {
+        if (!item) {
+          item = me.getItem(-1, -1, this.gid);
+        }
+        if (!item) return;
+        let charges = item.getStat(-2)[sdk.stats.ChargedSkill];
+        if (!(charges instanceof Array)) charges = [charges];
+        let charge = charges.find(c => c.skill === this.skill);
+        if (charge) {
+          this.level = charge.level;
+          this.charges = charge.charges;
+          this.maxcharges = charge.maxcharges;
+          this.unit = copyUnit(item);
+        }
+      };
 
       let item = me.getItem(-1, sdk.items.mode.Equipped);
 
@@ -475,7 +486,9 @@
         if (typeof x === "number") {
           const orgDist = [x, y].distance;
           if (Packet.teleport(x, y)) {
-            return Misc.poll(() => [x, y].distance < orgDist, 300, 25);
+            return Misc.poll(function () {
+              return [x, y].distance < orgDist;
+            }, 300, 25);
           }
         }
       }
@@ -527,10 +540,9 @@
 
       // account for lag, state 121 doesn't kick in immediately
       if (this.isTimed(skillId)) {
-        Misc.poll(
-          () => me.skillDelay || [sdk.player.mode.GettingHit, sdk.player.mode.Blocking].includes(me.mode),
-          100,
-          10
+        Misc.poll(function () {
+          return me.skillDelay || [sdk.player.mode.GettingHit, sdk.player.mode.Blocking].includes(me.mode);
+        }, 100, 10
         );
       }
 
@@ -544,8 +556,14 @@
      * @returns {boolean}
      */
     castCharges: function (skillId, unit) {
-      if (!Skill.charges) return false;
-      let charge = Skill.charges.find(c => c.skill === skillId);
+      if (!Skill.charges.length) return false;
+      let charge = Skill.charges
+        .filter(c => c.skill === skillId && c.charges > 0)
+        .sort(function (a, b) {
+          return b.level - a.level;
+        }).find(function (c) {
+          return me.getItem(-1, sdk.items.mode.Equipped, c.gid);
+        });
       if (!charge) return false;
       let item = me.getItem(-1, sdk.items.mode.Equipped, charge.gid);
       if (!item) return false;
@@ -560,7 +578,9 @@
         if (weaponSwitch !== me.weaponswitch) {
           me.switchWeapons(weaponSwitch);
         }
-        charge.charges--;
+        if (item) {
+          charge.update(item);
+        }
       }
     },
   };
