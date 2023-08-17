@@ -149,8 +149,8 @@
         break;
       case sdk.player.class.Sorceress:
         if (Config.UseColdArmor === true) {
-          Precast.skills.coldArmor.best = (function () {
-            let _coldSkill = (id) => ({ skillId: id, level: me.getSkill(id, sdk.skills.subindex.SoftPoints) });
+          Precast.coldArmor = (function () {
+            const _coldSkill = (id) => ({ skillId: id, level: me.getSkill(id, sdk.skills.subindex.SoftPoints) });
             let coldArmor = [
               _coldSkill(sdk.skills.ShiverArmor),
               _coldSkill(sdk.skills.ChillingArmor),
@@ -158,53 +158,127 @@
             ].filter(skill => !!skill.level && skill.level > 0).sort((a, b) => b.level - a.level).first();
             return coldArmor !== undefined ? coldArmor.skillId : -1;
           })();
-          Precast.skills.coldArmor.duration = this.getDuration(Precast.skills.coldArmor.best);
+          if (Precast.coldArmor > 0) {
+            Precast.skills.get(Precast.coldArmor).duration = this.getDuration(Precast.coldArmor);
+          }
         } else {
-          Precast.skills.coldArmor.duration = this.getDuration(Config.UseColdArmor);
+          Precast.skills.get(Config.UseColdArmor).duration = this.getDuration(Config.UseColdArmor);
         }
 
         break;
       case sdk.player.class.Necromancer:
         {
           let bMax = me.getStat(sdk.stats.SkillBoneArmorMax);
-          bMax > 0 && (Precast.skills.boneArmor.max = bMax);
+          bMax > 0 && (Precast.skills.get(sdk.skills.BoneArmor).max = bMax);
         }
         if (!!Config.Golem && Config.Golem !== "None") {
-          // todo: change Config.Golem to use skillid instead of 0, 1, 2, and 3
+          Config.Golem = (function () {
+            switch (Config.Golem) {
+            case 1:
+            case "Clay":
+              return sdk.skills.ClayGolem;
+            case 2:
+            case "Blood":
+              return sdk.skills.BloodGolem;
+            case 3:
+            case "Fire":
+              return sdk.skills.FireGolem;
+            default:
+              return Config.Golem;
+            }
+          })();
         }
         break;
       case sdk.player.class.Paladin:
         // how to handle if someone manually equips a shield during game play, don't want to build entire item list if we don't need to
         // maybe store gid of shield, would still require doing me.getItem(-1, 1, gid) everytime we wanted to cast but that's still less involved
         // than getting every item we have and finding shield, for now keeping this. Checks during init if we have a shield or not
-        Precast.skills.holyShield.canUse = me.usingShield();
-        Precast.skills.holyShield.duration = this.getDuration(sdk.skills.HolyShield);
+        let shield = me.usingShield();
+        if (shield) {
+          Precast.shieldGid = shield.gid;
+        }
+        Precast.skills.get(sdk.skills.HolyShield).duration = this.getDuration(sdk.skills.HolyShield);
 
         break;
       case sdk.player.class.Barbarian:
-        Skill.canUse(sdk.skills.Shout) && (Precast.skills.shout.duration = this.getDuration(sdk.skills.Shout));
+        if (Skill.canUse(sdk.skills.Shout)) {
+          Precast.skills.get(sdk.skills.Shout).duration = this.getDuration(sdk.skills.Shout);
+        }
         if (Skill.canUse(sdk.skills.BattleOrders)) {
-          Precast.skills.battleOrders.duration = this.getDuration(sdk.skills.BattleOrders);
+          Precast.skills.get(sdk.skills.BattleOrders).duration = this.getDuration(sdk.skills.BattleOrders);
         }
         if (Skill.canUse(sdk.skills.BattleCommand)) {
-          Precast.skills.battleCommand.duration = this.getDuration(sdk.skills.BattleCommand);
+          Precast.skills.get(sdk.skills.BattleCommand).duration = this.getDuration(sdk.skills.BattleCommand);
         }
         
         break;
       case sdk.player.class.Druid:
         if (!!Config.SummonAnimal && Config.SummonAnimal !== "None") {
-          // todo: change Config.SummonAnimal to use skillid instead of 0, 1, 2, and 3
+          Config.SummonAnimal = (function () {
+            switch (Config.SummonAnimal) {
+            case 1:
+            case "Spirit Wolf":
+              return sdk.skills.SummonSpiritWolf;
+            case 2:
+            case "Dire Wolf":
+              return sdk.skills.SummonDireWolf;
+            case 3:
+            case "Grizzly":
+              return sdk.skills.SummonGrizzly;
+            default:
+              return Config.SummonAnimal;
+            }
+          })();
         }
         if (!!Config.SummonVine && Config.SummonVine !== "None") {
-          // todo: change Config.SummonVine to use skillid instead of 0, 1, 2, and 3
+          Config.SummonVine = (function () {
+            switch (Config.SummonVine) {
+            case 1:
+            case "Poison Creeper":
+              return sdk.skills.PoisonCreeper;
+            case 2:
+            case "Carrion Vine":
+              return sdk.skills.CarrionVine;
+            case 3:
+            case "Solar Creeper":
+              return sdk.skills.SolarCreeper;
+            default:
+              return Config.SummonVine;
+            }
+          })();
         }
         if (!!Config.SummonSpirit && Config.SummonSpirit !== "None") {
-          // todo: change Config.SummonSpirit to use skillid instead of 0, 1, 2, and 3
+          Config.SummonSpirit = (function () {
+            switch (Config.SummonSpirit) {
+            case 1:
+            case "Oak Sage":
+              return sdk.skills.OakSage;
+            case 2:
+            case "Heart of Wolverine":
+              return sdk.skills.HeartofWolverine;
+            case 3:
+            case "Spirit of Barbs":
+              return sdk.skills.SpiritofBarbs;
+            default:
+              return Config.SummonSpirit;
+            }
+          })();
         }
         break;
       case sdk.player.class.Assassin:
-        if (!!Config.SummonShadow) {
-          // todo: change Config.SummonShadow to use skillid instead of 0, 1, 2, and 3
+        if (!!Config.SummonShadow && !!Config.SummonShadow !== "None") {
+          Config.SummonShadow = (function () {
+            switch (Config.SummonShadow) {
+            case 1:
+            case "Warrior":
+              return sdk.skills.ShadowWarrior;
+            case 2:
+            case "Master":
+              return sdk.skills.ShadowMaster;
+            default:
+              return Config.SummonShadow;
+            }
+          })();
         }
         break;
       }
@@ -356,8 +430,11 @@
 
     // Put a skill on desired slot
     setSkill: function (skillId, hand, item) {
+      const checkHand = (hand === sdk.skills.hand.Right
+        ? sdk.skills.get.RightId
+        : sdk.skills.get.LeftId);
       // Check if the skill is already set
-      if (me.getSkill(hand === sdk.skills.hand.Right ? sdk.skills.get.RightId : sdk.skills.get.LeftId) === skillId) {
+      if (me.getSkill(checkHand) === skillId) {
         return true;
       }
       if (!item && !Skill.canUse(skillId)) return false;
@@ -375,7 +452,7 @@
 
     // Change into werewolf or werebear
     shapeShift: function (mode) {
-      let [skill, state] = (() => {
+      const [skill, state] = (() => {
         switch (mode.toString().toLowerCase()) {
         case "0":
           return [-1, -1];
@@ -394,15 +471,18 @@
       if (!Skill.canUse(skill)) return false;
       // already in wanted state
       if (me.getState(state)) return true;
+      const _stateCheck = function () {
+        return me.getState(state);
+      };
 
-      let slot = Attack.getPrimarySlot();
+      const slot = Attack.getPrimarySlot();
       me.switchWeapons(Precast.getBetterSlot(skill));
 
       try {
         for (let i = 0; i < 3; i += 1) {
           Skill.cast(skill, sdk.skills.hand.Right);
           
-          if (Misc.poll(() => me.getState(state), 2000, 50)) {
+          if (Misc.poll(_stateCheck, 2000, 50)) {
             return true;
           }
         }
@@ -415,16 +495,19 @@
 
     // Change back to human shape
     unShift: function () {
-      let [state, skill] = me.getState(sdk.states.Wearwolf)
+      const [state, skill] = me.getState(sdk.states.Wearwolf)
         ? [sdk.states.Wearwolf, sdk.skills.Werewolf]
         : me.getState(sdk.states.Wearbear)
           ? [sdk.states.Wearbear, sdk.skills.Werebear]
           : [0, 0];
       if (!state) return true;
+      const _stateCheck = function () {
+        return !me.getState(state);
+      };
       for (let i = 0; i < 3; i++) {
         Skill.cast(skill);
 
-        if (Misc.poll(() => !me.getState(state), 2000, 50)) {
+        if (Misc.poll(_stateCheck, 2000, 50)) {
           return true;
         }
       }
@@ -496,20 +579,14 @@
       if (!this.setSkill(skillId, hand, item)) return false;
 
       if (Config.PacketCasting > 1) {
-        switch (typeof x) {
-        case "number":
-          Packet.castSkill(hand, x, y);
-          delay(250);
-
-          break;
-        case "object":
-          Packet.unitCast(hand, x);
-          delay(250);
-
-          break;
+        if (typeof x === "number") {
+          Packet.castSkill(sdk.skills.hand.Right, x, y);
+        } else if (typeof x === "object") {
+          Packet.unitCast(sdk.skills.hand.Right, x);
         }
+        delay(250);
       } else {
-        let [clickType, shift] = (() => {
+        let [clickType, shift] = (function () {
           switch (hand) {
           case sdk.skills.hand.Left: // Left hand + Shift
             return [sdk.clicktypes.click.map.LeftDown, sdk.clicktypes.shift.Shift];
@@ -524,11 +601,17 @@
         })();
 
         for (let n = 0; n < 3; n += 1) {
-          typeof x === "object" ? clickMap(clickType, shift, x) : clickMap(clickType, shift, x, y);
+          typeof x === "object"
+            ? clickMap(clickType, shift, x)
+            : clickMap(clickType, shift, x, y);
           delay(20);
-          typeof x === "object" ? clickMap(clickType + 2, shift, x) : clickMap(clickType + 2, shift, x, y);
+          typeof x === "object"
+            ? clickMap(clickType + 2, shift, x)
+            : clickMap(clickType + 2, shift, x, y);
 
-          if (Misc.poll(() => me.attacking, 200, 20)) {
+          if (Misc.poll(function () {
+            return me.attacking;
+          }, 200, 20)) {
             break;
           }
         }
@@ -541,9 +624,12 @@
       // account for lag, state 121 doesn't kick in immediately
       if (this.isTimed(skillId)) {
         Misc.poll(function () {
-          return me.skillDelay || [sdk.player.mode.GettingHit, sdk.player.mode.Blocking].includes(me.mode);
-        }, 100, 10
-        );
+          return (
+            me.skillDelay
+            || me.mode === sdk.player.mode.GettingHit
+            || me.mode === sdk.player.mode.Blocking
+          );
+        }, 100, 10);
       }
 
       return true;

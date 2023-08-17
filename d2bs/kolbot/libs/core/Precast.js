@@ -5,250 +5,88 @@
 *
 */
 
-const Precast = {
-  enabled: true,
-  haveCTA: -1,
-  bestSlot: {},
-
-  // TODO: build better method of keeping track of duration based skills so we can reduce resource usage
-  // build obj -> figure out which skills we have -> calc duration -> assign tick of last casted -> track tick (background worker maybe?)
-  // would reduce checking have skill and state calls, just let tick = getTickCount(); -> obj.some((el) => tick - el.lastTick > el.duration) -> true then cast
-  // would probably make sense to just re-cast everything (except summons) if one of our skills is about to run out rather than do this process again 3 seconds later
-  skills: {
-    // Not sure how I want to handle cold armors
-    coldArmor: {
-      best: false,
-      duration: 0,
-      tick: 0,
-      needSoon: function (seconds = 30) {
-        return (getTickCount() - this.tick) > (this.duration - Time.seconds(seconds));
-      },
-    },
-    boneArmor: {
-      max: 0,
-      remaining: function () {
-        return this.max > 0
-          ? Math.round(me.getStat(sdk.stats.SkillBoneArmor) * 100 / this.max)
-          : 100;
-      },
-    },
-    holyShield: {
-      canUse: false,
-      duration: 0,
-      tick: 0,
-      needSoon: function (seconds = 30) {
-        return (getTickCount() - this.tick) > (this.duration - Time.seconds(seconds));
-      },
-    },
-    shout: {
-      duration: 0,
-      tick: 0,
-      needSoon: function (seconds = 30) {
-        return (getTickCount() - this.tick) > (this.duration - Time.seconds(seconds));
-      },
-    },
-    battleOrders: {
-      duration: 0,
-      tick: 0,
-      needSoon: function (seconds = 30) {
-        return (getTickCount() - this.tick) > (this.duration - Time.seconds(seconds));
-      },
-    },
-    battleCommand: {
-      duration: 0,
-      tick: 0,
-      needSoon: function (seconds = 30) {
-        return (getTickCount() - this.tick) > (this.duration - Time.seconds(seconds));
-      },
-    },
-  },
-
+const Precast = (function () {
+  includeIfNotIncluded("core/Skill.js");
   /**
-   * Easier Shout/Bo/Bc casting with state checks to ensure it was casted
+   * @constructor
    * @param {number} skillId 
-   * @param {number | Unit} x 
-   * @param {number} [y] 
-   * @returns {boolean}
    */
-  warCries: function (skillId, x, y) {
-    if (!skillId || x === undefined) return false;
-    if (![sdk.skills.Shout, sdk.skills.BattleOrders, sdk.skills.BattleCommand].includes(skillId)) {
-      return false;
+  function PrecastSkill (skillId) {
+    this.skillId = skillId;
+    this.state = Skill.getState(skillId);
+    this.lastCast = 0;
+    this.duration = 0;
+  }
+  PrecastSkill.prototype.canUse = function () {
+    return Skill.canUse(this.skillId);
+  };
+  PrecastSkill.prototype.remaining = function () {
+    if (!this.duration) {
+      this.duration = Skill.getDuration(this.skillId);
     }
-    const _state = Skill.getState(skillId);
-    const _stateCheck = function () {
-      return me.getState(_state);
-    };
+    const pRemaining = 100 * (1 - (getTickCount() - this.lastCast) / this.duration);
+    return Math.max(0, Math.min(100, pRemaining));
+  };
+  PrecastSkill.prototype.needSoon = function (percent = 25) {
+    return this.remaining() < percent;
+  };
+  PrecastSkill.prototype.needToCast = function (force = false, percent = 25) {
+    if (!this.canUse()) return false;
+    return force || !me.getState(this.state) || this.needSoon(percent);
+  };
+  return {
+    enabled: true,
+    /** @type {number} */
+    coldArmor: null,
+    shieldGid: 0,
+    haveCTA: -1,
+    bestSlot: {},
 
-    for (let i = 0; i < 3; i++) {
-      try {
-        if (me.getSkill(sdk.skills.get.RightId) !== skillId && !me.setSkill(skillId, sdk.skills.hand.Right)) {
-          throw new Error("Failed to set " + getSkillById(skillId) + " on hand");
-        }
-        // Right hand + No Shift
-        let clickType = 3;
-        let shift = sdk.clicktypes.shift.NoShift;
-
-        MainLoop:
-        for (let n = 0; n < 3; n += 1) {
-          typeof x === "object" ? clickMap(clickType, shift, x) : clickMap(clickType, shift, x, y);
-          delay(20);
-          typeof x === "object" ? clickMap(clickType + 2, shift, x) : clickMap(clickType + 2, shift, x, y);
-
-          for (let i = 0; i < 8; i += 1) {
-            if (me.attacking) {
-              break MainLoop;
-            }
-
-            delay(20);
-          }
-        }
-
-        while (me.attacking) {
-          delay(10);
-        }
-
-        if (Misc.poll(_stateCheck, 300, 50)) return true;
-      } catch (e) {
-        console.error(e);
-        return false;
-      }
-    }
-    return false;
-  },
-
-  checkCTA: function () {
-    if (this.haveCTA > -1) return true;
-
-    let check = me.checkItem({ name: sdk.locale.items.CalltoArms, equipped: true });
-
-    if (check.have) {
-      Precast.haveCTA = check.item.isOnSwap ? 1 : 0;
-    }
-
-    return this.haveCTA > -1;
-  },
-
-  /**
-   * @param {boolean} force 
-   * @returns {boolean}
-   */
-  precastCTA: function (force = false) {
-    if (!Config.UseCta || this.haveCTA === -1 || me.classic || me.barbarian || me.inTown || me.shapeshifted) {
-      return false;
-    }
-    if (!force && me.getState(sdk.states.BattleOrders)) return true;
-
-    if (this.haveCTA > -1) {
-      let slot = me.weaponswitch;
-      let { x, y } = me;
-
-      me.switchWeapons(this.haveCTA);
-      this.cast(sdk.skills.BattleCommand, x, y, true);
-      this.cast(sdk.skills.BattleCommand, x, y, true);
-      this.cast(sdk.skills.BattleOrders, x, y, true);
-
-      this.skills.battleOrders.tick = getTickCount();
-      // does this need to be re-calculated everytime? if no autobuild should really just be done when we initialize
-      if (!this.skills.battleOrders.duration) {
-        this.skills.battleOrders.duration = Skill.getDuration(sdk.skills.BattleOrders);
-      }
-
-      me.switchWeapons(slot);
-
-      return true;
-    }
-
-    return false;
-  },
-
-  /**
-   * Check which slot (primary or secondary) gives us the most skillpoints in a skill
-   * @param {number} skillId 
-   * @returns {0 | 1} best slot to give us the most skillpoints in a skill
-   * @todo Move this to be part of the SkillData class
-   */
-  getBetterSlot: function (skillId) {
-    if (this.bestSlot[skillId] !== undefined) return this.bestSlot[skillId];
-
-    let [classid, skillTab] = (function () {
-      switch (skillId) {
-      case sdk.skills.FrozenArmor:
-      case sdk.skills.ShiverArmor:
-      case sdk.skills.ChillingArmor:
-        return [sdk.player.class.Sorceress, sdk.skills.tabs.Cold];
-      case sdk.skills.Enchant:
-        return [sdk.player.class.Sorceress, sdk.skills.tabs.Fire];
-      case sdk.skills.ThunderStorm:
-      case sdk.skills.EnergyShield:
-        return [sdk.player.class.Sorceress, sdk.skills.tabs.Lightning];
-      case sdk.skills.BoneArmor:
-        return [sdk.player.class.Necromancer, sdk.skills.tabs.PoisonandBone];
-      case sdk.skills.HolyShield:
-        return [sdk.player.class.Paladin, sdk.skills.tabs.PalaCombat];
-      case sdk.skills.Taunt:
-      case sdk.skills.FindItem:
-      case sdk.skills.BattleCry:
-      case sdk.skills.WarCry:
-      case sdk.skills.Shout:
-      case sdk.skills.BattleOrders:
-      case sdk.skills.BattleCommand:
-        return [sdk.player.class.Barbarian, sdk.skills.tabs.Warcries];
-      case sdk.skills.CycloneArmor:
-        return [sdk.player.class.Druid, sdk.skills.tabs.Elemental];
-      case sdk.skills.Werewolf:
-      case sdk.skills.Werebear:
-        return [sdk.player.class.Druid, sdk.skills.tabs.ShapeShifting];
-      case sdk.skills.BurstofSpeed:
-      case sdk.skills.Fade:
-        return [sdk.player.class.Assassin, sdk.skills.tabs.ShadowDisciplines];
-      case sdk.skills.BladeShield:
-        return [sdk.player.class.Assassin, sdk.skills.tabs.MartialArts];
-      default:
-        return [-1, -1];
-      }
-    })();
-
-    if (classid < 0) return me.weaponswitch;
-
-    me.weaponswitch !== 0 && me.switchWeapons(0);
-
-    let [sumCurr, sumSwap] = [0, 0];
-    const sumStats = function (item) {
-      return (item.getStat(sdk.stats.AllSkills)
-        + item.getStat(sdk.stats.AddClassSkills, classid) + item.getStat(sdk.stats.AddSkillTab, skillTab)
-        + item.getStat(sdk.stats.SingleSkill, skillId) + item.getStat(sdk.stats.NonClassSkill, skillId));
-    };
-
-    me.getItemsEx()
-      .filter(item => item.isEquipped && [
-        sdk.body.RightArm, sdk.body.LeftArm, sdk.body.RightArmSecondary, sdk.body.LeftArmSecondary
-      ].includes(item.bodylocation))
-      .forEach(function (item) {
-        if (item.isOnMain) {
-          sumCurr += sumStats(item);
-          return;
-        }
-
-        if (item.isOnSwap) {
-          sumSwap += sumStats(item);
-          return;
-        }
-      });
-    this.bestSlot[skillId] = (sumSwap > sumCurr) ? me.weaponswitch ^ 1 : me.weaponswitch;
-    return this.bestSlot[skillId];
-  },
-
-  cast: function (skillId, x = me.x, y = me.y, dontSwitch = false) {
-    if (!skillId || !Skill.wereFormCheck(skillId) || (me.inTown && !Skill.townSkill(skillId))) {
-      return false;
-    }
-    if (Skill.getManaCost(skillId) > me.mp) return false;
-
-    let swap = me.weaponswitch;
-    let success = true;
-    // don't use packet casting with summons - or boing
-    const usePacket = ([
+    // TODO: build better method of keeping track of duration based skills so we can reduce resource usage
+    // build obj -> figure out which skills we have -> calc duration -> assign tick of last casted -> track tick (background worker maybe?)
+    // would reduce checking have skill and state calls, just let tick = getTickCount(); -> obj.some((el) => tick - el.lastTick > el.duration) -> true then cast
+    // would probably make sense to just re-cast everything (except summons) if one of our skills is about to run out rather than do this process again 3 seconds later
+    skills: new Map([
+      [sdk.skills.FrozenArmor, new PrecastSkill(sdk.skills.FrozenArmor)],
+      [sdk.skills.ShiverArmor, new PrecastSkill(sdk.skills.ShiverArmor)],
+      [sdk.skills.ChillingArmor, new PrecastSkill(sdk.skills.ChillingArmor)],
+      [sdk.skills.Enchant, new PrecastSkill(sdk.skills.Enchant)],
+      [sdk.skills.ThunderStorm, new PrecastSkill(sdk.skills.ThunderStorm)],
+      [sdk.skills.EnergyShield, new PrecastSkill(sdk.skills.EnergyShield)],
+      [sdk.skills.HolyShield, new PrecastSkill(sdk.skills.HolyShield)],
+      [sdk.skills.Shout, new PrecastSkill(sdk.skills.Shout)],
+      [sdk.skills.BattleOrders, new PrecastSkill(sdk.skills.BattleOrders)],
+      [sdk.skills.BattleCommand, new PrecastSkill(sdk.skills.BattleCommand)],
+      [sdk.skills.CycloneArmor, new PrecastSkill(sdk.skills.CycloneArmor)],
+      [sdk.skills.Hurricane, new PrecastSkill(sdk.skills.Hurricane)],
+      [sdk.skills.Armageddon, new PrecastSkill(sdk.skills.Armageddon)],
+      [sdk.skills.Fade, new PrecastSkill(sdk.skills.Fade)],
+      [sdk.skills.BurstofSpeed, new PrecastSkill(sdk.skills.BurstofSpeed)],
+      [sdk.skills.BladeShield, new PrecastSkill(sdk.skills.BladeShield)],
+      [sdk.skills.Venom, new PrecastSkill(sdk.skills.Venom)],
+      [sdk.skills.BoneArmor, {
+        skillId: sdk.skills.BoneArmor,
+        state: sdk.states.BoneArmor,
+        lastCast: 0,
+        max: 0,
+        canUse: function () {
+          return Skill.canUse(this.skillId);
+        },
+        remaining: function () {
+          return this.max > 0
+            ? Math.round(me.getStat(sdk.stats.SkillBoneArmor) * 100 / this.max)
+            : 100;
+        },
+        needSoon: function (percent = 25) {
+          return this.remaining() < percent;
+        },
+        needToCast: function (force = false, percent = 25) {
+          if (!this.canUse()) return false;
+          return force || !me.getState(this.state) || this.needSoon(percent);
+        },
+      }],
+    ]),
+    nonPacketSkills: new Set([
       sdk.skills.Valkyrie, sdk.skills.Decoy, sdk.skills.RaiseSkeleton,
       sdk.skills.ClayGolem, sdk.skills.RaiseSkeletalMage, sdk.skills.BloodGolem,
       sdk.skills.Shout, sdk.skills.IronGolem, sdk.skills.Revive,
@@ -257,440 +95,541 @@ const Precast = {
       sdk.skills.SummonDireWolf, sdk.skills.Grizzly, sdk.skills.HeartofWolverine,
       sdk.skills.SpiritofBarbs, sdk.skills.ShadowMaster,
       sdk.skills.ShadowWarrior, sdk.skills.BattleCommand,
-    ].indexOf(skillId) === -1);
-    (typeof x !== "number" || typeof y !== "number") && ({ x, y } = me);
+    ]),
 
-    try {
-      !dontSwitch && me.switchWeapons(this.getBetterSlot(skillId));
-      if (me.getSkill(sdk.skills.get.RightId) !== skillId && !me.setSkill(skillId, sdk.skills.hand.Right)) {
-        throw new Error("Failed to set " + getSkillById(skillId) + " on hand");
-      }
-      if ([sdk.skills.Shout, sdk.skills.BattleOrders, sdk.skills.BattleCommand].includes(skillId)) {
-        return this.warCries(skillId, x, y);
-      }
+    checkCTA: function () {
+      if (this.haveCTA > -1) return true;
 
-      if (Config.PacketCasting > 1 || usePacket) {
-        Config.DebugMode.Skill && console.debug("Packet casting: " + skillId);
-        
-        switch (typeof x) {
-        case "number":
-          Packet.castSkill(sdk.skills.hand.Right, x, y);
+      let check = me.checkItem({ name: sdk.locale.items.CalltoArms, equipped: true });
 
-          break;
-        case "object":
-          Packet.unitCast(sdk.skills.hand.Right, x);
-
-          break;
-        }
-        delay(250);
-      } else {
-        // Right hand + No Shift
-        let clickType = 3, shift = sdk.clicktypes.shift.NoShift;
-
-        MainLoop:
-        for (let n = 0; n < 3; n += 1) {
-          typeof x === "object" ? clickMap(clickType, shift, x) : clickMap(clickType, shift, x, y);
-          delay(20);
-          typeof x === "object" ? clickMap(clickType + 2, shift, x) : clickMap(clickType + 2, shift, x, y);
-
-          for (let i = 0; i < 8; i += 1) {
-            if (me.attacking) {
-              break MainLoop;
-            }
-
-            delay(20);
-          }
-        }
-
-        while (me.attacking) {
-          delay(10);
-        }
+      if (check.have) {
+        Precast.haveCTA = check.item.isOnSwap ? 1 : 0;
       }
 
-      // account for lag, state 121 doesn't kick in immediately
-      if (Skill.isTimed(skillId)) {
-        for (let i = 0; i < 10; i += 1) {
-          if ([sdk.player.mode.GettingHit, sdk.player.mode.Blocking].includes(me.mode) || me.skillDelay) {
-            break;
-          }
+      return this.haveCTA > -1;
+    },
 
-          delay(10);
-        }
+    /**
+    * @param {boolean} force 
+    * @returns {boolean}
+    */
+    precastCTA: function (force = false) {
+      if (!Config.UseCta || this.haveCTA === -1 || me.classic || me.barbarian || me.inTown || me.shapeshifted) {
+        return false;
       }
-    } catch (e) {
-      console.error(e);
-      success = false;
-    }
+      if (!force && me.getState(sdk.states.BattleOrders)) return true;
 
-    !dontSwitch && me.switchWeapons(swap);
+      if (this.haveCTA > -1) {
+        const slot = me.weaponswitch;
+        const { x, y } = me;
 
-    return success;
-  },
+        me.switchWeapons(this.haveCTA);
+        this.cast(sdk.skills.BattleCommand, x, y, false);
+        this.cast(sdk.skills.BattleCommand, x, y, false);
+        this.cast(sdk.skills.BattleOrders, x, y, false);
 
-  summon: function (skillId, minionType) {
-    if (!Skill.canUse(skillId)) return false;
-
-    let rv, retry = 0;
-    let count = Skill.getMaxSummonCount(skillId);
-
-    while (me.getMinionCount(minionType) < count) {
-      rv = true;
-
-      if (retry > count * 2) {
-        if (me.inTown) {
-          Town.heal() && me.cancelUIFlags();
-          Town.move("portalspot");
-          Skill.cast(skillId, sdk.skills.hand.Right, me.x, me.y);
-        } else {
-          let coord = CollMap.getRandCoordinate(me.x, -6, 6, me.y, -6, 6);
-
-          // Keep bots from getting stuck trying to summon
-          if (!!coord && Attack.validSpot(coord.x, coord.y)) {
-            Pather.moveTo(coord.x, coord.y);
-            Skill.cast(skillId, sdk.skills.hand.Right, me.x, me.y);
-          }
+        // does this need to be re-calculated everytime? if no autobuild should really just be done when we initialize
+        if (!Precast.skills.get(sdk.skills.BattleOrders).duration) {
+          this.skills.get(sdk.skills.BattleOrders).duration = Skill.getDuration(sdk.skills.BattleOrders);
         }
 
-        if (me.getMinionCount(minionType) === count) {
-          return true;
-        } else {
-          console.warn("Failed to summon minion " + skillId);
+        me.switchWeapons(slot);
 
-          return false;
-        }
+        return true;
       }
 
-      // todo - only delay if we are close to the mana amount we need based on our mana regen rate or potion state
-      // also take into account surrounding mobs so we don't delay for mana in the middle of a mob pack
-      if (Skill.getManaCost(skillId) > me.mp) {
-        if (!Misc.poll(() => me.mp >= Skill.getManaCost(skillId), 500, 100)) {
-          retry++;
-          continue;
-        }
-      }
+      return false;
+    },
 
-      let coord = CollMap.getRandCoordinate(me.x, -4, 4, me.y, -4, 4);
+    /**
+    * Check which slot (primary or secondary) gives us the most skillpoints in a skill
+    * @param {number} skillId 
+    * @returns {0 | 1} best slot to give us the most skillpoints in a skill
+    * @todo Move this to be part of the SkillData class
+    */
+    getBetterSlot: function (skillId) {
+      if (this.bestSlot[skillId] !== undefined) return this.bestSlot[skillId];
 
-      if (!!coord && Attack.validSpot(coord.x, coord.y)) {
-        Skill.cast(skillId, sdk.skills.hand.Right, coord.x, coord.y);
-
-        if (me.getMinionCount(minionType) === count) {
-          break;
-        } else {
-          retry++;
-        }
-      }
-
-      delay(200);
-    }
-
-    return !!rv;
-  },
-
-  enchant: function () {
-    let unit, slot = me.weaponswitch, chanted = [];
-
-    me.switchWeapons(this.getBetterSlot(sdk.skills.Enchant));
-
-    // Player
-    unit = Game.getPlayer();
-
-    if (unit) {
-      do {
-        if (!unit.dead && Misc.inMyParty(unit.name) && unit.distance <= 40) {
-          Skill.cast(sdk.skills.Enchant, sdk.skills.hand.Right, unit);
-          chanted.push(unit.name);
-        }
-      } while (unit.getNext());
-    }
-
-    // Minion
-    unit = Game.getMonster();
-
-    if (unit) {
-      do {
-        if (unit.getParent() && chanted.includes(unit.getParent().name) && unit.distance <= 40) {
-          Skill.cast(sdk.skills.Enchant, sdk.skills.hand.Right, unit);
-        }
-      } while (unit.getNext());
-    }
-
-    me.switchWeapons(slot);
-
-    return true;
-  },
-
-  // should the config check still be included even though its part of Skill.init?
-  /**
-   * @description Handle precast related skills
-   * @param {boolean} force - force re-cast of all precast skills
-   * @param {boolean} partial - force re-cast of all state related precast skills
-   * @returns {boolean} sucessfully casted
-   * @todo durations
-   */
-  doPrecast: function (force = false, partial = false) {
-    if (!this.enabled) return false;
-
-    while (!me.gameReady) {
-      delay(40);
-    }
-
-    let [buffSummons, forceBo] = [false, false];
-
-    // Force BO 30 seconds before it expires
-    if (Precast.haveCTA > -1) {
-      forceBo = (force || partial
-        || Precast.skills.battleOrders.needSoon()
-        || !me.getState(sdk.states.BattleCommand));
-      forceBo && this.precastCTA(forceBo);
-    }
-
-    /** @param {number} state */
-    const needToCast = function (state) {
-      return (force || partial || !me.getState(state));
-    };
-
-    switch (me.classid) {
-    case sdk.player.class.Amazon:
-      if (Skill.canUse(sdk.skills.Valkyrie)) {
-        buffSummons = Precast.summon(sdk.skills.Valkyrie, sdk.summons.type.Valkyrie);
-      }
-      break;
-    case sdk.player.class.Sorceress:
-      if (Skill.canUse(sdk.skills.ThunderStorm) && needToCast(sdk.states.ThunderStorm)) {
-        this.cast(sdk.skills.ThunderStorm);
-      }
-
-      if (Skill.canUse(sdk.skills.EnergyShield) && needToCast(sdk.states.EnergyShield)) {
-        this.cast(sdk.skills.EnergyShield);
-      }
-
-      if (Config.UseColdArmor) {
-        let choosenSkill = (typeof Config.UseColdArmor === "number" && Skill.canUse(Config.UseColdArmor)
-          ? Config.UseColdArmor
-          : (Precast.skills.coldArmor.best || -1));
-        
-        if (Precast.skills.coldArmor.needSoon(45)) {
-          if (Precast.skills.coldArmor.needSoon(25)) {
-            force = true;
-          }
-        }
-        switch (choosenSkill) {
+      let [classid, skillTab] = (function () {
+        switch (skillId) {
         case sdk.skills.FrozenArmor:
-          if (needToCast(sdk.states.FrozenArmor)) {
-            if (Precast.cast(sdk.skills.FrozenArmor)) {
-              Precast.skills.coldArmor.tick = getTickCount();
-            }
-          }
-
-          break;
-        case sdk.skills.ChillingArmor:
-          if (needToCast(sdk.states.ChillingArmor)) {
-            if (Precast.cast(sdk.skills.ChillingArmor)) {
-              Precast.skills.coldArmor.tick = getTickCount();
-            }
-          }
-
-          break;
         case sdk.skills.ShiverArmor:
-          if (needToCast(sdk.states.ShiverArmor)) {
-            if (Precast.cast(sdk.skills.ShiverArmor)) {
-              Precast.skills.coldArmor.tick = getTickCount();
-            }
-          }
-
-          break;
+        case sdk.skills.ChillingArmor:
+          return [sdk.player.class.Sorceress, sdk.skills.tabs.Cold];
+        case sdk.skills.Enchant:
+          return [sdk.player.class.Sorceress, sdk.skills.tabs.Fire];
+        case sdk.skills.ThunderStorm:
+        case sdk.skills.EnergyShield:
+          return [sdk.player.class.Sorceress, sdk.skills.tabs.Lightning];
+        case sdk.skills.BoneArmor:
+          return [sdk.player.class.Necromancer, sdk.skills.tabs.PoisonandBone];
+        case sdk.skills.HolyShield:
+          return [sdk.player.class.Paladin, sdk.skills.tabs.PalaCombat];
+        case sdk.skills.Taunt:
+        case sdk.skills.FindItem:
+        case sdk.skills.BattleCry:
+        case sdk.skills.WarCry:
+        case sdk.skills.Shout:
+        case sdk.skills.BattleOrders:
+        case sdk.skills.BattleCommand:
+          return [sdk.player.class.Barbarian, sdk.skills.tabs.Warcries];
+        case sdk.skills.CycloneArmor:
+          return [sdk.player.class.Druid, sdk.skills.tabs.Elemental];
+        case sdk.skills.Werewolf:
+        case sdk.skills.Werebear:
+          return [sdk.player.class.Druid, sdk.skills.tabs.ShapeShifting];
+        case sdk.skills.BurstofSpeed:
+        case sdk.skills.Fade:
+          return [sdk.player.class.Assassin, sdk.skills.tabs.ShadowDisciplines];
+        case sdk.skills.BladeShield:
+          return [sdk.player.class.Assassin, sdk.skills.tabs.MartialArts];
         default:
-          break;
-        }
-      }
-
-      if (Skill.canUse(sdk.skills.Enchant) && needToCast(sdk.states.Enchant)) {
-        this.enchant();
-      }
-
-      break;
-    case sdk.player.class.Necromancer:
-      if (Skill.canUse(sdk.skills.BoneArmor)
-        && (force || this.skills.boneArmor.remaining() < 75 || !me.getState(sdk.states.BoneArmor))) {
-        this.cast(sdk.skills.BoneArmor);
-        if (this.skills.boneArmor.max === 0) {
-          this.skills.boneArmor.max = me.getStat(sdk.stats.SkillBoneArmorMax);
-        }
-      }
-
-      (function () {
-        switch (Config.Golem) {
-        case 1:
-        case "Clay":
-          return Precast.summon(sdk.skills.ClayGolem, sdk.summons.type.Golem);
-        case 2:
-        case "Blood":
-          return Precast.summon(sdk.skills.BloodGolem, sdk.summons.type.Golem);
-        case 3:
-        case "Fire":
-          return Precast.summon(sdk.skills.FireGolem, sdk.summons.type.Golem);
-        default:
-          return false;
+          return [-1, -1];
         }
       })();
 
-      Config.ActiveSummon && ClassAttack.raiseArmy();
+      if (classid < 0) return me.weaponswitch;
 
-      break;
-    case sdk.player.class.Paladin:
-      if (Skill.canUse(sdk.skills.HolyShield)
-        && Precast.skills.holyShield.canUse
-        && (Precast.skills.holyShield.needSoon() || needToCast(sdk.states.HolyShield))) {
-        this.cast(sdk.skills.HolyShield);
+      me.weaponswitch !== 0 && me.switchWeapons(0);
+
+      let [sumCurr, sumSwap] = [0, 0];
+      const sumStats = function (item) {
+        return (item.getStat(sdk.stats.AllSkills)
+          + item.getStat(sdk.stats.AddClassSkills, classid) + item.getStat(sdk.stats.AddSkillTab, skillTab)
+          + item.getStat(sdk.stats.SingleSkill, skillId) + item.getStat(sdk.stats.NonClassSkill, skillId));
+      };
+
+      me.getItemsEx()
+        .filter(item => item.isEquipped && [
+          sdk.body.RightArm, sdk.body.LeftArm, sdk.body.RightArmSecondary, sdk.body.LeftArmSecondary
+        ].includes(item.bodylocation))
+        .forEach(function (item) {
+          if (item.isOnMain) {
+            sumCurr += sumStats(item);
+            return;
+          }
+
+          if (item.isOnSwap) {
+            sumSwap += sumStats(item);
+            return;
+          }
+        });
+      this.bestSlot[skillId] = (sumSwap > sumCurr) ? me.weaponswitch ^ 1 : me.weaponswitch;
+      return this.bestSlot[skillId];
+    },
+
+    cast: function (skillId, x = me.x, y = me.y, allowSwitch = true) {
+      if (!skillId || !Skill.wereFormCheck(skillId) || (me.inTown && !Skill.townSkill(skillId))) {
+        return false;
+      }
+      if (Skill.getManaCost(skillId) > me.mp) return false;
+
+      const swap = me.weaponswitch;
+      // don't use packet casting with summons - or boing
+      const usePacket = !Precast.nonPacketSkills.has(skillId);
+      const state = Precast.skills.has(skillId)
+        ? Precast.skills.get(skillId).state
+        : 0;
+      (typeof x !== "number" || typeof y !== "number") && ({ x, y } = me);
+
+      try {
+        allowSwitch && me.switchWeapons(this.getBetterSlot(skillId));
+        if (me.getSkill(sdk.skills.get.RightId) !== skillId
+          && !me.setSkill(skillId, sdk.skills.hand.Right)) {
+          throw new Error(
+            "Failed to set " + getSkillById(skillId) + " on hand."
+            + "Current: " + getSkillById(me.getSkill(sdk.skills.get.RightId)));
+        }
+
+        if (Config.PacketCasting > 1 || usePacket) {
+          Config.DebugMode.Skill && console.debug("Packet casting: " + skillId);
+          
+          if (typeof x === "number") {
+            Packet.castSkill(sdk.skills.hand.Right, x, y);
+          } else if (typeof x === "object") {
+            Packet.unitCast(sdk.skills.hand.Right, x);
+          }
+          delay(250);
+        } else {
+          // Right hand + No Shift
+          const clickType = sdk.clicktypes.click.map.RightDown;
+          const shift = sdk.clicktypes.shift.NoShift;
+
+          for (let n = 0; n < 3; n += 1) {
+            typeof x === "object"
+              ? clickMap(clickType, shift, x)
+              : clickMap(clickType, shift, x, y);
+            delay(20);
+            typeof x === "object"
+              ? clickMap(clickType + 2, shift, x)
+              : clickMap(clickType + 2, shift, x, y);
+            
+            if (Misc.poll(function () {
+              return me.attacking;
+            }, 200, 20)) {
+              break;
+            }
+          }
+
+          while (me.attacking) {
+            delay(10);
+          }
+        }
+
+        // account for lag, state 121 doesn't kick in immediately
+        if (Skill.isTimed(skillId)) {
+          Misc.poll(function () {
+            return (
+              me.skillDelay
+              || me.mode === sdk.player.mode.GettingHit
+              || me.mode === sdk.player.mode.Blocking
+            );
+          }, 100, 10);
+        }
+        if (Precast.skills.has(skillId)) {
+          Precast.skills.get(skillId).lastCast = getTickCount();
+        }
+        return state ? me.getState(state) : true;
+      } catch (e) {
+        console.error(e);
+        return false;
+      } finally {
+        allowSwitch && me.switchWeapons(swap);
+      }
+    },
+
+    summon: function (skillId, minionType) {
+      if (!Skill.canUse(skillId)) return false;
+
+      let rv, retry = 0;
+      let count = Skill.getMaxSummonCount(skillId);
+
+      while (me.getMinionCount(minionType) < count) {
+        rv = true;
+
+        if (retry > count * 2) {
+          if (me.inTown) {
+            Town.heal() && me.cancelUIFlags();
+            Town.move("portalspot");
+            Skill.cast(skillId, sdk.skills.hand.Right, me.x, me.y);
+          } else {
+            let coord = CollMap.getRandCoordinate(me.x, -6, 6, me.y, -6, 6);
+
+            // Keep bots from getting stuck trying to summon
+            if (!!coord && Attack.validSpot(coord.x, coord.y)) {
+              Pather.moveTo(coord.x, coord.y);
+              Skill.cast(skillId, sdk.skills.hand.Right, me.x, me.y);
+            }
+          }
+
+          if (me.getMinionCount(minionType) === count) {
+            return true;
+          } else {
+            console.warn("Failed to summon minion " + skillId);
+
+            return false;
+          }
+        }
+
+        // todo - only delay if we are close to the mana amount we need based on our mana regen rate or potion state
+        // also take into account surrounding mobs so we don't delay for mana in the middle of a mob pack
+        if (Skill.getManaCost(skillId) > me.mp) {
+          if (!Misc.poll(() => me.mp >= Skill.getManaCost(skillId), 500, 100)) {
+            retry++;
+            continue;
+          }
+        }
+
+        let coord = CollMap.getRandCoordinate(me.x, -4, 4, me.y, -4, 4);
+
+        if (!!coord && Attack.validSpot(coord.x, coord.y)) {
+          Skill.cast(skillId, sdk.skills.hand.Right, coord.x, coord.y);
+
+          if (me.getMinionCount(minionType) === count) {
+            break;
+          } else {
+            retry++;
+          }
+        }
+
+        delay(200);
       }
 
-      break;
-    case sdk.player.class.Barbarian: // - TODO: durations
-      if (!Config.UseWarcries) {
+      return !!rv;
+    },
+
+    enchant: (function () {
+      let chantDuration = 0;
+
+      /** @constructor */
+      function ChantTracker () {
+        this.lastChant = getTickCount();
+      }
+
+      ChantTracker.prototype.reChant = function () {
+        return getTickCount() - this.lastChant >= chantDuration - Time.seconds(10);
+      };
+
+      ChantTracker.prototype.update = function () {
+        this.lastChant = getTickCount();
+      };
+
+      /** @type {Map<string, ChantTracker} */
+      const chantList = new Map();
+
+      return function () {
+        chantDuration = Skill.getDuration(sdk.skills.Enchant);
+        const slot = me.weaponswitch;
+        const chanted = [];
+
+        me.switchWeapons(Precast.getBetterSlot(sdk.skills.Enchant));
+
+        // Player
+        let unit = Game.getPlayer();
+
+        if (unit) {
+          do {
+            if (unit.dead) continue;
+            if (!Misc.inMyParty(unit.name) || unit.distance > 40) continue;
+            if (!unit.getState(sdk.states.Enchant)
+              || (chantList.has(unit.name) && chantList.get(unit.name).reChant())) {
+              Skill.cast(sdk.skills.Enchant, sdk.skills.hand.Right, unit);
+              if (Misc.poll(() => unit.getState(sdk.states.Enchant), 500, 100)) {
+                chanted.push(unit.name);
+                chantList.has(unit.name)
+                  ? chantList.get(unit.name).update()
+                  : chantList.set(unit.name, new ChantTracker());
+              }
+            }
+          } while (unit.getNext());
+        }
+
+        // Minion
+        unit = Game.getMonster();
+
+        if (unit) {
+          do {
+            if (unit.getParent()
+              && chanted.includes(unit.getParent().name)
+              && unit.distance <= 40
+              && !unit.getState(sdk.states.Enchant)) {
+              Skill.cast(sdk.skills.Enchant, sdk.skills.hand.Right, unit);
+            }
+          } while (unit.getNext());
+        }
+
+        me.switchWeapons(slot);
+
+        return true;
+      };
+    })(),
+
+    // should the config check still be included even though its part of Skill.init?
+    /**
+    * @description Handle precast related skills
+    * @param {boolean} force - force re-cast of all precast skills
+    * @param {boolean} partial - force re-cast of all state related precast skills
+    * @returns {boolean} sucessfully casted
+    * @todo durations
+    */
+    doPrecast: function (force = false, partial = false) {
+      if (!this.enabled) return false;
+
+      while (!me.gameReady) {
+        delay(40);
+      }
+
+      let [buffSummons, forceBo] = [false, false];
+
+      // Force BO 30 seconds before it expires
+      if (Precast.haveCTA > -1) {
+        forceBo = (force || partial
+          || Precast.skills.get(sdk.skills.BattleOrders).remaining() < 25
+          || !me.getState(sdk.states.BattleCommand));
+        forceBo && this.precastCTA(forceBo);
+      }
+
+      switch (me.classid) {
+      case sdk.player.class.Amazon:
+        if (Skill.canUse(sdk.skills.Valkyrie)) {
+          buffSummons = Precast.summon(sdk.skills.Valkyrie, sdk.summons.type.Valkyrie);
+        }
+        break;
+      case sdk.player.class.Sorceress:
+        if (Precast.skills.get(sdk.skills.ThunderStorm).needToCast(force || partial)) {
+          this.cast(sdk.skills.ThunderStorm);
+        }
+
+        if (Precast.skills.get(sdk.skills.EnergyShield).needToCast(force || partial)) {
+          this.cast(sdk.skills.EnergyShield);
+        }
+
+        if (Config.UseColdArmor) {
+          let choosenSkill = (typeof Config.UseColdArmor === "number" && Skill.canUse(Config.UseColdArmor)
+            ? Config.UseColdArmor
+            : (Precast.coldArmor || -1));
+          
+          if (choosenSkill && Precast.skills.has(choosenSkill)) {
+            if (Precast.skills.get(choosenSkill).needToCast(force || partial)) {
+              Precast.cast(choosenSkill);
+            }
+          }
+        }
+
+        if (Precast.skills.get(sdk.skills.Enchant).needToCast(force || partial)) {
+          this.enchant();
+        }
+
+        break;
+      case sdk.player.class.Necromancer:
+        if (Precast.skills.get(sdk.skills.BoneArmor).needToCast(force, 75)) {
+          this.cast(sdk.skills.BoneArmor);
+          if (Precast.skills.get(sdk.skills.BoneArmor).max === 0) {
+            Precast.skills.get(sdk.skills.BoneArmor).max = me.getStat(sdk.stats.SkillBoneArmorMax);
+          }
+        }
+
+        if (!!Config.Golem && Config.Golem !== "None") {
+          Precast.summon(Config.Golem, sdk.summons.type.Golem);
+        }
+
+        Config.ActiveSummon && ClassAttack.raiseArmy();
+
+        break;
+      case sdk.player.class.Paladin:
+        if (Precast.skills.get(sdk.skills.HolyShield).needToCast(force || partial, 15)) {
+          let _wearingShield = me.getItem(-1, sdk.items.mode.Equipped, Precast.shieldGid);
+          if (!_wearingShield) {
+            // try once to locate, in case we just swapped
+            _wearingShield = me.usingShield();
+            Precast.shieldGid = _wearingShield ? _wearingShield.gid : 0;
+            if (!_wearingShield) {
+              break;
+            }
+          }
+          if (Precast.shieldGid > 0) {
+            Precast.cast(sdk.skills.HolyShield);
+          }
+        }
+
+        break;
+      case sdk.player.class.Barbarian: // - TODO: durations
+        if (!Config.UseWarcries) {
+          break;
+        }
+        let needShout = (Precast.skills.get(sdk.skills.Shout).needToCast(force || partial));
+        let needBo = (Precast.skills.get(sdk.skills.BattleOrders).needToCast(force || partial));
+        let needBc = (Precast.skills.get(sdk.skills.BattleCommand).needToCast(force || partial));
+
+        if (needShout || needBo || needBc) {
+          let primary = Attack.getPrimarySlot();
+          let { x, y } = me;
+          (needBo || needBc) && me.switchWeapons(this.getBetterSlot(sdk.skills.BattleOrders));
+
+          needBc && this.cast(sdk.skills.BattleCommand, x, y, false);
+          needBo && this.cast(sdk.skills.BattleOrders, x, y, false);
+          needShout && this.cast(sdk.skills.Shout, x, y, false);
+
+          me.weaponswitch !== primary && me.switchWeapons(primary);
+        }
+
+        break;
+      case sdk.player.class.Druid:
+        if (Precast.skills.get(sdk.skills.CycloneArmor).needToCast(force || partial)) {
+          this.cast(sdk.skills.CycloneArmor);
+        }
+
+        Skill.canUse(sdk.skills.Raven) && Precast.summon(sdk.skills.Raven, sdk.summons.type.Raven);
+
+        buffSummons = (function () {
+          switch (Config.SummonAnimal) {
+          case sdk.skills.SummonSpiritWolf:
+            return (Precast.summon(sdk.skills.SummonSpiritWolf, sdk.summons.type.SpiritWolf) || buffSummons);
+          case sdk.skills.SummonDireWolf:
+            return (Precast.summon(sdk.skills.SummonDireWolf, sdk.summons.type.DireWolf) || buffSummons);
+          case sdk.skills.SummonGrizzly:
+            return (Precast.summon(sdk.skills.SummonGrizzly, sdk.summons.type.Grizzly) || buffSummons);
+          default:
+            return buffSummons;
+          }
+        })();
+
+        if (!!Config.SummonVine && Config.SummonVine !== "None") {
+          buffSummons = Precast.summon(Config.SummonVine, sdk.summons.type.Vine);
+        }
+
+        if (!!Config.SummonSpirit && Config.SummonSpirit !== "None") {
+          buffSummons = (
+            Config.SummonSpirit === sdk.skills.OakSage
+            && me.hardcore
+            && !me.getState(sdk.states.BattleOrders)
+            && me.inTown
+          )
+            ? buffSummons
+            : Precast.summon(Config.SummonSpirit, sdk.summons.type.Spirit);
+        }
+
+        if (Precast.skills.get(sdk.skills.Hurricane).needToCast(force || partial)) {
+          this.cast(sdk.skills.Hurricane);
+        }
+
+        break;
+      case sdk.player.class.Assassin:
+        if (Precast.skills.get(sdk.skills.Fade).needToCast(force || partial)) {
+          this.cast(sdk.skills.Fade);
+        }
+
+        if (Precast.skills.get(sdk.skills.Venom).needToCast(force || partial)) {
+          this.cast(sdk.skills.Venom);
+        }
+
+        if (Precast.skills.get(sdk.skills.BladeShield).needToCast(force || partial)) {
+          this.cast(sdk.skills.BladeShield);
+        }
+
+        if (!Config.UseFade && Precast.skills.get(sdk.skills.BurstofSpeed).needToCast(force || partial)) {
+          this.cast(sdk.skills.BurstofSpeed);
+        }
+
+        if (!!Config.SummonShadow && !!Config.SummonShadow !== "None") {
+          buffSummons = Precast.summon(Config.SummonShadow, sdk.summons.type.Shadow);
+        }
+
         break;
       }
-      let needShout = (Skill.canUse(sdk.skills.Shout) && needToCast(sdk.states.Shout));
-      let needBo = (Skill.canUse(sdk.skills.BattleOrders) && needToCast(sdk.states.BattleOrders));
-      let needBc = (Skill.canUse(sdk.skills.BattleCommand) && needToCast(sdk.states.BattleCommand));
 
-      if (needShout || needBo || needBc) {
-        let primary = Attack.getPrimarySlot();
-        let { x, y } = me;
-        (needBo || needBc) && me.switchWeapons(this.getBetterSlot(sdk.skills.BattleOrders));
+      buffSummons && this.haveCTA > -1 && this.precastCTA(force);
+      me.switchWeapons(Attack.getPrimarySlot());
 
-        needBc && this.cast(sdk.skills.BattleCommand, x, y, true);
-        needBo && this.cast(sdk.skills.BattleOrders, x, y, true);
-        needShout && this.cast(sdk.skills.Shout, x, y, true);
+      return true;
+    },
 
-        me.weaponswitch !== primary && me.switchWeapons(primary);
-      }
+    needOutOfTownCast: function () {
+      return Skill.canUse(sdk.skills.Shout) || Skill.canUse(sdk.skills.BattleOrders) || Precast.checkCTA();
+    },
 
-      break;
-    case sdk.player.class.Druid:
-      if (Skill.canUse(sdk.skills.CycloneArmor) && needToCast(sdk.states.CycloneArmor)) {
-        this.cast(sdk.skills.CycloneArmor);
-      }
-
-      Skill.canUse(sdk.skills.Raven) && Precast.summon(sdk.skills.Raven, sdk.summons.type.Raven);
-
-      buffSummons = (function () {
-        switch (Config.SummonAnimal) {
-        case 1:
-        case "Spirit Wolf":
-          return (Precast.summon(sdk.skills.SummonSpiritWolf, sdk.summons.type.SpiritWolf) || buffSummons);
-        case 2:
-        case "Dire Wolf":
-          return (Precast.summon(sdk.skills.SummonDireWolf, sdk.summons.type.DireWolf) || buffSummons);
-        case 3:
-        case "Grizzly":
-          return (Precast.summon(sdk.skills.SummonGrizzly, sdk.summons.type.Grizzly) || buffSummons);
-        default:
-          return buffSummons;
+    doRandomPrecast: function (force = false, goToWhenDone = undefined) {
+      const returnTo = (goToWhenDone && typeof goToWhenDone === "number"
+        ? goToWhenDone
+        : me.area);
+      
+      try {
+        // Only do this is you are a barb or actually have a cta. Otherwise its just a waste of time and you can precast in town
+        if (Precast.needOutOfTownCast()) {
+          Pather.useWaypoint("random") && Precast.doPrecast(force);
+        } else {
+          Precast.doPrecast(force);
         }
-      })();
-
-      buffSummons = (function () {
-        switch (Config.SummonVine) {
-        case 1:
-        case "Poison Creeper":
-          return (Precast.summon(sdk.skills.PoisonCreeper, sdk.summons.type.Vine) || buffSummons);
-        case 2:
-        case "Carrion Vine":
-          return (Precast.summon(sdk.skills.CarrionVine, sdk.summons.type.Vine) || buffSummons);
-        case 3:
-        case "Solar Creeper":
-          return (Precast.summon(sdk.skills.SolarCreeper, sdk.summons.type.Vine) || buffSummons);
-        default:
-          return buffSummons;
+        Pather.useWaypoint(returnTo);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (me.area !== returnTo && (!Pather.useWaypoint(returnTo) || !Pather.useWaypoint(sdk.areas.townOf(me.area)))) {
+          Pather.journeyTo(returnTo);
         }
-      })();
-
-      buffSummons = (function () {
-        switch (Config.SummonSpirit) {
-        case 1:
-        case "Oak Sage":
-          // to prevent false chickens when we cast oak before getting bo-ed
-          if (me.hardcore && !me.getState(sdk.states.BattleOrders) && me.inTown) return buffSummons;
-          return (Precast.summon(sdk.skills.OakSage, sdk.summons.type.Spirit) || buffSummons);
-        case 2:
-        case "Heart of Wolverine":
-          return (Precast.summon(sdk.skills.HeartofWolverine, sdk.summons.type.Spirit) || buffSummons);
-        case 3:
-        case "Spirit of Barbs":
-          return Precast.summon(sdk.skills.SpiritofBarbs, sdk.summons.type.Spirit) || buffSummons;
-        default:
-          return buffSummons;
-        }
-      })();
-
-      if (Skill.canUse(sdk.skills.Hurricane) && needToCast(sdk.states.Hurricane)) {
-        this.cast(sdk.skills.Hurricane);
       }
 
-      break;
-    case sdk.player.class.Assassin:
-      if (Skill.canUse(sdk.skills.Fade) && needToCast(sdk.states.Fade)) {
-        this.cast(sdk.skills.Fade);
-      }
-
-      if (Skill.canUse(sdk.skills.Venom) && needToCast(sdk.states.Venom)) {
-        this.cast(sdk.skills.Venom);
-      }
-
-      if (Skill.canUse(sdk.skills.BladeShield) && needToCast(sdk.states.BladeShield)) {
-        this.cast(sdk.skills.BladeShield);
-      }
-
-      if (!Config.UseFade && Skill.canUse(sdk.skills.BurstofSpeed) && needToCast(sdk.states.BurstofSpeed)) {
-        this.cast(sdk.skills.BurstofSpeed);
-      }
-
-      buffSummons = (function () {
-        switch (Config.SummonShadow) {
-        case 1:
-        case "Warrior":
-          return Precast.summon(sdk.skills.ShadowWarrior, sdk.summons.type.Shadow);
-        case 2:
-        case "Master":
-          return Precast.summon(sdk.skills.ShadowMaster, sdk.summons.type.Shadow);
-        default:
-          return false;
-        }
-      })();
-
-      break;
-    }
-
-    buffSummons && this.haveCTA > -1 && this.precastCTA(force);
-    me.switchWeapons(Attack.getPrimarySlot());
-
-    return true;
-  },
-
-  needOutOfTownCast: function () {
-    return Skill.canUse(sdk.skills.Shout) || Skill.canUse(sdk.skills.BattleOrders) || Precast.checkCTA();
-  },
-
-  doRandomPrecast: function (force = false, goToWhenDone = undefined) {
-    let returnTo = (goToWhenDone && typeof goToWhenDone === "number" ? goToWhenDone : me.area);
-
-    try {
-      // Only do this is you are a barb or actually have a cta. Otherwise its just a waste of time and you can precast in town
-      if (Precast.needOutOfTownCast()) {
-        Pather.useWaypoint("random") && Precast.doPrecast(force);
-      } else {
-        Precast.doPrecast(force);
-      }
-      Pather.useWaypoint(returnTo);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      if (me.area !== returnTo && (!Pather.useWaypoint(returnTo) || !Pather.useWaypoint(sdk.areas.townOf(me.area)))) {
-        Pather.journeyTo(returnTo);
-      }
-    }
-
-    return (me.area === returnTo);
-  },
-};
+      return (me.area === returnTo);
+    },
+  };
+})();
