@@ -5,14 +5,16 @@
 *
 */
 
-function GhostBusters() {
+function GhostBusters () {
   const clearGhosts = function () {
     let room = getRoom();
     if (!room) return false;
 
     const rooms = [];
     /** @param {Monster} monster */
-    const check = (monster) => monster.isGhost && monster.distance <= 30;
+    const check = function (monster) {
+      return monster.isGhost && monster.distance <= 30;
+    };
 
     do {
       rooms.push([room.x * 5 + room.xsize / 2, room.y * 5 + room.ysize / 2]);

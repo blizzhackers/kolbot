@@ -1044,8 +1044,8 @@ const Attack = {
 
   /**
    * @description Sort monsters based on distance, spectype and classId (summoners are attacked first)
-   * @param {Unit} unitA 
-   * @param {Unit} unitB 
+   * @param {Monster} unitA 
+   * @param {Monster} unitB 
    * @returns {boolean}
    * @todo Think this needs a collison check included for non tele chars, might prevent choosing 
    * closer mob that is actually behind a wall vs the one we pass trying to get behind the wall

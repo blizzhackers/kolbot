@@ -5,7 +5,7 @@
 *
 */
 
-function KillDclone() {
+function KillDclone () {
   Pather.useWaypoint(sdk.areas.ArcaneSanctuary);
   Precast.doPrecast(true);
 

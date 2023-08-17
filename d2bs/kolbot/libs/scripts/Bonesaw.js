@@ -5,7 +5,7 @@
 *
 */
 
-function Bonesaw() {
+function Bonesaw () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.GlacialTrail);
   Precast.doPrecast(true);

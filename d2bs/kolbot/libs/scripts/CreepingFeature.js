@@ -5,7 +5,7 @@
 *
 */
 
-function CreepingFeature() {
+function CreepingFeature () {
   Town.doChores();
   Town.goToTown(2);
   

@@ -5,7 +5,7 @@
 *
 */
 
-function DeveloperMode() {
+function DeveloperMode () {
   let [done, action, command, userAddon, test] = [false, false, false, false, false];
   let [watchSent, watchRecv, blockSent, blockRecv] = [[], [], [], []];
   const runCommand = function (msg) {
@@ -168,7 +168,7 @@ function DeveloperMode() {
   };
 
   // Received packet handler
-  const packetReceived = function(pBytes) {
+  const packetReceived = function (pBytes) {
     let ID = pBytes[0].toString(16);
 
     // Block received packets from list

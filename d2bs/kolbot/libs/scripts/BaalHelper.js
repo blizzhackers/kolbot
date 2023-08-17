@@ -5,7 +5,7 @@
 *
 */
 
-function BaalHelper() {
+function BaalHelper () {
   include("core/Common/Baal.js");
   Config.BaalHelper.KillNihlathak && Loader.runScript("Nihlathak");
   Config.BaalHelper.FastChaos && Loader.runScript("Diablo", () => Config.Diablo.Fast = true);

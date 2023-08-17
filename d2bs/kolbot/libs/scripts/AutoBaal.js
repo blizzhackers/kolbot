@@ -15,7 +15,7 @@
 *   - should this listen for baal death packet?
 */
 
-function AutoBaal() {
+function AutoBaal () {
   // internal variables
   let baalCheck, throneCheck, hotCheck, leader; // internal variables
   const safeMsg = ["safe", "throne clear", "leechers can come", "tp is up", "1 clear"]; // safe message - casing doesn't matter

@@ -5,7 +5,7 @@
 *
 */
 
-function Endugu() {
+function Endugu () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.FlayerJungle);
   Precast.doPrecast(true);

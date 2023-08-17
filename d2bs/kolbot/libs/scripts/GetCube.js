@@ -7,7 +7,7 @@
 
 function GetCube() {
   // Can't get the cube if we can't access the act
-  if (!Pather.accessToAct(2)) return false;
+  if (!me.accessToAct(2)) return false;
 
   console.log("Getting cube");
   me.overhead("Getting cube");

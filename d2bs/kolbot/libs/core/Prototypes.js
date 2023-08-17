@@ -2223,7 +2223,9 @@ Unit.prototype.usingShield = function () {
     me.switchWeapons(sdk.player.slot.Main);
   }
   return this.getItemsEx(-1, sdk.items.mode.Equipped)
-    .filter(s => s.isShield)
+    .filter(function (el) {
+      return el.isShield;
+    })
     .first();
 };
 
