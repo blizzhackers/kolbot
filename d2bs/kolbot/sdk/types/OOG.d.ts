@@ -54,22 +54,103 @@ declare global {
     remove(): void
   }
 
-  export const ControlAction: {
-    timeoutDelay(text: any, time: any, stopfunc?: any, arg?: any):void
-    click(type: any, x: any, y: any, xsize: any, ysize: any):void
-    setText(type: any, x: any, y: any, xsize: any, ysize: any, text: any):void
-    getText(type: any, x: any, y: any, xsize: any, ysize: any):string[]
-    joinChannel(channel: any):void
-    createGame(name: any, pass: any, diff: any, delay: any):void
-    clickRealm(realm: 0|1|2|3):void
-    loginAccount(info: any):void
-    makeAccount(info: any):void
-    findCharacter(info: any):void
-    getCharacters():void
-    getPosition():void
-    loginCharacter(info: any, startFromTop?: boolean):void
-    makeCharacter(info: any):void
-    getGameList():void
+  namespace ControlAction {
+    let mutedKey: boolean;
+    enum realms {
+      'uswest' = 0,
+      'useast' = 1,
+      'asia' = 2,
+      'europe' = 3
+    };
+    type ControlParams = {
+      type: number,
+      x: number,
+      y: number,
+      xsize: number,
+      ysize: number,
+    };
+    type CharacterInfo = {
+      charName: string;
+      charClass: string;
+      charLevel: number;
+      expansion: boolean;
+      hardcore: boolean;
+      ladder: boolean;
+    };
+    type AccountInfo = {
+      account: string;
+      password: string;
+      realm: realms;
+    };
+    function timeoutDelay(
+      text: string,
+      time: number,
+      stopfunc?: (arg: any) => boolean,
+      arg?: any
+    ): void;
+    // function click(
+    //   ...params: [targetx: number, targety: number, ...rest: ControlParams]
+    // ): boolean;
+    // function setText(
+    //   text: string,
+    //   ...params: ControlParams
+    // ): boolean;
+    // function getText(
+    //   ...params: ControlParams
+    // ): string[];
+    function click(
+      type: number,
+      x: number,
+      y: number,
+      xsize: number,
+      ysize: number,
+      targetx: number,
+      targety: number,
+    ): boolean;
+
+    function setText(
+      type: number,
+      x: number,
+      y: number,
+      xsize: number,
+      ysize: number,
+      text: string
+    ): boolean;
+
+    function getText(
+      type: number,
+      x: number,
+      y: number,
+      xsize: number,
+      ysize: number
+    ): string[];
+
+    function parseText(
+      type: number,
+      x: number,
+      y: number,
+      xsize: number,
+      ysize: number
+    ): string;
+
+    function scrollDown(): void;
+    function clickRealm(realm: realms): boolean;
+    function findCharacter(info: CharacterInfo): Control | false;
+    function getCharacters(): string[];
+    function getPermStatus(info: CharacterInfo): boolean;
+    function getPosition(): number;
+    function makeCharacter(info: CharacterInfo): boolean;
+    function deleteCharacter(info: CharacterInfo): boolean;
+    function convertCharacter(info: CharacterInfo): boolean;
+    function loginCharacter(info: CharacterInfo, startFromTop?: boolean): boolean;
+    function setEmail(email: string, domain?: string): boolean;
+    function makeAccount(info: AccountInfo): boolean;
+    function loginAccount(info: AccountInfo): boolean;
+    function joinChannel(channel: string): boolean;
+    function createGame(name: string, pass: string, diff: string, delay: number): void;
+    function getGameList(): { gameName: string, players: number }[] | false;
+    function getQueueTime(): number;
+    function loginOtherMultiplayer(): boolean;
   }
 }
 export {};

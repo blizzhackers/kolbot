@@ -55,6 +55,7 @@ declare global {
   }
   namespace Skill {
     let usePvpRange: boolean;
+    const haveTK: boolean;
     const manaCostList: object;
     const needFloor: number[];
     const missileSkills: number[];
