@@ -589,9 +589,9 @@
 
       if (Config.PacketCasting > 1) {
         if (typeof x === "number") {
-          Packet.castSkill(sdk.skills.hand.Right, x, y);
+          Packet.castSkill(hand, x, y);
         } else if (typeof x === "object") {
-          Packet.unitCast(sdk.skills.hand.Right, x);
+          Packet.unitCast(hand, x);
         }
         delay(250);
       } else {
