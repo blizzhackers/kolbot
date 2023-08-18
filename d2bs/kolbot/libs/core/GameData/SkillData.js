@@ -13,6 +13,7 @@
    * @property {boolean} [missile]
    * @property {number | () => number} range
    * @property {number} [state]
+   * @property {number} [summonType]
    * @property {() => boolean} [condition]
    * @property {() => number} [summonCount]
    */
@@ -160,6 +161,7 @@
     skillMap.set(sdk.skills.Decoy, {
       hand: sdk.skills.hand.Right,
       range: 30,
+      summonType: sdk.summons.type.Dopplezon,
       duration: () => ((10 + me.getSkill(sdk.skills.Decoy, sdk.skills.subindex.SoftPoints) * 5)),
       condition: () => Config.UseDecoy,
     });
@@ -181,6 +183,7 @@
     skillMap.set(sdk.skills.Valkyrie, {
       hand: sdk.skills.hand.Right,
       range: 30,
+      summonType: sdk.summons.type.Valkyrie,
       summonCount: () => 1,
       condition: () => Config.SummonValkyrie,
     });
@@ -346,6 +349,7 @@
     skillMap.set(sdk.skills.Hydra, {
       hand: sdk.skills.hand.Right,
       range: 30,
+      summonType: sdk.summons.type.Hydra,
       duration: () => 10,
       AoE: () => 14,
     });
@@ -390,6 +394,7 @@
     skillMap.set(sdk.skills.RaiseSkeleton, {
       hand: sdk.skills.hand.Right,
       range: 40,
+      summonType: sdk.summons.type.Skeleton,
       summonCount: () => {
         let skillNum = me.getSkill(sdk.skills.RaiseSkeleton, sdk.skills.subindex.SoftPoints);
         return skillNum < 4 ? skillNum : (Math.floor(skillNum / 3) + 2);
@@ -430,6 +435,7 @@
     skillMap.set(sdk.skills.ClayGolem, {
       hand: sdk.skills.hand.Right,
       range: 40,
+      summonType: sdk.summons.type.Golem,
       summonCount: () => 1,
     });
     skillMap.set(sdk.skills.IronMaiden, {
@@ -466,6 +472,7 @@
     skillMap.set(sdk.skills.RaiseSkeletalMage, {
       hand: sdk.skills.hand.Right,
       range: 40,
+      summonType: sdk.summons.type.SkeletonMage,
       summonCount: () => {
         let skillNum = me.getSkill(sdk.skills.RaiseSkeletalMage, sdk.skills.subindex.SoftPoints);
         return skillNum < 4 ? skillNum : (Math.floor(skillNum / 3) + 2);
@@ -507,6 +514,7 @@
     skillMap.set(sdk.skills.BloodGolem, {
       hand: sdk.skills.hand.Right,
       range: 40,
+      summonType: sdk.summons.type.Golem,
       summonCount: () => 1,
     });
     skillMap.set(sdk.skills.Attract, {
@@ -543,6 +551,7 @@
     skillMap.set(sdk.skills.IronGolem, {
       hand: sdk.skills.hand.Right,
       range: 40,
+      summonType: sdk.summons.type.Golem,
       summonCount: () => 1,
     });
     skillMap.set(sdk.skills.LowerResist, {
@@ -566,11 +575,13 @@
     skillMap.set(sdk.skills.FireGolem, {
       hand: sdk.skills.hand.Right,
       range: 40,
+      summonType: sdk.summons.type.Golem,
       summonCount: () => 1,
     });
     skillMap.set(sdk.skills.Revive, {
       hand: sdk.skills.hand.Right,
       range: 40,
+      summonType: sdk.summons.type.Revive,
       summonCount: () => me.getSkill(sdk.skills.Revive, sdk.skills.subindex.SoftPoints),
     });
   }
@@ -876,6 +887,7 @@
       hand: sdk.skills.hand.RightShift,
       range: 40,
       state: sdk.states.Terror,
+      summonType: sdk.summons.type.Totem,
       duration: () => 40,
       AoE: () => (2 + me.getSkill(sdk.skills.GrimWard, sdk.skills.subindex.SoftPoints) * (2 / 3)),
     });
@@ -936,12 +948,14 @@
     skillMap.set(sdk.skills.Raven, {
       hand: sdk.skills.hand.Right,
       range: 40,
+      summonType: sdk.summons.type.Raven,
       summonCount: () => Math.min(me.getSkill(sdk.skills.Raven, sdk.skills.subindex.SoftPoints), 5),
       condition: () => Config.SummonRaven,
     });
     skillMap.set(sdk.skills.PoisonCreeper, {
       hand: sdk.skills.hand.Right,
       range: 40,
+      summonType: sdk.summons.type.Vine,
       // condition: () => (typeof Config.SummonVine === "string"
       // 	? Config.SummonVine.toLowerCase() === "poison"
       // 	: Config.SummonVine === sdk.skills.PoisonCreeper),
@@ -965,6 +979,7 @@
       hand: sdk.skills.hand.Right,
       range: 40,
       state: sdk.states.OakSage,
+      summonType: sdk.summons.type.Spirit,
       // condition: () => (typeof Config.SummonSpirit === "string"
       // 	? Config.SummonSpirit.toLowerCase() === "oak"
       // 	: Config.SummonSpirit === sdk.skills.OakSage),
@@ -973,6 +988,7 @@
     skillMap.set(sdk.skills.SpiritWolf, {
       hand: sdk.skills.hand.Right,
       range: 40,
+      summonType: sdk.summons.type.SpiritWolf,
       // condition: () => (typeof Config.SummonAnimal === "string"
       // 	? Config.SummonAnimal.toLowerCase() === "spirit wolf"
       // 	: Config.SummonAnimal === sdk.skills.SpiritWolf),
@@ -1003,6 +1019,7 @@
     skillMap.set(sdk.skills.CarrionVine, {
       hand: sdk.skills.hand.Right,
       range: 40,
+      summonType: sdk.summons.type.Vine,
       // condition: () => (typeof Config.SummonVine === "string"
       // 	? Config.SummonVine.toLowerCase() === "carion"
       // 	: Config.SummonVine === sdk.skills.CarrionVine),
@@ -1033,6 +1050,7 @@
       hand: sdk.skills.hand.Right,
       range: 40,
       state: sdk.states.HeartofWolverine,
+      summonType: sdk.summons.type.Spirit,
       // condition: () => (typeof Config.SummonSpirit === "string"
       // 	? Config.SummonSpirit.toLowerCase() === "wolverine"
       // 	: Config.SummonSpirit === sdk.skills.HeartofWolverine),
@@ -1041,6 +1059,7 @@
     skillMap.set(sdk.skills.SummonDireWolf, {
       hand: sdk.skills.hand.Right,
       range: 40,
+      summonType: sdk.summons.type.DireWolf,
       // condition: () => (typeof Config.SummonAnimal === "string"
       // 	? Config.SummonAnimal.toLowerCase() === "dire wolf"
       // 	: Config.SummonAnimal === sdk.skills.SummonDireWolf),
@@ -1064,6 +1083,7 @@
     skillMap.set(sdk.skills.SolarCreeper, {
       hand: sdk.skills.hand.Right,
       range: 40,
+      summonType: sdk.summons.type.Vine,
       // condition: () => (typeof Config.SummonVine === "string"
       // 	? Config.SummonVine.toLowerCase() === "solar"
       // 	: Config.SummonVine === sdk.skills.SolarCreeper),
@@ -1091,6 +1111,7 @@
       hand: sdk.skills.hand.Right,
       range: 40,
       state: sdk.states.Barbs,
+      summonType: sdk.summons.type.Spirit,
       // condition: () => (typeof Config.SummonSpirit === "string"
       // 	? Config.SummonSpirit.toLowerCase() === "barbs"
       // 	: Config.SummonSpirit === sdk.skills.SpiritofBarbs),
@@ -1100,6 +1121,7 @@
       hand: sdk.skills.hand.Right,
       range: 40,
       timed: true,
+      summonType: sdk.summons.type.Grizzly,
       // condition: () => (typeof Config.SummonAnimal === "string"
       // 	? Config.SummonAnimal.toLowerCase() === "grizzly"
       // 	: Config.SummonAnimal === sdk.skills.SummonGrizzly),
@@ -1179,11 +1201,13 @@
     skillMap.set(sdk.skills.ChargedBoltSentry, {
       hand: sdk.skills.hand.Right,
       range: 30,
+      summonType: sdk.summons.type.AssassinTrap,
       summonCount: () => 5,
     });
     skillMap.set(sdk.skills.WakeofFireSentry, {
       hand: sdk.skills.hand.Right,
       range: 30,
+      summonType: sdk.summons.type.AssassinTrap,
       summonCount: () => 5,
     });
     skillMap.set(sdk.skills.WeaponBlock, {
@@ -1215,6 +1239,7 @@
     skillMap.set(sdk.skills.ShadowWarrior, {
       hand: sdk.skills.hand.Right,
       range: 30,
+      summonType: sdk.summons.type.Shadow,
       // condition: () => Config.SummonValkyrie,
       summonCount: () => 1,
     });
@@ -1229,11 +1254,13 @@
     skillMap.set(sdk.skills.LightningSentry, {
       hand: sdk.skills.hand.Right,
       range: 30,
+      summonType: sdk.summons.type.AssassinTrap,
       summonCount: () => 5,
     });
     skillMap.set(sdk.skills.InfernoSentry, {
       hand: sdk.skills.hand.Right,
       range: 30,
+      summonType: sdk.summons.type.AssassinTrap,
       summonCount: () => 5,
     });
     skillMap.set(sdk.skills.MindBlast, {
@@ -1252,6 +1279,7 @@
     skillMap.set(sdk.skills.DeathSentry, {
       hand: sdk.skills.hand.Right,
       range: 30,
+      summonType: sdk.summons.type.AssassinTrap,
       summonCount: () => 5,
     });
     skillMap.set(sdk.skills.BladeShield, {
@@ -1272,6 +1300,7 @@
     skillMap.set(sdk.skills.ShadowMaster, {
       hand: sdk.skills.hand.Right,
       range: 30,
+      summonType: sdk.summons.type.Shadow,
       // condition: () => Config.SummonValkyrie,
       summonCount: () => 1,
     });
@@ -1301,6 +1330,8 @@
     this.state = (_skillData.state || sdk.states.None);
     /** @type {() => number} */
     this.summonCount = (_skillData.summonCount || (() => 0));
+    /** @type {number} */
+    this.summonType = (_skillData.summonType || 0);
     /** @type {() => boolean} */
     this.condition = (_skillData.condition || (() => true));
     /** @type {boolean} */

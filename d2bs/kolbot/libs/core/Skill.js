@@ -316,6 +316,15 @@
      * @param {number} skillId 
      * @returns {number}
      */
+    getSummonType: function (skillId) {
+      if (!_SkillData.has(skillId)) return 0;
+      return _SkillData.get(skillId).summonType;
+    },
+
+    /**
+     * @param {number} skillId 
+     * @returns {number}
+     */
     getRange: function (skillId) {
       if (!_SkillData.has(skillId)) return 0;
       return _SkillData.get(skillId).range(this.usePvpRange);
