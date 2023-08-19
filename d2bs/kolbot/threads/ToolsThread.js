@@ -54,18 +54,23 @@ function main () {
 
   // General functions
   Common.Toolsthread.pauseScripts = [
-    "default.dbj", "threads/townchicken.js",
-    "threads/autobuildthread.js", "threads/antihostile.js",
-    "threads/party.js", "threads/rushthread.js"
+    "default.dbj",
+    "threads/autobuildthread.js",
+    "threads/antihostile.js",
+    "threads/party.js",
+    "threads/rushthread.js"
   ];
   Common.Toolsthread.stopScripts = [
-    "default.dbj", "threads/townchicken.js",
-    "threads/autobuildthread.js", "threads/antihostile.js",
-    "threads/party.js", "threads/rushthread.js", "libs//modules/guard.js"
+    "default.dbj",
+    "threads/autobuildthread.js",
+    "threads/antihostile.js",
+    "threads/party.js",
+    "threads/rushthread.js",
+    "libs//modules//workers//guard.js"
   ];
 
   // Event functions
-  this.keyEvent = function (key) {
+  const keyEvent = function (key) {
     switch (key) {
     case sdk.keys.PauseBreak: // pause running threads
       Common.Toolsthread.togglePause(townChicken);
@@ -188,7 +193,7 @@ function main () {
     }
   };
 
-  this.gameEvent = function (mode, param1, param2, name1, name2) {
+  const gameEvent = function (mode, param1, param2, name1, name2) {
     switch (mode) {
     case 0x00: // "%Name1(%Name2) dropped due to time out."
     case 0x01: // "%Name1(%Name2) dropped due to errors."
@@ -276,17 +281,9 @@ function main () {
     }
   };
 
-  this.scriptEvent = function (msg) {
+  const scriptEvent = function (msg) {
     if (!!msg && typeof msg === "string") {
       switch (msg) {
-      case "townChickenOn":
-        townChicken = true;
-
-        break;
-      case "townChickenOff":
-        townChicken = false;
-
-        break;
       case "toggleQuitlist":
         canQuit = !canQuit;
 
@@ -349,9 +346,9 @@ function main () {
   Config = copyObj(Config);
   let tick = getTickCount();
 
-  addEventListener("keyup", this.keyEvent);
-  addEventListener("gameevent", this.gameEvent);
-  addEventListener("scriptmsg", this.scriptEvent);
+  addEventListener("keyup", keyEvent);
+  addEventListener("gameevent", gameEvent);
+  addEventListener("scriptmsg", scriptEvent);
 
   Config.QuitListMode > 0 && Common.Toolsthread.initQuitList();
   !Array.isArray(Config.QuitList) && (Config.QuitList = [Config.QuitList]); // make it an array for simpler checks
