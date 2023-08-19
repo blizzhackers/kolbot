@@ -1,8 +1,8 @@
 (function (module, require, thread, globalThis) {
   "use strict";
-  const Messaging = require("./Messaging");
-  const Worker = require("./Worker");
-  const sdk = require("./sdk");
+  const Messaging = require("../Messaging");
+  const Worker = require("../Worker");
+  const sdk = require("../sdk");
 
   switch (thread) {
   case "thread": {
@@ -42,7 +42,7 @@
       // this.box = new Box(this.x-2, this.y-20, 250, (self.hooks.length * 15), 0, 0.2);
 
 
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 22; i++) {
         (i => this.hooks.push(new UpdateableText(() => stack && stack.length > i && stack[i] || "")))(i);
       }
 

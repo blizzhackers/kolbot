@@ -4,14 +4,14 @@
   const shitList = (Config.ShitList || Config.UnpartyShitlisted)
     ? ShitList.read()
     : [];
-  const Worker = require("Worker");
+  const Worker = require("../Worker");
   const NO_PARTY = 65535;
   const PARTY_MEMBER = 1;
   const ACCEPTABLE = 2;
   const INVITED = 4;
   const BUTTON_INVITE_ACCEPT_CANCEL = 2;
   const BUTTON_LEAVE_PARTY = 3;
-  const BUTTON_HOSTILE = 4;
+  // const BUTTON_HOSTILE = 4;
 
   print("ÿc2Kolbotÿc0 :: Simple party running");
 
@@ -19,25 +19,35 @@
 
   SimpleParty.biggestPartyId = function () {
     let uniqueParties = [];
-    //   Or add it and return the value
-    for (let party = getParty(); party.getNext();) {
-      (
-      // Find this party
-        uniqueParties.find(u => u.partyid === party.partyid)
-        // Or create an instance of it
-        || ((uniqueParties.push({
-          partyid: party.partyid,
-          used: 0
-        }) && false) || uniqueParties[uniqueParties.length - 1])
-        // Once we have the party object, increase field used
-      ).used++;
-    }
+    try {
+      //   Or add it and return the value
+      for (let party = getParty(); party.getNext();) {
+        (
+        // Find this party
+          uniqueParties.find(u => u.partyid === party.partyid)
+          // Or create an instance of it
+          || ((uniqueParties.push({
+            partyid: party.partyid,
+            used: 0
+          }) && false) || uniqueParties[uniqueParties.length - 1])
+          // Once we have the party object, increase field used
+        ).used++;
+      }
 
-    // Filter out no party, if another party is found
-    if (uniqueParties.some(u => u.partyid !== NO_PARTY)) {
-      (uniqueParties = uniqueParties.filter(u => u.partyid !== NO_PARTY));
+      // Filter out no party, if another party is found
+      if (uniqueParties.some(u => u.partyid !== NO_PARTY)) {
+        (uniqueParties = uniqueParties.filter(u => u.partyid !== NO_PARTY));
+      }
+      return (uniqueParties
+        .sort(function (a, b) {
+          /* b-a = desc */
+          return b.used - a.used;
+        }).first() || { partyid: -1 }).partyid;
+    } catch (e) {
+      console.error(e);
+
+      return -1;
     }
-    return (uniqueParties.sort((a, b) => b.used - a.used /*b-a = desc*/).first() || { partyid: -1 }).partyid;
   };
 
   SimpleParty.acceptFirst = function () {
@@ -86,11 +96,13 @@
       SimpleParty.timer = getTickCount();
       return function () {
         // Set timer back on 3 seconds, or reset it and continue
-        if ((getTickCount() - SimpleParty.timer) < 3000 || (SimpleParty.timer = getTickCount()) && false) {
+        if ((getTickCount() - SimpleParty.timer) < 3000
+          || (SimpleParty.timer = getTickCount()) && false) {
           return true;
         }
 
-        if (Config.PublicMode !== true) { // Public mode 1/2/3 dont count. This is SimplyParty
+        // Public mode 1/2/3 dont count. This is SimplyParty
+        if (Config.PublicMode !== true) {
           return true;
         }
 
