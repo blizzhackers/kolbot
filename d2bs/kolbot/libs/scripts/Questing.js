@@ -412,11 +412,6 @@ function Questing () {
     D2Bot.stop();
   } else {
     log("ÿc9(Questing) :: ÿc2Complete");
-    // reload town chicken in case we are doing others scripts after this one finishes
-    let townChick = getScript("threads/TownChicken.js");
-    if ((Config.TownHP > 0 || Config.TownMP > 0) && (townChick && !townChick.running || !townChick)) {
-      load("threads/TownChicken.js");
-    }
   }
 
   return true;
