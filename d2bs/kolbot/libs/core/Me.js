@@ -242,6 +242,101 @@ me.needPotions = function () {
   return false;
 };
 
+me.needBeltPots = function () {
+  // we aren't using MinColumn if none of the values are set
+  if (!Config.MinColumn.some(el => el > 0)) return false;
+  // no hp pots or mp pots in Config.BeltColumn (who uses only rejuv pots?)
+  if (!Config.BeltColumn.some(el => ["hp", "mp"].includes(el))) return false;
+  
+  // Start
+  if (me.charlvl > 2 && me.gold > 1000) {
+    let pots = { hp: [], mp: [], };
+    const beltSize = Storage.BeltSize();
+    
+    // only run this bit if we aren't wearing a belt for now
+    beltSize === 1 && me.cleanUpInvoPotions(beltSize);
+    // now check what's in our belt
+    me.getItemsEx(-1, sdk.items.mode.inBelt)
+      .filter(function (p) {
+        return p.x < 4
+          && [sdk.items.type.HealingPotion, sdk.items.type.ManaPotion].includes(p.itemType);
+      })
+      .forEach(function (p) {
+        if (p.itemType === sdk.items.type.HealingPotion) {
+          pots.hp.push(copyUnit(p));
+        } else if (p.itemType === sdk.items.type.ManaPotion) {
+          pots.mp.push(copyUnit(p));
+        }
+      });
+
+    // quick check
+    if ((Config.BeltColumn.includes("hp") && !pots.hp.length)
+      || (Config.BeltColumn.includes("mp") && !pots.mp.length)) {
+      return true;
+    }
+
+    // should we check the actual amount in the column?
+    // For now just keeping the way it was and checking if a column is empty
+    for (let i = 0; i < 4; i += 1) {
+      if (Config.MinColumn[i] <= 0) {
+        continue;
+      }
+
+      switch (Config.BeltColumn[i]) {
+      case "hp":
+        if (!pots.hp.some(p => p.x === i)) {
+          console.debug("Column: " + (i + 1) + " needs hp pots");
+          return true;
+        }
+        break;
+      case "mp":
+        if (!pots.mp.some(p => p.x === i)) {
+          console.debug("Column: " + (i + 1) + " needs mp pots");
+          return true;
+        }
+        break;
+      }
+    }
+  }
+
+  return false;
+};
+
+me.needBufferPots = function () {
+  // not using buffers
+  if (Config.HPBuffer < 0 && Config.MPBuffer < 0) return false;
+  
+  // Start
+  if (me.charlvl > 2 && me.gold > 1000) {
+    const pots = { hp: 0, mp: 0, };
+    const beltSize = Storage.BeltSize();
+    
+    // only run this bit if we aren't wearing a belt for now
+    beltSize === 1 && me.cleanUpInvoPotions(beltSize);
+    // now check what's in our belt
+    me.getItemsEx()
+      .filter(function (p) {
+        return p.isInInventory
+          && [sdk.items.type.HealingPotion, sdk.items.type.ManaPotion].includes(p.itemType);
+      })
+      .forEach(function (p) {
+        if (p.itemType === sdk.items.type.HealingPotion) {
+          pots.hp++;
+        } else if (p.itemType === sdk.items.type.ManaPotion) {
+          pots.mp++;
+        }
+      });
+
+    return (pots.mp < Config.MPBuffer || pots.hp < Config.HPBuffer);
+  }
+
+  return false;
+};
+
+// me.needPotions = function () {
+//   return me.needBeltPots() || me.needBufferPots();
+// };
+
 /** @returns {ItemUnit | null} */
 me.getTpTool = function () {
   const items = me.getItemsEx(-1, sdk.items.mode.inStorage)
