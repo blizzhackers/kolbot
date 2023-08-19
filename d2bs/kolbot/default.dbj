@@ -5,6 +5,7 @@
 *
 *  @typedef {import("./sdk/globals")}
 *  @typedef {import("./libs/systems/mulelogger/MuleLogger")}
+*  @typedef {import("./libs/systems/gameaction/GameAction")}
 */
 js_strict(true);
 include("critical.js"); // required
@@ -62,7 +63,7 @@ function main () {
   if (MuleLogger.inGameCheck()) return true;
 
   // don't load default for dropper/mules
-  if (getScript("D2BotDropper.dbj") || getScript("D2BotMule.dbj")) {
+  if (getScript("D2BotDropper.dbj") || getScript("d2botmule.dbj")) {
     load("threads/AreaWatcher.js");
     
     while (me.ingame) {
@@ -151,15 +152,17 @@ function main () {
   // Load threads
   load("threads/ToolsThread.js");
   if (Config.TownCheck || Config.TownHP > 0 || Config.TownMP > 0) {
-    load("threads/TownChicken.js");
+    require("libs/modules/workers/TownChicken");
   }
 
-  if (Config.DebugMode.Stack && FileTools.exists("libs/modules/Guard.js")) {
-    require("libs/modules/Guard");
+  if (Config.DebugMode.Stack) {
+    require("libs/modules/workers/Guard");
   }
 
   if (Config.PublicMode) {
-    Config.PublicMode === true ? require("libs/modules/SimpleParty") : load("threads/Party.js");
+    Config.PublicMode === true
+      ? require("libs/modules/workers/SimpleParty")
+      : load("threads/Party.js");
   }
   
   Config.AntiHostile && load("threads/AntiHostile.js");
@@ -256,8 +259,8 @@ function main () {
 
       break;
     case "object":
-      for (let i = 0; i < Config.LastMessage.length; i += 1) {
-        say(Config.LastMessage[i].replace("$nextgame", DataFile.getStats().nextGame, "i"));
+      for (let msg of Config.LastMessage) {
+        say(msg.replace("$nextgame", DataFile.getStats().nextGame, "i"));
       }
 
       break;
