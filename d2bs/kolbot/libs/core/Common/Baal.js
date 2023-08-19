@@ -8,8 +8,8 @@
 (function (Common) {
   typeof Common !== "object" && (Common = {});
   Object.defineProperty(Common, "Baal", {
-    value: {
-      throneCoords: {
+    value: new function Baal () {
+      this.throneCoords = {
         bottomLeft: { x: 15072, y: 5073 },
         bottomRight: { x: 15118, y: 5073 },
         bottomCenter: { x: 15093, y: 5073 },
@@ -17,14 +17,21 @@
         topLeft: { x: 15072, y: 5002 },
         topRight: { x: 15118, y: 5002 },
         baal: { x: 15090, y: 5014 },
-      },
+      };
 
-      checkHydra: function () {
+      this.checkHydra = function () {
         let hydra = Game.getMonster(getLocaleString(sdk.locale.monsters.Hydra));
         if (hydra) {
           do {
-            if (hydra.mode !== sdk.monsters.mode.Dead && hydra.getStat(sdk.stats.Alignment) !== 2) {
-              Pather.moveTo(15072, 5002);
+            if (hydra.mode !== sdk.monsters.mode.Dead
+              && hydra.getStat(sdk.stats.Alignment) !== 2) {
+              let _pos = [
+                this.throneCoords.bottomLeft, this.throneCoords.bottomRight,
+                this.throneCoords.topRight, this.throneCoords.topLeft,
+              ].sort(function (a, b) {
+                return getDistance(me, a) - getDistance(me, b);
+              }).first();
+              Pather.moveTo(_pos.x, _pos.y);
               while (hydra.mode !== sdk.monsters.mode.Dead) {
                 delay(500);
                 if (!copyUnit(hydra).x) {
@@ -38,9 +45,9 @@
         }
 
         return true;
-      },
+      };
 
-      checkThrone: function (clear = true) {
+      this.checkThrone = function (clear = true) {
         let monster = Game.getMonster();
 
         if (monster) {
@@ -74,9 +81,9 @@
         }
 
         return false;
-      },
+      };
 
-      clearThrone: function () {
+      this.clearThrone = function () {
         if (!Game.getMonster(sdk.monsters.ThroneBaal)) return true;
 
         let monList = [];
@@ -106,17 +113,18 @@
           { x: 15098, y: 5040 }, { x: 15099, y: 5022 },
           { x: 15086, y: 5024 }, { x: 15079, y: 5014 }
         ];
-        return pos.forEach((node) => {
+        return pos.forEach(function (node) {
           // no mobs at that next, skip it
-          if ([node.x, node.y].distance < 35 && [node.x, node.y].mobCount({ range: 30 }) === 0) {
+          if ([node.x, node.y].distance < 35
+            && [node.x, node.y].mobCount({ range: 30 }) === 0) {
             return;
           }
           Pather.moveTo(node.x, node.y);
           Attack.clear(30);
         });
-      },
+      };
 
-      preattack: function () {
+      this.preattack = function () {
         switch (me.classid) {
         case sdk.player.class.Sorceress:
           if ([
@@ -163,9 +171,9 @@
         }
 
         return false;
-      },
+      };
 
-      clearWaves: function () {
+      this.clearWaves = function () {
         Pather.moveTo(15094, me.paladin ? 5029 : 5038);
 
         let tick = getTickCount();
@@ -203,7 +211,7 @@
             if (getTickCount() - tick < Time.seconds(7)) {
               if (Skill.canUse(sdk.skills.Cleansing) && me.getState(sdk.states.Poison)) {
                 Skill.setSkill(sdk.skills.Cleansing, sdk.skills.hand.Right);
-                Misc.poll(() => {
+                Misc.poll(function () {
                   if (Config.AttackSkill[3] === sdk.skills.BlessedHammer) {
                     Skill.cast(Config.AttackSkill[3], sdk.skills.hand.Left);
                   }
@@ -269,16 +277,16 @@
         this.clearThrone();
 
         return true;
-      },
+      };
 
-      killBaal: function () {
+      this.killBaal = function () {
         if (me.inArea(sdk.areas.ThroneofDestruction)) {
           Config.PublicMode && Loader.scriptName() === "Baal" && say(Config.Baal.BaalMessage);
           me.checkForMobs({ range: 30 }) && this.clearWaves(); // ensure waves are actually done
           Pather.moveTo(15090, 5008);
           delay(5000);
           Precast.doPrecast(true);
-          Misc.poll(() => {
+          Misc.poll(function () {
             if (me.mode === sdk.player.mode.GettingHit || me.checkForMobs({ range: 15 })) {
               Common.Baal.clearThrone();
               Pather.moveTo(15090, 5008);
@@ -304,7 +312,7 @@
         }
 
         return false;
-      }
+      };
     },
     configurable: true,
   });

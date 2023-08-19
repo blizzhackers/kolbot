@@ -41,10 +41,10 @@ NTIP.OpenFile = function (filepath, notify) {
     return false;
   }
 
-  let nipfile, lines;
+  let nipfile;
   let tick = getTickCount();
-  let filename = filepath.substring(filepath.lastIndexOf("/") + 1, filepath.length);
   let entries = 0;
+  const filename = filepath.substring(filepath.lastIndexOf("/") + 1, filepath.length);
 
   try {
     nipfile = File.open(filepath, 0);
@@ -58,11 +58,11 @@ NTIP.OpenFile = function (filepath, notify) {
     return false;
   }
 
-  lines = nipfile.readAllLines();
+  let lines = nipfile.readAllLines();
   nipfile.close();
 
-  for (let i = 0; i < lines.length; i += 1) {
-    let info = {
+  for (let i = 0; i < lines.length; i++) {
+    const info = {
       line: i + 1,
       file: filename,
       string: lines[i]
@@ -71,7 +71,7 @@ NTIP.OpenFile = function (filepath, notify) {
     let line = NTIP.ParseLineInt(lines[i], info);
 
     if (line) {
-      entries += 1;
+      entries++;
 
       NTIP_CheckList.push(line);
 
@@ -84,7 +84,11 @@ NTIP.OpenFile = function (filepath, notify) {
   }
 
   if (notify) {
-    print("ÿc4Loaded NIP: ÿc2" + filename + "ÿc4. Lines: ÿc2" + lines.length + "ÿc4. Valid entries: ÿc2" + entries + ". ÿc4Time: ÿc2" + (getTickCount() - tick) + " ms");
+    console.log(
+      "ÿc4Loaded NIP: ÿc2" + filename + "ÿc4. Lines: ÿc2" + lines.length
+      + "ÿc4. Valid entries: ÿc2" + entries
+      + ". ÿc4Time: ÿc2" + (getTickCount() - tick) + " ms"
+    );
   }
 
   return true;
@@ -196,13 +200,20 @@ NTIP.GetTier = NTIP.generateTierFunc("Tier");
  */
 NTIP.GetMercTier = NTIP.generateTierFunc("Merctier");
 
+/**
+ * @param {ItemUnit} item 
+ * @param {[(item) => Boolean, (item) => Boolean, (item) => Boolean]} entryList 
+ * @param {boolean} verbose 
+ */
 NTIP.CheckItem = function (item, entryList, verbose) {
   let i, num;
   let rval = {};
   let result = 0;
 
-  let list = entryList ? entryList : NTIP_CheckList;
-  let identified = item.getFlag(sdk.items.flags.Identified);
+  const list = entryList
+    ? entryList
+    : NTIP_CheckList;
+  const identified = item.getFlag(sdk.items.flags.Identified);
 
   for (i = 0; i < list.length; i++) {
     try {

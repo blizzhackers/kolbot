@@ -506,22 +506,21 @@ const Item = {
     if (!Config.LogLowGems && ["gcv", "gcy", "gcb", "gcg", "gcr", "gcw", "skc", "gfv", "gfy", "gfb", "gfg", "gfr", "gfw", "skf", "gsv", "gsy", "gsb", "gsg", "gsr", "gsw", "sku"].includes(unit.code)) return false;
     if (!Config.LogHighGems && ["gzv", "gly", "glb", "glg", "glr", "glw", "skl", "gpv", "gpy", "gpb", "gpg", "gpr", "gpw", "skz"].includes(unit.code)) return false;
 
-    for (let i = 0; i < Config.SkipLogging.length; i++) {
-      if (Config.SkipLogging[i] === unit.classid || Config.SkipLogging[i] === unit.code) return false;
+    for (let skip of Config.SkipLogging) {
+      if (skip === unit.classid || skip === unit.code) return false;
     }
 
     let lastArea;
-    let name = unit.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<:;.*]|\/|\\/g, "").trim();
+    const name = unit.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<:;.*]|\/|\\/g, "").trim();
+    const color = (unit.getColor() || -1);
+    const code = this.getItemCode(unit);
+    const sock = unit.getItem();
     let desc = this.getItemDesc(unit);
-    let color = (unit.getColor() || -1);
 
     if (action.match("kept", "i")) {
       lastArea = DataFile.getStats().lastArea;
       lastArea && (desc += ("\n\\xffc0Area: " + lastArea));
     }
-
-    let code = this.getItemCode(unit);
-    let sock = unit.getItem();
 
     if (sock) {
       do {
@@ -535,7 +534,7 @@ const Item = {
     keptLine && (desc += ("\n\\xffc0Line: " + keptLine));
     desc += "$" + (unit.ethereal ? ":eth" : "");
 
-    let itemObj = {
+    const itemObj = {
       title: action + " " + name,
       description: desc,
       image: code,
