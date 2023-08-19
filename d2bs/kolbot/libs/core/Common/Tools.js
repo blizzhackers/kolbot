@@ -8,25 +8,25 @@
 (function (Common) {
   typeof Common !== "object" && (Common = {});
   Object.defineProperty(Common, "Toolsthread", {
-    value: {
-      pots: {
+    value: new function Toolsthread () {
+      this.pots = {
         Health: 0,
         Mana: 1,
         Rejuv: 2,
         MercHealth: 3,
         MercRejuv: 4
-      },
-      pingTimer: [],
-      pauseScripts: [],
-      stopScripts: [],
-      timerLastDrink: [],
-      cloneWalked: false,
+      };
+      this.pingTimer = [];
+      this.pauseScripts = [];
+      this.stopScripts = [];
+      this.timerLastDrink = [];
+      this.cloneWalked = false;
 
       /**
        * @param {boolean} print 
        * @returns {boolean}
        */
-      checkPing: function (print = true) {
+      this.checkPing = function (print = true) {
         // Quit after at least 5 seconds in game
         if (getTickCount() - me.gamestarttime < 5000 || !me.gameReady) return false;
 
@@ -60,12 +60,12 @@
         return false;
       },
 
-      initQuitList: function () {
+      this.initQuitList = function () {
         let temp = [];
 
-        for (let i = 0; i < Config.QuitList.length; i += 1) {
-          if (FileTools.exists("data/" + Config.QuitList[i] + ".json")) {
-            let string = FileAction.read("data/" + Config.QuitList[i] + ".json");
+        for (let profile of Config.QuitList) {
+          if (FileTools.exists("data/" + profile + ".json")) {
+            let string = FileAction.read("data/" + profile + ".json");
 
             if (string) {
               let obj = JSON.parse(string);
@@ -78,23 +78,22 @@
         }
 
         Config.QuitList = temp.slice(0);
-      },
+      };
 
-      togglePause: function (townChicken = false) {
-        for (let i = 0; i < this.pauseScripts.length; i++) {
-          let script = getScript(this.pauseScripts[i]);
+      this.togglePause = function () {
+        for (let curr of this.pauseScripts) {
+          let script = getScript(curr);
 
           if (script) {
             if (script.running) {
-              this.pauseScripts[i] === "default.dbj" && console.log("ÿc1Pausing.");
+              curr === "default.dbj" && console.log("ÿc1Pausing.");
 
               // don't pause townchicken during clone walk
-              if (this.pauseScripts[i] !== "threads/townchicken.js" || !this.cloneWalked) {
+              if (curr !== "threads/townchicken.js" || !this.cloneWalked) {
                 script.pause();
               }
             } else {
-              if (this.pauseScripts[i] === "default.dbj") {
-                if (townChicken) continue; // don't resume default if we are in the middle of townChicken
+              if (curr === "default.dbj") {
                 console.log("ÿc2Resuming.");
               }
               script.resume();
@@ -105,10 +104,10 @@
         return true;
       },
 
-      stopDefault: function () {
-        for (let i = 0; i < this.stopScripts.length; i++) {
+      this.stopDefault = function () {
+        for (let curr of this.stopScripts) {
           try {
-            let script = getScript(this.stopScripts[i]);
+            let script = getScript(curr);
             !!script && script.running && script.stop();
           } catch (e) {
             console.error(e);
@@ -116,9 +115,9 @@
         }
 
         return true;
-      },
+      };
 
-      exit: function (chickenExit = false) {
+      this.exit = function (chickenExit = false) {
         try {
           chickenExit && D2Bot.updateChickens();
           Config.LogExperience && Experience.log();
@@ -132,17 +131,20 @@
         }
 
         return true;
-      },
+      };
 
       /**
        * @param {number} pottype 
        * @param {number} type 
        * @returns {ItemUnit | false}
        */
-      getPotion: function (pottype, type) {
+      this.getPotion = function (pottype, type) {
         if (!pottype) return false;
 
-        let items = me.getItemsEx().filter((item) => item.itemType === pottype);
+        let items = me.getItemsEx()
+          .filter(function (item) {
+            return item.itemType === pottype;
+          });
         if (items.length === 0) return false;
 
         // Get highest id = highest potion first
@@ -150,27 +152,27 @@
           return b.classid - a.classid;
         });
 
-        for (let i = 0; i < items.length; i += 1) {
-          if (type < this.pots.MercHealth && items[i].isInInventory && items[i].itemType === pottype) {
+        for (let item of items) {
+          if (type < this.pots.MercHealth && item.isInInventory && item.itemType === pottype) {
             console.log("ÿc2Drinking potion from inventory.");
-            return items[i];
+            return item;
           }
 
-          if (items[i].isInBelt && items[i].itemType === pottype) {
+          if (item.isInBelt && item.itemType === pottype) {
             console.log("ÿc2" + (type > 2 ? "Giving Merc" : "Drinking") + " potion from belt.");
-            return items[i];
+            return item;
           }
         }
 
         return false;
-      },
+      };
 
       /**
        * @param {number} type 
        * @returns {boolean}
        * @todo add stamina/thawing/antidote pot drinking here
        */
-      drinkPotion: function (type) {
+      this.drinkPotion = function (type) {
         if (type === undefined) return false;
         let tNow = getTickCount();
 
@@ -230,7 +232,9 @@
           }
 
           try {
-            type < this.pots.MercHealth ? potion.interact() : Packet.useBeltItemForMerc(potion);
+            type < this.pots.MercHealth
+              ? potion.interact()
+              : Packet.useBeltItemForMerc(potion);
           } catch (e) {
             console.error(e);
           }
@@ -241,9 +245,9 @@
         }
 
         return false;
-      },
+      };
 
-      checkVipers: function () {
+      this.checkVipers = function () {
         let monster = Game.getMonster(sdk.monsters.TombViper2);
 
         if (monster) {
@@ -261,9 +265,9 @@
         }
 
         return false;
-      },
+      };
 
-      getIronGolem: function () {
+      this.getIronGolem = function () {
         let golem = Game.getMonster(sdk.summons.IronGolem);
 
         if (golem) {
@@ -277,9 +281,9 @@
         }
 
         return false;
-      },
+      };
 
-      getNearestPreset: function () {
+      this.getNearestPreset = function () {
         let id;
         let unit = getPresetUnits(me.area);
         let dist = 99;
@@ -298,7 +302,7 @@
        * @param {MeType | MercUnit} unit 
        * @returns {string}
        */
-      getStatsString: function (unit) {
+      this.getStatsString = function (unit) {
         let realFCR = unit.getStat(sdk.stats.FCR);
         let realIAS = unit.getStat(sdk.stats.IAS);
         let realFBR = unit.getStat(sdk.stats.FBR);
@@ -352,7 +356,7 @@
           + (unit.getStat(sdk.stats.CannotbeFrozen) > 0 ? "ÿc3Cannot be Frozenÿc1\n" : "\n");
 
         return str;
-      },
+      };
     },
     configurable: true,
   });
