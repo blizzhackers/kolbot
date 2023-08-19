@@ -259,8 +259,6 @@ const Attack = {
     Config.MFLeader && Pather.makePortal() && say("kill " + classId);
 
     while (attackCount < Config.MaxAttackCount && target.attackable && !this.skipCheck(target)) {
-      Misc.townCheck();
-      
       // Check if unit got invalidated, happens if necro raises a skeleton from the boss's corpse.
       if (!target || !copyUnit(target).x) {
         target = Game.getMonster(-1, -1, gid);
@@ -494,7 +492,6 @@ const Attack = {
         || (this.getScarinessLevel(target) > 7 && target.distance <= range))
         && target.attackable) {
         Config.Dodge && me.hpPercent <= Config.DodgeHP && this.deploy(target, Config.DodgeRange, 5, 9);
-        Misc.townCheck();
         tick = getTickCount();
 
         if (!logged && boss && boss.gid === target.gid) {
@@ -754,7 +751,6 @@ const Attack = {
 
       if (target.x !== undefined && target.attackable) {
         Config.Dodge && me.hpPercent <= Config.DodgeHP && this.deploy(target, Config.DodgeRange, 5, 9);
-        Misc.townCheck();
         // me.overhead("attacking " + target.name + " spectype " + target.spectype + " id " + target.classid);
         let i;
         let result = ClassAttack.doAttack(target, attackCount % 15 === 0);

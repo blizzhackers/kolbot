@@ -413,7 +413,7 @@ const Pather = {
               }
             }
 
-            settings.allowTown && Misc.townCheck();
+            // settings.allowTown && Misc.townCheck();
           }
         } else {
           if (!me.inTown) {
