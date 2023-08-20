@@ -344,6 +344,10 @@ let Config = {
   ClearPath: false,
   BossPriority: false,
   MaxAttackCount: 300,
+  ChargeCast: {
+    skill: -1,
+    spectype: 0x7,
+  },
 
   // Amazon specific
   LightningFuryDelay: 0,

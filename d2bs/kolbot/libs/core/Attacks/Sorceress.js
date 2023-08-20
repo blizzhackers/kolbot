@@ -52,6 +52,11 @@ const ClassAttack = {
     return skills;
   },
 
+  /**
+   * @param {Monster} unit 
+   * @param {boolean} preattack 
+   * @returns {AttackResult}
+   */
   doAttack: function (unit, preattack = false) {
     if (!unit) return Attack.Result.SUCCESS;
     Config.TeleSwitch && me.switchToPrimary();
@@ -76,6 +81,16 @@ const ClassAttack = {
     // Keep Thunder-Storm active
     if (Skill.canUse(sdk.skills.ThunderStorm) && !me.getState(sdk.states.ThunderStorm)) {
       Skill.cast(sdk.skills.ThunderStorm, sdk.skills.hand.Right);
+    }
+
+    if (Config.ChargeCast.skill > -1) {
+      let cRange = Skill.getRange(Config.ChargeCast.skill);
+      let cState = Skill.getState(Config.ChargeCast.skill);
+      if ((!Config.ChargeCast.spectype || (unit.spectype & Config.ChargeCast.spectype))
+        && (!cState || !unit.getState(cState))
+        && (unit.distance < cRange || !checkCollision(me, unit, sdk.collision.LineOfSight))) {
+        Skill.castCharges(Config.ChargeCast.skill, unit);
+      }
     }
 
     if (preattack && Config.AttackSkill[0] > 0

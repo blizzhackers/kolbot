@@ -507,6 +507,11 @@
 	// Low mana skills - these will be used if main skills can't be cast.
 	Config.LowManaSkill[0] = -1; // Timed low mana skill.
 	Config.LowManaSkill[1] = -1; // Untimed low mana skill.
+  
+  Config.ChargeCast = {
+    skill: sdk.skills.LowerResist,
+    spectype: 0x7,
+  };
 	
 	Config.PacketCasting = 0; // 0 = disable, 1 = packet teleport, 2 = full packet casting. (disables casting animation for increased d2bs stability)
 	
