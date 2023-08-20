@@ -541,18 +541,9 @@ const Precast = (function () {
 
         Skill.canUse(sdk.skills.Raven) && Precast.summon(sdk.skills.Raven, sdk.summons.type.Raven);
 
-        buffSummons = (function () {
-          switch (Config.SummonAnimal) {
-          case sdk.skills.SummonSpiritWolf:
-            return (Precast.summon(sdk.skills.SummonSpiritWolf, sdk.summons.type.SpiritWolf) || buffSummons);
-          case sdk.skills.SummonDireWolf:
-            return (Precast.summon(sdk.skills.SummonDireWolf, sdk.summons.type.DireWolf) || buffSummons);
-          case sdk.skills.SummonGrizzly:
-            return (Precast.summon(sdk.skills.SummonGrizzly, sdk.summons.type.Grizzly) || buffSummons);
-          default:
-            return buffSummons;
-          }
-        })();
+        if (!!Config.SummonAnimal && Config.SummonAnimal !== "None") {
+          buffSummons = Precast.summon(Config.SummonAnimal, Skill.getSummonType(Config.SummonAnimal));
+        }
 
         if (!!Config.SummonVine && Config.SummonVine !== "None") {
           buffSummons = Precast.summon(Config.SummonVine, sdk.summons.type.Vine);
@@ -633,3 +624,8 @@ const Precast = (function () {
     },
   };
 })();
+// handle cyclone armor for lack of duration
+Precast.skills.get(sdk.skills.CycloneArmor).needToCast = function (force = false) {
+  if (!this.canUse()) return false;
+  return force || !me.getState(this.state);
+};
