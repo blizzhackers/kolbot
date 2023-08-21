@@ -62,6 +62,7 @@ const Pickit = {
 
   // eslint-disable-next-line no-unused-vars
   itemEvent: function (gid, mode, code, global) {
+    // console.log("gid: " + gid, " mode: " + mode, " code: " + code, " global: " + global);
     if (gid > 0 && mode === 0) {
       Pickit.gidList.add(gid);
     }
@@ -289,8 +290,12 @@ const Pickit = {
       if (Config.GemHunter.GemList.some((p) => [unit.classid - 1, unit.classid].includes(p))) {
         // base and upgraded gem will be kept
         let _items = me.getItemsEx(unit.classid, sdk.items.mode.inStorage)
-          .filter(i => i.gid !== unit.gid
-            && !CraftingSystem.checkItem(i) && !Cubing.checkItem(i) && !Runewords.checkItem(i));
+          .filter(function (i) {
+            return i.gid !== unit.gid
+              && !CraftingSystem.checkItem(i)
+              && !Cubing.checkItem(i)
+              && !Runewords.checkItem(i);
+          });
         if (_items.length === 0) return resultObj(Pickit.Result.WANTED, "GemHunter");
       }
     }
@@ -335,6 +340,7 @@ const Pickit = {
      * @param {ItemUnit} unit 
      */
     function ItemStats (unit) {
+      this.gid = unit.gid;
       this.ilvl = unit.ilvl;
       this.type = unit.itemType;
       this.classid = unit.classid;
@@ -353,9 +359,8 @@ const Pickit = {
       sdk.uiflags.Waypoint, sdk.uiflags.Shop,
       sdk.uiflags.Stash, sdk.uiflags.Cube
     ];
-    const gid = unit.gid;
     
-    let item = Game.getItem(-1, -1, gid);
+    let item = Game.getItem(-1, -1, unit.gid);
     if (!item) return false;
 
     if (cancelFlags.some(function (flag) { return getUIFlag(flag); })) {
@@ -372,11 +377,11 @@ const Pickit = {
     for (let i = 0; i < retry; i += 1) {
       if (me.dead) return false;
       // recursion appeared
-      if (this.track.lastItem === gid) return true;
+      if (this.track.lastItem === stats.gid) return true;
       // can't find the item
-      if (!Game.getItem(-1, -1, gid)) return false;
+      if (!Game.getItem(-1, -1, stats.gid)) return false;
 
-      if (me.getItem(item.classid, -1, item.gid)) {
+      if (me.getItem(stats.classid, -1, stats.gid)) {
         console.debug("Already picked item");
         return true;
       }
@@ -402,19 +407,21 @@ const Pickit = {
             continue;
           }
           // we had to move, lets check to see if it's still there
-          if (me.getItem(-1, -1, gid)) {
+          if (me.getItem(stats.classid, -1, stats.gid)) {
             // we picked the item during another process - recursion happened
             // this has pontential to skip logging an item
             return true;
           }
-          if (!Game.getItem(-1, -1, gid)) {
+          if (!Game.getItem(stats.classid, -1, stats.gid)) {
             // it's gone so don't continue, 
             return false;
           }
         }
 
         // use packet first, if we fail and not using fast pick use click
-        (Config.FastPick || i < 1) ? Packet.click(item) : Misc.click(0, 0, item);
+        (Config.FastPick || i < 1)
+          ? Packet.click(item)
+          : Misc.click(0, 0, item);
       }
 
       let tick = getTickCount();
@@ -459,36 +466,38 @@ const Pickit = {
       stats.useTk = false;
     }
 
-    stats.picked = me.itemcount > itemCount || !!me.getItem(-1, -1, gid);
+    stats.picked = me.itemcount > itemCount || !!me.getItem(stats.classid, -1, stats.gid);
 
     if (stats.picked) {
       DataFile.updateStats("lastArea");
-      let _common = "ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")";
+      const _common = "ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")";
+      const pickedItem = me.getItem(stats.classid, -1, stats.gid);
+      if (!pickedItem) return false;
 
       switch (status) {
       case Pickit.Result.WANTED:
         console.log(_common + (keptLine ? " (" + keptLine + ")" : ""));
-        if (this.ignoreLog.indexOf(stats.type) === -1) {
-          Item.logger("Kept", item);
-          Item.logItem("Kept", item, keptLine);
+        if (Pickit.ignoreLog.indexOf(pickedItem.itemType) === -1) {
+          Item.logger("Kept", pickedItem);
+          Item.logItem("Kept", pickedItem, keptLine);
         }
 
         break;
       case Pickit.Result.CUBING:
         console.log(_common + " (Cubing)");
-        Item.logger("Kept", item, "Cubing " + me.findItems(item.classid).length);
+        Item.logger("Kept", pickedItem, "Cubing " + me.findItems(pickedItem.classid).length);
         Cubing.update();
 
         break;
       case Pickit.Result.RUNEWORD:
         console.log(_common + " (Runewords)");
-        Item.logger("Kept", item, "Runewords");
-        Runewords.update(stats.classid, gid);
+        Item.logger("Kept", pickedItem, "Runewords");
+        Runewords.update(pickedItem.classid, pickedItem.gid);
 
         break;
       case Pickit.Result.CRAFTING:
         console.log(_common + " (Crafting System)");
-        CraftingSystem.update(item);
+        CraftingSystem.update(pickedItem);
 
         break;
       default:
@@ -497,7 +506,7 @@ const Pickit = {
         break;
       }
       
-      this.track.lastItem = item.gid;
+      this.track.lastItem = pickedItem.gid;
     }
 
     return true;
@@ -512,7 +521,7 @@ const Pickit = {
     let items = Storage.Inventory.Compare(Config.Inventory) || [];
 
     if (items.length) {
-      return items.some(item => {
+      return items.some(function (item) {
         switch (Pickit.checkItem(item).result) {
         case Pickit.Result.UNID:
           // For low level chars that can't actually get id scrolls -> prevent an infinite loop
