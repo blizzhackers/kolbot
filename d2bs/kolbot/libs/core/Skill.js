@@ -652,15 +652,17 @@
      */
     castCharges: function (skillId, unit) {
       if (!Skill.charges.length) return false;
-      let charge = Skill.charges
-        .filter(c => c.skill === skillId && c.charges > 0)
+      const charge = Skill.charges
+        .filter(function (c) {
+          return c.skill === skillId && c.charges > 0;
+        })
         .sort(function (a, b) {
           return b.level - a.level;
-        }).find(function (c) {
-          return me.getItem(-1, sdk.items.mode.Equipped, c.gid);
+        }).find(function (charge) {
+          return me.getItem(-1, sdk.items.mode.Equipped, charge.gid);
         });
       if (!charge) return false;
-      let item = me.getItem(-1, sdk.items.mode.Equipped, charge.gid);
+      const item = me.getItem(-1, sdk.items.mode.Equipped, charge.gid);
       if (!item) return false;
       if (!unit) unit = me;
       const weaponSwitch = me.weaponswitch;
@@ -669,6 +671,11 @@
       }
       try {
         return item.castChargedSkill(skillId, unit.x, unit.y);
+      } catch (e) {
+        console.error(e);
+        // maybe rebuild list?
+        // Skill.getCharges();
+        return false;
       } finally {
         if (weaponSwitch !== me.weaponswitch) {
           me.switchWeapons(weaponSwitch);
