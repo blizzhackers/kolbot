@@ -8,6 +8,8 @@
 const Packet = {
   /**
    * Interact and open the menu of an NPC
+   * @deprecated there was only one line difference between this and Unit.openMenu
+   * added the line to Unit.openMenu to save defining this function
    * @param {NPCUnit} unit 
    * @returns {boolean}
    */
@@ -65,11 +67,18 @@ const Packet = {
     const gamble = mode === "Gamble";
     console.info(true, mode + " at " + unit.name);
 
-    if (this.openMenu(unit)) {
+    if (unit.openMenu()) {
       for (let i = 0; i < 10; i += 1) {
         delay(200);
 
-        i % 2 === 0 && sendPacket(1, sdk.packets.send.EntityAction, 4, gamble ? 2 : 1, 4, unit.gid, 4, 0);
+        if (i % 2 === 0) {
+          new PacketBuilder()
+            .byte(sdk.packets.send.EntityAction)
+            .dword(gamble ? 2 : 1)
+            .dword(unit.gid)
+            .dword(0)
+            .send();
+        }
 
         if (unit.itemcount > 0) {
           delay(200);
@@ -101,7 +110,6 @@ const Packet = {
       if (oldGold < unit.getItemCost(sdk.items.cost.ToBuy)) return false;
 
       for (let i = 0; i < 3; i += 1) {
-        // sendPacket(1, sdk.packets.send.NPCBuy, 4, npc.gid, 4, unit.gid, 4, shiftBuy ? 0x80000000 : gamble ? 0x2 : 0x0, 4, 0);
         new PacketBuilder()
           .byte(sdk.packets.send.NPCBuy)
           .dword(npc.gid)
@@ -109,7 +117,6 @@ const Packet = {
           .dword(shiftBuy ? 0x80000000 : gamble ? 0x2 : 0x0)
           .dword(0)
           .send();
-
         let tick = getTickCount();
 
         while (getTickCount() - tick < Math.max(2000, me.ping * 2 + 500)) {
@@ -151,8 +158,13 @@ const Packet = {
       if (oldGold < unit.getItemCost(sdk.items.cost.ToBuy)) return false;
 
       for (let i = 0; i < 3; i += 1) {
-        sendPacket(1, sdk.packets.send.NPCBuy, 4, npc.gid, 4, unit.gid, 4, shiftBuy ? 0x80000000 : 0x0, 4, 0);
-
+        new PacketBuilder()
+          .byte(sdk.packets.send.NPCBuy)
+          .dword(npc.gid)
+          .dword(unit.gid)
+          .dword(shiftBuy ? 0x80000000 : 0x0)
+          .dword(0)
+          .send();
         let tick = getTickCount();
 
         while (getTickCount() - tick < Math.max(2000, me.ping * 2 + 500)) {
@@ -192,8 +204,13 @@ const Packet = {
     }
 
     for (let i = 0; i < 5; i += 1) {
-      sendPacket(1, sdk.packets.send.NPCSell, 4, npc.gid, 4, unit.gid, 4, 0, 4, 0);
-
+      new PacketBuilder()
+        .byte(sdk.packets.send.NPCSell)
+        .dword(npc.gid)
+        .dword(unit.gid)
+        .dword(0)
+        .dword(0)
+        .send();
       let tick = getTickCount();
 
       while (getTickCount() - tick < 2000) {
@@ -212,11 +229,17 @@ const Packet = {
    */
   identifyItem: function (unit, tome) {
     if (!unit || unit.identified) return false;
+    const identify = function () {
+      new PacketBuilder()
+        .byte(sdk.packets.send.IndentifyItem)
+        .dword(unit.gid)
+        .dword(tome.gid)
+        .send();
+    };
 
     CursorLoop:
     for (let i = 0; i < 3; i += 1) {
-      sendPacket(1, sdk.packets.send.IndentifyItem, 4, unit.gid, 4, tome.gid);
-
+      identify();
       let tick = getTickCount();
 
       while (getTickCount() - tick < 2000) {
@@ -234,7 +257,7 @@ const Packet = {
 
     for (let i = 0; i < 3; i += 1) {
       if (getCursorType() === sdk.cursortype.Identify) {
-        sendPacket(1, sdk.packets.send.IndentifyItem, 4, unit.gid, 4, tome.gid);
+        identify();
       }
 
       let tick = getTickCount();
@@ -294,9 +317,11 @@ const Packet = {
     if (!this.itemToCursor(item)) return false;
 
     for (let i = 0; i < 15; i += 1) {
-      sendPacket(1, sdk.packets.send.DropItem, 4, item.gid);
-
-      let tick = getTickCount();
+      new PacketBuilder()
+        .byte(sdk.packets.send.DropItem)
+        .dword(item.gid)
+        .send();
+      const tick = getTickCount();
 
       while (getTickCount() - tick < Math.max(500, me.ping * 2 + 200)) {
         if (!me.itemoncursor) return true;
@@ -321,8 +346,10 @@ const Packet = {
     }
     if (item.isInBelt) return this.useBeltItemForMerc(item);
     if (item.isInInventory && this.itemToCursor(item)) {
-      sendPacket(1, sdk.packets.send.MercItem, 2, 0);
-
+      new PacketBuilder()
+        .byte(sdk.packets.send.MercItem)
+        .word(0)
+        .send();
       return true;
     }
     return false;
@@ -334,8 +361,16 @@ const Packet = {
    * @returns {boolean}
    */
   placeInBelt: function (item, xLoc) {
-    item.toCursor(true) && new PacketBuilder().byte(sdk.packets.send.ItemToBelt).dword(item.gid).dword(xLoc).send();
-    return Misc.poll(() => item.isInBelt, 500, 100);
+    if (item.toCursor(true)) {
+      new PacketBuilder()
+        .byte(sdk.packets.send.ItemToBelt)
+        .dword(item.gid)
+        .dword(xLoc)
+        .send();
+    }
+    return Misc.poll(function () {
+      return item.isInBelt;
+    }, 500, 100);
   },
 
   /**
@@ -360,7 +395,11 @@ const Packet = {
    */
   entityInteract: function (who) {
     if (!who || !copyUnit(who).x) return false;
-    new PacketBuilder().byte(sdk.packets.send.InteractWithEntity).dword(who.type).dword(who.gid).send();
+    new PacketBuilder()
+      .byte(sdk.packets.send.InteractWithEntity)
+      .dword(who.type)
+      .dword(who.gid)
+      .send();
     return true;
   },
 
@@ -370,7 +409,11 @@ const Packet = {
    */
   cancelNPC: function (who) {
     if (!who || !copyUnit(who).x) return false;
-    new PacketBuilder().byte(sdk.packets.send.NPCCancel).dword(who.type).dword(who.gid).send();
+    new PacketBuilder()
+      .byte(sdk.packets.send.NPCCancel)
+      .dword(who.type)
+      .dword(who.gid)
+      .send();
     return true;
   },
 
@@ -380,7 +423,12 @@ const Packet = {
    */
   useBeltItemForMerc: function (pot) {
     if (!pot) return false;
-    sendPacket(1, sdk.packets.send.UseBeltItem, 4, pot.gid, 4, 1, 4, 0);
+    new PacketBuilder()
+      .byte(sdk.packets.send.UseBeltItem)
+      .dword(pot.gid)
+      .dword(1)
+      .dword(0)
+      .send();
     return true;
   },
 
@@ -388,22 +436,34 @@ const Packet = {
     hand = (hand === sdk.skills.hand.Right)
       ? sdk.packets.send.RightSkillOnLocation
       : sdk.packets.send.LeftSkillOnLocation;
-    sendPacket(1, hand, 2, wX, 2, wY);
+    new PacketBuilder()
+      .byte(hand)
+      .word(wX)
+      .word(wY)
+      .send();
   },
 
   castAndHoldSkill: function (hand, wX, wY, duration = 1000) {
-    let nHand = (hand === sdk.skills.hand.Right)
+    /** @param {number} byte */
+    const cast = function (byte) {
+      new PacketBuilder()
+        .byte(byte)
+        .word(wX)
+        .word(wY)
+        .send();
+    };
+    const nHand = (hand === sdk.skills.hand.Right)
       ? sdk.packets.send.RightSkillOnLocation
       : sdk.packets.send.LeftSkillOnLocation;
     hand = (hand === sdk.skills.hand.Right)
       ? sdk.packets.send.RightSkillOnLocationEx
       : sdk.packets.send.LeftSkillOnLocationEx;
     
-    let endT = getTickCount() + duration;
+    const endTime = getTickCount() + duration;
     // has to be cast normally first with a click before held packet is sent
-    sendPacket(1, nHand, 2, wX, 2, wY);
-    while (getTickCount() < endT) {
-      sendPacket(1, hand, 2, wX, 2, wY);
+    cast(nHand);
+    while (getTickCount() < endTime) {
+      cast(hand);
       delay(25);
     }
   },
@@ -417,7 +477,11 @@ const Packet = {
     hand = (hand === sdk.skills.hand.Right)
       ? sdk.packets.send.RightSkillOnEntityEx3
       : sdk.packets.send.LeftSkillOnEntityEx3;
-    sendPacket(1, hand, 4, who.type, 4, who.gid);
+    new PacketBuilder()
+      .byte(hand)
+      .dword(who.type)
+      .dword(who.gid)
+      .send();
   },
 
   /**
@@ -442,7 +506,11 @@ const Packet = {
    */
   enchant: function (who) {
     if (!who || !Skill.setSkill(sdk.skills.Enchant, sdk.skills.hand.Right)) return false;
-    sendPacket(1, sdk.packets.send.RightSkillOnEntityEx3, 4, who.type, 4, who.gid);
+    new PacketBuilder()
+      .byte(sdk.packets.send.RightSkillOnEntityEx3)
+      .dword(who.type)
+      .dword(who.gid)
+      .send();
     return true;
   },
 
@@ -454,7 +522,11 @@ const Packet = {
   teleport: function (wX, wY) {
     if (![wX, wY].every(n => typeof n === "number")) return false;
     if (!Skill.setSkill(sdk.skills.Teleport, sdk.skills.hand.Right)) return false;
-    new PacketBuilder().byte(sdk.packets.send.RightSkillOnLocation).word(wX).word(wY).send();
+    new PacketBuilder()
+      .byte(sdk.packets.send.RightSkillOnLocation)
+      .word(wX)
+      .word(wY)
+      .send();
     return true;
   },
 
