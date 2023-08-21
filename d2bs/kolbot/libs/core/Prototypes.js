@@ -692,19 +692,20 @@ Object.defineProperties(Unit.prototype, {
  * @returns {boolean}
  */
 Unit.prototype.openMenu = function (addDelay) {
-  if (Config.PacketShopping) return Packet.openMenu(this);
   if (this.type !== sdk.unittype.NPC) throw new Error("Unit.openMenu: Must be used on NPCs.");
   if (getUIFlag(sdk.uiflags.NPCMenu)) return true;
 
   addDelay === undefined && (addDelay = 0);
-  let pingDelay = (me.gameReady ? me.ping : 125);
+  const pingDelay = (me.gameReady ? me.ping : 125);
 
   for (let i = 0; i < 5; i += 1) {
     if (getDistance(me, this) > 4) {
       Pather.moveNearUnit(this, 4);
     }
 
-    Misc.click(0, 0, this);
+    Config.PacketShopping
+      ? Packet.entityInteract(this)
+      : Misc.click(0, 0, this);
     let tick = getTickCount();
 
     while (getTickCount() - tick < 5000) {
@@ -714,14 +715,19 @@ Unit.prototype.openMenu = function (addDelay) {
         return true;
       }
 
-      if (getInteractedNPC() && getTickCount() - tick > 1000) {
+      if ((getTickCount() - tick > 1000 && getInteractedNPC())
+        || (getTickCount() - tick > 500 && getIsTalkingNPC())) {
         me.cancel();
       }
 
       delay(100);
     }
 
-    sendPacket(1, sdk.packets.send.NPCInit, 4, 1, 4, this.gid);
+    new PacketBuilder()
+      .byte(sdk.packets.send.NPCInit)
+      .dword(1)
+      .dword(this.gid)
+      .send();
     delay(pingDelay * 2 + 1);
     Packet.cancelNPC(this);
     delay(pingDelay * 2 + 1);
@@ -742,7 +748,7 @@ Unit.prototype.startTrade = function (mode) {
   console.log("Starting " + mode + " at " + this.name);
   if (getUIFlag(sdk.uiflags.Shop)) return true;
 
-  let menuId = mode === "Gamble"
+  const menuId = mode === "Gamble"
     ? sdk.menu.Gamble
     : mode === "Repair"
       ? sdk.menu.TradeRepair
@@ -852,8 +858,6 @@ Unit.prototype.sell = function () {
 
     while (getTickCount() - tick < 2000) {
       if (me.itemcount !== itemCount) {
-        //delay(500);
-
         return true;
       }
 
@@ -981,15 +985,19 @@ Unit.prototype.use = function () {
   case sdk.storage.Inventory:
     if (this.isInStash && !Town.openStash()) return false;
     // doesn't work, not sure why but it's missing something 
-    //new PacketBuilder().byte(sdk.packets.send.UseItem).dword(gid).dword(this.x).dword(this.y).send();
+    // new PacketBuilder().byte(sdk.packets.send.UseItem).dword(gid).dword(this.x).dword(this.y).send();
     checkQuantity = iType === sdk.items.type.Book;
     checkQuantity && (quantity = this.getStat(sdk.stats.Quantity));
     this.interact(); // use interact instead, was hoping to skip this since its really just doing the same thing over but oh well
 
     break;
   case sdk.storage.Belt:
-    new PacketBuilder().byte(sdk.packets.send.UseBeltItem).dword(gid).dword(0).dword(0).send();
-
+    new PacketBuilder()
+      .byte(sdk.packets.send.UseBeltItem)
+      .dword(gid)
+      .dword(0)
+      .dword(0)
+      .send();
     break;
   default:
     return false;
@@ -1003,21 +1011,26 @@ Unit.prototype.use = function () {
 };
 
 /**
+ * @typedef {Object} ItemInfo
+ * @property {number} [classid]
+ * @property {number} [itemtype]
+ * @property {number} [quality]
+ * @property {boolean} [runeword]
+ * @property {boolean} [ethereal]
+ * @property {boolean | number} [equipped]
+ * @property {boolean} [basetype]
+ * @property {string | number} [name]
+ */
+
+/**
  * @description Returns item given by itemInfo
- * @param itemInfo object -
- * 	{
- * 		classid: Number,
- * 		itemtype: Number,
- * 		quality: Number,
- * 		runeword: Boolean,
- * 		ethereal: Boolean,
- * 		name: getLocaleString(id) || localeStringId,
- * 		equipped: Boolean || Number (bodylocation)
- * 	}
- * @returns Unit[]
+ * @param {ItemInfo} itemInfo
+ * @returns {ItemUnit[]}
  */
 Unit.prototype.checkItem = function (itemInfo) {
-  if (this === undefined || this.type > 1 || typeof itemInfo !== "object") return { have: false, item: null };
+  if (this === undefined || this.type > 1 || typeof itemInfo !== "object") {
+    return { have: false, item: null };
+  }
 
   const itemObj = Object.assign({}, {
     classid: -1,
@@ -1065,17 +1078,8 @@ Unit.prototype.checkItem = function (itemInfo) {
 
 /**
  * @description Returns first item given by itemInfo
- * @param itemInfo array of objects -
- * 	{
- * 		classid: Number,
- * 		itemtype: Number,
- * 		quality: Number,
- * 		runeword: Boolean,
- * 		ethereal: Boolean,
- * 		name: getLocaleString(id) || localeStringId,
- * 		equipped: Boolean || Number (bodylocation)
- * 	}
- * @returns Unit[]
+ * @param {ItemInfo} itemInfo
+ * @returns {ItemUnit[]}
  */
 Unit.prototype.findFirst = function (itemInfo = []) {
   if (this === undefined || this.type > 1) return { have: false, item: null };
@@ -1127,18 +1131,9 @@ Unit.prototype.findFirst = function (itemInfo = []) {
 };
 
 /**
- * @description Returns boolean if we have all the items given by itemInfo
- * @param itemInfo array of objects -
- * 	{
- * 		classid: Number,
- * 		itemtype: Number,
- * 		quality: Number,
- * 		runeword: Boolean,
- * 		ethereal: Boolean,
- * 		name: getLocaleString(id) || localeStringId,
- * 		equipped: Boolean || Number (bodylocation)
- * 	}
- * @returns Boolean
+ * @description Check if we have all the items given by itemInfo
+ * @param {ItemInfo} itemInfo
+ * @returns {boolean}
  */
 Unit.prototype.haveAll = function (itemInfo = [], returnIfSome = false) {
   if (this === undefined || this.type > 1) return false;
@@ -1195,6 +1190,11 @@ Unit.prototype.haveAll = function (itemInfo = [], returnIfSome = false) {
   return haveAll;
 };
 
+/**
+ * @description Check if we have some of the items given by itemInfo
+ * @param {ItemInfo[]} itemInfo
+ * @returns {boolean}
+ */
 Unit.prototype.haveSome = function (itemInfo = []) {
   return this.haveAll(itemInfo, true);
 };
