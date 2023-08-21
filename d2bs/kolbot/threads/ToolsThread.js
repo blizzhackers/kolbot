@@ -66,7 +66,7 @@ function main () {
     "threads/antihostile.js",
     "threads/party.js",
     "threads/rushthread.js",
-    "libs//modules//workers//guard.js"
+    "libs\\\\modules\\workers\\guard.js" // why?
   ];
 
   // Event functions
@@ -375,7 +375,6 @@ function main () {
               + " in " + getAreaName(me.area) + ". Ping: " + me.ping,
               sdk.colors.D2Bot.Red
             );
-            Common.Toolsthread.exit(true);
 
             break;
           }
@@ -390,7 +389,6 @@ function main () {
 
         if (Config.ManaChicken > 0 && me.mpPercent <= Config.ManaChicken) {
           D2Bot.printToConsole("Mana Chicken: (" + me.mp + "/" + me.mpmax + ") in " + getAreaName(me.area), sdk.colors.D2Bot.Red);
-          Common.Toolsthread.exit(true);
 
           break;
         }
@@ -404,7 +402,6 @@ function main () {
             // ironGolem.hpmax is bugged with BO
             if (ironGolem.hp <= Math.floor(128 * Config.IronGolemChicken / 100)) {
               D2Bot.printToConsole("Irom Golem Chicken in " + getAreaName(me.area), sdk.colors.D2Bot.Red);
-              Common.Toolsthread.exit(true);
 
               break;
             }
@@ -419,13 +416,16 @@ function main () {
             if (mercHP > 0 && merc.mode !== sdk.monsters.mode.Dead) {
               if (mercHP < Config.MercChicken) {
                 D2Bot.printToConsole("Merc Chicken in " + getAreaName(me.area), sdk.colors.D2Bot.Red);
-                Common.Toolsthread.exit(true);
 
                 break;
               }
 
-              mercHP < Config.UseMercHP && Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.MercHealth);
-              mercHP < Config.UseMercRejuv && Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.MercRejuv);
+              if (mercHP < Config.UseMercHP) {
+                Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.MercHealth);
+              }
+              if (mercHP < Config.UseMercRejuv) {
+                Common.Toolsthread.drinkPotion(Common.Toolsthread.pots.MercRejuv);
+              }
             }
           }
         }
@@ -472,14 +472,14 @@ function main () {
         }
       } else {
         Common.Toolsthread.checkPing(false); // In case of quitlist triggering first
-        Common.Toolsthread.exit();
 
-        return true;
+        break;
       }
     }
 
     delay(20);
   }
+  Common.Toolsthread.exit();
 
   return true;
 }
