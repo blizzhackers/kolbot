@@ -10,6 +10,7 @@
 
 function UserAddon () {
   let i, title, dummy, command = "";
+  let showInfo = true;
   const UnitInfo = new (require("../modules/UnitInfo"));
   const className = sdk.player.class.nameOf(me.classid);
   const flags = [
@@ -31,10 +32,14 @@ function UserAddon () {
     }
   };
 
-  const onChatInput = (speaker, msg) => {
+  /**
+   * @param {string} speaker 
+   * @param {string} msg 
+   * @returns {boolean}
+   */
+  const onChatInput = function (speaker, msg) {
     if (msg.length && msg[0] === ".") {
-      command = str.split(" ")[0].split(".")[1];
-
+      command = msg.split(" ")[0].split(".")[1];
       return true;
     }
 
@@ -74,21 +79,25 @@ function UserAddon () {
 
       UnitInfo.check();
 
-      if (command && command.toLowerCase() === "done") {
-        console.log("ÿc4UserAddon ÿc1ended");
-
-        return true;
-      } else {
-        console.log(command);
+      if (command) {
+        console.debug(command);
+        if (command.toLowerCase() === "done") {
+          return true;
+        } else if (command.toLowerCase() === "info") {
+          showInfo = !showInfo;
+        }
         command = "";
       }
 
       Pickit.fastPick();
-      UnitInfo.createInfo(Game.getSelectedUnit());
+      if (showInfo) {
+        UnitInfo.createInfo(Game.getSelectedUnit());
+      }
 
       delay(20);
     }
   } finally {
+    console.log("ÿc4UserAddon ÿc1ended");
     removeEventListener("keyup", keyEvent);
     removeEventListener("itemaction", Pickit.itemEvent);
     removeEventListener("chatinputblocker", onChatInput);
