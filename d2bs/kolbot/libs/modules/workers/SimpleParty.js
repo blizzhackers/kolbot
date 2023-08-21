@@ -96,7 +96,7 @@
       SimpleParty.timer = getTickCount();
       return function () {
         // Set timer back on 3 seconds, or reset it and continue
-        if ((getTickCount() - SimpleParty.timer) < 3000
+        if (((getTickCount() - SimpleParty.timer) < 3000 || !me.gameReady)
           || (SimpleParty.timer = getTickCount()) && false) {
           return true;
         }

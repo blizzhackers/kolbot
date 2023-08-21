@@ -7,7 +7,7 @@
   switch (thread) {
   case "thread": {
     Worker.runInBackground.stackTrace = (new function () {
-      let self = this;
+      const self = this;
       let stack;
 
       let myStack = "";
@@ -19,15 +19,15 @@
       );
 
       /**
-      * @constructor
-      * @param {function():string} callback
-      */
+       * @constructor
+       * @param {function():string} callback
+       */
       function UpdateableText (callback) {
         let element = new Text(callback(), self.x + 15, self.y + (7 * self.hooks.length), 0, 12, 0);
         self.hooks.push(element);
         this.update = () => {
           element.text = callback();
-          element.visible = element.visible = [sdk.uiflags.Inventory,
+          element.visible = me.gameReady && [sdk.uiflags.Inventory,
             sdk.uiflags.SkillWindow,
             sdk.uiflags.TradePrompt,
             sdk.uiflags.Stash,
@@ -60,7 +60,6 @@
         this.hooks.filter(hook => hook.hasOwnProperty("update") && typeof hook.update === "function" && hook.update());
         return true;
       };
-
     }).update;
 
     let quiting = false;
