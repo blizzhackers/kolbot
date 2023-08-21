@@ -75,6 +75,7 @@
     break;
   }
   case "started": {
+    console.log("ÿc2Kolbotÿc0 :: Guard running");
     let sendStack = getTickCount();
     Worker.push(function highPrio () {
       Worker.push(highPrio);
