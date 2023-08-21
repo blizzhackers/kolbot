@@ -3,6 +3,7 @@
 *  @author      kolton, theBGuy
 *  @desc        Entry script for following public games
 *
+*  @typedef {import("./sdk/globals")}
 */
 
 include("critical.js"); // required
@@ -290,7 +291,6 @@ const locationAction = (function () {
       try {
         let func = locations.get(loc);
         if (typeof func === "function") {
-          console.debug("Running location: " + loc);
           func(loc);
         } else if (loc !== undefined && loc !== null) {
           console.log("Unhandled location: " + loc);
@@ -329,7 +329,11 @@ function main () {
     delay(200);
 
     if (Starter.gameInfo.crashInfo) {
-      D2Bot.printToConsole("Crash Info: Script: " + Starter.gameInfo.crashInfo.currScript + " Area: " + Starter.gameInfo.crashInfo.area, sdk.colors.D2Bot.Gray);
+      D2Bot.printToConsole(
+        "Crash Info: Script: " + Starter.gameInfo.crashInfo.currScript
+        + " Area: " + Starter.gameInfo.crashInfo.area,
+        sdk.colors.D2Bot.Gray
+      );
     }
 
     ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);
@@ -366,7 +370,10 @@ function main () {
           Starter.setNextGame(me.gamename);
         }
 
-        D2Bot.updateStatus(Starter.profileInfo.charName + " | Game: " + (me.gamename || "singleplayer") + Starter.timer(Starter.gameStart));
+        D2Bot.updateStatus(
+          me.charname + " | Game: " + (me.gamename || "singleplayer")
+          + Starter.timer(Starter.gameStart)
+        );
       }
 
       delay(1000);
