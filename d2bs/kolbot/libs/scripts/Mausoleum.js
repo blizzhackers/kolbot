@@ -5,13 +5,13 @@
 *
 */
 
-function Mausoleum() {
+function Mausoleum () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.ColdPlains);
   Precast.doPrecast(true);
 
   if (Config.Mausoleum.KillBishibosh) {
-    Pather.moveToPreset(sdk.areas.ColdPlains, sdk.unittype.Monster, sdk.monsters.preset.Bishibosh);
+    Pather.moveToPresetMonster(sdk.areas.ColdPlains, sdk.monsters.preset.Bishibosh);
     Attack.kill(getLocaleString(sdk.locale.monsters.Bishibosh));
     Pickit.pickItems();
   }
@@ -19,7 +19,9 @@ function Mausoleum() {
   if (!Pather.moveToExit(sdk.areas.BurialGrounds, true)) throw new Error("Failed to move to Burial Grounds");
 
   if (Config.Mausoleum.KillBloodRaven) {
-    Pather.moveToPreset(sdk.areas.BurialGrounds, sdk.unittype.Monster, sdk.monsters.preset.BloodRaven);
+    Pather.moveToPresetMonster(sdk.areas.BurialGrounds, sdk.monsters.preset.BloodRaven, {
+      minDist: me.sorceress && Pather.canTeleport() ? 30 : 5
+    });
     Attack.kill(getLocaleString(sdk.locale.monsters.BloodRaven));
     Pickit.pickItems();
   }
