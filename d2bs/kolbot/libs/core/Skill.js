@@ -213,6 +213,10 @@
         
         break;
       case sdk.player.class.Druid:
+        {
+          let cMax = me.getStat(sdk.stats.SkillCycloneArmorMax);
+          cMax > 0 && (Precast.skills.get(sdk.skills.CycloneArmor).max = cMax);
+        }
         if (!!Config.SummonAnimal && Config.SummonAnimal !== "None") {
           Config.SummonAnimal = (function () {
             switch (Config.SummonAnimal) {
@@ -362,8 +366,17 @@
      * @returns {number}
      */
     getCharClass: function (skillId) {
-      if (!_SkillData.has(skillId)) return 0;
+      if (!_SkillData.has(skillId)) return -1;
       return _SkillData.get(skillId).charClass;
+    },
+
+    /**
+     * @param {number} skillId 
+     * @returns {number}
+     */
+    getSkillTab: function (skillId) {
+      if (!_SkillData.has(skillId)) return -1;
+      return _SkillData.get(skillId).skillTab;
     },
 
     /**
