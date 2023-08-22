@@ -155,45 +155,11 @@ const Precast = (function () {
     getBetterSlot: function (skillId) {
       if (this.bestSlot[skillId] !== undefined) return this.bestSlot[skillId];
 
-      let [classid, skillTab] = (function () {
-        switch (skillId) {
-        case sdk.skills.FrozenArmor:
-        case sdk.skills.ShiverArmor:
-        case sdk.skills.ChillingArmor:
-          return [sdk.player.class.Sorceress, sdk.skills.tabs.Cold];
-        case sdk.skills.Enchant:
-          return [sdk.player.class.Sorceress, sdk.skills.tabs.Fire];
-        case sdk.skills.ThunderStorm:
-        case sdk.skills.EnergyShield:
-          return [sdk.player.class.Sorceress, sdk.skills.tabs.Lightning];
-        case sdk.skills.BoneArmor:
-          return [sdk.player.class.Necromancer, sdk.skills.tabs.PoisonandBone];
-        case sdk.skills.HolyShield:
-          return [sdk.player.class.Paladin, sdk.skills.tabs.PalaCombat];
-        case sdk.skills.Taunt:
-        case sdk.skills.FindItem:
-        case sdk.skills.BattleCry:
-        case sdk.skills.WarCry:
-        case sdk.skills.Shout:
-        case sdk.skills.BattleOrders:
-        case sdk.skills.BattleCommand:
-          return [sdk.player.class.Barbarian, sdk.skills.tabs.Warcries];
-        case sdk.skills.CycloneArmor:
-          return [sdk.player.class.Druid, sdk.skills.tabs.Elemental];
-        case sdk.skills.Werewolf:
-        case sdk.skills.Werebear:
-          return [sdk.player.class.Druid, sdk.skills.tabs.ShapeShifting];
-        case sdk.skills.BurstofSpeed:
-        case sdk.skills.Fade:
-          return [sdk.player.class.Assassin, sdk.skills.tabs.ShadowDisciplines];
-        case sdk.skills.BladeShield:
-          return [sdk.player.class.Assassin, sdk.skills.tabs.MartialArts];
-        default:
-          return [-1, -1];
-        }
-      })();
+      const [classid, skillTab] = [
+        Skill.getCharClass(skillId), Skill.getSkillTab(skillId)
+      ];
 
-      if (classid < 0) return me.weaponswitch;
+      if (classid < 0 || classid === 255) return me.weaponswitch;
 
       me.weaponswitch !== 0 && me.switchWeapons(0);
 
