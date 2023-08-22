@@ -13,8 +13,6 @@
   const BUTTON_LEAVE_PARTY = 3;
   // const BUTTON_HOSTILE = 4;
 
-  print("ÿc2Kolbotÿc0 :: Simple party running");
-
   const SimpleParty = {};
 
   SimpleParty.biggestPartyId = function () {
@@ -54,7 +52,7 @@
     const toMd5Int = what => parseInt(md5(what).substr(0, 4), 16); //ToDo; do something with game number here
     const names = [];
     for (let party = getParty(); party.getNext();) {
-      if (party.partyid === NO_PARTY) {
+      if (party.partyid === NO_PARTY && party.partyflag === ACCEPTABLE) {
         names.push(party.name);
       }
     }
@@ -92,12 +90,18 @@
   SimpleParty.timer = 0;
 
   if (getScript(true).name.toLowerCase() === "default.dbj") {
-    (Worker.runInBackground.party = (function () {// For now, we gonna do this in game with a single party
+    // For now, we gonna do this in game with a single party
+    (Worker.runInBackground.party = (function () {
+      console.log("ÿc2Kolbotÿc0 :: Simple party running");
       SimpleParty.timer = getTickCount();
       return function () {
         // Set timer back on 3 seconds, or reset it and continue
-        if (((getTickCount() - SimpleParty.timer) < 3000 || !me.gameReady)
+        if ((getTickCount() - SimpleParty.timer) < 3000
           || (SimpleParty.timer = getTickCount()) && false) {
+          return true;
+        }
+        if (!me.gameReady) {
+          SimpleParty.timer = getTickCount();
           return true;
         }
 
