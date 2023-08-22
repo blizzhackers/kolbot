@@ -360,8 +360,10 @@ const Pickit = {
       sdk.uiflags.Stash, sdk.uiflags.Cube
     ];
     
+    if (!unit.gid) return false;
     let item = Game.getItem(-1, -1, unit.gid);
     if (!item) return false;
+    if (!item.onGroundOrDropping) return false;
 
     if (cancelFlags.some(function (flag) { return getUIFlag(flag); })) {
       delay(500);
