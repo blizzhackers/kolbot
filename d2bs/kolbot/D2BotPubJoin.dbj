@@ -14,6 +14,7 @@ Starter.Config.ResetCount = 0; // Reset game count back to 1 every X games.
 Starter.Config.JoinDelay = 10; // Seconds to wait between join attempts
 Starter.Config.AttemptNextGame = true; // after joining a game, attempt incrementing game count and joining next game rather than looking for it in game list
 Starter.Config.AttemptNextGameRetrys = 5;
+Starter.Config.MinPlayers = 1; // Minimum players in game to join
 const {
   includeFilter,
   excludeFilter
@@ -222,8 +223,6 @@ const locationAction = (function () {
         delay(1000);
       }
 
-      console.debug(gameList);
-
       if (gameList) {
         doneGames = [];
         gameToJoin = false;
@@ -231,16 +230,18 @@ const locationAction = (function () {
           doneGames = JSON.parse(FileAction.read("logs/doneGames.json"));
         }
 
-        gameList.sort(function (a, b) {
-          return b.players - a.players;
-        });
+        gameList
+          .sort(function (a, b) {
+            return b.players - a.players;
+          });
 
-        for (let i = 0; i < gameList.length; i += 1) {
-          if (doneGames.indexOf(gameList[i].gameName) === -1
-            && includeCheck(gameList[i].gameName)
-            && excludeCheck(gameList[i].gameName)) {
-            console.log("ÿc7Game: " + gameList[i].gameName + ", Players: " + gameList[i].players);
-            gameToJoin = gameList[i].gameName;
+        for (let { gameName, players } of gameList) {
+          if (players < Starter.Config.MinPlayers) continue;
+          if (doneGames.indexOf(gameName) === -1
+            && includeCheck(gameName)
+            && excludeCheck(gameName)) {
+            console.log("ÿc7Game: " + gameName + ", Players: " + players);
+            gameToJoin = gameName;
 
             break;
           }
@@ -371,7 +372,7 @@ function main () {
         }
 
         D2Bot.updateStatus(
-          me.charname + " | Game: " + (me.gamename || "singleplayer")
+          me.charname + " (" + me.charlvl + ") | Game: " + (me.gamename || "singleplayer")
           + Starter.timer(Starter.gameStart)
         );
       }
