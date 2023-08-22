@@ -21,20 +21,15 @@ Starter.Config.SwitchKeyDelay = 0; // Seconds to wait before switching a used/ba
 include("systems/dropper/DropperSetup.js");
 include("systems/mulelogger/MuleLogger.js");
 
-const Controls = require("./libs/modules/Control");
-
 if (!FileTools.exists("data/" + me.profile + ".json")) {
   DataFile.create();
 }
 
-let currAcc;
-let usingDroper = isIncluded("systems/dropper/DropperSetup.js");
-let charList = [];
-let accounts = [];
-let chars = [];
-
-function parseInfo () {
-  usingDroper && parseDropperAccounts(accounts, chars);
+const usingDropper = isIncluded("systems/dropper/DropperSetup.js");
+const accounts = [];
+const chars = [];
+const parseInfo = function () {
+  usingDropper && parseDropperAccounts(accounts, chars);
   
   for (let i in MuleLogger.LogAccounts) {
     if (MuleLogger.LogAccounts.hasOwnProperty(i) && typeof i === "string") {
@@ -42,261 +37,234 @@ function parseInfo () {
       chars.push(MuleLogger.LogAccounts[i]);
     }
   }
-}
+};
+const locationAction = (function () {
+  let currAcc;
+  let charList = [];
+  let obj = {};
 
-function locationAction (location) {
-  let i, currChar,
-    obj = {};
+  const Controls = require("./libs/modules/Control");
+  const {
+    locations,
+    addLocations
+  } = require("./libs/oog/Locations");
 
-  switch (location) {
-  case sdk.game.locations.PreSplash:
-    ControlAction.click();
+  addLocations([sdk.game.locations.Lobby, sdk.game.locations.LobbyChat],
+    function () {
+      D2Bot.updateStatus("Lobby");
 
-    break;
-  case sdk.game.locations.Lobby:
-  case sdk.game.locations.LobbyChat:
-    D2Bot.updateStatus("Lobby");
+      if (Starter.inGame) {
+        if (getTickCount() - Starter.gameStart < Starter.Config.MinGameTime * 1e3) {
+          ControlAction.timeoutDelay(
+            "Min game time wait",
+            Starter.Config.MinGameTime * 1e3 + Starter.gameStart - getTickCount()
+          );
+        }
 
-    if (Starter.inGame) {
-      if (getTickCount() - Starter.gameStart < Starter.Config.MinGameTime * 1e3) {
-        ControlAction.timeoutDelay("Min game time wait", Starter.Config.MinGameTime * 1e3 + Starter.gameStart - getTickCount());
+        console.log("updating runs");
+        D2Bot.updateRuns();
+        delay(1000);
+
+        Starter.gameCount += 1;
+        Starter.lastGameStatus = "ready";
+        Starter.inGame = false;
+        Controls.LobbyQuit.click();
+
+        return;
       }
 
-      print("updating runs");
-      D2Bot.updateRuns();
-      delay(1000);
+      Starter.LocationEvents.openCreateGameWindow();
+    }
+  );
+  addLocations([sdk.game.locations.WaitingInLine, sdk.game.locations.CreateGame],
+    function () {
+      Controls.CancelCreateGame.click();
+      Controls.JoinGameWindow.click();
+    }
+  );
+  locations.set(sdk.game.locations.CreateGame,
+    function (location) {
+      D2Bot.updateStatus("Creating Game");
 
-      Starter.gameCount += 1;
+      // remove level restriction
+      if (Controls.CharacterDifference.disabled === 5) {
+        Controls.CharacterDifferenceButton.click();
+      }
+
+      // Max number of players
+      Controls.MaxPlayerCount.setText("8");
+
+      if (Starter.gameCount >= 99) {
+        Starter.gameCount = 1;
+
+        DataFile.updateStats("runs", Starter.gameCount);
+      }
+
+      if (Starter.lastGameStatus === "pending") {
+        D2Bot.printToConsole("Failed to create game");
+
+        Starter.gameCount += 1;
+      }
+
+      ControlAction.timeoutDelay("Make Game Delay", Starter.Config.CreateGameDelay * 1e3);
+      createGame(MuleLogger.LogGame[0] + Starter.gameCount, MuleLogger.LogGame[1], 0);
+      Starter.locationTimeout(5000, location);
+      Starter.lastGameStatus = "pending";
+    }
+  );
+  addLocations(
+    [
+      sdk.game.locations.JoinGame,
+      sdk.game.locations.Ladder,
+      sdk.game.locations.ChannelList,
+    ],
+    function () {
+      Starter.LocationEvents.openCreateGameWindow();
+    }
+  );
+  addLocations(
+    [
+      sdk.game.locations.MainMenu,
+      sdk.game.locations.Login,
+      sdk.game.locations.SplashScreen,
+    ],
+    function () {
+      if (!accounts.length) {
+        MuleLogger.remove();
+        D2Bot.printToConsole("Done logging mules!");
+        D2Bot.stop();
+
+        return;
+      }
+
+      if (FileTools.exists("logs/MuleLog.json")) {
+        obj = JSON.parse(FileTools.readText("logs/MuleLog.json"));
+
+        if (obj.currAcc) {
+          for (let i = 0; i < accounts.length; i += 1) {
+            if (accounts[i].split("/")[0] === obj.currAcc) {
+              accounts.splice(0, i);
+              chars.splice(0, i);
+              i -= 1;
+
+              break;
+            }
+          }
+        }
+      }
+
+      currAcc = accounts[0];
+      currAcc = currAcc.split("/");
+      charList = chars[0];
+      obj.currAcc = currAcc[0];
+
+      console.log("ÿc4Mule Loggerÿc2: Login account: " + currAcc[0]);
+      MuleLogger.save(md5(currAcc[2].toLowerCase() + currAcc[0].toLowerCase()), currAcc[1]);
+
+      if (ControlAction.loginAccount({ account: currAcc[0], password: currAcc[1], realm: currAcc[2] })) {
+        accounts.shift(); // remove current account from the list
+      }
+    }
+  );
+  locations.set(sdk.game.locations.CharSelect,
+    function () {
+      // Single Player screen fix
+      if (getLocation() === sdk.game.locations.CharSelect
+        && !Controls.CharSelectCurrentRealm.control
+        && Controls.BottomLeftExit.click()) {
+        return;
+      }
+
+      if (!charList.length && Controls.BottomLeftExit.click()) {
+        return;
+      }
+
+      charList[0] === "all" && (charList = ControlAction.getCharacters());
+
+      if (FileTools.exists("logs/MuleLog.json")) {
+        obj = JSON.parse(FileTools.readText("logs/MuleLog.json"));
+        
+        if (obj.currChar) {
+          for (let i = 0; i < charList.length; i += 1) {
+            if (charList[i] === obj.currChar) {
+              // Remove the previous currChar as well
+              charList.splice(0, i + 1);
+
+              break;
+            }
+          }
+        }
+      }
+
+      // last char in acc = trigger next acc
+      if (!charList.length) {
+        console.log("No more characters");
+        accounts.shift(); // remove current account from the list
+        chars.shift();
+
+        return;
+      }
+
+      let currChar = charList.shift();
+      obj.currChar = currChar;
+
+      console.log("ÿc4Mule Loggerÿc2: Login character: " + currChar);
+      FileTools.writeText("logs/MuleLog.json", JSON.stringify(obj));
+
+      if (MuleLogger.AutoPerm) {
+        let characterStatus = {
+          charname: currChar,
+          perm: ControlAction.getPermStatus({ charName: currChar })
+        };
+        MuleLogger.savePermedStatus(characterStatus);
+      }
+
+      ControlAction.loginCharacter({ charName: currChar });
+    }
+  );
+  addLocations([sdk.game.locations.CharSelectConnecting, sdk.game.locations.CharSelectNoChars],
+    function () {
+      if (!Starter.LocationEvents.charSelectError()) {
+        accounts.shift(); // remove current account from the list
+        chars.shift();
+      }
+    }
+  );
+  locations.set(sdk.game.locations.GameIsFull,
+    function () {
+      D2Bot.printToConsole("Game is full");
       Starter.lastGameStatus = "ready";
-      Starter.inGame = false;
-      Controls.LobbyQuit.click();
-
-      break;
-    }
-
-    Starter.LocationEvents.openCreateGameWindow();
-
-    break;
-  case sdk.game.locations.WaitingInLine:
-    Starter.LocationEvents.waitingInLine();
-
-    break;
-  case sdk.game.locations.CreateGame:
-    D2Bot.updateStatus("Creating Game");
-
-    // remove level restriction
-    Controls.CharacterDifference.disabled === 5 && Controls.CharacterDifferenceButton.click();
-
-    // Max number of players
-    Controls.MaxPlayerCount.setText("8");
-
-    if (Starter.gameCount >= 99) {
-      Starter.gameCount = 1;
-
-      DataFile.updateStats("runs", Starter.gameCount);
-    }
-
-    if (Starter.lastGameStatus === "pending") {
-      D2Bot.printToConsole("Failed to create game");
-
-      Starter.gameCount += 1;
-    }
-
-    ControlAction.timeoutDelay("Make Game Delay", Starter.Config.CreateGameDelay * 1e3);
-    createGame(MuleLogger.LogGame[0] + Starter.gameCount, MuleLogger.LogGame[1], 0);
-    Starter.locationTimeout(5000, location);
-    Starter.lastGameStatus = "pending";
-
-    break;
-  case sdk.game.locations.JoinGame:
-  case sdk.game.locations.Ladder:
-  case sdk.game.locations.ChannelList:
-    Starter.LocationEvents.openCreateGameWindow();
-
-    break;
-  case sdk.game.locations.MainMenu:
-  case sdk.game.locations.Login:
-  case sdk.game.locations.SplashScreen:
-    if (!accounts.length) {
-      MuleLogger.remove();
-      D2Bot.printToConsole("Done logging mules!");
-      D2Bot.stop();
-
-      break;
-    }
-
-    if (FileTools.exists("logs/MuleLog.json")) {
-      obj = JSON.parse(FileTools.readText("logs/MuleLog.json"));
-
-      if (obj.currAcc) {
-        for (i = 0; i < accounts.length; i += 1) {
-          if (accounts[i].split("/")[0] === obj.currAcc) {
-            accounts.splice(0, i);
-            chars.splice(0, i);
-            i -= 1;
-
-            break;
-          }
-        }
-      }
-    }
-
-    currAcc = accounts[0];
-    currAcc = currAcc.split("/");
-    charList = chars[0];
-    obj.currAcc = currAcc[0];
-
-    print("ÿc4Mule Loggerÿc2: Login account: " + currAcc[0]);
-    MuleLogger.save(md5(currAcc[2].toLowerCase() + currAcc[0].toLowerCase()), currAcc[1]);
-
-    if (ControlAction.loginAccount({ account: currAcc[0], password: currAcc[1], realm: currAcc[2] })) {
-      accounts.shift(); // remove current account from the list
-    }
-
-    break;
-  case sdk.game.locations.LoginError:
-  case sdk.game.locations.InvalidCdKey:
-  case sdk.game.locations.CdKeyInUse:
-    Starter.LocationEvents.loginError();
-
-    break;
-  case sdk.game.locations.LoginUnableToConnect:
-  case sdk.game.locations.TcpIpUnableToConnect:
-    Starter.LocationEvents.unableToConnect();
-
-    break;
-  case sdk.game.locations.CharSelect:
-    // Single Player screen fix
-    if (getLocation() === sdk.game.locations.CharSelect
-      && !Controls.CharSelectCurrentRealm.control
-      && Controls.BottomLeftExit.click()) {
-      break;
-    }
-
-    if (!charList.length && Controls.BottomLeftExit.click()) {
-      break;
-    }
-
-    charList[0] === "all" && (charList = ControlAction.getCharacters());
-
-    if (FileTools.exists("logs/MuleLog.json")) {
-      obj = JSON.parse(FileTools.readText("logs/MuleLog.json"));
-      
-      if (obj.currChar) {
-        for (i = 0; i < charList.length; i += 1) {
-          if (charList[i] === obj.currChar) {
-            // Remove the previous currChar as well
-            charList.splice(0, i + 1);
-
-            break;
-          }
-        }
-      }
-    }
-
-    // last char in acc = trigger next acc
-    if (!charList.length) {
-      print("No more characters");
-      accounts.shift(); // remove current account from the list
-      chars.shift();
-
-      break;
-    }
-
-    currChar = charList.shift();
-    obj.currChar = currChar;
-
-    print("ÿc4Mule Loggerÿc2: Login character: " + currChar);
-    FileTools.writeText("logs/MuleLog.json", JSON.stringify(obj));
-
-    if (MuleLogger.AutoPerm) {
-      let characterStatus = {
-        charname: currChar,
-        perm: ControlAction.getPermStatus({ charName: currChar })
-      };
-      MuleLogger.savePermedStatus(characterStatus);
-    }
-
-    ControlAction.loginCharacter({ charName: currChar });
-
-    break;
-  case sdk.game.locations.RealmDown:
-    Starter.LocationEvents.realmDown();
-
-    break;
-  case sdk.game.locations.Disconnected:
-  case sdk.game.locations.LobbyLostConnection:
-    D2Bot.updateStatus("Disconnected/LostConnection");
-    delay(1000);
-    Controls.OkCentered.click();
-
-    break;
-  case sdk.game.locations.NewCharSelected:
-    Controls.BottomLeftExit.click();
-
-    break;
-  case sdk.game.locations.CharSelectPleaseWait:
-    !Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
-
-    break;
-  case sdk.game.locations.SelectDifficultySP:
-    Starter.LocationEvents.selectDifficultySP();
-
-    break;
-  case sdk.game.locations.MainMenuConnecting:
-    !Starter.locationTimeout(Starter.Config.ConnectingTimeout * 1e3, location) && Controls.LoginCancelWait.click();
-
-    break;
-  case sdk.game.locations.CharSelectConnecting:
-  case sdk.game.locations.CharSelectNoChars:
-    if (!Starter.LocationEvents.charSelectError()) {
-      accounts.shift(); // remove current account from the list
-      chars.shift();
-    }
-
-    break;
-  case sdk.game.locations.ServerDown:
-    break;
-  case sdk.game.locations.LobbyPleaseWait:
-    !Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
-
-    break;
-  case sdk.game.locations.GameNameExists:
-  case sdk.game.locations.GameDoesNotExist:
-    Controls.CreateGameWindow.click();
-
-    break;
-  case sdk.game.locations.GatewaySelect:
-    Controls.GatewayCancel.click();
-
-    break;
-  case sdk.game.locations.GameIsFull:
-    D2Bot.printToConsole("Game is full");
-    Starter.lastGameStatus = "ready";
-    delay(500);
-    Controls.JoinGameWindow.click();
-
-    break;
-  case sdk.game.locations.OtherMultiplayer:
-    // probably should implement way to use open bnet
-    Controls.OtherMultiplayerCancel.click();
-
-    break;
-  case sdk.game.locations.TcpIp:
-  case sdk.game.locations.TcpIpEnterIp:
-    Controls.TcpIpCancel.click();
-
-    break;
-  default:
-    if (location !== undefined) {
-      D2Bot.printToConsole("Unhandled location " + location);
       delay(500);
-      D2Bot.restart();
+      Controls.JoinGameWindow.click();
     }
+  );
+  locations.set(sdk.game.locations.OtherMultiplayer,
+    function () {
+      Controls.OtherMultiplayerCancel.click();
+    }
+  );
+  locations.set(sdk.game.locations.TcpIp,
+    function () {
+      Controls.TcpIpCancel.click();
+    }
+  );
 
-    break;
-  }
-}
+  return {
+    /** @param {number} loc */
+    run: function (loc) {
+      try {
+        let func = locations.get(loc);
+        if (typeof func === "function") {
+          func(loc);
+        } else if (loc !== undefined && loc !== null) {
+          console.log("Unhandled location: " + loc);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
+  };
+})();
 
 function main () {
   addEventListener("copydata", Starter.receiveCopyData);
@@ -325,10 +293,14 @@ function main () {
   parseInfo();
 
   if (Starter.gameInfo.error) {
-    if (!!DataFile.getStats().debugInfo) {
+    if (DataFile.getStats().debugInfo) {
       Starter.gameInfo.crashInfo = DataFile.getStats().debugInfo;
 
-      D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, sdk.colors.D2Bot.Gray);
+      D2Bot.printToConsole(
+        "Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript
+        + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area,
+        sdk.colors.D2Bot.Gray
+      );
     }
 
     ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);
@@ -343,7 +315,7 @@ function main () {
       // returns false when switching acts so we can't use while
       if (me.gameReady) {
         if (!Starter.inGame) {
-          print("Updating Status");
+          console.log("Updating Status");
           Starter.lastGameStatus = "ingame";
           Starter.inGame = true;
           Starter.gameStart = getTickCount();
@@ -356,7 +328,7 @@ function main () {
       delay(1000);
     }
 
-    locationAction(getLocation());
+    locationAction.run(getLocation());
     delay(1000);
   }
 }
