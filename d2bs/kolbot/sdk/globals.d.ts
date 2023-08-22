@@ -41,6 +41,7 @@ declare global {
     find(predicate: (value: T, index: number, obj: Int8Array) => boolean, thisArg?: any): T | undefined;
     first(): T | undefined;
     last(): T | undefined;
+    at(index: number): T | undefined;
     findIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any): number;
     intersection(other: T[]): T[];
     difference(other: T[]): T[];
@@ -671,6 +672,7 @@ declare global {
     readonly attacking: boolean;
 
     haveWaypoint(area: number): boolean;
+    accessToAct(act: number): boolean;
     overhead(msg: string): void;
     repair(): boolean;
     revive(): void;
