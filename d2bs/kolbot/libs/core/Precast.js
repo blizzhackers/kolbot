@@ -34,6 +34,31 @@ const Precast = (function () {
     if (!this.canUse()) return false;
     return force || !me.getState(this.state) || this.needSoon(percent);
   };
+  PrecastSkill.prototype.update = function () {
+    this.lastCast = getTickCount();
+  };
+
+  /**
+   * @constructor
+   * @augments PrecastSkill
+   * @param {number} skillId 
+   */
+  function PrecastArmorSkill (skillId) {
+    PrecastSkill.call(this, skillId);
+    this.max = 0;
+  }
+  PrecastArmorSkill.prototype = Object.create(PrecastSkill.prototype);
+  PrecastArmorSkill.prototype.constructor = PrecastArmorSkill;
+
+  PrecastArmorSkill.prototype.remaining = function () {
+    return this.max > 0
+      ? Math.round(me.getStat(sdk.stats.SkillBoneArmor) * 100 / this.max)
+      : 0;
+  };
+  PrecastArmorSkill.prototype.update = function () {
+    this.lastCast = getTickCount();
+    this.max = me.getStat(sdk.stats.SkillBoneArmorMax);
+  };
   return {
     enabled: true,
     /** @type {number} */
@@ -57,34 +82,14 @@ const Precast = (function () {
       [sdk.skills.Shout, new PrecastSkill(sdk.skills.Shout)],
       [sdk.skills.BattleOrders, new PrecastSkill(sdk.skills.BattleOrders)],
       [sdk.skills.BattleCommand, new PrecastSkill(sdk.skills.BattleCommand)],
-      [sdk.skills.CycloneArmor, new PrecastSkill(sdk.skills.CycloneArmor)],
       [sdk.skills.Hurricane, new PrecastSkill(sdk.skills.Hurricane)],
       [sdk.skills.Armageddon, new PrecastSkill(sdk.skills.Armageddon)],
       [sdk.skills.Fade, new PrecastSkill(sdk.skills.Fade)],
       [sdk.skills.BurstofSpeed, new PrecastSkill(sdk.skills.BurstofSpeed)],
       [sdk.skills.BladeShield, new PrecastSkill(sdk.skills.BladeShield)],
       [sdk.skills.Venom, new PrecastSkill(sdk.skills.Venom)],
-      [sdk.skills.BoneArmor, {
-        skillId: sdk.skills.BoneArmor,
-        state: sdk.states.BoneArmor,
-        lastCast: 0,
-        max: 0,
-        canUse: function () {
-          return Skill.canUse(this.skillId);
-        },
-        remaining: function () {
-          return this.max > 0
-            ? Math.round(me.getStat(sdk.stats.SkillBoneArmor) * 100 / this.max)
-            : 100;
-        },
-        needSoon: function (percent = 25) {
-          return this.remaining() < percent;
-        },
-        needToCast: function (force = false, percent = 25) {
-          if (!this.canUse()) return false;
-          return force || !me.getState(this.state) || this.needSoon(percent);
-        },
-      }],
+      [sdk.skills.BoneArmor, new PrecastArmorSkill(sdk.skills.BoneArmor)],
+      [sdk.skills.CycloneArmor, new PrecastArmorSkill(sdk.skills.CycloneArmor)],
     ]),
     nonPacketSkills: new Set([
       sdk.skills.Valkyrie, sdk.skills.Decoy, sdk.skills.RaiseSkeleton,
@@ -287,11 +292,12 @@ const Precast = (function () {
           }, 100, 10);
         }
         if (Precast.skills.has(skillId)) {
-          Precast.skills.get(skillId).lastCast = getTickCount();
+          Precast.skills.get(skillId).update();
         }
         return state ? me.getState(state) : true;
       } catch (e) {
         console.error(e);
+
         return false;
       } finally {
         allowSwitch && me.switchWeapons(swap);
@@ -624,8 +630,3 @@ const Precast = (function () {
     },
   };
 })();
-// handle cyclone armor for lack of duration
-Precast.skills.get(sdk.skills.CycloneArmor).needToCast = function (force = false) {
-  if (!this.canUse()) return false;
-  return force || !me.getState(this.state);
-};
