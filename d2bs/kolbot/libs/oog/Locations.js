@@ -67,7 +67,9 @@
 
           break;
         case sdk.game.profiletype.Battlenet:
+          ControlAction.clickRealm(ControlAction.realms[Starter.profileInfo.realm]);
           Controls.BattleNet.click();
+          Starter.firstLogin && (Starter.firstLogin = false);
 
           break;
         case sdk.game.profiletype.SinglePlayer:
@@ -334,8 +336,10 @@
     ],
   ]);
   addLocations([sdk.game.locations.PreSplash, sdk.game.locations.SplashScreen],
-    function () {
+    function (location) {
       ControlAction.click();
+      Starter.locationTimeout(5000, location);
+      getLocation() === sdk.game.locations.PreSplash && sendKey(0x0D);
     }
   );
   addLocations(
