@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /* eslint-disable no-fallthrough */
 /**
 *  @filename    D2BotLead.dbj
@@ -21,294 +20,34 @@ const Controls = require("./libs/modules/Control");
 
 if (typeof Starter.AdvancedConfig[me.profile] === "object") {
   Object.assign(Starter.Config, Starter.AdvancedConfig[me.profile]);
-} else {
-  // no need to carry around the reference then
-  delete Starter.AdvancedConfig;
 }
+delete Starter.AdvancedConfig;
 
 if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
   Starter.firstRun = true;
 }
 
-function locationAction (location) {
-  switch (location) {
-  case sdk.game.locations.PreSplash:
-    ControlAction.click();
-    Starter.locationTimeout(5000, location);
-    getLocation() === sdk.game.locations.PreSplash && sendKey(0x0D);
+const locationAction = (function () {
+  const {
+    locations,
+  } = require("./libs/oog/Locations");
 
-    break;
-  case sdk.game.locations.Lobby:
-    D2Bot.updateStatus("Lobby");
-
-    me.blockKeys = false;
-    Starter.loginRetry = 0;
-    !Starter.firstLogin && (Starter.firstLogin = true);
-    Starter.lastGameStatus === "pending" && (Starter.gameCount += 1);
-
-    if (Starter.Config.PingQuitDelay && Starter.pingQuit) {
-      ControlAction.timeoutDelay("Ping Delay", Starter.Config.PingQuitDelay * 1e3);
-      Starter.pingQuit = false;
-    }
-
-    if (Starter.Config.JoinChannel !== "") {
-      Controls.LobbyEnterChat.click();
-
-      break;
-    }
-
-    if (Starter.inGame || Starter.gameInfo.error) {
-      !Starter.gameStart && (Starter.gameStart = DataFile.getStats().ingameTick);
-
-      if (getTickCount() - Starter.gameStart < Starter.Config.MinGameTime * 1e3) {
-        ControlAction.timeoutDelay("Min game time wait", Starter.Config.MinGameTime * 1e3 + Starter.gameStart - getTickCount());
-      }
-    }
-
-    if (Starter.inGame) {
-      if (AutoMule.outOfGameCheck() || TorchSystem.outOfGameCheck() || Gambling.outOfGameCheck() || CraftingSystem.outOfGameCheck()) {
-        break;
-      }
-
-      print("updating runs");
-      D2Bot.updateRuns();
-
-      Starter.gameCount += 1;
-      Starter.lastGameStatus = "ready";
-      Starter.inGame = false;
-
-      if (Starter.Config.ResetCount && Starter.gameCount > Starter.Config.ResetCount) {
-        Starter.gameCount = 1;
-        DataFile.updateStats("runs", Starter.gameCount);
-      }
-    }
-
-    Starter.LocationEvents.openCreateGameWindow();
-
-    break;
-  case sdk.game.locations.WaitingInLine:
-    Starter.LocationEvents.waitingInLine();
-
-    break;
-  case sdk.game.locations.LobbyChat:
-    D2Bot.updateStatus("Lobby Chat");
-    Starter.lastGameStatus === "pending" && (Starter.gameCount += 1);
-
-    if (Starter.inGame || Starter.gameInfo.error) {
-      !Starter.gameStart && (Starter.gameStart = DataFile.getStats().ingameTick);
-
-      if (getTickCount() - Starter.gameStart < Starter.Config.MinGameTime * 1e3) {
-        ControlAction.timeoutDelay("Min game time wait", Starter.Config.MinGameTime * 1e3 + Starter.gameStart - getTickCount());
-      }
-    }
-
-    if (Starter.inGame) {
-      if (AutoMule.outOfGameCheck() || TorchSystem.outOfGameCheck() || Gambling.outOfGameCheck() || CraftingSystem.outOfGameCheck()) {
-        break;
-      }
-
-      print("updating runs");
-      D2Bot.updateRuns();
-
-      Starter.gameCount += 1;
-      Starter.lastGameStatus = "ready";
-      Starter.inGame = false;
-
-      if (Starter.Config.ResetCount && Starter.gameCount > Starter.Config.ResetCount) {
-        Starter.gameCount = 1;
-        DataFile.updateStats("runs", Starter.gameCount);
-      }
-
-      Starter.chanInfo.afterMsg = Starter.Config.AfterGameMessage;
-
-      // check that we are in the channel we are supposed to be in
-      if (Starter.chanInfo.joinChannel.length) {
-        let chanName = Controls.LobbyChannelName.getText();
-        chanName && (chanName = chanName.toString());
-        chanName && (chanName = chanName.slice(0, chanName.indexOf("(") - 1));
-        Starter.chanInfo.joinChannel.indexOf(chanName) === -1 && (Starter.chatActionsDone = false);
-      }
-
-      if (Starter.chanInfo.afterMsg) {
-        if (typeof Starter.chanInfo.afterMsg === "string") {
-          Starter.chanInfo.afterMsg = [Starter.chanInfo.afterMsg];
+  return {
+    /** @param {number} loc */
+    run: function (loc) {
+      try {
+        let func = locations.get(loc);
+        if (typeof func === "function") {
+          func(loc);
+        } else if (loc !== undefined && loc !== null) {
+          console.log("Unhandled location: " + loc);
         }
-
-        for (let i = 0; i < Starter.chanInfo.afterMsg.length; i += 1) {
-          Starter.sayMsg(Starter.chanInfo.afterMsg[i]);
-          delay(500);
-        }
+      } catch (e) {
+        console.error(e);
       }
-    }
-
-    if (!Starter.chatActionsDone) {
-      Starter.chatActionsDone = true;
-      Starter.chanInfo.joinChannel = Starter.Config.JoinChannel;
-      Starter.chanInfo.firstMsg = Starter.Config.FirstJoinMessage;
-
-      if (Starter.chanInfo.joinChannel) {
-        typeof Starter.chanInfo.joinChannel === "string" && (Starter.chanInfo.joinChannel = [Starter.chanInfo.joinChannel]);
-        typeof Starter.chanInfo.firstMsg === "string" && (Starter.chanInfo.firstMsg = [Starter.chanInfo.firstMsg]);
-
-        for (let i = 0; i < Starter.chanInfo.joinChannel.length; i += 1) {
-          ControlAction.timeoutDelay("Chat delay", Starter.Config.ChatActionsDelay * 1e3);
-
-          if (ControlAction.joinChannel(Starter.chanInfo.joinChannel[i])) {
-            Starter.useChat = true;
-          } else {
-            print("ÿc1Unable to join channel, disabling chat messages.");
-            Starter.useChat = false;
-          }
-
-          if (Starter.chanInfo.firstMsg[i] !== "") {
-            Starter.sayMsg(Starter.chanInfo.firstMsg[i]);
-            delay(500);
-          }
-        }
-      }
-    }
-
-    // Announce game
-    Starter.chanInfo.announce = Starter.Config.AnnounceGames;
-
-    Starter.LocationEvents.openCreateGameWindow();
-
-    break;
-  case sdk.game.locations.CreateGame:
-    D2Bot.updateStatus("Creating Game");
-
-    if (typeof Starter.Config.CharacterDifference === "number") {
-      Controls.CharacterDifference.disabled === sdk.game.controls.Disabled && Controls.CharacterDifferenceButton.click();
-      Controls.CharacterDifference.setText(Starter.Config.CharacterDifference.toString());
-    } else if (!Starter.Config.CharacterDifference && Controls.CharacterDifference.disabled === 5) {
-      Controls.CharacterDifferenceButton.click();
-    }
-
-    typeof Starter.Config.MaxPlayerCount === "number" && Controls.MaxPlayerCount.setText(Starter.Config.MaxPlayerCount.toString());
-
-    // Get game name if there is none
-    while (!Starter.gameInfo.gameName) {
-      D2Bot.requestGameInfo();
-      delay(500);
-    }
-
-    // FTJ handler
-    if (Starter.lastGameStatus === "pending") {
-      Starter.isUp = "no";
-      D2Bot.printToConsole("Failed to create game");
-      ControlAction.timeoutDelay("FTJ delay", Starter.Config.FTJDelay * 1e3);
-      D2Bot.updateRuns();
-    }
-
-    let gameName = (Starter.gameInfo.gameName === "?" ? Starter.randomString(null, true) : Starter.gameInfo.gameName + Starter.gameCount);
-    let gamePass = (Starter.gameInfo.gamePass === "?" ? Starter.randomString(null, true) : Starter.gameInfo.gamePass);
-
-    ControlAction.createGame(gameName, gamePass, Starter.gameInfo.difficulty, Starter.Config.CreateGameDelay * 1000);
-
-    Starter.lastGameStatus = "pending";
-    Starter.setNextGame(Starter.gameInfo);
-    Starter.locationTimeout(10000, location);
-
-    break;
-  case sdk.game.locations.JoinGame:
-  case sdk.game.locations.Ladder:
-  case sdk.game.locations.ChannelList:
-    Starter.LocationEvents.openCreateGameWindow();
-
-    break;
-  case sdk.game.locations.MainMenu:
-  case sdk.game.locations.SplashScreen:
-  case sdk.game.locations.Login:
-  case sdk.game.locations.CharSelect:
-    Starter.LocationEvents.login([sdk.game.gametype.TcpIpHost, sdk.game.profiletype.OpenBattlenet].includes(Profile().type));
-
-    break;
-  case sdk.game.locations.LoginError:
-  case sdk.game.locations.InvalidCdKey:
-  case sdk.game.locations.CdKeyInUse:
-    Starter.LocationEvents.loginError();
-
-    break;
-  case sdk.game.locations.LoginUnableToConnect:
-  case sdk.game.locations.TcpIpUnableToConnect:
-    Starter.LocationEvents.unableToConnect();
-
-    break;
-  case sdk.game.locations.RealmDown:
-    Starter.LocationEvents.realmDown();
-
-    break;
-  case sdk.game.locations.Disconnected:
-  case sdk.game.locations.LobbyLostConnection:
-    D2Bot.updateStatus("Disconnected/LostConnection");
-    delay(1000);
-    Controls.OkCentered.click();
-
-    break;
-  case sdk.game.locations.CharSelectPleaseWait:
-    !Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
-
-    break;
-  case sdk.game.locations.SelectDifficultySP:
-    Starter.LocationEvents.selectDifficultySP();
-
-    break;
-  case sdk.game.locations.MainMenuConnecting:
-    !Starter.locationTimeout(Starter.Config.ConnectingTimeout * 1e3, location) && Controls.LoginCancelWait.click();
-
-    break;
-  case sdk.game.locations.CharSelectConnecting:
-  case sdk.game.locations.CharSelectNoChars:
-    Starter.LocationEvents.charSelectError();
-
-    break;
-  case sdk.game.locations.ServerDown:
-    break;
-  case sdk.game.locations.LobbyPleaseWait:
-    !Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
-
-    break;
-  case sdk.game.locations.GameNameExists:
-  case sdk.game.locations.GameIsFull:
-    Controls.CreateGameWindow.click();
-    Starter.gameCount += 1;
-    Starter.lastGameStatus = "ready";
-
-    break;
-  case sdk.game.locations.GatewaySelect:
-    Controls.GatewayCancel.click();
-
-    break;
-  case sdk.game.locations.GameDoesNotExist:
-    Starter.LocationEvents.gameDoesNotExist();
-
-    break;
-  case sdk.game.locations.CharacterCreate:
-    Controls.BottomLeftExit.click();
-
-    break;
-  case sdk.game.locations.OtherMultiplayer:
-    Starter.LocationEvents.otherMultiplayerSelect();
-
-    break;
-  case sdk.game.locations.TcpIp:
-    Profile().type === sdk.game.profiletype.TcpIpHost ? Controls.TcpIpHost.click() : Controls.TcpIpCancel.click();
-
-    break;
-  case sdk.game.locations.TcpIpEnterIp:
-    Controls.TcpIpCancel.click();
-
-    break;
-  default:
-    if (location !== undefined) {
-      D2Bot.printToConsole("Unhandled location " + location);
-      delay(500);
-      D2Bot.restart();
-    }
-
-    break;
-  }
-}
+    },
+  };
+})();
 
 function main () {
   debugLog(me.profile);
@@ -342,7 +81,11 @@ function main () {
 
     if (!!DataFile.getStats().debugInfo) {
       Starter.gameInfo.crashInfo = DataFile.getStats().debugInfo;
-      D2Bot.printToConsole("Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, sdk.colors.D2Bot.Gray);
+      D2Bot.printToConsole(
+        "Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript
+        + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area,
+        sdk.colors.D2Bot.Gray
+      );
     }
 
     ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);
@@ -367,7 +110,10 @@ function main () {
           DataFile.updateStats("ingameTick");
         }
 
-        D2Bot.updateStatus(Starter.profileInfo.charName + " | Game: " + (me.gamename || "singleplayer") + Starter.timer(Starter.gameStart));
+        D2Bot.updateStatus(
+          me.charname + " (" + me.charlvl + ") | Game: " + (me.gamename || "singleplayer")
+          + Starter.timer(Starter.gameStart)
+        );
       }
 
       delay(1000);
@@ -375,7 +121,7 @@ function main () {
 
     Starter.isUp = "no";
 
-    locationAction(getLocation());
+    locationAction.run(getLocation());
     delay(1000);
   }
 }
