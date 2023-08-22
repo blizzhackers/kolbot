@@ -1317,6 +1317,14 @@
   ];
 
   /**
+   * probably an easier way to get tab id from getBaseStat
+   * @type {{ id: number, skills: number[] }[]}
+   */
+  const skillTabs = Object.keys(sdk.skillTabs)
+    .map((key) => Object.values(sdk.skillTabs[key]))
+    .flat();
+
+  /**
    * @constructor
    * @param {number} skillId 
    */
@@ -1342,6 +1350,10 @@
     this.missleSkill = (_skillData.missile || false);
     /** @type {number} */
     this.charClass = getBaseStat("skills", skillId, "charClass");
+    /** @type {number} */
+    this.skillTab = (function () {
+      return skillTabs.find((tab) => tab.skills.includes(skillId)) || { id: -1 };
+    })().id;
     /** @type {number} */
     this.reqLevel = getBaseStat("skills", skillId, "reqlevel");
     /** @type {number[]} */
