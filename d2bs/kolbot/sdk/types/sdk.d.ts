@@ -1081,7 +1081,9 @@ declare global {
 
       const SkillThornsPercent: 131;
       const SkillBoneArmor: 132;
+      const SkillCycloneArmor: 132;
       const SkillBoneArmorMax: 133;
+      const SkillCycloneArmorMax: 133;
       const SkillFade: 181;
       const SkillPoisonOverrideLength: 101;
       const SkillBypassUndead: 103;
