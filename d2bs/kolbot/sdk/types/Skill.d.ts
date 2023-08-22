@@ -4,6 +4,7 @@ declare global {
     skillId: number;
     hand: number;
     state: number;
+    summonType: number;
     summonCount: () => number;
     condition: () => boolean;
     townSkill: boolean;
@@ -68,10 +69,13 @@ declare global {
     function canUse(skillId: number): boolean;
     function getDuration(skillId: number): number;
     function getMaxSummonCount(skillId: number): number;
+    function getSummonType(skillId: number): number;
     function getRange(skillId: number): number;
     function getAoE(skillId: number): number;
     function getHand(skillId: number): number;
     function getState(skillId: number): number;
+    function getCharClass(skillId: number): number;
+    function getSkillTab(skillId: number): number;
     function getManaCost(skillId: number): number;
     function isTimed(skillId: number): boolean;
     function townSkill(skillId: number): boolean;
