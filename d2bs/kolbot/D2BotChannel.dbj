@@ -34,6 +34,8 @@ const watch = {
 };
 /** @type {Array<{ name: string, msg: string }>} */
 const messageQueue = [];
+/** @type {Map<string, string>} */
+const channelWatcher = new Map();
 const joinInfo = {
   gameName: "",
   gamePass: "",
@@ -54,10 +56,7 @@ if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
 function ChannelChatHandler (name, msg) {
   if (me.ingame) return;
   if (/[joined|left] the channel/g.test(msg)) {
-    if (!watch.player && ChannelConfig.Follow.length === 0) return;
-    if (watch.player === name) {
-      watch.status = msg.includes("joined") ? "joined" : "left";
-    }
+    channelWatcher.set(name, msg.includes("joined") ? "joined" : "left");
     return;
   }
   messageQueue.push({ name: name, msg: msg });
@@ -289,11 +288,11 @@ const locationAction = (function () {
               console.log("Joining game: " + gameName + "//" + gamePass);
               // wait for the player to leave the channel
               watch.player = chat.name;
-              watch.status = "channel";
               let timeout = getTickCount() + Time.minutes(1);
               console.log("Waiting for " + watch.player + " to leave the channel");
-              
-              while (watch.status !== "left" && getTickCount() < timeout) {
+
+              while (channelWatcher.get(watch.player) !== "left"
+                && getTickCount() < timeout) {
                 delay(100);
               }
 
@@ -316,14 +315,14 @@ const locationAction = (function () {
           console.log("Joining game: " + gameName + "//" + gamePass);
           // wait for the player to leave the channel
           watch.player = chat.name;
-          watch.status = "channel";
           let timeout = getTickCount() + Time.minutes(1);
           console.log("Waiting for " + watch.player + " to leave the channel");
 
-          while (watch.status !== "left" && getTickCount() < timeout) {
+          while (channelWatcher.get(watch.player) !== "left"
+            && getTickCount() < timeout) {
             delay(100);
           }
-          if (watch.status !== "left") {
+          if (channelWatcher.get(watch.player) !== "left") {
             let pName = watch.player.split("*")[0];
             say("/whois " + pName);
             pollQueue();
@@ -506,6 +505,7 @@ function main () {
           console.log("Updating Status");
 
           badGames.add(joinInfo.gameName);
+          channelWatcher.clear();
           joinInfo.oldGame = me.gamename;
           Starter.lastGameStatus = "ingame";
           Starter.inGame = true;
