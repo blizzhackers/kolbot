@@ -323,7 +323,24 @@ const locationAction = (function () {
           while (watch.status !== "left" && getTickCount() < timeout) {
             delay(100);
           }
-          if (watch.status !== "left") continue;
+          if (watch.status !== "left") {
+            let pName = watch.player.split("*")[0];
+            say("/whois " + pName);
+            pollQueue();
+            if (messageQueue.length > 0) {
+              let inGame = messageQueue
+                .filter(function (chat) {
+                  return chat.msg.includes(pName);
+                })
+                .some(function (chat) {
+                  return new RegExp(/in .+? game/gi).test(chat.msg);
+                });
+              if (!inGame) {
+                console.log("Player left channel, but is not in game. Skipping.");
+                continue;
+              }
+            }
+          }
           // player who announced has left chat so lets set the game name and password and try to join
           joinInfo.gameName = gameName;
           joinInfo.gamePass = gamePass || "";
