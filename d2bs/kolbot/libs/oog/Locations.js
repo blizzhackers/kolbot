@@ -133,7 +133,7 @@
       }
     ],
     [sdk.game.locations.CreateGame,
-      function () {
+      function (location) {
         D2Bot.updateStatus("Creating Game");
 
         if (typeof Starter.Config.CharacterDifference === "number") {
