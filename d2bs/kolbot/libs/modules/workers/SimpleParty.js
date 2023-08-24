@@ -89,7 +89,7 @@
 
   SimpleParty.timer = 0;
 
-  if (getScript(true).name.toLowerCase() === "default.dbj") {
+  if (new RegExp(/[default.dbj|main.js]/gi).test(getScript(true).name)) {
     // For now, we gonna do this in game with a single party
     (Worker.runInBackground.party = (function () {
       console.log("ÿc2Kolbotÿc0 :: Simple party running");

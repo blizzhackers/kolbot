@@ -7,7 +7,7 @@
 
 (function (module, require, Worker) {
   // Only load this in global scope
-  if (getScript(true).name.toLowerCase() === "default.dbj") {
+  if (new RegExp(/[default.dbj|main.js]/gi).test(getScript(true).name)) {
     /**
      * @param {number} [targetArea] 
      * @param {string} [owner] 
