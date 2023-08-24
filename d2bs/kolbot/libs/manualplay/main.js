@@ -164,6 +164,32 @@ function main () {
     return true;
   };
 
+  Worker.runInBackground.antiIdle = (function () {
+    const last = {
+      area: me.area,
+      x: me.x,
+      y: me.y,
+      idleTick: getTickCount() + Time.seconds(rand(1200, 1500)),
+    };
+
+    return function () {
+      if (!me.gameReady) return true;
+      if (last.area !== me.area || last.distance > 10) {
+        last.area = me.area;
+        last.x = me.x;
+        last.y = me.y;
+        last.idleTick = getTickCount() + Time.seconds(rand(1200, 1500));
+      }
+
+      if (getTickCount() - last.idleTick > 0) {
+        Packet.questRefresh();
+        last.idleTick += Time.seconds(rand(1200, 1500));
+        console.log("Sent anti-idle packet, next refresh in: (" + Time.format(last.idleTick - getTickCount()) + ")");
+      }
+      return true;
+    };
+  })();
+
   const log = function (msg = "") {
     me.overhead(msg);
     console.log(msg);
