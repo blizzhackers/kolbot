@@ -141,7 +141,11 @@ function main () {
   load("libs/manualplay/threads/maphelper.js");
   load("libs/manualplay/threads/maptoolsthread.js");
   Config.ManualPlayPick && load("libs/manualplay/threads/pickthread.js");
-  Config.PublicMode && load("threads/party.js");
+  if (Config.PublicMode) {
+    Config.PublicMode === true
+      ? require("../modules/workers/SimpleParty")
+      : load("threads/Party.js");
+  }
 
   const Worker = require("../modules/Worker");
   const UnitInfo = new (require("../modules/UnitInfo"));
