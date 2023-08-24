@@ -5,53 +5,45 @@
 *
 */
 
-/**
- * @enum {string}
- */
-const NPC = {
-  Akara: getLocaleString(sdk.locale.npcs.Akara).toLowerCase(),
-  Gheed: getLocaleString(sdk.locale.npcs.Gheed).toLowerCase(),
-  Charsi: getLocaleString(sdk.locale.npcs.Charsi).toLowerCase(),
-  Kashya: getLocaleString(sdk.locale.npcs.Kashya).toLowerCase(),
-  Warriv: getLocaleString(sdk.locale.npcs.Warriv).toLowerCase(),
+const NPC = (new function NPC () {
+  this.Akara = getLocaleString(sdk.locale.npcs.Akara).toLowerCase();
+  this.Gheed = getLocaleString(sdk.locale.npcs.Gheed).toLowerCase();
+  this.Charsi = getLocaleString(sdk.locale.npcs.Charsi).toLowerCase();
+  this.Kashya = getLocaleString(sdk.locale.npcs.Kashya).toLowerCase();
+  this.Warriv = getLocaleString(sdk.locale.npcs.Warriv).toLowerCase();
 
-  Fara: getLocaleString(sdk.locale.npcs.Fara).toLowerCase(),
-  Drognan: getLocaleString(sdk.locale.npcs.Drognan).toLowerCase(),
-  Elzix: getLocaleString(sdk.locale.npcs.Elzix).toLowerCase(),
-  Greiz: getLocaleString(sdk.locale.npcs.Greiz).toLowerCase(),
-  Lysander: getLocaleString(sdk.locale.npcs.Lysander).toLowerCase(),
-  Jerhyn: getLocaleString(sdk.locale.npcs.Jerhyn).toLowerCase(),
-  Meshif: getLocaleString(sdk.locale.npcs.Meshif).toLowerCase(),
-  Atma: getLocaleString(sdk.locale.npcs.Atma).toLowerCase(),
+  this.Fara = getLocaleString(sdk.locale.npcs.Fara).toLowerCase();
+  this.Drognan = getLocaleString(sdk.locale.npcs.Drognan).toLowerCase();
+  this.Elzix = getLocaleString(sdk.locale.npcs.Elzix).toLowerCase();
+  this.Greiz = getLocaleString(sdk.locale.npcs.Greiz).toLowerCase();
+  this.Lysander = getLocaleString(sdk.locale.npcs.Lysander).toLowerCase();
+  this.Jerhyn = getLocaleString(sdk.locale.npcs.Jerhyn).toLowerCase();
+  this.Meshif = getLocaleString(sdk.locale.npcs.Meshif).toLowerCase();
+  this.Atma = getLocaleString(sdk.locale.npcs.Atma).toLowerCase();
 
-  Ormus: getLocaleString(sdk.locale.npcs.Ormus).toLowerCase(),
-  Alkor: getLocaleString(sdk.locale.npcs.Alkor).toLowerCase(),
-  Hratli: getLocaleString(sdk.locale.npcs.Hratli).toLowerCase(),
-  Asheara: getLocaleString(sdk.locale.npcs.Asheara).toLowerCase(),
+  this.Ormus = getLocaleString(sdk.locale.npcs.Ormus).toLowerCase();
+  this.Alkor = getLocaleString(sdk.locale.npcs.Alkor).toLowerCase();
+  this.Hratli = getLocaleString(sdk.locale.npcs.Hratli).toLowerCase();
+  this.Asheara = getLocaleString(sdk.locale.npcs.Asheara).toLowerCase();
 
-  Jamella: getLocaleString(sdk.locale.npcs.Jamella).toLowerCase(),
-  Halbu: getLocaleString(sdk.locale.npcs.Halbu).toLowerCase(),
-  Tyrael: getLocaleString(sdk.locale.npcs.Tyrael).toLowerCase(),
+  this.Jamella = getLocaleString(sdk.locale.npcs.Jamella).toLowerCase();
+  this.Halbu = getLocaleString(sdk.locale.npcs.Halbu).toLowerCase();
+  this.Tyrael = getLocaleString(sdk.locale.npcs.Tyrael).toLowerCase();
 
-  Malah: getLocaleString(sdk.locale.npcs.Malah).toLowerCase(),
-  Anya: getLocaleString(sdk.locale.npcs.Anya).toLowerCase(),
-  Larzuk: getLocaleString(sdk.locale.npcs.Larzuk).toLowerCase(),
-  Qual_Kehk: getLocaleString(sdk.locale.npcs.QualKehk).toLowerCase(),
-  Nihlathak: getLocaleString(sdk.locale.npcs.Nihlathak2).toLowerCase(),
+  this.Malah = getLocaleString(sdk.locale.npcs.Malah).toLowerCase();
+  this.Anya = getLocaleString(sdk.locale.npcs.Anya).toLowerCase();
+  this.Larzuk = getLocaleString(sdk.locale.npcs.Larzuk).toLowerCase();
+  this.Qual_Kehk = getLocaleString(sdk.locale.npcs.QualKehk).toLowerCase();
+  this.Nihlathak = getLocaleString(sdk.locale.npcs.Nihlathak2).toLowerCase();
 
-  Cain: getLocaleString(sdk.locale.npcs.DeckardCain).toLowerCase()
-};
+  this.Cain = getLocaleString(sdk.locale.npcs.DeckardCain).toLowerCase();
 
-Object.defineProperty(NPC, "getAct", {
   /**
    * Returns the act(s) where the given NPC can be found.
-   *
-   * @memberof NPC
-   * @method getAct
    * @param {string} name - The name of the NPC.
    * @returns {Array<number>} An array of act numbers where the NPC can be found.
    */
-  value: function (name) {
+  this.getAct = function (name) {
     if (name === NPC.Cain) return [me.act];
     if (name === NPC.Warriv) return [1, 2];
     if (name === NPC.Meshif) return [2, 3];
@@ -68,8 +60,10 @@ Object.defineProperty(NPC, "getAct", {
       return [5];
     }
     return [];
-  },
-  enumerable: false,
+  };
+  Object.defineProperty(this, "getAct", {
+    enumerable: false,
+  });
 });
 
 /**
@@ -79,45 +73,6 @@ const Town = {
   telekinesis: true,
   sellTimer: getTickCount(), // shop speedup test
   lastChores: 0,
-  /**
-   * @namespace
-   */
-  lastInteractedNPC: {
-    tick: 0,
-    /**
-     * @type {{ name: string, gid: number, area: number}}
-     */
-    unit: {},
-    /**
-     * @param {NPCUnit} npc
-     */
-    set: function (npc) {
-      if (npc.hasOwnProperty("name") && Object.values(NPC).includes(npc.name)) {
-        // valid npc
-        Town.lastInteractedNPC.unit.name = npc.name.toLowerCase();
-        Town.lastInteractedNPC.unit.gid = npc.gid;
-        Town.lastInteractedNPC.unit.area = me.area;
-        Town.lastInteractedNPC.tick = getTickCount();
-      }
-    },
-    get: function () {
-      try {
-        if (!this.unit.hasOwnProperty("name")) return getInteractedNPC();
-        if (getTickCount() - this.tick > Time.seconds(15)) return getInteractedNPC();
-        if (this.unit.area !== me.area) return getInteractedNPC();
-        return this.unit;
-      } catch (e) {
-        Config.DebugMode.Town && console.error(e);
-        this.reset();
-        Config.DebugMode.Town && console.debug("getting new npc");
-        return getInteractedNPC();
-      }
-    },
-    reset: function () {
-      Town.lastInteractedNPC.unit = {};
-      Town.lastInteractedNPC.tick = 0;
-    }
-  },
 
   tasks: (function () {
     /**
@@ -163,8 +118,7 @@ const Town = {
   doChores: function (repair = false) {
     delay(250);
 
-    console.time("doChores");
-    console.info(true);
+    console.info(true, null, "doChores");
 
     /**
      * @todo Pre-build task list so we can more efficiently peform our chores
@@ -220,8 +174,9 @@ const Town = {
   npcInteract: function (name = "", cancel = true) {
     // name = name.includes("_") ? "Qual_Kehk" : name.capitalize(true);
     // what about finding the closest name in case someone mispells it?
-    let npcKey = Object.keys(NPC)
-      .find(key => String.isEqual(key, name));
+    const npcKey = Object.keys(NPC).find(function (key) {
+      return String.isEqual(key, name);
+    });
     if (!npcKey) {
       // @todo handle if NPC object key is used instead of common name
       console.warn("Couldn't find " + name + " in NPC object");
@@ -349,7 +304,10 @@ const Town = {
     let wantedNpc = Town.tasks.get(me.act)[task] !== undefined
       ? Town.tasks.get(me.act)[task]
       : "undefined";
-    let justUseClosest = (["clearInventory", "sell"].includes(reason) && !me.getUnids().length);
+    const justUseClosest = (
+      ["clearinventory", "sell"].includes(reason.toLowerCase())
+      && !me.getUnids().length
+    );
     
     if (getUIFlag(sdk.uiflags.NPCMenu)) {
       console.debug("Currently interacting with an npc");
@@ -418,7 +376,8 @@ const Town = {
         }
       }
 
-      if (!npc || npc.area !== me.area || (!getUIFlag(sdk.uiflags.NPCMenu) && !npc.openMenu())) {
+      if (!npc || npc.area !== me.area
+        || (!getUIFlag(sdk.uiflags.NPCMenu) /* && !Town.move(wantedNpc) */ && !npc.openMenu())) {
         throw new Error("Couldn't interact with npc");
       }
 
@@ -468,7 +427,9 @@ const Town = {
       return false;
     }
 
-    Misc.poll(() => me.gameReady, 2000, 250);
+    Misc.poll(function () {
+      return me.gameReady;
+    }, 2000, 250);
 
     if (task === "Heal") {
       Config.DebugMode.Town && console.debug("Checking if we are frozen");
@@ -499,10 +460,11 @@ const Town = {
     let [needPots, needBuffer, specialCheck] = [false, true, false];
     let col = this.checkColumns(beltSize);
 
-    const getNeededBuffer = () => {
+    const getNeededBuffer = function () {
       [buffer.hp, buffer.mp] = [0, 0];
       me.getItemsEx().filter(function (p) {
-        return p.isInInventory && [sdk.items.type.HealingPotion, sdk.items.type.ManaPotion].includes(p.itemType);
+        return p.isInInventory
+          && [sdk.items.type.HealingPotion, sdk.items.type.ManaPotion].includes(p.itemType);
       }).forEach(function (p) {
         switch (p.itemType) {
         case sdk.items.type.HealingPotion:
@@ -518,14 +480,17 @@ const Town = {
     (Config.HPBuffer > 0 || Config.MPBuffer > 0) && getNeededBuffer();
 
     // Check if we need to buy potions based on Config.MinColumn
-    if (Config.BeltColumn
-      .some((c, i) => ["hp", "mp"].includes(c) && col[i] > (beltSize - Math.min(Config.MinColumn[i], beltSize)))) {
+    if (Config.BeltColumn.some(function (c, i) {
+      return ["hp", "mp"].includes(c) && col[i] > (beltSize - Math.min(Config.MinColumn[i], beltSize));
+    })) {
       needPots = true;
     }
 
     // Check if we need any potions for buffers
     if (buffer.mp < Config.MPBuffer || buffer.hp < Config.HPBuffer) {
-      if (Config.BeltColumn.some((c, i) => col[i] >= beltSize && (!needPots || c === "rv"))) {
+      if (Config.BeltColumn.some(function (c, i) {
+        return col[i] >= beltSize && (!needPots || c === "rv");
+      })) {
         specialCheck = true;
       }
     }
@@ -547,15 +512,21 @@ const Town = {
     if (!npc) return false;
 
     // special check, sometimes our rejuv slot is empty but we do still need buffer. Check if we can buy something to slot there
-    if (specialCheck && Config.BeltColumn.some((c, i) => c === "rv" && col[i] >= beltSize)) {
+    if (specialCheck && Config.BeltColumn.some(function (c, i) {
+      return c === "rv" && col[i] >= beltSize;
+    })) {
       let pots = [sdk.items.ThawingPotion, sdk.items.AntidotePotion, sdk.items.StaminaPotion];
-      Config.BeltColumn.forEach((c, i) => {
+      Config.BeltColumn.forEach(function (c, i) {
         if (c === "rv" && col[i] >= beltSize && pots.length) {
           let usePot = pots[0];
           let pot = npc.getItem(usePot);
           if (pot) {
             Storage.Inventory.CanFit(pot) && Packet.buyItem(pot, false);
-            pot = me.getItemsEx(usePot, sdk.items.mode.inStorage).filter(i => i.isInInventory).first();
+            pot = me.getItemsEx(usePot, sdk.items.mode.inStorage)
+              .filter(function (i) {
+                return i.isInInventory;
+              })
+              .first();
             !!pot && Packet.placeInBelt(pot, i);
             pots.shift();
           } else {
@@ -567,7 +538,7 @@ const Town = {
 
     for (let i = 0; i < 4; i += 1) {
       if (col[i] > 0) {
-        let useShift = this.shiftCheck(col, beltSize);
+        const useShift = this.shiftCheck(col, beltSize);
         let pot = this.getPotion(npc, Config.BeltColumn[i]);
 
         if (pot) {
@@ -759,7 +730,7 @@ const Town = {
 
     // Avoid unnecessary NPC visits
     // Only unid items or sellable junk (low level) should trigger a NPC visit
-    if (!list.some(item => {
+    if (!list.some(function (item) {
       const unid = !item.identified;
       const results = [Pickit.Result.UNID, Pickit.Result.TRASH];
       return ((unid || Config.LowGold > 0) && (results.includes(Pickit.checkItem(item).result)));
@@ -771,7 +742,9 @@ const Town = {
     if (!npc) return false;
 
     let tome = me.getTome(sdk.items.TomeofIdentify);
-    !!tome && tome.getStat(sdk.stats.Quantity) < list.length && Town.fillTome(sdk.items.TomeofIdentify);
+    if (!!tome && tome.getStat(sdk.stats.Quantity) < list.length) {
+      Town.fillTome(sdk.items.TomeofIdentify);
+    }
 
     MainLoop:
     while (list.length > 0) {
@@ -972,16 +945,17 @@ const Town = {
     let npc = getInteractedNPC();
     if (!npc || !npc.itemcount) return false;
 
-    let items = npc.getItemsEx()
-      .filter((item) => !Town.ignoreType(item.itemType));
+    const items = npc.getItemsEx().filter(function (item) {
+      return !Town.ignoreType(item.itemType);
+    });
     if (!items.length) return false;
 
     console.log("ÿc4MiniShopBotÿc0: Scanning " + npc.itemcount + " items.");
 
     for (let item of items) {
-      let result = Pickit.checkItem(item);
+      const { result, line } = Pickit.checkItem(item);
 
-      switch (result.result) {
+      switch (result) {
       case Pickit.Result.WANTED:
       case Pickit.Result.CUBING:
       case Pickit.Result.CRAFTING:
@@ -989,7 +963,7 @@ const Town = {
         try {
           if (Storage.Inventory.CanFit(item) && me.gold >= item.getItemCost(sdk.items.cost.ToBuy)) {
             Item.logger("Shopped", item);
-            Item.logItem("Shopped", item, result.line);
+            Item.logItem("Shopped", item, line);
             item.buy();
           }
         } catch (e) {
@@ -1283,8 +1257,12 @@ const Town = {
     }
 
     return me.getItemsEx()
-      .filter(item => item.classid === sdk.items.Key && item.isInInventory)
-      .reduce((acc, curr) => acc + curr.getStat(sdk.stats.Quantity), 0);
+      .filter(function (item) {
+        return item.classid === sdk.items.Key && item.isInInventory;
+      })
+      .reduce(function (acc, curr) {
+        return acc + curr.getStat(sdk.stats.Quantity);
+      }, 0);
   },
 
   needKeys: function () {
@@ -1346,7 +1324,9 @@ const Town = {
     if (!Config.CubeRepair || !me.cube) return false;
 
     let items = this.getItemsForRepair(Config.RepairPercent, false)
-      .sort((a, b) => a.durabilityPercent - b.durabilityPercent);
+      .sort(function (a, b) {
+        return a.durabilityPercent - b.durabilityPercent;
+      });
 
     while (items.length > 0) {
       this.cubeRepairItem(items.shift());
@@ -1363,7 +1343,7 @@ const Town = {
     if (!item.isInStorage) return false;
 
     let rune, cubeItems;
-    let bodyLoc = item.bodylocation;
+    const bodyLoc = item.bodylocation;
 
     switch (item.itemType) {
     case sdk.items.type.Shield:
@@ -1468,14 +1448,19 @@ const Town = {
   },
 
   needRepair: function () {
-    let quiver, repairAction = [];
-    let canAfford = me.gold >= me.getRepairCost();
+    const repairAction = [];
+    if (getInteractedNPC() && !getUIFlag(sdk.uiflags.Shop)) {
+      // fix crash with d2bs
+      me.cancel();
+    }
+    const canAfford = me.gold >= me.getRepairCost();
+    const quiverType = { bow: "aqv", crossbow: "cqv" };
 
     // Arrow/Bolt check
-    let bowCheck = Attack.usingBow();
+    const bowCheck = Attack.usingBow();
 
     if (bowCheck) {
-      const quiverType = { bow: "aqv", crossbow: "cqv" };
+      let quiver;
       if (quiverType[bowCheck]) {
         quiver = me.getItem(quiverType[bowCheck], sdk.items.mode.Equipped);
       }
@@ -2385,14 +2370,13 @@ const Town = {
         if (returnWhenDone) return true;
       }
     } else if (me.act === 2
-      && me.x > 5122 && me.y < 5049
+      && me.x > 5122 && me.y <= 5049
       && !String.isEqual(spot, NPC.Atma)) {
       // we are inside the building, if Atma is blocking the entrance we need the side door
       let atma = Game.getNPC(NPC.Atma);
-      // console.debug("atma", atma);
       // todo - might need to consider her targetx/y coords as well
       if (atma && (atma.x === 5136 || atma.x === 5137)
-        && (atma.y >= 5048 && atma.y <= 5050)) {
+        && (atma.y >= 5048 && atma.y <= 5051)) {
         // yup dumb lady is blocking the door, take side door
         [[5140, 5038], [5148, 5031], [5154, 5025], [5161, 5030]].forEach(function (node) {
           Pather.walkTo(node[0], node[1]);
@@ -2423,6 +2407,7 @@ const Town = {
       || typeof (Town.act[me.act].spot[spot]) !== "object") {
       return false;
     }
+    if (Town.getDistance(spot) < 5) return true;
 
     const npcSpot = Object.values(NPC).includes(spot.toLowerCase());
     let longRange = (!Skill.haveTK && spot === "waypoint");
@@ -2507,6 +2492,10 @@ const Town = {
    * @returns {boolean}
    */
   goToTown: function (act = 0, wpmenu = false) {
+    if (!act) return true;
+    if (act < 1 || act > 5) throw new Error("Town.goToTown: Invalid act");
+    if (act > me.highestAct) return false;
+
     if (!me.inTown) {
       try {
         // this can save us spamming portals
@@ -2544,10 +2533,6 @@ const Town = {
         }
       }
     }
-
-    if (!act) return true;
-    if (act < 1 || act > 5) throw new Error("Town.goToTown: Invalid act");
-    if (act > me.highestAct) return false;
 
     if (act !== me.act) {
       try {
