@@ -54,7 +54,14 @@ function main () {
 
   // map mode runs in it's own thread
   if (getScript("d2botmap.dbj")) {
-    load("libs/manualplay/threads/mapthread.js");
+    load("libs/manualplay/main.js");
+    getScript(true).stop(); // kill this thread
+    return true;
+  }
+
+  // muling runs in it's own thread
+  if (getScript("d2botmule.dbj")) {
+    load("libs/systems/automule/main.js");
     getScript(true).stop(); // kill this thread
     return true;
   }
@@ -63,7 +70,7 @@ function main () {
   if (MuleLogger.inGameCheck()) return true;
 
   // don't load default for dropper/mules
-  if (getScript("D2BotDropper.dbj") || getScript("d2botmule.dbj")) {
+  if (getScript("D2BotDropper.dbj")) {
     load("threads/AreaWatcher.js");
     
     while (me.ingame) {
@@ -229,8 +236,8 @@ function main () {
         );
         delay(1000);
       }
-    } catch (e1) {
-      print(e1);
+    } catch (e) {
+      console.error(e);
     }
   }
 
@@ -247,8 +254,8 @@ function main () {
 
         sojCounter += 1;
       }
-    } catch (e2) {
-      print(e2);
+    } catch (e) {
+      console.error(e);
     }
   }
 
