@@ -94,8 +94,49 @@ declare global {
     cubingIngredient(item: ItemUnit): void
     runewordIngredient(item: ItemUnit): void
     dropCharm(dropAnni: any): void
-    getMaster(info: any): void
-    getMuleObject(mode: any, master: any): muleObj | undefined
-    getMuleFilename(mode: any, master: any): void
-  }
+  };
+  export namespace Mule {
+    let obj: muleObj;
+    let minGameTime: number;
+    let maxGameTime: number;
+    let continuous: boolean;
+    let makeNext: boolean;
+    let refresh: boolean;
+    let master: string;
+    let mode: number;
+    let startTick: number;
+    let status: string;
+    let statusString: string;
+    let masterStatus: { status: string };
+
+    function init(): void;
+    function gameRefresh(): void;
+    function ingameTimeout(): boolean;
+    function getMaster(info: { profile: string, mode: number }): { profile: string, mode: number }
+    function getMuleFilename(mode?: number, master: string): string;
+    function getMuleInfo(master?: string): { mode: number, obj: muleObj }[];
+  };
+  export namespace MuleData {
+    type MuleDataObj = {
+      account: string;
+      accNum: number;
+      character: string;
+      charNum: number;
+      realm: string;
+      expansion: boolean;
+      ladder: boolean;
+      fullChars: number[];
+      torchChars: number[];
+    };
+    const _default: MuleDataObj;
+    let fileName: string;
+    function create(): void;
+    function read(): MuleDataObj;
+    function write(data: Partial<MuleDataObj>): void;
+    function nextAccount(): string;
+    function nextChar(): string;
+  };
+  export namespace LocationAction {
+    function run(): void;
+  };
 }
