@@ -565,7 +565,11 @@ function main () {
             DataFile.updateStats("runs", Starter.gameCount);
             DataFile.updateStats("ingameTick");
           }
-          D2Bot.updateStatus(Mule.statusString + " Status: " + Mule.status + Starter.timer(me.gamestarttime));
+          D2Bot.updateStatus(
+            me.charname + " | Game: " + me.gamename
+            + " | " + Mule.statusString + " Status: " + Mule.status
+            + Starter.timer(me.gamestarttime)
+          );
         }
 
         delay(1000);
