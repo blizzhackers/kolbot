@@ -35,8 +35,8 @@ function main () {
       Starter.isUp === "no" && (Starter.isUp = "yes");
       if (me.ingame) {
         D2Bot.updateStatus(
-          "(Char: " + me.charname + ") (Game: "
-          + (me.gamename || "singleplayer") + ") (Level: " + me.charlvl + ")"
+          me.charname + " (" + me.charlvl + ") | Game: " + (me.gamename || "singleplayer")
+          + Starter.timer(Starter.gameStart)
         );
       }
     } else {
