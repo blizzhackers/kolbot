@@ -1,10 +1,11 @@
 /* eslint-disable max-len */
 /**
-*  @filename    MapThread.js
+*  @filename    main.js
 *  @author      theBGuy
-*  @credits     kolton for orginal MapThread, isid0re for the box/frame style, laz for gamepacketsent event handler
-*  @desc        MapThread used with D2BotMap.dbj
-*
+*  @credits     kolton for orginal MapThread,
+*               isid0re for the box/frame style,
+*               laz for gamepacketsent event handler
+*  @desc        main thread for D2BotMap.dbj
 */
 js_strict(true);
 include("critical.js"); // required
@@ -18,7 +19,7 @@ include("systems/mulelogger/MuleLogger.js");
 include("systems/gameaction/GameAction.js");
 
 // main thread specific
-const LocalChat = require("../../modules/LocalChat");
+const LocalChat = require("../modules/LocalChat");
 
 include("manualplay/MapMode.js");
 MapMode.include();
@@ -84,7 +85,7 @@ const Hooks = {
         VectorHooks.flush();
         TextHooks.displaySettings = false;
         TextHooks.check();
-      } else if (sdk.uiflags.Inventory === flag && [sdk.uiflags.stash, sdk.uiflags.Cube, sdk.uiflags.TradePrompt].every((el) => !getUIFlag(el))) {
+      } else if (sdk.uiflags.Inventory === flag && [sdk.uiflags.Stash, sdk.uiflags.Cube, sdk.uiflags.TradePrompt].every((el) => !getUIFlag(el))) {
         ItemHooks.flush();
         TextHooks.check();
       } else {
@@ -103,7 +104,7 @@ const Hooks = {
   }
 };
 
-function main() {
+function main () {
   D2Bot.init(); // Get D2Bot# handle
   D2Bot.ingame();
 
@@ -122,7 +123,10 @@ function main() {
   clearAllEvents(); // remove any event listeners from game crash
 
   // load heartbeat if it isn't already running
-  !getScript("threads/heartbeat.js") && load("threads/heartbeat.js");
+  let _heartbeat = getScript("threads/heartbeat.js");
+  if (!_heartbeat || !_heartbeat.running) {
+    load("threads/heartbeat.js");
+  }
 
   console.log("ÿc9Map Thread Loaded.");
   MapMode.include();
@@ -139,8 +143,8 @@ function main() {
   Config.ManualPlayPick && load("libs/manualplay/threads/pickthread.js");
   Config.PublicMode && load("threads/party.js");
 
-  const Worker = require("../../modules/Worker");
-  const UnitInfo = new (require("../../modules/UnitInfo"));
+  const Worker = require("../modules/Worker");
+  const UnitInfo = new (require("../modules/UnitInfo"));
 
   Worker.runInBackground.unitInfo = function () {
     // always, maybe a timeout would be good though
@@ -156,7 +160,7 @@ function main() {
     return true;
   };
 
-  const log = (msg = "") => {
+  const log = function (msg = "") {
     me.overhead(msg);
     console.log(msg);
   };
@@ -166,15 +170,20 @@ function main() {
   }
 
   const hideFlags = [
-    sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.QuickSkill, sdk.uiflags.SkillWindow, sdk.uiflags.ChatBox,
-    sdk.uiflags.EscMenu, sdk.uiflags.Shop, sdk.uiflags.Quest, sdk.uiflags.Waypoint, sdk.uiflags.TradePrompt, sdk.uiflags.Msgs,
-    sdk.uiflags.Stash, sdk.uiflags.Cube, sdk.uiflags.Help, sdk.uiflags.MercScreen
+    sdk.uiflags.Inventory, sdk.uiflags.StatsWindow,
+    sdk.uiflags.QuickSkill, sdk.uiflags.SkillWindow,
+    sdk.uiflags.ChatBox, sdk.uiflags.EscMenu,
+    sdk.uiflags.Shop, sdk.uiflags.Quest,
+    sdk.uiflags.Waypoint, sdk.uiflags.TradePrompt,
+    sdk.uiflags.Msgs, sdk.uiflags.Stash,
+    sdk.uiflags.Cube, sdk.uiflags.Help, sdk.uiflags.MercScreen
   ];
+  /** @type {Set<number>} */
+  const revealedAreas = new Set();
 
-  this.revealArea = function (area) {
-    !this.revealedAreas && (this.revealedAreas = []);
-
-    if (this.revealedAreas.indexOf(area) === -1) {
+  /** @param {number} area */
+  const revealArea = function (area) {
+    if (!revealedAreas.has(area)) {
       delay(500);
       
       if (!getRoom()) {
@@ -182,12 +191,16 @@ function main() {
       }
       
       revealLevel(true);
-      this.revealedAreas.push(area);
+      revealedAreas.add(area);
     }
   };
 
-  // Run commands from chat
-  this.runCommand = function (msg) {
+  /**
+   * Run commands from chat
+   * @param {string} msg 
+   * @returns {boolean}
+   */
+  const runCommand = function (msg) {
     if (msg.length <= 1) return true;
 
     msg = msg.toLowerCase();
@@ -218,7 +231,7 @@ function main() {
       break;
     case "drop":
       if (msgList.length < 2) {
-        print("ÿc1Missing arguments");
+        console.log("ÿc1Missing arguments");
         break;
       }
 
@@ -228,7 +241,7 @@ function main() {
       break;
     case "stack":
       if (msgList.length < 2) {
-        print("ÿc1Missing arguments");
+        console.log("ÿc1Missing arguments");
         break;
       }
 
@@ -265,7 +278,7 @@ function main() {
 
       break;
     default:
-      print("ÿc1Invalid command : " + cmd);
+      console.warn("ÿc1Invalid command : " + cmd);
 
       break;
     }
@@ -275,9 +288,14 @@ function main() {
     return true;
   };
 
-  let onChatInput = (speaker, msg) => {
+  /**
+   * @param {string} speaker 
+   * @param {string} msg 
+   * @returns {boolean}
+   */
+  const onChatInput = function (speaker, msg) {
     if (msg.length && msg[0] === ".") {
-      this.runCommand(msg);
+      runCommand(msg);
 
       return true;
     }
@@ -287,6 +305,7 @@ function main() {
 
   addEventListener("chatinputblocker", onChatInput);
   addEventListener("keyup", ActionHooks.event);
+  // addEventListener("itemaction", Pickit.itemEvent);
 
   while (true) {
     while (!me.area || !me.gameReady) {
@@ -295,7 +314,7 @@ function main() {
 
     let hideFlagFound = false;
 
-    this.revealArea(me.area);
+    revealArea(me.area);
     
     for (let i = 0; i < hideFlags.length; i++) {
       if (getUIFlag(hideFlags[i])) {
@@ -310,7 +329,9 @@ function main() {
 
     if (hideFlagFound) continue;
 
-    getUIFlag(sdk.uiflags.AutoMap) ? Hooks.update() : Hooks.flush(true) && (!HelpMenu.cleared && HelpMenu.hideMenu());
+    getUIFlag(sdk.uiflags.AutoMap)
+      ? Hooks.update()
+      : Hooks.flush(true) && (!HelpMenu.cleared && HelpMenu.hideMenu());
 
     delay(20);
 

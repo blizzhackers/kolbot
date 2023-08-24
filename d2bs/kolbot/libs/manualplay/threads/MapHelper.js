@@ -2,7 +2,7 @@
 *  @filename    MapHelper.js
 *  @author      theBGuy
 *  @credits     kolton
-*  @desc        MapHelper used in conjuction with MapThread.js
+*  @desc        MapHelper used in conjuction with main.js
 *
 */
 js_strict(true);
@@ -20,7 +20,7 @@ include("systems/gameaction/GameAction.js");
 include("manualplay/MapMode.js");
 MapMode.include();
 
-function main() {
+function main () {
   // getUnit test
   getUnit(-1) === null && console.warn("getUnit bug detected");
   
@@ -28,7 +28,7 @@ function main() {
 
   let obj = { type: false, dest: false, action: false };
   let action, fail = 0, x, y;
-  let mapThread = getScript("libs/manualplay/threads/mapthread.js");
+  const mapThread = getScript("libs/manualplay/main.js");
 
   const portalMap = {};
   portalMap[sdk.areas.Abaddon] = {
@@ -57,7 +57,7 @@ function main() {
     action = msg;
   });
 
-  this.togglePickThread = function () {
+  const togglePickThread = function () {
     if (!Config.ManualPlayPick) return;
 
     const pickThread = getScript("threads/pickthread.js");
@@ -71,27 +71,27 @@ function main() {
     }
   };
 
-  this.togglePause = function () {
+  const togglePause = function () {
     if (mapThread) {
       if (mapThread.running) {
-        print("pause mapthread");
+        console.log("pause mapthread");
         mapThread.pause();
       } else if (!mapThread.running) {
-        print("resume mapthread");
+        console.log("resume mapthread");
         mapThread.resume();
 
         if (!mapThread.running) {
           fail++;
 
-          if (fail % 5 === 0 && !getScript("libs/manualplay/threads/mapthread.js")) {
-            print("MapThread shut down, exiting MapHelper");
+          if (fail % 5 === 0 && !getScript("libs/manualplay/main.js")) {
+            console.log("MapThread shut down, exiting MapHelper");
             
             return false;
           }
         }
       }
-    } else if (!getScript("libs/manualplay/threads/mapthread.js")) {
-      print("MapThread shut down, exiting MapHelper");
+    } else if (!getScript("libs/manualplay/main.js")) {
+      console.log("MapThread shut down, exiting MapHelper");
 
       return false;
     }
@@ -102,10 +102,10 @@ function main() {
   while (true) {
     if (getUIFlag(sdk.uiflags.EscMenu)) {
       delay(100);
-      mapThread.running && this.togglePause();
+      mapThread.running && togglePause();
     } else {
       if (!mapThread.running) {
-        if (!this.togglePause()) {
+        if (!togglePause()) {
           return;
         }
       }
@@ -117,7 +117,7 @@ function main() {
         temp && Object.assign(obj, temp);
         
         addEventListener("keyup", Pather.stopEvent);
-        this.togglePickThread();
+        togglePickThread();
 
         if (obj) {
           let redPortal, chestLoc, king, unit;
@@ -185,7 +185,7 @@ function main() {
 
             break;
           case "actChange":
-            print("Going to act: " + obj.dest);
+            console.log("Going to act: " + obj.dest);
             Pather.changeAct(obj.dest);
 
             break;
@@ -416,7 +416,7 @@ function main() {
       } finally {
         action = false;
         removeEventListener("keyup", Pather.stopEvent);
-        this.togglePickThread();
+        togglePickThread();
       }
     }
 

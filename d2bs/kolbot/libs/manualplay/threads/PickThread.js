@@ -24,7 +24,7 @@ include("systems/mulelogger/MuleLogger.js");
 include("manualplay/MapMode.js");
 MapMode.include();
 
-function main() {
+function main () {
   console.log("ÿc9Pick Thread Loaded.");
   Config.init(false);
   Pickit.init(false);
