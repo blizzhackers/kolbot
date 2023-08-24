@@ -2492,10 +2492,6 @@ const Town = {
    * @returns {boolean}
    */
   goToTown: function (act = 0, wpmenu = false) {
-    if (!act) return true;
-    if (act < 1 || act > 5) throw new Error("Town.goToTown: Invalid act");
-    if (act > me.highestAct) return false;
-
     if (!me.inTown) {
       try {
         // this can save us spamming portals
@@ -2533,6 +2529,10 @@ const Town = {
         }
       }
     }
+
+    if (!act) return true;
+    if (act < 1 || act > 5) throw new Error("Town.goToTown: Invalid act");
+    if (act > me.highestAct) return false;
 
     if (act !== me.act) {
       try {
