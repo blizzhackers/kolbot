@@ -1,7 +1,7 @@
 // @ts-nocheck
 declare global {
   type NPC = string;
-  export namespace NPC {
+  namespace NPC {
     function getAct(name: string): number[];
     const Akara: string;
     const Gheed: string;
@@ -30,18 +30,11 @@ declare global {
     const Nihlathak: string;
     const Cain: string;
   }
-  export namespace Town {
+  namespace Town {
     let telekinesis: boolean;
     let sellTimer: number;
     let lastChores: number;
 
-    export namespace lastInteractedNPC {
-      const unit: Unit;
-      const tick: number;
-      function set(npc: Unit): void;
-      function get(): any;
-      function reset(): void;
-    }
     const tasks: Map<Act, {
       Heal: NPC;
       Shop: NPC;

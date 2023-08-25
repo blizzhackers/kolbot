@@ -13,4 +13,10 @@ declare global {
     function loadScripts(): void;
     function scriptName(offset?: number): void;
   }
+
+  type Scripts = {
+    [key: string]: boolean;
+  };
+
+  const Scripts: Scripts;
 }
