@@ -90,6 +90,8 @@ declare global {
     format(...pairs: Array<string, (number|string|boolean)>): string;
     padStart(targetLength: number, padString: string): string;
     padEnd(targetLength: number, padString: string): string;
+    at(index: number): string | undefined;
+    unshift(str: string): string;
   }
 
   interface StringConstructor {

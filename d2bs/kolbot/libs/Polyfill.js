@@ -47,7 +47,11 @@ String.prototype.lcsGraph = function (compareToThis) {
     }
   }
 
-  return { a: this.toString(), b: compareToThis, graph: graph };
+  return {
+    a: this.toString(),
+    b: compareToThis,
+    graph: graph
+  };
 };
 
 String.prototype.diffCount = function (stringB) {
@@ -199,13 +203,31 @@ if (!String.isEqual) {
 String.prototype.format = function (...pairs) {
   if (!pairs.length) return this;
   let newString = this;
-  pairs.forEach(pair => {
+  pairs.forEach(function (pair) {
     let [match, replace] = pair;
     if (match === undefined || replace === undefined) return;
     newString = newString.replace(match, replace);
   });
   return newString;
 };
+
+if (!String.prototype.at) {
+  String.prototype.at = function (pos) {
+    if (pos < 0) {
+      pos += this.length;
+    }
+    if (pos < 0 || pos >= this.length) return undefined;
+    return this[pos];
+  };
+}
+
+if (!String.prototype.unshift) {
+  /** @param {string} str */
+  String.prototype.unshift = function (str) {
+    if (typeof str !== "string") return this;
+    return str + this;
+  };
+}
 
 /**
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
@@ -426,6 +448,8 @@ if (!Array.prototype.compactMap) {
 // Returns a random object in array
 if (!Array.prototype.random) {
   Array.prototype.random = function () {
+    if (this.length === 0) return null;
+    if (this.length === 1) return this[0];
     return this[Math.floor((Math.random() * this.length))];
   };
 }
@@ -541,7 +565,7 @@ Array.prototype.fill = function (value, start = 0, end = undefined) {
 
 /**
  * @description Return the first element or undefined
- * @return undefined|*
+ * @return {undefined | *}
  */
 if (!Array.prototype.first) {
   Array.prototype.first = function () {
@@ -551,7 +575,7 @@ if (!Array.prototype.first) {
 
 /**
  * @description Return the last element or undefined
- * @return undefined|*
+ * @return {undefined | *}
  */
 if (!Array.prototype.last) {
   Array.prototype.last = function () {
@@ -562,7 +586,7 @@ if (!Array.prototype.last) {
 /**
  * @description Flatten an array with depth parameter.
  * @see https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/flat
- * @return array
+ * @return {Array<*>}
  */
 if (!Array.prototype.flat) {
   Object.defineProperty(Array.prototype, "flat", {
@@ -615,7 +639,8 @@ if (!Array.prototype.toReversed) {
 /**
  * Creates a new array with the elements of the original array sorted in ascending order.
  *
- * @param {Function} [compareFunction] A function that defines the sort order.
+ * @template T
+ * @param {function(T, T): number} [compareFunction] A function that defines the sort order.
  * If omitted, the elements are sorted in ascending order based on their string conversion.
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted
  * @returns {Array} A new array with the elements sorted in ascending order.
@@ -690,13 +715,19 @@ if (typeof Object.assign !== "function") {
 
 if (!Object.values) {
   Object.values = function (source) {
-    return Object.keys(source).map(function (k) { return source[k]; });
+    return Object.keys(source)
+      .map(function (k) {
+        return source[k];
+      });
   };
 }
 
 if (!Object.entries) {
   Object.entries = function (source) {
-    return Object.keys(source).map(function (k) { return [k, source[k]]; });
+    return Object.keys(source)
+      .map(function (k) {
+        return [k, source[k]];
+      });
   };
 }
 
@@ -908,7 +939,11 @@ Set.prototype.difference = function (setB) {
 };
 
 Set.prototype.toString = function () {
-  return JSON.stringify(this.values());
+  let arr = [];
+  for (let item of this) {
+    arr.push(item);
+  }
+  return JSON.stringify(arr);
 };
 
 /**
@@ -1210,7 +1245,12 @@ if (!global.hasOwnProperty("includeCoreLibs")) {
       }
       // always include util first
       includeIfNotIncluded("core/Util.js");
-      files.filter(file => file.endsWith(".js") && !obj.exclude.includes(file) && !file.match("util.js", "gi"))
+      files
+        .filter(function (file) {
+          return file.endsWith(".js")
+            && !obj.exclude.includes(file)
+            && !file.match("util.js", "gi");
+        })
         .forEach(function (x) {
           if (!includeIfNotIncluded("core/" + x)) {
             throw new Error("Failed to include core/" + x);
