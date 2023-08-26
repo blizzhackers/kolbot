@@ -365,6 +365,13 @@ NTIP.ParseLineInt = function (input, info) {
   }
 
   const _props = new Map([
+    ["classid", "item.classid"],
+    ["name", "item.classid"],
+    ["type", "item.itemType"],
+    ["class", "item.itemclass"],
+    ["quality", "item.quality"],
+    ["level", "item.ilvl"],
+    ["flag", "item.getFlag("],
     ["wsm", 'getBaseStat("items", item.classid, "speed")'],
     ["weaponspeed", 'getBaseStat("items", item.classid, "speed")'],
     ["minimumsockets", 'getBaseStat("items", item.classid, "gemsockets")'],
@@ -372,12 +379,6 @@ NTIP.ParseLineInt = function (input, info) {
     ["dexreq", "item.dexreq"],
     ["2handed", 'getBaseStat("items", item.classid, "2handed")'],
     ["color", "item.getColor()"],
-    ["type", "item.itemType"],
-    ["name", "item.classid"],
-    ["classid", "item.classid"],
-    ["class", "item.itemclass"],
-    ["quality", "item.quality"],
-    ["level", "item.ilvl"],
     ["europe", '("' + me.realm.toLowerCase() + '"===" europe")'],
     ["uswest", '("' + me.realm.toLowerCase() + '"===" uswest")'],
     ["useast", '("' + me.realm.toLowerCase() + '"===" useast")'],
@@ -386,12 +387,22 @@ NTIP.ParseLineInt = function (input, info) {
     ["hardcore", "(!!me.playertype)"],
     ["classic", "(!me.gametype)"],
     ["distance", "(item.onGroundOrDropping && item.distance || Infinity)"],
-    ["flag", "item.getFlag("],
     ["prefix", "item.getPrefix("],
     ["suffix", "item.getSuffix("]
   ]);
 
   const _aliases = new Map([
+    ["n", "name"],
+    ["id", "classid"],
+    ["t", "type"],
+    ["q", "quality"],
+    ["lvl", "level"],
+    ["f", "flag"],
+    ["hc", "hardcore"],
+    ["cl", "classic"],
+  ]);
+
+  const _lists = new Map([
     ["color", NTIPAliasColor],
     ["type", NTIPAliasType],
     ["name", NTIPAliasClassID],
@@ -404,155 +415,154 @@ NTIP.ParseLineInt = function (input, info) {
 
   p_result = input.split("#");
 
-  if (p_result[0] && p_result[0].length > 4) {
-    p_section = p_result[0].split("[");
+  try {
+    if (p_result[0] && p_result[0].length > 4) {
+      p_section = p_result[0].split("[");
 
-    p_result[0] = p_section[0];
+      p_result[0] = p_section[0];
 
-    for (i = 1; i < p_section.length; i += 1) {
-      p_end = p_section[i].indexOf("]") + 1;
-      property = p_section[i].substring(0, p_end - 1);
+      for (i = 1; i < p_section.length; i += 1) {
+        p_end = p_section[i].indexOf("]") + 1;
+        property = p_section[i].substring(0, p_end - 1);
 
-      switch (property) {
-      case "flag":
-      case "prefix":
-      case "suffix":
-        if (p_section[i][p_end] === "!") {
-          p_result[0] += "!" + _props.get(property);
-        } else {
-          p_result[0] += _props.get(property);
+        if (_aliases.has(property)) {
+          property = _aliases.get(property);
         }
 
-        p_end += 2;
-
-        break;
-      default:
-        if (!_props.has(property)) {
-          Misc.errorReport("Unknown property: " + property + " File: " + info.file + " Line: " + info.line);
-          
-          return false;
-        }
-        p_result[0] += _props.get(property);
-      }
-
-      for (p_start = p_end; p_end < p_section[i].length; p_end += 1) {
-        if (!NTIP.IsSyntaxInt(p_section[i][p_end])) {
-          break;
-        }
-      }
-
-      p_result[0] += p_section[i].substring(p_start, p_end);
-
-      if (p_section[i].substring(p_start, p_end) === "=") {
-        Misc.errorReport("Unexpected = at line " + info.line + " in " + info.file);
-
-        return false;
-      }
-
-      for (p_start = p_end; p_end < p_section[i].length; p_end += 1) {
-        if (NTIP.IsSyntaxInt(p_section[i][p_end])) {
-          break;
-        }
-      }
-
-      p_keyword = p_section[i].substring(p_start, p_end);
-
-      if (isNaN(p_keyword)) {
         switch (property) {
+        case "flag":
         case "prefix":
         case "suffix":
-          p_result[0] += "\"" + p_keyword + "\")";
+          if (p_section[i][p_end] === "!") {
+            p_result[0] += "!" + _props.get(property);
+          } else {
+            p_result[0] += _props.get(property);
+          }
+
+          p_end += 2;
 
           break;
         default:
-          if (!_aliases.has(property)) {
-            Misc.errorReport("Unknown property: " + property + " File: " + info.file + " Line: " + info.line);
-
-            return false;
-          } else if (_aliases.get(property)[p_keyword] === undefined) {
-            Misc.errorReport("Unknown " + property + ": " + p_keyword + " File: " + info.file + " Line: " + info.line);
-
-            return false;
+          if (!_props.has(property)) {
+            throw new Error("Unknown property: " + property + " File: " + info.file + " Line: " + info.line);
           }
-          p_result[0] += _aliases.get(property)[p_keyword];
-          property === "flag" && (p_result[0] += ")");
+          p_result[0] += _props.get(property);
+        }
+
+        for (p_start = p_end; p_end < p_section[i].length; p_end += 1) {
+          if (!NTIP.IsSyntaxInt(p_section[i][p_end])) {
+            break;
+          }
+        }
+
+        p_result[0] += p_section[i].substring(p_start, p_end);
+
+        if (p_section[i].substring(p_start, p_end) === "=") {
+          throw new Error("Unexpected = at line " + info.line + " in " + info.file);
+        }
+
+        for (p_start = p_end; p_end < p_section[i].length; p_end += 1) {
+          if (NTIP.IsSyntaxInt(p_section[i][p_end])) {
+            break;
+          }
+        }
+
+        p_keyword = p_section[i].substring(p_start, p_end);
+
+        if (isNaN(p_keyword)) {
+          switch (property) {
+          case "prefix":
+          case "suffix":
+            p_result[0] += "\"" + p_keyword + "\")";
+
+            break;
+          default:
+            if (!_lists.has(property)) {
+              throw new Error("Unknown property: " + property + " File: " + info.file + " Line: " + info.line);
+            } else if (_lists.get(property)[p_keyword] === undefined) {
+              throw new Error("Unknown " + property + ": " + p_keyword + " File: " + info.file + " Line: " + info.line);
+            }
+            p_result[0] += _lists.get(property)[p_keyword];
+            property === "flag" && (p_result[0] += ")");
+
+            break;
+          }
+        } else {
+          if (property === "flag" || property === "prefix" || property === "suffix") {
+            p_result[0] += p_keyword + ")";
+          } else {
+            p_result[0] += p_keyword;
+          }
+        }
+
+        p_result[0] += p_section[i].substring(p_end);
+      }
+    } else {
+      p_result[0] = "";
+    }
+
+    if (p_result[1] && p_result[1].length > 4) {
+      p_section = p_result[1].split("[");
+      p_result[1] = p_section[0];
+
+      for (i = 1; i < p_section.length; i += 1) {
+        p_end = p_section[i].indexOf("]");
+        p_keyword = p_section[i].substring(0, p_end);
+
+        if (isNaN(p_keyword)) {
+          if (NTIPAliasStat[p_keyword] === undefined) {
+            throw new Error("Unknown stat: " + p_keyword + " File: " + info.file + " Line: " + info.line);
+          }
+
+          p_result[1] += "item.getStatEx(" + NTIPAliasStat[p_keyword] + ")";
+        } else {
+          p_result[1] += "item.getStatEx(" + p_keyword + ")";
+        }
+
+        p_result[1] += p_section[i].substring(p_end + 1);
+      }
+    } else {
+      p_result[1] = "";
+    }
+
+    if (p_result[2] && p_result[2].length > 0) {
+      p_section = p_result[2].split("[");
+      p_result[2] = {};
+
+      for (i = 1; i < p_section.length; i += 1) {
+        p_end = p_section[i].indexOf("]");
+        p_keyword = p_section[i].substring(0, p_end);
+
+        let keyword = p_keyword.toLowerCase();
+        switch (keyword) {
+        case "maxquantity":
+          value = Number(p_section[i].split("==")[1].match(/\d+/g));
+
+          if (!isNaN(value)) {
+            p_result[2].MaxQuantity = value;
+          }
 
           break;
-        }
-      } else {
-        if (property === "flag" || property === "prefix" || property === "suffix") {
-          p_result[0] += p_keyword + ")";
-        } else {
-          p_result[0] += p_keyword;
+        case "merctier":
+        case "tier":
+          try {
+            // p_result[2].Tier = function(item) { return value };
+            p_result[2][keyword.charAt(0).toUpperCase() + keyword.slice(1)] = (new Function("return function(item) { return " + p_section[i].split("==")[1] + ";}")).call(null); // generate function out of
+          } catch (e) {
+            throw new Error("ÿc1Pickit Tier (" + keyword + ") error! Line # ÿc2" + info.line + " ÿc1Entry: ÿc0" + info.string + " (" + info.file + ") Error message: " + e.message);
+          }
+          break;
+        default:
+          throw new Error("Unknown 3rd part keyword: " + p_keyword.toLowerCase() + " File: " + info.file + " Line: " + info.line);
         }
       }
-
-      p_result[0] += p_section[i].substring(p_end);
     }
-  } else {
-    p_result[0] = "";
+  } catch (e) {
+    Misc.errorReport(e);
+
+    return false;
   }
 
-  if (p_result[1] && p_result[1].length > 4) {
-    p_section = p_result[1].split("[");
-    p_result[1] = p_section[0];
-
-    for (i = 1; i < p_section.length; i += 1) {
-      p_end = p_section[i].indexOf("]");
-      p_keyword = p_section[i].substring(0, p_end);
-
-      if (isNaN(p_keyword)) {
-        if (NTIPAliasStat[p_keyword] === undefined) {
-          Misc.errorReport("Unknown stat: " + p_keyword + " File: " + info.file + " Line: " + info.line);
-
-          return false;
-        }
-
-        p_result[1] += "item.getStatEx(" + NTIPAliasStat[p_keyword] + ")";
-      } else {
-        p_result[1] += "item.getStatEx(" + p_keyword + ")";
-      }
-
-      p_result[1] += p_section[i].substring(p_end + 1);
-    }
-  } else {
-    p_result[1] = "";
-  }
-
-  if (p_result[2] && p_result[2].length > 0) {
-    p_section = p_result[2].split("[");
-    p_result[2] = {};
-
-    for (i = 1; i < p_section.length; i += 1) {
-      p_end = p_section[i].indexOf("]");
-      p_keyword = p_section[i].substring(0, p_end);
-
-      let keyword = p_keyword.toLowerCase();
-      switch (keyword) {
-      case "maxquantity":
-        value = Number(p_section[i].split("==")[1].match(/\d+/g));
-
-        if (!isNaN(value)) {
-          p_result[2].MaxQuantity = value;
-        }
-
-        break;
-      case "merctier":
-      case "tier":
-        try {
-          // p_result[2].Tier = function(item) { return value };
-          p_result[2][keyword.charAt(0).toUpperCase() + keyword.slice(1)] = (new Function("return function(item) { return " + p_section[i].split("==")[1] + ";}")).call(null); // generate function out of
-        } catch (e) {
-          Misc.errorReport("ÿc1Pickit Tier (" + keyword + ") error! Line # ÿc2" + info.line + " ÿc1Entry: ÿc0" + info.string + " (" + info.file + ") Error message: " + e.message);
-        }
-        break;
-
-      default:
-        Misc.errorReport("Unknown 3rd part keyword: " + p_keyword.toLowerCase() + " File: " + info.file + " Line: " + info.line);
-        return false;
-      }
-    }
-  }
   // Compile the line, to 1) remove the eval lines, and 2) increase the speed
   for (let i = 0; i < 2; i++) {
     if (p_result[i].length) {
@@ -561,7 +571,7 @@ NTIP.ParseLineInt = function (input, info) {
       } catch (e) {
         Misc.errorReport("ÿc1Pickit error! Line # ÿc2" + info.line + " ÿc1Entry: ÿc0" + info.string + " (" + info.file + ") Error message: " + e.message);
 
-        return null ; // failed load this line so return false
+        return null; // failed load this line so return false
       }
     } else {
       p_result[i] = undefined;
