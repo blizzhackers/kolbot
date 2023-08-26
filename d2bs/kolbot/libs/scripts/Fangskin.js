@@ -5,7 +5,7 @@
 *
 */
 
-function Fangskin() {
+function Fangskin () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.LostCity);
   Precast.doPrecast(true);

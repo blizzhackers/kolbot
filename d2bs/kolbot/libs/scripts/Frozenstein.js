@@ -5,7 +5,7 @@
 *
 */
 
-function Frozenstein() {
+function Frozenstein () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.CrystalizedPassage);
   Precast.doPrecast(true);

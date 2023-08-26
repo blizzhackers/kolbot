@@ -5,13 +5,13 @@
 *
 */
 
-function Snapchip() {
+function Snapchip () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.AncientsWay);
   Precast.doPrecast(true);
 
   if (!Pather.moveToExit(sdk.areas.IcyCellar, true)
-    || !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.SmallSparklyChest)) {
+    || !Pather.moveToPresetObject(me.area, sdk.objects.SmallSparklyChest)) {
     throw new Error("Failed to move to Snapchip Shatter");
   }
 

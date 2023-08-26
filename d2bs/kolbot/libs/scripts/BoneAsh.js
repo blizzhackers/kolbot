@@ -5,7 +5,7 @@
 *
 */
 
-function BoneAsh() {
+function BoneAsh () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.InnerCloister);
   Precast.doPrecast(true);

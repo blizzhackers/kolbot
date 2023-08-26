@@ -5,7 +5,7 @@
 *
 */
 
-function GetCube() {
+function GetCube () {
   // Can't get the cube if we can't access the act
   if (!me.accessToAct(2)) return false;
 

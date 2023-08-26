@@ -5,7 +5,7 @@
 *
 */
 
-function CrushTele() {
+function CrushTele () {
   let go = false;
 
   addEventListener("keyup",

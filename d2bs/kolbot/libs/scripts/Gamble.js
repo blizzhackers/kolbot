@@ -5,7 +5,7 @@
 *
 */
 
-function Gamble() {
+function Gamble () {
   let idleTick = 0;
   let info = Gambling.getInfo();
   let needGold = false;

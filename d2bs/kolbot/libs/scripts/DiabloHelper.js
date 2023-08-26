@@ -5,7 +5,7 @@
 *
 */
 
-function DiabloHelper() {
+function DiabloHelper () {
   include("core/Common/Diablo.js");
   this.Leader = Config.Leader;
   Common.Diablo.waitForGlow = true;

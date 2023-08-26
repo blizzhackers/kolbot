@@ -5,7 +5,7 @@
 *
 */
 
-function Stormtree() {
+function Stormtree () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.LowerKurast);
   Precast.doPrecast(true);

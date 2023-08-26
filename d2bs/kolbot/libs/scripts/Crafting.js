@@ -8,7 +8,7 @@
 let info;
 let gameRequest = false;
 
-function Crafting() {
+function Crafting () {
   info = CraftingSystem.getInfo();
 
   if (!info || !info.worker) throw new Error("Bad Crafting System config.");
@@ -119,7 +119,7 @@ function Crafting() {
   }
 }
 
-function getNPCName(idList) {
+function getNPCName (idList) {
   for (let i = 0; i < idList.length; i += 1) {
     switch (idList[i]) {
     case sdk.items.LightBelt:
@@ -136,7 +136,7 @@ function getNPCName(idList) {
   return false;
 }
 
-function countItems(idList, quality) {
+function countItems (idList, quality) {
   let count = 0;
   let item = me.getItem(-1, sdk.items.mode.inStorage);
 
@@ -151,7 +151,7 @@ function countItems(idList, quality) {
   return count;
 }
 
-function updateInfo() {
+function updateInfo () {
   if (info) {
     let items = me.findItems(-1, sdk.items.mode.inStorage);
 
@@ -215,7 +215,7 @@ function updateInfo() {
   return false;
 }
 
-function runewordIngredient(item) {
+function runewordIngredient (item) {
   if (Runewords.validGids.includes(item.gid)) return true;
 
   let baseGids = [];
@@ -230,7 +230,7 @@ function runewordIngredient(item) {
   return baseGids.includes(item.gid);
 }
 
-function pickItems() {
+function pickItems () {
   let items = [];
   let item = Game.getItem(-1, sdk.items.mode.onGround);
 
@@ -256,7 +256,7 @@ function pickItems() {
   Town.stash();
 }
 
-function checkItem(item) {
+function checkItem (item) {
   for (let i = 0; i < info.Sets.length; i += 1) {
     if (info.Sets[i].Enabled) {
       switch (info.Sets[i].Type) {
@@ -285,7 +285,7 @@ function checkItem(item) {
   return false;
 }
 
-function shopStuff(npcId, classids, amount) {
+function shopStuff (npcId, classids, amount) {
   print("shopStuff: " + npcId + " " + amount);
 
   let wpArea, town, path, menuId, npc;

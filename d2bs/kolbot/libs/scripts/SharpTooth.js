@@ -5,14 +5,14 @@
 *
 */
 
-function SharpTooth() {
+function SharpTooth () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.FrigidHighlands);
   Precast.doPrecast(true);
 
   // FrigidHighlands returns invalid size with getBaseStat('leveldefs', 111, ['SizeX', 'SizeX(N)', 'SizeX(H)'][me.diff]);
   // Could this be causing crashes here?
-  if (!Pather.moveToPreset(sdk.areas.FrigidHighlands, sdk.unittype.Monster, sdk.monsters.preset.SharpToothSayer)) {
+  if (!Pather.moveToPresetMonster(sdk.areas.FrigidHighlands, sdk.monsters.preset.SharpToothSayer)) {
     throw new Error("Failed to move to Sharptooth Slayer");
   }
 

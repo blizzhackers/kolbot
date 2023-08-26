@@ -5,7 +5,7 @@
 *
 */
 
-function Pit() {
+function Pit () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.BlackMarsh);
   Precast.doPrecast(true);

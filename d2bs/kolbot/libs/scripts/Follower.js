@@ -824,6 +824,7 @@ function Follower () {
   };
 
   const gameEvent = function (mode, param1, param2, name1, name2) {
+    console.log("gameevent", mode, param1, param2, name1, name2);
     if (name1 === Config.Leader
       && mode === 0x07
       && param1 === 0x02

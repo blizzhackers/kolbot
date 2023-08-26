@@ -5,7 +5,7 @@
 *
 */
 
-function Coldcrow() {
+function Coldcrow () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.ColdPlains);
   Precast.doPrecast(true);

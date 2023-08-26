@@ -14,7 +14,7 @@
 *
 */
 
-function Rusher() {
+function Rusher () {
   load("threads/rushthread.js");
   delay(500);
 
@@ -26,7 +26,7 @@ function Rusher() {
   ];
   let rushThread = getScript("threads/rushthread.js");
 
-  this.reloadThread = function () {
+  const reloadThread = function () {
     rushThread = getScript("threads/rushthread.js");
     rushThread && rushThread.stop();
 
@@ -38,7 +38,7 @@ function Rusher() {
     delay(500);
   };
 
-  this.getPartyAct = function () {
+  const getPartyAct = function () {
     let party = getParty();
     let minArea = 999;
 
@@ -58,7 +58,7 @@ function Rusher() {
     return sdk.areas.actOf(minArea);
   };
 
-  this.chatEvent = function (nick, msg) {
+  const chatEvent = function (nick, msg) {
     if (nick !== me.name) {
       if (typeof msg !== "string") return;
       switch (msg) {
@@ -111,7 +111,7 @@ function Rusher() {
     }
   };
 
-  addEventListener("chatmsg", this.chatEvent);
+  addEventListener("chatmsg", chatEvent);
 
   while (Misc.getPartyCount() < Math.min(8, Config.Rusher.WaitPlayerCount)) {
     me.overhead("Waiting for players to join");
@@ -119,7 +119,7 @@ function Rusher() {
   }
 
   // Skip to a higher act if all party members are there
-  switch (this.getPartyAct()) {
+  switch (getPartyAct()) {
   case 2:
     say("Party is in act 2, starting from act 2");
     rushThread.send("skiptoact 2");
@@ -212,7 +212,7 @@ function Rusher() {
             if (!isNaN(parseInt(command.split(" ")[1], 10))
               && parseInt(command.split(" ")[1], 10) > 0
               && parseInt(command.split(" ")[1], 10) <= 132) {
-              this.reloadThread();
+              reloadThread();
               rushThread.send(command);
             } else {
               say("Invalid area");

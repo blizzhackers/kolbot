@@ -5,13 +5,13 @@
 *
 */
 
-function AncientTunnels() {
+function AncientTunnels () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.LostCity);
   Precast.doPrecast(true);
 
   try {
-    if (Config.AncientTunnels.OpenChest && Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.SuperChest)) {
+    if (Config.AncientTunnels.OpenChest && Pather.moveToPresetObject(me.area, sdk.objects.SuperChest)) {
       Misc.openChests(5) && Pickit.pickItems();
     }
   } catch (e) {
@@ -20,7 +20,7 @@ function AncientTunnels() {
 
   try {
     if (Config.AncientTunnels.KillDarkElder
-      && Pather.moveToPreset(me.area, sdk.unittype.Monster, sdk.monsters.preset.DarkElder)) {
+      && Pather.moveToPresetMonster(me.area, sdk.monsters.preset.DarkElder)) {
       Attack.clear(15, 0, getLocaleString(sdk.locale.monsters.DarkElder));
     }
   } catch (e) {

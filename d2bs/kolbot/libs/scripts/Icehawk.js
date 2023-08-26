@@ -5,7 +5,7 @@
 *
 */
 
-function Icehawk() {
+function Icehawk () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.KurastBazaar);
   Precast.doPrecast(true);

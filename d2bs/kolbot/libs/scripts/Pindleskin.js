@@ -5,7 +5,7 @@
 *
 */
 
-function Pindleskin() {
+function Pindleskin () {
   Town.goToTown((Config.Pindleskin.UseWaypoint ? undefined : 5));
   Town.doChores();
 

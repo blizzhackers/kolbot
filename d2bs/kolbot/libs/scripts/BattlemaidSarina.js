@@ -5,13 +5,13 @@
 *
 */
 
-function BattlemaidSarina() {
+function BattlemaidSarina () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.KurastBazaar);
   Precast.doPrecast(true);
 
   if (!Pather.moveToExit(sdk.areas.RuinedTemple, true)
-    || !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.LamEsensTomeHolder)) {
+    || !Pather.moveToPresetObject(me.area, sdk.quest.chest.LamEsensTomeHolder)) {
     throw new Error("Failed to move near Sarina");
   }
 

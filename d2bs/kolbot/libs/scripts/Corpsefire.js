@@ -5,7 +5,7 @@
 *
 */
 
-function Corpsefire() {
+function Corpsefire () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.ColdPlains);
   Precast.doPrecast(true);

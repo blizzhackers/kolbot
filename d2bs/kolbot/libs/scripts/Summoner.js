@@ -22,7 +22,7 @@ function Summoner () {
   if (me.inArea(sdk.areas.PalaceCellarLvl3) && !Pather.usePortal(null)) {
     throw new Error("Failed to move back to arcane");
   }
-  if (!Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.Journal, -3, -3)) {
+  if (!Pather.moveToPresetObject(me.area, sdk.quest.chest.Journal, { offX: -3, offY: -3 })) {
     throw new Error("Failed to move to Summoner");
   }
 
@@ -39,7 +39,7 @@ function Summoner () {
 
       // couldnt find journal? Move to it's preset
       if (!journal) {
-        Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.objects.Journal);
+        Pather.moveToPresetObject(me.area, sdk.objects.Journal);
         continue;
       } else if (journal && journal.distance > (18 - i)) {
         Pather.moveNearUnit(journal, 13);
@@ -56,7 +56,9 @@ function Summoner () {
   }
 
   if (me.inArea(sdk.areas.CanyonofMagic)) {
-    Loader.scriptName(1) === "Duriel" ? Loader.skipTown.push("Duriel") : Pather.useWaypoint(sdk.areas.LutGholein);
+    Loader.scriptName(1) === "Duriel"
+      ? Loader.skipTown.push("Duriel")
+      : Pather.useWaypoint(sdk.areas.LutGholein);
   }
 
   return true;

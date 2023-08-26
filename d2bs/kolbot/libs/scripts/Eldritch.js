@@ -5,7 +5,7 @@
 *
 */
 
-function Eldritch() {
+function Eldritch () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.FrigidHighlands);
   Precast.doPrecast(true);

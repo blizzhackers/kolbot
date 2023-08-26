@@ -7,7 +7,7 @@
 
 // redo this, maybe different keys or chat commands instead?
 
-function ClassicChaosAssistant() {
+function ClassicChaosAssistant () {
   include("core/Common/Diablo.js");
   let stargo, infgo, seisgo, vizgo, infseal, seisseal, vizseal, diablopickup, normalpickup = false;
 

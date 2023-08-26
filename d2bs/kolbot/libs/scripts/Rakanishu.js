@@ -5,7 +5,7 @@
 *
 */
 
-function Rakanishu() {
+function Rakanishu () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.StonyField);
   Precast.doPrecast(true);

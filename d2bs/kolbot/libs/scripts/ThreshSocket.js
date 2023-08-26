@@ -5,7 +5,7 @@
 *
 */
 
-function ThreshSocket() {
+function ThreshSocket () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.ArreatPlateau);
   Precast.doPrecast(true);

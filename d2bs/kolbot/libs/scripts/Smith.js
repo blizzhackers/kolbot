@@ -5,12 +5,12 @@
 *
 */
 
-function Smith() {
+function Smith () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.OuterCloister);
   Precast.doPrecast(true);
 
-  if (!Pather.moveToPreset(sdk.areas.Barracks, sdk.unittype.Object, sdk.quest.chest.MalusHolder)) {
+  if (!Pather.moveToPresetObject(sdk.areas.Barracks, sdk.quest.chest.MalusHolder)) {
     throw new Error("Failed to move to the Smith");
   }
 

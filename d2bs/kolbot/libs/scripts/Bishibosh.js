@@ -5,12 +5,12 @@
 *
 */
 
-function Bishibosh() {
+function Bishibosh () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.ColdPlains);
   Precast.doPrecast(true);
 
-  Pather.moveToPreset(sdk.areas.ColdPlains, sdk.unittype.Monster, sdk.monsters.preset.Bishibosh);
+  Pather.moveToPresetMonster(sdk.areas.ColdPlains, sdk.monsters.preset.Bishibosh);
   Attack.clear(15, 0, getLocaleString(sdk.locale.monsters.Bishibosh));
   Pickit.pickItems();
 

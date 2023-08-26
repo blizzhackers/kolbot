@@ -5,12 +5,12 @@
 *
 */
 
-function Hephasto() {
+function Hephasto () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.RiverofFlame);
   Precast.doPrecast(true);
 
-  if (!Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HellForge)) {
+  if (!Pather.moveToPresetObject(me.area, sdk.quest.chest.HellForge)) {
     throw new Error("Failed to move to Hephasto");
   }
 

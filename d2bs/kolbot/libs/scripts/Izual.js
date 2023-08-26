@@ -5,12 +5,12 @@
 *
 */
 
-function Izual() {
+function Izual () {
   Town.doChores();
   Pather.useWaypoint(sdk.areas.CityoftheDamned);
   Precast.doPrecast(true);
 
-  if (!Pather.moveToPreset(sdk.areas.PlainsofDespair, sdk.unittype.Monster, sdk.monsters.Izual)) {
+  if (!Pather.moveToPresetMonster(sdk.areas.PlainsofDespair, sdk.monsters.Izual)) {
     throw new Error("Failed to move to Izual.");
   }
 

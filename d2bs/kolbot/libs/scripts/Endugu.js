@@ -11,7 +11,7 @@ function Endugu () {
   Precast.doPrecast(true);
 
   if (!Pather.moveToExit([sdk.areas.FlayerDungeonLvl1, sdk.areas.FlayerDungeonLvl2, sdk.areas.FlayerDungeonLvl3], true)
-    || !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.KhalimsBrainChest)) {
+    || !Pather.moveToPresetObject(me.area, sdk.quest.chest.KhalimsBrainChest)) {
     throw new Error("Failed to move to Endugu");
   }
 

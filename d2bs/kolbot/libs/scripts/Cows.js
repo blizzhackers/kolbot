@@ -5,7 +5,7 @@
 *
 */
 
-function Cows() {
+function Cows () {
   include("core/Common/Cows.js");
   
   const getLeg = function () {
