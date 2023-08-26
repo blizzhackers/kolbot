@@ -370,6 +370,7 @@ NTIP.ParseLineInt = function (input, info) {
     ["type", "item.itemType"],
     ["class", "item.itemclass"],
     ["quality", "item.quality"],
+    ["charlvl", "me.charlvl"],
     ["level", "item.ilvl"],
     ["flag", "item.getFlag("],
     ["wsm", 'getBaseStat("items", item.classid, "speed")'],
@@ -397,9 +398,11 @@ NTIP.ParseLineInt = function (input, info) {
     ["t", "type"],
     ["q", "quality"],
     ["lvl", "level"],
+    ["ilvl", "level"],
     ["f", "flag"],
     ["hc", "hardcore"],
     ["cl", "classic"],
+    ["clvl", "charlvl"],
   ]);
 
   const _lists = new Map([
