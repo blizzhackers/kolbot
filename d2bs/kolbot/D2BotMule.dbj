@@ -510,6 +510,17 @@ function main () {
     Mule.continuous = muleObjs[0].obj.continuousMule;
     // we can use any of the enabled profiles
     MuleData.fileName = Mule.getMuleFilename(Mule.mode, Mule.obj.enabledProfiles[0], Mule.continuous);
+  } else if (muleObjs.some(muleObj => muleObj.obj.continuousMule)) {
+    // continuous mule doesn't wait for master profiles
+    // find the obj and we can assign our info directly
+    let _muleObj = muleObjs.find(function (muleObj) {
+      return muleObj.obj.continuousMule;
+    });
+    Mule.obj = _muleObj.obj;
+    Mule.mode = _muleObj.mode;
+    Mule.continuous = _muleObj.obj.continuousMule;
+    // we can use any of the enabled profiles
+    MuleData.fileName = Mule.getMuleFilename(Mule.mode, Mule.obj.enabledProfiles[0], Mule.continuous);
   } else {
     // we need to wait for confirmation from the master
     while (!Mule.master) {

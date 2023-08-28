@@ -283,7 +283,10 @@ const Mule = {
           break;
         }
 
-        // pick large items first by sorting items by size in descending order and move gheed's charm to the end of the list
+        /**
+         * pick large items first by sorting items by size in descending order
+         * and move gheed's charm to the end of the list
+         */
         list.sort(function (a, b) {
           if (a.isGheeds && !Pickit.canPick(a)) return 1;
           if (b.isGheeds && !Pickit.canPick(b)) return -1;
@@ -404,7 +407,7 @@ const Mule = {
   getMuleFilename: function (mode, master, continuous = false) {
     mode = mode || 0;
     let file;
-    let mule = mode > 0 ? AutoMule.TorchAnniMules : AutoMule.Mules;
+    const mule = mode > 0 ? AutoMule.TorchAnniMules : AutoMule.Mules;
 
     // Iterate through mule object
     for (let i in mule) {
@@ -413,10 +416,12 @@ const Mule = {
           muleProfile,
           enabledProfiles,
           accountPrefix,
+          continuousMule,
         } = mule[i];
         // Mule profile matches config
         if (muleProfile && String.isEqual(muleProfile, me.profile)
           && (continuous || enabledProfiles.includes(master) || enabledProfiles.includes("all"))) {
+          if (continuous && !continuousMule) continue;
           file = mode === 0
             ? "logs/AutoMule." + i + ".json"
             : "logs/TorchMule." + i + ".json";
@@ -448,21 +453,19 @@ const Mule = {
   },
 
   /** @returns {{ mode: number, obj: muleObj }[]} */
-  getMuleInfo: function (master = "") {
+  getMuleInfo: function () {
     const data = [];
     /**
      * @param {muleObj} muleObj 
      * @param {number} mode 
      */
     const checkObj = function (muleObj, mode) {
-      let { muleProfile, enabledProfiles, continuousMule } = muleObj;
+      let { muleProfile } = muleObj;
       if (muleProfile && String.isEqual(muleProfile, me.profile)) {
-        if (continuousMule || enabledProfiles.includes(master) || enabledProfiles.includes("all")) {
-          data.push({
-            mode: mode,
-            obj: muleObj,
-          });
-        }
+        data.push({
+          mode: mode,
+          obj: muleObj,
+        });
       }
     };
     
