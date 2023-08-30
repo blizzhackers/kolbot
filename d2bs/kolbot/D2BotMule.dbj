@@ -529,7 +529,7 @@ function main () {
     console.log("Master found: " + Mule.master + " Mode: " + Mule.mode);
     Mule.obj = muleObjs.find(function (muleObj) {
       return muleObj.obj.enabledProfiles.includes(Mule.master) || muleObj.obj.enabledProfiles.includes("all");
-    });
+    }).obj;
     Mule.continuous = Mule.obj.continuousMule;
     MuleData.fileName = Mule.getMuleFilename(Mule.mode, Mule.master, Mule.continuous);
   }
