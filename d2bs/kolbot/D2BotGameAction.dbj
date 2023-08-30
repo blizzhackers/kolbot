@@ -362,7 +362,7 @@ function main () {
       delay(1000);
     }
 
-    locationAction(getLocation());
+    locationAction.run(getLocation());
     delay(1000);
   }
 }
