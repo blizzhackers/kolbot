@@ -132,7 +132,7 @@ const locationAction = (function () {
       if (!accounts.length) {
         MuleLogger.remove();
         D2Bot.printToConsole("Done logging mules!");
-        D2Bot.stop();
+        D2Bot.stop(me.profile, true);
 
         return;
       }
@@ -285,7 +285,7 @@ function main () {
 
   if (Starter.gameInfo.rdBlocker) {
     D2Bot.printToConsole("You must disable RD Blocker for Mule Logger to work properly. Stopping.");
-    D2Bot.stop();
+    D2Bot.stop(me.profile, true);
 
     return;
   }
