@@ -29,13 +29,20 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
   const ControlAction = {
     mutedKey: false,
-    realms: { "uswest": 0, "useast": 1, "asia": 2, "europe": 3 },
+    realms: {
+      "uswest": 0,
+      "west": 0,
+      "useast": 1,
+      "east": 1,
+      "asia": 2,
+      "europe": 3
+    },
 
     /**
      * @param {string} text 
      * @param {number} time - in milliseconds 
-     * @param {Function} [stopfunc] 
-     * @param {*} [arg] 
+     * @param {(arg: any) => boolean} [stopfunc] 
+     * @param {any} [arg] 
      */
     timeoutDelay: function (text, time, stopfunc, arg) {
       let currTime = 0;
@@ -74,8 +81,11 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
       let control = getControl(type, x, y, xsize, ysize);
 
       if (!control) {
-        print("control not found " + type + " " + x + " " + y + " " + xsize + " " + ysize + " location " + getLocation());
-
+        console.error(
+          "control not found " + type + " "
+          + x + " " + y + " " + xsize + " " + ysize
+          + " location " + getLocation()
+        );
         return false;
       }
 
@@ -104,8 +114,11 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
       currText = control.getText();
 
-      if (currText && ((typeof currText === "string" && currText === text) || (typeof currText === "object" && currText.includes(text)))) {
-        return true;
+      if (currText) {
+        if ((typeof currText === "string" && currText === text)
+          || (typeof currText === "object" && currText.includes(text))) {
+          return true;
+        }
       }
 
       control.setText(text);
@@ -125,6 +138,22 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
       let control = getControl(type, x, y, xsize, ysize);
 
       return (!!control ? control.getText() : false);
+    },
+
+    /**
+     * @param {number} type 
+     * @param {number} x 
+     * @param {number} y 
+     * @param {number} xsize 
+     * @param {number} ysize 
+     * @returns {string}
+     */
+    parseText: function (type, x, y, xsize, ysize) {
+      let control = getControl(type, x, y, xsize, ysize);
+      if (!control) return "";
+      let text = control.getText();
+      if (!text || !text.length) return "";
+      return text.join(" ");
     },
 
     // ~~~ Start of general functions ~~~ //
@@ -231,10 +260,12 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
           do {
             let text = control.getText();
 
-            if (text instanceof Array && typeof text[1] === "string") {
+            if (Array.isArray(text) && typeof text[1] === "string") {
               count++;
 
               if (String.isEqual(text[1], info.charName)) {
+                if (info.ladder && !text.some(el => el.includes("LADDER"))) continue;
+                // how to check hardcore?
                 return control;
               }
             }
@@ -335,84 +366,91 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
     /**
      * @param {CharacterInfo} info 
+     * @param {boolean} [randNameOnFail]
      * @returns {boolean}
      */
-    makeCharacter: function (info) {
-      me.blockMouse = true;
-      !info.charClass && (info.charClass = "barbarian");
-      (!info.charName || info.charName.length < 2 || info.charName.length > 15) && (info.charName = Starter.randomString(8, false));
-      info.charName.match(/\d+/g) && (info.charName.replace(/\d+/g, ""));
-      !info.expansion && ["druid", "assassin"].includes(info.charClass) && (info.expansion = true);
+    makeCharacter: function (info, randNameOnFail = false) {
+      try {
+        me.blockMouse = true;
+        !info.charClass && (info.charClass = "barbarian");
+        if (!info.charName || info.charName.length < 2 || info.charName.length > 15) {
+          info.charName = Starter.randomString(8, false);
+        }
+        info.charName.match(/\d+/g) && (info.charName.replace(/\d+/g, ""));
+        if (!info.expansion && ["druid", "assassin"].includes(info.charClass)) {
+          info.expansion = true;
+        }
 
-      let clickCoords = [];
-      /** @type {Map<string, [number, number]} */
-      const coords = new Map();
-      coords.set("barbarian", [400, 280]);
-      coords.set("amazon", [100, 280]);
-      coords.set("necromancer", [300, 290]);
-      coords.set("sorceress", [620, 270]);
-      coords.set("assassin", [200, 280]);
-      coords.set("druid", [700, 280]);
-      coords.set("paladin", [521, 260]);
+        let clickCoords = [];
+        /** @type {Map<string, [number, number]} */
+        const coords = new Map([
+          ["barbarian", [400, 280]],
+          ["amazon", [100, 280]],
+          ["necromancer", [300, 290]],
+          ["sorceress", [620, 270]],
+          ["assassin", [200, 280]],
+          ["druid", [700, 280]],
+          ["paladin", [521, 260]]
+        ]);
 
-      // cycle until in lobby
-      while (getLocation() !== sdk.game.locations.Lobby) {
-        switch (getLocation()) {
-        case sdk.game.locations.CharSelect:
-        case sdk.game.locations.CharSelectNoChars:
-          // Create Character greyed out
-          if (Controls.CharSelectCreate.disabled === sdk.game.controls.Disabled) {
-            me.blockMouse = false;
+        // cycle until in lobby
+        while (getLocation() !== sdk.game.locations.Lobby) {
+          if (me.ingame) return true;
+
+          switch (getLocation()) {
+          case sdk.game.locations.CharSelect:
+          case sdk.game.locations.CharSelectNoChars:
+            // Create Character greyed out
+            if (Controls.CharSelectCreate.disabled === sdk.game.controls.Disabled) {
+              return false;
+            }
+
+            Controls.CharSelectCreate.click();
+
+            break;
+          case sdk.game.locations.CharacterCreate:
+            clickCoords = coords.get(info.charClass.toLowerCase()) || coords.get("paladin");
+            getControl().click(clickCoords[0], clickCoords[1]);
+            delay(500);
+
+            break;
+          case sdk.game.locations.NewCharSelected:
+            if (Controls.CharCreateHCWarningOk.control) {
+              Controls.CharCreateHCWarningOk.click();
+            } else {
+              Controls.CharCreateCharName.setText(info.charName);
+
+              !info.expansion && Controls.CharCreateExpansion.click();
+              !info.ladder && Controls.CharCreateLadder.click();
+              info.hardcore && Controls.CharCreateHardcore.click();
+
+              Controls.BottomRightOk.click();
+            }
+
+            break;
+          case sdk.game.locations.OkCenteredErrorPopUp:
+            // char name exists (text box 4, 268, 320, 264, 120)
+            Controls.OkCentered.click();
+            Controls.BottomLeftExit.click();
+            if (randNameOnFail) {
+              console.log("char name exists - randomizing a new one");
+              info.charName = Starter.randomString(8, false);
+              
+              continue;
+            }
 
             return false;
+          default:
+            break;
           }
 
-          Controls.CharSelectCreate.click();
-
-          break;
-        case sdk.game.locations.CharacterCreate:
-          clickCoords = coords.get(info.charClass.toLowerCase()) || coords.get("paladin");
-          getControl().click(clickCoords[0], clickCoords[1]);
           delay(500);
-
-          break;
-        case sdk.game.locations.NewCharSelected:
-          if (Controls.CharCreateHCWarningOk.control) {
-            Controls.CharCreateHCWarningOk.click();
-          } else {
-            Controls.CharCreateCharName.setText(info.charName);
-
-            !info.expansion && Controls.CharCreateExpansion.click();
-            !info.ladder && Controls.CharCreateLadder.click();
-            info.hardcore && Controls.CharCreateHardcore.click();
-
-            Controls.BottomRightOk.click();
-          }
-
-          break;
-        case sdk.game.locations.OkCenteredErrorPopUp:
-          // char name exists (text box 4, 268, 320, 264, 120)
-          Controls.OkCentered.click();
-          Controls.BottomLeftExit.click();
-
-          me.blockMouse = false;
-
-          return false;
-        default:
-          break;
         }
 
-        // Singleplayer loop break fix.
-        if (me.ingame) {
-          break;
-        }
-
-        delay(500);
+        return true;
+      } finally {
+        me.blockMouse = false;
       }
-
-      me.blockMouse = false;
-
-      return true;
     },
 
     /**
@@ -533,7 +571,8 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
       while (getLocation() !== sdk.game.locations.CharSelect) {
         switch (getLocation()) {
         case sdk.game.locations.RegisterEmail:
-          if (Controls.EmailSetEmail.setText(email + domain) && Controls.EmailVerifyEmail.setText(email + domain)) {
+          if (Controls.EmailSetEmail.setText(email + domain)
+            && Controls.EmailVerifyEmail.setText(email + domain)) {
             Controls.EmailRegister.click();
             delay(100);
           }
@@ -600,7 +639,9 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
           break;
         case sdk.game.locations.RegisterEmail:
-          Controls.EmailDontRegisterContinue.control ? Controls.EmailDontRegisterContinue.click() : Controls.EmailDontRegister.click();
+          Controls.EmailDontRegisterContinue.control
+            ? Controls.EmailDontRegisterContinue.click()
+            : Controls.EmailDontRegister.click();
 
           break;
         case sdk.game.locations.CharSelect:
@@ -645,6 +686,10 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
           Controls.EnterAccountName.setText(info.account);
           Controls.EnterAccountPassword.setText(info.password);
           Controls.Login.click();
+
+          break;
+        case sdk.game.locations.CreateNewAccount:
+          Controls.BottomLeftExit.click();
 
           break;
         case sdk.game.locations.LoginUnableToConnect:
@@ -1105,14 +1150,29 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
         break;
       case 1638: // getProfile
         try {
-          obj = JSON.parse(msg);
+          /**
+           * @typedef {object} ProfileInfo
+           * @property {string} Name
+           * @property {string} Status
+           * @property {string} Account
+           * @property {string} Character
+           * @property {string} Difficulty
+           * @property {string} Realm
+           * @property {string} Game
+           * @property {string} Entry
+           * @property {string} Tag
+           */
+          /** @type {ProfileInfo} */
+          let pObj = JSON.parse(msg);
           Starter.profileInfo.profile = me.profile;
-          Starter.profileInfo.account = obj.account;
-          Starter.profileInfo.charName = obj.Character;
-          obj.Realm = obj.Realm.toLowerCase();
-          Starter.profileInfo.realm = ["east", "west"].includes(obj.Realm)
-            ? "us" + obj.Realm
-            : obj.Realm;
+          Starter.profileInfo.account = pObj.Account || "";
+          Starter.profileInfo.charName = pObj.Character || "";
+          Starter.profileInfo.difficulty = pObj.Difficulty || "";
+          Starter.profileInfo.tag = pObj.Tag || "";
+          pObj.Realm = pObj.Realm.toLowerCase();
+          Starter.profileInfo.realm = ["east", "west"].includes(pObj.Realm)
+            ? "us" + pObj.Realm
+            : pObj.Realm;
         } catch (e) {
           console.error(e);
         }
@@ -1172,7 +1232,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
             D2Bot.printToConsole("Invalid Account Name :: " + Starter.profileInfo.account);
             D2Bot.stop(true);
 
-            break;
+            return false;
           case getLocaleString(sdk.locale.text.UnableToCreateAccount):
           case getLocaleString(5239): // An account name already exists
             if (!Starter.accountExists) {
@@ -1187,7 +1247,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
             D2Bot.printToConsole("Account name already exists :: " + Starter.profileInfo.account);
             D2Bot.stop(true);
 
-            break;
+            return false;
           case getLocaleString(sdk.locale.text.InvalidPassword):
           case getLocaleString(5208): // Invalid account
           case getLocaleString(sdk.locale.text.AccountDoesNotExist):
@@ -1196,13 +1256,12 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
               Controls.LoginErrorOk.click();
 
               return true;
-            } else {
-              D2Bot.printToConsole(string);
-              D2Bot.updateStatus(string);
-              D2Bot.stop(true);
             }
+            D2Bot.printToConsole(string);
+            D2Bot.updateStatus(string);
+            D2Bot.stop(true);
 
-            break;
+            return false;
           case getLocaleString(sdk.locale.text.CdKeyIntendedForAnotherProduct):
           case getLocaleString(sdk.locale.text.LoDKeyIntendedForAnotherProduct):
           case getLocaleString(sdk.locale.text.CdKeyDisabled):
@@ -1520,13 +1579,20 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
             return true;
           }
 
-          // dead HardCore character
-          if (Controls.CreateGameWindow.control && Controls.CreateGameWindow.disabled === sdk.game.controls.Disabled) {
+          // dead HC character
+          if (Controls.CreateGameWindow.control
+            && Controls.CreateGameWindow.disabled === sdk.game.controls.Disabled) {
             if (Starter.Config.StopOnDeadHardcore) {
-              D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Shutting down, better luck next time", sdk.colors.D2Bot.Gold);
+              D2Bot.printToConsole(
+                Profile().character + " has died. They shall be remembered...maybe. Shutting down, better luck next time",
+                sdk.colors.D2Bot.Gold
+              );
               D2Bot.stop();
             } else {
-              D2Bot.printToConsole(Profile().character + " has died. They shall be remembered...maybe. Better luck next time", sdk.colors.D2Bot.Gold);
+              D2Bot.printToConsole(
+                Profile().character + " has died. They shall be remembered...maybe. Better luck next time",
+                sdk.colors.D2Bot.Gold
+              );
               D2Bot.updateStatus(Profile().character + " has died. They shall be remembered...maybe. Better luck next time");
               Starter.deadCheck = true;
               Controls.LobbyQuit.click();
@@ -1570,11 +1636,13 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
         login: function (otherMultiCheck = false) {
           Starter.inGame && (Starter.inGame = false);
-          if (otherMultiCheck && [sdk.game.gametype.SinglePlayer, sdk.game.gametype.BattleNet].indexOf(Profile().type) === -1) {
+          let currLocation = getLocation();
+          
+          if (otherMultiCheck && currLocation === sdk.game.locations.OtherMultiplayer) {
             return ControlAction.loginOtherMultiplayer();
           }
 
-          if (getLocation() === sdk.game.locations.MainMenu) {
+          if (currLocation === sdk.game.locations.MainMenu) {
             if (Profile().type === sdk.game.profiletype.SinglePlayer
               && Starter.firstRun
               && Controls.SinglePlayer.click()) {
@@ -1594,7 +1662,9 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
           }
 
           // Multiple realm botting fix in case of R/D or disconnect
-          Starter.firstLogin && getLocation() === sdk.game.locations.Login && Controls.BottomLeftExit.click();
+          if (Starter.firstLogin && getLocation() === sdk.game.locations.Login) {
+            Controls.BottomLeftExit.click();
+          }
       
           D2Bot.updateStatus("Logging In");
               
@@ -1618,7 +1688,7 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
             } else if (getLocation() === sdk.game.locations.TcpIpEnterIp && Profile().type === sdk.game.profiletype.TcpIpJoin) {
               return true; // handled in its own case
             } else {
-              print(e + " " + getLocation());
+              console.error(e, " " + getLocation());
             }
           }
 
@@ -1626,9 +1696,14 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
         },
 
         otherMultiplayerSelect: function () {
-          if ([sdk.game.profiletype.TcpIpHost, sdk.game.profiletype.TcpIpJoin].includes(Profile().type)) {
-            Controls.TcpIp.click() && (Profile().type === sdk.game.profiletype.TcpIpHost ? Controls.TcpIpHost.click() : Controls.TcpIpJoin.click());
-          } else if (Profile().type === sdk.game.profiletype.OpenBattlenet) {
+          const pType = Profile().type;
+          if ([sdk.game.profiletype.TcpIpHost, sdk.game.profiletype.TcpIpJoin].includes(pType)) {
+            if (Controls.TcpIp.click()) {
+              pType === sdk.game.profiletype.TcpIpHost
+                ? Controls.TcpIpHost.click()
+                : Controls.TcpIpJoin.click();
+            }
+          } else if (pType === sdk.game.profiletype.OpenBattlenet) {
             Controls.OpenBattleNet.click();
           } else {
             Controls.OtherMultiplayerCancel.click();
