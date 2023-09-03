@@ -49,6 +49,10 @@ const locationAction = (function () {
   let lastGameTick, leader = "";
 
   const lastGame = [];
+  /**
+   * @type {Map<string, { lastAsked: number, game: string }>}
+   */
+  const tracker = new Map();
   const Controls = require("./libs/modules/Control");
   const {
     locations,
@@ -152,21 +156,19 @@ const locationAction = (function () {
     function (location) {
       D2Bot.updateStatus("Join Game");
 
-      if (!leader) {
-        leader = [];
-
+      if (!tracker.size) {
         for (let i in JoinSettings) {
           if (JoinSettings.hasOwnProperty(i) && typeof i === "string") {
-            for (let j = 0; j < JoinSettings[i].length; j += 1) {
-              if (JoinSettings[i][j] === me.profile || JoinSettings[i][j] === "all") {
-                leader.push(i);
+            for (let profile of JoinSettings[i]) {
+              if (profile === me.profile || profile === "all") {
+                tracker.set(i, { lastAsked: 0, game: "" });
               }
             }
           }
         }
       }
 
-      if (!leader || !leader.length && !announced) {
+      if (!tracker.size && !announced) {
         console.log("No leader");
         D2Bot.printToConsole("No leader");
         announced = true;
@@ -176,9 +178,23 @@ const locationAction = (function () {
 
       JoinLoop2:
       for (let i = 0; i < 5; i += 1) {
-        for (let j = 0; j < leader.length; j += 1) {
+        for (let [leader, check] of tracker) {
+          if (getTickCount() - check.lastAsked < Time.minutes(5)) {
+            if (check.game) {
+              // alright so we've already asked this profile and recieved a game but we didn't want to join
+              // instead of asking them again and spamming copydata. Lets read their datafile and see if they
+              // are still in game. If they are we'll wait for them to leave and ask again. If they aren't we'll
+              // ask again immediately.
+              let data = DataFile.read(leader);
+              if (data && !!data.currentGame && String.isEqual(data.currentGame, check.game)) {
+                D2Bot.updateStatus("Waiting for " + leader + " to leave " + check.game);
+                delay(Time.seconds(i + 1));
+                continue;
+              }
+            }
+          }
           Starter.joinInfo = {};
-          D2Bot.requestGame(leader[j]);
+          D2Bot.requestGame(leader);
           delay(100);
 
           if (!Starter.joinInfo.hasOwnProperty("gameName") || Starter.joinInfo.gameName === "") {
@@ -191,7 +207,7 @@ const locationAction = (function () {
           * leader who's game we left get the current game time
           * and see if there is x amount of time left that makes it worth it vs waiting for next.
           */
-
+          tracker.set(leader, { lastAsked: getTickCount(), game: Starter.joinInfo.gameName });
           if (lastGame.indexOf(Starter.joinInfo.gameName) === -1 || Starter.lastGameStatus === "pending") {
             Controls.JoinGameName.setText(Starter.joinInfo.gameName);
             Controls.JoinGamePass.setText(Starter.joinInfo.gamePass);
@@ -272,14 +288,12 @@ const locationAction = (function () {
   locations.set(sdk.game.locations.TcpIpEnterIp,
     function () {
       try {
-        if (!leader) {
-          leader = [];
-
+        if (!tracker.size) {
           for (let i in JoinSettings) {
             if (JoinSettings.hasOwnProperty(i) && typeof i === "string") {
-              for (let j = 0; j < JoinSettings[i].length; j += 1) {
-                if (JoinSettings[i][j] === me.profile || JoinSettings[i][j] === "all") {
-                  leader.push(i);
+              for (let profile of JoinSettings[i]) {
+                if (profile === me.profile || profile === "all") {
+                  tracker.set(i, { lastAsked: 0, game: "" });
                 }
               }
             }
@@ -288,8 +302,8 @@ const locationAction = (function () {
 
         mainLoop:
         for (let i = 0; i < 3; i++) {
-          for (let j = 0; j < leader.length; j++) {
-            D2Bot.requestGame(leader[j]);
+          for (let [leader] of tracker) {
+            D2Bot.requestGame(leader);
 
             if (Object.keys(Starter.joinInfo).length && Starter.joinInfo.gameName !== "") {
               break mainLoop;
