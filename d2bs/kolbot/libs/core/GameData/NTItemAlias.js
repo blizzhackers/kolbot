@@ -936,17 +936,32 @@ NTIPAliasStat["itemnonclassskill"] = 97;
 // Amazon
 NTIPAliasStat["plusskillcriticalstrike"] = [97, 9];
 NTIPAliasStat["plusskillguidedarrow"] = [97, 22];
+NTIPAliasStat["plusskillvalkyrie"] = [97, sdk.skills.Valkyrie];
 // Sorceress
-NTIPAliasStat["plusskillteleport"] = [97, 54];
+NTIPAliasStat["plusskillwarmth"] = [97, sdk.skills.Warmth];
+NTIPAliasStat["plusskillinferno"] = [97, sdk.skills.Inferno];
+NTIPAliasStat["plusskillfireball"] = [97, sdk.skills.FireBall];
+NTIPAliasStat["plusskillfirewall"] = [97, sdk.skills.FireWall];
+NTIPAliasStat["plusskillteleport"] = [97, sdk.skills.Teleport];
+NTIPAliasStat["plusskillmeteor"] = [97, sdk.skills.Meteor];
+NTIPAliasStat["plusskillfiremastery"] = [97, sdk.skills.FireMastery];
+NTIPAliasStat["plusskillhydra"] = [97, sdk.skills.Hydra];
 // Barbarian
+NTIPAliasStat["plusskillbattlecry"] = [97, 146];
 NTIPAliasStat["plusskillbattleorders"] = [97, 149];
 NTIPAliasStat["plusskillbattlecommand"] = [97, 155];
-NTIPAliasStat["plusskillbattlecry"] = [97, 146];
+NTIPAliasStat["plusskillwhirlwind"] = [97, sdk.skills.Whirlwind];
+NTIPAliasStat["plusskillberserk"] = [97, sdk.skills.Berserk];
 // Druid
 NTIPAliasStat["plusskillwerewolf"] = [97, 223];
+NTIPAliasStat["plusskillwerebear"] = [97, sdk.skills.Werebear];
 NTIPAliasStat["plusskillshapeshifting"] = [97, 224];	NTIPAliasStat["plusskilllycanthropy"] = [97, 224];
 NTIPAliasStat["plusskillsummonspiritwolf"] = [97, 227];
 NTIPAliasStat["plusskillferalrage"] = [97, 232];
+NTIPAliasStat["plusskillarticblast"] = [97, sdk.skills.ArcticBlast];
+// paladin
+NTIPAliasStat["plusskillzeal"] = [97, sdk.skills.Zeal];
+NTIPAliasStat["plusskillvengeance"] = [97, sdk.skills.Vengeance];
 
 NTIPAliasStat["state"] = 98;
 NTIPAliasStat["itemfastergethitrate"] = 99;	NTIPAliasStat["fhr"] = 99;
