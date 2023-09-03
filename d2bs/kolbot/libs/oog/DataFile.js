@@ -17,26 +17,46 @@ includeIfNotIncluded("oog/FileAction.js");
   } else {
     root.DataFile = factory();
   }
-}(this, function() {
+}(this, function () {
   const DataFile = {
     _default: {
-      runs: 0,
-      experience: 0,
-      deaths: 0,
-      lastArea: "",
-      gold: 0,
-      level: 0,
-      name: "",
-      gameName: "",
-      ingameTick: 0,
       handle: 0,
+      name: "",
+      level: 0,
+      experience: 0,
+      gold: 0,
+      deaths: 0,
+      runs: 0,
+      lastArea: "",
+      ingameTick: 0,
+      gameName: "",
+      currentGame: "",
       nextGame: ""
     },
 
     create: function () {
-      FileAction.write("data/" + me.profile + ".json", JSON.stringify(this._default));
+      FileAction.write("data/" + me.profile + ".json", JSON.stringify(this._default, null, 2));
 
       return this._default;
+    },
+
+    /**
+     * @param {string} profile 
+     * @returns {DataFileObj | null}
+     */
+    read: function (profile) {
+      if (!profile) return null;
+      if (!FileTools.exists("data/" + profile + ".json")) return null;
+      let string = FileAction.read("data/" + profile + ".json");
+
+      try {
+        let obj = JSON.parse(string);
+        return obj;
+      } catch (e) {
+        console.error(e);
+
+        return null;
+      }
     },
 
     getObj: function () {
@@ -74,13 +94,16 @@ includeIfNotIncluded("oog/FileAction.js");
 
       let statArr = [];
 
-      typeof arg === "object" && (statArr = arg.slice());
-      typeof arg === "string" && statArr.push(arg);
+      if (Array.isArray(arg)) {
+        statArr = arg.slice();
+      } else if (typeof arg === "string") {
+        statArr.push(arg);
+      }
 
       let obj = this.getObj();
 
-      for (let i = 0; i < statArr.length; i += 1) {
-        switch (statArr[i]) {
+      for (let prop of statArr) {
+        switch (prop) {
         case "experience":
           obj.experience = me.getStat(sdk.stats.Experience);
           obj.level = me.getStat(sdk.stats.Level);
@@ -103,7 +126,11 @@ includeIfNotIncluded("oog/FileAction.js");
 
           break;
         case "name":
-          obj.name = me.name;
+          obj.name = me.charname;
+
+          break;
+        case "currentGame":
+          obj.currentGame = me.ingame ? me.gamename : "";
 
           break;
         case "ingameTick":
@@ -115,13 +142,13 @@ includeIfNotIncluded("oog/FileAction.js");
 
           break;
         default:
-          obj[statArr[i]] = value;
+          obj[prop] = value;
 
           break;
         }
       }
 
-      let string = JSON.stringify(obj);
+      let string = JSON.stringify(obj, null, 2);
 
       FileAction.write("data/" + me.profile + ".json", string);
     }
