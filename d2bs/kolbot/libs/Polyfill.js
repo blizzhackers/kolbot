@@ -187,6 +187,7 @@ if (!String.isEqual) {
    * @returns {boolean}
    */
   String.isEqual = function (str1, str2) {
+    if (typeof str1 !== "string" || typeof str2 !== "string") return false;
     return str1.toLowerCase() === str2.toLowerCase();
   };
 }
