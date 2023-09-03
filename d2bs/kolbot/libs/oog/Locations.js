@@ -217,6 +217,7 @@
         if (Starter.inGame || Starter.gameInfo.error) {
           !Starter.gameStart && (Starter.gameStart = DataFile.getStats().ingameTick);
 
+          DataFile.updateStats("currentGame", "");
           if (getTickCount() - Starter.gameStart < Starter.Config.MinGameTime * 1e3) {
             ControlAction.timeoutDelay("Min game time wait", Starter.Config.MinGameTime * 1e3 + Starter.gameStart - getTickCount());
           }
@@ -252,6 +253,7 @@
         Starter.lastGameStatus === "pending" && (Starter.gameCount += 1);
 
         if (Starter.inGame || Starter.gameInfo.error) {
+          DataFile.updateStats("currentGame", "");
           !Starter.gameStart && (Starter.gameStart = DataFile.getStats().ingameTick);
 
           if (getTickCount() - Starter.gameStart < Starter.Config.MinGameTime * 1e3) {
