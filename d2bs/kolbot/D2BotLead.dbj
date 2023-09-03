@@ -51,7 +51,26 @@ const locationAction = (function () {
 
 function main () {
   debugLog(me.profile);
-  addEventListener("copydata", Starter.receiveCopyData);
+
+  const Worker = require("./libs/modules/Worker");
+  Worker.runInBackground.copyData = (function () {
+    const workBench = [];
+    addEventListener("copydata", function (mode, msg) {
+      workBench.push({ mode: mode, msg: msg });
+    });
+
+    return function () {
+      if (!workBench.length) return true;
+
+      while (workBench.length) {
+        const { mode, msg } = workBench.shift();
+        Starter.receiveCopyData(mode, msg);
+      }
+
+      return true;
+    };
+  })();
+  // addEventListener("copydata", Starter.receiveCopyData);
   addEventListener("scriptmsg", Starter.scriptMsgEvent);
 
   while (!Starter.handle) {
@@ -106,8 +125,7 @@ function main () {
           Starter.lastGameStatus = "ingame";
           Starter.inGame = true;
 
-          DataFile.updateStats("runs", Starter.gameCount);
-          DataFile.updateStats("ingameTick");
+          DataFile.updateStats(["runs", "ingameTick", "currentGame"], Starter.gameCount);
         }
 
         D2Bot.updateStatus(
