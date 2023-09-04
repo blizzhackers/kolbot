@@ -1047,6 +1047,7 @@ Object.defineProperties(me, {
     highestQuestDone: {
       get: function () {
         for (let i = sdk.quest.id.Respec; i >= sdk.quest.id.SpokeToWarriv; i--) {
+          if (!QuestData.has(i)) continue;
           if (QuestData.get(i).complete()) return i;
 
           // check if we've completed main part but not used our reward
