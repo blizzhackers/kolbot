@@ -126,7 +126,7 @@
           quit();
         } finally {
           while (me.ingame) {
-            delay(100);
+            delay(3);
           }
         }
 

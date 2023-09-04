@@ -59,9 +59,9 @@ const ClassAttack = {
     if (!unit) return Attack.Result.SUCCESS;
     Config.TeleSwitch && me.switchToPrimary();
     let gid = unit.gid;
-    let needRepair = Town.needRepair();
+    let needRepair = me.needRepair();
 
-    if ((Config.MercWatch && Town.needMerc()) || needRepair.length > 0) {
+    if ((Config.MercWatch && me.needMerc()) || needRepair.length > 0) {
       print("towncheck");
 
       if (Town.visitTown(!!needRepair.length)) {
@@ -134,7 +134,7 @@ const ClassAttack = {
         }
         if (!unit) return Attack.Result.SUCCESS;
 
-        if (Town.needMerc()) {
+        if (me.needMerc()) {
           if (Config.MercWatch && mercRevive++ < 1) {
             Town.visitTown();
           } else {
@@ -170,7 +170,7 @@ const ClassAttack = {
   afterAttack: function () {
     Precast.doPrecast(false);
 
-    let needRepair = (Town.needRepair() || []);
+    let needRepair = (me.needRepair() || []);
 
     // Repair check, mainly to restock arrows
     needRepair.length > 0 && Town.visitTown(true);

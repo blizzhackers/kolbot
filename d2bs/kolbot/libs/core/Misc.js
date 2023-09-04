@@ -593,7 +593,7 @@ const Misc = {
 
     if (Config.TownCheck && !me.inTown) {
       try {
-        if (me.needPotions() || (Config.OpenChests.Enabled && Town.needKeys())) {
+        if (me.needPotions() || (Config.OpenChests.Enabled && me.needKeys())) {
           check = true;
         }
       } catch (e) {
@@ -650,7 +650,7 @@ const Misc = {
     let stackLog = "";
 
     let date = new Date();
-    let dateString = "[" + new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
+    const dateString = "[" + new Date(date.getTime() - (date.getTimezoneOffset() * 60000))
       .toISOString().slice(0, -5).replace(/-/g, "/").replace("T", " ") + "]";
 
     if (typeof error === "string") {
@@ -660,8 +660,10 @@ const Misc = {
     } else {
       source = error.fileName.substring(error.fileName.lastIndexOf("\\") + 1, error.fileName.length);
       msg = "ÿc1Error in ÿc0" + script + " ÿc1(" + source + " line ÿc1" + error.lineNumber + "): ÿc1" + error.message;
-      oogmsg = " Error in " + script + " (" + source + " #" + error.lineNumber + ") " + error.message
-        + " (Area: " + me.area + ", Ping:" + me.ping + ", Game: " + me.gamename + ")";
+      oogmsg = (
+        "Error in " + script + " (" + source + " #" + error.lineNumber + ") " + error.message
+        + " (Area: " + me.area + ", Ping:" + me.ping + ", Game: " + me.gamename + ")"
+      );
       filemsg = dateString + " <" + me.profile + "> " + msg.replace(/ÿc[0-9!"+<:;.*]/gi, "") + "\n";
 
       if (error.hasOwnProperty("stack")) {

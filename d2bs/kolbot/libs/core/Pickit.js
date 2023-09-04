@@ -404,7 +404,8 @@ const Pickit = {
           continue;
         }
       } else {
-        if (item.distance > (Config.FastPick || i < 1 ? 6 : 4) || checkCollision(me, item, sdk.collision.BlockWall)) {
+        if (item.distance > (Config.FastPick || i < 1 ? 6 : 4)
+          || checkCollision(me, item, sdk.collision.BlockWall)) {
           if (!Pather.moveToEx(item.x, item.y, { retry: 3, allowPicking: false, minDist: 4 })) {
             continue;
           }
@@ -446,7 +447,7 @@ const Pickit = {
         if (!item.onGroundOrDropping) {
           switch (stats.classid) {
           case sdk.items.Key:
-            console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc7(" + Town.checkKeys() + "/12)");
+            console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc7(" + me.checkKeys() + "/12)");
 
             return true;
           case sdk.items.ScrollofTownPortal:
@@ -577,7 +578,7 @@ const Pickit = {
     if (Pickit.pickList.some(function (el) {
       return _pots.includes(el.itemType);
     })) {
-      Town.clearBelt();
+      me.clearBelt();
     }
 
     while (Pickit.pickList.length > 0) {

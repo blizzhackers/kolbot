@@ -5,12 +5,12 @@
 *
 */
 
-function main() {
+function main () {
   include("critical.js");	// required
   D2Bot.init();
   console.log("Heartbeat loaded");
 
-  function togglePause() {
+  function togglePause () {
     let script = getScript();
 
     if (script) {
@@ -31,7 +31,7 @@ function main() {
   }
 
   // Event functions
-  function KeyEvent(key) {
+  function KeyEvent (key) {
     switch (key) {
     case sdk.keys.PauseBreak:
       if (me.ingame) {

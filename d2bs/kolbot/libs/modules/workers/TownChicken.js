@@ -325,7 +325,7 @@
         if (!Config.TownCheck) return true;
         // can we chicken?
         if (!me.canTpToTown()) return true;
-        if (me.needBeltPots() || (Config.OpenChests.Enabled && Town.needKeys())) {
+        if (me.needBeltPots() || (Config.OpenChests.Enabled && me.needKeys())) {
           shouldChicken = true;
         }
       }

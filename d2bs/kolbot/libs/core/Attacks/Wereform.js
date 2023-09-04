@@ -31,7 +31,7 @@ const ClassAttack = (function () {
       if (!unit) return Attack.Result.SUCCESS;
       let gid = unit.gid;
 
-      if (Config.MercWatch && Town.needMerc()) {
+      if (Config.MercWatch && me.needMerc()) {
         console.debug("mercwatch");
 
         if (Town.visitTown()) {

@@ -60,8 +60,8 @@ let Config = {
       }
     } else {
       if (notify) {
-        print("ÿc1" + className + "." + me.charname + ".js not found!"); // Use the primary format
-        print("ÿc1Loading default config.");
+        console.log("ÿc1" + className + "." + me.charname + ".js not found!"); // Use the primary format
+        console.log("ÿc1Loading default config.");
       }
 
       // Try to find default config
@@ -74,6 +74,7 @@ let Config = {
         if (!include("config/" + className + ".js")) {
           throw new Error();
         }
+        Config._defaultLoaded = true;
       } catch (e) {
         throw new Error("ÿc1Failed to load default config.");
       }
@@ -84,7 +85,7 @@ let Config = {
       Config.Loaded = true;
     } catch (e2) {
       if (notify) {
-        // print("ÿc8Error in " + e2.fileName.substring(e2.fileName.lastIndexOf("\\") + 1, e2.fileName.length) + "(line " + e2.lineNumber + "): " + e2.message);
+        // console.log("ÿc8Error in " + e2.fileName.substring(e2.fileName.lastIndexOf("\\") + 1, e2.fileName.length) + "(line " + e2.lineNumber + "): " + e2.message);
         console.error(e2);
 
         throw new Error("Config.init: Error in character config.");
@@ -94,7 +95,7 @@ let Config = {
     if (Config.Silence && !Config.LocalChat.Enabled) {
       // Override the say function with print, so it just gets printed to console
       global._say = global.say;
-      global.say = (what) => print("Tryed to say: " + what);
+      global.say = (what) => console.log("Tryed to say: " + what);
     }
 
     try {
@@ -102,12 +103,13 @@ let Config = {
         AutoBuild.initialize();
       }
     } catch (e3) {
-      print("ÿc8Error in libs/core/AutoBuild.js (AutoBuild system is not active!)");
+      console.log("ÿc8Error in libs/core/AutoBuild.js (AutoBuild system is not active!)");
       console.error(e3);
     }
   },
 
   // dev
+  _defaultLoaded: false,
   Loaded: false,
   DebugMode: {
     Path: false,
@@ -556,6 +558,11 @@ let Config = {
   BoBarbHelper: {
     Mode: -1,
     Wp: 35
+  },
+  Idle: {
+    Advertise: false,
+    AdvertiseMessage: "",
+    MaxGameLength: 0,
   },
   ControlBot: {
     Bo: false,

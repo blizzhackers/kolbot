@@ -717,7 +717,7 @@ function Follower () {
   const pickPotions = function (range = 5) {
     if (me.dead) return false;
 
-    Town.clearBelt();
+    me.clearBelt();
 
     while (!me.idle) {
       delay(40);

@@ -159,7 +159,7 @@ const TextHooks = {
 
       break;
     case "nextAct":
-      me.inTown && Pather.accessToAct(me.act + 1) && this.qolHooks.push({
+      me.inTown && me.accessToAct(me.act + 1) && this.qolHooks.push({
         name: "Next Act",
         dest: me.act + 1,
         type: "actChange",

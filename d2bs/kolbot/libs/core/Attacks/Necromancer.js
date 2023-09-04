@@ -137,7 +137,7 @@ const ClassAttack = {
     let [timedSkill, untimedSkill, customCurse] = [-1, -1, -1];
     const index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 
-    if (Config.MercWatch && Town.needMerc()) {
+    if (Config.MercWatch && me.needMerc()) {
       print("mercwatch");
 
       if (Town.visitTown()) {
@@ -252,7 +252,7 @@ const ClassAttack = {
         }
         if (!unit) return Attack.Result.SUCCESS;
 
-        if (Town.needMerc()) {
+        if (me.needMerc()) {
           if (Config.MercWatch && mercRevive++ < 1) {
             Town.visitTown();
           } else {

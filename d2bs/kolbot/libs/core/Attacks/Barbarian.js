@@ -20,9 +20,9 @@ const ClassAttack = {
     if (!unit) return Attack.Result.SUCCESS;
     Config.TeleSwitch && me.switchToPrimary();
     let gid = unit.gid;
-    let needRepair = Town.needRepair();
+    let needRepair = me.needRepair();
 
-    if ((Config.MercWatch && Town.needMerc()) || needRepair.length > 0) {
+    if ((Config.MercWatch && me.needMerc()) || needRepair.length > 0) {
       print("towncheck");
 
       if (Town.visitTown(!!needRepair.length)) {
@@ -92,7 +92,7 @@ const ClassAttack = {
   afterAttack: function (pickit = true) {
     Precast.doPrecast(false);
 
-    let needRepair = (Town.needRepair() || []);
+    let needRepair = (me.needRepair() || []);
 
     // Repair check
     needRepair.length > 0 && Town.visitTown(true);

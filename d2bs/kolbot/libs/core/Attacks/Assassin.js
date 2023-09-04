@@ -19,7 +19,7 @@ const ClassAttack = {
     Config.TeleSwitch && me.switchToPrimary();
     let gid = unit.gid;
 
-    if (Config.MercWatch && Town.needMerc()) {
+    if (Config.MercWatch && me.needMerc()) {
       print("mercwatch");
 
       if (Town.visitTown()) {
@@ -140,7 +140,7 @@ const ClassAttack = {
         }
         if (!unit) return Attack.Result.SUCCESS;
 
-        if (Town.needMerc()) {
+        if (me.needMerc()) {
           if (Config.MercWatch && mercRevive++ < 1) {
             Town.visitTown();
           } else {

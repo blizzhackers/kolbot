@@ -18,7 +18,7 @@ const ClassAttack = {
     Config.TeleSwitch && me.switchToPrimary();
     let gid = unit.gid;
 
-    if (Config.MercWatch && Town.needMerc()) {
+    if (Config.MercWatch && me.needMerc()) {
       print("mercwatch");
 
       if (Town.visitTown()) {
@@ -114,7 +114,7 @@ const ClassAttack = {
         }
         if (!unit) return Attack.Result.SUCCESS;
 
-        if (Town.needMerc()) {
+        if (me.needMerc()) {
           if (Config.MercWatch && mercRevive++ < 1) {
             Town.visitTown();
           } else {
@@ -320,10 +320,15 @@ const ClassAttack = {
     return false;
   },
 
+  /**
+   * @param {Monster | Player} unit 
+   * @returns {boolean}
+   */
   getHammerPosition: function (unit) {
-    let x, y, positions, baseId = getBaseStat("monstats", unit.classid, "baseid");
+    let x, y, positions;
+    const canTele = Pather.canTeleport();
+    const baseId = getBaseStat("monstats", unit.classid, "baseid");
     let size = getBaseStat("monstats2", baseId, "sizex");
-    let canTele = Pather.canTeleport();
 
     // in case base stat returns something outrageous
     (typeof size !== "number" || size < 1 || size > 3) && (size = 3);
@@ -361,29 +366,33 @@ const ClassAttack = {
     for (let i = 0; i < positions.length; i += 1) {
       let check = { x: positions[i][0], y: positions[i][1] };
 
-      if (Attack.validSpot(check.x, check.y) && !CollMap.checkColl(unit, check, sdk.collision.BlockWalk, 0)) {
+      if (Attack.validSpot(check.x, check.y)
+        && !CollMap.checkColl(unit, check, sdk.collision.BlockWalk, 0)) {
         if (this.reposition(check.x, check.y)) return true;
       }
     }
 
-    console.debug("Failed to find a hammer position for " + unit.name + " distance from me: " + unit.distance);
+    // console.debug("Failed to find a hammer position for " + unit.name + " distance from me: " + unit.distance);
 
     return false;
   },
 
   reposition: function (x, y) {
     if (typeof x !== "number" || typeof y !== "number") return false;
-    if ([x, y].distance > 0) {
+    const node = { x: x, y: y };
+    if (node.distance > 0) {
       if (Pather.useTeleport()) {
-        [x, y].distance > 30 ? Pather.moveTo(x, y) : Pather.teleportTo(x, y, 3);
+        node.distance > 30
+          ? Pather.moveTo(x, y)
+          : Pather.teleportTo(x, y, 3);
       } else {
-        if ([x, y].distance <= 4) {
+        if (node.distance <= 4) {
           Misc.click(0, 0, x, y);
-        } else if (!CollMap.checkColl(me, { x: x, y: y }, sdk.collision.BlockWalk, 3)) {
+        } else if (!CollMap.checkColl(me, node, sdk.collision.BlockWalk, 3)) {
           Pather.walkTo(x, y);
         } else {
           // don't clear while trying to reposition
-          Pather.moveToEx(x, y, { clearSettings: { allowClearing: false } });
+          Pather.move(node, { clearSettings: { allowClearing: false } });
         }
 
         delay(200);

@@ -46,7 +46,7 @@ Pather.changeAct = function (act) {
     npcUnit = Game.getNPC(NPC[npc]);
     wp = Game.getObject("waypoint");
 
-    if (Pather.accessToAct(act)
+    if (me.accessToAct(act)
       && ((wp && !npcUnit)
         || (wp && npcUnit && getDistance(me, wp) < getDistance(me, npcUnit))
         || (Town.getDistance("waypoint") < Town.getDistance(NPC[npc])))) {
@@ -112,7 +112,7 @@ Pather.getWP = function (area, clearPath) {
           if (!getUIFlag(sdk.uiflags.Waypoint)) {
             if (wp.distance > 5 && Skill.useTK(wp) && j < 3) {
               wp.distance > 21 && Attack.getIntoPosition(wp, 20, sdk.collision.Ranged);
-              Skill.cast(sdk.skills.Telekinesis, sdk.skills.hand.Right, wp);
+              Packet.telekinesis(wp);
             } else if (wp.distance > 5 || !getUIFlag(sdk.uiflags.Waypoint)) {
               this.moveToUnit(wp) && Misc.click(0, 0, wp);
             }
@@ -350,8 +350,6 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
               this.recursion = true;
             }
           }
-
-          Misc.townCheck();
         }
       } else {
         if (Pather.stop) {
