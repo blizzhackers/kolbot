@@ -10,7 +10,7 @@ function Bonesaw () {
   Pather.useWaypoint(sdk.areas.GlacialTrail);
   Precast.doPrecast(true);
 
-  if (!Pather.moveToPreset(sdk.areas.GlacialTrail, sdk.unittype.Object, sdk.objects.LargeSparklyChest, 15, 15)) {
+  if (!Pather.moveToPresetObject(sdk.areas.GlacialTrail, sdk.objects.LargeSparklyChest, { offX: 15, offY: 15 })) {
     throw new Error("Failed to move to Bonesaw");
   }
 

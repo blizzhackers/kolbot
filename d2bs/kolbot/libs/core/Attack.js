@@ -324,9 +324,11 @@ const Attack = {
    */
   hurt: function (classId, percent) {
     if (!classId || !percent) return false;
-    let target = (typeof classId === "object"
+    const target = (typeof classId === "object"
       ? classId
-      : Misc.poll(() => Game.getMonster(classId), 2000, 100));
+      : Misc.poll(function () {
+        return Game.getMonster(classId);
+      }, 2000, 100));
 
     if (!target) {
       console.warn("Attack.hurt: Target not found");
@@ -1678,7 +1680,6 @@ const Attack = {
     /**
      * @todo If we've disabled tele for walking clear, allow use of tele specifically for repositioning
      */
-
     if (distance < 4 && (!unit.hasOwnProperty("mode") || !unit.dead)) {
       if (walk) {
         if (unit.distance > 8 || checkCollision(me, unit, coll)) {

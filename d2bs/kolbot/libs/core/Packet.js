@@ -236,39 +236,28 @@ const Packet = {
         .dword(tome.gid)
         .send();
     };
+    const idOnCursor = function () {
+      return getCursorType() === sdk.cursortype.Identify;
+    };
+    const unitIdentified = function () {
+      return unit.identified;
+    };
 
-    CursorLoop:
     for (let i = 0; i < 3; i += 1) {
       identify();
-      let tick = getTickCount();
-
-      while (getTickCount() - tick < 2000) {
-        if (getCursorType() === sdk.cursortype.Identify) {
-          break CursorLoop;
-        }
-
-        delay(10);
+      if (Misc.poll(idOnCursor, 2000, 10)) {
+        break;
       }
     }
 
-    if (getCursorType() !== sdk.cursortype.Identify) {
-      return false;
-    }
+    if (!idOnCursor()) return false;
 
     for (let i = 0; i < 3; i += 1) {
-      if (getCursorType() === sdk.cursortype.Identify) {
-        identify();
-      }
+      idOnCursor() && identify();
+      if (Misc.poll(unitIdentified, 2000, 10)) {
+        delay(25);
 
-      let tick = getTickCount();
-
-      while (getTickCount() - tick < 2000) {
-        if (unit.identified) {
-          delay(50);
-          return true;
-        }
-
-        delay(10);
+        return true;
       }
     }
 

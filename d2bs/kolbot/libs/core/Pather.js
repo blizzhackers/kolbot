@@ -300,7 +300,9 @@ const Pather = {
     // set settings.clearSettings equal to the now properly asssigned clearSettings
     settings.clearSettings = clearSettings;
 
-    !settings.allowClearing && settings.allowClearing !== undefined && (settings.clearSettings.allowClearing = false);
+    if (!settings.allowClearing && settings.allowClearing !== undefined) {
+      settings.clearSettings.allowClearing = false;
+    }
     (target instanceof PresetUnit) && (target = target.realCoords());
 
     if (settings.minDist > 3) {
@@ -545,7 +547,9 @@ const Pather = {
    */
   teleportTo: function (x, y, maxRange = 5) {
     for (let i = 0; i < 3; i += 1) {
-      Config.PacketCasting > 0 ? Packet.teleport(x, y) : Skill.cast(sdk.skills.Teleport, sdk.skills.hand.Right, x, y);
+      Config.PacketCasting > 0
+        ? Packet.teleport(x, y)
+        : Skill.cast(sdk.skills.Teleport, sdk.skills.hand.Right, x, y);
       let tick = getTickCount();
       let pingDelay = i === 0 ? 150 : me.getPingDelay();
 
@@ -1269,7 +1273,11 @@ const Pather = {
 
     const destName = targetArea ? getAreaName(targetArea) : targetArea;
     Pather.broadcastIntent(targetArea);
-    console.info(true, "ÿc7targetArea: ÿc0" + destName + " ÿc7myArea: ÿc0" + getAreaName(me.area), "useWaypoint");
+    console.info(
+      true,
+      "ÿc7targetArea: ÿc0" + destName + " ÿc7myArea: ÿc0" + getAreaName(me.area),
+      "useWaypoint"
+    );
 
     MainLoop:
     for (let i = 0; i < 12; i += 1) {
@@ -1510,13 +1518,18 @@ const Pather = {
 
     me.cancelUIFlags();
 
-    let preArea = me.area;
+    const preArea = me.area;
+    const changedArea = function () {
+      return me.area !== preArea;
+    };
 
     for (let i = 0; i < 10; i += 1) {
       if (me.dead) return false;
       i > 0 && me.inTown && Town.move("portalspot");
 
-      let portal = unit ? copyUnit(unit) : this.getPortal(targetArea, owner);
+      const portal = unit
+        ? copyUnit(unit)
+        : this.getPortal(targetArea, owner);
 
       if (portal) {
         if (portal.objtype === sdk.areas.DuranceofHateLvl3 && portal.getParent() !== me.name
@@ -1533,16 +1546,9 @@ const Pather = {
                 : Pather.moveNearUnit(portal, 20);
             }
             if (Packet.telekinesis(portal)) {
-              if (Misc.poll(function () {
-                if (me.area !== preArea) {
-                  Pather.lastPortalTick = getTickCount();
-                  delay(100);
-
-                  return true;
-                }
-
-                return false;
-              }, 500, 50)) {
+              if (Misc.poll(changedArea, 500, 50)) {
+                Pather.lastPortalTick = getTickCount();
+                delay(100);
                 return true;
               }
             }
@@ -1575,17 +1581,11 @@ const Pather = {
           }
         }
 
-        let tick = getTickCount();
+        if (Misc.poll(changedArea, 500, 3)) {
+          Pather.lastPortalTick = getTickCount();
+          delay(100);
 
-        while (getTickCount() - tick < 500) {
-          if (me.area !== preArea) {
-            Pather.lastPortalTick = getTickCount();
-            delay(100);
-
-            return true;
-          }
-
-          delay(10);
+          break;
         }
 
         i > 1 && Packet.flash(me.gid);
@@ -1714,22 +1714,7 @@ const Pather = {
    * @returns {boolean}
    */
   accessToAct: function (act) {
-    switch (act) {
-    // Act 1 is always accessible
-    case 1:
-      return true;
-      // For the other acts, check the "Able to go to Act *" quests
-    case 2:
-      return me.getQuest(sdk.quest.id.AbleToGotoActII, sdk.quest.states.Completed) === 1;
-    case 3:
-      return me.getQuest(sdk.quest.id.AbleToGotoActIII, sdk.quest.states.Completed) === 1;
-    case 4:
-      return me.getQuest(sdk.quest.id.AbleToGotoActIV, sdk.quest.states.Completed) === 1;
-    case 5:
-      return me.expansion && me.getQuest(sdk.quest.id.AbleToGotoActV, sdk.quest.states.Completed) === 1;
-    default:
-      return false;
-    }
+    return me.accessToAct(act);
   },
 
   /**
@@ -1744,7 +1729,9 @@ const Pather = {
       let preset = Game.getPresetObject(me.area, sdk.waypoints.Ids[i]);
 
       if (preset) {
-        Skill.haveTK ? Pather.moveNearUnit(preset, 20, clearPath) : Pather.moveToUnit(preset, 0, 0, clearPath);
+        Skill.haveTK
+          ? Pather.moveNearUnit(preset, 20, clearPath)
+          : Pather.moveToUnit(preset, 0, 0, clearPath);
 
         let wp = Game.getObject("waypoint");
 
