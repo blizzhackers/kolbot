@@ -78,13 +78,16 @@ me.findItems = function (id = -1, mode = -1, loc = false) {
 
 me.cancelUIFlags = function () {
   while (!me.gameReady) {
-    delay(25);
+    delay(3);
   }
 
   const flags = [
-    sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.SkillWindow, sdk.uiflags.NPCMenu,
-    sdk.uiflags.Waypoint, sdk.uiflags.Party, sdk.uiflags.Shop, sdk.uiflags.Quest, sdk.uiflags.Stash,
-    sdk.uiflags.Cube, sdk.uiflags.KeytotheCairnStonesScreen, sdk.uiflags.SubmitItem
+    sdk.uiflags.Inventory, sdk.uiflags.StatsWindow,
+    sdk.uiflags.SkillWindow, sdk.uiflags.NPCMenu,
+    sdk.uiflags.Waypoint, sdk.uiflags.Party,
+    sdk.uiflags.Shop, sdk.uiflags.Quest,
+    sdk.uiflags.Stash, sdk.uiflags.Cube,
+    sdk.uiflags.KeytotheCairnStonesScreen, sdk.uiflags.SubmitItem
   ];
 
   for (let i = 0; i < flags.length; i++) {
@@ -178,9 +181,115 @@ me.castingDuration = function (skillId, fcr = me.FCR, charClass = me.classid) {
 
 me.getWeaponQuantity = function (weaponLoc = sdk.body.RightArm) {
   let currItem = me.getItemsEx(-1, sdk.items.mode.Equipped)
-    .filter(i => i.bodylocation === weaponLoc)
+    .filter(function (i) {
+      return i.bodylocation === weaponLoc;
+    })
     .first();
   return !!currItem ? currItem.getStat(sdk.stats.Quantity) : 0;
+};
+
+me.clearBelt = function () {
+  let item = me.getItem(-1, sdk.items.mode.inBelt);
+  let clearList = [];
+
+  if (item) {
+    do {
+      switch (item.itemType) {
+      case sdk.items.type.HealingPotion:
+        if (Config.BeltColumn[item.x % 4] !== "hp") {
+          clearList.push(copyUnit(item));
+        }
+
+        break;
+      case sdk.items.type.ManaPotion:
+        if (Config.BeltColumn[item.x % 4] !== "mp") {
+          clearList.push(copyUnit(item));
+        }
+
+        break;
+      case sdk.items.type.RejuvPotion:
+        if (Config.BeltColumn[item.x % 4] !== "rv") {
+          clearList.push(copyUnit(item));
+        }
+
+        break;
+      case sdk.items.type.StaminaPotion:
+      case sdk.items.type.AntidotePotion:
+      case sdk.items.type.ThawingPotion:
+        clearList.push(copyUnit(item));
+      }
+    } while (item.getNext());
+
+    while (clearList.length > 0) {
+      let pot = clearList.shift();
+      (Storage.Inventory.CanFit(pot) && Storage.Inventory.MoveTo(pot)) || pot.interact();
+      delay(200);
+    }
+  }
+
+  return true;
+};
+
+me.cleanUpInvoPotions = function (beltSize) {
+  beltSize === undefined && (beltSize = Storage.BeltSize());
+  const beltMax = (beltSize * 4);
+  /**
+   * belt 4x4 locations
+   * 12 13 14 15
+   * 8  9  10 11
+   * 4  5  6  7
+   * 0  1  2  3
+   */
+  const beltCapRef = [(0 + beltMax), (1 + beltMax), (2 + beltMax), (3 + beltMax)];
+  // check if we have empty belt slots
+  const needCleanup = Storage.Belt.checkColumns(beltSize).some(slot => slot > 0);
+
+  if (needCleanup) {
+    const potsInInventory = me.getItemsEx()
+      .filter(function (p) {
+        return p.isInInventory
+          && [
+            sdk.items.type.HealingPotion,
+            sdk.items.type.ManaPotion,
+            sdk.items.type.RejuvPotion
+          ].includes(p.itemType);
+      })
+      .sort(function (a, b) {
+        return a.itemType - b.itemType;
+      });
+
+    if (potsInInventory.length > 0 && Config.DebugMode.Town) {
+      console.debug("We have potions in our invo, put them in belt before we perform townchicken check");
+    }
+    // Start interating over all the pots we have in our inventory
+    beltSize > 1 && potsInInventory.forEach(function (p) {
+      let moved = false;
+      // get free space in each slot of our belt
+      let freeSpace = Storage.Belt.checkColumns(beltSize);
+      for (let i = 0; i < 4 && !moved; i += 1) {
+        // checking that current potion matches what we want in our belt
+        if (freeSpace[i] > 0 && p.code && p.code.startsWith(Config.BeltColumn[i])) {
+          // Pick up the potion and put it in belt if the column is empty, and we don't have any other columns empty
+          // prevents shift-clicking potion into wrong column
+          if (freeSpace[i] === beltSize || freeSpace.some((spot) => spot === beltSize)) {
+            const x = freeSpace[i] === beltSize
+              ? i
+              : (beltCapRef[i] - (freeSpace[i] * 4));
+            Packet.placeInBelt(p, x);
+          } else {
+            clickItemAndWait(sdk.clicktypes.click.item.ShiftLeft, p.x, p.y, p.location);
+          }
+          Misc.poll(function () {
+            return !me.itemoncursor;
+          }, 300, 30);
+          moved = Storage.Belt.checkColumns(beltSize)[i] === freeSpace[i] - 1;
+        }
+        Cubing.cursorCheck();
+      }
+    });
+  }
+
+  return true;
 };
 
 me.needPotions = function () {
@@ -414,6 +523,101 @@ me.needHealing = function () {
 };
 
 /**
+ * @description Check if stashing is needed, based on character config
+ * @returns {boolean}
+ */
+me.needStash = function () {
+  if (Config.StashGold
+    && me.getStat(sdk.stats.Gold) >= Config.StashGold
+    && me.getStat(sdk.stats.GoldBank) < 25e5) {
+    return true;
+  }
+
+  return (Storage.Inventory.Compare(Config.Inventory) || [])
+    .some(function (item) {
+      return Storage.Stash.CanFit(item);
+    });
+};
+
+/**
+ * @description Check if reviving merc is needed, based on character config
+ * @returns {boolean}
+ */
+me.needMerc = function () {
+  if (me.classic || !Config.UseMerc || me.gold < me.mercrevivecost || me.mercrevivecost === 0) {
+    return false;
+  }
+
+  Misc.poll(function () {
+    return me.gameReady;
+  }, 1000, 100);
+  // me.getMerc() might return null if called right after taking a portal, that's why there's retry attempts
+  for (let i = 0; i < 3; i += 1) {
+    let merc = me.getMerc();
+
+    if (!!merc && !merc.dead) {
+      return false;
+    }
+
+    delay(100);
+  }
+
+  // In case we never had a merc and Config.UseMerc is still set to true for some odd reason
+  return true;
+};
+
+me.needRepair = function () {
+  const repairAction = [];
+  if (getInteractedNPC() && !getUIFlag(sdk.uiflags.Shop)) {
+    console.debug("Checking need repair: Currently at NPC");
+    // fix crash with d2bs
+    me.cancel();
+  }
+  const canAfford = me.gold >= me.getRepairCost();
+  const quiverType = { bow: "aqv", crossbow: "cqv" };
+
+  // Arrow/Bolt check
+  const bowCheck = Attack.usingBow();
+
+  if (bowCheck) {
+    let quiver;
+    if (quiverType[bowCheck]) {
+      quiver = me.getItem(quiverType[bowCheck], sdk.items.mode.Equipped);
+    }
+
+    if (!quiver) { // Out of arrows/bolts
+      repairAction.push("buyQuiver");
+    } else {
+      let quantity = quiver.getStat(sdk.stats.Quantity);
+
+      if (typeof quantity === "number"
+        && quantity * 100 / getBaseStat("items", quiver.classid, "maxstack") <= Config.RepairPercent) {
+        repairAction.push("buyQuiver");
+      }
+    }
+  }
+
+  // Repair durability/quantity/charges
+  if (canAfford) {
+    if (me.getItemsForRepair(Config.RepairPercent, true).length > 0) {
+      repairAction.push("repair");
+    }
+  } else {
+    console.warn("Can't afford repairs.");
+  }
+
+  return repairAction;
+};
+
+/**
+ * @description Check if buying keys is needed, based on character config
+ * @returns {boolean}
+ */
+me.needKeys = function () {
+  return me.checkKeys() <= 0;
+};
+
+/**
  * @param {number} id 
  * @returns {ItemUnit | null}
  */
@@ -428,6 +632,86 @@ me.getUnids = function () {
     .filter(function (item) {
       return item.isInInventory && !item.identified;
     });
+};
+
+/**
+ * @param {number} repairPercent 
+ * @param {boolean} chargedItems 
+ * @returns {ItemUnit[]}
+ */
+me.getItemsForRepair = function (repairPercent, chargedItems) {
+  let itemList = [];
+  let item = me.getItem(-1, sdk.items.mode.Equipped);
+
+  if (item) {
+    do {
+      // Skip ethereal items
+      if (item.ethereal) continue;
+      // Skip indestructible items
+      if (!item.getStat(sdk.stats.Indestructible)) {
+        switch (item.itemType) {
+        // Quantity check
+        case sdk.items.type.ThrowingKnife:
+        case sdk.items.type.ThrowingAxe:
+        case sdk.items.type.Javelin:
+        case sdk.items.type.AmazonJavelin:
+          let quantity = item.getStat(sdk.stats.Quantity);
+
+          // Stat 254 = increased stack size
+          if (typeof quantity === "number") {
+            let _maxStack = (getBaseStat("items", item.classid, "maxstack") + item.getStat(sdk.stats.ExtraStack));
+            if (quantity * 100 / _maxStack <= repairPercent) {
+              itemList.push(copyUnit(item));
+            }
+          }
+
+          break;
+          // Durability check
+        default:
+          if (item.durabilityPercent <= repairPercent) {
+            itemList.push(copyUnit(item));
+          }
+
+          break;
+        }
+      }
+
+      if (chargedItems) {
+        // Charged item check
+        let charge = item.getStat(-2)[sdk.stats.ChargedSkill];
+
+        if (typeof (charge) === "object") {
+          if (charge instanceof Array) {
+            for (let i = 0; i < charge.length; i += 1) {
+              if (charge[i] !== undefined && charge[i].hasOwnProperty("charges")
+                && charge[i].charges * 100 / charge[i].maxcharges <= repairPercent) {
+                itemList.push(copyUnit(item));
+              }
+            }
+          } else if (charge.charges * 100 / charge.maxcharges <= repairPercent) {
+            itemList.push(copyUnit(item));
+          }
+        }
+      }
+    } while (item.getNext());
+  }
+
+  return itemList;
+};
+
+me.checkKeys = function () {
+  if (!Config.OpenChests.Enabled || me.assassin || me.gold < 540
+    || (!me.getItem("key") && !Storage.Inventory.CanFit({ sizex: 1, sizey: 1 }))) {
+    return 12;
+  }
+
+  return me.getItemsEx()
+    .filter(function (item) {
+      return item.classid === sdk.items.Key && item.isInInventory;
+    })
+    .reduce(function (acc, curr) {
+      return acc + curr.getStat(sdk.stats.Quantity);
+    }, 0);
 };
 
 // Identify items while in the field if we have a id tome
