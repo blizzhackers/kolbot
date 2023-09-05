@@ -203,7 +203,9 @@
           !makePortal(true) && console.warn("Town.goToTown: Failed to make TP");
           if (!me.inTown && !usePortal(townArea, me.name)) {
             console.warn("Town.goToTown: Failed to take TP");
-            if (!me.inTown && !usePortal(sdk.areas.townOf(me.area))) throw new Error("Town.goToTown: Failed to take TP");
+            if (!me.inTown && !usePortal(sdk.areas.townOf(me.area))) {
+              throw new Error("Town.goToTown: Failed to take TP");
+            }
           }
         } catch (e) {
           let tpTool = me.getTpTool();
@@ -244,6 +246,21 @@
       return true;
     };
 
+    const threads = ["threads/antihostile.js", "threads/rushthread.js", "threads/CloneKilla.js"];
+    const togglePause = function () {
+      for (let thread of threads) {
+        let script = getScript(thread);
+
+        if (script) {
+          script.running
+            ? script.pause()
+            : script.resume();
+        }
+      }
+
+      return true;
+    };
+
     const visitTown = function () {
       console.log("ÿc8Start ÿc0:: ÿc8visitTown");
     
@@ -262,6 +279,8 @@
       me.cancelUIFlags();
       try {
         goToTown();
+        while (!me.area) delay (3);
+        if (!me.inTown) return false;
       } catch (e) {
         return false;
       }
@@ -334,6 +353,7 @@
         let t4 = getTickCount();
         try {
           _recursion = true;
+          togglePause();
           console.log("ÿc8(TownChicken) :: ÿc0Going to town");
           me.overhead("ÿc8(TownChicken) :: ÿc0Going to town");
           Attack.stopClear = true;
@@ -346,6 +366,7 @@
           return false;
         } finally {
           _recursion = false;
+          togglePause();
           Packet.flash(me.gid, 100);
           console.log("ÿc8(TownChicken) :: ÿc0Took: " + Time.format(getTickCount() - t4) + " to visit town.");
           [Attack.stopClear, townCheck] = [false, false];
