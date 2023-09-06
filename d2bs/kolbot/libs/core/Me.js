@@ -1030,6 +1030,17 @@ Object.defineProperties(me, {
     return me.highestAct >= act;
   };
 
+  /**
+   * Easier way to check if you have a waypoint
+   * @param {number} area 
+   * @returns {boolean}
+   */
+  me.haveWaypoint = function (area) {
+    let areaIndex = Pather.wpAreas.indexOf(area);
+    if (areaIndex === -1) return false;
+    return getWaypoint(areaIndex);
+  };
+
   Object.defineProperties(me, {
     highestAct: {
       get: function () {
