@@ -179,20 +179,6 @@ const locationAction = (function () {
       JoinLoop2:
       for (let i = 0; i < 5; i += 1) {
         for (let [leader, check] of tracker) {
-          if (getTickCount() - check.lastAsked < Time.minutes(5)) {
-            if (check.game) {
-              // alright so we've already asked this profile and recieved a game but we didn't want to join
-              // instead of asking them again and spamming copydata. Lets read their datafile and see if they
-              // are still in game. If they are we'll wait for them to leave and ask again. If they aren't we'll
-              // ask again immediately.
-              let data = DataFile.read(leader);
-              if (data && !!data.currentGame && String.isEqual(data.currentGame, check.game)) {
-                D2Bot.updateStatus("Waiting for " + leader + " to leave " + check.game);
-                delay(Time.seconds(i + 1));
-                continue;
-              }
-            }
-          }
           Starter.joinInfo = {};
           D2Bot.requestGame(leader);
           delay(100);
@@ -208,16 +194,17 @@ const locationAction = (function () {
           * and see if there is x amount of time left that makes it worth it vs waiting for next.
           */
           tracker.set(leader, { lastAsked: getTickCount(), game: Starter.joinInfo.gameName });
-          if (lastGame.indexOf(Starter.joinInfo.gameName) === -1 || Starter.lastGameStatus === "pending") {
+          if (lastGame.indexOf(Starter.joinInfo.gameName) === -1
+            || Starter.lastGameStatus === "pending") {
             Controls.JoinGameName.setText(Starter.joinInfo.gameName);
             Controls.JoinGamePass.setText(Starter.joinInfo.gamePass);
 
             if (Starter.lastGameStatus === "pending"
               || (Starter.gameInfo.error && DataFile.getStats().gameName === Starter.joinInfo.gameName)) {
               D2Bot.printToConsole("Failed to join game");
-              ControlAction.timeoutDelay("Join Delay", Starter.Config.JoinRetryDelay * 1000, joinCheck(leader[j]));
+              ControlAction.timeoutDelay("Join Delay", Starter.Config.JoinRetryDelay * 1000, joinCheck(leader));
               D2Bot.updateRuns();
-              D2Bot.requestGame(leader[j]);
+              D2Bot.requestGame(leader);
               delay(200);
 
               if (!Starter.joinInfo.inGame) {
@@ -228,9 +215,7 @@ const locationAction = (function () {
             }
 
             if (!Starter.joinInfo.inGame) {
-              if (Starter.joinInfo.delay) {
-                ControlAction.timeoutDelay("Leader Delay", Starter.joinInfo.delay);
-              }
+              ControlAction.timeoutDelay("Leader Delay", (Starter.joinInfo.delay || 1000) + Time.seconds(3));
               continue;
             }
 
@@ -255,7 +240,7 @@ const locationAction = (function () {
             lastGame.push(Starter.joinInfo.gameName);
 
             // Might need a fixed number. Right now it stores 1 game per leader.
-            lastGame.length > leader.length && lastGame.shift();
+            lastGame.length > tracker.size && lastGame.shift();
 
             Starter.lastGameStatus = "pending";
             Starter.locationTimeout(15000, location);
@@ -264,7 +249,10 @@ const locationAction = (function () {
           } else {
             // for now, if leader is in game and it's the last game we were in. delay to prevent copyData spam
             if (lastGame.includes(Starter.joinInfo.gameName)) {
-              delay((Starter.joinInfo.inGame ? 5000 : 2000));
+              ControlAction.timeoutDelay(
+                "Waiting for new game from " + leader,
+                Time.seconds((Starter.joinInfo.inGame ? 5 : 2) * (i + 1))
+              );
             }
           }
         }
