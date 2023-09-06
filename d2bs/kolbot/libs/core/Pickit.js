@@ -365,7 +365,7 @@ const Pickit = {
     if (!item) return false;
     if (!item.onGroundOrDropping) return false;
 
-    if (cancelFlags.some(function (flag) { return getUIFlag(flag); })) {
+    if (cancelFlags.some(getUIFlag)) {
       delay(500);
       me.cancel(0);
     }
@@ -376,7 +376,7 @@ const Pickit = {
       : Infinity;
 
     MainLoop:
-    for (let i = 0; i < retry; i += 1) {
+    for (let i = 0; i < retry; i++) {
       if (me.dead) return false;
       // recursion appeared
       if (this.track.lastItem === stats.gid) return true;
@@ -406,7 +406,7 @@ const Pickit = {
       } else {
         if (item.distance > (Config.FastPick || i < 1 ? 6 : 4)
           || checkCollision(me, item, sdk.collision.BlockWall)) {
-          if (!Pather.moveToEx(item.x, item.y, { retry: 3, allowPicking: false, minDist: 4 })) {
+          if (!Pather.move(item, { retry: 3, allowPicking: false, minDist: 4 })) {
             continue;
           }
           // we had to move, lets check to see if it's still there
@@ -568,6 +568,9 @@ const Pickit = {
     if (item) {
       do {
         if (Pickit.ignoreList.has(item.gid)) continue;
+        if (item.classid === sdk.items.Gold && item.distance <= 4 && Pickit.canPick(item)) {
+          if (Pickit.pickItem(item, Pickit.Result.WANTED, "gold", 1)) continue;
+        }
         if (Pickit.pickList.some(el => el.gid === item.gid)) continue;
         if (item.onGroundOrDropping && item.distance <= range) {
           Pickit.pickList.push(copyUnit(item));
@@ -599,6 +602,7 @@ const Pickit = {
         
         continue;
       }
+      const itemName = _item.prettyPrint;
 
       // Check if the item unit is still valid and if it's on ground or being dropped
       // Don't pick items behind walls/obstacles when walking
@@ -661,7 +665,7 @@ const Pickit = {
           if (canFit) {
             let picked = this.pickItem(_item, status.result, status.line);
             if (!picked) {
-              console.warn("Failed to pick item " + _item.prettyPrint);
+              console.warn("Failed to pick item " + itemName);
 
               break;
             }
