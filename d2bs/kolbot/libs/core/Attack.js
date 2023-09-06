@@ -256,7 +256,13 @@ const Attack = {
     let lastLoc = { x: me.x, y: me.y };
     let tick = getTickCount();
     console.log("ÿc7Kill ÿc0:: " + who);
-    Config.MFLeader && Pather.makePortal() && say("kill " + classId);
+    if (Config.MFLeader
+      // mfhelper is disabled for these scripts so announcing is pointless
+      && !Loader.scriptName(0).toLowerCase().includes("diablo")
+      && !Loader.scriptName(0).toLowerCase().includes("baal")
+      && Pather.makePortal()) {
+      say("kill " + classId);
+    }
 
     while (attackCount < Config.MaxAttackCount && target.attackable && !this.skipCheck(target)) {
       // Check if unit got invalidated, happens if necro raises a skeleton from the boss's corpse.
@@ -458,7 +464,12 @@ const Attack = {
       }
 
       ({ orgx, orgy } = { orgx: boss.x, orgy: boss.y });
-      if (Config.MFLeader && !!bossId && Pather.makePortal()) {
+      if (Config.MFLeader
+        && !!bossId
+        // mfhelper is disabled for these scripts so announcing is pointless
+        && !Loader.scriptName(0).toLowerCase().includes("diablo")
+        && !Loader.scriptName(0).toLowerCase().includes("baal")
+        && Pather.makePortal()) {
         say("clear " + (["number", "string"].includes(typeof bossId) ? bossId : bossId.name));
       }
     } else {

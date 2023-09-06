@@ -1244,7 +1244,11 @@ const Pather = {
    * @param {number} targetArea - area id
    */
   broadcastIntent: function broadcastIntent (targetArea) {
-    if (Config.MFLeader && Pather.allowBroadcast) {
+    if (Config.MFLeader
+      && Pather.allowBroadcast
+      // mfhelper is disabled for these scripts so announcing is pointless
+      && !Loader.scriptName(0).toLowerCase().includes("diablo")
+      && !Loader.scriptName(0).toLowerCase().includes("baal")) {
       let targetAct = sdk.areas.actOf(targetArea);
       me.act !== targetAct && say("goto A" + targetAct);
     }
