@@ -374,7 +374,7 @@ function LoadConfig () {
   Config.AutoMap = false; // Set to true to open automap at the beginning of the game.
   Config.WaypointMenu = true; // open waypoint menu, if set to false will use packets to interact
   Config.MinGameTime = 60; // Min game time in seconds. Bot will TP to town and stay in game if the run is completed before.
-  Config.MaxGameTime = 0; // Maximum game time in seconds. Quit game when limit is reached.
+  Config.MaxGameTime = 0; // Maximum game time in minutes. Quit game when limit is reached.
   Config.LogExperience = false; // Print experience statistics in the manager.
 
   // Chicken settings
@@ -589,7 +589,7 @@ function LoadConfig () {
    * Can use monster name or classid
    * Format: Config.CustomCurse = [["monstername", skillid], [156, skillid]];
    * Optional 3rd parameter for spectype, leave blank to use on all
-     0x00    Normal Monster
+    0x00    Normal Monster
     0x01    Super Unique
     0x02    Champion
     0x04    Boss

@@ -217,9 +217,13 @@
         if (Starter.inGame || Starter.gameInfo.error) {
           !Starter.gameStart && (Starter.gameStart = DataFile.getStats().ingameTick);
 
+          Starter.isUp = "no";
           DataFile.updateStats("currentGame", "");
           if (getTickCount() - Starter.gameStart < Starter.Config.MinGameTime * 1e3) {
-            ControlAction.timeoutDelay("Min game time wait", Starter.Config.MinGameTime * 1e3 + Starter.gameStart - getTickCount());
+            ControlAction.timeoutDelay(
+              "Min game time wait",
+              Starter.Config.MinGameTime * 1e3 + Starter.gameStart - getTickCount()
+            );
           }
         }
 

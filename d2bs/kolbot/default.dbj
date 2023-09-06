@@ -140,7 +140,7 @@ function main () {
     return true;
   }
 
-  me.maxgametime = Config.MaxGameTime * 1000;
+  me.maxgametime = Time.minutes(Config.MaxGameTime);
   let stats = DataFile.getStats();
 
   // Check for experience decrease -> log death. Skip report if life chicken is disabled.
