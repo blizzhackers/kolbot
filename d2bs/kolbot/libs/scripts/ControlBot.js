@@ -441,6 +441,11 @@ function ControlBot () {
     let tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.items.mode.inStorage, sdk.storage.Inventory);
 
     if (tpTome.length < 2) {
+      if (!Storage.Inventory.CanFit({ sizex: 1, sizey: 2 })) {
+        if (tpTome.length === 1) {
+          return tpTome.first();
+        }
+      }
       let npc = Town.initNPC("Shop", "buyTpTome");
       if (!getInteractedNPC()) throw new Error("Failed to find npc");
 
@@ -499,6 +504,11 @@ function ControlBot () {
 
     let leg = getLeg();
     if (!leg) return false;
+    if (!Storage.Inventory.CanFit({ sizex: 1, sizey: 2 })) {
+      // we don't have any space, put the leg in the stash to make room in invo
+      Storage.Stash.MoveTo(leg);
+      me.cancelUIFlags();
+    }
 
     let tome = getTome();
     if (!tome) return false;
