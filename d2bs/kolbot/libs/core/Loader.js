@@ -130,12 +130,12 @@ const Loader = {
           }
 
           if (this.skipTown.includes(script) || Town.goToTown()) {
-            print("ÿc2Starting script: ÿc9" + script);
+            console.log("ÿc2Starting script: ÿc9" + script);
             Messaging.sendToScript("threads/toolsthread.js", JSON.stringify({ currScript: script }));
             reconfiguration = typeof Scripts[script] === "object";
 
             if (reconfiguration) {
-              print("ÿc2Copying Config properties from " + script + " object.");
+              console.log("ÿc2Copying Config properties from " + script + " object.");
               this.copy(Scripts[script], Config);
             }
 
@@ -184,7 +184,7 @@ const Loader = {
           }
           
           if (reconfiguration) {
-            print("ÿc2Reverting back unmodified config properties.");
+            console.log("ÿc2Reverting back unmodified config properties.");
             this.copy(unmodifiedConfig, Config);
           }
         }
@@ -226,19 +226,22 @@ const Loader = {
         if (this.skipTown.includes(script) || Town.goToTown()) {
           let mainScriptStr = (mainScript !== script ? buildScriptMsg() : "");
           this.tempList.push(script);
-          print(mainScriptStr + "ÿc2Starting script: ÿc9" + script);
+          console.log(mainScriptStr + "ÿc2Starting script: ÿc9" + script);
           Messaging.sendToScript("threads/toolsthread.js", JSON.stringify({ currScript: script }));
 
           reconfiguration = typeof Scripts[script] === "object";
 
           if (reconfiguration) {
-            print("ÿc2Copying Config properties from " + script + " object.");
+            console.log("ÿc2Copying Config properties from " + script + " object.");
             this.copy(Scripts[script], Config);
           }
 
           if (typeof configOverride === "function") {
             reconfiguration = true;
             configOverride();
+          } else if (typeof configOverride === "object") {
+            reconfiguration = true;
+            this.copy(configOverride, Config);
           }
 
           let tick = getTickCount();
@@ -278,7 +281,7 @@ const Loader = {
         this.tempList.pop();
         
         if (reconfiguration) {
-          print("ÿc2Reverting back unmodified config properties.");
+          console.log("ÿc2Reverting back unmodified config properties.");
           this.copy(unmodifiedConfig, Config);
         }
       }
@@ -287,6 +290,11 @@ const Loader = {
     return !failed;
   },
 
+  /**
+   * Get script name by index
+   * @param {number} [offset] 
+   * @returns {string}
+   */
   scriptName: function (offset = 0) {
     let index = this.scriptIndex + offset;
 
@@ -294,6 +302,6 @@ const Loader = {
       return this.scriptList[index];
     }
 
-    return null;
+    return "";
   }
 };
