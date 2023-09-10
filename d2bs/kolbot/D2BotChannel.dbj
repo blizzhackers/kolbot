@@ -80,6 +80,31 @@ const locationAction = (function () {
     return messageQueue.length > preLen;
   };
 
+  /** @param {string} game */
+  const exclude = function (game) {
+    // No filters
+    if (!ChannelConfig.excludeFilter.length) return false;
+
+    for (let filterSet of ChannelConfig.excludeFilter) {
+      let conditionsMatched = true;
+
+      for (let condition of filterSet) {
+        // Break the inner loop if an element didn't match or if an element is invalid
+        if (!condition || !game.match(condition, "gi")) {
+          conditionsMatched = false;
+          break;
+        }
+      }
+
+      // All elements matched
+      if (conditionsMatched) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
   let lastText;
   let channelTick = getTickCount();
   let fListTick = 0;
@@ -226,6 +251,7 @@ const locationAction = (function () {
             // check if this is a game we are looking for - what about just following the friend in all games that are not private?
             for (let gInfo of ChannelConfig.Games) {
               if (gameName.match(gInfo.game, "gi")
+                && !exclude(gameName)
                 && !String.isEqual(gameName, joinInfo.oldGame)
                 && !badGames.has(gameName)) {
                 // check if the game is private
@@ -278,7 +304,7 @@ const locationAction = (function () {
         let [, gameName, gamePass] = match;
 
         // double check that this is a valid game name
-        if (gameName.length > 15 || badGames.has(gameName)) continue;
+        if (gameName.length > 15 || badGames.has(gameName) || exclude(gameName)) continue;
 
         // handle following player names
         if (ChannelConfig.Follow.length > 0) {
@@ -310,7 +336,7 @@ const locationAction = (function () {
           if (game === "") continue;
           if (!gameName.toLowerCase().includes(game.toLowerCase())) continue;
           // alright so this gamename is one we were looking for, lets confirm it is not a bad game
-          if (badGames.has(gameName)) continue;
+          if (badGames.has(gameName) || exclude(gameName)) continue;
           // alright so this is a game we want to join, lets set the game name and password
           console.log("Joining game: " + gameName + "//" + gamePass);
           // wait for the player to leave the channel

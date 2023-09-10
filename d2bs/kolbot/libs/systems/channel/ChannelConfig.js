@@ -28,6 +28,21 @@
       { game: "", password: "" },
     ],
     /**
+     * @description excludeFilter format
+     * @example <caption>Multiple entries in the same array mean AND</caption>
+     *  // ignores games that contain "baal" and "-"
+     *  const includeFilter = ["baal", "-"];
+     * 
+     * @example <caption>Multiple entries in different arrays mean OR</caption>
+     *  // will ignore games with either "baal" or "diablo" in their name
+     *  const includeFilter = [
+     *    ["baal"],
+     *    ["diablo"]
+     *  ];
+     * @type {Array<Array<string>>}
+     */
+    excludeFilter: [],
+    /**
     * Leaders in game character name, only use this if the leader is using announce in the chat.
     * Can be an array or names ["somename", "somename2"]
     * @type {string[]}
