@@ -254,9 +254,9 @@ const ClassAttack = {
           }
 
           if (attempted && !invalidated && corpse && !corpse.getState(sdk.states.CorpseNoSelect)) {
-            if (!me.inArea(sdk.areas.ThroneofDestruction)) {
-              D2Bot.printToConsole("Failed to hork " + JSON.stringify(corpse) + " at " + getAreaName(me.area));
-            }
+            // if (!me.inArea(sdk.areas.ThroneofDestruction)) {
+            //   D2Bot.printToConsole("Failed to hork " + JSON.stringify(corpse) + " at " + getAreaName(me.area));
+            // }
             console.debug("Failed to hork " + JSON.stringify(corpse) + " at " + getAreaName(me.area));
           }
         }
