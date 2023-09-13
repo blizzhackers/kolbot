@@ -449,12 +449,15 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   isEquipped: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.location === sdk.storage.Equipped;
     }
   },
   isEquippedCharm: {
+    // todo - fix this for storage checks
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return (this.location === sdk.storage.Inventory
@@ -462,24 +465,28 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   isInInventory: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.location === sdk.storage.Inventory && this.mode === sdk.items.mode.inStorage;
     }
   },
   isInStash: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.location === sdk.storage.Stash && this.mode === sdk.items.mode.inStorage;
     }
   },
   isInCube: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.location === sdk.storage.Cube && this.mode === sdk.items.mode.inStorage;
     }
   },
   isInStorage: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.mode === sdk.items.mode.inStorage
@@ -487,6 +494,7 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   isInBelt: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.location === sdk.storage.Belt && this.mode === sdk.items.mode.inBelt;
@@ -519,6 +527,7 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   identified: {
+    /** @this {ItemUnit} */
     get: function () {
       // Can't tell, as it isn't an item
       if (this.type !== sdk.unittype.Item) return undefined;
@@ -527,6 +536,7 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   ethereal: {
+    /** @this {ItemUnit} */
     get: function () {
       // Can't tell, as it isn't an item
       if (this.type !== sdk.unittype.Item) return undefined;
@@ -534,29 +544,34 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   twoHanded: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return getBaseStat("items", this.classid, "2handed") === 1;
     }
   },
   oneOrTwoHanded: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return getBaseStat("items", this.classid, "1or2handed") === 1;
     }
   },
   strictlyTwoHanded: {
+    /** @this {ItemUnit} */
     get: function () {
       return this.twoHanded && !this.oneOrTwoHanded;
     }
   },
   runeword: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return !!this.getFlag(sdk.items.flags.Runeword);
     }
   },
   questItem: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return (this.itemType === sdk.items.type.Quest
@@ -570,6 +585,7 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   sellable: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       if (this.getItemCost(sdk.items.cost.ToSell) <= 1) return false;
@@ -585,84 +601,105 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   lowquality: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.quality === sdk.items.quality.LowQuality;
     },
   },
   normal: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.quality === sdk.items.quality.Normal;
     },
   },
   superior: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.quality === sdk.items.quality.Superior;
     },
   },
   magic: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.quality === sdk.items.quality.Magic;
     },
   },
   set: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.quality === sdk.items.quality.Set;
     },
   },
   rare: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.quality === sdk.items.quality.Rare;
     },
   },
   unique: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.quality === sdk.items.quality.Unique;
     },
   },
   crafted: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.quality === sdk.items.quality.Crafted;
     },
   },
   sockets: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.getStat(sdk.stats.NumSockets);
     },
   },
   onGroundOrDropping: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return (this.mode === sdk.items.mode.onGround || this.mode === sdk.items.mode.Dropping);
     },
   },
   isShield: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return [sdk.items.type.Shield, sdk.items.type.AuricShields, sdk.items.type.VoodooHeads].includes(this.itemType);
     },
   },
+  isCharm: {
+    /** @this {ItemUnit} */
+    get: function () {
+      if (this.type !== sdk.unittype.Item) return false;
+      return [sdk.items.SmallCharm, sdk.items.LargeCharm, sdk.items.GrandCharm].includes(this.classid);
+    }
+  },
   isAnni: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.unique && this.itemType === sdk.items.type.SmallCharm;
     },
   },
   isTorch: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.unique && this.itemType === sdk.items.type.LargeCharm;
     },
   },
   isGheeds: {
+    /** @this {ItemUnit} */
     get: function () {
       if (this.type !== sdk.unittype.Item) return false;
       return this.unique && this.itemType === sdk.items.type.GrandCharm;
