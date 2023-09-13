@@ -330,7 +330,7 @@ const ItemHooks = (function () {
         break;
       case sdk.items.quality.Set:
       case sdk.items.quality.Unique:
-        ({ color, code } = this.itemColorCode[item.quality]);
+        ({ color, code } = itemColorCode[item.quality]);
 
         if (codeById.has(item.classid)) {
           code += codeById.get(item.classid);
@@ -355,7 +355,7 @@ const ItemHooks = (function () {
       case sdk.items.quality.Magic:
       case sdk.items.quality.Rare:
         if (item.name) {
-          ({ color, code } = this.itemColorCode[item.quality]);
+          ({ color, code } = itemColorCode[item.quality]);
 
           code += (item.sockets > 0 ? "[" + item.sockets + "]" : "");
           code += this.getName(item);
