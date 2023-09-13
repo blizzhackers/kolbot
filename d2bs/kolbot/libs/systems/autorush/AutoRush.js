@@ -85,9 +85,12 @@
     Pather.usePortal(1) || Town.goToTown();
     Pather.useWaypoint(sdk.areas.StonyField, true);
     Precast.doPrecast(true);
-    Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Monster, sdk.monsters.preset.Rakanishu, 10, 10, false, true);
-    Attack.securePosition(me.x, me.y, 40, 3000, true);
-    Pather.moveToPreset(sdk.areas.StonyField, sdk.unittype.Object, sdk.quest.chest.StoneAlpha, null, null, true);
+    Pather.moveToPresetMonster(sdk.areas.StonyField, sdk.monsters.preset.Rakanishu, {
+      offX: 10, offY: 10, pop: true
+    });
+    const StoneAlpha = Game.getObject(sdk.quest.chest.StoneAlpha);
+    Attack.securePosition(StoneAlpha.x, StoneAlpha.y, 40, 3000, true);
+    StoneAlpha.distance > 5 && Pather.moveToUnit(StoneAlpha);
     Pather.makePortal();
     log(AutoRush.playersIn);
 
@@ -97,7 +100,7 @@
       if (Pather.usePortal(sdk.areas.Tristram)) {
         break;
       }
-      Attack.securePosition(me.x, me.y, 35, 1000);
+      Attack.securePosition(StoneAlpha.x, StoneAlpha.y, 35, 1000);
     }
 
     if (me.inArea(sdk.areas.Tristram)) {
@@ -109,7 +112,7 @@
           throw new Error("Failed to move to Cain's Jail");
         }
 
-        Attack.securePosition(gibbet.x, gibbet.y, 20, 3000);
+        Attack.securePosition(gibbet.x, gibbet.y, 25, 3000);
         Pather.makePortal();
         log(AutoRush.playersIn);
 
@@ -119,7 +122,7 @@
           if (gibbet.mode) {
             break;
           }
-          Attack.securePosition(me.x, me.y, 10, 1000);
+          Attack.securePosition(me.x, me.y, 15, 1000);
         }
       }
     }
@@ -729,7 +732,9 @@
 
     Town.doChores();
     Pather.useWaypoint(sdk.areas.DuranceofHateLvl2, true) && Precast.doPrecast(true);
-    Pather.moveToExit(sdk.areas.DuranceofHateLvl3, true) && Pather.moveTo(17692, 8023) && Pather.makePortal();
+    if (Pather.moveToExit(sdk.areas.DuranceofHateLvl3, true) && Pather.moveTo(17692, 8023)) {
+      Pather.makePortal();
+    }
     delay(2000);
     log(AutoRush.playersIn);
 
@@ -746,40 +751,38 @@
     Pather.moveTo(17692, 8023) && Pather.makePortal();
     log(AutoRush.playersOut);
 
-    if (AutoRush.rushMode !== RushModes.chanter) {
-      while (playerIn(me.area, nick)) {
-        delay(250);
-      }
-
-      Pather.moveTo(17591, 8070) && Attack.securePosition(me.x, me.y, 40, 3000);
-
-      let hydra = Game.getMonster(getLocaleString(sdk.locale.monsters.Hydra));
-
-      if (hydra) {
-        do {
-          while (!hydra.dead && hydra.hp > 0) {
-            delay(500);
-          }
-        } while (hydra.getNext());
-      }
-
-      Pather.makePortal();
-      Pather.moveTo(17581, 8070);
-      log(AutoRush.playersIn);
-
-      while (!playerIn(me.area, nick)) {
-        delay(250);
-      }
-
-      log("a4");
-
-      while (!playersInAct(4)) {
-        delay(250);
-      }
-
-      delay(2000);
-      Pather.usePortal(null);
+    while (playerIn(me.area, nick)) {
+      delay(250);
     }
+
+    Pather.moveTo(17591, 8070) && Attack.securePosition(me.x, me.y, 40, 3000);
+
+    let hydra = Game.getMonster(getLocaleString(sdk.locale.monsters.Hydra));
+
+    if (hydra) {
+      do {
+        while (!hydra.dead && hydra.hp > 0) {
+          delay(500);
+        }
+      } while (hydra.getNext());
+    }
+
+    Pather.makePortal();
+    Pather.moveTo(17581, 8070);
+    log(AutoRush.playersIn);
+
+    while (!playerIn(me.area, nick)) {
+      delay(250);
+    }
+
+    log("a4");
+
+    while (!playersInAct(4)) {
+      delay(250);
+    }
+
+    delay(2000);
+    Pather.usePortal(null);
 
     return true;
   };
