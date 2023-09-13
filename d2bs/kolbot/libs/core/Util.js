@@ -345,6 +345,22 @@
     return (areaNames[area] || "undefined");
   };
 
+  /**
+   * Utility function to fix error tracing for getPresetUnit(s)
+   * @param {Error} err
+   * @param {number} area
+   * @param {number} id
+   */
+  const rewriteStack = function (err, area, id) {
+    let stack = err.stack.match(/[^\r\n]+/g);
+    let fileNameAndLine = stack[1].substring(stack[1].lastIndexOf("\\") + 1);
+    let [fileName, line] = fileNameAndLine.split(":");
+    err.message += " Area: " + area + " Id: " + id;
+    err.fileName = fileName;
+    err.lineNumber = line;
+    err.stack = err.stack.split("\n").slice(1).join("\n");
+  };
+
   const Game = {
     getDistance: function (...args) {
       switch (args.length) {
@@ -463,7 +479,7 @@
       try {
         return getPresetUnit(area, sdk.unittype.Monster, id);
       } catch (e) {
-        e.message += " Area: " + area + " Id: " + id;
+        rewriteStack(e, area, id);
         throw e;
       }
     },
@@ -477,7 +493,7 @@
       try {
         return getPresetUnits(area, sdk.unittype.Monster, id);
       } catch (e) {
-        e.message += " Area: " + area + " Id: " + id;
+        rewriteStack(e, area, id);
         throw e;
       }
     },
@@ -491,7 +507,7 @@
       try {
         return getPresetUnit(area, sdk.unittype.Object, id);
       } catch (e) {
-        e.message += " Area: " + area + " Id: " + id;
+        rewriteStack(e, area, id);
         throw e;
       }
     },
@@ -505,7 +521,7 @@
       try {
         return getPresetUnits(area, sdk.unittype.Object, id);
       } catch (e) {
-        e.message += " Area: " + area + " Id: " + id;
+        rewriteStack(e, area, id);
         throw e;
       }
     },
@@ -519,7 +535,7 @@
       try {
         return getPresetUnit(area, sdk.unittype.Stairs, id);
       } catch (e) {
-        e.message += " Area: " + area + " Id: " + id;
+        rewriteStack(e, area, id);
         throw e;
       }
     },
@@ -533,7 +549,7 @@
       try {
         return getPresetUnits(area, sdk.unittype.Stairs, id);
       } catch (e) {
-        e.message += " Area: " + area + " Id: " + id;
+        rewriteStack(e, area, id);
         throw e;
       }
     },
@@ -600,7 +616,7 @@
       getResponse && addEventListener("copydata", copyDataEvent);
 
       if (!sendCopyData(null, profileName, mode, JSON.stringify({ message: message, sender: me.profile }))) {
-        //print("sendToProfile: failed to get response from " + profileName);
+        //console.log("sendToProfile: failed to get response from " + profileName);
         getResponse && removeEventListener("copydata", copyDataEvent);
 
         return false;
