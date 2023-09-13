@@ -11,7 +11,7 @@ const VectorHooks = {
   lastLoc: { x: 0, y: 0 },
   names: [],
   hooks: [],
-  nextAreas: (function() {
+  nextAreas: (function () {
     let nextAreas = [];
 
     // Specific area override

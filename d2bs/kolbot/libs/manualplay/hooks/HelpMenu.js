@@ -152,7 +152,7 @@ Worker.runInBackground.helpAction = function () {
 
       !!str && me.overhead(str);
     } catch (e) {
-      print(e);
+      console.error(e);
       me.overhead(cmd);
     }
 
