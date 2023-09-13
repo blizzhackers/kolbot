@@ -127,7 +127,7 @@ const Town = {
     !me.inTown && Town.goToTown();
     
     if (!NPC.getAct(npcName).includes(me.act)) {
-      Town.goToTown(NPC.getAct(npcName)[0]);
+      Town.goToTown(NPC.getAct(npcName).first());
     }
 
     me.cancelUIFlags();
@@ -1532,9 +1532,13 @@ const Town = {
 
     me.cancelUIFlags();
 
-    let items = Storage.Inventory.Compare(Config.Inventory);
+    /** @type {ItemUnit[]} */
+    let items = (Storage.Inventory.Compare(Config.Inventory) || [])
+      .filter(function (item) {
+        return !Town.ignoreType(item.itemType);
+      });
 
-    if (items) {
+    if (items && items.length) {
       Config.SortSettings.SortStash && Storage.Stash.SortItems();
       
       for (let item of items) {
