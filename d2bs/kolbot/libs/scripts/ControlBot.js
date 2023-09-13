@@ -10,6 +10,8 @@
 function ControlBot () {
   // Quests
   const {
+    log,
+    playerIn,
     andariel,
     cube,
     radament,
@@ -22,7 +24,7 @@ function ControlBot () {
     heart,
     eye,
     travincal,
-    mephisto,
+    // mephisto,
     izual,
     diablo,
     shenk,
@@ -35,6 +37,48 @@ function ControlBot () {
     RushModes,
   } = require("../systems/autorush/RushConfig");
   const Worker = require("../modules/Worker");
+
+  /** @param {string} [nick] */
+  const mephisto = function (nick) {
+    log("starting mephisto");
+
+    Town.doChores();
+    Pather.useWaypoint(sdk.areas.DuranceofHateLvl2, true) && Precast.doPrecast(true);
+    if (!Pather.moveToExit(sdk.areas.DuranceofHateLvl3, true)) {
+      throw new Error("Failed to move to durance 3");
+    }
+    Pather.moveTo(17617, 8069);
+    Attack.securePosition(me.x, me.y, 30, 3000);
+    Pather.moveTo(17591, 8070) && Attack.securePosition(me.x, me.y, 20, 3000);
+    let hydra = Game.getMonster(getLocaleString(sdk.locale.monsters.Hydra));
+
+    if (hydra) {
+      do {
+        while (!hydra.dead && hydra.hp > 0) {
+          delay(500);
+        }
+      } while (hydra.getNext());
+    }
+    Pather.makePortal();
+    Pather.moveTo(17581, 8070);
+    log(AutoRush.playersIn);
+
+    if (!Misc.poll(function () {
+      return playerIn(me.area, nick);
+    }, AutoRush.playerWaitTimeout, 1000)) {
+      log("timed out");
+      return false;
+    }
+
+    Pather.moveTo(17591, 8070);
+    Attack.kill(sdk.monsters.Mephisto);
+    Pickit.pickItems();
+    log("meph dead");
+    log(AutoRush.playersOut);
+    Pather.usePortal(null);
+
+    return true;
+  };
 
   AutoRush.rushMode = RushModes.chanter;
   AutoRush.playersIn = "in";
