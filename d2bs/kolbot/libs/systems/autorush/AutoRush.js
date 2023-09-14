@@ -35,11 +35,13 @@
     return false;
   };
 
+  const bumperLvlReq = function () {
+    return [20, 40, 60][me.diff];
+  };
   const bumperCheck = function (nick) {
-    let bumperLevelReq = [20, 40, 60][me.diff];
     return nick
-      ? Misc.findPlayer(nick).level >= bumperLevelReq
-      : Misc.checkPartyLevel(bumperLevelReq);
+      ? Misc.findPlayer(nick).level >= bumperLvlReq()
+      : Misc.checkPartyLevel(bumperLvlReq());
   };
 
   const playersInAct = function (act) {
@@ -140,8 +142,8 @@
       throw new Error("andy failed");
     }
 
+    Attack.securePosition(22582, 9612, 40, 3000, true);
     Pather.makePortal();
-    Attack.securePosition(me.x, me.y, 40, 3000, true);
     log(AutoRush.playersIn);
 
     if (!Misc.poll(function () {
@@ -290,9 +292,8 @@
         || !Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricCubeChest)) {
         throw new Error("cube failed");
       }
-
-      Pather.makePortal();
       Attack.securePosition(me.x, me.y, 30, 3000, true);
+      Pather.makePortal();
       log(AutoRush.playersIn);
 
       if (!Misc.poll(function () {
@@ -325,8 +326,8 @@
       throw new Error("amulet failed");
     }
 
+    Attack.securePosition(15044, 14045, 25, 3000, me.hell, me.hell);
     Pather.makePortal();
-    Attack.securePosition(me.x, me.y, 25, 3000, me.hell, me.hell);
 
     log(AutoRush.playersIn);
 
@@ -358,8 +359,8 @@
       throw new Error("staff failed");
     }
 
-    Pather.makePortal();
     Attack.securePosition(me.x, me.y, 30, 3000, true);
+    Pather.makePortal();
     log(AutoRush.playersIn);
 
     if (!Misc.poll(function () {
@@ -390,10 +391,11 @@
     Town.doChores();
     Pather.useWaypoint(sdk.areas.ArcaneSanctuary, true) && Precast.doPrecast(true);
 
-    let preset = Game.getPresetObject(sdk.areas.ArcaneSanctuary, sdk.quest.chest.Journal);
+    const preset = Game.getPresetObject(sdk.areas.ArcaneSanctuary, sdk.quest.chest.Journal).realCoords();
+    /** @type {PathNode} */
     let spot = {};
 
-    switch (preset.roomx * 5 + preset.x) {
+    switch (preset.x) {
     case 25011:
       spot = { x: 25081, y: 5446 };
       break;
@@ -401,7 +403,7 @@
       spot = { x: 25830, y: 5447 };
       break;
     case 25431:
-      switch (preset.roomy * 5 + preset.y) {
+      switch (preset.y) {
       case 5011:
         spot = { x: 25449, y: 5081 };
         break;
@@ -417,8 +419,8 @@
       throw new Error("summoner failed");
     }
 
+    Attack.securePosition(spot.x, spot.y, 25, 3000);
     Pather.makePortal();
-    Attack.securePosition(me.x, me.y, 25, 3000);
     log(AutoRush.playersIn);
 
     if (!Misc.poll(function () {
@@ -448,8 +450,8 @@
 
     let redPortal = Game.getObject(sdk.objects.RedPortal);
 
-    if (!redPortal || !this.usePortal(null, null, redPortal)) {
-      if (!Misc.poll(() => {
+    if (!redPortal || !Pather.usePortal(null, null, redPortal)) {
+      if (!Misc.poll(function () {
         let journal = Game.getObject(sdk.quest.chest.Journal);
 
         if (journal && journal.interact()) {
@@ -462,6 +464,7 @@
         return (redPortal && Pather.usePortal(null, null, redPortal));
       })) throw new Error("summoner failed");
     }
+    Pather.useWaypoint(sdk.areas.LutGholein);
 
     return true;
   };
@@ -483,8 +486,8 @@
       throw new Error("duriel failed");
     }
 
-    Pather.makePortal();
     Attack.securePosition(me.x, me.y, 30, 3000, true, me.hell);
+    Pather.makePortal();
     log(AutoRush.playersIn);
 
     if (!Misc.poll(function () {
@@ -493,6 +496,10 @@
       log("timed out");
       return false;
     }
+
+    AutoRush.rushMode !== RushModes.chanter
+      ? log(AutoRush.playersOut)
+      : log("Place staff in orifice then wait in town");
 
     if (!Misc.poll(function () {
       return !playerIn(me.area, nick);
@@ -605,8 +612,8 @@
       throw new Error("brain failed");
     }
 
+    Attack.securePosition(me.x, me.y, 30, 3000, me.hell, me.hell);
     Pather.makePortal();
-    Attack.securePosition(me.x, me.y, 25, 3000, me.hell, me.hell);
 
     log(AutoRush.playersIn);
 
@@ -638,8 +645,8 @@
       throw new Error("eye failed");
     }
 
+    Attack.securePosition(me.x, me.y, 30, 3000, me.hell, me.hell);
     Pather.makePortal();
-    Attack.securePosition(me.x, me.y, 25, 3000, me.hell, me.hell);
 
     log(AutoRush.playersIn);
 
@@ -671,8 +678,8 @@
       throw new Error("heart failed");
     }
 
+    Attack.securePosition(me.x, me.y, 30, 3000, me.hell, me.hell);
     Pather.makePortal();
-    Attack.securePosition(me.x, me.y, 25, 3000, me.hell, me.hell);
 
     log(AutoRush.playersIn);
 
@@ -703,8 +710,8 @@
     let coords = [me.x, me.y];
 
     Pather.moveTo(coords[0] + 23, coords[1] - 102);
-    Pather.makePortal();
     Attack.securePosition(me.x, me.y, 40, 3000);
+    Pather.makePortal();
     log(AutoRush.playersIn);
 
     if (!Misc.poll(function () {
@@ -827,15 +834,12 @@
     Pather.useWaypoint(sdk.areas.CityoftheDamned, true) && Precast.doPrecast(false);
     Pather.moveToExit(sdk.areas.PlainsofDespair, true);
 
-    let izualPreset = Game.getPresetMonster(sdk.areas.PlainsofDespair, sdk.monsters.Izual);
-    let izualCoords = {
-      area: sdk.areas.PlainsofDespair,
-      x: izualPreset.roomx * 5 + izualPreset.x,
-      y: izualPreset.roomy * 5 + izualPreset.y
-    };
+    const izualPreset = Game.getPresetMonster(sdk.areas.PlainsofDespair, sdk.monsters.Izual).realCoords();
 
-    moveIntoPos(izualCoords, 50);
-    let izual = Misc.poll(() => Game.getMonster(sdk.monsters.Izual), 1500, 500);
+    moveIntoPos(izualPreset, 50);
+    let izual = Misc.poll(function () {
+      return Game.getMonster(sdk.monsters.Izual);
+    }, 1500, 500);
 
     izual ? moveIntoPos(izual, 60) : console.log("izual unit not found");
 
@@ -877,6 +881,7 @@
 
     function inviteIn () {
       Pather.moveTo(7763, 5267) && Pather.makePortal();
+      // change this spot so we don't bring diablo closer to rushees
       Pather.moveTo(7727, 5267);
       log(AutoRush.playersIn);
 
@@ -988,8 +993,13 @@
       me.cancel();
     }
 
+    if (AutoRush.rushMode === RushModes.chanter) {
+      log("Talk to Malah to get potion then come in");
+    }
     Pather.makePortal();
-    log(AutoRush.playersIn);
+    if (AutoRush.rushMode !== RushModes.chanter) {
+      log(AutoRush.playersIn);
+    }
 
     if (!Misc.poll(function () {
       return playerIn(me.area, nick);
@@ -998,11 +1008,11 @@
       return false;
     }
 
-    Misc.poll(() => !Game.getObject(sdk.objects.FrozenAnya), 30000, 1000);
-
-    log(AutoRush.playersOut); // Mainly for non-questers to know when to get the scroll of resistance
-
     if (AutoRush.rushMode !== RushModes.chanter) {
+      Misc.poll(function () {
+        return !Game.getObject(sdk.objects.FrozenAnya);
+      }, 30000, 1000);
+      log(AutoRush.playersOut); // Mainly for non-questers to know when to get the scroll of resistance
       while (playerIn(me.area, nick)) {
         delay(200);
       }
@@ -1027,7 +1037,7 @@
 
     if (!bumperCheck(nick)) {
       if (AutoRush.rushMode === RushModes.chanter) {
-        log(nick + " you are not eligible for ancients.");
+        log(nick + " you are not eligible for ancients. You need to be at least level " + bumperLvlReq());
         
         return false;
       }
