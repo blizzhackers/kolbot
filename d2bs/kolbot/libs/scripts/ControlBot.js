@@ -741,6 +741,9 @@ function ControlBot () {
     if (msg.match(/^rush /gi)) {
       msg = msg.split(" ")[1];
     }
+    if (commandAliases.has(msg)) {
+      msg = commandAliases.get(msg);
+    }
     if (!actions.has(msg)) return;
     if (shitList.has(nick)) {
       Chat.say("No commands for the shitlisted.");
@@ -789,10 +792,25 @@ function ControlBot () {
    * @property {string} desc
    * @property {boolean} hostileCheck
    * @property {boolean} [complete]
+   * @property {function(): void} [markAsComplete]
    * @property {function(): boolean | void} run
    */
   /** @type {Map<string, Action} */
   const actions = (function () {
+    /**
+     * @constructor
+     * @param {string} desc 
+     * @param {(nick: string) => boolean} run 
+     */
+    function RushAction (desc, run) {
+      this.desc = desc;
+      this.hostileCheck = true;
+      this.complete = false;
+      this.run = run;
+    }
+    RushAction.prototype.markAsComplete = function () {
+      this.complete = true;
+    };
     /** @type {Map<string, Action} */
     const _actions = new Map();
 
@@ -851,13 +869,11 @@ function ControlBot () {
 
     if (Config.ControlBot.Chant.Enchant
       && Skill.canUse(sdk.skills.Enchant)) {
-      ["chant", "enchant"]
-        .forEach(key => _actions.set(key, {
-          desc: "Give enchant",
-          hostileCheck: false,
-          run: enchant
-        }));
-      _actions.get("enchant").desc = "";
+      _actions.set("chant", {
+        desc: "Give enchant",
+        hostileCheck: false,
+        run: enchant
+      });
     } else {
       Config.ControlBot.Chant.AutoEnchant = false;
     }
@@ -889,161 +905,83 @@ function ControlBot () {
 
     if (Config.ControlBot.Rush) {
       if (Config.ControlBot.Rush.Andy) {
-        _actions.set("andy", {
-          desc: "Rush Andariel",
-          hostileCheck: true,
-          complete: false,
-          run: andariel
-        });
+        _actions.set("andy", new RushAction("Rush Andariel", andariel));
       }
       if (Config.ControlBot.Rush.Cube) {
-        _actions.set("cube", {
-          desc: "Rush Cube",
-          hostileCheck: true,
-          complete: false,
-          run: cube
-        });
+        _actions.set("cube", new RushAction("Rush Cube", cube));
       }
       if (Config.ControlBot.Rush.Radament) {
-        _actions.set("rada", {
-          desc: "Rush Radament",
-          hostileCheck: true,
-          complete: false,
-          run: radament
-        });
+        _actions.set("rada", new RushAction("Rush Radament", radament));
       }
       if (Config.ControlBot.Rush.Staff) {
-        _actions.set("staff", {
-          desc: "Rush Staff",
-          hostileCheck: true,
-          complete: false,
-          run: staff
-        });
+        _actions.set("staff", new RushAction("Rush Staff", staff));
       }
       if (Config.ControlBot.Rush.Amulet) {
-        _actions.set("amu", {
-          desc: "Rush Amulet",
-          hostileCheck: true,
-          complete: false,
-          run: amulet
-        });
+        _actions.set("amu", new RushAction("Rush Amulet", amulet));
       }
       if (Config.ControlBot.Rush.Summoner) {
-        _actions.set("summoner", {
-          desc: "Rush Summoner",
-          hostileCheck: true,
-          complete: false,
-          run: summoner
-        });
+        _actions.set("summoner", new RushAction("Rush Summoner", summoner));
       }
       if (Config.ControlBot.Rush.Duriel) {
-        _actions.set("duri", {
-          desc: "Rush Duriel",
-          hostileCheck: true,
-          complete: false,
-          run: duriel
-        });
+        _actions.set("duri", new RushAction("Rush Duriel", duriel));
       }
       if (Config.ControlBot.Rush.LamEsen) {
-        _actions.set("lamesen", {
-          desc: "Rush Lamesen",
-          hostileCheck: true,
-          complete: false,
-          run: lamesen
-        });
+        _actions.set("lamesen", new RushAction("Rush Lamesen", lamesen));
       }
       if (Config.ControlBot.Rush.Eye) {
-        _actions.set("eye", {
-          desc: "Rush eye",
-          hostileCheck: true,
-          complete: false,
-          run: eye
-        });
+        _actions.set("eye", new RushAction("Rush Eye", eye));
       }
       if (Config.ControlBot.Rush.Brain) {
-        _actions.set("brain", {
-          desc: "Rush brain",
-          hostileCheck: true,
-          complete: false,
-          run: brain
-        });
+        _actions.set("brain", new RushAction("Rush Brain", brain));
       }
       if (Config.ControlBot.Rush.Heart) {
-        _actions.set("heart", {
-          desc: "Rush heart",
-          hostileCheck: true,
-          complete: false,
-          run: heart
-        });
+        _actions.set("heart", new RushAction("Rush Heart", heart));
       }
       if (Config.ControlBot.Rush.Travincal) {
-        _actions.set("trav", {
-          desc: "Rush Travincal",
-          hostileCheck: true,
-          complete: false,
-          run: travincal
-        });
+        _actions.set("trav", new RushAction("Rush Travincal", travincal));
       }
       if (Config.ControlBot.Rush.Mephisto) {
-        _actions.set("meph", {
-          desc: "Rush Mephisto",
-          hostileCheck: true,
-          complete: false,
-          run: mephisto
-        });
+        _actions.set("meph", new RushAction("Rush Mephisto", mephisto));
       }
       if (Config.ControlBot.Rush.Izual) {
-        _actions.set("izzy", {
-          desc: "Rush Izual",
-          hostileCheck: true,
-          complete: false,
-          run: izual
-        });
+        _actions.set("izzy", new RushAction("Rush Izual", izual));
       }
       if (Config.ControlBot.Rush.Diablo) {
-        _actions.set("diablo", {
-          desc: "Rush Diablo",
-          hostileCheck: true,
-          complete: false,
-          run: diablo
-        });
+        _actions.set("diablo", new RushAction("Rush Diablo", diablo));
       }
       if (Config.ControlBot.Rush.Shenk) {
-        _actions.set("shenk", {
-          desc: "Rush Shenk",
-          hostileCheck: true,
-          complete: false,
-          run: shenk
-        });
+        _actions.set("shenk", new RushAction("Rush Shenk", shenk));
       }
       if (Config.ControlBot.Rush.Anya) {
-        _actions.set("anya", {
-          desc: "Rush Anya",
-          hostileCheck: true,
-          complete: false,
-          run: anya
-        });
+        _actions.set("anya", new RushAction("Rush Anya", anya));
       }
       if (Config.ControlBot.Rush.Ancients) {
-        _actions.set("ancients", {
-          desc: "Rush Ancients",
-          hostileCheck: true,
-          complete: false,
-          run: ancients
-        });
+        _actions.set("ancients", new RushAction("Rush Ancients", ancients));
       }
       if (Config.ControlBot.Rush.Baal) {
-        _actions.set("baal", {
-          desc: "Rush Baal",
-          hostileCheck: true,
-          complete: false,
-          run: baal
-        });
+        _actions.set("baal", new RushAction("Rush Baal", baal));
       }
     }
 
     return _actions;
   })();
+
+  /** @type {Map<string, string>} */
+  const commandAliases = new Map([
+    ["andariel", "andy"],
+    ["radament", "rada"],
+    ["amulet", "amu"],
+    ["ammy", "amu"],
+    ["duriel", "duri"],
+    ["dury", "duri"],
+    ["tome", "lamesen"],
+    ["travincal", "trav"],
+    ["mephisto", "meph"],
+    ["izual", "izzy"],
+    ["bome", "bo"],
+    ["time", "timeleft"],
+    ["enchant", "chant"],
+  ]);
 
   /** @param {[string, string]} command */
   const runAction = function (command) {
@@ -1052,6 +990,9 @@ function ControlBot () {
     let [cmd, nick] = command;
     if (cmd.match(/^rush /gi)) {
       cmd = cmd.split(" ")[1];
+    }
+    if (commandAliases.has(cmd.toLowerCase())) {
+      cmd = commandAliases.get(cmd.toLowerCase());
     }
 
     if (!actions.has(cmd.toLowerCase())) return false;
@@ -1102,7 +1043,7 @@ function ControlBot () {
               // check if command was for rush, if so we need to remove that as an option since its now completed
               if (actions.get(running.command).desc.includes("Rush")) {
                 console.log("Disabling " + running.command + " from actions");
-                actions.get(running.command).complete = true;
+                lastAction.markAsComplete();
               }
             }
           }
