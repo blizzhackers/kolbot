@@ -240,14 +240,15 @@
 
     Attack.kill(sdk.monsters.Radament);
 
-    let returnSpot = {
-      x: me.x,
-      y: me.y
+    let book = Game.getItem(sdk.quest.item.BookofSkill);
+    const returnSpot = {
+      x: book.x || me.x,
+      y: book.y || me.y
     };
 
     log(AutoRush.playersOut);
     Pickit.pickItems();
-    Attack.securePosition(me.x, me.y, 30, 3000);
+    Attack.securePosition(returnSpot.x, returnSpot.y, 30, 3000);
 
     if (!Misc.poll(function () {
       return !playerIn(me.area, nick);
@@ -707,10 +708,18 @@
     Town.doChores();
     Pather.useWaypoint(sdk.areas.Travincal, true) && Precast.doPrecast(true);
 
-    let coords = [me.x, me.y];
+    /** @type {PathNode} */
+    const wpCoords = {
+      x: me.x,
+      y: me.y
+    };
+    const portalSpot = {
+      x: wpCoords.x + 23,
+      y: wpCoords.y - 102
+    };
 
-    Pather.moveTo(coords[0] + 23, coords[1] - 102);
-    Attack.securePosition(me.x, me.y, 40, 3000);
+    Pather.move(portalSpot);
+    Attack.securePosition(portalSpot.x, portalSpot.y, 40, 4000);
     Pather.makePortal();
     log(AutoRush.playersIn);
 
@@ -721,12 +730,13 @@
       return false;
     }
 
-    Pather.moveTo(coords[0] + 30, coords[1] - 134);
-    Pather.moveTo(coords[0] + 86, coords[1] - 130);
-    Pather.moveTo(coords[0] + 71, coords[1] - 94);
-    Attack.securePosition(me.x, me.y, 40, 3000);
+    Pather.moveTo(wpCoords.x + 30, wpCoords.y - 134);
+    Pather.moveTo(wpCoords.x + 86, wpCoords.y - 130);
+    Pather.moveTo(wpCoords.x + 71, wpCoords.y - 94);
+    Attack.securePosition(me.x, me.y, 40, 4000);
+    Attack.kill(sdk.locale.monsters.IsmailVilehand);
 
-    Pather.moveTo(coords[0] + 23, coords[1] - 102);
+    Pather.move(portalSpot);
     Pather.makePortal();
     log(AutoRush.playersOut);
     Pather.usePortal(null, me.name);
