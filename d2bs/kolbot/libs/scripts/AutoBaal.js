@@ -18,42 +18,55 @@
 function AutoBaal () {
   // internal variables
   let baalCheck, throneCheck, hotCheck, leader; // internal variables
+  let hotTick = 0;
   const safeMsg = ["safe", "throne clear", "leechers can come", "tp is up", "1 clear"]; // safe message - casing doesn't matter
   const baalMsg = ["baal"]; // baal message - casing doesn't matter
   const hotMsg = ["hot", "warm", "dangerous", "lethal"]; // used for shrine hunt
 
-  // chat event handler function, listen to what leader says
+  [safeMsg, baalMsg, hotMsg].forEach((function (arr) {
+    for (let i = 0; i < arr.length; i++) {
+      arr[i] = arr[i].toLowerCase();
+    }
+  }));
+
+  /**
+   * chat event handler function, listen to what leader says
+   * @param {string} nick 
+   * @param {string} msg 
+   */
   const chatEvent = function (nick, msg) {
     // filter leader messages
-    if (nick === leader) {
-      // loop through all predefined messages to find a match
-      for (let i = 0; i < hotMsg.length; i += 1) {
-        // leader says a hot tp message
-        if (msg.toLowerCase().includes(hotMsg[i].toLowerCase()) && Config.AutoBaal.FindShrine === 1) {
-          hotCheck = true; // safe to enter baal chamber
+    if (!nick || !msg || nick !== leader) return;
+    msg = msg.toLowerCase();
 
-          break;
-        }
+    // loop through all predefined messages to find a match
+    for (let str of hotMsg) {
+      // leader says a hot tp message
+      if (msg.includes(str)) {
+        hotCheck = true; // not safe to enter baal chamber
+        hotTick = getTickCount();
+
+        return;
       }
+    }
 
-      // loop through all predefined messages to find a match
-      for (let i = 0; i < safeMsg.length; i += 1) {
-        // leader says a safe tp message
-        if (msg.toLowerCase().includes(safeMsg[i].toLowerCase())) {
-          throneCheck = true; // safe to enter throne
+    // loop through all predefined messages to find a match
+    for (let str of safeMsg) {
+      // leader says a safe tp message
+      if (msg.includes(str)) {
+        throneCheck = true; // safe to enter throne
 
-          break;
-        }
+        return;
       }
+    }
 
-      // loop through all predefined messages to find a match
-      for (let i = 0; i < baalMsg.length; i += 1) {
-        // leader says a baal message
-        if (msg.toLowerCase().includes(baalMsg[i].toLowerCase())) {
-          baalCheck = true; // safe to enter baal chamber
+    // loop through all predefined messages to find a match
+    for (let str of baalMsg) {
+      // leader says a baal message
+      if (msg.includes(str)) {
+        baalCheck = true; // safe to enter baal chamber
 
-          break;
-        }
+        return;
       }
     }
   };
@@ -190,17 +203,22 @@ function AutoBaal () {
                 }
               }
             }
+            Town.goToTown(5);
+            Town.move("portalspot");
+
+            hotCheck = false;
+          } else if (getTickCount() - hotTick > Time.seconds(30)) {
+            // maybe we missed the message, go ahead and enter throne
+            if (!throneCheck && !baalCheck) {
+              throneCheck = true;
+              hotCheck = false;
+            }
           }
-
-          Town.goToTown(5);
-          Town.move("portalspot");
-
-          hotCheck = false;
         }
 
         // wait for throne signal - leader's safe message
         if ((throneCheck || baalCheck) && me.inArea(sdk.areas.Harrogath)) {
-          print("ÿc4AutoBaal: ÿc0Trying to take TP to throne.");
+          console.log("ÿc4AutoBaal: ÿc0Trying to take TP to throne.");
           Pather.usePortal(sdk.areas.ThroneofDestruction, null);
           // move to a safe spot
           Pather.moveTo(Config.AutoBaal.LeechSpot[0], Config.AutoBaal.LeechSpot[1]);
@@ -225,7 +243,7 @@ function AutoBaal () {
           let portal = Game.getObject(sdk.objects.WorldstonePortal);
 
           delay(2000); // wait for others to enter first - helps with curses and tentacles from spawning around you
-          print("ÿc4AutoBaal: ÿc0Entering chamber.");
+          console.log("ÿc4AutoBaal: ÿc0Entering chamber.");
           Pather.usePortal(null, null, portal) && Pather.moveTo(15166, 5903); // go to a safe position
           Town.getCorpse();
         }
