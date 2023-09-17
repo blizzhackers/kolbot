@@ -5,7 +5,8 @@
 *
 */
 
-function MFHelper() {
+function MFHelper () {
+  const startTime = getTickCount();
   /**
    * @todo We should be able to handle Diablo scripts then resume MFHelper, not sure how yet but doesn't make sense to have
    * helper just idle if leader does any of the a5 scripts before baal. I guess could re-order them in the configs but having
@@ -92,8 +93,8 @@ function MFHelper() {
         Town.move("portalspot");
       }
 
-      // Finish MFHelper script if leader is running Diablo or Baal
-      if ([
+      // Finish MFHelper script if leader is running Diablo or Baal AND we've been running longer than 30s
+      if ((getTickCount() - startTime > Time.seconds(30)) && [
         sdk.areas.ChaosSanctuary, sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber
       ].includes(player.area)) {
         break;
