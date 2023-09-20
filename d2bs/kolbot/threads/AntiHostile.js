@@ -71,7 +71,7 @@ function main () {
     let script = getScript("default.dbj");
 
     if (script && script.running) {
-      print("ÿc1Pausing.");
+      console.log("ÿc1Pausing.");
       script.pause();
     }
   };
@@ -81,7 +81,7 @@ function main () {
     let script = getScript("default.dbj");
 
     if (script && !script.running) {
-      print("ÿc2Resuming.");
+      console.log("ÿc2Resuming.");
       script.resume();
     }
   };
@@ -171,7 +171,7 @@ function main () {
   };
 
   addEventListener("scriptmsg", this.scriptEvent);
-  print("ÿc2Anti-Hostile thread loaded.");
+  console.log("ÿc2Anti-Hostile thread loaded.");
 
   // Main Loop
   while (true) {
@@ -181,7 +181,7 @@ function main () {
 
       if (hostiles.length > 0 && (Config.HostileAction === 0 || (Config.HostileAction === 1 && me.inTown))) {
         if (Config.TownOnHostile) {
-          print("ÿc1Hostility detected, going to town.");
+          console.log("ÿc1Hostility detected, going to town.");
           this.pause();
 
           if (!me.inTown) {
@@ -293,7 +293,7 @@ function main () {
         // Mode 1 - Quit if hostile player is nearby
         if (Config.HostileAction === 1) {
           if (Config.TownOnHostile) {
-            print("ÿc1Hostile player nearby, going to town.");
+            console.log("ÿc1Hostile player nearby, going to town.");
             this.pause();
 
             if (!me.inTown) {
@@ -303,7 +303,7 @@ function main () {
             try {
               Town.goToTown();
             } catch (e) {
-              print(e + " Failed to go to town. Quitting.");
+              console.log(e + " Failed to go to town. Quitting.");
               scriptBroadcast("quit"); // quit if failed to go to town
             }
 

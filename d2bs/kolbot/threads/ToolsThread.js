@@ -103,7 +103,7 @@ function main () {
     case sdk.keys.Numpad5: // force automule check
       if (AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("muleInfo")) {
         if (AutoMule.getMuleItems().length > 0) {
-          print("ÿc2Mule triggered");
+          console.log("ÿc2Mule triggered");
           scriptBroadcast("mule");
           Common.Toolsthread.exit();
         } else {
@@ -266,7 +266,7 @@ function main () {
         Common.Toolsthread.togglePause();
         Town.goToTown();
         showConsole();
-        print("ÿc4Diablo Walks the Earth");
+        console.log("ÿc4Diablo Walks the Earth");
 
         me.maxgametime = 0;
 
@@ -287,19 +287,20 @@ function main () {
       case "toggleQuitlist":
         canQuit = !canQuit;
 
-        break;
+        return;
       case "quit":
         console.debug("Quiting");
         quitFlag = true;
+        Common.Toolsthread.stopDefault();
 
-        break;
+        return;
       case "reload":
         console.log("ÿc8ToolsThread :: " + sdk.colors.Red + "Stopping threads and waiting 5 seconds to restart");
         Common.Toolsthread.stopDefault() && delay(Time.seconds(5));
         console.log("Starting default.dbj");
         load("default.dbj");
         
-        break;
+        return;
       case "datadump":
         console.log("ÿc8Systems Data Dump: ÿc2Start");
         console.log("ÿc8Cubing");
@@ -310,7 +311,7 @@ function main () {
         console.log("ÿc9Runeword Needed Itemsÿc0", Runewords.needList);
         console.log("ÿc8Systems Data Dump: ÿc1****************Info End****************");
 
-        break;
+        return;
         // ignore common scriptBroadcast messages that aren't relevent to this thread
       case "mule":
       case "muleTorch":
@@ -320,7 +321,7 @@ function main () {
       case "getMuleMode":
       case "pingquit":
       case "townCheck":
-        break;
+        return;
       default:
         let obj;
 
@@ -336,8 +337,7 @@ function main () {
 
           DataFile.updateStats("debugInfo", JSON.stringify(debugInfo));
         }
-
-        break;
+        return;
       }
     }
   };
@@ -352,6 +352,7 @@ function main () {
 
   Config.QuitListMode > 0 && Common.Toolsthread.initQuitList();
   !Array.isArray(Config.QuitList) && (Config.QuitList = [Config.QuitList]); // make it an array for simpler checks
+  // console.debug("QuitList", Config.QuitList);
 
   // Start
   while (true) {
@@ -448,7 +449,7 @@ function main () {
             idleTick += rand(1200, 1500) * 1000;
             let timeStr = Time.format(idleTick - getTickCount());
             me.overhead("Diablo Walks the Earth! - Next packet in: (" + timeStr + ")");
-            print("Sent anti-idle packet, next refresh in: (" + timeStr + ")");
+            console.log("Sent anti-idle packet, next refresh in: (" + timeStr + ")");
           }
         }
       }
