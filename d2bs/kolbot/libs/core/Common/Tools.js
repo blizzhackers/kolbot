@@ -87,11 +87,7 @@
           if (script) {
             if (script.running) {
               curr === "default.dbj" && console.log("ÿc1Pausing.");
-
-              // don't pause townchicken during clone walk
-              if (curr !== "threads/townchicken.js" || !this.cloneWalked) {
-                script.pause();
-              }
+              script.pause();
             } else {
               if (curr === "default.dbj") {
                 console.log("ÿc2Resuming.");
@@ -108,7 +104,12 @@
         for (let curr of this.stopScripts) {
           try {
             let script = getScript(curr);
-            !!script && script.running && script.stop();
+            if (!!script && script.running) {
+              script.stop();
+              while (script.running) {
+                delay(3);
+              }
+            }
           } catch (e) {
             console.error(e);
           }
@@ -118,19 +119,12 @@
       };
 
       this.exit = function (chickenExit = false) {
-        try {
-          chickenExit && D2Bot.updateChickens();
-          Config.LogExperience && Experience.log();
-          console.log("ÿc8Run duration ÿc2" + (Time.format(getTickCount() - me.gamestarttime)));
-          this.stopDefault();
-          quit();
-        } finally {
-          while (me.ingame) {
-            delay(3);
-          }
-        }
-
-        return true;
+        chickenExit && D2Bot.updateChickens();
+        Config.LogExperience && Experience.log();
+        // clearAllEvents();
+        console.log("ÿc8Run duration ÿc2" + (Time.format(getTickCount() - me.gamestarttime)));
+        this.stopDefault();
+        quit();
       };
 
       /**
@@ -140,6 +134,7 @@
        */
       this.getPotion = function (pottype, type) {
         if (!pottype) return false;
+        if (!me.gameReady) return false;
 
         let items = me.getItemsEx()
           .filter(function (item) {
@@ -174,6 +169,7 @@
        */
       this.drinkPotion = function (type) {
         if (type === undefined) return false;
+        if (!me.gameReady) return false;
         let tNow = getTickCount();
 
         switch (type) {
@@ -285,13 +281,15 @@
 
       this.getNearestPreset = function () {
         let id;
-        let unit = getPresetUnits(me.area);
+        /** @type {Array<PresetUnit>} */
+        let presets = getPresetUnits(me.area);
         let dist = 99;
 
-        for (let i = 0; i < unit.length; i += 1) {
-          if (getDistance(me, unit[i].roomx * 5 + unit[i].x, unit[i].roomy * 5 + unit[i].y) < dist) {
-            dist = getDistance(me, unit[i].roomx * 5 + unit[i].x, unit[i].roomy * 5 + unit[i].y);
-            id = unit[i].type + " " + unit[i].id;
+        for (let unit of presets) {
+          let coords = unit.realCoords();
+          if (getDistance(me, coords.x, coords.y) < dist) {
+            dist = getDistance(me, coords.x, coords.y);
+            id = unit.type + " " + unit.id;
           }
         }
 
