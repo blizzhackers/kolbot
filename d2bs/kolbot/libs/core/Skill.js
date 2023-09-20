@@ -93,7 +93,7 @@
         if (!item) return;
         let charges = item.getStat(-2)[sdk.stats.ChargedSkill];
         if (!(charges instanceof Array)) charges = [charges];
-        let charge = charges.find(c => c.skill === this.skill);
+        let charge = charges.find(c => !!c && c.skill === this.skill);
         if (charge) {
           this.level = charge.level;
           this.charges = charge.charges;
