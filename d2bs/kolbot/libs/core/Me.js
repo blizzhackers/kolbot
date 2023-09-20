@@ -220,6 +220,11 @@ me.clearBelt = function () {
       }
     } while (item.getNext());
 
+    if (clearList.length > 0 && me.inShop) {
+      console.debug("Currently inShop, canceling UI flags to clear belt");
+      me.cancelUIFlags();
+    }
+
     while (clearList.length > 0) {
       let pot = clearList.shift();
       (Storage.Inventory.CanFit(pot) && Storage.Inventory.MoveTo(pot)) || pot.interact();
@@ -699,6 +704,27 @@ me.getItemsForRepair = function (repairPercent, chargedItems) {
   return itemList;
 };
 
+/**
+ * @param {number} id 
+ * @returns {number} quantity of scrolls in tome
+ */
+me.checkScrolls = function (id) {
+  let tome = me.getTome(id);
+
+  if (!tome) {
+    switch (id) {
+    case sdk.items.TomeofIdentify:
+    case "ibk":
+      return Config.FieldID.Enabled ? 0 : 20; // Ignore missing ID tome if we aren't using field ID
+    case sdk.items.TomeofTownPortal:
+    case "tbk":
+      return 0; // Force TP tome check
+    }
+  }
+
+  return tome.getStat(sdk.stats.Quantity);
+};
+
 me.checkKeys = function () {
   if (!Config.OpenChests.Enabled || me.assassin || me.gold < 540
     || (!me.getItem("key") && !Storage.Inventory.CanFit({ sizex: 1, sizey: 1 }))) {
@@ -780,6 +806,12 @@ Object.defineProperties(me, {
       return Math.floor((4 * (1 / me.hpmax * me.hp)) + 1);
     },
     configurable: true
+  },
+  maxgold: {
+    /** max capacity (cLvl * 10000) */
+    get: function () {
+      return me.getStat(sdk.stats.Level) * 10000;
+    },
   },
   inShop: {
     get: function () {
@@ -1039,6 +1071,12 @@ Object.defineProperties(me, {
     let areaIndex = Pather.wpAreas.indexOf(area);
     if (areaIndex === -1) return false;
     return getWaypoint(areaIndex);
+  };
+
+  me.checkQuest = function (questId, state) {
+    const quest = QuestData.get(questId);
+    if (!quest) return false;
+    return quest.checkState(state);
   };
 
   Object.defineProperties(me, {
