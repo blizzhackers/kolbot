@@ -52,8 +52,6 @@ const Town = {
    * @param {boolean} repair
    */
   doChores: function (repair = false) {
-    delay(250);
-
     console.info(true, null, "doChores");
 
     /**
@@ -642,24 +640,12 @@ const Town = {
   },
 
   /**
+   * @deprecated use `me.checkScrolls` instead
    * @param {number} id 
    * @returns {number} quantity of scrolls in tome
    */
   checkScrolls: function (id) {
-    let tome = me.getTome(id);
-
-    if (!tome) {
-      switch (id) {
-      case sdk.items.TomeofIdentify:
-      case "ibk":
-        return Config.FieldID.Enabled ? 0 : 20; // Ignore missing ID tome if we aren't using field ID
-      case sdk.items.TomeofTownPortal:
-      case "tbk":
-        return 0; // Force TP tome check
-      }
-    }
-
-    return tome.getStat(sdk.stats.Quantity);
+    return me.checkScrolls(id);
   },
 
   identify: function () {
