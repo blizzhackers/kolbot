@@ -111,47 +111,43 @@ const Pickit = {
     if (!unit) return false;
     if (sdk.quest.items.includes(unit.classid) && me.getItem(unit.classid)) return false;
 
-    let tome, potion, needPots, buffers, pottype, myKey, key;
-
     switch (unit.itemType) {
     case sdk.items.type.Gold:
       // Check current gold vs max capacity (cLvl*10000)
-      if (me.getStat(sdk.stats.Gold) === me.getStat(sdk.stats.Level) * 10000) {
+      if (me.getStat(sdk.stats.Gold) === me.maxgold) {
         return false; // Skip gold if full
       }
-
-      break;
+      return true;
     case sdk.items.type.Scroll:
-      // 518 - Tome of Town Portal or 519 - Tome of Identify
-      tome = me.getItem(unit.classid - 11, sdk.items.mode.inStorage);
-
-      if (tome) {
+      {
+        // 518 - Tome of Town Portal or 519 - Tome of Identify
+        let tome = me.getItem(unit.classid - 11, sdk.items.mode.inStorage);
+        // Don't pick scrolls if there's no tome
+        if (!tome) return false;
         do {
-          // In inventory, contains 20 scrolls
-          if (tome.isInInventory && tome.getStat(sdk.stats.Quantity) === 20) {
-            return false; // Skip a scroll if its tome is full
+          if (tome.isInInventory && tome.getStat(sdk.stats.Quantity) < 20) {
+            return true;
           }
         } while (tome.getNext());
-      } else {
-        return false; // Don't pick scrolls if there's no tome
       }
-
-      break;
+      // Couldn't find a tome that wasn't full. Skipping scroll
+      return false;
     case sdk.items.type.Key:
-      // Assassins don't ever need keys
-      if (me.assassin) return false;
+      {
+        // Assassins don't ever need keys
+        if (me.assassin) return false;
 
-      myKey = me.getItem(sdk.items.Key, sdk.items.mode.inStorage);
-      key = Game.getItem(-1, -1, unit.gid); // Passed argument isn't an actual unit, we need to get it
+        let myKey = me.getItem(sdk.items.Key, sdk.items.mode.inStorage);
+        let key = Game.getItem(-1, -1, unit.gid); // Passed argument isn't an actual unit, we need to get it
 
-      if (myKey && key) {
-        do {
-          if (myKey.isInInventory && myKey.getStat(sdk.stats.Quantity) + key.getStat(sdk.stats.Quantity) > 12) {
-            return false;
-          }
-        } while (myKey.getNext());
+        if (myKey && key) {
+          do {
+            if (myKey.isInInventory && myKey.getStat(sdk.stats.Quantity) + key.getStat(sdk.stats.Quantity) > 12) {
+              return false;
+            }
+          } while (myKey.getNext());
+        }
       }
-
       break;
     case sdk.items.type.SmallCharm:
     case sdk.items.type.LargeCharm:
@@ -171,18 +167,28 @@ const Pickit = {
     case sdk.items.type.HealingPotion:
     case sdk.items.type.ManaPotion:
     case sdk.items.type.RejuvPotion:
-      needPots = 0;
+    {
+      let needPots = 0;
+      const _pots = new Map([
+        [sdk.items.type.HealingPotion, { count: 0 }],
+        [sdk.items.type.ManaPotion, { count: 0 }],
+        [sdk.items.type.RejuvPotion, { count: 0 }],
+        [sdk.items.type.AntidotePotion, { count: 0 }],
+        [sdk.items.type.StaminaPotion, { count: 0 }],
+        [sdk.items.type.ThawingPotion, { count: 0 }],
+      ]);
 
-      for (let i = 0; i < 4; i += 1) {
-        if (typeof unit.code === "string" && unit.code.includes(Config.BeltColumn[i])) {
-          needPots += this.beltSize;
+      for (let column of Config.BeltColumn) {
+        if (unit.code.includes(column)) {
+          needPots += Pickit.beltSize;
         }
       }
 
-      potion = me.getItem(-1, sdk.items.mode.inBelt);
+      let potion = me.getItem(-1, sdk.items.mode.inBelt);
 
       if (potion) {
         do {
+          _pots.get(potion.itemType).count += 1;
           if (potion.itemType === unit.itemType) {
             needPots -= 1;
           }
@@ -190,37 +196,27 @@ const Pickit = {
       }
 
       if (needPots < 1 && this.checkBelt()) {
-        buffers = ["HPBuffer", "MPBuffer", "RejuvBuffer"];
+        const _buffers = new Map([
+          ["HPBuffer", { type: sdk.items.type.HealingPotion, amount: Config.HPBuffer }],
+          ["MPBuffer", { type: sdk.items.type.ManaPotion, amount: Config.MPBuffer }],
+          ["RejuvBuffer", { type: sdk.items.type.RejuvPotion, amount: Config.RejuvBuffer }]
+        ]);
 
-        for (let i = 0; i < buffers.length; i += 1) {
-          if (Config[buffers[i]]) {
-            pottype = (() => {
-              switch (buffers[i]) {
-              case "HPBuffer":
-                return sdk.items.type.HealingPotion;
-              case "MPBuffer":
-                return sdk.items.type.ManaPotion;
-              case "RejuvBuffer":
-                return sdk.items.type.RejuvPotion;
-              default:
-                return -1;
+        for (let buffer of _buffers) {
+          if (buffer[1].amount <= 0) continue;
+          if (buffer[1].type !== unit.itemType) continue;
+          needPots = buffer[1].amount;
+          potion = me.getItem(-1, sdk.items.mode.inStorage);
+
+          if (potion) {
+            do {
+              if (potion.isInInventory && _pots.has(potion.itemType)) {
+                _pots.get(potion.itemType).count += 1;
+                if (potion.itemType === buffer[1].type) {
+                  needPots -= 1;
+                }
               }
-            })();
-
-            if (unit.itemType === pottype) {
-              if (!Storage.Inventory.CanFit(unit)) return false;
-
-              needPots = Config[buffers[i]];
-              potion = me.getItem(-1, sdk.items.mode.inStorage);
-
-              if (potion) {
-                do {
-                  if (potion.itemType === pottype && potion.isInInventory) {
-                    needPots -= 1;
-                  }
-                } while (potion.getNext());
-              }
-            }
+            } while (potion.getNext());
           }
         }
       }
@@ -230,7 +226,8 @@ const Pickit = {
 
         if (potion) {
           do {
-            if (potion.itemType === unit.itemType && (potion.isInInventory || potion.isInBelt)) {
+            if (potion.itemType === unit.itemType
+              && (potion.isInInventory || potion.isInBelt)) {
               if (potion.classid < unit.classid) {
                 potion.use();
                 needPots += 1;
@@ -243,6 +240,7 @@ const Pickit = {
       }
 
       return (needPots > 0);
+    }
     case undefined: // Yes, it does happen
       console.warn("undefined item (!?)");
 
@@ -263,11 +261,13 @@ const Pickit = {
    * 	 4 : Pickup to sell (triggered when low on gold)
    */
   checkItem: function (unit) {
-    let rval = NTIP.CheckItem(unit, false, true);
-    const resultObj = (result, line = null) => ({
-      result: result,
-      line: line
-    });
+    const rval = NTIP.CheckItem(unit, false, true);
+    const resultObj = function (result, line = null) {
+      return {
+        result: result,
+        line: line
+      };
+    };
 
     // make sure we have essentials - no pickit files loaded
     if (rval.result === Pickit.Result.UNWANTED && Config.PickitFiles.length === 0
@@ -557,6 +557,16 @@ const Pickit = {
     let needMule = false;
     const canUseMule = AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("muleInfo");
     const _pots = [sdk.items.type.HealingPotion, sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion];
+    /** @param {ItemUnit} item */
+    const copyItem = function (item) {
+      return {
+        gid: item.gid,
+        x: item.x,
+        y: item.y,
+        classid: item.classid,
+        itemType: item.itemType,
+      };
+    };
 
     // why wait for idle?
     while (!me.idle) {
@@ -573,7 +583,7 @@ const Pickit = {
         }
         if (Pickit.pickList.some(el => el.gid === item.gid)) continue;
         if (item.onGroundOrDropping && item.distance <= range) {
-          Pickit.pickList.push(copyUnit(item));
+          Pickit.pickList.push(copyItem(item));
         }
       } while (item.getNext());
     }
@@ -596,7 +606,7 @@ const Pickit = {
       }
       
       // get the real item
-      const _item = Game.getItem(-1, -1, currItem.gid);
+      const _item = Game.getItem(currItem.classid, -1, currItem.gid);
       if (!_item || copyUnit(_item).x === undefined) {
         Pickit.pickList.shift();
         
