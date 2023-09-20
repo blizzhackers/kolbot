@@ -163,7 +163,7 @@ const CollMap = new function () {
 
     do {
       if (retry > 30) {
-        print("failed to get valid coordinate");
+        console.log("failed to get valid coordinate");
         coordX = cX;
         coordY = cY;
 
@@ -181,7 +181,7 @@ const CollMap = new function () {
       retry++;
     } while (getCollision(me.area, coordX, coordY) & 1);
 
-    // print("Move " + retry + " from (" + cX + ", " + cY + ") to (" + coordX + ", " + coordY + ")");
+    // console.log("Move " + retry + " from (" + cX + ", " + cY + ") to (" + coordX + ", " + coordY + ")");
     return { x: coordX, y: coordY };
   };
 };

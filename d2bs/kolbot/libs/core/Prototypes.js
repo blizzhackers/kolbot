@@ -2083,7 +2083,7 @@ Unit.prototype.equip = function (destLocation) {
     currentEquiped.forEach(function (item, index) {
       // Last item, so swap instead of putting off first
       if (index === (currentEquiped.length - 1)) {
-        print("swap " + _self.name + " for " + item.name);
+        console.log("swap " + _self.name + " for " + item.name);
         let oldLoc = { x: _self.x, y: _self.y, location: _self.location };
         clickItemAndWait(sdk.clicktypes.click.item.Left, _self); // Pick up current item
         clickItemAndWait(sdk.clicktypes.click.item.Left, destLocation.first()); // the swap of items
@@ -2101,7 +2101,7 @@ Unit.prototype.equip = function (destLocation) {
         return;
       }
 
-      print("Unequip item first " + item.name);
+      console.log("Unequip item first " + item.name);
       // Incase multiple items are equipped
       let spot = findspot(item); // Find a spot for the current item
 
@@ -2422,6 +2422,7 @@ Object.defineProperty(Object.prototype, "has", {
 
 PresetUnit.prototype.realCoords = function () {
   return {
+    id: this.id,
     area: this.level, // for some reason, preset units names the area "level"
     x: this.roomx * 5 + this.x,
     y: this.roomy * 5 + this.y,

@@ -19,7 +19,7 @@ const ClassAttack = {
     let gid = unit.gid;
 
     if (Config.MercWatch && me.needMerc()) {
-      print("mercwatch");
+      console.log("mercwatch");
 
       if (Town.visitTown()) {
         // lost reference to the mob we were attacking

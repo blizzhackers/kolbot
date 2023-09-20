@@ -56,7 +56,7 @@ const AutoSkill = new function () {
     for (let i = 0; i < inputArray.length; i += 1) {
       // limit maximum allocation count to 20
       if (inputArray[i][1] > 20) {
-        print(
+        console.log(
           "AutoSkill: Skill build index " + i + " has allocation count of "
           + inputArray[i][1] + " and it will be limited to 20"
         );
@@ -108,7 +108,7 @@ const AutoSkill = new function () {
       let addTo = this.skillToAdd(this.skillBuildOrder);
 
       if (addTo) {
-        print("AutoSkill: Using skill point in Skill: " + getSkillById(addTo) + " ID: " + addTo);
+        console.log("AutoSkill: Using skill point in Skill: " + getSkillById(addTo) + " ID: " + addTo);
         delay(100);
         useSkillPoint(addTo, 1);
       }
@@ -133,7 +133,7 @@ const AutoSkill = new function () {
     this.save = save;
 
     if (!this.skillBuildOrder || !this.skillBuildOrder.length) {
-      print("AutoSkill: No build array specified");
+      console.log("AutoSkill: No build array specified");
 
       return false;
     }
@@ -152,7 +152,7 @@ const AutoSkill = new function () {
       }
     }
 
-    print("AutoSkill: Finished allocating skill points");
+    console.log("AutoSkill: Finished allocating skill points");
 
     return true;
   };

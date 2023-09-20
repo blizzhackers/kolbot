@@ -64,7 +64,7 @@ const ClassAttack = {
 
     if (Config.MercWatch && me.needMerc()) {
       if (Town.visitTown()) {
-        print("mercwatch");
+        console.log("mercwatch");
         
         if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
           console.debug("Lost reference to unit");

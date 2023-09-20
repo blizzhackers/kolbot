@@ -572,7 +572,7 @@ const Attack = {
 
           // Skip non-unique monsters after 15 attacks, except in Throne of Destruction
           if (!me.inArea(sdk.areas.ThroneofDestruction) && !isSpecial && gidAttack[i].attacks > 15) {
-            print("ÿc1Skipping " + target.name + " " + target.gid + " " + gidAttack[i].attacks);
+            console.log("ÿc1Skipping " + target.name + " " + target.gid + " " + gidAttack[i].attacks);
             monsterList.shift();
           }
 
@@ -1757,7 +1757,7 @@ const Attack = {
       }
     }
 
-    !!name && print("ÿc4Attackÿc0: No valid positions for: " + name);
+    !!name && console.log("ÿc4Attackÿc0: No valid positions for: " + name);
 
     return false;
   },

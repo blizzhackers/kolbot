@@ -183,7 +183,7 @@
        * @param {boolean} openSeals 
        */
       runSeals: function (sealOrder, openSeals = true, recheck = false) {
-        print("seal order: " + sealOrder);
+        console.log("seal order: " + sealOrder);
         Common.Diablo.sealOrder = sealOrder;
         let seals = {
           1: () => this.vizierSeal(openSeals),
@@ -316,7 +316,7 @@
        * @returns {boolean}
        */
       vizierSeal: function (openSeal = true) {
-        print("Viz layout " + Common.Diablo.vizLayout);
+        console.log("Viz layout " + Common.Diablo.vizLayout);
         let path = (Common.Diablo.vizLayout === 1 ? this.starToVizA : this.starToVizB);
         let distCheck = path.last();
 
@@ -360,7 +360,7 @@
        * @returns {boolean}
        */
       seisSeal: function (openSeal = true) {
-        print("Seis layout " + Common.Diablo.seisLayout);
+        console.log("Seis layout " + Common.Diablo.seisLayout);
         let path = (Common.Diablo.seisLayout === 1 ? this.starToSeisA : this.starToSeisB);
         let distCheck = path.last();
 
@@ -407,7 +407,7 @@
        */
       infectorSeal: function (openSeal = true) {
         Precast.doPrecast(true);
-        print("Inf layout " + Common.Diablo.infLayout);
+        console.log("Inf layout " + Common.Diablo.infLayout);
         let path = (Common.Diablo.infLayout === 1 ? this.starToInfA : this.starToInfB);
         let distCheck = path.last();
 

@@ -23,7 +23,7 @@ const ClassAttack = {
     let needRepair = me.needRepair();
 
     if ((Config.MercWatch && me.needMerc()) || needRepair.length > 0) {
-      print("towncheck");
+      console.log("towncheck");
 
       if (Town.visitTown(!!needRepair.length)) {
         if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {

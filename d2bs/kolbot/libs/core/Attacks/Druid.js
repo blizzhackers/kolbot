@@ -12,7 +12,7 @@ const ClassAttack = {
     let gid = unit.gid;
 
     if (Config.MercWatch && me.needMerc()) {
-      print("mercwatch");
+      console.log("mercwatch");
 
       if (Town.visitTown()) {
         if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {

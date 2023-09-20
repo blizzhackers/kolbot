@@ -62,7 +62,7 @@ const ClassAttack = {
     let needRepair = me.needRepair();
 
     if ((Config.MercWatch && me.needMerc()) || needRepair.length > 0) {
-      print("towncheck");
+      console.log("towncheck");
 
       if (Town.visitTown(!!needRepair.length)) {
         // lost reference to the mob we were attacking

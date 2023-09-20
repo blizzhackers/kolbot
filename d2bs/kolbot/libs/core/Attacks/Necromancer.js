@@ -138,7 +138,7 @@ const ClassAttack = {
     const index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 
     if (Config.MercWatch && me.needMerc()) {
-      print("mercwatch");
+      console.log("mercwatch");
 
       if (Town.visitTown()) {
         if (!unit || !copyUnit(unit).x || !Game.getMonster(-1, -1, gid) || unit.dead) {
@@ -445,7 +445,7 @@ const ClassAttack = {
           }
         } else if (me.getMinionCount(sdk.summons.type.Revive) < this.maxRevives) {
           if (this.checkCorpse(corpse, true)) {
-            print("Reviving " + corpse.name);
+            console.log("Reviving " + corpse.name);
 
             if (!Skill.cast(sdk.skills.Revive, sdk.skills.hand.Right, corpse)) {
               return false;

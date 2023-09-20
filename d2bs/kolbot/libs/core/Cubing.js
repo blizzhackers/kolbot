@@ -357,7 +357,7 @@ const Cubing = {
   init: function () {
     if (!Config.Cubing) return;
 
-    // print("We have " + Config.Recipes.length + " cubing recipe(s).");
+    // console.log("We have " + Config.Recipes.length + " cubing recipe(s).");
 
     for (let i = 0; i < Config.Recipes.length; i += 1) {
       if (Config.Recipes[i].length > 1 && isNaN(Config.Recipes[i][1])) {
@@ -1078,7 +1078,7 @@ const Cubing = {
 
         transmute();
         delay(700 + me.ping);
-        print("ÿc4Cubing: " + string);
+        console.log("ÿc4Cubing: " + string);
         Config.ShowCubingInfo && D2Bot.printToConsole(string, sdk.colors.D2Bot.Green);
         this.update();
 

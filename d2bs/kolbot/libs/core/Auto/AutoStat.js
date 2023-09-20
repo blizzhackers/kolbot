@@ -599,7 +599,7 @@ const AutoStat = new function () {
 
     while (getTickCount() - tick < 3000) {
       if (currStat > me.getStat(sdk.stats.StatPts)) {
-        print(
+        console.log(
           "AutoStat: Using " + (currStat - me.getStat(sdk.stats.StatPts))
           + " stat points in " + statIDToString[type]
         );
@@ -723,7 +723,7 @@ const AutoStat = new function () {
     this.bulkStat = bulkStat;
 
     if (!this.statBuildOrder || !this.statBuildOrder.length) {
-      print("AutoStat: No build array specified");
+      console.log("AutoStat: No build array specified");
 
       return false;
     }
@@ -742,7 +742,7 @@ const AutoStat = new function () {
       }
     }
 
-    print("AutoStat: Finished allocating stat points");
+    console.log("AutoStat: Finished allocating stat points");
 
     return true;
   };
