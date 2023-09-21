@@ -24,18 +24,52 @@ function Rusher () {
     "cain", "andariel", "radament", "cube", "amulet", "staff", "summoner", "duriel", "lamesen",
     "travincal", "mephisto", "izual", "diablo", "shenk", "anya", "ancients", "baal", "givewps"
   ];
-  let rushThread = getScript("threads/rushthread.js");
+  const RushThread = {
+    /** @type {Script} */
+    _thread: null,
+    path: "threads/rushthread.js",
 
-  const reloadThread = function () {
-    rushThread = getScript("threads/rushthread.js");
-    rushThread && rushThread.stop();
+    get: function () {
+      if (!this._thread) {
+        this._thread = getScript(this.path);
+      }
+      return this._thread;
+    },
+    /** @param {String} msg */
+    send: function (msg) {
+      // sign the msg so we can ignore other threads' messages
+      this.get().send("rush-" + msg);
+    },
+    pause: function () {
+      say("Pausing");
+      console.log("Pausing rush thread");
+      this.get().pause();
+    },
+    resume: function () {
+      say("Resuming");
+      console.log("Resuming rush thread");
+      this.get().resume();
+    },
+    start: function () {
+      load(this.path);
+      delay(500);
+      
+      while (!this.get()) {
+        delay(500);
+      }
+    },
+    stop: function () {
+      this.get().stop();
+    },
+    reload: function () {
+      this.stop();
 
-    delay(500);
-    load("threads/rushthread.js");
-
-    rushThread = getScript("threads/rushthread.js");
-
-    delay(500);
+      while (this.get().running) {
+        delay(3);
+      }
+      this._thread = null;
+      this.start();
+    },
   };
 
   const getPartyAct = function () {
@@ -122,22 +156,22 @@ function Rusher () {
   switch (getPartyAct()) {
   case 2:
     say("Party is in act 2, starting from act 2");
-    rushThread.send("skiptoact 2");
+    RushThread.send("skiptoact 2");
 
     break;
   case 3:
     say("Party is in act 3, starting from act 3");
-    rushThread.send("skiptoact 3");
+    RushThread.send("skiptoact 3");
 
     break;
   case 4:
     say("Party is in act 4, starting from act 4");
-    rushThread.send("skiptoact 4");
+    RushThread.send("skiptoact 4");
 
     break;
   case 5:
     say("Party is in act 5, starting from act 5");
-    rushThread.send("skiptoact 5");
+    RushThread.send("skiptoact 5");
 
     break;
   }
@@ -161,12 +195,12 @@ function Rusher () {
   if (command) {
     commandSplit0 = command.split(" ")[1];
     if (!!commandSplit0 && sequence.some(el => el.toLowerCase() === commandSplit0)) {
-      rushThread.send(command.toLowerCase());
+      RushThread.send(command.toLowerCase());
     }
   }
 
   delay(200);
-  rushThread.send("go");
+  RushThread.send("go");
 
   while (true) {
     if (commands.length > 0) {
@@ -174,19 +208,11 @@ function Rusher () {
 
       switch (command) {
       case "pause":
-        if (rushThread.running) {
-          say("Pausing");
-
-          rushThread.pause();
-        }
+        RushThread.pause();
 
         break;
       case "resume":
-        if (!rushThread.running) {
-          say("Resuming");
-
-          rushThread.resume();
-        }
+        RushThread.resume();
 
         break;
       default:
@@ -200,8 +226,8 @@ function Rusher () {
           if (commandSplit0.toLowerCase() === "do") {
             for (i = 0; i < sequence.length; i += 1) {
               if (command.split(" ")[1] && sequence[i].match(command.split(" ")[1], "gi")) {
-                this.reloadThread();
-                rushThread.send(command.split(" ")[1]);
+                RushThread.reload();
+                RushThread.send(command.split(" ")[1]);
 
                 break;
               }
@@ -212,8 +238,8 @@ function Rusher () {
             if (!isNaN(parseInt(command.split(" ")[1], 10))
               && parseInt(command.split(" ")[1], 10) > 0
               && parseInt(command.split(" ")[1], 10) <= 132) {
-              reloadThread();
-              rushThread.send(command);
+              RushThread.reload();
+              RushThread.send(command);
             } else {
               say("Invalid area");
             }

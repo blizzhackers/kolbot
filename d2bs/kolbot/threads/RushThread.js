@@ -1055,7 +1055,8 @@ function main () {
 
   this.scriptEvent = function (msg) {
     if (typeof msg === "string") {
-      command = msg;
+      if (!msg.startsWith("rush-")) return;
+      command = msg.substring(5);
     }
   };
 
