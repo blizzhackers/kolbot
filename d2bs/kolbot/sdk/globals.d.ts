@@ -527,6 +527,7 @@ declare global {
     readonly isAnni: boolean;
     readonly isTorch: boolean;
     readonly isGheeds: boolean;
+    readonly durabilityPercent: number;
 
     getColor(): number;
     getBodyLoc(): number[];
@@ -672,17 +673,57 @@ declare global {
     readonly IAS: number;
     readonly shapeshifted: boolean;
     readonly attacking: boolean;
+    /**
+     * @description max gold capacity (cLvl * 10000)
+     */
+    readonly maxgold: number;
 
-    haveWaypoint(area: number): boolean;
-    accessToAct(act: number): boolean;
+    // d2bs functions
     overhead(msg: string): void;
     repair(): boolean;
     revive(): void;
     move(x: number, y: number): boolean;
     setSkill(): boolean;
     cancel(number?: number): boolean;
-    inArea(area: number): boolean;
+    getRepairCost(): number;
+
+    // additions from kolbot
+    // #setters
+    walk(): void;
+    run(): void;
     switchToPrimary(): boolean;
+    switchWeapons(slot: 0 | 1): boolean;
+
+    // #getters
+    getPingDelay(): number;
+    getTpTool(): ItemUnit | null;
+    getIdTool(): ItemUnit | null;
+    getTome(id: number): ItemUnit | null;
+    getUnids(): ItemUnit[];
+    getWeaponQuantity(weaponLoc: number): number;
+    getItemsForRepair(repairPercent: number, chargedItems: boolean): ItemUnit[];
+    castingFrames(skillId: number, fcr?: number, charClass?: number): number;
+    castingDuration(skillId: number, fcr?: number, charClass?: number): number;
+
+    // #checkers?
+    needBeltPots(): boolean;
+    needBufferPots(): boolean;
+    needPotions(): boolean;
+    needHealing(): boolean;
+    needKeys(): boolean;
+    needRepair(): string[];
+    needMerc(): boolean;
+    needStash(): boolean;
+    needHealing(): boolean;
+    // checkScrolls(id: number): number;
+    checkKeys(): number;
+    canTpToTown(): boolean;
+    haveWaypoint(area: number): boolean;
+    accessToAct(act: number): boolean;
+    inArea(area: number): boolean;
+    haveSome(arg0: { name: number; equipped: boolean; }[]): any;
+    findItem(id?: number | string, mode?: number, location?: number, quality?: number): ItemUnit | boolean;
+    findItems(id?: number | string, mode?: number, location?: number): ItemUnit[];
     checkItem(itemInfo: {
       classid?: number;
       itemtype?: number;
@@ -692,33 +733,17 @@ declare global {
       name?: string | number;
       equipped?: boolean | number;
     }): {have: boolean; item: ItemUnit | null};
-    haveSome(arg0: { name: number; equipped: boolean; }[]): any;
-    equip(destination: number | undefined, item: ItemUnit);
-    getRepairCost(): number;
-    findItems(param: number, number?: number, number2?: number): ItemUnit[];
     usingShield(): boolean;
-    walk(): void;
-    run(): void;
-    getPingDelay(): number;
-    findItem(id?: number | string, mode?: number, location?: number, quality?: number): ItemUnit | boolean;
-    findItems(id?: number | string, mode?: number, location?: number): ItemUnit[];
+    checkQuest(questId: number, state: number): boolean;
+
+    // #actions
+    cleanUpInvoPotions(beltSize?: number): boolean;
+    equip(destination: number | undefined, item: ItemUnit);
     cancelUIFlags(): boolean;
-    switchWeapons(slot: 0 | 1): boolean;
-    castingFrames(skillId: number, fcr?: number, charClass?: number): number;
-    castingDuration(skillId: number, fcr?: number, charClass?: number): number;
-    getWeaponQuantity(weaponLoc: number): number;
-    needPotions(): boolean;
-    getTpTool(): ItemUnit | null;
-    getIdTool(): ItemUnit | null;
-    canTpToTown(): boolean;
-    needHealing(): boolean;
-    getTome(id: number): ItemUnit | null;
-    getUnids(): ItemUnit[];
     fieldID(): boolean;
-    switchToPrimary(): boolean;
-    haveWaypoint(area: number): boolean;
     castChargedSkill(skillId: number, target?: Unit): boolean;
     castChargedSkill(skillId: number, x: number, y: number): boolean;
+    clearBelt(): boolean;
   }
 
   const me: MeType
@@ -821,7 +846,7 @@ declare global {
     readonly distance: number;
 
     getNext(): PresetUnit | false;
-    realCoords(): { area: number, x: number, y: number };
+    realCoords(): { id: number, area: number, x: number, y: number };
   }
 
   type PresetObject = {
@@ -1090,6 +1115,37 @@ declare global {
     static info(start: boolean, msg: string, timer: string): void;
   }
   const console: Console;
+
+  class File {
+    public readonly readable: boolean;
+    public readonly writeable: boolean;
+    public readonly seekable: boolean;
+    public readonly mode: number;
+    public readonly binaryMode: boolean;
+    public readonly length: number;
+    public readonly path: string;
+    public position: number;
+    public readonly eof: boolean;
+    public readonly accessed: number;
+    public readonly created: number;
+    public readonly modified: number;
+    public autoflush: boolean;
+
+    public static open(filePath: string, mode?: number): File;
+    public static read(count: number): string;
+    public static read(count: number): Uint8Array;
+    public close(): File;
+    public reopen(): File;
+    public readLine(): string;
+    public readAllLines(): string[];
+    public readAll(): string;
+    public write(...args: any[]): File;
+    public seek(n: number): File;
+    public seek(n: number, isLines: boolean, fromStart: boolean): File;
+    public flush(): File;
+    public reset(): File;
+    public end(): File;
+  }
 
   function includeIfNotIncluded(file?: string): boolean;
   function includeCoreLibs(obj: { exclude: string[] }): boolean;

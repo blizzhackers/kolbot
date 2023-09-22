@@ -20,15 +20,14 @@ declare global {
     function scanShrines(range: any): void;
     function getShrine(unit: any): void;
     function getShrinesInArea(area: any, type: any, use: any): void;
-    function skipItem(id: any): void;
-    function shapeShift(mode: any): void;
-    function unShift(): void;
+    /** @deprecated */
     function townCheck(boolean?: boolean): void;
     function spy(name: any): void;
     function errorReport(error: Error | string, script?: string): void;
     function debugLog(msg: any): void;
     function useMenu(id: number): void;
     function poll<T>(check: () => T, timeout?: number, sleep?: number): T;
-    function getUIFlags(excluded?: []): void;
+    function getUIFlags(excluded?: []): number[] | null;
+    function getQuestStates(questId: number): number[];
   }
 }

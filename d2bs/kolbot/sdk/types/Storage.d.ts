@@ -36,6 +36,12 @@ declare global {
      * A function that resets the container's buffer and item list.
      */
     Reset(): void
+
+    /**
+     * Checks whether it is possible to fit an item in inventory given available non-locked space.
+     * @param item 
+     */
+    IsPossibleToFit(item: ItemUnit): boolean
     
     /**
      * A function that checks if an item can fit in the container.
