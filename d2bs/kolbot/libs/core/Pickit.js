@@ -245,6 +245,9 @@ const Pickit = {
       console.warn("undefined item (!?)");
 
       return false;
+    default:
+      // don't attempt items we are simply unable to pick up
+      return Storage.Inventory.IsPossibleToFit(unit);
     }
 
     return true;

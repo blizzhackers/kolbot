@@ -142,6 +142,33 @@
   /**
    * @param {ItemUnit} item 
    */
+  Container.prototype.IsPossibleToFit = function (item) {
+    if (!item) return false;
+    // only for the inventory as this has to deal with locked spots
+    if (this.name !== "Inventory") return true;
+    console.debug("Columns: " + Config.Inventory[0].length + " Rows: " + Config.Inventory.length);
+    for (let y = 0; y < this.width - (item.sizex - 1); y++) {
+      Loop:
+      for (let x = 0; x < this.height - (item.sizey - 1); x++) {
+        // If spot is locked move on
+        if (Config.Inventory[x][y] === 0) continue;
+
+        // Loop the item size to make sure we can fit it in non locked spots.
+        for (let nx = 0; nx < item.sizey; nx++) {
+          for (let ny = 0; ny < item.sizex; ny++) {
+            if (Config.Inventory[x + nx][y + ny] === 0) continue Loop;
+          }
+        }
+
+        return true;
+      }
+    }
+    return false;
+  };
+
+  /**
+   * @param {ItemUnit} item 
+   */
   Container.prototype.CanFit = function (item) {
     return (!!this.FindSpot(item));
   };
@@ -246,6 +273,14 @@
     // Make sure it's a valid item
     if (!item) return false;
 
+    if (item.sizex && item.sizey && !(item instanceof Unit)) {
+      // fake item we are checking if we can fit a certain sized item so mock some props to it
+      item.gid = -1;
+      item.classid = -1;
+      item.quality = -1;
+      item.gfx = -1;
+    }
+
     /**
      * @todo review this to see why it sometimes fails when there is actually enough room
      */
@@ -258,16 +293,6 @@
     let endX = this.width - (item.sizex - 1);
     let endY = this.height - (item.sizey - 1);
 
-    Storage.Reload();
-
-    if (item.sizex && item.sizey && !(item instanceof Unit)) {
-      // fake item we are checking if we can fit a certain sized item so mock some props to it
-      item.gid = -1;
-      item.classid = -1;
-      item.quality = -1;
-      item.gfx = -1;
-    }
-
     if (reverseX) { // right-to-left
       startX = endX - 1;
       endX = -1; // stops at 0
@@ -279,6 +304,8 @@
       endY = -1; // stops at 0
       yDir = -1;
     }
+
+    Storage.Reload();
 
     //Loop buffer looking for spot to place item.
     for (y = startX; y !== endX; y += xDir) {
