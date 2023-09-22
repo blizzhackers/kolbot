@@ -325,12 +325,12 @@ const AutoMule = {
       Town.move("stash");
 
       if (muleObj.continuousMule) {
-        print("ÿc4AutoMuleÿc0: Looking for valid mule");
+        console.log("ÿc4AutoMuleÿc0: Looking for valid mule");
         tick = getTickCount();
 
         while (getTickCount() - tick < timeout) {
           if (this.verifyMulePrefix(muleObj.charPrefix)) {
-            print("ÿc4AutoMuleÿc0: Found valid mule");
+            console.log("ÿc4AutoMuleÿc0: Found valid mule");
             begin = true;
 
             break;
@@ -352,7 +352,7 @@ const AutoMule = {
         : this.torchAnniCheck === 1
           ? " torch"
           : "";
-      print("ÿc4AutoMuleÿc0: In" + gameType + " mule game.");
+      console.log("ÿc4AutoMuleÿc0: In" + gameType + " mule game.");
       D2Bot.updateStatus("AutoMule: In" + gameType + " mule game.");
       
       if (this.torchAnniCheck === 2) {
@@ -406,7 +406,7 @@ const AutoMule = {
       removeEventListener("scriptmsg", muleModeEvent);
       removeEventListener("copydata", dropStatusEvent);
       
-      if (!muleObj.continuousMule) {
+      if (muleObj && !muleObj.continuousMule) {
         D2Bot.stop(muleObj.muleProfile, true);
         delay(1000);
         muleObj.stopProfile && D2Bot.start(muleObj.stopProfile);
@@ -625,7 +625,7 @@ const AutoMule = {
   },
 
   /**
-   * Drop Anni or Gheeds
+   * Drop Anni or Torch
    * @param {boolean} dropAnni 
    * @returns {boolean}
    */
@@ -648,11 +648,11 @@ const AutoMule = {
       D2Bot.printToConsole("AutoMule: Transfering Anni.", sdk.colors.D2Bot.DarkGold);
     } else {
       item = items.find(function (item) {
-        return item.isGheeds;
+        return item.isTorch;
       });
       if (!item) return false;
 
-      D2Bot.printToConsole("AutoMule: Transfering Gheeds.", sdk.colors.D2Bot.DarkGold);
+      D2Bot.printToConsole("AutoMule: Transfering Torch.", sdk.colors.D2Bot.DarkGold);
     }
 
     item.drop();
