@@ -242,8 +242,8 @@
 
     let book = Game.getItem(sdk.quest.item.BookofSkill);
     const returnSpot = {
-      x: book.x || me.x,
-      y: book.y || me.y
+      x: (book ? book.x : me.x),
+      y: (book ? book.y : me.y)
     };
 
     log(AutoRush.playersOut);
