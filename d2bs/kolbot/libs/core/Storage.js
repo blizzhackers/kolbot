@@ -146,7 +146,6 @@
     if (!item) return false;
     // only for the inventory as this has to deal with locked spots
     if (this.name !== "Inventory") return true;
-    console.debug("Columns: " + Config.Inventory[0].length + " Rows: " + Config.Inventory.length);
     for (let y = 0; y < this.width - (item.sizex - 1); y++) {
       Loop:
       for (let x = 0; x < this.height - (item.sizey - 1); x++) {
