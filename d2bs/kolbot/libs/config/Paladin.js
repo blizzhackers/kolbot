@@ -33,6 +33,8 @@ function LoadConfig () {
     Config.BattleOrders.SkipIfTardy = true; // Proceed with scripts if other players already moved on from BO spot
     Config.BattleOrders.Wait = 10; // Duration to wait for players to join game in seconds (default: 10)
 
+  Scripts.GetFade = false; // Get fade in River of Flames - only works if we are wearing an item with ctc Fade
+
   // ## Team MF
   Config.MFLeader = false; // Set to true if you have one or more MFHelpers. Opens TP and gives commands when doing normal MF runs.
 

@@ -20,6 +20,8 @@
     Config.BoBarbHelper.Mode = -1; // 0 = give BO, -1 = disabled
     Config.BoBarbHelper.Wp = 35; // 35 = Catacombs level 2
 
+  Scripts.GetFade = false; // Get fade in River of Flames - only works if we are wearing an item with ctc Fade
+
   // ## Team MF system
   Config.MFLeader = false; // Set to true if you have one or more MFHelpers. Opens TP and gives commands when doing normal MF runs.
   Scripts.MFHelper = false; // Run the same MF run as the MFLeader. Leader must have Config.MFLeader = true
