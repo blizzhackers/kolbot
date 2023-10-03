@@ -1065,7 +1065,8 @@ function ControlBot () {
 
         break;
       } else if (!gameEndWarningAnnounced && getTickCount() - startTime >= maxTime - Time.seconds(30)) {
-        Chat.say("Next game in 30 seconds.");
+        let remaining = Math.round((maxTime - (getTickCount() - startTime)) / 1000);
+        Chat.say("Next game in " + (Math.max(0, remaining)) + " seconds.");
         gameEndWarningAnnounced = true;
       }
 
