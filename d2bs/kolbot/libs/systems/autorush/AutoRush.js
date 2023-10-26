@@ -1101,7 +1101,7 @@
   };
   /** @param {string} [nick] */
   const baal = function (nick) {
-    if (me.hell) {
+    if (me.hell && AutoRush.rushMode !== RushModes.chanter) {
       if (!RushConfig[me.profile].config.Wps) {
         log("Baal not done in Hell ~Hell rush complete~");
         delay(500);
@@ -1112,7 +1112,7 @@
       return false;
     }
 
-    if (!bumperCheck(nick)) {
+    if (AutoRush.rushMode !== RushModes.chanter && !bumperCheck(nick)) {
       if (!RushConfig[me.profile].config.Wps) {
         log("No eligible bumpers detected. ~Rush complete~");
         delay(500);
