@@ -305,7 +305,7 @@
           throw new Error("Town.visitTown: Failed to go back from town");
         }
       }
-
+      Config.PublicMode && Pather.makePortal();
       console.log("ÿc8End ÿc0:: ÿc8visitTown - currentArea: " + getAreaName(me.area));
 
       return me.area === preArea;
