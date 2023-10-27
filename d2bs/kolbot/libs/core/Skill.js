@@ -161,7 +161,7 @@
           if (Precast.coldArmor > 0) {
             Precast.skills.get(Precast.coldArmor).duration = this.getDuration(Precast.coldArmor);
           }
-        } else {
+        } else if (Precast.skills.has(Config.UseColdArmor)) {
           Precast.skills.get(Config.UseColdArmor).duration = this.getDuration(Config.UseColdArmor);
         }
 
