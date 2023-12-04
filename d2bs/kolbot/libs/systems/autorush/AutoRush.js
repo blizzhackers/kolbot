@@ -177,6 +177,73 @@
 
     return true;
   };
+
+  /** @param {string} [nick] */
+  const bloodraven = function (nick) {
+    log("starting bloodraven");
+    Town.doChores();
+    Pather.useWaypoint(sdk.areas.ColdPlains, true) && Precast.doPrecast(true);
+
+    if (!Pather.moveToPreset(sdk.areas.BurialGrounds, sdk.unittype.Monster, sdk.monsters.preset.BloodRaven, 30, 30)) {
+      throw new Error("bloodraven failed");
+    }
+
+    Attack.securePosition(me.x, me.y, 20, 1000);
+    Pather.makePortal();
+    log(AutoRush.playersIn);
+
+    if (!Misc.poll(function () {
+      if (playerIn(me.area, nick)) {
+        return true;
+      }
+      Pather.moveTo(22582, 9612);
+      return false;
+    }, AutoRush.playerWaitTimeout, 1000)) {
+      log("timed out");
+      return false;
+    }
+
+    Attack.kill(sdk.monsters.BloodRaven);
+    log(AutoRush.playersOut);
+    Pather.moveTo(22582, 9612);
+
+    if (AutoRush.rushMode !== RushModes.chanter) {
+      while (playerIn(me.area, nick)) {
+        delay(250);
+      }
+
+      Pather.usePortal(null, me.name);
+      Town.goToTown(2);
+    }
+
+    return true;
+  };
+
+  /** @param {string} [nick] */
+  const smith = function (nick) {
+    log("starting smith");
+    Town.doChores();
+    Pather.useWaypoint(sdk.areas.OuterCloister, true) && Precast.doPrecast(true);
+    if (!Pather.moveToPreset(sdk.areas.Barracks, sdk.unittype.Object, sdk.quest.chest.MalusHolder)) {
+      throw new Error("smith failed");
+    }
+    Attack.securePosition(me.x, me.y, 30, 3000, true);
+    Pather.makePortal();
+    log(AutoRush.playersIn);
+    if (!Misc.poll(function () {
+      return playerIn(me.area, nick);
+    }, AutoRush.playerWaitTimeout, 1000)) {
+      log("timed out");
+      return false;
+    }
+    if (AutoRush.rushMode !== RushModes.chanter) {
+      while (playerIn(me.area, nick)) {
+        delay(100);
+      }
+    }
+    Pather.usePortal(null, me.name);
+    return true;
+  };
   /** @param {string} [nick] */
   const radament = function (nick) {
     log("starting radament");
@@ -1190,6 +1257,8 @@
     playersInAct: playersInAct,
     bumperCheck: bumperCheck,
     andariel: andariel,
+    bloodraven: bloodraven,
+    smith: smith,
     cube: cube,
     amulet: amulet,
     staff: staff,
