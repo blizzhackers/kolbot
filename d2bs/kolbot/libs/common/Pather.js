@@ -323,7 +323,7 @@ const Pather = {
 			delay(5);
 		}
 
-		useTeleport && Config.TeleSwitch && me.switchWeapons(Attack.getPrimarySlot() ^ 1);
+		useTeleport && Config.TeleSwitch && me.switchWeapons(Attack.getPrimarySlot());
 		PathDebug.removeHooks();
 
 		return getDistance(me, node.x, node.y) < 5;
