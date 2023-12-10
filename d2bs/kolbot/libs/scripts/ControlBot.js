@@ -910,10 +910,10 @@ function ControlBot () {
         _actions.set("andy", new RushAction("Rush Andariel", andariel));
       }
       if (Config.ControlBot.Rush.Bloodraven) {
-        _actions.set("andy", new RushAction("Rush Bloodraven", bloodraven));
+        _actions.set("raven", new RushAction("Rush Bloodraven", bloodraven));
       }
       if (Config.ControlBot.Rush.Smith) {
-        _actions.set("andy", new RushAction("Rush Smith", smith));
+        _actions.set("smith", new RushAction("Rush Smith", smith));
       }
       if (Config.ControlBot.Rush.Cube) {
         _actions.set("cube", new RushAction("Rush Cube", cube));
@@ -1052,7 +1052,7 @@ function ControlBot () {
               // check if command was for rush, if so we need to remove that as an option since its now completed
               if (actions.get(running.command).desc.includes("Rush")) {
                 console.log("Disabling " + running.command + " from actions");
-                lastAction.markAsComplete();
+                actions.get(running.command).markAsComplete();
               }
             }
           }

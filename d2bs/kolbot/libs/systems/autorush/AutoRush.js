@@ -188,7 +188,7 @@
       throw new Error("bloodraven failed");
     }
 
-    Attack.securePosition(me.x, me.y, 20, 1000);
+    Attack.securePosition(me.x, me.y, 10, 1000);
     Pather.makePortal();
     log(AutoRush.playersIn);
 
