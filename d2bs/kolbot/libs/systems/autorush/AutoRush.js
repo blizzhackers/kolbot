@@ -222,6 +222,12 @@
   /** @param {string} [nick] */
   const smith = function (nick) {
     log("starting smith");
+    if (Misc.findPlayer(nick).level < 8) {
+      log(nick + " you are not eligible for smith. You need to be at least level 8");
+        
+      return false;
+    }  
+
     Town.doChores();
     Pather.useWaypoint(sdk.areas.OuterCloister, true) && Precast.doPrecast(true);
     if (!Pather.moveToPreset(sdk.areas.Barracks, sdk.unittype.Object, sdk.quest.chest.MalusHolder)) {
