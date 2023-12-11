@@ -579,6 +579,8 @@ let Config = {
       SecurePortal: false,
     },
     Rush: {
+      Bloodraven: false,
+      Smith: false,
       Andy: false,
       Cube: false,
       Radament: false,

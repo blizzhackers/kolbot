@@ -399,23 +399,45 @@ declare global {
       export { Mode_2 as Mode };
       export const Wp: number;
     }
-    namespace ControlBot {
-      export const Bo: boolean;
-      export namespace Cows_1 {
-        const MakeCows: boolean;
-        const GetLeg: boolean;
-      }
-      export { Cows_1 as Cows };
-      export namespace Chant {
-        const Enchant: boolean;
-        const AutoEnchant: boolean;
-      }
-      export namespace Wps {
-        const GiveWps: boolean;
-        const SecurePortal: boolean;
-      }
-      export const EndMessage: string;
-      export const GameLength: number;
+    interface ControlBot {
+      Bo: boolean;
+      Cows: {
+        MakeCows: boolean;
+        GetLeg: boolean;
+      };
+      Chant: {
+        Enchant: boolean;
+        AutoEnchant: boolean;
+      };
+      Wps: {
+        GiveWps: boolean;
+        SecurePortal: boolean;
+      };
+      Rush: {
+        Bloodraven: boolean;
+        Smith: boolean;
+        Andy: boolean;
+        Cube: boolean;
+        Radament: boolean;
+        Amulet: boolean;
+        Staff: boolean;
+        Summoner: boolean;
+        Duriel: boolean;
+        LamEsen: boolean;
+        Eye: boolean;
+        Heart: boolean;
+        Brain: boolean;
+        Travincal: boolean;
+        Mephisto: boolean;
+        Izual: boolean;
+        Diablo: boolean;
+        Shenk: boolean;
+        Anya: boolean;
+        Ancients: boolean;
+        Baal: boolean;
+      };
+      EndMessage: string;
+      GameLength: number;
     }
     namespace IPHunter {
       export const IPList: any[];
