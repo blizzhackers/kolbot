@@ -250,6 +250,8 @@ function LoadConfig () {
     Config.ControlBot.Wps.GiveWps = true; // Give wps on command
     Config.ControlBot.Wps.SecurePortal = true; // Secure wp before making portal
     Config.ControlBot.Rush.Andy = true; // Kill Andy on command
+    Config.ControlBot.Rush.Bloodraven = true; // Kill Bloodraven on command
+    Config.ControlBot.Rush.Smith = true; // Kill Smith on command
     Config.ControlBot.Rush.Cube = true; // Get cube on command
     Config.ControlBot.Rush.Radament = true; // Kill Radament on command
     Config.ControlBot.Rush.Staff = true; // Get staff on command
