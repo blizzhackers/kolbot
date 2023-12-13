@@ -92,9 +92,7 @@ function main () {
         }
 
         MuleLogger.save(md5(info.realm.toLowerCase() + info.account.toLowerCase()), info.password);
-        if (!ControlAction.loginAccount(info)) {
-          Starter.makeAccount = true;
-        }
+        ControlAction.loginAccount(info);
       }
     );
     locations.set(sdk.game.locations.CreateNewAccount,
