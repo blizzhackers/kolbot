@@ -740,6 +740,55 @@ me.checkKeys = function () {
     }, 0);
 };
 
+/**
+ * @todo Whats the point of this?
+ * @returns {boolean}
+ */
+me.checkShard = function () {
+  let shard;
+  let check = { left: false, right: false };
+  let item = me.getItem("bld", sdk.items.mode.inStorage);
+
+  if (item) {
+    do {
+      if (item.isInInventory && item.unique) {
+        shard = copyUnit(item);
+
+        break;
+      }
+    } while (item.getNext());
+  }
+
+  if (!shard) return true;
+
+  item = me.getItem(-1, sdk.items.mode.Equipped);
+
+  if (item) {
+    do {
+      item.bodylocation === sdk.body.RightArm && (check.right = true);
+      item.bodylocation === sdk.body.LeftArm && (check.left = true);
+    } while (item.getNext());
+  }
+
+  if (!check.right) {
+    shard.toCursor();
+
+    while (me.itemoncursor) {
+      clickItem(sdk.clicktypes.click.item.Left, sdk.body.RightArm);
+      delay(500);
+    }
+  } else if (!check.left) {
+    shard.toCursor();
+
+    while (me.itemoncursor) {
+      clickItem(sdk.clicktypes.click.item.Left, sdk.body.LeftArm);
+      delay(500);
+    }
+  }
+
+  return true;
+};
+
 // Identify items while in the field if we have a id tome
 me.fieldID = function () {
   let list = me.getUnids();

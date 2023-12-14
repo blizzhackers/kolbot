@@ -1179,53 +1179,19 @@ const Town = {
   },
 
   /**
+   * @deprecated Use `Cubing.repairIngredientCheck` instead
    * @param {ItemUnit} item - Rune
    */
   repairIngredientCheck: function (item) {
-    if (!Config.CubeRepair) return false;
-
-    let [have, needRal, needOrt] = [0, 0, 0];
-    let items = me.getItemsForRepair(Config.RepairPercent, false);
-
-    if (items.length) {
-      while (items.length > 0) {
-        let runeNeeded = Item.getRepairIngred(items.shift());
-
-        if (runeNeeded === sdk.items.runes.Ral) {
-          needRal += 1;
-        } else if (runeNeeded === sdk.items.runes.Ort) {
-          needOrt += 1;
-        }
-      }
-    }
-
-    switch (item.classid) {
-    case sdk.items.runes.Ral:
-      needRal && (have = me.findItems(sdk.items.runes.Ral).length);
-
-      return (!have || have < needRal);
-    case sdk.items.runes.Ort:
-      needOrt && (have = me.findItems(sdk.items.runes.Ort).length);
-
-      return (!have || have < needOrt);
-    }
-
-    return false;
+    return Cubing.repairIngredientCheck(item);
   },
 
+  /**
+   * @deprecated Use `Cubing.doRepairs` instead
+   * @returns {boolean}
+   */
   cubeRepair: function () {
-    if (!Config.CubeRepair || !me.cube) return false;
-
-    let items = me.getItemsForRepair(Config.RepairPercent, false)
-      .sort(function (a, b) {
-        return a.durabilityPercent - b.durabilityPercent;
-      });
-
-    while (items.length > 0) {
-      Cubing.repairItem(items.shift());
-    }
-
-    return true;
+    return Cubing.doRepairs();
   },
 
   /**
@@ -1586,49 +1552,13 @@ const Town = {
     return true;
   },
 
+  /**
+   * @todo Whats the point of this?
+   * @deprecated Use `me.checkShard` instead
+   * @returns {boolean}
+   */
   checkShard: function () {
-    let shard;
-    let check = { left: false, right: false };
-    let item = me.getItem("bld", sdk.items.mode.inStorage);
-
-    if (item) {
-      do {
-        if (item.isInInventory && item.unique) {
-          shard = copyUnit(item);
-
-          break;
-        }
-      } while (item.getNext());
-    }
-
-    if (!shard) return true;
-
-    item = me.getItem(-1, sdk.items.mode.Equipped);
-
-    if (item) {
-      do {
-        item.bodylocation === sdk.body.RightArm && (check.right = true);
-        item.bodylocation === sdk.body.LeftArm && (check.left = true);
-      } while (item.getNext());
-    }
-
-    if (!check.right) {
-      shard.toCursor();
-
-      while (me.itemoncursor) {
-        clickItem(sdk.clicktypes.click.item.Left, sdk.body.RightArm);
-        delay(500);
-      }
-    } else if (!check.left) {
-      shard.toCursor();
-
-      while (me.itemoncursor) {
-        clickItem(sdk.clicktypes.click.item.Left, sdk.body.LeftArm);
-        delay(500);
-      }
-    }
-
-    return true;
+    return me.checkShard();
   },
 
   /** @deprecated Use `me.clearBelt` */
