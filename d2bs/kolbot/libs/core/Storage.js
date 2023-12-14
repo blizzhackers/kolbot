@@ -452,6 +452,14 @@
     let cItem, cube;
 
     // handle opening cube
+    if (this.location === sdk.storage.Cube) {
+      cube = me.getItem(sdk.quest.item.Cube);
+      if (!cube) return false;
+      if ((cube.isInStash || item.isInStash) && !getUIFlag(sdk.uiflags.Stash) && !Town.openStash()) {
+        return false;
+      }
+    }
+
     if (item.location === sdk.storage.Cube/*  && this.location === sdk.storage.Stash && !Storage.Inventory.MoveTo(item) */) {
       if (!getUIFlag(sdk.uiflags.Cube) && !Cubing.openCube()) return false;
       // Cube -> Stash, must place item in inventory first

@@ -106,6 +106,7 @@ const Town = {
   },
 
   /**
+   * @todo Only use names from the NPC object
    * @param {string} name 
    * @param {boolean} cancel 
    * @returns {boolean | Unit}
@@ -401,18 +402,18 @@ const Town = {
 
     const getNeededBuffer = function () {
       [buffer.hp, buffer.mp] = [0, 0];
-      me.getItemsEx().filter(function (p) {
-        return p.isInInventory
-          && [sdk.items.type.HealingPotion, sdk.items.type.ManaPotion].includes(p.itemType);
-      }).forEach(function (p) {
-        switch (p.itemType) {
-        case sdk.items.type.HealingPotion:
-          return (buffer.hp++);
-        case sdk.items.type.ManaPotion:
-          return (buffer.mp++);
-        }
-        return false;
-      });
+      me.getItemsEx()
+        .filter(function (p) {
+          if (!p.isInInventory) return false;
+          return (p.itemType === sdk.items.type.HealingPotion || p.itemType === sdk.items.type.ManaPotion);
+        })
+        .forEach(function (p) {
+          if (p.itemType === sdk.items.type.HealingPotion) {
+            buffer.hp++;
+          } else {
+            buffer.mp++;
+          }
+        });
     };
 
     // HP/MP Buffer
@@ -599,12 +600,10 @@ const Town = {
    */
   fillTome: function (classid) {
     if (me.gold < 450) return false;
-    if (Town.checkScrolls(classid) >= 13) return true;
+    if (me.checkScrolls(classid) >= 13) return true;
 
     let npc = Town.initNPC("Shop", "fillTome");
     if (!npc) return false;
-
-    delay(500);
 
     if (classid === sdk.items.TomeofTownPortal && !me.getTome(sdk.items.TomeofTownPortal)) {
       let tome = npc.getItem(sdk.items.TomeofTownPortal);
@@ -701,7 +700,6 @@ const Town = {
 
               if (tpTome) {
                 tpTome.sell();
-                delay(500);
               }
             }
 
@@ -1191,24 +1189,12 @@ const Town = {
 
     if (items.length) {
       while (items.length > 0) {
-        switch (items.shift().itemType) {
-        case sdk.items.type.Shield:
-        case sdk.items.type.Armor:
-        case sdk.items.type.Boots:
-        case sdk.items.type.Gloves:
-        case sdk.items.type.Belt:
-        case sdk.items.type.VoodooHeads:
-        case sdk.items.type.AuricShields:
-        case sdk.items.type.PrimalHelm:
-        case sdk.items.type.Pelt:
-        case sdk.items.type.Circlet:
+        let runeNeeded = Item.getRepairIngred(items.shift());
+
+        if (runeNeeded === sdk.items.runes.Ral) {
           needRal += 1;
-
-          break;
-        default:
+        } else if (runeNeeded === sdk.items.runes.Ort) {
           needOrt += 1;
-
-          break;
         }
       }
     }
@@ -1236,79 +1222,19 @@ const Town = {
       });
 
     while (items.length > 0) {
-      Town.cubeRepairItem(items.shift());
+      Cubing.repairItem(items.shift());
     }
 
     return true;
   },
 
   /**
+   * @deprecated Use `Cubing.repairItem` instead
    * @param {ItemUnit} item 
    * @returns {boolean}
    */
   cubeRepairItem: function (item) {
-    if (!item.isInStorage) return false;
-
-    let rune, cubeItems;
-    const bodyLoc = item.bodylocation;
-
-    switch (item.itemType) {
-    case sdk.items.type.Shield:
-    case sdk.items.type.Armor:
-    case sdk.items.type.Boots:
-    case sdk.items.type.Gloves:
-    case sdk.items.type.Belt:
-    case sdk.items.type.VoodooHeads:
-    case sdk.items.type.AuricShields:
-    case sdk.items.type.PrimalHelm:
-    case sdk.items.type.Pelt:
-    case sdk.items.type.Circlet:
-      rune = me.getItem(sdk.items.runes.Ral);
-
-      break;
-    default:
-      rune = me.getItem(sdk.items.runes.Ort);
-
-      break;
-    }
-
-    if (rune && Town.openStash() && Cubing.openCube() && Cubing.emptyCube()) {
-      for (let i = 0; i < 100; i += 1) {
-        if (!me.itemoncursor) {
-          if (Storage.Cube.MoveTo(item) && Storage.Cube.MoveTo(rune)) {
-            transmute();
-            delay(1000 + me.ping);
-          }
-
-          cubeItems = me.findItems(-1, -1, sdk.storage.Cube); // Get cube contents
-
-          // We expect only one item in cube
-          cubeItems.length === 1 && cubeItems[0].toCursor();
-        }
-
-        if (me.itemoncursor) {
-          for (let i = 0; i < 3; i += 1) {
-            clickItem(sdk.clicktypes.click.item.Left, bodyLoc);
-            delay(me.ping * 2 + 500);
-
-            if (cubeItems[0].bodylocation === bodyLoc) {
-              let cubeItem = cubeItems[0].fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<;.*]/, "").trim();
-              console.log(cubeItem + " successfully repaired and equipped.");
-              D2Bot.console.logToConsole(cubeItem + " successfully repaired and equipped.", sdk.colors.D2Bot.Green);
-
-              return true;
-            }
-          }
-        }
-
-        delay(200);
-      }
-
-      Misc.errorReport("Failed to put repaired item back on.");
-      D2Bot.stop();
-    }
-
-    return false;
+    return Cubing.repairItem(item);
   },
 
   /**

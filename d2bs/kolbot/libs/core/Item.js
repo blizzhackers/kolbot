@@ -56,6 +56,25 @@ const Item = {
   },
 
   /** @param {ItemUnit} item */
+  repairIngred: function (item) {
+    switch (item.itemType) {
+    case sdk.items.type.Shield:
+    case sdk.items.type.Armor:
+    case sdk.items.type.Boots:
+    case sdk.items.type.Gloves:
+    case sdk.items.type.Belt:
+    case sdk.items.type.VoodooHeads:
+    case sdk.items.type.AuricShields:
+    case sdk.items.type.PrimalHelm:
+    case sdk.items.type.Pelt:
+    case sdk.items.type.Circlet:
+      return sdk.items.runes.Ral;
+    default:
+      return sdk.items.runes.Ort;
+    }
+  },
+
+  /** @param {ItemUnit} item */
   hasTier: function (item) {
     return Config.AutoEquip && NTIP.GetTier(item) > 0;
   },

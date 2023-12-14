@@ -1329,4 +1329,138 @@ const Cubing = {
     me.cancel();
     me.cancel();
   },
+
+  /**
+   * @todo Add chipped/flawed gems for recharging a item
+   * @param {ItemUnit} item - Rune
+   */
+  repairIngredientCheck: function (item) {
+    if (!Config.CubeRepair) return false;
+    if (item.classid !== sdk.items.runes.Ral && item.classid !== sdk.items.runes.Ort) {
+      return false;
+    }
+
+    let [have, needRal, needOrt] = [0, 0, 0];
+    let items = me.getItemsForRepair(Config.RepairPercent, false);
+
+    if (items.length) {
+      while (items.length > 0) {
+        let runeNeeded = Item.getRepairIngred(items.shift());
+
+        if (runeNeeded === sdk.items.runes.Ral) {
+          needRal += 1;
+        } else if (runeNeeded === sdk.items.runes.Ort) {
+          needOrt += 1;
+        }
+      }
+    }
+
+    switch (item.classid) {
+    case sdk.items.runes.Ral:
+      needRal && (have = me.findItems(sdk.items.runes.Ral).length);
+
+      return (!have || have < needRal);
+    case sdk.items.runes.Ort:
+      needOrt && (have = me.findItems(sdk.items.runes.Ort).length);
+
+      return (!have || have < needOrt);
+    default:
+      return false;
+    }
+  },
+
+  /**
+   * @todo Allow cube-repairing items from stash/invo
+   * @todo Repair & Recharge
+   * @param {ItemUnit} item 
+   * @returns {boolean}
+   */
+  repairItem: function (item) {
+    if (!item || !item.isEquipped) return false;
+
+    const neededRune = Item.repairIngred(item);
+    const rune = me.getItem(neededRune);
+    const bodyLoc = item.bodylocation;
+
+    if (!rune || !Cubing.emptyCube()) return false;
+
+    for (let i = 0; i < 5; i++) {
+      if (!rune.isInCube) {
+        console.log("Moving rune to cube...");
+        if (!Storage.Cube.MoveTo(rune)) continue;
+      }
+      if (!item.isInCube) {
+        console.log("Moving item to cube...");
+        Storage.Cube.MoveTo(item);
+      }
+      if (rune.isInCube && item.isInCube && Cubing.openCube()) break;
+    }
+
+    if (!rune.isInCube || !item.isInCube) {
+      console.log("Failed to move rune or item to cube.");
+      // If item was equipped try reequipping it
+      if (bodyLoc && !item.isEquipped) {
+        item.isInCube && Cubing.openCube();
+        item.equip(bodyLoc);
+        delay(me.ping * 2 + 500);
+        me.cancelUIFlags();
+      }
+      return false;
+    }
+
+    for (let i = 0; i < 100; i += 1) {
+      let cubeItems = me.findItems(-1, -1, sdk.storage.Cube);
+
+      if (!me.itemoncursor && cubeItems.length === 2) {
+        console.log("Transmuting..." + i);
+        transmute();
+        delay(1000 + me.ping);
+
+        cubeItems = me.findItems(-1, -1, sdk.storage.Cube);
+
+        // We expect only one item in cube
+        console.log("Cube contents: " + cubeItems.map(i => i.name).join(", "));
+        cubeItems.length === 1 && cubeItems[0].toCursor();
+      }
+
+      if (me.itemoncursor) {
+        const cubeItem = Game.getCursorUnit();
+        for (let i = 0; i < 3; i++) {
+          clickItem(sdk.clicktypes.click.item.Left, bodyLoc);
+          delay(me.ping * 2 + 500);
+
+          if (cubeItem.bodylocation === bodyLoc) {
+            console.log(cubeItem.prettyPrint + " successfully repaired and equipped.");
+            D2Bot.printToConsole(cubeItem.prettyPrint + " successfully repaired and equipped.", sdk.colors.D2Bot.Green);
+            me.cancelUIFlags();
+
+            return true;
+          }
+        }
+      }
+
+      delay(200);
+    }
+
+    // error report is good but do we really need to stop?
+    Misc.errorReport("Failed to put repaired item back on.");
+    D2Bot.stop();
+
+    return false;
+  },
+
+  doRepairs: function () {
+    if (!Config.CubeRepair || !me.cube) return false;
+
+    let items = me.getItemsForRepair(Config.RepairPercent, false)
+      .sort(function (a, b) {
+        return a.durabilityPercent - b.durabilityPercent;
+      });
+
+    while (items.length > 0) {
+      Cubing.repairItem(items.shift());
+    }
+
+    return true;
+  },
 };
