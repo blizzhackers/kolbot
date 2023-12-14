@@ -230,6 +230,30 @@
     Control.LobbyQuit = new Control(sdk.controls.Button, 693, 490, 80, 20);
   }
 
+  // Ladder menu controls
+  {
+    Control.StandardLadder = new Control(sdk.controls.Button, 463, 188, 272, 32);
+    Control.HardcoreLadder = new Control(sdk.controls.Button, 463, 238, 272, 32);
+    Control.ExpansionLadder = new Control(sdk.controls.Button, 463, 288, 272, 32);
+    Control.ExpansionHardcoreLadder = new Control(sdk.controls.Button, 463, 338, 272, 32);
+    Control.LadderTab = new Control(sdk.controls.LabelBox, 421, 136, 350, 50);
+    Control.LadderOverall = new Control(sdk.controls.LabelBox, 427, 157, 85, 29);
+    Control.LadderAmazon = new Control(sdk.controls.LabelBox, 513, 157, 36, 29);
+    Control.LadderSorceress = new Control(sdk.controls.LabelBox, 550, 157, 36, 29);
+    Control.LadderNecromancer = new Control(sdk.controls.LabelBox, 587, 157, 36, 29);
+    Control.LadderPaladin = new Control(sdk.controls.LabelBox, 624, 157, 36, 29);
+    Control.LadderBarbarian = new Control(sdk.controls.LabelBox, 661, 157, 36, 29);
+    Control.LadderDruid = new Control(sdk.controls.LabelBox, 698, 157, 36, 29);
+    Control.LadderAssassin = new Control(sdk.controls.LabelBox, 735, 157, 36, 29);
+    Control.LadderRank = new Control(sdk.controls.LabelBox, 434, 162, 217, 12);
+    Control.LadderName = new Control(sdk.controls.LabelBox, 468, 162, 217, 12);
+    Control.LadderClass = new Control(sdk.controls.LabelBox, 596, 162, 217, 12);
+    Control.LadderLevel = new Control(sdk.controls.LabelBox, 640, 162, 217, 12);
+    Control.LadderExperience = new Control(sdk.controls.LabelBox, 703, 162, 217, 12);
+    Control.LadderList = new Control(sdk.controls.LabelBox, 434, 391, 313, 218);
+    Control.LadderScrollDown = new Control(sdk.controls.ScrollBar, 756, 391, 10, 238);
+  }
+
   // Join Game Menu Controls
   {
     Control.JoinGameWindow = new Control(sdk.controls.Button, 652, 469, 120, 20);
