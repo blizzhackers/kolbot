@@ -465,6 +465,18 @@ const Pather = {
                 }
               }
             }
+          } else if (fail > 0 && me.inArea(sdk.areas.LutGholein) && me.x > 5122 && me.y <= 5049) {
+            // dislike have this here but handle atma blocking us from inside the tavern
+            if (me.inArea(sdk.areas.LutGholein) && me.x > 5122 && me.y <= 5049) {
+              let atma = Game.getNPC(NPC.Atma);
+              if (atma && (atma.x === 5136 || atma.x === 5137)
+                && (atma.y >= 5048 && atma.y <= 5051)) {
+                // yup dumb lady is blocking the door, take side door
+                [[5140, 5038], [5148, 5031], [5154, 5025], [5161, 5030]].forEach(function (node) {
+                  Pather.walkTo(node[0], node[1]);
+                });
+              }
+            }
           }
 
           // Reduce node distance in new path
