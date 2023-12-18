@@ -755,6 +755,7 @@ Unit.prototype.openMenu = function (addDelay) {
       if ((getTickCount() - tick > 1000 && getInteractedNPC())
         || (getTickCount() - tick > 500 && getIsTalkingNPC())) {
         me.cancel();
+        break;
       }
 
       delay(100);
