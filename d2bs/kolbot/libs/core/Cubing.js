@@ -812,22 +812,22 @@ const Cubing = {
     let matchList = [];
 
     for (let i = 0; i < recipe.Ingredients.length; i += 1) {
-      for (let j = 0; j < this.validIngredients.length; j += 1) {
-        if (usedGids.indexOf(this.validIngredients[j].gid) === -1 && (
-          this.validIngredients[j].classid === recipe.Ingredients[i]
-            || (recipe.Ingredients[i] === "pgem" && this.gemList.includes(this.validIngredients[j].classid))
-            || (recipe.Ingredients[i] === "fgem" && this.gems.flawless.includes(this.validIngredients[j].classid))
-            || (recipe.Ingredients[i] === "gem" && this.gems.normal.includes(this.validIngredients[j].classid))
-            || (recipe.Ingredients[i] === "cgem" && this.gems.chipped.includes(this.validIngredients[j].classid))
-            || (recipe.Ingredients[i] === "hpot" && this.pots.healing.includes(this.validIngredients[j].classid))
-            || (recipe.Ingredients[i] === "mpot" && this.pots.mana.includes(this.validIngredients[j].classid))
+      for (let ingredient of Cubing.validIngredients) {
+        if (usedGids.indexOf(ingredient.gid) === -1 && (
+          ingredient.classid === recipe.Ingredients[i]
+            || (recipe.Ingredients[i] === "pgem" && Cubing.gemList.includes(ingredient.classid))
+            || (recipe.Ingredients[i] === "fgem" && Cubing.gems.flawless.includes(ingredient.classid))
+            || (recipe.Ingredients[i] === "gem" && Cubing.gems.normal.includes(ingredient.classid))
+            || (recipe.Ingredients[i] === "cgem" && Cubing.gems.chipped.includes(ingredient.classid))
+            || (recipe.Ingredients[i] === "hpot" && Cubing.pots.healing.includes(ingredient.classid))
+            || (recipe.Ingredients[i] === "mpot" && Cubing.pots.mana.includes(ingredient.classid))
         )) {
-          let item = me.getItem(this.validIngredients[j].classid, -1, this.validIngredients[j].gid);
+          let item = me.getItem(ingredient.classid, -1, ingredient.gid);
 
           // 26.11.2012. check if the item actually belongs to the given recipe
-          if (item && this.validItem(item, recipe)) {
+          if (item && Cubing.validItem(item, recipe)) {
             // don't repeat the same item
-            usedGids.push(this.validIngredients[j].gid);
+            usedGids.push(ingredient.gid);
             // push the item into the match list
             matchList.push(copyUnit(item));
 
