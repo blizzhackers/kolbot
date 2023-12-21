@@ -1047,80 +1047,80 @@ const Cubing = {
     for (let i = 0; i < tempArray.length; i += 1) {
       let string = "Transmuting: ";
       let items = this.checkRecipe(tempArray[i]);
+      if (!Array.isArray(items) || !items.length) continue;
 
-      if (Array.isArray(items) && items.length) {
-        // If cube isn't open, attempt to open stash (the function returns true if stash is already open)
-        if ((!getUIFlag(sdk.uiflags.Cube) && !Town.openStash()) || !this.emptyCube()) return false;
+      // If cube isn't open, attempt to open stash (the function returns true if stash is already open)
+      if ((!getUIFlag(sdk.uiflags.Cube) && !Town.openStash()) || !this.emptyCube()) return false;
 
-        this.cursorCheck();
+      this.cursorCheck();
 
-        i = -1;
+      i = -1;
 
-        let itemsToCubeCount = items.length;
+      let itemsToCubeCount = items.length;
 
-        while (items.length) {
-          string += (items[0].name.trim() + (items.length > 1 ? " + " : ""));
-          Storage.Cube.MoveTo(items[0]);
-          items.shift();
-        }
+      while (items.length) {
+        string += (items[0].name.trim() + (items.length > 1 ? " + " : ""));
+        Storage.Cube.MoveTo(items[0]);
+        items.shift();
+      }
 
-        let itemsInCube = me.getItemsEx().filter(el => el.isInCube);
-        if (itemsInCube.length !== itemsToCubeCount) {
-          console.warn("Failed to move all necesary items to cube");
-          itemsInCube.forEach(item => {
-            if (Storage.Inventory.CanFit(item) && Storage.Inventory.MoveTo(item)) return;
-            if (Storage.Stash.CanFit(item) && Storage.Stash.MoveTo(item)) return;
-          });
-          return false;
-        }
+      const itemsInCube = me.getItemsEx().filter(function (el) {
+        return el.isInCube;
+      });
+      if (itemsInCube.length !== itemsToCubeCount) {
+        console.warn("Failed to move all necesary items to cube");
+        itemsInCube.forEach(function (item) {
+          if (Storage.Inventory.CanFit(item) && Storage.Inventory.MoveTo(item)) return;
+          if (Storage.Stash.CanFit(item) && Storage.Stash.MoveTo(item)) return;
+        });
+        return false;
+      }
 
-        if (!this.openCube()) return false;
+      if (!this.openCube()) return false;
 
-        transmute();
-        delay(700 + me.ping);
-        console.log("ÿc4Cubing: " + string);
-        Config.ShowCubingInfo && D2Bot.printToConsole(string, sdk.colors.D2Bot.Green);
-        this.update();
+      transmute();
+      delay(700 + me.ping);
+      console.log("ÿc4Cubing: " + string);
+      Config.ShowCubingInfo && D2Bot.printToConsole(string, sdk.colors.D2Bot.Green);
+      this.update();
 
-        let cubeItems = me.findItems(-1, -1, sdk.storage.Cube);
+      let cubeItems = me.findItems(-1, -1, sdk.storage.Cube);
 
-        if (items) {
-          for (let j = 0; j < cubeItems.length; j += 1) {
-            let cubeItem = cubeItems[j];
-            let result = Pickit.checkItem(cubeItem);
+      if (items) {
+        for (let cubeItem of cubeItems) {
+          let result = Pickit.checkItem(cubeItem);
 
-            /**
-             * @todo
-             * - build better method of updating cubelist so if a item we cube is wanted by cubing we
-             * can update our list without clearing and rebuilding the whole thing
-             */
+          /**
+            * @todo
+            * - build better method of updating cubelist so if a item we cube is wanted by cubing we
+            * can update our list without clearing and rebuilding the whole thing
+            */
 
-            switch (result.result) {
-            case Pickit.Result.UNWANTED:
-              Item.logger("Dropped", cubeItem, "doCubing");
-              cubeItem.drop();
+          switch (result.result) {
+          case Pickit.Result.UNWANTED:
+            Item.logger("Dropped", cubeItem, "doCubing");
+            cubeItem.drop();
 
-              break;
-            case Pickit.Result.WANTED:
-              Item.logger("Cubing Kept", cubeItem);
-              Item.logItem("Cubing Kept", cubeItem, result.line);
+            break;
+          case Pickit.Result.WANTED:
+            Item.logger("Cubing Kept", cubeItem);
+            Item.logItem("Cubing Kept", cubeItem, result.line);
 
-              break;
-            case Pickit.Result.RUNEWORD:
-              Runewords.update(cubeItem.classid, cubeItem.gid);
+            break;
+          case Pickit.Result.RUNEWORD:
+            Runewords.update(cubeItem.classid, cubeItem.gid);
 
-              break;
-            case Pickit.Result.CRAFTING:
-              CraftingSystem.update(cubeItem);
+            break;
+          case Pickit.Result.CRAFTING:
+            CraftingSystem.update(cubeItem);
 
-              break;
-            }
+            break;
           }
         }
+      }
 
-        if (!this.emptyCube()) {
-          break;
-        }
+      if (!this.emptyCube()) {
+        break;
       }
     }
 
@@ -1130,7 +1130,7 @@ const Cubing = {
      */
     Cubing.update();
     let checkList = this.recipes.slice().shuffle();
-    if (checkList.some(r => Cubing.checkRecipe(r))) {
+    if (checkList.some(Cubing.checkRecipe)) {
       // we can still cube so recursive call to doCubing
       return Cubing.doCubing();
     }
@@ -1174,34 +1174,40 @@ const Cubing = {
     if (!cube) return false;
 
     if (cube.isInStash && !Town.openStash()) return false;
+    const cubeOpened = function () {
+      return getUIFlag(sdk.uiflags.Cube);
+    };
 
-    for (let i = 0; i < 5 && !getUIFlag(sdk.uiflags.Cube); i++) {
+    for (let i = 0; i < 5 && !cubeOpened(); i++) {
       cube.interact();
 
-      if (Misc.poll(() => getUIFlag(sdk.uiflags.Cube), (Time.seconds(1) * (i + 1)), 100)) {
+      if (Misc.poll(cubeOpened, (Time.seconds(1) * (i + 1)), 100)) {
         delay(100 + me.ping * 2); // allow UI to initialize
 
         return true;
       }
     }
 
-    return getUIFlag(sdk.uiflags.Cube);
+    return cubeOpened();
   },
 
   closeCube: function () {
     if (!getUIFlag(sdk.uiflags.Cube)) return true;
+    const cubeClosed = function () {
+      return !getUIFlag(sdk.uiflags.Cube);
+    };
 
-    for (let i = 0; i < 5 && getUIFlag(sdk.uiflags.Cube); i++) {
+    for (let i = 0; i < 5 && !cubeClosed(); i++) {
       me.cancel();
 
-      if (Misc.poll(() => !getUIFlag(sdk.uiflags.Cube), (Time.seconds(1) * (i + 1)), 100)) {
+      if (Misc.poll(cubeClosed, (Time.seconds(1) * (i + 1)), 100)) {
         delay(250 + me.ping * 2); // allow UI to initialize
 
         return true;
       }
     }
 
-    return !getUIFlag(sdk.uiflags.Cube);
+    return cubeClosed();
   },
 
   emptyCube: function () {
@@ -1210,6 +1216,11 @@ const Cubing = {
 
     let items = me.findItems(-1, -1, sdk.storage.Cube);
     if (!items) return true;
+
+    /** @param {ItemUnit} item */
+    const prettyPrint = function (item) {
+      return item && item.prettyPrint;
+    };
 
     let sorted = false;
 
@@ -1223,7 +1234,7 @@ const Cubing = {
           continue;
         }
         
-        console.warn("Failed to empty cube. Items still in cube :: ", items.map(i => i && i.prettyPrint));
+        console.warn("Failed to empty cube. Items still in cube :: ", items.map(prettyPrint));
         return false;
       }
 
