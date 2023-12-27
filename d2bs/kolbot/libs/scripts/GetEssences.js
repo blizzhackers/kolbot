@@ -17,17 +17,17 @@ function GetEssences () {
     }
   }
 
-  if (me.getItemsEx( sdk.quest.item.ChargedEssenceofHatred, sdk.items.mode.inStorage).length < 1) {
+  if (me.getItemsEx(sdk.quest.item.ChargedEssenceofHatred, sdk.items.mode.inStorage).length < 1) {
     try {
-      Loader.runScript("Mephisto", Config.Mephisto.MoatTrick = true);
+      Loader.runScript("Mephisto", Config.GetEssences.MoatTrick ? (Config.Mephisto.MoatTrick = true) : (Config.Mephisto.MoatTrick = false));
     } catch (e) {
       console.error("ÿc1Mephisto failed :: ", e);
     }
   }
-
+  
   if (me.getItemsEx(sdk.quest.item.BurningEssenceofTerror, sdk.items.mode.inStorage).length < 1) {
     try {
-      Loader.runScript("Diablo",() => Config.Diablo.Fast = true);
+      Loader.runScript("Diablo", Config.GetEssences.FastDiablo ? (Config.Diablo.Fast = true) : (Config.Diablo.Fast = false));
     } catch (e) {
       console.error("ÿc1Diablo failed :: ", e);
     }
