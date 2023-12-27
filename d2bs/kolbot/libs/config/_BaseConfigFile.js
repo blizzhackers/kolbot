@@ -332,7 +332,7 @@
     ];
   Scripts.ClearAnyArea = false; // Clear any area. Uses Config.ClearType to determine which type of monsters to kill.
     Config.ClearAnyArea.AreaList = []; // List of area ids to clear. See sdk/txt/areas.txt
-
+  Scripts.GetEssences = false; // Hunt for Essences.  Useful for cubing tokens without running all the bosses.
   Scripts.GemHunter = false; // Hunt for Gem Shrines. add the upgraded gems to your pickit. Upgraded version of gems will be auto-picked
     // List of are ids to hunt in. See sdk/txt/areas.txt or use sdk.areas.AreaName see -> \kolbot\libs\modules\sdk.js
     Config.GemHunter.AreaList = [
