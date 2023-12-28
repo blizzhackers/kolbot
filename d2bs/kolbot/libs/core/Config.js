@@ -704,6 +704,10 @@ let Config = {
   Questing: {
     StopProfile: false
   },
+  GetEssences: {
+    MoatMeph: false,
+    FastDiablo: false,
+  },
   GemHunter: {
     AreaList: [],
     GemList: []

@@ -555,6 +555,10 @@ declare global {
       const StopProfile_1: boolean;
       export { StopProfile_1 as StopProfile };
     }
+    interface GetEssences {
+      MoatMeph: boolean;
+      FastDiablo: boolean;
+    }
     namespace AutoSkill {
       const Enabled_3: boolean;
       export { Enabled_3 as Enabled };
