@@ -44,17 +44,6 @@ const MapMode = {
     Config.SkipLogging = []; // Custom log skip list. Set as three digit item code or classid. Example: ["tes", "ceh", 656, 657] will ignore logging of essences.
     Config.ShowCubingInfo = true; // Show cubing messages on console
 
-    // Gambling config
-    Config.Gamble = false;
-    Config.GambleGoldStart = 1000000;
-    Config.GambleGoldStop = 500000;
-
-    // List of item names or classids for gambling. Check libs/core/GameData/NTItemAlias.js file for other item classids.
-    Config.GambleItems.push("Amulet");
-    Config.GambleItems.push("Ring");
-    Config.GambleItems.push("Circlet");
-    Config.GambleItems.push("Coronet");
-
     // Party message settings. Each setting represents an array of messages that will be randomly chosen.
     // $name, $level, $class and $killer are replaced by the player's name, level, class and killer
     Config.Greetings = []; // Example: ["Hello, $name (level $level $class)"]
