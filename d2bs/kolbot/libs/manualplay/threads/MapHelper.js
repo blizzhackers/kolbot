@@ -280,34 +280,23 @@ function main () {
               Town.stash(true, true);
 
               break;
-
             case "gamble":
-              let _ConfigGamble = Config.Gamble;
-              Config.Gamble = true;
-              Town.gamble();
-              Config.Gamble = _ConfigGamble;
+              Config.Gamble ? Town.gamble() : me.overhead("Check your Config. Gambling is disabled.");
 
-              break;
-
-            case "diablo":
-              Loader.runScript("Diablo", () => {Config.Diablo.Fast = true; Config.PublicMode = false;} );
-	
               break;
             case "makePortal":
               Pather.makePortal();
 
               break;
-
             case "takePortal":
               Town.goToTown();
 
               break;
 
-            case "clearlevel":
-              Attack.clearLevel();
+            case "clear":
+              Attack.clear(10);
 							
               break;
-
             case "cowportal":
               Misc.openRedPortal(sdk.areas.MooMooFarm);
 
@@ -408,12 +397,11 @@ function main () {
             }
 
             break;
-
           case "stack":
             switch (obj.action) {
             case "thawing":
               Town.buyPots(10, "Thawing", true, true);
-							
+
               break;
             case "antidote":
               Town.buyPots(10, "Antidote", true, true);

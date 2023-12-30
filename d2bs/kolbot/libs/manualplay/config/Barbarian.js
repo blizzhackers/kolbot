@@ -45,17 +45,6 @@ function LoadConfig() {
   Config.TownHP = 0; // Go to town if life is under designated percent.
   Config.TownMP = 0; // Go to town if mana is under designated percent.
 
-  // Gambling config
-  Config.Gamble = false; // gamble command will override this.
-  Config.GambleGoldStart = 1000000;
-  Config.GambleGoldStop = 500000;
-
-  // List of item names or classids for gambling. Check libs/core/GameData/NTItemAlias.js file for other item classids.
-  Config.GambleItems.push("Amulet");
-  Config.GambleItems.push("Ring");
-  Config.GambleItems.push("Circlet");
-  Config.GambleItems.push("Coronet");
-
   /* Inventory lock configuration. !!!READ CAREFULLY!!!
    * 0 = item is locked and won't be moved. If item occupies more than one slot, ALL of those slots must be set to 0 to lock it in place.
    * Put 0s where your torch, annihilus and everything else you want to KEEP is.

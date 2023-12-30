@@ -28,8 +28,6 @@ const HelpMenu = new function () {
     "cowportal": "Make cow portal as long as bot already has leg",
     "uberportal": "Make uber portal(s) as long as bot already has key",
     "ubertrist": "Make uber tristam portal as long as bot already has organs",
-    "diablo": "Run Diablo in fast mode",
-    "clearlevel": "Clear the current Level",
     "useraddon": "Toggles useraddon mode",
     "Ctrl": "Hover over an item then press Ctrl to move that item from one area to the next. In example: Stash to Inventory, Cube to Inventory, Inventory to TradeScreen, or Inventory to Shop (sellItem)",
     "drop": {
@@ -78,8 +76,6 @@ const HelpMenu = new function () {
       "cowportal",
       "uberportal",
       "ubertrist",
-      "diablo",
-      "clearlevel",
       "useraddon",
       "drop invo",
       "drop stash",

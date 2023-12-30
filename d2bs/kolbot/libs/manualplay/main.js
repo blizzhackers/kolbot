@@ -256,8 +256,6 @@ function main () {
       me.inTown && (qolObj.action = "gamble");
  
       break;
-    case "diablo":
-    case "clearlevel":
     case "pick":
     case "cowportal":
     case "uberportal":
@@ -265,7 +263,6 @@ function main () {
       qolObj.action = cmd;
 
       break;
-
     case "drop":
       if (msgList.length < 2) {
         console.log("ÿc1Missing arguments");
