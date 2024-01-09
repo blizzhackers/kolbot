@@ -1191,15 +1191,19 @@ const Cubing = {
     return cubeOpened();
   },
 
-  closeCube: function () {
+  closeCube: function (closeToStash = false) {
     if (!getUIFlag(sdk.uiflags.Cube)) return true;
     const cubeClosed = function () {
       return !getUIFlag(sdk.uiflags.Cube);
     };
 
-    for (let i = 0; i < 5 && !cubeClosed(); i++) {
-      me.cancel();
+    const closeBtn = me.screensize
+      ? { x: 373, y: 469 }
+      : { x: 285, y: 394 };
 
+    for (let i = 0; i < 5 && !cubeClosed(); i++) {
+      closeToStash ? sendClick(closeBtn.x, closeBtn.y) : me.cancel();
+      
       if (Misc.poll(cubeClosed, (Time.seconds(1) * (i + 1)), 100)) {
         delay(250 + me.ping * 2); // allow UI to initialize
 
