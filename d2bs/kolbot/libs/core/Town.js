@@ -10,6 +10,94 @@ const Town = {
   sellTimer: getTickCount(), // shop speedup test
   lastChores: 0,
 
+  act: {
+    1: {
+      spot: (function () {
+        const _spot = {};
+        _spot.stash = [0, 0];
+        _spot[NPC.Warriv] = [0, 0];
+        _spot[NPC.Cain] = [0, 0];
+        _spot[NPC.Kashya] = [0, 0];
+        _spot[NPC.Akara] = [0, 0];
+        _spot[NPC.Charsi] = [0, 0];
+        _spot[NPC.Gheed] = [0, 0];
+        _spot.portalspot = [0, 0];
+        _spot.waypoint = [0, 0];
+        _spot.initialized = false;
+        return _spot;
+      })(),
+    },
+    2: {
+      spot: (function () {
+        const _spot = {};
+        _spot[NPC.Fara] = [5124, 5082];
+        _spot[NPC.Cain] = [5124, 5082];
+        _spot[NPC.Lysander] = [5118, 5104];
+        _spot[NPC.Greiz] = [5033, 5053];
+        _spot[NPC.Elzix] = [5032, 5102];
+        _spot[NPC.Jerhyn] = [5088, 5153];
+        _spot[NPC.Meshif] = [5205, 5058];
+        _spot[NPC.Drognan] = [5097, 5035];
+        _spot[NPC.Atma] = [5137, 5060];
+        _spot[NPC.Warriv] = [5152, 5201];
+        _spot.palace = [5088, 5153];
+        _spot.sewers = [5221, 5181];
+        _spot.portalspot = [5168, 5060];
+        _spot.stash = [5124, 5076];
+        _spot.waypoint = [5070, 5083];
+        _spot.initialized = true;
+        return _spot;
+      })(),
+    },
+    3: {
+      spot: (function () {
+        const _spot = {};
+        _spot[NPC.Meshif] = [5118, 5168];
+        _spot[NPC.Hratli] = [5223, 5048, 5127, 5172];
+        _spot[NPC.Ormus] = [5129, 5093];
+        _spot[NPC.Asheara] = [5043, 5093];
+        _spot[NPC.Alkor] = [5083, 5016];
+        _spot[NPC.Cain] = [5148, 5066];
+        _spot.stash = [5144, 5059];
+        _spot.portalspot = [5150, 5063];
+        _spot.waypoint = [5158, 5050];
+        _spot.initialized = true;
+        return _spot;
+      })(),
+    },
+    4: {
+      spot: (function () {
+        const _spot = {};
+        _spot[NPC.Cain] = [5027, 5027];
+        _spot[NPC.Halbu] = [5089, 5031];
+        _spot[NPC.Tyrael] = [5027, 5027];
+        _spot[NPC.Jamella] = [5088, 5054];
+        _spot.stash = [5022, 5040];
+        _spot.portalspot = [5045, 5042];
+        _spot.waypoint = [5043, 5018];
+        _spot.initialized = true;
+        return _spot;
+      })(),
+    },
+    5: {
+      spot: (function () {
+        const _spot = {};
+        _spot[NPC.Larzuk] = [5141, 5045];
+        _spot[NPC.Malah] = [5078, 5029];
+        _spot[NPC.Cain] = [5119, 5061];
+        _spot[NPC.Qual_Kehk] = [5066, 5083];
+        _spot[NPC.Anya] = [5112, 5120];
+        _spot[NPC.Nihlathak] = [5071, 5111];
+        _spot.stash = [5129, 5061];
+        _spot.portalspot = [5098, 5019];
+        _spot.portal = [5118, 5120];
+        _spot.waypoint = [5113, 5068];
+        _spot.initialized = true;
+        return _spot;
+      })(),
+    }
+  },
+
   tasks: (function () {
     /**
      * @param {string} heal 
@@ -66,43 +154,54 @@ const Town = {
       throw new Error("Failed to go to town for chores");
     }
 
-    const preAct = me.act;
-    Pather.allowBroadcast = false;
+    try {
+      Pather.allowBroadcast = false;
+      if (Config.FastPick && new RegExp(/[default.dbj|main.js]/gi).test(getScript(true).name)) {
+        // shopping causes this to bug out sometimes so remove it for duration of chores
+        removeEventListener("itemaction", Pickit.itemEvent);
+      }
 
-    // Burst of speed while in town
-    if (Skill.canUse(sdk.skills.BurstofSpeed) && !me.getState(sdk.states.BurstofSpeed)) {
-      Skill.cast(sdk.skills.BurstofSpeed, sdk.skills.hand.Right);
+      const preAct = me.act;
+      // Burst of speed while in town
+      if (Skill.canUse(sdk.skills.BurstofSpeed) && !me.getState(sdk.states.BurstofSpeed)) {
+        Skill.cast(sdk.skills.BurstofSpeed, sdk.skills.hand.Right);
+      }
+
+      me.switchToPrimary();
+
+      Town.heal();
+      Town.identify();
+      Town.clearInventory();
+      Town.fillTome(sdk.items.TomeofTownPortal);
+      Town.buyPotions();
+      Config.FieldID.Enabled && Town.fillTome(sdk.items.TomeofIdentify);
+      Town.shopItems();
+      Town.buyKeys();
+      Town.repair(repair);
+      Town.gamble();
+      Town.reviveMerc();
+      Cubing.doCubing();
+      Runewords.makeRunewords();
+      Town.stash(true);
+      Town.checkQuestItems();
+      !!me.getItem(sdk.items.TomeofTownPortal) && Town.clearScrolls();
+
+      me.act !== preAct && Town.goToTown(preAct);
+      me.cancelUIFlags();
+      !me.barbarian && Precast.haveCTA === -1 && Precast.doPrecast(false);
+
+      delay(250);
+      console.info(false, null, "doChores");
+
+      return true;
+    } finally {
+      if (Config.FastPick && new RegExp(/[default.dbj|main.js]/gi).test(getScript(true).name)) {
+        addEventListener("itemaction", Pickit.itemEvent);
+      }
+      
+      Pather.allowBroadcast = true;
+      Town.lastChores = getTickCount();
     }
-
-    me.switchToPrimary();
-
-    Town.heal();
-    Town.identify();
-    Town.clearInventory();
-    Town.fillTome(sdk.items.TomeofTownPortal);
-    Town.buyPotions();
-    Config.FieldID.Enabled && Town.fillTome(sdk.items.TomeofIdentify);
-    Town.shopItems();
-    Town.buyKeys();
-    Town.repair(repair);
-    Town.gamble();
-    Town.reviveMerc();
-    Cubing.doCubing();
-    Runewords.makeRunewords();
-    Town.stash(true);
-    Town.checkQuestItems();
-    !!me.getItem(sdk.items.TomeofTownPortal) && Town.clearScrolls();
-
-    me.act !== preAct && Town.goToTown(preAct);
-    me.cancelUIFlags();
-    !me.barbarian && Precast.haveCTA === -1 && Precast.doPrecast(false);
-
-    delay(250);
-    console.info(false, null, "doChores");
-    Pather.allowBroadcast = true;
-    Town.lastChores = getTickCount();
-
-    return true;
   },
 
   /**
@@ -581,14 +680,13 @@ const Town = {
    */
   getPotion: function (npc, type, highestPot = 5) {
     if (!type) return false;
+    if (type !== "hp" && type !== "mp") return false;
 
-    if (type === "hp" || type === "mp") {
-      for (let i = highestPot; i > 0; i -= 1) {
-        let result = npc.getItem(type + i);
+    for (let i = highestPot; i > 0; i -= 1) {
+      let result = npc.getItem(type + i);
 
-        if (result) {
-          return result;
-        }
+      if (result) {
+        return result;
       }
     }
 
@@ -771,40 +869,38 @@ const Town = {
     me.cancel();
     Town.stash(false);
 
-    let unids = me.getUnids();
+    const unids = me.getUnids();
+    if (!unids.length) return true;
 
-    if (unids) {
-      // Check if we may use Cain - number of unid items
-      if (unids.length < Config.CainID.MinUnids) return false;
+    // Check if we may use Cain - number of unid items
+    if (unids.length < Config.CainID.MinUnids) return false;
 
-      // Check if we may use Cain - kept unid items
-      for (let item of unids) {
-        if (Pickit.checkItem(item).result > 0) return false;
-      }
-
-      let cain = Town.initNPC("CainID", "cainID");
-      if (!cain) return false;
-
-      for (let item of unids) {
-        let result = Pickit.checkItem(item);
-
-        switch (result.result) {
-        case Pickit.Result.UNWANTED:
-          Item.logger("Dropped", item, "cainID");
-          item.drop();
-
-          break;
-        case Pickit.Result.WANTED:
-          Item.logger("Kept", item);
-          Item.logItem("Kept", item, result.line);
-
-          break;
-        default:
-          break;
-        }
-      }
+    // Check if we may use Cain - kept unid items
+    for (let item of unids) {
+      if (Pickit.checkItem(item).result > 0) return false;
     }
 
+    let cain = Town.initNPC("CainID", "cainID");
+    if (!cain) return false;
+
+    for (let item of unids) {
+      let result = Pickit.checkItem(item);
+
+      switch (result.result) {
+      case Pickit.Result.UNWANTED:
+        Item.logger("Dropped", item, "cainID");
+        item.drop();
+
+        break;
+      case Pickit.Result.WANTED:
+        Item.logger("Kept", item);
+        Item.logItem("Kept", item, result.line);
+
+        break;
+      default:
+        break;
+      }
+    }
     return true;
   },
 
@@ -1207,7 +1303,7 @@ const Town = {
    * @param {boolean} [force=false] 
    */
   repair: function (force = false) {
-    if (Town.cubeRepair()) return true;
+    if (Cubing.doRepairs()) return true;
 
     let npc;
     let repairAction = me.needRepair();
@@ -1463,13 +1559,14 @@ const Town = {
   },
 
   openStash: function () {
-    if (getUIFlag(sdk.uiflags.Cube) && !Cubing.closeCube()) return false;
+    if (getUIFlag(sdk.uiflags.Cube) && !Cubing.closeCube(true)) return false;
     if (getUIFlag(sdk.uiflags.Stash)) return true;
     const stashOpened = function () {
       return getUIFlag(sdk.uiflags.Stash);
     };
 
-    for (let i = 0; i < 5; i += 1) {
+    for (let i = 0; i < 5 && !stashOpened(); i += 1) {
+      me.itemoncursor && Cubing.cursorCheck();
       me.cancel();
 
       if (Town.move("stash")) {
@@ -1811,94 +1908,6 @@ const Town = {
     console.info(false, null, "clearInventory");
 
     return true;
-  },
-  
-  act: {
-    1: {
-      spot: (function () {
-        const _spot = {};
-        _spot.stash = [0, 0];
-        _spot[NPC.Warriv] = [0, 0];
-        _spot[NPC.Cain] = [0, 0];
-        _spot[NPC.Kashya] = [0, 0];
-        _spot[NPC.Akara] = [0, 0];
-        _spot[NPC.Charsi] = [0, 0];
-        _spot[NPC.Gheed] = [0, 0];
-        _spot.portalspot = [0, 0];
-        _spot.waypoint = [0, 0];
-        _spot.initialized = false;
-        return _spot;
-      })(),
-    },
-    2: {
-      spot: (function () {
-        const _spot = {};
-        _spot[NPC.Fara] = [5124, 5082];
-        _spot[NPC.Cain] = [5124, 5082];
-        _spot[NPC.Lysander] = [5118, 5104];
-        _spot[NPC.Greiz] = [5033, 5053];
-        _spot[NPC.Elzix] = [5032, 5102];
-        _spot[NPC.Jerhyn] = [5088, 5153];
-        _spot[NPC.Meshif] = [5205, 5058];
-        _spot[NPC.Drognan] = [5097, 5035];
-        _spot[NPC.Atma] = [5137, 5060];
-        _spot[NPC.Warriv] = [5152, 5201];
-        _spot.palace = [5088, 5153];
-        _spot.sewers = [5221, 5181];
-        _spot.portalspot = [5168, 5060];
-        _spot.stash = [5124, 5076];
-        _spot.waypoint = [5070, 5083];
-        _spot.initialized = true;
-        return _spot;
-      })(),
-    },
-    3: {
-      spot: (function () {
-        const _spot = {};
-        _spot[NPC.Meshif] = [5118, 5168];
-        _spot[NPC.Hratli] = [5223, 5048, 5127, 5172];
-        _spot[NPC.Ormus] = [5129, 5093];
-        _spot[NPC.Asheara] = [5043, 5093];
-        _spot[NPC.Alkor] = [5083, 5016];
-        _spot[NPC.Cain] = [5148, 5066];
-        _spot.stash = [5144, 5059];
-        _spot.portalspot = [5150, 5063];
-        _spot.waypoint = [5158, 5050];
-        _spot.initialized = true;
-        return _spot;
-      })(),
-    },
-    4: {
-      spot: (function () {
-        const _spot = {};
-        _spot[NPC.Cain] = [5027, 5027];
-        _spot[NPC.Halbu] = [5089, 5031];
-        _spot[NPC.Tyrael] = [5027, 5027];
-        _spot[NPC.Jamella] = [5088, 5054];
-        _spot.stash = [5022, 5040];
-        _spot.portalspot = [5045, 5042];
-        _spot.waypoint = [5043, 5018];
-        _spot.initialized = true;
-        return _spot;
-      })(),
-    },
-    5: {
-      spot: (function () {
-        const _spot = {};
-        _spot[NPC.Larzuk] = [5141, 5045];
-        _spot[NPC.Malah] = [5078, 5029];
-        _spot[NPC.Cain] = [5119, 5061];
-        _spot[NPC.Qual_Kehk] = [5066, 5083];
-        _spot[NPC.Anya] = [5112, 5120];
-        _spot[NPC.Nihlathak] = [5071, 5111];
-        _spot.stash = [5129, 5061];
-        _spot.portalspot = [5098, 5019];
-        _spot.portal = [5118, 5120];
-        _spot.waypoint = [5113, 5068];
-        _spot.initialized = true;
-        return _spot;
-      })(),
-    }
   },
 
   initialize: function () {
