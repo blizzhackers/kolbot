@@ -121,8 +121,9 @@
       MonsterObject: 0xFFFF,
       BlockMissile: 0x80E,
       WallOrRanged: 0x5,
-      BlockWalk: 0x1805,
+      BlockWalk: 0x1905,
       FriendlyRanged: 0x2004,
+      BoneWall: 4352,
     },
 
     areas: {
@@ -4102,6 +4103,7 @@
         JalalsMane: 21750,
         HeraldofZakarum: 21758,
         BloodRavensCharge: 21508,
+        Windforce: 21635,
         Gimmershred: 21637,
         MedusasGaze: 21516,
         Rockstopper: 21519,
@@ -4296,6 +4298,7 @@
         Thunderstroke: 21445,
         DemonsArch: 21447,
         DjinnSlayer: 21450,
+        GinthersRift: 21829,
 
         // Runewords
         AncientsPledge: 20507,

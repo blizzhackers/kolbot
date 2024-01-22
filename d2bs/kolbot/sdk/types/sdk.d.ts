@@ -91,6 +91,7 @@ declare global {
       const WallOrRanged: 0x5;
       const BlockWalk: 0x1805;
       const FriendlyRanged: 0x2004;
+      const BoneWall: 4352;
     }
 
     export namespace areas {
@@ -3251,11 +3252,11 @@ declare global {
       const Soul: 540;
       const Scalp: 541;
       const Spleen: 542;
-      const Key: 543;
       const Ear: 556;
       const Herb: 602;
       const anevilforce: 609;
       // Potions, tomes/scrolls, gold
+      export const Key: 543;
       export const TomeofTownPortal: 518;
       export const TomeofIdentify: 519;
       export const ScrollofTownPortal: 529;
@@ -4221,6 +4222,8 @@ declare global {
         const Thunderstroke: 21445;
         const DemonsArch: 21447;
         const DjinnSlayer: 21450;
+        const Windforce: 21635;
+        const GinthersRift: 21829;
 
         // Runewords
         const AncientsPledge: 20507;
