@@ -252,6 +252,10 @@ function main () {
       me.inTown && (qolObj.action = "stashItems");
 
       break;
+    case "gamble":
+      me.inTown && (qolObj.action = "gamble");
+ 
+      break;
     case "pick":
     case "cowportal":
     case "uberportal":

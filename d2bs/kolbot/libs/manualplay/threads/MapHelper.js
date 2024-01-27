@@ -280,6 +280,10 @@ function main () {
               Town.stash(true, true);
 
               break;
+            case "gamble":
+              Config.Gamble ? Town.gamble() : me.overhead("Check your Config. Gambling is disabled.");
+
+              break;
             case "makePortal":
               Pather.makePortal();
 
@@ -288,9 +292,10 @@ function main () {
               Town.goToTown();
 
               break;
+
             case "clear":
               Attack.clear(10);
-
+							
               break;
             case "cowportal":
               Misc.openRedPortal(sdk.areas.MooMooFarm);
@@ -396,7 +401,7 @@ function main () {
             switch (obj.action) {
             case "thawing":
               Town.buyPots(10, "Thawing", true, true);
-              
+
               break;
             case "antidote":
               Town.buyPots(10, "Antidote", true, true);
