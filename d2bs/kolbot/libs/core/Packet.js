@@ -99,8 +99,8 @@ const Packet = {
    * @returns {boolean}
    */
   buyItem: function (unit, shiftBuy, gamble) {
-    let oldGold = me.gold;
-    let itemCount = me.itemcount;
+    const oldGold = me.gold;
+    const itemCount = me.itemcount;
     let npc = getInteractedNPC();
 
     try {
@@ -392,6 +392,20 @@ const Packet = {
     return true;
   },
 
+  /**
+   * @param {NPCUnit} who 
+   * @returns {boolean}
+   */
+  initNPC: function (who) {
+    if (!who || !copyUnit(who).x) return false;
+    new PacketBuilder()
+      .byte(sdk.packets.send.NPCInit)
+      .dword(1) // action type
+      .dword(who.gid)
+      .send();
+    return true;
+  },
+  
   /**
    * @param {NPCUnit} who 
    * @returns {boolean}
