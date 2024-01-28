@@ -5,12 +5,12 @@
 *
 */
 
-function ShopBot() {
+function ShopBot () {
   const overlayText = {
     title: new Text("kolbot shopbot", 50, 245, 2, 1),
-    cycles: new Text("Cycles in last minute:", 50, 260, 2, 1),
-    frequency: new Text("Valid item frequency:", 50, 275, 2, 1),
-    totalCycles: new Text("Total cycles:", 50, 290, 2, 1),
+    cycles: new Text("Cycles in last minute: 0", 50, 260, 2, 1),
+    frequency: new Text("Valid item frequency: 0", 50, 275, 2, 1),
+    totalCycles: new Text("Total cycles: 0", 50, 290, 2, 1),
   };
 
   let tickCount;
@@ -18,9 +18,46 @@ function ShopBot() {
   let validItems = 0;
   let totalCycles = 0;
 
-  Pather.teleport = false;
+  /** @type {Array<[(item: ItemUnit) => boolean, (item: ItemUnit) => boolean, (item: ItemUnit) => boolean]>} */
   const pickEntries = [];
+  /** @type {Object<string, NPCUnit>} */
   const npcs = {};
+  const wpPresets = {
+    1: sdk.objects.A1Waypoint,
+    2: sdk.objects.A2Waypoint,
+    3: sdk.objects.A3Waypoint,
+    4: sdk.objects.A4Waypoint,
+    5: sdk.objects.A5Waypoint
+  };
+  const outOfTownWps = {
+    1: sdk.areas.CatacombsLvl2,
+    2: sdk.areas.A2SewersLvl2,
+    3: sdk.areas.DuranceofHateLvl2,
+    4: sdk.areas.RiverofFlame,
+    5: sdk.areas.CrystalizedPassage
+  };
+  const shopableNPCS = new Map([
+    // Act 1
+    [NPC.Charsi, { town: sdk.areas.RogueEncampment, menuId: "Repair" }],
+    [NPC.Akara, { town: sdk.areas.RogueEncampment, menuId: "Shop" }],
+    [NPC.Gheed, { town: sdk.areas.RogueEncampment, menuId: "Shop" }],
+    // Act 2
+    [NPC.Fara, { town: sdk.areas.LutGholein, menuId: "Repair" }],
+    [NPC.Elzix, { town: sdk.areas.LutGholein, menuId: "Shop" }],
+    [NPC.Drognan, { town: sdk.areas.LutGholein, menuId: "Shop" }],
+    // Act 3
+    [NPC.Hratli, { town: sdk.areas.KurastDocktown, menuId: "Repair" }],
+    [NPC.Asheara, { town: sdk.areas.KurastDocktown, menuId: "Shop" }],
+    [NPC.Ormus, { town: sdk.areas.KurastDocktown, menuId: "Shop" }],
+    // Act 4
+    [NPC.Halbu, { town: sdk.areas.PandemoniumFortress, menuId: "Repair" }],
+    [NPC.Jamella, { town: sdk.areas.PandemoniumFortress, menuId: "Shop" }],
+    // Act 5
+    [NPC.Larzuk, { town: sdk.areas.Harrogath, menuId: "Repair" }],
+    [NPC.Malah, { town: sdk.areas.Harrogath, menuId: "Shop" }],
+    [NPC.Anya, { town: sdk.areas.Harrogath, menuId: "Shop" }],
+    [NPC.Nihlathak, { town: sdk.areas.Harrogath, menuId: "Shop" }]
+  ]);
 
   const buildPickList = function () {
     let nipfile, filepath = "pickit/shopbot.nip";
@@ -78,7 +115,7 @@ function ShopBot() {
 
       if (!getUIFlag(sdk.uiflags.NPCMenu)) {
         Packet.entityInteract(npc);
-        sendPacket(1, sdk.packets.send.NPCInit, 4, 1, 4, npc.gid);
+        Packet.initNPC(npc);
       }
 
       let tick = getTickCount();
@@ -103,8 +140,6 @@ function ShopBot() {
    * @returns {boolean}
    */
   const shopItems = function (npc, menuId) {
-    let bought;
-
     if (!Storage.Inventory.CanFit({ sizex: 2, sizey: 4 }) && AutoMule.getMuleItems().length > 0) {
       D2Bot.printToConsole("Mule triggered");
       scriptBroadcast("mule");
@@ -127,11 +162,11 @@ function ShopBot() {
     let items = npc.getItemsEx().filter(function (item) {
       return (Config.ShopBot.ScanIDs.includes(item.classid) || Config.ShopBot.ScanIDs.length === 0);
     });
-
     if (!items.length) return false;
 
     me.overhead(npc.itemcount + " items, " + items.length + " valid");
 
+    let bought;
     validItems += items.length;
     overlayText.frequency.text = "Valid base items / cycle: " + ((validItems / totalCycles).toFixed(2).toString());
 
@@ -167,53 +202,13 @@ function ShopBot() {
    * @returns {boolean}
    */
   const shopAtNPC = function (name) {
-    let wp, menuId = "Shop";
-
-    switch (name) {
-    case NPC.Charsi:
-      menuId = "Repair";
-      // eslint-disable-next-line no-fallthrough
-    case NPC.Akara:
-    case NPC.Gheed:
-      wp = sdk.areas.RogueEncampment;
-
-      break;
-    case NPC.Fara:
-      menuId = "Repair";
-      // eslint-disable-next-line no-fallthrough
-    case NPC.Elzix:
-    case NPC.Drognan:
-      wp = sdk.areas.LutGholein;
-
-      break;
-    case NPC.Hratli:
-      menuId = "Repair";
-      // eslint-disable-next-line no-fallthrough
-    case NPC.Asheara:
-    case NPC.Ormus:
-      wp = sdk.areas.KurastDocktown;
-
-      break;
-    case NPC.Halbu:
-      menuId = "Repair";
-      // eslint-disable-next-line no-fallthrough
-    case NPC.Jamella:
-      wp = sdk.areas.PandemoniumFortress;
-
-      break;
-    case NPC.Larzuk:
-      menuId = "Repair";
-      // eslint-disable-next-line no-fallthrough
-    case NPC.Malah:
-    case NPC.Anya:
-      wp = sdk.areas.Harrogath;
-
-      break;
-    default:
+    if (!shopableNPCS.has(name)) {
       throw new Error("Invalid NPC");
     }
 
-    if (!me.inArea(wp) && !Pather.useWaypoint(wp)) return false;
+    const { town, menuId } = shopableNPCS.get(name);
+
+    if (!me.inArea(town) && !Pather.useWaypoint(town)) return false;
 
     let npc = npcs[name] || Game.getNPC(name);
 
@@ -252,9 +247,10 @@ function ShopBot() {
   if (Config.ShopBot.MinGold && me.gold < Config.ShopBot.MinGold) return true;
 
   buildPickList();
-  print("Shopbot: Pickit entries: " + pickEntries.length);
+  console.log("Shopbot: Pickit entries: " + pickEntries.length);
   Town.doChores();
 
+  Pather.teleport = false;
   tickCount = getTickCount();
 
   while (!Config.ShopBot.Cycles || totalCycles < Config.ShopBot.Cycles) {
@@ -271,13 +267,8 @@ function ShopBot() {
 
     if (me.inTown) {
       let area = getArea();
-      let wp = Game.getPresetObject(me.area, [
-        sdk.objects.A1Waypoint, sdk.objects.A2Waypoint,
-        sdk.objects.A3Waypoint, sdk.objects.A4Waypoint, sdk.objects.A5Waypoint
-      ][me.act - 1]);
-      let wpX = wp.roomx * 5 + wp.x;
-      let wpY = wp.roomy * 5 + wp.y;
-      let redPortal = (getUnits(sdk.unittype.Object, sdk.objects.RedPortal)
+      const wp = Game.getPresetObject(me.area, wpPresets[me.act]).realCoords();
+      const redPortal = (getUnits(sdk.unittype.Object, sdk.objects.RedPortal)
         .sort((a, b) => a.distance - b.distance))
         .first();
       let exit = area.exits[0];
@@ -288,8 +279,7 @@ function ShopBot() {
         }
       }
 
-      if ([sdk.areas.RogueEncampment, sdk.areas.Harrogath].includes(me.area) && !!redPortal && redPortal.distance < 20
-        && Pather.usePortal(null, null, redPortal)) {
+      if (!!redPortal && redPortal.distance < 20 && Pather.usePortal(null, null, redPortal)) {
         delay(3000);
         Pather.usePortal(sdk.areas.townOf(me.area));
 
@@ -298,14 +288,11 @@ function ShopBot() {
         }
 
         delay(1500);
-      } else if (getDistance(me, exit) < (getDistance(me, wpX, wpY) + 6)) {
+      } else if (getDistance(me, exit) < (getDistance(me, wp.x, wp.y) + 6)) {
         Pather.moveToExit(me.area + 1, true);
         Pather.moveToExit(me.area - 1, true);
       } else {
-        Pather.useWaypoint([
-          sdk.areas.CatacombsLvl2, sdk.areas.A2SewersLvl2,
-          sdk.areas.DuranceofHateLvl2, sdk.areas.RiverofFlame, sdk.areas.CrystalizedPassage
-        ][me.act - 1]);
+        Pather.useWaypoint(outOfTownWps[me.act]);
       }
     }
 
