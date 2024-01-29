@@ -139,6 +139,18 @@ function ControlBot () {
     },
 
     /**
+     * Display a message overhead
+     * @param {string} msg 
+     * @param {boolean} [force]
+     */
+    overhead: function (msg, force = false) {
+      if (!force && getTickCount() - Chat.overheadTick < 0) return;
+      // allow overhead messages every ~3-4 seconds
+      Chat.overheadTick = getTickCount() + Time.seconds(3) + rand(250, 1500);
+      say("!" + msg);
+    },
+
+    /**
      * Whisper a chat to a user
      * @param {string} nick 
      * @param {string} msg 
@@ -1087,6 +1099,23 @@ function ControlBot () {
     return action.run(nick);
   };
 
+  const pickGoldPiles = function () {
+    /** @type {PathNode} */
+    const startPos = { x: me.x, y: me.y };
+    let gold = Game.getItem(sdk.items.Gold);
+
+    if (gold) {
+      do {
+        if (gold.onGroundOrDropping && gold.distance <= 20 && Pickit.canPick(gold)) {
+          Pickit.pickItem(gold) && Chat.overhead("Thank you!", true);
+          if (startPos.distance > 5) {
+            Pather.move(startPos);
+          }
+        }
+      } while (gold.getNext());
+    }
+  };
+
   // START
   let gameEndWarningAnnounced = false;
   include("oog/ShitList.js");
@@ -1131,6 +1160,11 @@ function ControlBot () {
 
       me.act > 1 && Town.goToTown(1);
       Config.ControlBot.Chant.AutoEnchant && autoChant();
+
+      if (me.gold < 500000) {
+        Chat.overhead("I am low on gold, to keep this service up please donate by dropping gold near me.");
+      }
+      pickGoldPiles();
 
       if (ngVote.watch && ngVote.elapsed() > Time.minutes(2) && !ngVote.nextGame) {
         Chat.say("Not enough votes to start next game.");
