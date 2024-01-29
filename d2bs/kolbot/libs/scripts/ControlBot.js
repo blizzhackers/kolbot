@@ -87,6 +87,38 @@ function ControlBot () {
   AutoRush.playersOut = "out";
   AutoRush.allIn = "all in";
 
+  const ngVote = new function () {
+    /** @type {Set<string>} */
+    this.votes = new Set();
+    this.watch = false;
+    this.tick = 0;
+    this.nextGame = false;
+
+    this.votesNeeded = function () {
+      return Math.max(1, (Misc.getPlayerCount() - 2) / 2);
+    };
+    this.reset = function () {
+      this.votes.clear();
+      this.tick = 0;
+      this.watch = false;
+    };
+    this.begin = function () {
+      this.watch = true;
+      this.votes.clear();
+      this.tick = getTickCount();
+    };
+    this.checkCount = function () {
+      return this.votes.size >= this.votesNeeded;
+    };
+    this.vote = function (nick) {
+      if (this.watch) {
+        this.votes.add(nick);
+      }
+    };
+    this.elapsed = function () {
+      return getTickCount() - this.tick;
+    };
+  };
   const MAX_CHAT_LENGTH = 180;
   const startTime = getTickCount();
   const maxTime = Time.minutes(Config.ControlBot.GameLength);
@@ -754,6 +786,10 @@ function ControlBot () {
         console.debug("Command already running.");
         return;
       }
+      if (!floodCheck([msg, nick]) && (msg === "help" || msg === "timeleft" || msg === "ngyes")) {
+        actions.get(msg).run(nick);
+        return;
+      }
       let index = queue.findIndex(function (cmd) {
         return cmd[0] === msg && cmd[1] === nick;
       });
@@ -784,6 +820,9 @@ function ControlBot () {
     case 0x01: // "%Name1(%Name2) dropped due to errors."
     case 0x03: // "%Name1(%Name2) left our world. Diablo's minions weaken."
       players.delete(name1);
+      if (ngVote.watch) {
+        ngVote.votes.delete(name1);
+      }
 
       break;
     }
@@ -866,6 +905,33 @@ function ControlBot () {
           + (m ? m + " minute" + (m > 1 ? "s" : "")
           + ", " : "") + s + " second" + (s > 1 ? "s." : ".")
         );
+      }
+    });
+    _actions.set("ngvote", {
+      desc: "Vote for next game",
+      hostileCheck: false,
+      run: function (nick) {
+        if (getTickCount() - startTime < Time.minutes(3)) {
+          Chat.say(
+            "Can't vote for next game yet. Must be in game for at least 3 minutes. Remaining: "
+            + Math.round((Time.minutes(3) - (getTickCount() - startTime)) / 1000) + " seconds."
+          );
+          return;
+        }
+        ngVote.begin();
+        Chat.say(nick + " voted for next game. Votes Needed: " + ngVote.votesNeeded + ". Type ngyes to vote.");
+      }
+    });
+    _actions.set("ngyes", {
+      desc: "",
+      hostileCheck: false,
+      run: function (nick) {
+        if (!ngVote.watch) return;
+        ngVote.vote(nick);
+        if (ngVote.checkCount()) {
+          Chat.say("Enough votes to start next game.");
+          ngVote.nextGame = true;
+        }
       }
     });
 
@@ -1066,7 +1132,12 @@ function ControlBot () {
       me.act > 1 && Town.goToTown(1);
       Config.ControlBot.Chant.AutoEnchant && autoChant();
 
-      if (getTickCount() - startTime >= maxTime) {
+      if (ngVote.watch && ngVote.elapsed() > Time.minutes(2) && !ngVote.nextGame) {
+        Chat.say("Not enough votes to start next game.");
+        ngVote.reset();
+      }
+
+      if (getTickCount() - startTime >= maxTime || ngVote.nextGame) {
         if (Config.ControlBot.EndMessage) {
           Chat.say(Config.ControlBot.EndMessage);
         }
