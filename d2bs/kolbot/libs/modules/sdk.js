@@ -121,7 +121,7 @@
       MonsterObject: 0xFFFF,
       BlockMissile: 0x80E,
       WallOrRanged: 0x5,
-      BlockWalk: 0x1905,
+      BlockWalk: 0x1805,
       FriendlyRanged: 0x2004,
       BoneWall: 4352,
     },
