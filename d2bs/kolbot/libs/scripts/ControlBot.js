@@ -120,11 +120,14 @@ function ControlBot () {
     };
   };
   const MAX_CHAT_LENGTH = 180;
+  const MIN_GOLD = 500000;
   const startTime = getTickCount();
   const maxTime = Time.minutes(Config.ControlBot.GameLength);
   const chantDuration = Skill.getDuration(sdk.skills.Enchant);
   /** @type {Map<string, string>} */
   const players = new Map();
+  /** @type {Set<string>} */
+  const givenGold = new Set();
 
   const Chat = {
     /** @type {string[]} */
@@ -775,6 +778,101 @@ function ControlBot () {
     return false;
   };
 
+  const pickGoldPiles = function () {
+    /** @type {PathNode} */
+    const startPos = { x: me.x, y: me.y };
+    let gold = Game.getItem(sdk.items.Gold);
+
+    if (gold) {
+      do {
+        if (gold.onGroundOrDropping && gold.distance <= 20 && Pickit.canPick(gold)) {
+          Pickit.pickItem(gold) && Chat.overhead("Thank you!", true);
+          if (startPos.distance > 5) {
+            Pather.move(startPos);
+          }
+        }
+      } while (gold.getNext());
+    }
+  };
+
+  const dropGold = function (nick) {
+    try {
+      if (me.gold < MIN_GOLD) {
+        throw new ScriptError("Not enough gold to drop.");
+      }
+      if (givenGold.has(nick)) {
+        throw new ScriptError("Already dropped gold this game for you. Don't be greedy.");
+      }
+
+      let unit = Game.getPlayer(nick);
+
+      if (unit && unit.distance > 15) {
+        throw new ScriptError("Get closer.");
+      }
+
+      if (!unit) {
+        let partyUnit = getParty(nick);
+
+        if (!Misc.poll(() => partyUnit.inTown, 500, 50)) {
+          throw new ScriptError("You need to be in one of the towns.");
+        }
+        // wait until party area is readable?
+        Chat.say("Wait for me at waypoint.");
+        Town.goToTown(sdk.areas.actOf(partyUnit.area));
+
+        unit = Game.getPlayer(nick);
+      }
+
+      if (unit) {
+        if (me.getStat(sdk.stats.Gold) < 5000) {
+          Town.openStash() && gold(5000, 4);
+          me.cancelUIFlags();
+        }
+
+        // drop the gold
+        gold(5000);
+        /** @type {ItemUnit} */
+        let droppedGold = Misc.poll(function () {
+          let _gold = Game.getItem(sdk.items.Gold);
+          if (_gold && _gold.onGroundOrDropping && _gold.getStat(sdk.stats.Gold) === 5000) {
+            return _gold;
+          }
+          return false;
+        }, Time.seconds(30), 1000);
+
+        if (!droppedGold) {
+          throw new ScriptError("Failed to drop gold.");
+        }
+
+        // watch for the gold dissapearing
+        let picked = false;
+        Misc.poll(function () {
+          let _gold = Game.getItem(sdk.items.Gold, sdk.items.mode.onGround, droppedGold.gid);
+          if (_gold) return false;
+          picked = true;
+          return !_gold;
+        }, Time.seconds(30), 1000);
+
+        if (!picked) {
+          Pickit.pickItem(droppedGold);
+          throw new ScriptError("Failed to pick gold.");
+        } else {
+          givenGold.add(nick);
+          Chat.say("yw " + nick);
+        }
+      } else {
+        throw new ScriptError("I don't see you");
+      }
+    } catch (e) {
+      if (e instanceof ScriptError) {
+        Chat.say((typeof e === "object" && e.message ? e.message : typeof e === "string" && e));
+      } else {
+        console.error(e);
+        Chat.say("Internal Error");
+      }
+    }
+  };
+
   /**
    * @param {string} nick 
    * @param {string} msg
@@ -825,6 +923,8 @@ function ControlBot () {
       me.inTown && me.mode === sdk.player.mode.StandingInTown && greet.push(name1);
       if (name2) {
         players.set(name1, "*" + name2);
+      } else {
+        players.set(name1, "");
       }
 
       break;
@@ -946,6 +1046,14 @@ function ControlBot () {
         }
       }
     });
+
+    if (Config.ControlBot.DropGold) {
+      _actions.set("dropgold", {
+        desc: "Drop 5k gold",
+        hostileCheck: false,
+        run: dropGold
+      });
+    }
 
     if (Config.ControlBot.Chant.Enchant
       && Skill.canUse(sdk.skills.Enchant)) {
@@ -1099,23 +1207,6 @@ function ControlBot () {
     return action.run(nick);
   };
 
-  const pickGoldPiles = function () {
-    /** @type {PathNode} */
-    const startPos = { x: me.x, y: me.y };
-    let gold = Game.getItem(sdk.items.Gold);
-
-    if (gold) {
-      do {
-        if (gold.onGroundOrDropping && gold.distance <= 20 && Pickit.canPick(gold)) {
-          Pickit.pickItem(gold) && Chat.overhead("Thank you!", true);
-          if (startPos.distance > 5) {
-            Pather.move(startPos);
-          }
-        }
-      } while (gold.getNext());
-    }
-  };
-
   // START
   let gameEndWarningAnnounced = false;
   include("oog/ShitList.js");
@@ -1127,6 +1218,16 @@ function ControlBot () {
     Town.doChores();
     Town.goToTown(1);
     Town.move("portalspot");
+
+    // check who is in game in cased we missed the gameevent or this was a restart
+    let party = getParty();
+    if (party) {
+      do {
+        if (party.name !== me.name && !players.has(party.name)) {
+          players.set(party.name, "");
+        }
+      } while (party.getNext());
+    }
 
     while (true) {
       while (greet.length > 0) {
@@ -1161,8 +1262,11 @@ function ControlBot () {
       me.act > 1 && Town.goToTown(1);
       Config.ControlBot.Chant.AutoEnchant && autoChant();
 
-      if (me.gold < 500000) {
-        Chat.overhead("I am low on gold, to keep this service up please donate by dropping gold near me.");
+      if (me.gold < MIN_GOLD && players.size > 1) {
+        Chat.overhead(
+          "I am low on gold, to keep this service up please donate by dropping gold near me."
+          + " I need at least " + (MIN_GOLD - me.gold) + " gold."
+        );
       }
       pickGoldPiles();
 

@@ -243,6 +243,7 @@ function LoadConfig () {
   Scripts.Follower = false; // Script that follows a manually played leader around like a merc. For a list of commands, see Follower.js
   Scripts.ControlBot = false;
     Config.ControlBot.Bo = true; // Bo player at waypoint
+    Config.ControlBot.DropGold = true; // Drop 5k gold on command once per player per game
     Config.ControlBot.Cows.MakeCows = true; // allow making cows if we can
     Config.ControlBot.Cows.GetLeg = true; // Get Wirt's Leg from Tristram. If set to false, it will check for the leg in town.
     Config.ControlBot.Chant.Enchant = true; // enchant player and their minions on command

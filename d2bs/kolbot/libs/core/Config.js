@@ -566,6 +566,7 @@ let Config = {
   },
   ControlBot: {
     Bo: false,
+    DropGold: false,
     Cows: {
       MakeCows: false,
       GetLeg: false,
