@@ -1430,7 +1430,7 @@ const Town = {
       return false;
     }
     if (!Storage.Stash.CanFit(item) && Config.SortSettings.PlugYStash) {
-      say("/swappage");
+      			say("/swappage");
 			delay(100);
 			say("/insertpage");
 			delay(100);
