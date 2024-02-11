@@ -1429,6 +1429,14 @@ const Town = {
       || !Town.canStashGem(item)) {
       return false;
     }
+    if (!Storage.Stash.CanFit(item) && Config.SortSettings.PlugYStash) {
+      say("/swappage");
+			delay(100);
+			say("/insertpage");
+			delay(100);
+			quit(); //or Common.Toolsthread.exit();
+      return true
+    }
     /**
      * @todo add sorting here first if we can't fit the item
      */
