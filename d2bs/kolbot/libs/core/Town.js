@@ -1430,11 +1430,11 @@ const Town = {
       return false;
     }
     if (!Storage.Stash.CanFit(item) && Config.SortSettings.PlugYStash) {
-      			say("/swappage");
-			delay(100);
-			say("/insertpage");
-			delay(100);
-			quit(); //or Common.Toolsthread.exit();
+      say("/swappage");
+      delay(100);
+      say("/insertpage");
+      delay(100);
+      quit(); //or Common.Toolsthread.exit();
       return true
     }
     /**
