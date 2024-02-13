@@ -1435,7 +1435,7 @@ const Town = {
       say("/insertpage");
       delay(100);
       console.log("Inserted new empty page into stash");
-      quit(); //or Common.Toolsthread.exit();
+      scriptBroadcast("quit"); //or Common.Toolsthread.exit();
       return true
     }
     /**
