@@ -1430,12 +1430,16 @@ const Town = {
       return false;
     }
     if (!Storage.Stash.CanFit(item) && Config.SortSettings.PlugYStash) {
+      const firstPageBtn = me.screensize
+        ? { x: 226, y: 463} // 800x600
+        : { x: 191, y: 400}; // 640x480
+      !getUIFlag(sdk.uiflags.Stash) && Town.openStash();
       say("/swappage");
-      delay(100);
-      say("/insertpage");
-      delay(100);
+			delay(50);
+			say("/insertpage");
       console.log("Inserted new empty page into stash");
-      scriptBroadcast("quit"); //or Common.Toolsthread.exit();
+      delay(250);
+      sendClick(firstPageBtn.x, firstPageBtn.y); //click previous page sendClick(firstPageBtn.x, firstPageBtn.y)
       return true
     }
     /**
