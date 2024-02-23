@@ -1425,11 +1425,10 @@ const Town = {
    */
   canStash: function (item) {
     if (Town.ignoreType(item.itemType)
-      || [sdk.items.quest.HoradricStaff, sdk.items.quest.KhalimsWill].includes(item.classid)
-      || !Town.canStashGem(item)) {
+      || [sdk.items.quest.HoradricStaff, sdk.items.quest.KhalimsWill].includes(item.classid)) {
       return false;
     }
-    if (!Storage.Stash.CanFit(item) && Config.SortSettings.PlugYStash) {
+    if ((!Storage.Stash.CanFit(item) || !Town.canStashGem(item)) && Config.SortSettings.PlugYStash) {
       const firstPageBtn = me.screensize
         ? { x: 226, y: 463} // 800x600
         : { x: 191, y: 400}; // 640x480
