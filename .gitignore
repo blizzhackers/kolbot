@@ -1,6 +1,16 @@
-data/
-images/
-logs/
+# Do not track hidden files and directories by default
+.*
+
+# Track these hidden files
+!.eslintrc.js
+!.gitignore
+!.gitmodules
+
+# Track these hidden directories
+!.github/
+!.vscode/
+
+# Do not track user generated data
 d2bs/kolbot/data/secure/*.txt
 d2bs/kolbot/data/*.json
 d2bs/kolbot/logs/*.json
@@ -12,3 +22,9 @@ d2bs/kolbot/libs/manualplay/config/*.*.js
 d2bs/kolbot/libs/soloplay/**
 d2bs/kolbot/libs/config/*.*.js
 d2bs/kolbot/D2BotSoloPlay.dbj
+data/
+images/
+logs/
+
+# Do not track install packages
+node_modules/
