@@ -8,6 +8,7 @@
 
 # Track these hidden directories
 !.github/
+!.vscode/
 
 # Do not track user generated data
 d2bs/kolbot/data/secure/*.txt
