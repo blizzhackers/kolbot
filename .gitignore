@@ -5,10 +5,14 @@
 !.eslintrc.js
 !.gitignore
 !.gitmodules
+!.editorconfig
 
 # Track these hidden directories
 !.github/
-!.vscode/
+
+# Track these files from vscodes
+!.vscode/settings.json
+!.vscode/extensions.json
 
 # Do not track user generated data
 d2bs/kolbot/data/secure/*.txt
