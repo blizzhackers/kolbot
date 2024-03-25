@@ -239,6 +239,7 @@ const Mule = {
     let waitTick = getTickCount();
     let rval = "ready";
     let override = false;
+    let pickedUniqueCharm = false;
 
     if (!Mule.clearedJunk) {
       me.getItemsEx()
@@ -320,6 +321,12 @@ const Mule = {
           canFit
             ? Pickit.pickItem(item)
             : (rval = "next");
+
+          // torch and anni handling
+          if (Mule.mode > 0 && Mule.continuous && (item.isAnni || item.isTorch) && item.isInStorage) {
+            // we picked up a torch or anni so move to next mule once we are done
+            pickedUniqueCharm = true;
+          }
         }
 
         if (rval === "next") {
@@ -341,6 +348,10 @@ const Mule = {
       }
 
       delay(500);
+    }
+
+    if (pickedUniqueCharm) {
+      return "next";
     }
 
     return rval;
