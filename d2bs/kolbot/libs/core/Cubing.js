@@ -361,8 +361,9 @@ const Cubing = {
 
     for (let i = 0; i < Config.Recipes.length; i += 1) {
       if (Config.Recipes[i].length > 1 && isNaN(Config.Recipes[i][1])) {
-        if (NTIPAliasClassID.hasOwnProperty(Config.Recipes[i][1].replace(/\s+/g, "").toLowerCase())) {
-          Config.Recipes[i][1] = NTIPAliasClassID[Config.Recipes[i][1].replace(/\s+/g, "").toLowerCase()];
+        const formattedName = Config.Recipes[i][1].replace(/\s+/g, "").toLowerCase();
+        if (NTIPAliasClassID.hasOwnProperty(formattedName)) {
+          Config.Recipes[i][1] = NTIPAliasClassID[formattedName];
         } else {
           Misc.errorReport("ÿc1Invalid cubing entry:ÿc0 " + Config.Recipes[i][1]);
           Config.Recipes.splice(i, 1);
@@ -404,6 +405,7 @@ const Cubing = {
    * @property {number} [Ethereal]
    * @property {boolean} [Enabled]
    * @property {boolean} [AlwaysEnabled]
+   * @property {number} [MainRecipe]
    *
    *
    * @todo
@@ -708,6 +710,7 @@ const Cubing = {
     }
   },
 
+  /** @type {ItemUnit[]} */
   validIngredients: [], // What we have
   neededIngredients: [], // What we need
   subRecipes: [],
@@ -725,14 +728,15 @@ const Cubing = {
 
       IngredientLoop:
       for (let j = 0; j < this.recipes[i].Ingredients.length; j += 1) {
+        const currIngred = this.recipes[i].Ingredients[j];
         for (let k = 0; k < items.length; k += 1) {
-          if (((this.recipes[i].Ingredients[j] === "pgem" && this.gemList.includes(items[k].classid))
-            || (this.recipes[i].Ingredients[j] === "fgem" && this.gems.flawless.includes(items[k].classid))
-            || (this.recipes[i].Ingredients[j] === "gem" && this.gems.normal.includes(items[k].classid))
-            || (this.recipes[i].Ingredients[j] === "cgem" && this.gems.chipped.includes(items[k].classid))
-            || (this.recipes[i].Ingredients[j] === "hpot" && this.pots.healing.includes(items[k].classid))
-            || (this.recipes[i].Ingredients[j] === "mpot" && this.pots.mana.includes(items[k].classid))
-            || items[k].classid === this.recipes[i].Ingredients[j]) && this.validItem(items[k], this.recipes[i])) {
+          if (((currIngred === "pgem" && this.gemList.includes(items[k].classid))
+            || (currIngred === "fgem" && this.gems.flawless.includes(items[k].classid))
+            || (currIngred === "gem" && this.gems.normal.includes(items[k].classid))
+            || (currIngred === "cgem" && this.gems.chipped.includes(items[k].classid))
+            || (currIngred === "hpot" && this.pots.healing.includes(items[k].classid))
+            || (currIngred === "mpot" && this.pots.mana.includes(items[k].classid))
+            || items[k].classid === currIngred) && this.validItem(items[k], this.recipes[i])) {
 
             // push the item's info into the valid ingredients array. this will be used to find items when checking recipes
             this.validIngredients.push({ classid: items[k].classid, gid: items[k].gid });
@@ -753,33 +757,117 @@ const Cubing = {
         }
 
         // add the item to needed list - enable pickup
-        this.neededIngredients.push({ classid: this.recipes[i].Ingredients[j], recipe: this.recipes[i] });
+        this.neededIngredients.push({ classid: currIngred, recipe: this.recipes[i] });
 
         // skip flawless gems adding if we don't have the main item (Recipe.Gem and Recipe.Rune for el-ort are always enabled)
         if (!this.recipes[i].Enabled) {
           break;
         }
 
-        // if the recipe is enabled (we have the main item), add gem recipes (if needed)
-        if (!this.recipes[i].hasOwnProperty("MainRecipe")) {
-          // make sure we don't add a subrecipe to a subrecipe
-          for (let gType of Object.values(Cubing.gems)) {
-            // skip over cgems - can't cube them
-            if (gType.includes(sdk.items.gems.Chipped.Amethyst)) continue;
-            for (let gem of gType) {
-              if (this.subRecipes.indexOf(gem) === -1
-                && (this.recipes[i].Ingredients[j] === gem
-                || (this.recipes[i].Ingredients[j] === "pgem" && Cubing.gemList.includes(gem)))) {
-                this.recipes.push({
-                  Ingredients: [gem - 1, gem - 1, gem - 1],
-                  Index: Recipe.Gem,
-                  AlwaysEnabled: true,
-                  MainRecipe: this.recipes[i].Index
-                });
-                this.subRecipes.push(gem);
-              }
-            }
-          }
+        // if the recipe is enabled (we have the main item), add gem recipes (if needed) - TODO: make this work
+        // if (!this.recipes[i].hasOwnProperty("MainRecipe")) {
+        //   // make sure we don't add a subrecipe to a subrecipe
+        //   for (let gType of Object.values(Cubing.gems)) {
+        //     // skip over cgems - can't cube them
+        //     if (gType.includes(sdk.items.gems.Chipped.Amethyst)) continue;
+        //     for (let gem of gType) {
+        //       if (this.subRecipes.indexOf(gem) === -1
+        //         && (this.recipes[i].Ingredients[j] === gem
+        //         || (this.recipes[i].Ingredients[j] === "pgem" && Cubing.gemList.includes(gem)))) {
+        //         this.recipes.push({
+        //           Ingredients: [gem - 1, gem - 1, gem - 1],
+        //           Index: Recipe.Gem,
+        //           AlwaysEnabled: true,
+        //           MainRecipe: this.recipes[i].Index
+        //         });
+        //         this.subRecipes.push(gem);
+        //       }
+        //     }
+        //   }
+        // }
+
+        // If the recipe is enabled (we have the main item), add flawless gem recipes (if needed) - old method
+        /**
+         * @param {number} gemId 
+         * @param {number} mainRecipe 
+         * @returns {recipeObj}
+         */
+        const gemRecipe = function (gemId, mainRecipe) {
+          return {
+            Ingredients: [gemId, gemId, gemId],
+            Index: Recipe.Gem,
+            AlwaysEnabled: true,
+            MainRecipe: mainRecipe
+          };
+        };
+        // Make perf amethyst
+        if (this.subRecipes.indexOf(sdk.items.gems.Perfect.Amethyst) === -1
+          && (
+            currIngred === sdk.items.gems.Perfect.Amethyst
+            || (currIngred === "pgem" && this.gemList.includes(sdk.items.gems.Perfect.Amethyst))
+          )) {
+          this.recipes.push(gemRecipe(sdk.items.gems.Flawless.Amethyst, this.recipes[i].Index));
+          this.subRecipes.push(sdk.items.gems.Perfect.Amethyst);
+        }
+
+        // Make perf topaz
+        if (this.subRecipes.indexOf(sdk.items.gems.Perfect.Topaz) === -1
+          && (
+            currIngred === sdk.items.gems.Perfect.Topaz
+            || (currIngred === "pgem" && this.gemList.includes(sdk.items.gems.Perfect.Topaz))
+          )) {
+          this.recipes.push(gemRecipe(sdk.items.gems.Flawless.Topaz, this.recipes[i].Index));
+          this.subRecipes.push(sdk.items.gems.Perfect.Topaz);
+        }
+
+        // Make perf sapphire
+        if (this.subRecipes.indexOf(sdk.items.gems.Perfect.Sapphire) === -1
+          && (
+            currIngred === sdk.items.gems.Perfect.Sapphire
+            || (currIngred === "pgem" && this.gemList.includes(sdk.items.gems.Perfect.Sapphire))
+          )) {
+          this.recipes.push(gemRecipe(sdk.items.gems.Flawless.Sapphire, this.recipes[i].Index));
+          this.subRecipes.push(sdk.items.gems.Perfect.Sapphire);
+        }
+
+        // Make perf emerald
+        if (this.subRecipes.indexOf(sdk.items.gems.Perfect.Emerald) === -1
+          && (
+            currIngred === sdk.items.gems.Perfect.Emerald
+            || (currIngred === "pgem" && this.gemList.includes(sdk.items.gems.Perfect.Emerald))
+          )) {
+          this.recipes.push(gemRecipe(sdk.items.gems.Flawless.Emerald, this.recipes[i].Index));
+          this.subRecipes.push(sdk.items.gems.Perfect.Emerald);
+        }
+
+        // Make perf ruby
+        if (this.subRecipes.indexOf(sdk.items.gems.Perfect.Ruby) === -1
+          && (
+            currIngred === sdk.items.gems.Perfect.Ruby
+            || (currIngred === "pgem" && this.gemList.includes(sdk.items.gems.Perfect.Ruby))
+          )) {
+          this.recipes.push(gemRecipe(sdk.items.gems.Flawless.Ruby, this.recipes[i].Index));
+          this.subRecipes.push(sdk.items.gems.Perfect.Ruby);
+        }
+
+        // Make perf diamond
+        if (this.subRecipes.indexOf(sdk.items.gems.Perfect.Diamond) === -1
+          && (
+            currIngred === sdk.items.gems.Perfect.Diamond
+            || (currIngred === "pgem" && this.gemList.includes(sdk.items.gems.Perfect.Diamond))
+          )) {
+          this.recipes.push(gemRecipe(sdk.items.gems.Flawless.Diamond, this.recipes[i].Index));
+          this.subRecipes.push(sdk.items.gems.Perfect.Diamond);
+        }
+
+        // Make perf skull
+        if (this.subRecipes.indexOf(sdk.items.gems.Perfect.Skull) === -1
+          && (
+            currIngred === sdk.items.gems.Perfect.Skull
+            || (currIngred === "pgem" && this.gemList.includes(sdk.items.gems.Perfect.Skull))
+          )) {
+          this.recipes.push(gemRecipe(sdk.items.gems.Flawless.Skull, this.recipes[i].Index));
+          this.subRecipes.push(sdk.items.gems.Perfect.Skull);
         }
       }
     }
