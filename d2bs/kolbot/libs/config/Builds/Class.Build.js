@@ -4,7 +4,7 @@
 *
 * Instructions:	See /d2bs/kolbot/libs/config/Builds/README.txt
 *
-* Skill IDs:	See /d2bs/kolbot/sdk/skills.txt for a list of skill IDs.
+* Skill IDs:	See /d2bs/kolbot/sdk/txt/skills.txt for a list of skill IDs.
 *
 * Stat IDs:
 *
@@ -16,10 +16,10 @@
 */
 js_strict(true);
 
-if (!isIncluded("common/Cubing.js")) { include("common/Cubing.js"); };
-if (!isIncluded("common/Prototypes.js")) { include("common/Prototypes.js"); };
-if (!isIncluded("common/Runewords.js")) { include("common/Runewords.js"); };
-if (!isIncluded("common/Town.js")) { include("common/Town.js"); };
+if (!isIncluded("core/Cubing.js")) { include("core/Cubing.js"); };
+if (!isIncluded("core/Prototypes.js")) { include("core/Prototypes.js"); };
+if (!isIncluded("core/Runewords.js")) { include("core/Runewords.js"); };
+if (!isIncluded("core/Town.js")) { include("core/Town.js"); };
 
 var AutoBuildTemplate = {
 

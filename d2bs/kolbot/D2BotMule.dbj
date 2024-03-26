@@ -3,14 +3,13 @@
 *  @author      kolton, theBGuy
 *  @desc        Entry script for AutoMule.js
 *
+*  @typedef {import("./sdk/globals")}
 */
-include("StarterConfig.js");
+js_strict(true);
+include("critical.js"); // required
 
-/**
- * @todo redo how muleing is handled, really dislike how it's handled here
- */
-
-// D2BotMule specific settings - for global settings see libs/StarterConfig.js
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// D2BotMule specific settings - for global settings see libs/starter/StarterConfig.js
 Starter.Config.MinGameTime = 30; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
 Starter.Config.MaxGameTime = 60; // Maximum game length in minutes, only for continuous muling
 Starter.Config.CreateGameDelay = 5; // Seconds to wait before creating a new game
@@ -21,992 +20,583 @@ Starter.Config.MakeAccountOnFailure = true;
 
 // Override default values for StarterConfig under here by following format
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
-
-// No touchy!
-include("json2.js");
-include("oog.js");
-include("automule.js");
-include("mulelogger.js");
-include("torchsystem.js");
-include("NTItemParser.dbl");
-include("NTItemAlias.dbl");
-include("common/util.js");
-includeCommonLibs();
-
-let Controls = require("./modules/Control");
-let Overrides = require("./modules/Override");
-const Worker = require("./modules/Worker");
-
-/** @global */
-let master, muleMode, muleFilename, muleObj, maxCharCount;
-let [checkOnJoin, makeNext] = [false, false];
-let status = "loading";
-let masterStatus = { status: "" };
-
-/**
- * Mule Data object manipulates external mule datafile
- */
-const MuleData = {
-	_default: {
-		account: "",
-		accNum: 0,
-		character: "",
-		charNum: 0,
-		fullChars: [],
-		torchChars: []
-	},
-	// create a new mule datafile
-	create: function () {
-		let string = JSON.stringify(this._default);
-		FileTools.writeText(muleFilename, string);
-	},
-
-	// read data from the mule datafile and return the data object
-	read: function () {
-		let string = FileTools.readText(muleFilename);
-		let obj = JSON.parse(string);
-
-		return obj;
-	},
-
-	// write a data object to the mule datafile
-	write: function (obj) {
-		let string = JSON.stringify(obj);
-		FileTools.writeText(muleFilename, string);
-	},
-
-	// set next account - increase account number in mule datafile
-	nextAccount: function () {
-		let obj = MuleData.read();
-
-		obj.accNum += 1;
-		obj.account = muleObj.accountPrefix + obj.accNum;
-
-		MuleData.write(Object.assign(this._default, { accNum: obj.accNum, account: obj.account }));
-
-		return obj.account;
-	},
-
-	nextChar: function () {
-		checkOnJoin = true;
-		let charSuffix = "";
-		let charNumbers = "abcdefghijklmnopqrstuvwxyz";
-		let obj = MuleData.read();
-
-		// dirty
-		obj.charNum > 25 && (obj.charNum = 0);
-		let num = obj.accNum.toString();
-
-		for (let i = 0; i < num.length; i++) {
-			charSuffix += charNumbers[parseInt(num[i], 10)];
-		}
-
-		charSuffix += charNumbers[obj.charNum];
-		obj.charNum = obj.charNum + 1;
-		obj.character = muleObj.charPrefix + charSuffix;
-
-		MuleData.write(obj);
-
-		return obj.character;
-	},
-};
-
-const Mule = {
-	continuousMule: false,
-	clearedJunk: false,
-	startTick: 0,
-	idleTick: 0,
-	areaTick: 0,
-	recheckTick: 0,
-	statusString: "",
-
-	/**
-	 * @description background worker to prevent idle disconnect
-	 */
-	antiIdle: function () {
-		if (!Starter.inGame) return true;
-		if (!me.ingame || getTickCount() - me.gamestarttime < Time.minutes(1) || !me.gameReady) return true;
-		if (Mule.idleTick === 0) {
-			Mule.idleTick = getTickCount() + Time.seconds(rand(1200, 1500));
-			console.log("Game start, anti-idle refresh in: (" + Time.format(Mule.idleTick - getTickCount()) + ")");
-		}
-		if (me.gameReady) {
-			if (getTickCount() - Mule.idleTick > 0) {
-				Packet.questRefresh();
-				Mule.idleTick += Time.seconds(rand(1200, 1500));
-				console.log("Sent anti-idle packet, next refresh in: (" + Time.format(Mule.idleTick - getTickCount()) + ")");
-			}
-		} else if (getLocation() !== null) {
-			Mule.idleTick = 0;
-		}
-
-		return true;
-	},
-
-	/**
-	 * @description background worker to prevent suicide walks
-	 * @todo figure out why this bugs out when used
-	 */
-	areaWatcher: function () {
-		if (!Starter.inGame) return true;
-		// run area check every half second
-		if (getTickCount() - Mule.areaTick < 500) return true;
-		Mule.areaTick = getTickCount();
-		// check that we are actually in game and that we've been there longer than a minute
-		if (getLocation() !== null || getTickCount() - me.gamestarttime < Time.minutes(1)) return true;
-		console.debug("Check Area: " + me.area);
-
-		if (me.ingame && me.gameReady && me.area > 0) {
-			if (me.area !== sdk.areas.RogueEncampment) {
-				console.warn("Preventing Suicide Walk! Current Area: " + me.area);
-				console.trace();
-
-				Mule.quit();
-			}
-		}
-
-		return true;
-	},
-
-	init: function () {
-		Mule.startTick = getTickCount();
-
-		while ((getLocation() !== null) && !!me.area && getTickCount() - Mule.startTick < Time.seconds(10)) {
-			delay(200);
-		}
-
-		if (getLocation() !== null || !me.ingame || !me.gameReady || !me.inTown) {
-			return false;
-		}
-
-		Starter.firstLogin ? (Starter.firstLogin = false) : (status = "begin");
-		status !== "begin" && (status = "ready");
-		Mule.statusString = "In " + (muleMode === 2 ? "anni " : muleMode === 1 ? "torch " : "") + "mule game.";
-
-		D2Bot.updateStatus(Mule.statusString + " Status: " + status);
-		D2Bot.printToConsole(Mule.statusString, sdk.colors.D2Bot.DarkGold);
-		Mule.recheckTick = getTickCount();
-
-		Town.goToTown(1);
-		Town.move("stash");
-
-		// Move away from stash so we don't block muler
-		let coord = {};
-		do {
-			delay(1000);
-			coord = CollMap.getRandCoordinate(me.x, -6, 6, me.y, -6, 6);
-		} while (!Attack.validSpot(coord.x, coord.y));
-
-		Pather.moveToUnit(coord);
-					
-		Storage.Init();
-		checkOnJoin && (status = "begin");
-		Starter.inGame = true;
-		Mule.continuousMule && !muleObj.onlyLogWhenFull && MuleLogger.logChar();
-		// Worker.runInBackground.areaWatcher = Mule.areaWatcher; // bugs for some reason, quits game then on re-join d2bot spams In mule game for ~30seconds
-		if (Worker.runInBackground.antiIdle === undefined) {
-			Worker.runInBackground.antiIdle = Mule.antiIdle;
-		}
-
-		return true;
-	},
-
-	waitForMaster: function () {
-		console.log("Waiting for muler");
-		// forever alone check?
-		Misc.poll(() => status === "begin", Time.minutes(3), 100);
-
-		if (status !== "begin") {
-			D2Bot.printToConsole("Nobody joined - stopping.", sdk.colors.D2Bot.Red);
-			D2Bot.stop(me.profile, true);
-		}
-
-		me.overhead("begin");
-	},
-
-	/**
-	 * @todo check if there are any other profiles that need to mule while we are already in game?
-	 */
-	done: function () {
-		!muleObj.onlyLogWhenFull && MuleLogger.logChar();
-
-		let obj = MuleData.read();
-
-		if (Mule.checkAnniTorch() && obj.torchChars.indexOf(me.name) === -1) {
-			obj.torchChars.push(me.name);
-		}
-
-		MuleData.write(obj);
-		D2Bot.printToConsole("Done muling.", sdk.colors.D2Bot.DarkGold);
-		sendCopyData(null, master, 10, JSON.stringify({ status: "quit" }));
-		D2Bot.stop(me.profile, true);
-	},
-
-	next: function () {
-		MuleLogger.logChar();
-		delay(500);
-
-		[makeNext, checkOnJoin] = [true, true];
-		let obj = MuleData.read();
-
-		if (Mule.checkAnniTorch() && obj.torchChars.indexOf(me.name) === -1) {
-			obj.torchChars.push(me.name);
-		}
-
-		obj.fullChars.push(me.name);
-		MuleData.write(obj);
-		MuleData.nextChar();
-		D2Bot.printToConsole("Mule full, getting next character.", sdk.colors.D2Bot.DarkGold);
-
-		if (Starter.Config.MinGameTime && getTickCount() - Mule.startTick < Starter.Config.MinGameTime * 1000) {
-			while (getTickCount() - Mule.startTick < Starter.Config.MinGameTime * 1000) {
-				me.overhead("Stalling for " + Math.round(((Mule.startTick + (Starter.Config.MinGameTime * 1000)) - getTickCount()) / 1000) + " Seconds");
-				delay(1000);
-			}
-		}
-
-		Mule.quit();
-	},
-	
-	quit: function () {
-		["default.dbj", "tools/AntiIdle.js", "tools/AreaWatcher.js"].forEach(thread => {
-			let script = getScript(thread);
-			if (script && script.running && script.stop()) {
-				delay(100);
-			}
-		});
-		Mule.cursorCheck();
-		console.log("ÿc8Mule game duration ÿc2" + (Time.format(getTickCount() - me.gamestarttime)));
-
-		try {
-			quit();
-		} finally {
-			while (me.ingame) {
-				delay(100);
-			}
-		}
-
-		return true;
-	},
-
-	/**
-	 * @todo handle when a bot wants to mule while we are refreshing the game
-	 */
-	gameRefresh: function () {
-		if (!this.continuousMule) return this.quit();
-		console.log("MaxGameTime Reached: ");
-		Mule.quit();
-						
-		Starter.firstLogin = true;
-		console.log("updating runs");
-		D2Bot.updateRuns();
-		status = "ready";
-		Starter.inGame = false;
-						
-		delay(1000);
-		Controls.LobbyQuit.click(); // Quit from Lobby
-		ControlAction.timeoutDelay("Refresh game", 330 * 1000); // 5.5 minutes
-
-		return true;
-	},
-
-	/**
-	 * @param {number} time 
-	 */
-	ingameTimeout: function (time) {
-		let tick = getTickCount();
-
-		while (getTickCount() - tick < time) {
-			if (me.ingame && me.gameReady && !!me.area) break;
-
-			// game doesn't exist, might need more locs
-			if (getLocation() === sdk.game.locations.GameDoesNotExist) {
-				break;
-			}
-
-			delay(100);
-		}
-
-		return (me.ingame && me.gameReady && !!me.area);
-	},
-
-	foreverAlone: function () {
-		let party = getParty();
-
-		if (party) {
-			do {
-				if (party.name !== me.name) return false;
-			} while (party.getNext());
-		}
-
-		return true;
-	},
-
-	checkAnniTorch: function () {
-		while (!me.gameReady) {
-			delay(500);
-		}
-
-		return me.getItemsEx()
-			.filter(i => i.isInStorage && i.unique && [sdk.items.SmallCharm, sdk.items.LargeCharm].includes(i.classid))
-			.some(i => [sdk.items.SmallCharm, sdk.items.LargeCharm].includes(i.classid));
-	},
-
-	stashItems: function () {
-		me.getItemsEx()
-			.filter(item => item.isInInventory)
-			.sort((a, b) => (b.sizex * b.sizey - a.sizex * a.sizey))
-			.forEach(item => {
-				Storage.Stash.CanFit(item) && Storage.Stash.MoveTo(item);
-			});
-
-		return true;
-	},
-
-	cursorCheck: function () {
-		let cursorItem = Game.getCursorUnit();
-
-		if (cursorItem) {
-			if (!Storage.Inventory.CanFit(cursorItem) || !Storage.Inventory.MoveTo(cursorItem)) {
-				console.warn("Can't place " + cursorItem.prettyPrint + " in inventory");
-				cursorItem.drop();
-			}
-		}
-		
-		return true;
-	},
-
-	pickItems: function () {
-		let waitTick = getTickCount();
-		let rval = "fail";
-		let list = [];
-
-		while (!me.name || !me.gameReady) {
-			if (!me.ingame) return rval;
-			delay(100);
-		}
-
-		if (!Mule.clearedJunk) {
-			me.getItemsEx()
-				.filter(item => item.isInInventory && Town.ignoreType(item.itemType) && (muleMode === 0 || item.classid !== sdk.items.ScrollofIdentify))
-				.forEach(item => {
-					try {
-						item.drop();
-					} catch (e) {
-						console.warn("Failed to drop an item.");
-					}
-				});
-			Mule.clearedJunk = true; // only do this once
-		}
-
-		while (me.gameReady) {
-			if (masterStatus.status === "done" || Mule.continuousMule || checkOnJoin) {
-				checkOnJoin && (checkOnJoin = false);
-				let item = Game.getItem();
-
-				if (item) {
-					do {
-					// don't pick up trash
-						if (item.distance < 20 && item.onGroundOrDropping && !Town.ignoreType(item.itemType)) {
-							list.push(copyUnit(item));
-						}
-					} while (item.getNext());
-				}
-
-				// If and only if there is nothing left are we "done"
-				if (list.length === 0) {
-					rval = Mule.continuousMule ? "ready" : "done";
-
-					break;
-				}
-
-				// pick large items first by sorting items by size in descending order and move gheed's charm to the end of the list
-				list.sort(function(a, b) {
-					if (a.isGheeds && !Pickit.canPick(a)) return 1;
-					if (b.isGheeds && !Pickit.canPick(b)) return -1;
-
-					return (b.sizex * b.sizey - a.sizex * a.sizey);
-				});
-
-				while (list.length > 0) {
-					item = list.shift();
-					let canFit = Storage.Inventory.CanFit(item);
-
-					// Torch and Anni handling
-					if (muleMode > 0 && item.unique && [sdk.items.SmallCharm, sdk.items.LargeCharm].includes(item.classid) && !Pickit.canPick(item)) {
-						let msg = item.classid === sdk.items.LargeCharm ? "Mule already has a Torch." : "Mule already has a Anni.";
-						D2Bot.printToConsole(msg, sdk.colors.D2Bot.DarkGold);
-						rval = "next";
-					}
-
-					// Gheed's Fortune handling
-					if (item.isGheeds && !Pickit.canPick(item)) {
-						D2Bot.printToConsole("Mule already has Gheed's.", sdk.colors.D2Bot.DarkGold);
-						rval = "next";
-					}
-
-					if (!canFit && Mule.stashItems()) {
-						canFit = Storage.Inventory.CanFit(item);
-					}
-
-					if (canFit) {
-						Pickit.pickItem(item);
-					} else {
-						rval = "next";
-					}
-				}
-
-				if (rval === "next") {
-					break;
-				}
-			} else {
-				if (!Mule.continuousMule) {
-					sendCopyData(null, master, 10, JSON.stringify({ status: "report" }));
-				} else {
-					if (getTickCount() - waitTick > Time.minutes(10)) {
-						break;
-					}
-				}
-			}
-
-			delay(500);
-		}
-
-		return rval;
-	},
-};
-
-new Overrides.Override (Starter, Starter.receiveCopyData, function (orignal, mode, msg) {
-	if (mode === 3) return;
-	// master/mule communication function
-	switch (mode) {
-	case 10: // mule request
-		let obj = JSON.parse(msg);
-
-		if (Mule.continuousMule && me.ingame) {
-			sendCopyData(null, obj.profile, 10, JSON.stringify({ status: "ready" }));
-		} else {
-			if (!master) {
-				let masterInfo = AutoMule.getMaster(obj);
-
-				if (masterInfo) {
-					master = masterInfo.profile;
-					muleMode = masterInfo.mode;
-				}
-			} else {
-				if (obj.profile === master) {
-					sendCopyData(null, master, 10, JSON.stringify({ status: status }));
-				} else {
-					sendCopyData(null, obj.profile, 10, JSON.stringify({ status: "busy" }));
-				}
-			}
-		}
-
-		break;
-	case 11: // begin item pickup
-		status = "begin";
-
-		break;
-	case 12: // get master's status
-		masterStatus = JSON.parse(msg);
-
-		break;
-	default:
-		orignal(mode, msg);
-	}
-}).apply();
-
-new Overrides.Override (Starter, Starter.updateCount, function () {
-	D2Bot.updateCount();
-	delay(1000);
-	Controls.BattleNet.click();
-
-	let obj = MuleData.read();
-	let info = {
-		realm: muleObj.realm,
-		account: obj.account,
-		password: muleObj.accountPassword
-	};
-
-	MuleLogger.save(md5(info.realm.toLowerCase() + info.account.toLowerCase()), info.password);
-	ControlAction.loginAccount(info);
-	delay(1000);
-	Controls.CharSelectExit.click();
-}).apply();
-
-function locationAction (location) {
-	let obj, info, string, text;
-
-	switch (location) {
-	case sdk.game.locations.PreSplash:
-	case sdk.game.locations.SplashScreen:
-		ControlAction.click();
-
-		break;
-	case sdk.game.locations.Lobby:
-	case sdk.game.locations.LobbyChat:
-		D2Bot.updateStatus("Lobby");
-
-		if (Starter.inGame) {
-			print("updating runs");
-			D2Bot.updateRuns();
-			status = "ready";
-			Starter.inGame = false;
-		}
-
-		if (makeNext) {
-			Controls.LobbyQuit.click();
-		} else {
-			Starter.LocationEvents.openJoinGameWindow();
-		}
-
-		break;
-	case sdk.game.locations.CreateGame:
-		D2Bot.updateStatus("Creating Game");
-
-		// remove level restriction
-		Controls.CharacterDifference.disabled === 5 && Controls.CharacterDifferenceButton.click();
-
-		// Max number of players
-		Controls.MaxPlayerCount.setText("8");
-
-		delay(2000);
-
-		// FTJ handler
-		if (status === "pending") {
-			D2Bot.printToConsole("Failed to create game");
-			ControlAction.timeoutDelay("FTJ delay", Starter.Config.FTJDelay * 1e3);
-			D2Bot.updateRuns();
-		}
-
-		createGame(muleObj.muleGameName[0], muleObj.muleGameName[1]);
-		if (!Mule.ingameTimeout(Time.minutes(1))) {
-			console.debug("Failed to get in game, current location: " + getLocation() + " inGame? " + me.ingame + " area? " + me.area);
-			break;
-		}
-		
-		status = "pending";
-
-		break;
-	case sdk.game.locations.WaitingInLine:
-		Starter.LocationEvents.waitingInLine();
-
-		break;
-	case sdk.game.locations.JoinGame:
-		D2Bot.updateStatus("Join Game");
-
-		if (status === "pending") {
-			D2Bot.printToConsole("Failed to join game");
-			ControlAction.timeoutDelay("Join Delay", Starter.Config.FTJDelay * 1000);
-			D2Bot.updateRuns();
-		}
-
-		if (!Mule.continuousMule) {
-			D2Bot.requestGame(master);
-			delay(100);
-		}
-
-		if (Starter.inGame) {
-			print("updating runs");
-			D2Bot.updateRuns();
-			status = "ready";
-			Starter.inGame = false;
-		}
-
-		delay(2000);
-
-		if (Object.keys(Starter.joinInfo).length && Starter.joinInfo.gameName !== "" && Starter.joinInfo.inGame) {
-			joinGame(Starter.joinInfo.gameName, Starter.joinInfo.gamePass);
-		} else {
-			joinGame(muleObj.muleGameName[0], muleObj.muleGameName[1]);
-		}
-
-		!Starter.firstLogin && (status = "pending");
-
-		if (Mule.ingameTimeout(Time.minutes(1))) {
-			console.debug("Ingame timeout done.");
-		}
-
-		// could not join game
-		getLocation() === sdk.game.locations.Lobby && !me.ingame && Controls.CreateGameWindow.click();
-
-		break;
-	case sdk.game.locations.Ladder:
-	case sdk.game.locations.ChannelList:
-		break;
-	case sdk.game.locations.MainMenu:
-	case sdk.game.locations.Login:
-		makeNext && (makeNext = false);
-
-		obj = MuleData.read();
-
-		if (!obj.account || obj.account.indexOf(muleObj.accountPrefix) < 0) {
-			MuleData.nextAccount();
-			obj = MuleData.read();
-		}
-
-		info = {
-			realm: muleObj.realm,
-			account: obj.account,
-			password: muleObj.accountPassword
-		};
-
-		if (Starter.makeAccount) {
-			ControlAction.makeAccount(info);
-			D2Bot.printToConsole("Made account: " + info.account, sdk.colors.D2Bot.DarkGold);
-			Starter.makeAccount = false;
-
-			break;
-		}
-
-		MuleLogger.save(md5(info.realm.toLowerCase() + info.account.toLowerCase()), info.password);
-		!ControlAction.loginAccount(info) && (Starter.makeAccount = true);
-
-		break;
-	case sdk.game.locations.LoginError:
-	case sdk.game.locations.InvalidCdKey:
-	case sdk.game.locations.CdKeyInUse:
-		Starter.LocationEvents.loginError();
-
-		break;
-	case sdk.game.locations.LoginUnableToConnect:
-	case sdk.game.locations.TcpIpUnableToConnect:
-		Starter.LocationEvents.unableToConnect();
-
-		break;
-	case sdk.game.locations.RealmDown:
-		Starter.LocationEvents.realmDown();
-
-		break;
-	case sdk.game.locations.Disconnected:
-	case sdk.game.locations.LobbyLostConnection:
-		D2Bot.updateStatus("Disconnected/LostConnection");
-		delay(1000);
-		Controls.OkCentered.click();
-
-		break;
-	case sdk.game.locations.CharSelect:
-	case sdk.game.locations.NewCharSelected:
-	case sdk.game.locations.CharacterCreate:
-	case sdk.game.locations.CharSelectNoChars:
-		string = "";
-		text = Controls.CharSelectError.getText();
-
-		if (text) {
-			for (let i = 0; i < text.length; i++) {
-				string += text[i];
-
-				if (i !== text.length - 1) {
-					string += " ";
-				}
-			}
-
-			if (string === getLocaleString(sdk.locale.text.CdKeyDisabledFromRealm)) { // CDKey disabled from realm play
-				D2Bot.updateStatus("Realm Disabled CDKey");
-				D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, sdk.colors.D2Bot.Gold);
-				D2Bot.CDKeyDisabled();
-
-				if (Starter.gameInfo.switchKeys) {
-					ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
-					D2Bot.restart(true);
-				} else {
-					D2Bot.stop(me.profile, true);
-				}
-			}
-		}
-
-		// Single Player screen fix
-		// TODO: see if this is still needed. d2bs doesn't load scripts twice anymore
-		if (getLocation() === sdk.game.locations.CharSelect && !Controls.CharSelectCurrentRealm.control) {
-			Controls.CharSelectExit.click();
-
-			break;
-		}
-
-		// Can't create character, button greyed out = high likelyhood of realm down
-		if (getLocation() === sdk.game.locations.CharSelectNoChars && Controls.CharSelectCreate.disabled === sdk.game.controls.Disabled) {
-			D2Bot.updateStatus("Realm Down");
-			delay(1000);
-
-			if (!Controls.CharSelectExit.click()) {
-				break;
-			}
-
-			Starter.updateCount();
-			ControlAction.timeoutDelay("Realm Down", Starter.Config.RealmDownDelay * 6e4);
-			D2Bot.CDKeyRD();
-
-			if (Starter.gameInfo.switchKeys) {
-				D2Bot.printToConsole("Realm Down - Changing CD-Key");
-				ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
-				D2Bot.restart(true);
-			} else {
-				D2Bot.restart();
-			}
-		}
-
-		obj = MuleData.read();
-		maxCharCount = (muleObj.charsPerAcc > 0 ? Math.min(muleObj.charsPerAcc, 18) : 8);
-
-		if (makeNext) {
-			if (obj.fullChars.length >= maxCharCount || (muleMode > 0 && obj.torchChars.length >= maxCharCount)) {
-				Controls.CharSelectExit.click();
-				MuleData.nextAccount();
-
-				break;
-			}
-
-			makeNext = false;
-		}
-
-		if (!obj.character || obj.character.indexOf(muleObj.charPrefix) < 0) {
-			MuleData.nextChar();
-
-			obj = MuleData.read();
-		}
-
-		info = {
-			account: obj.account,
-			charName: obj.character,
-			ladder: muleObj.ladder,
-			hardcore: muleObj.hardcore,
-			expansion: muleObj.expansion,
-			charClass: "amazon"
-		};
-
-		if (muleMode > 0 && obj.torchChars.includes(info.charName)) {
-			MuleData.nextChar();
-
-			break;
-		}
-
-		if (ControlAction.findCharacter(info)) {
-			ControlAction.loginCharacter(info, false);
-		} else {
-			// premade account that's already full
-			if (ControlAction.getCharacters().length >= maxCharCount) {
-				Controls.CharSelectExit.click();
-				MuleData.nextAccount();
-
-				break;
-			}
-
-			if (!ControlAction.makeCharacter(info)) {
-				// TODO: check if acc is full and cancel location 15 and 29 if true
-				MuleData.nextChar();
-
-				break;
-			}
-
-			D2Bot.printToConsole("Made character: " + info.charName, sdk.colors.D2Bot.DarkGold);
-		}
-
-		break;
-	case sdk.game.locations.CharSelectPleaseWait:
-		!Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
-
-		break;
-	case sdk.game.locations.SelectDifficultySP:
-		break;
-	case sdk.game.locations.MainMenuConnecting:
-		!Starter.locationTimeout(Starter.Config.ConnectingTimeout * 1e3, location) && Controls.LoginCancelWait.click();
-
-		break;
-	case sdk.game.locations.CharSelectConnecting:
-		Starter.LocationEvents.charSelectError();
-
-		break;
-	case sdk.game.locations.LobbyPleaseWait:
-		!Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
-
-		break;
-	case sdk.game.locations.GameNameExists:
-		Controls.JoinGameWindow.click();
-
-		break;
-	case sdk.game.locations.GatewaySelect:
-		Controls.GatewayCancel.click();
-
-		break;
-	case sdk.game.locations.GameDoesNotExist:
-		Controls.CreateGameWindow.click();
-
-		break;
-	case sdk.game.locations.OkCenteredErrorPopUp:
-		Controls.OkCentered.click();
-		Controls.CharSelectExit.click();
-
-		break;
-	case sdk.game.locations.ServerDown:
-	case sdk.game.locations.GameIsFull:
-		break;
-	case sdk.game.locations.OtherMultiplayer:
-		// probably should implement way to use open-bnet
-		Controls.OtherMultiplayerCancel.click();
-
-		break;
-	case sdk.game.locations.TcpIp:
-	case sdk.game.locations.TcpIpEnterIp:
-		Controls.TcpIpCancel.click();
-
-		break;
-	default:
-		if (location !== undefined && location !== null) {
-			D2Bot.printToConsole("Unhandled location " + location);
-			delay(500);
-			D2Bot.restart();
-		}
-
-		break;
-	}
-}
-
-// item event check instead?
-// eslint-disable-next-line no-unused-vars
-function gameEvent (mode, param1, param2, name1, name2) {
-	if (!me.ingame || !me.gameReady || !me.name) {
-		return;
-	}
-
-	switch (mode) {
-	case 0x00: // "%Name1(%Name2) dropped due to time out."
-	case 0x01: // "%Name1(%Name2) dropped due to errors."
-	case 0x03: // "%Name1(%Name2) left our world. Diablo's minions weaken."
-		if (Mule.foreverAlone()) {
-			console.log("Waiting");
-			status = "ready";
-		}
-
-		break;
-	case 0x02: // "%Name1(%Name2) joined our world. Diablo's minions grow stronger."
-		if (name1.trim() !== me.name.trim()) {
-			console.log("begin");
-			status = "begin";
-		}
-
-		break;
-	}
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// system libs
+includeSystemLibs();
+include("systems/automule/Mule.js");
+include("systems/mulelogger/MuleLogger.js");
+include("systems/gameaction/GameAction.js");
+
+if (!FileTools.exists("data/" + me.profile + ".json")
+  && DataFile.create()) {
+  Starter.firstRun = true;
 }
 
 function main () {
-	// basics -- don't touch
-	addEventListener("copydata", Starter.receiveCopyData);
+  const inGameThread = "libs/systems/automule/main.js";
+  const locationAction = (function () {
+    const Controls = require("./libs/modules/Control");
+    const {
+      locations,
+      addLocations,
+      parseControlText
+    } = require("./libs/oog/Locations");
 
-	while (!Starter.handle) {
-		delay(100);
-	}
+    locations.set(sdk.game.locations.OtherMultiplayer,
+      function () {
+        Controls.OtherMultiplayerCancel.click();
+      }
+    );
+    locations.set(sdk.game.locations.TcpIpEnterIp,
+      function () {
+        Controls.PopupNo.click();
+      }
+    );
+    locations.set(sdk.game.locations.MainMenu,
+      function () {
+        if (!Mule.obj) return; // don't do anything if we don't have a mule profile
+        if (Mule.obj.realm) {
+          ControlAction.clickRealm(ControlAction.realms[Mule.obj.realm]);
+        }
+        Controls.BattleNet.click();
+      }
+    );
+    locations.set(sdk.game.locations.Login,
+      function () {
+        if (Mule.makeNext) {
+          // why?
+          Mule.makeNext = false;
+        }
+        let obj = MuleData.read();
 
-	DataFile.updateStats("handle", Starter.handle);
-	D2Bot.init();
-	load("tools/heartbeat.js");
+        if (!obj.account || obj.account.indexOf(Mule.obj.accountPrefix) < 0) {
+          MuleData.nextAccount();
+          obj = MuleData.read();
+        }
 
-	while (!Object.keys(Starter.gameInfo).length) {
-		D2Bot.requestGameInfo();
-		delay(500);
-	}
-	
-	D2Bot.updateRuns(); // we need the mule to swap keys somehow after all
-	delay(1000);
+        let info = {
+          realm: Mule.obj.realm,
+          account: obj.account,
+          password: Mule.obj.accountPassword
+        };
 
-	// mule/master data initialization block 
-	Mule.continuousMule = AutoMule.isContinousMule();
+        if (Starter.makeAccount) {
+          if (ControlAction.makeAccount(info)) {
+            D2Bot.printToConsole("Made account: " + info.account, sdk.colors.D2Bot.DarkGold);
+            Starter.makeAccount = false;
+          } else {
+            MuleData.nextAccount();
+          }
 
-	if (Mule.continuousMule) {
-		console.log("Continuous Mule Mode Started");
-		muleMode = AutoMule.getMuleMode();
-		muleObj = AutoMule.getMuleObject(muleMode, "", true);
-		muleFilename = AutoMule.getMuleFilename(muleMode, "", true);
-		addEventListener("gameevent", gameEvent);
-	} else {
-		// Wait for master before login = give room to determine muling mode (normal or torch)
-		while (!master) {
-			delay(100);
-		}
+          return;
+        }
 
-		console.log("Master found: " + master);
+        MuleLogger.save(md5(info.realm.toLowerCase() + info.account.toLowerCase()), info.password);
+        ControlAction.loginAccount(info);
+      }
+    );
+    locations.set(sdk.game.locations.CreateNewAccount,
+      function () {
+        if (Starter.makeAccount) {
+          let obj = MuleData.read();
+          let info = {
+            realm: Mule.obj.realm,
+            account: obj.account,
+            password: Mule.obj.accountPassword
+          };
 
-		muleObj = AutoMule.getMuleObject(muleMode, master);
-		muleFilename = AutoMule.getMuleFilename(muleMode, master);
-	}
+          if (ControlAction.makeAccount(info)) {
+            D2Bot.printToConsole("Made account: " + info.account, sdk.colors.D2Bot.DarkGold);
+            Starter.makeAccount = false;
+          } else {
+            MuleData.nextAccount();
+          }
+        }
+      }
+    );
+    locations.set(sdk.game.locations.CharSelectNoChars,
+      function () {
+        if (!Controls.CharSelectCurrentRealm.control) {
+          Controls.BottomLeftExit.click();
+        } else if (Controls.CharSelectCreate.disabled === sdk.game.controls.Disabled) {
+          D2Bot.updateStatus("Realm Down");
+          delay(1000);
 
-	console.log("Mule filename: " + muleFilename);
+          if (!Controls.BottomLeftExit.click()) {
+            return;
+          }
 
-	try {
-		// ugly solution to uglier problem - pickItem area update
-		!FileTools.exists("data/" + me.profile + ".json") && DataFile.create();
+          Starter.updateCount();
+          ControlAction.timeoutDelay("Realm Down", Starter.Config.RealmDownDelay * 6e4);
+          D2Bot.CDKeyRD();
 
-		// create mule datafile if it doesn't exist
-		!FileTools.exists(muleFilename) && MuleData.create();
+          if (Starter.gameInfo.switchKeys) {
+            D2Bot.printToConsole("Realm Down - Changing CD-Key");
+            ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
+            D2Bot.restart(true);
+          } else {
+            D2Bot.restart();
+          }
+        }
+      }
+    );
+    locations.set(sdk.game.locations.SelectDifficultySP,
+      function () {
+        hideConsole();
+        sendKey(sdk.keys.Escape);
+      }
+    );
+    locations.set(sdk.game.locations.GameNameExists,
+      function () {
+        Controls.JoinGameWindow.click();
+      }
+    );
+    locations.set(sdk.game.locations.GameDoesNotExist,
+      function () {
+        Controls.CreateGameWindow.click();
+      }
+    );
+    locations.set(sdk.game.locations.CreateGame,
+      function () {
+        D2Bot.updateStatus("Creating Game");
 
-		let obj = MuleData.read();
-		obj.account && obj.account.indexOf(muleObj.accountPrefix) < 0 && MuleData.create();
-	} catch (e) {
-		// probably should try again if fails to make file or shut down instead of continuing loop
-		console.warn("Caught exception creating data files.");
-		console.error(e);
-		D2Bot.printToConsole("DataFileException: " + e.message + " (" + e.fileName.substring(e.fileName.lastIndexOf("\\") + 1, e.fileName.length) + " #" + e.lineNumber + ")");
-	}
+        // remove level restriction
+        if (Controls.CharacterDifference.disabled === 5) {
+          Controls.CharacterDifferenceButton.click();
+        }
+        // Max number of players
+        Controls.MaxPlayerCount.setText("8");
 
-	// begin
-	MainLoop:
-	while (true) {
-		try {
-			if (me.ingame && me.gameReady) {
-				if (!Starter.inGame) {
-					if (!Mule.init()) {
-						console.debug("Failed to init. Trying again. Ingame and ready? " + (me.ingame && me.gameReady && !!me.area));
-						delay(1000);
-						continue;
-					}
-				}
+        delay(2000);
 
-				if (!Mule.continuousMule) {
-					Mule.waitForMaster();
-				}
+        // FTJ handler
+        if (Mule.status === "pending") {
+          D2Bot.printToConsole("Failed to create game");
+          ControlAction.timeoutDelay("FTJ delay", Starter.Config.FTJDelay * 1e3);
+          D2Bot.updateRuns();
+        }
 
-				D2Bot.updateStatus(Mule.statusString + " Status: " + status + Starter.timer(me.gamestarttime));
+        createGame(Mule.obj.muleGameName[0], Mule.obj.muleGameName[1]);
+        if (!Mule.ingameTimeout(Time.minutes(1))) {
+          console.debug(
+            "Failed to get in game, current location: " + getLocation()
+            + " inGame? " + me.ingame + " area? " + me.area
+          );
+          return;
+        }
+        
+        Mule.status = "pending";
+      }
+    );
+    locations.set(sdk.game.locations.JoinGame,
+      function () {
+        D2Bot.updateStatus("Join Game");
 
-				if (status === "begin") {
-					switch (Mule.pickItems()) {
-					// done picking, tell the master to leave game and kill mule profile
-					case "done":
-						Mule.done();
+        if (Mule.status === "pending") {
+          D2Bot.printToConsole("Failed to join game");
+          ControlAction.timeoutDelay("Join Delay", Starter.Config.FTJDelay * 1000);
+          D2Bot.updateRuns();
+        }
 
-						return;
-					// can't fit more items, get to next character or account
-					case "next":
-						Mule.next();
+        if (Starter.inGame) {
+          console.log("updating runs");
+          D2Bot.updateRuns();
+          Mule.status = "ready";
+          Starter.inGame = false;
+        }
 
-						// should fix hitting gameRefresh when making a new character
-						continue MainLoop;
-					case "ready":
-						Mule.recheckTick = getTickCount();
+        if (Mule.refresh
+          || (Mule.makeNext && !String.isEqual(me.charname, MuleData.read().character))) {
+          Controls.LobbyQuit.click(); // Quit from Lobby
+          if (Mule.makeNext) {
+            console.debug("Next mule: " + MuleData.read().character + " current: " + me.charname);
+          }
+          if (Mule.refresh) {
+            ControlAction.timeoutDelay("Refresh game", 330 * 1000); // 5.5 minutes
+            Mule.refresh = false;
+          }
+          return;
+        }
 
-						break;
-					case "fail":
-						// Try again
-						break;
-					}
-				}
+        if (!Mule.continuous) {
+          D2Bot.requestGame(Mule.master);
+          delay(100);
+        }
 
-				if (Mule.continuousMule) {
-					if (Starter.Config.MaxGameTime > 0 && getTickCount() - me.gamestarttime > Time.minutes(Starter.Config.MaxGameTime) && Mule.foreverAlone()) {
-						Mule.gameRefresh();
-					} else if (getTickCount() - Mule.recheckTick > Time.minutes(10)) {
-						// recheck every 10 minutes?
-						status = "begin";
-					}
-				}
-			} else if (!me.ingame) {
-				delay(1000);
-				locationAction(getLocation());
-			}
-		} catch (e2) {
-			console.warn("Caught an exception in the main loop.");
-			console.error(e2);
-			D2Bot.printToConsole("MainLoopException: " + e2.message + " (" + e2.fileName.substring(e2.fileName.lastIndexOf("\\") + 1, e2.fileName.length) + " #" + e2.lineNumber + ")");
-		}
+        delay(2000);
 
-		delay(100);
-	}
+        if (Object.keys(Starter.joinInfo).length
+          && Starter.joinInfo.gameName !== ""
+          && Starter.joinInfo.inGame) {
+          joinGame(Starter.joinInfo.gameName, Starter.joinInfo.gamePass);
+        } else {
+          joinGame(Mule.obj.muleGameName[0], Mule.obj.muleGameName[1]);
+        }
+
+        !Starter.firstLogin && (Mule.status = "pending");
+
+        if (Mule.ingameTimeout(Time.minutes(1))) {
+          console.debug("Ingame timeout done.");
+        }
+
+        // could not join game
+        if (getLocation() === sdk.game.locations.Lobby && !me.ingame) {
+          Controls.CreateGameWindow.click();
+        }
+      }
+    );
+    addLocations([sdk.game.locations.TcpIp, sdk.game.locations.NewCharSelected],
+      function () {
+        Controls.BottomLeftExit.click();
+      }
+    );
+    addLocations([sdk.game.locations.CharSelect, sdk.game.locations.CharSelectNoChars],
+      function () {
+        let string = parseControlText(Controls.CharSelectError.control);
+
+        if (string) {
+          if (string === getLocaleString(sdk.locale.text.CdKeyDisabledFromRealm)) {
+            D2Bot.updateStatus("Realm Disabled CDKey");
+            D2Bot.printToConsole("Realm Disabled CDKey: " + Starter.gameInfo.mpq, sdk.colors.D2Bot.Gold);
+            D2Bot.CDKeyDisabled();
+
+            if (Starter.gameInfo.switchKeys) {
+              ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
+              D2Bot.restart(true);
+            } else {
+              D2Bot.stop(me.profile, true);
+            }
+          }
+        }
+
+        // Single Player screen fix
+        // TODO: see if this is still needed. d2bs doesn't load scripts twice anymore
+        if (!Controls.CharSelectCurrentRealm.control) {
+          Controls.BottomLeftExit.click();
+
+          return;
+        }
+
+        // Can't create character, button greyed out = high likelyhood of realm down
+        if (getLocation() === sdk.game.locations.CharSelectNoChars
+          && Controls.CharSelectCreate.disabled === sdk.game.controls.Disabled) {
+          D2Bot.updateStatus("Realm Down");
+          delay(1000);
+
+          if (!Controls.BottomLeftExit.click()) {
+            return;
+          }
+
+          Starter.updateCount();
+          ControlAction.timeoutDelay("Realm Down", Starter.Config.RealmDownDelay * 6e4);
+          D2Bot.CDKeyRD();
+
+          if (Starter.gameInfo.switchKeys) {
+            D2Bot.printToConsole("Realm Down - Changing CD-Key");
+            ControlAction.timeoutDelay("Key switch delay", Starter.Config.SwitchKeyDelay * 1000);
+            D2Bot.restart(true);
+          } else {
+            D2Bot.restart();
+          }
+        }
+
+        let obj = MuleData.read();
+        const maxCharCount = (Mule.obj.charsPerAcc > 0 ? Math.min(Mule.obj.charsPerAcc, 18) : 8);
+
+        if (Mule.makeNext) {
+          if (obj.fullChars.length >= maxCharCount
+            || (Mule.mode > 0 && obj.torchChars.length >= maxCharCount)) {
+            Controls.BottomLeftExit.click();
+            MuleData.nextAccount();
+
+            return;
+          }
+
+          Mule.makeNext = false;
+        }
+
+        if (!obj.character || obj.character.indexOf(Mule.obj.charPrefix) < 0) {
+          MuleData.nextChar();
+
+          obj = MuleData.read();
+        }
+
+        const info = {
+          account: obj.account,
+          charName: obj.character,
+          ladder: Mule.obj.ladder,
+          hardcore: Mule.obj.hardcore,
+          expansion: Mule.obj.expansion,
+          charClass: "amazon"
+        };
+
+        if (Mule.mode > 0 && obj.torchChars.includes(info.charName)) {
+          MuleData.nextChar();
+
+          return;
+        }
+
+        if (ControlAction.findCharacter(info)) {
+          ControlAction.loginCharacter(info, false);
+        } else {
+          // premade account that's already full
+          if (ControlAction.getCharacters().length >= maxCharCount) {
+            Controls.BottomLeftExit.click();
+            MuleData.nextAccount();
+
+            return;
+          }
+
+          if (!ControlAction.makeCharacter(info)) {
+            // TODO: check if acc is full and cancel location 15 and 29 if true
+            MuleData.nextChar();
+
+            return;
+          }
+
+          D2Bot.printToConsole("Made character: " + info.charName, sdk.colors.D2Bot.DarkGold);
+        }
+      }
+    );
+    addLocations([sdk.game.locations.Lobby, sdk.game.locations.LobbyChat],
+      function () {
+        D2Bot.updateStatus("Lobby");
+
+        if (Starter.inGame) {
+          if (Mule.refresh) {
+            Controls.LobbyQuit.click(); // Quit from Lobby
+            ControlAction.timeoutDelay("Refresh game", 330 * 1000); // 5.5 minutes
+            Mule.refresh = false;
+            
+            return;
+          }
+          console.log("updating runs");
+          D2Bot.updateRuns();
+          Mule.status = "ready";
+          Starter.inGame = false;
+        }
+        Mule.makeNext
+          ? Controls.LobbyQuit.click()
+          : Starter.LocationEvents.openJoinGameWindow();
+      }
+    );
+
+    return {
+      /** @param {number} loc */
+      run: function (loc) {
+        try {
+          let func = locations.get(loc);
+          if (typeof func === "function") {
+            func(loc);
+          } else if (loc !== undefined && loc !== null) {
+            console.log("Unhandled location: " + loc);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      },
+    };
+  })();
+
+  const Overrides = require("./libs/modules/Override");
+  new Overrides.Override (Starter, Starter.receiveCopyData, function (orignal, mode, msg) {
+    if (mode === 3) return;
+    // master/mule communication function
+    switch (mode) {
+    case 10: // mule request
+      if (me.ingame) return;
+      let obj = JSON.parse(msg);
+
+      if (Mule.continuous && me.ingame) {
+        sendCopyData(null, obj.profile, 10, JSON.stringify({ status: "ready" }));
+      } else {
+        if (!Mule.master) {
+          let masterInfo = Mule.getMaster(obj);
+
+          if (masterInfo) {
+            Mule.master = masterInfo.profile;
+            Mule.mode = masterInfo.mode;
+          }
+        } else {
+          // come back to this to allow multiple mulers
+          if (obj.profile === Mule.master) {
+            sendCopyData(null, Mule.master, 10, JSON.stringify({ status: Mule.status }));
+          } else {
+            sendCopyData(null, obj.profile, 10, JSON.stringify({ status: "busy" }));
+          }
+        }
+      }
+
+      break;
+    case 11: // begin item pickup
+    case 12: // get master's status
+      break;
+    default:
+      orignal(mode, msg);
+    }
+  }).apply();
+
+  new Overrides.Override (Starter, Starter.updateCount, function () {
+    D2Bot.updateCount();
+    delay(1000);
+    Controls.BattleNet.click();
+
+    let obj = MuleData.read();
+    let info = {
+      realm: Mule.obj.realm,
+      account: obj.account,
+      password: Mule.obj.accountPassword
+    };
+
+    MuleLogger.save(md5(info.realm.toLowerCase() + info.account.toLowerCase()), info.password);
+    ControlAction.loginAccount(info);
+    delay(1000);
+    Controls.BottomLeftExit.click();
+  }).apply();
+
+  addEventListener("copydata", Starter.receiveCopyData);
+  addEventListener("scriptmsg", function (msg) {
+    if (typeof msg === "string") {
+      if (msg === "mule_init") {
+        getScript(inGameThread).send({
+          obj: Mule.obj,
+          mode: Mule.mode,
+          master: Mule.master,
+          fileName: MuleData.fileName,
+          next: Mule.next,
+          minGameTime: Starter.Config.MinGameTime,
+          maxGameTime: Starter.Config.MaxGameTime
+        });
+        Mule.refresh = false;
+        Mule.next = false;
+      } else if (msg === "refresh") {
+        Mule.refresh = true;
+      } else if (msg === "next") {
+        Mule.makeNext = true;
+        // maybe hacky? I want to let the newly created mule know that it's a next mule instead of first join
+        Mule.next = true;
+      }
+    } else if (typeof msg === "object") {
+      if (msg.hasOwnProperty("status")) {
+        Mule.status = msg.status;
+      }
+    }
+  });
+
+  while (!Starter.handle) {
+    delay(100);
+  }
+
+  DataFile.updateStats("handle", Starter.handle);
+  D2Bot.init();
+  load("threads/heartbeat.js");
+
+  while (!Object.keys(Starter.gameInfo).length) {
+    D2Bot.requestGameInfo();
+    delay(500);
+  }
+
+  D2Bot.updateRuns(); // we need the mule to swap keys somehow after all
+  delay(1000);
+
+  const muleObjs = Mule.getMuleInfo();
+
+  if (muleObjs.length === 1) {
+    // we can assign our info directly
+    Mule.obj = muleObjs[0].obj;
+    Mule.mode = muleObjs[0].mode;
+    Mule.continuous = muleObjs[0].obj.continuousMule;
+    // we can use any of the enabled profiles
+    MuleData.fileName = Mule.getMuleFilename(Mule.mode, Mule.obj.enabledProfiles[0], Mule.continuous);
+  } else if (muleObjs.some(muleObj => muleObj.obj.continuousMule)) {
+    // continuous mule doesn't wait for master profiles
+    // find the obj and we can assign our info directly
+    let _muleObj = muleObjs.find(function (muleObj) {
+      return muleObj.obj.continuousMule;
+    });
+    Mule.obj = _muleObj.obj;
+    Mule.mode = _muleObj.mode;
+    Mule.continuous = _muleObj.obj.continuousMule;
+    // we can use any of the enabled profiles
+    MuleData.fileName = Mule.getMuleFilename(Mule.mode, Mule.obj.enabledProfiles[0], Mule.continuous);
+  } else {
+    // we need to wait for confirmation from the master
+    while (!Mule.master) {
+      delay(100);
+    }
+    console.log("Master found: " + Mule.master + " Mode: " + Mule.mode);
+    Mule.obj = muleObjs.find(function (muleObj) {
+      return muleObj.obj.enabledProfiles.includes(Mule.master) || muleObj.obj.enabledProfiles.includes("all");
+    }).obj;
+    Mule.continuous = Mule.obj.continuousMule;
+    MuleData.fileName = Mule.getMuleFilename(Mule.mode, Mule.master, Mule.continuous);
+  }
+
+  console.log("Mule filename: " + MuleData.fileName);
+
+  try {
+    // create mule datafile if it doesn't exist
+    !FileTools.exists(MuleData.fileName) && MuleData.create();
+
+    let obj = MuleData.read();
+    if (obj.account && obj.account.indexOf(Mule.obj.accountPrefix) < 0) {
+      MuleData.create();
+    }
+  } catch (e) {
+    // probably should try again if fails to make file or shut down instead of continuing loop
+    console.warn("Caught exception creating data files.");
+    console.error(e);
+    D2Bot.printToConsole(
+      "DataFileException: " + e.message
+      + " (" + e.fileName.substring(e.fileName.lastIndexOf("\\") + 1, e.fileName.length)
+      + " #" + e.lineNumber + ")"
+    );
+  }
+
+  // begin
+  while (true) {
+    try {
+      while (me.ingame) {
+        if (me.gameReady) {
+          Starter.isUp = "yes";
+
+          if (!Starter.inGame) {
+            Starter.gameStart = getTickCount();
+            Starter.lastGameStatus = "ingame";
+            Starter.inGame = true;
+            Mule.statusString = (
+              "In "
+              + (Mule.mode === 2 ? "anni " : Mule.mode === 1 ? "torch " : "")
+              + "mule game."
+            );
+            D2Bot.printToConsole(Mule.statusString, sdk.colors.D2Bot.DarkGold);
+
+            DataFile.updateStats("runs", Starter.gameCount);
+            DataFile.updateStats("ingameTick");
+          }
+          D2Bot.updateStatus(
+            me.charname + " | Game: " + me.gamename
+            + " | " + Mule.statusString + " Status: " + Mule.status
+            + Starter.timer(me.gamestarttime)
+          );
+        }
+
+        delay(1000);
+      }
+
+      Starter.isUp = "no";
+
+      locationAction.run(getLocation());
+      delay(1000);
+    } catch (e) {
+      console.error(e);
+      D2Bot.printToConsole(
+        "MainLoopException: " + e.message
+        + " (" + e.fileName.substring(e2.fileName.lastIndexOf("\\") + 1, e.fileName.length)
+        + " #" + e.lineNumber + ")"
+      );
+    }
+
+    delay(100);
+  }
 }
