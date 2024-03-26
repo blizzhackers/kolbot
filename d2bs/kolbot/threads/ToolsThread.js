@@ -402,7 +402,7 @@ function main () {
           if (ironGolem) {
             // ironGolem.hpmax is bugged with BO
             if (ironGolem.hp <= Math.floor(128 * Config.IronGolemChicken / 100)) {
-              D2Bot.printToConsole("Irom Golem Chicken in " + getAreaName(me.area), sdk.colors.D2Bot.Red);
+              D2Bot.printToConsole("Iron Golem Chicken in " + getAreaName(me.area), sdk.colors.D2Bot.Red);
 
               break;
             }
