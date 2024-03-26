@@ -562,99 +562,109 @@
     },
 
     // Cast a skill on self, Unit or coords
-    cast: function (skillId, hand, x, y, item) {
+    cast: function (skillId, hand, x, y, item, weaponSlot = -1) {
       if (skillId === undefined) throw new Error("Unit.cast: Must supply a skill ID");
-      switch (true) {
-      case me.inTown && !this.townSkill(skillId):
-      case !item && (this.getManaCost(skillId) > me.mp || !this.canUse(skillId)):
-      case !this.wereFormCheck(skillId):
-        return false;
-      }
-
-      hand === undefined && (hand = this.getHand(skillId));
-      x === undefined && (x = me.x);
-      y === undefined && (y = me.y);
-
-      // Check mana cost, charged skills don't use mana
-      if (!item && this.getManaCost(skillId) > me.mp) {
-        // Maybe delay on ALL skills that we don't have enough mana for?
-        if (Config.AttackSkill
-          .concat([sdk.skills.StaticField, sdk.skills.Teleport])
-          .concat(Config.LowManaSkill).includes(skillId)) {
-          delay(300);
+      const switchWeapons = weaponSlot > -1;
+      try {
+        if (switchWeapons && me.weaponswitch !== weaponSlot) {
+          me.switchWeapons(weaponSlot);
+        }
+        switch (true) {
+        case me.inTown && !this.townSkill(skillId):
+        case !item && (this.getManaCost(skillId) > me.mp || !this.canUse(skillId)):
+        case !this.wereFormCheck(skillId):
+          return false;
         }
 
-        return false;
-      }
+        hand === undefined && (hand = this.getHand(skillId));
+        x === undefined && (x = me.x);
+        y === undefined && (y = me.y);
 
-      if (skillId === sdk.skills.Teleport) {
-        if (typeof x === "number") {
-          const orgDist = [x, y].distance;
-          if (Packet.teleport(x, y)) {
-            return Misc.poll(function () {
-              return [x, y].distance < orgDist;
-            }, 300, 25);
+        // Check mana cost, charged skills don't use mana
+        if (!item && this.getManaCost(skillId) > me.mp) {
+          // Maybe delay on ALL skills that we don't have enough mana for?
+          if (Config.AttackSkill
+            .concat([sdk.skills.StaticField, sdk.skills.Teleport])
+            .concat(Config.LowManaSkill).includes(skillId)) {
+            delay(300);
           }
+
+          return false;
         }
-      }
 
-      if (!this.setSkill(skillId, hand, item)) return false;
-
-      if (Config.PacketCasting > 1) {
-        if (typeof x === "number") {
-          Packet.castSkill(hand, x, y);
-        } else if (typeof x === "object") {
-          Packet.unitCast(hand, x);
-        }
-        delay(250);
-      } else {
-        let [clickType, shift] = (function () {
-          switch (hand) {
-          case sdk.skills.hand.Left: // Left hand + Shift
-            return [sdk.clicktypes.click.map.LeftDown, sdk.clicktypes.shift.Shift];
-          case sdk.skills.hand.LeftNoShift: // Left hand + No Shift
-            return [sdk.clicktypes.click.map.LeftDown, sdk.clicktypes.shift.NoShift];
-          case sdk.skills.hand.RightShift: // Right hand + Shift
-            return [sdk.clicktypes.click.map.RightDown, sdk.clicktypes.shift.Shift];
-          case sdk.skills.hand.Right: // Right hand + No Shift
-          default:
-            return [sdk.clicktypes.click.map.RightDown, sdk.clicktypes.shift.NoShift];
-          }
-        })();
-
-        for (let n = 0; n < 3; n += 1) {
-          typeof x === "object"
-            ? clickMap(clickType, shift, x)
-            : clickMap(clickType, shift, x, y);
-          delay(20);
-          typeof x === "object"
-            ? clickMap(clickType + 2, shift, x)
-            : clickMap(clickType + 2, shift, x, y);
-
-          if (Misc.poll(function () {
-            return me.attacking;
-          }, 200, 20)) {
-            break;
+        if (skillId === sdk.skills.Teleport) {
+          if (typeof x === "number") {
+            const orgDist = [x, y].distance;
+            if (Packet.teleport(x, y)) {
+              return Misc.poll(function () {
+                return [x, y].distance < orgDist;
+              }, 300, 25);
+            }
           }
         }
 
-        while (me.attacking) {
-          delay(10);
+        if (!this.setSkill(skillId, hand, item)) return false;
+
+        if (Config.PacketCasting > 1) {
+          if (typeof x === "number") {
+            Packet.castSkill(hand, x, y);
+          } else if (typeof x === "object") {
+            Packet.unitCast(hand, x);
+          }
+          delay(250);
+        } else {
+          let [clickType, shift] = (function () {
+            switch (hand) {
+            case sdk.skills.hand.Left: // Left hand + Shift
+              return [sdk.clicktypes.click.map.LeftDown, sdk.clicktypes.shift.Shift];
+            case sdk.skills.hand.LeftNoShift: // Left hand + No Shift
+              return [sdk.clicktypes.click.map.LeftDown, sdk.clicktypes.shift.NoShift];
+            case sdk.skills.hand.RightShift: // Right hand + Shift
+              return [sdk.clicktypes.click.map.RightDown, sdk.clicktypes.shift.Shift];
+            case sdk.skills.hand.Right: // Right hand + No Shift
+            default:
+              return [sdk.clicktypes.click.map.RightDown, sdk.clicktypes.shift.NoShift];
+            }
+          })();
+
+          for (let n = 0; n < 3; n += 1) {
+            typeof x === "object"
+              ? clickMap(clickType, shift, x)
+              : clickMap(clickType, shift, x, y);
+            delay(20);
+            typeof x === "object"
+              ? clickMap(clickType + 2, shift, x)
+              : clickMap(clickType + 2, shift, x, y);
+
+            if (Misc.poll(function () {
+              return me.attacking;
+            }, 200, 20)) {
+              break;
+            }
+          }
+
+          while (me.attacking) {
+            delay(10);
+          }
+        }
+
+        // account for lag, state 121 doesn't kick in immediately
+        if (this.isTimed(skillId)) {
+          Misc.poll(function () {
+            return (
+              me.skillDelay
+              || me.mode === sdk.player.mode.GettingHit
+              || me.mode === sdk.player.mode.Blocking
+            );
+          }, 100, 10);
+        }
+
+        return true;
+      } finally {
+        if (switchWeapons) {
+          me.switchWeapons(Attack.getPrimarySlot());
         }
       }
-
-      // account for lag, state 121 doesn't kick in immediately
-      if (this.isTimed(skillId)) {
-        Misc.poll(function () {
-          return (
-            me.skillDelay
-            || me.mode === sdk.player.mode.GettingHit
-            || me.mode === sdk.player.mode.Blocking
-          );
-        }, 100, 10);
-      }
-
-      return true;
     },
 
     /**
