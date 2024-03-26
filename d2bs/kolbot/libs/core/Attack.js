@@ -118,7 +118,6 @@ const Attack = {
   },
 
   /**
-   * 
    * @param {Monster} unit 
    * @returns {[number, number] | boolean}
    * @todo add checking for other options than just name/classid
@@ -147,6 +146,43 @@ const Attack = {
         case "number":
           if (unit.classid === i) {
             return Config.CustomAttack[i];
+          }
+        }
+      }
+    }
+
+    return false;
+  },
+
+  /**
+   * @param {Monster} unit 
+   * @returns {[number, number] | boolean}
+   * @todo add checking for other options than just name/classid
+   *  - option for based on spectype
+   *  - option for based on enchant/aura
+   */
+  getCustomPreAttack: function (unit) {
+    // Check if unit got invalidated
+    if (!unit || !unit.name || !copyUnit(unit).x) return false;
+    
+    for (let i in Config.CustomPreAttack) {
+      if (Config.CustomPreAttack.hasOwnProperty(i)) {
+        // if it contains numbers but is a string, convert to an int
+        if (typeof i === "string" && i.match(/\d+/g)) {
+          // @ts-ignore
+          i = parseInt(i, 10);
+        }
+
+        switch (typeof i) {
+        case "string":
+          if (unit.name.toLowerCase() === i.toLowerCase()) {
+            return Config.CustomPreAttack[i];
+          }
+
+          break;
+        case "number":
+          if (unit.classid === i) {
+            return Config.CustomPreAttack[i];
           }
         }
       }
@@ -1854,5 +1890,32 @@ const Attack = {
 
     return (Attack.validSpot(unit.x, unit.y)
       && Skill.cast(sdk.skills.Whirlwind, Skill.getHand(sdk.skills.Whirlwind), me.x, me.y));
-  }
+  },
+
+  /**
+   * @param {Monster} unit 
+   * @returns {AttackResult}
+   */
+  doPreAttack: function (unit) {
+    const preAttackInfo = Attack.getCustomPreAttack(unit)
+      ? Attack.getCustomPreAttack(unit)
+      : [Config.AttackSkill[0], Attack.getPrimarySlot()];
+    preAttackInfo.length < 2 && preAttackInfo.push(Attack.getPrimarySlot());
+    const [skill, slot] = preAttackInfo;
+
+    if (skill > 0
+      && Attack.checkResist(unit, skill)
+      && (!me.skillDelay || !Skill.isTimed(skill))) {
+      if (unit.distance > Skill.getRange(skill) || checkCollision(me, unit, sdk.collision.Ranged)) {
+        if (!Attack.getIntoPosition(unit, Skill.getRange(skill), sdk.collision.Ranged)) {
+          return Attack.Result.FAILED;
+        }
+      }
+
+      Skill.cast(skill, Skill.getHand(skill), unit, null, null, slot);
+
+      return Attack.Result.SUCCESS;
+    }
+    return Attack.Result.NOOP;
+  },
 };

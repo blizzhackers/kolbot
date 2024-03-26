@@ -546,14 +546,27 @@ function LoadConfig () {
   Config.LowManaSkill[0] = -1; // Low mana skill.
   Config.LowManaSkill[1] = -1; // Low mana aura.
   
-  /* Advanced Attack config. Allows custom skills to be used on custom monsters.
-   *	Format: "Monster Name": [timed skill id, untimed skill id]
-   *	Example: "Baal": [38, -1] to use charged bolt on Baal
-   *	Multiple entries are separated by commas
+  /**
+   * Advanced Attack config. Allows custom skills to be used on custom monsters.
+   * Format: "Monster Name": [timed skill id, untimed skill id]
+   * Example: "Baal": [38, -1] to use charged bolt on Baal
+   * Multiple entries are separated by commas
    */
   Config.CustomAttack = {
-    //"Monster Name": [-1, -1]
+    // "Monster Name": [-1, -1]
   };
+
+  /**
+   * Advanced PreAttack config. Allows custom skills to be used on custom monsters.
+   * Format: "Monster Name": [skill id, weapon slot]
+   * Example: "Baal": [146, 1] to use battle cry on Baal with weapon slot 1 (switches if necessary)
+   * Multiple entries are separated by commas
+   */
+  Config.CustomPreAttack = {
+    // "Monster Name": [-1, -1]
+  };
+  // Alternatively, you can use the sdk.monsters.MonsterName and sdk.skills.SkillName enums to avoid typos
+  // Config.CustomPreAttack[sdk.monsters.Baal] = [sdk.skills.BattleCry, sdk.player.slot.Secondary];
 
   // Weapon slot settings
   Config.PrimarySlot = -1; //  primary weapon slot: -1 = disabled (will try to determine primary slot by using non-cta slot that's not empty), 0 = slot I, 1 = slot II

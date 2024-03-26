@@ -147,18 +147,11 @@ const ClassAttack = {
       }
     }
 
-    if (preattack && Config.AttackSkill[0] > 0
-      && Attack.checkResist(unit, Config.AttackSkill[0])
-      && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
-      if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
-        if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), sdk.collision.Ranged)) {
-          return Attack.Result.FAILED;
-        }
+    if (preattack) {
+      let preAttackResult = Attack.doPreAttack(unit);
+      if (preAttackResult !== Attack.Result.NOOP) {
+        return preAttackResult;
       }
-
-      Skill.cast(Config.AttackSkill[0], Skill.getHand(Config.AttackSkill[0]), unit);
-
-      return Attack.Result.SUCCESS;
     }
 
     // only continue if we can actually curse the unit otherwise its a waste of time

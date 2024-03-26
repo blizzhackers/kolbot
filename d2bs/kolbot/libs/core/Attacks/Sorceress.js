@@ -6,6 +6,7 @@
 */
 
 const ClassAttack = {
+  /** @param {Monster} unit */
   decideSkill: function (unit) {
     let skills = { timed: -1, untimed: -1 };
     if (!unit || !unit.attackable) return skills;
@@ -14,7 +15,9 @@ const ClassAttack = {
     let classid = unit.classid;
 
     // Get timed skill
-    let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
+    let checkSkill = Attack.getCustomAttack(unit)
+      ? Attack.getCustomAttack(unit)[0]
+      : Config.AttackSkill[index];
 
     if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill, classid)) {
       skills.timed = checkSkill;
@@ -25,7 +28,9 @@ const ClassAttack = {
     }
 
     // Get untimed skill
-    checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[1] : Config.AttackSkill[index + 1];
+    checkSkill = Attack.getCustomAttack(unit)
+      ? Attack.getCustomAttack(unit)[1]
+      : Config.AttackSkill[index + 1];
 
     if (Attack.checkResist(unit, checkSkill) && Attack.validSpot(unit.x, unit.y, checkSkill, classid)) {
       skills.untimed = checkSkill;
@@ -93,18 +98,11 @@ const ClassAttack = {
       }
     }
 
-    if (preattack && Config.AttackSkill[0] > 0
-      && Attack.checkResist(unit, Config.AttackSkill[0])
-      && (!me.skillDelay || !Skill.isTimed(Config.AttackSkill[0]))) {
-      if (unit.distance > Skill.getRange(Config.AttackSkill[0]) || checkCollision(me, unit, sdk.collision.Ranged)) {
-        if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), sdk.collision.Ranged)) {
-          return Attack.Result.FAILED;
-        }
+    if (preattack) {
+      let preAttackResult = Attack.doPreAttack(unit);
+      if (preAttackResult !== Attack.Result.NOOP) {
+        return preAttackResult;
       }
-
-      Skill.cast(Config.AttackSkill[0], Skill.getHand(Config.AttackSkill[0]), unit);
-
-      return Attack.Result.SUCCESS;
     }
 
     let useStatic = (Config.StaticList.length > 0

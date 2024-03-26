@@ -85,7 +85,6 @@ let Config = {
       Config.Loaded = true;
     } catch (e2) {
       if (notify) {
-        // console.log("ÿc8Error in " + e2.fileName.substring(e2.fileName.lastIndexOf("\\") + 1, e2.fileName.length) + "(line " + e2.lineNumber + "): " + e2.message);
         console.error(e2);
 
         throw new Error("Config.init: Error in character config.");
@@ -339,7 +338,10 @@ let Config = {
   DodgeHP: 100,
   AttackSkill: [],
   LowManaSkill: [],
+  /** @type {Record<string | number, [number, number]>} */
   CustomAttack: {},
+  /** @type {Record<string | number, [number, number]>} */
+  CustomPreAttack: {},
   TeleStomp: false,
   NoTele: false,
   ClearType: false,
