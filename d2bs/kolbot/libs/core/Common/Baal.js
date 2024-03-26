@@ -1,5 +1,5 @@
 /**
-*  @filename    Cows.js
+*  @filename    Baal.js
 *  @author      theBGuy
 *  @desc        Handle Baal functions
 *
@@ -133,7 +133,7 @@
             if (me.getState(sdk.states.SkillDelay)) {
               delay(50);
             } else {
-              Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Right, 15094 + rand(-1, 1), 5024);
+              Skill.cast(Config.AttackSkill[1], sdk.skills.hand.Right, 15094 + rand(-2, 2), 5024 + rand(-2, 2));
             }
           }
 
@@ -178,12 +178,14 @@
 
         let tick = getTickCount();
         let totalTick = getTickCount();
+        let lastWave = 0;
 
         MainLoop:
         while (true) {
           if (!Game.getMonster(sdk.monsters.ThroneBaal)) return true;
+          const wave = this.checkThrone() || 0;
 
-          switch (this.checkThrone()) {
+          switch (wave) {
           case 1:
             Attack.clearClassids(sdk.monsters.WarpedFallen, sdk.monsters.WarpedShaman) && (tick = getTickCount());
 
@@ -232,12 +234,20 @@
             break;
           }
 
+          if (wave > 0 && wave > lastWave) {
+            lastWave = wave;
+          }
+
           switch (me.classid) {
           case sdk.player.class.Amazon:
           case sdk.player.class.Sorceress:
           case sdk.player.class.Necromancer:
           case sdk.player.class.Assassin:
-            [15116, 5026].distance > 3 && Pather.moveTo(15116, 5026);
+            if (Config.AttackSkill[3] === sdk.skills.FrozenOrb && (lastWave < 4)) {
+              [15106, 5040].distance > 3 && Pather.moveTo(15106, 5040);
+            } else {
+              [15116, 5026].distance > 3 && Pather.moveTo(15116, 5026);
+            }
 
             break;
           case sdk.player.class.Paladin:
