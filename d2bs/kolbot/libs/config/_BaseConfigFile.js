@@ -534,10 +534,19 @@
   Config.LowManaSkill[0] = -1; // Timed low mana skill.
   Config.LowManaSkill[1] = -1; // Untimed low mana skill.
   
-  Config.ChargeCast = {
-    skill: sdk.skills.LowerResist,
-    spectype: 0x7,
-  };
+  /**
+   * ChargeCast config.
+   * Allows use of charged skills (experimental)
+   * Summons are unsupported.
+   * Switchcasting is supported.
+   */
+  Config.ChargeCast.skill = -1; // Skill to use
+  Config.ChargeCast.spectype = 0x7; // Monster spectype to use skill on. 0xF = skip normal, 0x7 = champions/bosses, 0 = all
+  
+  // Config.ChargeCast = {
+  //   skill: sdk.skills.LowerResist,
+  //   spectype: 0x7,
+  // };
   
   Config.PacketCasting = 0; // 0 = disable, 1 = packet teleport, 2 = full packet casting. (disables casting animation for increased d2bs stability)
   

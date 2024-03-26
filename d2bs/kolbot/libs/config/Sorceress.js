@@ -546,7 +546,16 @@ function LoadConfig () {
   // Low mana skills - these will be used if main skills can't be cast.
   Config.LowManaSkill[0] = -1; // Timed low mana skill.
   Config.LowManaSkill[1] = -1; // Untimed low mana skill.
-  
+
+  /**
+   * ChargeCast config.
+   * Allows use of charged skills (experimental)
+   * Summons are unsupported.
+   * Switchcasting is supported.
+   */
+  Config.ChargeCast.skill = -1; // Skill to use
+  Config.ChargeCast.spectype = 0x7; // Monster spectype to use skill on. 0xF = skip normal, 0x7 = champions/bosses, 0 = all
+
   /**
    * Advanced Attack config. Allows custom skills to be used on custom monsters.
    * Format: "Monster Name": [timed skill id, untimed skill id]
