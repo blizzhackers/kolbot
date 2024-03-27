@@ -174,6 +174,11 @@ function main () {
   
   Config.AntiHostile && load("threads/AntiHostile.js");
 
+  // Advertise
+  if (Config.Advertise.Enabled) {
+    require("libs/modules/workers/Advertise");
+  }
+
   if (Config.FastPick) {
     print("ÿc2Fast pickit active.");
     addEventListener("itemaction", Pickit.itemEvent);

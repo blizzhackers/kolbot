@@ -417,6 +417,12 @@ let Config = {
     UseOwnItemFilter: false,
   },
 
+  Advertise: {
+    Enabled: false,
+    Message: "",
+    Interval: [0, 0],
+  },
+
   // Script specific
   MFLeader: false,
   Mausoleum: {
