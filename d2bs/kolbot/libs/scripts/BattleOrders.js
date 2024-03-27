@@ -10,7 +10,10 @@
 
 function BattleOrders () {
   this.gaveBo = false;
-  this.totalBoed = [];
+  /** @type {Set<string>} */
+  const totalBoed = new Set();
+  /** @type {Set<string>} */
+  const boGetters = new Set(Config.BattleOrders.Getters.map(name => name.toLowerCase()));
 
   const boMode = {
     Give: 0,
@@ -41,7 +44,7 @@ function BattleOrders () {
       } catch (e) {
         if (Config.BattleOrders.Wait) {
           let counter = 0;
-          print("Waiting " + Config.BattleOrders.Wait + " seconds for other players...");
+          console.log("Waiting " + Config.BattleOrders.Wait + " seconds for other players...");
 
           Misc.poll(() => {
             counter++;
@@ -79,7 +82,10 @@ function BattleOrders () {
     if (party) {
       do {
         if ([
-          sdk.areas.MooMooFarm, sdk.areas.ChaosSanctuary, sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber
+          sdk.areas.MooMooFarm,
+          sdk.areas.ChaosSanctuary,
+          sdk.areas.ThroneofDestruction,
+          sdk.areas.WorldstoneChamber
         ].includes(party.area)) {
           log("ÿc1I'm late to BOs. Moving on...");
 
@@ -100,7 +106,7 @@ function BattleOrders () {
     // if we haven't already given a bo, lets wait to see if more players show up
     if (!BattleOrders.gaveBo) {
       nearPlayers = Misc.getNearbyPlayerCount();
-      while (nearPlayers !== Config.BattleOrders.Getters.length) {
+      while (nearPlayers !== boGetters.size) {
         if (getTickCount() - tick >= Time.seconds(30)) {
           log("Begin");
 
@@ -117,8 +123,8 @@ function BattleOrders () {
     }
 
     let boed = false;
-    let playersToBo = getUnits(sdk.unittype.Player)
-      .filter(p => Config.BattleOrders.Getters.includes(p.name.toLowerCase()) && p.distance < 20);
+    const playersToBo = getUnits(sdk.unittype.Player)
+      .filter(p => boGetters.has(p.name.toLowerCase()) && p.distance < 20);
     playersToBo.forEach(p => {
       tick = getTickCount();
 
@@ -138,7 +144,7 @@ function BattleOrders () {
           delay(1000);
         }
 
-        this.totalBoed.indexOf(p.name.toLowerCase()) === -1 && this.totalBoed.push(p.name.toLowerCase());
+        totalBoed.add(p.name.toLowerCase());
         console.debug("Bo-ed " + p.name);
         boed = true;
       }
@@ -177,97 +183,127 @@ function BattleOrders () {
   // Ready
   Precast.enabled = true;
 
-  MainLoop:
-  while (true) {
-    if (Config.BattleOrders.SkipIfTardy && tardy()) {
-      break;
+  /**
+   * @param {string} name 
+   * @param {string} msg 
+   */
+  function chatEvent (name, msg) {
+    if (!msg | !name) return;
+    if (!boGetters.has(name.toLowerCase())) return;
+    if (msg === "got-bo") {
+      console.log(name + " got bo");
+      totalBoed.add(name.toLowerCase());
+    }
+  }
+
+  /** @returns {string[]} */
+  function getFailedToBO () {
+    return Config.BattleOrders.Getters.filter(name => !totalBoed.has(name.toLowerCase()));
+  }
+
+  try {
+    if (Config.BattleOrders.Mode === boMode.Give) {
+      addEventListener("chatmsg", chatEvent);
     }
 
-    switch (Config.BattleOrders.Mode) {
-    case boMode.Give:
-      // check if anyone is near us
-      nearPlayer = Game.getPlayer();
+    MainLoop:
+    while (true) {
+      if (Config.BattleOrders.SkipIfTardy && tardy()) {
+        break;
+      }
 
-      if (nearPlayer) {
-        do {
-          if (nearPlayer.name !== me.name) {
-            let nearPlayerName = nearPlayer.name.toLowerCase();
-            // there is a player near us and they are in the list of players to bo and in my party
-            if (Config.BattleOrders.Getters.includes(nearPlayerName)
-              && !this.totalBoed.includes(nearPlayerName) && Misc.inMyParty(nearPlayerName)) {
-              let result = giveBO();
-              if (result.success) {
-                if (result.count === Config.BattleOrders.Getters.length
-                  || this.totalBoed.length === Config.BattleOrders.Getters.length) {
-                  // we bo-ed everyone we are set to, don't wait around any longer
-                  break MainLoop;
+      switch (Config.BattleOrders.Mode) {
+      case boMode.Give:
+        // check if anyone is near us
+        nearPlayer = Game.getPlayer();
+
+        if (nearPlayer) {
+          do {
+            if (nearPlayer.name !== me.name) {
+              let nearPlayerName = nearPlayer.name.toLowerCase();
+              // there is a player near us and they are in the list of players to bo and in my party
+              if (boGetters.has(nearPlayerName)
+                && !totalBoed.has(nearPlayerName)
+                && Misc.inMyParty(nearPlayerName)) {
+                let result = giveBO();
+                if (result.success) {
+                  if (result.count === boGetters.size
+                    || totalBoed.size === boGetters.size) {
+                    // we bo-ed everyone we are set to, don't wait around any longer
+                    break MainLoop;
+                  }
+                  // reset fail tick
+                  tick = getTickCount();
+                  // shorten waiting time since we've already started giving out bo's
+                  BattleOrders.gaveBo = true;
                 }
-                // reset fail tick
-                tick = getTickCount();
-                // shorten waiting time since we've already started giving out bo's
-                BattleOrders.gaveBo = true;
+              }
+            } else {
+              me.overhead(
+                "Waiting " + Math.round(((tick + failTimer) - getTickCount()) / 1000)
+                + " Seconds for other players"
+              );
+
+              if (getTickCount() - tick >= failTimer) {
+                log("ÿc1Give BO timeout fail.");
+                log("Failed to bo: " + getFailedToBO().join(", "));
+                Config.BattleOrders.QuitOnFailure && scriptBroadcast("quit");
+
+                break MainLoop;
               }
             }
-          } else {
-            me.overhead(
-              "Waiting " + Math.round(((tick + failTimer) - getTickCount()) / 1000)
-              + " Seconds for other players"
-            );
+          } while (nearPlayer.getNext());
+        } else {
+          me.overhead(
+            "Waiting " + Math.round(((tick + failTimer) - getTickCount()) / 1000)
+            + " Seconds for other players"
+          );
 
-            if (getTickCount() - tick >= failTimer) {
-              log("ÿc1Give BO timeout fail.");
-              Config.BattleOrders.QuitOnFailure && scriptBroadcast("quit");
+          if (getTickCount() - tick >= failTimer) {
+            log("ÿc1Give BO timeout fail.");
+            log("Failed to bo: " + getFailedToBO().join(", "));
+            Config.BattleOrders.QuitOnFailure && scriptBroadcast("quit");
 
-              break MainLoop;
-            }
+            break MainLoop;
           }
-        } while (nearPlayer.getNext());
-      } else {
-        me.overhead(
-          "Waiting " + Math.round(((tick + failTimer) - getTickCount()) / 1000)
-          + " Seconds for other players"
-        );
+        }
+
+        break;
+      case boMode.Receive:
+        if (me.getState(sdk.states.BattleOrders)) {
+          log("Got bo-ed");
+          say("got-bo");
+          delay(1000);
+
+          break MainLoop;
+        }
 
         if (getTickCount() - tick >= failTimer) {
-          log("ÿc1Give BO timeout fail.");
+          log("ÿc1BO timeout fail.");
           Config.BattleOrders.QuitOnFailure && scriptBroadcast("quit");
 
           break MainLoop;
         }
+
+        break;
       }
 
-      break;
-    case boMode.Receive:
-      if (me.getState(sdk.states.BattleOrders)) {
-        log("Got bo-ed");
-        delay(1000);
-
-        break MainLoop;
-      }
-
-      if (getTickCount() - tick >= failTimer) {
-        log("ÿc1BO timeout fail.");
-        Config.BattleOrders.QuitOnFailure && scriptBroadcast("quit");
-
-        break MainLoop;
-      }
-
-      break;
+      delay(500);
     }
 
-    delay(500);
-  }
+    (Pather.useWaypoint(sdk.areas.RogueEncampment) || Town.goToTown());
 
-  (Pather.useWaypoint(sdk.areas.RogueEncampment) || Town.goToTown());
-
-  // what's the point of this?
-  if (Config.BattleOrders.Mode === boMode.Give && Config.BattleOrders.Idle) {
-    for (let i = 0; i < Config.BattleOrders.Getters.length; i += 1) {
-      while (Misc.inMyParty(Config.BattleOrders.Getters[i])) {
-        delay(1000);
+    // what's the point of this?
+    if (Config.BattleOrders.Mode === boMode.Give && Config.BattleOrders.Idle) {
+      for (let i = 0; i < Config.BattleOrders.Getters.length; i += 1) {
+        while (Misc.inMyParty(Config.BattleOrders.Getters[i])) {
+          delay(1000);
+        }
       }
     }
-  }
 
-  return true;
+    return true;
+  } finally {
+    removeEventListener("chatmsg", chatEvent);
+  }
 }
