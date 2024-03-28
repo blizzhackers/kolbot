@@ -333,6 +333,7 @@ const Pather = {
     const leaped = new PathAction();
     const whirled = new PathAction();
     const cleared = new PathAction();
+    const primarySlot = Attack.getPrimarySlot(); // for tele-switch
 
     for (let i = 0; i < this.cancelFlags.length; i += 1) {
       getUIFlag(this.cancelFlags[i]) && me.cancel();
@@ -341,7 +342,9 @@ const Pather = {
     if (typeof target.x !== "number" || typeof target.y !== "number") {
       throw new Error("move: Coords must be numbers");
     }
-    if (getDistance(me, target) < 2 && !CollMap.checkColl(me, target, sdk.collision.BlockMissile, 5)) return true;
+    if (getDistance(me, target) < 2 && !CollMap.checkColl(me, target, sdk.collision.BlockMissile, 5)) {
+      return true;
+    }
 
     let useTeleport = settings.allowTeleport && this.useTeleport();
     const tpMana = useTeleport ? Skill.getManaCost(sdk.skills.Teleport) : Infinity;
@@ -364,7 +367,7 @@ const Pather = {
     path.reverse();
     settings.pop && path.pop();
     PathDebug.drawPath(path);
-    useTeleport && Config.TeleSwitch && path.length > 5 && me.switchWeapons(Attack.getPrimarySlot() ^ 1);
+    useTeleport && Config.TeleSwitch && path.length > 5 && me.switchWeapons(primarySlot ^ 1);
 
     while (path.length > 0) {
       // Abort if dead
@@ -380,7 +383,7 @@ const Pather = {
 
       if (typeof settings.callback === "function" && settings.callback()) {
         console.debug("Callback function passed. Ending path.");
-        useTeleport && Config.TeleSwitch && me.switchWeapons(Attack.getPrimarySlot() ^ 1);
+        useTeleport && Config.TeleSwitch && me.switchWeapons(primarySlot);
         PathDebug.removeHooks();
         return true;
       }
@@ -414,8 +417,6 @@ const Pather = {
                 Pather.recursion = true;
               }
             }
-
-            // settings.allowTown && Misc.townCheck();
           }
         } else {
           if (!me.inTown) {
@@ -509,14 +510,13 @@ const Pather = {
       delay(5);
     }
 
-    useTeleport && Config.TeleSwitch && me.switchWeapons(Attack.getPrimarySlot() ^ 1);
+    useTeleport && Config.TeleSwitch && me.switchWeapons(primarySlot);
     PathDebug.removeHooks();
 
     return getDistance(me, node.x, node.y) < 5;
   },
 
   /**
-   * 
    * @param {number} x 
    * @param {number} y 
    * @param {number} minDist 
