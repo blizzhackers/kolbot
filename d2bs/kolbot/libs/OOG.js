@@ -27,6 +27,29 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 }([].filter.constructor("return this")(), function () {
   const Controls = require("./modules/Control");
 
+  Object.defineProperties(me, {
+    classic: {
+      get: function () {
+        return me.gametype === sdk.game.gametype.Classic;
+      }
+    },
+    expansion: {
+      get: function () {
+        return me.gametype === sdk.game.gametype.Expansion;
+      }
+    },
+    softcore: {
+      get: function () {
+        return me.playertype === false;
+      }
+    },
+    hardcore: {
+      get: function () {
+        return me.playertype === true;
+      }
+    },
+  });
+
   const ControlAction = {
     mutedKey: false,
     realms: {
@@ -808,13 +831,16 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
         break;
       case "Highest":
         if (Controls.Hell.disabled !== 4 && Controls.Hell.click()) {
+          diff = "Hell";
           break;
         }
 
         if (Controls.Nightmare.disabled !== 4 && Controls.Nightmare.click()) {
+          diff = "Nightmare";
           break;
         }
 
+        diff = "Normal";
         Controls.Normal.click();
 
         break;
@@ -827,12 +853,19 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
       !!delay && this.timeoutDelay("Make Game Delay", delay);
 
       if (Starter.chanInfo.announce) {
-        Starter.sayMsg("Next game is " + name + (pass === "" ? "" : "//" + pass));
+        const pType = me.hardcore ? "hc" : "sc";
+        const ladder = me.ladder ? "l" : "nl";
+        Starter.sayMsg(
+          "Next game is " + name
+          + (pass === "" ? "" : "//" + pass)
+          + " in " + diff
+          + " on " + (pType + ladder)
+        );
       }
 
       me.blockMouse = true;
 
-      print("Creating Game: " + name);
+      console.log("Creating Game: " + name);
       Controls.CreateGame.click();
 
       me.blockMouse = false;

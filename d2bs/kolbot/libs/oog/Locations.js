@@ -208,7 +208,7 @@
           Starter.pingQuit = false;
         }
 
-        if (Starter.Config.JoinChannel !== "") {
+        if (Starter.Config.JoinChannel !== "" || Starter.Config.AnnounceGames) {
           Controls.LobbyEnterChat.click();
 
           return;
@@ -261,7 +261,10 @@
           !Starter.gameStart && (Starter.gameStart = DataFile.getStats().ingameTick);
 
           if (getTickCount() - Starter.gameStart < Starter.Config.MinGameTime * 1e3) {
-            ControlAction.timeoutDelay("Min game time wait", Starter.Config.MinGameTime * 1e3 + Starter.gameStart - getTickCount());
+            ControlAction.timeoutDelay(
+              "Min game time wait",
+              Starter.Config.MinGameTime * 1e3 + Starter.gameStart - getTickCount()
+            );
           }
         }
 
@@ -313,8 +316,12 @@
           Starter.chanInfo.firstMsg = Starter.Config.FirstJoinMessage;
 
           if (Starter.chanInfo.joinChannel) {
-            typeof Starter.chanInfo.joinChannel === "string" && (Starter.chanInfo.joinChannel = [Starter.chanInfo.joinChannel]);
-            typeof Starter.chanInfo.firstMsg === "string" && (Starter.chanInfo.firstMsg = [Starter.chanInfo.firstMsg]);
+            if (typeof Starter.chanInfo.joinChannel === "string") {
+              Starter.chanInfo.joinChannel = [Starter.chanInfo.joinChannel];
+            }
+            if (typeof Starter.chanInfo.firstMsg === "string") {
+              Starter.chanInfo.firstMsg = [Starter.chanInfo.firstMsg];
+            }
 
             for (let i = 0; i < Starter.chanInfo.joinChannel.length; i += 1) {
               ControlAction.timeoutDelay("Chat delay", Starter.Config.ChatActionsDelay * 1e3);
@@ -322,7 +329,7 @@
               if (ControlAction.joinChannel(Starter.chanInfo.joinChannel[i])) {
                 Starter.useChat = true;
               } else {
-                print("ÿc1Unable to join channel, disabling chat messages.");
+                console.warn("ÿc1Unable to join channel, disabling chat messages.");
                 Starter.useChat = false;
               }
 
@@ -331,6 +338,9 @@
                 delay(500);
               }
             }
+          } else if (Starter.Config.AnnounceGames) {
+            // announcing in public channel
+            Starter.useChat = true;
           }
         }
 

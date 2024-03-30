@@ -297,14 +297,41 @@ const locationAction = (function () {
         if (!chat.name || chat.name.split("*")[0] === me.charname) continue;
         // is this a game announcement?
         if (!chat.msg.toLowerCase().includes("next game is")) continue;
+        // eslint-disable-next-line max-len
+        const gameRegex = new RegExp(/Next game is\s+([a-zA-Z0-9_-]+)(?:\/\/(\w+))?(?:\s+in\s+(\w+))?(?:\s+on\s+(\w+))?/gm);
         // capture the game name and password if there is one
-        let match = new RegExp(/^Next game is\s+([a-zA-Z0-9_-]+)(?:\/\/(\w+))?$/gm).exec(chat.msg);
+        let match = gameRegex.exec(chat.msg);
         if (!match) continue;
         // extract capture groups from regex
-        let [, gameName, gamePass] = match;
+        let [, gameName, gamePass, diff, mode] = match;
 
         // double check that this is a valid game name
         if (gameName.length > 15 || badGames.has(gameName) || exclude(gameName)) continue;
+
+        // TODO: handle difficulty
+        if (diff) {
+          //
+        }
+
+        // handle mode - TODO: handle classic vs expansion (gametype doesn't seem to be set yet in lobby)
+        if (mode) {
+          mode = mode.toLowerCase();
+          // can't join nl games if we are ladder
+          if (mode.includes("nl") && me.ladder) {
+            // console.debug("Skipping NL game: " + gameName + " " + gamePass + " " + diff + " " + mode);
+            continue;
+          }
+          // can't join hardcore games if we are softcore
+          if (mode.includes("hc") && me.softcore) {
+            // console.debug("Skipping HC game: " + gameName + " " + gamePass + " " + diff + " " + mode);
+            continue;
+          }
+          // can't join softcore games if we are hardcore
+          if (mode.includes("sc") && me.hardcore) {
+            // console.debug("Skipping SC game: " + gameName + " " + gamePass + " " + diff + " " + mode);
+            continue;
+          }
+        }
 
         // handle following player names
         if (ChannelConfig.Follow.length > 0) {
