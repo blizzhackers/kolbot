@@ -385,6 +385,7 @@
     });
     skillMap.set(sdk.skills.BoneArmor, {
       hand: sdk.skills.hand.Right,
+      state: sdk.states.BoneArmor,
       range: 1,
     });
     skillMap.set(sdk.skills.SkeletonMastery, {
