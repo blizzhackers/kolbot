@@ -7,6 +7,8 @@
 */
 
 const Misc = (function () {
+  const ShrineData = require("./GameData/ShrineData");
+  
   return {
     /**
      * Click something
@@ -456,6 +458,7 @@ const Misc = (function () {
       !range && (range = Pather.useTeleport() ? 25 : 15);
       !Array.isArray(ignore) && (ignore = [ignore]);
 
+      /** @type {ObjectUnit[]} */
       let shrineList = [];
 
       // Initiate shrine states
@@ -463,53 +466,29 @@ const Misc = (function () {
         Misc.shrineStates = [];
 
         for (let i = 0; i < Config.ScanShrines.length; i += 1) {
-          switch (Config.ScanShrines[i]) {
-          case sdk.shrines.None:
-          case sdk.shrines.Refilling:
-          case sdk.shrines.Health:
-          case sdk.shrines.Mana:
-          case sdk.shrines.HealthExchange: // (doesn't exist)
-          case sdk.shrines.ManaExchange: // (doesn't exist)
-          case sdk.shrines.Enirhs: // (doesn't exist)
-          case sdk.shrines.Portal:
-          case sdk.shrines.Gem:
-          case sdk.shrines.Fire:
-          case sdk.shrines.Monster:
-          case sdk.shrines.Exploding:
-          case sdk.shrines.Poison:
-            this.shrineStates[i] = 0; // no state
-
-            break;
-          case sdk.shrines.Armor:
-          case sdk.shrines.Combat:
-          case sdk.shrines.ResistFire:
-          case sdk.shrines.ResistCold:
-          case sdk.shrines.ResistLightning:
-          case sdk.shrines.ResistPoison:
-          case sdk.shrines.Skill:
-          case sdk.shrines.ManaRecharge:
-          case sdk.shrines.Stamina:
-          case sdk.shrines.Experience:
-            // Both states and shrines are arranged in same order with armor shrine starting at 128
-            this.shrineStates[i] = Config.ScanShrines[i] + 122;
-
-            break;
-          }
+          this.shrineStates[i] = ShrineData.getState(Config.ScanShrines[i]);
         }
       }
 
-      let shrine = Game.getObject("shrine");
+      /**
+       * Fix for a3/a5 shrines
+       */
+      let shrine = Game.getObject();
 
       if (shrine) {
         let index = -1;
+        
         // Build a list of nearby shrines
         do {
-          if (shrine.mode === sdk.objects.mode.Inactive
+          if (shrine.name.toLowerCase().includes("shrine")
+            && ShrineData.has(shrine.objtype)
+            && shrine.mode === sdk.objects.mode.Inactive
             && !ignore.includes(shrine.objtype)
             && getDistance(me.x, me.y, shrine.x, shrine.y) <= range) {
             shrineList.push(copyUnit(shrine));
           }
         } while (shrine.getNext());
+        if (!shrineList.length) return false;
 
         // Check if we have a shrine state, store its index if yes
         for (let i = 0; i < this.shrineStates.length; i += 1) {

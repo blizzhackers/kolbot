@@ -7,6 +7,12 @@
 
 (function (module) {
   const ShrineData = (function () {
+    /**
+     * @constructor
+     * @param {number} state 
+     * @param {number} duration 
+     * @param {number} regen 
+     */
     function Shrine (state, duration, regen) {
       this.state = state || 0;
       this.duration = duration || 0;
@@ -38,22 +44,27 @@
     ]);
     
     return {
+      /** @param {number} shrineType */
       get: function (shrineType) {
         return _shrines.get(shrineType);
       },
 
+      /** @param {number} shrineType */
       has: function (shrineType) {
         return _shrines.has(shrineType);
       },
 
+      /** @param {number} shrineType */
       getState: function (shrineType) {
         return _shrines.get(shrineType).state || 0;
       },
 
+      /** @param {number} shrineType */
       getDuration: function (shrineType) {
         return _shrines.get(shrineType).duration || 0;
       },
 
+      /** @param {number} shrineType */
       getRegenTime: function (shrineType) {
         return _shrines.get(shrineType).regenTime || Infinity;
       },
