@@ -56,6 +56,7 @@
 
       /** @param {number} shrineType */
       getState: function (shrineType) {
+        if (!_shrines.has(shrineType)) return 0;
         return _shrines.get(shrineType).state || 0;
       },
 
