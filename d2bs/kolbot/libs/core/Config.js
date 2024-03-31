@@ -254,7 +254,14 @@ let Config = {
   SkipImmune: [],
   SkipAura: [],
   SkipException: [],
+  /** @type {number[]} */
   ScanShrines: [],
+  UseWells: {
+    HpPercent: 0,
+    MpPercent: 0,
+    StaminaPercent: 0,
+    StatusEffects: false,
+  },
   Debug: false,
 
   AutoMule: {

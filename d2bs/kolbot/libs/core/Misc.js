@@ -470,6 +470,23 @@ const Misc = (function () {
         }
       }
 
+      const needWell = function () {
+        if (me.hpPercent < Config.UseWells.HpPercent) return true;
+        if (me.mpPercent < Config.UseWells.MpPercent) return true;
+        if (me.staminaPercent < Config.UseWells.StaminaPercent) return true;
+        if (Config.UseWells.StatusEffects) {
+          return [
+            sdk.states.Frozen,
+            sdk.states.Poison,
+            sdk.states.AmplifyDamage,
+            sdk.states.Decrepify
+          ].some(function (state) {
+            return me.getState(state);
+          });
+        }
+        return false;
+      };
+
       /**
        * Fix for a3/a5 shrines
        */
@@ -480,8 +497,8 @@ const Misc = (function () {
         
         // Build a list of nearby shrines
         do {
-          if (shrine.name.toLowerCase().includes("shrine")
-            && ShrineData.has(shrine.objtype)
+          let _name = shrine.name.toLowerCase();
+          if ((_name.includes("shrine") && ShrineData.has(shrine.objtype) || (_name.includes("well")))
             && shrine.mode === sdk.objects.mode.Inactive
             && !ignore.includes(shrine.objtype)
             && getDistance(me.x, me.y, shrine.x, shrine.y) <= range) {
@@ -500,15 +517,17 @@ const Misc = (function () {
         }
 
         for (let i = 0; i < Config.ScanShrines.length; i += 1) {
-          for (let j = 0; j < shrineList.length; j += 1) {
+          for (let shrine of shrineList) {
             // Get the shrine if we have no active state or to refresh current state or if the shrine has no state
             // Don't override shrine state with a lesser priority shrine
             // todo - check to make sure we can actually get the shrine for ones without states
             // can't grab a health shrine if we are in perfect health, can't grab mana shrine if our mana is maxed
             if (index === -1 || i <= index || this.shrineStates[i] === 0) {
-              if (shrineList[j].objtype === Config.ScanShrines[i]
-                && (Pather.useTeleport() || !checkCollision(me, shrineList[j], sdk.collision.WallOrRanged))) {
-                this.getShrine(shrineList[j]);
+              if ((
+                shrine.objtype === Config.ScanShrines[i]
+                || (Config.ScanShrines[i] === "well" && shrine.name.toLowerCase().includes("well") && needWell())
+              ) && (Pather.useTeleport() || !checkCollision(me, shrine, sdk.collision.WallOrRanged))) {
+                this.getShrine(shrine);
 
                 // Gem shrine - pick gem
                 if (Config.ScanShrines[i] === sdk.shrines.Gem) {
