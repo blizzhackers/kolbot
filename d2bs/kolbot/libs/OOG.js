@@ -1070,6 +1070,8 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
       Controls.BottomLeftExit.click();
     },
 
+    waypointCache: {},
+
     scriptMsgEvent: function (msg) {
       if (msg && typeof msg !== "string") return;
       switch (msg) {
@@ -1107,7 +1109,63 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
         Starter.pingQuit = true;
 
         break;
+
+      case 'get-cached-waypoints':
+        if (!me.ingame) {
+          break;
+        }
+
+        print('requested cache for waypoints - 1');
+        if (typeof Starter.waypointCache[me.charname] === 'object' && Starter.waypointCache[me.charname].length === 3) {
+          const arr = Starter.waypointCache[me.charname];
+          const cache = arr[me.diff];
+          if (cache) {
+            print('requested cache for waypoints - 2');
+            scriptBroadcast({type: 'wp-cache', cache: cache})
+          }
+        }
+
+        break;
       }
+    },
+
+    waypointWatcher: function() {
+      const self = this;
+      let skip = false;
+
+      return function () {
+        if (!me.ingame) {
+          skip = false; // Next time we are in game, look again
+          return true;
+        } else if (skip) {
+          return true;
+        }
+
+        // Waypoint is open, so lets cache it
+        if (!getUIFlag(sdk.uiflags.Waypoint)) {
+          return true;
+        }
+        const wpIds = [
+          sdk.waypoints.Act1,
+          sdk.waypoints.Act2,
+          sdk.waypoints.Act3,
+          sdk.waypoints.Act4,
+          sdk.waypoints.Act5,
+        ].flat();
+        const waypointsCache = wpIds.map(el => getWaypoint(el));
+
+        // Upsert array so it exists
+        const arr = typeof self.waypointCache[me.charname] === 'object'
+          ? self.waypointCache[me.charname]
+          // 3 elements of nothing
+          : self.waypointCache[me.charname] = [undefined, undefined, undefined];
+
+        arr[me.diff] = waypointsCache;
+        print('Build cache for waypoints');
+        skip = true; // Dont do it again for this run
+
+        return true;
+      };
     },
 
     /**
