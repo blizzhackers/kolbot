@@ -1115,12 +1115,10 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
           break;
         }
 
-        print('requested cache for waypoints - 1');
         if (typeof Starter.waypointCache[me.charname] === 'object' && Starter.waypointCache[me.charname].length === 3) {
           const arr = Starter.waypointCache[me.charname];
           const cache = arr[me.diff];
           if (cache) {
-            print('requested cache for waypoints - 2');
             scriptBroadcast({type: 'wp-cache', cache: cache})
           }
         }
@@ -1161,7 +1159,6 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
           : self.waypointCache[me.charname] = [undefined, undefined, undefined];
 
         arr[me.diff] = waypointsCache;
-        print('Build cache for waypoints');
         skip = true; // Dont do it again for this run
 
         return true;
