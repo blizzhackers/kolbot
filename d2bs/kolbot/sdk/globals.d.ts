@@ -528,6 +528,7 @@ declare global {
     readonly isTorch: boolean;
     readonly isGheeds: boolean;
     readonly durabilityPercent: number;
+    readonly isCharm: boolean;
 
     getColor(): number;
     getBodyLoc(): number[];
@@ -715,8 +716,9 @@ declare global {
     needMerc(): boolean;
     needStash(): boolean;
     needHealing(): boolean;
-    // checkScrolls(id: number): number;
+    checkScrolls(id: number): number;
     checkKeys(): number;
+    checkShard(): boolean;
     canTpToTown(): boolean;
     haveWaypoint(area: number): boolean;
     accessToAct(act: number): boolean;
