@@ -25,7 +25,7 @@
 		// "outDir": "./d2bs/kolbot/sdk/types/",
 		"outFile": "./d2bs/kolbot/data/out.js",
 		"typeRoots": [
-			"./d2bs/kolbot/sdk/global.d.ts",
+			"./d2bs/kolbot/sdk/globals.d.ts",
 			"./d2bs/kolbot/sdk/types/",
 			"./d2bs/kolbot/libs/SoloPlay/index.d.ts",
 		],
