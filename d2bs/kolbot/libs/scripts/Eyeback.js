@@ -5,16 +5,19 @@
 *
 */
 
-function Eyeback () {
-  Town.doChores();
-  Pather.useWaypoint(sdk.areas.ArreatPlateau);
-  Precast.doPrecast(true);
+const Eyeback = new Runnable(
+  function Eyeback () {
+    Town.doChores();
+    Pather.useWaypoint(sdk.areas.ArreatPlateau);
+    Precast.doPrecast(true);
 
-  if (!Pather.moveToPresetMonster(sdk.areas.FrigidHighlands, sdk.monsters.preset.EyebacktheUnleashed)) {
-    throw new Error("Failed to move to Eyeback the Unleashed");
-  }
+    if (!Pather.moveToPresetMonster(sdk.areas.FrigidHighlands, sdk.monsters.preset.EyebacktheUnleashed)) {
+      throw new Error("Failed to move to Eyeback the Unleashed");
+    }
 
-  Attack.kill(getLocaleString(sdk.locale.monsters.EyebacktheUnleashed));
+    Attack.kill(getLocaleString(sdk.locale.monsters.EyebacktheUnleashed));
 
-  return true;
-}
+    return true;
+  },
+  sdk.areas.ArreatPlateau
+);

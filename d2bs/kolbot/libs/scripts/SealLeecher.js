@@ -5,95 +5,98 @@
 *
 */
 
-function SealLeecher() {
-  let commands = [];
+const SealLeecher = new Runnable(
+  function SealLeecher() {
+    let commands = [];
 
-  Town.goToTown(4);
-  Town.doChores();
-  Town.move("portalspot");
+    Town.goToTown(4);
+    Town.doChores();
+    Town.move("portalspot");
 
-  if (!Config.Leader) {
-    D2Bot.printToConsole("You have to set Config.Leader");
-    D2Bot.stop();
+    if (!Config.Leader) {
+      D2Bot.printToConsole("You have to set Config.Leader");
+      D2Bot.stop();
 
-    return false;
-  }
-
-  let chatEvent = function (nick, msg) {
-    if (nick === Config.Leader) {
-      commands.push(msg);
-    }
-  };
-
-  try {
-    addEventListener("chatmsg", chatEvent);
-
-    // Wait until leader is partied
-    while (!Misc.inMyParty(Config.Leader)) {
-      delay(1000);
+      return false;
     }
 
-    while (Misc.inMyParty(Config.Leader)) {
-      if (commands.length > 0) {
-        let command = commands.shift();
+    let chatEvent = function (nick, msg) {
+      if (nick === Config.Leader) {
+        commands.push(msg);
+      }
+    };
 
-        switch (command) {
-        case "in":
-          if (me.inTown) {
-            Pather.usePortal(sdk.areas.ChaosSanctuary, Config.Leader);
-            delay(250);
-          }
+    try {
+      addEventListener("chatmsg", chatEvent);
 
-          if (getDistance(me, 7761, 5267) < 10) {
-            Pather.walkTo(7761, 5267, 2);
-          }
-
-          break;
-        case "out":
-          if (!me.inTown) {
-            Pather.usePortal(sdk.areas.PandemoniumFortress, Config.Leader);
-          }
-
-          break;
-        case "done":
-          if (!me.inTown) {
-            Pather.usePortal(sdk.areas.PandemoniumFortress, Config.Leader);
-          }
-
-          return true; // End script
-        }
+      // Wait until leader is partied
+      while (!Misc.inMyParty(Config.Leader)) {
+        delay(1000);
       }
 
-      if (me.dead) {
-        while (me.mode === sdk.player.mode.Death) {
-          delay(40);
-        }
+      while (Misc.inMyParty(Config.Leader)) {
+        if (commands.length > 0) {
+          let command = commands.shift();
 
-        me.revive();
+          switch (command) {
+          case "in":
+            if (me.inTown) {
+              Pather.usePortal(sdk.areas.ChaosSanctuary, Config.Leader);
+              delay(250);
+            }
 
-        while (!me.inTown) {
-          delay(40);
-        }
-      }
+            if (getDistance(me, 7761, 5267) < 10) {
+              Pather.walkTo(7761, 5267, 2);
+            }
 
-      if (!me.inTown) {
-        let monster = Game.getMonster();
-
-        if (monster) {
-          do {
-            if (monster.attackable && monster.distance < 20) {
-              me.overhead("HOT");
+            break;
+          case "out":
+            if (!me.inTown) {
               Pather.usePortal(sdk.areas.PandemoniumFortress, Config.Leader);
             }
-          } while (monster.getNext());
+
+            break;
+          case "done":
+            if (!me.inTown) {
+              Pather.usePortal(sdk.areas.PandemoniumFortress, Config.Leader);
+            }
+
+            return true; // End script
+          }
         }
+
+        if (me.dead) {
+          while (me.mode === sdk.player.mode.Death) {
+            delay(40);
+          }
+
+          me.revive();
+
+          while (!me.inTown) {
+            delay(40);
+          }
+        }
+
+        if (!me.inTown) {
+          let monster = Game.getMonster();
+
+          if (monster) {
+            do {
+              if (monster.attackable && monster.distance < 20) {
+                me.overhead("HOT");
+                Pather.usePortal(sdk.areas.PandemoniumFortress, Config.Leader);
+              }
+            } while (monster.getNext());
+          }
+        }
+
+        delay(100);
       }
-
-      delay(100);
+    } finally {
+      removeEventListener("chatmsg", chatEvent);
     }
-  } finally {
-    removeEventListener("chatmsg", chatEvent);
-  }
 
-  return true;
-}
+    return true;
+  },
+  sdk.areas.PandemoniumFortress
+);

@@ -5,23 +5,26 @@
 *
 */
 
-function Hephasto () {
-  Town.doChores();
-  Pather.useWaypoint(sdk.areas.RiverofFlame);
-  Precast.doPrecast(true);
+const Hephasto = new Runnable(
+  function Hephasto () {
+    Town.doChores();
+    Pather.useWaypoint(sdk.areas.RiverofFlame);
+    Precast.doPrecast(true);
 
-  if (!Pather.moveToPresetObject(me.area, sdk.quest.chest.HellForge)) {
-    throw new Error("Failed to move to Hephasto");
-  }
+    if (!Pather.moveToPresetObject(me.area, sdk.quest.chest.HellForge)) {
+      throw new Error("Failed to move to Hephasto");
+    }
 
-  try {
-    Attack.kill(getLocaleString(sdk.locale.monsters.HephastoTheArmorer));
-  } catch (e) {
-    print("Heph not found. Carry on");
-  }
+    try {
+      Attack.kill(getLocaleString(sdk.locale.monsters.HephastoTheArmorer));
+    } catch (e) {
+      print("Heph not found. Carry on");
+    }
 
-  Pickit.pickItems();
-  Config.Hephasto.ClearRiver && Attack.clearLevel(Config.Hephasto.ClearType);
+    Pickit.pickItems();
+    Config.Hephasto.ClearRiver && Attack.clearLevel(Config.Hephasto.ClearType);
 
-  return true;
-}
+    return true;
+  },
+  sdk.areas.RiverofFlame
+);
