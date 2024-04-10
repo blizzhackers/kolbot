@@ -5,11 +5,31 @@
 *
 */
 
+/** @typedef {function(): boolean} GlobalScript */
+// TODO: preaction/postaction
+/**
+ * @constructor
+ * @param {function(): boolean} action 
+ * @param {number} [startArea] 
+ */
+function Runnable (action, startArea) {
+  this.action = action;
+  this.startArea = startArea;
+}
+
 const Loader = {
+  /** @type {string[]} */
   fileList: [],
+  /** @type {string[]} */
   scriptList: [],
   scriptIndex: -1,
   skipTown: ["Test", "Follower"],
+  firstScriptAct: -1,
+  /** @type {GlobalScript | Runnable | null} */
+  currentScript: null,
+  /** @type {Runnable | null} */
+  nextScript: null,
+  /** @type {Set<string>} */
   doneScripts: new Set(),
 
   init: function () {
@@ -18,16 +38,27 @@ const Loader = {
   },
 
   getScripts: function () {
+    /** @type {string[]} */
     let fileList = dopen("libs/scripts/").getFiles();
 
     for (let i = 0; i < fileList.length; i += 1) {
-      if (fileList[i].indexOf(".js") > -1) {
+      if (fileList[i].endsWith(".js")) {
         this.fileList.push(fileList[i].substring(0, fileList[i].indexOf(".js")));
       }
     }
   },
 
-  // see http://stackoverflow.com/questions/728360/copying-an-object-in-javascript#answer-728694
+  _runCurrent: function () {
+    return this.currentScript instanceof Runnable
+      ? this.currentScript.action()
+      : this.currentScript();
+  },
+
+  /**
+   * @see http://stackoverflow.com/questions/728360/copying-an-object-in-javascript#answer-728694
+   * @param {Date | Array | Object} obj 
+   * @returns 
+   */
   clone: function (obj) {
     let copy;
 
@@ -123,9 +154,29 @@ const Loader = {
         continue;
       }
 
+      Loader.currentScript = global[script];
+
+      // Preload the next script
+      if (Loader.scriptIndex < Loader.scriptList.length - 1) {
+        let nextScript = this.scriptList[Loader.scriptIndex + 1];
+        if (include("scripts/" + nextScript + ".js")) {
+          if (global[nextScript] instanceof Runnable && global[nextScript].startArea) {
+            Loader.nextScript = global[nextScript];
+          }
+        }
+      }
+
       if (isIncluded("scripts/" + script + ".js")) {
         try {
-          if (typeof (global[script]) !== "function") {
+          if (Loader.currentScript instanceof Runnable) {
+            if (Loader.currentScript.startArea && Loader.scriptIndex === 0) {
+              Loader.firstScriptAct = sdk.areas.actOf(Loader.currentScript.startArea);
+            }
+
+            if (Loader.currentScript.startArea && me.inArea(Loader.currentScript.startArea)) {
+              this.skipTown.push(script);
+            }
+          } else if (typeof (Loader.currentScript) !== "function") {
             throw new Error("Invalid script function name");
           }
 
@@ -159,7 +210,7 @@ const Loader = {
               say("nextup " + script);
             }
 
-            if (global[script]()) {
+            if (Loader._runCurrent()) {
               let gain = Math.max(me.getStat(sdk.stats.Experience) - exp, 0);
               let duration = Time.elapsed(tick);
               console.log(
@@ -181,6 +232,8 @@ const Loader = {
           if (this.scriptIndex < this.scriptList.length) {
             // remove script function from global scope, so it can be cleared by GC
             delete global[script];
+            Loader.currentScript = null;
+            Loader.nextScript = null;
           }
           
           if (reconfiguration) {
@@ -190,10 +243,21 @@ const Loader = {
         }
       }
     }
+
+    // return to first script town
+    if (Loader.firstScriptAct > -1) {
+      Town.goToTown(Loader.firstScriptAct);
+    }
   },
 
+  /** @type {string[]} */
   tempList: [],
 
+  /**
+   * @param {string} script 
+   * @param {Object | function(): any} configOverride 
+   * @returns {boolean}
+   */
   runScript: function (script, configOverride) {
     let reconfiguration, unmodifiedConfig = {};
     let failed = false;
@@ -217,9 +281,15 @@ const Loader = {
       return false;
     }
 
+    Loader.currentScript = global[script];
+
     if (isIncluded("scripts/" + script + ".js")) {
       try {
-        if (typeof (global[script]) !== "function") {
+        if (Loader.currentScript instanceof Runnable) {
+          if (Loader.currentScript.startArea && me.inArea(Loader.currentScript.startArea)) {
+            this.skipTown.push(script);
+          }
+        } else if (typeof (Loader.currentScript) !== "function") {
           throw new Error("Invalid script function name");
         }
 
@@ -247,7 +317,7 @@ const Loader = {
           let tick = getTickCount();
           let exp = me.getStat(sdk.stats.Experience);
 
-          if (global[script]()) {
+          if (Loader._runCurrent()) {
             console.log(
               mainScriptStr + "ÿc7" + script
               + " :: ÿc0Complete ÿc0- ÿc7Duration: ÿc0" + (Time.format(getTickCount() - tick))
@@ -278,7 +348,8 @@ const Loader = {
           delete global[script];
         }
 
-        this.tempList.pop();
+        Loader.currentScript = null;
+        Loader.tempList.pop();
         
         if (reconfiguration) {
           console.log("ÿc2Reverting back unmodified config properties.");
