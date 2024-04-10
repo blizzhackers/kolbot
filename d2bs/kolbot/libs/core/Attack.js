@@ -607,8 +607,7 @@ const Attack = {
           case sdk.skills.BlessedHammer:
             // Tele in random direction with Blessed Hammer
             if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % (isSpecial ? 4 : 2) === 0) {
-              let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 5);
-              Pather.moveTo(coord.x, coord.y);
+              Pather.randMove(-1, 1, -1, 1, 5);
             }
 
             break;

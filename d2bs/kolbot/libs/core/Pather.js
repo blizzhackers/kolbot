@@ -2128,6 +2128,24 @@ const Pather = {
 
     return true;
   },
+
+  /**
+   * @param {number} xMin 
+   * @param {number} xMax 
+   * @param {number} yMin 
+   * @param {number} yMax 
+   * @param {number} factor
+   */
+  randMove: function (xMin, xMax, yMin, yMax, factor) {
+    xMin === undefined && (xMin = -4);
+    xMax === undefined && (xMax = 4);
+    yMin === undefined && (yMin = -4);
+    yMax === undefined && (yMax = 4);
+    factor === undefined && (factor = 1);
+    /** @type {PathNode} */
+    const coord = CollMap.getRandCoordinate(me.x, -4, 4, me.y, -4, 4, factor);
+    return Pather.move(coord, { retry: 3, allowClearing: false });
+  },
 };
 
 Pather.nextAreas[sdk.areas.RogueEncampment] = sdk.areas.BloodMoor;
