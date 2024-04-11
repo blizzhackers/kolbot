@@ -12,7 +12,7 @@
  * - override Misc.getShrinesInArea to end when we recieve safeCheck message
  */
 
-const BaalAssisstant = new Runnable(
+const BaalAssistant = new Runnable(
   function BaalAssistant () {
     include("core/Common/Baal.js");
     let Leader = Config.Leader;
