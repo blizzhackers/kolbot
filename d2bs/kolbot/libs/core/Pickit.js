@@ -279,7 +279,7 @@ const Pickit = {
     }
 
     if ((unit.classid === sdk.items.runes.Ort || unit.classid === sdk.items.runes.Ral)
-      && Town.repairIngredientCheck(unit)) {
+      && Cubing.repairIngredientCheck(unit)) {
       return resultObj(Pickit.Result.UTILITY);
     }
 
@@ -303,10 +303,16 @@ const Pickit = {
       }
     }
 
-    if (rval.result === Pickit.Result.UNWANTED && !Town.ignoreType(unit.itemType) && !unit.questItem
-      && ((unit.isInInventory && (me.inTown || !Config.FieldID.Enabled))
-      || (me.gold < Config.LowGold || (me.gold < 500000 && Config.PickitFiles.length === 0)))) {
-      // Gold doesn't take up room, just pick it up
+    if (rval.result === Pickit.Result.UNWANTED
+      && !Town.ignoreType(unit.itemType)
+      && !unit.questItem
+      && (
+        (unit.isInInventory && (me.inTown || !Config.FieldID.Enabled))
+        || me.gold < Config.LowGold
+        || (me.gold < 500000 && Config.PickitFiles.length === 0)
+        || (me.gold < me.getRepairCost())
+      )) {
+      // Gold doesn't ta=ke up room, just pick it up
       if (unit.classid === sdk.items.Gold) return resultObj(Pickit.Result.TRASH);
 
       if (!this.invoLocked) {
