@@ -240,8 +240,12 @@ includeIfNotIncluded("core/Me.js");
      * @returns {Control | false}
      */
     findCharacter: function (info, startFromTop = true) {
+      const singlePlayer = ![sdk.game.gametype.OpenBattlenet, sdk.game.gametype.BattleNet].includes(Profile().type);
+      // offline doesn't have a character limit cap
+      const cap = singlePlayer ? 999 : 24;
       let count = 0;
       let tick = getTickCount();
+      let firstCheck;
 
       while (getLocation() !== sdk.game.locations.CharSelect) {
         if (getTickCount() - tick >= 5000) {
@@ -258,6 +262,7 @@ includeIfNotIncluded("core/Me.js");
         let control = Controls.CharSelectCharInfo0.control;
 
         if (control) {
+          firstCheck = control.getText();
           do {
             let text = control.getText();
 
@@ -270,12 +275,23 @@ includeIfNotIncluded("core/Me.js");
                 return control;
               }
             }
-          } while (count < 24 && control.getNext());
+          } while (count < cap && control.getNext());
         }
 
-        // check for additional characters up to 24
-        if (count === 8 || count === 16) {
-          Controls.CharSelectChar6.click() && this.scrollDown();
+        // check for additional characters up to 24 (online) or 999 offline (no character limit cap)
+        if (count > 0 && count % 8 === 0) {
+          if (Controls.CharSelectChar6.click()) {
+            this.scrollDown();
+            let check = Controls.CharSelectCharInfo0.control;
+
+            if (firstCheck && check) {
+              let nameCheck = check.getText();
+
+              if (String.isEqual(firstCheck[1], nameCheck[1])) {
+                return false;
+              }
+            }
+          }
         } else {
           // no further check necessary
           break;
@@ -286,16 +302,21 @@ includeIfNotIncluded("core/Me.js");
     },
 
     getCharacters: function () {
+      const singlePlayer = ![sdk.game.gametype.OpenBattlenet, sdk.game.gametype.BattleNet].includes(Profile().type);
+      // offline doesn't have a character limit cap
+      const cap = singlePlayer ? 999 : 24;
       let count = 0;
       let list = [];
+      let firstCheck;
 
       // start from beginning of the char list
       sendKey(sdk.keys.code.Home);
 
-      while (getLocation() === sdk.game.locations.CharSelect && count < 24) {
+      while (getLocation() === sdk.game.locations.CharSelect && count < cap) {
         let control = Controls.CharSelectCharInfo0.control;
 
         if (control) {
+          firstCheck = control.getText();
           do {
             let text = control.getText();
 
@@ -306,12 +327,23 @@ includeIfNotIncluded("core/Me.js");
                 list.push(text[1]);
               }
             }
-          } while (count < 24 && control.getNext());
+          } while (count < cap && control.getNext());
         }
 
         // check for additional characters up to 24
-        if (count === 8 || count === 16) {
-          Controls.CharSelectChar6.click() && this.scrollDown();
+        if (count > 0 && count % 8 === 0) {
+          if (Controls.CharSelectChar6.click()) {
+            this.scrollDown();
+            let check = Controls.CharSelectCharInfo0.control;
+
+            if (firstCheck && check) {
+              let nameCheck = check.getText();
+
+              if (String.isEqual(firstCheck[1], nameCheck[1])) {
+                return false;
+              }
+            }
+          }
         } else {
           // no further check necessary
           break;
