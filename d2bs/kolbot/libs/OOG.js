@@ -8,6 +8,7 @@
 
 !isIncluded("Polyfill.js") && include("Polyfill.js");
 includeIfNotIncluded("oog/D2Bot.js"); // required
+includeIfNotIncluded("core/Me.js");
 
 /**
  * ControlAction and Starter are very closely related, how should this be handled?
@@ -26,29 +27,6 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
   }
 }([].filter.constructor("return this")(), function () {
   const Controls = require("./modules/Control");
-
-  Object.defineProperties(me, {
-    classic: {
-      get: function () {
-        return me.gametype === sdk.game.gametype.Classic;
-      }
-    },
-    expansion: {
-      get: function () {
-        return me.gametype === sdk.game.gametype.Expansion;
-      }
-    },
-    softcore: {
-      get: function () {
-        return me.playertype === false;
-      }
-    },
-    hardcore: {
-      get: function () {
-        return me.playertype === true;
-      }
-    },
-  });
 
   const ControlAction = {
     mutedKey: false,
