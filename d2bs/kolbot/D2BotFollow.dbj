@@ -372,8 +372,6 @@ function main () {
     console.log("Getting Profile");
     delay(500);
   }
-  const Worker = require("./libs/modules/Worker");
-  Worker.runInBackground.waypointWorker = Starter.waypointWatcher();
 
   while (true) {
     // returns true before actually in game so we can't only use this check

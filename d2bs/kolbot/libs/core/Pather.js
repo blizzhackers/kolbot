@@ -186,14 +186,36 @@ const Pather = {
   ],
   nextAreas: {},
 
+  /** @param {{ type: string, data: number[] }} msg */
+  cacheListener: function (msg) {
+    if (typeof msg !== "object" || !msg /*null*/) return;
+    if (typeof msg.type === "undefined") return;
+    if (msg.type !== "wp-cache") return;
+    if (typeof msg.data !== "object") return;
+    if (!Array.isArray(msg.data)) return;
+    if (msg.data.length !== Pather.wpAreas.length) return;
+    
+    me.waypoints = msg.data;
+
+    // Waypoint data is set
+    Pather.initialized = true;
+  },
+
   init: function () {
     if (!this.initialized) {
+      addEventListener("scriptmsg", Pather.cacheListener);
       me.classic && (Pather.nonTownWpAreas = this.nonTownWpAreas.filter((wp) => wp < sdk.areas.Harrogath));
-      if (!Config.WaypointMenu) {
+      
+      scriptBroadcast("get-cached-waypoints");
+      delay(500);
+      
+      if (!Config.WaypointMenu && !Pather.initialized) {
         !getWaypoint(1) && this.getWP(me.area);
         me.cancelUIFlags();
         Pather.initialized = true;
       }
+
+      removeEventListener("scriptmsg", Pather.cacheListener);
     }
   },
 
@@ -1848,7 +1870,7 @@ const Pather = {
 
       if (me.inTown && this.nextAreas[currArea] !== targetArea
         && this.wpAreas.includes(targetArea) && getWaypoint(this.wpAreas.indexOf(targetArea))) {
-        this.useWaypoint(targetArea, !this.plotCourse_openedWpMenu);
+        this.useWaypoint(targetArea, !Pather.initialized);
         Precast.doPrecast(false);
       } else if (currArea === sdk.areas.StonyField && targetArea === sdk.areas.Tristram) {
         // Stony Field -> Tristram
@@ -2050,8 +2072,11 @@ const Pather = {
 
     !src && (src = me.area);
 
-    if (!this.plotCourse_openedWpMenu && me.inTown && this.nextAreas[me.area] !== dest && Pather.useWaypoint(null)) {
-      Pather.plotCourse_openedWpMenu = true;
+    if (!Pather.initialized
+      && me.inTown
+      && Pather.nextAreas[me.area] !== dest
+      && Pather.useWaypoint(null)) {
+      Pather.initialized = true;
     }
 
     while (toVisitNodes.length > 0) {
@@ -2136,36 +2161,29 @@ Pather.nextAreas[sdk.areas.KurastDocktown] = sdk.areas.SpiderForest;
 Pather.nextAreas[sdk.areas.PandemoniumFortress] = sdk.areas.OuterSteppes;
 Pather.nextAreas[sdk.areas.Harrogath] = sdk.areas.BloodyFoothills;
 
-// Trick to let the OOG script cache the getWaypoint
-(function(getWaypoint, globalThis) {
-  function cacheListener (msg) {
-    if (typeof msg !== 'object' || !msg /*null*/) return;
-    if (typeof msg.type === 'undefined') return;
-    if (typeof msg.cache !== 'object') return;
-    if (msg.type !== 'wp-cache') return;
-    if (msg.type !== 'wp-cache') return;
-    cachedWaypoints = msg.cache;
+/**
+ * Trick to let the OOG script cache the getWaypoint
+ * @param {Object} globalThis
+ * @param {(id: number) => boolean} original
+ */
+(function (globalThis, original) {
+  globalThis._getWaypoint = original;
 
-    // Waypoint data is set
-    Pather.plotCourse_openedWpMenu = true;
-
-    // Don't need to listen anymore,
-    removeEventListener('scriptmsg', cacheListener);
-  }
-
-   let cachedWaypoints = Pather.wpAreas.filter(el => false);
-
-  // Ask the main script
-  scriptBroadcast('get-cached-waypoints');
-  addEventListener('scriptmsg', cacheListener);
-
-
-  globalThis.getWaypoint = function(id) {
+  globalThis.getWaypoint = function (id, noCache = false) {
+    if (noCache) {
+      return original(id);
+    }
     // You got it
-    if (cachedWaypoints[id]) {
+    if (me.waypoints[id]) {
       return true;
     }
     // You cant lose a wp, you can gain one. Store the result
-    return cachedWaypoints[id] = getWaypoint(id);
+    const result = original(id);
+    if (result !== me.waypoints[id]) {
+      // we've got a mismatch, update the cache
+      me.waypoints[id] = result;
+      scriptBroadcast({ type: "cache-waypoints", data: me.waypoints });
+    }
+    return result;
   };
-})(getWaypoint, [].filter.constructor("return this")())
+})([].filter.constructor("return this")(), getWaypoint);

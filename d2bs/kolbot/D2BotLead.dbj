@@ -113,7 +113,6 @@ function main () {
   }
 
   DataFile.updateStats("debugInfo", JSON.stringify({ currScript: "none", area: "out of game" }));
-  Worker.runInBackground.waypointWorker = Starter.waypointWatcher();
   while (true) {
     // returns true before actually in game so we can't only use this check
     while (me.ingame) {

@@ -492,6 +492,8 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
         delay(500);
         Controls.PopupYes.click();
         delay(500);
+        // delete wp cache if it exists
+        delete Starter.waypointCache[info.charName];
 
         return true;
       } catch (e) {
@@ -1073,6 +1075,22 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
     waypointCache: {},
 
     scriptMsgEvent: function (msg) {
+      if (typeof msg === "object"
+        && msg.hasOwnProperty("type")
+        && msg.type === "cache-waypoints"
+        && msg.hasOwnProperty("data")
+        && Array.isArray(msg.data)) {
+        
+        // Upsert array so it exists
+        let arr = typeof Starter.waypointCache[me.charname] === "object"
+          ? Starter.waypointCache[me.charname]
+          // 3 elements of nothing
+          : Starter.waypointCache[me.charname] = [undefined, undefined, undefined];
+        arr[me.diff] = msg.data;
+
+        return;
+      }
+
       if (msg && typeof msg !== "string") return;
       switch (msg) {
       case "mule":
@@ -1110,59 +1128,22 @@ includeIfNotIncluded("oog/D2Bot.js"); // required
 
         break;
 
-      case 'get-cached-waypoints':
+      case "get-cached-waypoints":
         if (!me.ingame) {
           break;
         }
 
-        if (typeof Starter.waypointCache[me.charname] === 'object' && Starter.waypointCache[me.charname].length === 3) {
-          const arr = Starter.waypointCache[me.charname];
+        if (typeof Starter.waypointCache[me.charname] === "object"
+          && Starter.waypointCache[me.charname].length === 3) {
+          let arr = Starter.waypointCache[me.charname];
           const cache = arr[me.diff];
           if (cache) {
-            scriptBroadcast({type: 'wp-cache', cache: cache})
+            scriptBroadcast({ type: "wp-cache", data: cache });
           }
         }
 
         break;
       }
-    },
-
-    waypointWatcher: function() {
-      const self = this;
-      let skip = false;
-
-      return function () {
-        if (!me.ingame) {
-          skip = false; // Next time we are in game, look again
-          return true;
-        } else if (skip) {
-          return true;
-        }
-
-        // Waypoint is open, so lets cache it
-        if (!getUIFlag(sdk.uiflags.Waypoint)) {
-          return true;
-        }
-        const wpIds = [
-          sdk.waypoints.Act1,
-          sdk.waypoints.Act2,
-          sdk.waypoints.Act3,
-          sdk.waypoints.Act4,
-          sdk.waypoints.Act5,
-        ].flat();
-        const waypointsCache = wpIds.map(el => getWaypoint(el));
-
-        // Upsert array so it exists
-        const arr = typeof self.waypointCache[me.charname] === 'object'
-          ? self.waypointCache[me.charname]
-          // 3 elements of nothing
-          : self.waypointCache[me.charname] = [undefined, undefined, undefined];
-
-        arr[me.diff] = waypointsCache;
-        skip = true; // Dont do it again for this run
-
-        return true;
-      };
     },
 
     /**

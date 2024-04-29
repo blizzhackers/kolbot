@@ -429,6 +429,11 @@ declare global {
     readonly curseable: boolean;
     readonly scareable: boolean;
     readonly attacking: boolean;
+    readonly fireRes: number;
+    readonly coldRes: number;
+    readonly lightRes: number;
+    readonly poisonRes: number;
+    resPenalty: number;
 
     getEnchant(type: number): boolean;
     hasEnchant(...enchants: number): boolean
@@ -528,6 +533,7 @@ declare global {
     readonly isTorch: boolean;
     readonly isGheeds: boolean;
     readonly durabilityPercent: number;
+    readonly isCharm: boolean;
 
     getColor(): number;
     getBodyLoc(): number[];
@@ -677,6 +683,7 @@ declare global {
      * @description max gold capacity (cLvl * 10000)
      */
     readonly maxgold: number;
+    waypoints: boolean[];
 
     // d2bs functions
     overhead(msg: string): void;
@@ -715,8 +722,9 @@ declare global {
     needMerc(): boolean;
     needStash(): boolean;
     needHealing(): boolean;
-    // checkScrolls(id: number): number;
+    checkScrolls(id: number): number;
     checkKeys(): number;
+    checkShard(): boolean;
     canTpToTown(): boolean;
     haveWaypoint(area: number): boolean;
     accessToAct(act: number): boolean;
@@ -779,7 +787,7 @@ declare global {
   function getThreadPriority(): number
   function getUIFlag(flag: number): boolean
   function getTradeInfo(mode: 0 | 1 | 2): boolean
-  function getWaypoint(id: number): boolean
+  function getWaypoint(id: number, noCache?: boolean): boolean
 
   class Script {
     running: boolean;
