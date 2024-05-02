@@ -554,7 +554,7 @@ const Item = {
     desc += "$" + (unit.ethereal ? ":eth" : "");
 
     const itemObj = {
-      title: action + " " + name,
+      title: (new Date().dateStamp() + " ") + action + " " + name,
       description: desc,
       image: code,
       textColor: unit.quality,
