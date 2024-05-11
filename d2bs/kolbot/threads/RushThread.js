@@ -1035,7 +1035,7 @@ function main () {
     console.log(JSON.stringify(wpsLeft));
 
     wpsLeft.forEach(function (wp) {
-      Town.checkScrolls(sdk.items.TomeofTownPortal) <= 5 && (Pather.useWaypoint(sdk.areas.townOf(me.area)) || Town.goToTown()) && Town.doChores();
+      me.checkScrolls(sdk.items.TomeofTownPortal) <= 5 && (Pather.useWaypoint(sdk.areas.townOf(me.area)) || Town.goToTown()) && Town.doChores();
       Pather.useWaypoint(wp);
     });
 

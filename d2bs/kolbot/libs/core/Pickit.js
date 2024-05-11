@@ -463,7 +463,7 @@ const Pickit = {
           case sdk.items.ScrollofIdentify:
             console.log(
               "ÿc7Picked up " + stats.color + stats.name
-              + " ÿc7(" + Town.checkScrolls(stats.classid === sdk.items.ScrollofTownPortal ? "tbk" : "ibk") + "/20)"
+              + " ÿc7(" + me.checkScrolls(stats.classid === sdk.items.ScrollofTownPortal ? "tbk" : "ibk") + "/20)"
             );
             return true;
           }

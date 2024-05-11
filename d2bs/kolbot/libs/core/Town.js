@@ -1642,7 +1642,7 @@ const Town = {
       !Game.getPlayer(-1, -1, gid) && corpseList.shift();
     }
 
-    me.classic && Town.checkShard();
+    me.classic && me.checkShard();
     // re-init skills since we started off without our body
     Skill.init();
 

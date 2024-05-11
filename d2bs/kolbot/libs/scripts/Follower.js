@@ -960,7 +960,7 @@ const Follower = new Runnable(
       } else if (!actions.length && getTickCount() - Town.lastChores > Time.minutes(3)) {
         // no actions currently, lets do some town chores
         if (me.gold > 1000
-          && (me.needPotions() || Town.checkScrolls(sdk.items.TomeofTownPortal) < 5)) {
+          && (me.needPotions() || me.checkScrolls(sdk.items.TomeofTownPortal) < 5)) {
           Town.doChores();
         }
         Town.getDistance("portalspot") > 5 && Town.move("portalspot");

@@ -322,7 +322,7 @@ const TorchSystem = {
         }
 
         // Free up inventory
-        Town.needStash() && Town.stash();
+        me.needStash() && Town.stash();
 
         // Get the number keys
         tkeys = me.findItems("pk1", sdk.items.mode.inStorage).length || 0;
