@@ -1,3 +1,4 @@
+/// <reference path="../../sdk/globals.d.ts" />
 /**
  *  @filename    Attack.js
  *  @author      kolton, theBGuy
