@@ -689,7 +689,7 @@ const Cubing = {
         case sdk.items.runes.Jah:
         case sdk.items.runes.Cham:
         case sdk.items.runes.Zod:
-          if (me.ladder) {
+          if (me.ladder || !me.realm) {
             this.recipes.push({ Ingredients: ingredients, Index: index });
           }
 
