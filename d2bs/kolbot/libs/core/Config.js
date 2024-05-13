@@ -5,6 +5,7 @@
 *
 */
 
+/** @type {Record<string, boolean | Object>} */
 const Scripts = {};
 
 let Config = {
@@ -390,6 +391,7 @@ let Config = {
   Redemption: [0, 0],
   Charge: false,
   Vigor: false,
+  RunningAura: -1,
   AvoidDolls: false,
 
   // Barbarian specific
