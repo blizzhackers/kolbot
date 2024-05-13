@@ -8,12 +8,22 @@ declare global {
     
     function click(button: number, shift: number, unit: Unit): void;
     function click(button: number, shift: number, x: Unit, y: undefined): void;
-    function inMyParty(name: any): void;
-    function findPlayer(name: any): void;
-    function getPlayerUnit(name: any): void;
-    function getPlayerAct(player: any): void;
-    function getNearbyPlayerCount(): void;
-    function getPlayerCount(): void;
+    function inMyParty(name: string): boolean;
+    function findPlayer(name: string): Party | false;
+    function getPlayerUnit(name: string): Player | false;
+    function getPlayerAct(player: Party | string): number | false;
+    function getNearbyPlayerCount(): number;
+    function getPlayerCount(): number;
+    function getPartyCount(): number;
+    function checkPartyLevel(levelCheck: number, exclude: string | string[]): boolean;
+    function getPlayerArea(player: Party | string): number | false;
+
+    type AutoLeaderDetectSettings = {
+      destination: number | number[],
+      quitIf: (area: number) => boolean,
+      timeout: number,
+    };
+    function autoLeaderDetect(givenSettings: AutoLeaderDetectSettings): string | false;
     function openChest(unit: any): boolean;
     function openChestsInArea(area?: any, chestIds?: any): void;
     function openChests(range: any): void;

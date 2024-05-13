@@ -10,6 +10,7 @@ declare global {
     townSkill: boolean;
     timed: boolean;
     missleSkill: boolean;
+    aura: boolean;
     charClass: number;
     reqLevel: number;
     preReqs: number[];
@@ -80,6 +81,7 @@ declare global {
     function isTimed(skillId: number): boolean;
     function townSkill(skillId: number): boolean;
     function missileSkill(skillId: number): boolean;
+    function isAura(skillId: number): boolean;
     function wereFormCheck(skillId: number): boolean;
     function setSkill(skillId: number, hand?: number, item?: any): boolean;
     function shapeShift(mode: number | string): boolean;

@@ -618,7 +618,7 @@ const Pather = {
         && Skill.setSkill(sdk.skills.Charge, sdk.skills.hand.Left)) {
         if (Skill.canUse(sdk.skills.Vigor)) {
           Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right);
-        } else if (Config.RunningAura > -1 && Skill.canUse(Config.RunningAura)) {
+        } else if (Skill.isAura(Config.RunningAura) && Skill.canUse(Config.RunningAura)) {
           Skill.setSkill(Config.RunningAura, sdk.skills.hand.Right);
         } else if (!Config.Vigor && !Attack.auradin && Skill.canUse(sdk.skills.HolyFreeze)) {
           // Useful in classic to keep mobs cold while you rush them
@@ -645,7 +645,7 @@ const Pather = {
       if (me.paladin && !me.inTown) {
         Skill.canUse(sdk.skills.Vigor)
           ? Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right)
-          : Config.RunningAura > -1
+          : Skill.isAura(Config.RunningAura) && Skill.canUse(Config.RunningAura)
             ? Skill.setSkill(Config.RunningAura, sdk.skills.hand.Right)
             : Skill.setSkill(Config.AttackSkill[2], sdk.skills.hand.Right);
       }

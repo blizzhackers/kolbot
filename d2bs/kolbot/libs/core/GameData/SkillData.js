@@ -1349,6 +1349,8 @@
     this.timed = (_skillData.timed || getBaseStat("skills", skillId, "delay") > 0);
     /** @type {boolean} */
     this.missleSkill = (_skillData.missile || false);
+    /** @type {boolean} */
+    this.aura = getBaseStat("skills", skillId, "aura") === 1;
     /** @type {number} */
     this.charClass = getBaseStat("skills", skillId, "charClass");
     /** @type {number} */
