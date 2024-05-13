@@ -252,6 +252,7 @@ const Wakka = new Runnable(
           if ([sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(getLeaderUnitArea())) {
             if (Loader.scriptName() === "Wakka") {
               killLeaderTracker = true;
+              Common.Diablo.done = true;
               throw new Error("Party leader is running baal");
             } else {
               // kill process
@@ -312,6 +313,11 @@ const Wakka = new Runnable(
 
       while (Misc.inMyParty(leader)) {
         try {
+          if (Common.Diablo.done) {
+            console.log("Diablo is done");
+            break;
+          }
+          
           if (me.inArea(sdk.areas.PandemoniumFortress)) {
             let portal = Pather.getPortal(sdk.areas.ChaosSanctuary, null);
 

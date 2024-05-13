@@ -180,8 +180,20 @@ const AutoBaal = new Runnable(
         destination: sdk.areas.ThroneofDestruction,
         quitIf: (area) => [sdk.areas.WorldstoneChamber].includes(area)
       }))) {
+        const start = getTickCount();
         // do our stuff while partied
         while (Misc.inMyParty(leader)) {
+          if (!throneCheck && !baalCheck && getTickCount() - start > Time.minutes(2)) {
+            // no signal? Lets set it ourselves and check things out
+            console.log("ÿc4AutoBaal: ÿc0No signal from leader, setting throne signal.");
+            throneCheck = true;
+          }
+
+          if (!baalCheck && Misc.getPlayerArea(leader) === sdk.areas.WorldstoneChamber) {
+            console.log("ÿc4AutoBaal: ÿc0Leader is in Baal chamber, setting baal signal.");
+            baalCheck = true;
+          }
+          
           if (hotCheck) {
             if (Config.AutoBaal.FindShrine) {
               let i;
