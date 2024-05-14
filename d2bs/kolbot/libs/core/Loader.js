@@ -246,7 +246,8 @@ const Loader = {
 
     // return to first script town
     if (Loader.firstScriptAct > -1) {
-      Town.goToTown(Loader.firstScriptAct);
+      let _act = [2, 3].includes(Loader.firstScriptAct) ? 1 : Loader.firstScriptAct;
+      Town.goToTown(_act);
     }
   },
 
