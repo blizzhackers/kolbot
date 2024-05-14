@@ -265,8 +265,10 @@ const Misc = (function () {
 
       let leader;
       let startTick = getTickCount();
-      let check = typeof settings.quitIf === "function";
+      const check = typeof settings.quitIf === "function";
       do {
+        /** @type {Party[]} */
+        let suspects = [];
         let solofail = 0;
         let suspect = getParty(); // get party object (players in game)
 
@@ -276,14 +278,37 @@ const Misc = (function () {
 
           if (check && settings.quitIf(suspect.area)) return false;
 
-          // first player not hostile found in destination area...
-          if (settings.destination.includes(suspect.area) && !getPlayerFlag(me.gid, suspect.gid, 8)) {
-            leader = suspect.name; // ... is our leader
-            console.log("ÿc4Autodetected " + leader);
-
-            return leader;
+          // players not hostile found in destination area...
+          if (settings.destination.includes(suspect.area)
+            && !getPlayerFlag(me.gid, suspect.gid, sdk.player.flag.Hostile)) {
+            suspects.push(copyObj(suspect));
+            console.log("ÿc4Autodetected ÿc0" + suspect.name + " (level " + suspect.level + ")");
           }
         } while (suspect.getNext());
+
+        if (suspects.length > 1) {
+          // if we have more than one suspect, sort by level and they are generally the leaders
+          suspects.sort((a, b) => b.level - a.level);
+
+          // look for tps from the suspect to the destination area. Sometimes we come in late, happens a lot with pubjoin
+          for (let suspect of suspects) {
+            let portal = Pather.getPortal(null, suspect.name);
+            if (!portal) continue;
+
+            if (portal && settings.destination.includes(portal.objtype)) {
+              leader = suspect.name;
+              console.log("ÿc4Autodetect Selecting: ÿc0" + leader + " (Portal found)");
+              return leader;
+            }
+          }
+        }
+
+        if (suspects.length) {
+          leader = suspects[0].name;
+          console.log("ÿc4Autodetect Selecting: ÿc0" + leader);
+          
+          return leader;
+        }
 
         // empty game, nothing left to do. Or we exceeded our wait time
         if (solofail === 0 || (getTickCount() - startTick > settings.timeout)) {
