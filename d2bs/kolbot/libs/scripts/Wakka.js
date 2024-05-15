@@ -228,7 +228,7 @@ const Wakka = new Runnable(
       timeout: timeout * 60e3
     }));
     Town.doChores();
-    if (!leader) throw new Error("Wakka: Leader not found");
+    if (!leader) throw new ScriptError("Wakka: Leader not found");
 
     addEventListener("gamepacket", Common.Diablo.diabloLightsEvent);
     const Worker = require("../modules/Worker");
@@ -331,9 +331,17 @@ const Wakka = new Runnable(
               if (!internals.safeTP) {
                 if (checkMonsters(25, false)) {
                   log("hot tp");
-                  Pather.usePortal(sdk.areas.PandemoniumFortress, null);
-
-                  continue;
+                  // go back through portal if it's still there
+                  if (Pather.usePortal(sdk.areas.PandemoniumFortress, null)) {
+                    continue;
+                  }
+                  // if the portal isn't there try to make our own
+                  if (me.canTpToTown() && Town.goToTown()) {
+                    continue;
+                  }
+                  // dodge monsters otherwise - find closest monster
+                  let _closeMon = Attack.getNearestMonster(25);
+                  Attack.deploy(_closeMon, 25, 5, 15);
                 } else {
                   getCoords();
                   internals.safeTP = true;
