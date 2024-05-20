@@ -1020,9 +1020,10 @@ const Attack = {
   /**
    * @description Clear an entire area based on monster spectype
    * @param {number} spectype 
+   * @param {() => boolean} [cb] callback to end clearing early
    * @returns {boolean}
    */
-  clearLevel: function (spectype = 0) {
+  clearLevel: function (spectype = 0, cb = null) {
     function RoomSort (a, b) {
       return getDistance(myRoom[0], myRoom[1], a[0], a[1]) - getDistance(myRoom[0], myRoom[1], b[0], b[1]);
     }
@@ -1036,8 +1037,6 @@ const Attack = {
     let myRoom, previousArea;
     let rooms = [];
     const currentArea = getArea().id;
-    const breakClearLevelCheck = !!(Loader.scriptName() === "MFHelper"
-      && Config.MFHelper.BreakClearLevel && Config.Leader !== "");
 
     do {
       rooms.push([room.x * 5 + room.xsize / 2, room.y * 5 + room.ysize / 2]);
@@ -1053,14 +1052,8 @@ const Attack = {
       // get the first room + initialize myRoom var
       !myRoom && (room = getRoom(me.x, me.y));
 
-      if (breakClearLevelCheck) {
-        let leader = Misc.findPlayer(Config.Leader);
-
-        if (leader && leader.area !== me.area && !leader.inTown) {
-          me.overhead("break the clearing in " + getArea().name);
-
-          return true;
-        }
+      if (typeof cb === "function" && cb()) {
+        break;
       }
 
       if (room) {

@@ -39,6 +39,17 @@ const MFHelper = new Runnable(
       }
     }
 
+    function breakClearLevel () {
+      if (!Config.MFHelper.BreakClearLevel) return false;
+      if (taskList.length) {
+        console.debug("Recieved new task, breaking clearLevel");
+
+        return true;
+      }
+
+      return false;
+    }
+
     addEventListener("chatmsg", chatEvent);
     Town.doChores();
     Town.move("portalspot");
@@ -259,7 +270,7 @@ const MFHelper = new Runnable(
                     throw new Error("Failed to move to clearlevel area");
                   }
                 }
-                Attack.clearLevel(Config.ClearType);
+                Attack.clearLevel(Config.ClearType, breakClearLevel);
               } catch (killerror2) {
                 console.error(killerror2);
               }
