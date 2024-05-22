@@ -32,6 +32,29 @@ const NTIP_CheckList = [];
 const NTIP_CheckListNoTier = [];
 let stringArray = [];
 
+NTIP.addLine = function (itemString, filename = "kolbot") {
+  const tierdItem = itemString.toLowerCase().includes("tier");
+  const info = {
+    line: NTIP_CheckList.length + 1,
+    file: filename,
+    string: itemString
+  };
+
+  const line = NTIP.ParseLineInt(itemString, info);
+
+  if (line) {
+    NTIP_CheckList.push(line);
+
+    if (!tierdItem) {
+      NTIP_CheckListNoTier.push(line);
+    }
+
+    stringArray.push(info);
+  }
+
+  return true;
+};
+
 NTIP.OpenFile = function (filepath, notify) {
   if (!FileTools.exists(filepath)) {
     if (notify) {
@@ -538,6 +561,7 @@ NTIP.ParseLineInt = function (input, info) {
 
         let keyword = p_keyword.toLowerCase();
         switch (keyword) {
+        case "mq":
         case "maxquantity":
           value = Number(p_section[i].split("==")[1].match(/\d+/g));
 
