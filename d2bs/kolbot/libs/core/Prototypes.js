@@ -365,7 +365,11 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   gold: {
+    /** @this {Unit} */
     get: function () {
+      if (this.type === sdk.unittype.Item) {
+        return this.getStat(sdk.stats.Gold);
+      }
       return this.getStat(sdk.stats.Gold) + this.getStat(sdk.stats.GoldBank);
     }
   },

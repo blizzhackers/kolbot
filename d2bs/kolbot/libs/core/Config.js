@@ -241,12 +241,19 @@ let Config = {
   MakeRoom: true,
   ClearInvOnStart: false,
   FastPick: false,
+  FastPickRange: 0,
   ManualPlayPick: false,
   OpenChests: {
     Enabled: false,
     Range: 15,
     Types: ["chest", "chest3", "armorstand", "weaponrack"]
   },
+  /** 
+   * Each entry should be a tuple of [nipline, filename]
+   * @example [["[name] == ThulRune # # [maxquantity] == 1", "HeartOfTheOak"]]
+   * @type {[string, string][]}
+   */
+  PickitLines: [],
   PickitFiles: [],
   BeltColumn: [],
   MinColumn: [],
