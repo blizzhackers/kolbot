@@ -652,7 +652,7 @@ const Attack = {
            * @todo allow for more aggressive horking here
            */
           if (target.dead || Config.FastPick || Config.FastFindItem) {
-            if (target.isBoss) {
+            if (target.isBoss && target.dead) {
               Attack._killed.add(target.classid);
             }
             if (boss && boss.gid === target.gid && target.dead) {
