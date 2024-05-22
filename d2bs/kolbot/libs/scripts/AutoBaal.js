@@ -159,12 +159,12 @@ const AutoBaal = new Runnable(
     };
 
     // critical error - can't reach harrogath
-    if (!Town.goToTown(5)) throw new Error("Town.goToTown failed.");
+    if (!Town.goToTown(5)) throw new ScriptError("Town.goToTown failed.");
 
     if (Config.Leader) {
       leader = Config.Leader;
       if (!Misc.poll(() => Misc.inMyParty(leader), Time.seconds(30), Time.seconds(1))) {
-        throw new Error("AutoBaal: Leader not partied");
+        throw new ScriptError("AutoBaal: Leader not partied");
       }
     }
 
@@ -183,7 +183,7 @@ const AutoBaal = new Runnable(
         const start = getTickCount();
         // do our stuff while partied
         while (Misc.inMyParty(leader)) {
-          if (!throneCheck && !baalCheck && getTickCount() - start > Time.minutes(2)) {
+          if (!throneCheck && !baalCheck && getTickCount() - start > Time.seconds(90)) {
             // no signal? Lets set it ourselves and check things out
             console.log("ÿc4AutoBaal: ÿc0No signal from leader, setting throne signal.");
             throneCheck = true;

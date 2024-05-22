@@ -200,9 +200,10 @@ const Wakka = new Runnable(
       if (!leaderUnit || !copyUnit(leaderUnit).x) {
         leaderUnit = Game.getPlayer(leader);
       }
-      return !!leaderUnit
-        ? leaderUnit.area
-        : getParty(leader).area;
+      if (leaderUnit && leaderUnit.area !== 0) return leaderUnit.area;
+      let pLeader = getParty(leader);
+      if (pLeader && pLeader.area !== 0) return pLeader.area;
+      return 0;
     };
 
     const log = function (msg = "") {
