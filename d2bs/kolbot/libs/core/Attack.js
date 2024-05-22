@@ -381,8 +381,10 @@ const Attack = {
       if (!!target && target.attackable) {
         console.warn("ÿc1Failed to kill ÿc0" + who + errorInfo);
       } else {
-        if (target.dead && target.isBoss) {
-          Attack._killed.add(target.classid);
+        if (target.dead && (target.isBoss || target.uniqueid > -1)) {
+          // a little obnoxious, but we need to track bosses killed and this handles if we are attempting to check by id or name
+          target.isBoss && Attack._killed.add(target.classid);
+          target.uniqueid > -1 && Attack._killed.add(target.name);
         }
         console.log("ÿc7Killed ÿc0:: " + who + "ÿc0 - ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
       }
@@ -654,7 +656,8 @@ const Attack = {
           if (target.dead || Config.FastPick || Config.FastFindItem) {
             if ((target.isBoss || target.uniqueid > 0) && target.dead) {
               // TODO: add uniqueids to sdk
-              Attack._killed.add(target.isBoss ? target.classid : target.name);
+              target.isBoss && Attack._killed.add(target.classid);
+              target.uniqueid > -1 && Attack._killed.add(target.name);
             }
             if (boss && boss.gid === target.gid && target.dead) {
               killedBoss = true;
