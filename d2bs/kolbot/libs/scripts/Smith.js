@@ -20,5 +20,8 @@ const Smith = new Runnable(
 
     return true;
   },
-  sdk.areas.OuterCloister
+  sdk.areas.OuterCloister,
+  {
+    bossid: getLocaleString(sdk.locale.monsters.TheSmith),
+  }
 );

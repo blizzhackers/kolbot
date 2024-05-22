@@ -122,6 +122,10 @@ declare global {
     symmetricDifference(other: Set<T>): Set<T>;
   }
 
+  interface Date {
+    dateStamp(): string;
+  }
+
   class ScriptError extends Error {
   }
 
@@ -230,15 +234,6 @@ declare global {
   }
 
   class Frame extends Box {
-  }
-
-  interface ClassAttack {
-    doAttack(unit: Monster, preattack?: boolean): number
-    afterAttack(any?: any): void
-    doCast(unit: Monster, timedSkill: number, untimedSkill: number): number
-
-    // Self defined
-    decideSkill(unit: Monster, skipSkill?: number[]): [number, number]
   }
 
   /**
@@ -429,6 +424,11 @@ declare global {
     readonly curseable: boolean;
     readonly scareable: boolean;
     readonly attacking: boolean;
+    readonly fireRes: number;
+    readonly coldRes: number;
+    readonly lightRes: number;
+    readonly poisonRes: number;
+    resPenalty: number;
 
     getEnchant(type: number): boolean;
     hasEnchant(...enchants: number): boolean
@@ -529,6 +529,7 @@ declare global {
     readonly isGheeds: boolean;
     readonly durabilityPercent: number;
     readonly isCharm: boolean;
+    readonly gold: number;
 
     getColor(): number;
     getBodyLoc(): number[];
@@ -1075,7 +1076,7 @@ declare global {
   function playSound(num: number): void
   function quit(): never
   function quitGame(): never
-  function say(what: string): void
+  function say(what: string, force?: boolean): void
   function clickParty(player: Party, type: 0 | 1 | 2 | 3 | 4)
   function weaponSwitch(): void
   function transmute(): void

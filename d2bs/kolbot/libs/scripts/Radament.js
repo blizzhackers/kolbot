@@ -22,5 +22,8 @@ const Radament = new Runnable(
 
     return true;
   },
-  sdk.areas.A2SewersLvl2
+  sdk.areas.A2SewersLvl2,
+  {
+    bossid: sdk.monsters.Radament,
+  }
 );

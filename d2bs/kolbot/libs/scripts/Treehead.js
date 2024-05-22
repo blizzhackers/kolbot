@@ -19,5 +19,8 @@ const Treehead = new Runnable(
 
     return true;
   },
-  sdk.areas.DarkWood
+  sdk.areas.DarkWood,
+  {
+    bossid: getLocaleString(sdk.locale.monsters.TreeheadWoodFist),
+  }
 );

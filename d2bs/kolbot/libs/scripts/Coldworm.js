@@ -38,5 +38,8 @@ const Coldworm = new Runnable(
 
     return true;
   },
-  sdk.areas.FarOasis
+  sdk.areas.FarOasis,
+  {
+    bossid: sdk.monsters.ColdwormtheBurrower,
+  }
 );

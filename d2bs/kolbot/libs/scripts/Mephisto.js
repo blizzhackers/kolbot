@@ -161,5 +161,8 @@ const Mephisto = new Runnable(
 
     return true;
   },
-  sdk.areas.DuranceofHateLvl2
+  sdk.areas.DuranceofHateLvl2,
+  {
+    bossid: sdk.monsters.Mephisto,
+  }
 );

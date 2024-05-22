@@ -26,5 +26,8 @@ const Endugu = new Runnable(
 
     return true;
   },
-  sdk.areas.FlayerJungle
+  sdk.areas.FlayerJungle,
+  {
+    bossid: getLocaleString(sdk.locale.monsters.WitchDoctorEndugu),
+  }
 );

@@ -31,9 +31,17 @@ const Attack = {
   },
   /**
    * Track bosses killed
-   * @type {Set<number>}
+   * @type {Set<number | string>}
    */
   _killed: new Set(),
+
+  /**
+   * @param {number | string} id 
+   * @returns {boolean}
+   */
+  haveKilled: function (id) {
+    return this._killed.has(id);
+  },
 
   // Initialize attacks
   init: function () {

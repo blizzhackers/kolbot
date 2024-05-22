@@ -18,5 +18,8 @@ const BoneAsh = new Runnable(
 
     return true;
   },
-  sdk.areas.InnerCloister
+  sdk.areas.InnerCloister,
+  {
+    bossid: getLocaleString(sdk.locale.monsters.BoneAsh),
+  }
 );

@@ -100,5 +100,8 @@ const Baal = new Runnable(
 
     return true;
   },
-  sdk.areas.WorldstoneLvl2
+  sdk.areas.WorldstoneLvl2,
+  {
+    bossid: sdk.monsters.Baal,
+  }
 );

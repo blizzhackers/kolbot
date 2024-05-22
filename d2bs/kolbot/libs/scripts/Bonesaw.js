@@ -21,5 +21,8 @@ const Bonesaw = new Runnable(
     }
     return true;
   },
-  sdk.areas.GlacialTrail
+  sdk.areas.GlacialTrail,
+  {
+    bossid: getLocaleString(sdk.locale.monsters.BonesawBreaker),
+  }
 );

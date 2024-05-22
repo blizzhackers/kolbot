@@ -20,5 +20,8 @@ const ThreshSocket = new Runnable(
 
     return true;
   },
-  sdk.areas.ArreatPlateau
+  sdk.areas.ArreatPlateau,
+  {
+    bossid: getLocaleString(sdk.locale.monsters.ThreshSocket),
+  }
 );

@@ -25,5 +25,8 @@ const Fangskin = new Runnable(
 
     return true;
   },
-  sdk.areas.LostCity
+  sdk.areas.LostCity,
+  {
+    bossid: getLocaleString(sdk.locale.monsters.Fangskin),
+  }
 );

@@ -8,13 +8,26 @@
 /** @typedef {function(): boolean} GlobalScript */
 // TODO: preaction/postaction
 /**
+ * @typedef {Object} RunnableOptions
+ * @property {function(): boolean} preAction
+ * @property {function(): boolean} postAction
+ * @property {boolean} forceTown
+ * @property {number} bossid
+ */
+
+/**
  * @constructor
  * @param {function(): boolean} action 
  * @param {number} [startArea] 
+ * @param {RunnableOptions} [options]
  */
-function Runnable (action, startArea) {
+function Runnable (action, startArea, options = {}) {
   this.action = action;
   this.startArea = startArea;
+  this.preAction = options.hasOwnProperty("preAction") ? options.preAction : null;
+  this.postAction = options.hasOwnProperty("postAction") ? options.postAction : null;
+  this.forceTown = options.hasOwnProperty("forceTown") ? options.forceTown : false;
+  this.bossid = options.hasOwnProperty("bossid") ? options.bossid : null;
 }
 
 const Loader = {
@@ -169,16 +182,28 @@ const Loader = {
       if (isIncluded("scripts/" + script + ".js")) {
         try {
           if (Loader.currentScript instanceof Runnable) {
-            if (Loader.currentScript.startArea && Loader.scriptIndex === 0) {
-              Loader.firstScriptAct = sdk.areas.actOf(Loader.currentScript.startArea);
+            const { startArea, bossid } = Loader.currentScript;
+            
+            if (startArea && Loader.scriptIndex === 0) {
+              Loader.firstScriptAct = sdk.areas.actOf(startArea);
             }
 
-            if (Loader.currentScript.startArea && me.inArea(Loader.currentScript.startArea)) {
+            if (startArea && me.inArea(startArea)) {
               this.skipTown.push(script);
             }
+            
+            if (bossid && Attack.haveKilled(bossid)) {
+              console.log("ÿc2Skipping script: ÿc9" + script + " ÿc2- Boss already killed.");
+              continue;
+            }
           } else if (typeof (Loader.currentScript) !== "function") {
-            throw new Error("Invalid script function name");
+            throw new Error(
+              "Invalid script function name. "
+              + "Typeof: " + typeof (Loader.currentScript)
+              + " Name: " + script
+            );
           }
+
 
           if (this.skipTown.includes(script) || Town.goToTown()) {
             console.log("ÿc2Starting script: ÿc9" + script);
@@ -226,6 +251,8 @@ const Loader = {
         } catch (error) {
           if (!(error instanceof ScriptError)) {
             Misc.errorReport(error, script);
+          } else {
+            console.error(error);
           }
         } finally {
           // Dont run for last script as that will clear everything anyway

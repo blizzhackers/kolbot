@@ -19,5 +19,8 @@ const Icehawk = new Runnable(
 
     return true;
   },
-  sdk.areas.KurastBazaar
+  sdk.areas.KurastBazaar,
+  {
+    bossid: getLocaleString(sdk.locale.monsters.IcehawkRiftwing),
+  }
 );

@@ -13,7 +13,7 @@ const Nihlathak = new Runnable(
     !Pather.initialized && Pather.useWaypoint(null, true);
 
     // UseWaypoint if set to or if we already have it
-    if (Config.Nihlathak.UseWaypoint || getWaypoint(Pather.wpAreas.indexOf(sdk.areas.HallsofPain))) {
+    if (Config.Nihlathak.UseWaypoint || me.haveWaypoint(sdk.areas.HallsofPain)) {
       Pather.useWaypoint(sdk.areas.HallsofPain);
     } else {
       if (Pather.journeyTo(sdk.areas.NihlathaksTemple)) {
@@ -38,5 +38,8 @@ const Nihlathak = new Runnable(
 
     return true;
   },
-  sdk.areas.Harrogath
+  sdk.areas.Harrogath,
+  {
+    bossid: sdk.monsters.Nihlathak,
+  }
 );

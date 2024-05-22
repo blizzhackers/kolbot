@@ -20,5 +20,8 @@ const Izual = new Runnable(
 
     return true;
   },
-  sdk.areas.CityoftheDamned
+  sdk.areas.CityoftheDamned,
+  {
+    bossid: sdk.monsters.Izual,
+  }
 );

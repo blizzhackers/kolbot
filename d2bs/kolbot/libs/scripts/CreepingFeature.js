@@ -17,5 +17,8 @@ const CreepingFeature = new Runnable(
 
     return true;
   },
-  sdk.areas.LutGholein
+  sdk.areas.LutGholein,
+  {
+    bossid: getLocaleString(sdk.locale.monsters.CreepingFeature),
+  }
 );

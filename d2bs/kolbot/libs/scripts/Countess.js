@@ -34,5 +34,8 @@ const Countess = new Runnable(
 
     return true;
   },
-  sdk.areas.BlackMarsh
+  sdk.areas.BlackMarsh,
+  {
+    bossid: getLocaleString(sdk.locale.monsters.TheCountess),
+  }
 );

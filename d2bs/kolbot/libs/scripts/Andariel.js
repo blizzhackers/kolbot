@@ -41,5 +41,8 @@ const Andariel = new Runnable(
 
     return true;
   },
-  sdk.areas.CatacombsLvl2
+  sdk.areas.CatacombsLvl2,
+  {
+    bossid: sdk.monsters.Andariel,
+  }
 );

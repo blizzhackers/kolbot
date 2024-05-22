@@ -19,5 +19,8 @@ const Stormtree = new Runnable(
 
     return true;
   },
-  sdk.areas.LowerKurast
+  sdk.areas.LowerKurast,
+  {
+    bossid: getLocaleString(sdk.locale.monsters.Stormtree),
+  }
 );

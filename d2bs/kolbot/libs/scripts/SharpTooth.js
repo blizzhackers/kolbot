@@ -22,5 +22,8 @@ const SharpTooth = new Runnable(
 
     return true;
   },
-  sdk.areas.FrigidHighlands
+  sdk.areas.FrigidHighlands,
+  {
+    bossid: getLocaleString(sdk.locale.monsters.SharpToothSayer),
+  }
 );

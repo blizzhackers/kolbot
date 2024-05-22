@@ -17,5 +17,8 @@ const Bishibosh = new Runnable(
 
     return true;
   },
-  sdk.areas.ColdPlains
+  sdk.areas.ColdPlains,
+  {
+    bossid: getLocaleString(sdk.locale.monsters.Bishibosh),
+  }
 );

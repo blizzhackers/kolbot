@@ -96,5 +96,8 @@ const Diablo = new Runnable(
 
     return true;
   },
-  sdk.areas.RiverofFlame
+  sdk.areas.RiverofFlame,
+  {
+    bossid: sdk.monsters.Diablo,
+  }
 );

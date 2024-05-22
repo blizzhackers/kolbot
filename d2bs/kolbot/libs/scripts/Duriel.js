@@ -77,5 +77,8 @@ const Duriel = new Runnable(
 
     return true;
   },
-  sdk.areas.CanyonofMagic
+  sdk.areas.CanyonofMagic,
+  {
+    bossid: sdk.monsters.Duriel,
+  }
 );
