@@ -29,8 +29,12 @@ const Andariel = new Runnable(
       throw new Error("Failed to move to Catacombs Level 4");
     }
 
-    Pather.moveTo(22549, 9520);
-    me.sorceress && me.classic ? killAndariel() : Attack.kill(sdk.monsters.Andariel);
+    Pather.move(new PathNode(22549, 9520), { callback: function () {
+      return Attack._killed.has(sdk.monsters.Andariel);
+    } });
+    me.sorceress && me.classic
+      ? killAndariel()
+      : Attack.kill(sdk.monsters.Andariel);
 
     delay(2000); // Wait for minions to die.
     Pickit.pickItems();

@@ -6,6 +6,16 @@
 */
 
 /**
+ * @constructor
+ * @param {number} x 
+ * @param {number} y 
+ */
+function PathNode (x, y) {
+  this.x = x;
+  this.y = y;
+}
+
+/**
  * Perform certain actions after moving to each node
  * @todo this needs to be re-worked
  */

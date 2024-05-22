@@ -29,6 +29,11 @@ const Attack = {
     NEEDMANA: 3,
     NOOP: 4, // used for clearing, if we didn't find any monsters to clear it's not exactly a success or fail
   },
+  /**
+   * Track bosses killed
+   * @type {Set<number>}
+   */
+  _killed: new Set(),
 
   // Initialize attacks
   init: function () {
@@ -265,6 +270,10 @@ const Attack = {
       : Misc.poll(() => Game.getMonster(classId), 2000, 100));
 
     if (!target) {
+      if (Attack._killed.has(classId)) {
+        console.log("ÿc7Killed ÿc0:: " + classId);
+        return true;
+      }
       console.warn("Attack.kill: Target not found");
       return Attack.clear(10);
     }
@@ -364,6 +373,9 @@ const Attack = {
       if (!!target && target.attackable) {
         console.warn("ÿc1Failed to kill ÿc0" + who + errorInfo);
       } else {
+        if (target.dead && target.isBoss) {
+          Attack._killed.add(target.classid);
+        }
         console.log("ÿc7Killed ÿc0:: " + who + "ÿc0 - ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
       }
 
@@ -632,6 +644,9 @@ const Attack = {
            * @todo allow for more aggressive horking here
            */
           if (target.dead || Config.FastPick || Config.FastFindItem) {
+            if (target.isBoss) {
+              Attack._killed.add(target.classid);
+            }
             if (boss && boss.gid === target.gid && target.dead) {
               killedBoss = true;
               console.log(
