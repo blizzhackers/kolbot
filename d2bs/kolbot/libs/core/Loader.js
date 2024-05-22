@@ -314,8 +314,15 @@ const Loader = {
     if (isIncluded("scripts/" + script + ".js")) {
       try {
         if (Loader.currentScript instanceof Runnable) {
-          if (Loader.currentScript.startArea && me.inArea(Loader.currentScript.startArea)) {
-            this.skipTown.push(script);
+          const { startArea, bossid } = Loader.currentScript;
+
+          if (startArea && me.inArea(startArea)) {
+            Loader.skipTown.push(script);
+          }
+          
+          if (bossid && Attack.haveKilled(bossid)) {
+            console.log("ÿc2Skipping script: ÿc9" + script + " ÿc2- Boss already killed.");
+            return true;
           }
         } else if (typeof (Loader.currentScript) !== "function") {
           throw new Error("Invalid script function name");
