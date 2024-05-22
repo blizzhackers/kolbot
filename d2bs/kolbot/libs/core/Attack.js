@@ -652,8 +652,9 @@ const Attack = {
            * @todo allow for more aggressive horking here
            */
           if (target.dead || Config.FastPick || Config.FastFindItem) {
-            if (target.isBoss && target.dead) {
-              Attack._killed.add(target.classid);
+            if ((target.isBoss || target.uniqueid > 0) && target.dead) {
+              // TODO: add uniqueids to sdk
+              Attack._killed.add(target.isBoss ? target.classid : target.name);
             }
             if (boss && boss.gid === target.gid && target.dead) {
               killedBoss = true;
