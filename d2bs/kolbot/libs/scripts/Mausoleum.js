@@ -11,7 +11,7 @@ const Mausoleum = new Runnable(
     Pather.useWaypoint(sdk.areas.ColdPlains);
     Precast.doPrecast(true);
 
-    if (Config.Mausoleum.KillBishibosh) {
+    if (Config.Mausoleum.KillBishibosh && !Attack.haveKilled(getLocaleString(sdk.locale.monsters.Bishibosh))) {
       Pather.moveToPresetMonster(sdk.areas.ColdPlains, sdk.monsters.preset.Bishibosh);
       Attack.kill(getLocaleString(sdk.locale.monsters.Bishibosh));
       Pickit.pickItems();
@@ -19,7 +19,7 @@ const Mausoleum = new Runnable(
 
     if (!Pather.moveToExit(sdk.areas.BurialGrounds, true)) throw new Error("Failed to move to Burial Grounds");
 
-    if (Config.Mausoleum.KillBloodRaven) {
+    if (Config.Mausoleum.KillBloodRaven && !Attack.haveKilled(sdk.monsters.BloodRaven)) {
       Pather.moveToPresetMonster(sdk.areas.BurialGrounds, sdk.monsters.preset.BloodRaven, {
         minDist: me.sorceress && Pather.canTeleport() ? 30 : 5
       });

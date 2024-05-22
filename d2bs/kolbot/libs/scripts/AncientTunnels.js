@@ -21,6 +21,7 @@ const AncientTunnels = new Runnable(
 
     try {
       if (Config.AncientTunnels.KillDarkElder
+        && !Attack.haveKilled(getLocaleString(sdk.locale.monsters.DarkElder))
         && Pather.moveToPresetMonster(me.area, sdk.monsters.preset.DarkElder)) {
         Attack.clear(15, 0, getLocaleString(sdk.locale.monsters.DarkElder));
       }

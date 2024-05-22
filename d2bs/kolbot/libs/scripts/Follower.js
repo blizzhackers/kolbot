@@ -180,7 +180,7 @@ const Follower = new Runnable(
       ["wp", (me.name + " wp")]
         .forEach(key => _actions.set(key, () => {
           if (me.inTown) return;
-          if (getWaypoint(Pather.wpAreas.indexOf(me.area))) return;
+          if (me.haveWaypoint(me.area)) return;
           if (!Pather.wpAreas.includes(me.area)) return;
           if (Pather.getWP(me.area)) {
             announce("Got Wp in " + getAreaName(me.area));

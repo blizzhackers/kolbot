@@ -12,7 +12,7 @@ const Coldworm = new Runnable(
     Precast.doPrecast(true);
 
     // Beetleburst, added by 13ack.Stab
-    if (Config.Coldworm.KillBeetleburst) {
+    if (Config.Coldworm.KillBeetleburst && !Attack.haveKilled(getLocaleString(sdk.locale.monsters.Beetleburst))) {
       try {
         if (!Pather.moveToPresetMonster(me.area, sdk.monsters.preset.Beetleburst)) {
           throw new Error("Failed to move to Beetleburst");

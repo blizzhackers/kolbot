@@ -10,24 +10,26 @@ const Pindleskin = new Runnable(
     Town.goToTown((Config.Pindleskin.UseWaypoint ? undefined : 5));
     Town.doChores();
 
-    if (Config.Pindleskin.UseWaypoint) {
-      Pather.useWaypoint(sdk.areas.HallsofPain);
-      Precast.doPrecast(true);
+    if (!Attack.haveKilled(getLocaleString(sdk.locale.monsters.Pindleskin))) {
+      if (Config.Pindleskin.UseWaypoint) {
+        Pather.useWaypoint(sdk.areas.HallsofPain);
+        Precast.doPrecast(true);
 
-      if (!Pather.moveToExit([sdk.areas.HallsofAnguish, sdk.areas.NihlathaksTemple], true)) {
-        throw new Error("Failed to move to Nihlahak's Temple");
+        if (!Pather.moveToExit([sdk.areas.HallsofAnguish, sdk.areas.NihlathaksTemple], true)) {
+          throw new Error("Failed to move to Nihlahak's Temple");
+        }
+      } else {
+        if (!Pather.journeyTo(sdk.areas.NihlathaksTemple)) throw new Error("Failed to use portal.");
+        Precast.doPrecast(true);
       }
-    } else {
-      if (!Pather.journeyTo(sdk.areas.NihlathaksTemple)) throw new Error("Failed to use portal.");
-      Precast.doPrecast(true);
-    }
 
-    Pather.moveTo(10058, 13234);
+      Pather.moveTo(10058, 13234);
 
-    try {
-      Attack.kill(getLocaleString(sdk.locale.monsters.Pindleskin));
-    } catch (e) {
-      console.error(e);
+      try {
+        Attack.kill(getLocaleString(sdk.locale.monsters.Pindleskin));
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     if (Config.Pindleskin.KillNihlathak) {
