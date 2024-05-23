@@ -264,6 +264,7 @@ let Config = {
   SkipException: [],
   /** @type {number[]} */
   ScanShrines: [],
+  AutoShriner: false,
   UseWells: {
     HpPercent: 0,
     MpPercent: 0,

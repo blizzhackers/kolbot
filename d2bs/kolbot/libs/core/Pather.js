@@ -97,7 +97,11 @@ const NodeAction = {
    * Scan shrines while pathing
    */
   getShrines: function () {
-    Config.ScanShrines.length > 0 && Misc.scanShrines(null, this.shrinesToIgnore);
+    if (Config.AutoShriner) {
+      Misc.shriner();
+    } else if (Config.ScanShrines.length > 0) {
+      Misc.scanShrines(null, this.shrinesToIgnore);
+    }
   }
 };
 

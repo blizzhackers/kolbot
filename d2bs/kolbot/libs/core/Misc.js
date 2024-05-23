@@ -10,6 +10,7 @@ const Misc = (function () {
   const ShrineData = require("./GameData/ShrineData");
   
   return {
+    _diabloSpawned: false,
     /**
      * Click something
      * @param {number} button 
@@ -421,7 +422,6 @@ const Misc = (function () {
     openChests: function (range = 15) {
       if (!Config.OpenChests.Enabled) return true;
 
-      let unitList = [];
       let containers = [];
 
       // Testing all container code
@@ -441,21 +441,36 @@ const Misc = (function () {
         containers = Config.OpenChests.Types;
       }
 
-      let unit = Game.getObject();
+      /** @type {Set<number>} */
+      const seenGids = new Set();
 
-      if (unit) {
-        do {
-          if (unit.name && unit.mode === sdk.objects.mode.Inactive
-            && getDistance(me.x, me.y, unit.x, unit.y) <= range
-            && containers.includes(unit.name.toLowerCase())) {
-            unitList.push(copyUnit(unit));
-          }
-        } while (unit.getNext());
-      }
+      /**
+       * @param {number} range 
+       * @returns {ObjectUnit[]}
+       */
+      const buildChestList = function (range) {
+        let unitList = [];
+        let unit = Game.getObject();
+
+        if (unit) {
+          do {
+            if (unit.name && unit.mode === sdk.objects.mode.Inactive
+              && !seenGids.has(unit.gid) && seenGids.add(unit.gid)
+              && getDistance(me.x, me.y, unit.x, unit.y) <= range
+              && containers.includes(unit.name.toLowerCase())) {
+              unitList.push(copyUnit(unit));
+            }
+          } while (unit.getNext());
+        }
+        return unitList;
+      };
+      
+      const startPos = new PathNode(me.x, me.y);
+      let unitList = buildChestList(range);
 
       while (unitList.length > 0) {
         unitList.sort(Sort.units);
-        unit = unitList.shift();
+        let unit = unitList.shift();
 
         if (unit) {
           const chest = Game.getObject(-1, -1, unit.gid);
@@ -463,6 +478,13 @@ const Misc = (function () {
             && this.openChest(chest)) {
             Pickit.pickItems();
           }
+        }
+
+        if (startPos.distance > 5) {
+          // rebuid chest list every 5 chests in case we've moved and add any new chests to our list
+          let _unitList = buildChestList(range / 2);
+          console.debug("Rescanning for chests: " + _unitList.length + " chests found.");
+          unitList = unitList.concat(_unitList);
         }
       }
 
@@ -472,12 +494,230 @@ const Misc = (function () {
     /** @type {number[] | null} */
     shrineStates: null,
 
+    lastShrine: new function () {
+      this.tick = 0;
+      this.duration = 0;
+      this.type = -1;
+      this.state = 0;
+
+      /** @param {ObjectUnit} unit */
+      this.update = function (unit) {
+        if (!unit || !unit.hasOwnProperty("objtype")) return;
+        // we only care about tracking shrines with states
+        if (!ShrineData.getState(unit.objtype)) return;
+        this.tick = getTickCount();
+        this.type = unit.objtype;
+        this.duration = ShrineData.getDuration(unit.objtype);
+        this.state = ShrineData.getState(unit.objtype);
+      };
+
+      this.remaining = function () {
+        return this.duration - (getTickCount() - this.tick);
+      };
+
+      this.isMyCurrentState = function () {
+        if (this.state <= 0) return false;
+        return me.getState(this.state);
+      };
+    },
+
+    /** @type {Set<number>} */
+    _shrinerIgnore: new Set(),
+
+    shriner: function () {
+      if (!Config.AutoShriner) return false;
+
+      let shrineList = [];
+      let shrine = Game.getObject();
+
+      /**
+       * TODO: Handle stateful shrines
+       * TODO: Track last shrine used - should tier based on shrine type
+       * @param {ObjectUnit} shrine 
+       * @returns {boolean}
+       */
+      const wantShrine = function (shrine) {
+        if (ShrineData.getState(shrine.objtype)
+          && Misc.lastShrine.type === shrine.objtype
+          && Misc.lastShrine.isMyCurrentState()
+          && Misc.lastShrine.remaining() > Time.seconds(30)) {
+          return false;
+        }
+        switch (shrine.objtype) {
+        case sdk.shrines.Health:
+          // we only want if its dire or its close to us if we can't teleport
+          if (!Pather.useTeleport() && Pather.getWalkDistance(shrine.x, shrine.y) > 10) {
+            return me.hpPercent <= 50;
+          }
+          return me.hpPercent < 80;
+        case sdk.shrines.Mana:
+          // we only want if its dire or its close to us if we can't teleport
+          if (!Pather.useTeleport() && Pather.getWalkDistance(shrine.x, shrine.y) > 10) {
+            return me.mpPercent <= 50;
+          }
+          return me.mpPercent < 80;
+        case sdk.shrines.Refilling:
+          // we only want if its dire or its close to us if we can't teleport
+          if (!Pather.useTeleport() && Pather.getWalkDistance(shrine.x, shrine.y) > 10) {
+            return me.hpPercent <= 50 || me.mpPercent <= 50;
+          }
+          return me.hpPercent < 85 || me.mpPercent < 85;
+        case sdk.shrines.Experience:
+          return me.charlvl < 99;
+        case sdk.shrines.Skill:
+          return !me.getState(sdk.states.ShrineExperience);
+        case sdk.shrines.ManaRecharge:
+        case sdk.shrines.Stamina:
+          // we only want if its close to us if we can't teleport
+          if (!Pather.useTeleport() && Pather.getWalkDistance(shrine.x, shrine.y) > 15) {
+            return false;
+          }
+          // for now, only grab if we have nothing else active
+          return !Misc.lastShrine.state || !me.getState(Misc.lastShrine.state);
+        case sdk.shrines.ResistFire:
+        case sdk.shrines.ResistCold:
+        case sdk.shrines.ResistLightning:
+        case sdk.shrines.ResistPoison:
+        {
+          /** @type {Record<number, number>} */
+          let resistances = {};
+          resistances[sdk.shrines.ResistFire] = me.fireRes;
+          resistances[sdk.shrines.ResistCold] = me.coldRes;
+          resistances[sdk.shrines.ResistLightning] = me.lightRes;
+          resistances[sdk.shrines.ResistPoison] = me.poisonRes;
+
+          // we only want if its dire or its close to us if we can't teleport
+          if (!Pather.useTeleport() && Pather.getWalkDistance(shrine.x, shrine.y) > 15) {
+            return resistances[shrine.objtype] <= 0;
+          }
+          
+          if (!Misc.lastShrine.state || !me.getState(Misc.lastShrine.state)) {
+            return true;
+          }
+
+          // first check if the lasts shrine was a resist shrine
+          if (resistances[Misc.lastShrine.type] === undefined) {
+            // evaluate whether we should overwrite the last shrine
+            if (Misc.lastShrine.type === sdk.shrines.Experience) {
+              // never overwrite experience shrine
+              return false;
+            }
+
+            if (Misc.lastShrine.type === sdk.shrines.Skill) {
+              if (resistances[shrine.objtype] <= 25) {
+                // makes sense if we have a low resistance
+                return true;
+              }
+
+              return false;
+            }
+          }
+
+          // check that the current shrine benefits our lowest resistance better than the last shrine
+          if (resistances[shrine.objtype] < resistances[Misc.lastShrine.type]) {
+            // how much better? If it's at least a 5% difference, we should take it
+            // otherwise only do it if the distance is convenient
+            
+            return true;
+          }
+          break;
+        }
+        // TODO: handle armor and combat shrines
+        case sdk.shrines.Armor:
+        case sdk.shrines.Combat:
+          // we only want if its close to us if we can't teleport
+          if (!Pather.useTeleport() && Pather.getWalkDistance(shrine.x, shrine.y) > 15) {
+            return false;
+          }
+          
+          if (!Misc.lastShrine.state || !me.getState(Misc.lastShrine.state)) {
+            return true;
+          }
+          return false;
+        case sdk.shrines.Monster:
+          // we only want if its close to us if we can't teleport
+          if (!Pather.useTeleport() && Pather.getWalkDistance(shrine.x, shrine.y) > 15) {
+            return false;
+          }
+          
+          return true; // why not?
+        case sdk.shrines.Gem:
+          // for now we ignore if we are gem hunting later on
+          // TODO: add gem hunting logic, get gem from stash if we have one
+          return !Scripts.GemHunter;
+        }
+        return false;
+      };
+
+      const wantWell = function () {
+        if (me.hpPercent < 75) return true;
+        if (me.mpPercent < 75) return true;
+        if (me.staminaPercent < 50) return true;
+        return [
+          sdk.states.Frozen,
+          sdk.states.Poison,
+          sdk.states.AmplifyDamage,
+          sdk.states.Decrepify
+        ].some(function (state) {
+          return me.getState(state);
+        });
+      };
+
+      if (shrine) {
+        do {
+          let _name = shrine.name.toLowerCase();
+          if ((_name.includes("shrine") && ShrineData.has(shrine.objtype) || (_name.includes("well")))
+            && ShrineData.has(shrine.objtype)
+            && shrine.mode === sdk.objects.mode.Inactive) {
+            shrineList.push(copyUnit(shrine));
+          }
+        } while (shrine.getNext());
+      }
+
+      while (shrineList.length > 0) {
+        shrineList.sort(Sort.units);
+        shrine = shrineList.shift();
+
+        if (shrine) {
+          if (me.inArea(sdk.areas.ChaosSanctuary)) {
+            // stateful shrines are pointless in CS unless we are running wakka or diablo has spawned so no more oblivion knights
+            if (!this._diabloSpawned && Loader.scriptName() !== "Wakka" && ShrineData.getState(shrine.objtype)) {
+              continue;
+            }
+          }
+          
+          if (ShrineData.has(shrine.objtype) ? wantShrine(shrine) : wantWell()) {
+            // need to take distance into account.
+            // How far away is this shrine?
+            // Can we teleport to it?
+            // Is it closer to our path at a later point?
+            // Is it a really good shrine or just a meh one? So we know if we should go out of our way for it.
+            if (shrine.distance > Skill.haveTK ? 20 : 10) {
+              if (Pather.currentWalkingPath.some((point) => getDistance(point.x, point.y, shrine.x, shrine.y) < 10)) {
+                if (Config.DebugMode.Path) {
+                  new Line(shrine.x - 3, shrine.y, shrine.x + 3, shrine.y, 0x9B, true);
+                  new Line(shrine.x, shrine.y - 3, shrine.x, shrine.y + 3, 0x9B, true);
+                }
+                continue;
+              }
+            }
+            this.getShrine(shrine);
+          }
+        }
+      }
+
+      return true;
+    },
+
     /**
      * @param {number} range 
      * @param {number[]} ignore 
      * @returns {boolean}
      */
-    scanShrines: function (range, ignore = []) {
+    scanShrines: function (range, ignore) {
+      if (Config.AutoShriner) {
+        return this.shriner();
+      }
       if (!Config.ScanShrines.length) return false;
 
       !range && (range = Pather.useTeleport() ? 25 : 15);
@@ -588,6 +828,7 @@ const Misc = (function () {
         }
 
         if (Misc.poll(() => unit.mode, 1000, 40)) {
+          Misc.lastShrine.update(unit);
           return true;
         }
       }
