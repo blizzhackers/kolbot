@@ -7,7 +7,6 @@
 
 const Treehead = new Runnable(
   function Treehead () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.DarkWood);
     Precast.doPrecast(true);
 
@@ -19,8 +18,8 @@ const Treehead = new Runnable(
 
     return true;
   },
-  sdk.areas.DarkWood,
   {
+    startArea: sdk.areas.DarkWood,
     bossid: getLocaleString(sdk.locale.monsters.TreeheadWoodFist),
   }
 );

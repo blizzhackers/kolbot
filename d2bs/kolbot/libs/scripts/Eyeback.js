@@ -1,13 +1,12 @@
 /**
 *  @filename    Eyeback.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        kill Eyeback the Unleashed
 *
 */
 
 const Eyeback = new Runnable(
   function Eyeback () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.ArreatPlateau);
     Precast.doPrecast(true);
 
@@ -19,8 +18,8 @@ const Eyeback = new Runnable(
 
     return true;
   },
-  sdk.areas.ArreatPlateau,
   {
+    startArea: sdk.areas.ArreatPlateau,
     bossid: getLocaleString(sdk.locale.monsters.EyebacktheUnleashed),
   }
 );

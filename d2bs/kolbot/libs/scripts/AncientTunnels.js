@@ -7,7 +7,6 @@
 
 const AncientTunnels = new Runnable(
   function AncientTunnels () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.LostCity);
     Precast.doPrecast(true);
 
@@ -34,5 +33,7 @@ const AncientTunnels = new Runnable(
 
     return true;
   },
-  sdk.areas.LostCity
+  {
+    startArea: sdk.areas.LostCity
+  }
 );

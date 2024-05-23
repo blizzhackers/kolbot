@@ -7,7 +7,6 @@
 
 const Mausoleum = new Runnable(
   function Mausoleum () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.ColdPlains);
     Precast.doPrecast(true);
 
@@ -46,5 +45,7 @@ const Mausoleum = new Runnable(
 
     return true;
   },
-  sdk.areas.ColdPlains
+  {
+    startArea: sdk.areas.ColdPlains
+  }
 );

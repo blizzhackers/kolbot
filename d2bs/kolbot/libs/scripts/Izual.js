@@ -7,7 +7,6 @@
 
 const Izual = new Runnable(
   function Izual () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.CityoftheDamned);
     Precast.doPrecast(true);
 
@@ -20,8 +19,8 @@ const Izual = new Runnable(
 
     return true;
   },
-  sdk.areas.CityoftheDamned,
   {
+    startArea: sdk.areas.CityoftheDamned,
     bossid: sdk.monsters.Izual,
   }
 );

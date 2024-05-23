@@ -9,14 +9,8 @@
 const BaalHelper = new Runnable(
   function BaalHelper () {
     include("core/Common/Baal.js");
-    Config.BaalHelper.KillNihlathak && Loader.runScript("Nihlathak");
-    Config.BaalHelper.FastChaos && Loader.runScript("Diablo", () => Config.Diablo.Fast = true);
 
     Town.goToTown(5);
-
-    if (getTickCount() - Town.lastChores > Time.minutes(1)) {
-      Town.doChores();
-    }
     Config.RandomPrecast && Precast.needOutOfTownCast()
       ? Precast.doRandomPrecast(true, sdk.areas.Harrogath)
       : Precast.doPrecast(true);
@@ -136,6 +130,16 @@ const BaalHelper = new Runnable(
     }
 
     return true;
+  },
+  {
+    preAction: function () {
+      Config.BaalHelper.KillNihlathak && Loader.runScript("Nihlathak");
+      Config.BaalHelper.FastChaos && Loader.runScript("Diablo", () => Config.Diablo.Fast = true);
+
+      if (getTickCount() - Town.lastChores > Time.minutes(1)) {
+        Town.doChores();
+      }
+    }
   }
 );
 

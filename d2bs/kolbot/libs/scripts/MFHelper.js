@@ -299,5 +299,8 @@ const MFHelper = new Runnable(
     }
 
     return true;
+  },
+  {
+    preAction: null
   }
 );

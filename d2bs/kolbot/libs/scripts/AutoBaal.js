@@ -284,5 +284,8 @@ const AutoBaal = new Runnable(
 
     return true;
   },
-  sdk.areas.Harrogath
+  {
+    startArea: sdk.areas.Harrogath,
+    preAction: null
+  }
 );

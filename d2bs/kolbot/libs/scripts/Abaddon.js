@@ -7,7 +7,6 @@
 
 const Abaddon = new Runnable(
   function Abaddon () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.FrigidHighlands);
     Precast.doPrecast(true);
 
@@ -20,5 +19,7 @@ const Abaddon = new Runnable(
 
     return true;
   },
-  sdk.areas.FrigidHighlands
+  {
+    startArea: sdk.areas.FrigidHighlands
+  }
 );

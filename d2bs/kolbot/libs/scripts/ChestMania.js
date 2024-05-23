@@ -9,7 +9,6 @@
 
 const ChestMania = new Runnable(
   function ChestMania () {
-    Town.doChores();
     const nextToTown = [
       sdk.areas.BloodMoor,
       sdk.areas.RockyWaste,
@@ -39,5 +38,7 @@ const ChestMania = new Runnable(
 
     return true;
   },
-  Object.values(Config.ChestMania).find((act) => act.length > 0)[0][0]
+  {
+    startArea: Object.values(Config.ChestMania).find((act) => act.length > 0)[0][0]
+  }
 );

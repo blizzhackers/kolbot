@@ -8,7 +8,6 @@
 const Pindleskin = new Runnable(
   function Pindleskin () {
     Town.goToTown((Config.Pindleskin.UseWaypoint ? undefined : 5));
-    Town.doChores();
 
     if (!Attack.haveKilled(getLocaleString(sdk.locale.monsters.Pindleskin))) {
       if (Config.Pindleskin.UseWaypoint) {
@@ -53,5 +52,7 @@ const Pindleskin = new Runnable(
 
     return true;
   },
-  sdk.areas.Harrogath
+  {
+    startArea: sdk.areas.Harrogath
+  }
 );

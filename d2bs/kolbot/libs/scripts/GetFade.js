@@ -65,5 +65,8 @@ const GetFade = new Runnable(
       mainSlot !== undefined && me.weaponswitch !== mainSlot && me.switchWeapons(mainSlot);
     }
   },
-  sdk.areas.RiverofFlame
+  {
+    startArea: sdk.areas.RiverofFlame,
+    preAction: null
+  }
 );

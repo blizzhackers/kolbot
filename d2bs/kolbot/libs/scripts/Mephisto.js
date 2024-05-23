@@ -108,7 +108,6 @@ const Mephisto = new Runnable(
       return true;
     };
 
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.DuranceofHateLvl2);
     Precast.doPrecast(true);
 
@@ -161,8 +160,8 @@ const Mephisto = new Runnable(
 
     return true;
   },
-  sdk.areas.DuranceofHateLvl2,
   {
+    startArea: sdk.areas.DuranceofHateLvl2,
     bossid: sdk.monsters.Mephisto,
   }
 );

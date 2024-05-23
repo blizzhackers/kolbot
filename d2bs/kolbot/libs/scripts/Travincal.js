@@ -7,7 +7,6 @@
 
 const Travincal = new Runnable(
   function Travincal () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.Travincal);
     Precast.doPrecast(true);
 
@@ -69,5 +68,7 @@ const Travincal = new Runnable(
 
     return true;
   },
-  sdk.areas.Travincal
+  {
+    startArea: sdk.areas.Travincal
+  }
 );

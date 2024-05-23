@@ -23,5 +23,8 @@ const KillDclone = new Runnable(
 
     return true;
   },
-  sdk.areas.ArcaneSanctuary
+  {
+    startArea: sdk.areas.ArcaneSanctuary,
+    preAction: null
+  }
 );

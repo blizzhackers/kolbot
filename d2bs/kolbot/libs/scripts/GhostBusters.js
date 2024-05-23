@@ -114,5 +114,8 @@ const GhostBusters = new Runnable(
 
     return true;
   },
-  sdk.areas.BlackMarsh
+  {
+    startArea: sdk.areas.BlackMarsh,
+    preAction: null
+  }
 );

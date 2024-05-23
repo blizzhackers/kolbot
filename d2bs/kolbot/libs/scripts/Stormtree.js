@@ -7,7 +7,6 @@
 
 const Stormtree = new Runnable(
   function Stormtree () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.LowerKurast);
     Precast.doPrecast(true);
 
@@ -19,8 +18,8 @@ const Stormtree = new Runnable(
 
     return true;
   },
-  sdk.areas.LowerKurast,
   {
+    startArea: sdk.areas.LowerKurast,
     bossid: getLocaleString(sdk.locale.monsters.Stormtree),
   }
 );

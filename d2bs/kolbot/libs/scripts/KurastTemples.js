@@ -7,7 +7,6 @@
 
 const KurastTemples = new Runnable(
   function KurastTemples () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.KurastBazaar);
 
     [
@@ -42,5 +41,7 @@ const KurastTemples = new Runnable(
 
     return true;
   },
-  sdk.areas.KurastBazaar
+  {
+    startArea: sdk.areas.KurastBazaar
+  }
 );

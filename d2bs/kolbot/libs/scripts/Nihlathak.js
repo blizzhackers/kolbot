@@ -8,7 +8,6 @@
 const Nihlathak = new Runnable(
   function Nihlathak () {
     Town.goToTown(5);
-    Town.doChores();
 
     !Pather.initialized && Pather.useWaypoint(null, true);
 
@@ -38,8 +37,8 @@ const Nihlathak = new Runnable(
 
     return true;
   },
-  sdk.areas.Harrogath,
   {
+    startArea: sdk.areas.Harrogath,
     bossid: sdk.monsters.Nihlathak,
   }
 );

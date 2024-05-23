@@ -7,7 +7,6 @@
 
 const Bonesaw = new Runnable(
   function Bonesaw () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.GlacialTrail);
     Precast.doPrecast(true);
 
@@ -21,8 +20,8 @@ const Bonesaw = new Runnable(
     }
     return true;
   },
-  sdk.areas.GlacialTrail,
   {
+    startArea: sdk.areas.GlacialTrail,
     bossid: getLocaleString(sdk.locale.monsters.BonesawBreaker),
   }
 );

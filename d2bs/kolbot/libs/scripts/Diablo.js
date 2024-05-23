@@ -16,12 +16,6 @@ const Diablo = new Runnable(
     Common.Diablo.clearRadius = Config.Diablo.ClearRadius;
 
     // START
-
-    // We can skip chores if it's been less than a minute since we last did them
-    if (getTickCount() - Town.lastChores > Time.minutes(1)) {
-      Town.doChores();
-    }
-
     if (!me.inArea(sdk.areas.RiverofFlame)) {
       !!Config.RandomPrecast
         ? Precast.doRandomPrecast(true, sdk.areas.RiverofFlame)
@@ -96,8 +90,8 @@ const Diablo = new Runnable(
 
     return true;
   },
-  sdk.areas.RiverofFlame,
   {
+    startArea: sdk.areas.RiverofFlame,
     bossid: sdk.monsters.Diablo,
   }
 );

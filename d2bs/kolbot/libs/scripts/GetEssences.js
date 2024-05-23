@@ -8,12 +8,10 @@
 
 const GetEssences = new Runnable(
   function GetEssences () {
-    Town.doChores();
-    
     /**
-    * @param {number} essence 
-    * @returns {number}
-    */
+     * @param {number} essence 
+     * @returns {number}
+     */
     const count = function (essence) {
       return me.getItemsEx(essence, sdk.items.mode.inStorage).length;
     };

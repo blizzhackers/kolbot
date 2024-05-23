@@ -21,7 +21,6 @@ const Andariel = new Runnable(
       return target.dead;
     };
 
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.CatacombsLvl2);
     Precast.doPrecast(true);
 
@@ -41,8 +40,8 @@ const Andariel = new Runnable(
 
     return true;
   },
-  sdk.areas.CatacombsLvl2,
   {
+    startArea: sdk.areas.CatacombsLvl2,
     bossid: sdk.monsters.Andariel,
   }
 );

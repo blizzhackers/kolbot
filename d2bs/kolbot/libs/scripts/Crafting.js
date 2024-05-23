@@ -119,7 +119,10 @@ const Crafting = new Runnable(
       delay(2000);
     }
   },
-  sdk.areas.RogueEncampment
+  {
+    startArea: sdk.areas.RogueEncampment,
+    preAction: null
+  }
 );
 
 function getNPCName (idList) {

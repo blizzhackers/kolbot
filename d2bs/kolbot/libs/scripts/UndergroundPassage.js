@@ -7,7 +7,6 @@
 
 const UndergroundPassage = new Runnable(
   function UndergroundPassage() {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.StonyField);
     Precast.doPrecast(true);
 
@@ -19,5 +18,7 @@ const UndergroundPassage = new Runnable(
 
     return true;
   },
-  sdk.areas.StonyField
+  {
+    startArea: sdk.areas.StonyField
+  }
 );

@@ -59,5 +59,8 @@ const Gamble = new Runnable(
 
     // eslint-disable-next-line no-unreachable
     return true;
+  },
+  {
+    preAction: null
   }
 );

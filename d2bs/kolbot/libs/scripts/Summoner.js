@@ -7,7 +7,6 @@
 
 const Summoner = new Runnable(
   function Summoner () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.ArcaneSanctuary);
     Precast.doPrecast(true);
 
@@ -70,5 +69,7 @@ const Summoner = new Runnable(
 
     return true;
   },
-  sdk.areas.ArcaneSanctuary
+  {
+    startArea: sdk.areas.ArcaneSanctuary
+  }
 );

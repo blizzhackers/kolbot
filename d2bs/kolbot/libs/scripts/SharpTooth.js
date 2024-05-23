@@ -7,7 +7,6 @@
 
 const SharpTooth = new Runnable(
   function SharpTooth () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.FrigidHighlands);
     Precast.doPrecast(true);
 
@@ -22,8 +21,8 @@ const SharpTooth = new Runnable(
 
     return true;
   },
-  sdk.areas.FrigidHighlands,
   {
+    startArea: sdk.areas.FrigidHighlands,
     bossid: getLocaleString(sdk.locale.monsters.SharpToothSayer),
   }
 );

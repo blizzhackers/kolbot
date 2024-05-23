@@ -1298,5 +1298,8 @@ const ControlBot = new Runnable(
 
     return true;
   },
-  sdk.areas.RogueEncampment
+  {
+    startArea: sdk.areas.RogueEncampment,
+    preAction: null
+  }
 );

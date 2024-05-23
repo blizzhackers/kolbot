@@ -7,7 +7,6 @@
 
 const Coldworm = new Runnable(
   function Coldworm () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.FarOasis);
     Precast.doPrecast(true);
 
@@ -38,8 +37,8 @@ const Coldworm = new Runnable(
 
     return true;
   },
-  sdk.areas.FarOasis,
   {
+    startArea: sdk.areas.FarOasis,
     bossid: sdk.monsters.ColdwormtheBurrower,
   }
 );

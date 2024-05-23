@@ -7,7 +7,6 @@
 
 const Coldcrow = new Runnable(
   function Coldcrow () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.ColdPlains);
     Precast.doPrecast(true);
 
@@ -20,8 +19,8 @@ const Coldcrow = new Runnable(
 
     return true;
   },
-  sdk.areas.ColdPlains,
   {
+    startArea: sdk.areas.ColdPlains,
     bossid: getLocaleString(sdk.locale.monsters.Coldcrow),
   }
 );

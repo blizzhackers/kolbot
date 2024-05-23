@@ -7,7 +7,6 @@
 
 const Corpsefire = new Runnable(
   function Corpsefire () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.ColdPlains);
     Precast.doPrecast(true);
 
@@ -21,8 +20,8 @@ const Corpsefire = new Runnable(
 
     return true;
   },
-  sdk.areas.ColdPlains,
   {
+    startArea: sdk.areas.ColdPlains,
     bossid: getLocaleString(sdk.locale.monsters.Corpsefire),
   }
 );

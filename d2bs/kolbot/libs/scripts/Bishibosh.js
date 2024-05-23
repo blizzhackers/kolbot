@@ -7,7 +7,6 @@
 
 const Bishibosh = new Runnable(
   function Bishibosh () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.ColdPlains);
     Precast.doPrecast(true);
 
@@ -17,8 +16,8 @@ const Bishibosh = new Runnable(
 
     return true;
   },
-  sdk.areas.ColdPlains,
   {
+    startArea: sdk.areas.ColdPlains,
     bossid: getLocaleString(sdk.locale.monsters.Bishibosh),
   }
 );

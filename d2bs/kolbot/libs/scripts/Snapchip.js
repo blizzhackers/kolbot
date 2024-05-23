@@ -7,7 +7,6 @@
 
 const Snapchip = new Runnable(
   function Snapchip () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.AncientsWay);
     Precast.doPrecast(true);
 
@@ -21,5 +20,7 @@ const Snapchip = new Runnable(
 
     return true;
   },
-  sdk.areas.AncientsWay
+  {
+    startArea: sdk.areas.AncientsWay
+  }
 );

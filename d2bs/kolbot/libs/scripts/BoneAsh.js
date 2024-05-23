@@ -1,13 +1,12 @@
 /**
 *  @filename    BoneAsh.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        kill Bone Ash
 *
 */
 
 const BoneAsh = new Runnable(
   function BoneAsh () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.InnerCloister);
     Precast.doPrecast(true);
 
@@ -18,8 +17,8 @@ const BoneAsh = new Runnable(
 
     return true;
   },
-  sdk.areas.InnerCloister,
   {
+    startArea: sdk.areas.InnerCloister,
     bossid: getLocaleString(sdk.locale.monsters.BoneAsh),
   }
 );

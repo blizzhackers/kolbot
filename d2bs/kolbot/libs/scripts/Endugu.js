@@ -1,13 +1,12 @@
 /**
 *  @filename    Endugu.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        kill Witch Doctor Endugu
 *
 */
 
 const Endugu = new Runnable(
   function Endugu () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.FlayerJungle);
     Precast.doPrecast(true);
 
@@ -26,8 +25,8 @@ const Endugu = new Runnable(
 
     return true;
   },
-  sdk.areas.FlayerJungle,
   {
+    startArea: sdk.areas.FlayerJungle,
     bossid: getLocaleString(sdk.locale.monsters.WitchDoctorEndugu),
   }
 );

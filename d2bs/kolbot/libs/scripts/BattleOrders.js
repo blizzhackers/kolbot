@@ -156,8 +156,6 @@ const BattleOrders = new Runnable(
     }
 
     // START
-    Town.doChores();
-
     try {
       Pather.useWaypoint(sdk.areas.CatacombsLvl2, true);
     } catch (wperror) {
@@ -306,5 +304,7 @@ const BattleOrders = new Runnable(
       removeEventListener("chatmsg", chatEvent);
     }
   },
-  sdk.areas.CatacombsLvl2
+  {
+    startArea: sdk.areas.CatacombsLvl2
+  }
 );

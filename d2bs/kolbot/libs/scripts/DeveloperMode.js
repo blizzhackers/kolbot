@@ -280,5 +280,8 @@ const DeveloperMode = new Runnable(
     }
     
     return true;
+  },
+  {
+    preAction: null
   }
 );

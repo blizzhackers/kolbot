@@ -107,5 +107,8 @@ const UserAddon = new Runnable(
       dummy && dummy.remove();
       UnitInfo.remove();
     }
+  },
+  {
+    preAction: null
   }
 );

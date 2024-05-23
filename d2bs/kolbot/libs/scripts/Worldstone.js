@@ -7,7 +7,6 @@
 
 const Worldstone = new Runnable(
   function Worldstone() {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
     Precast.doPrecast(true);
     /**
@@ -38,5 +37,7 @@ const Worldstone = new Runnable(
 
     return true;
   },
-  sdk.areas.WorldstoneLvl2
+  {
+    startArea: sdk.areas.WorldstoneLvl2
+  }
 );

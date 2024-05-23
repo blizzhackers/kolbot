@@ -7,7 +7,6 @@
 
 const Countess = new Runnable(
   function Countess () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.BlackMarsh);
     Precast.doPrecast(true);
 
@@ -17,7 +16,6 @@ const Countess = new Runnable(
     ], true)) throw new Error("Failed to move to Countess");
 
     let poi = Game.getPresetObject(me.area, sdk.objects.SuperChest);
-
     if (!poi) throw new Error("Failed to move to Countess (preset not found)");
 
     switch (poi.roomx * 5 + poi.x) {
@@ -34,8 +32,8 @@ const Countess = new Runnable(
 
     return true;
   },
-  sdk.areas.BlackMarsh,
   {
+    startArea: sdk.areas.BlackMarsh,
     bossid: getLocaleString(sdk.locale.monsters.TheCountess),
   }
 );

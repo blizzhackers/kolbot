@@ -57,5 +57,8 @@ const Idle = new Runnable(
       removeEventListener("gameevent", gameEvent);
     }
   },
-  sdk.areas.RogueEncampment
+  {
+    startArea: sdk.areas.RogueEncampment,
+    preAction: null
+  }
 );

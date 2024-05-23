@@ -7,7 +7,6 @@
 
 const Smith = new Runnable(
   function Smith () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.OuterCloister);
     Precast.doPrecast(true);
 
@@ -20,8 +19,8 @@ const Smith = new Runnable(
 
     return true;
   },
-  sdk.areas.OuterCloister,
   {
+    startArea: sdk.areas.OuterCloister,
     bossid: getLocaleString(sdk.locale.monsters.TheSmith),
   }
 );

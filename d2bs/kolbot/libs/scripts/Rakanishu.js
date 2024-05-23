@@ -7,7 +7,6 @@
 
 const Rakanishu = new Runnable(
   function Rakanishu () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.StonyField);
     Precast.doPrecast(true);
 
@@ -29,5 +28,7 @@ const Rakanishu = new Runnable(
 
     return true;
   },
-  sdk.areas.StonyField
+  {
+    startArea: sdk.areas.StonyField
+  }
 );

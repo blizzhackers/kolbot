@@ -7,7 +7,6 @@
 
 const Pit = new Runnable(
   function Pit () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.BlackMarsh);
     Precast.doPrecast(true);
 
@@ -23,5 +22,7 @@ const Pit = new Runnable(
 
     return true;
   },
-  sdk.areas.BlackMarsh
+  {
+    startArea: sdk.areas.BlackMarsh
+  }
 );

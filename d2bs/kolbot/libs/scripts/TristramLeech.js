@@ -16,8 +16,7 @@ const TristramLeech = new Runnable(
         done = true;
       }
     };
-    
-    Town.doChores();
+
     Town.goToTown(1);
     Town.move("portalspot");
 
@@ -124,5 +123,7 @@ const TristramLeech = new Runnable(
 
     return true;
   },
-  sdk.areas.RogueEncampment
+  {
+    startArea: sdk.areas.RogueEncampment
+  }
 );

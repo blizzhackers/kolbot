@@ -69,5 +69,7 @@ const Tristram = new Runnable(
 
     return true;
   },
-  sdk.areas.StonyField
+  {
+    startArea: sdk.areas.StonyField
+  }
 );

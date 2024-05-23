@@ -7,7 +7,6 @@
 
 const ThreshSocket = new Runnable(
   function ThreshSocket () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.ArreatPlateau);
     Precast.doPrecast(true);
 
@@ -20,8 +19,8 @@ const ThreshSocket = new Runnable(
 
     return true;
   },
-  sdk.areas.ArreatPlateau,
   {
+    startArea: sdk.areas.ArreatPlateau,
     bossid: getLocaleString(sdk.locale.monsters.ThreshSocket),
   }
 );

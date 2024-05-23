@@ -8,9 +8,7 @@
 const SealLeecher = new Runnable(
   function SealLeecher() {
     let commands = [];
-
     Town.goToTown(4);
-    Town.doChores();
     Town.move("portalspot");
 
     if (!Config.Leader) {
@@ -98,5 +96,7 @@ const SealLeecher = new Runnable(
 
     return true;
   },
-  sdk.areas.PandemoniumFortress
+  {
+    startArea: sdk.areas.PandemoniumFortress
+  }
 );

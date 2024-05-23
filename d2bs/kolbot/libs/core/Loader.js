@@ -9,22 +9,29 @@
 // TODO: preaction/postaction
 /**
  * @typedef {Object} RunnableOptions
- * @property {function(): boolean} preAction
+ * @property {function(): any} preAction
  * @property {function(): boolean} postAction
  * @property {boolean} forceTown
  * @property {number} bossid
+ * @property {number} startArea
  */
 
 /**
  * @constructor
- * @param {function(): boolean} action 
- * @param {number} [startArea] 
+ * @param {function(): boolean} action
  * @param {RunnableOptions} [options]
  */
-function Runnable (action, startArea, options = {}) {
+function Runnable (action, options = {}) {
   this.action = action;
-  this.startArea = startArea;
-  this.preAction = options.hasOwnProperty("preAction") ? options.preAction : null;
+  this.startArea = options.hasOwnProperty("startArea") ? options.startArea : null;
+  this.preAction = options.hasOwnProperty("preAction")
+    ? options.preAction
+    : function chores () {
+        // TODO: We need to do a dry-run of chores to actually determine if we need it or not
+        if (getTickCount() - Town.lastChores > Time.minutes(1)) {
+          Town.doChores();
+        }
+      };
   this.postAction = options.hasOwnProperty("postAction") ? options.postAction : null;
   this.forceTown = options.hasOwnProperty("forceTown") ? options.forceTown : false;
   this.bossid = options.hasOwnProperty("bossid") ? options.bossid : null;
@@ -182,19 +189,23 @@ const Loader = {
       if (isIncluded("scripts/" + script + ".js")) {
         try {
           if (Loader.currentScript instanceof Runnable) {
-            const { startArea, bossid } = Loader.currentScript;
+            const { startArea, bossid, preAction } = Loader.currentScript;
             
             if (startArea && Loader.scriptIndex === 0) {
               Loader.firstScriptAct = sdk.areas.actOf(startArea);
             }
 
-            if (startArea && me.inArea(startArea)) {
-              this.skipTown.push(script);
-            }
-            
             if (bossid && Attack.haveKilled(bossid)) {
               console.log("ÿc2Skipping script: ÿc9" + script + " ÿc2- Boss already killed.");
               continue;
+            }
+
+            if (preAction && typeof preAction === "function") {
+              preAction();
+            }
+
+            if (startArea && me.inArea(startArea)) {
+              this.skipTown.push(script);
             }
           } else if (typeof (Loader.currentScript) !== "function") {
             throw new Error(

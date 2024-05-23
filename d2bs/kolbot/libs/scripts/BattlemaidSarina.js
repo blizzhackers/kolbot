@@ -7,7 +7,6 @@
 
 const BattlemaidSarina = new Runnable(
   function BattlemaidSarina () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.KurastBazaar);
     Precast.doPrecast(true);
 
@@ -21,8 +20,8 @@ const BattlemaidSarina = new Runnable(
 
     return true;
   },
-  sdk.areas.KurastBazaar,
   {
+    startArea: sdk.areas.KurastBazaar,
     bossid: getLocaleString(sdk.locale.monsters.BattlemaidSarina),
   }
 );

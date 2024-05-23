@@ -7,7 +7,6 @@
 
 const Eldritch = new Runnable(
   function Eldritch () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.FrigidHighlands);
     Precast.doPrecast(true);
     let { x, y } = me;
@@ -50,5 +49,7 @@ const Eldritch = new Runnable(
 
     return true;
   },
-  sdk.areas.FrigidHighlands
+  {
+    startArea: sdk.areas.FrigidHighlands
+  }
 );

@@ -34,5 +34,8 @@ const GetCube = new Runnable(
 
     return (!!cube && Storage.Stash.MoveTo(cube));
   },
-  sdk.areas.HallsoftheDeadLvl2
+  {
+    startArea: sdk.areas.HallsoftheDeadLvl2,
+    preAction: null
+  }
 );

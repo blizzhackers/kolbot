@@ -47,11 +47,6 @@ const Baal = new Runnable(
       say(string);
     };
 
-    // We can skip chores if it's been less than a minute since we last did them
-    if (getTickCount() - Town.lastChores > Time.minutes(1)) {
-      Town.doChores();
-    }
-
     if (!me.inArea(sdk.areas.WorldstoneLvl2)) {
       Config.RandomPrecast
         ? Precast.doRandomPrecast(true, sdk.areas.WorldstoneLvl2)
@@ -100,8 +95,8 @@ const Baal = new Runnable(
 
     return true;
   },
-  sdk.areas.WorldstoneLvl2,
   {
+    startArea: sdk.areas.WorldstoneLvl2,
     bossid: sdk.monsters.Baal,
   }
 );

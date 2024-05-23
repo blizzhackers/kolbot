@@ -7,7 +7,6 @@
 
 const Fangskin = new Runnable(
   function Fangskin () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.LostCity);
     Precast.doPrecast(true);
 
@@ -25,8 +24,8 @@ const Fangskin = new Runnable(
 
     return true;
   },
-  sdk.areas.LostCity,
   {
+    startArea: sdk.areas.LostCity,
     bossid: getLocaleString(sdk.locale.monsters.Fangskin),
   }
 );

@@ -84,5 +84,8 @@ const TravincalLeech = new Runnable(
 
     return true;
   },
-  sdk.areas.KurastDocktown
+  {
+    startArea: sdk.areas.KurastDocktown,
+    preAction: null
+  }
 );

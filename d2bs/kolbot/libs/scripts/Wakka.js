@@ -456,5 +456,8 @@ const Wakka = new Runnable(
 
     return true;
   },
-  sdk.areas.PandemoniumFortress
+  {
+    startArea: sdk.areas.PandemoniumFortress,
+    preAction: null
+  }
 );

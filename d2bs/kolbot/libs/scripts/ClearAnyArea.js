@@ -7,8 +7,6 @@
 
 const ClearAnyArea = new Runnable(
   function ClearAnyArea () {
-    Town.doChores();
-
     for (let area of Config.ClearAnyArea.AreaList) {
       try {
         if (Pather.journeyTo(area)) {

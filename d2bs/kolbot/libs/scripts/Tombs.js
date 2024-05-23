@@ -7,7 +7,6 @@
 
 const Tombs = new Runnable(
   function Tombs() {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.CanyonofMagic);
     Precast.doPrecast(true);
     const correctTomb = getRoom().correcttomb;
@@ -31,5 +30,7 @@ const Tombs = new Runnable(
 
     return true;
   },
-  sdk.areas.CanyonofMagic
+  {
+    startArea: sdk.areas.CanyonofMagic
+  }
 );

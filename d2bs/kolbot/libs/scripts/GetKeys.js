@@ -1,15 +1,21 @@
 /**
 *  @filename    GetKeys.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        get them keys
 *
 */
 
 const GetKeys = new Runnable(
   function GetKeys () {
-    Town.doChores();
+    /**
+     * @param {number} id 
+     * @returns {number}
+     */
+    const count = function (id) {
+      return me.getItemsEx(id, sdk.items.mode.inStorage).length;
+    };
 
-    if (me.getItemsEx(sdk.items.quest.KeyofTerror, sdk.items.mode.inStorage).length < 3) {
+    if (count(sdk.items.quest.KeyofTerror) < 3) {
       try {
         Loader.runScript("Countess");
       } catch (e) {
@@ -17,7 +23,7 @@ const GetKeys = new Runnable(
       }
     }
 
-    if (me.getItemsEx(sdk.items.quest.KeyofHate, sdk.items.mode.inStorage).length < 3) {
+    if (count(sdk.items.quest.KeyofHate) < 3) {
       try {
         Loader.runScript("Summoner", () => Config.Summoner.FireEye = false);
       } catch (e) {
@@ -25,7 +31,7 @@ const GetKeys = new Runnable(
       }
     }
 
-    if (me.getItemsEx(sdk.items.quest.KeyofDestruction, sdk.items.mode.inStorage).length < 3) {
+    if (count(sdk.items.quest.KeyofDestruction) < 3) {
       try {
         Loader.runScript("Nihlathak");
       } catch (e) {

@@ -7,7 +7,6 @@
 
 const Radament = new Runnable(
   function Radament () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.A2SewersLvl2);
     Precast.doPrecast(true);
 
@@ -22,8 +21,8 @@ const Radament = new Runnable(
 
     return true;
   },
-  sdk.areas.A2SewersLvl2,
   {
+    startArea: sdk.areas.A2SewersLvl2,
     bossid: sdk.monsters.Radament,
   }
 );

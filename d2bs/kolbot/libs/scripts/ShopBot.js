@@ -302,5 +302,8 @@ const ShopBot = new Runnable(
     }
 
     return true;
+  },
+  {
+    preAction: null
   }
 );

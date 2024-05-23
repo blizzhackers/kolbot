@@ -55,15 +55,15 @@ const BoBarbHelper = new Runnable(
 
     if (!Config.QuitList) {
       showConsole();
-      print("set Config.QuitList in character settings");
-      print("if you don't I will idle indefinitely");
+      console.log("set Config.QuitList in character settings");
+      console.log("if you don't I will idle indefinitely");
     }
 
     if (me.hardcore && Config.LifeChicken <= 0) {
       showConsole();
-      print("on HARDCORE");
-      print("you should set Config.LifeChicken");
-      print("monsters can find their way to wps ...");
+      console.log("on HARDCORE");
+      console.log("you should set Config.LifeChicken");
+      console.log("monsters can find their way to wps ...");
       delay(2000);
       hideConsole();
       me.overhead("set LifeChiken to 40");
@@ -77,8 +77,8 @@ const BoBarbHelper = new Runnable(
       Pather.useWaypoint(Config.BoBarbHelper.Wp);
     } catch (e) {
       showConsole();
-      print("Failed to move to BO WP");
-      print("make sure I have " + getAreaName(Config.BoBarbHelper.Wp) + " waypoint");
+      console.log("Failed to move to BO WP");
+      console.log("make sure I have " + getAreaName(Config.BoBarbHelper.Wp) + " waypoint");
       delay(20000);
 
       return true;
@@ -103,5 +103,7 @@ const BoBarbHelper = new Runnable(
 
     return true;
   },
-  Config.BoBarbHelper.Wp
+  {
+    startArea: Config.BoBarbHelper.Wp
+  }
 );

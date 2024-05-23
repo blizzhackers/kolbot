@@ -7,7 +7,6 @@
 
 const Hephasto = new Runnable(
   function Hephasto () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.RiverofFlame);
     Precast.doPrecast(true);
 
@@ -29,5 +28,7 @@ const Hephasto = new Runnable(
 
     return true;
   },
-  sdk.areas.RiverofFlame
+  {
+    startArea: sdk.areas.RiverofFlame
+  }
 );

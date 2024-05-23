@@ -1,13 +1,12 @@
 /**
 *  @filename    Icehawk.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        kill Icehawk Riftwing
 *
 */
 
 const Icehawk = new Runnable(
   function Icehawk () {
-    Town.doChores();
     Pather.useWaypoint(sdk.areas.KurastBazaar);
     Precast.doPrecast(true);
 
@@ -19,8 +18,8 @@ const Icehawk = new Runnable(
 
     return true;
   },
-  sdk.areas.KurastBazaar,
   {
+    startArea: sdk.areas.KurastBazaar,
     bossid: getLocaleString(sdk.locale.monsters.IcehawkRiftwing),
   }
 );

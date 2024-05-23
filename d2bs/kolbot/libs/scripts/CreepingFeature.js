@@ -7,7 +7,6 @@
 
 const CreepingFeature = new Runnable(
   function CreepingFeature () {
-    Town.doChores();
     Town.goToTown(2);
     
     Pather.journeyTo(sdk.areas.StonyTombLvl2);
@@ -17,8 +16,8 @@ const CreepingFeature = new Runnable(
 
     return true;
   },
-  sdk.areas.LutGholein,
   {
+    startArea: sdk.areas.LutGholein,
     bossid: getLocaleString(sdk.locale.monsters.CreepingFeature),
   }
 );

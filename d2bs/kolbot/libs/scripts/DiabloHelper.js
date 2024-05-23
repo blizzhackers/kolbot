@@ -11,7 +11,6 @@ const DiabloHelper = new Runnable(
     this.Leader = Config.Leader;
     Common.Diablo.waitForGlow = true;
     Common.Diablo.clearRadius = Config.DiabloHelper.ClearRadius;
-    Town.doChores();
     const Worker = require("../modules/Worker");
 
     try {
@@ -178,5 +177,7 @@ const DiabloHelper = new Runnable(
 
     return true;
   },
-  sdk.areas.PandemoniumFortress
+  {
+    startArea: sdk.areas.PandemoniumFortress
+  }
 );

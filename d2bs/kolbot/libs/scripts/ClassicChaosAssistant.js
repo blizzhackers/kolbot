@@ -129,5 +129,7 @@ const ClassicChaosAssistant = new Runnable(
       delay(10);
     }
   },
-  sdk.areas.RiverofFlame
+  {
+    startArea: sdk.areas.RiverofFlame
+  }
 );

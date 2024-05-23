@@ -57,5 +57,8 @@ const IPHunter = new Runnable(
     D2Bot.printToConsole("IPHunter: IP was [" + ip + "]", sdk.colors.D2Bot.Gray);
 
     return true;
+  },
+  {
+    preAction: null
   }
 );
