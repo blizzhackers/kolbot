@@ -1803,6 +1803,16 @@ const Attack = {
       for (let i = 0; i < coords.length; i += 1) {
         // Valid position found
         if (!CollMap.checkColl({ x: coords[i].x, y: coords[i].y }, unit, coll, 1)) {
+          if (!Pather.canTeleport() && Pather.getWalkDistance(coords[i].x, coords[i].y) > unit.distance) {
+            if (Config.DebugMode.Path) {
+              console.debug(
+                "Skipping position due to walk distance being too far."
+                + "\n - DistanceToMonster: " + unit.distance
+                + "\n - DistanceToPosition: " + Pather.getWalkDistance(coords[i].x, coords[i].y)
+              );
+            }
+            continue;
+          }
           if ((() => {
             switch (walk) {
             case 1:

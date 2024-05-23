@@ -2160,6 +2160,32 @@ const Pather = {
     const coord = CollMap.getRandCoordinate(me.x, -4, 4, me.y, -4, 4, factor);
     return Pather.move(coord, { retry: 3, allowClearing: false });
   },
+
+  /**
+   * @param {number} x 
+   * @param {number} y 
+   * @param {number} [area] 
+   * @param {number} [xx] 
+   * @param {number} [yy] 
+   * @param {number} [reductionType] 
+   * @param {number} [radius] 
+   * @returns {number}
+   */
+  getWalkDistance: function (x, y, area, xx, yy, reductionType, radius) {
+    area === undefined && (area = me.area);
+    xx === undefined && (xx = me.x);
+    yy === undefined && (yy = me.y);
+    reductionType === undefined && (reductionType = 2);
+    radius === undefined && (radius = 5);
+    // distance between node x and x-1
+    return (getPath(area, x, y, xx, yy, reductionType, radius) || [])
+      .map(function (e, i, s) {
+        return i && getDistance(s[i - 1], e) || 0;
+      })
+      .reduce(function (acc, cur) {
+        return acc + cur;
+      }, 0) || Infinity;
+  },
 };
 
 Pather.nextAreas[sdk.areas.RogueEncampment] = sdk.areas.BloodMoor;
