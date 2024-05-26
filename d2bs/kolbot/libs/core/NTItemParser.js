@@ -439,10 +439,52 @@ NTIP.ParseLineInt = function (input, info) {
     ["stat", NTIPAliasStat],
   ]);
 
+  const parseAliasIn = {
+    in: "\[([^\]]+)\]in\(",
+    notin: "\[([^\]]+)\]notin\(",
+    /**
+     * @param {string} input 
+     * @returns {boolean}
+     */
+    test: function (input) {
+      return new RegExp(/\[([^\]]+)\](in|notin)\(/gi).test(input);
+    },
+    /**
+     * @param {string} input 
+     * @returns {string}
+     */
+    convert: function (input) {
+      const regex = new RegExp(/\[([^\]]+)\](in|notin)\(([^)]+)\)/g);
+      let match;
+      let result = input;
+      while ((match = regex.exec(input)) !== null) {
+        if (match.index === regex.lastIndex) {
+          regex.lastIndex++;
+        }
+        const [_full, property, type, values] = match;
+        if (!property || !values) throw new Error("Invalid syntax");
+        const alias = "(" + values.split(",")
+          .filter(function (el) {
+            return el.trim().length > 0;
+          })
+          .map(function (el) {
+            return "[" + property + "]" + (type === "in" ? "==" : "!=") + el.trim();
+          })
+          .join(type === "in" ? "||" : "&&")
+          + ")";
+        result = result.replace(match[0], alias);
+      }
+      return result;
+    }
+  };
+
   p_result = input.split("#");
 
   try {
     if (p_result[0] && p_result[0].length > 4) {
+      if (parseAliasIn.test(p_result[0])) {
+        p_result[0] = parseAliasIn.convert(p_result[0]);
+      }
       p_section = p_result[0].split("[");
 
       p_result[0] = p_section[0];
