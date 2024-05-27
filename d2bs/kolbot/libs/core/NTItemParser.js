@@ -372,6 +372,100 @@ NTIP.IsSyntaxInt = function (ch) {
   );
 };
 
+NTIP.parseAliasIn = {
+  in: "\[([^\]]+)\]in\(",
+  notin: "\[([^\]]+)\]notin\(",
+  /** @private */
+  _regex: new RegExp(/\[([^\]]+)\](in|notin)\(/gi),
+  /**
+    * @param {string} input 
+    * @returns {boolean}
+    */
+  test: function (input) {
+    this._regex.lastIndex = 0;
+    return this._regex.test(input);
+  },
+  /**
+    * @param {string} input 
+    * @returns {string}
+    */
+  convert: function (input) {
+    const regex = new RegExp(/\[([^\]]+)\](in|notin)\(([^)]+)\)/g);
+    let match;
+    let result = input;
+    while ((match = regex.exec(input)) !== null) {
+      if (match.index === regex.lastIndex) {
+        regex.lastIndex++;
+      }
+      const [_full, property, type, values] = match;
+      if (!property || !values) throw new Error("Invalid syntax");
+      const alias = "(" + values.split(",")
+        .filter(function (el) {
+          return el.trim().length > 0;
+        })
+        .map(function (el) {
+          return "[" + property + "]" + (type === "in" ? "==" : "!=") + el.trim();
+        })
+        .join(type === "in" ? "||" : "&&")
+        + ")";
+      result = result.replace(match[0], alias);
+    }
+    return result;
+  }
+};
+
+NTIP._props = new Map([
+  ["classid", "item.classid"],
+  ["name", "item.classid"],
+  ["type", "item.itemType"],
+  ["class", "item.itemclass"],
+  ["quality", "item.quality"],
+  ["charlvl", "me.charlvl"],
+  ["level", "item.ilvl"],
+  ["flag", "item.getFlag("],
+  ["wsm", 'getBaseStat("items", item.classid, "speed")'],
+  ["weaponspeed", 'getBaseStat("items", item.classid, "speed")'],
+  ["minimumsockets", 'getBaseStat("items", item.classid, "gemsockets")'],
+  ["strreq", "item.strreq"],
+  ["dexreq", "item.dexreq"],
+  ["2handed", 'getBaseStat("items", item.classid, "2handed")'],
+  ["color", "item.getColor()"],
+  ["europe", '("' + me.realm.toLowerCase() + '"===" europe")'],
+  ["uswest", '("' + me.realm.toLowerCase() + '"===" uswest")'],
+  ["useast", '("' + me.realm.toLowerCase() + '"===" useast")'],
+  ["asia", '("' + me.realm.toLowerCase() + '"===" asia")'],
+  ["ladder", "me.ladder"],
+  ["hardcore", "(!!me.playertype)"],
+  ["classic", "(!me.gametype)"],
+  ["distance", "(item.onGroundOrDropping && item.distance || Infinity)"],
+  ["prefix", "item.getPrefix("],
+  ["suffix", "item.getSuffix("]
+]);
+
+NTIP._aliases = new Map([
+  ["n", "name"],
+  ["id", "classid"],
+  ["t", "type"],
+  ["q", "quality"],
+  ["lvl", "level"],
+  ["ilvl", "level"],
+  ["f", "flag"],
+  ["hc", "hardcore"],
+  ["cl", "classic"],
+  ["clvl", "charlvl"],
+]);
+
+NTIP._lists = new Map([
+  ["color", NTIPAliasColor],
+  ["type", NTIPAliasType],
+  ["name", NTIPAliasClassID],
+  ["classid", NTIPAliasClassID],
+  ["class", NTIPAliasClass],
+  ["quality", NTIPAliasQuality],
+  ["flag", NTIPAliasFlag],
+  ["stat", NTIPAliasStat],
+]);
+
 NTIP.ParseLineInt = function (input, info) {
   let i, property, p_start, p_end, p_section, p_keyword, p_result, value;
 
@@ -387,117 +481,22 @@ NTIP.ParseLineInt = function (input, info) {
     return null;
   }
 
-  const _props = new Map([
-    ["classid", "item.classid"],
-    ["name", "item.classid"],
-    ["type", "item.itemType"],
-    ["class", "item.itemclass"],
-    ["quality", "item.quality"],
-    ["charlvl", "me.charlvl"],
-    ["level", "item.ilvl"],
-    ["flag", "item.getFlag("],
-    ["wsm", 'getBaseStat("items", item.classid, "speed")'],
-    ["weaponspeed", 'getBaseStat("items", item.classid, "speed")'],
-    ["minimumsockets", 'getBaseStat("items", item.classid, "gemsockets")'],
-    ["strreq", "item.strreq"],
-    ["dexreq", "item.dexreq"],
-    ["2handed", 'getBaseStat("items", item.classid, "2handed")'],
-    ["color", "item.getColor()"],
-    ["europe", '("' + me.realm.toLowerCase() + '"===" europe")'],
-    ["uswest", '("' + me.realm.toLowerCase() + '"===" uswest")'],
-    ["useast", '("' + me.realm.toLowerCase() + '"===" useast")'],
-    ["asia", '("' + me.realm.toLowerCase() + '"===" asia")'],
-    ["ladder", "me.ladder"],
-    ["hardcore", "(!!me.playertype)"],
-    ["classic", "(!me.gametype)"],
-    ["distance", "(item.onGroundOrDropping && item.distance || Infinity)"],
-    ["prefix", "item.getPrefix("],
-    ["suffix", "item.getSuffix("]
-  ]);
-
-  const _aliases = new Map([
-    ["n", "name"],
-    ["id", "classid"],
-    ["t", "type"],
-    ["q", "quality"],
-    ["lvl", "level"],
-    ["ilvl", "level"],
-    ["f", "flag"],
-    ["hc", "hardcore"],
-    ["cl", "classic"],
-    ["clvl", "charlvl"],
-  ]);
-
-  const _lists = new Map([
-    ["color", NTIPAliasColor],
-    ["type", NTIPAliasType],
-    ["name", NTIPAliasClassID],
-    ["classid", NTIPAliasClassID],
-    ["class", NTIPAliasClass],
-    ["quality", NTIPAliasQuality],
-    ["flag", NTIPAliasFlag],
-    ["stat", NTIPAliasStat],
-  ]);
-
-  const parseAliasIn = {
-    in: "\[([^\]]+)\]in\(",
-    notin: "\[([^\]]+)\]notin\(",
-    /** @private */
-    _regex: new RegExp(/\[([^\]]+)\](in|notin)\(/gi),
-    /**
-     * @param {string} input 
-     * @returns {boolean}
-     */
-    test: function (input) {
-      this._regex.lastIndex = 0;
-      return this._regex.test(input);
-    },
-    /**
-     * @param {string} input 
-     * @returns {string}
-     */
-    convert: function (input) {
-      const regex = new RegExp(/\[([^\]]+)\](in|notin)\(([^)]+)\)/g);
-      let match;
-      let result = input;
-      while ((match = regex.exec(input)) !== null) {
-        if (match.index === regex.lastIndex) {
-          regex.lastIndex++;
-        }
-        const [_full, property, type, values] = match;
-        if (!property || !values) throw new Error("Invalid syntax");
-        const alias = "(" + values.split(",")
-          .filter(function (el) {
-            return el.trim().length > 0;
-          })
-          .map(function (el) {
-            return "[" + property + "]" + (type === "in" ? "==" : "!=") + el.trim();
-          })
-          .join(type === "in" ? "||" : "&&")
-          + ")";
-        result = result.replace(match[0], alias);
-      }
-      return result;
-    }
-  };
-
   p_result = input.split("#");
 
   try {
     if (p_result[0] && p_result[0].length > 4) {
-      if (parseAliasIn.test(p_result[0])) {
-        p_result[0] = parseAliasIn.convert(p_result[0]);
+      if (NTIP.parseAliasIn.test(p_result[0])) {
+        p_result[0] = NTIP.parseAliasIn.convert(p_result[0]);
       }
       p_section = p_result[0].split("[");
-
       p_result[0] = p_section[0];
 
       for (i = 1; i < p_section.length; i += 1) {
         p_end = p_section[i].indexOf("]") + 1;
         property = p_section[i].substring(0, p_end - 1);
 
-        if (_aliases.has(property)) {
-          property = _aliases.get(property);
+        if (NTIP._aliases.has(property)) {
+          property = NTIP._aliases.get(property);
         }
 
         switch (property) {
@@ -505,19 +504,19 @@ NTIP.ParseLineInt = function (input, info) {
         case "prefix":
         case "suffix":
           if (p_section[i][p_end] === "!") {
-            p_result[0] += "!" + _props.get(property);
+            p_result[0] += "!" + NTIP._props.get(property);
           } else {
-            p_result[0] += _props.get(property);
+            p_result[0] += NTIP._props.get(property);
           }
 
           p_end += 2;
 
           break;
         default:
-          if (!_props.has(property)) {
+          if (!NTIP._props.has(property)) {
             throw new Error("Unknown property: " + property + " File: " + info.file + " Line: " + info.line);
           }
-          p_result[0] += _props.get(property);
+          p_result[0] += NTIP._props.get(property);
         }
 
         for (p_start = p_end; p_end < p_section[i].length; p_end += 1) {
@@ -548,12 +547,12 @@ NTIP.ParseLineInt = function (input, info) {
 
             break;
           default:
-            if (!_lists.has(property)) {
+            if (!NTIP._lists.has(property)) {
               throw new Error("Unknown property: " + property + " File: " + info.file + " Line: " + info.line);
-            } else if (_lists.get(property)[p_keyword] === undefined) {
+            } else if (NTIP._lists.get(property)[p_keyword] === undefined) {
               throw new Error("Unknown " + property + ": " + p_keyword + " File: " + info.file + " Line: " + info.line);
             }
-            p_result[0] += _lists.get(property)[p_keyword];
+            p_result[0] += NTIP._lists.get(property)[p_keyword];
             property === "flag" && (p_result[0] += ")");
 
             break;
