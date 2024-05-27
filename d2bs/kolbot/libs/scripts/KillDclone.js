@@ -5,20 +5,26 @@
 *
 */
 
-function KillDclone () {
-  Pather.useWaypoint(sdk.areas.ArcaneSanctuary);
-  Precast.doPrecast(true);
+const KillDclone = new Runnable(
+  function KillDclone () {
+    Pather.useWaypoint(sdk.areas.ArcaneSanctuary);
+    Precast.doPrecast(true);
 
-  if (!Pather.usePortal(null)) {
-    throw new Error("Failed to move to Palace Cellar");
+    if (!Pather.usePortal(null)) {
+      throw new Error("Failed to move to Palace Cellar");
+    }
+
+    Attack.kill(sdk.monsters.DiabloClone);
+    Pickit.pickItems();
+
+    if (AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
+      scriptBroadcast("muleAnni");
+    }
+
+    return true;
+  },
+  {
+    startArea: sdk.areas.ArcaneSanctuary,
+    preAction: null
   }
-
-  Attack.kill(sdk.monsters.DiabloClone);
-  Pickit.pickItems();
-
-  if (AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
-    scriptBroadcast("muleAnni");
-  }
-
-  return true;
-}
+);

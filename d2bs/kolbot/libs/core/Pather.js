@@ -6,6 +6,16 @@
 */
 
 /**
+ * @constructor
+ * @param {number} x 
+ * @param {number} y 
+ */
+function PathNode (x, y) {
+  this.x = x;
+  this.y = y;
+}
+
+/**
  * Perform certain actions after moving to each node
  * @todo this needs to be re-worked
  */
@@ -87,7 +97,11 @@ const NodeAction = {
    * Scan shrines while pathing
    */
   getShrines: function () {
-    Config.ScanShrines.length > 0 && Misc.scanShrines(null, this.shrinesToIgnore);
+    if (Config.AutoShriner) {
+      Misc.shriner();
+    } else if (Config.ScanShrines.length > 0) {
+      Misc.scanShrines(null, this.shrinesToIgnore);
+    }
   }
 };
 
@@ -640,6 +654,8 @@ const Pather = {
         && Skill.setSkill(sdk.skills.Charge, sdk.skills.hand.Left)) {
         if (Skill.canUse(sdk.skills.Vigor)) {
           Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right);
+        } else if (Skill.isAura(Config.RunningAura) && Skill.canUse(Config.RunningAura)) {
+          Skill.setSkill(Config.RunningAura, sdk.skills.hand.Right);
         } else if (!Config.Vigor && !Attack.auradin && Skill.canUse(sdk.skills.HolyFreeze)) {
           // Useful in classic to keep mobs cold while you rush them
           Skill.setSkill(sdk.skills.HolyFreeze, sdk.skills.hand.Right);
@@ -665,7 +681,9 @@ const Pather = {
       if (me.paladin && !me.inTown) {
         Skill.canUse(sdk.skills.Vigor)
           ? Skill.setSkill(sdk.skills.Vigor, sdk.skills.hand.Right)
-          : Skill.setSkill(Config.AttackSkill[2], sdk.skills.hand.Right);
+          : Skill.isAura(Config.RunningAura) && Skill.canUse(Config.RunningAura)
+            ? Skill.setSkill(Config.RunningAura, sdk.skills.hand.Right)
+            : Skill.setSkill(Config.AttackSkill[2], sdk.skills.hand.Right);
       }
 
       if (this.openDoors(x, y) && getDistance(me.x, me.y, x, y) <= minDist) {
@@ -2152,6 +2170,50 @@ const Pather = {
     }
 
     return true;
+  },
+
+  /**
+   * @param {number} xMin 
+   * @param {number} xMax 
+   * @param {number} yMin 
+   * @param {number} yMax 
+   * @param {number} factor
+   */
+  randMove: function (xMin, xMax, yMin, yMax, factor) {
+    xMin === undefined && (xMin = -4);
+    xMax === undefined && (xMax = 4);
+    yMin === undefined && (yMin = -4);
+    yMax === undefined && (yMax = 4);
+    factor === undefined && (factor = 1);
+    /** @type {PathNode} */
+    const coord = CollMap.getRandCoordinate(me.x, -4, 4, me.y, -4, 4, factor);
+    return Pather.move(coord, { retry: 3, allowClearing: false });
+  },
+
+  /**
+   * @param {number} x 
+   * @param {number} y 
+   * @param {number} [area] 
+   * @param {number} [xx] 
+   * @param {number} [yy] 
+   * @param {number} [reductionType] 
+   * @param {number} [radius] 
+   * @returns {number}
+   */
+  getWalkDistance: function (x, y, area, xx, yy, reductionType, radius) {
+    area === undefined && (area = me.area);
+    xx === undefined && (xx = me.x);
+    yy === undefined && (yy = me.y);
+    reductionType === undefined && (reductionType = 2);
+    radius === undefined && (radius = 5);
+    // distance between node x and x-1
+    return (getPath(area, x, y, xx, yy, reductionType, radius) || [])
+      .map(function (e, i, s) {
+        return i && getDistance(s[i - 1], e) || 0;
+      })
+      .reduce(function (acc, cur) {
+        return acc + cur;
+      }, 0) || Infinity;
   },
 };
 

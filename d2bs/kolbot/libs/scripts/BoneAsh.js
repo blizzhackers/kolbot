@@ -1,19 +1,24 @@
 /**
 *  @filename    BoneAsh.js
-*  @author      kolton
+*  @author      kolton, theBGuy
 *  @desc        kill Bone Ash
 *
 */
 
-function BoneAsh () {
-  Town.doChores();
-  Pather.useWaypoint(sdk.areas.InnerCloister);
-  Precast.doPrecast(true);
+const BoneAsh = new Runnable(
+  function BoneAsh () {
+    Pather.useWaypoint(sdk.areas.InnerCloister);
+    Precast.doPrecast(true);
 
-  if (!Pather.moveTo(20047, 4898)) throw new Error("Failed to move to Bone Ash");
+    if (!Pather.moveTo(20047, 4898)) throw new Error("Failed to move to Bone Ash");
 
-  Attack.kill(getLocaleString(sdk.locale.monsters.BoneAsh));
-  Pickit.pickItems();
+    Attack.kill(getLocaleString(sdk.locale.monsters.BoneAsh));
+    Pickit.pickItems();
 
-  return true;
-}
+    return true;
+  },
+  {
+    startArea: sdk.areas.InnerCloister,
+    bossid: getLocaleString(sdk.locale.monsters.BoneAsh),
+  }
+);

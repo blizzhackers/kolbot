@@ -5,6 +5,7 @@
 *
 */
 
+/** @type {Record<string, boolean | Object>} */
 const Scripts = {};
 
 let Config = {
@@ -240,12 +241,19 @@ let Config = {
   MakeRoom: true,
   ClearInvOnStart: false,
   FastPick: false,
+  FastPickRange: 0,
   ManualPlayPick: false,
   OpenChests: {
     Enabled: false,
     Range: 15,
     Types: ["chest", "chest3", "armorstand", "weaponrack"]
   },
+  /** 
+   * Each entry should be a tuple of [nipline, filename]
+   * @example [["[name] == ThulRune # # [maxquantity] == 1", "HeartOfTheOak"]]
+   * @type {[string, string][]}
+   */
+  PickitLines: [],
   PickitFiles: [],
   BeltColumn: [],
   MinColumn: [],
@@ -256,6 +264,7 @@ let Config = {
   SkipException: [],
   /** @type {number[]} */
   ScanShrines: [],
+  AutoShriner: false,
   UseWells: {
     HpPercent: 0,
     MpPercent: 0,
@@ -390,6 +399,7 @@ let Config = {
   Redemption: [0, 0],
   Charge: false,
   Vigor: false,
+  RunningAura: -1,
   AvoidDolls: false,
 
   // Barbarian specific

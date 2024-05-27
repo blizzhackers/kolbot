@@ -552,9 +552,10 @@ const Item = {
 
     keptLine && (desc += ("\n\\xffc0Line: " + keptLine));
     desc += "$" + (unit.ethereal ? ":eth" : "");
+    const formattedDate = new Date().dateStamp().replace(/\//g, "-");
 
     const itemObj = {
-      title: action + " " + name,
+      title: formattedDate + " " + action + " " + name,
       description: desc,
       image: code,
       textColor: unit.quality,

@@ -612,6 +612,7 @@ function LoadConfig () {
   // ############################ //
   Config.AvoidDolls = false; // Try to attack dolls from a greater distance with hammerdins.
   Config.Vigor = true; // Swith to Vigor when running
+  Config.RunningAura = -1; // Aura to use when running, DO NOT use in conjunction with Config.Vigor it will be ignored
   Config.Charge = true; // Use Charge when running
   Config.Redemption = [50, 50]; // Switch to Redemption after clearing an area if under designated life or mana. Format: [lifepercent, manapercent]
 

@@ -420,6 +420,15 @@
     },
 
     /**
+     * @param {number} skillId 
+     * @returns {boolean}
+     */
+    isAura: function (skillId = -1) {
+      if (!_SkillData.has(skillId)) return false;
+      return _SkillData.get(skillId).aura;
+    },
+
+    /**
      * Wereform skill check
      * @param {number} skillId 
      * @returns {number}

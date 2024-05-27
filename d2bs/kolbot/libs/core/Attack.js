@@ -1,3 +1,4 @@
+/// <reference path="../../sdk/globals.d.ts" />
 /**
  *  @filename    Attack.js
  *  @author      kolton, theBGuy
@@ -27,6 +28,19 @@ const Attack = {
     CANTATTACK: 2, // need to fix the ambiguity between this result and Failed
     NEEDMANA: 3,
     NOOP: 4, // used for clearing, if we didn't find any monsters to clear it's not exactly a success or fail
+  },
+  /**
+   * Track bosses killed
+   * @type {Set<number | string>}
+   */
+  _killed: new Set(),
+
+  /**
+   * @param {number | string} id 
+   * @returns {boolean}
+   */
+  haveKilled: function (id) {
+    return this._killed.has(id);
   },
 
   // Initialize attacks
@@ -264,6 +278,10 @@ const Attack = {
       : Misc.poll(() => Game.getMonster(classId), 2000, 100));
 
     if (!target) {
+      if (Attack._killed.has(classId)) {
+        console.log("ÿc7Killed ÿc0:: " + classId);
+        return true;
+      }
       console.warn("Attack.kill: Target not found");
       return Attack.clear(10);
     }
@@ -363,6 +381,11 @@ const Attack = {
       if (!!target && target.attackable) {
         console.warn("ÿc1Failed to kill ÿc0" + who + errorInfo);
       } else {
+        if (target.dead && (target.isBoss || target.uniqueid > -1)) {
+          // a little obnoxious, but we need to track bosses killed and this handles if we are attempting to check by id or name
+          target.isBoss && Attack._killed.add(target.classid);
+          target.uniqueid > -1 && Attack._killed.add(target.name);
+        }
         console.log("ÿc7Killed ÿc0:: " + who + "ÿc0 - ÿc7Duration: ÿc0" + Time.format(getTickCount() - tick));
       }
 
@@ -607,8 +630,7 @@ const Attack = {
           case sdk.skills.BlessedHammer:
             // Tele in random direction with Blessed Hammer
             if (gidAttack[i].attacks > 0 && gidAttack[i].attacks % (isSpecial ? 4 : 2) === 0) {
-              let coord = CollMap.getRandCoordinate(me.x, -1, 1, me.y, -1, 1, 5);
-              Pather.moveTo(coord.x, coord.y);
+              Pather.randMove(-1, 1, -1, 1, 5);
             }
 
             break;
@@ -632,6 +654,11 @@ const Attack = {
            * @todo allow for more aggressive horking here
            */
           if (target.dead || Config.FastPick || Config.FastFindItem) {
+            if ((target.isBoss || target.uniqueid > 0) && target.dead) {
+              // TODO: add uniqueids to sdk
+              target.isBoss && Attack._killed.add(target.classid);
+              target.uniqueid > -1 && Attack._killed.add(target.name);
+            }
             if (boss && boss.gid === target.gid && target.dead) {
               killedBoss = true;
               console.log(
@@ -1020,9 +1047,10 @@ const Attack = {
   /**
    * @description Clear an entire area based on monster spectype
    * @param {number} spectype 
+   * @param {() => boolean} [cb] callback to end clearing early
    * @returns {boolean}
    */
-  clearLevel: function (spectype = 0) {
+  clearLevel: function (spectype = 0, cb = null) {
     function RoomSort (a, b) {
       return getDistance(myRoom[0], myRoom[1], a[0], a[1]) - getDistance(myRoom[0], myRoom[1], b[0], b[1]);
     }
@@ -1036,8 +1064,6 @@ const Attack = {
     let myRoom, previousArea;
     let rooms = [];
     const currentArea = getArea().id;
-    const breakClearLevelCheck = !!(Loader.scriptName() === "MFHelper"
-      && Config.MFHelper.BreakClearLevel && Config.Leader !== "");
 
     do {
       rooms.push([room.x * 5 + room.xsize / 2, room.y * 5 + room.ysize / 2]);
@@ -1053,14 +1079,8 @@ const Attack = {
       // get the first room + initialize myRoom var
       !myRoom && (room = getRoom(me.x, me.y));
 
-      if (breakClearLevelCheck) {
-        let leader = Misc.findPlayer(Config.Leader);
-
-        if (leader && leader.area !== me.area && !leader.inTown) {
-          me.overhead("break the clearing in " + getArea().name);
-
-          return true;
-        }
+      if (typeof cb === "function" && cb()) {
+        break;
       }
 
       if (room) {
@@ -1783,6 +1803,16 @@ const Attack = {
       for (let i = 0; i < coords.length; i += 1) {
         // Valid position found
         if (!CollMap.checkColl({ x: coords[i].x, y: coords[i].y }, unit, coll, 1)) {
+          if (!Pather.canTeleport() && Pather.getWalkDistance(coords[i].x, coords[i].y) > unit.distance) {
+            if (Config.DebugMode.Path) {
+              console.debug(
+                "Skipping position due to walk distance being too far."
+                + "\n - DistanceToMonster: " + unit.distance
+                + "\n - DistanceToPosition: " + Pather.getWalkDistance(coords[i].x, coords[i].y)
+              );
+            }
+            continue;
+          }
           if ((() => {
             switch (walk) {
             case 1:

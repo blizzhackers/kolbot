@@ -6,99 +6,104 @@
 *
 */
 
-function BoBarbHelper () {
-  if (!me.barbarian && Config.BoBarbHelper.Mode !== 0) return true;
+const BoBarbHelper = new Runnable(
+  function BoBarbHelper () {
+    if (!me.barbarian && Config.BoBarbHelper.Mode !== 0) return true;
 
-  const townNearbyMonster = true; // go to town if monsters nearby
-  const townLowMana = 20; // go refill mana if mana drops below this percent
-  const shouldHealMana = amount => me.mp < Math.floor(me.mpmax * amount / 100);
+    const townNearbyMonster = true; // go to town if monsters nearby
+    const townLowMana = 20; // go refill mana if mana drops below this percent
+    const shouldHealMana = amount => me.mp < Math.floor(me.mpmax * amount / 100);
 
-  const healMana = () => {
-    Pather.useWaypoint(sdk.areas.RogueEncampment);
-    Town.initNPC("Heal", "heal");
-    Pather.useWaypoint(Config.BoBarbHelper.Wp);
-  };
+    const healMana = () => {
+      Pather.useWaypoint(sdk.areas.RogueEncampment);
+      Town.initNPC("Heal", "heal");
+      Pather.useWaypoint(Config.BoBarbHelper.Wp);
+    };
 
-  const shouldBuff = unit => (
-    Misc.inMyParty(unit) &&
-    getDistance(me, unit) < 10 &&
-    unit.name !== me.name &&
-    !unit.dead &&
-    !unit.inTown
-  );
+    const shouldBuff = unit => (
+      Misc.inMyParty(unit) &&
+      getDistance(me, unit) < 10 &&
+      unit.name !== me.name &&
+      !unit.dead &&
+      !unit.inTown
+    );
 
-  const giveBuff = () => {
-    const unit = Game.getPlayer();
+    const giveBuff = () => {
+      const unit = Game.getPlayer();
 
-    do {
-      if (shouldBuff(unit)) {
-        Precast.doPrecast(true);
-        delay(50);
-      }
-    } while (unit.getNext());
-  };
-
-  const monsterNear = () => {
-    const unit = Game.getMonster();
-
-    if (unit) {
       do {
-        if (unit.attackable && getDistance(me, unit) < 20) {
-          return true;
+        if (shouldBuff(unit)) {
+          Precast.doPrecast(true);
+          delay(50);
         }
       } while (unit.getNext());
+    };
+
+    const monsterNear = () => {
+      const unit = Game.getMonster();
+
+      if (unit) {
+        do {
+          if (unit.attackable && getDistance(me, unit) < 20) {
+            return true;
+          }
+        } while (unit.getNext());
+      }
+
+      return false;
+    };
+
+    if (!Config.QuitList) {
+      showConsole();
+      console.log("set Config.QuitList in character settings");
+      console.log("if you don't I will idle indefinitely");
     }
 
-    return false;
-  };
+    if (me.hardcore && Config.LifeChicken <= 0) {
+      showConsole();
+      console.log("on HARDCORE");
+      console.log("you should set Config.LifeChicken");
+      console.log("monsters can find their way to wps ...");
+      delay(2000);
+      hideConsole();
+      me.overhead("set LifeChiken to 40");
+      Config.LifeChicken = 40;
+    }
 
-  if (!Config.QuitList) {
-    showConsole();
-    print("set Config.QuitList in character settings");
-    print("if you don't I will idle indefinitely");
-  }
+    shouldHealMana(townLowMana) && Town.initNPC("Heal", "heal");
+    Town.heal(); // in case our life is low as well
+    
+    try {
+      Pather.useWaypoint(Config.BoBarbHelper.Wp);
+    } catch (e) {
+      showConsole();
+      console.log("Failed to move to BO WP");
+      console.log("make sure I have " + getAreaName(Config.BoBarbHelper.Wp) + " waypoint");
+      delay(20000);
 
-  if (me.hardcore && Config.LifeChicken <= 0) {
-    showConsole();
-    print("on HARDCORE");
-    print("you should set Config.LifeChicken");
-    print("monsters can find their way to wps ...");
-    delay(2000);
-    hideConsole();
-    me.overhead("set LifeChiken to 40");
-    Config.LifeChicken = 40;
-  }
+      return true;
+    }
 
-  shouldHealMana(townLowMana) && Town.initNPC("Heal", "heal");
-  Town.heal(); // in case our life is low as well
-  
-  try {
-    Pather.useWaypoint(Config.BoBarbHelper.Wp);
-  } catch (e) {
-    showConsole();
-    print("Failed to move to BO WP");
-    print("make sure I have " + getAreaName(Config.BoBarbHelper.Wp) + " waypoint");
-    delay(20000);
+    Pather.moveTo(me.x + 4, me.y + 4);
+
+    while (true) {
+      giveBuff();
+
+      if (townNearbyMonster && monsterNear()) {
+        if (!Pather.useWaypoint(sdk.areas.RogueEncampment)) {
+          break;
+        }
+      }
+
+      shouldHealMana(townLowMana) && healMana();
+      delay(25);
+    }
+
+    Town.goToTown();
 
     return true;
+  },
+  {
+    startArea: Config.BoBarbHelper.Wp
   }
-
-  Pather.moveTo(me.x + 4, me.y + 4);
-
-  while (true) {
-    giveBuff();
-
-    if (townNearbyMonster && monsterNear()) {
-      if (!Pather.useWaypoint(sdk.areas.RogueEncampment)) {
-        break;
-      }
-    }
-
-    shouldHealMana(townLowMana) && healMana();
-    delay(25);
-  }
-
-  Town.goToTown();
-
-  return true;
-}
+);

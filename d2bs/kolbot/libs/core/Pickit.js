@@ -47,6 +47,14 @@ const Pickit = {
    */
   init: function (notify) {
     Config.PickitFiles.forEach((file) => NTIP.OpenFile("pickit/" + file, notify));
+    Config.PickitLines.forEach(function (line) {
+      if (Array.isArray(line)) {
+        let [str, file] = line;
+        NTIP.addLine(str, file);
+      } else {
+        NTIP.addLine(line);
+      }
+    });
     // check if we can pick up items, only do this is our inventory slots aren't completly locked
     Pickit.invoLocked = !Config.Inventory.some(row => row.some(el => el > 0));
 
@@ -275,17 +283,17 @@ const Pickit = {
     // make sure we have essentials - no pickit files loaded
     if (rval.result === Pickit.Result.UNWANTED && Config.PickitFiles.length === 0
       && Pickit.essentials.includes(unit.itemType) && this.canPick(unit)) {
-      return resultObj(Pickit.Result.WANTED);
+      return resultObj(Pickit.Result.WANTED, "Essentials");
     }
 
     if ((unit.classid === sdk.items.runes.Ort || unit.classid === sdk.items.runes.Ral)
-      && Town.repairIngredientCheck(unit)) {
-      return resultObj(Pickit.Result.UTILITY);
+      && Cubing.repairIngredientCheck(unit)) {
+      return resultObj(Pickit.Result.UTILITY, "Cubing Repair Ingredients");
     }
 
-    if (CraftingSystem.checkItem(unit)) return resultObj(Pickit.Result.CRAFTING);
-    if (Cubing.checkItem(unit)) return resultObj(Pickit.Result.CUBING);
-    if (Runewords.checkItem(unit)) return resultObj(Pickit.Result.RUNEWORD);
+    if (CraftingSystem.checkItem(unit)) return resultObj(Pickit.Result.CRAFTING, "Crafting System");
+    if (Cubing.checkItem(unit)) return resultObj(Pickit.Result.CUBING, "Cubing");
+    if (Runewords.checkItem(unit)) return resultObj(Pickit.Result.RUNEWORD, "Runewords");
 
     // if Gemhunting, pick Item for Cubing, if no other system needs it
     if (Scripts.GemHunter && rval.result === Pickit.Result.UNWANTED) {
@@ -303,11 +311,17 @@ const Pickit = {
       }
     }
 
-    if (rval.result === Pickit.Result.UNWANTED && !Town.ignoreType(unit.itemType) && !unit.questItem
-      && ((unit.isInInventory && (me.inTown || !Config.FieldID.Enabled))
-      || (me.gold < Config.LowGold || (me.gold < 500000 && Config.PickitFiles.length === 0)))) {
-      // Gold doesn't take up room, just pick it up
-      if (unit.classid === sdk.items.Gold) return resultObj(Pickit.Result.TRASH);
+    if (rval.result === Pickit.Result.UNWANTED
+      && !Town.ignoreType(unit.itemType)
+      && !unit.questItem
+      && (
+        (unit.isInInventory && (me.inTown || !Config.FieldID.Enabled))
+        || me.gold < Config.LowGold
+        || (me.gold < 500000 && Config.PickitFiles.length === 0)
+        || (me.gold < me.getRepairCost())
+      )) {
+      // Gold doesn't ta=ke up room, just pick it up
+      if (unit.classid === sdk.items.Gold) return resultObj(Pickit.Result.WANTED, "LowGold");
 
       if (!this.invoLocked) {
         const itemValue = unit.getItemCost(sdk.items.cost.ToSell);
@@ -437,11 +451,13 @@ const Pickit = {
         item = copyUnit(item);
 
         if (stats.classid === sdk.items.Gold) {
-          if (!item.getStat(sdk.stats.Gold) || item.getStat(sdk.stats.Gold) < stats.gold) {
+          let _gold = item.gold;
+          if (!_gold || _gold < stats.gold) {
             console.log(
               "ÿc7Picked up " + stats.color
-              + (item.getStat(sdk.stats.Gold) ? (item.getStat(sdk.stats.Gold) - stats.gold) : stats.gold)
+              + (_gold ? (_gold - stats.gold) : stats.gold)
               + " " + stats.name
+              + (keptLine ? " ÿc0(" + keptLine + ")" : "")
             );
             return true;
           }
@@ -457,7 +473,7 @@ const Pickit = {
           case sdk.items.ScrollofIdentify:
             console.log(
               "ÿc7Picked up " + stats.color + stats.name
-              + " ÿc7(" + Town.checkScrolls(stats.classid === sdk.items.ScrollofTownPortal ? "tbk" : "ibk") + "/20)"
+              + " ÿc7(" + me.checkScrolls(stats.classid === sdk.items.ScrollofTownPortal ? "tbk" : "ibk") + "/20)"
             );
             return true;
           }
@@ -706,6 +722,7 @@ const Pickit = {
     let item;
     const _removeList = [];
     const itemList = [];
+    const range = Config.FastPickRange || Config.PickRange;
 
     for (let gid of this.gidList) {
       _removeList.push(gid);
@@ -714,7 +731,7 @@ const Pickit = {
         && (!Town.ignoreType(item.itemType) || (item.itemType >= sdk.items.type.HealingPotion
         && item.itemType <= sdk.items.type.RejuvPotion))
         && item.itemType !== sdk.items.type.Gold
-        && getDistance(me, item) <= Config.PickRange) {
+        && getDistance(me, item) <= range) {
         itemList.push(copyUnit(item));
       }
     }
@@ -735,7 +752,7 @@ const Pickit = {
 
         if (status.result && this.canPick(item)
           && (Storage.Inventory.CanFit(item) || Pickit.essentials.includes(item.itemType))) {
-          this.pickItem(item, status.result, status.line, retry);
+          this.pickItem(item, status.result, status.line + " / (fastpick)", retry);
         }
       }
     }

@@ -5,17 +5,22 @@
 *
 */
 
-function Smith () {
-  Town.doChores();
-  Pather.useWaypoint(sdk.areas.OuterCloister);
-  Precast.doPrecast(true);
+const Smith = new Runnable(
+  function Smith () {
+    Pather.useWaypoint(sdk.areas.OuterCloister);
+    Precast.doPrecast(true);
 
-  if (!Pather.moveToPresetObject(sdk.areas.Barracks, sdk.quest.chest.MalusHolder)) {
-    throw new Error("Failed to move to the Smith");
+    if (!Pather.moveToPresetObject(sdk.areas.Barracks, sdk.quest.chest.MalusHolder)) {
+      throw new Error("Failed to move to the Smith");
+    }
+
+    Attack.kill(getLocaleString(sdk.locale.monsters.TheSmith));
+    Pickit.pickItems();
+
+    return true;
+  },
+  {
+    startArea: sdk.areas.OuterCloister,
+    bossid: getLocaleString(sdk.locale.monsters.TheSmith),
   }
-
-  Attack.kill(getLocaleString(sdk.locale.monsters.TheSmith));
-  Pickit.pickItems();
-
-  return true;
-}
+);

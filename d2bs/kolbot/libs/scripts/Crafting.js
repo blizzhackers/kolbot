@@ -8,116 +8,122 @@
 let info;
 let gameRequest = false;
 
-function Crafting () {
-  info = CraftingSystem.getInfo();
+const Crafting = new Runnable(
+  function Crafting () {
+    info = CraftingSystem.getInfo();
 
-  if (!info || !info.worker) throw new Error("Bad Crafting System config.");
+    if (!info || !info.worker) throw new Error("Bad Crafting System config.");
 
-  me.maxgametime = 0;
-  Town.goToTown(1);
-  Town.doChores();
-  Town.move("stash");
-  updateInfo();
-  pickItems();
+    me.maxgametime = 0;
+    Town.goToTown(1);
+    Town.doChores();
+    Town.move("stash");
+    updateInfo();
+    pickItems();
 
-  addEventListener("copydata",
-    function (mode, msg) {
-      let obj, rval;
+    addEventListener("copydata",
+      function (mode, msg) {
+        let obj, rval;
 
-      if (mode === 0) {
-        try {
-          obj = JSON.parse(msg);
-        } catch (e) {
-          return false;
-        }
+        if (mode === 0) {
+          try {
+            obj = JSON.parse(msg);
+          } catch (e) {
+            return false;
+          }
 
-        if (obj) {
-          switch (obj.name) {
-          case "GetGame":
-            if (info.Collectors.includes(obj.profile)) {
-              print("GetGame: " + obj.profile);
-              sendCopyData(null, obj.profile, 4, me.gamename + "/" + me.gamepassword);
+          if (obj) {
+            switch (obj.name) {
+            case "GetGame":
+              if (info.Collectors.includes(obj.profile)) {
+                print("GetGame: " + obj.profile);
+                sendCopyData(null, obj.profile, 4, me.gamename + "/" + me.gamepassword);
 
-              gameRequest = true;
-            }
-
-            break;
-          case "GetSetInfo":
-            if (info.Collectors.includes(obj.profile)) {
-              print("GetSetInfo: " + obj.profile);
-
-              rval = [];
-
-              for (let i = 0; i < info.Sets.length; i += 1) {
-                rval.push(info.Sets[i].Enabled ? 1 : 0);
+                gameRequest = true;
               }
 
-              print(rval);
+              break;
+            case "GetSetInfo":
+              if (info.Collectors.includes(obj.profile)) {
+                print("GetSetInfo: " + obj.profile);
 
-              sendCopyData(null, obj.profile, 4, JSON.stringify({ name: "SetInfo", value: rval }));
+                rval = [];
+
+                for (let i = 0; i < info.Sets.length; i += 1) {
+                  rval.push(info.Sets[i].Enabled ? 1 : 0);
+                }
+
+                print(rval);
+
+                sendCopyData(null, obj.profile, 4, JSON.stringify({ name: "SetInfo", value: rval }));
+              }
+
+              break;
+            }
+          }
+        }
+
+        return true;
+      });
+
+    for (let i = 0; i < Cubing.recipes.length; i += 1) {
+      Cubing.recipes[i].Level = 0;
+    }
+
+    while (true) {
+      for (let i = 0; i < info.Sets.length; i += 1) {
+        switch (info.Sets[i].Type) {
+        case "crafting":
+          let num = 0;
+          let npcName = getNPCName(info.Sets[i].BaseItems);
+
+          if (npcName) {
+            num = countItems(info.Sets[i].BaseItems, 4);
+
+            if (num < info.Sets[i].SetAmount) {
+              shopStuff(npcName, info.Sets[i].BaseItems, info.Sets[i].SetAmount);
+            }
+          }
+
+          break;
+        case "cubing": // Nothing to do currently
+          break;
+        case "runewords": // Nothing to do currently
+          break;
+        }
+      }
+
+      me.act !== 1 && Town.goToTown(1) && Town.move("stash");
+
+      if (gameRequest) {
+        for (let i = 0; i < 10; i += 1) {
+          if (Misc.getPlayerCount() > 1) {
+            while (Misc.getPlayerCount() > 1) {
+              delay(200);
             }
 
             break;
-          }
-        }
-      }
-
-      return true;
-    });
-
-  for (let i = 0; i < Cubing.recipes.length; i += 1) {
-    Cubing.recipes[i].Level = 0;
-  }
-
-  while (true) {
-    for (let i = 0; i < info.Sets.length; i += 1) {
-      switch (info.Sets[i].Type) {
-      case "crafting":
-        let num = 0;
-        let npcName = getNPCName(info.Sets[i].BaseItems);
-
-        if (npcName) {
-          num = countItems(info.Sets[i].BaseItems, 4);
-
-          if (num < info.Sets[i].SetAmount) {
-            shopStuff(npcName, info.Sets[i].BaseItems, info.Sets[i].SetAmount);
+          } else {
+            break;
           }
         }
 
-        break;
-      case "cubing": // Nothing to do currently
-        break;
-      case "runewords": // Nothing to do currently
-        break;
+        gameRequest = false;
       }
+
+      pickItems();
+      Cubing.update();
+      Runewords.buildLists();
+      Cubing.doCubing();
+      Runewords.makeRunewords();
+      delay(2000);
     }
-
-    me.act !== 1 && Town.goToTown(1) && Town.move("stash");
-
-    if (gameRequest) {
-      for (let i = 0; i < 10; i += 1) {
-        if (Misc.getPlayerCount() > 1) {
-          while (Misc.getPlayerCount() > 1) {
-            delay(200);
-          }
-
-          break;
-        } else {
-          break;
-        }
-      }
-
-      gameRequest = false;
-    }
-
-    pickItems();
-    Cubing.update();
-    Runewords.buildLists();
-    Cubing.doCubing();
-    Runewords.makeRunewords();
-    delay(2000);
+  },
+  {
+    startArea: sdk.areas.RogueEncampment,
+    preAction: null
   }
-}
+);
 
 function getNPCName (idList) {
   for (let i = 0; i < idList.length; i += 1) {
