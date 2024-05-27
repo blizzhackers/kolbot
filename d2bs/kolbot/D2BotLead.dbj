@@ -17,7 +17,6 @@ include("critical.js"); // required
 includeSystemLibs();
 
 const Controls = require("./libs/modules/Control");
-const Worker = require("./libs/modules/Worker");
 
 if (typeof Starter.AdvancedConfig[me.profile] === "object") {
   Object.assign(Starter.Config, Starter.AdvancedConfig[me.profile]);
