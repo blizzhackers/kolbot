@@ -1,5 +1,13 @@
 export {};
 declare global {
+  const NTIPAliasType: Record<string, number>;
+  const NTIPAliasClassID: Record<string, number>;
+  const NTIPAliasClass: Record<string, number>;
+  const NTIPAliasQuality: Record<string, number>;
+  const NTIPAliasFlag: Record<string, number>;
+  const NTIPAliasColor: Record<string, number>;
+  const NTIPAliasStat: Record<string, number>;
+  
   namespace NTIP {
     function addLine(itemString: string, fileName: string): boolean;
     function OpenFile(filepath: string, notify: boolean): boolean;
