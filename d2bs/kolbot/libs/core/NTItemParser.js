@@ -442,12 +442,15 @@ NTIP.ParseLineInt = function (input, info) {
   const parseAliasIn = {
     in: "\[([^\]]+)\]in\(",
     notin: "\[([^\]]+)\]notin\(",
+    /** @private */
+    _regex: new RegExp(/\[([^\]]+)\](in|notin)\(/gi),
     /**
      * @param {string} input 
      * @returns {boolean}
      */
     test: function (input) {
-      return new RegExp(/\[([^\]]+)\](in|notin)\(/gi).test(input);
+      this._regex.lastIndex = 0;
+      return this._regex.test(input);
     },
     /**
      * @param {string} input 
