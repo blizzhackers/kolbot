@@ -184,6 +184,9 @@ function main () {
     addEventListener("itemaction", Pickit.itemEvent);
   }
 
+  // waypoint cacher
+  require("libs/modules/workers/WpWatcher");
+
   // One time maintenance - check cursor, get corpse, clear leftover items, pick items in case anything important was dropped
   if (!Scripts.UserAddon && !Scripts.Test) {
     // main checks

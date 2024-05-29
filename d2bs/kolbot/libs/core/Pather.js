@@ -26,7 +26,7 @@ const NodeAction = {
 
   /**
    * Run all the functions within NodeAction (except for itself)
-   * @param {clearSettings} arg 
+   * @param {clearSettings} arg
    */
   go: function (arg) {
     if (!this.enabled) return;
@@ -39,7 +39,7 @@ const NodeAction = {
 
   /**
    * Kill monsters while pathing
-   * @param {clearSettings} arg 
+   * @param {clearSettings} arg
    * @returns {void}
    */
   killMonsters: function (arg = {}) {
@@ -112,7 +112,7 @@ const PathDebug = {
 
   /**
    * Draw our path on the screen
-   * @param {PathNode[]} path 
+   * @param {PathNode[]} path
    * @returns {void}
    */
   drawPath: function (path) {
@@ -137,9 +137,9 @@ const PathDebug = {
 
   /**
    * Check if a set of coords are a set path
-   * @param {PathNode[]} path 
-   * @param {number} x 
-   * @param {number} y 
+   * @param {PathNode[]} path
+   * @param {number} x
+   * @param {number} y
    * @returns {boolean}
    */
   coordsInPath: function (path, x, y) {
@@ -200,14 +200,36 @@ const Pather = {
   ],
   nextAreas: {},
 
+  /** @param {{ type: string, data: number[] }} msg */
+  cacheListener: function (msg) {
+    if (typeof msg !== "object" || !msg /*null*/) return;
+    if (typeof msg.type === "undefined") return;
+    if (msg.type !== "wp-cache") return;
+    if (typeof msg.data !== "object") return;
+    if (!Array.isArray(msg.data)) return;
+    if (msg.data.length !== Pather.wpAreas.length) return;
+    
+    me.waypoints = msg.data;
+
+    // Waypoint data is set
+    Pather.initialized = true;
+  },
+
   init: function () {
     if (!this.initialized) {
+      addEventListener("scriptmsg", Pather.cacheListener);
       me.classic && (Pather.nonTownWpAreas = this.nonTownWpAreas.filter((wp) => wp < sdk.areas.Harrogath));
-      if (!Config.WaypointMenu) {
+      
+      scriptBroadcast("get-cached-waypoints");
+      delay(500);
+      
+      if (!Config.WaypointMenu && !Pather.initialized) {
         !getWaypoint(1) && this.getWP(me.area);
         me.cancelUIFlags();
         Pather.initialized = true;
       }
+
+      removeEventListener("scriptmsg", Pather.cacheListener);
     }
   },
 
@@ -229,11 +251,11 @@ const Pather = {
    * @property {number} [area]
    * @property {number} [reductionType]
    * @property {number} [coll]
-   * @property {boolean} [returnSpotOnError] 
+   * @property {boolean} [returnSpotOnError]
    *
-   * @param {PathNode} spot 
-   * @param {number} distance 
-   * @param {spotOnDistanceSettings} givenSettings 
+   * @param {PathNode} spot
+   * @param {number} distance
+   * @param {spotOnDistanceSettings} givenSettings
    * @returns {PathNode}
    */
   spotOnDistance: function (spot, distance, givenSettings = {}) {
@@ -245,7 +267,7 @@ const Pather = {
     }, givenSettings);
 
     let nodes = (getPath(spotSettings.area, me.x, me.y, spot.x, spot.y, spotSettings.reductionType, 4) || []);
-    
+
     if (!nodes.length) {
       if (spotSettings.reductionType === 2) {
         // try again with walking reduction
@@ -272,15 +294,15 @@ const Pather = {
    * @property {boolean} [returnSpotOnError]
    * @property {Function} [callback]
    * @property {clearSettings} [clearSettings]
-   * 
+   *
    * @typedef {object} clearSettings
    * @property {boolean} [clearSettings.clearPath]
    * @property {number} [clearSettings.range]
    * @property {number} [clearSettings.specType]
    * @property {Function} [clearSettings.sort]
    *
-   * @param {PathNode | Unit | PresetUnit} target 
-   * @param {pathSettings} givenSettings 
+   * @param {PathNode | Unit | PresetUnit} target
+   * @param {pathSettings} givenSettings
    * @returns {boolean}
    */
   move: function (target, givenSettings = {}) {
@@ -531,10 +553,10 @@ const Pather = {
   },
 
   /**
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} minDist 
-   * @param {pathSettings} givenSettings 
+   * @param {number} x
+   * @param {number} y
+   * @param {number} minDist
+   * @param {pathSettings} givenSettings
    * @returns {boolean}
    */
   moveNear: function (x, y, minDist, givenSettings = {}) {
@@ -554,11 +576,11 @@ const Pather = {
   },
 
   /**
-   * 
-   * @param {number} x 
-   * @param {number} y 
-   * @param {pathSettings} givenSettings 
-   * @returns 
+   *
+   * @param {number} x
+   * @param {number} y
+   * @param {pathSettings} givenSettings
+   * @returns
    */
   moveToEx: function (x, y, givenSettings = {}) {
     return Pather.move({ x: x, y: y }, givenSettings);
@@ -794,7 +816,7 @@ const Pather = {
     }
 
     let monstawall = Game.getMonster("barricade");
-    
+
     if (monstawall) {
       do {
         if (monstawall.hp > 0 && (getDistance(monstawall, x, y) < 4
@@ -987,12 +1009,12 @@ const Pather = {
    * @todo
    * moveTo/NearPresetTile
    */
-  
+
   /**
-   * 
-   * @param {number} area 
-   * @param {number} unitId 
-   * @param {pathSettings} givenSettings 
+   *
+   * @param {number} area
+   * @param {number} unitId
+   * @param {pathSettings} givenSettings
    */
   moveToPresetObject: function (area, unitId, givenSettings = {}) {
     if (area === undefined || unitId === undefined) {
@@ -1020,10 +1042,10 @@ const Pather = {
   },
 
   /**
-   * 
-   * @param {number} area 
-   * @param {number} unitId 
-   * @param {pathSettings} givenSettings 
+   *
+   * @param {number} area
+   * @param {number} unitId
+   * @param {pathSettings} givenSettings
    */
   moveToPresetMonster: function (area, unitId, givenSettings = {}) {
     if (area === undefined || unitId === undefined) {
@@ -1069,10 +1091,10 @@ const Pather = {
 
     for (let currTarget of areas) {
       console.info(null, getAreaName(me.area) + "ÿc8 --> ÿc0" + getAreaName(currTarget));
-      
+
       const area = Misc.poll(() => getArea(me.area));
       if (!area) throw new Error("moveToExit: error in getArea()");
-      
+
       /** @type {Array<Exit>} */
       const exits = (area.exits || []);
       if (!exits.length) return false;
@@ -1140,8 +1162,8 @@ const Pather = {
   },
 
   /**
-   * @param {number} area 
-   * @param {number} exit 
+   * @param {number} area
+   * @param {number} exit
    * @returns {number}
    */
   getDistanceToExit: function (area, exit) {
@@ -1157,8 +1179,8 @@ const Pather = {
   },
 
   /**
-   * @param {number} area 
-   * @param {number} exit 
+   * @param {number} area
+   * @param {number} exit
    * @returns {PathNode | false}
    */
   getExitCoords: function (area, exit) {
@@ -1264,7 +1286,7 @@ const Pather = {
         + (!!targetArea ? " TargetArea: " + getAreaName(targetArea) : "")
       );
     }
-    
+
     return unit.useUnit(targetArea);
   },
 
@@ -1501,7 +1523,7 @@ const Pather = {
         .first();
 
       !!oldPortal && (oldGid = oldPortal.gid);
-      
+
       if (tpTool.use() || Game.getObject("portal")) {
         let tick = getTickCount();
 
@@ -1595,7 +1617,7 @@ const Pather = {
             } else {
               let timeTillNextPortal = Math.max(3, Math.round(2500 - (getTickCount() - this.lastPortalTick)));
               delay(timeTillNextPortal);
-              
+
               continue;
             }
           }
@@ -1677,7 +1699,7 @@ const Pather = {
    * @param {number} range - maximum allowed range from the starting coords
    * @param {number} step - distance between each checked dot on the grid
    * @param {number} coll - collision flag to avoid
-   * @param {number} size 
+   * @param {number} size
    * @returns {[number, number] | false}
    */
   getNearestWalkable: function (x, y, range, step, coll, size) {
@@ -1720,7 +1742,7 @@ const Pather = {
    * @param {number} y - the y coord to check
    * @param {number} coll - collision flag to search for
    * @param {boolean} cacheOnly - use only cached room data
-   * @param {number} size 
+   * @param {number} size
    * @returns {boolean}
    */
   checkSpot: function (x, y, coll, cacheOnly, size) {
@@ -1753,7 +1775,7 @@ const Pather = {
 
   /**
    * @param {number} area - the id of area to get the waypoint in
-   * @param {boolean} [clearPath] 
+   * @param {boolean} [clearPath]
    * @returns {boolean}
    */
   getWP: function (area, clearPath) {
@@ -1857,7 +1879,7 @@ const Pather = {
 
       if (!me.inTown) {
         Precast.doPrecast(false);
-        
+
         if (this.wpAreas.includes(currArea)
           && !getWaypoint(this.wpAreas.indexOf(currArea))) {
           this.getWP(currArea);
@@ -1866,7 +1888,7 @@ const Pather = {
 
       if (me.inTown && this.nextAreas[currArea] !== targetArea
         && this.wpAreas.includes(targetArea) && getWaypoint(this.wpAreas.indexOf(targetArea))) {
-        this.useWaypoint(targetArea, !this.plotCourse_openedWpMenu);
+        this.useWaypoint(targetArea, !Pather.initialized);
         Precast.doPrecast(false);
       } else if (currArea === sdk.areas.StonyField && targetArea === sdk.areas.Tristram) {
         // Stony Field -> Tristram
@@ -2068,8 +2090,11 @@ const Pather = {
 
     !src && (src = me.area);
 
-    if (!this.plotCourse_openedWpMenu && me.inTown && this.nextAreas[me.area] !== dest && Pather.useWaypoint(null)) {
-      Pather.plotCourse_openedWpMenu = true;
+    if (!Pather.initialized
+      && me.inTown
+      && Pather.nextAreas[me.area] !== dest
+      && Pather.useWaypoint(null)) {
+      Pather.initialized = true;
     }
 
     while (toVisitNodes.length > 0) {
@@ -2197,3 +2222,30 @@ Pather.nextAreas[sdk.areas.LutGholein] = sdk.areas.RockyWaste;
 Pather.nextAreas[sdk.areas.KurastDocktown] = sdk.areas.SpiderForest;
 Pather.nextAreas[sdk.areas.PandemoniumFortress] = sdk.areas.OuterSteppes;
 Pather.nextAreas[sdk.areas.Harrogath] = sdk.areas.BloodyFoothills;
+
+/**
+ * Trick to let the OOG script cache the getWaypoint
+ * @param {Object} globalThis
+ * @param {(id: number) => boolean} original
+ */
+(function (globalThis, original) {
+  globalThis._getWaypoint = original;
+
+  globalThis.getWaypoint = function (id, noCache = false) {
+    if (noCache) {
+      return original(id);
+    }
+    // You got it
+    if (me.waypoints[id]) {
+      return true;
+    }
+    // You cant lose a wp, you can gain one. Store the result
+    const result = original(id);
+    if (result !== me.waypoints[id]) {
+      // we've got a mismatch, update the cache
+      me.waypoints[id] = result;
+      scriptBroadcast({ type: "cache-waypoints", data: me.waypoints });
+    }
+    return result;
+  };
+})([].filter.constructor("return this")(), getWaypoint);

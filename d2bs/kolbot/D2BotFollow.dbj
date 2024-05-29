@@ -58,7 +58,7 @@ const locationAction = (function () {
     locations,
     addLocations
   } = require("./libs/oog/Locations");
-  
+
   /** @param {string} leader */
   const joinCheck = function (leader) {
     D2Bot.requestGame(leader);
