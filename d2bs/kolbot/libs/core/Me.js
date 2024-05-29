@@ -1102,6 +1102,31 @@ Object.defineProperties(me, {
 (function () {
   const QuestData = require("./GameData/QuestData");
 
+  const AMOUNT_OF_WAYPOINTS = [
+    sdk.waypoints.Act1,
+    sdk.waypoints.Act2,
+    sdk.waypoints.Act3,
+    sdk.waypoints.Act4,
+    sdk.waypoints.Act5
+  ].flat().length;
+  /** @type {boolean[]} */
+  const _cachedWaypoints = new Array(AMOUNT_OF_WAYPOINTS).fill(false);
+
+  Object.defineProperty(me, "waypoints", {
+    get: function () {
+      return _cachedWaypoints;
+    },
+    /** @param {boolean[]} value */
+    set: function (value) {
+      if (!Array.isArray(value)) return;
+      value.forEach(function (val, index) {
+        if (index < AMOUNT_OF_WAYPOINTS) {
+          _cachedWaypoints[index] = val;
+        }
+      });
+    }
+  });
+  
   /**
    * @param {number} act 
    * @returns {boolean}

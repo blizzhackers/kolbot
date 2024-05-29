@@ -502,6 +502,8 @@ includeIfNotIncluded("core/Me.js");
         delay(500);
         Controls.PopupYes.click();
         delay(500);
+        // delete wp cache if it exists
+        delete Starter.waypointCache[info.charName];
 
         return true;
       } catch (e) {
@@ -1080,7 +1082,25 @@ includeIfNotIncluded("core/Me.js");
       Controls.BottomLeftExit.click();
     },
 
+    waypointCache: {},
+
     scriptMsgEvent: function (msg) {
+      if (typeof msg === "object"
+        && msg.hasOwnProperty("type")
+        && msg.type === "cache-waypoints"
+        && msg.hasOwnProperty("data")
+        && Array.isArray(msg.data)) {
+        
+        // Upsert array so it exists
+        let arr = typeof Starter.waypointCache[me.charname] === "object"
+          ? Starter.waypointCache[me.charname]
+          // 3 elements of nothing
+          : Starter.waypointCache[me.charname] = [undefined, undefined, undefined];
+        arr[me.diff] = msg.data;
+
+        return;
+      }
+
       if (msg && typeof msg !== "string") return;
       switch (msg) {
       case "mule":
@@ -1115,6 +1135,22 @@ includeIfNotIncluded("core/Me.js");
         break;
       case "pingquit":
         Starter.pingQuit = true;
+
+        break;
+
+      case "get-cached-waypoints":
+        if (!me.ingame) {
+          break;
+        }
+
+        if (typeof Starter.waypointCache[me.charname] === "object"
+          && Starter.waypointCache[me.charname].length === 3) {
+          let arr = Starter.waypointCache[me.charname];
+          const cache = arr[me.diff];
+          if (cache) {
+            scriptBroadcast({ type: "wp-cache", data: cache });
+          }
+        }
 
         break;
       }

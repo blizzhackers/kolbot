@@ -679,6 +679,7 @@ declare global {
      * @description max gold capacity (cLvl * 10000)
      */
     readonly maxgold: number;
+    waypoints: boolean[];
 
     // d2bs functions
     overhead(msg: string): void;
@@ -782,7 +783,7 @@ declare global {
   function getThreadPriority(): number
   function getUIFlag(flag: number): boolean
   function getTradeInfo(mode: 0 | 1 | 2): boolean
-  function getWaypoint(id: number): boolean
+  function getWaypoint(id: number, noCache?: boolean): boolean
 
   class Script {
     running: boolean;
