@@ -8,7 +8,61 @@
 const CollMap = new function () {
   this.rooms = [];
   this.maps = [];
+  /** @type {Line[]} */
+  this.hooks = [];
+  this.colors = {
+    green: 0x84,
+    red: 0x0a,
+    black: 0x00,
+    white: 0xff,
+    purple: 0x9b,
+    blue: 0x97,
+  };
 
+  /**
+   * @param {Room} room 
+   * @param {('green' | 'red' | 'black' | 'white' | 'purple' | 'blue' | number)} [color='green'] 
+   * @param {boolean} [update=false]
+   * @returns {void}
+   */
+  this.drawRoom = function (room, color = "green", update = false) {
+    let idx = this.hooks.findIndex(h => h.room.x === room.x && h.room.y === room.y);
+    if (idx >= 0) {
+      if (!update) return;
+      this.hooks[idx].lines.forEach(l => l.remove());
+      this.hooks.splice(idx, 1);
+    }
+    const lineColor = typeof color === "string"
+      ? (color in this.colors) ? this.colors[color] : this.colors.green
+      : color;
+    let lines = [
+      new Line(room.x * 5, room.y * 5, room.x * 5 + room.xsize, room.y * 5, lineColor, true),
+      new Line(room.x * 5 + room.xsize, room.y * 5, room.x * 5 + room.xsize, room.y * 5 + room.ysize, lineColor, true),
+      new Line(room.x * 5 + room.xsize, room.y * 5 + room.ysize, room.x * 5, room.y * 5 + room.ysize, lineColor, true),
+      new Line(room.x * 5, room.y * 5 + room.ysize, room.x * 5, room.y * 5, lineColor, true),
+    ];
+    this.hooks.push({ room: room, lines: lines });
+  };
+
+  /** @param {Room} room */
+  this.removeHookForRoom = function (room) {
+    let index = this.hooks.findIndex(h => h.room.x === room.x && h.room.y === room.y);
+    if (index !== -1) {
+      this.hooks[index].lines.forEach(l => l.remove());
+      this.hooks.splice(index, 1);
+    }
+  };
+
+  this.removeHooks = function () {
+    this.hooks.forEach(hook => hook.lines.forEach(l => l.remove()));
+    this.hooks = [];
+  };
+
+  /**
+   * @param {number} x 
+   * @param {number} y 
+   * @returns {boolean}
+   */
   this.getNearbyRooms = function (x, y) {
     let room = getRoom(x, y);
     if (!room) return false;
@@ -26,6 +80,11 @@ const CollMap = new function () {
     return true;
   };
 
+  /**
+   * @param {number | Room} x 
+   * @param {number} [y] 
+   * @returns {boolean}
+   */
   this.addRoom = function (x, y) {
     let room = x instanceof Room ? x : getRoom(x, y);
 
@@ -46,6 +105,12 @@ const CollMap = new function () {
     return false;
   };
 
+  /**
+   * @param {number} x 
+   * @param {number} y 
+   * @param {boolean} [cacheOnly]
+   * @returns {boolean}
+   */
   this.getColl = function (x, y, cacheOnly) {
     let index = this.getRoomIndex(x, y, cacheOnly);
 
@@ -63,6 +128,12 @@ const CollMap = new function () {
     return 5;
   };
 
+  /**
+   * @param {number} x 
+   * @param {number} y 
+   * @param {boolean} [cacheOnly]
+   * @returns {number | undefined}
+   */
   this.getRoomIndex = function (x, y, cacheOnly) {
     this.rooms.length > 25 && this.reset();
 
@@ -81,6 +152,12 @@ const CollMap = new function () {
     return undefined;
   };
 
+  /**
+   * @param {number} x 
+   * @param {number} y 
+   * @param {Room} room
+   * @returns {boolean}
+   */
   this.coordsInRoom = function (x, y, room) {
     if (room && x >= room.x * 5 && x < room.x * 5 + room.xsize && y >= room.y * 5 && y < room.y * 5 + room.ysize) {
       return true;
@@ -94,8 +171,15 @@ const CollMap = new function () {
     this.maps = [];
   };
 
-  // Check collision between unitA and unitB. true = collision present, false = collision not present
-  // If checking for blocking collisions (0x1, 0x4), true means blocked, false means not blocked
+  /**
+   * Check collision between unitA and unitB. true = collision present, false = collision not present
+   * If checking for blocking collisions (0x1, 0x4), true means blocked, false means not blocked
+   * @param {Unit | PathNode} unitA 
+   * @param {Unit | PathNode} unitB 
+   * @param {number} coll 
+   * @param {number} thickness 
+   * @returns {boolean}
+   */
   this.checkColl = function (unitA, unitB, coll, thickness) {
     thickness === undefined && (thickness = 1);
 
@@ -120,13 +204,18 @@ const CollMap = new function () {
     return false;
   };
 
+  /**
+   * @param {Room} room 
+   * @returns {PathNode}
+   */
   this.getTelePoint = function (room) {
     // returns {x, y, distance} of a valid point with lowest distance from room center
     // distance is from room center, handy for keeping bot from trying to teleport on walls
 
     if (!room) throw new Error("Invalid room passed to getTelePoint");
 
-    let roomx = room.x * 5, roomy = room.y * 5;
+    let roomx = room.x * 5;
+    let roomy = room.y * 5;
 
     if (getCollision(room.area, roomx, roomy) & 1) {
       let collision = room.getCollision(), validTiles = [];
@@ -156,6 +245,16 @@ const CollMap = new function () {
     return { x: roomx, y: roomy, distance: 0 };
   };
 
+  /**
+   * @param {number} cX 
+   * @param {number} xmin 
+   * @param {number} xmax 
+   * @param {number} cY 
+   * @param {number} ymin 
+   * @param {number} ymax 
+   * @param {number} factor 
+   * @returns {PathNode}
+   */
   this.getRandCoordinate = function (cX, xmin, xmax, cY, ymin, ymax, factor = 1) {
     // returns randomized {x, y} object with valid coordinates
     let coordX, coordY;
@@ -182,6 +281,6 @@ const CollMap = new function () {
     } while (getCollision(me.area, coordX, coordY) & 1);
 
     // console.log("Move " + retry + " from (" + cX + ", " + cY + ") to (" + coordX + ", " + coordY + ")");
-    return { x: coordX, y: coordY };
+    return new PathNode(coordX, coordY);
   };
 };
