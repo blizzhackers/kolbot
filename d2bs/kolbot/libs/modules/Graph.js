@@ -21,6 +21,7 @@
     this.walkableX = this.centerX;
     this.walkableY = this.centerY;
     this.area = room.level;
+    // Should the step be lowered?
     let adjusted = Pather.getNearestWalkable(this.centerX, this.centerY, 20, 10);
     if (!adjusted) {
       throw new Error("Vertex is not walkable");
@@ -28,79 +29,108 @@
     this.walkableX = adjusted[0];
     this.walkableY = adjusted[1];
 
+    /** @type {Record<any, any>} */
     this.cache = {};
-    this.clearCache = function() {
-      this.cache = {};
-    };
-    
-    this.walkablePath = function() {
-      if (this.cache.walkablePath) {
-        return this.cache.walkablePath;
-      }
-      let path = getPath(this.area, me.x, me.y, this.walkableX, this.walkableY, 0, Pather.walkDistance);
-      this.cache.walkablePath = path;
-      return path;
-    };
-
-    this.walkablePathDistance = function() {
-      if (this.cache.walkablePathDistance) {
-        return this.cache.walkablePathDistance;
-      }
-      let path = this.walkablePath();
-      if (!path.length) {
-        return Infinity;
-      }
-      let distance = path.reduce(function (acc, v, i, arr) {
-        let prev = i ? arr[i - 1] : v;
-        return acc + Math.sqrt((prev.x - v.x) * (prev.x - v.x) + (prev.y - v.y) * (prev.y - v.y));
-      }, 0);
-      this.cache.walkablePathDistance = distance;
-      return distance;
-    };
-
-    /**
-     * @this {Vertex}
-     * @param {Vertex} other 
-     * @returns {Array<{x: number, y: number}>}
-     */
-    this.walkablePathTo = function(other) {
-      const { area, walkableX, walkableY } = this;
-      if (this.cache.walkablePathTo && this.cache.walkablePathTo[other.id]) {
-        return this.cache.walkablePathTo[other.id];
-      }
-      let path = getPath(area, walkableX, walkableY, other.walkableX, other.walkableY, 0, Pather.walkDistance);
-      if (!this.cache.walkablePathTo) {
-        this.cache.walkablePathTo = {};
-      }
-      this.cache.walkablePathTo[other.id] = path;
-      return path;
-    };
-
-    /**
-     * @param {Vertex} other 
-     * @returns {number}
-     */
-    this.walkablePathDistanceTo = function(other) {
-      if (this.cache.walkablePathDistanceTo && this.cache.walkablePathDistanceTo[other.id]) {
-        return this.cache.walkablePathDistanceTo[other.id];
-      }
-      let path = this.walkablePathTo(other);
-      if (!path.length) {
-        return Infinity;
-      }
-      let distance = path.reduce(function (acc, v, i, arr) {
-        let prev = i ? arr[i - 1] : v;
-        return acc + Math.sqrt((prev.x - v.x) * (prev.x - v.x) + (prev.y - v.y) * (prev.y - v.y));
-      }, 0);
-      if (!this.cache.walkablePathDistanceTo) {
-        this.cache.walkablePathDistanceTo = {};
-      }
-      this.cache.walkablePathDistanceTo[other.id] = distance;
-      return distance;
-    };
   }
 
+  /** @static */
   Vertex._id = 0;
+
+  /** @this {Vertex} */
+  Vertex.prototype.clearCache = function() {
+    this.cache = {};
+  };
+
+  /**
+   * @param {"walk" | "teleport"} mode 
+   * @returns {PathNode[]}
+   */
+  Vertex.prototype.path = function(mode = "walk") {
+    const key = mode + "Path";
+    if (this.cache[key]) {
+      return this.cache[key];
+    }
+    const x = mode === "walk" ? this.walkableX : this.centerX;
+    const y = mode === "walk" ? this.walkableY : this.centerY;
+    const rType = mode === "walk" ? 0 : 1;
+    const nDist = mode === "walk" ? Pather.walkDistance : Pather.teleDistance;
+    let path = getPath(this.area, me.x, me.y, x, y, rType, nDist);
+    this.cache[key] = path;
+    return path;
+  };
+
+  /**
+   * @param {"walk" | "teleport"} mode 
+   * @returns {number}
+   */
+  Vertex.prototype.pathDistance = function(mode = "walk") {
+    const key = mode + "PathDistance";
+    if (this.cache[key]) {
+      return this.cache[key];
+    }
+    let path = this.path(mode);
+    if (!path.length) {
+      return Infinity;
+    }
+    let distance = path.reduce(function (acc, v, i, arr) {
+      let prev = i ? arr[i - 1] : v;
+      return acc + Math.sqrt((prev.x - v.x) * (prev.x - v.x) + (prev.y - v.y) * (prev.y - v.y));
+    }, 0);
+    this.cache[key] = distance;
+    return distance;
+  };
+
+  /**
+   * @this {Vertex}
+   * @param {Vertex} other 
+   * @param {"walk" | "teleport"} mode
+   * @returns {Array<{x: number, y: number}>}
+   */
+  Vertex.prototype.pathTo = function(other, mode = "walk") {
+    const key = mode + "PathTo";
+    if (this.cache[key] && this.cache[key][other.id]) {
+      return this.cache[key][other.id];
+    }
+    const area = this.area;
+    const rType = mode === "walk" ? 0 : 1;
+    const nDist = mode === "walk" ? Pather.walkDistance : Pather.teleDistance;
+    const x = mode === "walk" ? this.walkableX : this.centerX;
+    const y = mode === "walk" ? this.walkableY : this.centerY;
+    const otherX = mode === "walk" ? other.walkableX : other.centerX;
+    const otherY = mode === "walk" ? other.walkableY : other.centerY;
+
+    let path = getPath(area, x, y, otherX, otherY, rType, nDist);
+    if (!this.cache[key]) {
+      this.cache[key] = {};
+    }
+    this.cache[key][other.id] = path;
+    return path;
+  };
+
+  /**
+   * @param {Vertex} other 
+   * @param {"walk" | "teleport"} mode
+   * @returns {number}
+   */
+  Vertex.prototype.pathDistanceTo = function(other, mode = "walk") {
+    const key = mode + "PathDistanceTo";
+    if (this.cache[key] && this.cache[key][other.id]) {
+      return this.cache[key][other.id];
+    }
+    let path = this.pathTo(other, mode);
+    if (!path.length) {
+      return Infinity;
+    }
+    let distance = path.reduce(function (acc, v, i, arr) {
+      let prev = i ? arr[i - 1] : v;
+      return acc + Math.sqrt((prev.x - v.x) * (prev.x - v.x) + (prev.y - v.y) * (prev.y - v.y));
+    }, 0);
+    if (!this.cache[key]) {
+      this.cache[key] = {};
+    }
+    this.cache[key][other.id] = distance;
+    return distance;
+  };
 
   /**
    * @description Graph class to handle vertices and search algorithms
@@ -180,8 +210,9 @@
   /**
    * @param {Graph} graph 
    * @param {(vertex: Vertex) => any} explore 
+   * @param {"walk" | "teleport"} mode
    */
-  Graph.nearestNeighbourSearch = function(graph, explore) {
+  Graph.nearestNeighbourSearch = function(graph, explore, mode = "walk") {
     let currentVertex = graph.vertices.filter(filterSeen).first();
     while (currentVertex) {
       CollMap.drawRoom(graph.roomForVertex(currentVertex), "green", true);
@@ -193,11 +224,18 @@
       let nearbies = graph.nearbyVertices(currentVertex)
         .filter(filterSeen)
         .sort(function (a, b) {
-          // First sort by number of neighbors (ascending)
-          let diff = graph.nearbyVertices(a).length - graph.nearbyVertices(b).length;
-          if (diff !== 0) return diff;
+          let distanceToA = currentVertex.pathDistanceTo(a, mode);
+          let distanceToB = currentVertex.pathDistanceTo(b, mode);
+          let distDiff = Math.abs(distanceToA - distanceToB);
+          
+          // If the difference is less than 5% of the distance to a, sort by number of neighbors
+          if (distDiff / distanceToA < 0.05) {
+            // First sort by number of neighbors (ascending)
+            let diff = graph.nearbyVertices(a).length - graph.nearbyVertices(b).length;
+            if (diff !== 0) return diff;
+          }
           // If number of neighbors is the same, sort by walkable path distance (ascending)
-          return currentVertex.walkablePathDistanceTo(a) - currentVertex.walkablePathDistanceTo(b);
+          return distanceToA - distanceToB;
         });
       nearbies.forEach(function (n) {
         CollMap.drawRoom(graph.roomForVertex(n), "white", true);
@@ -207,7 +245,7 @@
         graph.vertices
           .filter(filterSeen)
           .sort(function (a, b) {
-            return a.walkablePathDistance() - b.walkablePathDistance();
+            return a.pathDistance(mode) - b.pathDistance(mode);
           })
           .first();
       for (let vertice of graph.vertices) {
@@ -225,8 +263,9 @@
    * exploreFunction is a function called for every explored vertex in the graph that takes a vertex as parameter
    * @param {Graph} graph 
    * @param {(vertex: Vertex) => any} exploreFunction 
+   * @param {"walk" | "teleport"} mode
    */
-  Graph.depthFirstSearch = function(graph, exploreFunction) {
+  Graph.depthFirstSearch = function(graph, exploreFunction, mode = "walk") {
     /** @type {Vertex[]} */
     let stack = [];
     let startVertex = graph.vertices.first();
@@ -244,11 +283,11 @@
         stack.push(neighbors[i]);
         CollMap.drawRoom(neighbors[i], "purple", true);
       }
-      console.time("sort");
+      // console.time("sort");
       stack.sort(function (a, b) {
-        return b.walkablePathDistance() - a.walkablePathDistance();
+        return b.pathDistance(mode) - a.pathDistance(mode);
       });
-      console.timeEnd("sort");
+      // console.timeEnd("sort");
       // clear cache for all vertices
       for (let vertice of graph.vertices) {
         vertice.clearCache();
