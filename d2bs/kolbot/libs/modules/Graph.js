@@ -41,6 +41,21 @@
     this.cache = {};
   };
 
+  Vertex.prototype.markAsSeen = function() {
+    this.seen = true;
+  };
+
+  /**
+   * @param {number} x 
+   * @param {number} y 
+   * @returns {boolean}
+   */
+  Vertex.prototype.coordsInRoom = function(x, y) {
+    return (x >= this.x * 5 && x < this.x * 5 + this.xsize
+      && y >= this.y * 5 && y < this.y * 5 + this.ysize
+    );
+  };
+
   /**
    * @param {"walk" | "teleport"} mode 
    * @returns {PathNode[]}
@@ -91,11 +106,12 @@
     if (this.cache[key] && this.cache[key][other.id]) {
       return this.cache[key][other.id];
     }
+    const inRoom = CollMap.coordsInRoom(me.x, me.y, this);
     const area = this.area;
     const rType = mode === "walk" ? 0 : 1;
     const nDist = mode === "walk" ? Pather.walkDistance : Pather.teleDistance;
-    const x = mode === "walk" ? this.walkableX : this.centerX;
-    const y = mode === "walk" ? this.walkableY : this.centerY;
+    const x = inRoom ? me.x : mode === "walk" ? this.walkableX : this.centerX;
+    const y = inRoom ? me.y : mode === "walk" ? this.walkableY : this.centerY;
     const otherX = mode === "walk" ? other.walkableX : other.centerX;
     const otherY = mode === "walk" ? other.walkableY : other.centerY;
 
@@ -215,12 +231,23 @@
   Graph.nearestNeighbourSearch = function(graph, explore, mode = "walk") {
     let currentVertex = graph.vertices.filter(filterSeen).first();
     while (currentVertex) {
-      CollMap.drawRoom(graph.roomForVertex(currentVertex), "green", true);
+      CollMap.drawRoom(currentVertex, "green", true);
 
       explore(currentVertex);
-      // currentVertex.seen = true; // not working when it comes from neabies array, it should be referenced from graph.vertices array
-      graph.vertices.find(function (v) { return v === currentVertex; }).seen = true;
-      CollMap.drawRoom(graph.roomForVertex(currentVertex), "purple", true);
+      currentVertex.markAsSeen();
+      CollMap.drawRoom(currentVertex, "purple", true);
+
+      // our explore method could move us to a different room, so we need to get the vertex again
+      if (!currentVertex.coordsInRoom(me.x, me.y)) {
+        console.debug("Moved to a different room, getting new vertex");
+        let _newVertex = graph.vertexForRoom(getRoom(me.x, me.y));
+        if (_newVertex) {
+          currentVertex = _newVertex;
+        } else {
+          console.warn("Could not find vertex for my room?");
+        }
+      }
+      
       let nearbies = graph.nearbyVertices(currentVertex)
         .filter(filterSeen)
         .sort(function (a, b) {
@@ -230,7 +257,7 @@
           
           // If the difference is less than 5% of the distance to a, sort by number of neighbors
           if (distDiff / distanceToA < 0.05) {
-            // First sort by number of neighbors (ascending)
+            // sort by number of neighbors (ascending)
             let diff = graph.nearbyVertices(a).length - graph.nearbyVertices(b).length;
             if (diff !== 0) return diff;
           }
@@ -245,7 +272,19 @@
         graph.vertices
           .filter(filterSeen)
           .sort(function (a, b) {
-            return a.pathDistance(mode) - b.pathDistance(mode);
+            let aDist = a.pathDistance(mode);
+            let bDist = b.pathDistance(mode);
+            let distDiff = Math.abs(aDist - bDist);
+
+            // If the difference is less than 5% of the distance to a, sort by number of neighbors
+            if (distDiff / aDist < 0.05) {
+              // sort by number of neighbors (ascending)
+              let diff = graph.nearbyVertices(a).length - graph.nearbyVertices(b).length;
+              if (diff !== 0) return diff;
+            }
+            
+            // return a.pathDistance(mode) - b.pathDistance(mode);
+            return aDist - bDist;
           })
           .first();
       for (let vertice of graph.vertices) {
