@@ -455,9 +455,10 @@ const Misc = (function () {
         if (unit) {
           do {
             if (unit.name && unit.mode === sdk.objects.mode.Inactive
-              && !seenGids.has(unit.gid) && seenGids.add(unit.gid)
+              && !seenGids.has(unit.gid)
               && getDistance(me.x, me.y, unit.x, unit.y) <= range
               && containers.includes(unit.name.toLowerCase())) {
+              seenGids.add(unit.gid);
               unitList.push(copyUnit(unit));
             }
           } while (unit.getNext());
@@ -482,7 +483,7 @@ const Misc = (function () {
 
         if (startPos.distance > 5) {
           // rebuid chest list every 5 chests in case we've moved and add any new chests to our list
-          let _unitList = buildChestList(range / 2);
+          let _unitList = buildChestList(Math.round(range / 2));
           console.debug("Rescanning for chests: " + _unitList.length + " chests found.");
           unitList = unitList.concat(_unitList);
         }
