@@ -18,18 +18,12 @@ function Rusher () {
   load("threads/rushthread.js");
   delay(500);
 
-  const {
-    AutoRush,
-    RushModes,
-    RushConfig,
-  } = require("../systems/autorush/RushConfig");
-
-  const commands = [];
-  let command = "";
-  let master = "";
-  let commandSplit0;
-  let done = false;
-
+  let i, command, master, commandSplit0;
+  let commands = [];
+  let sequence = [
+    "cain", "andariel", "radament", "cube", "amulet", "staff", "summoner", "duriel", "lamesen",
+    "travincal", "mephisto", "izual", "diablo", "shenk", "anya", "ancients", "baal", "givewps"
+  ];
   const RushThread = {
     /** @type {Script} */
     _thread: null,
@@ -124,7 +118,6 @@ function Rusher () {
         break;
       case "quit":
         if (nick === master) {
-          done = true;
           say("bye ~");
           scriptBroadcast("quit");
         } else {
@@ -154,46 +147,62 @@ function Rusher () {
 
   addEventListener("chatmsg", chatEvent);
 
-  while (Misc.getPartyCount() < Math.min(8, RushConfig[me.profile].config.WaitPlayerCount)) {
+  while (Misc.getPartyCount() < Math.min(8, Config.Rusher.WaitPlayerCount)) {
     me.overhead("Waiting for players to join");
     delay(500);
   }
 
   // Skip to a higher act if all party members are there
-  let partyAct = getPartyAct();
-  if (partyAct > 1) {
-    say("Party is in act " + partyAct + ", skipping to act " + partyAct);
-    RushThread.send("skiptoact " + partyAct);
+  switch (getPartyAct()) {
+  case 2:
+    say("Party is in act 2, starting from act 2");
+    RushThread.send("skiptoact 2");
+
+    break;
+  case 3:
+    say("Party is in act 3, starting from act 3");
+    RushThread.send("skiptoact 3");
+
+    break;
+  case 4:
+    say("Party is in act 4, starting from act 4");
+    RushThread.send("skiptoact 4");
+
+    break;
+  case 5:
+    say("Party is in act 5, starting from act 5");
+    RushThread.send("skiptoact 5");
+
+    break;
   }
 
   // get info from master
-  if (RushConfig[me.profile].type === RushModes.rusher) {
-    let tick = getTickCount();
-    let askAgain = 1;
-    say("questinfo");
-    while (!command) {
-      // wait up to 3 minutes
-      if (getTickCount() - tick > Time.minutes(3)) {
-        break;
-      }
-
-      if (getTickCount() - tick > Time.minutes(askAgain)) {
-        say("questinfo");
-        askAgain++;
-      }
+  let tick = getTickCount();
+  let askAgain = 1;
+  say("questinfo");
+  while (!command) {
+    // wait up to 3 minutes
+    if (getTickCount() - tick > Time.minutes(3)) {
+      break;
     }
-    if (command) {
-      commandSplit0 = command.toLowerCase().split(" ")[1];
-      if (!!commandSplit0 && AutoRush.sequences.includes(commandSplit0)) {
-        RushThread.send(command.toLowerCase());
-      }
+
+    if (getTickCount() - tick > Time.minutes(askAgain)) {
+      say("questinfo");
+      askAgain++;
     }
   }
-  
+
+  if (command) {
+    commandSplit0 = command.split(" ")[1];
+    if (!!commandSplit0 && sequence.some(el => el.toLowerCase() === commandSplit0)) {
+      RushThread.send(command.toLowerCase());
+    }
+  }
+
   delay(200);
   RushThread.send("go");
 
-  while (!done) {
+  while (true) {
     if (commands.length > 0) {
       command = commands.shift();
 
@@ -215,23 +224,25 @@ function Rusher () {
           }
 
           if (commandSplit0.toLowerCase() === "do") {
-            let script = command.split(" ")[1];
-            if (!script || !AutoRush.sequences.some(el => el.match(script, "gi"))) {
-              say("Invalid sequence");
-              break;
+            for (i = 0; i < sequence.length; i += 1) {
+              if (command.split(" ")[1] && sequence[i].match(command.split(" ")[1], "gi")) {
+                RushThread.reload();
+                RushThread.send(command.split(" ")[1]);
+
+                break;
+              }
             }
-            RushThread.reload();
-            RushThread.send(script);
+
+            i === sequence.length && say("Invalid sequence");
           } else if (commandSplit0.toLowerCase() === "clear") {
-            let area = command.split(" ")[1];
-            if (!area) break;
-            let areaId = parseInt(area, 10);
-            if (isNaN(areaId) || areaId < 1 || areaId > 132) {
+            if (!isNaN(parseInt(command.split(" ")[1], 10))
+              && parseInt(command.split(" ")[1], 10) > 0
+              && parseInt(command.split(" ")[1], 10) <= 132) {
+              RushThread.reload();
+              RushThread.send(command);
+            } else {
               say("Invalid area");
-              break;
             }
-            RushThread.reload();
-            RushThread.send(command);
           }
         }
 
