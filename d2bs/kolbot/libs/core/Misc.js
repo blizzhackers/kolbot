@@ -484,7 +484,7 @@ const Misc = (function () {
         if (startPos.distance > 5) {
           // rebuid chest list every 5 chests in case we've moved and add any new chests to our list
           let _unitList = buildChestList(Math.round(range / 2));
-          console.debug("Rescanning for chests: " + _unitList.length + " chests found.");
+          // console.debug("Rescanning for chests: " + _unitList.length + " chests found.");
           unitList = unitList.concat(_unitList);
         }
       }
@@ -763,6 +763,7 @@ const Misc = (function () {
         
         // Build a list of nearby shrines
         do {
+          if (!shrine.name) continue;
           let _name = shrine.name.toLowerCase();
           if ((_name.includes("shrine") && ShrineData.has(shrine.objtype) || (_name.includes("well")))
             && shrine.mode === sdk.objects.mode.Inactive
