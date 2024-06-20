@@ -2235,4 +2235,36 @@ const Attack = {
     }
     return Attack.Result.NOOP;
   },
+
+  /**
+   * @param {Monster} unit 
+   * @returns {boolean}
+   */
+  doChargeCast: function (unit) {
+    const { skill, spectype, classids } = Config.ChargeCast;
+    const cRange = Skill.getRange(skill);
+    const cState = Skill.getState(skill);
+
+    if (classids.length) {
+      /**
+       * @param {string | number} id 
+       * @returns {boolean}
+       */
+      const validId = function (id) {
+        return typeof id === "number"
+          ? unit.classid === id
+          : unit.name.toLowerCase().includes(id);
+      };
+      if (!classids.some(validId)) {
+        return false;
+      }
+    }
+
+    if ((!spectype || (unit.spectype & spectype))
+      && (!cState || !unit.getState(cState))
+      && (unit.distance < cRange || !checkCollision(me, unit, sdk.collision.LineOfSight))) {
+      return Skill.castCharges(skill, unit);
+    }
+    return false;
+  },
 };

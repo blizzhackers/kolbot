@@ -5,6 +5,7 @@
 *
 */
 
+/** @implements {ClassAttack} */
 const ClassAttack = {
   bowCheck: false,
   lightFuryTick: 0,
@@ -56,6 +57,11 @@ const ClassAttack = {
     return skills;
   },
 
+  /**
+   * @param {Monster | Player} unit 
+   * @param {boolean} [preattack] 
+   * @returns {AttackResult}
+   */
   doAttack: function (unit, preattack) {
     if (!unit) return Attack.Result.SUCCESS;
     Config.TeleSwitch && me.switchToPrimary();
@@ -74,13 +80,7 @@ const ClassAttack = {
     }
 
     if (Config.ChargeCast.skill > -1) {
-      let cRange = Skill.getRange(Config.ChargeCast.skill);
-      let cState = Skill.getState(Config.ChargeCast.skill);
-      if ((!Config.ChargeCast.spectype || (unit.spectype & Config.ChargeCast.spectype))
-        && (!cState || !unit.getState(cState))
-        && (unit.distance < cRange || !checkCollision(me, unit, sdk.collision.LineOfSight))) {
-        Skill.castCharges(Config.ChargeCast.skill, unit);
-      }
+      Attack.doChargeCast(unit);
     }
 
     if (preattack) {
@@ -172,7 +172,12 @@ const ClassAttack = {
     this.lightFuryTick = 0;
   },
 
-  // Returns: 0 - fail, 1 - success, 2 - no valid attack skills
+  /**
+   * @param {Monster | Player} unit 
+   * @param {number} timedSkill 
+   * @param {number} untimedSkill 
+   * @returns {AttackResult} 0 - fail, 1 - success, 2 - no valid attack skills
+   */
   doCast: function (unit, timedSkill = -1, untimedSkill = -1) {
     // No valid skills can be found
     if (timedSkill < 0 && untimedSkill < 0) return Attack.Result.CANTATTACK;

@@ -33,13 +33,7 @@ const ClassAttack = {
     }
 
     if (Config.ChargeCast.skill > -1) {
-      let cRange = Skill.getRange(Config.ChargeCast.skill);
-      let cState = Skill.getState(Config.ChargeCast.skill);
-      if ((!Config.ChargeCast.spectype || (unit.spectype & Config.ChargeCast.spectype))
-        && (!cState || !unit.getState(cState))
-        && (unit.distance < cRange || !checkCollision(me, unit, sdk.collision.LineOfSight))) {
-        Skill.castCharges(Config.ChargeCast.skill, unit);
-      }
+      Attack.doChargeCast(unit);
     }
 
     if (preattack) {

@@ -92,9 +92,10 @@ let Config = {
       }
     }
 
+    // Always set the orginal say function
+    global._say = global.say;
     if (Config.Silence && !Config.LocalChat.Enabled) {
       // Override the say function with print, so it just gets printed to console
-      global._say = global.say;
       global.say = (what) => console.log("Tryed to say: " + what);
     }
 
@@ -367,6 +368,8 @@ let Config = {
   ChargeCast: {
     skill: -1,
     spectype: 0x7,
+    /** @type {(number|string)[]} */
+    classids: [],
   },
 
   // Amazon specific
