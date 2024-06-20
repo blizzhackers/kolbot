@@ -2229,7 +2229,12 @@ const Attack = {
         }
       }
 
-      Skill.cast(skill, Skill.getHand(skill), unit, null, null, slot);
+      // Check if we need to charge cast - TODO: better check for charge vs not
+      if (Skill.charges.find(c => c.skill === skill)) {
+        Skill.castCharges(skill, unit);
+      } else {
+        Skill.cast(skill, Skill.getHand(skill), unit, null, null, slot);
+      }
 
       return Attack.Result.SUCCESS;
     }
