@@ -1358,7 +1358,17 @@ const Time = {
     return (minutes * 60000);
   },
   format: function (ms = 0) {
-    return (new Date(ms).toISOString().slice(11, -5));
+    const hours = Math.floor(ms / 3600000);
+    const minutes = Math.floor((ms % 3600000) / 60000);
+    const seconds = Math.floor((ms % 60000) / 1000);
+
+    /** @param {number} num */
+    const pad = function (num) {
+      return (num < 10 ? "0" + num : num);
+    };
+
+    return pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
+    // return (new Date(ms).toISOString().slice(11, -5));
   },
   toSeconds: function (ms = 0) {
     return (ms / 1000);
