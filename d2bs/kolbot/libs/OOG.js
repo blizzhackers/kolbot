@@ -340,7 +340,7 @@ includeIfNotIncluded("core/Me.js");
               let nameCheck = check.getText();
 
               if (String.isEqual(firstCheck[1], nameCheck[1])) {
-                return false;
+                break;
               }
             }
           }
