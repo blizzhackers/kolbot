@@ -459,6 +459,35 @@
       return true;
     },
 
+    /**
+     * Check whether this skills is even usable on the target
+     * @param {number} skillId 
+     * @param {Monster} unit 
+     */
+    usableOn: function (skillId, unit) {
+      if (!unit || !unit.type) return false;
+      
+      switch (skillId) {
+      case sdk.skills.SlowMissiles:
+        return !unit.isPrimeEvil;
+      case sdk.skills.Confuse:
+      case sdk.skills.Attract:
+        return unit.scareable;
+      case sdk.skills.DimVision:
+        if (unit.isSpecial) return false;
+        if ([
+          sdk.monsters.OblivionKnight1,
+          sdk.monsters.OblivionKnight2,
+          sdk.monsters.OblivionKnight3
+        ].includes(unit.classid)) {
+          return false;
+        }
+        return true;
+      default:
+        return true;
+      }
+    },
+
     // Put a skill on desired slot
     setSkill: function (skillId, hand, item) {
       const checkHand = (hand === sdk.skills.hand.Right
@@ -684,6 +713,10 @@
      */
     castCharges: function (skillId, unit) {
       if (!Skill.charges.length) return false;
+      // TODO: better validity check - for now preventing spamming slow missiles on bosses where it does't work
+      if (unit && unit.hasOwnProperty("classid") && !Skill.usableOn(skillId, unit)) {
+        return false;
+      }
       const charge = Skill.charges
         .filter(function (c) {
           return c.skill === skillId && c.charges > 0;
