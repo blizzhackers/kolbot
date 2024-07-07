@@ -824,7 +824,27 @@ const Attack = {
         }
         // me.overhead("attacking " + target.name + " spectype " + target.spectype + " id " + target.classid);
 
-        let result = ClassAttack.doAttack(target, attackCount % 15 === 0);
+        // custom handling here, we want to find a valid monster to use our skill on
+        // if we wait until they are the current target, it may too late to be useful
+        if (Config.ChargeCast.skill > -1
+          && Config.ChargeCast.spectype
+          && !(target.spectype & Config.ChargeCast.spectype)) {
+          let cRange = Skill.getRange(Config.ChargeCast.skill);
+          let cState = Skill.getState(Config.ChargeCast.skill);
+          let chargeTarget = monsterList.find(function (mon) {
+            return (
+              (mon.spectype & Config.ChargeCast.spectype)
+              && (mon.distance <= cRange)
+              && (!cState || !mon.getState(cState))
+              && !checkCollision(me, mon, sdk.collision.LineOfSight)
+            );
+          });
+          if (chargeTarget && chargeTarget.gid !== target.gid) {
+            Attack.doChargeCast(chargeTarget);
+          }
+        }
+
+        const result = ClassAttack.doAttack(target, attackCount % 15 === 0);
 
         if (result) {
           retry = 0;
