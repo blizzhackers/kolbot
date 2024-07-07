@@ -698,7 +698,7 @@
       if (!item) return false;
       if (!unit) unit = me;
       const weaponSwitch = me.weaponswitch;
-      if ([sdk.body.RightArmSecondary, sdk.body.RightArmSecondary].includes(item.bodylocation)) {
+      if ([sdk.body.RightArmSecondary, sdk.body.LeftArmSecondary].includes(item.bodylocation)) {
         me.switchWeapons(weaponSwitch ^ 1);
       }
       try {

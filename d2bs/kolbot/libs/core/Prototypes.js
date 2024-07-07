@@ -1984,18 +1984,21 @@ Unit.prototype.castChargedSkill = function (...args) {
       }).first().unit;
     return chargedItem.castChargedSkill.apply(chargedItem, args);
   } else if (this.type === sdk.unittype.Item) {
-    charge = this.getStat(-2)[sdk.stats.ChargedSkill]; // WARNING. Somehow this gives duplicates
-
-    if (!charge) throw Error("No charged skill on this item");
+    /** @type {Charge[]} */
+    let charges = this.getStat(-2)[sdk.stats.ChargedSkill]; // WARNING. Somehow this gives duplicates
+    if (!charges) throw Error("No charged skill on this item");
+    if (!Array.isArray(charges)) {
+      charges = [charges];
+    }
 
     if (skillId) {
       // Filter out all other charged skills
-      charge = charge.filter(item => (skillId && item.skill === skillId) && !!item.charges);
-    } else if (charge.length > 1) {
+      charges = charges.filter(item => (skillId && item.skill === skillId) && !!item.charges);
+    } else if (charges.length > 1) {
       throw new Error("multiple charges on this item without a given skillId");
     }
 
-    charge = charge.first();
+    charge = charges.first();
 
     if (charge) {
       // Setting skill on hand
