@@ -666,6 +666,7 @@ const Misc = (function () {
 
       if (shrine) {
         do {
+          if (!shrine.name) continue;
           let _name = shrine.name.toLowerCase();
           if ((_name.includes("shrine") && ShrineData.has(shrine.objtype) || (_name.includes("well")))
             && ShrineData.has(shrine.objtype)
