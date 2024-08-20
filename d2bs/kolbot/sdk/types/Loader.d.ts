@@ -2,8 +2,13 @@ export {};
 declare global {
   type GlobalScript = () => boolean;
   interface Runnable {
+    startArea: number | null;
+    forceTown: boolean;
+    bossid: number | null;
+    preAction: () => any;
     action: () => boolean;
-    startArea: number | undefined;
+    postAction: () => any;
+    cleanup: () => any;
   }
   
   namespace Loader {
