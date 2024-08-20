@@ -11,6 +11,7 @@
  * @typedef {Object} RunnableOptions
  * @property {function(): any} preAction
  * @property {function(): boolean} postAction
+ * @property {function(): any} cleanup
  * @property {boolean} forceTown
  * @property {number} bossid
  * @property {number} startArea
@@ -33,6 +34,7 @@ function Runnable (action, options = {}) {
         }
       };
   this.postAction = options.hasOwnProperty("postAction") ? options.postAction : null;
+  this.cleanup = options.hasOwnProperty("cleanup") ? options.cleanup : null;
   this.forceTown = options.hasOwnProperty("forceTown") ? options.forceTown : false;
   this.bossid = options.hasOwnProperty("bossid") ? options.bossid : null;
 }
@@ -268,6 +270,12 @@ const Loader = {
         } finally {
           // Dont run for last script as that will clear everything anyway
           if (this.scriptIndex < this.scriptList.length) {
+            // run cleanup if applicable
+            if (Loader.currentScript instanceof Runnable) {
+              if (Loader.currentScript.cleanup && typeof Loader.currentScript.cleanup === "function") {
+                Loader.currentScript.cleanup();
+              }
+            }
             // remove script function from global scope, so it can be cleared by GC
             delete global[script];
             Loader.currentScript = null;
@@ -394,6 +402,13 @@ const Loader = {
           delete global[script];
         }
 
+        // run cleanup if applicable
+        if (Loader.currentScript instanceof Runnable) {
+          if (Loader.currentScript.cleanup && typeof Loader.currentScript.cleanup === "function") {
+            Loader.currentScript.cleanup();
+          }
+        }
+        
         Loader.currentScript = null;
         Loader.tempList.pop();
         
