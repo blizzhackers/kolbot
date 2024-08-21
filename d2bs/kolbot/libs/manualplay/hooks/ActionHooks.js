@@ -50,8 +50,19 @@ const ActionHooks = {
     3: "sellItem"
   },
   blockKeyEvent: () => [
-    sdk.uiflags.Inventory, sdk.uiflags.StatsWindow, sdk.uiflags.ChatBox, sdk.uiflags.EscMenu, sdk.uiflags.Shop, sdk.uiflags.Quest, sdk.uiflags.Waypoint,
-    sdk.uiflags.TradePrompt, sdk.uiflags.Msgs, sdk.uiflags.Stash, sdk.uiflags.Cube, sdk.uiflags.Help, sdk.uiflags.MercScreen
+    sdk.uiflags.Inventory,
+    sdk.uiflags.StatsWindow,
+    sdk.uiflags.ChatBox,
+    sdk.uiflags.EscMenu,
+    sdk.uiflags.Shop,
+    sdk.uiflags.Quest,
+    sdk.uiflags.Waypoint,
+    sdk.uiflags.TradePrompt,
+    sdk.uiflags.Msgs,
+    sdk.uiflags.Stash,
+    sdk.uiflags.Cube,
+    sdk.uiflags.Help,
+    sdk.uiflags.MercScreen
   ].some((flag) => getUIFlag(flag)),
 
   /**
@@ -235,7 +246,7 @@ const ActionHooks = {
 
                 break;
               case 3: // Shop
-                qolObj.action = "sellItem";
+                // qolObj.action = "sellItem";
 
                 break;
               default:
