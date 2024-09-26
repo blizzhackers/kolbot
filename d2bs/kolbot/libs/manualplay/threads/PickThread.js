@@ -51,7 +51,7 @@ function main () {
       }
     }
 
-    if (!me.inTown && !noPick && !me.itemoncursor && Pickit.gidList.length > 0) {
+    if (!me.inTown && !noPick && !me.itemoncursor && Pickit.gidList.size > 0) {
       Pickit.fastPick(1);
     }
 

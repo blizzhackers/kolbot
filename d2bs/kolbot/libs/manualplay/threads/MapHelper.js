@@ -60,7 +60,7 @@ function main () {
   const togglePickThread = function () {
     if (!Config.ManualPlayPick) return;
 
-    const pickThread = getScript("threads/pickthread.js");
+    const pickThread = getScript("libs/manualplay/threads/pickthread.js");
 
     if (pickThread) {
       if (pickThread.running) {
