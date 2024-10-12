@@ -131,6 +131,7 @@ module.exports = {
     "no-fallthrough": ["error", { "commentPattern": "break[\\s\\w]*omitted" }],
     "no-undef": ["off", "always"],
     "no-extra-boolean-cast": ["off", "always"],
-    "max-len": ["warn", { "code": 120, "ignoreComments": true, "ignoreUrls": true }],
+    "no-useless-escape": ["off", "always"],
+    "max-len": ["warn", { "code": 120, "ignoreComments": true, "ignoreUrls": true, "ignoreStrings": true }],
   }
 };
