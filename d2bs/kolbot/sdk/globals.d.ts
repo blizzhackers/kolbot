@@ -16,6 +16,7 @@
 /// <reference path="./types/NTIP.d.ts" />
 /// <reference path="./types/AutoMule.d.ts" />
 /// <reference path="./types/OOG.d.ts" />
+/// <reference path="./types/Config.d.ts" />
 
 declare global {
   interface Error {
@@ -95,7 +96,7 @@ declare global {
   }
 
   interface StringConstructor {
-    static isEqual(str1: string, str2: string): boolean;
+    static isEqual(str1: string, str2: string, caseSensitive?: boolean): boolean;
   }
 
   interface ObjectConstructor {
@@ -751,15 +752,28 @@ declare global {
   }
 
   const me: MeType
-
-  // type PathNode = {
-  //   x: number,
-  //   y: number
-  // };
   interface PathNode {
     x: number;
     y: number;
+    /**
+     * Distance from 'me' to this node
+     */
     readonly distance: number;
+    /**
+     * Distance from 'unit' to this node
+     * @param unit 
+     */
+    distanceTo(unit: Unit): number;
+    /**
+     * Walk Distance from 'me' to this node
+     */
+    getWalkDistance(): number;
+    /**
+     * Walk Distance from 'node' to this node
+     * @param node 
+     */
+    getWalkDistanceTo(node: PathNode, area?: number): number;
+    mobCount(givenSettings: { range?: number, coll?: number, type?: number, ignoreClassids?: number[] }): number;
   }
 
   function getUnit(type: 4, name?: string, mode?: number, unitId?: number): ItemUnit
@@ -805,6 +819,8 @@ declare global {
 
   class Room {
     area: number;
+    level: number;
+    number: number;
     correcttomb: number;
     x: number;
     y: number;
@@ -1078,6 +1094,11 @@ declare global {
   function quit(): never
   function quitGame(): never
   function say(what: string, force?: boolean): void
+  /**
+   * Use when you want to force something to be said in chat and don't know if LocalChat is being used
+   * @param what 
+   */
+  function _say(what: string): void
   function clickParty(player: Party, type: 0 | 1 | 2 | 3 | 4)
   function weaponSwitch(): void
   function transmute(): void
@@ -1191,6 +1212,15 @@ declare global {
     GameDoesNotExistTimeout: number, // Seconds to wait before cancelling the 'Game does not exist.' screen
   }
 
+  interface ProfileInfo {
+    profile: string,
+    account: string,
+    charName: string,
+    difficulty: string,
+    tag: string,
+    realm: string,
+  }
+
   interface StarterInterface {
     Config: StarterConfig,
     useChat: boolean,
@@ -1218,6 +1248,9 @@ declare global {
     },
     gameInfo: {
       error: string,
+      gameName?: string,
+      gamePass?: string,
+      difficulty?: string,
       crashInfo: {
           currScript: number,
           area: number,
@@ -1225,7 +1258,7 @@ declare global {
       switchKeys: boolean,
     },
     joinInfo: {},
-    profileInfo: {},
+    profileInfo: ProfileInfo,
 
     sayMsg(string: string): void,
     timer(tick: number): string,
@@ -1241,14 +1274,79 @@ declare global {
   const Starter: StarterInterface;
 
   namespace Time {
+    /**
+     * Converts seconds to milliseconds.
+     * 
+     * @param {number} [seconds=0] - The number of seconds to convert.
+     * @returns {number} - The equivalent time in milliseconds.
+     */
     function seconds(seconds: number): number;
+
+    /**
+     * Converts minutes to milliseconds.
+     * 
+     * @param {number} [minutes=0] - The number of minutes to convert.
+     * @returns {number} - The equivalent time in milliseconds.
+     */
     function minutes(minutes: number): number;
+
+    /**
+     * Formats milliseconds into a "HH:MM:SS" string.
+     * 
+     * @param {number} [ms=0] - The time in milliseconds to format.
+     * @returns {string} - The formatted time string.
+     */
     function format(ms: number): string;
+
+    /**
+     * Converts milliseconds to seconds.
+     * 
+     * @param {number} [ms=0] - The time in milliseconds to convert.
+     * @returns {number} - The equivalent time in seconds.
+     */
     function toSeconds(ms: number): number;
+
+    /**
+     * Converts milliseconds to minutes.
+     * 
+     * @param {number} [ms=0] - The time in milliseconds to convert.
+     * @returns {number} - The equivalent time in minutes.
+     */
     function toMinutes(ms: number): number;
+
+    /**
+     * Converts milliseconds to hours.
+     * 
+     * @param {number} [ms=0] - The time in milliseconds to convert.
+     * @returns {number} - The equivalent time in hours.
+     */
     function toHours(ms: number): number;
+
+    /**
+     * Converts milliseconds to days.
+     * 
+     * @param {number} [ms=0] - The time in milliseconds to convert.
+     * @returns {number} - The equivalent time in days.
+     */
     function toDays(ms: number): number;
+
+    /**
+     * Calculates the elapsed time from a given timestamp.
+     * 
+     * @param {number} [ms=0] - The starting time in milliseconds.
+     * @returns {number} - The elapsed time in milliseconds.
+     */
     function elapsed(start: number): number;
   }
+
+  type PrimitiveType = "undefined" | "object" | "boolean" | "number" | "bigint" | "string" | "symbol" | "function" | "array";
+  /**
+   * Checks if the value matches the expected type.
+   * 
+   * @param val - The value to be checked.
+   * @param type - The expected type as a string.
+   * @returns {boolean} - Returns true if the value matches the expected type, otherwise false.
+   */
+  function isType(val: any, type: PrimitiveType): boolean;
 }
 export {};

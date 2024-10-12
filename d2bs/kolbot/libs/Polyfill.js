@@ -68,7 +68,7 @@ String.prototype.diffCount = function (stringB) {
 
     return (Math.max(graph.a.length, graph.b.length) - graph.graph[graph.a.length - 1][graph.b.length - 1]);
   } catch (err) {
-    print(err.stack);
+    console.log(err.stack);
   }
 
   return Infinity;
@@ -184,10 +184,14 @@ if (!String.isEqual) {
    * @static
    * @param {string} str1 
    * @param {string} str2 
+   * @param {boolean} caseSensitive
    * @returns {boolean}
    */
-  String.isEqual = function (str1, str2) {
-    if (typeof str1 !== "string" || typeof str2 !== "string") return false;
+  String.isEqual = function (str1, str2, caseSensitive = false) {
+    if (!isType(str1, "string") || !isType(str2, "string")) return false;
+    if (caseSensitive) {
+      return str1 === str2;
+    }
     return str1.toLowerCase() === str2.toLowerCase();
   };
 }
@@ -1348,15 +1352,44 @@ if (!global.hasOwnProperty("copyObj")) {
   });
 }
 
+/**
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Misc Utils ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ * - Time - Namespace of Helper methods for dealing with time
+ * - isType - Method to peform simple type checks
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+ */
+
 const Time = {
+  /**
+   * Converts seconds to milliseconds.
+   * 
+   * @param {number} [seconds=0] - The number of seconds to convert.
+   * @returns {number} - The equivalent time in milliseconds.
+   */
   seconds: function (seconds = 0) {
-    if (typeof seconds !== "number") return 0;
+    if (!isType(seconds, "number")) return 0;
     return (seconds * 1000);
   },
+
+  /**
+   * Converts minutes to milliseconds.
+   * 
+   * @param {number} [minutes=0] - The number of minutes to convert.
+   * @returns {number} - The equivalent time in milliseconds.
+   */
   minutes: function (minutes = 0) {
-    if (typeof minutes !== "number") return 0;
+    if (!isType(minutes, "number")) return 0;
     return (minutes * 60000);
   },
+
+  /**
+   * Formats milliseconds into a "HH:MM:SS" string.
+   * 
+   * @param {number} [ms=0] - The time in milliseconds to format.
+   * @returns {string} - The formatted time string.
+   */
   format: function (ms = 0) {
     const hours = Math.floor(ms / 3600000);
     const minutes = Math.floor((ms % 3600000) / 60000);
@@ -1370,19 +1403,66 @@ const Time = {
     return pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
     // return (new Date(ms).toISOString().slice(11, -5));
   },
+
+  /**
+   * Converts milliseconds to seconds.
+   * 
+   * @param {number} [ms=0] - The time in milliseconds to convert.
+   * @returns {number} - The equivalent time in seconds.
+   */
   toSeconds: function (ms = 0) {
     return (ms / 1000);
   },
+
+  /**
+   * Converts milliseconds to minutes.
+   * 
+   * @param {number} [ms=0] - The time in milliseconds to convert.
+   * @returns {number} - The equivalent time in minutes.
+   */
   toMinutes: function (ms = 0) {
     return (ms / 60000);
   },
+
+  /**
+   * Converts milliseconds to hours.
+   * 
+   * @param {number} [ms=0] - The time in milliseconds to convert.
+   * @returns {number} - The equivalent time in hours.
+   */
   toHours: function (ms = 0) {
     return (ms / 3600000);
   },
+
+  /**
+   * Converts milliseconds to days.
+   * 
+   * @param {number} [ms=0] - The time in milliseconds to convert.
+   * @returns {number} - The equivalent time in days.
+   */
   toDays: function (ms = 0) {
     return (ms / 86400000);
   },
+
+  /**
+   * Calculates the elapsed time from a given timestamp.
+   * 
+   * @param {number} [ms=0] - The starting time in milliseconds.
+   * @returns {number} - The elapsed time in milliseconds.
+   */
   elapsed: function (ms = 0) {
     return (getTickCount() - ms);
   }
+};
+
+/**
+ * @param {any} val 
+ * @param {PrimitiveType} type 
+ * @returns {boolean}
+ */
+const isType = function (val, type) {
+  if (type === "array") {
+    return Array.isArray(val);
+  }
+  return typeof val === type;
 };
