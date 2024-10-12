@@ -215,79 +215,79 @@ const BattleOrders = new Runnable(
         }
 
         switch (Config.BattleOrders.Mode) {
-          case boMode.Give:
-            // check if anyone is near us
-            nearPlayer = Game.getPlayer();
+        case boMode.Give:
+          // check if anyone is near us
+          nearPlayer = Game.getPlayer();
 
-            if (nearPlayer) {
-              do {
-                if (nearPlayer.name !== me.name) {
-                  let nearPlayerName = nearPlayer.name.toLowerCase();
-                  // there is a player near us and they are in the list of players to bo and in my party
-                  if (boGetters.has(nearPlayerName)
+          if (nearPlayer) {
+            do {
+              if (nearPlayer.name !== me.name) {
+                let nearPlayerName = nearPlayer.name.toLowerCase();
+                // there is a player near us and they are in the list of players to bo and in my party
+                if (boGetters.has(nearPlayerName)
                     && !totalBoed.has(nearPlayerName)
                     && Misc.inMyParty(nearPlayerName)) {
-                    let result = giveBO();
-                    if (result.success) {
-                      if (result.count === boGetters.size
+                  let result = giveBO();
+                  if (result.success) {
+                    if (result.count === boGetters.size
                         || totalBoed.size === boGetters.size) {
-                        // we bo-ed everyone we are set to, don't wait around any longer
-                        break MainLoop;
-                      }
-                      // reset fail tick
-                      tick = getTickCount();
-                      // shorten waiting time since we've already started giving out bo's
-                      BattleOrders.gaveBo = true;
+                      // we bo-ed everyone we are set to, don't wait around any longer
+                      break MainLoop;
                     }
-                  }
-                } else {
-                  me.overhead(
-                    "Waiting " + Math.round(((tick + failTimer) - getTickCount()) / 1000)
-                    + " Seconds for other players"
-                  );
-
-                  if (getTickCount() - tick >= failTimer) {
-                    log("ÿc1Give BO timeout fail.");
-                    log("Failed to bo: " + getFailedToBO().join(", "));
-                    Config.BattleOrders.QuitOnFailure && scriptBroadcast("quit");
-
-                    break MainLoop;
+                    // reset fail tick
+                    tick = getTickCount();
+                    // shorten waiting time since we've already started giving out bo's
+                    BattleOrders.gaveBo = true;
                   }
                 }
-              } while (nearPlayer.getNext());
-            } else {
-              me.overhead(
-                "Waiting " + Math.round(((tick + failTimer) - getTickCount()) / 1000)
-                + " Seconds for other players"
-              );
+              } else {
+                me.overhead(
+                  "Waiting " + Math.round(((tick + failTimer) - getTickCount()) / 1000)
+                    + " Seconds for other players"
+                );
 
-              if (getTickCount() - tick >= failTimer) {
-                log("ÿc1Give BO timeout fail.");
-                log("Failed to bo: " + getFailedToBO().join(", "));
-                Config.BattleOrders.QuitOnFailure && scriptBroadcast("quit");
+                if (getTickCount() - tick >= failTimer) {
+                  log("ÿc1Give BO timeout fail.");
+                  log("Failed to bo: " + getFailedToBO().join(", "));
+                  Config.BattleOrders.QuitOnFailure && scriptBroadcast("quit");
 
-                break MainLoop;
+                  break MainLoop;
+                }
               }
-            }
-
-            break;
-          case boMode.Receive:
-            if (me.getState(sdk.states.BattleOrders)) {
-              log("Got bo-ed");
-              say("got-bo");
-              delay(1000);
-
-              break MainLoop;
-            }
+            } while (nearPlayer.getNext());
+          } else {
+            me.overhead(
+              "Waiting " + Math.round(((tick + failTimer) - getTickCount()) / 1000)
+                + " Seconds for other players"
+            );
 
             if (getTickCount() - tick >= failTimer) {
-              log("ÿc1BO timeout fail.");
+              log("ÿc1Give BO timeout fail.");
+              log("Failed to bo: " + getFailedToBO().join(", "));
               Config.BattleOrders.QuitOnFailure && scriptBroadcast("quit");
 
               break MainLoop;
             }
+          }
 
-            break;
+          break;
+        case boMode.Receive:
+          if (me.getState(sdk.states.BattleOrders)) {
+            log("Got bo-ed");
+            say("got-bo");
+            delay(1000);
+
+            break MainLoop;
+          }
+
+          if (getTickCount() - tick >= failTimer) {
+            log("ÿc1BO timeout fail.");
+            Config.BattleOrders.QuitOnFailure && scriptBroadcast("quit");
+
+            break MainLoop;
+          }
+
+          break;
         }
 
         delay(500);
