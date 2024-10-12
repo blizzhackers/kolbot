@@ -432,11 +432,12 @@ const OrgTorch = new Runnable(
     */
     const runEvent = function (portal) {
       if (portal) {
-        if (Config.OrgTorch.PreGame.Antidote.At.includes(portal.objtype) && Config.OrgTorch.PreGame.Antidote.Drink > 0) {
-          Town.buyPots(Config.OrgTorch.PreGame.Antidote.Drink, "Antidote", true, true);
+        const { Antidote, Thawing } = Config.OrgTorch.PreGame;
+        if (Antidote.At.includes(portal.objtype) && Antidote.Drink > 0) {
+          Town.buyPots(Antidote.Drink, "Antidote", true, true);
         }
-        if (Config.OrgTorch.PreGame.Thawing.At.includes(portal.objtype) && Config.OrgTorch.PreGame.Thawing.Drink > 0) {
-          Town.buyPots(Config.OrgTorch.PreGame.Thawing.Drink, "Thawing", true, true);
+        if (Thawing.At.includes(portal.objtype) && Thawing.Drink > 0) {
+          Town.buyPots(Thawing.Drink, "Thawing", true, true);
         }
         Town.move("stash");
         console.log("taking portal: " + portal.objtype);

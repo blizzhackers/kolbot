@@ -178,7 +178,7 @@ const locationAction = (function () {
 
       JoinLoop2:
       for (let i = 0; i < 5; i += 1) {
-        for (let [leader, check] of tracker) {
+        for (let [leader, _check] of tracker) {
           Starter.joinInfo = {};
           D2Bot.requestGame(leader);
           delay(100);

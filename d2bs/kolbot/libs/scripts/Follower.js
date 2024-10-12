@@ -435,7 +435,7 @@ const Follower = new Runnable(
     /**
     * @todo allow user to use skill name and try to match it to skill id
     */
-    const skillsMap = (function () {
+    const _skillsMap = (function () {
       const _skills = new Map();
 
       for (let value of Object.values(sdk.skills)) {

@@ -85,13 +85,13 @@ function main () {
   }
 
   let quitting = false;
-  let partyCheck = false;
+  // let partyCheck = false;
 
   const scriptEvent = function (msg) {
     if (!!msg && typeof msg === "string") {
       switch (msg) {
       case "hostileCheck":
-        partyCheck = true;
+        // partyCheck = true;
 
         break;
       case "quit":
