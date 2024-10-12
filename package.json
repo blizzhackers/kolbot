@@ -5,7 +5,7 @@
   "main": "",
   "typings": "./d2bs/kolbot/**/global.d.ts",
   "scripts": {
-    "lint": "eslint --fix-dry-run --ext .js --ext .dbj d2bs/kolbot/",
+    "lint": "eslint --fix --ext .js --ext .dbj d2bs/kolbot/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
