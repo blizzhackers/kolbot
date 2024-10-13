@@ -99,6 +99,7 @@ const Recipe = {
       Small: 56,
       Large: 57,
       Grand: 58,
+      LowGrand: 64
     },
   },
   Rune: 52,
@@ -240,6 +241,7 @@ Object.defineProperty(Recipe, "ingredients", {
       return [sdk.items.SmallCharm, "pgem", "pgem", "pgem"];
     case Recipe.Reroll.Charm.Large:
       return [sdk.items.LargeCharm, "pgem", "pgem", "pgem"];
+    case Recipe.Reroll.Charm.LowGrand:
     case Recipe.Reroll.Charm.Grand:
       return [sdk.items.GrandCharm, "pgem", "pgem", "pgem"];
     case Recipe.Reroll.Magic: // Hacky solution ftw
@@ -356,8 +358,10 @@ const Cubing = {
 
   init: function () {
     if (!Config.Cubing) return;
-
     // console.log("We have " + Config.Recipes.length + " cubing recipe(s).");
+
+    /** @type {Set<string>} */
+    const uniqueRecipes = new Set();
 
     for (let i = 0; i < Config.Recipes.length; i += 1) {
       if (Config.Recipes[i].length > 1 && isNaN(Config.Recipes[i][1])) {
@@ -370,6 +374,14 @@ const Cubing = {
 
           i -= 1;
         }
+      }
+
+      let stringifiedRecipe = JSON.stringify(Config.Recipes[i]);
+      if (uniqueRecipes.has(stringifiedRecipe)) {
+        Config.Recipes.splice(i, 1);
+        i -= 1;
+      } else {
+        uniqueRecipes.add(stringifiedRecipe);
       }
     }
 
@@ -620,6 +632,7 @@ const Cubing = {
         break;
       case Recipe.Reroll.Charm.Small:
       case Recipe.Reroll.Charm.Large:
+      case Recipe.Reroll.Charm.LowGrand:
       case Recipe.Reroll.Charm.Grand:
       case Recipe.Reroll.Magic: // Hacky solution ftw
         /**
@@ -629,6 +642,8 @@ const Cubing = {
           this.recipes.push({ Ingredients: ingredients, Level: 94, Index: index });
         } else if (index === Recipe.Reroll.Charm.Large) {
           this.recipes.push({ Ingredients: ingredients, Level: 76, Index: index });
+        } else if (index === Recipe.Reroll.Charm.LowGrand) {
+          this.recipes.push({ Ingredients: ingredients, Level: 50, Index: index });
         } else if (index === Recipe.Reroll.Charm.Grand) {
           this.recipes.push({ Ingredients: ingredients, Level: 77, Index: index });
         } else {
