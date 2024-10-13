@@ -2,419 +2,429 @@
 *  @filename    MapHelper.js
 *  @author      theBGuy
 *  @credits     kolton
-*  @desc        MapHelper used in conjuction with MapThread.js
+*  @desc        MapHelper used in conjuction with main.js
 *
 */
-include("json2.js");
-include("NTItemParser.dbl");
-include("OOG.js");
-include("AutoMule.js");
-include("Gambling.js");
-include("TorchSystem.js");
-include("CraftingSystem.js");
-include("MuleLogger.js");
-include("common/util.js");
+js_strict(true);
+include("critical.js"); // required
 
-includeCommonLibs();
+// globals needed for core gameplay
+includeCoreLibs();
+
+// system libs
+includeSystemLibs();
+include("systems/mulelogger/MuleLogger.js");
+include("systems/gameaction/GameAction.js");
 
 // MapMode
 include("manualplay/MapMode.js");
 MapMode.include();
 
-function main() {
-	let obj = {type: false, dest: false, action: false};
-	let action, fail = 0, x, y;
-	let mapThread = getScript("libs/manualplay/threads/mapthread.js");
+function main () {
+  // getUnit test
+  getUnit(-1) === null && console.warn("getUnit bug detected");
+  
+  console.log("ÿc9MapHelper loaded");
 
-	const portalMap = {};
-	portalMap[sdk.areas.Abaddon] = {
-		14: [12638, 6373],
-		15: [12638, 6063],
-		20: [12708, 6063],
-		25: [12948, 6128],
-	};
-	portalMap[sdk.areas.PitofAcheron] = {
-		14: [12638, 7873],
-		15: [12638, 7563],
-		20: [12708, 7563],
-		25: [12948, 7628],
-	};
-	portalMap[sdk.areas.InfernalPit] = {
-		14: [12638, 9373],
-		20: [12708, 9063],
-		25: [12948, 9128],
-	};
+  let obj = { type: false, dest: false, action: false };
+  let action, fail = 0, x, y;
+  const mapThread = getScript("libs/manualplay/main.js");
 
-	console.log("ÿc9MapHelper loaded");
-	Config.init();
-	Attack.init(true);
-	Pickit.init();
-	Storage.Init();
-	addEventListener("scriptmsg", function (msg) {
-		action = msg;
-	});
+  const portalMap = {};
+  portalMap[sdk.areas.Abaddon] = {
+    14: [12638, 6373],
+    15: [12638, 6063],
+    20: [12708, 6063],
+    25: [12948, 6128],
+  };
+  portalMap[sdk.areas.PitofAcheron] = {
+    14: [12638, 7873],
+    15: [12638, 7563],
+    20: [12708, 7563],
+    25: [12948, 7628],
+  };
+  portalMap[sdk.areas.InfernalPit] = {
+    14: [12638, 9373],
+    20: [12708, 9063],
+    25: [12948, 9128],
+  };
 
-	this.togglePickThread = function () {
-		if (!Config.ManualPlayPick) return;
+  Config.init();
+  Attack.init(true);
+  Pickit.init();
+  Storage.Init();
+  addEventListener("scriptmsg", function (msg) {
+    action = msg;
+  });
 
-		let pickThread = getScript("tools/pickthread.js");
+  const togglePickThread = function () {
+    if (!Config.ManualPlayPick) return;
 
-		if (pickThread) {
-			if (pickThread.running) {
-				pickThread.pause();
-			} else if (!pickThread.running) {
-				pickThread.resume();
-			}
-		}
-	};
+    const pickThread = getScript("libs/manualplay/threads/pickthread.js");
 
-	this.togglePause = function () {
-		if (mapThread) {
-			if (mapThread.running) {
-				print("pause mapthread");
-				mapThread.pause();
-			} else if (!mapThread.running) {
-				print("resume mapthread");
-				mapThread.resume();
+    if (pickThread) {
+      if (pickThread.running) {
+        pickThread.pause();
+      } else if (!pickThread.running) {
+        pickThread.resume();
+      }
+    }
+  };
 
-				if (!mapThread.running) {
-					fail++;
+  const togglePause = function () {
+    if (mapThread) {
+      if (mapThread.running) {
+        console.log("pause mapthread");
+        mapThread.pause();
+      } else if (!mapThread.running) {
+        console.log("resume mapthread");
+        mapThread.resume();
 
-					if (fail % 5 === 0 && !getScript("libs/manualplay/threads/mapthread.js")) {
-						print("MapThread shut down, exiting MapHelper");
-						
-						return false;
-					}
-				}
-			}
-		} else if (!getScript("libs/manualplay/threads/mapthread.js")) {
-			print("MapThread shut down, exiting MapHelper");
+        if (!mapThread.running) {
+          fail++;
 
-			return false;
-		}
+          if (fail % 5 === 0 && !getScript("libs/manualplay/main.js")) {
+            console.log("MapThread shut down, exiting MapHelper");
+            
+            return false;
+          }
+        }
+      }
+    } else if (!getScript("libs/manualplay/main.js")) {
+      console.log("MapThread shut down, exiting MapHelper");
 
-		return true;
-	};
+      return false;
+    }
 
-	while (true) {
-		if (getUIFlag(sdk.uiflags.EscMenu)) {
-			delay(100);
-			mapThread.running && this.togglePause();
+    return true;
+  };
 
-		} else {
-			if (!mapThread.running) {
-				if (!this.togglePause()) {
-					return;
-				}
-			}
-		}
+  while (true) {
+    if (getUIFlag(sdk.uiflags.EscMenu)) {
+      delay(100);
+      mapThread.running && togglePause();
+    } else {
+      if (!mapThread.running) {
+        if (!togglePause()) {
+          return;
+        }
+      }
+    }
 
-		if (action) {
-			try {
-				let temp = JSON.parse(action);
-				temp && Object.assign(obj, temp);
-				
-				addEventListener("keyup", Pather.stopEvent);
-				this.togglePickThread();
+    if (action) {
+      try {
+        let temp = JSON.parse(action);
+        temp && Object.assign(obj, temp);
+        
+        addEventListener("keyup", Pather.stopEvent);
+        togglePickThread();
 
-				if (obj) {
-					let redPortal, chestLoc, king, unit;
+        if (obj) {
+          let redPortal, chestLoc, king, unit;
 
-					switch (obj.type) {
-					case "area":
-						if (obj.dest === sdk.areas.ArreatSummit) {
-							Pather.moveToExit(obj.dest, false);
-						} else if ([sdk.areas.CanyonofMagic, sdk.areas.A2SewersLvl1, sdk.areas.PalaceCellarLvl3, sdk.areas.PandemoniumFortress, sdk.areas.BloodyFoothills].includes(obj.dest)) {
-							Pather.journeyTo(obj.dest);
-						} else if (obj.dest === sdk.areas.DurielsLair) {
-							Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricStaffHolder, -11, 3);
+          switch (obj.type) {
+          case "area":
+            if (obj.dest === sdk.areas.ArreatSummit) {
+              Pather.moveToExit(obj.dest, false);
+            } else if ([
+              sdk.areas.CanyonofMagic, sdk.areas.A2SewersLvl1,
+              sdk.areas.PalaceCellarLvl3, sdk.areas.PandemoniumFortress, sdk.areas.BloodyFoothills
+            ].includes(obj.dest)) {
+              Pather.journeyTo(obj.dest);
+            } else if (obj.dest === sdk.areas.DurielsLair) {
+              Pather.moveToPreset(me.area, sdk.unittype.Object, sdk.quest.chest.HoradricStaffHolder, -11, 3);
 
-							for (let i = 0; i < 3; i++) {
-								if (Pather.useUnit(sdk.unittype.Object, sdk.objects.PortaltoDurielsLair, sdk.areas.DurielsLair)) {
-									break;
-								}
-							}
-						} else {
-							Pather.moveToExit(obj.dest, true);
-						}
+              for (let i = 0; i < 3; i++) {
+                if (Pather.useUnit(sdk.unittype.Object, sdk.objects.PortaltoDurielsLair, sdk.areas.DurielsLair)) {
+                  break;
+                }
+              }
+            } else {
+              Pather.moveToExit(obj.dest, true);
+            }
 
-						break;
-					case "unit":
-						if (me.inArea(sdk.areas.MooMooFarm)
-							|| (me.inArea(sdk.areas.DurielsLair) && Misc.talkToTyrael())) {
-							break;
-						}
+            break;
+          case "unit":
+            if (me.inArea(sdk.areas.MooMooFarm)
+              || (me.inArea(sdk.areas.DurielsLair) && Misc.talkToTyrael())) {
+              break;
+            }
 
-						Pather.moveToUnit(obj.dest, true);
+            Pather.moveToUnit(obj.dest, true);
 
-						switch (me.area) {
-						case sdk.areas.ColdPlains:
-							Pather.moveToExit(sdk.areas.CaveLvl1, true);
+            switch (me.area) {
+            case sdk.areas.ColdPlains:
+              Pather.moveToExit(sdk.areas.CaveLvl1, true);
 
-							break;
-						case sdk.areas.BlackMarsh:
-							Pather.moveToExit(sdk.areas.HoleLvl1, true);
+              break;
+            case sdk.areas.BlackMarsh:
+              Pather.moveToExit(sdk.areas.HoleLvl1, true);
 
-							break;
-						case sdk.areas.LutGholein:
-							Pather.useUnit(sdk.unittype.Stairs, sdk.exits.preset.A2EnterSewersDoor, sdk.areas.A2SewersLvl1);
+              break;
+            case sdk.areas.LutGholein:
+              Pather.useUnit(sdk.unittype.Stairs, sdk.exits.preset.A2EnterSewersDoor, sdk.areas.A2SewersLvl1);
 
-							break;
-						case sdk.areas.KurastBazaar:
-							Pather.useUnit(sdk.unittype.Stairs, sdk.exits.preset.A3EnterSewers, sdk.areas.A3SewersLvl1);
+              break;
+            case sdk.areas.KurastBazaar:
+              Pather.useUnit(sdk.unittype.Stairs, sdk.exits.preset.A3EnterSewers, sdk.areas.A3SewersLvl1);
 
-							break;
-						}
+              break;
+            }
 
-						if (obj.action && typeof obj.action === "object") {
-							if (obj.action.do === "openChest") {
-								!!obj.action.id && Misc.openChest(obj.action.id);
-							} else if (obj.action.do === "usePortal") {
-								!!obj.action.id ? Pather.usePortal(obj.action.id) : Pather.usePortal();
-							}
-						}
+            if (obj.action && typeof obj.action === "object") {
+              if (obj.action.do === "openChest") {
+                !!obj.action.id && Misc.openChest(obj.action.id);
+              } else if (obj.action.do === "usePortal") {
+                !!obj.action.id ? Pather.usePortal(obj.action.id) : Pather.usePortal();
+              }
+            }
 
-						break;
-					case "wp":
-						Pather.getWP(me.area);
+            break;
+          case "wp":
+            Pather.getWP(me.area);
 
-						break;
-					case "actChange":
-						print("Going to act: " + obj.dest);
-						Pather.changeAct(obj.dest);
+            break;
+          case "actChange":
+            console.log("Going to act: " + obj.dest);
+            Pather.changeAct(obj.dest);
 
-						break;
-					case "portal":
-						if (obj.dest === sdk.areas.WorldstoneChamber && Game.getMonster(sdk.monsters.ThroneBaal)) {
-							me.overhead("Can't enter Worldstone Chamber yet. Baal still in area");
+            break;
+          case "portal":
+            if (obj.dest === sdk.areas.WorldstoneChamber && Game.getMonster(sdk.monsters.ThroneBaal)) {
+              me.overhead("Can't enter Worldstone Chamber yet. Baal still in area");
+              
+              break;
+            } else if (obj.dest === sdk.areas.WorldstoneChamber && !Game.getMonster(sdk.monsters.ThroneBaal)) {
+              redPortal = Game.getObject(sdk.objects.WorldstonePortal);
+              redPortal && Pather.usePortal(null, null, redPortal);
+
+              break;
+            }
+
+            switch (obj.dest) {
+            case sdk.areas.RogueEncampment:
+              king = Game.getPresetMonster(me.area, sdk.monsters.preset.TheCowKing);
+
+              switch (king.x) {
+              case 1:
+                Pather.moveTo(25183, 5923);
+
+                break;
+              }
+
+              break;
+            case sdk.areas.StonyField:
+              Pather.moveTo(25173, 5086);
+              redPortal = Pather.getPortal(obj.dest);
+
+              break;
+            case sdk.areas.MooMooFarm:
+              redPortal = Pather.getPortal(obj.dest);
+
+              break;
+            case sdk.areas.ArcaneSanctuary:
+              Pather.moveTo(12692, 5195);
+              redPortal = Pather.getPortal(obj.dest);
+              !redPortal && Pather.useWaypoint(obj.dest);
+
+              break;
+            case sdk.areas.Harrogath:
+              Pather.moveTo(20193, 8693);
+
+              break;
+            case sdk.areas.FrigidHighlands:
+            case sdk.areas.ArreatPlateau:
+            case sdk.areas.FrozenTundra:
+              chestLoc = Game.getPresetObject(me.area, sdk.objects.SmallSparklyChest);
+
+              if (!chestLoc) {
+                break;
+              }
+
+              [x, y] = portalMap[me.area][chestLoc.x];
+
+              Pather.moveTo(x, y);
+              Pather.usePortal();
+
+              break;
+            case sdk.areas.MatronsDen:
+            case sdk.areas.ForgottenSands:
+            case sdk.areas.FurnaceofPain:
+            case sdk.areas.UberTristram:
+              redPortal = Pather.getPortal(obj.dest);
+
+              break;
+            default:
+              Pather.usePortal(obj.dest);
+              
+              break;
+            }
+
+            if (redPortal) {
+              Pather.moveToUnit(redPortal);
+              Pather.usePortal(null, null, redPortal);
+            }
+
+            break;
+          case "qol":
+            switch (obj.action) {
+            case "heal":
+              Town.initNPC("Heal", "heal");
+
+              break;
+            case "openStash":
+              Town.openStash();
+
+              break;
+            case "stashItems":
+              Town.stash(true, true);
+
+              break;
+            case "gamble":
+              Config.Gamble ? Town.gamble() : me.overhead("Check your Config. Gambling is disabled.");
+
+              break;
+            case "makePortal":
+              Pather.makePortal();
+
+              break;
+            case "takePortal":
+              Town.goToTown();
+
+              break;
+
+            case "clear":
+              Attack.clear(10);
 							
-							break;
-						} else if (obj.dest === sdk.areas.WorldstoneChamber && !Game.getMonster(sdk.monsters.ThroneBaal)) {
-							redPortal = Game.getObject(sdk.objects.WorldstonePortal);
-							redPortal && Pather.usePortal(null, null, redPortal);
+              break;
+            case "cowportal":
+              Misc.openRedPortal(sdk.areas.MooMooFarm);
 
-							break;
-						}
+              break;
+            case "ubertrist":
+              Misc.openRedPortal(sdk.areas.UberTristram);
 
-						switch (obj.dest) {
-						case sdk.areas.RogueEncampment:
-							king = Game.getPresetMonster(me.area, sdk.monsters.preset.TheCowKing);
+              break;
+            case "uberportal":
+              Misc.openRedPortal();
 
-							switch (king.x) {
-							case 1:
-								Pather.moveTo(25183, 5923);
+              break;
+            case "filltps":
+              Town.fillTome(sdk.items.TomeofTownPortal);
+              me.cancel();
 
-								break;
-							}
+              break;
+            case "moveItemFromInvoToStash":
+            case "moveItemFromStashToInvo":
+              unit = Game.getSelectedUnit();
 
-							break;
-						case sdk.areas.StonyField:
-							Pather.moveTo(25173, 5086);
-							redPortal = Pather.getPortal(obj.dest);
+              switch (unit.location) {
+              case sdk.storage.Inventory:
+                Storage.Stash.CanFit(unit) && Storage.Stash.MoveTo(unit);
 
-							break;
-						case sdk.areas.MooMooFarm:
-							redPortal = Pather.getPortal(obj.dest);
+                break;
+              case sdk.storage.Stash:
+                Storage.Inventory.CanFit(unit) && Storage.Inventory.MoveTo(unit);
 
-							break;
-						case sdk.areas.ArcaneSanctuary:
-							Pather.moveTo(12692, 5195);
-							redPortal = Pather.getPortal(obj.dest);
-							!redPortal && Pather.useWaypoint(obj.dest);
+                break;
+              }
 
-							break;
-						case sdk.areas.Harrogath:
-							Pather.moveTo(20193, 8693);
+              break;
+            case "moveItemFromInvoToCube":
+            case "moveItemFromCubeToInvo":
+              unit = Game.getSelectedUnit();
 
-							break;
-						case sdk.areas.FrigidHighlands:
-						case sdk.areas.ArreatPlateau:
-						case sdk.areas.FrozenTundra:
-							chestLoc = Game.getPresetObject(me.area, sdk.objects.SmallSparklyChest);
+              switch (unit.location) {
+              case sdk.storage.Inventory:
+                Storage.Cube.CanFit(unit) && Storage.Cube.MoveTo(unit);
 
-							if (!chestLoc) {
-								break;
-							}
+                break;
+              case sdk.storage.Cube:
+                Storage.Inventory.CanFit(unit) && Storage.Inventory.MoveTo(unit);
 
-							[x, y] = portalMap[me.area][chestLoc.x];
+                break;
+              }
 
-							Pather.moveTo(x, y);
-							Pather.usePortal();
+              break;
+            case "moveItemFromInvoToTrade":
+            case "moveItemFromTradeToInvo":
+              unit = Game.getSelectedUnit();
 
-							break;
-						case sdk.areas.MatronsDen:
-						case sdk.areas.ForgottenSands:
-						case sdk.areas.FurnaceofPain:
-						case sdk.areas.UberTristram:
-							redPortal = Pather.getPortal(obj.dest);
+              switch (unit.location) {
+              case sdk.storage.Inventory:
+                Storage.TradeScreen.CanFit(unit) && Storage.TradeScreen.MoveTo(unit);
 
-							break;
-						default:
-							Pather.usePortal(obj.dest);
-							
-							break;
-						}
+                break;
+              case sdk.storage.TradeWindow:
+                if (Storage.Inventory.CanFit(unit)) {
+                  Packet.itemToCursor(unit);
+                  Storage.Inventory.MoveTo(unit);
+                }
 
-						if (redPortal) {
-							Pather.moveToUnit(redPortal);
-							Pather.usePortal(null, null, redPortal);
-						}
+                break;
+              }
 
-						break;
-					case "qol":
-						switch (obj.action) {
-						case "heal":
-							Town.initNPC("Heal", "heal");
+              break;
+            case "pick":
+              Config.ManualPlayPick ? Pickit.pickItems() : Pickit.basicPickItems();
 
-							break;
-						case "openStash":
-							Town.openStash();
+              break;
+            case "sellItem":
+              unit = Game.getSelectedUnit();
 
-							break;
-						case "stashItems":
-							Town.stash(true, true);
+              if (unit.isInInventory && unit.sellable) {
+                try {
+                  unit.sell();
+                } catch (e) {
+                  console.error(e);
+                }
+              }
 
-							break;
-						case "makePortal":
-							Pather.makePortal();
+              break;
+            }
 
-							break;
-						case "takePortal":
-							Town.goToTown();
+            break;
+          case "drop":
+            switch (obj.action) {
+            case "invo":
+              Misc.dropItems(sdk.storage.Inventory);
+              
+              break;
+            case "stash":
+              Misc.dropItems(sdk.storage.Stash);
 
-							break;
-						case "clear":
-							Attack.clear(10);
+              break;
+            }
 
-							break;
-						case "cowportal":
-							Misc.openRedPortal(sdk.areas.MooMooFarm);
+            break;
+          case "stack":
+            switch (obj.action) {
+            case "thawing":
+              Town.buyPots(10, "Thawing", true, true);
 
-							break;
-						case "ubertrist":
-							Misc.openRedPortal(sdk.areas.UberTristram);
+              break;
+            case "antidote":
+              Town.buyPots(10, "Antidote", true, true);
 
-							break;
-						case "uberportal":
-							Misc.openRedPortal();
+              break;
+            case "stamina":
+              Town.buyPots(10, "Stamina", true, true);
 
-							break;
-						case "filltps":
-							Town.fillTome(sdk.items.TomeofTownPortal);
-							me.cancel();
+              break;
+            }
 
-							break;
-						case "moveItemFromInvoToStash":
-						case "moveItemFromStashToInvo":
-							unit = Game.getSelectedUnit();
+            break;
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        action = false;
+        removeEventListener("keyup", Pather.stopEvent);
+        togglePickThread();
+      }
+    }
 
-							switch (unit.location) {
-							case sdk.storage.Inventory:
-								Storage.Stash.CanFit(unit) && Storage.Stash.MoveTo(unit);
-
-								break;
-							case sdk.storage.Stash:
-								Storage.Inventory.CanFit(unit) && Storage.Inventory.MoveTo(unit);
-
-								break;
-							}
-
-							break;
-						case "moveItemFromInvoToCube":
-						case "moveItemFromCubeToInvo":
-							unit = Game.getSelectedUnit();
-
-							switch (unit.location) {
-							case sdk.storage.Inventory:
-								Storage.Cube.CanFit(unit) && Storage.Cube.MoveTo(unit);
-
-								break;
-							case sdk.storage.Cube:
-								Storage.Inventory.CanFit(unit) && Storage.Inventory.MoveTo(unit);
-
-								break;
-							}
-
-							break;
-						case "moveItemFromInvoToTrade":
-						case "moveItemFromTradeToInvo":
-							unit = Game.getSelectedUnit();
-
-							switch (unit.location) {
-							case sdk.storage.Inventory:
-								Storage.TradeScreen.CanFit(unit) && Storage.TradeScreen.MoveTo(unit);
-
-								break;
-							case sdk.storage.TradeWindow:
-								if (Storage.Inventory.CanFit(unit)) {
-									Packet.itemToCursor(unit);
-									Storage.Inventory.MoveTo(unit);
-								}
-
-								break;
-							}
-
-							break;
-						case "pick":
-							Config.ManualPlayPick ? Pickit.pickItems() : Pickit.basicPickItems();
-
-							break;
-						case "sellItem":
-							unit = Game.getSelectedUnit();
-
-							if (unit.isInInventory && unit.sellable) {
-								try {
-									unit.sell();
-								} catch (e) {
-									console.error(e);
-								}
-							}
-
-							break;
-						}
-
-						break;
-					case "drop":
-						switch (obj.action) {
-						case "invo":
-							Misc.dropItems(sdk.storage.Inventory);
-							
-							break;
-						case "stash":
-							Misc.dropItems(sdk.storage.Stash);
-
-							break;
-						}
-
-						break;
-					case "stack":
-						switch (obj.action) {
-						case "thawing":
-							Town.buyPots(10, "Thawing", true, true);
-							
-							break;
-						case "antidote":
-							Town.buyPots(10, "Antidote", true, true);
-
-							break;
-						case "stamina":
-							Town.buyPots(10, "Stamina", true, true);
-
-							break;
-						}
-
-						break;
-					}
-				}
-			} catch (e) {
-				console.error(e);
-			} finally {
-				action = false;
-				removeEventListener("keyup", Pather.stopEvent);
-				this.togglePickThread();
-			}
-		}
-
-		delay(20);
-	}
+    delay(20);
+  }
 }

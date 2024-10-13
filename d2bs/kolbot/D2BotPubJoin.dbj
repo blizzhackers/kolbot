@@ -3,442 +3,386 @@
 *  @author      kolton, theBGuy
 *  @desc        Entry script for following public games
 *
+*  @typedef {import("./sdk/globals")}
 */
-include("StarterConfig.js");
 
-// D2BotPubJoin specific settings - for global settings see libs/StarterConfig.js
+include("critical.js"); // required
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// D2BotPubJoin specific settings - for global settings see libs/starter/StarterConfig.js
 Starter.Config.MinGameTime = 0; // Minimum game length in seconds. If a game is ended too soon, the rest of the time is waited in the lobby
 Starter.Config.ResetCount = 0; // Reset game count back to 1 every X games.
 Starter.Config.JoinDelay = 10; // Seconds to wait between join attempts
 Starter.Config.AttemptNextGame = true; // after joining a game, attempt incrementing game count and joining next game rather than looking for it in game list
 Starter.Config.AttemptNextGameRetrys = 5;
+Starter.Config.MinPlayers = 1; // Minimum players in game to join
+const {
+  includeFilter,
+  excludeFilter
+} = require("./libs/systems/pubjoin/PubJoinConfig");
 
 // Override default values for StarterConfig under here by following format
 // Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
 
-/**
-	IncludeFilter config:
-
-	Multiple entries in the same array mean AND:
-	["baal", "-"] = game has to contain "baal" and "-"
-
-	Different entries mean OR:
-	["baal"],
-	["diablo"]
-	will join games with either "baal" or "diablo" in their name
-
-	Similar rules apply to ExcludeFilter:
-
-	["somebaal", "-"] ignores games with "somebaal" and "-" in the game name
-
-	["somebaal"],
-	["somediablo"]
-	this will ignore all games with "somebaal" or "somediablo" in their names
-*/
-
-const IncludeFilter = [
-	[""]
-];
-
-const ExcludeFilter = [
-	[""]
-];
-
 // ###############################################################################
 
-function includeCheck (game) {
-	// No filters
-	if (!IncludeFilter.length) return true;
+// the only things we really need from these are their oog checks
+includeSystemLibs();
 
-	for (let i = 0; i < IncludeFilter.length; i += 1) {
-		let j;
-		for (j = 0; j < IncludeFilter[i].length; j += 1) {
-			// Break the inner loop if an element didn't match or if an element is invalid
-			if (!IncludeFilter[i][j] || !game.match(IncludeFilter[i][j], "gi")) {
-				break;
-			}
-		}
+const Overrides = require("./modules/Override");
 
-		// All elements matched
-		if (j === IncludeFilter[i].length) {
-			return true;
-		}
-	}
-
-	return false;
+if (typeof Starter.AdvancedConfig[me.profile] === "object") {
+  Object.assign(Starter.Config, Starter.AdvancedConfig[me.profile]);
 }
-
-function excludeCheck (game) {
-	// No filters
-	if (!ExcludeFilter.length) return true;
-
-	for (let i = 0; i < ExcludeFilter.length; i += 1) {
-		let j;
-		for (j = 0; j < ExcludeFilter[i].length; j += 1) {
-			// Break the inner loop if an element didn't match or if an element is invalid
-			if (!ExcludeFilter[i][j] || !game.match(ExcludeFilter[i][j], "gi")) {
-				break;
-			}
-		}
-
-		// All elements matched
-		if (j === ExcludeFilter[i].length) {
-			return false;
-		}
-	}
-
-	return true;
-}
-
-// No touchy!
-include("json2.js");
-include("polyfill.js");
-include("OOG.js");
-include("automule.js");
-include("gambling.js");
-include("craftingsystem.js");
-include("torchsystem.js");
-include("common/misc.js");
-include("common/util.js");
-let sdk = require("./modules/sdk");
-let Controls = require("./modules/Control");
-let Overrides = require("./modules/Override");
-
-if (typeof AdvancedConfig[me.profile] === "object") {
-	Object.assign(Starter.Config, AdvancedConfig[me.profile]);
-}
+delete Starter.AdvancedConfig;
 
 new Overrides.Override(Starter, Starter.setNextGame, function (orignal, gameName) {
-	function incrementString (text) {
-		return text.replace(/(\d*)$/, (_, t) => (+t + 1).toString().padStart(t.length, 0));
-	}
+  function incrementString (text) {
+    return text.replace(/(\d*)$/, (_, t) => (+t + 1).toString().padStart(t.length, 0));
+  }
 
-	let nextGame = (gameName || this.randomString(null, true));
-	nextGame = incrementString(nextGame);
+  let nextGame = (gameName || Starter.randomString(null, true));
+  nextGame = incrementString(nextGame);
 
-	DataFile.updateStats("nextGame", nextGame);
+  DataFile.updateStats("nextGame", nextGame);
 }).apply();
 
 if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
-	Starter.firstRun = true;
+  Starter.firstRun = true;
 }
 
 let lastGameTick, retry = 0;
 let retryTick = 0;
 
-function locationAction (location) {
-	let gameToJoin, doneGames, gameList;
-
-	switch (location) {
-	case sdk.game.locations.PreSplash:
-		ControlAction.click();
-
-		break;
-	case sdk.game.locations.Lobby:
-		D2Bot.updateStatus("Lobby");
-
-		me.blockKeys = false;
-		Starter.loginRetry = 0;
-		!Starter.firstLogin && (Starter.firstLogin = true);
-		Starter.lastGameStatus === "pending" && (Starter.gameCount += 1);
-		Starter.loginFail = 0;
-
-		if (Starter.Config.PingQuitDelay && Starter.pingQuit) {
-			ControlAction.timeoutDelay("Ping Delay", Starter.Config.PingQuitDelay * 1e3);
-
-			Starter.pingQuit = false;
-		}
-
-		if (Starter.inGame || Starter.gameInfo.error) {
-			!Starter.gameStart && (Starter.gameStart = DataFile.getStats().ingameTick);
-
-			if (getTickCount() - Starter.gameStart < Starter.Config.MinGameTime * 1e3) {
-				ControlAction.timeoutDelay("Min game time wait", Starter.Config.MinGameTime * 1e3 + Starter.gameStart - getTickCount());
-			}
-		}
-
-		if (Starter.inGame) {
-			if (AutoMule.outOfGameCheck() || TorchSystem.outOfGameCheck() || Gambling.outOfGameCheck() || CraftingSystem.outOfGameCheck()) {
-				break;
-			}
-
-			print("updating runs");
-			D2Bot.updateRuns();
-
-			lastGameTick = getTickCount();
-			Starter.gameCount += 1;
-			Starter.lastGameStatus = "ready";
-			Starter.inGame = false;
-
-			if (Starter.Config.ResetCount && Starter.gameCount >= Starter.Config.ResetCount) {
-				Starter.gameCount = 1;
-				DataFile.updateStats("runs", Starter.gameCount);
-			}
-		}
-
-		Starter.LocationEvents.openJoinGameWindow();
-
-		break;
-	case sdk.game.locations.WaitingInLine:
-		Controls.CancelCreateGame.click();
-		Controls.JoinGameWindow.click();
-
-		break;
-	case sdk.game.locations.LobbyChat:
-	case sdk.game.locations.CreateGame:
-	case sdk.game.locations.Ladder:
-	case sdk.game.locations.ChannelList:
-		Starter.LocationEvents.openJoinGameWindow();
-
-		break;
-	case sdk.game.locations.JoinGame:
-		// Don't join immediately after previous game to avoid FTJ
-		if (getTickCount() - lastGameTick < 5000) {
-			ControlAction.timeoutDelay("Game Delay", (lastGameTick - getTickCount() + 5000));
-		}
-
-		if (Starter.Config.AttemptNextGame && retry < Starter.Config.AttemptNextGameRetrys) {
-			let ng = DataFile.getStats().nextGame;
-
-			if (ng && (retry === 0 || (getTickCount() - retryTick > Starter.Config.JoinDelay * 1e3))) {
-				gameToJoin = ng;
-				console.debug(gameToJoin);
-
-				me.blockMouse = true;
-
-				try {
-					joinGame(gameToJoin, "");
-				} catch (joinErr) {
-					print(joinErr);
-				}
-
-				retry++;
-				retryTick = getTickCount();
-				me.blockMouse = false;
-
-				Starter.locationTimeout(5000, location);
-
-				if (getLocation() === sdk.game.locations.GameDoesNotExist) {
-					Starter.LocationEvents.openJoinGameWindow();
-				}
-			}
-		}
-
-		for (let i = 0; i < 5; i += 1) {
-			gameList = ControlAction.getGameList();
-
-			if (gameList && gameList.length > 0) {
-				break;
-			}
-
-			delay(1000);
-		}
-
-		console.debug(gameList);
-
-		if (gameList) {
-			doneGames = [];
-			gameToJoin = false;
-			FileTools.exists("logs/doneGames.json") && (doneGames = JSON.parse(Misc.fileAction("logs/doneGames.json", 0)));
-
-			gameList.sort(function (a, b) {
-				return b.players - a.players;
-			});
-
-			for (let i = 0; i < gameList.length; i += 1) {
-				if (doneGames.indexOf(gameList[i].gameName) === -1 && includeCheck(gameList[i].gameName) && excludeCheck(gameList[i].gameName)) {
-					console.log("ÿc7Game: " + gameList[i].gameName + ", Players: " + gameList[i].players);
-					gameToJoin = gameList[i].gameName;
-
-					break;
-				}
-			}
-
-			if (gameToJoin) {
-				doneGames.length >= 20 && doneGames.shift();
-				doneGames.push(gameToJoin);
-				Misc.fileAction("logs/doneGames.json", 1, JSON.stringify(doneGames));
-
-				me.blockMouse = true;
-
-				try {
-					joinGame(gameToJoin, "");
-				} catch (joinErr) {
-					print(joinErr);
-				}
-
-				me.blockMouse = false;
-
-				Starter.locationTimeout(5000, location);
-			}
-		}
-
-		break;
-	case sdk.game.locations.MainMenu:
-	case sdk.game.locations.SplashScreen:
-	case sdk.game.locations.Login:
-	case sdk.game.locations.CharSelect:
-		Starter.LocationEvents.login();
-
-		break;
-	case sdk.game.locations.LoginError:
-	case sdk.game.locations.InvalidCdKey:
-	case sdk.game.locations.CdKeyInUse:
-		Starter.LocationEvents.loginError();
-
-		break;
-	case sdk.game.locations.LoginUnableToConnect:
-	case sdk.game.locations.TcpIpUnableToConnect:
-		Starter.LocationEvents.unableToConnect();
-
-		break;
-	case sdk.game.locations.RealmDown:
-		Starter.LocationEvents.realmDown();
-
-		break;
-	case sdk.game.locations.Disconnected:
-	case sdk.game.locations.LobbyLostConnection:
-		D2Bot.updateStatus("Disconnected/LostConnection");
-		delay(1000);
-		Controls.OkCentered.click();
-
-		break;
-	case sdk.game.locations.CharSelectPleaseWait:
-		!Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
-
-		break;
-	case sdk.game.locations.SelectDifficultySP:
-		break;
-	case sdk.game.locations.MainMenuConnecting:
-		!Starter.locationTimeout(Starter.Config.ConnectingTimeout * 1e3, location) && Controls.LoginCancelWait.click();
-
-		break;
-	case sdk.game.locations.CharSelectConnecting:
-	case sdk.game.locations.CharSelectNoChars:
-		Starter.LocationEvents.charSelectError();
-
-		break;
-	case sdk.game.locations.ServerDown:
-		break;
-	case sdk.game.locations.LobbyPleaseWait:
-		!Starter.locationTimeout(Starter.Config.PleaseWaitTimeout * 1e3, location) && Controls.OkCentered.click();
-
-		break;
-	case sdk.game.locations.GameNameExists:
-	case sdk.game.locations.GameIsFull:
-		Controls.CreateGameWindow.click();
-		Starter.gameCount += 1;
-		Starter.lastGameStatus = "ready";
-
-		break;
-	case sdk.game.locations.GatewaySelect:
-		Controls.GatewayCancel.click();
-
-		break;
-	case sdk.game.locations.GameDoesNotExist:
-		Starter.LocationEvents.gameDoesNotExist();
-
-		break;
-	case sdk.game.locations.CharacterCreate:
-		Controls.CharSelectExit.click();
-
-		break;
-	case sdk.game.locations.OtherMultiplayer:
-		Starter.LocationEvents.otherMultiplayerSelect();
-
-		break;
-	case sdk.game.locations.TcpIp:
-		Profile().type === sdk.game.profiletype.TcpIpHost ? Controls.TcpIpHost.click() : Controls.TcpIpCancel.click();
-
-		break;
-	case sdk.game.locations.TcpIpEnterIp:
-		Controls.TcpIpCancel.click();
-
-		break;
-	default:
-		if (location !== undefined) {
-			D2Bot.printToConsole("Unhandled location " + location);
-			delay(500);
-			D2Bot.restart();
-		}
-
-		break;
-	}
-}
-
-function main() {
-	debugLog(me.profile);
-	addEventListener("copydata", Starter.receiveCopyData);
-	addEventListener("scriptmsg", Starter.scriptMsgEvent);
-
-	while (!Starter.handle) {
-		delay(100);
-	}
-
-	DataFile.updateStats("handle", Starter.handle);
-	delay(500);
-	D2Bot.init();
-	load("tools/heartbeat.js");
-
-	while (!Object.keys(Starter.gameInfo).length) {
-		D2Bot.requestGameInfo();
-		delay(500);
-	}
-
-	Starter.gameCount = (DataFile.getStats().runs + 1 || 1);
-	DataFile.updateStats("nextGame", "");
-
-	if (Starter.gameInfo.error) {
-		D2Bot.retrieve();
-		delay(200);
-
-		if (Starter.gameInfo.crashInfo) {
-			D2Bot.printToConsole("Crash Info: Script: " + Starter.gameInfo.crashInfo.currScript + " Area: " + Starter.gameInfo.crashInfo.area, sdk.colors.D2Bot.Gray);
-		}
-
-		ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);
-		D2Bot.updateRuns();
-	}
-
-	D2Bot.store(JSON.stringify({currScript: "none", area: "out of game"}));
-
-	while (!Object.keys(Starter.profileInfo).length) {
-		D2Bot.getProfile();
-		print("Getting Profile");
-		delay(500);
-	}
-
-	while (true) {
-		// returns true before actually in game so we can't only use this check
-		while (me.ingame) {
-			// returns false when switching acts so we can't use while
-			if (me.gameReady) {
-				Starter.isUp = "yes";
-
-				if (!Starter.inGame) {
-					Starter.gameStart = getTickCount();
-
-					print("Updating Status");
-
-					Starter.lastGameStatus = "ingame";
-					Starter.inGame = true;
-					retry = 0;
-					retryTick = 0;
-
-					DataFile.updateStats("runs", Starter.gameCount);
-					DataFile.updateStats("ingameTick");
-					Starter.setNextGame(me.gamename);
-				}
-
-				D2Bot.updateStatus(Starter.profileInfo.charName + " | Game: " + (me.gamename || "singleplayer") + Starter.timer(Starter.gameStart));
-			}
-
-			delay(1000);
-		}
-
-		Starter.isUp = "no";
-
-		locationAction(getLocation());
-		delay(1000);
-	}
+const locationAction = (function () {
+  let gameToJoin, doneGames, gameList;
+
+  const Controls = require("./libs/modules/Control");
+  const {
+    locations,
+    addLocations
+  } = require("./libs/oog/Locations");
+  
+  /** @param {string} game */
+  const includeCheck = function (game) {
+    // No filters
+    if (!includeFilter.length) return true;
+
+    for (let filterSet of includeFilter) {
+      let conditionsMatched = true;
+
+      for (let condition of filterSet) {
+        // Break the inner loop if an element didn't match or if an element is invalid
+        if (!condition || !game.match(condition, "gi")) {
+          conditionsMatched = false;
+          break;
+        }
+      }
+
+      // All elements matched
+      if (conditionsMatched) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  /** @param {string} game */
+  const excludeCheck = function (game) {
+    // No filters
+    if (!excludeFilter.length) return true;
+
+    for (let filterSet of excludeFilter) {
+      let conditionsMatched = true;
+
+      for (let condition of filterSet) {
+        // Break the inner loop if an element didn't match or if an element is invalid
+        if (!condition || !game.match(condition, "gi")) {
+          conditionsMatched = false;
+          break;
+        }
+      }
+
+      // All elements matched
+      if (conditionsMatched) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  locations.set(sdk.game.locations.Lobby,
+    function () {
+      D2Bot.updateStatus("Lobby");
+
+      me.blockKeys = false;
+      Starter.loginRetry = 0;
+      !Starter.firstLogin && (Starter.firstLogin = true);
+      Starter.lastGameStatus === "pending" && (Starter.gameCount += 1);
+      Starter.loginFail = 0;
+
+      if (Starter.Config.PingQuitDelay && Starter.pingQuit) {
+        ControlAction.timeoutDelay("Ping Delay", Starter.Config.PingQuitDelay * 1e3);
+
+        Starter.pingQuit = false;
+      }
+
+      if (Starter.inGame || Starter.gameInfo.error) {
+        !Starter.gameStart && (Starter.gameStart = DataFile.getStats().ingameTick);
+
+        if (getTickCount() - Starter.gameStart < Starter.Config.MinGameTime * 1e3) {
+          ControlAction.timeoutDelay(
+            "Min game time wait",
+            Starter.Config.MinGameTime * 1e3 + Starter.gameStart - getTickCount()
+          );
+        }
+      }
+
+      if (Starter.inGame) {
+        if (AutoMule.outOfGameCheck()
+          || TorchSystem.outOfGameCheck()
+          || Gambling.outOfGameCheck()
+          || CraftingSystem.outOfGameCheck()) {
+          return;
+        }
+
+        print("updating runs");
+        D2Bot.updateRuns();
+
+        lastGameTick = getTickCount();
+        Starter.gameCount += 1;
+        Starter.lastGameStatus = "ready";
+        Starter.inGame = false;
+
+        if (Starter.Config.ResetCount && Starter.gameCount >= Starter.Config.ResetCount) {
+          Starter.gameCount = 1;
+          DataFile.updateStats("runs", Starter.gameCount);
+        }
+      }
+
+      Starter.LocationEvents.openJoinGameWindow();
+    }
+  );
+  addLocations([sdk.game.locations.WaitingInLine, sdk.game.locations.CreateGame],
+    function () {
+      Controls.CancelCreateGame.click();
+      Controls.JoinGameWindow.click();
+    }
+  );
+  addLocations(
+    [
+      sdk.game.locations.LobbyChat, sdk.game.locations.CreateGame,
+      sdk.game.locations.Ladder, sdk.game.locations.ChannelList
+    ],
+    function () {
+      Starter.LocationEvents.openJoinGameWindow();
+    }
+  );
+  locations.set(sdk.game.locations.JoinGame,
+    function (location) {
+      // Don't join immediately after previous game to avoid FTJ
+      if (getTickCount() - lastGameTick < 5000) {
+        ControlAction.timeoutDelay("Game Delay", (lastGameTick - getTickCount() + 5000));
+      }
+
+      if (Starter.Config.AttemptNextGame && retry < Starter.Config.AttemptNextGameRetrys) {
+        let ng = DataFile.getStats().nextGame;
+
+        if (ng && (retry === 0 || (getTickCount() - retryTick > Starter.Config.JoinDelay * 1e3))) {
+          gameToJoin = ng;
+          console.debug(gameToJoin);
+
+          me.blockMouse = true;
+
+          try {
+            joinGame(gameToJoin, "");
+          } catch (joinErr) {
+            print(joinErr);
+          }
+
+          retry++;
+          retryTick = getTickCount();
+          me.blockMouse = false;
+
+          Starter.locationTimeout(5000, location);
+
+          if (getLocation() === sdk.game.locations.GameDoesNotExist) {
+            Starter.LocationEvents.openJoinGameWindow();
+          }
+        }
+      }
+
+      for (let i = 0; i < 5; i += 1) {
+        gameList = ControlAction.getGameList();
+
+        if (gameList && gameList.length > 0) {
+          break;
+        }
+
+        delay(1000);
+      }
+
+      if (gameList) {
+        doneGames = [];
+        gameToJoin = false;
+        if (FileTools.exists("logs/doneGames.json")) {
+          doneGames = JSON.parse(FileAction.read("logs/doneGames.json"));
+        }
+
+        gameList
+          .sort(function (a, b) {
+            return b.players - a.players;
+          });
+
+        for (let { gameName, players } of gameList) {
+          if (players < Starter.Config.MinPlayers) continue;
+          if (doneGames.indexOf(gameName) === -1
+            && includeCheck(gameName)
+            && excludeCheck(gameName)) {
+            console.log("ÿc7Game: " + gameName + ", Players: " + players);
+            gameToJoin = gameName;
+
+            break;
+          }
+        }
+
+        if (gameToJoin) {
+          doneGames.length >= 20 && doneGames.shift();
+          doneGames.push(gameToJoin);
+          FileAction.write("logs/doneGames.json", JSON.stringify(doneGames));
+
+          me.blockMouse = true;
+
+          try {
+            joinGame(gameToJoin, "");
+          } catch (joinErr) {
+            print(joinErr);
+          }
+
+          me.blockMouse = false;
+
+          Starter.locationTimeout(5000, location);
+        }
+      }
+    }
+  );
+  locations.set(sdk.game.locations.SelectDifficultySP,
+    function () {
+      hideConsole();
+      sendKey(sdk.keys.Escape);
+    }
+  );
+  addLocations([sdk.game.locations.GameNameExists, sdk.game.locations.GameIsFull],
+    function () {
+      Controls.CreateGameWindow.click();
+      Starter.gameCount += 1;
+      Starter.lastGameStatus = "ready";
+    }
+  );
+  locations.set(sdk.game.locations.TcpIp,
+    function () {
+      Controls.TcpIpCancel.click();
+    }
+  );
+
+  return {
+    /** @param {number} loc */
+    run: function (loc) {
+      try {
+        let func = locations.get(loc);
+        if (typeof func === "function") {
+          func(loc);
+        } else if (loc !== undefined && loc !== null) {
+          console.log("Unhandled location: " + loc);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
+  };
+})();
+
+function main () {
+  debugLog(me.profile);
+  addEventListener("copydata", Starter.receiveCopyData);
+  addEventListener("scriptmsg", Starter.scriptMsgEvent);
+
+  while (!Starter.handle) {
+    delay(100);
+  }
+
+  DataFile.updateStats("handle", Starter.handle);
+  delay(500);
+  D2Bot.init();
+  load("threads/heartbeat.js");
+
+  while (!Object.keys(Starter.gameInfo).length) {
+    D2Bot.requestGameInfo();
+    delay(500);
+  }
+
+  Starter.gameCount = (DataFile.getStats().runs + 1 || 1);
+  DataFile.updateStats("nextGame", "");
+
+  if (Starter.gameInfo.error) {
+    D2Bot.retrieve();
+    delay(200);
+
+    if (Starter.gameInfo.crashInfo) {
+      D2Bot.printToConsole(
+        "Crash Info: Script: " + Starter.gameInfo.crashInfo.currScript
+        + " Area: " + Starter.gameInfo.crashInfo.area,
+        sdk.colors.D2Bot.Gray
+      );
+    }
+
+    ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);
+    D2Bot.updateRuns();
+  }
+
+  D2Bot.store(JSON.stringify({ currScript: "none", area: "out of game" }));
+
+  while (!Object.keys(Starter.profileInfo).length) {
+    D2Bot.getProfile();
+    print("Getting Profile");
+    delay(500);
+  }
+
+  while (true) {
+    // returns true before actually in game so we can't only use this check
+    while (me.ingame) {
+      // returns false when switching acts so we can't use while
+      if (me.gameReady) {
+        Starter.isUp = "yes";
+
+        if (!Starter.inGame) {
+          Starter.gameStart = getTickCount();
+
+          print("Updating Status");
+
+          Starter.lastGameStatus = "ingame";
+          Starter.inGame = true;
+          retry = 0;
+          retryTick = 0;
+
+          DataFile.updateStats("runs", Starter.gameCount);
+          DataFile.updateStats("ingameTick");
+          Starter.setNextGame(me.gamename);
+        }
+
+        D2Bot.updateStatus(
+          me.charname + " (" + me.charlvl + ") | Game: " + (me.gamename || "singleplayer")
+          + Starter.timer(Starter.gameStart)
+        );
+      }
+
+      delay(1000);
+    }
+
+    Starter.isUp = "no";
+
+    locationAction.run(getLocation());
+    delay(1000);
+  }
 }
