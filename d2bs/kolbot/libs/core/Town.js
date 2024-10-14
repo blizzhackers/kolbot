@@ -1425,9 +1425,21 @@ const Town = {
    */
   canStash: function (item) {
     if (Town.ignoreType(item.itemType)
-      || [sdk.items.quest.HoradricStaff, sdk.items.quest.KhalimsWill].includes(item.classid)
-      || !Town.canStashGem(item)) {
+      || [sdk.items.quest.HoradricStaff, sdk.items.quest.KhalimsWill].includes(item.classid)) {
       return false;
+    }
+    if ((!Storage.Stash.CanFit(item) || !Town.canStashGem(item)) && Config.SortSettings.PlugYStash) {
+      const firstPageBtn = me.screensize
+        ? { x: 226, y: 463} // 800x600
+        : { x: 191, y: 400}; // 640x480
+      !getUIFlag(sdk.uiflags.Stash) && Town.openStash();
+      say("/swappage");
+      delay(50);
+      say("/insertpage");
+      console.log("Inserted new empty page into stash");
+      delay(250);
+      sendClick(firstPageBtn.x, firstPageBtn.y); //click previous page
+      return true
     }
     /**
      * @todo add sorting here first if we can't fit the item

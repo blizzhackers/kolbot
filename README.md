@@ -39,6 +39,7 @@ If you want to contribute to d2bs/d2bot#, come to irc.synirc.net/d2bs and ask ar
 ## Guides
 - [manual playing](https://github.com/blizzhackers/documentation/blob/master/kolbot/ManualPlay.md/#manual-playing)
 - [multi botting](https://github.com/blizzhackers/documentation/blob/master/kolbot/MultiBotting.md/#multi-botting)
+- [PlugY Setup for single player](https://github.com/blizzhackers/documentation/blob/master/kolbot/PlugY.md#plugy-setup-for-single-player-botting)
 - [kolbot-SoloPlay](https://github.com/blizzhackers/kolbot-SoloPlay)
 - [character config](https://github.com/blizzhackers/documentation/blob/master/kolbot/CharacterConfig.md/#character-configuration)
 - [TCP/IP Games](https://github.com/blizzhackers/documentation/blob/master/kolbot/TCP-IP%20games.md#tcpip-games)
