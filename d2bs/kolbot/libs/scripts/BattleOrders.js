@@ -13,7 +13,7 @@ const BattleOrders = new Runnable(
     /** @type {Set<string>} */
     const totalBoed = new Set();
     /** @type {Set<string>} */
-    const boGetters = new Set(Config.BattleOrders.Getters.map(name => name.toLowerCase()));
+    let boGetters = new Set(Config.BattleOrders.Getters.map(name => name.toLowerCase()));
 
     const boMode = {
       Give: 0,
@@ -39,13 +39,13 @@ const BattleOrders = new Runnable(
         } catch (e) {
           if (Config.BattleOrders.Wait) {
             let counter = 0;
-            console.log("Waiting " + Config.BattleOrders.Wait + " seconds for other players...");
+            console.log("Waiting " + Config.BattleOrders.Wait + " seconds for other boGetters...");
 
             Misc.poll(() => {
               counter++;
               me.overhead(
                 "Waiting " + Math.round(((tick + Time.seconds(Config.BattleOrders.Wait)) - getTickCount()) / 1000)
-                + " Seconds for other players"
+                + " seconds for other getters"
               );
               if (counter % 5 === 0) {
                 return checkForPlayers();
@@ -92,38 +92,37 @@ const BattleOrders = new Runnable(
       return false; // Not late; wait.
     }
 
+    // if some getters are not in the game, remove them from the getters list
+    function removeMissing () {
+      const activePlayers = new Set(getUnits(sdk.unittype.Player).map(p => p.name.toLowerCase()));
+      boGetters = new Set([...boGetters].filter(name => activePlayers.has(name)));
+    }
+
     function giveBO () {
       let tick = getTickCount();
 
       // check nearby players
-      const playersToBo = getUnits(sdk.unittype.Player)
+      let playersToBo = getUnits(sdk.unittype.Player)
         .filter(p => boGetters.has(p.name.toLowerCase()) && p.distance < 20);
 
       // wait for players from boGetters list only, ignoring extra players
-      if (!BattleOrders.gaveBo) {
-        let boGettersNearby = new Set(playersToBo.map(p => p.name.toLowerCase()));
+      while (new Set(playersToBo.map(p => p.name.toLowerCase())).size !== boGetters.size) {
+        if (getTickCount() - tick >= Time.seconds(30)) {
+          log("Begin");
 
-        while (boGettersNearby.size !== boGetters.size) {
-          if (getTickCount() - tick >= Time.seconds(30)) {
-            log("Begin");
-
-            break;
-          }
-
-          me.overhead(
-            "Waiting " + Math.round(((tick + Time.seconds(30)) - getTickCount()) / 1000)
-            + " seconds for all BO getters."
-          );
-
-          // update nearby players to check only the ones in the getters list
-          boGettersNearby = new Set(
-            getUnits(sdk.unittype.Player)
-              .filter(p => boGetters.has(p.name.toLowerCase()) && p.distance < 20)
-              .map(p => p.name.toLowerCase())
-          );
-
-          delay(1000);
+          break;
         }
+
+        me.overhead(
+          "Waiting " + Math.round(((tick + Time.seconds(30)) - getTickCount()) / 1000)
+          + " seconds for all getters to show up"
+        );
+
+        // update nearby players to check only the ones in the getters list
+        playersToBo = getUnits(sdk.unittype.Player)
+          .filter(p => boGetters.has(p.name.toLowerCase()) && p.distance < 20);
+
+        delay(1000);
       }
 
       let boed = false;
@@ -154,9 +153,10 @@ const BattleOrders = new Runnable(
         }
       });
 
+      /*
       if (boed) {
-        delay(5000);
-      }
+        delay(5000); // Giving the barb a coffee break?
+      } */
 
       return {
         success: boed,
@@ -210,6 +210,12 @@ const BattleOrders = new Runnable(
 
       MainLoop:
       while (true) {
+        removeMissing(); // remove missing players from the list of getters
+        /*
+        if (me.classid === sdk.player.class.Barbarian) {
+          console.debug("Getters in game: " + [...boGetters].join(", "));
+        } */
+
         if (Config.BattleOrders.SkipIfTardy && tardy()) {
           break;
         }
@@ -225,12 +231,12 @@ const BattleOrders = new Runnable(
                 let nearPlayerName = nearPlayer.name.toLowerCase();
                 // there is a player near us and they are in the list of players to bo and in my party
                 if (boGetters.has(nearPlayerName)
-                    && !totalBoed.has(nearPlayerName)
-                    && Misc.inMyParty(nearPlayerName)) {
+                  && !totalBoed.has(nearPlayerName)
+                  && Misc.inMyParty(nearPlayerName)) {
                   let result = giveBO();
                   if (result.success) {
                     if (result.count === boGetters.size
-                        || totalBoed.size === boGetters.size) {
+                      || totalBoed.size === boGetters.size) {
                       // we bo-ed everyone we are set to, don't wait around any longer
                       break MainLoop;
                     }
@@ -243,7 +249,7 @@ const BattleOrders = new Runnable(
               } else {
                 me.overhead(
                   "Waiting " + Math.round(((tick + failTimer) - getTickCount()) / 1000)
-                    + " Seconds for other players"
+                  + " seconds for other getters"
                 );
 
                 if (getTickCount() - tick >= failTimer) {
@@ -258,7 +264,7 @@ const BattleOrders = new Runnable(
           } else {
             me.overhead(
               "Waiting " + Math.round(((tick + failTimer) - getTickCount()) / 1000)
-                + " Seconds for other players"
+              + " seconds for other getters"
             );
 
             if (getTickCount() - tick >= failTimer) {
@@ -305,15 +311,6 @@ const BattleOrders = new Runnable(
           while (Misc.inMyParty(Config.BattleOrders.Getters[i])) {
             delay(1000);
           }
-        }
-      }
-
-      if (Config.BattleOrders.Getters.length > 0) {
-        const failedToBo = getFailedToBO();
-        if (failedToBo.length > 0) {
-          log("Failed to bo: " + failedToBo.join(", "));
-        } else {
-          log("All designated players received BO.");
         }
       }
 
