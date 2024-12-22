@@ -92,7 +92,7 @@ const BattleOrders = new Runnable(
       return false; // Not late; wait.
     }
 
-    // if some getters are not in the game, remove them from the getters list
+    // remove those from the getters list who are not in game
     function removeMissing () {
       const activePlayers = new Set();
       let player = getParty();
@@ -216,12 +216,6 @@ const BattleOrders = new Runnable(
 
       MainLoop:
       while (true) {
-        removeMissing(); // remove missing players from the list of getters
-        /*
-        if (me.classid === sdk.player.class.Barbarian) {
-          console.debug("Getters in game: " + [...boGetters].join(", "));
-        } */
-
         if (Config.BattleOrders.SkipIfTardy && tardy()) {
           break;
         }
@@ -230,6 +224,9 @@ const BattleOrders = new Runnable(
         case boMode.Give:
           // check if anyone is near us
           nearPlayer = Game.getPlayer();
+
+          removeMissing(); // remove missing getters from the list
+          //console.debug("Getters in game: " + [...boGetters].join(", "));
 
           if (nearPlayer) {
             do {
