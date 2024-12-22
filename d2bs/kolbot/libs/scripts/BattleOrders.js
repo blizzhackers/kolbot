@@ -94,7 +94,13 @@ const BattleOrders = new Runnable(
 
     // if some getters are not in the game, remove them from the getters list
     function removeMissing () {
-      const activePlayers = new Set(getUnits(sdk.unittype.Player).map(p => p.name.toLowerCase()));
+      const activePlayers = new Set();
+      let player = getParty();
+      if (player) {
+        do {
+          activePlayers.add(player.name.toLowerCase());
+        } while (player.getNext());
+      }
       boGetters = new Set([...boGetters].filter(name => activePlayers.has(name)));
     }
 
