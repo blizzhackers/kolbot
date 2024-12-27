@@ -154,6 +154,7 @@ const BattleOrders = new Runnable(
           }
 
           totalBoed.add(p.name.toLowerCase());
+          boGetters.delete(p.name.toLowerCase());
           console.debug("Bo-ed " + p.name);
           boed = true;
         }
@@ -163,6 +164,13 @@ const BattleOrders = new Runnable(
       if (boed) {
         delay(5000); // Giving the barb a coffee break?
       } */
+
+      if (boGetters.size === 0) {
+        return {
+          success: boed,
+          count: playersToBo.length
+        };
+      }
 
       return {
         success: boed,
@@ -224,10 +232,8 @@ const BattleOrders = new Runnable(
         case boMode.Give:
           // check if anyone is near us
           nearPlayer = Game.getPlayer();
-
           removeMissing(); // remove missing getters from the list
           //console.debug("Getters in game: " + [...boGetters].join(", "));
-
           if (nearPlayer) {
             do {
               if (nearPlayer.name !== me.name) {
@@ -238,8 +244,7 @@ const BattleOrders = new Runnable(
                   && Misc.inMyParty(nearPlayerName)) {
                   let result = giveBO();
                   if (result.success) {
-                    if (result.count === boGetters.size
-                      || totalBoed.size === boGetters.size) {
+                    if (boGetters.size === 0) {
                       // we bo-ed everyone we are set to, don't wait around any longer
                       break MainLoop;
                     }
