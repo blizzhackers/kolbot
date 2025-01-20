@@ -1,0 +1,391 @@
+/**
+*  @filename    D2BotCleaner.dbj
+*  @author      theBGuy
+*  @credits     Whoever did the original D2BotAccountCleaner.dbj
+*  @desc        The purpose of this entryscript is to clean/remove characters and/or files easily
+*
+*  @typedef {import("./sdk/globals")}
+*/
+
+include("critical.js"); // required
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// D2BotCleaner settings - for global settings @see libs/starter/StarterConfig.js
+const {
+  CleanerConfig,
+  AccountsToClean,
+  CharactersToExclude,
+  profiles,
+  AdvancedProfileCleanerConfig,
+  AdvancedCleanerConfig,
+} = require("./libs/systems/cleaner/CleanerConfig");
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+// Override default values for StarterConfig under here by following format
+// Starter.Config.ValueToChange = value; // Example: Starter.Config.MinGameTime = 500; // changes MinGameTime to 500 seconds
+
+let Controls = require("./libs/modules/Control");
+
+if (!FileTools.exists("data/" + me.profile + ".json") && DataFile.create()) {
+  Starter.firstRun = true;
+}
+
+let currAcc, charList, realm;
+let firstAccount = true;
+let obj = {};
+const accounts = [];
+const chars = [];
+
+function dataCleaner () {
+  if (AdvancedProfileCleanerConfig.length) {
+    let incrementString = function (text) {
+      return text.replace(/(\d*)$/, (_, t) => (+t + 1).toString().padStart(t.length, 0));
+    };
+
+    AdvancedProfileCleanerConfig.forEach(p => {
+      let curr = p.profilePrefix + p.profileSuffixStart;
+      let end = p.profilePrefix + p.end;
+      profiles.push(curr);
+      while (curr !== end) {
+        curr = incrementString(curr);
+        profiles.push(curr);
+      }
+    });
+  }
+  if (!profiles.length) {
+    D2Bot.printToConsole(
+      "D2BotCleaner: No profiles entered to clean. "
+      + "If this was a mistake, fill out profile information under NEW STUFF. "
+      + "Exiting dataCleaner and moving on to clean characters...", sdk.colors.D2Bot.Gold
+    );
+    return;
+  }
+
+  let folder, j;
+  const charClassMap = new Map([
+    ["ZON", "amazon"],
+    ["SOR", "sorceress"],
+    ["NEC", "necromancer"],
+    ["PAL", "paladin"],
+    ["BAR", "barbarian"],
+    ["DRU", "druid"],
+    ["SIN", "assassin"]
+  ]);
+
+  for (let profile of profiles) {
+    const buildCheck = profile.toUpperCase().split("-");
+    const charClass = charClassMap.get(buildCheck[1].substring(0, 3)) || "undefined";
+    buildCheck[1] = buildCheck[1].substring(0, 3);
+    const charType = buildCheck[0].includes("CC") ? "Classic" : "Expansion";
+    let profileExists = false;
+    const soloplayProfile = charClass !== "undefined";
+
+    // Filepaths
+    const dataFP = "data/" + profile + ".json";
+    const gameTimeFP = "libs/SoloPlay/Data/" + profile + "/" + profile + "-GameTime" + ".json";
+    const charDataFP = "libs/SoloPlay/Data/" + profile + "/" + profile + "-CharData" + ".json";
+    const lvlPerfFP = "libs/SoloPlay/Data/" + profile + "/" + profile + "-LevelingPerformance" + ".csv";
+    const scrPerfFP = "libs/SoloPlay/Data/" + profile + "/" + profile + "-ScriptPerformance" + ".csv";
+    let savePath = "logs/"; // default value in case something goes wrong with assigning actual savePath
+
+    if (CleanerConfig.SaveFiles && soloplayProfile) {
+      if (FileTools.exists(dataFP)
+        || FileTools.exists(gameTimeFP)
+        || FileTools.exists(charDataFP)
+        || FileTools.exists(lvlPerfFP)
+        || FileTools.exists(scrPerfFP)) {
+        // Create folder to copy files to
+        if (!FileTools.exists("libs/SoloPlay/Data/" + charType)) {
+          folder = dopen("libs/SoloPlay/Data");
+          folder.create(charType);
+        }
+
+        if (!FileTools.exists("libs/SoloPlay/Data/" + charType + "/" + charClass)) {
+          folder = dopen("libs/SoloPlay/Data/" + charType);
+          folder.create(charClass);
+        }
+
+        let files = dopen("libs/SoloPlay/Data/" + charType + "/" + charClass + "/").getFolders();
+        j = files.length + 1;
+
+        // make sure folder doesn't already exist.
+        while (FileTools.exists("libs/SoloPlay/Data/" + charType + "/" + charClass + "/" + j.toString())) {
+          j++;
+          delay(100);
+        }
+
+        if (!FileTools.exists("libs/SoloPlay/Data/" + charType + "/" + charClass + "/" + j.toString())) {
+          folder = dopen("libs/SoloPlay/Data/" + charType + "/" + charClass);
+          folder.create(j.toString());
+        }
+
+        savePath = "libs/SoloPlay/Data/" + charType + "/" + charClass + "/" + j.toString() + "/" + profile;
+        profileExists = true;
+      }
+    }
+        
+    if (FileTools.exists(dataFP)) {
+      CleanerConfig.SaveFiles && FileTools.copy(dataFP, savePath + "Old.json");
+      FileTools.remove(dataFP);
+      profileExists = true;
+    }
+    
+    if (FileTools.exists(gameTimeFP)) {
+      CleanerConfig.SaveFiles && FileTools.copy(gameTimeFP, savePath + "-GameTimeOld.json");
+      FileTools.remove(gameTimeFP);
+    }
+
+    if (FileTools.exists(charDataFP)) {
+      CleanerConfig.SaveFiles && FileTools.copy(charDataFP, savePath + "-CharDataOld.json");
+      FileTools.remove(charDataFP);
+    }
+    
+    if (FileTools.exists(lvlPerfFP)) {
+      CleanerConfig.SaveFiles && FileTools.copy(lvlPerfFP, savePath + "-LevelingPerformanceOld.csv");
+      FileTools.remove(lvlPerfFP);
+    }
+
+    if (FileTools.exists(scrPerfFP)) {
+      CleanerConfig.SaveFiles && FileTools.copy(scrPerfFP, savePath + "-ScriptPerformanceOld.csv");
+      FileTools.remove(scrPerfFP);
+    }
+    
+    if (CleanerConfig.SaveFiles && profileExists && soloplayProfile) {
+      D2Bot.printToConsole("D2BotCleaner: Files saved to -> libs/SoloPlay/Data/" + charType + "/" + charClass + "/" + j, sdk.colors.D2Bot.Gold);
+    }
+
+    if (profileExists) {
+      D2Bot.printToConsole("D2BotCleaner: Cleaned files for -> " + profile, sdk.colors.D2Bot.Gold);
+    }
+
+    delay(500);
+  }
+
+  D2Bot.printToConsole("D2BotCleaner: Done cleaning files", sdk.colors.D2Bot.Gold);
+}
+  
+function parseInfo () {
+  for (let i in AccountsToClean) {
+    if (AccountsToClean.hasOwnProperty(i) && typeof i === "string") {
+      accounts.push(i);
+      chars.push(AccountsToClean[i]);
+    }
+  }
+  
+  if (AdvancedCleanerConfig.generateAccounts) {
+    for (let index = rangeStart; index <= rangeStop ; index += 1) {
+      const { accountPrefix, accountPassword, accountRealm } = AdvancedCleanerConfig;
+      accounts.push(accountPrefix + index + "/" + accountPassword + "/" + accountRealm);
+      chars.push(["all"]);
+    }
+  }
+
+  if (!accounts.length) {
+    FileTools.remove("logs/D2BotCleaner.json");
+    D2Bot.printToConsole("D2BotCleaner: No accounts entered. Exiting...", sdk.colors.D2Bot.Gold);
+    ControlAction.timeoutDelay("Exiting in: ", Time.seconds(3));
+    D2Bot.stop(me.profile, true);
+  }
+}
+  
+function deleteAllCharacters () {
+  let characters = ControlAction.getCharacters();
+  for (let character of characters) {
+    let info = { charName: character };
+    if (CharactersToExclude.includes(character)) continue;
+    if (!ControlAction.deleteCharacter(info)) {
+      print("failed to delete character " + character);
+      return false;
+    }
+    delay(500);
+  }
+  return true;
+}
+
+const {
+  locations,
+  addLocations
+} = require("./libs/oog/Locations");
+
+locations.set(sdk.game.locations.WaitingInLine,
+  function () {
+    Controls.CancelCreateGame.click();
+  }
+);
+addLocations(
+  [
+    sdk.game.locations.Lobby,
+    sdk.game.locations.LobbyChat,
+    sdk.game.locations.CreateGame,
+    sdk.game.locations.JoinGame,
+    sdk.game.locations.Ladder,
+    sdk.game.locations.ChannelList,
+    sdk.game.locations.GameNameExists,
+    sdk.game.locations.GameDoesNotExist,
+    sdk.game.locations.GameIsFull,
+  ],
+  function () {
+    Controls.LobbyQuit.click();
+  }
+);
+addLocations(
+  [
+    sdk.game.locations.MainMenu,
+    sdk.game.locations.Login,
+    sdk.game.locations.SplashScreen,
+  ],
+  function () {
+    if (!accounts.length) {
+      FileTools.remove("logs/D2BotCleaner.json");
+      D2Bot.printToConsole("D2BotCleaner: Done cleaning accounts!", sdk.colors.D2Bot.Gold);
+      D2Bot.stop(me.profile, true);
+    }
+    
+    if (!firstAccount) {
+      ControlAction.timeoutDelay("Waiting for next account in: ", Time.seconds(CleanerConfig.DelayBetweenAccounts));
+    }
+    
+    firstAccount = false;
+
+    if (FileTools.exists("logs/D2BotCleaner.json")) {
+      obj = JSON.parse(FileTools.readText("logs/D2BotCleaner.json"));
+
+      if (obj.currAcc) {
+        for (let i = 0; i < accounts.length; i += 1) {
+          if (accounts[i].split("/")[0] === obj.currAcc) {
+            accounts.splice(0, i);
+            chars.splice(0, i);
+
+            i -= 1;
+
+            break;
+          }
+        }
+      }
+    }
+
+    let currAccInfo = accounts[0].split("/");
+    currAcc = currAccInfo[0];
+    obj.currAcc = currAccInfo[0];
+    charList = chars[0];
+
+    D2Bot.printToConsole("D2BotCleaner: Cleaning account:" + currAcc + " , Character list: " + charList, sdk.colors.D2Bot.Gold);
+    FileTools.writeText("logs/D2BotCleaner.json", JSON.stringify(obj));
+    
+    if (currAcc.toLowerCase() === "singleplayer") {
+      Controls.SinglePlayer.click();
+    } else if (currAccInfo.length === 3) {
+      realm = currAccInfo[2].toLowerCase();
+      ControlAction.loginAccount({ account: currAcc, password: currAccInfo[1], realm: realm });
+    }
+  }
+);
+addLocations(
+  [
+    sdk.game.locations.CharSelect,
+    sdk.game.locations.CharSelectNoChars,
+  ],
+  function () {
+    // Single Player screen fix
+    if (currAcc.toLowerCase() !== "singleplayer") {
+      if (getLocation() === sdk.game.locations.CharSelect && !Controls.CharSelectCurrentRealm.control) {
+        Controls.BottomLeftExit.click();
+
+        return;
+      }
+    }
+    
+    if (!charList.length) {
+      Controls.BottomLeftExit.click();
+
+      return;
+    }
+
+    if (charList[0] === "all") {
+      deleteAllCharacters();
+    } else {
+      if (FileTools.exists("logs/D2BotCleaner.json")) {
+        obj = JSON.parse(FileTools.readText("logs/D2BotCleaner.json"));
+
+        if (obj.currChar) {
+          for (let i = 0; i < charList.length; i += 1) {
+            if (charList[i] === obj.currChar) {
+              // Remove the previous currChar as well
+              charList.splice(0, i + 1);
+
+              break;
+            }
+          }
+        }
+      }
+      
+      let charInfo = { charName: charList[0] };
+      CharactersToExclude.indexOf(charInfo) === -1 && ControlAction.deleteCharacter(charInfo);
+      delay(500);
+    }
+
+    let currChar = charList.shift();
+    obj.currChar = currChar;
+    
+    // last char in acc = trigger next acc
+    if (!charList.length) {
+      accounts.shift();
+      chars.shift();
+      Controls.BottomLeftExit.click();
+    }
+    
+    FileTools.writeText("logs/D2BotCleaner.json", JSON.stringify(obj));
+  }
+);
+
+/** @param {number} loc */
+function locationAction (loc) {
+  try {
+    let func = locations.get(loc);
+    if (typeof func === "function") {
+      func(loc);
+    } else if (loc !== undefined && loc !== null) {
+      console.log("Unhandled location: " + loc);
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function main () {
+  addEventListener("copydata", Starter.receiveCopyData);
+
+  while (!Starter.handle) {
+    delay(100);
+  }
+
+  DataFile.updateStats("handle", Starter.handle);
+  D2Bot.init();
+  load("threads/heartbeat.js");
+
+  while (!Object.keys(Starter.gameInfo).length) {
+    D2Bot.requestGameInfo();
+    delay(500);
+  }
+
+  if (Starter.gameInfo.error) {
+    if (!!DataFile.getStats().debugInfo) {
+      Starter.gameInfo.crashInfo = DataFile.getStats().debugInfo;
+      D2Bot.printToConsole(
+        "Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript
+        + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area, sdk.colors.D2Bot.Gray
+      );
+    }
+
+    ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);
+    D2Bot.updateRuns();
+  }
+
+  DataFile.updateStats("debugInfo", JSON.stringify({ currScript: "none", area: "out of game" }));
+
+  CleanerConfig.DataCleaner && dataCleaner();
+  !accounts.length && parseInfo();
+
+  while (true) {
+    locationAction(getLocation());
+    delay(1000);
+  }
+}

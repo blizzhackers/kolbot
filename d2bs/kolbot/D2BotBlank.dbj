@@ -1,64 +1,50 @@
-// Blank starter used for testin
+/**
+*  @filename    D2BotBlank.dbj
+*  @author      kolton, theBGuy
+*  @desc        Entry script for testing
+*
+*/
+
+
 function main() {
-	include("json2.js");
-	include("OOG.js");
-	include("common/misc.js");
+  include("critical.js"); // required
 
-	var handle,
-		isUp = "no";
+  if (!FileTools.exists("data/" + me.profile + ".json")) {
+    DataFile.create();
+  }
+  
+  addEventListener("copydata", Starter.receiveCopyData);
 
-	this.copyDataEvent = function (mode, msg) {
-		var obj;
+  while (!Starter.handle) {
+    delay(100);
+  }
 
-		switch (msg) {
-		case "Handle":
-			handle = mode;
+  DataFile.updateStats("handle", Starter.handle);
+  delay(500);
+  D2Bot.init();
+  load("threads/heartbeat.js");
 
-			break;
-		}
+  while (!Object.keys(Starter.gameInfo).length) {
+    D2Bot.requestGameInfo();
+    delay(500);
+  }
 
-		switch (mode) {
-		case 3: // request game
-			obj = JSON.parse(msg);
+  while (true) {
+    delay(1000);
+    
+    if (me.gameReady) {
+      Starter.isUp === "no" && (Starter.isUp = "yes");
+      if (me.ingame) {
+        D2Bot.updateStatus(
+          "(Char: " + me.charname + ") (Game: "
+          + (me.gamename || "singleplayer") + ") (Level: " + me.charlvl + ")"
+        );
+      }
+    } else {
+      D2Bot.updateStatus("Out of Game");
+      Starter.isUp = "no";
+    }
 
-			if (me.gameReady) {
-				D2Bot.joinMe(obj.profile, me.gamename.toLowerCase(), "", me.gamepassword.toLowerCase(), isUp);
-			}
-
-			break;
-		case 4:
-			// Heartbeat ping
-			if (msg === "pingreq") {
-				sendCopyData(null, me.windowtitle, 4, "pingrep");
-			}
-
-			break;
-		}
-	};
-
-
-	addEventListener('copydata', this.copyDataEvent);
-
-	while (!handle) {
-		delay(100);
-	}
-
-	DataFile.updateStats("handle", handle);
-	delay(500);
-	D2Bot.init();
-	load("tools/heartbeat.js");
-
-	if (!FileTools.exists("data/" + me.profile + ".json")) {
-		DataFile.create();
-	}
-
-	while (true) {
-		if (me.ingame) {
-			isUp = "yes";
-		} else {
-			isUp = "no";
-		}
-
-		delay(1000);
-	}
+    delay(1000);
+  }
 }

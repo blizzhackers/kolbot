@@ -1,0 +1,37 @@
+0x01    Inventory screen open
+0x02	Character Stat screen open
+0x03	Skill select open (left or right)
+0x04	Skill screen open
+0x05	Chat input open
+0x06    New stats button enabled
+0x07    New skill button enabled
+0x08	Npc menu open
+0x09	Esc menu open
+0x0A	Automap is open
+0x0B	Configure controls screen open
+0x0C	Npc trade window open
+0x0D	Holding alt to show items on gound
+0x0E	Npc choose item menu open (imbue, socket, personalize, etc)
+0x0F	Quest log open
+0x10  Key to the Cairn Stones Screen
+0x11	Quest button visible
+0x12	status area
+0x13	Has one or more portraits (merc, minion, party -agnostic of 0x23)
+0x14	Waypoint screen open
+0x15	Mini menu open
+0x16	Party screen open
+0x17	Trade prompt open -or Trade screen open
+0x18	Message log open
+0x19	Stash is open
+0x1A	Cube is open
+0x1B    ?
+0x1C    ?
+0x1D    ?
+0x1E    ?
+0x1F	Show belt is toggled (not on hover)
+0x20    ?
+0x21	Help screen open
+0x22    ?
+0x23    Show portraits is toggled
+0x24	Hireling screen open
+0x25	scroll of whatever
