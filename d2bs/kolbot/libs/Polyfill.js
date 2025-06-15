@@ -89,6 +89,10 @@ if (!String.prototype.includes) {
   };
 }
 
+if (!String.prototype.contains) {
+  String.prototype.contains = String.prototype.includes;
+}
+
 String.prototype.capitalize = function (downcase = false) {
   return this.charAt(0).toUpperCase() + (downcase ? this.slice(1).toLowerCase() : this.slice(1));
 };
