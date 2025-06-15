@@ -142,7 +142,7 @@ function getRequiredSkills (id) {
 
     for (let i = 0; i < results.length; i++) {
       let skill = results[i];
-      let skillInValidRange = (sdk.skills.Attack < skill && skill <= sdk.skills.PhoenixStrike) && (![sdk.skills.IdentifyScroll, sdk.skills.BookofIdentify, sdk.skills.TownPortalScroll, sdk.skills.BookofTownPortal].contains(skill));
+      let skillInValidRange = (sdk.skills.Attack < skill && skill <= sdk.skills.PhoenixStrike) && (![sdk.skills.IdentifyScroll, sdk.skills.BookofIdentify, sdk.skills.TownPortalScroll, sdk.skills.BookofTownPortal].includes(skill));
       let hardPointsInSkill = me.getSkill(skill, sdk.skills.subindex.HardPoints);
 
       if (skillInValidRange && !hardPointsInSkill) {
