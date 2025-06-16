@@ -82,6 +82,7 @@
           }
         };
         self.pushLowPrio(proxyCallback);
+        return true;
       },
       deleteProperty: function (target, name) {
         if (!target.processes.hasOwnProperty(name)) {
