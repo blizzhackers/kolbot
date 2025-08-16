@@ -1348,6 +1348,12 @@ const Pather = {
       );
     }
 
+    // There might be multiple stairs with the same class id nearby.
+    // Given we've walked to the stairs, pick the closest one.
+    if (type === sdk.unittype.Stairs) {
+      unit = getUnits(type, id).sort(Sort.units).first() || unit;
+    }
+
     return unit.useUnit(targetArea);
   },
 
