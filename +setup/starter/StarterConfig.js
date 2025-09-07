@@ -26,6 +26,7 @@
     AnnounceMessage: "", // Message to announce before making game
     AfterGameMessage: "", // Default message after a finished game. Can be an array of messages
 
+    JoinGameDelay: 3, // Seconds to wait before opening the join game window after a game
     InvalidPasswordDelay: 10, // Minutes to wait after getting Invalid Password message
     VersionErrorDelay: rand(5, 30), // Seconds to wait after 'unable to identify version' message
     SwitchKeyDelay: 5, // Seconds to wait before switching a used/banned key or after realm down

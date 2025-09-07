@@ -1366,6 +1366,10 @@ declare global {
     AnnounceMessage: string;
     AfterGameMessage: string;
 
+    /**
+     * Seconds to wait before opening the join game window after a game
+     */
+    JoinGameDelay: number;
     InvalidPasswordDelay: number; // Minutes to wait after getting Invalid Password message
     VersionErrorDelay: number; // Seconds to wait after 'unable to identify version' message
     SwitchKeyDelay: number; // Seconds to wait before switching a used/banned key or after realm down

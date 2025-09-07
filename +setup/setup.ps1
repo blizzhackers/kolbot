@@ -67,7 +67,8 @@ $dirs = @(
     "$SYSTEMS_DIR\gameaction",
     "$SYSTEMS_DIR\mulelogger",
     "$SYSTEMS_DIR\pubjoin",
-    "$SYSTEMS_DIR\torch"
+    "$SYSTEMS_DIR\torch",
+    "$SYSTEMS_DIR\charrefresher"
 )
 foreach ($dir in $dirs) {
     if (-not (Test-Path $dir)) {
@@ -112,6 +113,7 @@ Copy-IfNotExists "$SETUP_DIR\gameaction\GameActionConfig.js" "$SYSTEMS_DIR\gamea
 Copy-IfNotExists "$SETUP_DIR\mulelogger\LoggerConfig.js" "$SYSTEMS_DIR\mulelogger\LoggerConfig.js" "LoggerConfig.js to mulelogger directory"
 Copy-IfNotExists "$SETUP_DIR\pubjoin\PubJoinConfig.js" "$SYSTEMS_DIR\pubjoin\PubJoinConfig.js" "PubJoinConfig.js to pubjoin directory"
 Copy-IfNotExists "$SETUP_DIR\torch\FarmerConfig.js" "$SYSTEMS_DIR\torch\FarmerConfig.js" "FarmerConfig.js to torch directory"
+Copy-IfNotExists "$SETUP_DIR\charrefresher\RefresherConfig.js" "$SYSTEMS_DIR\charrefresher\RefresherConfig.js" "RefresherConfig.js to charrefresher directory"
 Write-Host "System configuration files processed successfully!"
 Write-Host ""
 

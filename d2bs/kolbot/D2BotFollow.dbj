@@ -4,6 +4,9 @@
 *  @desc        Entry script for following bots running on the same pc
 *
 *  @typedef {import("./sdk/globals")}
+*  @typedef {import("./libs/systems/torch/TorchSystem")}
+*  @typedef {import("./libs/systems/crafting/CraftingSystem")}
+*  @typedef {import("./libs/systems/gambling/Gambling")}
 */
 
 include("critical.js"); // required
@@ -101,6 +104,10 @@ const locationAction = (function () {
         Starter.gameCount += 1;
         Starter.lastGameStatus = "ready";
         Starter.inGame = false;
+
+        if (typeof Starter.Config.JoinGameDelay === "number" && Starter.Config.JoinGameDelay > 0) {
+          ControlAction.timeoutDelay("Join Game Delay", Starter.Config.JoinGameDelay * 1e3);
+        }
       }
 
       Starter.LocationEvents.openJoinGameWindow();
