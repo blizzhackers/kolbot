@@ -344,6 +344,7 @@ const MuleLogger = {
 
         for (let item of mercItems) {
           let parsedItem = this.logItem(item);
+          !parsedItem.header && (parsedItem.header = (me.account || "Single Player") + " / " + me.name);
           parsedItem.title += " (merc)";
           let string = JSON.stringify(parsedItem);
           finalString += (string + "\n");
