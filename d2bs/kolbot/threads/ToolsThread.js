@@ -153,12 +153,13 @@ function main () {
           itemString = (
             "ÿc4ItemName: ÿc0" + itemToCheck.prettyPrint
             + "\nÿc4ItemType: ÿc0" + itemToCheck.itemType
-            + "| ÿc4Classid: ÿc0" + itemToCheck.classid
-            + "| ÿc4Quality: ÿc0" + itemToCheck.quality
-            + "| ÿc4Gid: ÿc0" + itemToCheck.gid
+            + " | ÿc4Classid: ÿc0" + itemToCheck.classid
+            + " | ÿc4Quality: ÿc0" + itemToCheck.quality
+            + " | ÿc4Gid: ÿc0" + itemToCheck.gid
             + "\nÿc4ItemMode: ÿc0" + itemToCheck.mode
-            + "| ÿc4Location: ÿc0" + itemToCheck.location
-            + "| ÿc4Bodylocation: ÿc0" + itemToCheck.bodylocation
+            + " | ÿc4Location: ÿc0" + itemToCheck.location
+            + " | ÿc4Bodylocation: ÿc0" + itemToCheck.bodylocation
+            + " | ÿc4Item Level: ÿc0" + itemToCheck.ilvl
           );
           generalString = pString + nString
             + "\nÿc4Cubing Item: ÿc0" + Cubing.keepItem(itemToCheck)
