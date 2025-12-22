@@ -1,9 +1,9 @@
 /**
-*  @filename    BattleOrders.js
-*  @author      kolton, jmichelsen, theBGuy
-*  @desc        give or receive Battle Orders buff
-*
-*/
+ *  @filename    BattleOrders.js
+ *  @author      kolton, jmichelsen, theBGuy
+ *  @desc        give or receive Battle Orders buff
+ *
+ */
 
 // todo - define bo-er name, so bots who are getting bo know who is supposed to give it
 // todo - use profile <-> profile communication so we don't need to set char names, Maybe shout global?
@@ -45,7 +45,7 @@ const BattleOrders = new Runnable(
               counter++;
               me.overhead(
                 "Waiting " + Math.round(((tick + Time.seconds(Config.BattleOrders.Wait)) - getTickCount()) / 1000)
-                + " seconds for other getters"
+                + " seconds for other boGetters"
               );
               if (counter % 5 === 0) {
                 return checkForPlayers();
@@ -92,16 +92,49 @@ const BattleOrders = new Runnable(
       return false; // Not late; wait.
     }
 
-    // remove those from the getters list who are not in game
-    function removeMissing () {
-      const activePlayers = new Set();
+    /** Check for getters in game. */
+    function getGetters () {
+      const activeGetters = new Set();
       let player = getParty();
       if (player) {
         do {
-          activePlayers.add(player.name.toLowerCase());
+          activeGetters.add(player.name.toLowerCase());
         } while (player.getNext());
       }
-      boGetters = new Set([...boGetters].filter(name => activePlayers.has(name)));
+      boGetters = new Set(Config.BattleOrders.Getters
+        .map(name => name.toLowerCase())
+        .filter(name => activeGetters.has(name) && !totalBoed.has(name))
+      );
+    }
+
+    /**
+     * Checks if the giver is in game.
+     * @returns {boolean}
+     */
+    function getGiver () {
+      const giver = Config.BattleOrders.Giver.toLowerCase();
+      const wait = Time.seconds(Config.BattleOrders.WaitForGiver);
+      const tick = getTickCount();
+
+      //console.debug("Start checking for boGiver: " + giver);
+
+      while (getTickCount() - tick < wait) {
+        const timeout = Math.floor(((tick + wait) - getTickCount()) / 1000);
+        let player = getParty();
+        if (player) {
+          do {
+            if (player.name && player.name.toLowerCase() === giver) {
+              return true;
+            }
+          } while (player.getNext());
+        }
+
+        me.overhead("Waiting " + timeout + " seconds for " + giver);
+        delay(250);
+      }
+
+      log("ÿc1BO Giver not in game. Moving on...");
+      return false;
     }
 
     function giveBO () {
@@ -109,7 +142,11 @@ const BattleOrders = new Runnable(
 
       // check nearby players
       let playersToBo = getUnits(sdk.unittype.Player)
-        .filter(p => boGetters.has(p.name.toLowerCase()) && p.distance < 20);
+        .filter(p =>
+          boGetters.has(p.name.toLowerCase())
+          && p.distance < 20
+          && !totalBoed.has(p.name.toLowerCase())
+        );
 
       // wait for players from boGetters list only, ignoring extra players
       while (new Set(playersToBo.map(p => p.name.toLowerCase())).size !== boGetters.size) {
@@ -154,16 +191,12 @@ const BattleOrders = new Runnable(
           }
 
           totalBoed.add(p.name.toLowerCase());
-          boGetters.delete(p.name.toLowerCase());
           console.debug("Bo-ed " + p.name);
           boed = true;
+          delay(250);
+          boGetters.delete(p.name.toLowerCase());
         }
       });
-
-      /*
-      if (boed) {
-        delay(5000); // Giving the barb a coffee break?
-      } */
 
       if (boGetters.size === 0) {
         return {
@@ -193,7 +226,7 @@ const BattleOrders = new Runnable(
     Pather.moveTo(me.x + 6, me.y + 6);
 
     let tick = getTickCount();
-    let failTimer = Time.minutes(2);
+    let failTimer = Time.seconds(40);
     let nearPlayer;
 
     // Ready
@@ -204,7 +237,7 @@ const BattleOrders = new Runnable(
     * @param {string} msg 
     */
     function chatEvent (name, msg) {
-      if (!msg | !name) return;
+      if (!msg || !name) return;
       if (!boGetters.has(name.toLowerCase())) return;
       if (msg === "got-bo") {
         console.log(name + " got bo");
@@ -232,8 +265,8 @@ const BattleOrders = new Runnable(
         case boMode.Give:
           // check if anyone is near us
           nearPlayer = Game.getPlayer();
-          removeMissing(); // remove missing getters from the list
-          //console.debug("Getters in game: " + [...boGetters].join(", "));
+          getGetters();
+          console.debug("Getters in game: " + [...boGetters].join(", "));
           if (nearPlayer) {
             do {
               if (nearPlayer.name !== me.name) {
@@ -242,6 +275,7 @@ const BattleOrders = new Runnable(
                 if (boGetters.has(nearPlayerName)
                   && !totalBoed.has(nearPlayerName)
                   && Misc.inMyParty(nearPlayerName)) {
+                  delay(1000);
                   let result = giveBO();
                   if (result.success) {
                     if (boGetters.size === 0) {
@@ -257,7 +291,7 @@ const BattleOrders = new Runnable(
               } else {
                 me.overhead(
                   "Waiting " + Math.round(((tick + failTimer) - getTickCount()) / 1000)
-                  + " seconds for other getters"
+                  + " seconds for other boGetters"
                 );
 
                 if (getTickCount() - tick >= failTimer) {
@@ -272,7 +306,7 @@ const BattleOrders = new Runnable(
           } else {
             me.overhead(
               "Waiting " + Math.round(((tick + failTimer) - getTickCount()) / 1000)
-              + " seconds for other getters"
+              + " seconds for other boGetters"
             );
 
             if (getTickCount() - tick >= failTimer) {
@@ -294,11 +328,20 @@ const BattleOrders = new Runnable(
             break MainLoop;
           }
 
-          if (getTickCount() - tick >= failTimer) {
-            log("ÿc1BO timeout fail.");
-            Config.BattleOrders.QuitOnFailure && scriptBroadcast("quit");
+          if (Config.BattleOrders.Giver) {
+            if (!getGiver()) {
+              console.log("ÿc1BO timeout fail.");
+              Config.BattleOrders.QuitOnFailure && scriptBroadcast("quit");
 
-            break MainLoop;
+              break MainLoop;
+            }
+          } else {
+            if (getTickCount() - tick >= failTimer) {
+              log("ÿc1BO timeout fail.");
+              Config.BattleOrders.QuitOnFailure && scriptBroadcast("quit");
+                
+              break MainLoop;
+            }
           }
 
           break;
