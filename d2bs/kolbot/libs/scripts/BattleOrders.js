@@ -9,7 +9,6 @@
 // todo - use profile <-> profile communication so we don't need to set char names, Maybe shout global?
 const BattleOrders = new Runnable(
   function BattleOrders () {
-    this.gaveBo = false;
     /** @type {Set<string>} */
     const totalBoed = new Set();
     /** @type {Set<string>} */
@@ -284,8 +283,6 @@ const BattleOrders = new Runnable(
                     }
                     // reset fail tick
                     tick = getTickCount();
-                    // shorten waiting time since we've already started giving out bo's
-                    BattleOrders.gaveBo = true;
                   }
                 }
               } else {
@@ -368,7 +365,6 @@ const BattleOrders = new Runnable(
     } catch (e) {
       console.error(e);
     } finally {
-      BattleOrders.gaveBo = false;
       removeEventListener("chatmsg", chatEvent);
     }
 
