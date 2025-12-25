@@ -266,6 +266,9 @@ const BattleOrders = new Runnable(
 
         switch (Config.BattleOrders.Mode) {
         case boMode.Give:
+          if (boGetters.size === 0) {
+            break MainLoop;
+          }
           // check if anyone is near us
           nearPlayer = Game.getPlayer();
           getGetters();
