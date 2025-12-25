@@ -38,17 +38,22 @@ const BattleOrders = new Runnable(
         } catch (e) {
           if (Config.BattleOrders.Wait) {
             let counter = 0;
-            console.log("Waiting " + Config.BattleOrders.Wait + " seconds for other boGetters...");
+            console.log(
+              "Waiting " + Config.BattleOrders.Wait + " seconds for other " 
+              + (Config.BattleOrders.Mode === boMode.Give ? "boGetters..." : "boGiver...")
+            );
 
             Misc.poll(() => {
               counter++;
               me.overhead(
                 "Waiting " + Math.round(((tick + Time.seconds(Config.BattleOrders.Wait)) - getTickCount()) / 1000)
-                + " seconds for other boGetters"
+                + " seconds for other " + (Config.BattleOrders.Mode === boMode.Give ? "boGetters..." : "boGiver...")
               );
+
               if (counter % 5 === 0) {
                 return checkForPlayers();
               }
+              
               return false;
             }, Time.seconds(Config.BattleOrders.Wait), Time.seconds(1));
 
@@ -197,17 +202,16 @@ const BattleOrders = new Runnable(
         }
       });
 
-      if (boGetters.size === 0) {
-        return {
-          success: boed,
-          count: playersToBo.length
-        };
-      }
-
       return {
         success: boed,
         count: playersToBo.length
       };
+    }
+
+    if (Config.BattleOrders.Mode === boMode.Give) {
+      if (Config.BattleOrders.Getters.length === 0) {
+        throw new Error("No BO getters defined.");
+      }
     }
 
     // START
@@ -232,9 +236,9 @@ const BattleOrders = new Runnable(
     Precast.enabled = true;
 
     /**
-    * @param {string} name 
-    * @param {string} msg 
-    */
+     * @param {string} name 
+     * @param {string} msg 
+     */
     function chatEvent (name, msg) {
       if (!msg || !name) return;
       if (!boGetters.has(name.toLowerCase())) return;
