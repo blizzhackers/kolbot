@@ -40,25 +40,25 @@ const BaalAssistant = new Runnable(
       Config.BaalAssistant.NextGameMessage[i] = msg.toLowerCase();
     });
 
- function CheckShrine() {  // Check if XP shrine is still active, restore Helper to original config setting.
-    // If we never had a shrine, do nothing
-    if (!shrineActive)
+	function CheckShrine() {  // Check if XP shrine is still active, restore Helper to original config setting.
+      // If we never had a shrine, do nothing
+      if (!shrineActive)
         return;
 
-    const now = getTickCount(); 
-    // throttle: only allow once per 1000 ms
-    if (now - lastShrineCheck < 1000) {
+      const now = getTickCount(); 
+      // throttle: only allow once per 1000 ms
+      if (now - lastShrineCheck < 1000) {
         return; // skip
-    }
-    lastShrineCheck = now;
+      }
+      lastShrineCheck = now;
 
-    // If shrine buff is gone, shrine expired
-    if (!me.getState(sdk.states.ShrineExperience)) {
+      // If shrine buff is gone, shrine expired
+      if (!me.getState(sdk.states.ShrineExperience)) {
         Helper = Config.BaalAssistant.Helper;
         shrineActive = false;
         console.debug("XP shrine expired or removed, Helper restored to original config setting.");
-    }
-}
+      }
+	}
     
     const chatEvent = function (nick, msg) {
       if (nick === Leader) {
@@ -265,7 +265,7 @@ const BaalAssistant = new Runnable(
                   }
                   if (Misc.getShrinesInArea(i, sdk.shrines.Experience, true)) {
                     shrineActive = true;
-					          Helper = false;
+					Helper = false;
                     break;
                   }
                 }
@@ -282,7 +282,7 @@ const BaalAssistant = new Runnable(
                       }
                       if (Misc.getShrinesInArea(i, sdk.shrines.Experience, true)) {
                         shrineActive = true;
-					              Helper = false;
+					    Helper = false;
                         break;
                       }
                     }
@@ -512,13 +512,13 @@ const BaalAssistant = new Runnable(
 
                 }
                 if (Helper || Config.BaalAssistant.HurtBaal > 0) { // shrine was removed and Helper enabled
-                Pather.moveTo(15134, 5923);
-                Config.BaalAssistant.HurtBaal > 0
-                  ? Attack.hurt(sdk.monsters.Baal, Config.BaalAssistant.HurtBaal)
-                  : Attack.kill(sdk.monsters.Baal);
-                Pickit.pickItems();
-              }
-
+				  Pather.moveTo(15134, 5923);
+				  Config.BaalAssistant.HurtBaal > 0
+				  ? Attack.hurt(sdk.monsters.Baal, Config.BaalAssistant.HurtBaal)
+				  : Attack.kill(sdk.monsters.Baal);
+				  Pickit.pickItems();
+				}
+			  }
             } else {
               // how to accurately know when to end script in the instance of no ngCheck
               // listen for baal death packet maybe?
