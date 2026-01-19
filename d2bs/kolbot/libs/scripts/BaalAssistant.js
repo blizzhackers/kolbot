@@ -265,7 +265,7 @@ const BaalAssistant = new Runnable(
                   }
                   if (Misc.getShrinesInArea(i, sdk.shrines.Experience, true)) {
                     shrineActive = true;
-					Helper = false;
+					          Helper = false;
                     break;
                   }
                 }
@@ -282,7 +282,7 @@ const BaalAssistant = new Runnable(
                       }
                       if (Misc.getShrinesInArea(i, sdk.shrines.Experience, true)) {
                         shrineActive = true;
-					    Helper = false;
+					              Helper = false;
                         break;
                       }
                     }
@@ -511,14 +511,14 @@ const BaalAssistant = new Runnable(
                   CheckShrine();
 
                 }
-                if (Helper || Config.BaalAssistant.HurtBaal > 0) { // shrine was removed and Helper enabled
-				  Pather.moveTo(15134, 5923);
-				  Config.BaalAssistant.HurtBaal > 0
-				  ? Attack.hurt(sdk.monsters.Baal, Config.BaalAssistant.HurtBaal)
-				  : Attack.kill(sdk.monsters.Baal);
-				  Pickit.pickItems();
-				}
-			  }
+                if (Helper || Config.BaalAssistant.HurtBaal > 0) {    // shrine was removed and Helper enabled
+                  Pather.moveTo(15134, 5923);
+                  Config.BaalAssistant.HurtBaal > 0
+                    ? Attack.hurt(sdk.monsters.Baal, Config.BaalAssistant.HurtBaal)
+                    : Attack.kill(sdk.monsters.Baal);
+				          Pickit.pickItems();
+                }
+              }
             } else {
               // how to accurately know when to end script in the instance of no ngCheck
               // listen for baal death packet maybe?
