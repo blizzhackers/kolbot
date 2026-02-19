@@ -39,15 +39,15 @@ const BattleOrders = new Runnable(
           if (Config.BattleOrders.Wait) {
             let counter = 0;
             console.log(
-              "Waiting " + Config.BattleOrders.Wait + " seconds for other " 
-              + (Config.BattleOrders.Mode === boMode.Give ? "boGetters..." : "boGiver...")
+              "Waiting " + Config.BattleOrders.Wait + " seconds for " 
+              + (Config.BattleOrders.Mode === boMode.Give ? "other boGetters..." : "boGiver...")
             );
 
             Misc.poll(() => {
               counter++;
               me.overhead(
                 "Waiting " + Math.round(((tick + Time.seconds(Config.BattleOrders.Wait)) - getTickCount()) / 1000)
-                + " seconds for other " + (Config.BattleOrders.Mode === boMode.Give ? "boGetters..." : "boGiver...")
+                + " seconds for " + (Config.BattleOrders.Mode === boMode.Give ? "other boGetters..." : "boGiver...")
               );
 
               if (counter % 5 === 0) {
@@ -116,18 +116,16 @@ const BattleOrders = new Runnable(
      * @returns {boolean}
      */
     function getGiver () {
-      const giver = Config.BattleOrders.Giver.toLowerCase();
+      const giver = Config.BattleOrders.Giver;
       const wait = Time.seconds(Config.BattleOrders.WaitForGiver);
       const tick = getTickCount();
-
-      //console.debug("Start checking for boGiver: " + giver);
 
       while (getTickCount() - tick < wait) {
         const timeout = Math.floor(((tick + wait) - getTickCount()) / 1000);
         let player = getParty();
         if (player) {
           do {
-            if (player.name && player.name.toLowerCase() === giver) {
+            if (player.name && player.name.toLowerCase() === giver.toLowerCase()) {
               return true;
             }
           } while (player.getNext());
