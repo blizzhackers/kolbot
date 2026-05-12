@@ -25,6 +25,13 @@ includeIfNotIncluded("oog/DataFile.js");
     _entry: "",
 
     init: function () {
+      // Pick up handle updates, in case the instance is taken over by a new manager.
+      addEventListener("copydata", function (mode, msg) {
+        if (msg === "Handle" && typeof mode === "number") {
+          D2Bot.handle = mode;
+        }
+      });
+
       let handle = DataFile.getStats().handle;
 
       if (handle) {
