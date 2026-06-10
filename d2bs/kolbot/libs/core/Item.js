@@ -533,6 +533,7 @@ const Item = {
       let lastArea;
       const name = unit.fname.split("\n").reverse().join(" ").replace(/ÿc[0-9!"+<:;.*]|\/|\\/g, "").trim();
       const color = (unit.getColor() || -1);
+      const invTrans = (getBaseStat("items", unit.classid, "InvTrans") || 0);
       const code = this.getItemCode(unit);
       const sock = unit.getItem();
       let desc = this.getItemDesc(unit);
@@ -561,6 +562,7 @@ const Item = {
         image: code,
         textColor: unit.quality,
         itemColor: color,
+        invTrans: invTrans,
         header: "",
         sockets: this.getItemSockets(unit)
       };
