@@ -12,6 +12,8 @@
 const BaalHelper = new Runnable(
   /** @param {BaalHelperContext} ctx */
   function BaalHelper (ctx) {
+    let quitFlag;
+    
     const chatEvent = function (nick, msg) {
       if (nick === Config.Leader) {
         if ((Config.BaalHelper.DollQuit && msg === "Dolls found! NG.")
@@ -76,7 +78,7 @@ const BaalHelper = new Runnable(
       Town.goToTown(5);
       Town.move("portalspot");
 
-      let quitFlag = false;
+      quitFlag = false;
 
       if (Config.BaalHelper.DollQuit || Config.BaalHelper.SoulQuit) {
         addEventListener("chatmsg", chatEvent);
