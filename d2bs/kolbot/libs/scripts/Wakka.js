@@ -339,7 +339,7 @@ const Wakka = new Runnable(
                     Precast.doPrecast(true);
                     tick = getTickCount();
 
-                    while (getTickCount() - tick >= 5000) {
+                    while (getTickCount() - tick < 5000) {
                       delay(100);
                     }
                   }
@@ -356,7 +356,7 @@ const Wakka = new Runnable(
                     Precast.doPrecast(true);
                     tick = getTickCount();
 
-                    while (getTickCount() - tick >= 7000) {
+                    while (getTickCount() - tick < 7000) {
                       delay(100);
                     }
                   }
@@ -373,7 +373,7 @@ const Wakka = new Runnable(
                     Precast.doPrecast(true);
                     tick = getTickCount();
 
-                    while (getTickCount() - tick >= 2000) {
+                    while (getTickCount() - tick < 2000) {
                       delay(100);
                     }
                   }

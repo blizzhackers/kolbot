@@ -27,6 +27,5 @@ const RaiseArmy = new Runnable(
   },
   {
     startArea: sdk.areas.Harrogath,
-    bossid: getLocaleString(sdk.locale.monsters.Pindleskin),
   }
 );

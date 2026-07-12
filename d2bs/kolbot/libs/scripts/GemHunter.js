@@ -50,7 +50,7 @@ const GemHunter = new Runnable(
           if (shrine) {
             do {
               if (shrine.objtype === sdk.shrines.Gem && shrine.mode === sdk.objects.mode.Inactive) {
-                (!Skill.haveTK || !use) && Pather.moveTo(shrine.x - 2, shrine.y - 2);
+                (!Skill.haveTK) && Pather.moveTo(shrine.x - 2, shrine.y - 2);
 
                 console.log("ÿc4GemHunterÿc0: found a gem Shrine");
                 if (Misc.getShrine(shrine)) {

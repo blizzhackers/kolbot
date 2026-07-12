@@ -49,7 +49,7 @@ function Synch2() {
     delay(1000);
   }
 
-  if (!Synched) {
+  if (!Synched2) {
     D2Bot.printToConsole("Failed to sync.");
     quit();
   }

@@ -179,7 +179,7 @@ const AutoChaos = new Runnable(
         delay(250);
       }
 
-      if (classes.indexOf(true) >= 0) {
+      if (Object.values(classes).indexOf(true) >= 0) {
         throw new Error(notify("Not enough players."));
       }
     }

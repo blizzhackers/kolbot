@@ -463,7 +463,7 @@ function shopStuff (npcId, classids, amount) {
     me.area === wpArea && Pather.useWaypoint(town);
 
     // end script 5 seconds before we need to exit
-    if (getTickCount() - tickCount > me.maxgametime - 5000) {
+    if (me.maxgametime > 0 && getTickCount() - tickCount > me.maxgametime - 5000) {
       break;
     }
 

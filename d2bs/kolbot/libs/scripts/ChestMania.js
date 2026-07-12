@@ -41,7 +41,7 @@ const ChestMania = new Runnable(
     return true;
   },
   {
-    startArea: Object.values(Config.ChestMania).find((act) => act.length > 0)[0][0],
+    startArea: Object.values(Config.ChestMania).find((act) => act.length > 0)[0],
     cleanup: function () {
       Config.OpenChests.Enabled = Config.OpenChests._enabled;
       delete Config.OpenChests._enabled;
