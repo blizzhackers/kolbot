@@ -157,13 +157,13 @@
     for (let y = 0; y < this.width - (item.sizex - 1); y++) {
       Loop:
       for (let x = 0; x < this.height - (item.sizey - 1); x++) {
-        // If spot is locked move on
-        if (Config.Inventory[x][y] === 0) continue;
+        // If spot is locked or already occupied move on
+        if (Config.Inventory[x][y] === 0 || this.buffer[x][y] !== 0) continue;
 
         // Loop the item size to make sure we can fit it in non locked spots.
         for (let nx = 0; nx < item.sizey; nx++) {
           for (let ny = 0; ny < item.sizex; ny++) {
-            if (Config.Inventory[x + nx][y + ny] === 0) continue Loop;
+            if (Config.Inventory[x + nx][y + ny] === 0 || this.buffer[x + nx][y + ny] !== 0) continue Loop;
           }
         }
 
@@ -433,6 +433,7 @@
       for (let i = 0; i < itemsToMove.length; i++) {
         let reverseX = !(Config.SortSettings.ItemsSortedFromRight.includes(item.classid));
         tmpLocation = this.FindSpot(itemsToMove[i], reverseX, false);
+        if (!tmpLocation) return false; // no spot to move the blocking item — can't make room
         // D2Bot.printToConsole(itemsToMove[i].name + " moving from " + itemsToMove[i].x + "," + itemsToMove[i].y + " to "  + tmpLocation.y + "," + tmpLocation.x, sdk.colors.D2Bot.Gold);
 
         if (this.MoveToSpot(itemsToMove[i], tmpLocation.y, tmpLocation.x)) {

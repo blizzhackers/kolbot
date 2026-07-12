@@ -1392,7 +1392,7 @@ const Cubing = {
 
     if (items.length) {
       while (items.length > 0) {
-        let runeNeeded = Item.getRepairIngred(items.shift());
+        let runeNeeded = Item.repairIngred(items.shift());
 
         if (runeNeeded === sdk.items.runes.Ral) {
           needRal += 1;

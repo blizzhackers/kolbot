@@ -91,6 +91,7 @@ const Rusher = new Runnable(
 
     const getPartyAct = function () {
       let party = getParty();
+      if (!party) return sdk.areas.actOf(me.area);
       let minArea = 999;
 
       do {
@@ -255,7 +256,7 @@ const Rusher = new Runnable(
 
             if (commandSplit0.toLowerCase() === "do") {
               let script = (command.split(" ")[1] || "").toLowerCase();
-              if (!script || !AutoRush.sequences.some(el => el.match(script, "gi"))) {
+              if (!script || !AutoRush.sequences.includes(script)) {
                 say("Invalid sequence");
                 break;
               }
