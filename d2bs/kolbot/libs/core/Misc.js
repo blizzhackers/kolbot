@@ -737,9 +737,9 @@ const Misc = (function () {
     },
 
     _wantWell: function () {
-      if (me.hpPercent < Config.AutoShriner ? 75 : Config.UseWells.HpPercent) return true;
-      if (me.mpPercent < Config.AutoShriner ? 75 : Config.UseWells.MpPercent) return true;
-      if (me.staminaPercent < Config.AutoShriner ? 50 : Config.UseWells.StaminaPercent) return true;
+      if (me.hpPercent < (Config.AutoShriner ? 75 : Config.UseWells.HpPercent)) return true;
+      if (me.mpPercent < (Config.AutoShriner ? 75 : Config.UseWells.MpPercent)) return true;
+      if (me.staminaPercent < (Config.AutoShriner ? 50 : Config.UseWells.StaminaPercent)) return true;
       return (Config.AutoShriner || Config.UseWells.StatusEffects) && [
         sdk.states.Frozen,
         sdk.states.Poison,
@@ -804,7 +804,7 @@ const Misc = (function () {
             // Can we teleport to it?
             // Is it closer to our path at a later point?
             // Is it a really good shrine or just a meh one? So we know if we should go out of our way for it.
-            if (shrine.distance > Skill.haveTK ? 20 : 10) {
+            if (shrine.distance > (Skill.haveTK ? 20 : 10)) {
               if (Pather.currentWalkingPath.some((point) => getDistance(point.x, point.y, shrine.x, shrine.y) < 10)) {
                 if (Config.DebugMode.Path) {
                   new Line(shrine.x - 3, shrine.y, shrine.x + 3, shrine.y, 0x9B, true);

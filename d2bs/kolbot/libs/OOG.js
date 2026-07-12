@@ -158,6 +158,10 @@ includeIfNotIncluded("core/Me.js");
     },
 
     // ~~~ Start of general functions ~~~ //
+    /**
+     * Scroll the character select list down by sending several DownArrow key presses.
+     * @returns {void}
+     */
     scrollDown: function () {
       me.blockMouse = true;
       for (let i = 0; i < 4; i++) {
@@ -166,6 +170,12 @@ includeIfNotIncluded("core/Me.js");
       me.blockMouse = false;
     },
 
+    /**
+     * Select the given realm/gateway from the main menu, opening the gateway list if needed.
+     * @param {number} realm - realm index (0 = US West, 1 = US East, 2 = Asia, 3 = Europe)
+     * @returns {boolean} true once the requested realm is selected, false if the gateway control could not be found after retries
+     * @throws {Error} if realm is undefined, not a number, or outside the 0-3 range
+     */
     clickRealm: function (realm) {
       if (realm === undefined || typeof realm !== "number" || realm < 0 || realm > 3) {
         throw new Error("clickRealm: Invalid realm!");
@@ -326,6 +336,10 @@ includeIfNotIncluded("core/Me.js");
       return false;
     },
 
+    /**
+     * Collect the names of all characters on the current character select screen.
+     * @returns {string[]} array of character names (empty if not on the character select screen)
+     */
     getCharacters: function () {
       const singlePlayer = ![sdk.game.profiletype.OpenBattlenet, sdk.game.profiletype.Battlenet].includes(Profile().type);
       // offline doesn't have a character limit cap
@@ -633,6 +647,12 @@ includeIfNotIncluded("core/Me.js");
       }
     },
 
+    /**
+     * Register/verify an email on the RegisterEmail screen, cycling until reaching character select.
+     * @param {string} [email] - email local-part; a random string is generated when empty
+     * @param {string} [domain] - email domain suffix appended to the local-part
+     * @returns {boolean} true if the email was accepted (reached char select or fresh account), false if not on the RegisterEmail screen or a login error occurred
+     */
     setEmail: function (email = "", domain = "@email.com") {
       if (getLocation() !== sdk.game.locations.RegisterEmail) return false;
       if (!email || !email.length) {
@@ -664,6 +684,18 @@ includeIfNotIncluded("core/Me.js");
       return true;
     },
 
+    /**
+     * @typedef {Object} AccountInfo
+     * @property {string} account
+     * @property {string} password
+     * @property {string} realm
+     */
+
+    /**
+     * Drive the menus to create a new battle.net/open battle.net account, cycling until an empty char screen.
+     * @param {AccountInfo} info - account credentials and realm used to create the account
+     * @returns {boolean} true once the empty character select screen is reached, false on a login error
+     */
     makeAccount: function (info) {
       me.blockMouse = true;
 
@@ -747,6 +779,11 @@ includeIfNotIncluded("core/Me.js");
       return true;
     },
 
+    /**
+     * Drive the menus to log into an existing account, cycling until reaching a character select screen.
+     * @param {AccountInfo} info - account credentials and realm used to log in
+     * @returns {boolean} true if the account reached a (populated or empty) character select screen, false on connection failure, realm down, timeout, or an unhandled location
+     */
     loginAccount: function (info) {
       me.blockMouse = true;
 
@@ -824,6 +861,11 @@ includeIfNotIncluded("core/Me.js");
       return getLocation() === sdk.game.locations.CharSelect || getLocation() === sdk.game.locations.CharSelectNoChars;
     },
 
+    /**
+     * Join the given chat channel from the lobby, opening the chat/channel list as needed.
+     * @param {string} channel - name of the channel to join
+     * @returns {boolean} true if the channel was joined before the timeout, false otherwise
+     */
     joinChannel: function (channel) {
       me.blockMouse = true;
 
@@ -873,6 +915,14 @@ includeIfNotIncluded("core/Me.js");
       return rval;
     },
 
+    /**
+     * Fill out and submit the create-game window with the given name, password and difficulty.
+     * @param {string} name - game name
+     * @param {string} pass - game password
+     * @param {string} diff - difficulty selection ("Normal", "Nightmare", "Highest", or default for Hell)
+     * @param {number} [delay] - optional pre-create delay in milliseconds
+     * @returns {void}
+     */
     createGame: function (name, pass, diff, delay) {
       Controls.CreateGameName.setText(name);
       Controls.CreateGamePass.setText(pass);
@@ -929,6 +979,10 @@ includeIfNotIncluded("core/Me.js");
       me.blockMouse = false;
     },
     
+    /**
+     * Read the join-game list control and return the listed games.
+     * @returns {{ gameName: string, players: string }[] | false} array of games with name/player counts, or false if the list has no text
+     */
     getGameList: function () {
       let text = Controls.JoinGameList.getText();
 
@@ -948,6 +1002,10 @@ includeIfNotIncluded("core/Me.js");
       return false;
     },
 
+    /**
+     * Parse the create-game "in line" control to get the current queue position.
+     * @returns {number} position in line, or 0 when there is no queue
+     */
     getQueueTime: function () {
       // You are in line to create a game.,Try joining a game to avoid waiting.,,Your position in line is: ÿc02912
       const text = Controls.CreateGameInLine.getText();
@@ -961,6 +1019,13 @@ includeIfNotIncluded("core/Me.js");
       return 0; // You're in line 0, aka no queue
     },
 
+    /**
+     * Drive the Other Multiplayer / Open Battle.net / TCP-IP / single-player menus until in game,
+     * in the lobby, or at the TCP/IP enter-IP prompt.
+     * @returns {boolean} true if in game (or at the enter-IP prompt), false otherwise.
+     *   Note: the final `getLocation() === [sdk.game.locations.TcpIpEnterIp]` compares against an array
+     *   and is always false, so in practice the result reflects `me.ingame`.
+     */
     loginOtherMultiplayer: function () {
       MainLoop:
       while (true) {
@@ -1084,15 +1149,31 @@ includeIfNotIncluded("core/Me.js");
     lastLocation: [],
     charSelectConnectingRetry: 0,
 
+    /**
+     * Say a message in chat, but only when chat output is enabled.
+     * @param {string} string - message to say
+     * @returns {void}
+     */
     sayMsg: function (string) {
       if (!this.useChat) return;
       say(string);
     },
 
+    /**
+     * Format the elapsed time since the given tick as a " (HH:MM:SS)" string.
+     * @param {number} tick - starting tick count from getTickCount()
+     * @returns {string} elapsed time formatted as " (HH:MM:SS)"
+     */
     timer: function (tick) {
       return " (" + new Date(getTickCount() - tick).toISOString().slice(11, -5) + ")";
     },
 
+    /**
+     * Wait until leaving the given location, entering a game, or the timeout elapses.
+     * @param {number} time - maximum time to wait in milliseconds
+     * @param {number} location - location id (sdk.game.locations.*) to wait out of
+     * @returns {boolean} true if the current location differs from the given location when the wait ends
+     */
     locationTimeout: function (time, location) {
       let endtime = getTickCount() + time;
 
@@ -1103,6 +1184,11 @@ includeIfNotIncluded("core/Me.js");
       return (getLocation() !== location);
     },
 
+    /**
+     * Compute the next game name (incrementing/looping the counter) and persist it to the data file.
+     * @param {{ gameName?: string }} [gameInfo] - optional base game info; a random name is used when gameName is absent
+     * @returns {void}
+     */
     setNextGame: function (gameInfo = {}) {
       let nextGame = (gameInfo.gameName || this.randomString(null, true));
       
@@ -1116,6 +1202,10 @@ includeIfNotIncluded("core/Me.js");
       DataFile.updateStats("nextGame", nextGame);
     },
 
+    /**
+     * Report the run count to D2Bot then log in and exit back to the menu to refresh the profile.
+     * @returns {void}
+     */
     updateCount: function () {
       D2Bot.updateCount();
       delay(1000);
@@ -1133,6 +1223,12 @@ includeIfNotIncluded("core/Me.js");
 
     waypointCache: {},
 
+    /**
+     * Handle a scriptBroadcast message: cache waypoint data (object messages) or set the relevant
+     * mule/torch/crafting/pingquit flags and respond to cache/mode requests (string messages).
+     * @param {object | string} msg - the broadcast message (waypoint-cache object or a known command string)
+     * @returns {void}
+     */
     scriptMsgEvent: function (msg) {
       if (typeof msg === "object"
         && msg.hasOwnProperty("type")
@@ -1309,6 +1405,12 @@ includeIfNotIncluded("core/Me.js");
       }
     },
 
+    /**
+     * Generate a random lowercase (optionally alphanumeric) string.
+     * @param {number} [len] - length of the string; a random length between 5 and 14 is used when falsy
+     * @param {boolean} [useNumbers] - include digits 0-9 in the character set
+     * @returns {string} the generated random string
+     */
     randomString: function (len, useNumbers = false) {
       !len && (len = rand(5, 14));
 

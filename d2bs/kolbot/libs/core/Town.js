@@ -147,7 +147,9 @@ const Town = {
   },
 
   /**
-   * @param {boolean} repair
+   * @description Run the full set of town chores (heal, id, clear/sort inventory, buy pots/keys/scrolls, shop, gamble, repair, revive merc, cube, runewords, stash)
+   * @param {boolean} [repair=false] Force a repair even if items aren't below the repair threshold
+   * @returns {boolean} True once chores complete
    */
   doChores: function (repair = false) {
     console.info(true, null, "doChores");
@@ -515,12 +517,17 @@ const Town = {
 
   /**
    * @description Go to a town healer if we are below certain hp/mp percent or have a status effect
+   * @returns {boolean} True if we didn't need healing or successfully interacted with the healer
    */
   heal: function () {
     if (!me.needHealing()) return true;
     return !!(Town.initNPC("Heal", "heal"));
   },
 
+  /**
+   * @description Buy potions to fill the belt and any configured HP/MP buffer
+   * @returns {boolean} True if belt/buffer requirements were met (or nothing needed), false if we couldn't buy (no gold or failed to reach an NPC)
+   */
   buyPotions: function () {
     // Ain't got money fo' dat shyt
     if (me.gold < 1000) return false;
@@ -725,8 +732,10 @@ const Town = {
     return false;
   },
 
-  /** 
-   * @param {number} classid
+  /**
+   * @description Buy scrolls (and the tome itself if missing) to top up the given TP/ID tome to a full stack
+   * @param {number} classid - TomeofTownPortal or TomeofIdentify classid
+   * @returns {boolean} True if the tome is/was filled, false if we lacked gold or couldn't buy the tome/scrolls
    */
   fillTome: function (classid) {
     if (me.gold < 450) return false;
@@ -783,6 +792,10 @@ const Town = {
     return me.checkScrolls(id);
   },
 
+  /**
+   * @description Identify unid items in the inventory (via Cain, tome, or bought scrolls) and sell/keep them per pickit
+   * @returns {boolean} True if identification was performed or nothing needed identifying, false if there were no items to process
+   */
   identify: function () {
     !me.inShop && me.cancelUIFlags();
     if (Town.cainID()) return true;
@@ -896,6 +909,10 @@ const Town = {
     return true;
   },
 
+  /**
+   * @description Use Cain to identify unid items when the CainID config thresholds (gold, min unids, no kept unids) are met
+   * @returns {boolean} True if Cain was used or no unids remained, false if CainID is disabled/unaffordable or thresholds weren't met
+   */
   cainID: function () {
     // Not enabled or Check if we may use Cain - minimum gold
     if (!Config.CainID.Enable || me.gold < Config.CainID.MinGold) return false;
@@ -990,6 +1007,10 @@ const Town = {
     return false;
   },
 
+  /**
+   * @description MiniShopBot: scan the currently interacted NPC's wares and buy any pickit-wanted items that fit and we can afford
+   * @returns {boolean} True if scanning ran (or MiniShopBot is disabled), false if there's no NPC/no items to scan
+   */
   shopItems: function () {
     if (!Config.MiniShopBot) return true;
     
@@ -1034,6 +1055,10 @@ const Town = {
   /** @type {Set<number>} */
   gambleIds: new Set(),
 
+  /**
+   * @description Gamble the configured item classids while above the gold-stop threshold, keeping/selling results per pickit
+   * @returns {boolean} True if gambling completed or nothing was needed, false if we couldn't reach the gamble NPC or ran out of inventory space
+   */
   gamble: function () {
     if (!Town.needGamble() || Config.GambleItems.length === 0) return true;
     if (Town.gambleIds.size === 0) {
@@ -1128,12 +1153,18 @@ const Town = {
     return true;
   },
 
+  /**
+   * @description Check whether gambling should start (enabled and gold at/above the start threshold)
+   * @returns {boolean}
+   */
   needGamble: function () {
     return Config.Gamble && me.gold >= Config.GambleGoldStart;
   },
 
   /**
-   * @param {ItemUnit[]} list 
+   * @description Find the most recently gambled item (an inventory item whose gid isn't in the tracked list yet)
+   * @param {number[]} list - gids of items already accounted for
+   * @returns {ItemUnit | false} The newly gambled item, or false if none found
    */
   getGambledItem: function (list = []) {
     let items = me.findItems(-1, sdk.items.mode.inStorage, sdk.storage.Inventory);
@@ -1156,11 +1187,13 @@ const Town = {
   },
 
   /**
-   * @param {number} quantity 
-   * @param {number | string} type 
-   * @param {boolean} [drink=false] 
-   * @param {boolean} [force=false] 
-   * @param {Unit} [npc=null] 
+   * @description Buy a quantity of a specific potion type (thawing/antidote/etc.) from the act's pot dealer, optionally drinking them
+   * @param {number} quantity
+   * @param {number | string} type
+   * @param {boolean} [drink=false]
+   * @param {boolean} [force=false]
+   * @param {Unit} [npc=null]
+   * @returns {boolean} True if pots were bought (or the resistance/skill check made buying unnecessary), false on invalid args or NPC/trade failure
    */
   buyPots: function (quantity = 0, type = undefined, drink = false, force = false, npc = null) {
     if (!quantity || !type) return false;
@@ -1286,6 +1319,10 @@ const Town = {
     };
   },
 
+  /**
+   * @description Buy a stack of keys if we have fewer than 6, avoiding Hratli in act 3
+   * @returns {boolean} True if keys were bought or already stocked, false if we couldn't reach the NPC or find keys to buy
+   */
   buyKeys: function () {
     if (me.checkKeys() >= 6) return true;
 
@@ -1349,7 +1386,9 @@ const Town = {
   },
 
   /**
-   * @param {boolean} [force=false] 
+   * @description Repair gear (via cube first, else the act's repair NPC) and re-buy a spent quiver if needed
+   * @param {boolean} [force=false] Force a repair even if no item is below the repair threshold
+   * @returns {boolean} True if repairs were done or none were needed, false if we couldn't reach the repair NPC
    */
   repair: function (force = false) {
     if (Cubing.doRepairs()) return true;
@@ -1409,6 +1448,10 @@ const Town = {
     return me.getItemsForRepair(repairPercent, chargedItems);
   },
 
+  /**
+   * @description Revive the merc at the act's merc NPC and (optionally) recast BO on it via MercWatch
+   * @returns {boolean} True if no merc was needed or the merc was successfully revived, false if we couldn't reach the NPC, lacked gold, or revival failed
+   */
   reviveMerc: function () {
     if (!me.needMerc()) return true;
     let preArea = me.area;
@@ -1552,6 +1595,10 @@ const Town = {
     return me.needStash();
   },
 
+  /**
+   * @description Move to and open the stash (via telekinesis or click), retrying up to 5 times
+   * @returns {boolean} True if the stash UI opened, false if it couldn't be opened
+   */
   openStash: function () {
     if (getUIFlag(sdk.uiflags.Cube) && !Cubing.closeCube(true)) return false;
     if (getUIFlag(sdk.uiflags.Stash)) return true;
@@ -1594,6 +1641,10 @@ const Town = {
     return false;
   },
 
+  /**
+   * @description Walk to and loot our own corpse(s) to recover dropped items, re-initializing skills afterward
+   * @returns {boolean} True if there was no corpse or looting finished, false if we died again while retrieving it
+   */
   getCorpse: function () {
     let corpse, corpseList = [];
     let timer = getTickCount();
@@ -1659,6 +1710,10 @@ const Town = {
     return me.clearBelt();
   },
 
+  /**
+   * @description Consolidate loose TP/ID scrolls back into their tomes, then sell or drop the leftovers
+   * @returns {boolean} True if scrolls were processed, false if there were no loose scrolls in the inventory
+   */
   clearScrolls: function () {
     const scrolls = me.getItemsEx()
       .filter(function (scroll) {
@@ -1727,6 +1782,10 @@ const Town = {
     return true;
   },
 
+  /**
+   * @description Tidy the belt/inventory: return pots to the belt, drink specials, and sell or drop unwanted leftover items
+   * @returns {boolean} Always true once the clean-up pass completes
+   */
   clearInventory: function () {
     console.info(true, null, "clearInventory");
 
@@ -1944,6 +2003,10 @@ const Town = {
     return true;
   },
 
+  /**
+   * @description Initialize the current act's town spot coordinates (act 1 is derived from the town fire preset)
+   * @returns {boolean} True if spots are initialized, false if the act 1 town-fire preset couldn't be found
+   */
   initialize: function () {
     // console.log("Initialize town " + me.act);
     if (!Town.act[me.act].spot.initialized && me.act === 1) {

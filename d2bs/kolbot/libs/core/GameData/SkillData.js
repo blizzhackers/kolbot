@@ -1480,8 +1480,9 @@
   };
 
   /**
+   * Get the effective range of the skill, optionally using the pvp range variant
    * @this Skill
-   * @property {boolean} pvpRange
+   * @param {boolean} [pvpRange] - whether to use the pvp range for skills that define one
    * @returns {number}
    */
   Skill.prototype.range = function (pvpRange = false) {
@@ -1511,6 +1512,11 @@
     return this._hardPoints > 0 || (this._softPoints = me.getSkill(this.skillId, sdk.skills.subindex.SoftPoints)) > 0;
   };
 
+  /**
+   * Reset the cached mana cost, damage, and skill-point state so they are recomputed on next access
+   * @this Skill
+   * @returns {void}
+   */
   Skill.prototype.reset = function () {
     this._manaCost = Infinity;
     this._dmg = 0;

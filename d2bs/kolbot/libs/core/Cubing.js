@@ -471,6 +471,10 @@ const Cubing = {
     ],
   },
 
+  /**
+   * Initialize the cubing system - validate configured recipes, then build the recipe/gem/ingredient lists
+   * @returns {void}
+   */
   init: function () {
     if (!Config.Cubing) return;
     // console.log("We have " + Config.Recipes.length + " cubing recipe(s).");
@@ -505,6 +509,10 @@ const Cubing = {
     this.buildLists();
   },
 
+  /**
+   * Build the list of perfect gems (Cubing.gemList) that are not already consumed by another recipe's ingredients
+   * @returns {boolean} Always true
+   */
   buildGemList: function () {
     let gemList = Cubing.gems.perfect.slice();
 
@@ -538,6 +546,9 @@ const Cubing = {
    * @property {() => boolean} [condition]
    * @property {string} [pickLine]
    *
+   *
+   * Parse Config.Recipes into normalized recipeObj entries stored on Cubing.recipes
+   * @returns {void}
    *
    * @todo
    * - Allow passing in ilvl
@@ -624,6 +635,11 @@ const Cubing = {
   neededIngredients: [], // What we need
   subRecipes: [],
 
+  /**
+   * Scan storage and populate Cubing.validIngredients (items we have) and Cubing.neededIngredients (items to pick up),
+   * enabling recipes we have the base item for and queueing sub-recipes to upgrade gems
+   * @returns {void}
+   */
   buildLists: function () {
     CraftingSystem.checkSubrecipes();
 
@@ -813,6 +829,10 @@ const Cubing = {
   },
 
   // Remove unneeded flawless gem recipes
+  /**
+   * Remove the auto-generated flawless-gem sub-recipes (those with a MainRecipe property) from Cubing.recipes
+   * @returns {void}
+   */
   clearSubRecipes: function () {
     Cubing.subRecipes = [];
 
@@ -825,6 +845,10 @@ const Cubing = {
     }
   },
 
+  /**
+   * Refresh the ingredient/recipe state by clearing sub-recipes and rebuilding the valid/needed ingredient lists
+   * @returns {void}
+   */
   update: function () {
     this.clearSubRecipes();
     this.buildLists();
@@ -1065,6 +1089,11 @@ const Cubing = {
     return false;
   },
 
+  /**
+   * Run all currently-completable cube recipes: move ingredients into the cube, transmute, and handle the results.
+   * Recurses while more recipes remain completable.
+   * @returns {boolean} True if cubing completed (or nothing to do), false on failure (no cube, stash/cube couldn't open, items couldn't be moved)
+   */
   doCubing: function () {
     if (!Config.Cubing) return false;
     if (!me.getItem(sdk.quest.item.Cube)) return false;
@@ -1179,6 +1208,10 @@ const Cubing = {
     return true;
   },
 
+  /**
+   * If an item is on the cursor, stash/store it in inventory or drop it to clear the cursor
+   * @returns {boolean} True if the cursor is clear (or was successfully cleared), false if the item could not be placed or dropped
+   */
   cursorCheck: function () {
     if (me.itemoncursor) {
       let item = Game.getCursorUnit();
@@ -1199,6 +1232,10 @@ const Cubing = {
     return true;
   },
 
+  /**
+   * Open the Horadric Cube UI, opening the stash first if the cube is stashed
+   * @returns {boolean} True if the cube UI is open, false if the cube couldn't be found or opened
+   */
   openCube: function () {
     if (getUIFlag(sdk.uiflags.Cube)) return true;
 
@@ -1223,6 +1260,11 @@ const Cubing = {
     return cubeOpened();
   },
 
+  /**
+   * Close the Horadric Cube UI
+   * @param {boolean} [closeToStash] - If true, click the close button (returns to stash) instead of cancelling
+   * @returns {boolean} True if the cube UI is closed, false if it couldn't be closed
+   */
   closeCube: function (closeToStash = false) {
     if (!getUIFlag(sdk.uiflags.Cube)) return true;
     const cubeClosed = function () {
@@ -1246,6 +1288,10 @@ const Cubing = {
     return cubeClosed();
   },
 
+  /**
+   * Move every item out of the cube into stash or inventory, then close the cube
+   * @returns {boolean} True if the cube is empty (or nothing to move), false if the cube is missing or items couldn't be moved out
+   */
   emptyCube: function () {
     let cube = me.getItem(sdk.quest.item.Cube);
     if (!cube) return false;
@@ -1282,6 +1328,10 @@ const Cubing = {
     return true;
   },
 
+  /**
+   * Combine rejuvenation potions into full rejuvenation potions (3 per group) via the cube, restoring the results to their original locations
+   * @returns {void}
+   */
   makeRevPots: function () {
     let locations = {
       Belt: 2,
@@ -1378,8 +1428,10 @@ const Cubing = {
   },
 
   /**
+   * Determine whether the given Ral/Ort rune should be kept because it's needed to cube-repair equipped items
    * @todo Add chipped/flawed gems for recharging a item
    * @param {ItemUnit} item - Rune
+   * @returns {boolean} True if the rune is needed for repairs (and we don't already have enough), false otherwise
    */
   repairIngredientCheck: function (item) {
     if (!Config.CubeRepair) return false;
@@ -1496,6 +1548,10 @@ const Cubing = {
     return false;
   },
 
+  /**
+   * Cube-repair all equipped items below Config.RepairPercent durability, worst durability first
+   * @returns {boolean} True if repairs ran (or completed), false if cube repair is disabled or no cube is available
+   */
   doRepairs: function () {
     if (!Config.CubeRepair || !me.cube) return false;
 
