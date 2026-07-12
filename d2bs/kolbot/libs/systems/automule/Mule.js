@@ -61,7 +61,6 @@ const MuleData = {
   },
 
   nextChar: function () {
-    console.trace();
     let charSuffix = "";
     const charNumbers = "abcdefghijklmnopqrstuvwxyz";
     const obj = MuleData.read();

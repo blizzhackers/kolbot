@@ -64,11 +64,13 @@
 
       /** @param {number} shrineType */
       getDuration: function (shrineType) {
+        if (!_shrines.has(shrineType)) return 0;
         return _shrines.get(shrineType).duration || 0;
       },
 
       /** @param {number} shrineType */
       getRegenTime: function (shrineType) {
+        if (!_shrines.has(shrineType)) return Infinity;
         return _shrines.get(shrineType).regenTime || Infinity;
       },
     };

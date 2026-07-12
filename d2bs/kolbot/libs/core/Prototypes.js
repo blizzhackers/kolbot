@@ -2060,7 +2060,7 @@ Unit.prototype.castChargedSkill = function (...args) {
 
     chargedItem = chargedItems
       .sort(function (a, b) {
-        return b.charge.level - a.charge.level;
+        return b.level - a.level;
       }).first().unit;
     return chargedItem.castChargedSkill.apply(chargedItem, args);
   } else if (this.type === sdk.unittype.Item) {
