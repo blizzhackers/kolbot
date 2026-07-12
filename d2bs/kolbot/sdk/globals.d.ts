@@ -401,6 +401,7 @@ declare global {
 
     readonly targetx: number;
     readonly targety: number;
+    readonly direction: number;
     readonly idle: boolean;
     readonly isPlayer: boolean;
     readonly isNPC: boolean;
@@ -680,6 +681,9 @@ declare global {
     readonly profile: string;
     readonly pid: number;
     readonly charflags: number;
+    readonly mapid: number;
+    nopickup: boolean;
+    readonly unsupported: boolean;
     readonly screensize: number;
     readonly windowtitle: string;
     readonly ingame: boolean;

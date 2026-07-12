@@ -572,7 +572,7 @@ function main () {
       console.error(e);
       D2Bot.printToConsole(
         "MainLoopException: " + e.message
-        + " (" + e.fileName.substring(e2.fileName.lastIndexOf("\\") + 1, e.fileName.length)
+        + " (" + e.fileName.substring(e.fileName.lastIndexOf("\\") + 1, e.fileName.length)
         + " #" + e.lineNumber + ")"
       );
     }

@@ -742,8 +742,8 @@ const Town = {
         try {
           tome.buy();
         } catch (e1) {
-          if ((e instanceof ScriptError)) {
-            throw e;
+          if ((e1 instanceof ScriptError)) {
+            throw e1;
           }
           console.log(e1);
           // Couldn't buy the tome, don't spam the scrolls

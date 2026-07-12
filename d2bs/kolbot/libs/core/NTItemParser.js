@@ -72,8 +72,8 @@ NTIP.OpenFile = function (filepath, notify) {
   try {
     nipfile = File.open(filepath, 0);
   } catch (fileError) {
-    if ((e instanceof ScriptError)) {
-      throw e;
+    if ((fileError instanceof ScriptError)) {
+      throw fileError;
     }
     if (notify) {
       Misc.errorReport("ÿc1Failed to load NIP: ÿc0" + filename);
@@ -330,8 +330,8 @@ NTIP.CheckItem = function (item, entryList, verbose) {
         }
       }
     } catch (pickError) {
-      if ((e instanceof ScriptError)) {
-        throw e;
+      if ((pickError instanceof ScriptError)) {
+        throw pickError;
       }
       showConsole();
 
@@ -479,8 +479,8 @@ NTIP.DebugCheckItem = function (item, entryList, verbose) {
         results.push(rval);
       }
     } catch (pickError) {
-      if ((e instanceof ScriptError)) {
-        throw e;
+      if ((pickError instanceof ScriptError)) {
+        throw pickError;
       }
       showConsole();
 

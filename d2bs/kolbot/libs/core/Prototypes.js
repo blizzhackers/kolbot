@@ -295,7 +295,7 @@ Object.defineProperties(Unit.prototype, {
       return this.getEnchant(sdk.enchant.ColdEnchanted);
     },
   },
-  manBurn: {
+  manaBurn: {
     get: function () {
       if (!this.isMonster) return false;
       return this.getEnchant(sdk.enchant.ManaBurn);

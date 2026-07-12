@@ -31,7 +31,7 @@ const TravincalLeech = new Runnable(
     if (Config.Leader) {
       leader = Config.Leader;
       if (!Misc.poll(() => Misc.inMyParty(leader), Time.minutes(2), 1000)) {
-        throw new Error("TristramLeech: Leader not partied");
+        throw new Error("TravincalLeech: Leader not partied");
       }
     }
 

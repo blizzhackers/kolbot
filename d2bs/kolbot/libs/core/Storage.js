@@ -216,7 +216,7 @@
         let [ix, iy] = [item.y, item.x]; // x and y are backwards!
 
         if (this.location !== item.location) {
-          D2Bot.printToConsole("StorageOverrides.js>SortItems WARNING: Detected a non-storage item in the list: " + item.name + " at " + ix + "," + iy, sdk.colors.D2Bot.Gold);
+          D2Bot.printToConsole("Storage.js>SortItems WARNING: Detected a non-storage item in the list: " + item.name + " at " + ix + "," + iy, sdk.colors.D2Bot.Gold);
           continue; // dont try to touch non-storage items | TODO: prevent non-storage items from getting this far
         }
 
@@ -229,12 +229,12 @@
         }
 
         if (item.type !== sdk.unittype.Item) {
-          D2Bot.printToConsole("StorageOverrides.js>SortItems WARNING: Detected a non-item in the list: " + item.name + " at " + ix + "," + iy, sdk.colors.D2Bot.Gold);
+          D2Bot.printToConsole("Storage.js>SortItems WARNING: Detected a non-item in the list: " + item.name + " at " + ix + "," + iy, sdk.colors.D2Bot.Gold);
           continue; // dont try to touch non-items | TODO: prevent non-items from getting this far
         }
 
         if (item.mode === sdk.items.mode.onGround) {
-          D2Bot.printToConsole("StorageOverrides.js>SortItems WARNING: Detected a ground item in the list: " + item.name + " at " + ix + "," + iy, sdk.colors.D2Bot.Gold);
+          D2Bot.printToConsole("Storage.js>SortItems WARNING: Detected a ground item in the list: " + item.name + " at " + ix + "," + iy, sdk.colors.D2Bot.Gold);
           continue; // dont try to touch ground items | TODO: prevent ground items from getting this far
         }
 

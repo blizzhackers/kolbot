@@ -349,7 +349,7 @@ const Precast = (function () {
         this.lastChant = getTickCount();
       };
 
-      /** @type {Map<string, ChantTracker} */
+      /** @type {Map<string, ChantTracker>} */
       const chantList = new Map();
 
       return function () {
