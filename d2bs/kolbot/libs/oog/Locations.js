@@ -404,7 +404,7 @@
         if (getTickCount() - startTick < Time.seconds(5)) {
           ControlAction.timeoutDelay(
             "After Game Delay",
-            Math.max((Time.seconds(5) - (getTickCount() - startTick), 1000))
+            Math.max(Time.seconds(5) - (getTickCount() - startTick), 1000)
           );
         }
       }

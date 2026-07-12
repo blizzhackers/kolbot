@@ -1370,7 +1370,7 @@
         let preReq = (getBaseStat("skills", skillId, t));
 
         if (preReq > sdk.skills.Attack && preReq < sdk.skills.RoyalStrike) {
-          return preReqs.push(preReq);
+          preReqs.push(preReq);
         }
       }
 

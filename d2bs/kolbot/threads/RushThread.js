@@ -58,7 +58,7 @@ function main () {
   });
 
   function wpEvent (who, msg) {
-    if (typeof msg === "string" && msg === "gotwp" || msg === "Failed to get wp" || msg === "alreadyhave") {
+    if (typeof msg === "string" && (msg === "gotwp" || msg === "Failed to get wp" || msg === "alreadyhave")) {
       count++;
       !silentNameTracker.includes(who) && silentNameTracker.push(who);
     }

@@ -325,7 +325,7 @@ const OrgTorchHelper = new Runnable(
             continue;
           }
 
-          if ((task === "kill" || task === "clear" && Attack._killed.has(id))) {
+          if ((task === "kill" || task === "clear") && Attack._killed.has(id)) {
             continue;
           }
 

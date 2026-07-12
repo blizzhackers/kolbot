@@ -181,7 +181,7 @@ const BattleOrders = new Runnable(
     * @param {string} msg 
     */
     function chatEvent (name, msg) {
-      if (!msg | !name) return;
+      if (!msg || !name) return;
       if (!boGetters.has(name.toLowerCase())) return;
       if (msg === "got-bo") {
         console.log(name + " got bo");

@@ -63,7 +63,7 @@ const MFHelper = new Runnable(
     }
 
     if (player) {
-      if (!Misc.poll(() => player.area, 120 * 60, 100 + me.ping)) {
+      if (!Misc.poll(() => player.area, Time.minutes(2), 100 + me.ping)) {
         throw new Error("Failed to wait for player area");
       }
 

@@ -17,7 +17,7 @@ const Fangskin = new Runnable(
     }
 
     // casters can kill fangskin from the altar spot for better safety
-    Pather.canTeleport() && Skill.getRange(Config.AttackSkill[1] > 10) && Pather.moveTo(15044, 14045);
+    Pather.canTeleport() && Skill.getRange(Config.AttackSkill[1]) > 10 && Pather.moveTo(15044, 14045);
 
     Attack.clear(15, 0, getLocaleString(sdk.locale.monsters.Fangskin));
     Pickit.pickItems();

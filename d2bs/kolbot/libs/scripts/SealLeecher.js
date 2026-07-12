@@ -43,7 +43,7 @@ const SealLeecher = new Runnable(
               delay(250);
             }
 
-            if (getDistance(me, 7761, 5267) < 10) {
+            if (getDistance(me, 7761, 5267) > 10) {
               Pather.walkTo(7761, 5267, 2);
             }
 

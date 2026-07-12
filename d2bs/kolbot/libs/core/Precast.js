@@ -567,7 +567,7 @@ const Precast = (function () {
           this.cast(sdk.skills.BurstofSpeed);
         }
 
-        if (!!Config.SummonShadow && !!Config.SummonShadow !== "None") {
+        if (Config.SummonShadow && Config.SummonShadow !== "None") {
           buffSummons = Precast.summon(Config.SummonShadow, sdk.summons.type.Shadow);
         }
 
