@@ -407,7 +407,7 @@ const OrgTorch = new Runnable(
           return true;
         }
         let diablo = Game.getMonster(sdk.monsters.UberDiablo);
-        return (diablo && diablo.distance < 10) || diablo.dead;
+        return diablo && (diablo.distance < 10 || diablo.dead);
       };
       Misc.poll(uberDiableCB, 3250, 50);
 
@@ -423,7 +423,7 @@ const OrgTorch = new Runnable(
             return true;
           }
           let baal = Game.getMonster(sdk.monsters.UberBaal);
-          return (baal && baal.distance < 10) || baal.dead;
+          return baal && (baal.distance < 10 || baal.dead);
         } });
       }
 

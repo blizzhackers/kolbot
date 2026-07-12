@@ -675,7 +675,7 @@ const Follower = new Runnable(
         let pingDelay = me.getPingDelay();
 
         if (!npcUnit) {
-          while (!npcUnit && timeout < getTickCount()) {
+          while (!npcUnit && getTickCount() < timeout) {
             Town.move(NPC[npc]);
             Packet.flash(me.gid, pingDelay);
             delay(pingDelay * 2 + 100);

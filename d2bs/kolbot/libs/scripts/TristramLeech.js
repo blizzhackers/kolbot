@@ -71,6 +71,7 @@ const TristramLeech = new Runnable(
           if (done) return true;
 
           whereisleader = getParty(leader);
+          if (!whereisleader) break; // leader left the party — stop leeching
           let leaderUnit = Misc.getPlayerUnit(leader);
 
           if (whereisleader.area !== sdk.areas.Tristram && !Misc.poll(() => {

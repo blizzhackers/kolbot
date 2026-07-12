@@ -25,7 +25,7 @@ const Gamble = new Runnable(
       });
 
     while (true) {
-      Town.needGamble() ? Town.gamble() : (needGold = true) && (idleTick = 0);
+      Town.needGamble() ? Town.gamble() : (needGold = true) && (idleTick = getTickCount() + rand(1200, 1500) * 1000);
       Town.move("stash");
 
       while (needGold) {
