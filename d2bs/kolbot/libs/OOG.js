@@ -327,7 +327,7 @@ includeIfNotIncluded("core/Me.js");
     },
 
     getCharacters: function () {
-      const singlePlayer = ![sdk.game.gametype.OpenBattlenet, sdk.game.gametype.BattleNet].includes(Profile().type);
+      const singlePlayer = ![sdk.game.profiletype.OpenBattlenet, sdk.game.profiletype.Battlenet].includes(Profile().type);
       // offline doesn't have a character limit cap
       const cap = singlePlayer ? 999 : 24;
       let count = 0;
@@ -604,7 +604,7 @@ includeIfNotIncluded("core/Me.js");
             
             control.click();
             Controls.BottomRightOk.click();
-            Starter.locationTimeout(sdk.game.locations.CharSelect, 5000);
+            Starter.locationTimeout(5000, sdk.game.locations.CharSelect);
 
             return getLocation() === sdk.game.locations.SelectDifficultySP
               ? login(info.profile)

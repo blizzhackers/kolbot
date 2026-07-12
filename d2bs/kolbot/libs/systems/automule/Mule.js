@@ -55,7 +55,7 @@ const MuleData = {
     obj.accNum += 1;
     obj.account = Mule.obj.accountPrefix + obj.accNum;
 
-    MuleData.write(Object.assign(this._default, { accNum: obj.accNum, account: obj.account }));
+    MuleData.write(Object.assign({}, this._default, { accNum: obj.accNum, account: obj.account }));
 
     return obj.account;
   },
@@ -383,7 +383,7 @@ const Mule = {
    * @returns {{ profile: string, mode: number }} master info
    */
   getMaster: function (info) {
-    const muleObj = info.mode === 1
+    const muleObj = info.mode > 0
       ? AutoMule.TorchAnniMules
       : AutoMule.Mules;
 

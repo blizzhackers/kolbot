@@ -121,7 +121,7 @@ includeIfNotIncluded("oog/FileAction.js");
           break;
         case "lastArea":
           if (obj.lastArea === getAreaName(me.area)) {
-            return;
+            break;
           }
 
           obj.lastArea = getAreaName(me.area);

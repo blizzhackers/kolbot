@@ -1379,7 +1379,7 @@
     Common.Baal.clearThrone();
 
     if (AutoRush.rushMode !== RushModes.chanter) {
-      me.checkForMobs({ range: 30 }) && this.clearWaves(); // ensure waves are actually done
+      me.checkForMobs({ range: 30 }) && Common.Baal.clearWaves(); // ensure waves are actually done
       Pather.moveTo(15090, 5008);
       delay(5000);
       Precast.doPrecast(true);
