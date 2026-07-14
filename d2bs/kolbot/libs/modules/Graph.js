@@ -62,7 +62,7 @@
    */
   Vertex.prototype.path = function(mode = "walk") {
     const key = mode + "Path";
-    if (this.cache[key]) {
+    if (key in this.cache) {
       return this.cache[key];
     }
     const x = mode === "walk" ? this.walkableX : this.centerX;
@@ -75,22 +75,30 @@
   };
 
   /**
-   * @param {"walk" | "teleport"} mode 
+   * Sum of segment distances along a path.
+   * @param {PathNode[] | false} path
+   * @returns {number} total distance, Infinity if the path is missing/empty
+   */
+  const pathLength = function (path) {
+    if (!path || !path.length) {
+      return Infinity;
+    }
+    return path.reduce(function (acc, v, i, arr) {
+      let prev = i ? arr[i - 1] : v;
+      return acc + Math.sqrt((prev.x - v.x) * (prev.x - v.x) + (prev.y - v.y) * (prev.y - v.y));
+    }, 0);
+  };
+
+  /**
+   * @param {"walk" | "teleport"} mode
    * @returns {number}
    */
   Vertex.prototype.pathDistance = function(mode = "walk") {
     const key = mode + "PathDistance";
-    if (this.cache[key]) {
+    if (key in this.cache) {
       return this.cache[key];
     }
-    let path = this.path(mode);
-    if (!path.length) {
-      return Infinity;
-    }
-    let distance = path.reduce(function (acc, v, i, arr) {
-      let prev = i ? arr[i - 1] : v;
-      return acc + Math.sqrt((prev.x - v.x) * (prev.x - v.x) + (prev.y - v.y) * (prev.y - v.y));
-    }, 0);
+    let distance = pathLength(this.path(mode));
     this.cache[key] = distance;
     return distance;
   };
@@ -103,7 +111,7 @@
    */
   Vertex.prototype.pathTo = function(other, mode = "walk") {
     const key = mode + "PathTo";
-    if (this.cache[key] && this.cache[key][other.id]) {
+    if (this.cache[key] && other.id in this.cache[key]) {
       return this.cache[key][other.id];
     }
     const inRoom = CollMap.coordsInRoom(me.x, me.y, this);
@@ -130,17 +138,10 @@
    */
   Vertex.prototype.pathDistanceTo = function(other, mode = "walk") {
     const key = mode + "PathDistanceTo";
-    if (this.cache[key] && this.cache[key][other.id]) {
+    if (this.cache[key] && other.id in this.cache[key]) {
       return this.cache[key][other.id];
     }
-    let path = this.pathTo(other, mode);
-    if (!path.length) {
-      return Infinity;
-    }
-    let distance = path.reduce(function (acc, v, i, arr) {
-      let prev = i ? arr[i - 1] : v;
-      return acc + Math.sqrt((prev.x - v.x) * (prev.x - v.x) + (prev.y - v.y) * (prev.y - v.y));
-    }, 0);
+    let distance = pathLength(this.pathTo(other, mode));
     if (!this.cache[key]) {
       this.cache[key] = {};
     }
@@ -204,8 +205,12 @@
       if (!room) {
         return [];
       }
+      const nearby = room.getNearby();
+      if (!nearby) {
+        return [];
+      }
       const self = this;
-      return room.getNearby()
+      return nearby
         .compactMap(function (r) {
           return self.vertexForRoom(r);
         });

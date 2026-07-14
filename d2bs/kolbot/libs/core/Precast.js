@@ -23,6 +23,8 @@ const Precast = (function () {
   PrecastSkill.prototype.remaining = function () {
     if (!this.duration) {
       this.duration = Skill.getDuration(this.skillId);
+      // stateful buffs with no timed duration never "run out" - the state check governs recasts
+      if (!this.duration) return 100;
     }
     const pRemaining = 100 * (1 - (getTickCount() - this.lastCast) / this.duration);
     return Math.max(0, Math.min(100, pRemaining));

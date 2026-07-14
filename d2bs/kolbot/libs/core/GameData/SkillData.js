@@ -1470,13 +1470,15 @@
     }
     // Decoy wasn't reading from skill bin
     if (this.skillId === sdk.skills.Decoy) {
-      return (this._manaCost = Math.max(19.75 - (0.75 * skillLvl), 1));
+      let decoyCost = Math.max(19.75 - (0.75 * skillLvl), 1);
+      // don't memoize before the skill is learned - the level-0 value would poison the cache
+      return skillLvl > 0 ? (this._manaCost = decoyCost) : decoyCost;
     }
     let lvlmana = this._lvlMana === 65535
       ? -1
       : this._lvlMana; // Correction for skills that need less mana with levels (kolton)
     let ret = Math.max((this._mana + lvlmana * (skillLvl - 1)) * this._manaShift, this._minMana);
-    return (this._manaCost = ret);
+    return skillLvl > 0 ? (this._manaCost = ret) : ret;
   };
 
   /**

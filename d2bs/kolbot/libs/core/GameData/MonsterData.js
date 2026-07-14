@@ -75,7 +75,7 @@
       LocaleString: getLocaleString(getBaseStat("monstats", index, "NameStr")),
       InternalName: LocaleStringName[getBaseStat("monstats", index, "NameStr")],
       ExperienceModifier: getBaseStat("monstats", index, ["Exp", "Exp(N)", "Exp(H)"][me.diff]),
-      Undead: (getBaseStat("monstats", index, "hUndead") && 2) | (getBaseStat("monstats", index, "lUndead") && 1),
+      Undead: getBaseStat("monstats", index, "hUndead") ? 2 : (getBaseStat("monstats", index, "lUndead") ? 1 : 0),
       Drain: getBaseStat("monstats", index, ["Drain", "Drain(N)", "Drain(H)"][me.diff]),
       Block: getBaseStat("monstats", index, ["ToBlock", "ToBlock(N)", "ToBlock(H)"][me.diff]),
       Physical: getBaseStat("monstats", index, ["ResDm", "ResDm(N)", "ResDm(H)"][me.diff]),
@@ -108,9 +108,40 @@
     });
   }
 
+  /**
+   * Find a monster's data entry by (partial) name.
+   * @param {string} whatToFind - monster name to match against locale and internal names
+   * @returns {MonsterObj | undefined} best matching entry, or undefined for invalid input
+   */
   MonsterData.findByName = function (whatToFind) {
+    if (!whatToFind || typeof whatToFind !== "string") {
+      return undefined;
+    }
+
+    const searchTerm = whatToFind.toLowerCase().trim();
+
+    // First attempt: exact or contains matches, preferring shorter (more specific) names
+    const directMatches = MonsterData.filter(function (mon) {
+      if (!mon || !mon.LocaleString) return false;
+      const localeLower = mon.LocaleString.toLowerCase();
+      const internalLower = mon.InternalName ? mon.InternalName.toLowerCase() : "";
+      return localeLower === searchTerm || internalLower === searchTerm
+        || localeLower.includes(searchTerm) || internalLower.includes(searchTerm);
+    });
+
+    if (directMatches.length > 0) {
+      directMatches.sort(function (a, b) {
+        return a.LocaleString.length - b.LocaleString.length;
+      });
+      return directMatches.first();
+    }
+
+    // Fallback: fuzzy match over the full table
     let matches = MonsterData
-      .map(mon => [Math.min(whatToFind.diffCount(mon.LocaleString), whatToFind.diffCount(mon.InternalName)), mon])
+      .map(mon => [
+        Math.min(whatToFind.diffCount(mon.LocaleString || ""), whatToFind.diffCount(mon.InternalName || "")),
+        mon
+      ])
       .sort((a, b) => a[0] - b[0]);
 
     return matches[0][1];

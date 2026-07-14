@@ -26,14 +26,20 @@ PathNode.prototype.distanceTo = function (unit) {
   return !me.gameReady ? NaN : (getDistance.apply(null, [unit, this]));
 };
 
+/**
+ * Sum of segment distances along the walk path from me to this node.
+ * @returns {number} walk distance, 0 if already at the node, Infinity if no path exists
+ */
 PathNode.prototype.getWalkDistance = function () {
-  return (getPath(me.area, me.x, me.y, this.x, this.y, 0, Pather.walkDistance) || [])
+  const path = getPath(me.area, me.x, me.y, this.x, this.y, 0, Pather.walkDistance);
+  if (!path) return Infinity;
+  return path
     .map(function (e, i, s) {
       return i && getDistance(s[i - 1], e) || 0;
     })
     .reduce(function (acc, cur) {
       return acc + cur;
-    }, 0) || Infinity;
+    }, 0);
 };
 
 /**
@@ -2390,14 +2396,16 @@ const Pather = {
     yy === undefined && (yy = me.y);
     reductionType === undefined && (reductionType = 2);
     radius === undefined && (radius = 5);
+    const path = getPath(area, x, y, xx, yy, reductionType, radius);
+    if (!path) return Infinity;
     // distance between node x and x-1
-    return (getPath(area, x, y, xx, yy, reductionType, radius) || [])
+    return path
       .map(function (e, i, s) {
         return i && getDistance(s[i - 1], e) || 0;
       })
       .reduce(function (acc, cur) {
         return acc + cur;
-      }, 0) || Infinity;
+      }, 0);
   },
 };
 
