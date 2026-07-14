@@ -411,6 +411,8 @@ const Town = {
           }
         } else if (!_needPots && _needRepair) {
           choices.add(npcs.Repair);
+        } else if (_needPots && !_needRepair) {
+          choices.add(npcs.Shop);
         } else if (!_needPots && !_needRepair && !_needScrolls) {
           choices = new Set([npcs.Key, npcs.Repair, npcs.Gamble, npcs.Shop]);
         }

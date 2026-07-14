@@ -103,9 +103,9 @@ const Crafting = new Runnable(
             }
 
             break;
-          } else {
-            break;
           }
+
+          delay(1000);
         }
 
         gameRequest = false;

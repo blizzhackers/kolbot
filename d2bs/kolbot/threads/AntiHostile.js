@@ -347,6 +347,7 @@ function main() {
             }
 
             while (hostiles.length > 0) {
+              findHostiles();
               delay(500);
             }
 

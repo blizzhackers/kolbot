@@ -17,6 +17,7 @@ function main() {
   console.log("ÿc3Start AreaWatcher");
   
   while (true) {
+    delay(1000);
     try {
       if (me.gameReady && me.ingame && !me.inTown) {
         // additonal check for wierd behavior - it shouldn't be possbile to run out of town in less than 30 seconds in game
@@ -28,6 +29,5 @@ function main() {
     } catch (e) {
       console.warn("AreaWatcher failed somewhere. ", e);
     }
-    delay(1000);
   }
 }

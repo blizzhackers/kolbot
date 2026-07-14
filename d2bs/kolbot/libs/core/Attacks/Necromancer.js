@@ -38,8 +38,8 @@
 
       // See if we're at full army count
       if ((me.getMinionCount(sdk.summons.type.Skeleton) < this.maxSkeletons)
-        && (me.getMinionCount(sdk.summons.type.SkeletonMage) < this.maxMages)
-        && (me.getMinionCount(sdk.summons.type.Revive) < this.maxRevives)) {
+        || (me.getMinionCount(sdk.summons.type.SkeletonMage) < this.maxMages)
+        || (me.getMinionCount(sdk.summons.type.Revive) < this.maxRevives)) {
         return false;
       }
 

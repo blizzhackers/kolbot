@@ -241,7 +241,9 @@ CraftingSystem.getSetInfoFromWorker = function (workerName) {
   if (info && info.collector) {
     addEventListener("copydata", copyData);
     sendCopyData(null, workerName, 0, JSON.stringify({ name: "GetSetInfo", profile: me.profile }));
-    delay(100);
+    Misc.poll(function () {
+      return setInfo !== false;
+    }, Time.seconds(5), 100);
 
     if (setInfo !== false) {
       removeEventListener("copydata", copyData);

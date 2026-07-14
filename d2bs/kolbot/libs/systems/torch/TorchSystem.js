@@ -157,7 +157,11 @@ const TorchSystem = {
       sendCopyData(null, farmers[i].profile, 6, JSON.stringify({ name: "keyCheck", profile: me.profile }));
       delay(250);
 
-      if (neededItems.hasOwnProperty("pk1") || neededItems.hasOwnProperty("pk2") || neededItems.hasOwnProperty("pk3")) {
+      if (neededItems.hasOwnProperty("pk1")
+      || neededItems.hasOwnProperty("pk2")
+      || neededItems.hasOwnProperty("pk3")
+        || neededItems.hasOwnProperty("rv")
+      ) {
         removeEventListener("copydata", keyCheckEvent);
 
         return neededItems;

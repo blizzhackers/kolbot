@@ -17,11 +17,11 @@ const Worldstone = new Runnable(
     */
     
     /** @type {Exit[]} */
-    let exits = getArea().exits;
+    let exits = getArea().exits || [];
     let WS1 = exits.find(t => t.target === sdk.areas.WorldstoneLvl1);
     let WS3 = exits.find(t => t.target === sdk.areas.WorldstoneLvl3);
-    let wpToWS3 = WS3.distance;
-    let ws1ToWS3 = getDistance(WS1, WS3);
+    let wpToWS3 = WS3 ? WS3.distance : Infinity;
+    let ws1ToWS3 = (WS1 && WS3) ? getDistance(WS1, WS3) : Infinity;
 
     Attack.clearLevel(Config.ClearType);
     Pather.moveToExit(sdk.areas.WorldstoneLvl1, true) && Attack.clearLevel(Config.ClearType);

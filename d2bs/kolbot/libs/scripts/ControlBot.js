@@ -1098,7 +1098,7 @@ const ControlBot = new Runnable(
         const check = wpNicks.get(nick);
         if (check.singleWpRequests > 12) {
           throw new ScriptError("You have spent all your waypoint requests for this game.");
-        } else if (check.requests > 1 && check.timeSinceLastRequest() < 60000) {
+        } else if (check.singleWpRequests > 1 && check.timeSinceLastRequest() < 60000) {
           throw new ScriptError(
             "You may request wp again in "
             + Math.max(0, (60 - Math.floor(check.timeSinceLastRequest() / 1000)))

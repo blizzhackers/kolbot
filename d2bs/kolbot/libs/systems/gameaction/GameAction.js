@@ -100,15 +100,17 @@ const GameAction = {
 
     (this.task && this.task.data) && (li.password = this.load(this.task.hash));
 
-    // drop specific object
-    if (this.task.data["items"] && this.task.data.items.length > 0) {
-      li.realm = this.task.data.items[0].realm;
-      li.account = this.task.data.items[0].account;
-    }
+    if (this.task && this.task.data) {
+      // drop specific object
+      if (this.task.data["items"] && this.task.data.items.length > 0) {
+        li.realm = this.task.data.items[0].realm;
+        li.account = this.task.data.items[0].account;
+      }
 
-    // mule log specific objects
-    this.task.data["realm"] && (li.realm = this.task.data.realm);
-    this.task.data["account"] && (li.account = this.task.data.account);
+      // mule log specific objects
+      this.task.data["realm"] && (li.realm = this.task.data.realm);
+      this.task.data["account"] && (li.account = this.task.data.account);
+    }
 
     if (!li.password || !li.account || !li.realm) {
       this.update("done", "Realm, Account, or Password was invalid!");
@@ -122,17 +124,19 @@ const GameAction = {
   getCharacters: function () {
     let chars = [];
 
-    // drop specific object
-    if (this.task.data["items"]) {
-      for (let i = 0; i < this.task.data.items.length; i += 1) {
-        if (chars.indexOf(this.task.data.items[i].character) === -1) {
-          chars.push(this.task.data.items[i].character);
+    if (this.task && this.task.data) {
+      // drop specific object
+      if (this.task.data["items"]) {
+        for (let i = 0; i < this.task.data.items.length; i += 1) {
+          if (chars.indexOf(this.task.data.items[i].character) === -1) {
+            chars.push(this.task.data.items[i].character);
+          }
         }
       }
-    }
 
-    // mule log specific object
-    this.task.data["chars"] && (chars = this.task.data.chars);
+      // mule log specific object
+      this.task.data["chars"] && (chars = this.task.data.chars);
+    }
 
     return chars;
   },

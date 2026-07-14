@@ -1129,6 +1129,7 @@ includeIfNotIncluded("core/Me.js");
     pingQuit: false,
     inGame: false,
     firstLogin: true,
+    accountExists: false,
     firstRun: false,
     isUp: "no",
     delay: 0,

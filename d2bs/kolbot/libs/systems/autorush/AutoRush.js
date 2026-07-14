@@ -57,9 +57,9 @@
    * @returns {boolean}
    */
   const bumperCheck = function (nick) {
-    return nick
-      ? Misc.findPlayer(nick).level >= getBumperLvlReq()
-      : Misc.checkPartyLevel(getBumperLvlReq());
+    if (!nick) return Misc.checkPartyLevel(getBumperLvlReq());
+    let player = Misc.findPlayer(nick);
+    return !!player && player.level >= getBumperLvlReq();
   };
 
   /** @param {Act} act */
@@ -101,7 +101,8 @@
     let tick = getTickCount();
 
     while (getTickCount() - tick < Time.minutes(2)) {
-      if (tree.mode) {
+      !tree && (tree = Game.getObject(sdk.quest.chest.InifussTree));
+      if (!!tree && tree.mode) {
         break;
       }
       Attack.securePosition(me.x, me.y, { range: 25, duration: 1000 });
@@ -276,9 +277,10 @@
   /** @param {string} [nick] */
   const smith = function smith (nick) {
     log("starting smith");
-    if (Misc.findPlayer(nick).level < 8) {
+    let player = Misc.findPlayer(nick);
+    if (!player || player.level < 8) {
       log(nick + " you are not eligible for smith. You need to be at least level 8");
-        
+
       return false;
     }
 

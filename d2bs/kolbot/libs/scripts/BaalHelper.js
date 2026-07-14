@@ -12,7 +12,7 @@
 const BaalHelper = new Runnable(
   /** @param {BaalHelperContext} ctx */
   function BaalHelper (ctx) {
-    let quitFlag;
+    let quitFlag = false;
     
     const chatEvent = function (nick, msg) {
       if (nick === Config.Leader) {
@@ -24,6 +24,10 @@ const BaalHelper = new Runnable(
     };
     ctx.chatEvent = chatEvent;
 
+    if (Config.BaalHelper.DollQuit || Config.BaalHelper.SoulQuit) {
+      addEventListener("chatmsg", chatEvent);
+    }
+
     if (Config.BaalHelper.SkipTP) {
       !me.inArea(sdk.areas.WorldstoneLvl2) && Pather.useWaypoint(sdk.areas.WorldstoneLvl2);
 
@@ -31,6 +35,7 @@ const BaalHelper = new Runnable(
         throw new Error("Failed to move to WSK3.");
       }
       if (!Misc.poll(() => {
+        if (quitFlag) throw new ScriptError("Burning Souls or Dolls found, ending script.");
         let party = getParty();
 
         if (party) {
@@ -77,12 +82,6 @@ const BaalHelper = new Runnable(
     } else {
       Town.goToTown(5);
       Town.move("portalspot");
-
-      quitFlag = false;
-
-      if (Config.BaalHelper.DollQuit || Config.BaalHelper.SoulQuit) {
-        addEventListener("chatmsg", chatEvent);
-      }
 
       if (!Misc.poll(() => {
         if (Pather.getPortal(sdk.areas.ThroneofDestruction, Config.Leader || null)) {

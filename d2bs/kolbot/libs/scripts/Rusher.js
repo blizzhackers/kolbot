@@ -163,7 +163,7 @@ const Rusher = new Runnable(
             throw new Error("I'm only accepting commands from my master.");
           }
           say("I have no master now.");
-          master = false;
+          master = "";
 
           break;
         case "quit":

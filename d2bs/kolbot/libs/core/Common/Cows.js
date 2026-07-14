@@ -146,7 +146,6 @@
 
         rooms.sort(roomSort);
         room = rooms.shift();
-        seen.add(JSON.stringify(room));
         const result = Pather.getNearestWalkable(room[0], room[1], 10, 2);
 
         if (result) {

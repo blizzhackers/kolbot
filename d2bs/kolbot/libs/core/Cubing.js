@@ -492,6 +492,8 @@ const Cubing = {
           Config.Recipes.splice(i, 1);
 
           i -= 1;
+
+          continue;
         }
       }
 
