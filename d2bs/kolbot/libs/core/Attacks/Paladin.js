@@ -142,7 +142,9 @@
       // only proceed with other checks if we can use redemption and the config values aren't 0
       if (Skill.canUse(sdk.skills.Redemption) && Config.Redemption.some(v => v > 0)) {
         if ((me.hpPercent < Config.Redemption[0] || me.mpPercent < Config.Redemption[1])
-          && Attack.checkNearCorpses(me) > 2 && Skill.setSkill(sdk.skills.Redemption, sdk.skills.hand.Right)) {
+          && Attack.checkNearCorpses(me).length > 2
+          && Skill.setSkill(sdk.skills.Redemption, sdk.skills.hand.Right)
+        ) {
           delay(1500);
         }
       }

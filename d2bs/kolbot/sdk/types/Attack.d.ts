@@ -114,7 +114,7 @@ declare global {
       skipGid?: number;
     }): Monster | false;
     function checkCorpse(unit: Monster): boolean;
-    function checkNearCorpses(unit: Monster, range?: number): any;
+    function checkNearCorpses(unit: Monster, range?: number): Monster[];
     function whirlwind(unit: Monster | Player): boolean;
     function doPreAttack(unit: Monster): AttackResult;
     function doChargeCast(unit: Monster): boolean;

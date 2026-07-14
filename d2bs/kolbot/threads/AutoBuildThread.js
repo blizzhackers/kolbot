@@ -31,9 +31,6 @@ const STAT_ID_TO_NAME =	[
 ];
 let	prevLevel = me.charlvl;
 
-// Will check if value exists in an Array
-Array.prototype.contains = (val) => this.indexOf(val) > -1;
-
 function skillInValidRange (id) {
   switch (me.classid) {
   case sdk.player.class.Amazon:
@@ -154,7 +151,7 @@ function getRequiredSkills (id) {
 
   let requirements = [];
   searchSkillTree(id);
-  const increasing = () => a - b;
+  const increasing = (a, b) => a - b;
   return requirements.sort(increasing);
 }
 

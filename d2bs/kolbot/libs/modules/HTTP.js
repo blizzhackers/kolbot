@@ -34,7 +34,7 @@
    * @param {HTTPConfig} config 
    */
   const HTTP = function (config = {}) {
-    config = Object.assign(defaultOptions, config);
+    config = Object.assign({}, defaultOptions, config);
     if (!config.url) {
       throw new Error("Must give a url to connect to");
     }

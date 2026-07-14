@@ -1265,7 +1265,9 @@ const Attack = {
               target.isBoss && Attack._killed.add(target.classid);
               target.uniqueid > -1 && Attack._killed.add(target.name);
             }
-            Config.FastFindItem && pickit && ClassAttack[me.classid].findItem();
+            if (Config.FastFindItem && me.classid === sdk.player.class.Barbarian) {
+              ClassAttack[me.classid].findItem();
+            }
             Pickit.fastPick();
           }
         } else {
@@ -1872,7 +1874,7 @@ const Attack = {
    * @param {number} distance 
    * @param {number} spread 
    * @param {number} range 
-   * @returns {{x: number, y: number}} x/y coords of safe spot
+   * @returns {PathNode} x/y coords of safe spot
    */
   findSafeSpot: function (unit, distance, spread, range) {
     if (arguments.length < 4) throw new Error("deploy: Not enough arguments supplied");
@@ -1885,7 +1887,7 @@ const Attack = {
     monList.sort(Sort.units);
     
     if (this.getMonsterCount(me.x, me.y, 15, monList) === 0) {
-      return true;
+      return new PathNode(me.x, me.y);
     }
 
     CollMap.getNearbyRooms(unit.x, unit.y);
@@ -1913,10 +1915,7 @@ const Attack = {
     }
 
     if (typeof index === "number") {
-      return {
-        x: grid[index].x,
-        y: grid[index].y,
-      };
+      return new PathNode(grid[index].x, grid[index].y);
     }
 
     return false;

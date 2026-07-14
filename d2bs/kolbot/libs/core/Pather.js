@@ -531,7 +531,11 @@ const Pather = {
 
     while (path.length > 0) {
       // Abort if dead
-      if (me.dead) return false;
+      if (me.dead) {
+        useTeleport && Config.TeleSwitch && me.switchWeapons(primarySlot);
+        PathDebug.removeHooks(PATH_DEBUG_ID);
+        return false;
+      }
       // main path
       Pather.recursion && (Pather.currentWalkingPath = path);
 
@@ -590,8 +594,8 @@ const Pather = {
               // if we are allowed to clear
               if (settings.allowClearing) {
                 // Don't go berserk on longer paths - also check that there are even mobs blocking us
-                if (cleared.at === 0 || getTickCount() - cleared.at > Time.seconds(3)
-                  && cleared.node.distance > 5 && me.checkForMobs({ range: 10 })) {
+                if ((cleared.at === 0 || (getTickCount() - cleared.at > Time.seconds(3) && cleared.node.distance > 5))
+                  && me.checkForMobs({ range: 10 })) {
                   // only set that we cleared if we actually killed at least 1 mob
                   if (Attack.clear(10, null, null, null, settings.allowPicking) === Attack.Result.SUCCESS) {
                     cleared.update(node);
@@ -654,7 +658,11 @@ const Pather = {
             useTeleport ? 1 : 0,
             useTeleport ? rand(25, 35) : rand(10, 15)
           );
-          if (!path) throw new Error("move: Failed to generate path.");
+          if (!path) {
+            useTeleport && Config.TeleSwitch && me.switchWeapons(primarySlot);
+            PathDebug.removeHooks(PATH_DEBUG_ID);
+            throw new Error("move: Failed to generate path.");
+          }
 
           path.reverse();
           PathDebug.drawPath(PATH_DEBUG_ID, path);
@@ -939,8 +947,8 @@ const Pather = {
 
     if (monstadoor) {
       do {
-        if (monstadoor.hp > 0 && (getDistance(monstadoor, x, y) < 4
-          && monstadoor.distance < 9) || monstadoor.distance < 4) {
+        if (monstadoor.hp > 0 && ((getDistance(monstadoor, x, y) < 4
+          && monstadoor.distance < 9) || monstadoor.distance < 4)) {
           for (let p = 0; p < 20 && monstadoor.hp; p++) {
             Skill.cast(Config.AttackSkill[1], Skill.getHand(Config.AttackSkill[1]), monstadoor);
           }
@@ -952,8 +960,8 @@ const Pather = {
 
     if (monstawall) {
       do {
-        if (monstawall.hp > 0 && (getDistance(monstawall, x, y) < 4
-          && monstawall.distance < 9) || monstawall.distance < 4) {
+        if (monstawall.hp > 0 && ((getDistance(monstawall, x, y) < 4
+          && monstawall.distance < 9) || monstawall.distance < 4)) {
           for (let p = 0; p < 20 && monstawall.hp; p++) {
             Skill.cast(Config.AttackSkill[1], Skill.getHand(Config.AttackSkill[1]), monstawall);
           }
@@ -2362,7 +2370,7 @@ const Pather = {
     yMax === undefined && (yMax = 4);
     factor === undefined && (factor = 1);
     /** @type {PathNode} */
-    const coord = CollMap.getRandCoordinate(me.x, -4, 4, me.y, -4, 4, factor);
+    const coord = CollMap.getRandCoordinate(me.x, xMin, xMax, me.y, yMin, yMax, factor);
     return Pather.move(coord, { retry: 3, allowClearing: false });
   },
 

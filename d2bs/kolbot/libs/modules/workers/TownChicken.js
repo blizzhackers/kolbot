@@ -94,8 +94,8 @@
             let p = Game.getObject("portal");
             console.debug(p);
             if (!!p && Misc.click(0, 0, p) && Misc.poll(function () {
-              return me.area !== preArea, 1000, 100;
-            })) {
+              return me.area !== preArea;
+            }, 1000, 100)) {
               Pather.lastPortalTick = getTickCount();
               delay(100);
 

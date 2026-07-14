@@ -1967,7 +1967,7 @@ const Town = {
               Town.buyPotions();
             }
             let _needRepair = me.needRepair();
-            if (_needRepair && String.isEqual(Town.tasks.get(me.act).Repair, npc.name)) {
+            if (_needRepair.length && String.isEqual(Town.tasks.get(me.act).Repair, npc.name)) {
               console.info(null, "Repairing before we leave");
               Town.repair(true);
             }

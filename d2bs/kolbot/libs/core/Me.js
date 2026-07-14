@@ -170,7 +170,9 @@ me.castingFrames = function (skillId, fcr, charClass) {
     human: 208,
     wolf: 229,
     bear: 228
-  }[charClass === sdk.player.class.Druid ? (me.getState(sdk.states.Wolf) || me.getState(sdk.states.Bear)) : "normal"];
+  }[charClass === sdk.player.class.Druid
+    ? (me.getState(sdk.states.Wolf) ? "wolf" : me.getState(sdk.states.Bear) ? "bear" : "human")
+    : "normal"];
   return Math.ceil(
     256 * baseCastRate / Math.floor(animationSpeed * (100 + effectiveFCR) / 100) - (isLightning ? 0 : 1)
   );

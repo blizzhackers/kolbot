@@ -191,7 +191,11 @@ includeIfNotIncluded("core/Me.js");
         case sdk.game.locations.MainMenu:
           let control = Controls.Gateway.control;
           if (!control) {
-            if (retry > 3) return false;
+            if (retry > 3) {
+              me.blockMouse = false;
+
+              return false;
+            }
             retry++;
 
             break;
@@ -765,7 +769,8 @@ includeIfNotIncluded("core/Me.js");
           break MainLoop;
         case sdk.game.locations.LoginError:
           Controls.LoginErrorOk.click();
-          
+          me.blockMouse = false;
+
           return false;
         default:
           break;
@@ -848,6 +853,8 @@ includeIfNotIncluded("core/Me.js");
         }
 
         if (getTickCount() - tick >= 20000) {
+          me.blockMouse = false;
+
           return false;
         }
 
