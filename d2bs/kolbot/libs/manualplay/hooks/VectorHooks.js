@@ -58,6 +58,30 @@ const VectorHooks = (function () {
   ]);
 
   /**
+   * Helper function to create a POI from a preset unit
+   * @description This function takes a preset unit (like a monster or object), a name, and an optional action,
+   * and returns a POI object with the unit's coordinates and the provided name and action. If the unit is not found, it returns false.
+   * @param {PresetUnit} unit 
+   * @param {string} name 
+   * @param {*} action 
+   * @returns {{ name: string, x: number, y: number, action?: * }}
+   */
+  function createPOIFromPresetUnit(unit, name, action = null) {
+    const coords = unit.realCoords();
+    const poi = {
+      name: name,
+      x: coords.x,
+      y: coords.y
+    };
+
+    if (action) {
+      poi.action = action;
+    }
+
+    return poi;
+  }
+
+  /**
    * Helper function to create a POI from a preset object
    * @param {number} objectId - The ID of the preset object to find
    * @param {string} name - Name to display
@@ -68,18 +92,7 @@ const VectorHooks = (function () {
     const unit = Game.getPresetObject(me.area, objectId);
     if (!unit) return false;
     
-    const coords = unit.realCoords();
-    const poi = {
-      name: name,
-      x: coords.x,
-      y: coords.y
-    };
-    
-    if (action) {
-      poi.action = action;
-    }
-    
-    return poi;
+    return createPOIFromPresetUnit(unit, name, action);
   }
   
   /**
@@ -93,17 +106,7 @@ const VectorHooks = (function () {
     const unit = Game.getPresetMonster(me.area, monsterId);
     if (!unit) return false;
     
-    const poi = {
-      name: name,
-      x: unit.x,
-      y: unit.y
-    };
-    
-    if (action) {
-      poi.action = action;
-    }
-    
-    return poi;
+    return createPOIFromPresetUnit(unit, name, action);
   }
   
   /**
@@ -117,17 +120,7 @@ const VectorHooks = (function () {
     const unit = Game.getPresetStair(me.area, stairId);
     if (!unit) return false;
     
-    const poi = {
-      name: name,
-      x: unit.x,
-      y: unit.y
-    };
-    
-    if (action) {
-      poi.action = action;
-    }
-    
-    return poi;
+    return createPOIFromPresetUnit(unit, name, action);
   }
   
   /**
