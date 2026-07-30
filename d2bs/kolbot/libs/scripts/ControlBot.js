@@ -105,7 +105,7 @@ const ControlBot = new Runnable(
     const {
       AutoRush,
       RushModes,
-    } = require("../systems/autorush/RushConfig");
+    } = require("../systems/autorush/RushConstants");
     const Worker = require("../modules/Worker");
     const AreaData = require("../core/GameData/AreaData");
     
