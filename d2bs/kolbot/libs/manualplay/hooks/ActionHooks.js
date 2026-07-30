@@ -422,50 +422,47 @@ const ActionHooks = (function () {
       return;
     }
 
-    const uberPortalIds = [
-      sdk.areas.MatronsDen,
-      sdk.areas.ForgottenSands,
-      sdk.areas.FurnaceofPain,
-      sdk.areas.UberTristram,
-    ];
-  
-    const uberPortals = getUnits(sdk.unittype.Object, sdk.objects.RedPortal);
-  
-    if (!uberPortals || !uberPortals.some(portal => uberPortalIds.includes(portal.objtype))) {
-      return;
-    }
-  
-    TextHooks.displaySettings = false;
-    ActionHooks.frame.push({
-      name: "portalbox",
-      hook: new Box(Hooks.portalBoard.x - 8, Hooks.portalBoard.y + Hooks.resfix.y - 17, 190, 70, 0x0, 1, 0),
-    });
-  
-    ActionHooks.frame.push({
-      name: "portalframe",
-      hook: new Frame(Hooks.portalBoard.x - 8, Hooks.portalBoard.y + Hooks.resfix.y - 17, 190, 70, 0),
-    });
-  
     const portalConfig = [
       { area: sdk.areas.MatronsDen, name: "Matron's Den", key: 5, yOffset: 0 },
       { area: sdk.areas.ForgottenSands, name: "Forgotten Sands", key: 6, yOffset: 15 },
       { area: sdk.areas.FurnaceofPain, name: "Furnace of Pain", key: 7, yOffset: 30 },
       { area: sdk.areas.UberTristram, name: "Uber Tristam", key: 8, yOffset: 45 }
     ];
-  
-    portalConfig.forEach(function (config) {
-      if (Pather.getPortal(config.area)) {
-        ActionHooks.portals.push({
-          name: config.name,
-          type: "portal",
-          dest: config.area,
-          hook: new Text(
-            "ÿc1Num " + config.key + ": " + config.name,
-            Hooks.portalBoard.x,
-            Hooks.portalBoard.y + Hooks.resfix.y + config.yOffset
-          ),
-        });
-      }
+
+    const openPortals = portalConfig.filter(function (config) {
+      return !!Pather.getPortal(config.area);
+    });
+
+    if (!openPortals.length) {
+      return;
+    }
+
+    // draw the box/frame once, when the first portal appears
+    if (!ActionHooks.frame.some(function (f) { return f.name === "portalbox"; })) {
+      TextHooks.displaySettings = false;
+      ActionHooks.frame.push({
+        name: "portalbox",
+        hook: new Box(Hooks.portalBoard.x - 8, Hooks.portalBoard.y + Hooks.resfix.y - 17, 190, 70, 0x0, 1, 0),
+      });
+      ActionHooks.frame.push({
+        name: "portalframe",
+        hook: new Frame(Hooks.portalBoard.x - 8, Hooks.portalBoard.y + Hooks.resfix.y - 17, 190, 70, 0),
+      });
+    }
+
+    // add a hook only for portals we haven't hooked yet (fixed key/offset per type)
+    openPortals.forEach(function (config) {
+      if (ActionHooks.getPortalHook(config.name)) return;
+      ActionHooks.portals.push({
+        name: config.name,
+        type: "portal",
+        dest: config.area,
+        hook: new Text(
+          "ÿc1Num " + config.key + ": " + config.name,
+          Hooks.portalBoard.x,
+          Hooks.portalBoard.y + Hooks.resfix.y + config.yOffset
+        ),
+      });
     });
   };
 
@@ -897,6 +894,8 @@ const ActionHooks = (function () {
         TextHooks.events.emit("areachange", me.area);
         ActionHooks.currArea = me.area;
       }
+
+      addUberPortals(); // poll - crafted portals appear without an area change
     },
 
     yHookLoc: function () {
@@ -1033,8 +1032,6 @@ const ActionHooks = (function () {
       if (poi && poi.name === "Orifice") {
         this.hooks.push(createActionHook("Next Area", "area", sdk.areas.DurielsLair));
       }
-
-      addUberPortals();
     },
 
     getHook: function (name) {
