@@ -54,6 +54,9 @@ const MANUAL_EXTRAS = [
   "console", // Polyfill.js console shim
   "StopIteration", // legacy-generator termination sentinel; engine-verified via .probe (EngineProbe)
   "define", // UMD factory boilerplate: the define([], factory) call is typeof-guarded, dead in-engine
+  // declared by libs/config/_CustomConfig.js - untracked/gitignored, seeded by the setup script
+  // alongside the other user config files, so it exists in every supported install
+  "CustomConfig",
 ];
 
 // --- source 1: declare-global VALUES from the .d.ts layer ---------------------------------
@@ -85,6 +88,16 @@ function collectDtsStatements(statements, file) {
 // treating them all as universal globals masks reachability bugs. --ambient-only omits them:
 // the shared surface is then the DECLARED layer (d.ts) + deliberate global.X publications.
 const AMBIENT_ONLY = process.argv.includes("--ambient-only");
+// Loader-dispatched files run via include()/load() and are invoked by STRING name (Loader.runScript,
+// getScript) - nothing references their top-level declarations as identifiers from other files
+// (measured 2026-07-31: zero live cross-references), so counting them as globals only masks typos.
+// SoloPlay's Scripts/ and BuildFiles/ are deliberately NOT dropped: that family shares identifiers
+// internally (class base files declare CharInfo for sibling builds) - its model is the SoloPlay
+// epic's call.
+const LOADER_DISPATCHED_DIRS = [
+  "d2bs/kolbot/libs/scripts/",
+  "d2bs/kolbot/threads/",
+];
 const scriptGlobals = new Map();
 const assignedGlobals = new Map();
 function bindingNames(pattern, out) {
@@ -118,7 +131,10 @@ for (const file of dtsFiles) {
   collectDtsStatements(sf.statements, file);
 }
 
-const scriptFiles = gitFiles(["d2bs/kolbot/**/*.js", "d2bs/kolbot/**/*.dbj"]);
+const scriptFiles = gitFiles(["d2bs/kolbot/**/*.js", "d2bs/kolbot/**/*.dbj"]).filter((p) => {
+  const rel = relative(root, p).replaceAll("\\", "/");
+  return !LOADER_DISPATCHED_DIRS.some((d) => rel.startsWith(d));
+});
 let parseFailures = 0;
 for (const file of scriptFiles) {
   let ast;

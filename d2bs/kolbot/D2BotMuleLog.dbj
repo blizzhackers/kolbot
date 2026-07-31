@@ -25,8 +25,9 @@ const usingDropper = isIncluded("systems/dropper/DropperSetup.js");
 const accounts = [];
 const chars = [];
 const parseInfo = function () {
-  // eslint-disable-next-line no-undef -- external dropper plugin: usingDropper is false unless
-  // the untracked DropperSetup.js exists (include() of a missing file silently returns false)
+  // external dropper plugin: usingDropper is false unless the untracked DropperSetup.js
+  // exists (include() of a missing file silently returns false)
+  // eslint-disable-next-line no-undef
   usingDropper && parseDropperAccounts(accounts, chars);
   
   for (let i in MuleLogger.LogAccounts) {

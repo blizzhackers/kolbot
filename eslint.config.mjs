@@ -15,6 +15,7 @@ import esX from "eslint-plugin-es-x";
 // symbols. This replaced the old 90-name hand list, 4 entries of which were dead or wrong
 // (td/UtilitySystem/Items unused, handler was only ever a property).
 import d2bsGlobals from "./eslint.globals.mjs";
+import kolbot from "./tools/eslint-plugin-kolbot.mjs";
 
 export default [
   {
@@ -30,7 +31,7 @@ export default [
   },
   {
     files: ["**/*.js", "**/*.dbj"],
-    plugins: { "@stylistic": stylistic, "es-x": esX },
+    plugins: { "@stylistic": stylistic, "es-x": esX, kolbot },
     languageOptions: {
       // Parse the full modern grammar; the engine's real ceiling is enforced by rules below,
       // which produce per-construct messages instead of parser errors.
@@ -133,6 +134,11 @@ export default [
       // warn during adoption: the rule was off for the config's whole prior life, so first-run
       // volume is a findings queue, not a gate. Escalate to error once triaged.
       "no-undef": "warn",
+      // Dangling loader paths are invisible at runtime (the engine returns false on a missing
+      // file instead of throwing). systems/dropper/ is the known deliberately-external plugin.
+      // warn during adoption (remaining findings live in the SoloPlay submodule + personal
+      // configs); escalate to error once those are fixed.
+      "kolbot/include-path-exists": ["warn", { allowMissing: ["systems/dropper/"] }],
       "no-extra-boolean-cast": "off",
       "no-useless-escape": "off",
       // builtinGlobals false: Polyfill.js's `var global = ...` detection idiom must not clash

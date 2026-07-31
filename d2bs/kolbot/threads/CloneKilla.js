@@ -26,15 +26,11 @@ function main() {
   CraftingSystem.buildLists();
   Runewords.init();
   Cubing.init();
-  include("scripts/KillDclone.js");
-
-  if (typeof KillDclone === "function") {
-    try {
-      D2Bot.printToConsole("Trying to kill DClone.", sdk.colors.D2Bot.DarkGold);
-      KillDclone.call();
-    } catch (e) {
-      Misc.errorReport(e, "CloneKilla.js");
-    }
+  try {
+    D2Bot.printToConsole("Trying to kill DClone.", sdk.colors.D2Bot.DarkGold);
+    Loader.runScript("KillDclone");
+  } catch (e) {
+    Misc.errorReport(e, "CloneKilla.js");
   }
 
   try {
