@@ -7,6 +7,7 @@
 
 // each ClassAttack functionality is loaded into this object when it's needed
 // for the actual function files @see core/Attacks/
+/** @type {IClassAttack} */
 const ClassAttack = (function () {
   const LazyLoader = require("../modules/LazyLoader");
 

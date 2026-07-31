@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /**
 *  @filename    Item.js
 *  @author      kolton, theBGuy

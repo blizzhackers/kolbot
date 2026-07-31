@@ -34,7 +34,5 @@ declare global {
      */
     doCast: (unit: Monster | Player, timedSkill: number, untimedSkill: number) => AttackResult;
   }
-
-  const ClassAttack: IClassAttack;
 }
 export {};

@@ -2,7 +2,6 @@ export {};
 declare global {
   const NTIPAliasType: Record<string, number>;
   const NTIPAliasClassID: Record<string, number>;
-  const NTIPAliasCodes: Record<string, number>;
   const NTIPAliasClass: Record<string, number>;
   const NTIPAliasQuality: Record<string, number>;
   const NTIPAliasFlag: Record<string, number>;

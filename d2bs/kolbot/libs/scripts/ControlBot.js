@@ -1700,7 +1700,7 @@ const ControlBot = new Runnable(
       }
     }
 
-    // eslint-disable-next-line no-unused-vars
+
     /**
      * @param {number} mode 
      * @param {string} param1 

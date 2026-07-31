@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 /* Brief instructions:
  * - the role of this file is only to keep the required info for completing the specific character configuration files
  * - copy the desired script/config section and paste it to your character configuration file, named Class.CharName.js

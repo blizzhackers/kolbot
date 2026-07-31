@@ -1,9 +1,13 @@
 export {};
 
-interface Roll {
-  All: number;
-  Eth: number;
-  NonEth: number;
+declare global {
+  // Shape of the global `Roll` const in libs/core/Cubing.js (bound there via JSDoc @type);
+  // global so the JSDoc can reference it. Declaring the const here too would collide.
+  interface Roll {
+    All: number;
+    Eth: number;
+    NonEth: number;
+  }
 }
 
 interface RecipeHitPower {
@@ -118,7 +122,6 @@ interface RecipeLowToNorm {
 }
 
 declare global {
-  const Roll: Roll;
   const Recipe: RecipeHitPower | RecipeBlood | RecipeCaster | RecipeSafety | RecipeUnique | RecipeRare | RecipeSocket | RecipeReroll | RecipeLowToNorm;
   
   namespace Cubing {

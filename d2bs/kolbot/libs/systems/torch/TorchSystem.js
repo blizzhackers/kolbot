@@ -6,6 +6,7 @@
 *
 */
 
+/** @type {ITorchSystem} */
 const TorchSystem = {
   // load configuration file
   FarmerProfiles: Object.assign({}, require("./FarmerConfig", null, false)),
@@ -158,8 +159,8 @@ const TorchSystem = {
       delay(250);
 
       if (neededItems.hasOwnProperty("pk1")
-      || neededItems.hasOwnProperty("pk2")
-      || neededItems.hasOwnProperty("pk3")
+        || neededItems.hasOwnProperty("pk2")
+        || neededItems.hasOwnProperty("pk3")
         || neededItems.hasOwnProperty("rv")
       ) {
         removeEventListener("copydata", keyCheckEvent);

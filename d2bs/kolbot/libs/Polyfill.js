@@ -923,7 +923,7 @@ Map.prototype.toString = function () {
  */
 Map.prototype.keys = function () {
   let keys = [];
-  // eslint-disable-next-line no-unused-vars
+
   for (let [key, _value] of this.entries()) {
     keys.push(key);
   }
@@ -932,7 +932,7 @@ Map.prototype.keys = function () {
 
 Map.prototype.values = function () {
   let values = [];
-  // eslint-disable-next-line no-unused-vars
+
   for (let [_key, value] of this.entries()) {
     values.push(value);
   }

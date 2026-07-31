@@ -7,7 +7,6 @@ declare global {
     removeHooks(id: number): void;
     coordsInPath(path: PathNode[], x: number, y: number): boolean;
   }
-  const PathDebug: PathDebug;
 
   interface PathSettings {
     allowNodeActions?: boolean;

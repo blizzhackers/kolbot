@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 // Druid config file
 
 /* Brief instructions:

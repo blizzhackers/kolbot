@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 // Barbarian config file
 
 /* Brief instructions:

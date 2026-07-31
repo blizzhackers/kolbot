@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable @stylistic/max-len */
 /**
 *  @filename    MapToolsThread.js
 *  @author      theBGuy

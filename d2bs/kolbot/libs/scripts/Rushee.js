@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /**
 *  @filename    Rushee.js
 *  @author      kolton, theBGuy

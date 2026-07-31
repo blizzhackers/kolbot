@@ -590,7 +590,7 @@ const ActionHooks = (function () {
 
     if (TextHooks.displaySettings) {
       TextHooks.getHook("pickitStatus", TextHooks.statusHooks).hook.text
-      = "ÿc4N-Pad - ÿc0: " + (ItemHooks.pickitEnabled ? "ÿc<Your Filter" : "ÿc1Default Filter");
+        = "ÿc4N-Pad - ÿc0: " + (ItemHooks.pickitEnabled ? "ÿc<Your Filter" : "ÿc1Default Filter");
     }
   };
 
@@ -605,7 +605,7 @@ const ActionHooks = (function () {
     case sdk.keys.Seven:
       if (TextHooks.displaySettings) {
         TextHooks.getHook("itemStatus", TextHooks.statusHooks).hook.text
-        = "ÿc4Key 7ÿc0: " + (ItemHooks.enabled ? "Enable" : "Disable") + " Item Filter";
+          = "ÿc4Key 7ÿc0: " + (ItemHooks.enabled ? "Enable" : "Disable") + " Item Filter";
       }
       ItemHooks.enabled = !ItemHooks.enabled;
       
@@ -613,7 +613,7 @@ const ActionHooks = (function () {
     case sdk.keys.Eight:
       if (TextHooks.displaySettings) {
         TextHooks.getHook("monsterStatus", TextHooks.statusHooks).hook.text
-        = "ÿc4Key 8ÿc0: " + (MonsterHooks.enabled ? "Enable" : "Disable") + " Monsters";
+          = "ÿc4Key 8ÿc0: " + (MonsterHooks.enabled ? "Enable" : "Disable") + " Monsters";
       }
       MonsterHooks.enabled = !MonsterHooks.enabled;
       
@@ -621,7 +621,7 @@ const ActionHooks = (function () {
     case sdk.keys.Nine:
       if (TextHooks.displaySettings) {
         TextHooks.getHook("vectorStatus", TextHooks.statusHooks).hook.text
-        = "ÿc4Key 9ÿc0: " + (VectorHooks.enabled ? "Enable" : "Disable") + " Vectors";
+          = "ÿc4Key 9ÿc0: " + (VectorHooks.enabled ? "Enable" : "Disable") + " Vectors";
       }
       VectorHooks.enabled = !VectorHooks.enabled;
       

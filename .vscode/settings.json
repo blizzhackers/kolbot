@@ -1,4 +1,9 @@
 {
+  "files.associations": {
+    "*.dbj": "javascript"
+  },
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
   "editor.rulers": [
     120
   ],
@@ -21,5 +26,6 @@
       "source.fixAll.eslint": "never",
       "source.fixAll.biome": "explicit",
     }
-  }
+  },
+  "js/ts.tsdk.path": "node_modules/typescript/lib"
 }

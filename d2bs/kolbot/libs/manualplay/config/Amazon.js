@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 // Amazon config file
 
 /* Brief instructions:

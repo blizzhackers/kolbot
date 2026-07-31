@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 // Necromancer config file
 
 /* Brief instructions:

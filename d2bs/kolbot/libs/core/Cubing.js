@@ -5,6 +5,7 @@
 *
 */
 
+/** @type {Roll} */
 const Roll = {
   All: 0,
   Eth: 1,

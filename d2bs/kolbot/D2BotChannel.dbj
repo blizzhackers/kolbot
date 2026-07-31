@@ -337,7 +337,7 @@ const locationAction = (function () {
         if (!chat.name || chat.name.split("*")[0] === me.charname) continue;
         // is this a game announcement?
         if (!chat.msg.toLowerCase().includes("next game is")) continue;
-        // eslint-disable-next-line max-len
+        // eslint-disable-next-line @stylistic/max-len
         const gameRegex = new RegExp(/Next game is\s+([a-zA-Z0-9_-]+)(?:\/\/(\w+))?(?:\s+in\s+(\w+))?(?:\s+on\s+(\w+))?/gm);
         // capture the game name and password if there is one
         let match = gameRegex.exec(chat.msg);

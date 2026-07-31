@@ -15,6 +15,3 @@ export interface CharRefresherType {
   remove(): void;
 }
 
-declare global {
-  const CharRefresher: CharRefresherType;
-}

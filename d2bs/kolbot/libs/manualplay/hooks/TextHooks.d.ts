@@ -13,7 +13,7 @@ declare global {
    * The TextHooks module
    */
   const TextHooks: {
-    events: Events;
+    events: typeof import("../../modules/Events");
     enabled: boolean;
     displayTitle: boolean;
     displaySettings: boolean;

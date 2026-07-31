@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable @stylistic/max-len */
 /**
 *  @filename    GameData.js
 *  @author      Nishimura-Katsuo

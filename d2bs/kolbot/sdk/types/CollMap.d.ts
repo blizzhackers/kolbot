@@ -133,7 +133,5 @@ declare global {
       factor?: number,
     ): PathNode;
   }
-
-  const CollMap: CollMapInstance;
 }
 export {};

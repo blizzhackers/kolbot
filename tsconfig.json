@@ -1,44 +1,45 @@
 {
+  // Editor-intellisense-only project (noEmit): tsserver types the JS via JSDoc + the ambient
+  // sdk/*.d.ts layer. checkJs stays off - enable per-file with // @ts-check.
   "compilerOptions": {
-		"ignoreDeprecations": "6.0",
-		"module": "None",
-		"lib": [
-			"ES2015",
-			"es2015.collection",
-			"ES2015.Promise",
-			"ES2016.Array.Include",
-			"ES2017.Object",
-			"ScriptHost",
-		],
-		"target": "ES6",
-		"allowJs": true,
-		"checkJs": false,
-		"moduleResolution": "classic",
-		"allowUmdGlobalAccess": true,
-		"esModuleInterop": true,
-		"noImplicitAny": true,
-		"noEmit": true,
-		"strict": true,
-		// "declaration": true,
-		// "emitDeclarationOnly": true,
-		"baseUrl": "./d2bs/kolbot/",
-		"rootDir": "./d2bs/kolbot/",
-		// "outDir": "./d2bs/kolbot/sdk/types/",
-		"outFile": "./d2bs/kolbot/data/out.js",
-		"typeRoots": [
-			"./d2bs/kolbot/sdk/globals.d.ts",
-			"./d2bs/kolbot/sdk/types/",
-			"./d2bs/kolbot/libs/SoloPlay/index.d.ts",
-		],
+    // No real modules at runtime (D2BS include()/require() shim); preserve+bundler is the
+    // supported replacement for the removed module:"None"/moduleResolution:"classic" pair.
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "lib": [
+      "ES2015",
+      "es2015.collection",
+      "ES2015.Promise",
+      "ES2016.Array.Include",
+      "ES2017.Object",
+      "ScriptHost",
+    ],
+    "target": "ES6",
+    "allowJs": true,
+    "checkJs": false,
+    "allowUmdGlobalAccess": true,
+    "noImplicitAny": true,
+    "noEmit": true,
+    "strict": true,
+    // Keep node_modules/@types (e.g. @types/node) OUT of this program - the D2BS ambient
+    // globals below are the only intended type surface, and Node's collide with them.
+    "types": [],
+    // Editor-only (never affects tsc): attaches the .dbj entry scripts to this project.
+    // Requires the workspace TypeScript version - see tools/kolbot-ts-plugin/index.js.
+    "plugins": [{ "name": "kolbot-ts-plugin" }],
   },
   "include": [
-		"./d2bs/kolbot/*.dbj",
-		"./d2bs/kolbot/**/*.js",
-		"**/*.dbl",
+    // The ambient type layer is loaded HERE, explicitly. (typeRoots cannot do this - it only
+    // resolves @types-style package directories - and stray /// <reference> comments in .js
+    // files must never be what keeps intellisense alive.)
+    "./d2bs/kolbot/sdk/globals.d.ts",
+    "./d2bs/kolbot/sdk/types/*.d.ts",
+    "./d2bs/kolbot/libs/**/*.d.ts",
+    "./d2bs/kolbot/**/*.js",
   ],
   "exclude": [
-		"node_modules",
-		"**/node_modules/*",
-		"**/data/",
-	],
+    "node_modules",
+    "**/node_modules/*",
+    "**/data/",
+  ],
 }

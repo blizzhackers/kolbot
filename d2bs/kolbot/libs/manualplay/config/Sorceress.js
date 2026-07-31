@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 // Sorceress config file
 
 /* Brief instructions:

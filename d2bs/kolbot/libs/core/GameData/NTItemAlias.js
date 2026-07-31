@@ -773,6 +773,7 @@ NTIPAliasClassID["bet"] = 656; NTIPAliasClassID["burningessenceofterror"] = 656;
 NTIPAliasClassID["fed"] = 657; NTIPAliasClassID["festeringessenceofdestruction"] = 657;
 NTIPAliasClassID["std"] = 658; NTIPAliasClassID["standardofheroes"] = 658;
 
+/** @type {Record<string, number>} */
 const NTIPAliasCodes = {
   hax: 0,
   axe: 1,

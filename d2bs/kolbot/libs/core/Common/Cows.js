@@ -108,7 +108,7 @@
         if (startRoomInBadRooms) {
           console.warn("Starting room is in badRooms, finding the closest safe room...");
           rooms.sort(function (a, b) {
-            // eslint-disable-next-line max-len
+            // eslint-disable-next-line @stylistic/max-len
             return getDistance(startRoomCoords[0], startRoomCoords[1], a[0], a[1]) - getDistance(startRoomCoords[0], startRoomCoords[1], b[0], b[1]);
           });
 

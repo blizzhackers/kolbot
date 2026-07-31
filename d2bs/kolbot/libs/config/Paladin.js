@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 // Paladin config file
 
 /* Brief instructions:

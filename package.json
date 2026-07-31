@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "1. D2BS, D2Bot and kolbot # are educational tools with an open source developer community. These tools are meant to be used offline or on private servers that explicitly allow them. These tools are not meant to be abused on battle.net (a Blizzard Entertainment entity).",
   "main": "",
-  "typings": "./d2bs/kolbot/**/global.d.ts",
   "scripts": {
-    "lint": "eslint --fix --ext .js --ext .dbj d2bs/kolbot/",
+    "lint": "eslint --fix d2bs/kolbot/",
+    "lint:check": "eslint d2bs/kolbot/",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -13,8 +13,12 @@
   "license": "ISC",
   "devDependencies": {
     "@biomejs/biome": "2.1.2",
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
     "@types/node": "^24.0.10",
-    "eslint": "^7.32.0",
-    "typescript": "^4.9.3"
+    "eslint": "^10.8.0",
+    "eslint-plugin-es-x": "^10.0.0",
+    "kolbot-ts-plugin": "file:tools/kolbot-ts-plugin",
+    "typescript": "~5.9"
   }
 }

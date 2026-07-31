@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /**
 *  @filename    ConfigOverrides.js
 *  @author      theBGuy

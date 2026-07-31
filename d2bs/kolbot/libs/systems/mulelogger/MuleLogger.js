@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 /**
 *  @filename    MuleLogger.js
 *  @author      kolton, theBGuy

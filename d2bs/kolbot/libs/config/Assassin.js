@@ -1,4 +1,3 @@
-/* eslint-disable indent */
 // Assassin config file
 
 /* Brief instructions:

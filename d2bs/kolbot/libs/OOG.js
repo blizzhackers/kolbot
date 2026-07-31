@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable @stylistic/max-len */
 /**
 *  @filename    OOG.js
 *  @author      kolton, D3STROY3R, theBGuy

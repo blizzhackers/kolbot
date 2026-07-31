@@ -5,6 +5,7 @@
 *
 */
 
+/** @type {CollMapInstance} */
 const CollMap = new function () {
   this.rooms = [];
   this.maps = [];

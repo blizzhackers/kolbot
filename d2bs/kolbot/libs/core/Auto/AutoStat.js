@@ -1,4 +1,3 @@
-/* eslint-disable no-labels */
 /**
 *  @filename    AutoStat.js
 *  @author      IMBA

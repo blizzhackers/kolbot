@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable @stylistic/max-len */
 /**
 *  @filename    Storage.js
 *  @author      McGod, kolton, esd1, theBGuy

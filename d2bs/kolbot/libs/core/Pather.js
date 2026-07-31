@@ -152,6 +152,7 @@ const NodeAction = {
   }
 };
 
+/** @type {PathDebug} */
 const PathDebug = {
   enableHooks: false,
   /** @type {Map<number, Line[]} */
