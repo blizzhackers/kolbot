@@ -169,8 +169,8 @@ function parseInfo () {
   }
   
   if (AdvancedCleanerConfig.generateAccounts) {
-    for (let index = rangeStart; index <= rangeStop ; index += 1) {
-      const { accountPrefix, accountPassword, accountRealm } = AdvancedCleanerConfig;
+    const { rangeStart, rangeStop, accountPrefix, accountPassword, accountRealm } = AdvancedCleanerConfig;
+    for (let index = rangeStart; index <= rangeStop; index += 1) {
       accounts.push(accountPrefix + index + "/" + accountPassword + "/" + accountRealm);
       chars.push(["all"]);
     }

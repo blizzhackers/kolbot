@@ -9,24 +9,12 @@
 import js from "@eslint/js";
 import stylistic from "@stylistic/eslint-plugin";
 import esX from "eslint-plugin-es-x";
-
-/** D2BS engine globals (write-capable, matching the old .eslintrc.js list). Inert while
- * no-undef is off, but kept current for the planned no-undef re-enable. */
-const d2bsGlobals = Object.fromEntries([
-  "include", "print", "me", "td", "getTickCount", "delay", "getParty", "takeScreenshot",
-  "getUnit", "quit", "clickMap", "getBaseStat", "clickItem", "getCursorType", "getPresetUnits",
-  "getDistance", "copyUnit", "getRoom", "getLocaleString", "scriptBroadcast", "isIncluded",
-  "showConsole", "getInteractedNPC", "getDialogLines", "getUIFlag", "sendPacket", "getPacket",
-  "getPath", "rand", "PresetUnit", "getPresetUnit", "getArea", "getWaypoint", "getScript",
-  "Room", "say", "load", "addEventListener", "getMercHP", "checkCollision", "gold",
-  "getLocation", "login", "sendCopyData", "getControl", "debugLog", "getCollision", "transmute",
-  "submitItem", "createGame", "joinGame", "Line", "removeEventListener", "Unit", "Party",
-  "UtilitySystem", "moveNPC", "getPlayerFlag", "clickParty", "dopen", "Items", "Text", "File",
-  "js_strict", "handler", "sendKey", "md5", "module", "require", "Box", "Frame", "revealLevel",
-  "hideConsole",
-  // engine/loader globals the old list was missing
-  "sdk", "FileTools", "D2Bot", "StopIteration", "console", "global",
-].map((name) => [name, "writable"]));
+// Generated no-undef inventory: declare-global values from the .d.ts layer + top-level
+// declarations from every runtime file (the include() architecture makes those cross-file
+// globals). Regenerate with `npm run globals:gen` after adding globals or renaming top-level
+// symbols. This replaced the old 90-name hand list, 4 entries of which were dead or wrong
+// (td/UtilitySystem/Items unused, handler was only ever a property).
+import d2bsGlobals from "./eslint.globals.mjs";
 
 export default [
   {
@@ -36,6 +24,8 @@ export default [
       "d2bs/kolbot/logs/**",
       "**/*.d.ts",
       "**/*.ts",
+      // Node-land tooling, not D2BS dialect (tsserver plugin, generators)
+      "tools/**",
     ],
   },
   {
@@ -140,7 +130,9 @@ export default [
       // caughtErrors "none" preserves the ESLint 7 semantics (v9 flipped the default to "all").
       "no-unused-vars": ["warn", { vars: "local", varsIgnorePattern: "^_", caughtErrors: "none" }],
       "no-fallthrough": ["error", { commentPattern: "break[\\s\\w]*omitted" }],
-      "no-undef": "off",
+      // warn during adoption: the rule was off for the config's whole prior life, so first-run
+      // volume is a findings queue, not a gate. Escalate to error once triaged.
+      "no-undef": "warn",
       "no-extra-boolean-cast": "off",
       "no-useless-escape": "off",
       // builtinGlobals false: Polyfill.js's `var global = ...` detection idiom must not clash

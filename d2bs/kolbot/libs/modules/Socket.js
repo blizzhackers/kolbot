@@ -4,6 +4,7 @@
  */
 
 
+/** @param {typeof Socket} buildinSock the engine Socket class, captured before this wrapper shadows the name */
 (function (module, require, buildinSock) {
   const Worker = require("Worker");
   const Events = require("./AsyncEvents");

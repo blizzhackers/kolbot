@@ -393,4 +393,5 @@
 
     console.log("ÿc2Kolbotÿc0 :: TownChicken running");
   }
+// eslint-disable-next-line no-undef -- typeof-guarded probe: short-circuit means the bare Worker is never evaluated
 })(module, require, typeof Worker === "object" && Worker || require("../Worker"));

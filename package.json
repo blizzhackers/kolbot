@@ -6,6 +6,7 @@
   "scripts": {
     "lint": "eslint --fix d2bs/kolbot/",
     "lint:check": "eslint d2bs/kolbot/",
+    "globals:gen": "node tools/generate-eslint-globals.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -8,6 +8,7 @@
 *
 */
 
+/** @type {ICraftingSystem} */
 const CraftingSystem = {};
 
 // load configuration file
@@ -55,6 +56,8 @@ CraftingSystem.outOfGameCheck = function () {
   if (!CraftingSystem.check) return false;
 
   let info = CraftingSystem.getInfo();
+  /** @type {ReturnType<ICraftingSystem["getWorker"]>} */
+  let worker;
 
   function scriptMsg(msg) {
     let obj;
@@ -71,7 +74,7 @@ CraftingSystem.outOfGameCheck = function () {
   }
 
   if (info && info.collector) {
-    let worker = CraftingSystem.getWorker();
+    worker = CraftingSystem.getWorker();
 
     if (worker && worker.game) {
       D2Bot.printToConsole("CraftingSystem: Transfering items.", sdk.colors.D2Bot.DarkGold);

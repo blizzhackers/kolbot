@@ -279,6 +279,8 @@ const MuleLogger = {
     if (isIncluded("systems/dropper/ItemDB.js") || include("systems/dropper/ItemDB.js")) {
       /** @typedef {import("../dropper/ItemDB")} */
       // @ts-ignore
+      // eslint-disable-next-line no-undef -- external dropper plugin: this branch only runs when
+      // the untracked ItemDB.js was actually include()d, which defines the global
       while (!ItemDB.init(false)) {
         delay(1000);
       }

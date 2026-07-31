@@ -1304,7 +1304,27 @@ declare global {
 
   function getIP(): string;
   function sendKey(key: number): void;
+  /** Sends a raw mouse click at screen coordinates (engine builtin, JSCore.cpp my_sendClick). */
+  function sendClick(x: number, y: number): void;
   function revealLevel(unknown: true): void;
+
+  /**
+   * Engine TCP socket class (JSSocket.cpp), wrapped by libs/modules/Socket.js - use that
+   * wrapper (or libs/modules/HTTP.js) instead of this raw builtin. Instances only come from
+   * Socket.open; the host must be whitelisted in the D2Bot hosts setting or open throws.
+   */
+  class Socket {
+    private constructor();
+    /** Returns false if either argument is missing; throws on a non-whitelisted host. */
+    static open(host: string, port: number): Socket | false;
+    /** Drains pending data into a string; throws "Socket Error" on a receive failure. */
+    read(): string;
+    send(data: string): void;
+    close(): void;
+    readonly readable: boolean;
+    /** Engine spelling ("writeable"), not a typo. */
+    readonly writeable: boolean;
+  }
 
   // hash functions
   function md5(str: string): string;
