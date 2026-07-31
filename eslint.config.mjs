@@ -27,6 +27,8 @@ export default [
       "**/*.ts",
       // Node-land tooling, not D2BS dialect (tsserver plugin, generators)
       "tools/**",
+      // Double-underscore convention: gitignored personal working copies
+      "**/__*.js",
     ],
   },
   {
@@ -145,10 +147,12 @@ export default [
       // with the declared `global` in languageOptions.globals.
       "no-redeclare": ["error", { builtinGlobals: false }],
 
-      // ---- new-in-v10 signal, kept visible as warnings during migration ----
-      // Real findings queue (63/25/9/4 hits at migration time) - triage over time, then escalate.
+      // ---- new-in-v10 signal (triaged 2026-07-31: every site fixed, verified, or dispositioned) ----
       "no-useless-assignment": "warn",
-      "preserve-caught-error": "warn",
+      // Dialect-incompatible: the rule's only accepted remediation is the ES2022 `cause` option,
+      // which new Error(msg, {cause}) SILENTLY IGNORES in SpiderMonkey 24. Catch sites append
+      // e.message into thrown messages instead - better than nothing, invisible to this rule.
+      "preserve-caught-error": "off",
       "no-constant-binary-expression": "warn",
       "no-shadow-restricted-names": "warn",
     },
@@ -165,6 +169,7 @@ export default [
     rules: {
       "@stylistic/indent": "off",
       "@stylistic/no-multi-spaces": "off",
+      "@stylistic/max-len": "off",
     },
   },
 ];

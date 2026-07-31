@@ -42,7 +42,7 @@
       }
 
       let mercRevive = 0;
-      let [attackSkill, aura] = [-1, -1];
+      let attackSkill, aura;
       const index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 
       if (Attack.getCustomAttack(unit)) {
@@ -222,7 +222,8 @@
 
         CollMap.reset();
 
-        if (unit.distance > Skill.getRange(attackSkill) || CollMap.checkColl(me, unit, sdk.collision.FriendlyRanged, 2)) {
+        if (unit.distance > Skill.getRange(attackSkill)
+          || CollMap.checkColl(me, unit, sdk.collision.FriendlyRanged, 2)) {
           if (!Attack.getIntoPosition(unit, Skill.getRange(attackSkill), sdk.collision.FriendlyRanged, true)) {
             return Attack.Result.FAILED;
           }

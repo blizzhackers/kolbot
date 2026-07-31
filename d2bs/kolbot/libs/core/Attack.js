@@ -1122,7 +1122,8 @@ const Attack = {
    */
   getMob: function (classid, spectype, range, center) {
     let monsterList = [];
-    let monster = Game.getMonster();
+    /** @type {Monster} */
+    let monster;
 
     range === undefined && (range = 25);
     !center && (center = me);
@@ -1880,10 +1881,9 @@ const Attack = {
     if (arguments.length < 4) throw new Error("deploy: Not enough arguments supplied");
 
     let index;
-    let monList = [];
     let count = 999;
 
-    monList = this.buildMonsterList();
+    let monList = this.buildMonsterList();
     monList.sort(Sort.units);
     
     if (this.getMonsterCount(me.x, me.y, 15, monList) === 0) {
@@ -2076,7 +2076,7 @@ const Attack = {
       }
     }
 
-    let tempArray = [];
+    let tempArray;
 
     // EnchantLoop: // Skip enchanted monsters
     for (let i = 0; i < Config.SkipEnchant.length; i += 1) {

@@ -1302,6 +1302,13 @@ declare global {
   function sendPacket(buffer: ArrayBuffer): void;
   function sendPacket(...number: number[]): void;
 
+  /**
+   * The thread's global scope object, derived in Polyfill.js via the Function-constructor trick
+   * (`[].filter.constructor("return this")()`) since SM24 has no native globalThis. Typed as the
+   * ambient scope itself so `global.X` gets real member typing everywhere.
+   */
+  var global: typeof globalThis;
+
   function getIP(): string;
   function sendKey(key: number): void;
   /** Sends a raw mouse click at screen coordinates (engine builtin, JSCore.cpp my_sendClick). */

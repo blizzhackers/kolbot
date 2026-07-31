@@ -27,7 +27,7 @@ function main () {
   getUnit(-1) === null && console.warn("getUnit bug detected");
   
   let ironGolem, debugInfo = { area: 0, currScript: "no entry" };
-  let [quitFlag, antiIdle, townChicken] = [false, false, false];
+  let [quitFlag, antiIdle] = [false, false];
   let quitListDelayTime;
   let idleTick = 0;
   let canQuit = true;

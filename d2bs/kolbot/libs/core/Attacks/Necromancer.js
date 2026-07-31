@@ -135,7 +135,7 @@
       let mercRevive = 0;
       let gid = unit.gid;
       let classid = unit.classid;
-      let [timedSkill, untimedSkill, customCurse] = [-1, -1, -1];
+      let [timedSkill, untimedSkill] = [-1, -1];
       const index = (unit.isSpecial || unit.isPlayer) ? 1 : 3;
 
       if (Config.MercWatch && me.needMerc()) {
@@ -157,7 +157,7 @@
 
       // only continue if we can actually curse the unit otherwise its a waste of time
       if (unit.curseable) {
-        customCurse = this.getCustomCurse(unit);
+        let customCurse = this.getCustomCurse(unit);
 
         if (customCurse && this.canCurse(unit, customCurse)) {
           if (unit.distance > 25 || checkCollision(me, unit, sdk.collision.Ranged)) {

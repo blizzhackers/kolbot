@@ -114,6 +114,52 @@ function init (modules) {
     return out;
   }
 
+  /**
+   * Definition site of the require shim: the `global.require = (...)` assignment in
+   * libs/require.js. require is deliberately NOT declared in the ambient d.ts - a declared
+   * global would defeat tsserver's CommonJS inference that types `const X = require("...")`
+   * from the module file - so identifier navigation is provided here instead.
+   */
+  function requireShimSite (program, kolbotRoot) {
+    var shimPath = path.join(kolbotRoot, "libs", "require.js");
+    var sf = program.getSourceFile(shimPath) || program.getSourceFile(norm(shimPath));
+    if (!sf) return null;
+    for (var i = 0; i < sf.statements.length; i++) {
+      var s = sf.statements[i];
+      if (
+        ts.isExpressionStatement(s) &&
+        ts.isBinaryExpression(s.expression) &&
+        s.expression.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+        ts.isPropertyAccessExpression(s.expression.left) &&
+        ts.isIdentifier(s.expression.left.expression) &&
+        s.expression.left.expression.text === "global" &&
+        s.expression.left.name.text === "require"
+      ) {
+        var nameNode = s.expression.left.name;
+        return {
+          fileName: norm(sf.fileName),
+          textSpan: { start: nameNode.getStart(sf), length: nameNode.getWidth(sf) },
+          kind: ts.ScriptElementKind.functionElement,
+          name: "require",
+          containerKind: ts.ScriptElementKind.unknown,
+          containerName: "global",
+        };
+      }
+    }
+    return null;
+  }
+
+  /** The identifier node containing position, or null. */
+  function identifierAt (sourceFile, position) {
+    var hit = null;
+    (function walk (node) {
+      if (position < node.getFullStart() || position >= node.getEnd()) return;
+      if (ts.isIdentifier(node) && position >= node.getStart(sourceFile)) hit = node;
+      ts.forEachChild(node, walk);
+    })(sourceFile);
+    return hit;
+  }
+
   /** Finds the string literal at position when it is the first argument of a loader call. */
   function loaderLiteralAt (sourceFile, position) {
     var hit = null;
@@ -237,6 +283,22 @@ function init (modules) {
         }
       }
       var res = ls.getDefinitionAndBoundSpan(fileName, position);
+      // Undeclared-global fallback: `require` has no ambient declaration (see requireShimSite),
+      // so native lookup yields nothing unless a local binding shadows it - which correctly
+      // takes precedence because res is non-empty then.
+      if ((!res || !res.definitions || res.definitions.length === 0) && sourceFile) {
+        var ident = identifierAt(sourceFile, position);
+        if (ident && ident.text === "require") {
+          var reqRoot = loaderPaths.kolbotRootOf(path.normalize(fileName));
+          var shim = reqRoot && requireShimSite(program, reqRoot);
+          if (shim) {
+            return {
+              definitions: [shim],
+              textSpan: { start: ident.getStart(sourceFile), length: ident.getWidth(sourceFile) },
+            };
+          }
+        }
+      }
       if (res && res.definitions) {
         var kept = filterContextualDefs(fileName, res.definitions);
         if (kept !== res.definitions) {

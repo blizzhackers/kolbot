@@ -1,4 +1,8 @@
-(function (module, require, thread, globalThis) {
+/**
+ * @param {boolean} thread
+ * @param {typeof globalThis} global
+ */
+(function (module, require, thread, global) {
   "use strict";
   const Messaging = require("../Messaging");
   const Worker = require("../Worker");
@@ -66,7 +70,7 @@
     addEventListener("scriptmsg", data => data === "quit" && (quiting = true));
 
     // eslint-disable-next-line dot-notation
-    globalThis["main"] = function () {
+    global["main"] = function () {
       while (!quiting) delay(3);
       //@ts-ignore
       getScript(true).stop();

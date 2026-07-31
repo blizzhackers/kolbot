@@ -17,13 +17,12 @@ const Idle = new Runnable(
     const greet = [];
 
     /**
-     * @param {number} mode 
-     * @param {number} param1 
-     * @param {number} param2 
-     * @param {string} name1 
-     * @param {string} name2 
+     * @param {number} mode
+     * @param {number} param1
+     * @param {number} param2
+     * @param {string} name1
      */
-    function gameEvent (mode, param1, param2, name1, _name2) {
+    function gameEvent (mode, param1, param2, name1) {
       switch (mode) {
       case 0x02: // "%Name1(%Name2) joined our world. Diablo's minions grow stronger."
         // idle in town

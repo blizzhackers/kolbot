@@ -1117,8 +1117,8 @@ includeIfNotIncluded("core/Me.js");
         }
       }
       
-      // handling Enter Ip inside entry for now so that location === sucess
-      return (me.ingame || getLocation() === [sdk.game.locations.TcpIpEnterIp]);
+      // handling Enter Ip inside entry for now so that location === success
+      return (me.ingame || getLocation() === sdk.game.locations.TcpIpEnterIp);
     }
   };
 
@@ -1322,7 +1322,7 @@ includeIfNotIncluded("core/Me.js");
         return;
       }
 
-      let obj = null;
+      let obj;
 
       switch (mode) {
       case 1: // JoinInfo

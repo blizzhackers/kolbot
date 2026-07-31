@@ -445,7 +445,7 @@
         // sometimes we fail just because we aren't in range, move back towards star while checking
         Pather.moveToEx(this.starCoords.x, this.starCoords.y, { minDist: 15, callback: cb });
         if (!_Diablo.getBoss(vizier)) {
-          throw new Error("Failed to kill Vizier");
+          throw new Error("Failed to kill Vizier - " + e.message);
         }
       }
 
@@ -504,7 +504,7 @@
           return seis && (seis.distance < 30 || seis.dead);
         } });
         if (!_Diablo.getBoss(deSeis)) {
-          throw new Error("Failed to kill de Seis");
+          throw new Error("Failed to kill de Seis - " + e.message);
         }
       }
 
@@ -612,6 +612,7 @@
             return inf && (inf.distance < 30 || inf.dead);
           } });
           if (!_Diablo.getBoss(infector)) {
+            // e.message is provably identical to this literal (guarded above) - chaining would duplicate
             throw new Error("Failed to kill Infector");
           }
         }

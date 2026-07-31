@@ -245,7 +245,7 @@
           if (e instanceof ScriptError) {
             throw e;
           }
-          throw new Error("Town.goToTown: Failed use WP");
+          throw new Error("Town.goToTown: Failed use WP - " + e.message);
         }
       }
 
@@ -314,7 +314,7 @@
           if (e instanceof ScriptError) {
             throw e;
           }
-          throw new Error("Town.visitTown: Failed to go back from town");
+          throw new Error("Town.visitTown: Failed to go back from town - " + e.message);
         }
       }
       Config.PublicMode && Pather.makePortal();

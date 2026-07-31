@@ -426,7 +426,7 @@ const Precast = (function () {
         delay(40);
       }
 
-      let [buffSummons, forceBo] = [false, false];
+      let buffSummons = false, forceBo;
 
       // Force BO 30 seconds before it expires
       if (Precast.haveCTA > -1) {

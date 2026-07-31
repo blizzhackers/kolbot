@@ -213,9 +213,7 @@
 
           break;
         case 5:
-          if (Attack.clearClassids(sdk.monsters.ListerTheTormenter, sdk.monsters.Minion1, sdk.monsters.Minion2)) {
-            tick = getTickCount();
-          }
+          Attack.clearClassids(sdk.monsters.ListerTheTormenter, sdk.monsters.Minion1, sdk.monsters.Minion2);
 
           break MainLoop;
         default:

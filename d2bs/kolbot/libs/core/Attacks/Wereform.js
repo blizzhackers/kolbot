@@ -68,7 +68,9 @@
           && (Skill.wereFormCheck(Config.AttackSkill[0]) || !me.shapeshifted)) {
           if (unit.distance > Skill.getRange(Config.AttackSkill[0])
             || checkCollision(me, unit, sdk.collision.WallOrRanged)) {
-            if (!Attack.getIntoPosition(unit, Skill.getRange(Config.AttackSkill[0]), sdk.collision.WallOrRanged, true)) {
+            if (!Attack.getIntoPosition(
+              unit, Skill.getRange(Config.AttackSkill[0]), sdk.collision.WallOrRanged, true
+            )) {
               return Attack.Result.FAILED;
             }
           }
@@ -90,7 +92,8 @@
         // Get timed skill
         let checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[0] : Config.AttackSkill[index];
 
-        if (Attack.checkResist(unit, checkSkill) && Skill.wereFormCheck(checkSkill) && Attack.validSpot(unit.x, unit.y)) {
+        if (Attack.checkResist(unit, checkSkill) && Skill.wereFormCheck(checkSkill)
+          && Attack.validSpot(unit.x, unit.y)) {
           timedSkill = checkSkill;
         } else if (Config.AttackSkill[5] > -1
           && Attack.checkResist(unit, Config.AttackSkill[5])
@@ -101,7 +104,8 @@
         // Get untimed skill
         checkSkill = Attack.getCustomAttack(unit) ? Attack.getCustomAttack(unit)[1] : Config.AttackSkill[index + 1];
 
-        if (Attack.checkResist(unit, checkSkill) && Skill.wereFormCheck(checkSkill) && Attack.validSpot(unit.x, unit.y)) {
+        if (Attack.checkResist(unit, checkSkill) && Skill.wereFormCheck(checkSkill)
+          && Attack.validSpot(unit.x, unit.y)) {
           untimedSkill = checkSkill;
         } else if (Config.AttackSkill[6] > -1
           && Attack.checkResist(unit, Config.AttackSkill[6])
@@ -149,7 +153,9 @@
         }
 
         // use our secondary skill if we can't use our primary
-        let choosenSkill = (Skill.isTimed(timedSkill) && me.skillDelay && untimedSkill > -1 ? untimedSkill : timedSkill);
+        let choosenSkill = (Skill.isTimed(timedSkill) && me.skillDelay && untimedSkill > -1
+          ? untimedSkill
+          : timedSkill);
 
         return this.doCast(unit, choosenSkill);
       },

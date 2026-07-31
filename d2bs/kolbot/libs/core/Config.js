@@ -58,7 +58,7 @@ let Config = {
           throw new Error();
         }
       } catch (e1) {
-        throw new Error("Failed to load character config.");
+        throw new Error("Failed to load character config." + (e1 && e1.message ? " - " + e1.message : ""));
       }
     } else {
       if (notify) {
@@ -78,7 +78,7 @@ let Config = {
         }
         Config._defaultLoaded = true;
       } catch (e) {
-        throw new Error("ÿc1Failed to load default config.");
+        throw new Error("ÿc1Failed to load default config." + (e && e.message ? " - " + e.message : ""));
       }
     }
 
@@ -89,6 +89,7 @@ let Config = {
       if (notify) {
         console.error(e2);
 
+        // e2 is surfaced via console.error immediately above; the throw is a clean domain message
         throw new Error("Config.init: Error in character config.");
       }
     }

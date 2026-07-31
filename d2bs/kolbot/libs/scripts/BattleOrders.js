@@ -95,7 +95,7 @@ const BattleOrders = new Runnable(
     // bo is AoE, lets build a list of all players near us so we can know who we boed
     function giveBO () {
       // more players might be showing up, give a moment and lets wait until the nearby player count is static
-      let nearPlayers = 0;
+      let nearPlayers;
       let tick = getTickCount();
       
       // if we haven't already given a bo, lets wait to see if more players show up

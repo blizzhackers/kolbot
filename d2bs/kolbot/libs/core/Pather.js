@@ -2418,13 +2418,13 @@ Pather.nextAreas[sdk.areas.Harrogath] = sdk.areas.BloodyFoothills;
 
 /**
  * Trick to let the OOG script cache the getWaypoint
- * @param {Object} globalThis
+ * @param {typeof globalThis} global
  * @param {(id: number) => boolean} original
  */
-(function (globalThis, original) {
-  globalThis._getWaypoint = original;
+(function (global, original) {
+  global._getWaypoint = original;
 
-  globalThis.getWaypoint = function (id, noCache = false) {
+  global.getWaypoint = function (id, noCache = false) {
     if (noCache) {
       return original(id);
     }

@@ -700,7 +700,6 @@ const Cubing = {
 
             // Remove from item list to prevent counting the same item more than once
             items.splice(k, 1);
-            k -= 1;
 
             // Enable recipes for gem/jewel pickup
             if (this.recipes[i].Index !== Recipe.Rune

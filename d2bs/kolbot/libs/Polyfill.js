@@ -282,7 +282,7 @@ Array.prototype.filterHighDistance = function (step = 0) {
   if (distancesAvg > 30) {
     return this
       .filter((x, i) => distances[i] < distancesAvg * 0.75 || this[i] < distancesAvg)
-      .filterHighDistance(step++);
+      .filterHighDistance(step + 1);
   }
 
   return this; // Everything is relatively the same
@@ -1216,13 +1216,12 @@ Set.prototype.toString = function () {
 
       let output = "";
       let table = [];
-      let row = [];
 
       // Create table headers
       if (!columns) {
         columns = Object.keys(data[0]);
       }
-      row = columns;
+      let row = columns;
       table.push(row);
 
       // Create table rows

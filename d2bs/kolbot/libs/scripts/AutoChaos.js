@@ -369,7 +369,7 @@ const AutoChaos = new Runnable(
     function diablo() {
       let maxTime = 0;
       let preCount = 1;
-      let postCount = 1;
+      let postCount;
       let party = getParty();
 
       if (party) {
@@ -497,7 +497,7 @@ const AutoChaos = new Runnable(
     function slayBoss(classid, preattack, retry, stop = 0) {
       /** @type {Monster | null} */
       let boss = null;
-      let bosshp = 0;
+      let bosshp;
       let reposition = 0;
       let checkPosition = 0;
       let tick = 0;

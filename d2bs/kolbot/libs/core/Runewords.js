@@ -90,8 +90,6 @@ const Runewords = {
               this.validGids.push(items[k].gid);
               items.splice(k, 1);
 
-              k -= 1;
-
               continue RuneLoop;
             }
           }
@@ -127,8 +125,6 @@ const Runewords = {
     for (let i = 0; i < this.needList.length; i += 1) {
       if (this.needList[i] === classid) {
         this.needList.splice(i, 1);
-
-        i -= 1;
 
         break;
       }
@@ -166,8 +162,6 @@ const Runewords = {
             if (items[k].classid === runeword.runes[j]) { // rune matched
               itemList.push(items[k]); // push into the item list
               items.splice(k, 1); // remove from item list as to not count it twice
-
-              k -= 1;
 
               break; // stop item cycle - we found the item
             }

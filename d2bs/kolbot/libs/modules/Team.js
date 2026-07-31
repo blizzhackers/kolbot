@@ -5,7 +5,11 @@
  */
 !isIncluded("require.js") && include("require.js"); // load the require.js
 
-(function (threadType, globalThis) {
+/**
+ * @param {boolean} threadType
+ * @param {typeof globalThis} global
+ */
+(function (threadType, global) {
   const others = [];
 
   const myEvents = new (require("./AsyncEvents"));
@@ -178,7 +182,7 @@
     addEventListener("scriptmsg", data => data === "quit" && (quiting = true));
 
     // eslint-disable-next-line dot-notation
-    globalThis["main"] = function () {
+    global["main"] = function () {
       while (!quiting) delay(3);
       //@ts-ignore
       getScript(true).stop();

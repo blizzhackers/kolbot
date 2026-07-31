@@ -121,28 +121,6 @@ function main() {
   };
 
   /**
-   * Find a missile type
-   * @param {Player} owner 
-   * @param {number} id 
-   * @param {number} range 
-   * @returns {Missile | boolean}
-   */
-  const findMissile = function (owner, id, range) {
-    range === undefined && (range = 999);
-
-    let missile = Game.getMissile(id);
-    if (!missile) return false;
-
-    do {
-      if (missile.owner === owner.gid && getDistance(owner, missile) < range) {
-        return missile;
-      }
-    } while (missile.getNext());
-
-    return false;
-  };
-
-  /**
    * @param {Player} player 
    * @returns {boolean}
    */

@@ -74,7 +74,7 @@ const Crafting = new Runnable(
       for (let i = 0; i < info.Sets.length; i += 1) {
         switch (info.Sets[i].Type) {
         case "crafting":
-          let num = 0;
+          let num;
           let npcName = getNPCName(info.Sets[i].BaseItems);
 
           if (npcName) {

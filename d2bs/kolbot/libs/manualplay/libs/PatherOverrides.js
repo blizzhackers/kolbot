@@ -278,15 +278,17 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
   let tpMana = Skill.getManaCost(sdk.skills.Teleport);
   let preSkill = me.getSkill(sdk.skills.get.RightId);
   let annoyingArea = [sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.MaggotLairLvl3].includes(me.area);
+  // defaults must be applied BEFORE clearSettings is built from clearPath - computing them
+  // after left the AttackSkill guard unreachable and walkers unconditionally clearing
+  retry === undefined && (retry = useTeleport ? 3 : 15);
+  // walking characters need to clear in front of them - but only when an attack skill is assigned
+  clearPath === undefined && (clearPath = Config.AttackSkill.some(skillId => skillId > 0) && !useTeleport ? true : false);
+  pop === undefined && (pop = false);
   let clearSettings = {
-    clearPath: (!!clearPath || !useTeleport), // walking characters need to clear in front of them
+    clearPath: !!clearPath,
     range: 10,
     specType: (typeof clearPath === "number" ? clearPath : 0),
   };
-
-  retry === undefined && (retry = useTeleport ? 3 : 15);
-  clearPath === undefined && (clearPath = Config.AttackSkill.some(skillId => skillId > 0) && !useTeleport ? true : false);
-  pop === undefined && (pop = false);
   let path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? (annoyingArea ? 30 : this.teleDistance) : this.walkDistance);
   if (!path) throw new Error("moveTo: Failed to generate path.");
 

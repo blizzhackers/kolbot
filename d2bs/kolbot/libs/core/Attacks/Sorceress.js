@@ -209,7 +209,7 @@
       if (!unit || !unit.attackable) return Attack.Result.SUCCESS;
       Config.TeleSwitch && me.switchToPrimary();
       
-      let walk, noMana = false;
+      let walk, noMana;
       let classid = unit.classid;
 
       if (timedSkill > -1 && (!me.skillDelay || !Skill.isTimed(timedSkill)) && Skill.getManaCost(timedSkill) < me.mp) {
@@ -233,8 +233,6 @@
           Skill.cast(timedSkill, Skill.getHand(timedSkill), unit);
         }
         return Attack.Result.SUCCESS;
-      } else {
-        noMana = !me.skillDelay;
       }
 
       if (untimedSkill > -1 && Skill.getManaCost(untimedSkill) < me.mp) {
@@ -258,7 +256,7 @@
 
         return Attack.Result.SUCCESS;
       } else {
-        noMana = true;
+        noMana = !me.skillDelay;
       }
 
       // don't count as failed

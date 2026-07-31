@@ -151,7 +151,6 @@ const locationAction = (function () {
             if (accounts[i].split("/")[0] === obj.currAcc) {
               accounts.splice(0, i);
               chars.splice(0, i);
-              i -= 1;
 
               break;
             }

@@ -123,7 +123,7 @@
      * @returns {number} the player's fraction of total party levels (1 if not in a party)
      */
     partyModifier: function (playerID) {
-      let party = getParty(me), partyid = -1, level = 0, total = 0;
+      let party = getParty(me), partyid, level = 0, total = 0;
 
       if (!party) {
         return 1;
@@ -152,7 +152,7 @@
      * @returns {number} experience granted to the player (0 if not in a party)
      */
     killExp: function (playerID, monsterID, areaID) {
-      let exp = this.monsterExp(monsterID, areaID), party = getParty(me), partyid = -1, level = 0, total = 0, gamesize = 0;
+      let exp = this.monsterExp(monsterID, areaID), party = getParty(me), partyid, level = 0, total = 0, gamesize = 0;
 
       if (!party) {
         return 0;
@@ -184,7 +184,7 @@
      * @returns {number} average total party experience per kill (0 if not in a party)
      */
     areaPartyExp: function (areaID, exclude = null, onlytown = true, ignore = null) { // amount of total party exp gained per kill on average
-      let party = getParty(me), partyid = -1, partylevels = 0, gamesize = 0, exp = 0, playerexp = 0, poolsize = 0;
+      let party = getParty(me), partyid, partylevels = 0, gamesize = 0, exp = 0, playerexp = 0, poolsize = 0;
 
       if (!party) {
         return 0;

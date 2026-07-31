@@ -20,16 +20,18 @@
     try {
       //   Or add it and return the value
       for (let party = getParty(); party.getNext();) {
-        (
         // Find this party
-          uniqueParties.find(u => u.partyid === party.partyid)
+        let partyEntry = uniqueParties.find(u => u.partyid === party.partyid);
+        if (!partyEntry) {
           // Or create an instance of it
-          || ((uniqueParties.push({
+          uniqueParties.push({
             partyid: party.partyid,
             used: 0
-          }) && false) || uniqueParties[uniqueParties.length - 1])
-          // Once we have the party object, increase field used
-        ).used++;
+          });
+          partyEntry = uniqueParties[uniqueParties.length - 1];
+        }
+        // Once we have the party object, increase field used
+        partyEntry.used++;
       }
 
       // Filter out no party, if another party is found

@@ -312,7 +312,6 @@ const locationAction = (function () {
         return;
       }
 
-      fullText = "";
       lines = Controls.LobbyChat.getText();
       if (!lines) return;
 

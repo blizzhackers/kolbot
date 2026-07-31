@@ -106,7 +106,8 @@
             // Act Bosses and mini-bosses are immune to Slow Missles and pointless to use on lister or Cows, Use Inner-Sight instead
             if ([sdk.monsters.HellBovine].includes(unit.classid) || unit.isBoss) {
               // Check if already in this state
-              if (!unit.getState(sdk.states.InnerSight) && Config.UseInnerSight && Skill.canUse(sdk.skills.InnerSight)) {
+              if (!unit.getState(sdk.states.InnerSight) && Config.UseInnerSight
+                && Skill.canUse(sdk.skills.InnerSight)) {
                 Skill.cast(sdk.skills.InnerSight, sdk.skills.hand.Right, unit);
               }
             } else {

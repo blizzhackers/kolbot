@@ -97,7 +97,7 @@
       if (e2 instanceof ScriptError) {
         throw e2;
       }
-      throw new Error("Storage.IsLocked error! Item info: " + item.name + " " + item.y + " " + item.sizey + " " + item.x + " " + item.sizex + " " + item.mode + " " + item.location);
+      throw new Error("Storage.IsLocked error! Item info: " + item.name + " " + item.y + " " + item.sizey + " " + item.x + " " + item.sizex + " " + item.mode + " " + item.location + " Error: " + e2.message);
     }
 
     return false;
@@ -332,8 +332,6 @@
             && !this.IsLocked(this.itemList[this.buffer[x][y] - 1], Config.Inventory) // don't try to make a spot by moving locked items! TODO: move this to the start of loop
             && (priorityClassIds.indexOf(bufferItemClass) === -1
             || priorityClassIds.indexOf(item.classid) < priorityClassIds.indexOf(bufferItemClass))) { // item in this spot needs to move!
-            makeSpot = this.MakeSpot(item, { x: x, y: y }); // NOTE: passing these in buffer order [h/x][w/y]
-
             if (item.classid !== bufferItemClass // higher priority item
               || (item.classid === bufferItemClass && item.quality > bufferItemQuality) // same class, higher quality item
               || (item.classid === bufferItemClass && item.quality === bufferItemQuality && item.gfx > bufferItemGfx) // same quality, higher graphic item

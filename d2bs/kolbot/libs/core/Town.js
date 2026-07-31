@@ -2270,7 +2270,7 @@ const Town = {
         if ((e instanceof ScriptError)) {
           throw e;
         }
-        throw new Error("Town.goToTown: Failed use WP");
+        throw new Error("Town.goToTown: Failed use WP - " + e.message);
       }
     }
 
@@ -2321,7 +2321,7 @@ const Town = {
         if ((e instanceof ScriptError)) {
           throw e;
         }
-        throw new Error("Town.visitTown: Failed to go back from town");
+        throw new Error("Town.visitTown: Failed to go back from town - " + e.message);
       }
     }
 
@@ -2487,7 +2487,7 @@ const Town = {
           if ((e instanceof ScriptError)) {
             throw e;
           }
-          throw new Error("Town.visitTown: Failed to go back from town");
+          throw new Error("Town.visitTown: Failed to go back from town - " + e.message);
         }
       }
 

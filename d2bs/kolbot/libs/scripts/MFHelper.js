@@ -238,7 +238,8 @@ const MFHelper = new Runnable(
             if (!me.inTown && me.area === area) {
               let forceCast = false;
               if (!lastPrecast || getTickCount() - lastPrecast > Time.minutes(2)) {
-                (forceCast = true) && (lastPrecast = getTickCount());
+                forceCast = true;
+                lastPrecast = getTickCount();
               }
               Precast.doPrecast(forceCast);
             } else if (!me.inTown && !me.inArea(player.area)) {

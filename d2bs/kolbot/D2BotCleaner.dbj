@@ -254,8 +254,6 @@ const locationAction = (function () {
               accounts.splice(0, i);
               chars.splice(0, i);
 
-              i -= 1;
-
               break;
             }
           }
