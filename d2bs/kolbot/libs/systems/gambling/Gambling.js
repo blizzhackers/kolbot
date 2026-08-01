@@ -16,6 +16,10 @@ const Gambling = {
 
   inGame: false,
 
+  /**
+   * @param {string} [profile] profile name to look up; defaults to `me.profile`
+   * @returns {GamblingTeam | false} the matching team (with goldFinder/gambler flags set), or false
+   */
   getInfo: function (profile) {
     !profile && (profile = me.profile);
 
@@ -44,6 +48,7 @@ const Gambling = {
     return false;
   },
 
+  /** @returns {boolean} true if a gold-drop game was matched, gold dropped, and the script quit */
   inGameCheck: function () {
     let info = this.getInfo();
 
@@ -63,6 +68,10 @@ const Gambling = {
     return false;
   },
 
+  /**
+   * Drops carried gold and withdraws stashed gold down to `goldReserve` for other profiles to pick up.
+   * @returns {void}
+   */
   dropGold: function () {
     let info = this.getInfo();
 
@@ -88,6 +97,7 @@ const Gambling = {
     }
   },
 
+  /** @returns {boolean} true if a gold-drop game was found and joined (and has since ended) */
   outOfGameCheck: function () {
     let info = this.getInfo();
 
@@ -120,6 +130,11 @@ const Gambling = {
     return false;
   },
 
+  /**
+   * Requests the gold-drop game name/password from each configured gambler via copydata.
+   * @returns {string[] | null | false} [name, password] once a gambler replies, null if none replied,
+   * or false if the current profile isn't a gold finder
+   */
   getGame: function () {
     let game;
     let info = this.getInfo();
@@ -128,6 +143,11 @@ const Gambling = {
       return false;
     }
 
+    /**
+     * copydata handler: captures the gambler's game name/password reply into the outer `game`.
+     * @param {number} mode copydata mode (4 = string message)
+     * @param {string} msg raw copydata message, expected as "gamename/gamepassword"
+     */
     function checkEvent(mode, msg) {
       if (mode === 4) {
         for (let i = 0; i < info.gambleGames.length; i += 1) {

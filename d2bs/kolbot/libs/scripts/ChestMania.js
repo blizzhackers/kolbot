@@ -42,6 +42,9 @@ const ChestMania = new Runnable(
   },
   {
     startArea: Object.values(Config.ChestMania).find((act) => act.length > 0)[0],
+    /**
+     * Restores Config.OpenChests.Enabled to its pre-run value.
+     */
     cleanup: function () {
       Config.OpenChests.Enabled = Config.OpenChests._enabled;
       delete Config.OpenChests._enabled;

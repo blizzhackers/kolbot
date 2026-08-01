@@ -55,40 +55,54 @@ declare global {
     unit: ItemUnit;
     update(item: ItemUnit): void;
   }
-  namespace Skill {
-    let usePvpRange: boolean;
-    const haveTK: boolean;
-    const manaCostList: object;
-    const needFloor: number[];
-    const missileSkills: number[];
-    const charges: ChargedSkill[];
-    
-    function get (skillId: number): SkillDataInfo;
-    function getClassSkillRange(classid?: number): [number, number];
-    function getCharges(): boolean;
-    function init(): void;
-    function canUse(skillId: number): boolean;
-    function getDuration(skillId: number): number;
-    function getMaxSummonCount(skillId: number): number;
-    function getSummonType(skillId: number): number;
-    function getRange(skillId: number): number;
-    function getAoE(skillId: number): number;
-    function getHand(skillId: number): number;
-    function getState(skillId: number): number;
-    function getCharClass(skillId: number): number;
-    function getSkillTab(skillId: number): number;
-    function getManaCost(skillId: number): number;
-    function isTimed(skillId: number): boolean;
-    function townSkill(skillId: number): boolean;
-    function missileSkill(skillId: number): boolean;
-    function isAura(skillId: number): boolean;
-    function wereFormCheck(skillId: number): boolean;
-    function setSkill(skillId: number, hand?: number, item?: any): boolean;
-    function shapeShift(mode: number | string): boolean;
-    function unShift(): boolean;
-    function useTK(unit: Unit): boolean;
-    function cast(skillId: number, hand?: number, x?: number, y?: number, item?: ItemUnit | undefined): boolean;
-    function cast(skillId: number, hand?: number, unit?: Unit): boolean;
-    function castCharges(skillId: number, unit: Unit | { x: number, y: number }): boolean;
+
+  // Value shape of the global `Skill` const in Skill.js (bound there via JSDoc @type).
+  // Declaring the const here as well would collide: both files are global scripts.
+  interface Skill {
+    usePvpRange: boolean;
+    readonly haveTK: boolean;
+    needFloor: number[];
+    missileSkills: number[];
+    charges: ChargedSkill[];
+
+    get(skillId: number): SkillDataInfo | null;
+    getClassSkillRange(classid?: number): [number, number];
+    getCharges(): boolean;
+    init(): void;
+    canUse(skillId: number): boolean;
+    getDuration(skillId: number): number;
+    getMaxSummonCount(skillId: number): number;
+    getSummonType(skillId: number): number;
+    getRange(skillId: number): number;
+    getAoE(skillId: number): number;
+    getHand(skillId: number): number;
+    getState(skillId: number): number;
+    getCharClass(skillId: number): number;
+    getSkillTab(skillId: number): number;
+    getManaCost(skillId: number): number;
+    isTimed(skillId: number): boolean;
+    townSkill(skillId: number): boolean;
+    missileSkill(skillId: number): boolean;
+    isAura(skillId: number): boolean;
+    wereFormCheck(skillId: number): boolean;
+    usableOn(skillId: number, unit: Monster): boolean;
+    setSkill(skillId: number, hand?: number, item?: ItemUnit): boolean;
+    shapeShift(mode: number | string): boolean;
+    unShift(): boolean;
+    useTK(unit: Unit): boolean;
+    cast(
+      skillId: number,
+      hand?: number,
+      x?: number | Unit | IPathNode | null,
+      y?: number | null,
+      item?: ItemUnit | null,
+      weaponSlot?: number,
+    ): boolean;
+    castCharges(skillId: number, unit: Unit | { x: number, y: number }): boolean;
   }
+
+  // Pattern 2, unlike its libs/core siblings: Skill.js builds the object inside an IIFE and
+  // publishes it via `global.Skill = Skill` (Skill.js:778), so there is no top-level js
+  // binding to @type-annotate and this ambient const cannot collide.
+  const Skill: Skill;
 }

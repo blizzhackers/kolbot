@@ -1,6 +1,4 @@
-/**
- * @typedef {import('./hooks/TextHooks')} TextHooks
- */
+/** @typedef {import('./hooks/TextHooks')} TextHooksModule */
 
 /** @type {Hooks} */
 const Hooks = {
@@ -13,6 +11,10 @@ const Hooks = {
   enabled: true,
   flushed: false,
 
+  /**
+   * Includes every hook module file under libs/manualplay/hooks/ that isn't already included.
+   * @returns {void}
+   */
   init: function () {
     let files = dopen("libs/manualplay/hooks/").getFiles();
     
@@ -27,6 +29,10 @@ const Hooks = {
       });
   },
 
+  /**
+   * Blocks until the game is ready, then drives a check pass across all hook modules.
+   * @returns {void}
+   */
   update: function () {
     while (!me.gameReady) {
       delay(100);
@@ -47,6 +53,12 @@ const Hooks = {
     Hooks.flushed = false;
   },
 
+  /**
+   * Flushes hook module UI state. `true` flushes everything and disables hooks; a uiflags value
+   * flushes only the modules relevant to that flag (or all of them for unrecognized flags).
+   * @param {boolean | number} flag
+   * @returns {boolean} true if already flushed to this flag or once the flush completes
+   */
   flush: function (flag) {
     if (Hooks.flushed === flag) return true;
 

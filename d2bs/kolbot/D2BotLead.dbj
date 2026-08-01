@@ -37,6 +37,11 @@ const locationAction = (function () {
   };
 })();
 
+/**
+ * Entry point for the Lead script: forwards copydata/scriptmsg events to Starter, waits for
+ * game/profile info from D2Bot#, then loops tracking in-game status and dispatching location
+ * actions between games. Never returns.
+ */
 function main () {
   debugLog(me.profile);
 

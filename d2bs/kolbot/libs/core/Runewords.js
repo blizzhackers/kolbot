@@ -7,11 +7,15 @@
 
 const Runeword = require("./GameData/RuneData");
 
+/** @type {IRunewords} */
 const Runewords = {
   needList: [],
   pickitEntries: [],
   validGids: [],
 
+  /**
+   * Parses KeepRunewords pickit entries and resolves Config.Runewords base entries to classids.
+   */
   init: function () {
     if (!Config.MakeRunewords) return;
 
@@ -262,6 +266,10 @@ const Runewords = {
     return false;
   },
 
+  /**
+   * Finds or buys a Scroll of Town Portal for rerolling runewords.
+   * @returns {ItemUnit|false}
+   */
   getScroll: function () {
     let scroll = me.getItem(sdk.items.ScrollofTownPortal, sdk.items.mode.inStorage); // check if we already have the scroll
     if (scroll) return scroll;
@@ -286,6 +294,10 @@ const Runewords = {
     return me.getItem(sdk.items.ScrollofTownPortal, sdk.items.mode.inStorage);
   },
 
+  /**
+   * Sockets bases with runes for every completable runeword, then rerolls bad ones.
+   * @returns {boolean}
+   */
   makeRunewords: function () {
     if (!Config.MakeRunewords) return false;
 
@@ -323,6 +335,10 @@ const Runewords = {
     return true;
   },
 
+  /**
+   * Cubes a Hel rune, bad-rolled base, and a Town Portal scroll to reroll each unwanted runeword base.
+   * @returns {boolean}
+   */
   rerollRunewords: function () {
     for (let i = 0; i < Config.Runewords.length; i += 1) {
       let hel = me.getItem(sdk.items.runes.Hel, sdk.items.mode.inStorage);

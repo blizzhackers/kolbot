@@ -5,11 +5,17 @@
 *
 */
 
-/** @type {Record<KolbotScript, boolean | Object>} */
+/** @type {Scripts} */
 const Scripts = {};
 
 /** @type {IConfig} */
 let Config = {
+  /**
+   * Locates and includes the character's config file (custom/realm/char/profile/class formats, in that
+   * priority order), falling back to the class default; throws if no config file can be found or loaded.
+   * @param {boolean} [notify=true]
+   * @returns {void}
+   */
   init: function (notify = true) {
     const className = sdk.player.class.nameOf(me.classid);
     const formats = ((className, profile, charname, realm) => ({
@@ -104,6 +110,7 @@ let Config = {
     global._say = global.say;
     if (Config.Silence && !Config.LocalChat.Enabled) {
       // Override the say function with print, so it just gets printed to console
+      /** @param {string} what */
       global.say = (what) => console.log("Tryed to say: " + what);
     }
 

@@ -14,6 +14,7 @@
     this.korlicStatue = { x: 10058, y: 12617 };
     this.lastPrep = 0;
 
+    /** @returns {boolean} false if any non-parented ancient (Attack.canAttack) is unreachable, true otherwise */
     this.canAttack = function () {
       let ancient = Game.getMonster();
 
@@ -29,6 +30,10 @@
       return true;
     };
 
+    /**
+     * Activates the Ancients' Altar and waits for the ancients to spawn.
+     * @returns {boolean} true once the altar is active and Talic has spawned, false if the altar wasn't found
+     */
     this.touchAltar = function () {
       let altar = Misc.poll(() => Game.getObject(sdk.objects.AncientsAltar), 5000, 100);
 
@@ -58,6 +63,7 @@
       return false;
     };
 
+    /** @returns {boolean} true if all three ancient statues are active */
     this.checkStatues = function () {
       let statues = getUnits(sdk.unittype.Object)
         .filter(u => [
@@ -68,6 +74,11 @@
       return statues.length === 3;
     };
 
+    /**
+     * Sweeps the summit's corner spots clearing monsters, unless the statues are already all active.
+     * @returns {boolean|undefined} true if statues were already active (corners skipped); otherwise
+     * undefined after visiting the corners
+     */
     this.checkCorners = function () {
       let pos = [
         { x: 10036, y: 12592 }, { x: 10066, y: 12589 },
@@ -90,6 +101,10 @@
       return true;
     };
 
+    /**
+     * Repeatedly clears the ancients (and their surrounding corners) until all three statues are active.
+     * @param {boolean} [checkQuest] when true, also stop early once the Rite of Passage quest completes
+     */
     this.killAncients = function (checkQuest = false) {
       let retry = 0;
       let attackRange = Skill.getRange(Config.AttackSkill[1]);
@@ -101,9 +116,7 @@
           
           break;
         }
-        /**
-          * @todo - far cast pwning the ancients
-          */
+        /** @todo - far cast pwning the ancients */
         Attack.clearClassids(
           sdk.monsters.KorlictheProtector, sdk.monsters.TalictheDefender, sdk.monsters.MadawctheGuardian
         );
@@ -121,6 +134,9 @@
       }
     };
 
+    /**
+     * Restocks town supplies and portals to Arreat Summit ahead of an Ancients attempt.
+     */
     this.ancientsPrep = function () {
       Town.goToTown();
       Town.fillTome(sdk.items.TomeofTownPortal);
@@ -132,6 +148,13 @@
       Common.Ancients.lastPrep = getTickCount();
     };
 
+    /**
+     * Touches the altar and re-preps/portals until the ancients are attackable, then kills them.
+     * @param {boolean} [preTasks] when true, run `ancientsPrep` (rate-limited to once per minute)
+     * instead of just making a new portal between retries
+     * @param {boolean} [checkQuest] forwarded to `killAncients` to allow early exit on quest completion
+     * @throws {Error} if the ancients remain unattackable after 10 retries
+     */
     this.startAncients = function (preTasks = false, checkQuest = false) {
       let retry = 0;
       this.touchAltar();

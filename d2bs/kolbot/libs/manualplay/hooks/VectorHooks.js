@@ -174,6 +174,7 @@ const VectorHooks = (function () {
    * Handlers for specific locations
    */
   const poiHandlers = {
+    /** @returns {VectorHooksPOI|false} POI for this area's small sparkly (super) chest, if present. */
     superChest: function() {
       return createPOIFromPreset(
         sdk.objects.SmallSparklyChest,
@@ -182,6 +183,7 @@ const VectorHooks = (function () {
       );
     },
     
+    /** @returns {VectorHooksPOI|false} POI for this area's large sparkly chest, if present. */
     largeSparklyChest: function() {
       return createPOIFromPreset(
         sdk.objects.LargeSparklyChest,
@@ -190,6 +192,7 @@ const VectorHooks = (function () {
       );
     },
     
+    /** @returns {VectorHooksPOI|false} POI for the Tal Rasha tomb orifice, or its super chest fallback. */
     talRashaTomb: function() {
       let poi = createPOIFromPreset(sdk.quest.chest.HoradricStaffHolder, "Orifice");
       if (poi) return poi;
@@ -197,6 +200,7 @@ const VectorHooks = (function () {
       return createPOIFromPreset(sdk.objects.SmallSparklyChest, "SuperChest");
     },
 
+    /** @returns {VectorHooksPOI|false} POI for this area's red portal to Hell, if present. */
     getHellEntrance: function () {
       return createPOIFromPreset(
         sdk.objects.RedPortal,
@@ -444,6 +448,9 @@ const VectorHooks = (function () {
     /** @type {Line[]} */
     hooks: [],
 
+    /**
+     * Redraw the exit vectors/labels on area change, or reposition them as the player moves.
+     */
     check: function () {
       if (!this.enabled) {
         this.flush();
@@ -493,6 +500,9 @@ const VectorHooks = (function () {
       }
     },
 
+    /**
+     * Reposition all vector lines to originate from the player's current location.
+     */
     update: function () {
       VectorHooks.lastLoc = { x: me.x, y: me.y };
 
@@ -502,6 +512,10 @@ const VectorHooks = (function () {
       }
     },
 
+    /**
+     * Removes all vector lines and area-name labels, and resets currArea so check() rebuilds them.
+     * @returns {void}
+     */
     flush: function () {
       while (this.hooks.length) {
         this.hooks.pop().remove();
@@ -514,6 +528,10 @@ const VectorHooks = (function () {
       VectorHooks.currArea = 0;
     },
 
+    /**
+     * Find the current area's waypoint object, if any.
+     * @returns {{ id: number, area: number, x: number, y: number }|false}
+     */
     getWP: function () {
       if (Pather.wpAreas.indexOf(me.area) === -1) return false;
 
@@ -528,6 +546,10 @@ const VectorHooks = (function () {
       return false;
     },
 
+    /**
+     * Find the current area's point of interest (quest chest, boss, etc.), if any.
+     * @returns {VectorHooksPOI|false}
+     */
     getPOI: function () {
       if (superChestAreas.has(me.area)) {
         let result = poiHandlers.superChest();

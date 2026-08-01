@@ -18,9 +18,7 @@
   }
 }(this, function () {
   "use strict";
-  /**
-   * @exports sdk
-   */
+  /** @exports sdk */
   const sdk = {
     waypoints: {
       Ids: [119, 145, 156, 157, 237, 238, 288, 323, 324, 398, 402, 429, 494, 496, 511, 539],
@@ -37,6 +35,10 @@
       Hell: 2,
       Difficulties: ["Normal", "Nightmare", "Hell"],
 
+      /**
+       * @param {number} difficulty sdk.difficulty.* value
+       * @returns {string | false} difficulty name, or false if out of range
+       */
       nameOf: function (difficulty) {
         if (difficulty === undefined || typeof difficulty !== "number") return false;
         if (difficulty < 0 || difficulty > 2) return false;
@@ -278,6 +280,10 @@
       FurnaceofPain: 135,
       UberTristram: 136,
 
+      /**
+       * @param {number} area sdk.areas.* area id
+       * @returns {number} act number (1-5) containing the area
+       */
       actOf: function (area) {
         switch (true) {
         case area < sdk.areas.LutGholein:
@@ -293,6 +299,10 @@
         }
       },
 
+      /**
+       * @param {number} area sdk.areas.* area id
+       * @returns {number} sdk.areas.* id of the town belonging to that area's act
+       */
       townOf: function (area) {
         switch (true) {
         case area < sdk.areas.LutGholein:
@@ -308,6 +318,10 @@
         }
       },
 
+      /**
+       * @param {number} act act number (1-5)
+       * @returns {number} sdk.areas.* id of that act's town
+       */
       townOfAct: function (act) {
         switch (act) {
         case 1:

@@ -12,9 +12,18 @@
   module.exports = function (trackers) {
     let active = true;
     this.values = (Array.isArray(trackers) && (Array.isArray(trackers.first()) && trackers || [trackers])) || [];
+    /**
+     * Registers a new value to watch.
+     * @param {() => *} checkerFn - reads the current value
+     * @param {(oldValue: *, newValue: *) => *} callback - invoked when the value changes
+     * @returns {number} the new length of the tracked values array
+     */
     this.track = function (checkerFn, callback) {
       return this.values.push({ fn: checkerFn, callback: callback, value: checkerFn() });
     };
+    /**
+     * Polls every tracked value and fires its callback if it changed since the last check.
+     */
     this.check = function () {
       this.values.some(delta => {
         let val = delta.fn();
@@ -30,6 +39,9 @@
       });
     };
 
+    /**
+     * Stops the background worker from polling this delta's tracked values.
+     */
     this.destroy = () => active = false;
 
     Worker.runInBackground["__delta" + (instances++)] = () => active && (this.check() || true);

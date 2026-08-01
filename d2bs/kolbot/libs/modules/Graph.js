@@ -41,6 +41,9 @@
     this.cache = {};
   };
 
+  /**
+   * Marks this vertex's room as explored.
+   */
   Vertex.prototype.markAsSeen = function() {
     this.seen = true;
   };
@@ -218,6 +221,11 @@
     };
   }
 
+  /**
+   * @todo unimplemented placeholder for a custom exploration strategy
+   * @param {Graph} graph
+   * @param {(vertex: Vertex) => void} explore
+   */
   // eslint-disable-next-line no-unused-vars
   Graph.customSearch = function(graph, explore) {
     

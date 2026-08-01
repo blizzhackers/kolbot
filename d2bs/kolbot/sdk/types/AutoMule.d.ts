@@ -75,68 +75,103 @@ declare global {
       */
       onlyLogWhenFull: boolean;
   };
-  export const AutoMule: {
-    Mules: {
-      [x: string]: muleObj;
-    };
-    TorchAnniMules: {
-      [x: string]: muleObj;
-    };
-    getInfo(): boolean | muleObj
-    muleCheck(): void
-    getMule(): void
-    outOfGameCheck(): void
-    inGameCheck(): void
-    dropStuff(): void
-    matchItem(item: ItemUnit, list: any): void
-    getMuleItems(): ItemUnit[]
-    utilityIngredient(item: ItemUnit): void
-    cubingIngredient(item: ItemUnit): void
-    runewordIngredient(item: ItemUnit): void
-    dropCharm(dropAnni: any): void
-  };
-  export namespace Mule {
-    let obj: muleObj;
-    let minGameTime: number;
-    let maxGameTime: number;
-    let continuous: boolean;
-    let makeNext: boolean;
-    let refresh: boolean;
-    let master: string;
-    let mode: number;
-    let startTick: number;
-    let status: string;
-    let statusString: string;
-    let masterStatus: { status: string };
 
-    function init(): void;
-    function gameRefresh(): void;
-    function ingameTimeout(): boolean;
-    function getMaster(info: { profile: string, mode: number }): { profile: string, mode: number }
-    function getMuleFilename(mode?: number, master: string): string;
-    function getMuleInfo(master?: string): { mode: number, obj: muleObj }[];
+  /** Result of {@link AutoMule.getInfo} - the matching mule/torch-mule config for the current profile, if any. */
+  type MuleProfileInfo = {
+    muleInfo?: muleObj;
+    torchMuleInfo?: muleObj;
   };
-  export namespace MuleData {
-    type MuleDataObj = {
-      account: string;
-      accNum: number;
-      character: string;
-      charNum: number;
-      realm: string;
-      expansion: boolean;
-      ladder: boolean;
-      fullChars: number[];
-      torchChars: number[];
-    };
-    const _default: MuleDataObj;
-    let fileName: string;
-    function create(): void;
-    function read(): MuleDataObj;
-    function write(data: Partial<MuleDataObj>): void;
-    function nextAccount(): string;
-    function nextChar(): string;
+
+  // Value shape of the global `AutoMule` const in AutoMule.js (bound there via JSDoc @type).
+  // Declaring the const here as well would collide: both files are global scripts.
+  // Ambient value declaration (Skill/Attack/Misc precedent): the checker leaves some
+  // @type-bound js consts unresolved or any (cause undiagnosed); the ambient const
+  // restores resolution and empirically does not collide with the js declaration.
+  const AutoMule: AutoMule;
+
+  interface AutoMule {
+    Mules: { [profileKey: string]: muleObj };
+    TorchAnniMules: { [profileKey: string]: muleObj };
+    inGame: boolean;
+    check: boolean;
+    torchAnniCheck: boolean | 1 | 2;
+    gids: Set<number>;
+    baseGids: Set<number>;
+    getInfo(): MuleProfileInfo | undefined;
+    muleCheck(): boolean;
+    getMule(): muleObj | false;
+    outOfGameCheck(): boolean;
+    inGameCheck(): boolean;
+    isFinished(): boolean;
+    verifyMulePrefix(mulePrefix: string): boolean;
+    dropStuff(): boolean;
+    matchItem(item: ItemUnit, list: (number | string | ((item: ItemUnit) => boolean))[]): boolean;
+    getMuleItems(): ItemUnit[] | false;
+    utilityIngredient(item: ItemUnit): boolean;
+    cubingIngredient(item: ItemUnit): boolean;
+    runewordIngredient(item: ItemUnit): boolean;
+    dropCharm(dropAnni: boolean): boolean;
+  }
+
+  // Value shape of the global `Mule` const in Mule.js (bound there via JSDoc @type).
+  // Declaring the const here as well would collide: both files are global scripts.
+  interface Mule {
+    obj: muleObj | null;
+    minGameTime: number;
+    maxGameTime: number;
+    continuous: boolean;
+    makeNext: boolean;
+    next: boolean;
+    refresh: boolean;
+    master: string;
+    mode: number;
+    fileName: string;
+    startTick: number;
+    status: string;
+    statusString: string;
+    masterStatus: { status: string };
+    droppedGids: Set<number>;
+    /** Set on first {@link Mule.pickItems} call; not part of the initial object literal. */
+    clearedJunk?: boolean;
+    waitForMaster(): void;
+    done(): void;
+    nextChar(): void;
+    quit(): boolean;
+    foreverAlone(): boolean;
+    checkAnniTorch(): boolean;
+    stashItems(): boolean;
+    cursorCheck(): boolean;
+    getGroundItems(): ItemUnit[];
+    pickItems(): string;
+    ingameTimeout(time: number): boolean;
+    getMaster(info: { profile: string, mode: number }): { profile: string, mode: number } | false;
+    getMuleFilename(mode: number, master: string, continuous?: boolean): string;
+    getMuleInfo(): { mode: number, obj: muleObj }[];
+  }
+
+  type MuleDataObj = {
+    account: string;
+    accNum: number;
+    character: string;
+    charNum: number;
+    realm: string;
+    expansion: boolean;
+    ladder: boolean;
+    fullChars: number[];
+    torchChars: number[];
   };
-  export namespace LocationAction {
-    function run(): void;
-  };
+
+  // Value shape of the global `MuleData` const in Mule.js (bound there via JSDoc @type).
+  // Named MuleDataType (not the bare "MuleData") - reusing the const's own name here reproducibly
+  // triggers TS2451 "cannot redeclare block-scoped variable" in this program (verified via the
+  // compiler API; AutoMule/Mule right above do NOT hit it with a bare name, cause not isolated).
+  interface MuleDataType {
+    _default: MuleDataObj;
+    fileName: string;
+    create(): void;
+    read(): MuleDataObj;
+    write(data: Partial<MuleDataObj>): void;
+    nextAccount(): string;
+    nextChar(): string;
+  }
 }

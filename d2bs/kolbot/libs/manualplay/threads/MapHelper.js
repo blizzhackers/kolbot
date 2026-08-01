@@ -28,9 +28,7 @@ MapMode.include();
  * @property {number} [id] - The ID associated with the action
  */
 
-/**
- * @typedef {'area' | 'unit' | 'wp' | 'actChange' | 'portal' | 'qol' | 'drop' |'stack'} EventType
- */
+/** @typedef {'area' | 'unit' | 'wp' | 'actChange' | 'portal' | 'qol' | 'drop' |'stack'} EventType */
 
 /**
  * @typedef {Object} ActionEvent
@@ -124,12 +122,14 @@ function main () {
     return true;
   };
 
-  /**
-   * @param {number} portalID 
-   */
+  /** @param {number} portalID */
   const openRedPortal = function (portalID) {
     if (!me.getItem(sdk.quest.item.Cube)) return;
 
+    /**
+     * Ensures the inventory holds a Tome of Town Portal stocked with scrolls, buying from the shop NPC as needed.
+     * @returns {void}
+     */
     function getTome () {
       let npc, tome, scroll;
       let tpTome = me.findItems(sdk.items.TomeofTownPortal, sdk.items.mode.inStorage, sdk.storage.Inventory);
@@ -262,9 +262,7 @@ function main () {
     return Pather.usePortal(null);
   };
 
-  /**
-   * @param {number} fromLoc 
-   */
+  /** @param {number} fromLoc */
   const dropItems = function (fromLoc) {
     try {
       if (!fromLoc) throw new Error("No location given");

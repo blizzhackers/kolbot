@@ -39,6 +39,10 @@ const MFHelper = new Runnable(
       }
     }
 
+    /**
+     * Break-callback for Attack.clearLevel: aborts the clear as soon as a new leader task arrives.
+     * @returns {boolean}
+     */
     function breakClearLevel () {
       if (!Config.MFHelper.BreakClearLevel) return false;
       if (taskList.length) {

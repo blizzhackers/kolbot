@@ -13,7 +13,13 @@
  * All "extras" should be somewhere else
  */
 
+/** @type {IFileAction} */
 const FileAction = {
+  /**
+   * Retries up to 30 times (incremental delay) since the file may be mid-write by another script.
+   * @param {string} path
+   * @returns {string}
+   */
   read: function (path = "") {
     if (!path) throw new Error("No path provided");
 
@@ -35,6 +41,12 @@ const FileAction = {
     return contents;
   },
 
+  /**
+   * Retries up to 30 times (incremental delay) since the file may be locked by another script.
+   * @param {string} path
+   * @param {string} msg
+   * @returns {boolean}
+   */
   write: function (path = "", msg = "") {
     if (!path) throw new Error("No path provided");
 
@@ -55,6 +67,12 @@ const FileAction = {
     return true;
   },
 
+  /**
+   * Retries up to 30 times (incremental delay) since the file may be locked by another script.
+   * @param {string} path
+   * @param {string} msg
+   * @returns {boolean}
+   */
   append: function (path = "", msg = "") {
     if (!path) throw new Error("No path provided");
 
@@ -75,6 +93,10 @@ const FileAction = {
     return true;
   },
 
+  /**
+   * @param {string} path
+   * @returns {unknown} the parsed JSON contents; shape depends on which file is read
+   */
   parse: function (path = "") {
     if (!path) throw new Error("No path provided");
     if (!FileTools.exists(path)) throw new Error("Can't parse file that doesn't exist");

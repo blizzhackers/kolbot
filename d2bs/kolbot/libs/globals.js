@@ -28,9 +28,7 @@ if (!global.hasOwnProperty("sdk") && typeof require !== "undefined") {
 
 if (!global.hasOwnProperty("includeIfNotIncluded")) {
   Object.defineProperty(global, "includeIfNotIncluded", {
-    /**
-     * @param {string} file
-     */
+    /** @param {string} file */
     value: function (file = "") {
       if (!isIncluded(file)) {
         if (!include(file)) {
@@ -82,9 +80,7 @@ if (!global.hasOwnProperty("includeCoreLibs")) {
 
 if (!global.hasOwnProperty("includeSystemLibs")) {
   Object.defineProperty(global, "includeSystemLibs", {
-    /**
-     * @description includes system driver files from libs/systems/ folder
-     */
+    /** @description includes system driver files from libs/systems/ folder */
     value: function () {
       include("systems/automule/automule.js");
       include("systems/crafting/CraftingSystem.js");
@@ -173,6 +169,7 @@ if (!global.hasOwnProperty("hardDelay")) {
    * @param {number} ms 
    */
   Object.defineProperty(global, "hardDelay", {
+    /** @param {number} ms */
     value: function (ms) {
       let start = getTickCount();
       while (getTickCount() - start < ms) {
@@ -188,6 +185,7 @@ if (!global.hasOwnProperty("nativeDelay")) {
    * @param {number} ms 
    */
   Object.defineProperty(global, "nativeDelay", {
+    /** @param {number} ms */
     value: function (ms) {
       if (global.hasOwnProperty("_delay")) {
         return global._delay(ms);

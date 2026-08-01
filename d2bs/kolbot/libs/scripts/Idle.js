@@ -5,14 +5,10 @@
 *
 */
 
-/**
- * @typedef {ScriptContext & { cleanup: () => void }} IdleContext
- */
+/** @typedef {ScriptContext & { cleanup: () => void }} IdleContext */
 
 const Idle = new Runnable(
-  /**
-   * @param {IdleContext} ctx
-   */
+  /** @param {IdleContext} ctx */
   function Idle (ctx) {
     const greet = [];
 
@@ -33,6 +29,9 @@ const Idle = new Runnable(
       }
     }
 
+    /**
+     * Removes the gameevent listener registered for the greeting/advertise feature.
+     */
     ctx.cleanup = function () {
       removeEventListener("gameevent", gameEvent);
     };
@@ -89,9 +88,7 @@ const Idle = new Runnable(
   {
     startArea: sdk.areas.RogueEncampment,
     preAction: null,
-    /**
-     * @param {IdleContext} ctx
-     */
+    /** @param {IdleContext} ctx */
     cleanup: function (ctx) {
       ctx.cleanup();
     }

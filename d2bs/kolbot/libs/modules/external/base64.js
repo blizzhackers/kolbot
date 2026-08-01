@@ -9,9 +9,7 @@
   // Regular expression to check formal correctness of base64 encoded strings
   const b64re = /^(?:[A-Za-z\d+\/]{4})*?(?:[A-Za-z\d+\/]{2}(?:==)?|[A-Za-z\d+\/]{3}=?)?$/;
 
-  /**
-   * @param {string} string 
-   */
+  /** @param {string} string */
   const btoa = function(string) {
     string = String(string);
     let bitmap, a, b, c,
@@ -32,9 +30,7 @@
     return rest ? result.slice(0, rest - 3) + "===".substring(rest) : result;
   };
 
-  /**
-   * @param {string} string 
-   */
+  /** @param {string} string */
   const atob = function(string) {
     // atob can work with strings with whitespaces, even inside the encoded part,
     // but only \t, \n, \f, \r and ' ', which can be stripped.

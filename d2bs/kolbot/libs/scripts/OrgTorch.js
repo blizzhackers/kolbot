@@ -21,6 +21,10 @@ const OrgTorch = new Runnable(
   function OrgTorch () {
     if (Config.OrgTorch.UseSalvation) {
       Config.AdvancedCustomAttack.push({
+        /**
+         * @param {Monster} unit
+         * @returns {boolean}
+         */
         check: function (unit) {
           return (
             unit.classid === sdk.monsters.UberMephisto
@@ -358,9 +362,7 @@ const OrgTorch = new Runnable(
       return (me.findItems(sdk.items.quest.MephistosBrain, sdk.items.mode.inStorage).length > mBrain);
     };
 
-    /**
-    * @todo re-write this, lure doesn't always work and other classes can do ubers
-    */
+    /** @todo re-write this, lure doesn't always work and other classes can do ubers */
     const uberTrist = function () {
       Pather.moveTo(25068, 5078);
       
@@ -378,6 +380,7 @@ const OrgTorch = new Runnable(
       ];
 
       for (let node of nodes) {
+        /** @returns {boolean} True once any uber boss is within 10 distance. */
         Pather.move(node, { callback: function () {
           let meph = Game.getMonster(sdk.monsters.UberMephisto);
           let diablo = Game.getMonster(sdk.monsters.UberDiablo);
@@ -398,6 +401,7 @@ const OrgTorch = new Runnable(
 
       Attack.kill(sdk.monsters.UberMephisto);
 
+      /** @returns {boolean} True once Uber Diablo has been killed. */
       Pather.move(new PathNode(25162, 5141), { callback: function () {
         return Attack.haveKilled(sdk.monsters.UberDiablo);
       } });
@@ -418,6 +422,7 @@ const OrgTorch = new Runnable(
       Attack.kill(sdk.monsters.UberDiablo);
 
       if (!Game.getMonster(sdk.monsters.UberBaal)) {
+        /** @returns {boolean} True once Uber Baal is within 10 distance, dead, or already killed. */
         Pather.move(new PathNode(25122, 5170), { callback: function () {
           if (Attack.haveKilled(sdk.monsters.UberBaal)) {
             return true;
@@ -464,9 +469,7 @@ const OrgTorch = new Runnable(
       }
     };
 
-    /**
-    * @param {ObjectUnit} portal 
-    */
+    /** @param {ObjectUnit} portal */
     const runEvent = function (portal) {
       if (!portal) return;
       const portalArea = portal.objtype;

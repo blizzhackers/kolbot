@@ -9,10 +9,14 @@ export interface HookEntry {
 }
 
 declare global {
-  /**
-   * The TextHooks module
-   */
-  const TextHooks: {
+  // Value shape of the global `TextHooks` const in TextHooks.js (bound there via JSDoc @type).
+  // Declaring the const here as well would collide: both files are global scripts.
+  // Ambient value declaration (Skill/Attack/Misc precedent): the checker leaves some
+  // @type-bound js consts unresolved or any (cause undiagnosed); the ambient const
+  // restores resolution and empirically does not collide with the js declaration.
+  const TextHooks: TextHooks;
+
+  interface TextHooks {
     events: typeof import("../../modules/Events");
     enabled: boolean;
     displayTitle: boolean;
@@ -24,6 +28,8 @@ declare global {
     dashBoardWidthScale: number;
     statusFrameYSize: number;
     qolFrameYSize: number;
+    /** Set on area change (in the `qolBoard` special case); absent before the first area change. */
+    lastAct?: number;
     statusHooks: HookEntry[];
     dashBoard: HookEntry[];
     qolHooks: HookEntry[];
@@ -62,5 +68,5 @@ declare global {
      * Remove all hooks
      */
     flush(): void;
-  };
+  }
 }

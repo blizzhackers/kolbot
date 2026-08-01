@@ -29,6 +29,9 @@
       function UpdateableText (callback) {
         let element = new Text(callback(), self.x + 15, self.y + (7 * self.hooks.length), 0, 12, 0);
         self.hooks.push(element);
+        /**
+         * Refreshes this line's text and visibility from the callback / current UI state.
+         */
         this.update = () => {
           element.text = callback();
           element.visible = me.gameReady && [sdk.uiflags.Inventory,
@@ -50,6 +53,10 @@
         (i => this.hooks.push(new UpdateableText(() => stack && stack.length > i && stack[i] || "")))(i);
       }
 
+      /**
+       * Reparses the latest received stack trace and refreshes each hook line with it.
+       * @returns {boolean} always true (worker callback convention to keep re-queueing)
+       */
       this.update = () => {
         stack = myStack.match(/[^\r\n]+/g);
         stack = stack && stack.slice(6/*skip path to here*/).map(el => {

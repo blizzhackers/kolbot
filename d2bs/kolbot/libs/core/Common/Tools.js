@@ -58,6 +58,9 @@
       return false;
     },
 
+    /**
+     * Rebuilds {@link Config.QuitList} from the `name` field of each profile's existing save data.
+     */
     initQuitList: function () {
       let temp = [];
 
@@ -102,6 +105,10 @@
       return true;
     },
 
+    /**
+     * Stops every script listed in this.stopScripts, blocking until each has fully stopped.
+     * @returns {boolean}
+     */
     stopDefault: function () {
       for (let curr of this.stopScripts) {
         try {
@@ -120,6 +127,10 @@
       return true;
     },
 
+    /**
+     * Logs experience/run duration, stops default scripts, and quits the game.
+     * @param {boolean} [chickenExit]
+     */
     exit: function (chickenExit = false) {
       chickenExit && D2Bot.updateChickens();
       Config.LogExperience && Experience.log();
@@ -245,6 +256,7 @@
       return false;
     },
 
+    /** @returns {boolean} true if a revived Tomb Viper owned by another player is present */
     checkVipers: function () {
       let monster = Game.getMonster(sdk.monsters.TombViper2);
 
@@ -265,6 +277,7 @@
       return false;
     },
 
+    /** @returns {Monster|false} this player's own Iron Golem, or false if none found */
     getIronGolem: function () {
       let golem = Game.getMonster(sdk.summons.IronGolem);
 
@@ -281,6 +294,7 @@
       return false;
     },
 
+    /** @returns {string} "<type> <id>" of the nearest preset unit in the current area, or "" if none */
     getNearestPreset: function () {
       let id;
       /** @type {Array<PresetUnit>} */

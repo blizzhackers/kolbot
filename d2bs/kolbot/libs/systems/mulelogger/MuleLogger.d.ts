@@ -1,3 +1,7 @@
+// Exported (not just ambient) because libs/SoloPlay/Core/MuleloggerOverrides.js imports this
+// type directly via `import("../../systems/mulelogger/MuleLogger").MuleLoggerType`.
+// The `MuleLogger` const itself is bound in MuleLogger.js via JSDoc @type - no `declare global`
+// value declaration here, that would collide (both files are global scripts).
 export interface MuleLoggerType {
   LogGame: [string, string];
   LogNames: boolean;
@@ -51,6 +55,7 @@ export interface MuleLoggerType {
     logIlvl?: boolean,
   ): {
     itemColor: number;
+    invTrans: number;
     image: string;
     title: string;
     description: string;
@@ -68,5 +73,7 @@ export interface MuleLoggerType {
 }
 
 declare global {
+  // Ambient value declaration (Skill/Attack/Misc precedent - see those d.ts comments):
+  // restores checker resolution of the @type-bound js const.
   const MuleLogger: MuleLoggerType;
 }

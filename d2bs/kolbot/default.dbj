@@ -21,11 +21,19 @@ include("systems/gameaction/GameAction.js");
 // main thread specific
 const LocalChat = require("./libs/modules/LocalChat");
 
+/**
+ * Entry point for the default game thread: runs a game session (chores, scripts, mule/torch checks).
+ * @returns {boolean} true when the game session is complete and the thread should exit
+ */
 function main () {
   D2Bot.init(); // Get D2Bot# handle
   D2Bot.ingame();
 
   (function (global, original) {
+    /**
+     * Wraps the builtin load() with a 500ms delay so a spawned thread has time to initialize.
+     * @param {...unknown} args forwarded to the original load()
+     */
     global.load = function (...args) {
       original.apply(this, args);
       delay(500);
@@ -83,6 +91,10 @@ function main () {
   let sojCounter = 0;
   let startTime = getTickCount();
 
+  /**
+   * scriptmsg listener: on "soj" resets the SoJ sale wait counter so it starts counting again.
+   * @param {unknown} msg
+   */
   this.scriptEvent = function (msg) {
     if (msg === "quit") return;
     if (typeof msg === "string" && msg === "soj") {
@@ -91,6 +103,12 @@ function main () {
     }
   };
 
+  /**
+   * copydata listener: handles the "Mule Profile" D2Bot# command (mode 0) and getProfile replies
+   * (mode 1638, which carry the character's Tag and trigger GameAction.init).
+   * @param {number} mode
+   * @param {string} msg
+   */
   this.copyDataEvent = function (mode, msg) {
     // "Mule Profile" option from D2Bot#
     if (mode === 0 && msg === "mule") {

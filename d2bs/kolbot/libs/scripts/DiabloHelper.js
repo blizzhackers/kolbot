@@ -48,6 +48,10 @@ const DiabloHelper = new Runnable(
       if (!leader) {
         leader = Misc.autoLeaderDetect({
           destination: sdk.areas.ChaosSanctuary,
+          /**
+           * @param {number} area
+           * @returns {boolean}
+           */
           quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area),
           timeout: Time.minutes(2)
         });

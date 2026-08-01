@@ -26,10 +26,18 @@
     /** @private */
     this.workDisabled = false;
 
+    /**
+     * @param {Function|Array<*>} newWork - a callback (invoked with the Worker) or nested array of work
+     * @returns {number} the new length of the work queue
+     */
     this.push = function (newWork) {
       return work.push(newWork);
     };
 
+    /**
+     * @param {Function|Array<*>} newWork - a callback (invoked with the Worker) or nested array of work
+     * @returns {number} the new length of the low-priority work queue
+     */
     this.pushLowPrio = function (newWork) {
       return workLowPrio.push(newWork);
     };
@@ -47,22 +55,39 @@
       }
     };
 
+    /**
+     * Drains and runs all queued high-priority work; no-op while {@link this.workDisabled}.
+     */
     this.check = function () {
       return checker(work);
     };
 
+    /**
+     * Drains and runs all queued low-priority work; no-op while {@link this.workDisabled}.
+     */
     this.checkLowPrio = function () {
       return checker(workLowPrio);
     };
 
+    /**
+     * Runs a work item: invokes a function with the Worker, or recurses into an array of items.
+     * @param {Function|Array<*>} what
+     * @returns {unknown} the callback's return value when `what` is a function; otherwise undefined/false
+     */
     this.work = function (what) {
       return typeof what === "function" && what(self) || (Array.isArray(what) && what.forEach(self.work));
     };
 
-    /**
-     * @param {function({Worker}):boolean} callback
-     */
+    /** @param {function({Worker}):boolean} callback */
     this.runInBackground = new Proxy({ processes: {} }, {
+      /**
+       * Registers a named background process and immediately queues it on the low-prio queue;
+       * the process re-queues itself each low-prio check as long as `callback` keeps returning truthy.
+       * @param {{ processes: Object<string, {callback: Function, running: boolean, name: string}> }} target
+       * @param {string} name
+       * @param {function(): boolean} callback
+       * @returns {boolean}
+       */
       set: function (target, name, callback) {
         if (target.processes.hasOwnProperty(name)) {
           throw new Error("Process " + name + " already exists.");
@@ -84,6 +109,11 @@
         self.pushLowPrio(proxyCallback);
         return true;
       },
+      /**
+       * @param {{ processes: Object<string, {callback: Function, running: boolean, name: string}> }} target
+       * @param {string} name
+       * @returns {boolean}
+       */
       deleteProperty: function (target, name) {
         if (target.processes.hasOwnProperty(name)) {
           target.processes[name].running = false;
@@ -93,6 +123,7 @@
       }
     });
 
+    /** @param {string} name */
     this.stopProcess = function (name) {
       if (typeof self.runInBackground === "undefined"
         || typeof self.runInBackground.processes === "undefined") {
@@ -124,6 +155,10 @@
     };
 
     // Override the delay function, to check for background work while we wait anyway
+    /**
+     * @param {number} [amount]
+     * @returns {boolean} always true
+     */
     global.delay = function (amount) {
       let recursive = recursiveCheck();
       let start = getTickCount();

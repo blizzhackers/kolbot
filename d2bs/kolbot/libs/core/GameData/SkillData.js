@@ -1527,9 +1527,7 @@
     this._checked = false;
   };
 
-  /**
-   * @todo Damage calculations, best slot, etc.
-   */
+  /** @todo Damage calculations, best slot, etc. */
 
   /** @type {Map<number, Skill} */
   const SkillData = new Map();

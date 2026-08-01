@@ -19,10 +19,12 @@
     /** @type {OrgTorchDataObject} */
     _default: { gamename: "", gamepassword: "", active: -1, doneAreas: [] },
 
+    /** @returns {boolean} True if this profile's OrgTorch data file exists. */
     exists: function () {
       return FileTools.exists(this._path);
     },
       
+    /** @returns {OrgTorchDataObject} A freshly-written default data object for the current game. */
     create: function () {
       if (!FileTools.exists("data/" + me.profile)) {
         let folder = dopen("data");
@@ -59,6 +61,7 @@
       FileTools.writeText(this._path, JSON.stringify(data));
     },
 
+    /** @returns {boolean} True if this profile's OrgTorch data file was deleted. */
     remove: function () {
       return FileTools.remove(this._path);
     }

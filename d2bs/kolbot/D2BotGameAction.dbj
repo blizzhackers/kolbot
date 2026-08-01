@@ -282,6 +282,10 @@ const locationAction = (function () {
   };
 })();
 
+/**
+ * Entry point: waits for the D2Bot handle and game info, then drives the GameAction loop
+ * (login/char-select/in-game state machine) until the script is stopped.
+ */
 function main () {
   addEventListener("copydata", Starter.receiveCopyData);
 

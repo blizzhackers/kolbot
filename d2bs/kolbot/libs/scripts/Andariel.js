@@ -28,6 +28,7 @@ const Andariel = new Runnable(
       throw new Error("Failed to move to Catacombs Level 4");
     }
 
+    /** @returns {boolean} True once Andariel is confirmed dead, stopping the move loop early. */
     Pather.move(new PathNode(22549, 9520), { callback: function () {
       return Attack._killed.has(sdk.monsters.Andariel);
     } });

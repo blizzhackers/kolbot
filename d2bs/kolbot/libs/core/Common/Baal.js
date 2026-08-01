@@ -17,6 +17,10 @@
       baal: { x: 15090, y: 5014 },
     };
 
+    /**
+     * Moves to the throne corner farthest from any living, non-summoned Hydra and waits for it to die.
+     * @returns {boolean} always true
+     */
     this.checkHydra = function () {
       let hydra = Game.getMonster(getLocaleString(sdk.locale.monsters.Hydra));
       if (hydra) {
@@ -45,6 +49,12 @@
       return true;
     };
 
+    /**
+     * Checks for the current throne-room wave's signature monster near the throne.
+     * @param {boolean} [clear] when true and only trash is present, engage it via Attack.clear
+     * @returns {number | boolean} 1-5 for the matched wave (fallen/shaman, mummy/mage, council, venom
+     * lord, Lister), or false when no wave monster is present
+     */
     this.checkThrone = function (clear = true) {
       let monster = Game.getMonster();
 
@@ -81,6 +91,10 @@
       return false;
     };
 
+    /**
+     * Clears remaining throne-room monsters (dolls first if configured), then sweeps preset nodes.
+     * @returns {boolean} true when ThroneBaal is already gone or the sweep completes
+     */
     this.clearThrone = function () {
       if (!Game.getMonster(sdk.monsters.ThroneBaal)) return true;
 
@@ -133,6 +147,10 @@
       return true;
     };
 
+    /**
+     * Fires a class-specific ranged/AoE attack at the throne center to pre-damage upcoming spawns.
+     * @returns {boolean} true if an attack was cast, false if no class-specific action applied
+     */
     this.preattack = function () {
       switch (me.classid) {
       case sdk.player.class.Sorceress:
@@ -182,6 +200,10 @@
       return false;
     };
 
+    /**
+     * Positions in the throne room and clears each wave in sequence until Lister's wave is done.
+     * @returns {boolean} false if stuck in the throne for over 30 minutes, true otherwise
+     */
     this.clearWaves = function () {
       Pather.moveTo(15094, me.paladin ? 5029 : 5038);
 
@@ -296,6 +318,11 @@
       return true;
     };
 
+    /**
+     * Clears the throne room, portals to the Worldstone Chamber, and kills/damages Baal.
+     * @param {number} [hurtPercent] if > 0, only damage Baal to this HP percent instead of killing him
+     * @returns {boolean} true once Baal is killed/hurt as requested, false if not yet in the chamber
+     */
     this.killBaal = function (hurtPercent = 0) {
       if (me.inArea(sdk.areas.ThroneofDestruction)) {
         if (Config.PublicMode && Loader.scriptName() === "Baal" && !Config.Baal.Silent) {

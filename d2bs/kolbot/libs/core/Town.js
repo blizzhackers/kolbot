@@ -5,6 +5,7 @@
 *
 */
 
+/** @type {Town} */
 const Town = {
   telekinesis: true,
   sellTimer: getTickCount(), // shop speedup test
@@ -154,9 +155,7 @@ const Town = {
   doChores: function (repair = false) {
     console.info(true, null, "doChores");
 
-    /**
-     * @todo Pre-build task list so we can more efficiently peform our chores
-     */
+    /** @todo Pre-build task list so we can more efficiently peform our chores */
 
     !me.inTown && Town.goToTown();
     const readyInTown = function () {
@@ -283,9 +282,7 @@ const Town = {
     return false;
   },
 
-  /**
-   * @description handle quest consumables if we have them
-   */
+  /** @description handle quest consumables if we have them */
   checkQuestItems: function () {
     // Act 1
     // Tools of the trade
@@ -575,9 +572,7 @@ const Town = {
       }
     }
 
-    /**
-     * @todo If we are set to cube rejuvs, allow buying potions once we have our gem
-     */
+    /** @todo If we are set to cube rejuvs, allow buying potions once we have our gem */
 
     // We have enough potions in inventory
     (buffer.mp >= Config.MPBuffer && buffer.hp >= Config.HPBuffer) && (needBuffer = false);
@@ -1514,9 +1509,7 @@ const Town = {
     return me.needMerc();
   },
 
-  /**
-   * @param {ItemUnit} item 
-   */
+  /** @param {ItemUnit} item */
   canStash: function (item) {
     if (Town.dontStashGids.has(item.gid)) {
       return false;
@@ -1527,9 +1520,7 @@ const Town = {
     if ([sdk.items.quest.HoradricStaff, sdk.items.quest.KhalimsWill].includes(item.classid)) {
       return false;
     }
-    /**
-     * @todo add sorting here first if we can't fit the item
-     */
+    /** @todo add sorting here first if we can't fit the item */
     return Storage.Stash.CanFit(item);
   },
 
@@ -2159,6 +2150,7 @@ const Town = {
         if (npcSpot) {
           let npc = Game.getNPC(spot);
           if (npc && npc.distance < 5) return true;
+          /** @returns {boolean} True once the target NPC is within 5 units, stopping the move early. */
           Pather.move(node, { callback: function () {
             let npc = Game.getNPC(spot);
             return npc && npc.distance < 5;
@@ -2364,6 +2356,11 @@ const Town = {
       this.quality = gem.quality;
       this.ilvl = gem.ilvl;
     }
+    /**
+     * Stub matching Unit.prototype.getFlag's shape - gems have no flags, so this always passes.
+     * @param {number} flag unused
+     * @returns {boolean} always true
+     */
     // eslint-disable-next-line no-unused-vars
     GemUnit.prototype.getFlag = function (flag) {
       return true;

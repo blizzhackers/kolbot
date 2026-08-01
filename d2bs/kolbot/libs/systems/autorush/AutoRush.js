@@ -1099,6 +1099,7 @@
   const diablo = function diablo (nick) {
     log("starting diablo");
 
+    /** @returns {boolean} False if `nick` doesn't show up in the area before {@link AutoRush.playerWaitTimeout}. */
     function inviteIn () {
       Pather.moveTo(7763, 5267) && Pather.makePortal();
       // change this spot so we don't bring diablo closer to rushees

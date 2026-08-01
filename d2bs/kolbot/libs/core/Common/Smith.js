@@ -6,6 +6,10 @@
 */
 
 (function (module) {
+  /**
+   * Kills The Smith, loots and picks up the Horadric Malus, then turns it in to Charsi.
+   * @returns {boolean} true if the Tools of the Trade quest reached ReqComplete afterward
+   */
   module.exports = function () {
     if (!Pather.moveToPreset(sdk.areas.Barracks, sdk.unittype.Object, sdk.quest.chest.MalusHolder)) {
       throw new Error("Failed to move to the Smith");

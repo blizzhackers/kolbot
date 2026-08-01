@@ -28,6 +28,10 @@ const ShitList = {
     return Object.assign({}, this._default);
   },
 
+  /**
+   * Overwrites the shitlist datafile with defaults and clears the in-memory set.
+   * @returns {{ shitlist: Array<string> }}
+   */
   reset: function () {
     let string = JSON.stringify(this._default);
     FileAction.write(this._path, string);

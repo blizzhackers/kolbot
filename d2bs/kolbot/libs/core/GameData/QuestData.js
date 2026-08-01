@@ -6,9 +6,7 @@
 */
 
 (function (module) {
-  /**
-   * @todo Fill out more, items for quests, npcs, etc
-   */
+  /** @todo Fill out more, items for quests, npcs, etc */
   const QuestData = (function () {
     const CACHE_TIME = Time.minutes(5);
     let _lastRefresh = 0;

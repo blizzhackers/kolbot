@@ -38,6 +38,11 @@
       return false;
     },
 
+    /**
+     * Drives the full Search for Cain quest: Inifuss scroll and key, activating the Cairn Stones,
+     * opening the portal to Tristram, and freeing Cain from the gibbet.
+     * @returns {boolean}
+     */
     run: function () {
       MainLoop:
       while (true) {

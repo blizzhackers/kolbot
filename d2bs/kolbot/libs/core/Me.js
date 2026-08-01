@@ -63,6 +63,13 @@ me.findItem = function (id = -1, mode = -1, loc = -1, quality = -1) {
   return false;
 };
 
+/**
+ * Find all items matching classid, mode, and (optionally) location.
+ * @param {number} [id]
+ * @param {number} [mode]
+ * @param {number | boolean} [loc]
+ * @returns {ItemUnit[]}
+ */
 me.findItems = function (id = -1, mode = -1, loc = false) {
   let list = [];
   let item = me.getItem(id, mode);
@@ -78,6 +85,10 @@ me.findItems = function (id = -1, mode = -1, loc = false) {
   return list;
 };
 
+/**
+ * Waits for the game to be ready, then repeatedly cancels any open UI flag (inventory, shop, etc.).
+ * @returns {void}
+ */
 me.cancelUIFlags = function () {
   while (!me.gameReady) {
     delay(3);
@@ -154,7 +165,13 @@ me.switchWeapons = function (slot) {
   return false;
 };
 
-// Returns the number of frames needed to cast a given skill at a given FCR for a given char.
+/**
+ * Calculates the number of frames needed to cast a given skill at a given FCR for a given char.
+ * @param {number} skillId
+ * @param {number} [fcr]
+ * @param {number} [charClass]
+ * @returns {number}
+ */
 me.castingFrames = function (skillId, fcr, charClass) {
   if (skillId === undefined) return 0;
 
@@ -178,11 +195,21 @@ me.castingFrames = function (skillId, fcr, charClass) {
   );
 };
 
-// Returns the duration in seconds needed to cast a given skill at a given FCR for a given char.
+/**
+ * Calculates the duration in seconds needed to cast a given skill at a given FCR for a given char.
+ * @param {number} skillId
+ * @param {number} [fcr]
+ * @param {number} [charClass]
+ * @returns {number}
+ */
 me.castingDuration = function (skillId, fcr = me.FCR, charClass = me.classid) {
   return (me.castingFrames(skillId, fcr, charClass) / 25);
 };
 
+/**
+ * @param {number} [weaponLoc]
+ * @returns {number} quantity stat of the item equipped at weaponLoc, or 0 if none is equipped
+ */
 me.getWeaponQuantity = function (weaponLoc = sdk.body.RightArm) {
   let currItem = me.getItemsEx(-1, sdk.items.mode.Equipped)
     .filter(function (i) {
@@ -192,6 +219,11 @@ me.getWeaponQuantity = function (weaponLoc = sdk.body.RightArm) {
   return !!currItem ? currItem.getStat(sdk.stats.Quantity) : 0;
 };
 
+/**
+ * Removes belt potions that don't belong in their configured column, plus any stamina/antidote/thawing
+ * potions, moving them to storage or drinking them if there's no room.
+ * @returns {boolean}
+ */
 me.clearBelt = function () {
   let item = me.getItem(-1, sdk.items.mode.inBelt);
   let clearList = [];
@@ -239,6 +271,11 @@ me.clearBelt = function () {
   return true;
 };
 
+/**
+ * Moves matching potions from inventory into empty belt columns to top up the belt.
+ * @param {number} [beltSize]
+ * @returns {boolean}
+ */
 me.cleanUpInvoPotions = function (beltSize) {
   beltSize === undefined && (beltSize = Storage.BeltSize());
   const beltMax = (beltSize * 4);
@@ -301,6 +338,10 @@ me.cleanUpInvoPotions = function (beltSize) {
   return true;
 };
 
+/**
+ * Checks whether any configured belt column (hp/mp) is missing its potion type.
+ * @returns {boolean}
+ */
 me.needPotions = function () {
   // we aren't using MinColumn if none of the values are set
   if (!Config.MinColumn.some(el => el > 0)) return false;
@@ -360,6 +401,11 @@ me.needPotions = function () {
   return false;
 };
 
+/**
+ * Same column-coverage check as needPotions, but first tops up the belt from inventory potions
+ * (via cleanUpInvoPotions) before checking.
+ * @returns {boolean}
+ */
 me.needBeltPots = function () {
   // we aren't using MinColumn if none of the values are set
   if (!Config.MinColumn.some(el => el > 0)) return false;
@@ -420,6 +466,10 @@ me.needBeltPots = function () {
   return false;
 };
 
+/**
+ * Checks whether total inventory HP/MP potion counts are below the configured buffer thresholds.
+ * @returns {boolean}
+ */
 me.needBufferPots = function () {
   // not using buffers
   if (Config.HPBuffer < 0 && Config.MPBuffer < 0) return false;
@@ -575,6 +625,7 @@ me.needMerc = function () {
   return true;
 };
 
+/** @returns {string[]} repair actions needed, any of "buyQuiver" (out of/low on ammo) or "repair" */
 me.needRepair = function () {
   const repairAction = [];
   if (getInteractedNPC() && !getUIFlag(sdk.uiflags.Shop)) {
@@ -636,6 +687,7 @@ me.getTome = function (id) {
   return tome ? tome : null;
 };
 
+/** @returns {ItemUnit[]} unidentified items in inventory */
 me.getUnids = function () {
   return me.getItemsEx(-1, sdk.items.mode.inStorage)
     .filter(function (item) {
@@ -729,6 +781,10 @@ me.checkScrolls = function (id) {
   return tome.getStat(sdk.stats.Quantity);
 };
 
+/**
+ * @returns {number} quantity of Key items owned in inventory; returns the sentinel 12 (always "enough")
+ * when key buying doesn't apply - chests disabled, assassin, can't afford a key, or no inventory space
+ */
 me.checkKeys = function () {
   if (!Config.OpenChests.Enabled) return 12;
   // sins don't need keys
@@ -798,7 +854,11 @@ me.checkShard = function () {
   return true;
 };
 
-// Identify items while in the field if we have a id tome
+/**
+ * Identifies unidentified items in the field using an ID tome, then drops or keeps each per the
+ * pickit result.
+ * @returns {boolean} false if there's nothing to identify or the ID tome lacks enough charges
+ */
 me.fieldID = function () {
   let list = me.getUnids();
   if (!list.length) return false;
@@ -850,6 +910,7 @@ me.fieldID = function () {
   return true;
 };
 
+/** @returns {boolean} */
 me.switchToPrimary = function () {
   if (me.classic) return true;
   return me.switchWeapons(Attack.getPrimarySlot());
@@ -897,18 +958,23 @@ me.getOwned = function (itemInfo = {}, skipSame = false) {
  */
 Object.defineProperties(me, {
   maxNearMonsters: {
+    /** @returns {number} */
     get: function () {
       return Math.floor((4 * (1 / me.hpmax * me.hp)) + 1);
     },
     configurable: true
   },
   maxgold: {
-    /** max capacity (cLvl * 10000) */
+    /**
+     * max capacity (cLvl * 10000)
+     * @returns {number}
+     */
     get: function () {
       return me.getStat(sdk.stats.Level) * 10000;
     },
   },
   inShop: {
+    /** @returns {boolean} */
     get: function () {
       if (getUIFlag(sdk.uiflags.Shop)) return true;
       if (!Config.PacketShopping) return false;
@@ -917,31 +983,37 @@ Object.defineProperties(me, {
     }
   },
   walking: {
+    /** @returns {boolean} */
     get: function () {
       return me.runwalk === sdk.player.move.Walk;
     }
   },
   running: {
+    /** @returns {boolean} */
     get: function () {
       return me.runwalk === sdk.player.move.Run;
     }
   },
   deadOrInSequence: {
+    /** @returns {boolean} */
     get: function () {
       return me.dead || me.mode === sdk.player.mode.SkillActionSequence;
     }
   },
   moving: {
+    /** @returns {boolean} */
     get: function () {
       return [sdk.player.mode.Walking, sdk.player.mode.Running, sdk.player.mode.WalkingInTown].includes(me.mode);
     }
   },
   staminaPercent: {
+    /** @returns {number} */
     get: function () {
       return Math.round((me.stamina / me.staminamax) * 100);
     }
   },
   staminaDrainPerSec: {
+    /** @returns {number} */
     get: function () {
       let bonusReduction = me.getStat(sdk.stats.StaminaRecoveryBonus);
       let armorMalusReduction = 0; // TODO
@@ -949,46 +1021,55 @@ Object.defineProperties(me, {
     }
   },
   staminaTimeLeft: {
+    /** @returns {number} */
     get: function () {
       return me.stamina / me.staminaDrainPerSec;
     }
   },
   staminaMaxDuration: {
+    /** @returns {number} */
     get: function () {
       return me.staminamax / me.staminaDrainPerSec;
     }
   },
   FCR: {
+    /** @returns {number} */
     get: function () {
       return me.getStat(sdk.stats.FCR) - (!!Config ? Config.FCR : 0);
     }
   },
   FHR: {
+    /** @returns {number} */
     get: function () {
       return me.getStat(sdk.stats.FHR) - (!!Config ? Config.FHR : 0);
     }
   },
   FBR: {
+    /** @returns {number} */
     get: function () {
       return me.getStat(sdk.stats.FBR) - (!!Config ? Config.FBR : 0);
     }
   },
   IAS: {
+    /** @returns {number} */
     get: function () {
       return me.getStat(sdk.stats.IAS) - (!!Config ? Config.IAS : 0);
     }
   },
   shapeshifted: {
+    /** @returns {boolean} */
     get: function () {
       return me.getState(sdk.states.Wolf) || me.getState(sdk.states.Bear) || me.getState(sdk.states.Delerium);
     }
   },
   mpPercent: {
+    /** @returns {number} */
     get: function () {
       return Math.round(me.mp * 100 / me.mpmax);
     }
   },
   skillDelay: {
+    /** @returns {boolean} */
     get: function () {
       return me.getState(sdk.states.SkillDelay);
     }
@@ -1000,6 +1081,7 @@ Object.defineProperties(me, {
     configurable: true
   },
   shitList: {
+    /** @returns {Set<string>} */
     get: function () {
       return this._shitList;
     },
@@ -1021,71 +1103,85 @@ Object.defineProperties(me, {
  */
 Object.defineProperties(me, {
   classic: {
+    /** @returns {boolean} */
     get: function () {
       return me.gametype === sdk.game.gametype.Classic;
     }
   },
   expansion: {
+    /** @returns {boolean} */
     get: function () {
       return me.gametype === sdk.game.gametype.Expansion;
     }
   },
   softcore: {
+    /** @returns {boolean} */
     get: function () {
       return me.playertype === false;
     }
   },
   hardcore: {
+    /** @returns {boolean} */
     get: function () {
       return me.playertype === true;
     }
   },
   normal: {
+    /** @returns {boolean} */
     get: function () {
       return me.diff === sdk.difficulty.Normal;
     }
   },
   nightmare: {
+    /** @returns {boolean} */
     get: function () {
       return me.diff === sdk.difficulty.Nightmare;
     }
   },
   hell: {
+    /** @returns {boolean} */
     get: function () {
       return me.diff === sdk.difficulty.Hell;
     }
   },
   amazon: {
+    /** @returns {boolean} */
     get: function () {
       return me.classid === sdk.player.class.Amazon;
     }
   },
   sorceress: {
+    /** @returns {boolean} */
     get: function () {
       return me.classid === sdk.player.class.Sorceress;
     }
   },
   necromancer: {
+    /** @returns {boolean} */
     get: function () {
       return me.classid === sdk.player.class.Necromancer;
     }
   },
   paladin: {
+    /** @returns {boolean} */
     get: function () {
       return me.classid === sdk.player.class.Paladin;
     }
   },
   barbarian: {
+    /** @returns {boolean} */
     get: function () {
       return me.classid === sdk.player.class.Barbarian;
     }
   },
   druid: {
+    /** @returns {boolean} */
     get: function () {
       return me.classid === sdk.player.class.Druid;
     }
   },
   assassin: {
+    /** @returns {boolean} */
     get: function () {
       return me.classid === sdk.player.class.Assassin;
     }
@@ -1097,66 +1193,79 @@ Object.defineProperties(me, {
  */
 Object.defineProperties(me, {
   wirtsleg: {
+    /** @returns {ItemUnit | false} */
     get: function () {
       return me.getItem(sdk.quest.item.WirtsLeg);
     }
   },
   cube: {
+    /** @returns {ItemUnit | false} */
     get: function () {
       return me.getItem(sdk.quest.item.Cube);
     }
   },
   shaft: {
+    /** @returns {ItemUnit | false} */
     get: function () {
       return me.getItem(sdk.quest.item.ShaftoftheHoradricStaff);
     }
   },
   amulet: {
+    /** @returns {ItemUnit | false} */
     get: function () {
       return me.getItem(sdk.quest.item.ViperAmulet);
     }
   },
   staff: {
+    /** @returns {ItemUnit | false} */
     get: function () {
       return me.getItem(sdk.quest.item.HoradricStaff);
     }
   },
   completestaff: {
+    /** @returns {ItemUnit | false} */
     get: function () {
       return me.getItem(sdk.quest.item.HoradricStaff);
     }
   },
   eye: {
+    /** @returns {ItemUnit | false} */
     get: function () {
       return me.getItem(sdk.items.quest.KhalimsEye);
     }
   },
   brain: {
+    /** @returns {ItemUnit | false} */
     get: function () {
       return me.getItem(sdk.quest.item.KhalimsBrain);
     }
   },
   heart: {
+    /** @returns {ItemUnit | false} */
     get: function () {
       return me.getItem(sdk.quest.item.KhalimsHeart);
     }
   },
   khalimswill: {
+    /** @returns {ItemUnit | false} */
     get: function () {
       return me.getItem(sdk.quest.item.KhalimsWill);
     }
   },
   khalimsflail: {
+    /** @returns {ItemUnit | false} */
     get: function () {
       return me.getItem(sdk.quest.item.KhalimsFlail);
     }
   },
   malahspotion: {
+    /** @returns {ItemUnit | false} */
     get: function () {
       return me.getItem(sdk.quest.item.MalahsPotion);
     }
   },
   scrollofresistance: {
+    /** @returns {ItemUnit | false} */
     get: function () {
       return me.getItem(sdk.quest.item.ScrollofResistance);
     }
@@ -1190,6 +1299,7 @@ Object.defineProperties(me, {
   const _cachedWaypoints = new Array(AMOUNT_OF_WAYPOINTS).fill(false);
 
   Object.defineProperty(me, "waypoints", {
+    /** @returns {boolean[]} */
     get: function () {
       return _cachedWaypoints;
     },
@@ -1215,6 +1325,11 @@ Object.defineProperties(me, {
     return getWaypoint(areaIndex);
   };
 
+  /**
+   * @param {number} questId
+   * @param {number} state
+   * @returns {boolean}
+   */
   me.checkQuest = function (questId, state) {
     const quest = QuestData.get(questId);
     if (!quest) return false;
@@ -1223,6 +1338,7 @@ Object.defineProperties(me, {
 
   Object.defineProperties(me, {
     highestAct: {
+      /** @returns {number} highest act reached (1-5) */
       get: function () {
         let acts = [true,
           QuestData.get(sdk.quest.id.AbleToGotoActII).complete(),
@@ -1236,6 +1352,7 @@ Object.defineProperties(me, {
       }
     },
     highestQuestDone: {
+      /** @returns {number | undefined} highest completed quest id, walking backwards from Respec */
       get: function () {
         for (let i = sdk.quest.id.Respec; i >= sdk.quest.id.SpokeToWarriv; i--) {
           if (!QuestData.has(i)) continue;
@@ -1255,158 +1372,189 @@ Object.defineProperties(me, {
       }
     },
     den: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.DenofEvil).complete();
       }
     },
     bloodraven: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.SistersBurialGrounds).complete();
       }
     },
     smith: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.ToolsoftheTrade).complete();
       }
     },
     imbue: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.ToolsoftheTrade).checkState(sdk.quest.states.ReqComplete, true);
       }
     },
     cain: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.TheSearchForCain).complete();
       }
     },
     tristram: {
+      /** @returns {boolean} */
       get: function () {
         // update where this is used and change the state to be portal opened and me.cain to be quest completed
         return QuestData.get(sdk.quest.id.TheSearchForCain).complete();
       }
     },
     countess: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.ForgottenTower).complete();
       }
     },
     andariel: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.AbleToGotoActII).complete();
       }
     },
     radament: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.RadamentsLair).complete();
       }
     },
     horadricstaff: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.TheHoradricStaff).complete();
       }
     },
     summoner: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.TheSummoner).complete();
       }
     },
     duriel: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.AbleToGotoActIII).complete();
       }
     },
     goldenbird: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.TheGoldenBird).complete();
       }
     },
     lamessen: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.LamEsensTome).complete();
       }
     },
     gidbinn: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.BladeoftheOldReligion).complete();
       }
     },
     travincal: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.KhalimsWill).complete();
       }
     },
     blackendTemple: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.TheBlackenedTemple).complete();
       }
     },
     mephisto: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.AbleToGotoActIV).complete();
       }
     },
     izual: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.TheFallenAngel).complete();
       }
     },
     hellforge: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.HellsForge).complete();
       }
     },
     diablo: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.TerrorsEnd).complete();
       }
     },
     shenk: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.SiegeOnHarrogath).complete(true);
       }
     },
     larzuk: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.SiegeOnHarrogath).checkState(sdk.quest.states.ReqComplete, true);
       }
     },
     savebarby: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.RescueonMountArreat).complete();
       }
     },
     barbrescue: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.RescueonMountArreat).complete();
       }
     },
     anya: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.PrisonofIce).complete();
       }
     },
     ancients: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.RiteofPassage).complete();
       }
     },
     baal: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.EyeofDestruction).complete();
       }
     },
     // Misc
     cows: {
+      /** @returns {number} quest state value for the cow-portal quest state */
       get: function () {
         return me.getQuest(sdk.quest.id.TheSearchForCain, 10);
       }
     },
     respec: {
+      /** @returns {boolean} */
       get: function () {
         return QuestData.get(sdk.quest.id.Respec).complete();
       }
     },
     diffCompleted: {
+      /** @returns {boolean} */
       get: function () {
         return !!((me.classic && me.diablo) || me.baal);
       }

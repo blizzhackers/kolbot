@@ -12,6 +12,12 @@
 
 (function (global, original) {
   let firstRun = true;
+  /**
+   * Overrides the native getUnit, nulling out the phantom act 1/2 "Dummy" monster references
+   * a native engine bug returns when scanning by classid/name.
+   * @param {...(number|string)} args - forwarded verbatim to the native getUnit
+   * @returns {Unit|null}
+   */
   global.getUnit = function (...args) {
     if (firstRun) {
       delay(1500);
@@ -46,36 +52,43 @@ Party.prototype.__defineGetter__("inTown", function () {
 
 Object.defineProperties(Unit.prototype, {
   isChampion: {
+    /** @returns {boolean} */
     get: function () {
       return (this.spectype & sdk.monsters.spectype.Champion) > 0;
     },
   },
   isUnique: {
+    /** @returns {boolean} */
     get: function () {
       return (this.spectype & sdk.monsters.spectype.Unique) > 0;
     },
   },
   isMinion: {
+    /** @returns {boolean} */
     get: function () {
       return (this.spectype & sdk.monsters.spectype.Minion) > 0;
     },
   },
   isSuperUnique: {
+    /** @returns {boolean} */
     get: function () {
       return (this.spectype & (sdk.monsters.spectype.Super | sdk.monsters.spectype.Unique)) > 0;
     },
   },
   isSpecial: {
+    /** @returns {boolean} */
     get: function () {
       return (this.isChampion || this.isUnique || this.isSuperUnique);
     },
   },
   isPlayer: {
+    /** @returns {boolean} */
     get: function () {
       return this.type === sdk.unittype.Player;
     },
   },
   isMonster: {
+    /** @returns {boolean} */
     get: function () {
       return this.type === sdk.unittype.Monster;
     },
@@ -93,6 +106,10 @@ Object.defineProperties(Unit.prototype, {
   },
   // todo - monster types
   isPrimeEvil: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       return [
         sdk.monsters.Andariel, sdk.monsters.Duriel, sdk.monsters.Mephisto,
@@ -103,6 +120,10 @@ Object.defineProperties(Unit.prototype, {
     },
   },
   isBoss: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       return this.isPrimeEvil
         || [
@@ -114,6 +135,10 @@ Object.defineProperties(Unit.prototype, {
     },
   },
   isGhost: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       return [
         sdk.monsters.Ghost1, sdk.monsters.Wraith1, sdk.monsters.Specter1,
@@ -123,6 +148,10 @@ Object.defineProperties(Unit.prototype, {
     },
   },
   isDoll: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       return [
         sdk.monsters.BoneFetish1, sdk.monsters.BoneFetish2, sdk.monsters.BoneFetish3,
@@ -131,6 +160,10 @@ Object.defineProperties(Unit.prototype, {
     },
   },
   isSoul: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       return [
         sdk.monsters.BurningSoul1,
@@ -144,6 +177,10 @@ Object.defineProperties(Unit.prototype, {
     },
   },
   isMonsterObject: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       return [
         sdk.monsters.Turret1, sdk.monsters.Turret2, sdk.monsters.Turret3, sdk.monsters.MummyGenerator,
@@ -156,6 +193,10 @@ Object.defineProperties(Unit.prototype, {
     },
   },
   isMonsterEgg: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       return [
         sdk.monsters.SandMaggotEgg, sdk.monsters.RockWormEgg, sdk.monsters.DevourerEgg, sdk.monsters.GiantLampreyEgg,
@@ -164,6 +205,10 @@ Object.defineProperties(Unit.prototype, {
     },
   },
   isMonsterNest: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       return [
         sdk.monsters.FoulCrowNest, sdk.monsters.BlackVultureNest,
@@ -174,6 +219,10 @@ Object.defineProperties(Unit.prototype, {
     },
   },
   isBaalTentacle: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       return [
         sdk.monsters.Tentacle1, sdk.monsters.Tentacle2,
@@ -182,6 +231,10 @@ Object.defineProperties(Unit.prototype, {
     },
   },
   isShaman: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       return [
         sdk.monsters.FallenShaman, sdk.monsters.CarverShaman2, sdk.monsters.DevilkinShaman2, sdk.monsters.DarkShaman1,
@@ -190,11 +243,19 @@ Object.defineProperties(Unit.prototype, {
     },
   },
   isUnraveler: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       return getBaseStat("monstats", this.classid, "MonType") === sdk.monsters.type.Unraveler;
     },
   },
   isFallen: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       return [
         sdk.monsters.Fallen, sdk.monsters.Carver2, sdk.monsters.Devilkin2,
@@ -204,6 +265,10 @@ Object.defineProperties(Unit.prototype, {
     },
   },
   isBeetle: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       return getBaseStat("monstats", this.classid, "MonType") === sdk.monsters.type.Scarab;
     },
@@ -244,82 +309,132 @@ Object.defineProperties(Unit.prototype, {
     },
   },
   isFrozen: {
+    /** @returns {boolean} */
     get: function () {
       return this.getState(sdk.states.FrozenSolid);
     },
   },
   isChilled: {
+    /** @returns {boolean} */
     get: function () {
       return this.getState(sdk.states.Frozen);
     },
   },
   extraStrong: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       if (!this.isMonster) return false;
       return this.getEnchant(sdk.enchant.ExtraStrong);
     },
   },
   extraFast: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       if (!this.isMonster) return false;
       return this.getEnchant(sdk.enchant.ExtraFast);
     },
   },
   cursed: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       if (!this.isMonster) return false;
       return this.getEnchant(sdk.enchant.Cursed);
     },
   },
   magicResistant: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       if (!this.isMonster) return false;
       return this.getEnchant(sdk.enchant.MagicResistant);
     },
   },
   fireEnchanted: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       if (!this.isMonster) return false;
       return this.getEnchant(sdk.enchant.FireEnchanted);
     },
   },
   lightningEnchanted: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       if (!this.isMonster) return false;
       return this.getEnchant(sdk.enchant.LightningEnchanted);
     },
   },
   coldEnchanted: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       if (!this.isMonster) return false;
       return this.getEnchant(sdk.enchant.ColdEnchanted);
     },
   },
   manaBurn: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       if (!this.isMonster) return false;
       return this.getEnchant(sdk.enchant.ManaBurn);
     },
   },
   teleportation: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       if (!this.isMonster) return false;
       return this.getEnchant(sdk.enchant.Teleportation);
     },
   },
   spectralHit: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       if (!this.isMonster) return false;
       return this.getEnchant(sdk.enchant.SpectralHit);
     },
   },
   stoneSkin: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       if (!this.isMonster) return false;
       return this.getEnchant(sdk.enchant.StoneSkin);
     },
   },
   multiShot: {
+    /**
+     * @this {Monster}
+     * @returns {boolean}
+     */
     get: function () {
       if (!this.isMonster) return false;
       return this.getEnchant(sdk.enchant.MultipleShots);
@@ -330,6 +445,7 @@ Object.defineProperties(Unit.prototype, {
     writable: true
   },
   fireRes: {
+    /** @returns {number} fire resist stat, adjusted for this-is-`me` shrine buffs */
     get: function () {
       let modifier = 0;
       if (this === me) {
@@ -339,6 +455,7 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   coldRes: {
+    /** @returns {number} cold resist stat, adjusted for this-is-`me` shrine/potion buffs */
     get: function () {
       let modifier = 0;
       if (this === me) {
@@ -349,6 +466,7 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   lightRes: {
+    /** @returns {number} lightning resist stat, adjusted for this-is-`me` shrine buffs */
     get: function () {
       let modifier = 0;
       if (this === me) {
@@ -358,6 +476,7 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   poisonRes: {
+    /** @returns {number} poison resist stat, adjusted for this-is-`me` shrine/potion buffs */
     get: function () {
       let modifier = 0;
       if (this === me) {
@@ -368,11 +487,17 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   hpPercent: {
+    /** @returns {number} */
     get: function () {
       return Math.round(this.hp * 100 / this.hpmax);
     }
   },
   attacking: {
+    /**
+     * @this {Player | Monster}
+     * @throws {Error} if used on a unit type other than Player or Monster
+     * @returns {boolean}
+     */
     get: function () {
       if (this.type > sdk.unittype.Monster) {
         throw new Error("Unit.attacking: Must be used with Monster or Player units.");
@@ -398,6 +523,11 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   idle: {
+    /**
+     * @this {Player | Monster}
+     * @throws {Error} if used on a unit type other than Player or Monster
+     * @returns {boolean}
+     */
     get: function () {
       if (this.type > sdk.unittype.Monster) {
         throw new Error("Unit.idle: Must be used with Player or Monster units.");
@@ -424,6 +554,10 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   dead: {
+    /**
+     * @this {Player | Monster}
+     * @returns {boolean}
+     */
     get: function () {
       switch (this.type) {
       case sdk.unittype.Player:
@@ -436,6 +570,11 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   inTown: {
+    /**
+     * @this {Player}
+     * @throws {Error} if used on a unit type other than Player
+     * @returns {boolean}
+     */
     get: function () {
       if (this.type > sdk.unittype.Player) throw new Error("Unit.inTown: Must be used with player units.");
       return sdk.areas.Towns.includes(this.area);
@@ -456,9 +595,7 @@ Object.defineProperties(Unit.prototype, {
   }
 });
 
-/**
- * @extends ItemUnit
- */
+/** @extends ItemUnit */
 Object.defineProperties(Unit.prototype, {
   strreq: {
     /** @this {ItemUnit} */
@@ -781,6 +918,11 @@ Object.defineProperties(Unit.prototype, {
     }
   },
   durabilityPercent: {
+    /**
+     * @this {ItemUnit}
+     * @throws {Error} if used on a non-item unit (siblings in this block return false/undefined instead)
+     * @returns {number} 100 for stackable/charge items with no durability track
+     */
     get: function () {
       if (this.type !== sdk.unittype.Item) throw new Error("Unit.durabilityPercent: Must be used on items.");
       if (this.getStat(sdk.stats.Quantity) || !this.getStat(sdk.stats.MaxDurability)) return 100;
@@ -919,6 +1061,12 @@ Unit.prototype.repairItem = function () {
   return Misc.poll(() => this.getStat(sdk.stats.Durability) !== preDurability, 500, 50);
 };
 
+/**
+ * @this {ItemUnit}
+ * @param {boolean} [shiftBuy] - shift-click buy (buys full stack for stackables)
+ * @param {boolean} [gamble] - buy through the gambling window instead of a normal shop
+ * @returns {boolean}
+ */
 Unit.prototype.buy = function (shiftBuy, gamble) {
   if (Config.PacketShopping) return Packet.buyItem(this, shiftBuy, gamble);
   // Check if it's an item we want to buy
@@ -955,6 +1103,10 @@ Unit.prototype.buy = function (shiftBuy, gamble) {
 };
 
 // You MUST use a delay after Unit.sell() if using custom scripts. delay(500) works best, dynamic delay is used when identifying/selling (500 - item id time)
+/**
+ * @this {ItemUnit}
+ * @returns {boolean}
+ */
 Unit.prototype.sell = function () {
   if (Config.PacketShopping) return Packet.sellItem(this);
 
@@ -1035,6 +1187,10 @@ Unit.prototype.toCursor = function (usePacket = false) {
   return false;
 };
 
+/**
+ * @this {ItemUnit}
+ * @returns {boolean}
+ */
 Unit.prototype.drop = function () {
   if (this.type !== sdk.unittype.Item) {
     throw new Error("Unit.drop: Must be used with items. Unit Name: " + this.name);
@@ -1075,9 +1231,7 @@ Unit.prototype.drop = function () {
   return false;
 };
 
-/**
- * @description use consumable item, fixes issue with interact() returning false even if we used an item
- */
+/** @description use consumable item, fixes issue with interact() returning false even if we used an item */
 Unit.prototype.use = function () {
   if (this === undefined || !this.type) return false;
   if (this.type !== sdk.unittype.Item) throw new Error("Unit.use: Must be used with items. Unit Name: " + this.name);
@@ -1132,17 +1286,6 @@ Unit.prototype.use = function () {
   }
 };
 
-/**
- * @typedef {Object} ItemInfo
- * @property {number} [classid]
- * @property {number} [itemtype]
- * @property {number} [quality]
- * @property {boolean} [runeword]
- * @property {boolean} [ethereal]
- * @property {boolean | number} [equipped]
- * @property {boolean} [basetype]
- * @property {string | number} [name]
- */
 
 /**
  * @description Returns item given by itemInfo
@@ -1339,6 +1482,11 @@ Unit.prototype.getItems = function (...args) {
   return Array.isArray(items) ? items : [];
 };
 
+/**
+ * @description Return the items of a unit
+ * @param args
+ * @returns {ItemUnit[]}
+ */
 Unit.prototype.getItemsEx = function (...args) {
   let items = [];
   let item = this.getItem.apply(this, args);
@@ -1352,6 +1500,11 @@ Unit.prototype.getItemsEx = function (...args) {
   return items;
 };
 
+/**
+ * @this {ItemUnit}
+ * @param {number|string} id - prefix num, or prefix name (whitespace/case-insensitive)
+ * @returns {boolean}
+ */
 Unit.prototype.getPrefix = function (id) {
   switch (typeof id) {
   case "number":
@@ -1381,6 +1534,11 @@ Unit.prototype.getPrefix = function (id) {
   return false;
 };
 
+/**
+ * @this {ItemUnit}
+ * @param {number|string} id - suffix num, or suffix name (whitespace/case-insensitive)
+ * @returns {boolean}
+ */
 Unit.prototype.getSuffix = function (id) {
   switch (typeof id) {
   case "number":
@@ -1410,6 +1568,12 @@ Unit.prototype.getSuffix = function (id) {
   return false;
 };
 
+/**
+ * @this {ItemUnit}
+ * @param {number} id
+ * @param {number} [subid]
+ * @returns {number}
+ */
 Unit.prototype.getStatEx = function (id, subid) {
   let temp, rval, regex;
 
@@ -1717,6 +1881,10 @@ Unit.prototype.getStatEx = function (id, subid) {
   _NTIPAliasColor["white"] = 20;
 */
 
+/**
+ * @this {ItemUnit}
+ * @returns {number} the NTIP-style color id for this magic/rare/set/unique item, or -1 if unmapped
+ */
 Unit.prototype.getColor = function () {
   let colors;
   let Color = {
@@ -2205,6 +2373,7 @@ Unit.prototype.equip = function (destLocation) {
   return {
     success: this.bodylocation === destLocation.first(),
     unequiped: currentEquiped,
+    /** @returns {void} */
     rollback: () => currentEquiped.forEach(item => item.equip()) // Note; rollback only works if you had other items equipped before.
   };
 };
@@ -2248,6 +2417,11 @@ Unit.prototype.getBodyLoc = function () {
   return bodyLoc;
 };
 
+/**
+ * @param {number} type - one of sdk.stats.FireResist/ColdResist/PoisonResist/LightningResist
+ * @param {number} [difficulty] - 0 (normal) to 2 (hell); clamped to that range
+ * @returns {number} resistance value, or -1 if `type` isn't a resistance stat
+ */
 Unit.prototype.getRes = function (type, difficulty) {
   if (!type) return -1;
   if (![
@@ -2303,6 +2477,7 @@ Unit.prototype.getRes = function (type, difficulty) {
 
   Object.defineProperties(Object.prototype, {
     distance: {
+      /** @returns {number} distance from `me` to this unit/coord/preset-unit, or NaN if not in-game */
       get: function () {
         return !me.gameReady ? NaN : /* Math.round */(getDistance.apply(null, [me, ...coords.apply(this)]));
       },
@@ -2314,6 +2489,10 @@ Unit.prototype.getRes = function (type, difficulty) {
     writable: true,
     enumerable: false,
     configurable: true,
+    /**
+     * @param {{range?: number, coll?: number, type?: number, ignoreClassids?: number[]}} [givenSettings]
+     * @returns {number} count of attackable monsters near this unit/coord matching the given filters
+     */
     value: function (givenSettings = {}) {
       let [x, y] = coords.apply(this);
       const settings = Object.assign({}, {
@@ -2335,6 +2514,11 @@ Unit.prototype.getRes = function (type, difficulty) {
   });
 }
 
+/**
+ * @this {Monster}
+ * @param {...number} enchants
+ * @returns {boolean}
+ */
 Unit.prototype.hasEnchant = function (...enchants) {
   if (!this.isMonster) return false;
   for (let enchant of enchants) {
@@ -2343,6 +2527,11 @@ Unit.prototype.hasEnchant = function (...enchants) {
   return false;
 };
 
+/**
+ * Switches to the main weapon set (if checking `me`) before testing, so results always reflect
+ * the main-hand loadout.
+ * @returns {boolean}
+ */
 Unit.prototype.usingShield = function () {
   if (this.type > sdk.unittype.Monster) return false;
   // always switch to main hand if we are checking ourselves
@@ -2438,6 +2627,13 @@ Unit.prototype.__defineGetter__("scareable", function () {
   return this.curseable && !(this.isSpecial) && this.classid !== sdk.monsters.ListerTheTormenter;
 });
 
+/**
+ * @param {number} [range]
+ * @param {number} [coll] - collision flags to also filter by, or 0 to skip collision checks
+ * @param {number} [type] - spectype flags; when set and `noSpecialMobs`, special monsters are excluded
+ * @param {boolean} [noSpecialMobs]
+ * @returns {number}
+ */
 Unit.prototype.getMobCount = function (range = 10, coll = 0, type = 0, noSpecialMobs = false) {
   if (this === undefined) return 0;
   const _this = this;
@@ -2449,6 +2645,10 @@ Unit.prototype.getMobCount = function (range = 10, coll = 0, type = 0, noSpecial
     }).length;
 };
 
+/**
+ * @param {{range?: number, count?: number, coll?: number, spectype?: number}} [givenSettings]
+ * @returns {boolean} true once `settings.count` matching monsters are found (short-circuits the scan)
+ */
 Unit.prototype.checkForMobs = function (givenSettings = {}) {
   if (this === undefined) return 0;
   const _this = this;
@@ -2500,6 +2700,12 @@ Object.defineProperty(Object.prototype, "has", {
   writable: true,
   enumerable: false,
   configurable: true,
+  /**
+   * Generic property/method accessor: looks up `this[args[0]]` and, if it's a function, calls it
+   * with the remaining args; otherwise returns the property value (or {} if undefined).
+   * @param {...unknown} args - [key, ...callArgs]
+   * @returns {unknown}
+   */
   value: function (...args) {
     if (this === undefined) return undefined;
     return this[args[0]] !== undefined
@@ -2510,6 +2716,11 @@ Object.defineProperty(Object.prototype, "has", {
   }
 });
 
+/**
+ * @this {PresetUnit}
+ * @returns {{id: number, area: number, x: number, y: number}} absolute world coords
+ *   (roomx/roomy converted to tile units), unlike this.x/this.y which are room-relative
+ */
 PresetUnit.prototype.realCoords = function () {
   return {
     id: this.id,
@@ -2519,6 +2730,10 @@ PresetUnit.prototype.realCoords = function () {
   };
 };
 
+/**
+ * @this {ObjectUnit}
+ * @returns {boolean}
+ */
 Unit.prototype.openUnit = function () {
   if (this === undefined) return false;
   if (this.type !== sdk.unittype.Object && this.type !== sdk.unittype.Stairs) {
@@ -2557,6 +2772,13 @@ Unit.prototype.openUnit = function () {
   return false;
 };
 
+/**
+ * @this {ObjectUnit | Tile}
+ * @param {number} [targetArea] - expected destination area; used for quest-completion gating
+ *   and to detect success when reached
+ * @throws {Error} if a portal/lever/stairs requires an incomplete quest
+ * @returns {boolean}
+ */
 Unit.prototype.useUnit = function (targetArea) {
   if (this === undefined) return false;
   if (this.type !== sdk.unittype.Object && this.type !== sdk.unittype.Stairs) {

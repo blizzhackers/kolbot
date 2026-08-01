@@ -13,6 +13,10 @@
     const workBench = [];
     addEventListener("scriptmsg", data => workBench.push(data));
 
+    /**
+     * Drains the "scriptmsg" work bench, emitting each queued message's keys as events.
+     * @returns {boolean} Always true, so the background worker keeps looping.
+     */
     this.update = function () {
       if (!workBench.length) return true;
 

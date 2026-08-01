@@ -432,9 +432,7 @@ const Follower = new Runnable(
       ],
     ]);
 
-    /**
-    * @todo allow user to use skill name and try to match it to skill id
-    */
+    /** @todo allow user to use skill name and try to match it to skill id */
     const _skillsMap = (function () {
       const _skills = new Map();
 
@@ -916,6 +914,7 @@ const Follower = new Runnable(
           if (me.inArea(Leader.partyUnit.area) && copyUnit(Leader.unit).x) {
             if (Leader.unit.distance > 10) {
               // Pather.moveToUnit(Leader.unit);
+              /** @returns {boolean} True once within 10 units of the leader, stopping the move early. */
               Pather.moveToEx(
                 Leader.unit.x, Leader.unit.y, { callback: () => (
                   Leader.unit && Leader.unit.distance < 10
@@ -936,6 +935,7 @@ const Follower = new Runnable(
           console.error(e);
           if (Leader.partyUnit) {
             if (me.inArea(Leader.partyUnit.area)) {
+              /** @returns {boolean} True once refreshed Leader.unit is within 10 units, stopping the move early. */
               Pather.moveToEx(
                 Leader.partyUnit.x, Leader.partyUnit.y, { callback: () => {
                   Leader.unit = Misc.getPlayerUnit(Config.Leader);

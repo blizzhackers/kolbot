@@ -13,6 +13,7 @@ const Roll = {
 };
 
 /**
+ * @type {IRecipe}
  * @todo Fix/refactor this, these numbers are all arbitrary anyway
  */
 const Recipe = {
@@ -328,9 +329,7 @@ const Recipe = {
     return [];
   },
 
-  /**
-   * @param {number} index 
-   */
+  /** @param {number} index */
   itemLevel: function (index) {
     switch (index) {
     case Recipe.HitPower.Helm:
@@ -450,6 +449,7 @@ Object.defineProperty(Recipe, "itemLevel", {
   enumerable: false,
 });
 
+/** @type {ICubing} */
 const Cubing = {
   /** @type {recipeObj[]} */
   recipes: [],
@@ -973,9 +973,7 @@ const Cubing = {
 
     // Pots and Gems - for Rejuv recipes
     if ([Recipe.Rejuv, Recipe.FullRejuv].includes(rIndex)) {
-      /**
-       * @todo do this better, hacky fix for now
-       */
+      /** @todo do this better, hacky fix for now */
       if (!recipe.Enabled) {
         if (rIndex === Recipe.Rejuv && this.gems.chipped.includes(unit.classid)) return true;
         if (rIndex === Recipe.FullRejuv && this.gems.normal.includes(unit.classid)) return true;

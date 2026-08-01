@@ -17,9 +17,11 @@ const Precast = (function () {
     this.lastCast = 0;
     this.duration = 0;
   }
+  /** @returns {boolean} true if this skill can currently be used */
   PrecastSkill.prototype.canUse = function () {
     return Skill.canUse(this.skillId);
   };
+  /** @returns {number} percent of buff duration remaining, clamped to 0-100 */
   PrecastSkill.prototype.remaining = function () {
     if (!this.duration) {
       this.duration = Skill.getDuration(this.skillId);
@@ -29,13 +31,25 @@ const Precast = (function () {
     const pRemaining = 100 * (1 - (getTickCount() - this.lastCast) / this.duration);
     return Math.max(0, Math.min(100, pRemaining));
   };
+  /**
+   * @param {number} [percent] threshold percent remaining below which a recast is needed
+   * @returns {boolean}
+   */
   PrecastSkill.prototype.needSoon = function (percent = 25) {
     return this.remaining() < percent;
   };
+  /**
+   * @param {boolean} [force] treat as needing cast regardless of state/duration
+   * @param {number} [percent] threshold percent remaining passed to {@link needSoon}
+   * @returns {boolean}
+   */
   PrecastSkill.prototype.needToCast = function (force = false, percent = 25) {
     if (!this.canUse()) return false;
     return force || !me.getState(this.state) || this.needSoon(percent);
   };
+  /**
+   * Records the current tick as the last cast time.
+   */
   PrecastSkill.prototype.update = function () {
     this.lastCast = getTickCount();
   };
@@ -52,11 +66,15 @@ const Precast = (function () {
   PrecastArmorSkill.prototype = Object.create(PrecastSkill.prototype);
   PrecastArmorSkill.prototype.constructor = PrecastArmorSkill;
 
+  /** @returns {number} percent of max Bone/Cyclone Armor absorb currently remaining */
   PrecastArmorSkill.prototype.remaining = function () {
     return this.max > 0
       ? Math.round(me.getStat(sdk.stats.SkillBoneArmor) * 100 / this.max)
       : 0;
   };
+  /**
+   * Records the current tick and current armor max as the cast baseline.
+   */
   PrecastArmorSkill.prototype.update = function () {
     this.lastCast = getTickCount();
     this.max = me.getStat(sdk.stats.SkillBoneArmorMax);
@@ -104,6 +122,7 @@ const Precast = (function () {
       sdk.skills.ShadowWarrior, sdk.skills.BattleCommand,
     ]),
 
+    /** @returns {boolean} true once haveCTA has been resolved (cached after the first successful check) */
     checkCTA: function () {
       if (this.haveCTA > -1) return true;
 
@@ -191,6 +210,13 @@ const Precast = (function () {
       return this.bestSlot[skillId];
     },
 
+    /**
+     * @param {number} skillId
+     * @param {number|Unit} [x] x coordinate, or a Unit to target
+     * @param {number} [y] y coordinate (ignored when x is a Unit)
+     * @param {boolean} [allowSwitch] allow switching to the weapon slot with the better skill roll
+     * @returns {boolean} false on failure, otherwise the skill's state (or true if stateless)
+     */
     cast: function (skillId, x = me.x, y = me.y, allowSwitch = true) {
       if (!skillId || !Skill.wereFormCheck(skillId) || (me.inTown && !Skill.townSkill(skillId))) {
         return false;
@@ -275,6 +301,12 @@ const Precast = (function () {
       }
     },
 
+    /**
+     * Repeatedly casts a summon skill at random nearby spots until the minion count cap is reached.
+     * @param {number} skillId
+     * @param {number} minionType
+     * @returns {boolean}
+     */
     summon: function (skillId, minionType) {
       if (!Skill.canUse(skillId)) return false;
 
@@ -343,10 +375,14 @@ const Precast = (function () {
         this.lastChant = getTickCount();
       }
 
+      /** @returns {boolean} true if this unit's Enchant is due for a recast (10s before it expires) */
       ChantTracker.prototype.reChant = function () {
         return getTickCount() - this.lastChant >= chantDuration - Time.seconds(10);
       };
 
+      /**
+       * Records the current tick as the last chant time.
+       */
       ChantTracker.prototype.update = function () {
         this.lastChant = getTickCount();
       };
@@ -582,10 +618,16 @@ const Precast = (function () {
       return true;
     },
 
+    /** @returns {boolean} true if any out-of-town-only precast skill (warcries or CTA) is available */
     needOutOfTownCast: function () {
       return Skill.canUse(sdk.skills.Shout) || Skill.canUse(sdk.skills.BattleOrders) || Precast.checkCTA();
     },
 
+    /**
+     * @param {boolean} [force] force re-cast of all precast skills
+     * @param {number} [goToWhenDone] area id to return to when done; defaults to the current area
+     * @returns {boolean} true if we ended up back at the target area
+     */
     doRandomPrecast: function (force = false, goToWhenDone = undefined) {
       const returnTo = (goToWhenDone && typeof goToWhenDone === "number"
         ? goToWhenDone

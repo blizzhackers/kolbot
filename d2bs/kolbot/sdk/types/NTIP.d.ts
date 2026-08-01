@@ -8,33 +8,66 @@ declare global {
   const NTIPAliasColor: Record<string, number>;
   const NTIPAliasStat: Record<string, number>;
 
-  namespace NTIP {
-    function addLine(itemString: string, fileName: string): boolean;
-    function OpenFile(filepath: string, notify: boolean): boolean;
-    function CheckQuantityOwned(
-      item_type: (item: ItemUnit) => boolean,
-      item_stats: (item: ItemUnit) => boolean,
+  /** The parsed { line, file, string } info attached to each raw or generated NIP line. */
+  interface NTIPLineInfo {
+    line: number;
+    file: string;
+    string: string;
+  }
+
+  /** Optional 3rd part of a parsed NIP line: quantity cap and/or tier-scoring functions. */
+  interface NTIPWantedSpec {
+    MaxQuantity?: number;
+    Tier?: (item: ItemUnit) => number;
+    Merctier?: (item: ItemUnit) => number;
+  }
+
+  /** A single compiled NIP line: [type test, stat test, optional wanted-spec]. */
+  type NTIPEntry = [
+    ((item: ItemUnit) => boolean) | undefined,
+    ((item: ItemUnit) => boolean) | undefined,
+    NTIPWantedSpec | undefined
+  ];
+
+  // Value shape of the global `NTIP` const in NTItemParser.js (bound there via JSDoc @type).
+  // Declaring the const here as well would collide: both files are global scripts.
+  // Ambient value declaration (Skill/Attack/Misc precedent): the checker leaves some
+  // @type-bound js consts unresolved or any (cause undiagnosed); the ambient const
+  // restores resolution and empirically does not collide with the js declaration.
+  const NTIP: NTIP;
+
+  interface NTIP {
+    addLine(itemString: string, fileName?: string): boolean;
+    OpenFile(filepath: string, notify: boolean): boolean;
+    CheckQuantityOwned(
+      item_type: ((item: ItemUnit) => boolean) | null,
+      item_stats: ((item: ItemUnit) => boolean) | null,
     ): number;
-    function Clear(): void;
-    function generateTierFunc(tierType: string): (item: ItemUnit) => number;
-    function GetTier(item: ItemUnit): number;
-    function GetMercTier(item: ItemUnit): number;
-    function IsSyntaxInt(ch: string): boolean;
-    const parseAliasIn: {
+    Clear(): void;
+    generateTierFunc(tierType: string): (item: ItemUnit) => number;
+    GetTier(item: ItemUnit): number;
+    GetMercTier(item: ItemUnit): number;
+    IsSyntaxInt(ch: string): boolean;
+    parseAliasIn: {
       in: string;
       notin: string;
       _regex: RegExp;
       test: (input: string) => boolean;
       convert: (input: string) => string;
     };
-    const _props: Map<string, string>;
-    const _aliases: Map<string, string>;
-    const _lists: Map<string, Record<string, number | string>>;
-    function ParseLineInt(input: string, info: any): boolean;
-    function CheckItem(
+    _props: Map<string, string>;
+    _aliases: Map<string, string>;
+    _lists: Map<string, Record<string, number>>;
+    ParseLineInt(input: string, info: NTIPLineInfo): NTIPEntry | null | false;
+    CheckItem(
       item: ItemUnit,
-      entryList?: [] | false,
+      entryList?: NTIPEntry[] | false,
       verbose?: boolean,
-    ): number | { line: string; result: number };
+    ): number | { result: number; line: string | null };
+    DebugCheckItem(
+      item: ItemUnit,
+      entryList?: NTIPEntry[] | false,
+      verbose?: boolean,
+    ): { result: number; line?: string }[];
   }
 }

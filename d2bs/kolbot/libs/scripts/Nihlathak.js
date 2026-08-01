@@ -25,6 +25,7 @@ const Nihlathak = new Runnable(
     if (!Pather.moveToExit(sdk.areas.HallsofVaught, true)) throw new Error("Failed to go to Nihlathak");
 
     // faster detection of TombVipers
+    /** @returns {void} Throws a ScriptError to abort if Tomb Vipers are found and ViperQuit is enabled. */
     Pather.moveToPresetObject(me.area, sdk.objects.NihlathaksPlatform, { callback: () => {
       if (Config.Nihlathak.ViperQuit && Game.getMonster(sdk.monsters.TombViper2)) {
         console.log("Tomb Vipers found.");

@@ -12,6 +12,11 @@
     /** @type {{ id: number, area: number, x: number, y: number } | null} */
     this._kingCoords = null;
 
+    /**
+     * Builds the list of walkable Moo Moo Farm rooms, excluding the Cow King's room and its
+     * neighbors, and caches the excluded rooms in `this._badRooms`.
+     * @returns {[number, number, Room][]} [centerX, centerY, room] tuples for each safe room
+     */
     this.buildCowRooms = function () {
       /** @type {[number, number, Room][]} */
       const finalRooms = [];
@@ -59,6 +64,11 @@
     };
 
     // add soloplays kingTracker?
+    /**
+     * Walks the safe rooms in nearest-unseen order, clearing monsters in each while avoiding
+     * paths through the Cow King's room.
+     * @returns {boolean} false if a room failed to clear
+     */
     this.clearCowLevel = function () {
       /**
        * @param {Room} a 

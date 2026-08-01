@@ -75,9 +75,7 @@ const ActionHooks = (function () {
     return hookObj;
   };
 
-  /**
-   * @type {Map<number, ActionHookEntry[]>}
-   */
+  /** @type {Map<number, ActionHookEntry[]>} */
   const specialAreaConfigs = new Map([
     [sdk.areas.BloodMoor, [
       { name: "Side Area", type: "area", dest: sdk.areas.DenofEvil },
@@ -810,6 +808,9 @@ const ActionHooks = (function () {
       ActionHooks.action = keycode;
     },
 
+    /**
+     * Process the last recorded key press, dispatching the matching hook or action.
+     */
     checkAction: function () {
       if (!ActionHooks.action) {
         return;
@@ -879,6 +880,9 @@ const ActionHooks = (function () {
       }
     },
 
+    /**
+     * Poll for area changes and uber-portal availability, refreshing hooks as needed.
+     */
     check: function () {
       if (!this.enabled) return;
 
@@ -899,6 +903,10 @@ const ActionHooks = (function () {
       addUberPortals(); // poll - crafted portals appear without an area change
     },
 
+    /**
+     * Y coordinate for the next hook, stacked above the previously added ones.
+     * @returns {number}
+     */
     yHookLoc: function () {
       return 545 - this.hooks.length * 10 + Hooks.resfix.y;
     },
@@ -1035,6 +1043,10 @@ const ActionHooks = (function () {
       }
     },
 
+    /**
+     * @param {string} name
+     * @returns {ActionHookEntry|false}
+     */
     getHook: function (name) {
       for (let i = 0; i < this.hooks.length; i += 1) {
         if (this.hooks[i].name === name) {
@@ -1045,6 +1057,10 @@ const ActionHooks = (function () {
       return false;
     },
 
+    /**
+     * @param {string} name
+     * @returns {ActionHookEntry|false}
+     */
     getPortalHook: function (name) {
       for (let i = 0; i < this.portals.length; i += 1) {
         if (this.portals[i].name === name) {
@@ -1055,6 +1071,7 @@ const ActionHooks = (function () {
       return false;
     },
 
+    /** @returns {void} */
     flush: function () {
       clearHooks(ActionHooks.hooks);
       clearHooks(ActionHooks.portals);

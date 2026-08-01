@@ -7,6 +7,11 @@
 
 includeIfNotIncluded("core/Town.js");
 
+/**
+ * Stashes eligible inventory items (gems/runes/uniques first), then stashes gold if enabled.
+ * @param {boolean} [stashGold]
+ * @returns {boolean}
+ */
 Town.stash = function (stashGold = true) {
   me.cancel();
 

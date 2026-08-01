@@ -26,6 +26,7 @@
     let waitTick = getTickCount() + Time.seconds(rand(min, max));
 
     // Start
+    /** @returns {boolean} always true; says the advertise message to chat once the interval elapses */
     Worker.runInBackground.Advertise = function () {
       if (getTickCount() - waitTick < 0) return true;
       waitTick += Time.seconds(rand(min, max));

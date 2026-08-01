@@ -7,12 +7,11 @@
 
 // each common functionality is loaded into this object when it's needed
 // for the actual function files @see core/Common/
+/** @type {Common} */
 const Common = (function () {
   const LazyLoader = require("../modules/LazyLoader");
 
-  /**
-   * @type {Map<string, string>}
-   */
+  /** @type {Map<string, string>} */
   const modulePathMap = new Map([
     ["Ancients", "./Common/Ancients"],
     ["Baal", "./Common/Baal"],

@@ -42,9 +42,7 @@ PathNode.prototype.getWalkDistance = function () {
     }, 0);
 };
 
-/**
- * @param {{ x?: number, y?: number }} node
- */
+/** @param {{ x?: number, y?: number }} node */
 PathNode.prototype.update = function (node) {
   if (typeof node.x === "number") this.x = node.x;
   if (typeof node.y === "number") this.y = node.y;
@@ -177,9 +175,7 @@ const PathDebug = {
     this.paths.set(id, pathHooks);
   },
 
-  /**
-   * @param {number} id 
-   */
+  /** @param {number} id */
   removeHooks: function (id) {
     const pathHooks = this.paths.get(id);
     if (!pathHooks || !pathHooks.length) return;
@@ -209,6 +205,7 @@ const PathDebug = {
 };
 
 // todo - test path generating in a dedicated thread to prevent lagging main thread
+/** @type {Pather} */
 const Pather = {
   initialized: false,
   teleport: true,
@@ -272,6 +269,12 @@ const Pather = {
     Pather.initialized = true;
   },
 
+  /**
+   * Broadcasts a request for other scripts' cached waypoints and waits briefly for a reply; if still
+   * uncached (or forced), fetches waypoint 1 directly to populate me.waypoints.
+   * @param {boolean} [force]
+   * @returns {void}
+   */
   init: function (force) {
     if (!this.initialized) {
       addEventListener("scriptmsg", Pather.cacheListener);
@@ -290,13 +293,15 @@ const Pather = {
     }
   },
 
-  /**
-   * @todo Handle rare bug where teleport skill dissapears from enigma
-   */
+  /** @todo Handle rare bug where teleport skill dissapears from enigma */
   canTeleport: function () {
     return this.teleport && (Skill.canUse(sdk.skills.Teleport) || me.getStat(sdk.stats.OSkill, sdk.skills.Teleport));
   },
 
+  /**
+   * @returns {boolean} true when teleport is usable, not restricted by Config.NoTele, and there's enough
+   *   mana for more than 2 casts.
+   */
   useTeleport: function () {
     let manaTP = Skill.getManaCost(sdk.skills.Teleport);
     let numberOfTeleport = ~~(me.mpmax / manaTP);
@@ -778,9 +783,7 @@ const Pather = {
     let nTimer;
     let [nFail, attemptCount] = [0, 0];
 
-    /**
-     * @todo add cleansing/meditation here as well
-     */
+    /** @todo add cleansing/meditation here as well */
     // credit @Jaenster
     // Stamina handler and Charge
     if (!me.inTown) {
@@ -2424,6 +2427,13 @@ Pather.nextAreas[sdk.areas.Harrogath] = sdk.areas.BloodyFoothills;
 (function (global, original) {
   global._getWaypoint = original;
 
+  /**
+   * Overrides the engine's getWaypoint to cache results in me.waypoints and broadcast cache updates,
+   * avoiding redundant native lookups.
+   * @param {number} id
+   * @param {boolean} [noCache=false] - bypass the cache and call the original engine function directly.
+   * @returns {boolean}
+   */
   global.getWaypoint = function (id, noCache = false) {
     if (noCache) {
       return original(id);

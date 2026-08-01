@@ -126,6 +126,9 @@
       return result;
     },
 
+    /**
+     * Re-applies precast buffs once an attack sequence has finished.
+     */
     afterAttack: function () {
       Precast.doPrecast(false);
     },

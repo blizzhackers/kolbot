@@ -30,9 +30,7 @@
     data: "", // Fill with content for post
   };
 
-  /**
-   * @param {HTTPConfig} config 
-   */
+  /** @param {HTTPConfig} config */
   const HTTP = function (config = {}) {
     config = Object.assign({}, defaultOptions, config);
     if (!config.url) {

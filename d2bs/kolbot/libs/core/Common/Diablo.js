@@ -76,16 +76,26 @@
       }
     },
 
+    /**
+     * Registers the game-packet listener that detects Diablo's spawn cue.
+     */
     addLightsEventListener: function () {
       addEventListener("gamepacket", _Diablo.diabloLightsEvent);
     },
 
+    /**
+     * Unregisters the game-packet listener registered by {@link addLightsEventListener}.
+     */
     removeLightsEventListener: function () {
       removeEventListener("gamepacket", _Diablo.diabloLightsEvent);
     },
 
     diaSpawnWatcher: (
-      /** @param {null | (() => void)} onSpawn */
+      /**
+        * Builds a poll callback that skips town chores and throws (after invoking onSpawn) once Diablo spawns.
+        * @param {null | (() => void)} onSpawn
+        * @returns {() => boolean} Poll function that throws once Diablo spawns; returns false once done.
+        */
       function (onSpawn = null) {
         let diaTick = 0;
       
@@ -211,6 +221,10 @@
       }
     },
 
+    /**
+      * Attacks any monsters lingering near previously-cleared path nodes, then returns to the start position.
+      * @returns {boolean} Always true.
+      */
     clearStrays: function () {
       const startPos = new PathNode(me.x, me.y);
       let monster = Game.getMonster();
@@ -244,6 +258,7 @@
     runSeals: function (sealOrder, openSeals = true) {
       console.log("seal order: " + sealOrder);
       _Diablo.sealOrder = sealOrder;
+      /** @type {Record<1 | 2 | 3 | "vizier" | "seis" | "infector", (openSeal?: boolean) => boolean>} */
       const seals = {
         1: () => this.vizierSeal(openSeals),
         2: () => this.seisSeal(openSeals),
@@ -499,6 +514,7 @@
           throw e;
         }
         // sometimes we fail just because we aren't in range,
+        /** @returns {boolean} True once de Seis is in range or dead. */
         Pather.moveToEx(this.starCoords.x, this.starCoords.y, { minDist: 15, callback: () => {
           let seis = Game.getMonster(deSeis);
           return seis && (seis.distance < 30 || seis.dead);
@@ -607,6 +623,7 @@
         }
         if (e instanceof Error && e.message === "Failed to kill Infector") {
           // sometimes we fail just because we aren't in range,
+          /** @returns {boolean} True once Infector is in range or dead. */
           Pather.moveToEx(this.starCoords.x, this.starCoords.y, { minDist: 15, callback: () => {
             let inf = Game.getMonster(infector);
             return inf && (inf.distance < 30 || inf.dead);
@@ -754,6 +771,7 @@
       return !!glow;
     },
 
+    /** @returns {boolean} */
     moveToStar: function () {
       switch (me.classid) {
       case sdk.player.class.Amazon:
@@ -770,6 +788,11 @@
       return false;
     },
 
+    /**
+      * Positions for and waits for Diablo to spawn after the seals are opened.
+      * @returns {boolean} True once Diablo has spawned.
+      * @throws {Error} If the portal to Chaos Sanctuary can't be taken, or Diablo doesn't spawn in time.
+      */
     diabloPrep: function () {
       if (!me.inArea(sdk.areas.ChaosSanctuary)) {
         if (!me.inArea(sdk.areas.PandemoniumFortress)) {

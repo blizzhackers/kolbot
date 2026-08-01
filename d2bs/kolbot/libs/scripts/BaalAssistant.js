@@ -121,6 +121,7 @@ const BaalAssistant = new Runnable(
         // run background auto detect so we don't miss messages while running add ons
         let leadTick = getTickCount();
 
+        /** @returns {boolean} false once a leader is autodetected or tracking is cancelled, else true */
         Worker.runInBackground.leaderTracker = function () {
           if (killLeaderTracker || killTracker) return false;
           // check every 3 seconds
@@ -157,10 +158,18 @@ const BaalAssistant = new Runnable(
       if (Leader
         || (Leader = Misc.autoLeaderDetect({
           destination: sdk.areas.WorldstoneLvl3,
+          /**
+           * @param {number} area
+           * @returns {boolean}
+           */
           quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area)
         }))
         || (Leader = Misc.autoLeaderDetect({
           destination: sdk.areas.ThroneofDestruction,
+          /**
+           * @param {number} area
+           * @returns {boolean}
+           */
           quitIf: (area) => [sdk.areas.WorldstoneChamber].includes(area)
         }))) {
         console.log("ÿc<Leader: " + Leader);
@@ -169,6 +178,7 @@ const BaalAssistant = new Runnable(
         try {
           let ngTick = getTickCount();
 
+          /** @returns {boolean} false to stop; throws "NG"/Error to abort the script on failure conditions */
           Worker.runInBackground.ngTracker = function () {
             if (killTracker) return false;
             // check every 3 seconds
@@ -192,6 +202,7 @@ const BaalAssistant = new Runnable(
           if (Config.LifeChicken <= 0) {
             let deadTick = getTickCount();
 
+            /** @returns {boolean} false once tracking is cancelled, else true; revives and portals back on death */
             Worker.runInBackground.deathTracker = function () {
               if (killTracker) return false;
               // check every 3 seconds
@@ -299,6 +310,7 @@ const BaalAssistant = new Runnable(
                     throw new Error("Failed to move to Throne of Destruction.");
                   }
 
+                  /** @returns {void} Throws a ScriptError to abort if a DollQuit/SoulQuit trigger monster is found. */
                   Pather.moveToEx(15095, 5029, { callback: () => {
                     if (Config.BaalAssistant.DollQuit && Game.getMonster(sdk.monsters.SoulKiller)) {
                       console.log("Undead Soul Killers found, ending script.");

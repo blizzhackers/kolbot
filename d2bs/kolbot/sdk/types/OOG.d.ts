@@ -1,134 +1,162 @@
-// @ts-nocheck
+export {};
 declare global {
- namespace DataFile {
-    const _path: string;
-    const _default: {
-      handle: number;
-      name: string;
-      level: number;
-      experience: number;
-      gold: number;
-      deaths: number;
-      runs: number;
-      lastArea: string;
-      ingameTick: number;
-      gameName: string;
-      currentGame: string;
-      nextGame: string;
-    };
-
-    function init(): boolean;
-    function create(): typeof _default;
-    function read(profile: string): typeof _default | null;
-    function getObj(): typeof _default;
-    function getStats(): typeof _default;
-    function updateStats(arg: string | string[], value?: any): void;
+  interface DataFileObj {
+    handle: number;
+    name: string;
+    level: number;
+    experience: number;
+    gold: number;
+    deaths: number;
+    runs: number;
+    lastArea: string;
+    ingameTick: number;
+    gameName: string;
+    currentGame: string;
+    nextGame: string;
   }
 
-  namespace FileAction {
-    function read(path: string): string;
-    function write(path: string, msg: string): boolean;
-    function append(path: string, msg: string): boolean;
-    function parse(path: string): any;
+  // Value shape of the module-built `DataFile` global (UMD factory `root.DataFile = factory()`
+  // in oog/DataFile.js) - there is no top-level binding to annotate, so the const stays here.
+  interface IDataFile {
+    _path: string;
+    _default: DataFileObj;
+    init(): boolean;
+    create(): DataFileObj;
+    read(profile: string): DataFileObj | null;
+    getObj(): DataFileObj;
+    getStats(): DataFileObj;
+    updateStats(arg: string | string[], value?: string | number): void;
   }
 
-  interface D2BotProfileInfo {
-    Name: string;
-    Status: string;
-    Account: string;
-    Character: string;
-    Difficulty: string;
-    Realm: string;
-    Game: string;
-    Entry: string;
-    Tag: string;
+  const DataFile: IDataFile;
+
+  // Value shape of the top-level `FileAction` const in oog/FileAction.js (bound there via
+  // JSDoc @type). Declaring the const here as well would collide: both files are global scripts.
+  interface IFileAction {
+    read(path: string): string;
+    write(path: string, msg: string): boolean;
+    append(path: string, msg: string): boolean;
+    /** Parsed JSON content; shape depends on which file is being read. */
+    parse(path: string): unknown;
   }
 
-  export const D2Bot: {
-    handle: number,
-    init(): void
-    sendMessage(handle: any, mode: any, msg: any): void
-    printToConsole(msg: string, color?: number, tooltip?: undefined, trigger?: undefined): void
-    printToItemLog(itemObj: any): void
-    uploadItem(itemObj: any): void
-    writeToFile(filename: any, msg: any): void
-    postToIRC(ircProfile: any, recepient: any, msg: any): void
-    ircEvent(mode: any): void
-    notify(msg: any): void
-    saveItem(itemObj: any): void
-    updateStatus(msg: any): void
-    updateRuns(): void
-    updateChickens(): void
-    updateDeaths(): void
-    requestGameInfo(): void
-    restart(keySwap?: boolean): void
-    CDKeyInUse(): void
-    CDKeyDisabled(): void
-    CDKeyRD(): void
-    stop(profile?: undefined, release?: undefined): void
-    start(profile: any): void
-    startSchedule(profile: any): void
-    stopSchedule(profile: any): void
-    updateCount(): void
-    shoutGlobal(msg: any, mode: any): void
-    heartBeat(): void
-    sendWinMsg(wparam: any, lparam: any): void
-    ingame(): void
-    joinMe(profile: any, gameName: any, gameCount: any, gamePass: any, isUp: any): void
-    requestGame(profile: any): void
-    getProfile(): D2BotProfileInfo
-    setProfile(account: any, password: any, character: any, difficulty: any, realm: any, infoTag: any, gamePath: any): void
-    setTag(tag: any): void
-    store(info: any): void
-    retrieve(): void
-    remove(): void
+  type RealmName = "uswest" | "west" | "useast" | "east" | "asia" | "europe";
+  type RealmIndex = 0 | 1 | 2 | 3;
+
+  interface D2BotItemLogPayload {
+    title: string;
+    description: string;
+    image: string;
+    itemColor: number;
+    header: string;
+    sockets: ItemUnit[];
+    textColor?: number;
+    invTrans?: number;
   }
 
-  namespace ControlAction {
-    let mutedKey: boolean;
-    enum realms {
-      'uswest' = 0,
-      'useast' = 1,
-      'asia' = 2,
-      'europe' = 3
+  // Value shape of the module-built `D2Bot` global (UMD factory `root.D2Bot = factory()`
+  // in oog/D2Bot.js) - there is no top-level binding to annotate, so the const stays here.
+  interface ID2Bot {
+    handle: number;
+
+    init(): number;
+    sendMessage(handle: number | string, mode: number, msg: string): void;
+    printToConsole(msg: string, color?: number, tooltip?: string, trigger?: string): void;
+    printToItemLog(itemObj: D2BotItemLogPayload): void;
+    uploadItem(itemObj: D2BotItemLogPayload): void;
+    writeToFile(filename: string, msg: string): void;
+    postToIRC(ircProfile: string, recepient: string, msg: string): void;
+    ircEvent(mode: boolean): void;
+    notify(msg: string): void;
+    saveItem(itemObj: D2BotItemLogPayload): void;
+    updateStatus(msg: string): void;
+    updateRuns(): void;
+    updateChickens(): void;
+    updateDeaths(): void;
+    requestGameInfo(): void;
+    restart(keySwap?: boolean): void;
+    CDKeyInUse(): void;
+    CDKeyDisabled(): void;
+    CDKeyRD(): void;
+    // profile is meant to be the profile name, but several call sites pass the release flag
+    // positionally instead (D2Bot.stop(true)) - typed to match actual call sites.
+    stop(profile?: string | boolean, release?: boolean): void;
+    start(profile: string): void;
+    startSchedule(profile: string): void;
+    stopSchedule(profile: string): void;
+    updateCount(): void;
+    shoutGlobal(msg: string, mode: number): void;
+    heartBeat(): void;
+    sendWinMsg(wparam: number, lparam: number): void;
+    ingame(): void;
+    joinMe(
+      profile: string,
+      gameName: string,
+      gameCount: number | string,
+      gamePass: string,
+      isUp: "yes" | "no",
+      delay?: number
+    ): void;
+    requestGame(profile: string): void;
+    getProfile(): void;
+    setProfile(
+      account: string,
+      password: string,
+      character: string,
+      difficulty: string,
+      realm: string,
+      infoTag: string,
+      gamePath: string
+    ): void;
+    setTag(tag: string): void;
+    /** Arbitrary payload cached by D2Bot# keyed to the current profile; shape is caller-defined. */
+    store(info: unknown): void;
+    retrieve(): void;
+    remove(): void;
+  }
+
+  const D2Bot: ID2Bot;
+
+  interface CharacterInfo {
+    charName: string;
+    charClass: string;
+    charLevel: number;
+    expansion: boolean;
+    hardcore: boolean;
+    ladder: boolean;
+    /** Read by loginCharacter() when SP falls through to the difficulty select screen. */
+    profile?: string;
+  }
+
+  interface AccountInfo {
+    account: string;
+    password: string;
+    realm: RealmName;
+  }
+
+  type Difficulty = "Normal" | "Nightmare" | "Hell" | "Highest";
+
+  // Value shape of the module-built `ControlAction` global (Object.assign(root, factory())
+  // in OOG.js) - there is no top-level binding to annotate, so the const stays here.
+  interface IControlAction {
+    mutedKey: boolean;
+    realms: {
+      uswest: 0;
+      west: 0;
+      useast: 1;
+      east: 1;
+      asia: 2;
+      europe: 3;
     };
-    type ControlParams = {
-      type: number,
-      x: number,
-      y: number,
-      xsize: number,
-      ysize: number,
-    };
-    type CharacterInfo = {
-      charName: string;
-      charClass: string;
-      charLevel: number;
-      expansion: boolean;
-      hardcore: boolean;
-      ladder: boolean;
-    };
-    type AccountInfo = {
-      account: string;
-      password: string;
-      realm: realms;
-    };
-    function timeoutDelay(
+
+    timeoutDelay<T = unknown>(
       text: string,
       time: number,
-      stopfunc?: (arg: any) => boolean,
-      arg?: any
+      stopfunc?: (arg: T) => boolean,
+      arg?: T
     ): void;
-    // function click(
-    //   ...params: [targetx: number, targety: number, ...rest: ControlParams]
-    // ): boolean;
-    // function setText(
-    //   text: string,
-    //   ...params: ControlParams
-    // ): boolean;
-    // function getText(
-    //   ...params: ControlParams
-    // ): string[];
-    function click(
+
+    click(
       type: number,
       x: number,
       y: number,
@@ -138,7 +166,7 @@ declare global {
       targety: number,
     ): boolean;
 
-    function setText(
+    setText(
       type: number,
       x: number,
       y: number,
@@ -147,15 +175,15 @@ declare global {
       text: string
     ): boolean;
 
-    function getText(
+    getText(
       type: number,
       x: number,
       y: number,
       xsize: number,
       ysize: number
-    ): string[];
+    ): string[] | false;
 
-    function parseText(
+    parseText(
       type: number,
       x: number,
       y: number,
@@ -163,26 +191,26 @@ declare global {
       ysize: number
     ): string;
 
-    type Difficulty = 'Normal' | 'Nightmare' | 'Hell' | 'Highest';
-
-    function scrollDown(): void;
-    function clickRealm(realm: realms): boolean;
-    function findCharacter(info: CharacterInfo): Control | false;
-    function getCharacters(): string[];
-    function getPermStatus(info: CharacterInfo): boolean;
-    function getPosition(): number;
-    function makeCharacter(info: CharacterInfo): boolean;
-    function deleteCharacter(info: CharacterInfo): boolean;
-    function convertCharacter(info: CharacterInfo): boolean;
-    function loginCharacter(info: CharacterInfo, startFromTop?: boolean): boolean;
-    function setEmail(email: string, domain?: string): boolean;
-    function makeAccount(info: AccountInfo): boolean;
-    function loginAccount(info: AccountInfo): boolean;
-    function joinChannel(channel: string): boolean;
-    function createGame(name: string, pass: string, diff: Difficulty, delay: number): void;
-    function getGameList(): { gameName: string, players: number }[] | false;
-    function getQueueTime(): number;
-    function loginOtherMultiplayer(): boolean;
+    // ~~~ Start of general functions ~~~ //
+    scrollDown(): void;
+    clickRealm(realm: RealmIndex): boolean;
+    findCharacter(info: CharacterInfo, startFromTop?: boolean): Control | false;
+    getCharacters(): string[];
+    getPermStatus(info: CharacterInfo): boolean;
+    getPosition(): number;
+    makeCharacter(info: CharacterInfo, randNameOnFail?: boolean): boolean;
+    deleteCharacter(info: CharacterInfo): boolean;
+    convertCharacter(info: CharacterInfo): boolean;
+    loginCharacter(info: CharacterInfo, startFromTop?: boolean): boolean;
+    setEmail(email?: string, domain?: string): boolean;
+    makeAccount(info: AccountInfo): boolean;
+    loginAccount(info: AccountInfo): boolean;
+    joinChannel(channel: string): boolean;
+    createGame(name: string, pass: string, diff: Difficulty, delay?: number): void;
+    getGameList(): { gameName: string, players: string }[] | false;
+    getQueueTime(): number;
+    loginOtherMultiplayer(): boolean;
   }
+
+  const ControlAction: IControlAction;
 }
-export {};

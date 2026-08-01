@@ -22,6 +22,7 @@ const ClearAnyArea = new Runnable(
 );
 
 Object.defineProperty(ClearAnyArea, "startArea", {
+  /** @returns {number} */
   get: function () {
     return Config.ClearAnyArea.AreaList[0];
   }

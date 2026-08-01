@@ -48,6 +48,10 @@
       }
     };
 
+    /**
+     * Enables local chat and (re)wires the `say`/event hooks for the current mode.
+     * @param {boolean} [cycle] - when true, advances Config.LocalChat.Mode to the next mode (0-2) first
+     */
     this.init = (cycle = false) => {
       if (!Config.LocalChat.Enabled) return;
 

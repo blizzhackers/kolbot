@@ -13,6 +13,11 @@ typeof global === "undefined" && (this["global"] = this);
 
 global["module"] = { exports: undefined };
 global["exports"] = {};
+/**
+ * Resolves "." and ".." segments out of a path, normalizing backslashes to forward slashes.
+ * @param {string} test path to normalize
+ * @returns {string} normalized path with relative segments collapsed
+ */
 function removeRelativePath(test) {
   return test.replace(/\\/g, "/").split("/").reduce(function (acc, cur) {
     if (!cur || cur === ".") return acc;
@@ -139,6 +144,12 @@ global.require = (function (include, isIncluded, print, notify) {
   return obj;
 })(include, isIncluded, print, getScript(true).name.toLowerCase().split("").reverse().splice(0, ".dbj".length).reverse().join("") === ".dbj");
 
+/**
+ * Ensures the calling script is running as its own thread rather than inline, loading it as a
+ * separate script if it isn't already running.
+ * @returns {"thread" | "started" | "loaded"} "thread" if already running as this thread, "started"
+ * if it was just loaded as a new thread, "loaded" if it was already loaded under another thread
+ */
 getScript.startAsThread = function () {
   let stack = new Error().stack.match(/[^\r\n]+/g),
     filename = stack[1].match(/.*?@.*?d2bs\\kolbot\\(.*):/)[1];

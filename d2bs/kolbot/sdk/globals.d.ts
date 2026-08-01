@@ -1,5 +1,3 @@
-// @ts-nocheck
-/// <reference path="../libs/SoloPlay/globals.d.ts" />
 /// <reference path="./types/sdk.d.ts" />
 /// <reference path="./types/Misc.d.ts" />
 /// <reference path="./types/Util.d.ts" />
@@ -26,7 +24,7 @@
 declare global {
   type IncludePath = import("./types/include-paths").IncludePath;
   type KolbotScript = import("./types/kolbot-scripts").KolbotScript;
-  type EventsInstance = InstanceType<typeof import("libs/modules/Events")>;
+  type EventsInstance = InstanceType<typeof import("../libs/modules/Events")>;
 
   /**
    * @description A string that can be used in NTIP lists, which supports some additional syntax for item properties.
@@ -53,18 +51,18 @@ declare global {
 
   interface Array<T> {
     includes(searchElement: T): boolean;
-    find(predicate: (value: T, index: number, obj: Int8Array) => boolean, thisArg?: any): T | undefined;
+    find(predicate: (value: T, index: number, obj: T[]) => boolean, thisArg?: unknown): T | undefined;
     first(): T | undefined;
     last(): T | undefined;
     at(index: number): T | undefined;
-    findIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: any): number;
+    findIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: unknown): number;
     intersection(other: T[]): T[];
     difference(other: T[]): T[];
     symmetricDifference(other: T[]): T[];
     flat(depth?: number): T[];
-    compactMap(callback: (value: T, index: number, obj: T[]) => any, thisArg?: any): any[];
+    compactMap<U>(callback: (value: T, index: number, obj: T[]) => U, thisArg?: unknown): NonNullable<U>[];
     filterNull(): T[];
-    filterHighDistance(step: number): any[];
+    filterHighDistance(step: number): T[];
     isEqual(t: T[]): boolean;
     remove(val: T): T[];
     random(): T;
@@ -72,7 +70,7 @@ declare global {
     /**
      * Creates a new array by sorting the elements of the original array.
      *
-     * @param {(function(a: any, b: any): number) | undefined} compareFn Function used to determine the order of the elements.
+     * @param {(function(a: T, b: T): number) | undefined} compareFn Function used to determine the order of the elements.
      * It is expected to return a negative value if the first argument is less than the second argument, zero if they're equal, and a positive
      * value otherwise. If omitted, the elements are sorted in ascending, ASCII character order.
      * ```ts
@@ -119,7 +117,7 @@ declare global {
     diffCount(a: string): number;
     startsWith(a: string): boolean;
     capitalize(downCase: boolean): string;
-    format(...pairs: Array<string, number | string | boolean>): string;
+    format(...pairs: [string, number | string | boolean][]): string;
     padStart(targetLength: number, padString: string): string;
     padEnd(targetLength: number, padString: string): string;
     at(index: number): string | undefined;
@@ -134,20 +132,20 @@ declare global {
     assign<T, U>(target: T, source: U): T & U;
     assign<T, U, V>(target: T, source1: U, source2: V): T & U & V;
     assign<T, U, V, W>(target: T, source1: U, source2: V, source3: W): T & U & V & W;
-    assign(target: object, ...sources: any[]): any;
-    values(source: object): any[];
-    entries(source: object): any[][];
-    is(o1: any, o2: any): boolean;
+    assign(target: object, ...sources: object[]): object;
+    values<T extends object>(source: T): T[keyof T][];
+    entries<T extends object>(source: T): [Extract<keyof T, string>, T[keyof T]][];
+    is(o1: unknown, o2: unknown): boolean;
     // hasOwn(obj: object, prop: string): boolean;
     hasOwn<T extends object>(obj: T, prop: keyof T): boolean;
-    hasOwn<T extends object, K extends PropertyKey>(obj: T, prop: K): prop is keyof T;
+    hasOwn<T extends object, K extends PropertyKey>(obj: T, prop: K): prop is K & keyof T;
   }
 
   interface Object {
     readonly distance: number;
-    path: PathNode[] | undefined;
+    path: IPathNode[] | undefined;
 
-    setPrototypeOf(obj: object, proto: object);
+    setPrototypeOf(obj: object, proto: object): object;
   }
 
   interface Set<T> {
@@ -171,12 +169,12 @@ declare global {
      * @param settings Object containing settings to update
      * @returns The updated env object for chaining
      */
-    update(settings: Record<string, any>): Env;
+    update(settings: Record<string, unknown>): Env;
 
     /**
      * Any additional custom properties
      */
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   /**
@@ -343,8 +341,8 @@ declare global {
     readAllLines(): string[];
     readAll(): string;
     write(): void;
-    seek(n: number): any;
-    seek(n: number, isLines: boolean, fromStart: boolean): any;
+    seek(n: number): File;
+    seek(n: number, isLines: boolean, fromStart: boolean): File;
     flush(): void;
     reset(): void;
     end(): void;
@@ -354,17 +352,36 @@ declare global {
   const FILE_APPEND: 2;
 
   const FileTools: {
-    readText(filename: string);
-    writeText(filename: string, data: string);
-    appendText(filename: string, data: string);
+    readText(filename: string): string;
+    writeText(filename: string, data: string): boolean;
+    appendText(filename: string, data: string): boolean;
     exists(filename: string): boolean;
     remove(filename: string): boolean;
   };
 
-  function getCollision(area: number, x: number, y: number, x2: number, y2: number);
+  function getCollision(area: number, x: number, y: number, x2: number, y2: number): number;
 
-  function getDistance(unit: PathNode, other: PathNode): number;
-  function getDistance(unit: PathNode, x: number, y: number): number;
+  /**
+   * Shape of walk-path nodes. Named IPathNode, NOT PathNode: the runtime constructor is the
+   * top-level `function PathNode (x, y)` in libs/core/Pather.js:15 (this-assignments +
+   * prototype methods), and a same-named ambient interface merges with that JS constructor
+   * symbol and crashes TS 5.9's getConstructorDefinedThisAssignmentTypes (Debug Failure).
+   * The distinct name also keeps this resolvable in the SoloPlay program, which includes
+   * this file but not libs/core/.
+   */
+  interface IPathNode {
+    x: number;
+    y: number;
+    /** Distance from 'me' to this node */
+    readonly distance: number;
+    distanceTo(unit: Unit): number;
+    getWalkDistance(): number;
+    getWalkDistanceTo(node: IPathNode, area?: number): number;
+    mobCount(givenSettings: { range?: number; coll?: number; type?: number; ignoreClassids?: number[] }): number;
+    update({ x, y }: { x?: number; y?: number }): void;
+  }
+  function getDistance(unit: IPathNode, other: IPathNode): number;
+  function getDistance(unit: IPathNode, x: number, y: number): number;
 
   /*************************************
    *          Unit description         *
@@ -407,7 +424,6 @@ declare global {
     readonly isPlayer: boolean;
     readonly isNPC: boolean;
     readonly isMonster: boolean;
-    readonly attackable: boolean;
     readonly rawStrength: number;
     readonly rawDexterity: number;
     readonly fireRes: number;
@@ -423,7 +439,8 @@ declare global {
     interact(area: number): boolean;
     getItem(classId?: number, mode?: number, unitId?: number): ItemUnit | false;
     getItem(name?: string, mode?: number, unitId?: number): ItemUnit | false;
-    getItems(...args: any[]): ItemUnit[] | false;
+    getItems(classId?: number, mode?: number, unitId?: number): ItemUnit[];
+    getItems(name?: string, mode?: number, unitId?: number): ItemUnit[];
     getMerc(): MercUnit;
     getMercHP(): number | false;
     /**
@@ -513,7 +530,7 @@ declare global {
     readonly isEnchantable: boolean;
 
     getEnchant(type: number): boolean;
-    hasEnchant(...enchants: number): boolean;
+    hasEnchant(...enchants: number[]): boolean;
   }
 
   class NPCUnit extends Unit {
@@ -522,11 +539,11 @@ declare global {
 
     openMenu(): boolean;
     useMenu(): boolean;
-    startTrade: (mode: any) => any | boolean;
+    startTrade(mode: string): boolean;
   }
 
   class MercUnit extends Monster {
-    equip(destination: number | undefined, item: ItemUnit);
+    equip(destination: number | undefined, item: ItemUnit): boolean;
   }
 
   interface ObjectUnit extends Unit {}
@@ -542,7 +559,7 @@ declare global {
   type MissileType = 3;
   class Missile extends Unit {
     public readonly type: MissileType;
-    hits(position: PathNode): boolean;
+    hits(position: IPathNode): boolean;
   }
 
   type ItemType = 4;
@@ -636,17 +653,8 @@ declare global {
     useUnit(targetArea?: number): boolean;
   }
 
-  type GetOwnedSettings = {
-    itemType?: number;
-    classid?: number;
-    mode?: number;
-    quality?: number;
-    sockets?: number;
-    location?: number;
-    ethereal?: boolean;
-    cb?: (item: ItemUnit) => boolean;
-  };
-
+  // Authority for ItemInfo lives HERE, not as a @typedef in Prototypes.js: the SoloPlay
+  // program includes this file but no core .js, so a js-typedef authority is invisible there.
   interface ItemInfo {
     classid?: number;
     itemtype?: number;
@@ -657,7 +665,6 @@ declare global {
     basetype?: boolean;
     name?: string | number;
   }
-
   interface MeType extends Unit {
     type: PlayerType;
     readonly account: string;
@@ -691,13 +698,11 @@ declare global {
     quitonerror: boolean;
     maxgametime: number;
     readonly gamepassword: string;
-    readonly gamestarttime: number;
     readonly gamename: string;
     readonly gameserverip: string;
     readonly itemcount: number;
     readonly classid: 0 | 1 | 2 | 3 | 4 | 5 | 6;
     readonly weaponswitch: 0 | 1;
-    readonly gameReady: boolean;
     blockMouse: boolean;
     blockKeys: boolean;
     runwalk: number;
@@ -728,7 +733,6 @@ declare global {
     readonly staminaMaxDuration: number;
     readonly inShop: boolean;
     readonly skillDelay: boolean;
-    readonly highestAct: 1 | 2 | 3 | 4 | 5;
     readonly highestQuestDone: number;
     readonly den: boolean;
     readonly bloodraven: boolean;
@@ -829,7 +833,16 @@ declare global {
     getItemsForRepair(repairPercent: number, chargedItems: boolean): ItemUnit[];
     castingFrames(skillId: number, fcr?: number, charClass?: number): number;
     castingDuration(skillId: number, fcr?: number, charClass?: number): number;
-    getOwned(itemInfo: ItemUnit | GetOwnedSettings): ItemUnit[];
+    getOwned(itemInfo: ItemUnit | {
+      itemType?: number;
+      classid?: number;
+      mode?: number;
+      quality?: number;
+      sockets?: number;
+      location?: number;
+      ethereal?: boolean;
+      cb?: (item: ItemUnit) => boolean;
+    }): ItemUnit[];
 
     // #checkers?
     needBeltPots(): boolean;
@@ -848,7 +861,7 @@ declare global {
     haveWaypoint(area: number): boolean;
     accessToAct(act: number): boolean;
     inArea(area: number): boolean;
-    haveSome(arg0: { name: number; equipped: boolean }[]): any;
+    haveSome(itemInfo: ItemInfo[]): boolean;
     findItem(id?: number | string, mode?: number, location?: number, quality?: number): ItemUnit | boolean;
     findItems(id?: number | string, mode?: number, location?: number): ItemUnit[];
     checkItem(itemInfo: {
@@ -866,7 +879,7 @@ declare global {
 
     // #actions
     cleanUpInvoPotions(beltSize?: number): boolean;
-    equip(destination: number | undefined, item: ItemUnit);
+    equip(destination: number | undefined, item: ItemUnit): boolean;
     cancelUIFlags(): boolean;
     fieldID(): boolean;
     castChargedSkill(skillId: number, target?: Unit): boolean;
@@ -875,35 +888,6 @@ declare global {
   }
 
   const me: MeType;
-
-  interface PathNode {
-    x: number;
-    y: number;
-    /**
-     * Distance from 'me' to this node
-     */
-    readonly distance: number;
-    /**
-     * Distance from 'unit' to this node
-     * @param unit
-     */
-    distanceTo(unit: Unit): number;
-    /**
-     * Walk Distance from 'me' to this node
-     */
-    getWalkDistance(): number;
-    /**
-     * Walk Distance from 'node' to this node
-     * @param node
-     */
-    getWalkDistanceTo(node: PathNode, area?: number): number;
-    mobCount(givenSettings: { range?: number; coll?: number; type?: number; ignoreClassids?: number[] }): number;
-    update({ x, y }: { x?: number; y?: number }): void;
-  }
-
-  class PathNode {
-    constructor(x: number, y: number);
-  }
 
   function getUnit(type: 4, name?: string, mode?: number, unitId?: number): ItemUnit;
   function getUnit(type: 4, classId?: number, mode?: number, unitId?: number): ItemUnit;
@@ -920,8 +904,8 @@ declare global {
     toY: number,
     reductionType: 0 | 1 | 2,
     radius: number,
-  ): PathNode[] | false;
-  function getCollision(area: number, x: number, y: number);
+  ): IPathNode[] | false;
+  function getCollision(area: number, x: number, y: number): number;
   function getMercHP(): number;
   function getCursorType(type: 1 | 3 | 6): boolean;
   function getCursorType(): number;
@@ -930,7 +914,7 @@ declare global {
   function getLocaleString(id: number): string;
 
   // Never seen in the wild, not sure about arguments
-  function getTextSize(name: string, size: number);
+  function getTextSize(name: string, size: number): [number, number];
   function getThreadPriority(): number;
   function getUIFlag(flag: number): boolean;
   function getTradeInfo(mode: 0 | 1 | 2): boolean;
@@ -966,7 +950,7 @@ declare global {
 
     getNext(): Room | false;
     getNearby(): Room[];
-    isInRoom(unit: PathNode): boolean;
+    isInRoom(unit: IPathNode): boolean;
     isInRoom(x: number, y: number): boolean;
   }
 
@@ -986,7 +970,7 @@ declare global {
     name: string;
     classid: number;
     level: number;
-    inTown: any;
+    inTown: boolean;
 
     getNext(): Party | false;
   }
@@ -1100,9 +1084,9 @@ declare global {
      * - 12 - AccountList
      */
     type: number;
-    cursorpos: any;
-    selectstart: any;
-    selectend: any;
+    cursorpos: number;
+    selectstart: number;
+    selectend: number;
     disabled: number;
 
     getNext(): Control | undefined;
@@ -1134,7 +1118,7 @@ declare global {
   class SQLiteQuery {
     next(): boolean;
     ready: boolean;
-    getColumnValue(index: number): any;
+    getColumnValue(index: number): string | number | null;
   }
 
   function getControl(type?: number, x?: number, y?: number, xsize?: number, ysize?: number): Control | false;
@@ -1143,10 +1127,10 @@ declare global {
   function getTickCount(): number;
   function getInteractedNPC(): NPCUnit | false;
   function getIsTalkingNPC(): boolean;
-  function getDialogLines(): { handler() }[] | false;
+  function getDialogLines(): { text: string; handler(): void }[] | false;
   function print(what: string): void;
-  function stringToEUC(arg: any): [];
-  function utf8ToEuc(arg: any): [];
+  function stringToEUC(arg: string): number[];
+  function utf8ToEuc(arg: string): number[];
   function delay(ms: number): void;
   function load(file: string): boolean;
   function isIncluded(file: IncludePath): boolean;
@@ -1158,8 +1142,8 @@ declare global {
 
   function sendCopyData(noIdea: null, handle: number | string, mode: number, data: string): void;
 
-  function sendDDE();
-  function keystate();
+  function sendDDE(mode: number, server: string, topic: string, item: string, data: string): string | void;
+  function keystate(vKey: number): boolean;
 
   type eventName =
     | "itemaction"
@@ -1217,9 +1201,9 @@ declare global {
   function addEventListener(eventType: "playerassign", callback: (arg1: string, arg4: string) => void): void;
   function addEventListener(
     eventType: "ScreenHookClick",
-    callback: (arg1: any, arg2: any, arg3: any, arg4: any) => void,
+    callback: (arg1: string, arg2: string, arg3: string, arg4: string) => void,
   ): void;
-  function addEventListener(eventType: eventName, callback: (...args: any) => void): void;
+  function addEventListener(eventType: eventName, callback: (...args: unknown[]) => void): void;
 
   function removeEventListener(eventType: "gamepacket", callback: (bytes: ArrayBufferLike) => boolean): void;
   function removeEventListener(eventType: "scriptmsg", callback: (data: string | object | number) => void): void;
@@ -1230,15 +1214,15 @@ declare global {
   ): void;
   function removeEventListener(eventType: "keyup" | "keydown", callback: (key: number) => void): void;
   function removeEventListener(eventType: "chatmsg", callback: (nick: string, msg: string) => void): void;
-  function removeEventListener(eventType: eventName, callback: (...args: any) => void): void;
+  function removeEventListener(eventType: eventName, callback: (...args: unknown[]) => void): void;
 
-  function clearEvent();
-  function clearAllEvents();
-  function js_strict();
+  function clearEvent(event: string): void;
+  function clearAllEvents(): void;
+  function js_strict(enabled?: boolean): boolean;
   function version(): number;
   function scriptBroadcast(what: string | object): void;
-  function sqlite_version();
-  function sqlite_memusage();
+  function sqlite_version(): string;
+  function sqlite_memusage(): number;
 
   type directory = {
     getFiles(): string[];
@@ -1252,26 +1236,26 @@ declare global {
 
   // out of game functions
   function login(name?: string): void;
-  function selectCharacter();
-  function createGame();
-  function joinGame();
-  function addProfile();
+  function selectCharacter(): boolean;
+  function createGame(name: string, pass?: string, difficulty?: number): void;
+  function joinGame(name: string, password?: string): void;
+  function addProfile(name: string, mode: string, gateway: string, username: string, password: string, character: string): void;
   function getLocation(): number;
-  function loadMpq();
+  function loadMpq(path: string): void;
 
   // game functions that don't have anything to do with gathering data
   function submitItem(): void;
-  function getMouseCoords();
+  function getMouseCoords(mapCoords?: boolean, returnObject?: boolean): [number, number] | { x: number; y: number };
   function copyUnit<S extends Unit>(unit: S): S;
-  function clickMap(type: 0 | 1 | 2 | 3, shift: 0 | 1, x: number, y: number);
-  function acceptTrade();
-  function tradeOk();
-  function beep(id?: number);
+  function clickMap(type: 0 | 1 | 2 | 3, shift: 0 | 1, x: number, y: number): boolean;
+  function acceptTrade(mode?: number): number;
+  function tradeOk(): void;
+  function beep(id?: number): void;
 
-  function clickItem(where: 0 | 1 | 2, bodyLocation: number);
-  function clickItem(where: 0 | 1 | 2, item: ItemUnit);
-  function clickItem(where: 0 | 1 | 2, x: number, y: number);
-  function clickItem(where: 0 | 1 | 2, x: number, y: number, location: number);
+  function clickItem(where: 0 | 1 | 2, bodyLocation: number): void;
+  function clickItem(where: 0 | 1 | 2, item: ItemUnit): void;
+  function clickItem(where: 0 | 1 | 2, x: number, y: number): void;
+  function clickItem(where: 0 | 1 | 2, x: number, y: number, location: number): void;
 
   function getDistance(a: Unit, b: Unit): number;
   function getDistance(a: Unit, toX: number, toY: number): number;
@@ -1289,7 +1273,7 @@ declare global {
    * @param what
    */
   function _say(what: string): void;
-  function clickParty(player: Party, type: 0 | 1 | 2 | 3 | 4);
+  function clickParty(player: Party, type: 0 | 1 | 2 | 3 | 4): void;
   function weaponSwitch(): void;
   function transmute(): void;
   function useStatPoint(type: number): void;
@@ -1363,10 +1347,10 @@ declare global {
   function sha512_file(str: string): string;
 
   interface Console {
-    log(...whatever: any[]): void;
-    debug(...whatever: any[]): void;
-    warn(...whatever: any[]): void;
-    error(...whatever: any[]): void;
+    log(...whatever: unknown[]): void;
+    debug(...whatever: unknown[]): void;
+    warn(...whatever: unknown[]): void;
+    error(...whatever: unknown[]): void;
     time(name: string): void;
     timeEnd(name: string): void;
     trace(): void;
@@ -1397,7 +1381,7 @@ declare global {
     public readLine(): string;
     public readAllLines(): string[];
     public readAll(): string;
-    public write(...args: any[]): File;
+    public write(...args: (string | number)[]): File;
     public seek(n: number): File;
     public seek(n: number, isLines: boolean, fromStart: boolean): File;
     public flush(): File;
@@ -1408,7 +1392,7 @@ declare global {
   function includeIfNotIncluded(file?: string): boolean;
   function includeCoreLibs(obj: { exclude: string[] }): boolean;
   function includeSystemLibs(): boolean;
-  function clone(obj: Date | any[] | object): ThisParameterType;
+  function clone<T extends Date | unknown[] | object>(obj: T): T;
   function copyObj(from: object): object;
 
   interface StarterConfig {
@@ -1653,6 +1637,24 @@ declare global {
     | "symbol"
     | "function"
     | "array";
+
+  /**
+   * Maps each isType() type string to the TS type it narrows to.
+   * "object" includes null since `typeof null === "object"`; "array" is Array.isArray, not typeof.
+   */
+  interface PrimitiveTypeMap {
+    undefined: undefined;
+    object: object | null;
+    boolean: boolean;
+    number: number;
+    bigint: bigint;
+    string: string;
+    symbol: symbol;
+    // typeof val === "function" narrows only to the untyped Function type, not a specific signature
+    function: Function;
+    array: unknown[];
+  }
+
   /**
    * Checks if the value matches the expected type.
    *
@@ -1660,7 +1662,7 @@ declare global {
    * @param type - The expected type as a string.
    * @returns {boolean} - Returns true if the value matches the expected type, otherwise false.
    */
-  function isType<T extends PrimitiveType>(val: any, type: T): val is PrimitiveTypeMap[T];
+  function isType<T extends PrimitiveType>(val: unknown, type: T): val is PrimitiveTypeMap[T];
 
   /**
    * This method sleeps the caller thread for the duration in ms passed to it

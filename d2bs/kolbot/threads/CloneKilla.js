@@ -17,6 +17,10 @@ includeSystemLibs();
 include("systems/mulelogger/MuleLogger.js");
 include("systems/gameaction/GameAction.js");
 
+/**
+ * Initializes the bot, runs the KillDclone script, then quits and waits for the game to close.
+ * @returns {boolean}
+ */
 function main() {
   D2Bot.init();
   Config.init();

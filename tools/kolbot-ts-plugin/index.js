@@ -232,14 +232,12 @@ function init (modules) {
     for (var i = 0; i < files.length; i++) {
       var sf = files[i];
       if (sf.isDeclarationFile || inOverrideDir(sf.fileName)) continue;
-      for (var j = 0; j < sf.statements.length; j++) {
-        var s = sf.statements[j];
-        if (!ts.isVariableStatement(s)) continue;
-        var decls = s.declarationList.declarations;
-        for (var d = 0; d < decls.length; d++) {
-          var decl = decls[d];
-          if (!ts.isIdentifier(decl.name) || decl.name.text !== obj || !decl.initializer) continue;
-          var init = unwrapParens(decl.initializer);
+      // Recursive: UMD modules build the object inside their factory closure
+      // (libs/oog/D2Bot.js), so the declaration is NOT a top-level statement.
+      (function walkDecls (node) {
+        if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) &&
+            node.name.text === obj && node.initializer) {
+          var init = unwrapParens(node.initializer);
           if (ts.isObjectLiteralExpression(init)) {
             scanObjectLiteral(sf, init);
           } else if (ts.isNewExpression(init)) {
@@ -258,9 +256,106 @@ function init (modules) {
             }
           }
         }
-      }
+        ts.forEachChild(node, walkDecls);
+      })(sf);
     }
     return out;
+  }
+
+  /**
+   * Identifier-level implementation sites for ambient-only globals whose runtime value is
+   * built by a module wrapper (UMD `root.X = factory()` in D2Bot.js, OOG.js's Object.assign
+   * export): the `const X = {...}`/`new function`/IIFE declaration at ANY depth, plus
+   * `<anything>.X = ...` publication assignments. require()-alias consts don't match: the
+   * initializer must be a literal/constructor shape, not an arbitrary call.
+   */
+  function findGlobalValueSites (program, name) {
+    var out = [];
+    var files = program.getSourceFiles();
+    for (var i = 0; i < files.length; i++) {
+      var sf = files[i];
+      if (sf.isDeclarationFile || inOverrideDir(sf.fileName)) continue;
+      (function walk (node) {
+        if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) &&
+            node.name.text === name && node.initializer) {
+          var init = unwrapParensOf(node.initializer);
+          var ok = ts.isObjectLiteralExpression(init) || ts.isNewExpression(init) ||
+            (ts.isCallExpression(init) && ts.isFunctionExpression(unwrapParensOf(init.expression)));
+          if (ok) {
+            out.push({
+              fileName: norm(sf.fileName),
+              textSpan: { start: node.name.getStart(sf), length: node.name.getWidth(sf) },
+              kind: ts.ScriptElementKind.constElement,
+              name: name,
+              containerKind: ts.ScriptElementKind.unknown,
+              containerName: "",
+            });
+          }
+        }
+        if (
+          ts.isBinaryExpression(node) &&
+          node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+          ts.isPropertyAccessExpression(node.left) &&
+          node.left.name.text === name
+        ) {
+          out.push({
+            fileName: norm(sf.fileName),
+            textSpan: { start: node.left.name.getStart(sf), length: node.left.name.getWidth(sf) },
+            kind: ts.ScriptElementKind.constElement,
+            name: name,
+            containerKind: ts.ScriptElementKind.unknown,
+            containerName: "",
+          });
+        }
+        ts.forEachChild(node, walk);
+      })(sf);
+    }
+    return out;
+  }
+
+  function unwrapParensOf (node) {
+    while (node && ts.isParenthesizedExpression(node)) node = node.expression;
+    return node;
+  }
+
+  /** The same-basename .js implementation next to a module .d.ts, if the program has it. */
+  function siblingJsSourceFile (program, dtsFileName) {
+    if (!isDeclarationPath(dtsFileName)) return null;
+    var jsPath = String(dtsFileName).replace(/\.d\.ts$/i, ".js");
+    return program.getSourceFile(jsPath) || program.getSourceFile(norm(jsPath)) || null;
+  }
+
+  /**
+   * Value sites for `name` inside ONE file: declarations first (the class/const itself),
+   * export-assignments (`exports.X = X`) as fallback. Scoped to a single sibling file so
+   * common member names never fan out repo-wide.
+   */
+  function findLocalValueSites (sf, name) {
+    var decls = [];
+    var assigns = [];
+    (function walk (node) {
+      if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) &&
+          node.name.text === name && node.initializer) {
+        decls.push(node.name);
+      }
+      if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+          ts.isPropertyAccessExpression(node.left) && node.left.name.text === name &&
+          node.right.kind !== ts.SyntaxKind.VoidExpression) {
+        assigns.push(node.left.name);
+      }
+      ts.forEachChild(node, walk);
+    })(sf);
+    var picked = decls.length ? decls : assigns;
+    return picked.map(function (n) {
+      return {
+        fileName: norm(sf.fileName),
+        textSpan: { start: n.getStart(sf), length: n.getWidth(sf) },
+        kind: ts.ScriptElementKind.constElement,
+        name: name,
+        containerKind: ts.ScriptElementKind.unknown,
+        containerName: "",
+      };
+    });
   }
 
   /**
@@ -448,6 +543,25 @@ function init (modules) {
           }
         }
       }
+      // No native response at all for a property access: recover syntactic sites with a
+      // constructed bound span (the checker can fail to bind members it has no type for).
+      if ((!res || !res.definitions || res.definitions.length === 0) && sourceFile) {
+        var paTarget = propertyAccessAt(sourceFile, position);
+        if (paTarget) {
+          var paSites = dedupSpans(findAssignmentSites(program, paTarget.obj, paTarget.prop)
+            .concat(findDefinePropertySites(program, paTarget.obj, paTarget.prop))
+            .concat(findMemberSites(program, paTarget.obj, paTarget.prop)));
+          if (paSites.length > 0) {
+            var paNode = identifierAt(sourceFile, position);
+            return {
+              definitions: paSites,
+              textSpan: paNode
+                ? { start: paNode.getStart(sourceFile), length: paNode.getWidth(sourceFile) }
+                : (res && res.textSpan) || { start: position, length: 0 },
+            };
+          }
+        }
+      }
       if (res && res.definitions) {
         var defs = filterContextualDefs(fileName, res.definitions);
         var changed = defs !== res.definitions;
@@ -469,7 +583,9 @@ function init (modules) {
         // assignment, not a declaration, so the checker only ever knows the d.ts member.
         // Recover the executable site syntactically - the same trick the override fallback
         // below uses, extended to Object.defineProperty/defineProperties getter additions.
-        if (sourceFile && defs.length > 0 &&
+        // Empty defs count as "all ambient": a member the checker failed to bind at all
+        // still deserves the syntactic recovery.
+        if (sourceFile &&
             defs.every(function (d) { return isDeclarationPath(d.fileName); })) {
           var ambientTarget = propertyAccessAt(sourceFile, position);
           if (ambientTarget) {
@@ -478,13 +594,35 @@ function init (modules) {
               .concat(findMemberSites(program, ambientTarget.obj, ambientTarget.prop));
             // Contextual typing lets the native implementation search reach object-literal
             // members the syntactic scans could miss; keep executable (.js) results only.
-            var nativeImpls = ls.getImplementationAtPosition(fileName, position) || [];
+            // try/catch: an implementation-search Debug failure must degrade, not turn the
+            // whole definition request into an error response.
+            var nativeImpls = [];
+            try {
+              nativeImpls = ls.getImplementationAtPosition(fileName, position) || [];
+            } catch (e) {}
             for (var ni = 0; ni < nativeImpls.length; ni++) {
               if (!isDeclarationPath(nativeImpls[ni].fileName)) implSites.push(nativeImpls[ni]);
+            }
+            // Module-pair remap: when the only defs are in a .d.ts sitting next to its js
+            // implementation (hand-typed UMD modules like modules/Override), jump into the js.
+            if (implSites.length === 0) {
+              for (var si = 0; si < defs.length; si++) {
+                var sibSf = siblingJsSourceFile(program, defs[si].fileName);
+                if (sibSf) implSites = implSites.concat(findLocalValueSites(sibSf, ambientTarget.prop));
+              }
             }
             implSites = dedupSpans(implSites);
             if (implSites.length > 0) {
               defs = implSites;
+              changed = true;
+            }
+          } else if (ident) {
+            // Bare identifier with ambient-only defs: a module-built global (UMD D2Bot,
+            // OOG.js's Object.assign exports). Navigate to the closure declaration or
+            // publication site instead of the d.ts declare.
+            var valueSites = dedupSpans(findGlobalValueSites(program, ident.text));
+            if (valueSites.length > 0) {
+              defs = valueSites;
               changed = true;
             }
           }
@@ -497,7 +635,12 @@ function init (modules) {
             defs.every(function (d) { return inOverrideDir(d.fileName); })) {
           var target = propertyAccessAt(sourceFile, position);
           if (target) {
-            var coreSites = findAssignmentSites(program, target.obj, target.prop);
+            // Same three scans as the ambient branch: the core "definition" of an overridden
+            // member can be an assignment OR a literal member (Town.doChores in Town.js).
+            var coreSites = findAssignmentSites(program, target.obj, target.prop)
+              .concat(findDefinePropertySites(program, target.obj, target.prop))
+              .concat(findMemberSites(program, target.obj, target.prop));
+            coreSites = dedupSpans(coreSites);
             if (coreSites.length > 0) {
               defs = coreSites;
               changed = true;

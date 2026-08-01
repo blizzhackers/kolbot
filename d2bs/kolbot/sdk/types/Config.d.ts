@@ -5,6 +5,8 @@ declare global {
   type ExtendedCubingOpts = { Ethereal: number; MaxQuantity: number; condition: () => boolean };
   type CubingRecipe = [number, string] | [number, string, number] | [number, string, ExtendedCubingOpts];
 
+  // Value shape of the global `Config` const in Config.js (bound there via JSDoc @type).
+  // Declaring the const here as well would collide: both files are global scripts.
   interface IConfig {
     init(notify: boolean): void;
     Loaded: boolean;
@@ -72,9 +74,11 @@ declare global {
     };
     DroppedItemsAnnounce: {
       Enable: boolean;
-      Quality: any[];
+      /** Item quality codes to announce, see NTIPAliasQuality in core/GameData/NTItemAlias.js (e.g. [6, 7, 8]) */
+      Quality: number[];
       LogToOOG: boolean;
-      OOGQuality: any[];
+      /** Item quality codes to announce to OOG, see NTIPAliasQuality in core/GameData/NTItemAlias.js */
+      OOGQuality: number[];
     };
     CainID: {
       Enable: boolean;
@@ -100,16 +104,21 @@ declare global {
     Silence: boolean;
     PublicMode: boolean;
     PartyAfterScript: boolean;
-    Greetings: any[];
-    DeathMessages: any[];
-    Congratulations: any[];
+    /** Random greeting messages; $name, $level, $class, $killer are substituted */
+    Greetings: string[];
+    /** Random death messages; $name, $level, $class, $killer are substituted */
+    DeathMessages: string[];
+    /** Random level-up congratulation messages; $name, $level, $class, $killer are substituted */
+    Congratulations: string[];
     AnnounceGameTimeRemaing: boolean;
     ShitList: boolean;
     UnpartyShitlisted: boolean;
     Leader: string;
-    QuitList: any[];
+    /** Character names to quit with (or profile names if QuitListMode === 1) */
+    QuitList: string[];
     QuitListMode: number;
-    QuitListDelay: any[];
+    /** [min, max] random delay in seconds before quitting when using QuitList */
+    QuitListDelay: number[];
     HPBuffer: number;
     MPBuffer: number;
     RejuvBuffer: number;
@@ -117,16 +126,24 @@ declare global {
     MakeRoom: boolean;
     ClearInvOnStart: boolean;
     FastPick: boolean;
+    /** Range to use for FastPick; falls back to PickRange when unset/0 */
+    FastPickRange: number;
     ManualPlayPick: boolean;
     OpenChests: {
       Enabled: boolean;
       Range: number;
       Types: string[];
     };
+    /**
+     * Each entry should be a tuple of [nipline, filename]
+     * @example [["[name] == ThulRune # # [maxquantity] == 1", "HeartOfTheOak"]]
+     */
     PickitLines: [string, string][];
     PickitFiles: string[];
-    BeltColumn: any[];
-    MinColumn: any[];
+    /** Potion type for each belt column, left to right; rejuvenation ("rv") must always be rightmost */
+    BeltColumn: ("hp" | "mp" | "rv")[];
+    /** Minimum amount of potions per belt column, left to right; rejuv columns must be 0 (can't be bought) */
+    MinColumn: number[];
     SkipId: number[];
     SkipEnchant: string[];
     SkipImmune: string[];
@@ -155,11 +172,14 @@ declare global {
     Debug: boolean;
     AutoMule: {
       Trigger: (number | string | ((item: ItemUnit) => boolean))[];
-      Force: any[];
-      Exclude: any[];
+      /** Items muled even if they're cubing ingredients; pickit-format string or item classid */
+      Force: (number | string)[];
+      /** Items ignored during muling; pickit-format string or item classid */
+      Exclude: (number | string)[];
     };
     ItemInfo: boolean;
-    ItemInfoQuality: any[];
+    /** Item quality codes to log, see NTIPAliasQuality in core/GameData/NTItemAlias.js (e.g. [6, 7, 8]) */
+    ItemInfoQuality: number[];
     LogKeys: boolean;
     LogOrgans: boolean;
     LogLowRunes: boolean;
@@ -167,7 +187,8 @@ declare global {
     LogHighRunes: boolean;
     LogLowGems: boolean;
     LogHighGems: boolean;
-    SkipLogging: any[];
+    /** Item codes (3-char) or classids to exclude from item logging */
+    SkipLogging: (number | string)[];
     ShowCubingInfo: boolean;
     Cubing: boolean;
     CubeRepair: boolean;
@@ -179,10 +200,12 @@ declare global {
      * @example [Runeword.Enigma, 'Archon Plate', Roll.NonEth, 100]
      */
     Runewords: [runeword, string | number, boolean | undefined, number | undefined][];
-    KeepRunewords: any[];
+    /** Keep-runeword nip lines; any matching runeword is kept regardless of which recipe produced it */
+    KeepRunewords: string[];
     LadderOverride: boolean;
     Gamble: boolean;
-    GambleItems: any[];
+    /** Item type names or classids to gamble for */
+    GambleItems: (string | number)[];
     GambleGoldStart: number;
     GambleGoldStop: number;
     MiniShopBot: boolean;
@@ -214,18 +237,28 @@ declare global {
     DCloneWaitTime: number;
     ChampionBias: number;
     UseCta: boolean;
+    /** Anti-PK measure: force precast sequence (used by Baal/BaalHelper/BaalAssistant) */
+    ForcePrecast: boolean;
     Dodge: boolean;
     DodgeRange: number;
     DodgeHP: number;
-    AttackSkill: any[];
-    LowManaSkill: any[];
+    /** Skill ids: [preAttack, primaryBoss, primaryBossUntimed, primaryOther, primaryOtherUntimed, secondary, secondaryUntimed]; -1 disables an entry */
+    AttackSkill: number[];
+    /** Skill ids used when main skills can't be cast: [timed, untimed]; -1 disables an entry */
+    LowManaSkill: number[];
     CustomAttack: Record<string | number, [number, number]>;
     CustomPreAttack: Record<string | number, [number, number]>;
     AdvancedCustomAttack: { check: (unit: Monster) => boolean; attack: [number, number]; preAttack: number }[];
     TeleStomp: boolean;
     NoTele: boolean;
-    ClearType: boolean;
-    ClearPath: boolean;
+    /** Monster spectype to kill in level-clear scripts (ie. Mausoleum). 0xF = skip normal, 0x7 = champions/bosses, 0 = all */
+    ClearType: number;
+    /**
+     * Monster spectype to kill while traveling, or a per-area config object.
+     * A bare number applies everywhere with the default range (30). The object form limits
+     * clearing to Areas (if given), using Range and Spectype; if Areas is omitted, all areas clear.
+     */
+    ClearPath: number | { Areas?: number[]; Range: number; Spectype: number };
     BossPriority: boolean;
     MaxAttackCount: number;
     LightningFuryDelay: number;
@@ -235,41 +268,62 @@ declare global {
     SummonValkyrie: boolean;
     UseTelekinesis: boolean;
     CastStatic: boolean;
-    StaticList: any[];
+    /** Monster names or classids to static */
+    StaticList: (string | number)[];
     UseEnergyShield: boolean;
     UseColdArmor: boolean;
-    Golem: number;
+    /** 0/"None" = don't summon, 1/"Clay", 2/"Blood", 3/"Fire"; normalized to a skill id at runtime */
+    Golem: number | string;
     ActiveSummon: boolean;
     Skeletons: number;
     SkeletonMages: number;
     Revives: number;
     ReviveUnstackable: boolean;
     PoisonNovaDelay: number;
-    Curse: any[];
-    CustomCurse: any[];
+    /** [bossCurseSkill, otherCurseSkill]; 0 disables an entry */
+    Curse: number[];
+    /**
+     * [monsterNameOrClassid, skillId, spectype?] entries; spectype is a bitmask
+     * (0x00 normal, 0x01 super unique, 0x02 champion, 0x04 boss, 0x08 minion)
+     */
+    CustomCurse: [string | number, number, number?][];
     ExplodeCorpses: number;
+    /** [lifePercent, manaPercent] threshold to switch to Redemption after clearing an area */
     Redemption: number[];
     Charge: boolean;
     Vigor: boolean;
+    /** Switch to Vigor only when stamina is low, instead of always while running */
+    UseVigorOnLowStam: boolean;
+    /** Aura skill id to use while running; ignored when Vigor is enabled */
+    RunningAura: number;
     AvoidDolls: boolean;
     FindItem: boolean;
+    /** Switch to non-primary weapon slot when using Find Item skills */
+    FastFindItem: boolean;
     FindItemSwitch: boolean;
     UseWarcries: boolean;
-    Wereform: number;
-    SummonRaven: number;
-    SummonAnimal: number;
-    SummonVine: number;
-    SummonSpirit: number;
+    /** 0/false = don't shapeshift, 1/"Werewolf", 2/"Werebear" */
+    Wereform: number | string | boolean;
+    SummonRaven: number | boolean;
+    /** 0/"None" = disabled, 1/"Spirit Wolf", 2/"Dire Wolf", 3/"Grizzly"; normalized to a skill id at runtime */
+    SummonAnimal: number | string;
+    /** 0/"None" = disabled, 1/"Poison Creeper", 2/"Carrion Vine", 3/"Solar Creeper"; normalized to a skill id at runtime */
+    SummonVine: number | string;
+    /** 0/"None" = disabled, 1/"Oak Sage", 2/"Heart of Wolverine", 3/"Spirit of Barbs"; normalized to a skill id at runtime */
+    SummonSpirit: number | string;
     UseTraps: boolean;
-    Traps: any[];
-    BossTraps: any[];
+    /** Skill ids for traps cast on all monsters except act bosses */
+    Traps: number[];
+    /** Skill ids for traps cast on act bosses */
+    BossTraps: number[];
     UseFade: boolean;
     UseBoS: boolean;
     UseVenom: boolean;
     UseBladeShield: boolean;
     UseCloakofShadows: boolean;
     AggressiveCloak: boolean;
-    SummonShadow: boolean;
+    /** 0/false = don't summon, 1/"Warrior", 2/"Master"; normalized to a skill id at runtime */
+    SummonShadow: number | string | boolean;
     ChargeCast: {
       skill: number;
       spectype: number;
@@ -299,6 +353,7 @@ declare global {
     };
     Tombs: {
       KillDuriel: boolean;
+      WalkClear: boolean;
     };
     Eldritch: {
       OpenChest: boolean;
@@ -364,10 +419,10 @@ declare global {
       SkipTP: boolean;
       WaitForSafeTP: boolean;
       KillBaal: boolean;
-      HotTPMessage: any[];
-      SafeTPMessage: any[];
-      BaalMessage: any[];
-      NextGameMessage: any[];
+      HotTPMessage: string[];
+      SafeTPMessage: string[];
+      BaalMessage: string[];
+      NextGameMessage: string[];
       HurtBaal: number;
     };
     BaalHelper: {
@@ -398,6 +453,8 @@ declare global {
       StarTP: string;
       DiabloMsg: string;
       ClearRadius: number;
+      /** Monster spectype to kill while following path to seals. 0xF = skip normal, 0x7 = champions/bosses, 0 = all */
+      ClearType: number;
       SealOrder: DiabloSeal[];
     };
     DiabloHelper: {
@@ -457,9 +514,9 @@ declare global {
        */
       PreAttack: number[];
       /**
-       * order in which the taxi will go through cs, 1: vizier, 2: seis, 3: infector
+       * order in which the taxi will go through cs: 1 = vizier, 2 = seis, 3 = infector
        */
-      SealOrder: DiabloSeal[];
+      SealOrder: number[];
       /**
        * number of seconds to wait before entering hot tp
        */
@@ -477,7 +534,8 @@ declare global {
     };
     BattleOrders: {
       Mode: number;
-      Getters: any[];
+      /** Player names to wait for before casting Battle Orders (mode 0) */
+      Getters: string[];
       Idle: boolean;
       QuitOnFailure: boolean;
       SkipIfTardy: boolean;
@@ -493,7 +551,9 @@ declare global {
       MaxGameLength: number;
     };
     ControlBot: {
+      WelcomePlayers: boolean;
       Bo: boolean;
+      DropGold: boolean;
       Cows: {
         MakeCows: boolean;
         GetLeg: boolean;
@@ -516,6 +576,7 @@ declare global {
         Staff: boolean;
         Summoner: boolean;
         Duriel: boolean;
+        Gidbinn: boolean;
         LamEsen: boolean;
         Eye: boolean;
         Heart: boolean;
@@ -536,7 +597,8 @@ declare global {
       NGVoteCooldown: number;
     };
     IPHunter: {
-      IPList: any[];
+      /** IP address octets to look for, e.g. [165, 201, 64] */
+      IPList: number[];
       GameLength: number;
     };
     Follower: {
@@ -548,8 +610,9 @@ declare global {
       TakeRedPortal: boolean;
     };
     ShopBot: {
-      ScanIDs: any[];
-      ShopNPC: string;
+      /** Item classids to scan, or item names (case/whitespace-insensitive, resolved via NTIPAliasClassID); empty scans all */
+      ScanIDs: (string | number)[];
+      ShopNPC: string | string[];
       CycleDelay: number;
       QuitOnMatch: boolean;
     };
@@ -573,11 +636,13 @@ declare global {
       PreGame: {
         Thawing: {
           Drink: number;
-          At: any[];
+          /** Area ids to chug thawing pots before entering, see sdk/txt/areas.txt */
+          At: number[];
         };
         Antidote: {
           Drink: number;
-          At: any[];
+          /** Area ids to chug antidote pots before entering, see sdk/txt/areas.txt */
+          At: number[];
         };
       };
     };
@@ -589,9 +654,15 @@ declare global {
       UseWalkPath: boolean;
     };
     Synch: {
-      WaitFor: any[];
+      /** Character names to wait for (legacy/unused - see libs/scripts/Synch.js) */
+      WaitFor: string[];
     };
     TristramLeech: {
+      Leader: string;
+      Helper: boolean;
+      Wait: number;
+    };
+    TombLeech: {
       Leader: string;
       Helper: boolean;
       Wait: number;
@@ -609,20 +680,23 @@ declare global {
       PortalLeech: boolean;
     };
     SkillStat: {
-      Skills: any[];
+      /** Skill ids (legacy/unused field) */
+      Skills: number[];
     };
     Bonesaw: {
       ClearDrifterCavern: boolean;
     };
     ChestMania: {
-      Act1: any[];
-      Act2: any[];
-      Act3: any[];
-      Act4: any[];
-      Act5: any[];
+      /** Area ids to open chests in, see sdk/txt/areas.txt */
+      Act1: number[];
+      Act2: number[];
+      Act3: number[];
+      Act4: number[];
+      Act5: number[];
     };
     ClearAnyArea: {
-      AreaList: any[];
+      /** Area ids to clear, see sdk/txt/areas.txt */
+      AreaList: number[];
     };
     Rusher: {
       WaitPlayerCount: number;
@@ -649,14 +723,20 @@ declare global {
       FastDiablo: boolean;
       RunDuriel: boolean;
     };
+    GemHunter: {
+      /** Area ids to hunt gem shrines in, see sdk/txt/areas.txt */
+      AreaList: number[];
+      /** Priority-ordered gem classids to keep in inventory, highest priority first */
+      GemList: number[];
+    };
     AutoSkill: {
       Enabled: boolean;
-      Build: any[];
+      Build: AutoSkillBuildEntry[];
       Save: number;
     };
     AutoStat: {
       Enabled: boolean;
-      Build: any[];
+      Build: AutoStatBuildEntry[];
       Save: number;
       BlockChance: number;
       UseBulk: boolean;
@@ -668,5 +748,10 @@ declare global {
       DebugMode: boolean;
     };
   }
+
+  // Ambient value declaration (Skill/Attack/Misc precedent, but load-bearing here for a
+  // different reason): without it, the hundreds of top-level `Config.X = ...` assignment
+  // declarations in _BaseConfigFile.js and the config override files become Config's value
+  // symbol, which TS widens into a module-flavored any ("module Config" on hover, any members).
   const Config: IConfig;
 }

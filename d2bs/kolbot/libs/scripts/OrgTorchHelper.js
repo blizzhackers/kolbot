@@ -61,6 +61,10 @@ const OrgTorchHelper = new Runnable(
       }
     }
 
+    /**
+     * Waits out death, stops the profile on hardcore, otherwise revives and returns to town.
+     * @returns {void}
+     */
     function handleDeath () {
       while (me.mode === sdk.player.mode.Death) {
         delay(3);

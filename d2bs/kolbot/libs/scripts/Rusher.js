@@ -38,6 +38,10 @@ const Rusher = new Runnable(
       _thread: null,
       path: "threads/rushthread.js",
 
+      /**
+       * Lazily resolves and caches the rush thread's Script handle.
+       * @returns {Script}
+       */
       get thread() {
         if (!this._thread) {
           this._thread = getScript(this.path);
@@ -57,16 +61,25 @@ const Rusher = new Runnable(
         // sign the msg so we can ignore other threads' messages
         this.thread.send({ type: "rush", action: action, data: blob });
       },
+      /**
+       * Pauses the rush thread.
+       */
       pause: function () {
         say("Pausing");
         console.log("Pausing rush thread");
         this.thread.pause();
       },
+      /**
+       * Resumes the rush thread.
+       */
       resume: function () {
         say("Resuming");
         console.log("Resuming rush thread");
         this.thread.resume();
       },
+      /**
+       * Loads the rush thread script and blocks until it's running.
+       */
       start: function () {
         load(this.path);
         nativeDelay(500);
@@ -75,9 +88,15 @@ const Rusher = new Runnable(
           nativeDelay(500);
         }
       },
+      /**
+       * Stops the rush thread.
+       */
       stop: function () {
         this.thread.stop();
       },
+      /**
+       * Stops the rush thread, waits for it to fully exit, then starts a fresh instance.
+       */
       reload: function () {
         this.stop();
 

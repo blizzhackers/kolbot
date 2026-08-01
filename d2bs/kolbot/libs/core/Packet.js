@@ -5,6 +5,7 @@
 *
 */
 
+/** @type {Packet} */
 const Packet = {
   /**
    * Interact and open the menu of an NPC
@@ -441,6 +442,11 @@ const Packet = {
     return true;
   },
 
+  /**
+   * @param {number} hand - sdk.skills.hand.Left or sdk.skills.hand.Right
+   * @param {number} wX - world x coordinate
+   * @param {number} wY - world y coordinate
+   */
   castSkill: function (hand, wX, wY) {
     hand = (hand === sdk.skills.hand.Right)
       ? sdk.packets.send.RightSkillOnLocation
@@ -452,6 +458,13 @@ const Packet = {
       .send();
   },
 
+  /**
+   * Casts a skill and continually resends the held-skill packet until duration elapses.
+   * @param {number} hand - sdk.skills.hand.Left or sdk.skills.hand.Right
+   * @param {number} wX - world x coordinate
+   * @param {number} wY - world y coordinate
+   * @param {number} [duration] - milliseconds to keep the skill held
+   */
   castAndHoldSkill: function (hand, wX, wY, duration = 1000) {
     /** @param {number} byte */
     const cast = function (byte) {
@@ -573,6 +586,7 @@ const Packet = {
     return false;
   },
 
+  /** @returns {void} */
   questRefresh: function () {
     sendPacket(1, sdk.packets.send.UpdateQuests);
   },
@@ -603,6 +617,12 @@ const Packet = {
   },
 
   // specialized wrapper for addEventListener
+  /**
+   * Registers a "gamepacket" listener that only invokes `callback` for the given packet type(s).
+   * @param {number|number[]} packetType
+   * @param {(bytes: ArrayBufferLike) => boolean} callback
+   * @returns {((bytes: ArrayBufferLike) => boolean)|null} The registered callback, or null if packetType was invalid.
+   */
   addListener: function (packetType, callback) {
     if (typeof packetType === "number") {
       packetType = [packetType];
@@ -617,5 +637,9 @@ const Packet = {
     return null;
   },
 
+  /**
+   * @param {(bytes: ArrayBufferLike) => boolean} callback
+   * @returns {void}
+   */
   removeListener: callback => removeEventListener("gamepacket", callback), // just a wrapper
 };

@@ -15,6 +15,10 @@
 
   const SimpleParty = {};
 
+  /**
+   * @returns {number} The partyid with the most members among visible party entries (excluding NO_PARTY
+   * when any real party exists), or -1 on error / if no entries are found.
+   */
   SimpleParty.biggestPartyId = function () {
     let uniqueParties = [];
     try {
@@ -53,6 +57,11 @@
     }
   };
 
+  /**
+   * Deterministically picks one name (by md5 hash order) among the acceptable, non-self invites so
+   * that all bots converge on accepting the same invitation first.
+   * @returns {string|undefined}
+   */
   SimpleParty.acceptFirst = function () {
     const toMd5Int = what => parseInt(md5(what).substr(0, 4), 16); //ToDo; do something with game number here
     const names = [];
@@ -67,6 +76,7 @@
       .first();
   };
 
+  /** @returns {Party|undefined} The first other party member sharing our partyid, if any. */
   SimpleParty.getFirstPartyMember = function () {
     let myPartyId = ((() => (getParty() || { partyid: 0 }).partyid))();
     for (let party = getParty(); party.getNext();) {
@@ -77,6 +87,10 @@
     return undefined;
   };
 
+  /**
+   * @param {string} name
+   * @returns {boolean} True if a matching, invitable party entry was found and clicked.
+   */
   SimpleParty.invite = function (name) {
 
     for (let party = getParty(); party.getNext();) {

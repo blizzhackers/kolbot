@@ -5,9 +5,7 @@
 *
 */
 
-/**
- * @namespace Pickit
- */
+/** @type {Pickit} */
 const Pickit = {
   enabled: true,
   gidList: new Set(),
@@ -45,9 +43,7 @@ const Pickit = {
   /** @type {{ reason: string, gid: number }[]} */
   systemKeep: [],
 
-  /** 
-   * @param {boolean} notify
-   */
+  /** @param {boolean} notify */
   init: function (notify) {
     Config.PickitFiles.forEach((file) => NTIP.OpenFile("pickit/" + file, notify));
     Config.PickitLines.forEach(function (line) {
@@ -71,6 +67,14 @@ const Pickit = {
     }
   },
 
+  /**
+   * itemlog event handler: tracks newly-seen ground item gids for later pickup.
+   * @param {number} [gid]
+   * @param {number} [mode]
+   * @param {number} [code]
+   * @param {number} [global]
+   * @returns {void}
+   */
   // eslint-disable-next-line no-unused-vars
   itemEvent: function (gid, mode, code, global) {
     // console.log("gid: " + gid, " mode: " + mode, " code: " + code, " global: " + global);
@@ -100,6 +104,7 @@ const Pickit = {
     return getDistance(me, unitA) - getDistance(me, unitB);
   },
 
+  /** @returns {boolean} true if all 4 belt columns have a potion in their first row */
   checkBelt: function () {
     let check = 0;
     let item = me.getItem(-1, sdk.items.mode.inBelt);
@@ -115,9 +120,7 @@ const Pickit = {
     return check === 4;
   },
 
-  /**
-   * @param {ItemUnit} unit 
-   */
+  /** @param {ItemUnit} unit */
   canPick: function (unit) {
     if (!unit) return false;
     if (sdk.quest.items.includes(unit.classid) && me.getItem(unit.classid)) {
@@ -399,6 +402,10 @@ const Pickit = {
     }
 
     Object.defineProperty(ItemStats.prototype, "useTk", {
+      /**
+       * @this {ItemStats}
+       * @returns {boolean} true if within telekinesis range (5-20) and not blocked by wall/ranged collision
+       */
       get: function () {
         if (!this._useTk) return false;
         let dist = this.distance;
@@ -777,9 +784,7 @@ const Pickit = {
     return true;
   },
 
-  /**
-   * @param {number} retry 
-   */
+  /** @param {number} retry */
   fastPick: function (retry = 3) {
     if (me.dead || !Pickit.enabled) return false;
     const _removeList = [];

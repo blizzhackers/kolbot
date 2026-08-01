@@ -72,9 +72,7 @@ const AutoBaal = new Runnable(
       }
     };
 
-    /**
-    * @todo maybe factor this out and make it useable for other leecher scripts?
-    */
+    /** @todo maybe factor this out and make it useable for other leecher scripts? */
     const longRangeSupport = function () {
       switch (me.classid) {
       case sdk.player.class.Necromancer:
@@ -184,6 +182,10 @@ const AutoBaal = new Runnable(
       // find the first player in throne of destruction
       if (leader || (leader = Misc.autoLeaderDetect({
         destination: sdk.areas.ThroneofDestruction,
+        /**
+         * @param {number} area candidate leader's current area
+         * @returns {boolean} true to abort leader detection once the leader reaches Baal's chamber
+         */
         quitIf: (area) => [sdk.areas.WorldstoneChamber].includes(area)
       }))) {
         const start = getTickCount();

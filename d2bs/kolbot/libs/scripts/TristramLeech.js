@@ -28,6 +28,10 @@ const TristramLeech = new Runnable(
 
     !leader && (leader = Misc.autoLeaderDetect({
       destination: sdk.areas.Tristram,
+      /**
+       * @param {number} area
+       * @returns {boolean}
+       */
       quitIf: (area) => Common.Leecher.nextScriptAreas.includes(area),
       timeout: Time.minutes(5)
     }));

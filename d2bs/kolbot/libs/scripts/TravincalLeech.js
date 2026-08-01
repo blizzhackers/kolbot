@@ -37,6 +37,10 @@ const TravincalLeech = new Runnable(
 
     !leader && (leader = Misc.autoLeaderDetect({
       destination: sdk.areas.Travincal,
+      /**
+       * @param {number} area
+       * @returns {boolean} True once the leader enters a next-script area, stopping the search.
+       */
       quitIf: (area) => Common.Leecher.nextScriptAreas.includes(area),
       timeout: Time.minutes(5)
     }));

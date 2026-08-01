@@ -23,6 +23,10 @@ if (DataFile.init()) {
   Starter.firstRun = true;
 }
 
+/**
+ * Entry point: drives the OOG mule login/game-join state machine (location handlers) forever,
+ * coordinating with the in-game mule thread over copydata/scriptmsg.
+ */
 function main () {
   const inGameThread = "libs/systems/automule/main.js";
   const locationAction = (function () {
@@ -417,6 +421,7 @@ function main () {
   }).apply();
 
   new Overrides.Override (Starter, Starter.updateCount, function () {
+    const Controls = require("./libs/modules/Control");
     D2Bot.updateCount();
     delay(1000);
     Controls.BattleNet.click();

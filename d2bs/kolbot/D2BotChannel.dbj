@@ -518,6 +518,9 @@ const locationAction = (function () {
   };
 })();
 
+/**
+ * Entry point: overrides Starter.receiveCopyData to report gameReady/gameInfo status on mode 3.
+ */
 function main () {
   const Overrides = require("./modules/Override");
   new Overrides.Override(Starter, Starter.receiveCopyData, function (orignal, mode, msg) {

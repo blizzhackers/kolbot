@@ -8,6 +8,12 @@
 includeIfNotIncluded("core/Config.js");
 
 (function (Config, original) {
+  /**
+   * Loads the manualplay character config (falling back to the class default) before delegating
+   * to the original `Config.init` for the shared setup and AutoBuild initialization.
+   * @param {boolean} notify
+   * @returns {void}
+   */
   Config.init = function (notify) {
     const className = sdk.player.class.nameOf(me.classid);
     const formats = ((className, profile, charname, realm) => ({
@@ -94,6 +100,10 @@ includeIfNotIncluded("core/Config.js");
     if (Config.Silence && !Config.LocalChat.Enabled) {
       // Override the say function with print, so it just gets printed to console
       global._say = global.say;
+      /**
+       * @param {string} what
+       * @returns {void}
+       */
       global.say = (what) => console.log("Tryed to say: " + what);
     }
 

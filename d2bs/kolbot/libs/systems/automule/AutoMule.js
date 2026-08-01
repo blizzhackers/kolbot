@@ -7,6 +7,7 @@
 *
 */
 
+/** @type {AutoMule} */
 const AutoMule = {
   /** @type {Object.<string, muleObj>} */
   Mules: Object.assign({},
@@ -78,6 +79,7 @@ const AutoMule = {
     return info;
   },
 
+  /** @returns {boolean} true if stash/inventory usage or a triggering item warrants muling */
   muleCheck: function () {
     const info = this.getInfo();
 
@@ -133,6 +135,11 @@ const AutoMule = {
     return false;
   },
 
+  /**
+   * Out-of-game half of the master flow: starts/pokes the mule profile, waits for it to
+   * report ready, then joins the mule game. Blocks until the mule game ends.
+   * @returns {boolean}
+   */
   outOfGameCheck: function () {
     if (!this.check && !this.torchAnniCheck) {
       return false;
@@ -141,6 +148,10 @@ const AutoMule = {
     let muleObj = this.getMule();
     if (!muleObj) return false;
 
+    /**
+     * @param {number} mode
+     * @param {string} msg
+     */
     function muleCheckEvent (mode, msg) {
       mode === 10 && (muleInfo = JSON.parse(msg));
     }
@@ -287,6 +298,11 @@ const AutoMule = {
     return true;
   },
 
+  /**
+   * In-game half of the mule flow: verifies we're in the mule/torch-mule game, drops the
+   * wanted items (or waits as the mule character), then quits.
+   * @returns {boolean}
+   */
   inGameCheck: function () {
     let muleObj, tick;
     let begin = false;
@@ -312,6 +328,10 @@ const AutoMule = {
       return false;
     }
 
+    /**
+     * @param {number} mode
+     * @param {string} msg
+     */
     function dropStatusEvent (mode, msg) {
       if (mode === 10) {
         switch (JSON.parse(msg).status) {
@@ -327,6 +347,7 @@ const AutoMule = {
       }
     }
 
+    /** @param {string} msg */
     function muleModeEvent (msg) {
       switch (msg) {
       case "2":

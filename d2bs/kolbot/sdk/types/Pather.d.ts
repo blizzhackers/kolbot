@@ -3,9 +3,9 @@ declare global {
   interface PathDebug {
     enableHooks: boolean;
     paths: Map<number, Line[]>;
-    drawPath(id: number, path: PathNode[]): void;
+    drawPath(id: number, path: IPathNode[]): void;
     removeHooks(id: number): void;
-    coordsInPath(path: PathNode[], x: number, y: number): boolean;
+    coordsInPath(path: IPathNode[], x: number, y: number): boolean;
   }
 
   interface PathSettings {
@@ -28,18 +28,20 @@ declare global {
     specType?: number;
     sort?: () => void;
   }
-  namespace Pather {
-    const wpAreas: number[];
-    let walkDistance: number;
-    let teleDistance: number;
-    let teleport: boolean;
-    const cancelFlags: number[];
-    let recursion: boolean;
-    let lastPortalTick: 0;
-    let allowBroadcast: boolean;
+  // Value shape of the global `Pather` const in Pather.js (bound there via JSDoc @type).
+  // Declaring the const here as well would collide: both files are global scripts.
+  interface Pather {
+    wpAreas: number[];
+    walkDistance: number;
+    teleDistance: number;
+    teleport: boolean;
+    cancelFlags: number[];
+    recursion: boolean;
+    lastPortalTick: number;
+    allowBroadcast: boolean;
 
-    function findSpotAtDistance(node: PathNode, distance: number, maxAttempts?: number): PathNode | false;
-    function getWalkDistance(
+    findSpotAtDistance(node: IPathNode, distance: number, maxAttempts?: number): IPathNode | false;
+    getWalkDistance(
       x: number,
       y: number,
       area?: number,
@@ -48,48 +50,48 @@ declare global {
       reductionType?: 0 | 1 | 2,
       radius?: number,
     ): number;
-    function useTeleport(): boolean;
-    function moveTo(
+    useTeleport(): boolean;
+    moveTo(
       x: number,
       y: number,
       retry?: number | undefined,
       clearPath?: boolean | undefined,
       pop?: boolean | undefined,
     ): boolean;
-    function teleportTo(x: any, y: any, maxRange?: any): void;
-    function walkTo(x: any, y: any, minDist?: number | undefined): boolean;
-    function openDoors(x: any, y: any): boolean;
-    function moveToUnit(
-      unit: PathNode,
-      offX?: undefined,
-      offY?: undefined,
-      clearPath?: undefined,
-      pop?: undefined,
+    teleportTo(x: number, y: number, maxRange?: number): boolean;
+    walkTo(x: number, y: number, minDist?: number | undefined): boolean;
+    openDoors(x: number, y: number): boolean;
+    moveToUnit(
+      unit: Unit | PresetUnit | { x: number; y: number },
+      offX?: number,
+      offY?: number,
+      clearPath?: boolean,
+      pop?: boolean,
     ): boolean;
-    function moveToPreset(
-      area: any,
-      unitType: any,
-      unitId: any,
-      offX?: any,
-      offY?: any,
-      clearPath?: any,
-      pop?: any,
+    moveToPreset(
+      area: number,
+      unitType: number,
+      unitId: number,
+      offX?: number,
+      offY?: number,
+      clearPath?: boolean,
+      pop?: boolean,
     ): boolean;
-    function moveToPresetObject(area: number, unitId: number, givenSettings?: PathSettings): boolean;
-    function moveToPresetMonster(area: number, unitId: number, givenSettings?: PathSettings): boolean;
-    function moveToExit(targetArea: any, use?: any, givenSettings?: PathSettings): boolean;
-    function getDistanceToExit(area?: number, exit?: number): number;
-    function getExitCoords(area?: number, exit?: number): PathNode | false;
-    function getNearestRoom(area: number): [number, number] | false;
-    function openExit(targetArea: number): boolean;
-    function openUnit(type: number, id: number): void;
-    function useUnit(type: any, id: any, targetArea: any): boolean;
-    function broadcastIntent(targetArea: number): void;
-    function useWaypoint(targetArea: number | null | "random", check?: boolean): boolean;
-    function makePortal(use?: boolean | undefined): ObjectUnit | boolean;
-    function usePortal(targetArea?: number | null, owner?: string | undefined, unit?: undefined): boolean;
-    function getPortal(targetArea: number, owner?: any): ObjectUnit | false;
-    function getNearestWalkable(
+    moveToPresetObject(area: number, unitId: number, givenSettings?: PathSettings): boolean;
+    moveToPresetMonster(area: number, unitId: number, givenSettings?: PathSettings): boolean;
+    moveToExit(targetArea: number | number[], use?: boolean, givenSettings?: PathSettings): boolean;
+    getDistanceToExit(area?: number, exit?: number): number;
+    getExitCoords(area?: number, exit?: number): IPathNode | false;
+    getNearestRoom(area: number): [number, number] | false;
+    openExit(targetArea: number): boolean;
+    openUnit(type: UnitType, id: number): boolean;
+    useUnit(type: UnitType, id: number | string, targetArea: number): boolean;
+    broadcastIntent(targetArea: number): void;
+    useWaypoint(targetArea: number | null | "random", check?: boolean): boolean;
+    makePortal(use?: boolean | undefined): ObjectUnit | boolean;
+    usePortal(targetArea?: number | null, owner?: string | undefined, unit?: ObjectUnit): boolean;
+    getPortal(targetArea: number | null, owner?: string | null): ObjectUnit | false;
+    getNearestWalkable(
       x: number,
       y: number,
       range: number,
@@ -97,12 +99,12 @@ declare global {
       coll: number,
       size?: number,
     ): [number, number] | false;
-    function checkSpot(x: number, y: number, coll: number, cacheOnly: boolean, size: number): boolean;
+    checkSpot(x: number, y: number, coll: number, cacheOnly: boolean, size: number): boolean;
     /** @deprecated use `me.accessToAct(act)` instead */
-    function accessToAct(act: number): boolean;
-    function getWP(area: number, clearPath?: boolean): boolean;
-    function journeyTo(area: number): boolean;
-    function plotCourse(dest: number, src: number): false | { course: number[]; useWP: boolean };
-    function areasConnected(src: number, dest: number): void;
+    accessToAct(act: number): boolean;
+    getWP(area: number, clearPath?: boolean): boolean;
+    journeyTo(area: number): boolean;
+    plotCourse(dest: number, src: number): false | { course: number[]; useWP: boolean };
+    areasConnected(src: number, dest: number): boolean;
   }
 }

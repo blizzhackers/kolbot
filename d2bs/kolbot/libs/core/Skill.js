@@ -11,6 +11,7 @@
 
   /**
    * @todo Move some of the precast functions here
+   * @type {Skill}
    */
   const Skill = {
     usePvpRange: false,
@@ -44,6 +45,10 @@
       return _SkillData.get(skillId);
     },
     
+    /**
+     * @param {number} [classid]
+     * @returns {[number, number]} The skill id range `[min, max]` for the given class.
+     */
     getClassSkillRange: function (classid = me.classid) {
       switch (classid) {
       case sdk.player.class.Amazon:
@@ -129,6 +134,7 @@
     },
 
     // initialize our skill data
+    /** @returns {void} */
     init: function () {
       // reset check values
       {
@@ -489,6 +495,12 @@
     },
 
     // Put a skill on desired slot
+    /**
+     * @param {number} skillId
+     * @param {number} [hand]
+     * @param {ItemUnit} [item]
+     * @returns {boolean}
+     */
     setSkill: function (skillId, hand, item) {
       const checkHand = (hand === sdk.skills.hand.Right
         ? sdk.skills.get.RightId
@@ -511,6 +523,10 @@
     },
 
     // Change into werewolf or werebear
+    /**
+     * @param {number | string} mode
+     * @returns {boolean}
+     */
     shapeShift: function (mode) {
       const [skill, state] = (() => {
         switch (mode.toString().toLowerCase()) {
@@ -554,6 +570,7 @@
     },
 
     // Change back to human shape
+    /** @returns {boolean} */
     unShift: function () {
       const [state, skill] = me.getState(sdk.states.Wearwolf)
         ? [sdk.states.Wearwolf, sdk.skills.Werewolf]
@@ -768,6 +785,7 @@
       }
     },
 
+    /** @returns {boolean} True if the character currently has Telekinesis available. */
     get haveTK () {
       return Skill.canUse(sdk.skills.Telekinesis);
     }

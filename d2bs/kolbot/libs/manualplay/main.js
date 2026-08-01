@@ -23,15 +23,17 @@ const LocalChat = require("../modules/LocalChat");
 include("manualplay/MapMode.js");
 MapMode.include();
 
-/**
- * @typedef {import('./hooks/TextHooks')}
- */
+/** @typedef {import('./hooks/TextHooks')} TextHooksModule */
 
 function main () {
   D2Bot.init(); // Get D2Bot# handle
   D2Bot.ingame();
 
   (function (global, original) {
+    /**
+     * @param {...string} args - Forwarded to the original `load`.
+     * @returns {void}
+     */
     global.load = function (...args) {
       original.apply(this, args);
       delay(500);
@@ -74,6 +76,7 @@ function main () {
   const UnitInfo = new (require("../modules/UnitInfo"));
   const HelpMenu = require("./modules/HelpMenu");
 
+  /** @returns {boolean} Always true; keeps the background process re-queued each low-prio check. */
   Worker.runInBackground.unitInfo = function () {
     // always, maybe a timeout would be good though
     UnitInfo.check();

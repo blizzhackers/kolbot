@@ -240,9 +240,7 @@ const DeveloperMode = new Runnable(
       return false;
     };
 
-    /**
-     * @param {number} key 
-     */
+    /** @param {number} key */
     const keyEvent = function (key) {
       switch (key) {
       case sdk.keys.Spacebar:

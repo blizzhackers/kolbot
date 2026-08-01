@@ -54,6 +54,11 @@ String.prototype.lcsGraph = function (compareToThis) {
   };
 };
 
+/**
+ * Computes an approximate edit-distance style difference count against another string using the LCS graph.
+ * @param {string} stringB - String to compare against.
+ * @returns {number} Difference count, or `Infinity` if computing the LCS graph fails.
+ */
 String.prototype.diffCount = function (stringB) {
   try {
     if (typeof stringB !== "string" || !stringB) {
@@ -75,6 +80,11 @@ String.prototype.diffCount = function (stringB) {
 };
 
 if (!String.prototype.includes) {
+  /**
+   * @param {string} search
+   * @param {number} [start]
+   * @returns {boolean}
+   */
   String.prototype.includes = function (search, start) {
     "use strict";
     if (typeof start !== "number") {
@@ -89,10 +99,19 @@ if (!String.prototype.includes) {
   };
 }
 
+/**
+ * @param {boolean} [downcase] - When true, lowercases the remainder of the string after the first character.
+ * @returns {string}
+ */
 String.prototype.capitalize = function (downcase = false) {
   return this.charAt(0).toUpperCase() + (downcase ? this.slice(1).toLowerCase() : this.slice(1));
 };
 
+/**
+ * @param {number} targetLength
+ * @param {string} [padString]
+ * @returns {string}
+ */
 String.prototype.padEnd = function padEnd (targetLength, padString) {
   targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
   padString = String(typeof padString !== "undefined" ? padString : " ");
@@ -107,6 +126,11 @@ String.prototype.padEnd = function padEnd (targetLength, padString) {
   }
 };
 
+/**
+ * @param {number} targetLength
+ * @param {string} [padString]
+ * @returns {string}
+ */
 String.prototype.padStart = function padStart (targetLength, padString) {
   targetLength = targetLength >> 0; //floor if number or convert non-number to 0;
   padString = String(typeof padString !== "undefined" ? padString : " ");
@@ -121,6 +145,12 @@ String.prototype.padStart = function padStart (targetLength, padString) {
   }
 };
 
+/**
+ * @param {number} count
+ * @returns {string}
+ * @throws {TypeError} If called on `null`/`undefined`.
+ * @throws {RangeError} If `count` is negative, infinite, or the result would overflow max string size.
+ */
 String.prototype.repeat = function (count) {
   "use strict";
   if (this == null) throw new TypeError("can't convert " + this + " to object");
@@ -158,18 +188,28 @@ String.prototype.repeat = function (count) {
 
 // Trim String
 if (!String.prototype.trim) {
+  /** @returns {string} */
   String.prototype.trim = function () {
     return this.replace(/^\s+|\s+$/g, "");
   };
 }
 
 if (!String.prototype.startsWith) {
+  /**
+   * @param {string} prefix
+   * @returns {boolean}
+   */
   String.prototype.startsWith = function (prefix) {
     return !prefix || this.substring(0, prefix.length) === prefix;
   };
 }
 
 if (!String.prototype.endsWith) {
+  /**
+   * @param {string} search
+   * @param {number} [this_len] - Position to treat as the end of the string; defaults to the string's length.
+   * @returns {boolean}
+   */
   String.prototype.endsWith = function (search, this_len) {
     if (this_len === undefined || this_len > this.length) {
       this_len = this.length;
@@ -217,6 +257,10 @@ String.prototype.format = function (...pairs) {
 };
 
 if (!String.prototype.at) {
+  /**
+   * @param {number} pos - Zero-based index; negative counts back from the end.
+   * @returns {string|undefined}
+   */
   String.prototype.at = function (pos) {
     if (pos < 0) {
       pos += this.length;
@@ -269,6 +313,12 @@ Array.prototype.isEqual = function (t) {
   return this.map((x, i) => t.hasOwnProperty(i) && x === t[i]).reduce((a, c) => c & a, true);
 };
 
+/**
+ * Recursively filters outlier numeric values whose average distance to other elements exceeds
+ * the group average, giving up after 10 recursive steps.
+ * @param {number} [step] - Current recursion depth (internal use).
+ * @returns {Array<number>}
+ */
 Array.prototype.filterHighDistance = function (step = 0) {
   if (step > 10) return this; // If we took 10 steps, give up
   const distances = this.map(
@@ -291,6 +341,11 @@ Array.prototype.filterHighDistance = function (step = 0) {
 // https://tc39.github.io/ecma262/#sec-array.prototype.findindex
 if (!Array.prototype.findIndex) {
   Object.defineProperty(Array.prototype, "findIndex", {
+    /**
+     * @param {function(*, number, Array): boolean} predicate
+     * @param {*} [thisArg] - Value to use as `this` when executing `predicate`.
+     * @returns {number} Index of the first matching element, or -1 if none match.
+     */
     value: function (predicate) {
       // 1. Let O be ? ToObject(this value).
       if (this == null) {
@@ -337,6 +392,11 @@ if (!Array.prototype.findIndex) {
 
 // basic remove prototype
 if (!Array.prototype.remove) {
+  /**
+   * @param {*} val - Element to remove (first occurrence only); falsy/undefined values are rejected.
+   * @returns {Array} This array, mutated in place.
+   * @throws {Error} If the array is empty or `val` is falsy.
+   */
   Array.prototype.remove = function (val) {
     if (this === undefined || !this.length) throw new Error("No Array defined");
     if (val === undefined || !val) throw new Error("Cannot remove and element if there is no element defined");
@@ -431,6 +491,7 @@ if (!Array.from) {
 
 // Filter null or undefined objects in array
 if (!Array.prototype.filterNull) {
+  /** @returns {Array} A new array with all falsy elements (null, undefined, etc.) removed. */
   Array.prototype.filterNull = function () {
     return this.filter(x => x);
   };
@@ -438,6 +499,10 @@ if (!Array.prototype.filterNull) {
 
 // Map the objects with the callback function and filter null values after mapping.
 if (!Array.prototype.compactMap) {
+  /**
+   * @param {function(*, number, Array): *} callback
+   * @returns {Array} Mapped results with null/undefined entries filtered out.
+   */
   Array.prototype.compactMap = function (callback) {
     return this.map((x, i, array) => {
       if (x == null) {
@@ -451,6 +516,7 @@ if (!Array.prototype.compactMap) {
 
 // Returns a random object in array
 if (!Array.prototype.random) {
+  /** @returns {*} A random element, or `null` if the array is empty. */
   Array.prototype.random = function () {
     if (this.length === 0) return null;
     if (this.length === 1) return this[0];
@@ -459,12 +525,20 @@ if (!Array.prototype.random) {
 }
 
 if (!Array.prototype.includes) {
+  /**
+   * @param {*} e
+   * @returns {boolean}
+   */
   Array.prototype.includes = function (e) {
     return this.indexOf(e) > -1;
   };
 }
 
 if (!Array.prototype.at) {
+  /**
+   * @param {number} pos - Zero-based index; negative counts back from the end.
+   * @returns {*}
+   */
   Array.prototype.at = function (pos) {
     if (pos < 0) {
       pos += this.length;
@@ -475,18 +549,30 @@ if (!Array.prototype.at) {
 }
 
 if (!Array.prototype.intersection) {
+  /**
+   * @param {Array} other
+   * @returns {Array} Elements present in both this array and `other`.
+   */
   Array.prototype.intersection = function (other) {
     return this.filter(e => other.includes(e));
   };
 }
 
 if (!Array.prototype.difference) {
+  /**
+   * @param {Array} other
+   * @returns {Array} Elements of this array not present in `other`.
+   */
   Array.prototype.difference = function (other) {
     return this.filter(e => !other.includes(e));
   };
 }
 
 if (!Array.prototype.symmetricDifference) {
+  /**
+   * @param {Array} other
+   * @returns {Array} Elements present in exactly one of the two arrays.
+   */
   Array.prototype.symmetricDifference = function (other) {
     return this
       .filter(e => !other.includes(e))
@@ -497,6 +583,10 @@ if (!Array.prototype.symmetricDifference) {
 // Shuffle Array
 // http://stackoverflow.com/questions/6274339/how-can-i-shuffle-an-array-in-javascript
 if (!Array.prototype.shuffle) {
+  /**
+   * Shuffles the array in place using the Fisher-Yates algorithm.
+   * @returns {Array} This array, mutated in place.
+   */
   Array.prototype.shuffle = function () {
     let temp, index;
     let counter = this.length;
@@ -522,6 +612,11 @@ if (!Array.prototype.shuffle) {
 // Array.find polyfill from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find
 if (!Array.prototype.find) {
   Object.defineProperty(Array.prototype, "find", {
+    /**
+     * @param {function(*, number, Array): boolean} predicate
+     * @param {*} [thisArg] - Value to use as `this` when executing `predicate`.
+     * @returns {*} The first matching element, or `undefined` if none match.
+     */
     value: function (predicate) {
       if (this === null) {
         throw new TypeError('"this" is null or not defined');
@@ -557,6 +652,12 @@ if (!Array.prototype.find) {
 }
 
 // Fill an array with the same value from start to end indexes.
+/**
+ * @param {*} value
+ * @param {number} [start]
+ * @param {number} [end]
+ * @returns {Array} This array, mutated in place.
+ */
 Array.prototype.fill = function (value, start = 0, end = undefined) {
   let stop = end || this.length;
   for (let i = start; i < stop; i++) {
@@ -565,33 +666,34 @@ Array.prototype.fill = function (value, start = 0, end = undefined) {
   return this;
 };
 
-/**
- * @description Return the first element or undefined
- * @return {undefined | *}
- */
 if (!Array.prototype.first) {
+  /**
+   * @description Return the first element or undefined
+   * @return {undefined | *}
+   */
   Array.prototype.first = function () {
     return this.length > 0 ? this[0] : undefined;
   };
 }
 
-/**
- * @description Return the last element or undefined
- * @return {undefined | *}
- */
 if (!Array.prototype.last) {
+  /**
+   * @description Return the last element or undefined
+   * @return {undefined | *}
+   */
   Array.prototype.last = function () {
     return this.length > 0 ? this[this.length - 1] : undefined;
   };
 }
 
-/**
- * @description Flatten an array with depth parameter.
- * @see https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/flat
- * @return {Array<*>}
- */
 if (!Array.prototype.flat) {
   Object.defineProperty(Array.prototype, "flat", {
+    /**
+     * @description Flatten an array with depth parameter.
+     * @see https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Objets_globaux/Array/flat
+     * @param {number} [depth] - Maximum recursion depth; defaults to 1.
+     * @return {Array<*>}
+     */
     value: function flat () {
       let depth = arguments.length > 0 ? isNaN(arguments[0]) ? 1 : Number(arguments[0]) : 1;
 
@@ -610,14 +712,15 @@ if (!Array.prototype.flat) {
   });
 }
 
-/**
- * @description The Array.of() static method creates a new Array instance from a
- * variable number of arguments, regardless of number or type of the arguments.
- * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/of
- * @return {Array<...args>}
- */
 if (!Array.of) {
   Object.defineProperty(Array, "of", {
+    /**
+     * @description The Array.of() static method creates a new Array instance from a
+     * variable number of arguments, regardless of number or type of the arguments.
+     * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/of
+     * @param {...*} elements - Elements to include in the new array.
+     * @return {Array<...args>}
+     */
     value: function of () {
       return Array.prototype.slice.call(arguments);
     },
@@ -626,45 +729,45 @@ if (!Array.of) {
   });
 }
 
-/**
- * @description The toReversed() method of Array instances is the copying counterpart of the reverse()
- * method. It returns a new array with the elements in reversed order.
- * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toReversed
- * @return {Array}
- */
 if (!Array.prototype.toReversed) {
+  /**
+   * @description The toReversed() method of Array instances is the copying counterpart of the reverse()
+   * method. It returns a new array with the elements in reversed order.
+   * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toReversed
+   * @return {Array}
+   */
   Array.prototype.toReversed = function () {
     return this.slice().reverse();
   };
 }
 
-/**
- * Creates a new array with the elements of the original array sorted in ascending order.
- *
- * @template T
- * @param {function(T, T): number} [compareFunction] A function that defines the sort order.
- * If omitted, the elements are sorted in ascending order based on their string conversion.
- * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted
- * @returns {Array} A new array with the elements sorted in ascending order.
- */
 if (!Array.prototype.toSorted) {
+  /**
+   * Creates a new array with the elements of the original array sorted in ascending order.
+   *
+   * @template T
+   * @param {function(T, T): number} [compareFunction] A function that defines the sort order.
+   * If omitted, the elements are sorted in ascending order based on their string conversion.
+   * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted
+   * @returns {Array} A new array with the elements sorted in ascending order.
+   */
   Array.prototype.toSorted = function (compareFunction) {
     return this.slice().sort(compareFunction);
   };
 }
 
-/**
- * Creates a new array by removing or replacing elements from the original array.
- *
- * @param {number} start The index at which to start changing the array.
- * If negative, it is treated as `array.length + start`.
- * @param {number} [deleteCount] The number of elements to remove from the array.
- * If omitted or greater than `array.length - start`, all elements from `start` to the end of the array are deleted.
- * @param {...*} [items] The elements to add to the array starting from the `start` index.
- * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSpliced
- * @returns {Array} A new array with the modified elements.
- */
 if (!Array.prototype.toSpliced) {
+  /**
+   * Creates a new array by removing or replacing elements from the original array.
+   *
+   * @param {number} start The index at which to start changing the array.
+   * If negative, it is treated as `array.length + start`.
+   * @param {number} [deleteCount] The number of elements to remove from the array.
+   * If omitted or greater than `array.length - start`, all elements from `start` to the end of the array are deleted.
+   * @param {...*} [items] The elements to add to the array starting from the `start` index.
+   * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSpliced
+   * @returns {Array} A new array with the modified elements.
+   */
   Array.prototype.toSpliced = function (start, deleteCount) {
     const newArr = this.slice();
     const items = Array.prototype.slice.call(arguments, 2);
@@ -673,15 +776,15 @@ if (!Array.prototype.toSpliced) {
   };
 }
 
-/**
- * @description The with() method of Array instances is the copying version of using the bracket notation to change the value of a given index.
- * It returns a new array with the element at the given index replaced with the given value.
- * @param {number} index - Zero-based index at which to change the array, converted to an integer.
- * @param {*} value - Any value to be assigned to the given index.
- * @returns {Array} A new array with the element at index replaced with value.
- * @throws {RangeError} If index >= array.length or index < -array.length.
- */
 if (!Array.prototype.with) {
+  /**
+   * @description The with() method of Array instances is the copying version of using the bracket notation to change the value of a given index.
+   * It returns a new array with the element at the given index replaced with the given value.
+   * @param {number} index - Zero-based index at which to change the array, converted to an integer.
+   * @param {*} value - Any value to be assigned to the given index.
+   * @returns {Array} A new array with the element at index replaced with value.
+   * @throws {RangeError} If index >= array.length or index < -array.length.
+   */
   Array.prototype.with = function (index, value) {
     const len = this.length;
     const relativeIndex = index < 0 ? len + index : index;
@@ -706,12 +809,15 @@ if (!Array.prototype.with) {
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
  */
 
-/**
- * @description Copy the values of all enumerable own properties from one or more source objects to a target object. Returns the target object.
- * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
- */
 if (typeof Object.assign !== "function") {
   Object.defineProperty(Object, "assign", {
+    /**
+     * @description Copy the values of all enumerable own properties from one or more source objects to a target object. Returns the target object.
+     * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
+     * @param {Object} target - Target object.
+     * @param {...Object} sources - One or more source objects.
+     * @returns {Object} The target object.
+     */
     value: function assign (target) {
       if (target === null) {
         throw new TypeError("Cannot convert undefined or null to object");
@@ -739,6 +845,10 @@ if (typeof Object.assign !== "function") {
 }
 
 if (!Object.values) {
+  /**
+   * @param {Object} source
+   * @returns {Array<*>} The own enumerable property values of `source`.
+   */
   Object.values = function (source) {
     return Object.keys(source)
       .map(function (k) {
@@ -748,6 +858,10 @@ if (!Object.values) {
 }
 
 if (!Object.entries) {
+  /**
+   * @param {Object} source
+   * @returns {Array<Array<*>>} Array of `[key, value]` pairs for `source`'s own enumerable properties.
+   */
   Object.entries = function (source) {
     return Object.keys(source)
       .map(function (k) {
@@ -757,6 +871,11 @@ if (!Object.entries) {
 }
 
 if (!Object.hasOwn) {
+  /**
+   * @param {Object} obj
+   * @param {string|symbol} prop
+   * @returns {boolean}
+   */
   Object.hasOwn = function (obj, prop) {
     return Object.prototype.hasOwnProperty.call(obj, prop);
   };
@@ -770,11 +889,16 @@ global["globalThis"] = [].filter.constructor("return this")();
 if (!global.hasOwnProperty("require")) {
   let cache;
   Object.defineProperty(global, "require", {
+    /**
+     * Lazily loads and caches require.js on first access.
+     * @returns {*} The cached `require` implementation.
+     */
     get: function () {
       if (cache) return cache;
       !isIncluded("require.js") && include("require.js");
       return cache; // cache is loaded by require.js
     },
+    /** @param {*} v */
     set: function (v) {
       cache = v;
     }
@@ -794,6 +918,12 @@ if (!global.hasOwnProperty("env")) {
   
   Object.defineProperty(global, "env", {
     value: new Proxy({}, {
+      /**
+       * Lazily loads `.env.json` into the backing store on first access.
+       * @param {Object} target
+       * @param {string|symbol} prop
+       * @returns {*} The stored value for `prop`, or `undefined`.
+       */
       get: function (target, prop) {
         if (!initialized) {
           /** @param {Record<string, any>} settings */
@@ -823,6 +953,12 @@ if (!global.hasOwnProperty("env")) {
         return undefined;
       },
       
+      /**
+       * @param {Object} target
+       * @param {string|symbol} prop
+       * @param {*} value
+       * @returns {boolean}
+       */
       set: function (target, prop, value) {
         if (!initialized) {
           this.get(target, "version");
@@ -832,6 +968,11 @@ if (!global.hasOwnProperty("env")) {
         return true;
       },
       
+      /**
+       * @param {Object} target
+       * @param {string|symbol} prop
+       * @returns {boolean}
+       */
       has: function (target, prop) {
         if (!initialized) {
           this.get(target, "version");
@@ -840,6 +981,10 @@ if (!global.hasOwnProperty("env")) {
         return prop in envStore;
       },
       
+      /**
+       * @param {Object} target
+       * @returns {Array<string|symbol>}
+       */
       ownKeys: function (target) {
         if (!initialized) {
           this.get(target, "version");
@@ -864,6 +1009,11 @@ if (!global.hasOwnProperty("env")) {
  */
 
 // Returns a random integer between start and end included.
+/**
+ * @param {number} start
+ * @param {number} end
+ * @returns {number} A random integer in the inclusive range [start, end].
+ */
 Math.randomIntBetween = function (start, end) {
   let min = Math.ceil(start);
   let max = Math.floor(end);
@@ -883,6 +1033,11 @@ if (!Math.trunc) {
   };
 }
 
+/**
+ * @param {number} value1
+ * @param {number} value2
+ * @returns {number} Percent difference between the two values, truncated to an integer.
+ */
 Math.percentDifference = function (value1, value2) {
   const diff = Math.abs(value1 - value2);
   const average = (value1 + value2) / 2;
@@ -902,6 +1057,10 @@ Math.percentDifference = function (value1, value2) {
  */
 
 if (typeof Map.prototype.forEach !== "function") {
+  /**
+   * @param {function(*, *, Map): void} callbackFn
+   * @param {*} [thisArg]
+   */
   Map.prototype.forEach = function (callbackFn, thisArg) {
     thisArg = thisArg || this;
     for (let [key, value] of this.entries()) {
@@ -910,6 +1069,7 @@ if (typeof Map.prototype.forEach !== "function") {
   };
 }
 
+/** @returns {string} JSON string of the map's entries as a plain object. */
 Map.prototype.toString = function () {
   let obj = {};
   for (let [key, value] of this.entries()) {
@@ -918,9 +1078,7 @@ Map.prototype.toString = function () {
   return JSON.stringify(obj);
 };
 
-/**
- * @returns {Array<typeof Map.prototype.keys>}
- */
+/** @returns {Array<typeof Map.prototype.keys>} */
 Map.prototype.keys = function () {
   let keys = [];
 
@@ -930,6 +1088,7 @@ Map.prototype.keys = function () {
   return keys;
 };
 
+/** @returns {Array<*>} */
 Map.prototype.values = function () {
   let values = [];
 
@@ -956,6 +1115,10 @@ Map.prototype.values = function () {
  */
 
 if (typeof Set.prototype.forEach !== "function") {
+  /**
+   * @param {function(*, *, Set): void} callbackFn
+   * @param {*} [thisArg]
+   */
   Set.prototype.forEach = function (callbackFn, thisArg) {
     thisArg = thisArg || this;
     for (let item of this) {
@@ -965,6 +1128,7 @@ if (typeof Set.prototype.forEach !== "function") {
 }
 
 if (typeof Set.prototype.keys !== "function") {
+  /** @returns {Array<*>} */
   Set.prototype.keys = function () {
     let keys = [];
     for (let item of this) {
@@ -975,6 +1139,7 @@ if (typeof Set.prototype.keys !== "function") {
 }
 
 if (typeof Set.prototype.values !== "function") {
+  /** @returns {Array<*>} */
   Set.prototype.values = function () {
     let values = [];
     for (let item of this) {
@@ -985,6 +1150,7 @@ if (typeof Set.prototype.values !== "function") {
 }
 
 if (typeof Set.prototype.entries !== "function") {
+  /** @returns {Array<Array<*>>} Array of `[item, item]` pairs. */
   Set.prototype.entries = function () {
     let entries = [];
     for (let item of this) {
@@ -994,6 +1160,10 @@ if (typeof Set.prototype.entries !== "function") {
   };
 }
 
+/**
+ * @param {Set|Iterable} subset
+ * @returns {boolean} True if every element of `subset` is present in this set.
+ */
 Set.prototype.isSuperset = function (subset) {
   for (let item of subset) {
     if (!this.has(item)) {
@@ -1003,6 +1173,10 @@ Set.prototype.isSuperset = function (subset) {
   return true;
 };
 
+/**
+ * @param {Set|Iterable} setB
+ * @returns {Set} A new set containing all elements from both sets.
+ */
 Set.prototype.union = function (setB) {
   let union = new Set(this);
   for (let item of setB) {
@@ -1011,6 +1185,10 @@ Set.prototype.union = function (setB) {
   return union;
 };
 
+/**
+ * @param {Set|Iterable} setB
+ * @returns {Set} A new set containing elements present in both sets.
+ */
 Set.prototype.intersection = function (setB) {
   let intersection = new Set();
   for (let item of setB) {
@@ -1021,6 +1199,10 @@ Set.prototype.intersection = function (setB) {
   return intersection;
 };
 
+/**
+ * @param {Set|Iterable} setB
+ * @returns {Set} A new set containing elements present in exactly one of the two sets.
+ */
 Set.prototype.symmetricDifference = function (setB) {
   let difference = new Set(this);
   for (let item of setB) {
@@ -1033,6 +1215,10 @@ Set.prototype.symmetricDifference = function (setB) {
   return difference;
 };
 
+/**
+ * @param {Set|Iterable} setB
+ * @returns {Set} A new set containing this set's elements minus those in `setB`.
+ */
 Set.prototype.difference = function (setB) {
   let difference = new Set(this);
   for (let item of setB) {
@@ -1041,6 +1227,7 @@ Set.prototype.difference = function (setB) {
   return difference;
 };
 
+/** @returns {string} JSON string of the set's elements. */
 Set.prototype.toString = function () {
   let arr = [];
   for (let item of this) {
@@ -1106,12 +1293,17 @@ Set.prototype.toString = function () {
       return el;
     };
 
+    /** @param {...*} args */
     console.log = function (...args) {
       // use call to avoid type errors
       print.call(null, args.map(argMap).join(","));
     };
 
     console.printDebug = true;
+    /**
+     * Logs only when `console.printDebug` is true, prefixed with the caller's file and line.
+     * @param {...*} args
+     */
     console.debug = function (...args) {
       if (console.printDebug) {
         const stack = new Error().stack.match(/[^\r\n]+/g);
@@ -1121,6 +1313,10 @@ Set.prototype.toString = function () {
       }
     };
 
+    /**
+     * Logs a warning prefixed with the caller's file and line.
+     * @param {...*} args
+     */
     console.warn = function (...args) {
       const stack = new Error().stack.match(/[^\r\n]+/g);
       let filenameAndLine = stack && stack.length && stack[1].substr(stack[1].lastIndexOf("\\") + 1) || "unknown:0";
@@ -1128,6 +1324,7 @@ Set.prototype.toString = function () {
       this.log("[ÿc9Warningÿc0] ÿc9[" + filenameAndLine + "]ÿc0 " + args.map(argMap).join(","));
     };
 
+    /** @param {string|Error} [error] */
     console.error = function (error = "") {
       let msg, source;
       
@@ -1144,16 +1341,12 @@ Set.prototype.toString = function () {
     /** @type {Map<string, number>} */
     const timers = new Map();
 
-    /**
-     * @param {string} name 
-     */
+    /** @param {string} name */
     console.time = function (name) {
       name && timers.set(name, getTickCount());
     };
 
-    /**
-     * @param {string} name 
-     */
+    /** @param {string} name */
     console.timeEnd = function (name) {
       let currTimer = timers.get(name);
       if (currTimer) {
@@ -1162,6 +1355,9 @@ Set.prototype.toString = function () {
       }
     };
 
+    /**
+     * Logs a stack trace built from `new Error().stack`, formatted innermost-frame-last.
+     */
     console.trace = function () {
       let stackLog = "";
       let stack = new Error().stack;
@@ -1183,6 +1379,11 @@ Set.prototype.toString = function () {
       }
     };
 
+    /**
+     * @param {boolean} [start] - `true` logs a "Start" prefix, `false` an "End" prefix, any other value a plain prefix.
+     * @param {string} [msg]
+     * @param {string} [timer] - Key registered via `console.time`; appends elapsed duration and clears the timer.
+     */
     console.info = function (start = false, msg = "", timer = "") {
       const stack = new Error().stack.match(/[^\r\n]+/g);
       let funcName = stack[1].substr(0, stack[1].indexOf("@"));
@@ -1279,6 +1480,7 @@ Set.prototype.toString = function () {
 
 if (!Date.prototype.hasOwnProperty("dateStamp")) {
   Object.defineProperty(Date.prototype, "dateStamp", {
+    /** @returns {string} Date formatted as "[MM/DD/YYYY]". */
     value: function () {
       let month = this.getMonth() + 1;
       let day = this.getDate();

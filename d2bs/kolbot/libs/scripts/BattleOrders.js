@@ -20,15 +20,18 @@ const BattleOrders = new Runnable(
       Receive: 1
     };
 
+    /** @throws {Error} if the game is empty (player count <= 1) */
     function checkForPlayers () {
       if (Misc.getPlayerCount() <= 1) throw new Error("Empty game");
     }
 
+    /** @param {string} [msg] */
     function log (msg = "") {
       console.log(msg);
       me.overhead(msg);
     }
 
+    /** @returns {boolean} true if too late for this BO round (or game is empty), false to keep waiting */
     function tardy () {
       let party;
 
@@ -93,6 +96,7 @@ const BattleOrders = new Runnable(
     }
 
     // bo is AoE, lets build a list of all players near us so we can know who we boed
+    /** @returns {{ success: boolean, count: number }} whether anyone was bo-ed and how many were in range */
     function giveBO () {
       // more players might be showing up, give a moment and lets wait until the nearby player count is static
       let nearPlayers;

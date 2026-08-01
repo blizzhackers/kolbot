@@ -97,7 +97,9 @@ const ItemHooks = (function () {
     [sdk.items.LargeCharm, "Hellfire Torch"],
     [sdk.items.GrandCharm, "Gheed's"],
     [sdk.items.Jewel, "Facet"],
-    /** Misc Items */
+    /**
+     * Misc Items
+     */
     [sdk.items.quest.TokenofAbsolution, "ÿc8Token"],
     [sdk.items.quest.TwistedEssenceofSuffering, "ÿc3Ess-Of-Suffering"],
     [sdk.items.quest.ChargedEssenceofHatred, "ÿc7Ess-Of-Hatred"],
@@ -187,11 +189,15 @@ const ItemHooks = (function () {
     [sdk.items.LightBelt, buildClassIdAndQuality("Artic's Belt", "Snakecord")],
     [sdk.items.QuiltedArmor, buildClassIdAndQuality("Artic's Armor", "Greyform")],
     [sdk.items.ShortWarBow, buildClassIdAndQuality("Artic's Bow", "Hellclap")],
-    /** Berserker's */
+    /**
+     * Berserker's
+     */
     [sdk.items.DoubleAxe, buildClassIdAndQuality("Beserker's Axe", "Bladebone")],
     [sdk.items.SplintMail, buildClassIdAndQuality("Beserker's Armor", "Iceblink")],
     [sdk.items.Helm, buildClassIdAndQuality("Beserker's Helm", "Coif of Glory")],
-    /** Tancred's */
+    /**
+     * Tancred's
+     */
     [sdk.items.BoneHelm, buildClassIdAndQuality("Tancred's Skull", "Wormskull")],
     [sdk.items.FullPlateMail, buildClassIdAndQuality("Tancred's Spine", "Goldskin")],
     [sdk.items.MilitaryPick, buildClassIdAndQuality("Tancred's Crowbill", "Skull Splitter")],
@@ -209,6 +215,11 @@ const ItemHooks = (function () {
     pickitEnabled: false,
     hooks: [],
 
+    /**
+     * Syncs on-screen item hooks with ground items in the current area, adding hooks for newly
+     * visible items and removing stale ones (item picked up, moved out of area, or no longer
+     * eligible under the current pickit filter).
+     */
     check: function () {
       if (!this.enabled) {
         this.flush();
@@ -257,6 +268,9 @@ const ItemHooks = (function () {
       }
     },
 
+    /**
+     * Re-anchors every hook's vector line to the player's current position.
+     */
     update: function () {
       for (let i = 0; i < this.hooks.length; i++) {
         this.hooks[i].vector[0].x = me.x;
@@ -435,6 +449,9 @@ const ItemHooks = (function () {
       return false;
     },
 
+    /**
+     * Removes every active item hook's line/text overlays and clears the hooks array.
+     */
     flush: function () {
       while (this.hooks.length) {
         for (let j = 0; j < this.hooks[0].hook.length; j++) {

@@ -1,40 +1,50 @@
 export {};
 declare global {
-  type PickitResult = {
-      UNID: -1,
-      UNWANTED: 0,
-      WANTED: 1,
-      CUBING: 2,
-      RUNEWORD: 3,
-      TRASH: 4,
-      CRAFTING: 5,
-      UTILITY: 6
-  };
-  namespace Pickit {
-    const enabled: boolean;
-    const gidList: number[];
-    let invoLocked: boolean;
-    let beltSize: 1 | 2 | 3 | 4;
-    const ignoreLog: number[]; // Ignored item types for item logging
-    const Result: PickitResult;
-    const tkable: number[];
-    const essentials: number[];
-    const systemKeep: { reason: string, gid: number }[];
+  interface PickitResultMap {
+    UNID: -1;
+    UNWANTED: 0;
+    WANTED: 1;
+    CUBING: 2;
+    RUNEWORD: 3;
+    TRASH: 4;
+    CRAFTING: 5;
+    UTILITY: 6;
+  }
+  /** A single pickit verdict (one value out of PickitResultMap), e.g. the value of Pickit.Result.WANTED. */
+  type PickitResult = PickitResultMap[keyof PickitResultMap];
 
-    function init(notify: any): void;
-    function itemEvent(gid?: number, mode?: number, code?: number, global?: number): void;
-    function sortItems(unitA: Unit, unitB: Unit): number;
-    function sortFastPickItems(unitA: Unit, unitB: Unit): number;
-    function checkBelt(): boolean;
-    function canPick(unit: ItemUnit): boolean;
-    function checkItem(unit: ItemUnit): { result: PickitResult, line: null | number };
-    function pickItem(
+  // Value shape of the global `Pickit` const in Pickit.js (bound there via JSDoc @type).
+  // Declaring the const here as well would collide: both files are global scripts.
+  interface Pickit {
+    enabled: boolean;
+    gidList: Set<number>;
+    invoLocked: boolean;
+    beltSize: 1 | 2 | 3 | 4;
+    /** Ignored item types for item logging */
+    ignoreLog: number[];
+    Result: PickitResultMap;
+    tkable: number[];
+    essentials: number[];
+    systemKeep: { reason: string, gid: number }[];
+    pickList: ItemUnit[];
+    ignoreList: Set<number>;
+    track: { lastItem: number | null };
+
+    init(notify: boolean): void;
+    itemEvent(gid?: number, mode?: number, code?: number, global?: number): void;
+    sortItems(unitA: ItemUnit, unitB: ItemUnit): number;
+    sortFastPickItems(unitA: ItemUnit, unitB: ItemUnit): number;
+    checkBelt(): boolean;
+    canPick(unit: ItemUnit): boolean;
+    checkItem(unit: ItemUnit): { result: PickitResult, line: string | null };
+    pickItem(
       unit: ItemUnit,
       status?: PickitResult,
-      keptLine?: any, retry?: number
-    ): { result: PickitResult, line: string | null };
-    function canMakeRoom(): boolean;
-    function pickItems(range?: number): boolean;
-    function fastPick(): boolean;
+      keptLine?: string,
+      retry?: number
+    ): boolean;
+    canMakeRoom(): boolean;
+    pickItems(range?: number): boolean;
+    fastPick(retry?: number): boolean;
   }
 }

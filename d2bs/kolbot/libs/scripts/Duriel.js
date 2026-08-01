@@ -37,6 +37,7 @@ const Duriel = new Runnable(
     }
     /** @type {ObjectUnit} */
     let lairEntrance = null;
+    /** @returns {boolean} True once the lair entrance portal has been found within 20 distance. */
     if (!Pather.moveToPresetObject(me.area, sdk.quest.chest.HoradricStaffHolder,
       { offX: -11, offY: 3, callback: function () {
         lairEntrance = Game.getObject(sdk.objects.PortaltoDurielsLair);

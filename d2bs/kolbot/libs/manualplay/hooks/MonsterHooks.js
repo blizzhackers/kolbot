@@ -38,6 +38,10 @@ const MonsterHooks = (function () {
     this.hook = new Text((unit.spectype & 0xF ? "O" : "X"), unit.x, unit.y, specTypeColor(unit), 1, null, true);
   }
 
+  /**
+   * Syncs the hook's marker position with its unit; removes the hook if the unit is gone or unattackable.
+   * @returns {void}
+   */
   MonsterHook.prototype.update = function () {
     if (!this.unit || !this.unit.x || !this.unit.attackable) {
       this.hook.remove();
@@ -52,6 +56,7 @@ const MonsterHooks = (function () {
     hooks: {},
     enabled: true,
 
+    /** @returns {void} */
     check: function () {
       if (!this.enabled || me.inTown) {
         this.flush();
@@ -90,7 +95,10 @@ const MonsterHooks = (function () {
       }
     },
 
-    /** @param {Monster} unit */
+    /**
+     * @param {Monster} unit
+     * @returns {boolean}
+     */
     remove: function (unit) {
       if (this.hooks.hasOwnProperty(unit.gid)) {
         this.hooks[unit.gid].hook.remove();
@@ -102,6 +110,7 @@ const MonsterHooks = (function () {
       return false;
     },
 
+    /** @returns {void} */
     flush: function () {
       for (let m in this.hooks) {
         if (!this.hooks.hasOwnProperty(m)) {

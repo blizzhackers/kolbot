@@ -8,6 +8,7 @@
 // torn on if this should be broken up in two classes Item and AutoEquip, for now leaving as is
 /**
  * @todo fix the max-len warnings + redo majority of this file
+ * @type {Item}
  */
 const Item = {
   /** @param {number} quality */
@@ -126,6 +127,11 @@ const Item = {
     return false;
   },
 
+  /**
+   * @param {number} bodyLoc
+   * @returns {{ classid: number, tier: number }} classid/tier of the item in that slot,
+   * or `{ classid: -1, tier: -1 }` if nothing is equipped there
+   */
   getEquippedItem: function (bodyLoc) {
     let item = me.getItemsEx(-1, sdk.items.mode.Equipped)
       .filter(function (item) {
@@ -181,10 +187,19 @@ const Item = {
     return true;
   },
 
-  // returns true if the item should be kept+logged, false if not
+  /**
+   * Equips any higher-tier storage items over what's currently worn.
+   * @returns {boolean} true if the item should be kept+logged, false if not
+   */
   autoEquip: function () {
     if (!Config.AutoEquip) return true;
 
+    /**
+     * Comparator: equippable items sort before non-equippable ones.
+     * @param {ItemUnit} a
+     * @param {ItemUnit} b
+     * @returns {number}
+     */
     function sortEq (a, b) {
       if (Item.canEquip(a)) return -1;
       if (Item.canEquip(b)) return 1;

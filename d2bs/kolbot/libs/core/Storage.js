@@ -34,9 +34,7 @@
     }
   }
 
-  /**
-   * @param {ItemUnit} item 
-   */
+  /** @param {ItemUnit} item */
   Container.prototype.Mark = function (item) {
     let x, y;
 
@@ -103,6 +101,9 @@
     return false;
   };
 
+  /**
+   * Clears the container's buffer and item list. @returns {boolean} always true
+   */
   Container.prototype.Reset = function () {
     for (let h = 0; h < this.height; h += 1) {
       for (let w = 0; w < this.width; w += 1) {
@@ -116,9 +117,7 @@
     return true;
   };
 
-  /**
-   * @param {string} name 
-   */
+  /** @param {string} name */
   Container.prototype.cubeSpot = function (name) {
     if (name !== "Stash") return true;
 
@@ -147,9 +146,7 @@
     return true;
   };
 
-  /**
-   * @param {ItemUnit} item 
-   */
+  /** @param {ItemUnit} item */
   Container.prototype.IsPossibleToFit = function (item) {
     if (!item) return false;
     // only for the inventory as this has to deal with locked spots
@@ -173,9 +170,7 @@
     return false;
   };
 
-  /**
-   * @param {ItemUnit} item 
-   */
+  /** @param {ItemUnit} item */
   Container.prototype.CanFit = function (item) {
     return (!!this.FindSpot(item));
   };
@@ -289,9 +284,7 @@
       item.gfx = -1;
     }
 
-    /**
-     * @todo review this to see why it sometimes fails when there is actually enough room
-     */
+    /** @todo review this to see why it sometimes fails when there is actually enough room */
 
     let x, y, nx, ny, makeSpot;
     let xDir = 1, yDir = 1;
@@ -536,9 +529,7 @@
     return false;
   };
 
-  /**
-   * @param {ItemUnit} item 
-   */
+  /** @param {ItemUnit} item */
   Container.prototype.MoveTo = function (item) {
     let nPos;
 
@@ -558,6 +549,9 @@
     }
   };
 
+  /**
+   * Logs the container's occupancy grid (when >60% full) and used-space percent to console.
+   */
   Container.prototype.Dump = function () {
     let x, y, string;
 
@@ -576,6 +570,7 @@
     console.log("ÿc9Storageÿc0: " + this.name + " has used " + this.UsedSpacePercent().toFixed(2) + "% of its total space");
   };
 
+  /** @returns {number} percent of the container's total space currently occupied */
   Container.prototype.UsedSpacePercent = function () {
     let usedSpace = 0;
     let totalSpace = this.height * this.width;
@@ -593,9 +588,7 @@
     return usedSpace * 100 / totalSpace;
   };
 
-  /**
-   * @param {number[][]} baseRef 
-   */
+  /** @param {number[][]} baseRef */
   Container.prototype.Compare = function (baseRef) {
     let h, w, n, item, itemList, reference;
 
@@ -641,14 +634,19 @@
     }
   };
 
+  /**
+   * @deprecated
+   * @returns {string} source representation of the container's buffer
+   */
   Container.prototype.toSource = function () {
     return this.buffer.toSource();
   };
 
-  /**
-   * @type {storage} Storage
-   */
+  /** @type {storage} Storage */
   const Storage = new function () {
+    /**
+     * Builds all storage containers (Inventory, TradeScreen, Stash, Belt, Cube) and loads them.
+     */
     this.Init = () => {
       this.StashY = me.classic ? 4 : Config.SortSettings.PlugYStash ? 10 : 8;
       this.Inventory = new Container("Inventory", 10, 4, 3);
@@ -682,6 +680,7 @@
       this.Reload();
     };
 
+    /** @returns {1 | 2 | 3 | 4} belt column count based on the equipped belt's item code */
     this.BeltSize = function () {
       let item = me.getItem(-1, sdk.items.mode.Equipped); // get equipped item
       if (!item) return 1; // nothing equipped
@@ -704,6 +703,9 @@
       return 1; // no belt
     };
 
+    /**
+     * Resets and re-marks every container from the character's current item list. @returns {boolean}
+     */
     this.Reload = function () {
       this.Inventory.Reset();
       this.Stash.Reset();

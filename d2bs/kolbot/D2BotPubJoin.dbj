@@ -48,6 +48,10 @@ if (typeof profileOverides[me.profile] === "object") {
 }
 
 new Overrides.Override(Starter, Starter.setNextGame, function (orignal, gameName) {
+  /**
+   * @param {string} text
+   * @returns {string} `text` with its trailing numeric suffix incremented, zero-padded to the same width
+   */
   function incrementString (text) {
     return text.replace(/(\d*)$/, (_, t) => (+t + 1).toString().padStart(t.length, 0));
   }
@@ -69,6 +73,9 @@ let retryTick = 0;
 const GameTracker = {
   _path: "data/" + me.profile + "/pubjoin.json",
 
+  /**
+   * Creates the per-profile data folder and pubjoin.json tracker file if they don't already exist.
+   */
   init: function () {
     if (!FileTools.exists("data/" + me.profile)) {
       let folder = dopen("data");
@@ -80,9 +87,7 @@ const GameTracker = {
     }
   },
 
-  /**
-   * @returns {string[]}
-   */
+  /** @returns {string[]} */
   read: function () {
     return FileAction.parse(this._path);
   },
@@ -381,6 +386,9 @@ const locationAction = (function () {
   };
 })();
 
+/**
+ * Entry point: waits for the Starter window handle, then drives the public-game join loop.
+ */
 function main () {
   debugLog(me.profile);
   addEventListener("copydata", Starter.receiveCopyData);

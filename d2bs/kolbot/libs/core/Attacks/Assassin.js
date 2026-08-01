@@ -155,6 +155,7 @@
       return result;
     },
 
+    /** @returns {void} */
     afterAttack: function () {
       Precast.doPrecast(false);
     },
@@ -237,9 +238,7 @@
       return Attack.Result.SUCCESS;
     },
 
-    /**
-     * @param {Monster} unit 
-     */
+    /** @param {Monster} unit */
     checkTraps: function (unit) {
       if (!Config.UseTraps || !unit) return false;
 

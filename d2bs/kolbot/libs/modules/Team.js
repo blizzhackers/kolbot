@@ -147,6 +147,11 @@
       addEventListener("copydata", (mode, data) => workBench.push({ mode: mode, data: data }));
 
       let timer = getTickCount() - Math.round((Math.random() * 2500) + 1000); // start with 3 seconds off
+      /**
+       * Background worker tick: every ~3.5s refreshes other profiles' data from disk, and always
+       * drains the copydata workBench, forwarding parsed emits to the Team message thread.
+       * @returns {boolean} always true, to keep the background worker looping
+       */
       this.update = function () {
         if (!((getTickCount() - timer) < 3500)) { // only ever 3 seconds update the entire team
           timer = getTickCount();
@@ -225,6 +230,12 @@
           typeof obj.data === "object" && obj.data && Object.keys(obj.data).forEach(function (item) {
 
             // For each item in the object, trigger an event
+            /**
+             * Convenience reply sent back to the emitting profile via the local Team send.
+             * @param {object} what - Payload object; mutated to include `profile`.
+             * @param {number} [mode] - Copydata channel to send on.
+             * @returns {boolean} Result of the underlying sendCopyData call.
+             */
             obj.data[item].reply = (what, mode) => localTeam.send(obj.data.profile, what, mode);
 
             // Registered events on a data item

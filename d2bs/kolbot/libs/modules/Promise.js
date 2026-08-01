@@ -50,8 +50,13 @@
 
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/valueOf
     // override the valueOf as primitive value function
+    /** @returns {Promise|unknown} the resolved value once stopped, otherwise this Promise instance */
     this.valueOf = () => self.stopped ? self.value : self;
 
+    /**
+     * @param {function(unknown): unknown} handler
+     * @returns {Promise} this Promise, for chaining
+     */
     this.then = function (handler) {
       typeof self._after !== "undefined" && (self._after = []);
       self._after.push(handler);
@@ -59,6 +64,10 @@
       return self;
     };
 
+    /**
+     * @param {function(unknown): unknown} handler
+     * @returns {Promise} this Promise, for chaining
+     */
     this.catch = function (handler) {
       typeof self._catchers !== "undefined" && (self._catchers = []);
       self._catchers.push(handler);
@@ -66,6 +75,10 @@
       return self;
     };
 
+    /**
+     * @param {function(unknown): unknown} handler
+     * @returns {Promise} this Promise, for chaining
+     */
     this.finally = function (handler) {
       typeof self._finally !== "undefined" && (self._finally = []);
       self._finally.push(handler);
@@ -93,6 +106,11 @@
     }
   };
 
+  /**
+   * @description resolves once every promise in the array has stopped (settled), with the array itself.
+   * @param {Promise[]} promises
+   * @returns {Promise}
+   */
   Promise.allSettled = (promises) => new Promise(resolve => promises.every(x => x.stopped) && resolve(promises));
 
 })(module, require);

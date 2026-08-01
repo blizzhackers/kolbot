@@ -728,9 +728,7 @@ const Attack = {
             monsterList.shift();
           }
 
-          /**
-           * @todo allow for more aggressive horking here
-           */
+          /** @todo allow for more aggressive horking here */
           if (target.dead || Config.FastPick || Config.FastFindItem) {
             if ((target.isBoss || target.uniqueid > 0) && target.dead) {
               // TODO: add uniqueids to sdk
@@ -1006,9 +1004,7 @@ const Attack = {
             monsterList.shift();
           }
 
-          /**
-           * @todo allow for more aggressive horking here
-           */
+          /** @todo allow for more aggressive horking here */
           if (target.dead || Config.FastPick || Config.FastFindItem) {
             if ((target.isBoss || target.uniqueid > 0) && target.dead) {
               // TODO: add uniqueids to sdk
@@ -1367,9 +1363,7 @@ const Attack = {
     }
   },
 
-  /**
-   * @description Count uniques in current area within getUnit range
-   */
+  /** @description Count uniques in current area within getUnit range */
   countUniques: function () {
     !Attack.uniques && (Attack.uniques = 0);
     !Attack.ignoredGids && (Attack.ignoredGids = []);
@@ -2419,9 +2413,7 @@ const Attack = {
     walk === true && (walk = 1);
     force && console.debug("Forcing new position");
 
-    /**
-     * @todo If we've disabled tele for walking clear, allow use of tele specifically for repositioning
-     */
+    /** @todo If we've disabled tele for walking clear, allow use of tele specifically for repositioning */
     if (distance < 4 && (!unit.hasOwnProperty("mode") || !unit.dead)) {
       if (walk) {
         if (unit.distance > 8 || checkCollision(me, unit, coll)) {

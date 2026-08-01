@@ -9,6 +9,10 @@ let Synched = false;
 let uRdyMsg = "I'm rdy, u?";
 let rdyMsg = "rdy";
 
+/**
+ * @param {string} nick
+ * @param {string} msg
+ */
 function messageHandler(nick, msg) {
   if (nick !== me.name) {
     if (msg === uRdyMsg) {
@@ -23,6 +27,7 @@ function messageHandler(nick, msg) {
   }
 }
 
+/** @returns {boolean} */
 function Synch() {
   let i, party, j;
 

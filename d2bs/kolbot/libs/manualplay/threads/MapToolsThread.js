@@ -21,6 +21,11 @@ include("systems/gameaction/GameAction.js");
 include("manualplay/MapMode.js");
 MapMode.include();
 
+/**
+ * Entry point: runs the manual-play toolsthread loop - potion/chicken monitoring, ping/viper checks,
+ * key/game/script event handling - until a quit condition is met.
+ * @returns {boolean} true once the loop exits and cleanup has run
+ */
 function main () {
   // getUnit test
   getUnit(-1) === null && console.warn("getUnit bug detected");

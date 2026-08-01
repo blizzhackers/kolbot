@@ -23,15 +23,19 @@
 includeIfNotIncluded("core/Prototypes.js");
 includeIfNotIncluded("core/GameData/NTItemAlias.js");
 
-/**
- * @todo clean up this file
- */
+/** @todo clean up this file */
 
 const NTIP = {};
 const NTIP_CheckList = [];
 const NTIP_CheckListNoTier = [];
 let stringArray = [];
 
+/**
+ * Parses a single pickit line and registers it in the checklists if valid.
+ * @param {string} itemString - one pickit line, in NTIP syntax.
+ * @param {string} [filename="kolbot"] - source label recorded for error messages.
+ * @returns {boolean} always true, regardless of whether the line parsed successfully.
+ */
 NTIP.addLine = function (itemString, filename = "kolbot") {
   const tierdItem = itemString.toLowerCase().includes("tier");
   const info = {
@@ -55,6 +59,12 @@ NTIP.addLine = function (itemString, filename = "kolbot") {
   return true;
 };
 
+/**
+ * Reads and parses a .nip file, registering every valid line in the checklists.
+ * @param {string} filepath
+ * @param {boolean} [notify] - log load status / errors to console when true.
+ * @returns {boolean} false if the file doesn't exist or couldn't be opened, true otherwise.
+ */
 NTIP.OpenFile = function (filepath, notify) {
   if (!FileTools.exists(filepath)) {
     if (notify) {
@@ -120,6 +130,12 @@ NTIP.OpenFile = function (filepath, notify) {
   return true;
 };
 
+/**
+ * Counts stash/inventory items matching the given filters.
+ * @param {?((item: ItemUnit) => boolean)} item_type - filter on item type/class, or null to match any.
+ * @param {?((item: ItemUnit) => boolean)} item_stats - filter on item stats, or null to match any.
+ * @returns {number} matching item count; 0 if items couldn't be enumerated.
+ */
 NTIP.CheckQuantityOwned = function (item_type, item_stats) {
   let num = 0;
   let items = me.getItemsEx();
@@ -153,6 +169,10 @@ NTIP.CheckQuantityOwned = function (item_type, item_stats) {
   return num;
 };
 
+/**
+ * Empties the compiled checklists and the raw line-string cache.
+ * @returns {void}
+ */
 NTIP.Clear = function () {
   NTIP_CheckList.length = 0;
   NTIP_CheckListNoTier.length = 0;
@@ -612,6 +632,13 @@ NTIP._lists = new Map([
   ["stat", NTIPAliasStat],
 ]);
 
+/**
+ * Compiles one raw pickit line into a [propertyMatcher, statMatcher, options] tuple of runtime functions.
+ * @param {string} input - raw pickit line text (property expr # stat expr).
+ * @param {{line: number, file: string, string: string}} info - source metadata used in thrown error messages.
+ * @returns {[((item: ItemUnit) => boolean)|undefined, ((item: ItemUnit) => number)|undefined, Object]|false|null}
+ *   the compiled tuple, or false/null if the line failed to parse.
+ */
 NTIP.ParseLineInt = function (input, info) {
   let i, property, p_start, p_end, p_section, p_keyword, p_result, value;
 

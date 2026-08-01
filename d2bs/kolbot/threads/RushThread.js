@@ -17,6 +17,9 @@ include("systems/mulelogger/MuleLogger.js");
 include("systems/gameaction/GameAction.js");
 
 
+/**
+ * Entry point for the rusher's second-stage thread: drives the boss-run sequence for this profile.
+ */
 function main () {
   const {
     log,
@@ -57,6 +60,11 @@ function main () {
     return true;
   });
 
+  /**
+   * chatmsg listener: tallies rushees who acknowledged the waypoint drop.
+   * @param {string} who
+   * @param {string} msg
+   */
   function wpEvent (who, msg) {
     if (typeof msg === "string" && (msg === "gotwp" || msg === "Failed to get wp" || msg === "alreadyhave")) {
       count++;
@@ -64,6 +72,11 @@ function main () {
     }
   }
 
+  /**
+   * Drops a portal at the current waypoint and waits (up to 2 minutes) for every party
+   * member to acknowledge it.
+   * @returns {boolean} true if all rushees acknowledged (or fell silent) before the timeout
+   */
   function giveWP () {
     let wp = Game.getObject("waypoint");
     let success = false;

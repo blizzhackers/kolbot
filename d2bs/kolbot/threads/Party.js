@@ -18,6 +18,11 @@ include("systems/gameaction/GameAction.js");
 // party thread specific
 include("oog/ShitList.js");
 
+/**
+ * Entry point: runs the in-game party thread - auto invite/accept per `Config.PublicMode`,
+ * shitlist enforcement, and greeting/death/congratulation chat messages - until quit.
+ * @returns {boolean} true once the thread is signaled to quit (or shut down on single player)
+ */
 function main () {
   Config.init();
 

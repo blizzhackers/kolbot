@@ -21,6 +21,12 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
   Object.defineProperty(exports, "__esModule", { value: true });
   exports.Override = void 0;
   var Override = /** @class */ (function () {
+    /**
+     * @param {object} target object whose method is being overridden
+     * @param {string | Function} original method name on `target`, or the current function reference
+     * to look up its key on `target`
+     * @param {Function} method replacement implementation; called as `method(original, ...args)`
+     */
     function Override(target, original, method) {
       this.target = target;
       if (typeof original !== 'string') {
@@ -34,6 +40,9 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
       this.method = method;
       Override.all.push(this);
     }
+    /**
+     * Installs the override, replacing `target[key]` with a wrapper that forwards to `method`.
+     */
     Override.prototype.apply = function () {
       var _a = this, target = _a.target, key = _a.key, method = _a.method, original = _a.original;
       target[key] = function () {
@@ -44,6 +53,9 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
         return method.apply(this, __spreadArray([original && original.bind(this)], args, true));
       };
     };
+    /**
+     * Restores `target[key]` to its original value, or deletes it if there was no original.
+     */
     Override.prototype.rollback = function () {
       var _a = this, target = _a.target, key = _a.key, original = _a.original;
       if (original) {

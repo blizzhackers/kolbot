@@ -7,7 +7,7 @@
 */
 include("systems/mulelogger/MuleLogger.js");
 
-/** @type {import("./GameAction").GameActionType} */
+/** @type {GameAction} */
 const GameAction = {
   task: null,
   
@@ -73,6 +73,7 @@ const GameAction = {
     D2Bot.setTag(tag);
   },
 
+  /** @returns {{ gameName: string, gamePass: string } | null} */
   gameInfo: function () {
     let gi = { gameName: null, gamePass: null };
 
@@ -95,6 +96,7 @@ const GameAction = {
     return gi;
   },
 
+  /** @returns {{ realm: string | null, account: string | null, password: string | null }} */
   getLogin: function () {
     let li = { realm: null, account: null, password: null };
 
@@ -121,6 +123,7 @@ const GameAction = {
     return li;
   },
 
+  /** @returns {string[]} */
   getCharacters: function () {
     let chars = [];
 
@@ -141,6 +144,7 @@ const GameAction = {
     return chars;
   },
 
+  /** @returns {boolean} */
   inGameCheck: function () {
     if (!getScript("D2BotGameAction.dbj")) {
       return false;
@@ -185,6 +189,10 @@ const GameAction = {
     return true;
   },
 
+  /**
+   * @param {string} hash
+   * @returns {string}
+   */
   load: function (hash) {
     let filename = "data/secure/" + hash + ".txt";
 
@@ -198,11 +206,16 @@ const GameAction = {
     return FileTools.readText(filename);
   },
 
+  /**
+   * @param {string} hash
+   * @param {string} data
+   */
   save: function (hash, data) {
     let filename = "data/secure/" + hash + ".txt";
     FileTools.writeText(filename, data);
   },
 
+  /** @param {GameActionDropItem[]} droplist */
   dropItems: function (droplist) {
     if (!droplist) return;
 
@@ -241,6 +254,9 @@ const GameAction = {
     }
   },
 
+  /**
+   * Converts a batch of ladder mule data files to their non-ladder filename/path equivalents.
+   */
   convertLadderFiles: function () {
     console.log("ÿc4GameActionÿc0: Converting ladder files to non-ladder...");
     if (!this.task || !this.task.data || this.task.action !== "doConvertNL") {

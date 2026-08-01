@@ -1,122 +1,149 @@
 export {};
 declare global {
   /**
-   * @property {string} name - The name of the runeword.
-   * @property {number} sockets - The number of sockets required for the item.
-   * @property {Array<number>} runes - Array of rune IDs required for the runeword.
-   * @property {Array<number>} itemTypes - Array of item type IDs the runeword can be applied to.
-   * @method ladderRestricted - Returns true if we are unable to make the runeword because we are not on ladder.
+   * Definition of a single runeword recipe, as constructed by RunewordObj in
+   * libs/core/GameData/RuneData.js.
    */
-  interface runeword {
+  interface RunewordDefinition {
     name: string;
     sockets: number;
     runes: number[];
     itemTypes: number[];
     _ladder: boolean;
     reqLvl: number;
-    ladderRestricted: () => boolean;
+    /** Returns true if we are unable to make the runeword because we are not on ladder. */
+    ladderRestricted(): boolean;
   }
 
-  namespace Runeword {
-    const AncientsPledge: runeword;
-    const Black: runeword;
-    const Fury: runeword;
-    const HolyThunder: runeword;
-    const Honor: runeword;
-    const KingsGrace: runeword;
-    const Leaf: runeword;
-    const Lionheart: runeword;
-    const Lore: runeword;
-    const Malice: runeword;
-    const Melody: runeword;
-    const Memory: runeword;
-    const Nadir: runeword;
-    const Radiance: runeword;
-    const Rhyme: runeword;
-    const Silence: runeword;
-    const Smoke: runeword;
-    const Stealth: runeword;
-    const Steel: runeword;
-    const Strength: runeword;
-    const Venom: runeword;
-    const Wealth: runeword;
-    const White: runeword;
-    const Zephyr: runeword;
-    const Beast: runeword;
-    const Bramble: runeword;
-    const BreathoftheDying: runeword;
-    const CallToArms: runeword;
-    const ChainsofHonor: runeword;
-    const Chaos: runeword;
-    const CrescentMoon: runeword;
-    const Delirium: runeword;
-    const Doom: runeword;
-    const Duress: runeword;
-    const Enigma: runeword;
-    const Eternity: runeword;
-    const Exile: runeword;
-    const Famine: runeword;
-    const Gloom: runeword;
-    const HandofJustice: runeword;
-    const HeartoftheOak: runeword;
-    const Kingslayer: runeword;
-    const Passion: runeword;
-    const Prudence: runeword;
-    const Sanctuary: runeword;
-    const Splendor: runeword;
-    const Stone: runeword;
-    const Wind: runeword;
-    const Brand: runeword;
-    const Death: runeword;
-    const Destruction: runeword;
-    const Dragon: runeword;
-    const Dream: runeword;
-    const Edge: runeword;
-    const Faith: runeword;
-    const Fortitude: runeword;
-    const Grief: runeword;
-    const Harmony: runeword;
-    const Ice: runeword;
-    const Infinity: runeword;
-    const Insight: runeword;
-    const LastWish: runeword;
-    const Lawbringer: runeword;
-    const Oath: runeword;
-    const Obedience: runeword;
-    const Phoenix: runeword;
-    const Pride: runeword;
-    const Rift: runeword;
-    const Spirit: runeword;
-    const VoiceofReason: runeword;
-    const Wrath: runeword;
-    const Bone: runeword;
-    const Enlightenment: runeword;
-    const Myth: runeword;
-    const Peace: runeword;
-    const Principle: runeword;
-    const Rain: runeword;
-    const Treachery: runeword;
-    const Test: runeword;
+  // Back-compat alias: sdk/types/Config.d.ts, libs/core/Runewords.js,
+  // libs/core/GameData/RuneData.js, and libs/SoloPlay/Core/RunewordsOverrides.js still reference
+  // the lowercase type name `runeword` - keep it resolving to the same shape.
+  type runeword = RunewordDefinition;
 
-    function findByName(name: string): runeword | undefined;
-    function findByRune(rune: number): runeword[];
-    function findByType(type: number): runeword[];
+  // Value shape of the global `Runeword` const in libs/core/Runewords.js. Unlike a Pattern-1
+  // global, `Runeword` isn't a literal object declared in that file - it's `require()`d from
+  // libs/core/GameData/RuneData.js, whose module.exports is built inside an IIFE module factory.
+  // There's no single top-level declaration site to bind via JSDoc @type, so the ambient const
+  // declaration stays here.
+  interface IRuneword {
+    AncientsPledge: RunewordDefinition;
+    Black: RunewordDefinition;
+    Fury: RunewordDefinition;
+    HolyThunder: RunewordDefinition;
+    Honor: RunewordDefinition;
+    KingsGrace: RunewordDefinition;
+    Leaf: RunewordDefinition;
+    Lionheart: RunewordDefinition;
+    Lore: RunewordDefinition;
+    Malice: RunewordDefinition;
+    Melody: RunewordDefinition;
+    Memory: RunewordDefinition;
+    Nadir: RunewordDefinition;
+    Radiance: RunewordDefinition;
+    Rhyme: RunewordDefinition;
+    Silence: RunewordDefinition;
+    Smoke: RunewordDefinition;
+    Stealth: RunewordDefinition;
+    Steel: RunewordDefinition;
+    Strength: RunewordDefinition;
+    Venom: RunewordDefinition;
+    Wealth: RunewordDefinition;
+    White: RunewordDefinition;
+    Zephyr: RunewordDefinition;
+    Beast: RunewordDefinition;
+    Bramble: RunewordDefinition;
+    BreathoftheDying: RunewordDefinition;
+    CallToArms: RunewordDefinition;
+    ChainsofHonor: RunewordDefinition;
+    Chaos: RunewordDefinition;
+    CrescentMoon: RunewordDefinition;
+    Delirium: RunewordDefinition;
+    Doom: RunewordDefinition;
+    Duress: RunewordDefinition;
+    Enigma: RunewordDefinition;
+    Eternity: RunewordDefinition;
+    Exile: RunewordDefinition;
+    Famine: RunewordDefinition;
+    Gloom: RunewordDefinition;
+    HandofJustice: RunewordDefinition;
+    HeartoftheOak: RunewordDefinition;
+    Kingslayer: RunewordDefinition;
+    Passion: RunewordDefinition;
+    Prudence: RunewordDefinition;
+    Sanctuary: RunewordDefinition;
+    Splendor: RunewordDefinition;
+    Stone: RunewordDefinition;
+    Wind: RunewordDefinition;
+    Brand: RunewordDefinition;
+    Death: RunewordDefinition;
+    Destruction: RunewordDefinition;
+    Dragon: RunewordDefinition;
+    Dream: RunewordDefinition;
+    Edge: RunewordDefinition;
+    Faith: RunewordDefinition;
+    Fortitude: RunewordDefinition;
+    Grief: RunewordDefinition;
+    Harmony: RunewordDefinition;
+    Ice: RunewordDefinition;
+    Infinity: RunewordDefinition;
+    Insight: RunewordDefinition;
+    LastWish: RunewordDefinition;
+    Lawbringer: RunewordDefinition;
+    Oath: RunewordDefinition;
+    Obedience: RunewordDefinition;
+    Phoenix: RunewordDefinition;
+    Pride: RunewordDefinition;
+    Rift: RunewordDefinition;
+    Spirit: RunewordDefinition;
+    VoiceofReason: RunewordDefinition;
+    Wrath: RunewordDefinition;
+    Bone: RunewordDefinition;
+    Enlightenment: RunewordDefinition;
+    Myth: RunewordDefinition;
+    Peace: RunewordDefinition;
+    Principle: RunewordDefinition;
+    Rain: RunewordDefinition;
+    Treachery: RunewordDefinition;
+    Test: RunewordDefinition;
 
-    function addRuneword(name: string, sockets: number, runes: number | number[], itemTypes: number | number[]): runeword | boolean;
+    findByName(name: string): RunewordDefinition | undefined;
+    findByRune(rune: number): RunewordDefinition[];
+    findByType(type: number): RunewordDefinition[];
+    addRuneword(
+      name: string,
+      sockets: number,
+      runes: number | number[],
+      itemTypes: number | number[]
+    ): RunewordDefinition | false;
   }
 
-  namespace Runewords {
-    function init(): void
-    function validItem(item: any): void
-    function buildLists(): void
-    function update(classid: any, gid: any): void
-    function checkRunewords(): void
-    function checkItem(unit: any): boolean
-    function keepItem(unit: any): boolean
-    function getBase(runeword: any, base: any, ethFlag: any, reroll: any): void
-    function socketItem(base: any, rune: any): void
-    function getScroll(): void
-    function makeRunewords(): void
-    function rerollRunewords(): void
+  const Runeword: IRuneword;
+
+  // Value shape of the global `Runewords` const in libs/core/Runewords.js (bound there via
+  // JSDoc @type). Declaring the const here as well would collide: both files are global scripts.
+  // Ambient value declaration (Skill/Attack/Misc precedent): the checker leaves some
+  // @type-bound js consts unresolved or any (cause undiagnosed); the ambient const
+  // restores resolution and empirically does not collide with the js declaration.
+  const Runewords: IRunewords;
+
+  interface IRunewords {
+    needList: number[];
+    // NTIP.ParseLineInt is ambient-typed as returning `boolean` (sdk/types/NTIP.d.ts), but at
+    // runtime returns null or a parsed-line object - that type isn't precise yet, so this is a
+    // last-resort placeholder until NTIP.d.ts's owner fixes it.
+    pickitEntries: unknown[];
+    validGids: number[];
+    init(): void;
+    validItem(item: ItemUnit): boolean;
+    buildLists(): void;
+    update(classid: number, gid: number): void;
+    checkRunewords(): ItemUnit[] | false;
+    checkItem(unit: ItemUnit): boolean;
+    keepItem(unit: ItemUnit): boolean;
+    getBase(runeword: RunewordDefinition, base: ItemUnit | number, ethFlag?: number, reroll?: boolean): ItemUnit | false;
+    socketItem(base: ItemUnit, rune: ItemUnit): boolean;
+    getScroll(): ItemUnit | false;
+    makeRunewords(): boolean;
+    rerollRunewords(): boolean;
   }
 }

@@ -18,6 +18,11 @@ includeSystemLibs();
 include("systems/automule/Mule.js");
 include("systems/mulelogger/MuleLogger.js");
 
+/**
+ * D2BS entry point: sets up the mule's background workers/listeners, then loops picking up
+ * items from the ground until muling is done or the character needs to move on.
+ * @returns {boolean}
+ */
 function main () {
   D2Bot.init(); // Get D2Bot# handle
   D2Bot.ingame();

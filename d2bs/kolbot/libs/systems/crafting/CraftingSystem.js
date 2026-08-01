@@ -17,6 +17,7 @@ CraftingSystem.Teams = Object.assign({}, require("./TeamsConfig", null, false));
 // ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ## ##
 
 // Get the Crafting System information for current profile
+/** @returns {CraftingSystemTeamInfo | false} */
 CraftingSystem.getInfo = function () {
   for (let i in CraftingSystem.Teams) {
     if (CraftingSystem.Teams.hasOwnProperty(i)) {
@@ -52,6 +53,7 @@ CraftingSystem.getInfo = function () {
 CraftingSystem.check = false;
 CraftingSystem.inGame = false;
 
+/** @returns {boolean} */
 CraftingSystem.outOfGameCheck = function () {
   if (!CraftingSystem.check) return false;
 
@@ -59,6 +61,10 @@ CraftingSystem.outOfGameCheck = function () {
   /** @type {ReturnType<ICraftingSystem["getWorker"]>} */
   let worker;
 
+  /**
+   * @param {string | object | number} msg
+   * @returns {boolean}
+   */
   function scriptMsg(msg) {
     let obj;
 
@@ -107,6 +113,7 @@ CraftingSystem.outOfGameCheck = function () {
   return false;
 };
 
+/** @returns {CraftingSystemWorker | false} */
 CraftingSystem.getWorker = function () {
   let rval = {
     game: false,
@@ -114,6 +121,10 @@ CraftingSystem.getWorker = function () {
   };
   let info = CraftingSystem.getInfo();
 
+  /**
+   * @param {number} mode
+   * @param {string} msg
+   */
   function checkEvent(mode, msg) {
     if (mode === 4) {
       for (let i = 0; i < info.CraftingGames.length; i += 1) {
@@ -154,6 +165,7 @@ CraftingSystem.getWorker = function () {
 // # Item collector in-game specific functions #
 // #############################################
 
+/** @returns {boolean} */
 CraftingSystem.inGameCheck = function () {
   let info = CraftingSystem.getInfo();
 
@@ -179,6 +191,10 @@ CraftingSystem.itemList = [];
 CraftingSystem.fullSets = [];
 
 // Check whether item can be used for crafting
+/**
+ * @param {ItemUnit} item
+ * @returns {boolean}
+ */
 CraftingSystem.validItem = function (item) {
   switch (item.itemType) {
   case sdk.items.type.Jewel:
@@ -190,6 +206,10 @@ CraftingSystem.validItem = function (item) {
 };
 
 // Check if the item should be picked for crafting
+/**
+ * @param {ItemUnit} item
+ * @returns {boolean}
+ */
 CraftingSystem.checkItem = function (item) {
   let info = CraftingSystem.getInfo();
 
@@ -205,6 +225,10 @@ CraftingSystem.checkItem = function (item) {
 };
 
 // Check if the item should be kept or dropped
+/**
+ * @param {ItemUnit} item
+ * @returns {boolean}
+ */
 CraftingSystem.keepItem = function (item) {
   let info = CraftingSystem.getInfo();
 
@@ -221,10 +245,19 @@ CraftingSystem.keepItem = function (item) {
 };
 
 // Collect ingredients only if a worker needs them
+/**
+ * @param {string} workerName
+ * @returns {number[] | false}
+ */
 CraftingSystem.getSetInfoFromWorker = function (workerName) {
   let setInfo = false;
   let info = CraftingSystem.getInfo();
 
+  /**
+   * @param {number} mode
+   * @param {string} msg
+   * @returns {boolean}
+   */
   function copyData(mode, msg) {
     let obj;
 
@@ -260,6 +293,7 @@ CraftingSystem.getSetInfoFromWorker = function (workerName) {
   return false;
 };
 
+/** @param {string} name */
 CraftingSystem.init = function (name) {
   let info = CraftingSystem.getInfo();
 
@@ -281,6 +315,10 @@ CraftingSystem.init = function (name) {
 };
 
 // Build global lists of needed items and valid ingredients
+/**
+ * @param {boolean} [onlyNeeded]
+ * @returns {boolean}
+ */
 CraftingSystem.buildLists = function (onlyNeeded) {
   let info = CraftingSystem.getInfo();
 
@@ -303,6 +341,10 @@ CraftingSystem.buildLists = function (onlyNeeded) {
 };
 
 // Check which ingredients a set needs and has
+/**
+ * @param {CraftingSystemSet} set
+ * @returns {object}
+ */
 CraftingSystem.checkSet = function (set) {
   let rval = {};
   let setNeeds = [];
@@ -343,6 +385,10 @@ CraftingSystem.checkSet = function (set) {
 };
 
 // Update lists when a valid ingredient is picked
+/**
+ * @param {ItemUnit} item
+ * @returns {boolean}
+ */
 CraftingSystem.update = function (item) {
   CraftingSystem.neededItems.splice(CraftingSystem.neededItems.indexOf(item.classid), 1);
   CraftingSystem.validGids.push(item.gid);
@@ -351,6 +397,7 @@ CraftingSystem.update = function (item) {
 };
 
 // Cube flawless gems if the ingredient is a perfect gem
+/** @returns {boolean} */
 CraftingSystem.checkSubrecipes = function () {
   for (let i = 0; i < CraftingSystem.neededItems.length; i += 1) {
     switch (CraftingSystem.neededItems[i]) {
@@ -383,6 +430,7 @@ CraftingSystem.checkSubrecipes = function () {
 };
 
 // Check if there are any complete ingredient sets
+/** @returns {boolean} */
 CraftingSystem.checkFullSets = function () {
   let info = CraftingSystem.getInfo();
 
@@ -401,6 +449,7 @@ CraftingSystem.checkFullSets = function () {
 };
 
 // Drop complete ingredient sets
+/** @returns {boolean} */
 CraftingSystem.dropItems = function () {
   Town.goToTown(1);
   Town.move("stash");
@@ -408,6 +457,10 @@ CraftingSystem.dropItems = function () {
 
   let worker;
 
+  /**
+   * @param {string | object | number} msg
+   * @returns {boolean}
+   */
   function scriptMsg(msg) {
     let obj;
 
@@ -448,6 +501,7 @@ CraftingSystem.dropItems = function () {
   return true;
 };
 
+/** @returns {void} */
 CraftingSystem.dropGold = function () {
   Town.goToTown(1);
   Town.move("stash");

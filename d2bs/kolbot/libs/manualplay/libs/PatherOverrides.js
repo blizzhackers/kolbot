@@ -9,10 +9,18 @@
 includeIfNotIncluded("core/Pather.js");
 
 Pather.stop = false;
+/**
+ * "keyup" listener that requests an early stop of the current move when Numpad9 is pressed.
+ * @param {number} key
+ */
 Pather.stopEvent = function (key) {
   key === sdk.keys.Numpad9 && !me.idle && (Pather.stop = true);
 };
 
+/**
+ * @param {number} act
+ * @returns {boolean} true once the character has reached the requested act
+ */
 Pather.changeAct = function (act) {
   let npc, npcUnit, loc;
   let wp, useWp = false;
@@ -96,6 +104,11 @@ Pather.changeAct = function (act) {
   return me.act === act;
 };
 
+/**
+ * @param {number} area
+ * @param {boolean} [clearPath]
+ * @returns {boolean}
+ */
 Pather.getWP = function (area, clearPath) {
   area !== me.area && this.journeyTo(area);
 
@@ -136,6 +149,12 @@ Pather.getWP = function (area, clearPath) {
   return false;
 };
 
+/**
+ * @param {number} [x]
+ * @param {number} [y]
+ * @param {number | undefined} [minDist]
+ * @returns {boolean}
+ */
 Pather.walkTo = function (x = undefined, y = undefined, minDist = undefined) {
   while (!me.gameReady) {
     delay(100);
@@ -239,6 +258,12 @@ Pather.walkTo = function (x = undefined, y = undefined, minDist = undefined) {
   return !me.dead && getDistance(me.x, me.y, x, y) <= minDist;
 };
 
+/**
+ * @param {number} x
+ * @param {number} y
+ * @param {number} [maxRange]
+ * @returns {boolean}
+ */
 Pather.teleportTo = function (x, y, maxRange = 5) {
   for (let i = 0; i < 3; i++) {
     Config.PacketCasting > 0 ? Packet.teleport(x, y) : Skill.cast(sdk.skills.Teleport, sdk.skills.hand.Right, x, y);
@@ -257,6 +282,14 @@ Pather.teleportTo = function (x, y, maxRange = 5) {
   return false;
 };
 
+/**
+ * @param {number} x
+ * @param {number} y
+ * @param {number | undefined} [retry]
+ * @param {boolean | undefined} [clearPath]
+ * @param {boolean | undefined} [pop]
+ * @returns {boolean}
+ */
 Pather.moveTo = function (x, y, retry, clearPath, pop) {
   // Abort if dead
   if (me.dead) return false;

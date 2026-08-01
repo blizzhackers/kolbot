@@ -160,6 +160,9 @@
         return this.doCast(unit, choosenSkill);
       },
 
+      /**
+       * Re-applies precast buffs (e.g. rebuffing shapeshift form) after an attack sequence ends.
+       */
       afterAttack: function () {
         Precast.doPrecast(false);
       },

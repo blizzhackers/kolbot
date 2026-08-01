@@ -32,6 +32,11 @@ let obj = {};
 const accounts = [];
 const chars = [];
 
+/**
+ * Removes SoloPlay data/log files for each profile in `AdvancedProfileCleanerConfig`/`profiles`,
+ * optionally archiving them under `libs/SoloPlay/.soloplay/` first.
+ * @returns {void}
+ */
 function dataCleaner () {
   if (AdvancedProfileCleanerConfig.length) {
     let incrementString = function (text) {
@@ -160,6 +165,11 @@ function dataCleaner () {
   D2Bot.printToConsole("D2BotCleaner: Done cleaning files", sdk.colors.D2Bot.Gold);
 }
   
+/**
+ * Populates `accounts`/`chars` from `AccountsToClean` and `AdvancedCleanerConfig`, stopping the
+ * script if no accounts were configured.
+ * @returns {void}
+ */
 function parseInfo () {
   for (let i in AccountsToClean) {
     if (AccountsToClean.hasOwnProperty(i) && typeof i === "string") {
@@ -184,6 +194,7 @@ function parseInfo () {
   }
 }
   
+/** @returns {boolean} False as soon as a character fails to delete, true once all are done. */
 function deleteAllCharacters () {
   let characters = ControlAction.getCharacters();
   for (let character of characters) {
@@ -339,6 +350,11 @@ const locationAction = (function () {
   };
 })();
 
+/**
+ * Entry point: waits for the D2Bot handle and game info, then cleans configured accounts/characters
+ * by driving `locationAction` forever.
+ * @returns {void}
+ */
 function main () {
   addEventListener("copydata", Starter.receiveCopyData);
 

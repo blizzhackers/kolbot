@@ -35,6 +35,10 @@ includeIfNotIncluded("oog/FileAction.js");
       nextGame: ""
     },
 
+    /**
+     * Creates the datafile if it does not already exist.
+     * @returns {boolean} True if a new datafile was created.
+     */
     init: function () {
       if (!FileTools.exists(this._path)) {
         this.create();
@@ -44,6 +48,7 @@ includeIfNotIncluded("oog/FileAction.js");
       return false;
     },
 
+    /** @returns {DataFileObj} The freshly written default datafile. */
     create: function () {
       FileAction.write(this._path, JSON.stringify(this._default, null, 2));
 
@@ -69,6 +74,10 @@ includeIfNotIncluded("oog/FileAction.js");
       }
     },
 
+    /**
+     * Reads the current datafile from disk, recreating it from defaults if the JSON is corrupted.
+     * @returns {DataFileObj}
+     */
     getObj: function () {
       !FileTools.exists(this._path) && DataFile.create();
       
@@ -92,11 +101,16 @@ includeIfNotIncluded("oog/FileAction.js");
       return this._default;
     },
 
+    /** @returns {DataFileObj} A cloned copy of the current datafile contents. */
     getStats: function () {
       let obj = this.getObj();
       return clone(obj);
     },
 
+    /**
+     * @param {string | string[]} arg Stat name(s) to recompute/update.
+     * @param {string | number} [value] Value to assign for stats without a computed rule.
+     */
     updateStats: function (arg, value) {
       while (me.ingame && !me.gameReady) {
         delay(100);

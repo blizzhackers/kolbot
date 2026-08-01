@@ -270,6 +270,10 @@ const Wakka = new Runnable(
 
     !leader && (leader = Misc.autoLeaderDetect({
       destination: sdk.areas.ChaosSanctuary,
+      /**
+       * @param {number} area
+       * @returns {boolean}
+       */
       quitIf: (area) => [sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber].includes(area),
       timeout: timeout * 60e3
     }));

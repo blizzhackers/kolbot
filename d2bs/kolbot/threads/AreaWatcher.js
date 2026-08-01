@@ -8,9 +8,7 @@ js_strict(true);
 include("critical.js");
 includeCoreLibs();
 
-/**
- * @todo redo this, feels messy
- */
+/** @todo redo this, feels messy */
 
 function main() {
   let _default = getScript("default.dbj");

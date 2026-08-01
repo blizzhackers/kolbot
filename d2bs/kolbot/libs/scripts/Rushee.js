@@ -20,6 +20,9 @@ const Rushee = new Runnable(
       throw new Error("No rush config found for profile: " + me.profile);
     }
 
+    /**
+     * Installs Town.goToTown and Pather.getWP overrides tailored to rushee waypoint/portal behavior.
+     */
     function applyOverrides() {
       new Overrides.Override(Town, Town.goToTown, function (orignal, act, wpmenu) {
         try {
@@ -183,6 +186,7 @@ const Rushee = new Runnable(
     const tyraelTalk = function () {
       const bridgeNode = new PathNode(22577, 15609);
       if (me.inArea(sdk.areas.DurielsLair) && bridgeNode.distance > 10) {
+        /** @returns {boolean} true once Tyrael has spawned, stopping the move early */
         Pather.move(bridgeNode, { callback: function () {
           return Game.getNPC(NPC.Tyrael);
         } });
@@ -239,10 +243,12 @@ const Rushee = new Runnable(
         return true;
       };
       return {
+        /** @returns {boolean} true if the Horadric Staff exists or was successfully cubed */
         Staff: function () {
           log("Making staff", Config.LocalChat.Enabled);
           return make(staff);
         },
+        /** @returns {boolean} true if Khalim's Will exists or was successfully cubed */
         Flail: function () {
           log("Making flail", Config.LocalChat.Enabled);
           return make(flail);

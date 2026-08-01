@@ -41,5 +41,10 @@
     "node_modules",
     "**/node_modules/*",
     "**/data/",
+    // The SoloPlay submodule is its own TS program (libs/SoloPlay/tsconfig.json, nearest-wins
+    // in the editor) with a PARALLEL ambient layer - its namespace declarations for core
+    // globals (Attack/Skill/Misc/Pather) shadow this program's interface+@type pattern when
+    // both are loaded, killing hover on the converted globals.
+    "./d2bs/kolbot/libs/SoloPlay",
   ],
 }

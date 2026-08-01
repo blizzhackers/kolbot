@@ -11,9 +11,7 @@
 const ClassAttack = (function () {
   const LazyLoader = require("../modules/LazyLoader");
 
-  /**
-   * @type {Map<string, string>}
-   */
+  /** @type {Map<string, string>} */
   const modulePathMap = new Map([
     [sdk.player.class.Amazon.toString(), "./Attacks/Amazon"],
     [sdk.player.class.Assassin.toString(), "./Attacks/Assassin"],

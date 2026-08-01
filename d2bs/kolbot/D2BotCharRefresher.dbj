@@ -242,6 +242,10 @@ const locationAction = (function () {
   };
 })();
 
+/**
+ * Entry point for the CharRefresher session: initializes the D2Bot handshake, then loops
+ * forever tracking game status and reacting to location changes.
+ */
 function main () {
   addEventListener("copydata", Starter.receiveCopyData);
 

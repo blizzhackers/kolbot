@@ -5,6 +5,7 @@
  *
  */
 
+/** @type {TextHooks} */
 const TextHooks = (function () {
   const Events = new (require("../../modules/AsyncEvents"));
   const HookFactory = require("../modules/HookFactory");
@@ -19,7 +20,7 @@ const TextHooks = (function () {
   const Y_LOC_MAP_SCALE = { 1: 40, 2: 30, 3: 20, 4: 10, 6: -10, 9: -40 };
 
   /** @typedef {import("./TextHooks").HookEntry} HookEntry */
-  /** @typedef {import("../libs/Hooks")} */
+  /** @typedef {import("../libs/Hooks")} HooksModule */
 
   /**
    * @param {number} click 
@@ -80,6 +81,7 @@ const TextHooks = (function () {
   };
 
   const textHooks = {
+    /** @returns {HookEntry} */
     credits: function () {
       return HookFactory.createHooks.text({
         name: "credits",
@@ -88,6 +90,7 @@ const TextHooks = (function () {
         y: 600 + Hooks.resfix.y,
       });
     },
+    /** @returns {HookEntry} */
     title: function () {
       return HookFactory.createHooks.text({
         name: "title",
@@ -96,6 +99,7 @@ const TextHooks = (function () {
         y: 13,
       });
     },
+    /** @returns {HookEntry} */
     ping: function () {
       return HookFactory.createHooks.text({
         name: "ping",
@@ -107,6 +111,7 @@ const TextHooks = (function () {
         align: 1,
       });
     },
+    /** @returns {HookEntry} */
     time: function () {
       return HookFactory.createHooks.text({
         name: "time",
@@ -118,6 +123,7 @@ const TextHooks = (function () {
         align: 1,
       });
     },
+    /** @returns {HookEntry} */
     ip: function () {
       const hook = HookFactory.createHooks.text({
         name: "ip",
@@ -131,6 +137,7 @@ const TextHooks = (function () {
       hook.hook.zorder = 0;
       return hook;
     },
+    /** @returns {HookEntry} */
     key5: function () {
       return HookFactory.createHooks.text({
         name: "key5",
@@ -139,6 +146,7 @@ const TextHooks = (function () {
         y: 545 - TextHooks.qolHooks.length * 10 + Hooks.resfix.y,
       });
     },
+    /** @returns {HookEntry} */
     key6: function () {
       return HookFactory.createHooks.text({
         name: "key6",
@@ -147,6 +155,7 @@ const TextHooks = (function () {
         y: 545 - TextHooks.qolHooks.length * 10 + Hooks.resfix.y,
       });
     },
+    /** @returns {(HookEntry & { dest: number, type: string })|null} */
     nextAct: function () {
       if (me.inTown && me.accessToAct(me.act + 1)) {
         return Object.assign({
@@ -161,6 +170,7 @@ const TextHooks = (function () {
       }
       return null;
     },
+    /** @returns {(HookEntry & { dest: number, type: string })|null} */
     previousAct: function () {
       if (me.inTown && me.act > 1) {
         return Object.assign({
@@ -175,6 +185,7 @@ const TextHooks = (function () {
       }
       return null;
     },
+    /** @returns {HookEntry} */
     pickitStatus: function () {
       return HookFactory.createHooks.text({
         name: "pickitStatus",
@@ -183,6 +194,7 @@ const TextHooks = (function () {
         y: 503 - TextHooks.settingsModifer * 10 - TextHooks.statusHooks.length * 11 + Hooks.resfix.y,
       });
     },
+    /** @returns {HookEntry} */
     itemStatus: function () {
       return HookFactory.createHooks.text({
         name: "itemStatus",
@@ -191,6 +203,7 @@ const TextHooks = (function () {
         y: 503 - TextHooks.settingsModifer * 10 - TextHooks.statusHooks.length * 11 + Hooks.resfix.y,
       });
     },
+    /** @returns {HookEntry} */
     monsterStatus: function () {
       return HookFactory.createHooks.text({
         name: "monsterStatus",
@@ -199,6 +212,7 @@ const TextHooks = (function () {
         y: 503 - TextHooks.settingsModifer * 10 - TextHooks.statusHooks.length * 11 + Hooks.resfix.y,
       });
     },
+    /** @returns {HookEntry} */
     vectorStatus: function () {
       return HookFactory.createHooks.text({
         name: "vectorStatus",
@@ -212,6 +226,9 @@ const TextHooks = (function () {
   const statusHookNames = ["pickitStatus", "vectorStatus", "monsterStatus", "itemStatus"];
   const qols = ["previousAct", "nextAct", "key6", "key5"];
   const specialCases = {
+    /**
+     * Rebuilds the dashboard container hooks (box + frame) at the current scale.
+     */
     dashboard: function () {
       clearHooks(TextHooks.dashBoard);
       
@@ -228,6 +245,9 @@ const TextHooks = (function () {
       });
     },
     
+    /**
+     * Rebuilds the quality-of-life hook list and its container, sized to how many hooks fit.
+     */
     qolBoard: function () {
       clearHooks(TextHooks.qolHooks);
       
@@ -251,6 +271,9 @@ const TextHooks = (function () {
       });
     },
     
+    /**
+     * Rebuilds the status hooks with the full settings box and a "Hide Settings" toggle.
+     */
     showSettings: function () {
       clearHooks(TextHooks.statusHooks);
       
@@ -287,6 +310,9 @@ const TextHooks = (function () {
       }));
     },
 
+    /**
+     * Clears the status hooks and replaces them with a single "Show Settings" toggle.
+     */
     hideSettings: function () {
       clearHooks(TextHooks.statusHooks);
 
@@ -341,6 +367,9 @@ const TextHooks = (function () {
     /** @type {HookEntry[]} */
     hooks: [],
 
+    /**
+     * Adds/refreshes the framework, settings and title hooks and updates the ping/time text.
+     */
     check: function () {
       if (!TextHooks.enabled) {
         TextHooks.flush();
@@ -418,6 +447,9 @@ const TextHooks = (function () {
       return false;
     },
 
+    /**
+     * Removes the status/dashboard/qol hooks; also clears the framework hooks if Hooks is disabled.
+     */
     flush: function () {
       if (!Hooks.enabled) {
         clearHooks(this.hooks);

@@ -9,11 +9,16 @@
   const Worker = require("Worker");
   const Events = require("./AsyncEvents");
 
-  /** @constructor Socket*/
+  /** @constructor Socket */
   function Socket(hostname, port) {
     typeof Socket.__socketCounter === "undefined" && (Socket.__socketCounter = 0);
     this.connected = false;
     const myEvents = new Events;
+    /**
+     * Opens the underlying engine socket and marks the connection as active.
+     * @returns {Socket | false} This wrapper instance once connected, or false if the engine
+     * refused to open the socket (missing args or a non-whitelisted host).
+     */
     this.connect = () => (this.socket = buildinSock.open(hostname, port)) && (this.connected = true) && this;
 
     this.on = myEvents.on;
@@ -26,6 +31,9 @@
       myEvents.emit("close", this);
     };
 
+    /**
+     * Drains any pending data off the socket and emits a "data" event; closes on read failure.
+     */
     this.recv = () => {
       if (!this.connected || !this.socket || !this.socket.readable) return;
 
@@ -41,6 +49,10 @@
       data && myEvents.emit("data", data);
     };
 
+    /**
+     * Sends data on the socket; closes the socket on a send failure.
+     * @param {string} data
+     */
     this.send = (data) => {
       if (!data || !this.socket) return;
 

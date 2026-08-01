@@ -51,9 +51,7 @@ const locationAction = (function () {
   let lastGameTick;
 
   const lastGame = [];
-  /**
-   * @type {Map<string, { lastAsked: number, game: string }>}
-   */
+  /** @type {Map<string, { lastAsked: number, game: string }>} */
   const tracker = new Map();
   const Controls = require("./libs/modules/Control");
   const {
@@ -323,6 +321,11 @@ const locationAction = (function () {
   };
 })();
 
+/**
+ * D2BotFollow entry point: waits for game/profile info from the client, then drives Starter's join/create
+ * loop for the follower character.
+ * @returns {void}
+ */
 function main () {
   debugLog(me.profile);
   addEventListener("copydata", Starter.receiveCopyData);

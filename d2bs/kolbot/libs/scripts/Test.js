@@ -10,6 +10,10 @@ function Test() {
 
   let c;
 
+  /**
+   * @param {number} key
+   * @returns {void}
+   */
   function KeyDown(key) {
     key === sdk.keys.Insert && (c = true);
   }
@@ -32,6 +36,7 @@ function Test() {
   }
 }
 
+/** @returns {void} */
 function doTest() {
   console.log("test");
   console.log("done");

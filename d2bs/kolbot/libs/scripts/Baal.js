@@ -57,6 +57,7 @@ const Baal = new Runnable(
       throw new Error("Failed to move to Throne of Destruction.");
     }
 
+    /** @returns {void} Throws a ScriptError to abort if a doll or soul quit condition (Config.Baal) is met. */
     Pather.moveToEx(15095, 5029, { callback: () => {
       if (Config.Baal.DollQuit && Game.getMonster(sdk.monsters.SoulKiller)) {
         say("Dolls found! NG.");

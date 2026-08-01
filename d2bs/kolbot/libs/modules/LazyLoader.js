@@ -7,6 +7,11 @@
  */
 
 (function (module, require) {
+  /**
+   * Derives the relative path from LazyLoader.js's directory to the caller's directory, by walking the
+   * call stack for the first frame outside this file. Used to resolve caller-relative ("./") module paths.
+   * @returns {string} the relative path (e.g. "../scripts"), or "" if it couldn't be determined.
+   */
   function getCallerRelativeDir() {
     const stack = new Error().stack.match(/[^\r\n]+/g);
     let loaderDir, callerDir;
@@ -55,6 +60,13 @@
     const moduleCache = new Map();
     const callerRelDir = getCallerRelativeDir();
 
+    /**
+     * Resolves and requires a module by name, caching the result; a supplied customHandler bypasses
+     * requiring and is cached/returned as-is.
+     * @param {string|number} moduleName
+     * @param {*} [customHandler]
+     * @returns {*} the loaded module (or customHandler, if given).
+     */
     function loadModule(moduleName, customHandler) {
       const nameStr = String(moduleName);
       
@@ -156,6 +168,7 @@
           return {
             enumerable: true,
             configurable: true,
+            /** @returns {*} the lazily-loaded module. */
             get: function () {
               return loadModule(property);
             }

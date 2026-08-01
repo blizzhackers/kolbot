@@ -262,6 +262,10 @@ const locationAction = (function () {
   };
 })();
 
+/**
+ * Entry point: drives the OOG login/game-join state machine (location handlers) and
+ * launches the in-game MuleLogger heartbeat thread.
+ */
 function main () {
   addEventListener("copydata", Starter.receiveCopyData);
 

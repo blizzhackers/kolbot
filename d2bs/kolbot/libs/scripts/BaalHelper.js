@@ -5,9 +5,7 @@
 *
 */
 
-/**
- * @typedef {ScriptContext & { chatEvent: (nick: string, msg: string) => void }} BaalHelperContext
- */
+/** @typedef {ScriptContext & { chatEvent: (nick: string, msg: string) => void }} BaalHelperContext */
 
 const BaalHelper = new Runnable(
   /** @param {BaalHelperContext} ctx */
@@ -68,6 +66,11 @@ const BaalHelper = new Runnable(
       if (!Pather.moveToExit(sdk.areas.ThroneofDestruction, true)) {
         throw new Error("Failed to move to Throne of Destruction.");
       }
+      /**
+       * moveToEx callback - aborts the approach (throws) if the DollQuit/SoulQuit trigger
+       * monsters appear en route.
+       * @returns {void}
+       */
       Pather.moveToEx(15113, 5040, { callback: function () {
         if (Config.BaalHelper.DollQuit && Game.getMonster(sdk.monsters.SoulKiller)) {
           console.log("Undead Soul Killers found, ending script.");
@@ -124,6 +127,9 @@ const BaalHelper = new Runnable(
     return true;
   },
   {
+    /**
+     * Runs helper sub-scripts, town chores, and precast/positioning before the main action.
+     */
     preAction: function () {
       Config.BaalHelper.KillNihlathak && Loader.runScript("Nihlathak");
       Config.BaalHelper.FastChaos && Loader.runScript("Diablo", () => Config.Diablo.Fast = true);
@@ -149,6 +155,7 @@ const BaalHelper = new Runnable(
 );
 
 Object.defineProperty(BaalHelper, "startArea", {
+  /** @returns {number} Harrogath, unless a fast Chaos-Sanctuary skip is configured */
   get: function() {
     if (Config.BaalHelper.KillNihlathak || !Config.BaalHelper.FastChaos) {
       return sdk.areas.Harrogath;

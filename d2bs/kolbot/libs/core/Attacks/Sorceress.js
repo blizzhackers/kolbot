@@ -192,6 +192,7 @@
       return result;
     },
 
+    /** @returns {void} */
     afterAttack: function () {
       Precast.doPrecast(false);
     },

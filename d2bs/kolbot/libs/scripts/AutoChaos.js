@@ -27,6 +27,9 @@ const AutoChaos = new Runnable(
       return message;
     }
 
+    /**
+     * Updates the `taxi` target name from config, or auto-detects a candidate if unset/invalid.
+     */
     function setTaxi() {
       if (Config.AutoChaos.Leader !== "" && getParty(Config.AutoChaos.Leader)) {
         taxi = Config.AutoChaos.Leader;
@@ -35,6 +38,10 @@ const AutoChaos = new Runnable(
       }
     }
 
+    /**
+     * Scans the party for a leveled sorceress with a portal to the Chaos Sanctuary.
+     * @returns {string} name of the detected taxi candidate, or the current taxi if none found
+     */
     function detectTaxi() {
       let player = getParty();
       let current = taxi;
@@ -68,6 +75,7 @@ const AutoChaos = new Runnable(
       return current;
     }
 
+    /** @returns {boolean} true to keep the main loop running, false once the Diablo phase is reached */
     function doNext() {
       let portal, gid, tick;
 
@@ -153,9 +161,7 @@ const AutoChaos = new Runnable(
       return true;
     }
 
-    /**
-     * @param {number} area 
-     */
+    /** @param {number} area */
     function waitForParty(area = 0) {
       let time = getTickCount();
       let classes = copyObj(Config.AutoChaos.RequireClass);
@@ -184,6 +190,9 @@ const AutoChaos = new Runnable(
       }
     }
 
+    /**
+     * Precasts while waiting for the taxi sorceress to reach the Chaos Sanctuary, then follows and returns to town.
+     */
     function precast() {
       let sorc = getParty(taxi);
 
@@ -232,6 +241,9 @@ const AutoChaos = new Runnable(
       } while (shrine.getNext());
     }
 
+    /**
+     * Blocks for `Config.AutoChaos.SealDelay` seconds, preattacking in place while not in town.
+     */
     function sealDelay() {
       if (!Config.AutoChaos.SealDelay) {
         return;
@@ -249,6 +261,9 @@ const AutoChaos = new Runnable(
       }
     }
 
+    /**
+     * Picks up items, returns to town, increments the seal-completion counter, and moves to the portal spot.
+     */
     function clearOut() {
       Pickit.pickItems();
       Town.goToTown();
@@ -256,24 +271,31 @@ const AutoChaos = new Runnable(
       Town.move("portalspot");
     }
 
+    /**
+     * Kills the Grand Vizier of Chaos and clears the seal area.
+     */
     function vizier() {
       slayBoss(sdk.locale.monsters.GrandVizierofChaos, Config.AutoChaos.PreAttack[0], 20);
       clearOut();
     }
 
+    /**
+     * Kills Lord De Seis and clears the seal area.
+     */
     function seis() {
       slayBoss(sdk.locale.monsters.LordDeSeis, Config.AutoChaos.PreAttack[1], 30);
       clearOut();
     }
 
+    /**
+     * Kills the Infector of Souls and clears the seal area.
+     */
     function infector() {
       slayBoss(sdk.locale.monsters.InfectorofSouls, Config.AutoChaos.PreAttack[2], 20);
       clearOut();
     }
 
-    /**
-     * @param {number} amount 
-     */
+    /** @param {number} amount */
     function taxiInit(amount = 0) {
       if (amount > 0) {
         delay(amount);
@@ -302,9 +324,7 @@ const AutoChaos = new Runnable(
       return true;
     }
 
-    /**
-     * @param {boolean} last 
-     */
+    /** @param {boolean} last */
     function taxiVizier(last) {
       const viz = Common.Diablo.vizLayout === 1 ? new PathNode(7683, 5302) : new PathNode(7687, 5315);
 
@@ -328,6 +348,9 @@ const AutoChaos = new Runnable(
       Pickit.pickItems();
     }
 
+    /**
+     * Opens the Seis seal, waits out the seal delay, then kills Lord De Seis and picks up items.
+     */
     function taxiSeis() {
       const seis = Common.Diablo.seisLayout === 1 ? new PathNode(7782, 5224) : new PathNode(7775, 5193);
 
@@ -341,9 +364,7 @@ const AutoChaos = new Runnable(
       Pickit.pickItems();
     }
 
-    /**
-     * @param {boolean} last 
-     */
+    /** @param {boolean} last */
     function taxiInfector(last) {
       const inf = Common.Diablo.infLayout === 1 ? new PathNode(7926, 5300) : new PathNode(7924, 5282);
 
@@ -366,6 +387,10 @@ const AutoChaos = new Runnable(
       Pickit.pickItems();
     }
 
+    /**
+     * Engages (or leeches off) Diablo, then waits until the party's leveled member count drops
+     * or the non-taxi party leaves, up to a 180 second timeout.
+     */
     function diablo() {
       let maxTime = 0;
       let preCount = 1;
@@ -427,9 +452,7 @@ const AutoChaos = new Runnable(
       }
     }
 
-    /**
-     * @param {PathNode} loc 
-     */
+    /** @param {PathNode} loc */
     function doPreattack(loc) {
       switch (me.classid) {
       case sdk.player.class.Amazon:
@@ -693,6 +716,9 @@ const AutoChaos = new Runnable(
   {
     startArea: sdk.areas.PandemoniumFortress,
     preAction: null,
+    /**
+     * Removes the "diablospawned" listener and the Diablo lights event listener.
+     */
     cleanup: function () {
       Common.Diablo.off("diablospawned");
       Common.Diablo.removeLightsEventListener();

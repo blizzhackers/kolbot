@@ -9,6 +9,7 @@
 
 /**
  * Mule Data object manipulates external mule datafile
+ * @type {MuleDataType}
  */
 const MuleData = {
   _default: {
@@ -20,13 +21,18 @@ const MuleData = {
     torchChars: []
   },
   fileName: "",
-  // create a new mule datafile
+  /**
+   * Overwrites the mule datafile with a fresh copy of the default data shape.
+   */
   create: function () {
     let string = JSON.stringify(this._default);
     FileTools.writeText(this.fileName, string);
   },
 
-  // read data from the mule datafile and return the data object
+  /**
+   * Reads and parses the mule datafile, recreating it with defaults if missing or corrupt.
+   * @returns {MuleDataObj}
+   */
   read: function () {
     try {
       let string = FileTools.readText(this.fileName);
@@ -41,13 +47,19 @@ const MuleData = {
     }
   },
 
-  // write a data object to the mule datafile
+  /**
+   * Writes a data object to the mule datafile.
+   * @param {Partial<MuleDataObj>} obj
+   */
   write: function (obj) {
     let string = JSON.stringify(obj);
     FileTools.writeText(this.fileName, string);
   },
 
-  // set next account - increase account number in mule datafile
+  /**
+   * Advances to the next account, resetting character/full/torch tracking in the datafile.
+   * @returns {string} the new account name
+   */
   nextAccount: function () {
     Starter.makeAccount = true;
     let obj = MuleData.read();
@@ -60,6 +72,10 @@ const MuleData = {
     return obj.account;
   },
 
+  /**
+   * Advances to the next character suffix on the current account in the datafile.
+   * @returns {string} the new character name
+   */
   nextChar: function () {
     let charSuffix = "";
     const charNumbers = "abcdefghijklmnopqrstuvwxyz";
@@ -83,6 +99,7 @@ const MuleData = {
   },
 };
 
+/** @type {Mule} */
 const Mule = {
   /** @type {muleObj} */
   obj: null,
@@ -101,6 +118,9 @@ const Mule = {
   masterStatus: { status: "" },
   droppedGids: new Set(),
 
+  /**
+   * Blocks until the master signals "begin", stopping the profile if nobody joined.
+   */
   waitForMaster: function () {
     console.log("Waiting for muler");
     // forever alone check?
@@ -119,9 +139,7 @@ const Mule = {
     me.overhead("begin");
     console.debug("begin");
   },
-  /**
-   * @todo check if there are any other profiles that need to mule while we are already in game?
-   */
+  /** @todo check if there are any other profiles that need to mule while we are already in game? */
   done: function () {
     !Mule.obj.onlyLogWhenFull && MuleLogger.logChar();
 
@@ -138,6 +156,9 @@ const Mule = {
     D2Bot.stop(me.profile, true);
   },
 
+  /**
+   * Logs the current mule character as full, advances to the next mule character, and quits.
+   */
   nextChar: function () {
     MuleLogger.logChar();
     delay(500);
@@ -169,6 +190,10 @@ const Mule = {
     Mule.quit();
   },
   
+  /**
+   * Stashes any cursor item, quits the game, and blocks until fully out of game.
+   * @returns {boolean}
+   */
   quit: function () {
     Mule.cursorCheck();
     console.log("ÿc8Mule game duration ÿc2" + (Time.format(getTickCount() - me.gamestarttime)));
@@ -183,6 +208,7 @@ const Mule = {
 
     return true;
   },
+  /** @returns {boolean} true if no other party members are present */
   foreverAlone: function () {
     let party = getParty();
 
@@ -195,6 +221,7 @@ const Mule = {
     return true;
   },
 
+  /** @returns {boolean} true if an Annihilus or Hellfire Torch is already in storage */
   checkAnniTorch: function () {
     while (!me.gameReady) {
       delay(500);
@@ -204,6 +231,10 @@ const Mule = {
       .some(i => i.isInStorage && (i.isAnni || i.isTorch));
   },
 
+  /**
+   * Moves all inventory items into the stash where they fit, largest first.
+   * @returns {boolean}
+   */
   stashItems: function () {
     me.getItemsEx()
       .filter(item => item.isInInventory)
@@ -215,6 +246,10 @@ const Mule = {
     return true;
   },
 
+  /**
+   * Clears any item stuck on the cursor into inventory, dropping it if it won't fit.
+   * @returns {boolean}
+   */
   cursorCheck: function () {
     let cursorItem = Game.getCursorUnit();
 
@@ -228,11 +263,17 @@ const Mule = {
     return true;
   },
 
+  /** @returns {ItemUnit[]} nearby ground/dropping items that aren't pickit-ignored */
   getGroundItems: function () {
     return getUnits(sdk.unittype.Item)
       .filter(i => i.distance < 20 && i.onGroundOrDropping && !Town.ignoreType(i.itemType));
   },
 
+  /**
+   * Main mule item-pickup loop: waits for the dropper's report, then picks droppable items,
+   * stashing to make room as needed.
+   * @returns {string} "ready", "next", or "done"
+   */
   pickItems: function () {
     /** @type {ItemUnit[]} */
     let list = [];
@@ -357,9 +398,7 @@ const Mule = {
     return rval;
   },
 
-  /**
-   * @param {number} time 
-   */
+  /** @param {number} time */
   ingameTimeout: function (time) {
     let tick = getTickCount();
 

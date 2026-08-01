@@ -37,6 +37,7 @@ const Pindleskin = new Runnable(
       }
 
       // faster detection of TombVipers
+      /** @returns {void} Throws a ScriptError to abort as soon as a Tomb Viper is seen (if ViperQuit). */
       Pather.moveToPresetObject(me.area, sdk.objects.NihlathaksPlatform, { offX: 10, offY: 10, callback: () => {
         if (Config.Pindleskin.ViperQuit && Game.getMonster(sdk.monsters.TombViper2)) {
           console.log("Tomb Vipers found.");

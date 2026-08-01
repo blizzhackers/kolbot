@@ -16,6 +16,10 @@
       sdk.areas.ChaosSanctuary, sdk.areas.ThroneofDestruction, sdk.areas.WorldstoneChamber
     ],
 
+    /**
+     * Polled every 3 seconds; throws if the game is empty or the leader has moved on to a new script.
+     * @returns {boolean} false to signal the caller to kill the tracking process, true to keep polling.
+     */
     leaderTracker: function () {
       if (Leecher.killLeaderTracker) return false;
       // check every 3 seconds

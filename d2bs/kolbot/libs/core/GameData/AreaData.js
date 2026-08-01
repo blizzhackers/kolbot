@@ -175,9 +175,7 @@
             sdk.areas.KurastDocktown, sdk.areas.PandemoniumFortress, sdk.areas.Harrogath
           ][this.Act]];
       },
-      /**
-       * @function
-       */
+      /** @function */
       haveWaypoint: function () {
         // get the last area that got a WP
         let wpArea = this.nearestWaypointArea();
@@ -289,9 +287,7 @@
     return matches[0][1];
   };
 
-  /**
-   * @type {Dungeons}
-   */
+  /** @type {Dungeons} */
   AreaData.dungeons = {
     DenOfEvil: [sdk.areas.DenofEvil],
 

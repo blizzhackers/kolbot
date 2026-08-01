@@ -136,6 +136,7 @@
       return result;
     },
 
+    /** @returns {void} */
     afterAttack: function () {
       Precast.doPrecast(false);
 
@@ -149,9 +150,7 @@
         }
       }
 
-      /**
-      * @todo add config options for these and possibly add to Pather.walkTo 
-      */
+      /** @todo add config options for these and possibly add to Pather.walkTo */
       // if (Skill.canUse(sdk.skills.Cleansing)
       // 	&& ([sdk.states.AmplifyDamage, sdk.states.Decrepify].some(s => me.getState(s)) || me.hpPercent < 70 && me.getState(sdk.states.Poison))
       // 	&& !me.checkForMobs({range: 12, coll: sdk.collision.BlockWall}) && Skill.setSkill(sdk.skills.Cleansing, sdk.skills.hand.Right)) {

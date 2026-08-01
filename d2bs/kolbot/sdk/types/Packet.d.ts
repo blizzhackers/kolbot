@@ -1,12 +1,18 @@
 // @ts-nocheck
+export {};
 declare global {
-  namespace Packet {
+  // Value shape of the global `Packet` const in libs/core/Packet.js (bound there via JSDoc @type).
+  // Declaring the const here as well would collide: both files are global scripts.
+  interface Packet {
+    /** Last teleWalk tick; lazily initialized on first call, not part of the initial object literal. */
+    telewalkTick?: number;
+
     /**
      * Interact and open the menu of an NPC
      * @param {NPCUnit} unit
      * @returns {boolean}
      */
-    function openMenu(unit: NPCUnit): boolean;
+    openMenu(unit: NPCUnit): boolean;
 
     /**
      * Start a trade action with an NPC
@@ -14,7 +20,7 @@ declare global {
      * @param {number} mode
      * @returns {boolean}
      */
-    function startTrade(unit: NPCUnit, mode: number): boolean;
+    startTrade(unit: NPCUnit, mode: number): boolean;
 
     /**
      * Buy an item from an interacted NPC
@@ -23,7 +29,7 @@ declare global {
      * @param {boolean} gamble
      * @returns {boolean}
      */
-    function buyItem(unit: NPCUnit, shiftBuy: boolean, gamble: boolean): boolean;
+    buyItem(unit: NPCUnit, shiftBuy: boolean, gamble: boolean): boolean;
 
     /**
      * Buy scrolls from an interacted NPC, we need this as a separate check because itemcount doesn't change
@@ -33,83 +39,105 @@ declare global {
      * @param {boolean} [shiftBuy]
      * @returns {boolean}
      */
-    function buyScroll(unit: NPCUnit, tome?: ItemUnit, shiftBuy?: boolean): boolean;
+    buyScroll(unit: NPCUnit, tome?: ItemUnit, shiftBuy?: boolean): boolean;
 
     /**
      * Sell an item to a NPC
      * @param {ItemUnit} unit
      * @returns {boolean}
      */
-    function sellItem(unit: ItemUnit): boolean;
+    sellItem(unit: ItemUnit): boolean;
 
     /**
      * @param {ItemUnit} unit
      * @param {ItemUnit} tome
      * @returns {boolean}
      */
-    function identifyItem(unit: ItemUnit, tome: ItemUnit): boolean;
+    identifyItem(unit: ItemUnit, tome: ItemUnit): boolean;
 
     /**
      * @param {ItemUnit} item
      * @returns {boolean}
      */
-    function itemToCursor(item: ItemUnit): boolean;
+    itemToCursor(item: ItemUnit): boolean;
 
     /**
      * @param {ItemUnit} item
      * @returns {boolean}
      */
-    function dropItem(item: ItemUnit): boolean;
+    dropItem(item: ItemUnit): boolean;
 
     /**
      * @param {ItemUnit} item
      * @returns {boolean}
      */
-    function givePotToMerc(item: ItemUnit): boolean;
+    givePotToMerc(item: ItemUnit): boolean;
 
     /**
      * @param {ItemUnit} item
      * @param {number} xLoc
      * @returns {boolean}
      */
-    function placeInBelt(item: ItemUnit, xLoc: number): boolean;
+    placeInBelt(item: ItemUnit, xLoc: number): boolean;
 
     /**
      * @param {ItemUnit} who
      * @param {boolean} toCursor
      * @returns {boolean}
      */
-    function click(who: ItemUnit, toCursor?: boolean): boolean;
+    click(who: ItemUnit, toCursor?: boolean): boolean;
 
     /**
      * @param {Unit} who
      * @returns {boolean}
      */
-    function entityInteract(who: Unit): boolean;
+    entityInteract(who: Unit): boolean;
 
     /**
      * @param {NPCUnit} who
      * @returns {boolean}
      */
-    function cancelNPC(who: NPCUnit): boolean;
+    initNPC(who: NPCUnit): boolean;
+
+    /**
+     * @param {NPCUnit} who
+     * @returns {boolean}
+     */
+    cancelNPC(who: NPCUnit): boolean;
 
     /**
      * @param {ItemUnit} pot
      * @returns {boolean}
      */
-    function useBeltItemForMerc(pot: ItemUnit): boolean;
-    function castSkill(hand: number, wX: number, wY: number): void;
-    function castAndHoldSkill(hand: number, wX: number, wY: number, duration?: number): void;
-    function unitCast(hand: number, who: Monster | ItemUnit | ObjectUnit): void;
-    function telekinesis(who: Monster | ItemUnit | ObjectUnit): boolean;
-    function enchant(who: Monster | Player | MercUnit): boolean;
-    function teleport(wX: number, wY: number): boolean;
-    function teleWalk(x: number, y: number, maxDist: number): boolean;
-    function questRefresh(): void;
-    function flash(gid?: number, wait?: number): void;
-    function changeStat(stat: number, value: number): void;
-    function addListener(packetType: number | number[], callback: (packet: number) => any): null;
-    function removeListener(callback: (packet: number) => any): null;
+    useBeltItemForMerc(pot: ItemUnit): boolean;
+    castSkill(hand: number, wX: number, wY: number): void;
+    castAndHoldSkill(hand: number, wX: number, wY: number, duration?: number): void;
+    unitCast(hand: number, who: Monster | ItemUnit | ObjectUnit): void;
+    telekinesis(who: Monster | ItemUnit | ObjectUnit): boolean;
+    enchant(who: Monster | Player | MercUnit): boolean;
+    teleport(wX: number, wY: number): boolean;
+
+    /**
+     * @deprecated
+     */
+    teleWalk(x: number, y: number, maxDist: number): boolean;
+    questRefresh(): void;
+    flash(gid?: number, wait?: number): void;
+
+    /**
+     * @deprecated
+     */
+    changeStat(stat: number, value: number): void;
+
+    /**
+     * Specialized wrapper for addEventListener("gamepacket", ...) - filters by packet type(s) before invoking callback.
+     * @returns the callback (for later removeListener), or null if packetType resolved to an empty list.
+     */
+    addListener(
+      packetType: number | number[],
+      callback: (packet: ArrayBufferLike) => boolean,
+    ): ((packet: ArrayBufferLike) => boolean) | null;
+    /** Wrapper for removeEventListener("gamepacket", callback). */
+    removeListener(callback: (packet: ArrayBufferLike) => boolean): void;
   }
 }
-export {};

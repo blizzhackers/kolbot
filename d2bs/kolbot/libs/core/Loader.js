@@ -29,6 +29,7 @@ function Runnable (action, options = {}) {
   this.bossid = options.hasOwnProperty("bossid") ? options.bossid : null;
 }
 
+/** @type {Loader} */
 const Loader = {
   /** @type {string[]} */
   fileList: [],
@@ -44,11 +45,17 @@ const Loader = {
   /** @type {Set<string>} */
   doneScripts: new Set(),
 
+  /**
+   * Populates fileList from libs/scripts/ and runs loadScripts().
+   */
   init: function () {
     this.getScripts();
     this.loadScripts();
   },
 
+  /**
+   * Populates fileList with the basenames (no extension) of every .js file in libs/scripts/.
+   */
   getScripts: function () {
     /** @type {string[]} */
     let fileList = dopen("libs/scripts/").getFiles();
@@ -115,6 +122,10 @@ const Loader = {
     throw new Error("Unable to copy obj! Its type isn't supported.");
   },
 
+  /**
+   * @param {object} from
+   * @param {object} to - each own property of `from` is deep-cloned onto this object
+   */
   copy: function (from, to) {
     for (let i in from) {
       if (from.hasOwnProperty(i)) {
@@ -123,6 +134,9 @@ const Loader = {
     }
   },
 
+  /**
+   * Runs every enabled script in Scripts, in order, restoring Config between reconfigured scripts.
+   */
   loadScripts: function () {
     let reconfiguration, unmodifiedConfig = {};
 
@@ -319,6 +333,7 @@ const Loader = {
     let failed = false;
     let mainScript = this.scriptName();
     
+    /** @returns {string} log line prefix listing the main script and any nested tempList scripts */
     function buildScriptMsg () {
       let str = "ÿc9" + mainScript + " ÿc0:: ";
 

@@ -40,6 +40,7 @@ const GemHunter = new Runnable(
           shrineLocs.sort(Sort.units);
           let coords = shrineLocs.shift();
 
+          /** @returns {boolean} True once the shrine at `coords` is confirmed still present. */
           Pather.move(coords, { minDist: Skill.haveTK ? 20 : 5, callback: () => {
             let shrine = Game.getObject("shrine");
             return !!shrine && shrine.x === coords.x && shrine.y === coords.y;
@@ -85,9 +86,11 @@ const GemHunter = new Runnable(
     return true;
   },
   {
+    /** @param {ScriptContext} ctx */
     preAction: function (ctx) {
       ctx.preGidList = new Set(Town.dontStashGids);
     },
+    /** @param {ScriptContext} ctx */
     cleanup: function (ctx) {
       for (let gid of Town.dontStashGids) {
         if (!ctx.preGidList.has(gid)) {

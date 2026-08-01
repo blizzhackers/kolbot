@@ -12,6 +12,10 @@
     maxMages: 0,
     maxRevives: 0,
 
+    /**
+     * Recomputes maxSkeletons/maxMages/maxRevives from Config, resolving "max" to the skill's cap.
+     * @returns {void}
+     */
     setArmySize: function () {
       ClassAttack[me.classid].maxSkeletons = Config.Skeletons === "max"
         ? Skill.getMaxSummonCount(sdk.skills.RaiseSkeleton)
@@ -24,9 +28,7 @@
         : Config.Revives;
     },
 
-    /**
-    * @returns {boolean} true - doesn't use summons or has all he can summon, false - not full of summons yet
-    */
+    /** @returns {boolean} true - doesn't use summons or has all he can summon, false - not full of summons yet */
     isArmyFull: function () {
       // This necro doesn't summon anything so assume he's full
       if (Config.Skeletons + Config.SkeletonMages + Config.Revives === 0) {
@@ -275,6 +277,7 @@
       return result;
     },
 
+    /** @returns {void} */
     afterAttack: function () {
       Precast.doPrecast(false);
       this.raiseArmy();
@@ -382,9 +385,7 @@
       return Attack.Result.SUCCESS;
     },
 
-    /**
-    * @param {number} range 
-    */
+    /** @param {number} range */
     raiseArmy: function (range = 25) {
       let tick, count;
 
@@ -465,9 +466,7 @@
       return true;
     },
 
-    /**
-    * @param {Monster} unit 
-    */
+    /** @param {Monster} unit */
     explodeCorpses: function (unit) {
       if (Config.ExplodeCorpses === 0 || unit.dead) return false;
 

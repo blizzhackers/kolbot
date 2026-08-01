@@ -6,6 +6,7 @@
 *
 */
 
+/** @type {Misc} */
 const Misc = (function () {
   const ShrineData = require("./GameData/ShrineData");
   const chestsTypes = [
@@ -544,10 +545,12 @@ const Misc = (function () {
         this.state = ShrineData.getState(unit.objtype);
       };
 
+      /** @returns {number} milliseconds left before the tracked shrine's state effect expires */
       this.remaining = function () {
         return this.duration - (getTickCount() - this.tick);
       };
 
+      /** @returns {boolean} true if the character currently has the tracked shrine's state active */
       this.isMyCurrentState = function () {
         if (this.state <= 0) return false;
         return me.getState(this.state);
@@ -736,6 +739,7 @@ const Misc = (function () {
       return false;
     },
 
+    /** @returns {boolean} true if HP/MP/stamina are low or (when configured) an ailment state is active */
     _wantWell: function () {
       if (me.hpPercent < (Config.AutoShriner ? 75 : Config.UseWells.HpPercent)) return true;
       if (me.mpPercent < (Config.AutoShriner ? 75 : Config.UseWells.MpPercent)) return true;
@@ -975,6 +979,7 @@ const Misc = (function () {
 
           Pather.moveToEx(coords[0], coords[1], {
             minDist: Skill.haveTK ? 20 : 5,
+            /** @returns {boolean} true once positioned at the expected shrine coordinates */
             callback: function () {
               let shrine = Game.getObject("shrine");
               return !!shrine && shrine.x === coords[0] && shrine.y === coords[1];

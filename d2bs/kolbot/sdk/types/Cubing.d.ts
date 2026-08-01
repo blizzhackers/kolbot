@@ -8,178 +8,211 @@ declare global {
     Eth: number;
     NonEth: number;
   }
-}
 
-interface RecipeHitPower {
-  Helm: number;
-  Boots: number;
-  Gloves: number;
-  Belt: number;
-  Shield: number;
-  Body: number;
-  Amulet: number;
-  Ring: number;
-  Weapon: number;
-}
+  interface RecipeHitPower {
+    Helm: number;
+    Boots: number;
+    Gloves: number;
+    Belt: number;
+    Shield: number;
+    Body: number;
+    Amulet: number;
+    Ring: number;
+    Weapon: number;
+  }
 
-interface RecipeBlood {
-  Helm: number;
-  Boots: number;
-  Gloves: number;
-  Belt: number;
-  Shield: number;
-  Body: number;
-  Amulet: number;
-  Ring: number;
-  Weapon: number;
-}
+  interface RecipeBlood {
+    Helm: number;
+    Boots: number;
+    Gloves: number;
+    Belt: number;
+    Shield: number;
+    Body: number;
+    Amulet: number;
+    Ring: number;
+    Weapon: number;
+  }
 
-interface RecipeCaster {
-  Helm: number;
-  Boots: number;
-  Gloves: number;
-  Belt: number;
-  Shield: number;
-  Body: number;
-  Amulet: number;
-  Ring: number;
-  Weapon: number;
-}
+  interface RecipeCaster {
+    Helm: number;
+    Boots: number;
+    Gloves: number;
+    Belt: number;
+    Shield: number;
+    Body: number;
+    Amulet: number;
+    Ring: number;
+    Weapon: number;
+  }
 
-interface RecipeSafety {
-  Helm: number;
-  Boots: number;
-  Gloves: number;
-  Belt: number;
-  Shield: number;
-  Body: number;
-  Amulet: number;
-  Ring: number;
-  Weapon: number;
-}
+  interface RecipeSafety {
+    Helm: number;
+    Boots: number;
+    Gloves: number;
+    Belt: number;
+    Shield: number;
+    Body: number;
+    Amulet: number;
+    Ring: number;
+    Weapon: number;
+  }
 
-interface RecipeUniqueWeapon {
-  ToExceptional: number;
-  ToElite: number;
-}
+  interface RecipeUniqueWeapon {
+    ToExceptional: number;
+    ToElite: number;
+  }
 
-interface RecipeUniqueArmor {
-  ToExceptional: number;
-  ToElite: number;
-}
+  interface RecipeUniqueArmor {
+    ToExceptional: number;
+    ToElite: number;
+  }
 
-interface RecipeUnique {
-  Weapon: RecipeUniqueWeapon;
-  Armor: RecipeUniqueArmor;
-}
+  interface RecipeUnique {
+    Weapon: RecipeUniqueWeapon;
+    Armor: RecipeUniqueArmor;
+  }
 
-interface RecipeRareWeapon {
-  ToExceptional: number;
-  ToElite: number;
-}
+  interface RecipeRareWeapon {
+    ToExceptional: number;
+    ToElite: number;
+  }
 
-interface RecipeRareArmor {
-  ToExceptional: number;
-  ToElite: number;
-}
+  interface RecipeRareArmor {
+    ToExceptional: number;
+    ToElite: number;
+  }
 
-interface RecipeRare {
-  Weapon: RecipeRareWeapon;
-  Armor: RecipeRareArmor;
-}
+  interface RecipeRare {
+    Weapon: RecipeRareWeapon;
+    Armor: RecipeRareArmor;
+  }
 
-interface RecipeSocketMagic {
-  LowWeapon: number;
-  HighWeapon: number;
-}
+  interface RecipeSocketMagic {
+    LowWeapon: number;
+    HighWeapon: number;
+  }
 
-interface RecipeSocket {
-  Shield: number;
-  Weapon: number;
-  Armor: number;
-  Helm: number;
-  Magic: RecipeSocketMagic;
-  Rare: number;
-}
+  interface RecipeSocket {
+    Shield: number;
+    Weapon: number;
+    Armor: number;
+    Helm: number;
+    Magic: RecipeSocketMagic;
+    Rare: number;
+  }
 
-interface RecipeRerollCharm {
-  Small: number;
-  Large: number;
-  Grand: number;
-  LowGrand: number;
-}
+  interface RecipeRerollCharm {
+    Small: number;
+    Large: number;
+    Grand: number;
+    LowGrand: number;
+  }
 
-interface RecipeReroll {
-  Magic: number;
-  Rare: number;
-  HighRare: number;
-  Charm: RecipeRerollCharm;
-}
+  interface RecipeReroll {
+    Magic: number;
+    Rare: number;
+    HighRare: number;
+    Charm: RecipeRerollCharm;
+  }
 
-interface RecipeLowToNorm {
-  Armor: number;
-  Weapon: number;
-}
+  interface RecipeLowToNorm {
+    Armor: number;
+    Weapon: number;
+  }
 
-declare global {
-  const Recipe: RecipeHitPower | RecipeBlood | RecipeCaster | RecipeSafety | RecipeUnique | RecipeRare | RecipeSocket | RecipeReroll | RecipeLowToNorm;
-  
-  namespace Cubing {
-    interface RecipeObj {
-      Ingredients: (number[] | string[]);
-      Index: number;
-      KeyItem: number;
-      Level?: number;
-      Ethereal?: number;
-      Enabled?: boolean;
-      AlwaysEnabled?: boolean;
-      MainRecipe?: number;
-      MaxQuantity?: number;
-      condition?(): boolean;
-      pickLine?: string;
-    }
+  // Value shape of the global `Recipe` const in libs/core/Cubing.js (bound there via JSDoc
+  // @type). Declaring the const here as well would collide: both files are global scripts.
+  interface IRecipe {
+    Gem: number;
+    HitPower: RecipeHitPower;
+    Blood: RecipeBlood;
+    Caster: RecipeCaster;
+    Safety: RecipeSafety;
+    Unique: RecipeUnique;
+    Rare: RecipeRare;
+    Socket: RecipeSocket;
+    Reroll: RecipeReroll;
+    Rune: number;
+    Token: number;
+    LowToNorm: RecipeLowToNorm;
+    Rejuv: number;
+    FullRejuv: number;
+    /**
+     * Ingredient list for a recipe index - numeric classids mixed with "cgem"/"gem"/"fgem"/
+     * "pgem"/"hpot"/"mpot" wildcard entries resolved later by Cubing.checkRecipe/validItem.
+     */
+    ingredients(index: number, keyItem?: number): (number | string)[];
+    /** Minimum ilvl/clvl gate for a recipe index, or undefined if the index has none defined. */
+    itemLevel(index: number): number | undefined;
+  }
 
-    interface GemList {
-      chipped: number[];
-      flawed: number[];
-      normal: number[];
-      flawless: number[];
-      perfect: number[];
-    }
+  interface CubingRecipeObj {
+    Ingredients: (number | string)[];
+    Index: number;
+    KeyItem: number;
+    Level?: number;
+    Ethereal?: number;
+    Enabled?: boolean;
+    AlwaysEnabled?: boolean;
+    MainRecipe?: number;
+    MaxQuantity?: number;
+    condition?(): boolean;
+    pickLine?: string;
+  }
 
-    interface PotList {
-      healing: number[];
-      mana: number[];
-    }
+  interface CubingGemList {
+    chipped: number[];
+    flawed: number[];
+    normal: number[];
+    flawless: number[];
+    perfect: number[];
+  }
 
-    interface ValidIngredient {
-      classid: number;
-      gid: number;
-    }
+  interface CubingPotList {
+    healing: number[];
+    mana: number[];
+  }
 
-    interface NeededIngredient {
-      classid: number | string;
-      recipe: RecipeObj;
-    }
+  interface CubingValidIngredient {
+    classid: number;
+    gid: number;
+  }
 
-    function init(): void;
-    function buildGemList(): void;
-    function getCube(): void;
-    function buildRecipes(): void;
-    function buildLists(): void;
-    function clearSubRecipes(): void;
-    function update(): void;
-    function checkRecipe(recipe: RecipeObj): ItemUnit[] | boolean;
-    function getRecipeNeeds(index: number): string;
-    function checkItem(unit: ItemUnit): boolean;
-    function keepItem(unit: ItemUnit): boolean;
-    function validItem(unit: ItemUnit, recipe: RecipeObj): boolean;
-    function doCubing(): boolean;
-    function cursorCheck(): boolean;
-    function openCube(): boolean;
-    function closeCube(closeToStash?: boolean): boolean;
-    function emptyCube(): boolean;
-    function makeRevPots(): void;
-    function repairItem(item: ItemUnit): boolean;
+  interface CubingNeededIngredient {
+    classid: number | string;
+    recipe: CubingRecipeObj;
+  }
+
+  // Value shape of the global `Cubing` const in libs/core/Cubing.js (bound there via JSDoc
+  // @type). Declaring the const here as well would collide: both files are global scripts.
+  interface ICubing {
+    recipes: CubingRecipeObj[];
+    gemList: number[];
+    gems: CubingGemList;
+    pots: CubingPotList;
+    validIngredients: CubingValidIngredient[];
+    neededIngredients: CubingNeededIngredient[];
+    subRecipes: number[];
+
+    init(): void;
+    buildGemList(): boolean;
+    buildRecipes(): void;
+    buildLists(): void;
+    clearSubRecipes(): void;
+    update(): void;
+    checkRecipe(recipe: CubingRecipeObj): ItemUnit[] | false;
+    getRecipeNeeds(index: number): string;
+    checkItem(unit: ItemUnit): boolean;
+    keepItem(unit: ItemUnit): boolean;
+    validItem(unit: ItemUnit, recipe: CubingRecipeObj): boolean;
+    doCubing(): boolean;
+    cursorCheck(): boolean;
+    openCube(): boolean;
+    closeCube(closeToStash?: boolean): boolean;
+    emptyCube(): boolean;
+    makeRevPots(): void;
+    repairIngredientCheck(item: ItemUnit): boolean;
+    repairItem(item: ItemUnit): boolean;
+    doRepairs(): boolean;
   }
 }

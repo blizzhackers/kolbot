@@ -10,80 +10,107 @@ declare global {
     FAILED_POSITION: 5;
   }
 
-  namespace Attack {
-    const infinity: boolean;
-    const auradin: boolean;
-    const monsterObjects: Set<number>;
-    const Result: AttackResult;
-    const _killed: Set<number>;
-    function haveKilled(id: number | string): boolean;
-    function init(): void;
-    function checkSlot(slot?: 0 | 1): boolean;
-    function getPrimarySlot(): 0 | 1;
-    function getCustomAttack(unit: Unit): boolean | [number, number];
-    function getCharges(): boolean;
-    function checkInfinity(): boolean;
-    function checkAuradin(): boolean;
-    function canTeleStomp(unit: Monster | Player): boolean;
-    function kill(classId: number | Unit): boolean;
-    function hurt(classId: string | number | Unit, percent: number): boolean;
-    function getScarinessLevel(unit: Unit): number;
-    function clear(
+  interface SecurePositionOptions {
+    range?: number;
+    timer?: number;
+    skipBlocked?: boolean;
+    useRedemption?: boolean;
+    skipIds?: number[];
+    /**
+     * @default 300000 (5 minutes)
+     * @description Timeout in milliseconds for attempting to secure area.
+     */
+    timeout?: number;
+  }
+
+  /** Options object for {@link Attack.clearEx} - see the `ClearOptions` typedef in Attack.js. */
+  interface ClearOptions {
+    spectype: number;
+    bossId: number | Unit;
+    sortfunc: (a: Monster, b: Monster) => number;
+    pickit: boolean;
+    filter: (unit: Monster) => boolean;
+    /** Called on each iteration of the main loop */
+    onLoop: () => void;
+    /** If returns true, exit the clearing loop. Called on each iteration of the main loop */
+    earlyExit: () => boolean;
+    /** Called after all clearing is complete */
+    onCleared: () => void;
+  }
+
+  // Value shape of the global `Attack` const in Attack.js (bound there via JSDoc @type).
+  // Declaring the const here as well would collide: both files are global scripts.
+  interface Attack {
+    infinity: boolean;
+    auradin: boolean;
+    monsterObjects: Set<number>;
+    Result: AttackResult;
+    _killed: Set<number | string>;
+    /** Count of unique/superunique monsters seen this area, set lazily by {@link countUniques}. */
+    uniques?: number;
+    /** gids of superuniques already counted by {@link countUniques}, set lazily. */
+    ignoredGids?: number[];
+    haveKilled(id: number | string): boolean;
+    init(notify?: boolean): void;
+    checkSlot(slot?: 0 | 1): boolean;
+    getPrimarySlot(): 0 | 1;
+    getCustomAttack(unit: Monster): boolean | [number, number];
+    getCustomPreAttack(unit: Monster): boolean | [number, number];
+    checkInfinity(): boolean;
+    checkAuradin(): boolean;
+    canTeleStomp(unit: Monster | Player): boolean;
+    kill(classId: Monster | number | string): boolean;
+    hurt(classId: string | number | Unit, percent: number): boolean;
+    getScarinessLevel(unit: Unit): number | undefined;
+    /**
+     * @todo Refactor so this can accept prebuilt monsterlist, we have repeat logic with this and clearList
+     * @description Clear monsters in a section based on range and spectype or clear monsters around a boss monster
+     */
+    clear(
       range?: number,
       spectype?: number,
       bossId?: number | Unit,
-      sortfunc?: Function,
+      sortfunc?: (a: Monster, b: Monster) => number,
       pickit?: boolean,
-    ): boolean;
-    function clearClassids(...ids: number[]): boolean;
-    function getMob(
-      classid: number,
+      shouldAttackCb?: (unit: Monster) => boolean,
+    ): AttackResult;
+    /** @description Clear monsters in a section based on range and spectype or clear monsters around a boss monster */
+    clearEx(range: number, opts?: Partial<ClearOptions>): boolean;
+    clearClassids(...ids: number[]): boolean;
+    getMob(
+      classid: number | string | number[],
       spectype: number,
-      range: number,
-      center:
+      range?: number,
+      center?:
         | Unit
         | {
             x: number;
             y: number;
           },
     ): Monster[];
-    function clearList(mainArg: Function | Unit[], sortFunc?: Function, refresh?: boolean): boolean;
+    clearList(mainArg: Function | Monster[], sortFunc?: Function, refresh?: boolean): boolean;
 
-    interface SecurePositionOptions {
-      range?: number;
-      timer?: number;
-      skipBlocked?: boolean;
-      useRedemption?: boolean;
-      skipIds?: number[];
-      /**
-       * @default 300000 (5 minutes)
-       * @description Timeout in milliseconds for attempting to secure area.
-       */
-      timeout?: number;
-    }
-    function securePosition(x: number, y: number, options: SecurePositionOptions): boolean;
-    function countUniques(): void;
-    function storeStatistics(area: number): void;
-    function clearRoom(room: Room, spectype?: number): boolean;
-    function clearLevel(spectype?: number): boolean;
-    function sortMonsters(unitA: Unit, unitB: Unit): boolean;
-    function validSpot(x: number, y: number, skill?: number, unitid?: number): boolean;
+    securePosition(x: number, y: number, options?: SecurePositionOptions): boolean;
+    countUniques(): void;
+    storeStatistics(area: number): void;
+    /** @description Clear an entire area based on monster spectype using nearestNeighbourSearch */
+    clearLevelWalk(spectype: number, cb?: () => boolean): void;
+    clearRoom(room: Room, spectype?: number): boolean;
+    clearLevel(spectype?: number, cb?: () => boolean): boolean;
+    sortMonsters(unitA: Monster, unitB: Monster): number;
+    validSpot(x: number, y: number, skill?: number, unitid?: number): boolean;
     /** @deprecated Use Misc.openChests instead */
-    function openChests(range: number, x?: number, y?: number): boolean;
-    function buildMonsterList(): [] | Monster[];
-    function findSafeSpot(
+    openChests(range: number, x?: number, y?: number): boolean;
+    buildMonsterList(check?: (unit: Monster) => boolean): [] | Monster[];
+    findSafeSpot(
       unit: Unit,
       distance: number,
       spread: number,
       range: number,
-      ...args: any[]
-    ): {
-      x: number;
-      y: number;
-    };
-    function deploy(unit: Monster, distance: any, spread: any, range: any, ...args: any[]): boolean;
-    function getMonsterCount(x: any, y: any, range: any, list: any): number;
-    function buildGrid(
+    ): IPathNode | false;
+    deploy(unit: Unit, distance: number, spread: number, range: number): boolean;
+    getMonsterCount(x: number, y: number, range: number, list: Monster[]): number;
+    buildGrid(
       xmin: number,
       xmax: number,
       ymin: number,
@@ -94,30 +121,35 @@ declare global {
       y: number;
       coll: number;
     }[];
-    function skipCheck(unit: Monster): boolean;
-    function getSkillElement(
+    skipCheck(unit: Monster): boolean;
+    getSkillElement(
       skillId: number,
     ): false | "physical" | "fire" | "lightning" | "magic" | "cold" | "poison" | "holybolt" | "none";
-    function getResist(
-      unit: Monster,
+    getResist(
+      unit: Unit | Monster,
       type: "physical" | "fire" | "lightning" | "magic" | "cold" | "poison" | "holybolt" | "none",
-    ): boolean;
-    function getLowerResistPercent(): number;
-    function getConvictionPercent(): number;
-    function checkResist(unit: Monster, val: any, maxres?: number): boolean;
-    function canAttack(unit: Monster): boolean;
-    function usingBow(): false | "bow" | "crossbow";
-    function getIntoPosition(unit: Monster, distance: any, coll: any, walk: any): boolean;
-    function getNearestMonster(givenSettings?: {
+    ): number;
+    getLowerResistPercent(): number;
+    getConvictionPercent(): number;
+    checkResist(unit: Monster | Player, val: number | DamageType | "none" | false, maxres?: number): boolean;
+    canAttack(unit: Monster): boolean;
+    usingBow(): false | "bow" | "crossbow";
+    getIntoPosition(unit: Unit, distance: number, coll: number, walk?: boolean | 2, force?: boolean): boolean;
+    getNearestMonster(givenSettings?: {
       skipBlocked?: boolean;
       skipImmune?: boolean;
       skipGid?: number;
     }): Monster | false;
-    function checkCorpse(unit: Monster): boolean;
-    function checkNearCorpses(unit: Monster, range?: number): Monster[];
-    function whirlwind(unit: Monster | Player): boolean;
-    function doPreAttack(unit: Monster): AttackResult;
-    function doChargeCast(unit: Monster): boolean;
+    checkCorpse(unit: Monster): boolean;
+    checkNearCorpses(unit: Monster, range?: number): Monster[];
+    whirlwind(unit: Monster | Player): boolean;
+    doPreAttack(unit: Monster): AttackResult;
+    doChargeCast(unit: Monster): boolean;
   }
+
+  // Ambient value declaration (Skill.d.ts precedent): checker resolution of the @type-bound
+  // js const yields any for this symbol (unlike Pather/Experience - cause undiagnosed);
+  // the ambient const restores member typing and empirically does not TS2451.
+  const Attack: Attack;
 }
 export {};

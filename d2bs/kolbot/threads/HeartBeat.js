@@ -10,6 +10,9 @@ function main () {
   D2Bot.init();
   console.log("Heartbeat loaded");
 
+  /**
+   * Pauses every running .dbj thread, or resumes them if already paused. @returns {boolean} always true
+   */
   function togglePause () {
     let script = getScript();
 
@@ -31,6 +34,10 @@ function main () {
   }
 
   // Event functions
+  /**
+   * keyup listener: Pause/Break toggles all .dbj threads while out of game.
+   * @param {number} key
+   */
   function KeyEvent (key) {
     switch (key) {
     case sdk.keys.PauseBreak:

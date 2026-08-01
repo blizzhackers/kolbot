@@ -49,6 +49,7 @@ const locationAction = (function () {
   //   return orignal.apply(this, args);
   // }).apply();
 
+  /** @returns {boolean} */
   Starter.LocationEvents.login = function () {
     Starter.inGame && (Starter.inGame = false);
     const pType = Profile().type;
@@ -482,6 +483,11 @@ const locationAction = (function () {
   };
 })();
 
+/**
+ * D2BS entry point: initializes the profile, then loops handling in-game status updates and,
+ * out of game, dispatching the current lobby/menu location to `locationAction`.
+ * @returns {void}
+ */
 function main () {
   debugLog(me.profile);
   addEventListener("copydata", Starter.receiveCopyData);

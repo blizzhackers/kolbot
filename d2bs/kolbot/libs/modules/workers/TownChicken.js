@@ -325,6 +325,11 @@
 
     let townCheck = false;
 
+    /**
+     * Stubbed override of Misc.townCheck for this thread; town-visit triggering is driven by the
+     * `townCheck` closure flag instead.
+     * @returns {boolean} always false.
+     */
     Misc.townCheck = function () {
       return false;
     };
@@ -334,6 +339,11 @@
     let _recursion = false;
 
     // Start
+    /**
+     * Background worker tick: chickens to town when HP/MP drops below the configured thresholds, needed
+     * potions/keys are missing (with Config.TownCheck), or `townCheck` was externally flagged.
+     * @returns {boolean} false only when visitTown throws and the profile is being quit.
+     */
     Worker.runInBackground.TownChicken = function () {
       if (getTickCount() - waitTick < 100) return true;
       if (_recursion) return true;

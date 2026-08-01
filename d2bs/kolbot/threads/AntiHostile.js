@@ -17,6 +17,10 @@ include("systems/gameaction/GameAction.js");
 
 include("oog/ShitList.js");
 
+/**
+ * Entry point: watches for hostile players and responds per Config.HostileAction
+ * (quit, town-flee, spam entrance, or fight).
+ */
 function main() {
   // Variables and functions
   let player, attackCount, prevPos, check, missile, outside;

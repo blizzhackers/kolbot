@@ -17,9 +17,7 @@ include("core/prototypes.js");
     root.UnitInfo = factory();
   }
 }(this, function () {
-  /**
-   * @constructor
-   */
+  /** @constructor */
   function UnitInfo () {
     /**
      * screen coordinate for info box
@@ -245,6 +243,9 @@ include("core/prototypes.js");
     this.hooks[this.hooks.length - 2].zorder = 0;
   };
   
+  /**
+   * Removes all hooks drawn for the current unit and clears tracking state.
+   */
   UnitInfo.prototype.remove = function () {
     while (this.hooks.length > 0) {
       this.hooks.shift().remove();

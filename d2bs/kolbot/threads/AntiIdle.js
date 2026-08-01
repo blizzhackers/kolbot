@@ -9,6 +9,9 @@ include("critical.js");
 include("core/Util.js");
 include("core/Packet.js");
 
+/**
+ * Thread entry point: sends a periodic anti-idle packet every ~20-25 minutes while in game.
+ */
 function main () {
   console.log("ÿc3Start AntiIdle");
   let idleTick = Time.seconds(getTickCount() + rand(1200, 1500));

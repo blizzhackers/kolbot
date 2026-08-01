@@ -22,6 +22,11 @@ new Overrides.Override(Attack, Attack.getNearestMonster, function (orignal) {
   return (monster ? " to " + monster.name : "");
 }).apply();
 
+/**
+ * Entry point for the tools thread: registers key/game/script event handlers, then loops potion
+ * use, chicken checks, and Diablo-clone anti-idle packet spam until a quit condition is met.
+ * @returns {true}
+ */
 function main () {
   // getUnit test
   getUnit(-1) === null && console.warn("getUnit bug detected");

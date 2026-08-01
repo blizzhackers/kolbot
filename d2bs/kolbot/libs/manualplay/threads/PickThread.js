@@ -18,6 +18,10 @@ include("systems/mulelogger/MuleLogger.js");
 include("manualplay/MapMode.js");
 MapMode.include();
 
+/**
+ * Entry point for the pick-only manual-play thread: initializes core systems, then loops
+ * Pickit.fastPick() while no blocking UI (inventory, stash, etc.) is open. Never returns.
+ */
 function main () {
   console.log("ÿc9Pick Thread Loaded.");
   Config.init(false);

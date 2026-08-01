@@ -30,6 +30,7 @@ const AutoStat = new function () {
     ];
   */
 
+  /** @returns {number} effective block chance percent, casting Holy Shield first if it would raise it */
   this.getBlock = function () {
     if (!me.usingShield()) return this.block;
 
@@ -57,6 +58,12 @@ const AutoStat = new function () {
 
   // this check may not be necessary with this.validItem(), but consider it double check
   // verify that the set bonuses are there
+  /**
+   * @param {ItemUnit} unit
+   * @param {number} type sdk.stats id
+   * @param {number} stats expected stat value to confirm against the item's description text
+   * @returns {boolean}
+   */
   this.verifySetStats = function (unit, type, stats) {
     let string = type === sdk.stats.Strength ? sdk.locale.text.ToStrength : sdk.locale.text.ToDexterity;
 
@@ -75,6 +82,10 @@ const AutoStat = new function () {
     return false;
   };
 
+  /**
+   * @param {ItemUnit} item
+   * @returns {boolean}
+   */
   this.validItem = function (item) {
     // ignore item bonuses from secondary weapon slot
     if (me.expansion && item.isOnSwap) return false;
@@ -85,6 +96,10 @@ const AutoStat = new function () {
   };
 
   // get stats from set bonuses
+  /**
+   * @param {number} type sdk.stats id
+   * @returns {number} bonus points of `type` granted by equipped set items, or 0 for energy/vitality
+   */
   this.setBonus = function (type) {
     // set bonuses do not have energy or vitality (we can ignore this)
     if (type === sdk.stats.Energy || type === sdk.stats.Vitality) return 0;
@@ -487,6 +502,10 @@ const AutoStat = new function () {
   };
 
   // return stat values excluding stat bonuses from sets and/or items
+  /**
+   * @param {number} type sdk.stats id
+   * @returns {number} stat value excluding bonuses from items and set bonuses
+   */
   this.getHardStats = function (type) {
     let i, statID;
     let addedStat = 0;
@@ -533,6 +552,7 @@ const AutoStat = new function () {
     return (me.getStat(type) - addedStat - this.setBonus(type));
   };
 
+  /** @returns {number} dexterity points still needed to reach the configured block chance */
   this.requiredDex = function () {
     let set = false;
     let inactiveDex = 0;
@@ -570,6 +590,11 @@ const AutoStat = new function () {
     ) - me.getStat(sdk.stats.Dexterity) - inactiveDex;
   };
 
+  /**
+   * @param {number} type sdk.stats id
+   * @param {number | false} [goal] target stat point count; falsy spends up to 99 at once
+   * @returns {boolean} true once the expected stat points were spent within the 3s wait
+   */
   this.useStats = function (type, goal = false) {
     let currStat = me.getStat(sdk.stats.StatPts);
     let tick = getTickCount();
@@ -612,6 +637,10 @@ const AutoStat = new function () {
     return false;
   };
 
+  /**
+   * Spends the next stat point(s) per statBuildOrder.
+   * @returns {boolean} result of the useStats call for the matched entry, or false if none matched
+   */
   this.addStatPoint = function () {
     this.remaining = me.getStat(sdk.stats.StatPts);
     
@@ -716,6 +745,13 @@ const AutoStat = new function () {
   this.remaining = 0;
   this.count = 0;
 
+  /**
+   * @param {AutoStatBuildEntry[]} statBuildOrder
+   * @param {number} [save] stat points to leave unspent
+   * @param {number} [block] desired block chance for "block" dexterity entries (ignored in classic)
+   * @param {boolean} [bulkStat] spend multiple points per packet (true) or one at a time (false)
+   * @returns {boolean} false if statBuildOrder is empty, true once allocation loop finishes/stalls
+   */
   this.init = function (statBuildOrder, save = 0, block = 0, bulkStat = true) {
     this.statBuildOrder = statBuildOrder;
     this.save = save;

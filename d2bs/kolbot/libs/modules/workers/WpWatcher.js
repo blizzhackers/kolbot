@@ -12,6 +12,10 @@
     let done = false;
 
     // Start
+    /**
+     * Waits for the waypoint UI to open, caches all waypoints once, and broadcasts them to other scripts.
+     * @returns {boolean} always true, to keep the background worker looping
+     */
     Worker.runInBackground.WpWatcher = function () {
       if (done) return true;
       if (getTickCount() - waitTick < 100) return true;

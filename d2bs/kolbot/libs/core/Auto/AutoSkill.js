@@ -28,7 +28,10 @@ const AutoSkill = new function () {
     ];
   */
 
-  //a function to return false if have all prereqs or a skill if not
+  /**
+   * @param {number} skillid
+   * @returns {number | false} The first unmet prerequisite skill id, or false if all are met.
+   */
   this.needPreReq = function (skillid) {
     //a loop to go through each reqskill
     for (let t = sdk.stats.PreviousSkillLeft; t >= sdk.stats.PreviousSkillRight; t--) {
@@ -43,6 +46,11 @@ const AutoSkill = new function () {
     return false;
   };
 
+  /**
+   * @param {number} skillid
+   * @param {number} count
+   * @returns {boolean}
+   */
   this.skillCheck = function (skillid, count) {
     let _hardPoints = me.getSkill(skillid, sdk.skills.subindex.HardPoints);
     if (_hardPoints <= me.charlvl - getBaseStat("skills", skillid, sdk.stats.MinimumRequiredLevel)
@@ -53,6 +61,10 @@ const AutoSkill = new function () {
     return false;
   };
 
+  /**
+   * @param {AutoSkillBuildEntry[]} inputArray
+   * @returns {number | false} Id of the next skill/prerequisite to allocate, or false if none.
+   */
   this.skillToAdd = function (inputArray) {
     for (let i = 0; i < inputArray.length; i += 1) {
       // limit maximum allocation count to 20
@@ -100,6 +112,7 @@ const AutoSkill = new function () {
     return false;
   };
 
+  /** @returns {boolean} True once a point was spent (or false on timeout). */
   this.allocate = function () {
     let tick = getTickCount();
 
@@ -129,6 +142,11 @@ const AutoSkill = new function () {
   this.remaining = 0;
   this.count = 0;
 
+  /**
+   * @param {AutoSkillBuildEntry[]} skillBuildOrder
+   * @param {number} [save]
+   * @returns {boolean} False if `skillBuildOrder` is empty, true once allocation finishes/stalls.
+   */
   this.init = function (skillBuildOrder, save = 0) {
     this.skillBuildOrder = skillBuildOrder;
     this.save = save;

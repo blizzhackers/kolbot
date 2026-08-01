@@ -10,7 +10,7 @@ type AttackModules =
 
 declare global {
   interface IClassAttack {
-    load: (moduleName: AttackModules) => unknown;
+    load: <M extends AttackModules>(moduleName: M) => IClassAttack[M];
 
     [sdk.player.class.Amazon]: typeof import("../../libs/core/Attacks/Amazon");
     [sdk.player.class.Assassin]: typeof import("../../libs/core/Attacks/Assassin");

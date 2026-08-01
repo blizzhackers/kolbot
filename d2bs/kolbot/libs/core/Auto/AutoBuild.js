@@ -24,9 +24,12 @@ const AutoBuild = new function AutoBuild () {
   let verbose = !!Config.AutoBuild.Verbose;
   let configUpdateLevel = 0;
 
-  // Apply all Update functions from the build template in order from level 1 to me.charlvl.
-  // By reapplying all of the changes to the Config object, we preserve
-  // the state of the Config file without altering the saved char config.
+  /**
+   * Reapplies build template Update() functions from the last-applied level up to me.charlvl.
+   * By reapplying all of the changes to the Config object, we preserve
+   * the state of the Config file without altering the saved char config.
+   * @returns {void}
+   */
   function applyConfigUpdates () {
     debug && this.print("Updating Config from level " + configUpdateLevel + " to " + me.charlvl);
     while (configUpdateLevel < me.charlvl) {
@@ -36,6 +39,10 @@ const AutoBuild = new function AutoBuild () {
     }
   }
 
+  /**
+   * @returns {string} the configured build template name
+   * @throws {Error} if Config.AutoBuild.Template is falsy
+   */
   function getBuildType () {
     let build = Config.AutoBuild.Template;
     if (!build) {
@@ -45,22 +52,31 @@ const AutoBuild = new function AutoBuild () {
     return build;
   }
 
+  /** @returns {string} lowercased filename of the currently running script */
   function getCurrentScript () {
     return getScript(true).name.toLowerCase();
   }
 
+  /** @returns {string} per-character, per-day log file path under logs/ */
   function getLogFilename () {
     let d = new Date();
     let dateString = d.getMonth() + "_" + d.getDate() + "_" + d.getFullYear();
     return ("logs/AutoBuild." + me.realm + "." + me.charname + "." + dateString + ".log");
   }
 
+  /** @returns {string} lowercased include path of the class/template build file */
   function getTemplateFilename () {
     let build = getBuildType();
     let template = "config/Builds/" + sdk.player.class.nameOf(me.classid) + "." + build + ".js";
     return template.toLowerCase();
   }
 
+  /**
+   * Includes the character's build template, wires up the level-up listener (all scripts
+   * except autobuildthread.js), loads autobuildthread.js from default.dbj if needed, and
+   * resynchronizes Config with all past AutoBuild updates.
+   * @throws {Error} if the build template fails to include
+   */
   function initialize () {
     let currentScript = getCurrentScript();
     let template = getTemplateFilename();
@@ -83,16 +99,24 @@ const AutoBuild = new function AutoBuild () {
     applyConfigUpdates();
   }
 
+  /**
+   * scriptmsg listener: reapplies config updates when a "level up" event is received.
+   * @param {{event?: string}} obj
+   */
   function levelUpHandler (obj) {
     if (typeof obj === "object" && obj.hasOwnProperty("event") && obj.event === "level up") {
       applyConfigUpdates();
     }
   }
 
+  /** @param {string} message appended (with trailing newline) to the AutoBuild log file */
   function log (message) { FileTools.appendText(getLogFilename(), message + "\n"); }
 
   // Only print to console from autobuildthread.js,
   // but log from all scripts
+  /**
+   * Prints and/or logs the given arguments joined with a space and prefixed "AutoBuild:".
+   */
   function myPrint () {
     let args = Array.prototype.slice.call(arguments);
     args.unshift("AutoBuild:");

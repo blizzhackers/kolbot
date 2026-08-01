@@ -176,6 +176,9 @@ const CollMap = new function () {
     return false;
   };
 
+  /**
+   * Clears the cached room and map collision data.
+   */
   this.reset = function () {
     this.rooms = [];
     this.maps = [];

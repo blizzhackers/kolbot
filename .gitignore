@@ -39,6 +39,7 @@ d2bs/kolbot/libs/manualplay/config/*.*.js
 d2bs/kolbot/libs/config/*.*.js
 d2bs/kolbot/data/web/limedrop.json
 d2bs/kolbot/libs/systems/automule/config/MuleConfig.js
+d2bs/kolbot/libs/systems/mulecondenser/config/MuleCondenserConfig.js
 d2bs/kolbot/libs/systems/channel/ChannelConfig.js
 d2bs/kolbot/libs/systems/cleaner/CleanerConfig.js
 d2bs/kolbot/libs/systems/torch/FarmerConfig.js
@@ -57,3 +58,5 @@ d2bs/kolbot/libs/systems/charrefresher/RefresherConfig.js
 d2bs/kolbot/libs/systems/lead/LeadConfig.js
 /d2bs/kolbot/libs/core/Overrides
 d2bs/kolbot/libs/systems/autorush/RushConfig.js
+/d2bs/kolbot/libs/modules/EngineProbe.js
+/d2bs/kolbot/libs/modules/external/base85.js

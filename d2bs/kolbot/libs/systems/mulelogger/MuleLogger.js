@@ -8,6 +8,11 @@
 
 /** @type {import("./MuleLogger").MuleLoggerType} */
 const MuleLogger = {
+  /**
+   * If this is a configured MuleLog game, logs the character's items and stays in game for
+   * `IngameTime` (or the perm-status override) before quitting.
+   * @returns {boolean} True if logging ran (and the game was quit), false if this game didn't match.
+   */
   inGameCheck: function () {
     if (getScript("D2BotMuleLog.dbj") && this.LogGame[0] && me.gamename.match(this.LogGame[0], "i")) {
       console.log("ÿc4MuleLoggerÿc0: Logging items on " + me.account + " - " + me.name + ".");
@@ -95,6 +100,7 @@ const MuleLogger = {
     FileTools.writeText(filename, data);
   },
 
+  /** @returns {void} */
   remove: function () {
     FileTools.remove("logs/MuleLog.json");
     FileTools.remove("logs/MuleLogPermInfo.json");

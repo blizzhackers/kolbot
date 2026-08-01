@@ -6,34 +6,52 @@
 */
 
 (function (module) {
-  /**
-   * @const
-   */
+  /** @const */
   const RushModes = {
-    /** The rushee that does the quests */
+    /**
+     * The rushee that does the quests
+     */
     quester: 0,
-    /** The rushee that follows */
+    /**
+     * The rushee that follows
+     */
     follower: 1,
-    /** The rushee that bumps the quester */
+    /**
+     * The rushee that bumps the quester
+     */
     bumper: 2,
-    /** Autorush mode */
+    /**
+     * Autorush mode
+     */
     rusher: 3,
-    /** ControlBot/Chant scripts mode */
+    /**
+     * ControlBot/Chant scripts mode
+     */
     chanter: 4,
-    /** Manual follow mode - disables some of the bot <-> bot communication we need with auto */
+    /**
+     * Manual follow mode - disables some of the bot <-> bot communication we need with auto
+     */
     manual: 5,
   };
 
   const AutoRush = {
-    /** Command by rusher to tell players to enter a portal */
+    /**
+     * Command by rusher to tell players to enter a portal
+     */
     playersIn: "1",
-    /** Command by rusher to tell players to go back to town */
+    /**
+     * Command by rusher to tell players to go back to town
+     */
     playersOut: "2",
     allIn: "3",
     rushMode: RushModes.rusher,
-    /** How long to wait for a player to leave/enter an area before ending quest script with failed */
+    /**
+     * How long to wait for a player to leave/enter an area before ending quest script with failed
+     */
     playerWaitTimeout: Time.minutes(1),
-    /** controls the order */
+    /**
+     * controls the order
+     */
     sequences: [
       "cain",
       "andariel",
@@ -56,91 +74,106 @@
     ],
   };
 
-  /**
-   * @type {Object.<string, {check: function(): boolean}>}
-   */
+  /** @type {Object.<string, {check: function(): boolean}>} */
   const sequenceCheck = {
     cain: {
+      /** @returns {boolean} Whether Deckard Cain has been rescued. */
       check: function () {
         return me.cain;
       }
     },
     andariel: {
+      /** @returns {boolean} Whether Andariel has been killed. */
       check: function () {
         return me.andariel;
       }
     },
     radament: {
+      /** @returns {boolean} Whether Radament has been killed. */
       check: function () {
         return me.radament;
       }
     },
     cube: {
+      /** @returns {boolean} Whether the Horadric Cube has been picked up. */
       check: function () {
         return !!me.cube;
       }
     },
     amulet: {
+      /** @returns {boolean} Whether the Horadric amulet ingredient has been obtained. */
       check: function () {
         return (me.horadricstaff || me.amulet || me.completestaff);
       }
     },
     staff: {
+      /** @returns {boolean} Whether the Horadric staff ingredient has been obtained. */
       check: function () {
         return (me.horadricstaff || me.shaft || me.completestaff);
       }
     },
     summoner: {
+      /** @returns {boolean} Whether the Summoner has been killed. */
       check: function () {
         return me.summoner;
       }
     },
     duriel: {
+      /** @returns {boolean} Whether Duriel has been killed. */
       check: function () {
         return me.duriel;
       }
     },
     lamesen: {
+      /** @returns {boolean} Whether the Lam Esen's Tome quest has been completed. */
       check: function () {
         return me.lamessen;
       }
     },
     travincal: {
+      /** @returns {boolean} Whether the Travincal (Compelling Orb) quest has been completed. */
       check: function () {
         return me.travincal;
       }
     },
     mephisto: {
+      /** @returns {boolean} Whether Mephisto has been killed. */
       check: function () {
         return me.mephisto;
       }
     },
     izual: {
+      /** @returns {boolean} Whether Izual has been killed. */
       check: function () {
         return me.izual;
       }
     },
     diablo: {
+      /** @returns {boolean} Whether Diablo has been killed. */
       check: function () {
         return me.diablo;
       }
     },
     shenk: {
+      /** @returns {boolean} Whether Shenk the Overseer has been killed. */
       check: function () {
         return me.shenk;
       }
     },
     anya: {
+      /** @returns {boolean} Whether Anya has been rescued or the Prison of Ice scroll obtained. */
       check: function () {
         return me.anya || Misc.checkQuest(sdk.quest.id.PrisonofIce, 8/** Recieved the scroll */);
       }
     },
     ancients: {
+      /** @returns {boolean} Whether the Ancients' Way quest has been completed. */
       check: function () {
         return me.ancients;
       }
     },
     baal: {
+      /** @returns {boolean} Whether Baal has been killed. */
       check: function () {
         return me.baal;
       }
@@ -167,7 +200,9 @@
       charInfo: "",
     },
     config: {
-      /** Rusher in game character name */
+      /**
+       * Rusher in game character name
+       */
       Leader: "",
     }
   };
@@ -175,7 +210,9 @@
   const _defaultRusherConfig = {
     /** @type {RushModes.rusher} */
     type: RushModes.rusher,
-    /** How long to wait for a player to leave/enter an area before ending quest script with failed */
+    /**
+     * How long to wait for a player to leave/enter an area before ending quest script with failed
+     */
     playerWaitTimeout: Time.minutes(1),
     config: {
       WaitPlayerCount: 1,
@@ -243,7 +280,7 @@
     return rushProfile;
   }
 
-  /** @param {DefaultConfig} rushProfile  */
+  /** @param {DefaultConfig} rushProfile */
   function rushConfigInit (rushProfile) {
     if (!rushProfile) {
       throw new Error("No rush config found for this profile. Please create one in RushConfig.js");

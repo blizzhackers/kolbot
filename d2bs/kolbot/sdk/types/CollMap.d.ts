@@ -103,14 +103,14 @@ declare global {
      * @param thickness Line thickness
      * @returns Whether collision exists
      */
-    checkColl(unitA: Unit | PathNode, unitB: Unit | PathNode, coll: number, thickness?: number): boolean;
+    checkColl(unitA: Unit | IPathNode, unitB: Unit | IPathNode, coll: number, thickness?: number): boolean;
 
     /**
      * Get teleport point for room
      * @param room Room to get teleport point for
      * @returns Teleport point or null
      */
-    getTelePoint(room: Room): PathNode | null;
+    getTelePoint(room: Room): IPathNode | null;
 
     /**
      * Get random valid coordinate
@@ -131,7 +131,7 @@ declare global {
       ymin: number,
       ymax: number,
       factor?: number,
-    ): PathNode;
+    ): IPathNode;
   }
 }
 export {};

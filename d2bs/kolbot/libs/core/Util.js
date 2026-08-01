@@ -22,6 +22,7 @@
     });
   }
 }(this, function () {
+  /** @param {string} [message] */
   function ScriptError (message) {
     this.name = "ScriptError";
     this.message = message || "";
@@ -381,6 +382,12 @@
   };
 
   const Game = {
+    /**
+     * Overloaded distance helper - accepts (unit), (x, y), (unitA, unitB), (unit, x, y),
+     * or (x1, y1, x2, y2); any other arity or mismatched arg types returns Infinity.
+     * @param {...(number|Unit)} args
+     * @returns {number}
+     */
     getDistance: function (...args) {
       switch (args.length) {
       case 0:
@@ -413,15 +420,11 @@
         return Infinity;
       }
     },
-    /**
-     * @returns {ItemUnit | undefined} item on cursor
-     */
+    /** @returns {ItemUnit | undefined} item on cursor */
     getCursorUnit: function () {
       return getUnit(100);
     },
-    /**
-     * @returns {ItemUnit | undefined} item cursor is hovering over
-     */
+    /** @returns {ItemUnit | undefined} item cursor is hovering over */
     getSelectedUnit: function () {
       return getUnit(101);
     },
@@ -575,28 +578,55 @@
   };
 
   const Sort = {
-    // Sort units by comparing distance between the player
+    /**
+     * Comparator: sorts units by distance from the player.
+     * @param {Unit} a
+     * @param {Unit} b
+     * @returns {number}
+     */
     units: function (a, b) {
       return Math.round(getDistance(me.x, me.y, a.x, a.y)) - Math.round(getDistance(me.x, me.y, b.x, b.y));
     },
 
-    // Sort preset units by comparing distance between the player (using preset x/y calculations)
+    /**
+     * Comparator: sorts preset units by distance from the player, using preset room-relative
+     * x/y calculations.
+     * @param {PresetUnit} a
+     * @param {PresetUnit} b
+     * @returns {number}
+     */
     presetUnits: function (a, b) {
       return getDistance(me, a.roomx * 5 + a.x, a.roomy * 5 + a.y)
         - getDistance(me, b.roomx * 5 + b.x, b.roomy * 5 + b.y);
     },
 
-    // Sort arrays of x,y coords by comparing distance between the player
+    /**
+     * Comparator: sorts [x, y] coordinate pairs by distance from the player.
+     * @param {[number, number]} a
+     * @param {[number, number]} b
+     * @returns {number}
+     */
     points: function (a, b) {
       return getDistance(me, a[0], a[1]) - getDistance(me, b[0], b[1]);
     },
 
+    /**
+     * Comparator: sorts numbers in ascending order.
+     * @param {number} a
+     * @param {number} b
+     * @returns {number}
+     */
     numbers: function (a, b) {
       return a - b;
     }
   };
 
   const Messaging = {
+    /**
+     * @param {string} name - script filename
+     * @param {*} msg
+     * @returns {boolean} true if a running script was found and sent the message
+     */
     sendToScript: function (name, msg) {
       let script = getScript(name);
 
@@ -609,9 +639,23 @@
       return false;
     },
 
+    /**
+     * Sends a copydata message to another profile, optionally waiting for a matching response.
+     * @param {string} profileName
+     * @param {number} mode
+     * @param {*} message
+     * @param {boolean} [getResponse]
+     * @returns {boolean|*} false on failure/timeout, true if sent with no response requested,
+     * or the parsed response object when getResponse is true
+     */
     sendToProfile: function (profileName, mode, message, getResponse = false) {
       let response;
 
+      /**
+       * @param {number} mode2
+       * @param {string} msg
+       * @returns {boolean}
+       */
       function copyDataEvent (mode2, msg) {
         if (mode2 === mode) {
           let obj;

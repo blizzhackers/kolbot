@@ -8,6 +8,7 @@
 /** @type {MapMode} */
 const MapMode = {
   mapHelperFilePath: "libs/manualplay/threads/maphelper.js",
+  /** @returns {void} */
   include: function () {
     let files = dopen("libs/manualplay/libs/").getFiles();
     
@@ -22,6 +23,7 @@ const MapMode = {
       });
   },
 
+  /** @returns {void} */
   generalSettings: function () {
     Config.MapMode.UseOwnItemFilter = false; // set to true if you want to start with your own nip files as the loot filter vs starting with default.
     // General

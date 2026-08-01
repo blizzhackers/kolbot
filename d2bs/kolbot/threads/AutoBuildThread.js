@@ -31,6 +31,10 @@ const STAT_ID_TO_NAME =	[
 ];
 let	prevLevel = me.charlvl;
 
+/**
+ * @param {number} id
+ * @returns {boolean} True if `id` falls within the current class's skill id range.
+ */
 function skillInValidRange (id) {
   switch (me.classid) {
   case sdk.player.class.Amazon:
@@ -54,6 +58,7 @@ function skillInValidRange (id) {
 
 const gainedLevels = () => me.charlvl - prevLevel;
 
+/** @returns {boolean} True if a full level-up worth of stat and skill points are unspent. */
 function canSpendPoints () {
   let unusedStatPoints = me.getStat(sdk.stats.StatPts);
   let haveUnusedStatpoints = unusedStatPoints >= 5;	// We spend 5 stat points per level up
@@ -63,6 +68,10 @@ function canSpendPoints () {
   return haveUnusedStatpoints && haveUnusedSkillpoints;
 }
 
+/**
+ * @param {number} id
+ * @returns {boolean} True if the stat point was actually spent.
+ */
 function spendStatPoint (id) {
   let unusedStatPoints = me.getStat(sdk.stats.StatPts);
   if (SPEND_POINTS) {
@@ -76,6 +85,10 @@ function spendStatPoint (id) {
 }
 
 // TODO: What do we do if it fails? report/ignore/continue?
+/**
+ * Spends all stat points for the current level's build template entry.
+ * @returns {boolean} True if every point in the template was successfully spent.
+ */
 function spendStatPoints () {
   let stats = AutoBuildTemplate[me.charlvl].StatPoints;
   let errorMessage = "\nInvalid stat point set in build template " + getTemplateFilename() + " at level " + me.charlvl;
@@ -120,13 +133,23 @@ function spendStatPoints () {
   return spentEveryPoint;
 }
 
+/** @returns {string} Relative path of the current class/build's template file. */
 function getTemplateFilename () {
   let buildType = Config.AutoBuild.Template;
   let templateFilename = "config/Builds/" + sdk.player.class.nameOf(me.classid) + "." + buildType + ".js";
   return templateFilename;
 }
 
+/**
+ * @param {number} id
+ * @returns {number[]} Missing prerequisite skill ids, sorted ascending.
+ */
 function getRequiredSkills (id) {
+  /**
+   * Recursively walks the skill tree for `id`, pushing unfilled prerequisites into `requirements`.
+   * @param {number} id
+   * @returns {void}
+   */
   function searchSkillTree (id) {
     let results = [];
     let skillTreeRight = getBaseStat("skills", id, sdk.stats.PreviousSkillRight);
@@ -155,6 +178,10 @@ function getRequiredSkills (id) {
   return requirements.sort(increasing);
 }
 
+/**
+ * @param {number} id
+ * @returns {boolean} True if the skill point was actually spent.
+ */
 function spendSkillPoint (id) {
   let unusedSkillPoints = me.getStat(sdk.stats.NewSkills);
   let skillName = getSkillById(id) + " (" + id + ")";
@@ -168,6 +195,10 @@ function spendSkillPoint (id) {
   return (unusedSkillPoints - me.getStat(sdk.stats.NewSkills) === 1);	// Check if we spent one point
 }
 
+/**
+ * Spends all skill points for the current level's build template entry.
+ * @returns {boolean} True if every point in the template was successfully spent.
+ */
 function spendSkillPoints () {
   let skills = AutoBuildTemplate[me.charlvl].SkillPoints;
   let errInvalidSkill = "\nInvalid skill point set in build template " + getTemplateFilename() + " for level " + me.charlvl;
@@ -230,6 +261,10 @@ function spendSkillPoints () {
 *	not to bombard the d2bs event system
 */
 
+/**
+ * Entry point: watches for level-ups and spends stat/skill points accordingly, until an error occurs.
+ * @returns {boolean} False if an unhandled error breaks the loop.
+ */
 function main () {
   try {
     AutoBuild.print("Loaded helper thread");

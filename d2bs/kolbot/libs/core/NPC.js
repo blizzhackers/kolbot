@@ -5,6 +5,7 @@
 *
 */
 
+/** @type {NPCList} */
 const NPC = (new function NPC () {
   this.Akara = getLocaleString(sdk.locale.npcs.Akara).toLowerCase();
   this.Gheed = getLocaleString(sdk.locale.npcs.Gheed).toLowerCase();

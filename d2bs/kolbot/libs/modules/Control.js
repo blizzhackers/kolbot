@@ -47,6 +47,13 @@
     this.ysize = ysize;
 
     return new Proxy(this, {
+      /**
+       * Resolves, in order: live D2 control properties, bound ControlAction passthrough
+       * methods (click/setText/getText), then the target's own fields.
+       * @param {Control} target
+       * @param {string | symbol} p
+       * @returns {unknown} shape depends on which of the above resolves p
+       */
       get: function (target, p) {
         const passthroughFunc = ["click", "setText", "getText"];
 

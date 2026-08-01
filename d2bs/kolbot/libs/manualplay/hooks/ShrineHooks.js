@@ -35,6 +35,9 @@ const ShrineHooks = {
     [sdk.shrines.Poison, "Poison"]
   ]),
 
+  /**
+   * Prunes stale hooks then adds/removes hooks for inactive/active shrines in the current area.
+   */
   check: function () {
     if (!this.enabled || me.inTown) {
       this.flush();
@@ -112,6 +115,9 @@ const ShrineHooks = {
     return false;
   },
 
+  /**
+   * Removes all shrine hooks.
+   */
   flush: function () {
     while (this.hooks.length) {
       this.hooks.pop().hook.remove();

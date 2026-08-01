@@ -125,6 +125,10 @@ const Crafting = new Runnable(
   }
 );
 
+/**
+ * @param {number[]} idList list of item classids to match against known crafting/repair NPCs
+ * @returns {string | boolean} lowercase NPC name to shop from, or false if none match
+ */
 function getNPCName (idList) {
   for (let i = 0; i < idList.length; i += 1) {
     switch (idList[i]) {
@@ -142,6 +146,11 @@ function getNPCName (idList) {
   return false;
 }
 
+/**
+ * @param {number[]} idList item classids to count
+ * @param {number} quality item quality (e.g. sdk.items.quality.*) to match
+ * @returns {number} count of stored items matching both classid and quality
+ */
 function countItems (idList, quality) {
   let count = 0;
   let item = me.getItem(-1, sdk.items.mode.inStorage);
@@ -157,6 +166,10 @@ function countItems (idList, quality) {
   return count;
 }
 
+/**
+ * Enables/disables each crafting set in `info.Sets` based on available bases/ingredients in storage.
+ * @returns {boolean} true if `info` was present and sets were evaluated, false otherwise
+ */
 function updateInfo () {
   if (info) {
     let items = me.findItems(-1, sdk.items.mode.inStorage);
@@ -221,6 +234,10 @@ function updateInfo () {
   return false;
 }
 
+/**
+ * @param {ItemUnit} item item to test
+ * @returns {boolean} true if the item's gid is a known runeword base gid (validated or config-derived)
+ */
 function runewordIngredient (item) {
   if (Runewords.validGids.includes(item.gid)) return true;
 
@@ -236,6 +253,9 @@ function runewordIngredient (item) {
   return baseGids.includes(item.gid);
 }
 
+/**
+ * Picks up ground items that match an enabled crafting set, gold, or the normal pickit, then stashes.
+ */
 function pickItems () {
   let items = [];
   let item = Game.getItem(-1, sdk.items.mode.onGround);
@@ -262,6 +282,10 @@ function pickItems () {
   Town.stash();
 }
 
+/**
+ * @param {ItemUnit} item item to test
+ * @returns {boolean} true if the item is a base or ingredient for any currently enabled crafting set
+ */
 function checkItem (item) {
   for (let i = 0; i < info.Sets.length; i += 1) {
     if (info.Sets[i].Enabled) {
@@ -291,6 +315,14 @@ function checkItem (item) {
   return false;
 }
 
+/**
+ * Leads the given NPC to town, opens their trade menu, and buys matching items in a loop until
+ * `amount` magic items are acquired, a game request is pending, or maxgametime is about to expire.
+ * @param {string} npcId NPC key (case-insensitive) - one of fara, elzix, drognan, ormus, anya, malah
+ * @param {number[]} classids item classids to buy
+ * @param {number} amount number of magic-quality matching items to accumulate
+ * @returns {boolean} true when the buy target is met, a game request is pending, or timeout is reached
+ */
 function shopStuff (npcId, classids, amount) {
   console.log("shopStuff: " + npcId + " " + amount);
 
@@ -298,6 +330,12 @@ function shopStuff (npcId, classids, amount) {
   let leadTimeout = 30;
   let leadRetry = 3;
 
+  /**
+   * Walks the NPC along `path` waypoint pairs, retrying each leg up to `leadTimeout` seconds.
+   * @param {NPCUnit} npc NPC unit being led
+   * @param {number[]} path flat x,y pairs to lead the NPC through
+   * @returns {boolean} true if the NPC was led through the full path, false on timeout
+   */
   this.mover = function (npc, path) {
     path = this.processPath(npc, path);
 
@@ -333,6 +371,12 @@ function shopStuff (npcId, classids, amount) {
     return true;
   };
 
+  /**
+   * Trims `path` to start at the waypoint pair nearest the NPC's current position.
+   * @param {NPCUnit} npc NPC unit to measure distance from
+   * @param {number[]} path flat x,y pairs
+   * @returns {number[]} path slice starting at the closest waypoint pair
+   */
   this.processPath = function (npc, path) {
     let cutIndex = 0;
     let dist = 100;
@@ -347,6 +391,12 @@ function shopStuff (npcId, classids, amount) {
     return path.slice(cutIndex);
   };
 
+  /**
+   * Buys stock items matching `classids` from the currently interacted NPC until `amount` is reached.
+   * @param {number[]} classids item classids eligible to buy
+   * @param {number} amount target count of magic-quality matching items
+   * @returns {boolean} true once amount is reached, or the pending gameRequest flag otherwise
+   */
   this.shopItems = function (classids, amount) {
     let npc = getInteractedNPC();
 

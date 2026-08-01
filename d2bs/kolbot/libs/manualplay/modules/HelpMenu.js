@@ -84,13 +84,15 @@
       return false;
     },
 
-    /**
-     * @param {string} text 
-     */
+    /** @param {string} text */
     addHook: function (text) {
       this.hooks.push(new Text("ÿc4." + text, this.helpBoxTextX, this.helpBoxTextY + 13 * this.hooks.length, 0, 0, 0, false, this.hookHandler));
     },
 
+    /**
+     * Builds and draws the chat/key-command help box (hooks + boxes) at the configured screen position.
+     * @returns {void}
+     */
     showMenu: function () {
       this.cleared = false;
       
@@ -139,6 +141,10 @@
       this.hooks[this.hooks.length - 1].zorder = 1;
     },
 
+    /**
+     * Removes all help-box hooks and boxes drawn by showMenu.
+     * @returns {void}
+     */
     hideMenu: function () {
       this.cleared = true;
 
@@ -153,11 +159,22 @@
       return;
     },
 
+    /**
+     * Comparator sorting hooks by vertical proximity to the clicked y-coordinate (HelpMenu.actionY).
+     * @param {Text} h1
+     * @param {Text} h2
+     * @returns {number}
+     */
     sortHooks: function (h1, h2) {
       return Math.abs(h1.y - HelpMenu.actionY) - Math.abs(h2.y - HelpMenu.actionY);
     }
   };
 
+  /**
+   * Drains queued menu clicks, resolving each to the nearest clickable hook and echoing its help text
+   * overhead; clicking the "X" hook closes the menu.
+   * @returns {boolean} true once the action queue is drained (or the menu was closed).
+   */
   Worker.runInBackground.helpAction = function () {
     while (HelpMenu.action.length > 0) {
       HelpMenu.tick = getTickCount();

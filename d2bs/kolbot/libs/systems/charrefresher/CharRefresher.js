@@ -6,7 +6,7 @@
 *  @typedef {import("../../../sdk/globals")}
 */
 
-/** @type {import("./CharRefresher").CharRefresherType} */
+/** @type {CharRefresherType} */
 const CharRefresher = {
   LobbyTime: [15, 30],
   /**
@@ -30,6 +30,9 @@ const CharRefresher = {
     FileTools.writeText(filename, data);
   },
 
+  /**
+   * Deletes the CharRefresher run-state log file.
+   */
   remove: function () {
     FileTools.remove("logs/CharRefresher.json");
   },

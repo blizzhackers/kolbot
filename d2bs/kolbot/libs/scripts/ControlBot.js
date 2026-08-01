@@ -7,14 +7,10 @@
 *
 */
 
-/**
- * @typedef {ScriptContext & { cleanup: () => void }} ControlBotContext
- */
+/** @typedef {ScriptContext & { cleanup: () => void }} ControlBotContext */
 
 const ControlBot = new Runnable(
-  /**
-   * @param {ControlBotContext} ctx
-   */
+  /** @param {ControlBotContext} ctx */
   function ControlBot (ctx) {
     const thankYouMessages = [
       "Ty {name}. Current count: {stats}",
@@ -286,6 +282,7 @@ const ControlBot = new Runnable(
         };
       },
 
+      /** @returns {string} formatted "yes: X no: Y undecided: Z" summary */
       stats: function () {
         const { yes, no, undecided } = this.count();
 
@@ -383,6 +380,9 @@ const ControlBot = new Runnable(
       Chat.say(msg);
     };
 
+    /**
+     * Restores the original global say function overridden at script start.
+     */
     ctx.cleanup = function () {
       // restore the original say function
       global.say = sendChatMessage;
@@ -566,6 +566,9 @@ const ControlBot = new Runnable(
       this.lastChant = 0;
     }
 
+    /**
+     * Resets the command counter and command-window start tick for this player.
+     */
     PlayerTracker.prototype.resetCmds = function () {
       this.firstCmd = getTickCount();
       this.commands = 0;
@@ -584,16 +587,23 @@ const ControlBot = new Runnable(
       this.ignoredAt = getTickCount();
     };
 
+    /**
+     * Clears the ignored state (does not un-squelch the player in party) and resets their command count.
+     */
     PlayerTracker.prototype.unIgnore = function () {
       this.ignored = false;
       this.ignoredAt = 0;
       this.commands = 0;
     };
 
+    /** @returns {boolean} true if the player's Enchant buff is due to expire soon and should be recast */
     PlayerTracker.prototype.reChant = function () {
       return getTickCount() - this.lastChant >= chantDuration - Time.minutes(1);
     };
 
+    /**
+     * Records the current tick as the time this player was last enchanted.
+     */
     PlayerTracker.prototype.updateChantTracker = function () {
       this.lastChant = getTickCount();
     };
@@ -605,16 +615,23 @@ const ControlBot = new Runnable(
       this.singleWpRequests = 0;
     }
 
+    /**
+     * Records a full waypoint-set request, resetting the timer and incrementing the request count.
+     */
     WpTracker.prototype.update = function () {
       this.timer = getTickCount();
       this.requests++;
     };
 
+    /**
+     * Records a single-waypoint request, resetting the timer and incrementing the single-request count.
+     */
     WpTracker.prototype.updateSingle = function () {
       this.timer = getTickCount();
       this.singleWpRequests++;
     };
 
+    /** @returns {number} milliseconds elapsed since this player's last waypoint request */
     WpTracker.prototype.timeSinceLastRequest = function () {
       return getTickCount() - this.timer;
     };
@@ -1525,9 +1542,7 @@ const ControlBot = new Runnable(
     function chatEvent (nick, msg) {
       if (!nick || !msg) return;
       if (nick === me.name) return;
-      /**
-       * @param {string} input 
-       */
+      /** @param {string} input */
       const cleanMsg = function (input) {
         return input
           .replace(/[\'\<\>\[\]\{\}\(\)\!\@\#\$\%\^\&\*\_\+\=\|\~\`\;\:\"\?\,\.\/\\]|plz|please/g, "")
@@ -1834,11 +1849,17 @@ const ControlBot = new Runnable(
       _actions.set("cancel", {
         desc: "cancel <cmd>",
         hostileCheck: false,
+        /**
+         * No-op; matched specially by the cancel-command handler before dispatch.
+         */
         run: () => {}
       });
       _actions.set("timeleft", {
         desc: "Remaining time for this game",
         hostileCheck: false,
+        /**
+         * Reports the remaining game time to party chat.
+         */
         run: function () {
           let tick = Time.minutes(Config.ControlBot.GameLength) - getTickCount() + startTime;
           let m = Math.floor(tick / 60000);
@@ -1856,6 +1877,7 @@ const ControlBot = new Runnable(
         _actions.set("ngvote", {
           desc: "Vote for next game",
           hostileCheck: false,
+          /** @param {string} nick */
           run: function (nick) {
             if (ngVote.active) {
               Chat.say("NGVote is already active. Type ngyes/ngno to vote. Current count: " + ngVote.stats());
@@ -1892,6 +1914,7 @@ const ControlBot = new Runnable(
         _actions.set("ngyes", {
           desc: "",
           hostileCheck: false,
+          /** @param {string} nick */
           run: function (nick) {
             if (!ngVote.active) return;
             if (ngVote.votes.get(nick) === "yes") {
@@ -1915,6 +1938,7 @@ const ControlBot = new Runnable(
         _actions.set("ngno", {
           desc: "",
           hostileCheck: false,
+          /** @param {string} nick */
           run: function (nick) {
             if (!ngVote.active) return;
             if (ngVote.votes.get(nick) === "no") {
@@ -2238,9 +2262,7 @@ const ControlBot = new Runnable(
   {
     startArea: sdk.areas.RogueEncampment,
     preAction: null,
-    /**
-     * @param {ControlBotContext} ctx
-     */
+    /** @param {ControlBotContext} ctx */
     cleanup: function (ctx) {
       ctx.cleanup();
     }

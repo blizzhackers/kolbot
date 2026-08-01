@@ -287,7 +287,9 @@ const Questing = new Runnable(
           Town.npcInteract("anya");
         }
 
-        /** Handles using the scroll, no need to repeat the same code here */
+        /**
+         * Handles using the scroll, no need to repeat the same code here
+         */
         let scroll = me.scrollofresistance;
         !!scroll && scroll.use();
       }
@@ -340,12 +342,6 @@ const Questing = new Runnable(
       Config = tempConfig;
       log("restored settings");
       Precast.doPrecast(true);
-
-      // reload town chicken in case we are doing others scripts after this one finishes
-      let townChick = getScript("threads/TownChicken.js");
-      if ((Config.TownHP > 0 || Config.TownMP > 0) && (townChick && !townChick.running || !townChick)) {
-        load("threads/TownChicken.js");
-      }
 
       try {
         if (Misc.checkQuest(sdk.quest.id.RiteofPassage, sdk.quest.states.Completed)) {

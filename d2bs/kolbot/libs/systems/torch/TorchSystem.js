@@ -15,6 +15,10 @@ const TorchSystem = {
   inGame: false,
   check: false,
 
+  /**
+   * @returns {({KeyFinderProfiles: string[], FarmGame: string, profile: string})[]|false} farmer profiles this
+   *   character is registered as a key finder for, or false if none.
+   */
   getFarmers: function () {
     let list = [];
 
@@ -33,6 +37,10 @@ const TorchSystem = {
     return list.length > 0 ? list : false;
   },
 
+  /**
+   * @returns {({KeyFinderProfiles: string[], FarmGame: string, profile: string})|false} this profile's farmer
+   *   config if the current character is a configured farmer, else false.
+   */
   isFarmer: function () {
     if (this.FarmerProfiles.hasOwnProperty(me.profile)) {
       this.FarmerProfiles[me.profile].profile = me.profile;
@@ -43,6 +51,11 @@ const TorchSystem = {
     return false;
   },
 
+  /**
+   * When the current game matches a configured farmer's FarmGame name, drops the requested keys/gold to the
+   * stash for pickup, then quits the game.
+   * @returns {boolean} true if a matching farm game was found and handled.
+   */
   inGameCheck: function () {
     let farmers = this.getFarmers();
     if (!farmers) return false;
@@ -89,11 +102,22 @@ const TorchSystem = {
     return false;
   },
 
+  /**
+   * Asks each configured farmer over copydata for its needed key/juv counts, then copies matching items
+   * out of this character's inventory to satisfy the first farmer that responds.
+   * @returns {Object<string, Item[]>|false} items keyed by code (pk1/pk2/pk3/rv) ready to drop, or false.
+   */
   keyCheck: function () {
     let neededItems = {};
     let farmers = this.getFarmers();
     if (!farmers) return false;
 
+    /**
+     * copydata listener; on a "neededItems" reply, copies matching inventory items into `neededItems`.
+     * @param {number} mode
+     * @param {string} msg
+     * @returns {void}
+     */
     function keyCheckEvent(mode, msg) {
       if (mode === 6) {
         let obj = JSON.parse(msg);
@@ -174,12 +198,23 @@ const TorchSystem = {
     return false;
   },
 
+  /**
+   * Queries configured farmers for their farm game name/password over copydata and, if found, joins that
+   * game (blocking mouse input) until the character leaves it.
+   * @returns {boolean} true if a farm game was joined, false if not checked or none found.
+   */
   outOfGameCheck: function () {
     if (!this.check) return false;
     TorchSystem.check = false;
 
     let game;
 
+    /**
+     * copydata listener; on a "gameName" reply matching a known farmer, captures its game/password.
+     * @param {number} mode
+     * @param {string} msg
+     * @returns {boolean} always true.
+     */
     function checkEvent(mode, msg) {
       let farmers = TorchSystem.getFarmers();
 
@@ -238,6 +273,11 @@ const TorchSystem = {
     return false;
   },
 
+  /**
+   * Farmer-side loop: registers a copydata listener answering key-hunter game/count requests, then waits
+   * in Act 1 by the stash until enough keys/juvs are collected or the configured wait timeout elapses.
+   * @returns {void}
+   */
   waitForKeys: function () {
     let timer = getTickCount();
     let busy = false;
