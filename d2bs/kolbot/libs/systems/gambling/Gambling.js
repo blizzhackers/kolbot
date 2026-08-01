@@ -9,6 +9,7 @@
 *
 */
 
+/** @type {IGambling} */
 const Gambling = {
   // load configuration file
   Teams: Object.assign({}, require("./TeamsConfig", null, false)),

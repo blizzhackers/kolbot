@@ -5,6 +5,7 @@
  *
  */
 
+/** @type {ActionHooks} */
 const ActionHooks = (function () {
   /**
    * @typedef {Object} ActionHookEntry

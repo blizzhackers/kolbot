@@ -5,6 +5,7 @@
 *
 */
 
+/** @type {MapMode} */
 const MapMode = {
   mapHelperFilePath: "libs/manualplay/threads/maphelper.js",
   include: function () {

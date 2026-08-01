@@ -6,6 +6,7 @@
 *
 */
 
+/** @type {Experience} */
 const Experience = {
   /**
    * @todo combine this and nextExp into key-value pairs 1-99

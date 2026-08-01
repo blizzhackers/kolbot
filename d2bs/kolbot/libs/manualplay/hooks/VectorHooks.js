@@ -5,6 +5,7 @@
 *
 */
 
+/** @type {VectorHooks} */
 const VectorHooks = (function () {
   const nextAreas = new Map([
     [sdk.areas.TamoeHighland, sdk.areas.MonasteryGate],

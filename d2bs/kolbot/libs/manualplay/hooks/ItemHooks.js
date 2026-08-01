@@ -7,6 +7,7 @@
 */
 
 // todo - clean up all the map stuff
+/** @type {ItemHooks} */
 const ItemHooks = (function () {
   const modifier = (
     16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename))

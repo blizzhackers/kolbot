@@ -20,6 +20,7 @@
 /// <reference path="./types/Common.d.ts" />
 /// <reference path="./types/CollMap.d.ts" />
 /// <reference path="./types/ClassAttack.d.ts" />
+/// <reference path="./types/Experience.d.ts" />
 /// <reference path="../libs/systems/torch/TorchSystem.d.ts" />
 
 declare global {
@@ -1308,6 +1309,22 @@ declare global {
    * ambient scope itself so `global.X` gets real member typing everywhere.
    */
   var global: typeof globalThis;
+
+  /**
+   * Per-class config entry point: every libs/config/<Class>[.<Profile>].js declares
+   * `function LoadConfig () {...}`; core/Config.js include()s the selected file, then calls it
+   * (Config.js:86, mirrored in manualplay ConfigOverrides.js:84).
+   */
+  function LoadConfig(): void;
+
+  /**
+   * Value shape of the `const AutoBuildTemplate` each libs/config/Builds/<Class>.<Template>.js
+   * declares (bound there via JSDoc @type; declaring the const here would collide - the Builds
+   * files are global scripts). core/Auto/AutoBuild.js runs Update() per gained level.
+   */
+  interface AutoBuildTemplate {
+    [level: number]: { Update: () => void };
+  }
 
   function getIP(): string;
   function sendKey(key: number): void;

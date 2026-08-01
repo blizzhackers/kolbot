@@ -114,6 +114,155 @@ function init (modules) {
     return out;
   }
 
+  function isDeclarationPath (fileName) {
+    return /\.d\.ts$/i.test(String(fileName));
+  }
+
+  function dedupSpans (spans) {
+    var seen = {};
+    return spans.filter(function (s) {
+      var key = s.fileName + ":" + s.textSpan.start;
+      if (seen[key]) return false;
+      seen[key] = true;
+      return true;
+    });
+  }
+
+  /**
+   * `Object.defineProperty(obj, "prop", ...)` / `Object.defineProperties(obj, { prop: ... })`
+   * sites anywhere in non-override program files - unlike plain assignments these legitimately
+   * sit inside blocks (feature-detection guards in Me.js), so the walk is recursive.
+   */
+  function findDefinePropertySites (program, obj, prop) {
+    var out = [];
+    var files = program.getSourceFiles();
+    for (var i = 0; i < files.length; i++) {
+      var sf = files[i];
+      if (sf.isDeclarationFile || inOverrideDir(sf.fileName)) continue;
+      (function walk (node) {
+        if (
+          ts.isCallExpression(node) &&
+          ts.isPropertyAccessExpression(node.expression) &&
+          ts.isIdentifier(node.expression.expression) &&
+          node.expression.expression.text === "Object" &&
+          node.arguments.length >= 2 &&
+          ts.isIdentifier(node.arguments[0]) &&
+          node.arguments[0].text === obj
+        ) {
+          var callee = node.expression.name.text;
+          var siteNode = null;
+          if (callee === "defineProperty" && ts.isStringLiteral(node.arguments[1]) &&
+              node.arguments[1].text === prop) {
+            siteNode = node.arguments[1];
+          } else if (callee === "defineProperties" && ts.isObjectLiteralExpression(node.arguments[1])) {
+            for (var p = 0; p < node.arguments[1].properties.length; p++) {
+              var entry = node.arguments[1].properties[p];
+              if (entry.name && ts.isIdentifier(entry.name) && entry.name.text === prop) {
+                siteNode = entry.name;
+                break;
+              }
+            }
+          }
+          if (siteNode) {
+            out.push({
+              fileName: norm(sf.fileName),
+              textSpan: { start: siteNode.getStart(sf), length: siteNode.getWidth(sf) },
+              kind: ts.ScriptElementKind.memberVariableElement,
+              name: obj + "." + prop,
+              containerKind: ts.ScriptElementKind.unknown,
+              containerName: obj,
+            });
+          }
+        }
+        ts.forEachChild(node, walk);
+      })(sf);
+    }
+    return out;
+  }
+
+  /**
+   * Member implementation sites inside the INITIALIZER of a top-level `const obj = ...`:
+   * object-literal properties, IIFE-returned literal properties, and `this.prop = ...` inside
+   * `new function () {...}` singletons (that shape is opaque to tsserver's implementation
+   * search - no contextual typing flows into constructor-function this-assignments).
+   */
+  function findMemberSites (program, obj, prop) {
+    var out = [];
+
+    function unwrapParens (node) {
+      while (node && ts.isParenthesizedExpression(node)) node = node.expression;
+      return node;
+    }
+    function pushSite (sf, nameNode) {
+      out.push({
+        fileName: norm(sf.fileName),
+        textSpan: { start: nameNode.getStart(sf), length: nameNode.getWidth(sf) },
+        kind: ts.ScriptElementKind.memberFunctionElement,
+        name: obj + "." + prop,
+        containerKind: ts.ScriptElementKind.unknown,
+        containerName: obj,
+      });
+    }
+    function scanObjectLiteral (sf, literal) {
+      for (var p = 0; p < literal.properties.length; p++) {
+        var entry = literal.properties[p];
+        var name = entry.name;
+        if (name && (ts.isIdentifier(name) || ts.isStringLiteral(name)) && name.text === prop) {
+          pushSite(sf, name);
+        }
+      }
+    }
+    function scanCtorBody (sf, fn) {
+      if (!fn || !fn.body) return;
+      (function walk (node) {
+        if (
+          ts.isBinaryExpression(node) &&
+          node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+          ts.isPropertyAccessExpression(node.left) &&
+          node.left.expression.kind === ts.SyntaxKind.ThisKeyword &&
+          node.left.name.text === prop
+        ) {
+          pushSite(sf, node.left.name);
+        }
+        ts.forEachChild(node, walk);
+      })(fn.body);
+    }
+
+    var files = program.getSourceFiles();
+    for (var i = 0; i < files.length; i++) {
+      var sf = files[i];
+      if (sf.isDeclarationFile || inOverrideDir(sf.fileName)) continue;
+      for (var j = 0; j < sf.statements.length; j++) {
+        var s = sf.statements[j];
+        if (!ts.isVariableStatement(s)) continue;
+        var decls = s.declarationList.declarations;
+        for (var d = 0; d < decls.length; d++) {
+          var decl = decls[d];
+          if (!ts.isIdentifier(decl.name) || decl.name.text !== obj || !decl.initializer) continue;
+          var init = unwrapParens(decl.initializer);
+          if (ts.isObjectLiteralExpression(init)) {
+            scanObjectLiteral(sf, init);
+          } else if (ts.isNewExpression(init)) {
+            var ctor = unwrapParens(init.expression);
+            if (ctor && ts.isFunctionExpression(ctor)) scanCtorBody(sf, ctor);
+          } else if (ts.isCallExpression(init)) {
+            var fn = unwrapParens(init.expression);
+            if (fn && ts.isFunctionExpression(fn) && fn.body) {
+              for (var r = 0; r < fn.body.statements.length; r++) {
+                var ret = fn.body.statements[r];
+                if (ts.isReturnStatement(ret) && ret.expression) {
+                  var retVal = unwrapParens(ret.expression);
+                  if (ts.isObjectLiteralExpression(retVal)) scanObjectLiteral(sf, retVal);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    return out;
+  }
+
   /**
    * Definition site of the require shim: the `global.require = (...)` assignment in
    * libs/require.js. require is deliberately NOT declared in the ambient d.ts - a declared
@@ -300,32 +449,86 @@ function init (modules) {
         }
       }
       if (res && res.definitions) {
-        var kept = filterContextualDefs(fileName, res.definitions);
-        if (kept !== res.definitions) {
-          return { definitions: kept, textSpan: res.textSpan };
+        var defs = filterContextualDefs(fileName, res.definitions);
+        var changed = defs !== res.definitions;
+        // Implementation preference: interfaces deliberately share their const's name
+        // (interface Experience + const Experience), which makes native lookup return the d.ts
+        // alongside the js const. For a VALUE reference the implementation is the answer - the
+        // d.ts stays reachable via Go to Type Definition. identifierAt() is the type-position
+        // guard: JSDoc type references ({@type {Experience}}) live outside forEachChild's
+        // traversal, so ident is null there and the d.ts result passes through untouched.
+        var ident = sourceFile && identifierAt(sourceFile, position);
+        if (ident && defs.length > 1) {
+          var impls = defs.filter(function (d) { return !isDeclarationPath(d.fileName); });
+          if (impls.length > 0 && impls.length < defs.length) {
+            defs = impls;
+            changed = true;
+          }
+        }
+        // All-ambient property access (me.walk, me.needMerc): the runtime addition is an
+        // assignment, not a declaration, so the checker only ever knows the d.ts member.
+        // Recover the executable site syntactically - the same trick the override fallback
+        // below uses, extended to Object.defineProperty/defineProperties getter additions.
+        if (sourceFile && defs.length > 0 &&
+            defs.every(function (d) { return isDeclarationPath(d.fileName); })) {
+          var ambientTarget = propertyAccessAt(sourceFile, position);
+          if (ambientTarget) {
+            var implSites = findAssignmentSites(program, ambientTarget.obj, ambientTarget.prop)
+              .concat(findDefinePropertySites(program, ambientTarget.obj, ambientTarget.prop))
+              .concat(findMemberSites(program, ambientTarget.obj, ambientTarget.prop));
+            // Contextual typing lets the native implementation search reach object-literal
+            // members the syntactic scans could miss; keep executable (.js) results only.
+            var nativeImpls = ls.getImplementationAtPosition(fileName, position) || [];
+            for (var ni = 0; ni < nativeImpls.length; ni++) {
+              if (!isDeclarationPath(nativeImpls[ni].fileName)) implSites.push(nativeImpls[ni]);
+            }
+            implSites = dedupSpans(implSites);
+            if (implSites.length > 0) {
+              defs = implSites;
+              changed = true;
+            }
+          }
         }
         // The checker sometimes binds an overridden member (Obj.member = ...) to the override
         // site ONLY - the core assignment never makes the list. When asking from outside the
         // override dir, recover core sites syntactically: top-level `Obj.member =` assignments
         // in non-override program files are exactly what the runtime's global include() executes.
-        if (sourceFile && !inOverrideDir(fileName) && res.definitions.length > 0 &&
-            res.definitions.every(function (d) { return inOverrideDir(d.fileName); })) {
+        if (sourceFile && !inOverrideDir(fileName) && defs.length > 0 &&
+            defs.every(function (d) { return inOverrideDir(d.fileName); })) {
           var target = propertyAccessAt(sourceFile, position);
           if (target) {
             var coreSites = findAssignmentSites(program, target.obj, target.prop);
             if (coreSites.length > 0) {
-              return { definitions: coreSites, textSpan: res.textSpan };
+              defs = coreSites;
+              changed = true;
             }
           }
+        }
+        if (changed) {
+          return { definitions: defs, textSpan: res.textSpan };
         }
       }
       return res;
     };
 
-    // Same context rule for Go to Implementation.
+    // Same context rule for Go to Implementation, plus the ambient-member recovery: prefer
+    // executable sites when any exist, and fall back to the syntactic scans when the native
+    // search only knows the d.ts (the CollMap/AutoSkill `new function(){}` singleton shape).
     proxy.getImplementationAtPosition = function (fileName, position) {
       var impls = ls.getImplementationAtPosition(fileName, position);
-      return impls ? filterContextualDefs(fileName, impls) : impls;
+      var kept = impls ? filterContextualDefs(fileName, impls) : [];
+      var executable = kept.filter(function (d) { return !isDeclarationPath(d.fileName); });
+      if (executable.length > 0) return executable;
+      var program = ls.getProgram();
+      var sourceFile = program && program.getSourceFile(fileName);
+      var target = sourceFile && propertyAccessAt(sourceFile, position);
+      if (target) {
+        var sites = findAssignmentSites(program, target.obj, target.prop)
+          .concat(findDefinePropertySites(program, target.obj, target.prop))
+          .concat(findMemberSites(program, target.obj, target.prop));
+        if (sites.length > 0) return dedupSpans(sites);
+      }
+      return impls ? kept : impls;
     };
 
     return proxy;

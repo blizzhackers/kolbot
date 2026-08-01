@@ -5,6 +5,7 @@
 *
 */
 
+/** @type {AutoSkill} */
 const AutoSkill = new function () {
   this.skillBuildOrder = [];
   this.save = 0;

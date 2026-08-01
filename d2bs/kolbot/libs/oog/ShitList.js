@@ -8,6 +8,7 @@
 !isIncluded("Polyfill.js") && include("Polyfill.js");
 includeIfNotIncluded("oog/FileAction.js");
 
+/** @type {ShitListInstance} */
 const ShitList = {
   _default: {
     /** @type {Array<string>} */

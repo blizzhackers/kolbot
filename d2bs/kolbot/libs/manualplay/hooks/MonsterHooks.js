@@ -6,6 +6,7 @@
 *
 */
 
+/** @type {MonsterHooks} */
 const MonsterHooks = (function () {
   /**
    * @author DetectiveSquirrel from his maphack

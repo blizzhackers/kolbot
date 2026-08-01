@@ -1,7 +1,8 @@
 /**
- * @typedef {import('./hooks/TextHooks')}
+ * @typedef {import('./hooks/TextHooks')} TextHooks
  */
 
+/** @type {Hooks} */
 const Hooks = {
   dashBoard: { x: 113, y: 490 },
   portalBoard: { x: 12, y: 432 },

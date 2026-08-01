@@ -5,6 +5,7 @@
 *
 */
 
+/** @type {AutoStat} */
 const AutoStat = new function () {
   this.statBuildOrder = [];
   this.save = 0;

@@ -16,6 +16,7 @@ js_strict(true);
 !isIncluded("core/Cubing.js") && include("core/Cubing.js");
 !isIncluded("core/Runewords.js") && include("core/Runewords.js");
 
+/** @type {AutoBuildInstance} */
 const AutoBuild = new function AutoBuild () {
   Config.AutoBuild.DebugMode && (Config.AutoBuild.Verbose = true);
 

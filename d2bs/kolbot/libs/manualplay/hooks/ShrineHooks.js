@@ -5,6 +5,7 @@
 *
 */
 
+/** @type {ShrineHooks} */
 const ShrineHooks = {
   enabled: true,
   /** @type {{ shrine: ObjectUnit, hook: Text }[]} */

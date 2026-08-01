@@ -21,6 +21,7 @@ include("core/Prototypes.js");
 include("core/Runewords.js");
 include("core/Town.js");
 
+/** @type {AutoBuildTemplate} */
 const AutoBuildTemplate = {
 	1:	{
 		//SkillPoints: [-1],											// This doesn't matter. We don't have skill points to spend at lvl 1
