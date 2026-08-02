@@ -52,6 +52,7 @@ PathNode.prototype.update = function (node) {
  * Perform certain actions after moving to each node
  * @todo this needs to be re-worked
  */
+/** @type {NodeAction} */
 const NodeAction = {
   /** @type {number[]} */
   shrinesToIgnore: [],

@@ -15,6 +15,12 @@ declare global {
 
   // Value shape of the global `Pickit` const in Pickit.js (bound there via JSDoc @type).
   // Declaring the const here as well would collide: both files are global scripts.
+  // Ambient value declaration - load-bearing, not decoration: top-level `Pickit.member = ...`
+  // assignments elsewhere in the tree turn the js const into an expando/module symbol whose
+  // members all widen to any (hover shows "module Pickit"). Declaring the const pins the
+  // interface as the authority. Re-add if it ever disappears; see tools/audit/type-surface.mjs.
+  const Pickit: Pickit;
+
   interface Pickit {
     enabled: boolean;
     gidList: Set<number>;

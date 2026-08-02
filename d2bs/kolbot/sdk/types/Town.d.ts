@@ -1,4 +1,3 @@
-// @ts-nocheck
 declare global {
   /** A single named town spot: an [x, y] pair, or (rarely, e.g. NPC.Hratli) multiple pairs flattened. */
   type TownSpotCoords = number[];
@@ -22,6 +21,12 @@ declare global {
 
   // Value shape of the global `Town` const in Town.js (bound there via JSDoc @type).
   // Declaring the const here as well would collide: both files are global scripts.
+  // Ambient value declaration - load-bearing, not decoration: top-level `Town.member = ...`
+  // assignments elsewhere in the tree turn the js const into an expando/module symbol whose
+  // members all widen to any (hover shows "module Town"). Declaring the const pins the
+  // interface as the authority. Re-add if it ever disappears; see tools/audit/type-surface.mjs.
+  const Town: Town;
+
   interface Town {
     telekinesis: boolean;
     sellTimer: number;

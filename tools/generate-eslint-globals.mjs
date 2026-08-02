@@ -85,9 +85,45 @@ function collectDtsStatements(statements, file) {
 
 // --- source 2: top-level declarations in runtime scripts ----------------------------------
 // A file's top-level declarations only become globals in threads that actually include() it, so
-// treating them all as universal globals masks reachability bugs. --ambient-only omits them:
-// the shared surface is then the DECLARED layer (d.ts) + deliberate global.X publications.
-const AMBIENT_ONLY = process.argv.includes("--ambient-only");
+// treating them all as universal globals masks reachability bugs. Ambient-only is the DEFAULT
+// (flipped 2026-08-01): the shared surface is the DECLARED layer (d.ts values) + deliberate
+// global.X publications + the curated CROSS_FILE_GLOBALS manifest below. Pass --union to
+// restore the old scrape-everything superset for comparison.
+const AMBIENT_ONLY = !process.argv.includes("--union");
+
+// Curated cross-file globals: top-level declarations that other files genuinely read as bare
+// identifiers, but which have NO ambient value declaration (their d.ts coverage is a types-only
+// interface - the TS2451 house pattern) and no global.X publication. Every entry was verified
+// by scope-aware analysis (eslint-scope through-references, so same-name locals don't count).
+// A NEW deliberate cross-file global belongs here; a no-undef warning at a read site otherwise
+// means a typo, a vanished symbol, or an accidental dependency on another file's leak.
+const CROSS_FILE_GLOBALS = [
+  // libs/core singletons (types-only interfaces since the 2026-07-31 d.ts standardization).
+  // Town/Pather/Pickit/Precast/ClassAttack joined 2026-08-01: their names had been riding
+  // SoloPlay globals.d.ts namespace declarations, which the generator no longer scans.
+  "CollMap", "Cubing", "Experience", "Item", "Loader", "NPC", "Packet", "Scripts",
+  "NodeAction",
+  "Town", "Pather", "Pickit", "Precast", "ClassAttack",
+  // core/Cubing.js + config DSL surface (read by config files and BuildFiles)
+  "Recipe", "Roll",
+  // core/Pather.js internals shared with the override families
+  "PathDebug", "PathNode",
+  // core/Auto family + the per-class config injection contract
+  "AutoSkill", "AutoStat", "AutoBuildTemplate",
+  // systems drivers (includeSystemLibs() convention) + their entry pairs
+  "CraftingSystem", "Gambling", "TorchSystem", "CharRefresher", "GameAction",
+  "Mule", "MuleData",
+  // oog layer
+  "FileAction", "ShitList", "getThreads",
+  // manualplay hook family (loaded together via Hooks.init()/MapMode.include())
+  "ActionHooks", "Hooks", "ItemHooks", "MonsterHooks", "ShrineHooks", "VectorHooks", "MapMode",
+  // AutoBuild is MAIN's core/Auto/AutoBuild.js (readers: core/Config.js, manualplay
+  // ConfigOverrides.js) - SoloPlay's same-named global is a separate copy, covered by the
+  // SoloPlay-scoped globals block in eslint.config.mjs. All other SoloPlay-internal globals
+  // (myPrint, CharInfo, ...) live in that scoped block, NOT here: the submodule owns its
+  // global surface, and the epic moves that block into a submodule-owned manifest.
+  "AutoBuild",
+];
 // Loader-dispatched files run via include()/load() and are invoked by STRING name (Loader.runScript,
 // getScript) - nothing references their top-level declarations as identifiers from other files
 // (measured 2026-07-31: zero live cross-references), so counting them as globals only masks typos.
@@ -125,14 +161,23 @@ function add(map, name, file) {
   if (!map.has(name)) map.set(name, relative(root, file).replaceAll("\\", "/"));
 }
 
-const dtsFiles = gitFiles(["d2bs/kolbot/sdk/**/*.d.ts", "d2bs/kolbot/libs/**/*.d.ts"]);
+// SoloPlay d.ts are EXCLUDED: the submodule owns its lint surface via its own manifest
+// (libs/SoloPlay/eslint.globals.mjs, imported by the SoloPlay-scoped config block) -
+// its ambient declarations must not leak names into the shared inventory.
+const dtsFiles = gitFiles(["d2bs/kolbot/sdk/**/*.d.ts", "d2bs/kolbot/libs/**/*.d.ts"])
+  .filter((p) => !p.includes("SoloPlay"));
 for (const file of dtsFiles) {
   const sf = ts.createSourceFile(file, readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
   collectDtsStatements(sf.statements, file);
 }
 
+// SoloPlay is EXCLUDED here as well as from the d.ts scan above: the submodule owns its own
+// lint surface (libs/SoloPlay/eslint.globals.mjs, imported by the SoloPlay-scoped config
+// block), so its `global.X =` publications must not leak into the shared inventory. This also
+// keeps this file reproducible when the submodule is not checked out, which is how CI runs.
 const scriptFiles = gitFiles(["d2bs/kolbot/**/*.js", "d2bs/kolbot/**/*.dbj"]).filter((p) => {
   const rel = relative(root, p).replaceAll("\\", "/");
+  if (rel.startsWith("d2bs/kolbot/libs/SoloPlay/")) return false;
   return !LOADER_DISPATCHED_DIRS.some((d) => rel.startsWith(d));
 });
 let parseFailures = 0;
@@ -185,15 +230,26 @@ for (const file of scriptFiles) {
 const all = AMBIENT_ONLY
   ? new Map([...dtsGlobals, ...assignedGlobals])
   : new Map([...dtsGlobals, ...scriptGlobals, ...assignedGlobals]);
+if (AMBIENT_ONLY) {
+  // Manifest names keep their provenance visible: prefer the scanned declaration site so a
+  // stale entry (provider deleted/renamed) is caught here instead of lying in the output.
+  for (const name of CROSS_FILE_GLOBALS) {
+    if (all.has(name)) continue;
+    if (!scriptGlobals.has(name)) {
+      console.warn(`WARNING: CROSS_FILE_GLOBALS entry "${name}" has no top-level declaration anywhere - stale manifest entry?`);
+    }
+    all.set(name, scriptGlobals.get(name) ?? "CROSS_FILE_GLOBALS");
+  }
+}
 for (const extra of MANUAL_EXTRAS) if (!all.has(extra)) all.set(extra, "MANUAL_EXTRAS");
 const names = [...all.keys()].sort((a, b) => a.localeCompare(b));
 
 const header = `// GENERATED by tools/generate-eslint-globals.mjs - do not edit by hand.
 // Regenerate with: npm run globals:gen
-// Mode: ${AMBIENT_ONLY ? "ambient-only (d.ts + global.X publications)" : "union (+ top-level script declarations)"}
+// Mode: ${AMBIENT_ONLY ? "ambient-only (d.ts values + global.X publications + curated cross-file manifest)" : "union (+ top-level script declarations)"}
 // Sources: ${dtsGlobals.size} declare-global values from ${dtsFiles.length} .d.ts files,
-// ${AMBIENT_ONLY ? 0 : scriptGlobals.size} top-level script declarations from ${scriptFiles.length} runtime files
-// (${parseFailures} unparseable skipped), ${assignedGlobals.size} global.X publications,
+// ${AMBIENT_ONLY ? CROSS_FILE_GLOBALS.length + " curated cross-file globals" : scriptGlobals.size + " top-level script declarations"} (${scriptFiles.length} runtime files scanned,
+// ${parseFailures} unparseable skipped), ${assignedGlobals.size} global.X publications,
 // ${MANUAL_EXTRAS.length} manual extras.
 `;
 const body = `export default {\n${names.map((n) => `  ${JSON.stringify(n)}: "writable",`).join("\n")}\n};\n`;

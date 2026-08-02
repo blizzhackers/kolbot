@@ -81,12 +81,12 @@ function init (modules) {
   }
 
   /** Top-level `Obj.prop = ...` assignment sites in non-override, non-declaration program files. */
-  function findAssignmentSites (program, obj, prop) {
+  function findAssignmentSites (program, obj, prop, fromOverride, extraFiles) {
     var out = [];
-    var files = program.getSourceFiles();
+    var files = program.getSourceFiles().concat(extraFiles || []);
     for (var i = 0; i < files.length; i++) {
       var sf = files[i];
-      if (sf.isDeclarationFile || inOverrideDir(sf.fileName)) continue;
+      if (sf.isDeclarationFile || (!fromOverride && inOverrideDir(sf.fileName))) continue;
       var statements = sf.statements;
       for (var j = 0; j < statements.length; j++) {
         var s = statements[j];
@@ -114,6 +114,79 @@ function init (modules) {
     return out;
   }
 
+  /**
+   * Disk-parsed implementation candidates for a d.ts definition file: the same-basename
+   * sibling .js, and sdk/types/<X>.d.ts -> libs/core/<X>.js (the whole sdk/types family
+   * follows that convention). Needed when the requesting PROJECT (SoloPlay's) does not
+   * contain main-repo js - program scans cannot see files outside the program.
+   */
+  function diskImplFiles (program, dtsFileNames) {
+    var out = [];
+    var seen = {};
+    for (var i = 0; i < dtsFileNames.length; i++) {
+      var p = norm(String(dtsFileNames[i]));
+      if (!/\.d\.ts$/i.test(p)) continue;
+      var candidates = [p.replace(/\.d\.ts$/i, ".js")];
+      var m = p.match(/^(.*)\/sdk\/types\/(\w+)\.d\.ts$/i);
+      if (m) candidates.push(m[1] + "/libs/core/" + m[2] + ".js");
+      for (var c = 0; c < candidates.length; c++) {
+        var jsPath = candidates[c];
+        if (seen[jsPath]) continue;
+        seen[jsPath] = true;
+        if (program.getSourceFile(jsPath) || program.getSourceFile(norm(jsPath))) continue;
+        try {
+          out.push(ts.createSourceFile(norm(jsPath), fs.readFileSync(jsPath, "utf8"), ts.ScriptTarget.ES2020, true));
+        } catch (e) {}
+      }
+    }
+    return out;
+  }
+
+  /**
+   * `new Overrides.Override(Obj, Obj.prop, fn)` registration sites (libs/modules/Override) -
+   * the fourth implementation shape: SoloPlay and thread files override members through the
+   * module rather than assignment, so none of the other scans see them. Requester context
+   * governs visibility like the sibling scans: SoloPlay requesters find their overrides in
+   * the first pass, which outranks the disk-parsed core implementation automatically.
+   */
+  function findOverrideModuleSites (program, obj, prop, fromOverride, extraFiles) {
+    var out = [];
+    var files = program.getSourceFiles().concat(extraFiles || []);
+    for (var i = 0; i < files.length; i++) {
+      var sf = files[i];
+      if (sf.isDeclarationFile || (!fromOverride && inOverrideDir(sf.fileName))) continue;
+      (function walk (node) {
+        if (
+          ts.isNewExpression(node) && node.arguments && node.arguments.length >= 3 &&
+          ((ts.isPropertyAccessExpression(node.expression) && node.expression.name.text === "Override") ||
+           (ts.isIdentifier(node.expression) && node.expression.text === "Override")) &&
+          ts.isIdentifier(node.arguments[0]) && node.arguments[0].text === obj
+        ) {
+          var target = node.arguments[1];
+          var hitNode = null;
+          if (ts.isPropertyAccessExpression(target) && ts.isIdentifier(target.expression) &&
+              target.expression.text === obj && target.name.text === prop) {
+            hitNode = target.name;
+          } else if (ts.isStringLiteral(target) && target.text === prop) {
+            hitNode = target;
+          }
+          if (hitNode) {
+            out.push({
+              fileName: norm(sf.fileName),
+              textSpan: { start: hitNode.getStart(sf), length: hitNode.getWidth(sf) },
+              kind: ts.ScriptElementKind.memberFunctionElement,
+              name: obj + "." + prop,
+              containerKind: ts.ScriptElementKind.unknown,
+              containerName: obj,
+            });
+          }
+        }
+        ts.forEachChild(node, walk);
+      })(sf);
+    }
+    return out;
+  }
+
   function isDeclarationPath (fileName) {
     return /\.d\.ts$/i.test(String(fileName));
   }
@@ -133,12 +206,12 @@ function init (modules) {
    * sites anywhere in non-override program files - unlike plain assignments these legitimately
    * sit inside blocks (feature-detection guards in Me.js), so the walk is recursive.
    */
-  function findDefinePropertySites (program, obj, prop) {
+  function findDefinePropertySites (program, obj, prop, fromOverride, extraFiles) {
     var out = [];
-    var files = program.getSourceFiles();
+    var files = program.getSourceFiles().concat(extraFiles || []);
     for (var i = 0; i < files.length; i++) {
       var sf = files[i];
-      if (sf.isDeclarationFile || inOverrideDir(sf.fileName)) continue;
+      if (sf.isDeclarationFile || (!fromOverride && inOverrideDir(sf.fileName))) continue;
       (function walk (node) {
         if (
           ts.isCallExpression(node) &&
@@ -186,7 +259,7 @@ function init (modules) {
    * `new function () {...}` singletons (that shape is opaque to tsserver's implementation
    * search - no contextual typing flows into constructor-function this-assignments).
    */
-  function findMemberSites (program, obj, prop) {
+  function findMemberSites (program, obj, prop, fromOverride, extraFiles) {
     var out = [];
 
     function unwrapParens (node) {
@@ -228,10 +301,10 @@ function init (modules) {
       })(fn.body);
     }
 
-    var files = program.getSourceFiles();
+    var files = program.getSourceFiles().concat(extraFiles || []);
     for (var i = 0; i < files.length; i++) {
       var sf = files[i];
-      if (sf.isDeclarationFile || inOverrideDir(sf.fileName)) continue;
+      if (sf.isDeclarationFile || (!fromOverride && inOverrideDir(sf.fileName))) continue;
       // Recursive: UMD modules build the object inside their factory closure
       // (libs/oog/D2Bot.js), so the declaration is NOT a top-level statement.
       (function walkDecls (node) {
@@ -269,12 +342,12 @@ function init (modules) {
    * `<anything>.X = ...` publication assignments. require()-alias consts don't match: the
    * initializer must be a literal/constructor shape, not an arbitrary call.
    */
-  function findGlobalValueSites (program, name) {
+  function findGlobalValueSites (program, name, fromOverride, extraFiles) {
     var out = [];
-    var files = program.getSourceFiles();
+    var files = program.getSourceFiles().concat(extraFiles || []);
     for (var i = 0; i < files.length; i++) {
       var sf = files[i];
-      if (sf.isDeclarationFile || inOverrideDir(sf.fileName)) continue;
+      if (sf.isDeclarationFile || (!fromOverride && inOverrideDir(sf.fileName))) continue;
       (function walk (node) {
         if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) &&
             node.name.text === name && node.initializer) {
@@ -548,9 +621,10 @@ function init (modules) {
       if ((!res || !res.definitions || res.definitions.length === 0) && sourceFile) {
         var paTarget = propertyAccessAt(sourceFile, position);
         if (paTarget) {
-          var paSites = dedupSpans(findAssignmentSites(program, paTarget.obj, paTarget.prop)
-            .concat(findDefinePropertySites(program, paTarget.obj, paTarget.prop))
-            .concat(findMemberSites(program, paTarget.obj, paTarget.prop)));
+          var paFromOv = inOverrideDir(fileName);
+          var paSites = dedupSpans(findAssignmentSites(program, paTarget.obj, paTarget.prop, paFromOv)
+            .concat(findDefinePropertySites(program, paTarget.obj, paTarget.prop, paFromOv))
+            .concat(findMemberSites(program, paTarget.obj, paTarget.prop, paFromOv)));
           if (paSites.length > 0) {
             var paNode = identifierAt(sourceFile, position);
             return {
@@ -589,9 +663,11 @@ function init (modules) {
             defs.every(function (d) { return isDeclarationPath(d.fileName); })) {
           var ambientTarget = propertyAccessAt(sourceFile, position);
           if (ambientTarget) {
-            var implSites = findAssignmentSites(program, ambientTarget.obj, ambientTarget.prop)
-              .concat(findDefinePropertySites(program, ambientTarget.obj, ambientTarget.prop))
-              .concat(findMemberSites(program, ambientTarget.obj, ambientTarget.prop));
+            var fromOv = inOverrideDir(fileName);
+            var implSites = findAssignmentSites(program, ambientTarget.obj, ambientTarget.prop, fromOv)
+              .concat(findDefinePropertySites(program, ambientTarget.obj, ambientTarget.prop, fromOv))
+              .concat(findMemberSites(program, ambientTarget.obj, ambientTarget.prop, fromOv))
+            implSites = implSites.concat(findOverrideModuleSites(program, ambientTarget.obj, ambientTarget.prop, fromOv));
             // Contextual typing lets the native implementation search reach object-literal
             // members the syntactic scans could miss; keep executable (.js) results only.
             // try/catch: an implementation-search Debug failure must degrade, not turn the
@@ -611,6 +687,13 @@ function init (modules) {
                 if (sibSf) implSites = implSites.concat(findLocalValueSites(sibSf, ambientTarget.prop));
               }
             }
+            if (implSites.length === 0) {
+              var diskFiles = diskImplFiles(program, defs.map(function (d) { return d.fileName; }));
+              if (diskFiles.length > 0) {
+                implSites = findAssignmentSites(program, ambientTarget.obj, ambientTarget.prop, fromOv, diskFiles)
+                  .concat(findMemberSites(program, ambientTarget.obj, ambientTarget.prop, fromOv, diskFiles));
+              }
+            }
             implSites = dedupSpans(implSites);
             if (implSites.length > 0) {
               defs = implSites;
@@ -620,7 +703,7 @@ function init (modules) {
             // Bare identifier with ambient-only defs: a module-built global (UMD D2Bot,
             // OOG.js's Object.assign exports). Navigate to the closure declaration or
             // publication site instead of the d.ts declare.
-            var valueSites = dedupSpans(findGlobalValueSites(program, ident.text));
+            var valueSites = dedupSpans(findGlobalValueSites(program, ident.text, inOverrideDir(fileName)));
             if (valueSites.length > 0) {
               defs = valueSites;
               changed = true;
@@ -666,9 +749,10 @@ function init (modules) {
       var sourceFile = program && program.getSourceFile(fileName);
       var target = sourceFile && propertyAccessAt(sourceFile, position);
       if (target) {
-        var sites = findAssignmentSites(program, target.obj, target.prop)
-          .concat(findDefinePropertySites(program, target.obj, target.prop))
-          .concat(findMemberSites(program, target.obj, target.prop));
+        var ovCtx = inOverrideDir(fileName);
+        var sites = findAssignmentSites(program, target.obj, target.prop, ovCtx)
+          .concat(findDefinePropertySites(program, target.obj, target.prop, ovCtx))
+          .concat(findMemberSites(program, target.obj, target.prop, ovCtx));
         if (sites.length > 0) return dedupSpans(sites);
       }
       return impls ? kept : impls;

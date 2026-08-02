@@ -29,6 +29,10 @@ export default [
       "tools/**",
       // Double-underscore convention: gitignored personal working copies
       "**/__*.js",
+      // Gitignored in the SoloPlay submodule (generated tsc output, its .gitignore:9) -
+      // linting a derived local file only produces phantom warnings. TRANSITIONAL like the
+      // globals import: the epic should drive submodule ignores from the submodule itself.
+      "d2bs/kolbot/libs/SoloPlay/Modules/util.js",
     ],
   },
   {
@@ -155,6 +159,18 @@ export default [
       "preserve-caught-error": "off",
       "no-constant-binary-expression": "warn",
       "no-shadow-restricted-names": "warn",
+    },
+  },
+  {
+    // SoloPlay-internal cross-file globals, scoped to the submodule's files so main-repo code
+    // referencing them still flags. The names live in the SUBMODULE-OWNED manifest
+    // (libs/SoloPlay/eslint.globals.mjs) - SoloPlay global changes never touch this repo.
+    // The dynamic import tolerates an uninitialized submodule checkout (empty dir).
+    files: ["d2bs/kolbot/libs/SoloPlay/**/*.js"],
+    languageOptions: {
+      globals: await import("./d2bs/kolbot/libs/SoloPlay/eslint.globals.mjs")
+        .then((m) => m.default)
+        .catch(() => ({})),
     },
   },
   {

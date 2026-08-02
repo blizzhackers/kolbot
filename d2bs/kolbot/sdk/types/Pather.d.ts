@@ -28,10 +28,22 @@ declare global {
     specType?: number;
     sort?: () => void;
   }
+
+  // Hoisted from the `@typedef {object} spotOnDistanceSettings` JSDoc block on
+  // Pather.spotOnDistance in Pather.js.
+  interface SpotOnDistanceSettings {
+    area?: number;
+    reductionType?: number;
+    coll?: number;
+    returnSpotOnError?: boolean;
+  }
+
   // Value shape of the global `Pather` const in Pather.js (bound there via JSDoc @type).
   // Declaring the const here as well would collide: both files are global scripts.
   interface Pather {
+    initialized: boolean;
     wpAreas: number[];
+    nonTownWpAreas: number[];
     walkDistance: number;
     teleDistance: number;
     teleport: boolean;
@@ -39,7 +51,20 @@ declare global {
     recursion: boolean;
     lastPortalTick: number;
     allowBroadcast: boolean;
+    /** Maps an area id to the next area id along its default course. */
+    nextAreas: Record<number, number>;
+    /** The path currently being walked by {@link Pather.move}; updated node-by-node while `recursion` is true. */
+    currentWalkingPath: IPathNode[];
+    plotCourse_openedWpMenu: boolean;
 
+    /** @param msg forwarded by the `scriptmsg` event; populates `me.waypoints` from another script's cache. */
+    cacheListener(msg: { type: string; data: number[] }): void;
+    /**
+     * Broadcasts a request for other scripts' cached waypoints and waits briefly for a reply; if still
+     * uncached (or forced), fetches waypoint 1 directly to populate me.waypoints.
+     */
+    init(force?: boolean): void;
+    canTeleport(): boolean;
     findSpotAtDistance(node: IPathNode, distance: number, maxAttempts?: number): IPathNode | false;
     getWalkDistance(
       x: number,
@@ -51,6 +76,9 @@ declare global {
       radius?: number,
     ): number;
     useTeleport(): boolean;
+    spotOnDistance(spot: IPathNode, distance: number, givenSettings?: SpotOnDistanceSettings): IPathNode;
+    move(target: IPathNode | Unit | PresetUnit, givenSettings?: PathSettings): boolean;
+    moveNear(x: number, y: number, minDist: number, givenSettings?: PathSettings): boolean;
     moveTo(
       x: number,
       y: number,
@@ -58,13 +86,24 @@ declare global {
       clearPath?: boolean | undefined,
       pop?: boolean | undefined,
     ): boolean;
+    moveToEx(x: number, y: number, givenSettings?: PathSettings): boolean;
     teleportTo(x: number, y: number, maxRange?: number): boolean;
     walkTo(x: number, y: number, minDist?: number | undefined): boolean;
     openDoors(x: number, y: number): boolean;
+    kickBarrels(x: number, y: number): boolean;
     moveToUnit(
       unit: Unit | PresetUnit | { x: number; y: number },
       offX?: number,
       offY?: number,
+      clearPath?: boolean,
+      pop?: boolean,
+    ): boolean;
+    moveNearUnit(unit: Unit | PresetUnit, minDist?: number, clearPath?: boolean, pop?: boolean): boolean;
+    moveNearPreset(
+      area: number,
+      unitType: number,
+      unitId: number,
+      minDist?: number,
       clearPath?: boolean,
       pop?: boolean,
     ): boolean;
@@ -106,5 +145,20 @@ declare global {
     journeyTo(area: number): boolean;
     plotCourse(dest: number, src: number): false | { course: number[]; useWP: boolean };
     areasConnected(src: number, dest: number): boolean;
+    randMove(xMin?: number, xMax?: number, yMin?: number, yMax?: number, factor?: number): boolean;
+  }
+
+  // Value shape of the global `NodeAction` const in Pather.js (bound there via JSDoc @type).
+  // Declaring the const here as well would collide: both files are global scripts.
+  interface NodeAction {
+    shrinesToIgnore: number[];
+    enabled: boolean;
+
+    /** Runs every other function member of NodeAction (except itself) with `arg`. */
+    go(arg: ClearSettings): void;
+    killMonsters(arg?: ClearSettings): void;
+    pickItems(arg?: ClearSettings): void;
+    popChests(): void;
+    getShrines(): void;
   }
 }

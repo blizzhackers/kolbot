@@ -1229,7 +1229,10 @@ declare global {
     getFolders(): string[];
     create(what?: string): boolean;
   };
-  function dopen(what?: string): directory | false;
+  // Returns the plain shape, not `directory | false`: the engine does return false on a bad
+  // path, but every call site chains directly (dopen(x).getFiles()) and a `| false` union
+  // types the whole chain `any` under unchecked js - poisoning the idiom the codebase uses.
+  function dopen(what?: string): directory;
   function debugLog(text: string): void;
   function showConsole(): void;
   function hideConsole(): void;

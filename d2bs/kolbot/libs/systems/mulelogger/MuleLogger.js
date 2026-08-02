@@ -6,7 +6,7 @@
 *  @typedef {import("../../../sdk/globals")}
 */
 
-/** @type {import("./MuleLogger").MuleLoggerType} */
+/** @type {MuleLoggerType} */
 const MuleLogger = {
   /**
    * If this is a configured MuleLog game, logs the character's items and stays in game for

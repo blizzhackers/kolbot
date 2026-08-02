@@ -5,6 +5,7 @@
 *
 */
 
+/** @type {Precast} */
 const Precast = (function () {
   includeIfNotIncluded("core/Skill.js");
   /**

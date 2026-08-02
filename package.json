@@ -7,7 +7,16 @@
     "lint": "eslint --fix d2bs/kolbot/",
     "lint:check": "eslint d2bs/kolbot/",
     "globals:gen": "node tools/generate-eslint-globals.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "typecheck": "tsc --noEmit",
+    "globals:check": "node tools/generate-eslint-globals.mjs && git diff --exit-code -- eslint.globals.mjs",
+    "audit:programs": "node tools/audit/program-files.mjs",
+    "audit:types": "node tools/audit/type-surface.mjs",
+    "audit:jsdoc": "node tools/audit/jsdoc-coverage.mjs",
+    "audit:format": "node tools/audit/jsdoc-format.mjs",
+    "audit": "npm run audit:programs && npm run audit:types && npm run audit:jsdoc && npm run audit:format",
+    "typecheck:soloplay": "tsc --noEmit -p d2bs/kolbot/libs/SoloPlay",
+    "lint:soloplay": "eslint d2bs/kolbot/libs/SoloPlay"
   },
   "keywords": [],
   "author": "",
@@ -21,5 +30,8 @@
     "eslint-plugin-es-x": "^10.0.0",
     "kolbot-ts-plugin": "file:tools/kolbot-ts-plugin",
     "typescript": "~5.9"
+  },
+  "engines": {
+    "node": ">=24.18.0"
   }
 }
