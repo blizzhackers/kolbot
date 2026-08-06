@@ -97,7 +97,7 @@
     cube: {
       /** @returns {boolean} Whether the Horadric Cube has been picked up. */
       check: function () {
-        return !!me.cube;
+        return me.normal && !!me.cube;
       }
     },
     amulet: {
