@@ -9,7 +9,7 @@
 // Known false negatives: inline `{ callback: function () {...} }` properties, where the only
 // legal comment position is above the enclosing statement. Those report as undocumented.
 import { readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve, relative } from "node:path";
 import { KOLBOT, SOLOPLAY, gitFiles, parseJs, finish } from "./lib.mjs";
 
 // Data tables and vendored code: real files, but documenting per-entry adds noise, not meaning.
@@ -130,8 +130,11 @@ for (const r of report.slice(0, 25)) {
 }
 if (report.length > 25) console.log(`... and ${report.length - 25} more files`);
 if (jsonFlag > -1 && process.argv[jsonFlag + 1]) {
-  writeFileSync(process.argv[jsonFlag + 1], JSON.stringify(report, null, 1));
-  console.log(`\nwrote ${process.argv[jsonFlag + 1]}`);
+  const outPath = resolve(process.argv[jsonFlag + 1]);
+  const rel = relative(process.cwd(), outPath);
+  if (rel.startsWith("..")) throw new Error(`path traversal denied: ${outPath}`);
+  writeFileSync(outPath, JSON.stringify(report, null, 1));
+  console.log(`\nwrote ${outPath}`);
 }
 
 finish(grandUndoc, "jsdoc-coverage");
