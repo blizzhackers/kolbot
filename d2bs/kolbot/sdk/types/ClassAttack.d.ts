@@ -22,6 +22,17 @@ declare global {
     Wereform: typeof import("../../libs/core/Attacks/Wereform");
 
     /**
+     * Lightning Fury cooldown stamp. Written on the ROOT object (Attacks/Amazon.js:213) while the
+     * attack loop reads the per-class module's own copy - two different slots, a latent bug.
+     */
+    lightFuryTick: number;
+    /**
+     * Trap placement range. AntiHostile.js widens it to 40 on the ROOT object; the Assassin module
+     * reads its own copy (default 20) - same root-vs-module split as lightFuryTick.
+     */
+    trapRange: number;
+
+    /**
      * @deprecated Use the specific class attack modules instead. ClassAttack[me.classid].doAttack(...)
      */
     doAttack: (unit: Monster | Player, preattack?: boolean) => AttackResult;

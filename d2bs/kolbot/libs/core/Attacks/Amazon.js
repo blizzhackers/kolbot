@@ -163,6 +163,9 @@
       return result;
     },
 
+    /**
+     * Runs post-attack upkeep: handles precast skills, visits town to restock ammo if repair is needed, and resets the light fury tick.
+     */
     afterAttack: function () {
       Precast.doPrecast(false);
 

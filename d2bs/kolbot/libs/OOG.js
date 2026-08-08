@@ -1610,6 +1610,11 @@ includeIfNotIncluded("core/Me.js");
       ]);
 
       return {
+        /**
+         * Select the profile's configured difficulty on the single-player difficulty screen,
+         * falling back to the highest one that is unlocked.
+         * @returns {boolean} true if the difficulty screen was left before the timeout
+         */
         selectDifficultySP: function () {
           let diff = (Starter.gameInfo.difficulty || "Highest");
           diff === "Highest" && (diff = "Hell"); // starts from top with fall-through to select highest
@@ -1635,6 +1640,10 @@ includeIfNotIncluded("core/Me.js");
           return Starter.locationTimeout(5e3, sdk.game.locations.SelectDifficultySP);
         },
 
+        /**
+         * Dispatch the current error location to its handler, restarting the client when the location is unhandled.
+         * @returns {void}
+         */
         loginError: function () {
           let _loc = getLocation();
 
@@ -1647,6 +1656,10 @@ includeIfNotIncluded("core/Me.js");
           }
         },
 
+        /**
+         * Handle a character select error screen, stopping or switching keys when the CD key is realm disabled.
+         * @returns {boolean} true if the screen cleared, false if still stuck on the connecting screen
+         */
         charSelectError: function () {
           let string = parseControlText(Controls.CharSelectError);
           let currentLoc = getLocation();
@@ -1685,6 +1698,10 @@ includeIfNotIncluded("core/Me.js");
           return true;
         },
 
+        /**
+         * Handle a realm down: exit to the main menu, wait out the configured delay, then switch keys or restart.
+         * @returns {void}
+         */
         realmDown: function () {
           D2Bot.updateStatus("Realm Down");
           delay(1000);
@@ -1705,6 +1722,10 @@ includeIfNotIncluded("core/Me.js");
           }
         },
 
+        /**
+         * Report the create-game queue position, abandoning a failed creation or waiting out a queue restriction.
+         * @returns {void}
+         */
         waitingInLine: function () {
           let queue = ControlAction.getQueueTime();
           let currentLoc = getLocation();
@@ -1748,6 +1769,11 @@ includeIfNotIncluded("core/Me.js");
           }
         },
 
+        /**
+         * Handle a "game does not exist" result by switching a flagged CD key or waiting out the configured timeout,
+         * then marking the starter ready for the next game.
+         * @returns {void}
+         */
         gameDoesNotExist: function () {
           let currentLoc = getLocation();
           console.log("Game doesn't exist");
@@ -1766,6 +1792,11 @@ includeIfNotIncluded("core/Me.js");
           Starter.lastGameStatus = "ready";
         },
 
+        /**
+         * Handle a TCP/IP or battle.net unable-to-connect screen, retrying a couple of times before
+         * waiting out the configured version-error or connect delay.
+         * @returns {void}
+         */
         unableToConnect: function () {
           let currentLoc = getLocation();
 
@@ -1814,6 +1845,10 @@ includeIfNotIncluded("core/Me.js");
           }
         },
 
+        /**
+         * Open the create-game window from the lobby, handling a dead hardcore character and a bugged create button.
+         * @returns {boolean} false if the character is dead or the create-game screen was not reached, true otherwise
+         */
         openCreateGameWindow: function () {
           let currentLoc = getLocation();
 
@@ -1857,6 +1892,10 @@ includeIfNotIncluded("core/Me.js");
           return (getLocation() === sdk.game.locations.CreateGame);
         },
 
+        /**
+         * Open the join-game window from the lobby, retrying once through the create-game window when the button is bugged.
+         * @returns {void}
+         */
         openJoinGameWindow: function () {
           let currentLoc = getLocation();
 
@@ -1880,6 +1919,11 @@ includeIfNotIncluded("core/Me.js");
           }
         },
 
+        /**
+         * Log the current profile in, first correcting a character select screen that does not match the profile type.
+         * @param {boolean} [otherMultiCheck] - hand off to the other multiplayer flow when on the OtherMultiplayer screen
+         * @returns {boolean} false when exiting a character select screen wrong for this profile type, true otherwise
+         */
         login: function (otherMultiCheck = false) {
           if (!Starter.lastLocation.includes(sdk.game.locations.LobbyLostConnection)) {
             Starter.inGame && (Starter.inGame = false);
@@ -1943,6 +1987,11 @@ includeIfNotIncluded("core/Me.js");
           return true;
         },
 
+        /**
+         * Pick the other-multiplayer entry matching the profile type (TCP/IP host or join, open battle.net), cancelling
+         * out of the screen for any other type.
+         * @returns {void}
+         */
         otherMultiplayerSelect: function () {
           const pType = Profile().type;
           if ([sdk.game.profiletype.TcpIpHost, sdk.game.profiletype.TcpIpJoin].includes(pType)) {
@@ -1958,6 +2007,10 @@ includeIfNotIncluded("core/Me.js");
           }
         },
 
+        /**
+         * Try to clear a stuck character select "connecting" screen by exiting back out of it.
+         * @returns {boolean} true if not (or no longer) on the connecting screen
+         */
         charSelectConnecting: function () {
           if (getLocation() === sdk.game.locations.CharSelectConnecting) {
             // bugged? lets see if we can unbug it

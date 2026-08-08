@@ -1132,6 +1132,17 @@ declare global {
   function stringToEUC(arg: string): number[];
   function utf8ToEuc(arg: string): number[];
   function delay(ms: number): void;
+  // Published by libs/modules/Worker.js before it overrides `delay`: both are the engine's
+  // original sleep, kept reachable for code that must not yield to background work.
+  var _delay: typeof delay;
+  var nativeSleep: typeof delay;
+  // Published by libs/core/Pather.js: the engine's getWaypoint captured before the cache wrapper.
+  var _getWaypoint: typeof getWaypoint;
+  // Published by libs/modules/Worker.js: cooperative block-until-settled on the Promise polyfill.
+  var await: <T>(promise: Promise<T>) => T;
+  // Published by libs/require.js. Only the fallback contract for dynamic call shapes - a literal
+  // require("./x") is still resolved per-module by TS itself.
+  var require: (field: string, path?: string) => unknown;
   function load(file: string): boolean;
   function isIncluded(file: IncludePath): boolean;
   function include(file: IncludePath): boolean;
@@ -1358,6 +1369,14 @@ declare global {
     timeEnd(name: string): void;
     trace(): void;
     info(start: boolean, msg: string, timer: string): void;
+    /** Gates all console.debug output; the Polyfill.js console shim initialises it to true. */
+    printDebug: boolean;
+    /**
+     * Partial polyfill: prints an ASCII table through console.log rather than returning it.
+     * `columns` defaults to Object.keys(data[0]), so every row must expose the same keys and
+     * every value must be toString()-able.
+     */
+    table(data: Array<Record<string, unknown>>, columns?: string[]): void;
   }
   const console: Console;
 
@@ -1486,6 +1505,14 @@ declare global {
     profileInfo: ProfileInfo;
     ftjCount: number;
     lastLocation: number[];
+    /** Milliseconds left on the running ControlAction.timeoutDelay countdown; 0 when no countdown is active. */
+    delay: number;
+    /** Per-profile StarterConfig overrides; entry scripts merge the current profile's entry, then delete this (so it must stay optional). */
+    AdvancedConfig?: Record<string, Partial<StarterConfig>>;
+    /** One-shot latch: set on the first "account already exists" login error so the retry happens only once. */
+    accountExists: boolean;
+    /** Retries spent sitting on the CharSelectConnecting screen; past 3 the profile is restarted. */
+    charSelectConnectingRetry: number;
 
     sayMsg(string: string): void;
     /**

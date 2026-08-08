@@ -90,12 +90,12 @@
       removeEventListener("gamepacket", _Diablo.diabloLightsEvent);
     },
 
+    /**
+     * Builds a poll callback that skips town chores and throws (after invoking onSpawn) once Diablo spawns.
+     * @param {null | (() => void)} onSpawn
+     * @returns {() => boolean} Poll function that throws once Diablo spawns; returns false once done.
+     */
     diaSpawnWatcher: (
-      /**
-        * Builds a poll callback that skips town chores and throws (after invoking onSpawn) once Diablo spawns.
-        * @param {null | (() => void)} onSpawn
-        * @returns {() => boolean} Poll function that throws once Diablo spawns; returns false once done.
-        */
       function (onSpawn = null) {
         let diaTick = 0;
       

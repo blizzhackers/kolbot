@@ -34,6 +34,9 @@ for (const m of dtsText.matchAll(/^\s*(?:declare )?const (\w+)\s*:\s*([\w.]+)\s*
 }
 const declaredNames = new Set([...ambientConsts.keys()]);
 for (const m of dtsText.matchAll(/^\s*(?:declare )?function (\w+)\s*[(<]/gm)) declaredNames.add(m[1]);
+// var/let declarations count too - runtime-assigned globals (global.X = ...) are declared as
+// `var`, and their type is often a function type the const regex above cannot parse.
+for (const m of dtsText.matchAll(/^\s*(?:declare )?(?:var|let) (\w+)\s*[:;]/gm)) declaredNames.add(m[1]);
 // A `namespace X {}` block is a value declaration too - NPCAction is typed that way because its
 // js uses the tsc namespace-emit IIFE shape.
 for (const m of dtsText.matchAll(/^\s*(?:declare )?namespace (\w+)\s*\{/gm)) declaredNames.add(m[1]);
@@ -48,6 +51,11 @@ const JS = [
 /** Members an implementation actually exposes on `name`. */
 const implMembers = new Map();
 const publications = new Map();
+// Second pairing family: interfaces with NO ambient const, merged instead with a same-named
+// top-level script const (Item, Tracker, CharData, ...). The ambient-const loop cannot see
+// them, which is how Tracker.IPPath drifted unreported. Top-level declarations only - a
+// function-local `const GameTracker = ...` shadow must not pollute the member set.
+const topLevelConsts = new Map();
 
 for (const file of JS) {
   const ast = parseJs(file);
@@ -62,6 +70,13 @@ for (const file of JS) {
       if (key !== undefined) add(name, String(key));
     }
   };
+
+  for (const stmt of ast.body) {
+    if (stmt.type !== "VariableDeclaration") continue;
+    for (const d of stmt.declarations) {
+      if (d.id?.type === "Identifier") topLevelConsts.set(d.id.name, file);
+    }
+  }
 
   walk(ast, (node) => {
     // const X = {...} / new function(){this.y=..} / (function(){ return {...} })()
@@ -125,6 +140,22 @@ for (const [name, iface] of [...ambientConsts].sort()) {
   if (missing.length) {
     findings += missing.length;
     console.log(`  ${name} (${iface}): ${missing.length} - ${missing.slice(0, 10).join(", ")}`);
+  }
+}
+
+// Interfaces merged with a same-named top-level script const instead of bound via an ambient
+// const. Skip names the ambient-const loop already compared, and names with no such interface.
+const coveredByAmbient = new Set([...ambientConsts.keys(), ...ambientConsts.values()]);
+for (const [name, file] of [...topLevelConsts].sort()) {
+  if (coveredByAmbient.has(name)) continue;
+  const declared = members.get(name);
+  if (!declared || declared.size === 0) continue;
+  const impl = implMembers.get(name);
+  if (!impl) continue;
+  const missing = [...impl.keys()].filter((m) => !declared.has(m) && !m.startsWith("_"));
+  if (missing.length) {
+    findings += missing.length;
+    console.log(`  ${name} (script-const merge): ${missing.length} - ${missing.slice(0, 10).join(", ")}`);
   }
 }
 

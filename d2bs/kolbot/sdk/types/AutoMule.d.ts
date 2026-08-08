@@ -133,6 +133,8 @@ declare global {
     droppedGids: Set<number>;
     /** Set on first {@link Mule.pickItems} call; not part of the initial object literal. */
     clearedJunk?: boolean;
+    /** Stamped by automule/main.js once the mule is ready; not part of the initial object literal. */
+    recheckTick?: number;
     waitForMaster(): void;
     done(): void;
     nextChar(): void;

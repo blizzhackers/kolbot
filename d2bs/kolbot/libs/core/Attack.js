@@ -45,6 +45,10 @@ const Attack = {
   },
 
   // Initialize attacks
+  /**
+   * Load the class attack file and prime attack state (primary slot, skills, infinity/auradin flags)
+   * @param {boolean} [notify] Warn on console when the configured attack skills are unusable
+   */
   init: function (notify = true) {
     // TODO: properly handle loading wereform and custom files so they work with LazyLoader and get the correct types
     if (Config.Wereform) {
@@ -1428,6 +1432,11 @@ const Attack = {
         Pather.move(roomNode, { callback: cb, clearSettings: { clearPath: true } });
         Attack.clearEx(room.xsize, {
           spectype: spectype || 0,
+          /**
+           * Restrict this clear to monsters standing inside the room currently being explored
+           * @param {Monster} unit
+           * @returns {boolean}
+           */
           filter: function (unit) {
             return unit && room.coordsInRoom(unit.x, unit.y);
           }
@@ -1450,6 +1459,11 @@ const Attack = {
    * @returns {boolean}
    */
   clearRoom: function (room, spectype = 0) {
+    /**
+     * Walkable center of a room, falling back to the geometric center when nothing walkable is near
+     * @param {Room} room
+     * @returns {[number, number]}
+     */
     function getCenter(room) {
       let centerX = room.x * 5 + room.xsize / 2;
       let centerY = room.y * 5 + room.ysize / 2;
@@ -1501,10 +1515,22 @@ const Attack = {
    * @returns {boolean}
    */
   clearLevel: function (spectype = 0, cb = null) {
+    /**
+     * Order rooms by straight-line distance from the room we are standing in
+     * @param {[number, number, Room]} a
+     * @param {[number, number, Room]} b
+     * @returns {number} comparator: negative if a is closer, positive if b is closer, 0 if equal
+     */
     function RoomSort (a, b) {
       return getDistance(myRoom[0], myRoom[1], a[0], a[1]) - getDistance(myRoom[0], myRoom[1], b[0], b[1]);
     }
 
+    /**
+     * Order rooms by walking distance from the room we are standing in
+     * @param {[number, number, Room]} a
+     * @param {[number, number, Room]} b
+     * @returns {number} comparator: negative if a is closer, positive if b is closer, 0 if equal
+     */
     function _walkingRoomSort (a, b) {
       let aDist = Pather.getWalkDistance(a[0], a[1], me.area, myRoom[0], myRoom[1]);
       let bDist = Pather.getWalkDistance(b[0], b[1], me.area, myRoom[0], myRoom[1]);
@@ -1915,6 +1941,14 @@ const Attack = {
     return false;
   },
 
+  /**
+   * Move to the least crowded spot around a unit
+   * @param {Unit} unit
+   * @param {number} distance Max offset from the unit the spot may be
+   * @param {number} spread Grid step used when sampling candidate spots
+   * @param {number} range Radius each candidate spot is scored for nearby monsters
+   * @returns {boolean} Successfully moved to a safe spot
+   */
   deploy: function (unit, distance, spread, range) {
     if (arguments.length < 4) {
       throw new Error("deploy: Not enough arguments supplied");
@@ -1925,6 +1959,14 @@ const Attack = {
     return (typeof safeLoc === "object" ? Pather.moveToUnit(safeLoc, 0) : false);
   },
 
+  /**
+   * Count attackable monsters within range of a spot, heavily penalizing spots standing in fire
+   * @param {number} x
+   * @param {number} y
+   * @param {number} range
+   * @param {Monster[]} list Pre-built monster list to check against
+   * @returns {number}
+   */
   getMonsterCount: function (x, y, range, list) {
     let count = 0;
     let ignored = [sdk.monsters.Diablo]; // why is diablo ignored?
@@ -1950,6 +1992,16 @@ const Attack = {
     return count;
   },
 
+  /**
+   * Build evenly spaced coords over a rectangle, keeping only those with known collision data
+   * @param {number} xmin
+   * @param {number} xmax
+   * @param {number} ymin
+   * @param {number} ymax
+   * @param {number} spread Distance between sampled coords
+   * @returns {(PathNode & { coll: number })[]}
+   * @throws {Error} If the rectangle is inverted or spread is less than 1
+   */
   buildGrid: function (xmin, xmax, ymin, ymax, spread) {
     if (xmin >= xmax || ymin >= ymax || spread < 1) {
       throw new Error("buildGrid: Bad parameters");
@@ -2233,6 +2285,10 @@ const Attack = {
     }
   },
 
+  /**
+   * Resistance reduction our Lower Resist curse applies, 0 when we can't cast it
+   * @returns {number} Percent of resistance lowered
+   */
   getLowerResistPercent: function () {
     const calc = (level) => Math.floor(Math.min(25 + (45 * ((110 * level) / (level + 6)) / 100), 70));
     if (Skill.canUse(sdk.skills.LowerResist)) {
@@ -2241,6 +2297,10 @@ const Attack = {
     return 0;
   },
 
+  /**
+   * Resistance reduction our Conviction aura applies, treating an equipped Infinity as level 12
+   * @returns {number} Percent of resistance lowered
+   */
   getConvictionPercent: function () {
     const calc = (level) => Math.floor(Math.min(25 + (5 * level), 150));
     if (me.expansion && this.checkInfinity()) {

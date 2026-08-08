@@ -1,13 +1,14 @@
 // JSDoc coverage: function-valued members with no JSDoc block immediately above them.
 //
 // Counts object-literal methods, `X.y = function`, `this.x = function`, and function
-// declarations. A block only counts when nothing but whitespace separates it from the
-// declaration, which is what the editor requires to show it.
+// declarations. A block counts when only whitespace - or `//` line comments, so an
+// eslint-disable-next-line directive can keep its mandatory position - separates it from the
+// declaration. One codified exception: an inline `{ callback: function () {...} }` property
+// that STARTS mid-line accepts the JSDoc above its enclosing statement, because that is the
+// only legal comment position without splitting the code line (the codebase's convention for
+// Pather.move/moveToEx callbacks).
 //
 //   node tools/audit/jsdoc-coverage.mjs [main|soloplay|all] [--json <path>] [--check]
-//
-// Known false negatives: inline `{ callback: function () {...} }` properties, where the only
-// legal comment position is above the enclosing statement. Those report as undocumented.
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { KOLBOT, SOLOPLAY, gitFiles, parseJs, finish } from "./lib.mjs";
@@ -21,7 +22,8 @@ const TARGETS = {
       "libs/SoloPlay/", // its own project - use the soloplay target
       "libs/json2.js", // vendored Crockford polyfill
       "libs/core/GameData/", // generated/large data tables
-      "libs/config/Builds/", // per-level Update() template stubs
+      "libs/config/", // per-class config templates (LoadConfig stubs + Builds/) - user-facing, docs are noise
+      "libs/manualplay/config/", // same class of per-class config templates
     ],
   },
   soloplay: {
@@ -58,8 +60,19 @@ for (const name of targets) {
     for (const c of ast.comments ?? []) {
       if (c.type === "Block" && c.value.startsWith("*")) jsdocEnds.set(c.range[1], c.value);
     }
-    // Adjacent = only whitespace between the block's end and the declaration's start.
-    const docFor = (node) => jsdocEnds.get(src.slice(0, node.range[0]).trimEnd().length);
+    // Adjacent = only whitespace, or whole `//` line comments (an eslint-disable-next-line
+    // directive must sit directly above its target and cannot move above the JSDoc), between
+    // the block's end and the declaration's start.
+    const docFor = (node) => {
+      let end = src.slice(0, node.range[0]).trimEnd().length;
+      for (;;) {
+        const doc = jsdocEnds.get(end);
+        if (doc !== undefined) return doc;
+        const lineStart = src.lastIndexOf("\n", end - 1) + 1;
+        if (!src.slice(lineStart, end).trim().startsWith("//")) return undefined;
+        end = src.slice(0, lineStart).trimEnd().length;
+      }
+    };
     const documented = (node) => docFor(node) !== undefined;
 
     // Members of a `@type`-annotated container are already typed by that annotation
@@ -87,8 +100,14 @@ for (const name of targets) {
     let total = 0;
     const missing = [];
     const isFn = (n) => n && (n.type === "FunctionExpression" || n.type === "ArrowFunctionExpression");
-    (function scan(node) {
+    // A Property that STARTS mid-line (code before it on its own line) can never satisfy the
+    // adjacency rule without splitting the code line; the codebase's convention documents it
+    // above the enclosing statement instead, so the check falls back to that statement's block.
+    const startsMidLine = (node) =>
+      /\S/.test(src.slice(src.lastIndexOf("\n", node.range[0] - 1) + 1, node.range[0]));
+    (function scan(node, stmt) {
       if (!node || typeof node.type !== "string") return;
+      if (/Statement$|Declaration$/.test(node.type)) stmt = node;
       let target = null;
       let label = null;
       if (node.type === "FunctionDeclaration" && node.id) [target, label] = [node, node.id.name];
@@ -105,15 +124,17 @@ for (const name of targets) {
       }
       if (target && label && !coveredProps.has(target.range[0])) {
         total++;
-        if (!documented(target)) missing.push(`${label}:${target.loc.start.line}`);
+        const ok = documented(target)
+          || (node.type === "Property" && startsMidLine(target) && stmt && documented(stmt));
+        if (!ok) missing.push(`${label}:${target.loc.start.line}`);
       }
       for (const key of Object.keys(node)) {
         if (key === "range" || key === "loc") continue;
         const value = node[key];
-        if (Array.isArray(value)) for (const child of value) scan(child);
-        else if (value && typeof value === "object") scan(value);
+        if (Array.isArray(value)) for (const child of value) scan(child, stmt);
+        else if (value && typeof value === "object") scan(value, stmt);
       }
-    })(ast);
+    })(ast, null);
 
     if (total > 0) {
       grandTotal += total;

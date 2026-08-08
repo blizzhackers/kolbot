@@ -86,7 +86,8 @@ export function interfaceMembers(rawText) {
     .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "))
     .replace(/\/\/[^\n]*/g, "");
   const byName = new Map();
-  const re = /\binterface (\w+)[^{]*\{/g;
+  const parents = new Map();
+  const re = /\binterface (\w+)([^{]*)\{/g;
   let m;
   while ((m = re.exec(dtsText)) !== null) {
     let depth = 1;
@@ -113,9 +114,30 @@ export function interfaceMembers(rawText) {
       }
     }
     byName.set(m[1], set);
+    const ext = m[2].match(/\bextends\s+([\w.,\s]+)/);
+    if (ext) {
+      const list = parents.get(m[1]) ?? [];
+      for (const p of ext[1].split(",")) list.push(p.trim().split(".").pop());
+      parents.set(m[1], list);
+    }
     re.lastIndex = i;
   }
-  return byName;
+  // Inherited members count as declared: `interface MeType extends Unit` really does expose every
+  // Unit member on `me`, and reporting them as drift manufactures findings (me.haveRunes).
+  const resolved = new Map();
+  const resolve = (name, seen = new Set()) => {
+    if (resolved.has(name)) return resolved.get(name);
+    if (seen.has(name)) return byName.get(name) ?? new Set();
+    seen.add(name);
+    const merged = new Set(byName.get(name) ?? []);
+    for (const p of parents.get(name) ?? []) {
+      for (const mem of resolve(p, seen)) merged.add(mem);
+    }
+    resolved.set(name, merged);
+    return merged;
+  };
+  for (const name of byName.keys()) resolve(name);
+  return resolved;
 }
 
 export function readAll(paths) {

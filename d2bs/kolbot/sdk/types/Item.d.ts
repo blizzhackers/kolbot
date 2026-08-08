@@ -1,7 +1,12 @@
 export {};
 declare global {
   // Value shape of the global `Item` const in Item.js (bound there via JSDoc @type).
-  // Declaring the const here as well would collide: both files are global scripts.
+  // No ambient const here, deliberately: Item.js is a global SCRIPT with no expando
+  // assignments in this program, so its @type-bound const and this interface are one
+  // merged symbol - an ambient `const Item` is TS2451 against it, and redundant anyway
+  // (members already resolve through the bind; probe-verified 2026-08-02). An ambient
+  // const becomes both legal and necessary only if the js file turns into a CJS module
+  // or gains top-level `Item.member =` assignments in-program (see Town/Pickit).
   interface Item {
     useItemLog: boolean;
 
