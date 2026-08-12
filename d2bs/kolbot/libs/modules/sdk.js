@@ -5085,6 +5085,15 @@
         Expansion: 1,
       },
 
+      // me.charflags bits (D2ClientSaveFlags) - same layout as the .d2s status byte and the realm statstring flags
+      charflags: {
+        Init: 0x01,
+        Hardcore: 0x04,
+        Dead: 0x08,
+        Expansion: 0x20,
+        Ladder: 0x40,
+      },
+
       // out of game locations
       locations: {
         PreSplash: 0,

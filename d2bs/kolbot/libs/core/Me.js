@@ -1126,6 +1126,16 @@ Object.defineProperties(me, {
       return me.playertype === true;
     }
   },
+  diedHardcore: {
+    /**
+     * Hardcore character has permanently died. Also readable out of game
+     * (char select/lobby), where the dead char greys out join/create.
+     * @returns {boolean}
+     */
+    get: function () {
+      return me.hardcore && !!(me.charflags & sdk.game.charflags.Dead);
+    }
+  },
   normal: {
     /** @returns {boolean} */
     get: function () {

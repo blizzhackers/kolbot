@@ -712,6 +712,8 @@ declare global {
     readonly classic: boolean;
     readonly softcore: boolean;
     readonly hardcore: boolean;
+    /** Hardcore character has permanently died; also readable out of game (char select/lobby) */
+    readonly diedHardcore: boolean;
     readonly normal: boolean;
     readonly nightmare: boolean;
     readonly hell: boolean;
