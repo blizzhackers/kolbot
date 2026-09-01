@@ -30,9 +30,9 @@
             let _pos = [
               this.throneCoords.bottomLeft, this.throneCoords.bottomRight,
               this.throneCoords.topRight, this.throneCoords.topLeft,
-            ].sort(function (a, b) {
-              return getDistance(me, a) - getDistance(me, b);
-            }).first();
+            ].sort(Sort.makeComparator(function (a) {
+              return getDistance(me, a);
+            })).first();
             Pather.moveTo(_pos.x, _pos.y);
             while (hydra.mode !== sdk.monsters.mode.Dead) {
               delay(500);

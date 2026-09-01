@@ -273,7 +273,7 @@ const ShopBot = new Runnable(
         let area = getArea();
         const wp = Game.getPresetObject(me.area, wpPresets[me.act]).realCoords();
         const redPortal = (getUnits(sdk.unittype.Object, sdk.objects.RedPortal)
-          .sort((a, b) => a.distance - b.distance))
+          .sort(Sort.makeComparator(a => a.distance)))
           .first();
         let exit = area.exits[0];
 

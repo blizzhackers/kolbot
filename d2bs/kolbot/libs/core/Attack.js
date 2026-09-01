@@ -1914,9 +1914,9 @@ const Attack = {
     const grid = this.buildGrid(unit.x - distance, unit.x + distance, unit.y - distance, unit.y + distance, spread);
 
     if (!grid.length) return false;
-    grid.sort(function (a, b) {
-      return getDistance(b.x, b.y, unit.x, unit.y) - getDistance(a.x, a.y, unit.x, unit.y);
-    });
+    grid.sort(Sort.makeComparator(function (a) {
+      return -getDistance(a.x, a.y, unit.x, unit.y);
+    }));
 
     for (let i = 0; i < grid.length; i += 1) {
       if (!(CollMap.getColl(grid[i].x, grid[i].y, true) & sdk.collision.BlockWall)
