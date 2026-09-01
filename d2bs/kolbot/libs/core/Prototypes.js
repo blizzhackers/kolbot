@@ -2378,37 +2378,39 @@ Unit.prototype.equip = function (destLocation) {
   };
 };
 
+// Body location -> item types that can be equipped there
+const _prototypesBodyLocTypes = new Map([
+  [sdk.body.Head, [sdk.items.type.Helm, sdk.items.type.Pelt, sdk.items.type.PrimalHelm]],
+  [sdk.body.Neck, [sdk.items.type.Amulet]],
+  [sdk.body.Armor, [sdk.items.type.Armor]],
+  [sdk.body.RightArm, [
+    sdk.items.type.Scepter, sdk.items.type.Wand, sdk.items.type.Staff, sdk.items.type.Bow,
+    sdk.items.type.Axe, sdk.items.type.Club, sdk.items.type.Sword, sdk.items.type.Hammer,
+    sdk.items.type.Knife, sdk.items.type.Spear, sdk.items.type.Polearm, sdk.items.type.Crossbow,
+    sdk.items.type.Mace, sdk.items.type.Javelin, sdk.items.type.ThrowingKnife, sdk.items.type.ThrowingAxe,
+    sdk.items.type.MissilePotion, sdk.items.type.Javelin, sdk.items.type.Orb,
+    sdk.items.type.HandtoHand, sdk.items.type.AmazonBow,
+    sdk.items.type.AmazonSpear
+  ]], // right arm
+  [sdk.body.LeftArm, [
+    sdk.items.type.Shield, sdk.items.type.BowQuiver,
+    sdk.items.type.CrossbowQuiver, sdk.items.type.AuricShields, sdk.items.type.VoodooHeads
+  ]], // left arm
+  [sdk.body.RingRight, [sdk.items.type.Ring]],
+  [sdk.body.RingLeft, [sdk.items.type.Ring]],
+  [sdk.body.Belt, [sdk.items.type.Belt]],
+  [sdk.body.Feet, [sdk.items.type.Boots]],
+  [sdk.body.Gloves, [sdk.items.type.Gloves]],
+]);
+
 /**
  * @this {ItemUnit}
  * @returns {number[]}
  */
 Unit.prototype.getBodyLoc = function () {
-  const _types = new Map([
-    [sdk.body.Head, [sdk.items.type.Helm, sdk.items.type.Pelt, sdk.items.type.PrimalHelm]],
-    [sdk.body.Neck, [sdk.items.type.Amulet]],
-    [sdk.body.Armor, [sdk.items.type.Armor]],
-    [sdk.body.RightArm, [
-      sdk.items.type.Scepter, sdk.items.type.Wand, sdk.items.type.Staff, sdk.items.type.Bow,
-      sdk.items.type.Axe, sdk.items.type.Club, sdk.items.type.Sword, sdk.items.type.Hammer,
-      sdk.items.type.Knife, sdk.items.type.Spear, sdk.items.type.Polearm, sdk.items.type.Crossbow,
-      sdk.items.type.Mace, sdk.items.type.Javelin, sdk.items.type.ThrowingKnife, sdk.items.type.ThrowingAxe,
-      sdk.items.type.MissilePotion, sdk.items.type.Javelin, sdk.items.type.Orb,
-      sdk.items.type.HandtoHand, sdk.items.type.AmazonBow,
-      sdk.items.type.AmazonSpear
-    ]], // right arm
-    [sdk.body.LeftArm, [
-      sdk.items.type.Shield, sdk.items.type.BowQuiver,
-      sdk.items.type.CrossbowQuiver, sdk.items.type.AuricShields, sdk.items.type.VoodooHeads
-    ]], // left arm
-    [sdk.body.RingRight, [sdk.items.type.Ring]],
-    [sdk.body.RingLeft, [sdk.items.type.Ring]],
-    [sdk.body.Belt, [sdk.items.type.Belt]],
-    [sdk.body.Feet, [sdk.items.type.Boots]],
-    [sdk.body.Gloves, [sdk.items.type.Gloves]],
-  ]);
   let bodyLoc = [];
-  
-  for (let [key, value] of _types) {
+
+  for (let [key, value] of _prototypesBodyLocTypes) {
     if (value.includes(this.itemType)) {
       bodyLoc.push(key);
     }

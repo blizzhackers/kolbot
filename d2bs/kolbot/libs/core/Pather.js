@@ -205,6 +205,13 @@ const PathDebug = {
   }
 };
 
+// Small breakable objects kickBarrels clears out of the way - anything small and annoying really
+const _patherBarrelNames = [
+  "ratnest", "goo pile", "barrel", "basket",
+  "largeurn", "jar3", "jar2", "jar1",
+  "urn", "jug", "barrel wilderness", "cocoon"
+];
+
 // todo - test path generating in a dedicated thread to prevent lagging main thread
 /** @type {Pather} */
 const Pather = {
@@ -994,16 +1001,10 @@ const Pather = {
 
     (typeof x !== "number" || typeof y !== "number") && ({ x, y } = me);
 
-    // anything small and annoying really
-    let _things = [
-      "ratnest", "goo pile", "barrel", "basket",
-      "largeurn", "jar3", "jar2", "jar1",
-      "urn", "jug", "barrel wilderness", "cocoon"
-    ];
     let barrels = getUnits(sdk.unittype.Object)
       .filter(function (el) {
         return (el.name && el.mode === sdk.objects.mode.Inactive
-        && _things.includes(el.name.toLowerCase())
+        && _patherBarrelNames.includes(el.name.toLowerCase())
         && ((getDistance(el, x, y) < 4 && el.distance < 9) || el.distance < 4));
       });
     let brokeABarrel = false;

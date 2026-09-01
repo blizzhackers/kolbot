@@ -8,6 +8,19 @@
 
 (function () {
   const _SkillData = require("./GameData/SkillData");
+  // Skills usable in both wereforms
+  const wereFormSharedSkills = new Set([
+    sdk.skills.Attack, sdk.skills.Kick,
+    sdk.skills.Raven, sdk.skills.Werewolf,
+    sdk.skills.Werebear, sdk.skills.PoisonCreeper,
+    sdk.skills.OakSage, sdk.skills.SpiritWolf,
+    sdk.skills.CarrionVine, sdk.skills.HeartofWolverine,
+    sdk.skills.SummonDireWolf, sdk.skills.FireClaws,
+    sdk.skills.SolarCreeper, sdk.skills.Hunger,
+    sdk.skills.SpiritofBarbs, sdk.skills.SummonGrizzly, sdk.skills.Armageddon
+  ]);
+  const wolfOnlySkills = new Set([sdk.skills.FeralRage, sdk.skills.Rabies, sdk.skills.Fury]);
+  const bearOnlySkills = new Set([sdk.skills.Maul, sdk.skills.ShockWave]);
 
   /**
    * @todo Move some of the precast functions here
@@ -442,24 +455,12 @@
     wereFormCheck: function (skillId) {
       // we don't even have the skills to transform or we aren't transformed - add handler for wereform given by an item that is on switch
       if (!Skill.canUse(sdk.skills.Werewolf) && !Skill.canUse(sdk.skills.Werebear)) return true;
-      const shared = new Set([
-        sdk.skills.Attack, sdk.skills.Kick,
-        sdk.skills.Raven, sdk.skills.Werewolf,
-        sdk.skills.Werebear, sdk.skills.PoisonCreeper,
-        sdk.skills.OakSage, sdk.skills.SpiritWolf,
-        sdk.skills.CarrionVine, sdk.skills.HeartofWolverine,
-        sdk.skills.SummonDireWolf, sdk.skills.FireClaws,
-        sdk.skills.SolarCreeper, sdk.skills.Hunger,
-        sdk.skills.SpiritofBarbs, sdk.skills.SummonGrizzly, sdk.skills.Armageddon
-      ]);
-      const wolfOnly = new Set([sdk.skills.FeralRage, sdk.skills.Rabies, sdk.skills.Fury]);
-      const bearOnly = new Set([sdk.skills.Maul, sdk.skills.ShockWave]);
-      
+
       let wolfForm = me.getState(sdk.states.Wearwolf);
-      if (wolfForm) return shared.has(skillId) || wolfOnly.has(skillId);
+      if (wolfForm) return wereFormSharedSkills.has(skillId) || wolfOnlySkills.has(skillId);
 
       let bearForm = me.getState(sdk.states.Wearbear);
-      if (bearForm) return shared.has(skillId) || bearOnly.has(skillId);
+      if (bearForm) return wereFormSharedSkills.has(skillId) || bearOnlySkills.has(skillId);
 
       // if we are not in either form, we can use any skill
       return true;

@@ -6,6 +6,14 @@
 */
 
 (function (module) {
+  // Base ids that should never be revived
+  const noReviveBaseIds = [312, 571];
+  // States that make a corpse unusable
+  const badCorpseStates = [
+    sdk.states.FrozenSolid, sdk.states.Revive, sdk.states.Redeemed,
+    sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
+  ];
+
   module.exports = {
     novaTick: 0,
     maxSkeletons: 0,
@@ -553,14 +561,10 @@
     checkCorpse: function (unit, revive = false) {
       if (!unit || unit.mode !== sdk.monsters.mode.Dead) return false;
 
-      let baseId = getBaseStat("monstats", unit.classid, "baseid"), badList = [312, 571];
-      let	states = [
-        sdk.states.FrozenSolid, sdk.states.Revive, sdk.states.Redeemed,
-        sdk.states.CorpseNoDraw, sdk.states.Shatter, sdk.states.RestInPeace, sdk.states.CorpseNoSelect
-      ];
+      let baseId = getBaseStat("monstats", unit.classid, "baseid");
 
       if (revive
-        && (unit.isSpecial || badList.includes(baseId)
+        && (unit.isSpecial || noReviveBaseIds.includes(baseId)
         || (Config.ReviveUnstackable && getBaseStat("monstats2", baseId, "sizex") === 3))) {
         return false;
       }
@@ -569,7 +573,7 @@
 
       return !!(unit.distance <= 25
         && !checkCollision(me, unit, sdk.collision.Ranged)
-        && states.every(state => !unit.getState(state)));
+        && badCorpseStates.every(state => !unit.getState(state)));
     }
   };
 })(module);

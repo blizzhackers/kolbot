@@ -6,6 +6,42 @@
  *
  */
 
+// Summoner-type monsters (shamans, unravelers, ancients, etc.) used for scariness scoring
+const _attackSummonerIds = [
+  sdk.monsters.FallenShaman, sdk.monsters.CarverShaman, sdk.monsters.CarverShaman2,
+  sdk.monsters.DevilkinShaman, sdk.monsters.DevilkinShaman2, sdk.monsters.DarkShaman1,
+  sdk.monsters.DarkShaman2, sdk.monsters.WarpedShaman, sdk.monsters.HollowOne, sdk.monsters.Guardian1,
+  sdk.monsters.Guardian2, sdk.monsters.Unraveler1, sdk.monsters.Unraveler2,
+  sdk.monsters.Ancient1, sdk.monsters.Ancient2, sdk.monsters.Ancient3,
+  sdk.monsters.BaalSubjectMummy, sdk.monsters.RatManShaman, sdk.monsters.FetishShaman,
+  sdk.monsters.FlayerShaman1, sdk.monsters.FlayerShaman2, sdk.monsters.SoulKillerShaman1,
+  sdk.monsters.SoulKillerShaman2, sdk.monsters.StygianDollShaman1, sdk.monsters.StygianDollShaman2,
+  sdk.monsters.FleshSpawner1, sdk.monsters.FleshSpawner2,
+  sdk.monsters.StygianHag, sdk.monsters.Grotesque1, sdk.monsters.Grotesque2
+];
+// Monsters sorted to the front of the kill order (summoners, oblivion knights, etc.)
+const _attackPriorityIds = [
+  sdk.monsters.OblivionKnight1, sdk.monsters.OblivionKnight2, sdk.monsters.OblivionKnight3,
+  sdk.monsters.FallenShaman, sdk.monsters.CarverShaman, sdk.monsters.CarverShaman2,
+  sdk.monsters.DevilkinShaman, sdk.monsters.DevilkinShaman2, sdk.monsters.DarkShaman1,
+  sdk.monsters.DarkShaman2, sdk.monsters.WarpedShaman, sdk.monsters.HollowOne, sdk.monsters.Guardian1,
+  sdk.monsters.Guardian2, sdk.monsters.Unraveler1, sdk.monsters.Unraveler2,
+  sdk.monsters.Ancient1, sdk.monsters.BaalSubjectMummy, sdk.monsters.BloodRaven, sdk.monsters.RatManShaman,
+  sdk.monsters.FetishShaman, sdk.monsters.FlayerShaman1, sdk.monsters.FlayerShaman2,
+  sdk.monsters.SoulKillerShaman1, sdk.monsters.SoulKillerShaman2, sdk.monsters.StygianDollShaman1,
+  sdk.monsters.StygianDollShaman2, sdk.monsters.FleshSpawner1, sdk.monsters.FleshSpawner2,
+  sdk.monsters.StygianHag, sdk.monsters.Grotesque1, sdk.monsters.Ancient2, sdk.monsters.Ancient3,
+  sdk.monsters.Grotesque2
+];
+const _attackNonFloorAreas = [
+  sdk.areas.ArcaneSanctuary, sdk.areas.RiverofFlame, sdk.areas.ChaosSanctuary,
+  sdk.areas.Abaddon, sdk.areas.PitofAcheron, sdk.areas.InfernalPit
+];
+const _attackIgnoredCountIds = [sdk.monsters.Diablo]; // why is diablo ignored?
+// Indexed by the "etype" column of skills.txt
+const _attackElements = ["physical", "fire", "lightning", "magic", "cold", "poison", "none"];
+const _attackPositionAngles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 135, -135, 180];
+const _attackWhirlwindAngles = [180, 175, -175, 170, -170, 165, -165, 150, -150, 135, -135, 45, -45, 90, -90];
 
 const Attack = {
   infinity: false,
@@ -487,18 +523,6 @@ const Attack = {
   getScarinessLevel: function (unit) {
     // todo - define summonertype prototype
     let scariness = 0;
-    const ids = [
-      sdk.monsters.FallenShaman, sdk.monsters.CarverShaman, sdk.monsters.CarverShaman2,
-      sdk.monsters.DevilkinShaman, sdk.monsters.DevilkinShaman2, sdk.monsters.DarkShaman1,
-      sdk.monsters.DarkShaman2, sdk.monsters.WarpedShaman, sdk.monsters.HollowOne, sdk.monsters.Guardian1,
-      sdk.monsters.Guardian2, sdk.monsters.Unraveler1, sdk.monsters.Unraveler2,
-      sdk.monsters.Ancient1, sdk.monsters.Ancient2, sdk.monsters.Ancient3,
-      sdk.monsters.BaalSubjectMummy, sdk.monsters.RatManShaman, sdk.monsters.FetishShaman,
-      sdk.monsters.FlayerShaman1, sdk.monsters.FlayerShaman2, sdk.monsters.SoulKillerShaman1,
-      sdk.monsters.SoulKillerShaman2, sdk.monsters.StygianDollShaman1, sdk.monsters.StygianDollShaman2,
-      sdk.monsters.FleshSpawner1, sdk.monsters.FleshSpawner2,
-      sdk.monsters.StygianHag, sdk.monsters.Grotesque1, sdk.monsters.Grotesque2
-    ];
 
     // Only handling monsters for now
     if (!unit || unit.type !== sdk.unittype.Monster) return undefined;
@@ -509,7 +533,7 @@ const Attack = {
     // Boss
     (unit.isUnique) && (scariness += 4);
     // Summoner or the like
-    ids.includes(unit.classid) && (scariness += 8);
+    _attackSummonerIds.includes(unit.classid) && (scariness += 8);
 
     return scariness;
   },
@@ -1733,19 +1757,7 @@ const Attack = {
     if (unitA.getState(sdk.states.Attract)) return 1;
     if (unitB.getState(sdk.states.Attract)) return -1;
 
-    const ids = [
-      sdk.monsters.OblivionKnight1, sdk.monsters.OblivionKnight2, sdk.monsters.OblivionKnight3,
-      sdk.monsters.FallenShaman, sdk.monsters.CarverShaman, sdk.monsters.CarverShaman2,
-      sdk.monsters.DevilkinShaman, sdk.monsters.DevilkinShaman2, sdk.monsters.DarkShaman1,
-      sdk.monsters.DarkShaman2, sdk.monsters.WarpedShaman, sdk.monsters.HollowOne, sdk.monsters.Guardian1,
-      sdk.monsters.Guardian2, sdk.monsters.Unraveler1, sdk.monsters.Unraveler2,
-      sdk.monsters.Ancient1, sdk.monsters.BaalSubjectMummy, sdk.monsters.BloodRaven, sdk.monsters.RatManShaman,
-      sdk.monsters.FetishShaman, sdk.monsters.FlayerShaman1, sdk.monsters.FlayerShaman2,
-      sdk.monsters.SoulKillerShaman1, sdk.monsters.SoulKillerShaman2, sdk.monsters.StygianDollShaman1,
-      sdk.monsters.StygianDollShaman2, sdk.monsters.FleshSpawner1, sdk.monsters.FleshSpawner2,
-      sdk.monsters.StygianHag, sdk.monsters.Grotesque1, sdk.monsters.Ancient2, sdk.monsters.Ancient3,
-      sdk.monsters.Grotesque2
-    ];
+    const ids = _attackPriorityIds;
 
     if (!me.inArea(sdk.areas.ClawViperTempleLvl2) && ids.includes(unitA.classid) && ids.includes(unitB.classid)) {
       // Kill "scary" uniques first (like Bishibosh)
@@ -1793,10 +1805,7 @@ const Attack = {
 
     let result;
     let mObject = Attack.monsterObjects.has(unitid);
-    let nonFloorAreas = [
-      sdk.areas.ArcaneSanctuary, sdk.areas.RiverofFlame, sdk.areas.ChaosSanctuary,
-      sdk.areas.Abaddon, sdk.areas.PitofAcheron, sdk.areas.InfernalPit
-    ];
+    const nonFloorAreas = _attackNonFloorAreas;
 
     // Treat thrown errors as invalid spot
     try {
@@ -1969,10 +1978,9 @@ const Attack = {
    */
   getMonsterCount: function (x, y, range, list) {
     let count = 0;
-    let ignored = [sdk.monsters.Diablo]; // why is diablo ignored?
 
     for (let i = 0; i < list.length; i += 1) {
-      if (ignored.indexOf(list[i].classid) === -1 && list[i].attackable
+      if (_attackIgnoredCountIds.indexOf(list[i].classid) === -1 && list[i].attackable
         && getDistance(x, y, list[i].x, list[i].y) <= range) {
         count += 1;
       }
@@ -2223,8 +2231,6 @@ const Attack = {
    * @returns {DamageType | "none" | false}
    */
   getSkillElement: function (skillId) {
-    let elements = ["physical", "fire", "lightning", "magic", "cold", "poison", "none"];
-
     switch (skillId) {
     case sdk.skills.HolyFire:
       return "fire";
@@ -2246,7 +2252,7 @@ const Attack = {
 
     let eType = getBaseStat("skills", skillId, "etype");
 
-    return typeof (eType) === "number" ? elements[eType] : false;
+    return typeof (eType) === "number" ? _attackElements[eType] : false;
   },
 
   /**
@@ -2489,7 +2495,7 @@ const Attack = {
     let fullDistance = distance;
     const name = unit.hasOwnProperty("name") ? unit.name : "";
     const angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
-    const angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 135, -135, 180];
+    const angles = _attackPositionAngles;
     const canTele = !walk && Pather.useTeleport();
     const { x: orgX, y: orgY } = me;
 
@@ -2644,9 +2650,7 @@ const Attack = {
   whirlwind: function (unit) {
     if (!unit.attackable) return true;
 
-    let angles = [180, 175, -175, 170, -170, 165, -165, 150, -150, 135, -135, 45, -45, 90, -90];
-
-    unit.isSpecial && angles.unshift(120);
+    const angles = unit.isSpecial ? [120].concat(_attackWhirlwindAngles) : _attackWhirlwindAngles;
 
     me.runwalk = me.gametype;
     let angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);

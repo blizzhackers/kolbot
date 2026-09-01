@@ -5,6 +5,13 @@
 *
 */
 
+// UI windows that block picking an item up
+const _pickitCancelFlags = [
+  sdk.uiflags.Inventory, sdk.uiflags.NPCMenu,
+  sdk.uiflags.Waypoint, sdk.uiflags.Shop,
+  sdk.uiflags.Stash, sdk.uiflags.Cube
+];
+
 /** @type {Pickit} */
 const Pickit = {
   enabled: true,
@@ -422,18 +429,13 @@ const Pickit = {
     });
 
     const itemCount = me.itemcount;
-    const cancelFlags = [
-      sdk.uiflags.Inventory, sdk.uiflags.NPCMenu,
-      sdk.uiflags.Waypoint, sdk.uiflags.Shop,
-      sdk.uiflags.Stash, sdk.uiflags.Cube
-    ];
-    
+
     if (!unit.gid) return false;
     let item = Game.getItem(-1, -1, unit.gid);
     if (!item) return false;
     if (!item.onGroundOrDropping) return false;
 
-    if (cancelFlags.some(getUIFlag)) {
+    if (_pickitCancelFlags.some(getUIFlag)) {
       nativeDelay(500);
       me.cancel(0);
     }

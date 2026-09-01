@@ -6,6 +6,19 @@
 */
 
 (function (module) {
+  const councilClassIds = [sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3];
+  const waterWatcherIds = [sdk.monsters.WaterWatcherHead, sdk.monsters.WaterWatcherLimb];
+  // States that make a corpse unhorkable
+  const unhorkableStates = [
+    sdk.states.FrozenSolid,
+    sdk.states.Revive,
+    sdk.states.Redeemed,
+    sdk.states.CorpseNoDraw,
+    sdk.states.Shatter,
+    sdk.states.RestInPeace,
+    sdk.states.CorpseNoSelect
+  ];
+
   /**
   * @todo
   * - Add howl
@@ -264,13 +277,11 @@
       if (!unit || !copyUnit(unit).x || !unit.dead) {
         return false;
       }
-      const councilClassIds = [sdk.monsters.Council1, sdk.monsters.Council2, sdk.monsters.Council3];
       if (councilClassIds.indexOf(unit.classid) === -1 && unit.spectype === sdk.monsters.spectype.All) {
         // why ignore all normal monsters?
         return false;
       }
 
-      const waterWatcherIds = [sdk.monsters.WaterWatcherHead, sdk.monsters.WaterWatcherLimb];
       if (waterWatcherIds.includes(unit.classid)) {
         return false;
       }
@@ -282,19 +293,9 @@
         return false;
       }
 
-      let states = [
-        sdk.states.FrozenSolid,
-        sdk.states.Revive,
-        sdk.states.Redeemed,
-        sdk.states.CorpseNoDraw,
-        sdk.states.Shatter,
-        sdk.states.RestInPeace,
-        sdk.states.CorpseNoSelect
-      ];
-
       return (unit.distance <= 25
         && !checkCollision(me, unit, sdk.collision.Ranged)
-        && states.every(function (state) {
+        && unhorkableStates.every(function (state) {
           return !unit.getState(state);
         }));
     }
