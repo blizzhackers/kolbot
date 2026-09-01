@@ -205,13 +205,6 @@ const PathDebug = {
   }
 };
 
-// Small breakable objects kickBarrels clears out of the way - anything small and annoying really
-const _patherBarrelNames = [
-  "ratnest", "goo pile", "barrel", "basket",
-  "largeurn", "jar3", "jar2", "jar1",
-  "urn", "jug", "barrel wilderness", "cocoon"
-];
-
 // todo - test path generating in a dedicated thread to prevent lagging main thread
 /** @type {Pather} */
 const Pather = {
@@ -990,50 +983,58 @@ const Pather = {
     return false;
   },
 
-  /**
-   * Small and annoying things like barrels can block our path, open them if they are near us
-   * @param {number} x - the x coord of the node close to the barrel
-   * @param {number} y - the y coord of the node close to the barrel
-   * @returns {boolean} true if we kicked any barrels that were in our way
-   */
-  kickBarrels: function (x, y) {
-    if (me.inTown) return false;
+  kickBarrels: (function () {
+    // Small breakable objects kickBarrels clears out of the way - anything small and annoying really
+    const barrelNames = [
+      "ratnest", "goo pile", "barrel", "basket",
+      "largeurn", "jar3", "jar2", "jar1",
+      "urn", "jug", "barrel wilderness", "cocoon"
+    ];
+    /**
+     * Small and annoying things like barrels can block our path, open them if they are near us
+     * @param {number} x - the x coord of the node close to the barrel
+     * @param {number} y - the y coord of the node close to the barrel
+     * @returns {boolean} true if we kicked any barrels that were in our way
+     */
+    return function (x, y) {
+      if (me.inTown) return false;
 
-    (typeof x !== "number" || typeof y !== "number") && ({ x, y } = me);
+      (typeof x !== "number" || typeof y !== "number") && ({ x, y } = me);
 
-    let barrels = getUnits(sdk.unittype.Object)
-      .filter(function (el) {
-        return (el.name && el.mode === sdk.objects.mode.Inactive
-        && _patherBarrelNames.includes(el.name.toLowerCase())
-        && ((getDistance(el, x, y) < 4 && el.distance < 9) || el.distance < 4));
-      });
-    let brokeABarrel = false;
+      let barrels = getUnits(sdk.unittype.Object)
+        .filter(function (el) {
+          return (el.name && el.mode === sdk.objects.mode.Inactive
+          && barrelNames.includes(el.name.toLowerCase())
+          && ((getDistance(el, x, y) < 4 && el.distance < 9) || el.distance < 4));
+        });
+      let brokeABarrel = false;
 
-    while (barrels.length > 0) {
-      barrels.sort(Sort.units);
-      let unit = barrels.shift();
+      while (barrels.length > 0) {
+        barrels.sort(Sort.units);
+        let unit = barrels.shift();
 
-      if (unit && !checkCollision(me, unit, sdk.collision.WallOrRanged)) {
-        try {
-          for (let i = 0; i < 5; i++) {
-            i < 3 ? Packet.entityInteract(unit) : Misc.click(0, 0, unit);
+        if (unit && !checkCollision(me, unit, sdk.collision.WallOrRanged)) {
+          try {
+            for (let i = 0; i < 5; i++) {
+              i < 3 ? Packet.entityInteract(unit) : Misc.click(0, 0, unit);
 
-            if (unit.mode) {
-              brokeABarrel = true;
-              break;
+              if (unit.mode) {
+                brokeABarrel = true;
+                break;
+              }
             }
+          } catch (e) {
+            if (e instanceof ScriptError) {
+              throw e;
+            }
+            continue;
           }
-        } catch (e) {
-          if (e instanceof ScriptError) {
-            throw e;
-          }
-          continue;
         }
       }
-    }
 
-    return brokeABarrel;
-  },
+      return brokeABarrel;
+    };
+  })(),
 
   /**
    * Move to unit
