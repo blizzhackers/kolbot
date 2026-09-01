@@ -5,7 +5,8 @@
 *
 */
 
-const GetCube = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var GetCube = new Runnable(
   function GetCube () {
     // Can't get the cube if we can't access the act
     if (!me.accessToAct(2)) return false;

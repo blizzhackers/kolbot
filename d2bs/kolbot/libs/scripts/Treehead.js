@@ -5,7 +5,8 @@
 *
 */
 
-const Treehead = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Treehead = new Runnable(
   function Treehead () {
     Pather.useWaypoint(sdk.areas.DarkWood);
     Precast.doPrecast(true);

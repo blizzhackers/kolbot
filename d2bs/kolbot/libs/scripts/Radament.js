@@ -5,7 +5,8 @@
 *
 */
 
-const Radament = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Radament = new Runnable(
   function Radament () {
     Pather.useWaypoint(sdk.areas.A2SewersLvl2);
     Precast.doPrecast(true);

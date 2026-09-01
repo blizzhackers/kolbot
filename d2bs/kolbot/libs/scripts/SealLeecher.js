@@ -5,7 +5,8 @@
 *
 */
 
-const SealLeecher = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var SealLeecher = new Runnable(
   function SealLeecher() {
     let commands = [];
     Town.goToTown(4);
