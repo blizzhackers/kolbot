@@ -6,7 +6,6 @@
  *
  */
 
-
 const Attack = {
   infinity: false,
   auradin: false,
@@ -479,15 +478,9 @@ const Attack = {
     return true;
   },
 
-  /**
-   * @description Determine scariness of monster for monster sorting
-   * @param {Monster} unit 
-   * @returns {number} scariness
-   */
-  getScarinessLevel: function (unit) {
-    // todo - define summonertype prototype
-    let scariness = 0;
-    const ids = [
+  getScarinessLevel: (function () {
+    // Summoner-type monsters (shamans, unravelers, ancients, etc.) used for scariness scoring
+    const summonerIds = [
       sdk.monsters.FallenShaman, sdk.monsters.CarverShaman, sdk.monsters.CarverShaman2,
       sdk.monsters.DevilkinShaman, sdk.monsters.DevilkinShaman2, sdk.monsters.DarkShaman1,
       sdk.monsters.DarkShaman2, sdk.monsters.WarpedShaman, sdk.monsters.HollowOne, sdk.monsters.Guardian1,
@@ -499,20 +492,29 @@ const Attack = {
       sdk.monsters.FleshSpawner1, sdk.monsters.FleshSpawner2,
       sdk.monsters.StygianHag, sdk.monsters.Grotesque1, sdk.monsters.Grotesque2
     ];
+    /**
+     * @description Determine scariness of monster for monster sorting
+     * @param {Monster} unit 
+     * @returns {number} scariness
+     */
+    return function (unit) {
+      // todo - define summonertype prototype
+      let scariness = 0;
 
-    // Only handling monsters for now
-    if (!unit || unit.type !== sdk.unittype.Monster) return undefined;
-    // Minion
-    (unit.isMinion) && (scariness += 1);
-    // Champion
-    (unit.isChampion) && (scariness += 2);
-    // Boss
-    (unit.isUnique) && (scariness += 4);
-    // Summoner or the like
-    ids.includes(unit.classid) && (scariness += 8);
+      // Only handling monsters for now
+      if (!unit || unit.type !== sdk.unittype.Monster) return undefined;
+      // Minion
+      (unit.isMinion) && (scariness += 1);
+      // Champion
+      (unit.isChampion) && (scariness += 2);
+      // Boss
+      (unit.isUnique) && (scariness += 4);
+      // Summoner or the like
+      summonerIds.includes(unit.classid) && (scariness += 8);
 
-    return scariness;
-  },
+      return scariness;
+    };
+  })(),
 
   /**
    * @typedef {Object} ClearOptions
@@ -1684,55 +1686,8 @@ const Attack = {
     return true;
   },
 
-  /**
-   * @description Sort monsters based on distance, spectype and classId (summoners are attacked first)
-   * @param {Monster} unitA 
-   * @param {Monster} unitB 
-   * @returns {number} comparator: negative if unitA should be attacked first, positive if unitB, 0 if equal
-   * @todo Think this needs a collison check included for non tele chars, might prevent choosing 
-   * closer mob that is actually behind a wall vs the one we pass trying to get behind the wall
-   */
-  sortMonsters: function (unitA, unitB) {
-    // No special sorting for were-form
-    if (Config.Wereform) return getDistance(me, unitA) - getDistance(me, unitB);
-
-    // sort main bosses first
-    // Andy
-    if (me.inArea(sdk.areas.CatacombsLvl4)) {
-      if (unitA.distance < 5 && unitA.classid === sdk.monsters.Andariel
-        && !checkCollision(me, unitA, sdk.collision.Ranged)) {
-        return -1;
-      }
-    }
-
-    // Meph
-    if (me.inArea(sdk.areas.DuranceofHateLvl3)) {
-      if (unitA.distance < 5 && unitA.classid === sdk.monsters.Mephisto
-        && !checkCollision(me, unitA, sdk.collision.Ranged)) {
-        return -1;
-      }
-    }
-
-    // Baal
-    if (me.inArea(sdk.areas.WorldstoneChamber)) {
-      if (unitA.classid === sdk.monsters.Baal) return -1;
-    }
-
-    // Barb optimization
-    if (me.barbarian) {
-      if (!Attack.checkResist(unitA, Attack.getSkillElement(Config.AttackSkill[(unitA.isSpecial) ? 1 : 3]))) {
-        return 1;
-      }
-
-      if (!Attack.checkResist(unitB, Attack.getSkillElement(Config.AttackSkill[(unitB.isSpecial) ? 1 : 3]))) {
-        return -1;
-      }
-    }
-
-    // Put monsters under Attract curse at the end of the list - They are helping us
-    if (unitA.getState(sdk.states.Attract)) return 1;
-    if (unitB.getState(sdk.states.Attract)) return -1;
-
+  sortMonsters: (function () {
+    // Monsters sorted to the front of the kill order (summoners, oblivion knights, etc.)
     const ids = [
       sdk.monsters.OblivionKnight1, sdk.monsters.OblivionKnight2, sdk.monsters.OblivionKnight3,
       sdk.monsters.FallenShaman, sdk.monsters.CarverShaman, sdk.monsters.CarverShaman2,
@@ -1746,92 +1701,143 @@ const Attack = {
       sdk.monsters.StygianHag, sdk.monsters.Grotesque1, sdk.monsters.Ancient2, sdk.monsters.Ancient3,
       sdk.monsters.Grotesque2
     ];
+    /**
+     * @description Sort monsters based on distance, spectype and classId (summoners are attacked first)
+     * @param {Monster} unitA 
+     * @param {Monster} unitB 
+     * @returns {number} comparator: negative if unitA should be attacked first, positive if unitB, 0 if equal
+     * @todo Think this needs a collison check included for non tele chars, might prevent choosing 
+     * closer mob that is actually behind a wall vs the one we pass trying to get behind the wall
+     */
+    return function (unitA, unitB) {
+      // No special sorting for were-form
+      if (Config.Wereform) return getDistance(me, unitA) - getDistance(me, unitB);
 
-    if (!me.inArea(sdk.areas.ClawViperTempleLvl2) && ids.includes(unitA.classid) && ids.includes(unitB.classid)) {
-      // Kill "scary" uniques first (like Bishibosh)
-      if ((unitA.isUnique) && (unitB.isUnique)) return getDistance(me, unitA) - getDistance(me, unitB);
-      if (unitA.isUnique) return -1;
-      if (unitB.isUnique) return 1;
+      // sort main bosses first
+      // Andy
+      if (me.inArea(sdk.areas.CatacombsLvl4)) {
+        if (unitA.distance < 5 && unitA.classid === sdk.monsters.Andariel
+          && !checkCollision(me, unitA, sdk.collision.Ranged)) {
+          return -1;
+        }
+      }
+
+      // Meph
+      if (me.inArea(sdk.areas.DuranceofHateLvl3)) {
+        if (unitA.distance < 5 && unitA.classid === sdk.monsters.Mephisto
+          && !checkCollision(me, unitA, sdk.collision.Ranged)) {
+          return -1;
+        }
+      }
+
+      // Baal
+      if (me.inArea(sdk.areas.WorldstoneChamber)) {
+        if (unitA.classid === sdk.monsters.Baal) return -1;
+      }
+
+      // Barb optimization
+      if (me.barbarian) {
+        if (!Attack.checkResist(unitA, Attack.getSkillElement(Config.AttackSkill[(unitA.isSpecial) ? 1 : 3]))) {
+          return 1;
+        }
+
+        if (!Attack.checkResist(unitB, Attack.getSkillElement(Config.AttackSkill[(unitB.isSpecial) ? 1 : 3]))) {
+          return -1;
+        }
+      }
+
+      // Put monsters under Attract curse at the end of the list - They are helping us
+      if (unitA.getState(sdk.states.Attract)) return 1;
+      if (unitB.getState(sdk.states.Attract)) return -1;
+
+      if (!me.inArea(sdk.areas.ClawViperTempleLvl2) && ids.includes(unitA.classid) && ids.includes(unitB.classid)) {
+        // Kill "scary" uniques first (like Bishibosh)
+        if ((unitA.isUnique) && (unitB.isUnique)) return getDistance(me, unitA) - getDistance(me, unitB);
+        if (unitA.isUnique) return -1;
+        if (unitB.isUnique) return 1;
+
+        return getDistance(me, unitA) - getDistance(me, unitB);
+      }
+
+      if (ids.includes(unitA.classid)) return -1;
+      if (ids.includes(unitB.classid)) return 1;
+
+      if (Config.BossPriority) {
+        if ((unitA.isSuperUnique) && (unitB.isSuperUnique)) return getDistance(me, unitA) - getDistance(me, unitB);
+
+        if (unitA.isSuperUnique) return -1;
+        if (unitB.isSuperUnique) return 1;
+      }
 
       return getDistance(me, unitA) - getDistance(me, unitB);
-    }
+    };
+  })(),
 
-    if (ids.includes(unitA.classid)) return -1;
-    if (ids.includes(unitB.classid)) return 1;
-
-    if (Config.BossPriority) {
-      if ((unitA.isSuperUnique) && (unitB.isSuperUnique)) return getDistance(me, unitA) - getDistance(me, unitB);
-
-      if (unitA.isSuperUnique) return -1;
-      if (unitB.isSuperUnique) return 1;
-    }
-
-    return getDistance(me, unitA) - getDistance(me, unitB);
-  },
-
-  /**
-   * @description Check if a set of coords is valid/accessable
-   * @param {number} x 
-   * @param {number} y 
-   * @param {number} [skill=-1] 
-   * @param {number} [unitid=0] 
-   * @returns {boolean} If the spot is a valid location for walking/casting/attack
-   * @todo re-work this for more info:
-   *  - casting skills can go over non-floors - excluding bliz/meteor - not sure if any others
-   *  - physical skills can't, need to exclude monster objects though
-   *  - splash skills can go through some objects, however some objects are cast blockers
-   */
-  validSpot: function (x, y, skill = -1, unitid = 0) {
-    // Just in case
-    if (!me.area || !x || !y) return false;
-    // for now this just returns true and we leave getting into position to the actual class attack files
-    if (Skill.missileSkills.includes(skill)
-      || ([sdk.skills.Blizzard, sdk.skills.Meteor].includes(skill)
-      && unitid > 0 && !getBaseStat("monstats", unitid, "flying"))) {
-      return true;
-    }
-
-    let result;
-    let mObject = Attack.monsterObjects.has(unitid);
-    let nonFloorAreas = [
+  validSpot: (function () {
+    const nonFloorAreas = [
       sdk.areas.ArcaneSanctuary, sdk.areas.RiverofFlame, sdk.areas.ChaosSanctuary,
       sdk.areas.Abaddon, sdk.areas.PitofAcheron, sdk.areas.InfernalPit
     ];
-
-    // Treat thrown errors as invalid spot
-    try {
-      result = getCollision(me.area, x, y);
-    } catch (e) {
-      if (e instanceof ScriptError) {
-        throw e;
+    /**
+     * @description Check if a set of coords is valid/accessable
+     * @param {number} x 
+     * @param {number} y 
+     * @param {number} [skill=-1] 
+     * @param {number} [unitid=0] 
+     * @returns {boolean} If the spot is a valid location for walking/casting/attack
+     * @todo re-work this for more info:
+     *  - casting skills can go over non-floors - excluding bliz/meteor - not sure if any others
+     *  - physical skills can't, need to exclude monster objects though
+     *  - splash skills can go through some objects, however some objects are cast blockers
+     */
+    return function (x, y, skill = -1, unitid = 0) {
+      // Just in case
+      if (!me.area || !x || !y) return false;
+      // for now this just returns true and we leave getting into position to the actual class attack files
+      if (Skill.missileSkills.includes(skill)
+        || ([sdk.skills.Blizzard, sdk.skills.Meteor].includes(skill)
+        && unitid > 0 && !getBaseStat("monstats", unitid, "flying"))) {
+        return true;
       }
-      return false;
-    }
 
-    if (result === undefined) return false;
+      let result;
+      let mObject = Attack.monsterObjects.has(unitid);
 
-    switch (true) {
-    case Skill.needFloor.includes(skill) && nonFloorAreas.includes(me.area):
-      let isFloor = !!(result & (0 | sdk.collision.IsOnFloor));
-      // this spot is not on the floor (lava (river/chaos, space (arcane), ect))
-      if (!isFloor) {
+      // Treat thrown errors as invalid spot
+      try {
+        result = getCollision(me.area, x, y);
+      } catch (e) {
+        if (e instanceof ScriptError) {
+          throw e;
+        }
         return false;
       }
 
-      return !(result & sdk.collision.BlockWall); // outside lava area in abaddon returns coll 1
-    case (mObject && (!!(result & sdk.collision.MonsterIsOnFloor) || !!(result & sdk.collision.MonsterObject))):
-      // kinda dumb - monster objects have a collision that causes them to not be attacked
-      // this should fix that
+      if (result === undefined) return false;
+
+      switch (true) {
+      case Skill.needFloor.includes(skill) && nonFloorAreas.includes(me.area):
+        let isFloor = !!(result & (0 | sdk.collision.IsOnFloor));
+        // this spot is not on the floor (lava (river/chaos, space (arcane), ect))
+        if (!isFloor) {
+          return false;
+        }
+
+        return !(result & sdk.collision.BlockWall); // outside lava area in abaddon returns coll 1
+      case (mObject && (!!(result & sdk.collision.MonsterIsOnFloor) || !!(result & sdk.collision.MonsterObject))):
+        // kinda dumb - monster objects have a collision that causes them to not be attacked
+        // this should fix that
+        return true;
+      default:
+        // Avoid non-walkable spots, objects - this preserves the orignal function and also physical attack skills will get here
+        if ((result & sdk.collision.BlockWall) || (result & sdk.collision.Objects)) return false;
+
+        break;
+      }
+
       return true;
-    default:
-      // Avoid non-walkable spots, objects - this preserves the orignal function and also physical attack skills will get here
-      if ((result & sdk.collision.BlockWall) || (result & sdk.collision.Objects)) return false;
-
-      break;
-    }
-
-    return true;
-  },
+    };
+  })(),
 
   /**
    * @deprecated - Use Misc.openChests instead
@@ -1959,38 +1965,40 @@ const Attack = {
     return (typeof safeLoc === "object" ? Pather.moveToUnit(safeLoc, 0) : false);
   },
 
-  /**
-   * Count attackable monsters within range of a spot, heavily penalizing spots standing in fire
-   * @param {number} x
-   * @param {number} y
-   * @param {number} range
-   * @param {Monster[]} list Pre-built monster list to check against
-   * @returns {number}
-   */
-  getMonsterCount: function (x, y, range, list) {
-    let count = 0;
-    let ignored = [sdk.monsters.Diablo]; // why is diablo ignored?
+  getMonsterCount: (function () {
+    const ignoredIds = [sdk.monsters.Diablo]; // why is diablo ignored?
+    /**
+     * Count attackable monsters within range of a spot, heavily penalizing spots standing in fire
+     * @param {number} x
+     * @param {number} y
+     * @param {number} range
+     * @param {Monster[]} list Pre-built monster list to check against
+     * @returns {number}
+     */
+    return function (x, y, range, list) {
+      let count = 0;
 
-    for (let i = 0; i < list.length; i += 1) {
-      if (ignored.indexOf(list[i].classid) === -1 && list[i].attackable
-        && getDistance(x, y, list[i].x, list[i].y) <= range) {
-        count += 1;
-      }
-    }
-
-    // missile check?
-    let fire = Game.getObject("fire");
-
-    if (fire) {
-      do {
-        if (getDistance(x, y, fire.x, fire.y) <= 4) {
-          count += 100;
+      for (let i = 0; i < list.length; i += 1) {
+        if (ignoredIds.indexOf(list[i].classid) === -1 && list[i].attackable
+          && getDistance(x, y, list[i].x, list[i].y) <= range) {
+          count += 1;
         }
-      } while (fire.getNext());
-    }
+      }
 
-    return count;
-  },
+      // missile check?
+      let fire = Game.getObject("fire");
+
+      if (fire) {
+        do {
+          if (getDistance(x, y, fire.x, fire.y) <= 4) {
+            count += 100;
+          }
+        } while (fire.getNext());
+      }
+
+      return count;
+    };
+  })(),
 
   /**
    * Build evenly spaced coords over a rectangle, keeping only those with known collision data
@@ -2217,37 +2225,39 @@ const Attack = {
     return false;
   },
 
-  /**
-   * @description Get element by skill number
-   * @param {number} skillId 
-   * @returns {DamageType | "none" | false}
-   */
-  getSkillElement: function (skillId) {
-    let elements = ["physical", "fire", "lightning", "magic", "cold", "poison", "none"];
+  getSkillElement: (function () {
+    // Indexed by the "etype" column of skills.txt
+    const elements = ["physical", "fire", "lightning", "magic", "cold", "poison", "none"];
+    /**
+     * @description Get element by skill number
+     * @param {number} skillId 
+     * @returns {DamageType | "none" | false}
+     */
+    return function (skillId) {
+      switch (skillId) {
+      case sdk.skills.HolyFire:
+        return "fire";
+      case sdk.skills.HolyFreeze:
+        return "cold";
+      case sdk.skills.HolyShock:
+        return "lightning";
+      case sdk.skills.CorpseExplosion:
+      case sdk.skills.Stun:
+      case sdk.skills.Concentrate:
+      case sdk.skills.Frenzy:
+      case sdk.skills.MindBlast:
+      case sdk.skills.Summoner:
+        return "physical";
+      case sdk.skills.HolyBolt:
+        // no need to use this.elements array because it returns before going over the array
+        return "holybolt";
+      }
 
-    switch (skillId) {
-    case sdk.skills.HolyFire:
-      return "fire";
-    case sdk.skills.HolyFreeze:
-      return "cold";
-    case sdk.skills.HolyShock:
-      return "lightning";
-    case sdk.skills.CorpseExplosion:
-    case sdk.skills.Stun:
-    case sdk.skills.Concentrate:
-    case sdk.skills.Frenzy:
-    case sdk.skills.MindBlast:
-    case sdk.skills.Summoner:
-      return "physical";
-    case sdk.skills.HolyBolt:
-      // no need to use this.elements array because it returns before going over the array
-      return "holybolt";
-    }
+      let eType = getBaseStat("skills", skillId, "etype");
 
-    let eType = getBaseStat("skills", skillId, "etype");
-
-    return typeof (eType) === "number" ? elements[eType] : false;
-  },
+      return typeof (eType) === "number" ? elements[eType] : false;
+    };
+  })(),
 
   /**
    * @description Get a monster's resistance to specified element
@@ -2458,118 +2468,120 @@ const Attack = {
     return false;
   },
 
-  /**
-   * Find an optimal attack position and move or walk to it
-   * @param {Unit} unit 
-   * @param {number} distance 
-   * @param {number} coll 
-   * @param {boolean} walk 
-   * @param {boolean} force 
-   * @returns {boolean} sucessfully found and moved into position
-   */
-  getIntoPosition: function (unit, distance, coll, walk, force) {
-    if (!unit || !unit.x || !unit.y) return false;
+  getIntoPosition: (function () {
+    const angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 135, -135, 180];
+    /**
+     * Find an optimal attack position and move or walk to it
+     * @param {Unit} unit 
+     * @param {number} distance 
+     * @param {number} coll 
+     * @param {boolean} walk 
+     * @param {boolean} force 
+     * @returns {boolean} sucessfully found and moved into position
+     */
+    return function (unit, distance, coll, walk, force) {
+      if (!unit || !unit.x || !unit.y) return false;
 
-    walk === true && (walk = 1);
-    force && console.debug("Forcing new position");
+      walk === true && (walk = 1);
+      force && console.debug("Forcing new position");
 
-    /** @todo If we've disabled tele for walking clear, allow use of tele specifically for repositioning */
-    if (distance < 4 && (!unit.hasOwnProperty("mode") || !unit.dead)) {
-      if (walk) {
-        if (unit.distance > 8 || checkCollision(me, unit, coll)) {
-          Pather.walkTo(unit.x, unit.y, 3);
+      /** @todo If we've disabled tele for walking clear, allow use of tele specifically for repositioning */
+      if (distance < 4 && (!unit.hasOwnProperty("mode") || !unit.dead)) {
+        if (walk) {
+          if (unit.distance > 8 || checkCollision(me, unit, coll)) {
+            Pather.walkTo(unit.x, unit.y, 3);
+          }
+        } else {
+          Pather.moveTo(unit.x, unit.y, 0);
         }
-      } else {
-        Pather.moveTo(unit.x, unit.y, 0);
+
+        return !CollMap.checkColl(me, unit, coll);
       }
 
-      return !CollMap.checkColl(me, unit, coll);
-    }
+      let fullDistance = distance;
+      const name = unit.hasOwnProperty("name") ? unit.name : "";
+      const angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
+      const canTele = !walk && Pather.useTeleport();
+      const { x: orgX, y: orgY } = me;
 
-    let fullDistance = distance;
-    const name = unit.hasOwnProperty("name") ? unit.name : "";
-    const angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
-    const angles = [0, 15, -15, 30, -30, 45, -45, 60, -60, 75, -75, 90, -90, 135, -135, 180];
-    const canTele = !walk && Pather.useTeleport();
-    const { x: orgX, y: orgY } = me;
-
-    /** @param {PathNode} node */
-    const handleMove = function (node) {
-      switch (walk) {
-      case 1:
-        return Pather.walkTo(node.x, node.y, 2);
-      case 2:
-        if (node.distance < 6 && !CollMap.checkColl(me, node, sdk.collision.WallOrRanged)) {
+      /** @param {PathNode} node */
+      const handleMove = function (node) {
+        switch (walk) {
+        case 1:
           return Pather.walkTo(node.x, node.y, 2);
-        } else {
+        case 2:
+          if (node.distance < 6 && !CollMap.checkColl(me, node, sdk.collision.WallOrRanged)) {
+            return Pather.walkTo(node.x, node.y, 2);
+          } else {
+            return Pather.move(node, { retry: 1, allowPicking: !force });
+          }
+        default:
           return Pather.move(node, { retry: 1, allowPicking: !force });
         }
-      default:
-        return Pather.move(node, { retry: 1, allowPicking: !force });
-      }
-    };
+      };
 
-    for (let n = 0; n < 3; n++) {
-      /** @type {PathNode[]} */
-      const coords = [];
-      n > 0 && (distance -= Math.floor(fullDistance / 3 - 1));
+      for (let n = 0; n < 3; n++) {
+        /** @type {PathNode[]} */
+        const coords = [];
+        n > 0 && (distance -= Math.floor(fullDistance / 3 - 1));
 
-      for (let currAngle of angles) {
-        const _angle = ((angle + currAngle) * Math.PI / 180);
-        let cx = Math.round((Math.cos(_angle)) * distance + unit.x);
-        let cy = Math.round((Math.sin(_angle)) * distance + unit.y);
-        let node = new PathNode(cx, cy);
+        for (let currAngle of angles) {
+          const _angle = ((angle + currAngle) * Math.PI / 180);
+          let cx = Math.round((Math.cos(_angle)) * distance + unit.x);
+          let cy = Math.round((Math.sin(_angle)) * distance + unit.y);
+          let node = new PathNode(cx, cy);
 
-        // ignore this spot as it's too close to our current position when we are forcing a new location
-        if (force && node.distance < distance) continue;
-        if (Pather.checkSpot(node.x, node.y, sdk.collision.BlockWall, false)) {
-          coords.push(node);
-        }
-      }
-      if (!coords.length) continue;
-
-      coords.sort(Sort.units);
-
-      for (let coord of coords) {
-        // check if position is valid
-        if (CollMap.checkColl(coord, unit, coll, 1)) {
-          continue;
-        }
-        if (!canTele) {
-          if (Config.DebugMode.Path) {
-            console.debug("coord", coord, " dist", coord.distance);
-            new Line(coord.x - 3, coord.y, coord.x + 3, coord.y, 0x9B, true);
-            new Line(coord.x, coord.y - 3, coord.x, coord.y + 3, 0x9B, true);
+          // ignore this spot as it's too close to our current position when we are forcing a new location
+          if (force && node.distance < distance) continue;
+          if (Pather.checkSpot(node.x, node.y, sdk.collision.BlockWall, false)) {
+            coords.push(node);
           }
-          
-          let walkDist = Pather.getWalkDistance(coord.x, coord.y);
-          if (walkDist > unit.distance) {
+        }
+        if (!coords.length) continue;
+
+        coords.sort(Sort.units);
+
+        for (let coord of coords) {
+          // check if position is valid
+          if (CollMap.checkColl(coord, unit, coll, 1)) {
+            continue;
+          }
+          if (!canTele) {
             if (Config.DebugMode.Path) {
-              console.debug(
-                "Skipping position due to walk distance being too far."
-                + "\n - DistanceToMonster: " + unit.distance
-                + "\n - DistanceToPosition: " + walkDist
-              );
-              continue;
+              console.debug("coord", coord, " dist", coord.distance);
+              new Line(coord.x - 3, coord.y, coord.x + 3, coord.y, 0x9B, true);
+              new Line(coord.x, coord.y - 3, coord.x, coord.y + 3, 0x9B, true);
+            }
+            
+            let walkDist = Pather.getWalkDistance(coord.x, coord.y);
+            if (walkDist > unit.distance) {
+              if (Config.DebugMode.Path) {
+                console.debug(
+                  "Skipping position due to walk distance being too far."
+                  + "\n - DistanceToMonster: " + unit.distance
+                  + "\n - DistanceToPosition: " + walkDist
+                );
+                continue;
+              }
             }
           }
-        }
-        if (handleMove(coord)) {
-          if (Config.DebugMode.Path && force) {
-            console.debug(
-              "Sucessfully got into position. orginal Loc: " + orgX + "/" + orgY
-              + " new loc " + me.x + "/" + me.y + " distance: " + [orgX, orgY].distance
-            );
+          if (handleMove(coord)) {
+            if (Config.DebugMode.Path && force) {
+              console.debug(
+                "Sucessfully got into position. orginal Loc: " + orgX + "/" + orgY
+                + " new loc " + me.x + "/" + me.y + " distance: " + [orgX, orgY].distance
+              );
+            }
+            return true;
           }
-          return true;
         }
       }
-    }
 
-    !!name && console.log("ÿc4Attackÿc0: No valid positions for: " + name);
+      !!name && console.log("ÿc4Attackÿc0: No valid positions for: " + name);
 
-    return false;
-  },
+      return false;
+    };
+  })(),
 
   /**
    * Find the nearest monster to us with optional exception parameters
@@ -2637,35 +2649,36 @@ const Attack = {
     return corpses.length > 0 ? corpses : [];
   },
 
-  /**
-   * @param {Monster} unit 
-   * @returns {boolean}
-   */
-  whirlwind: function (unit) {
-    if (!unit.attackable) return true;
+  whirlwind: (function () {
+    const baseAngles = [180, 175, -175, 170, -170, 165, -165, 150, -150, 135, -135, 45, -45, 90, -90];
+    /**
+     * @param {Monster} unit 
+     * @returns {boolean}
+     */
+    return function (unit) {
+      if (!unit.attackable) return true;
 
-    let angles = [180, 175, -175, 170, -170, 165, -165, 150, -150, 135, -135, 45, -45, 90, -90];
+      const angles = unit.isSpecial ? [120].concat(baseAngles) : baseAngles;
 
-    unit.isSpecial && angles.unshift(120);
+      me.runwalk = me.gametype;
+      let angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
 
-    me.runwalk = me.gametype;
-    let angle = Math.round(Math.atan2(me.y - unit.y, me.x - unit.x) * 180 / Math.PI);
+      // get a better spot
+      for (let i = 0; i < angles.length; i += 1) {
+        let coords = [
+          Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * 4 + unit.x),
+          Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * 4 + unit.y)
+        ];
 
-    // get a better spot
-    for (let i = 0; i < angles.length; i += 1) {
-      let coords = [
-        Math.round((Math.cos((angle + angles[i]) * Math.PI / 180)) * 4 + unit.x),
-        Math.round((Math.sin((angle + angles[i]) * Math.PI / 180)) * 4 + unit.y)
-      ];
-
-      if (!CollMap.checkColl(me, { x: coords[0], y: coords[1] }, sdk.collision.BlockWall, 1)) {
-        return Skill.cast(sdk.skills.Whirlwind, sdk.skills.hand.Right, coords[0], coords[1]);
+        if (!CollMap.checkColl(me, { x: coords[0], y: coords[1] }, sdk.collision.BlockWall, 1)) {
+          return Skill.cast(sdk.skills.Whirlwind, sdk.skills.hand.Right, coords[0], coords[1]);
+        }
       }
-    }
 
-    return (Attack.validSpot(unit.x, unit.y)
-      && Skill.cast(sdk.skills.Whirlwind, Skill.getHand(sdk.skills.Whirlwind), me.x, me.y));
-  },
+      return (Attack.validSpot(unit.x, unit.y)
+        && Skill.cast(sdk.skills.Whirlwind, Skill.getHand(sdk.skills.Whirlwind), me.x, me.y));
+    };
+  })(),
 
   /**
    * @param {Monster} unit 

@@ -374,216 +374,219 @@ const Pickit = {
     lastItem: null,
   },
 
-  /**
-   * @param {ItemUnit} unit 
-   * @param {PickitResult} status 
-   * @param {string} keptLine 
-   * @param {number} retry 
-   * @todo figure out why sometimes we double print picking up an item, gut feeling is recursion somewhere
-   */
-  pickItem: function (unit, status, keptLine, retry = 3) {
-    /**
-     * @constructor
-     * @param {ItemUnit} unit 
-     */
-    function ItemStats (unit) {
-      this.gid = unit.gid;
-      this.ilvl = unit.ilvl;
-      this.type = unit.itemType;
-      this.classid = unit.classid;
-      this.name = unit.name;
-      this.color = Item.color(unit);
-      this.gold = unit.getStat(sdk.stats.Gold);
-      this.x = unit.x;
-      this.y = unit.y;
-      this.area = unit.area;
-      this._useTk = (Skill.haveTK && Pickit.tkable.includes(this.type));
-      this.picked = false;
-    }
-
-    Object.defineProperty(ItemStats.prototype, "useTk", {
-      /**
-       * @this {ItemStats}
-       * @returns {boolean} true if within telekinesis range (5-20) and not blocked by wall/ranged collision
-       */
-      get: function () {
-        if (!this._useTk) return false;
-        let dist = this.distance;
-        let coll = CollMap.checkColl(me, this, sdk.collision.WallOrRanged);
-        return dist > 5 && dist < 20 && !coll;
-      },
-      /**
-       * @this {ItemStats}
-       * @param {boolean} value 
-       */
-      set: function (value) {
-        this._useTk = value;
-      }
-    });
-
-    const itemCount = me.itemcount;
+  pickItem: (function () {
+    // UI windows that block picking an item up
     const cancelFlags = [
       sdk.uiflags.Inventory, sdk.uiflags.NPCMenu,
       sdk.uiflags.Waypoint, sdk.uiflags.Shop,
       sdk.uiflags.Stash, sdk.uiflags.Cube
     ];
-    
-    if (!unit.gid) return false;
-    let item = Game.getItem(-1, -1, unit.gid);
-    if (!item) return false;
-    if (!item.onGroundOrDropping) return false;
-
-    if (cancelFlags.some(getUIFlag)) {
-      nativeDelay(500);
-      me.cancel(0);
-    }
-
-    const stats = new ItemStats(item);
-    const tkMana = stats.useTk
-      ? Skill.getManaCost(sdk.skills.Telekinesis) * 2
-      : Infinity;
-
-    MainLoop:
-    for (let i = 0; i < retry; i++) {
-      if (me.dead) return false;
-      // recursion appeared
-      if (this.track.lastItem === stats.gid) return true;
-      // can't find the item
-      if (!Game.getItem(-1, -1, stats.gid)) return false;
-
-      if (me.getItem(stats.classid, -1, stats.gid)) {
-        console.debug("Already picked item");
-        return true;
+    /**
+     * @param {ItemUnit} unit 
+     * @param {PickitResult} status 
+     * @param {string} keptLine 
+     * @param {number} retry 
+     * @todo figure out why sometimes we double print picking up an item, gut feeling is recursion somewhere
+     */
+    return function (unit, status, keptLine, retry = 3) {
+      /**
+       * @constructor
+       * @param {ItemUnit} unit 
+       */
+      function ItemStats (unit) {
+        this.gid = unit.gid;
+        this.ilvl = unit.ilvl;
+        this.type = unit.itemType;
+        this.classid = unit.classid;
+        this.name = unit.name;
+        this.color = Item.color(unit);
+        this.gold = unit.getStat(sdk.stats.Gold);
+        this.x = unit.x;
+        this.y = unit.y;
+        this.area = unit.area;
+        this._useTk = (Skill.haveTK && Pickit.tkable.includes(this.type));
+        this.picked = false;
       }
 
-      while (!me.idle) {
-        delay(40);
-      }
-
-      if (!item.onGroundOrDropping) {
-        break;
-      }
-
-      // fastPick check? should only pick items if surrounding monsters have been cleared or if fastPick is active
-      // note: clear of surrounding monsters of the spectype we are set to clear
-      if (stats.useTk && me.mp > tkMana) {
-        if (!Packet.telekinesis(item)) {
-          i > 1 && (stats.useTk = false);
-          continue;
+      Object.defineProperty(ItemStats.prototype, "useTk", {
+        /**
+         * @this {ItemStats}
+         * @returns {boolean} true if within telekinesis range (5-20) and not blocked by wall/ranged collision
+         */
+        get: function () {
+          if (!this._useTk) return false;
+          let dist = this.distance;
+          let coll = CollMap.checkColl(me, this, sdk.collision.WallOrRanged);
+          return dist > 5 && dist < 20 && !coll;
+        },
+        /**
+         * @this {ItemStats}
+         * @param {boolean} value 
+         */
+        set: function (value) {
+          this._useTk = value;
         }
-      } else {
-        if (item.distance > (Config.FastPick || i < 1 ? 6 : 4)
-          || checkCollision(me, item, sdk.collision.BlockWall)) {
-          if (!Pather.move(item, { retry: 3, allowPicking: false, minDist: 4 })) {
-            continue;
-          }
-          // we had to move, lets check to see if it's still there
-          if (me.getItem(stats.classid, -1, stats.gid)) {
-            // we picked the item during another process - recursion happened
-            // this has pontential to skip logging an item
-            return true;
-          }
-          if (!Game.getItem(stats.classid, -1, stats.gid)) {
-            // it's gone so don't continue, 
-            return false;
-          }
-        }
+      });
 
-        // use packet first, if we fail and not using fast pick use click
-        (Config.FastPick || i < 1)
-          ? Packet.click(item)
-          : Misc.click(0, 0, item);
+      const itemCount = me.itemcount;
+
+      if (!unit.gid) return false;
+      let item = Game.getItem(-1, -1, unit.gid);
+      if (!item) return false;
+      if (!item.onGroundOrDropping) return false;
+
+      if (cancelFlags.some(getUIFlag)) {
+        nativeDelay(500);
+        me.cancel(0);
       }
 
-      let tick = getTickCount();
+      const stats = new ItemStats(item);
+      const tkMana = stats.useTk
+        ? Skill.getManaCost(sdk.skills.Telekinesis) * 2
+        : Infinity;
 
-      while (getTickCount() - tick < 1000) {
-        // why the use of copyUnit here?
-        item = copyUnit(item);
+      MainLoop:
+      for (let i = 0; i < retry; i++) {
+        if (me.dead) return false;
+        // recursion appeared
+        if (this.track.lastItem === stats.gid) return true;
+        // can't find the item
+        if (!Game.getItem(-1, -1, stats.gid)) return false;
 
-        if (stats.classid === sdk.items.Gold) {
-          let _gold = item.gold;
-          if (!_gold || _gold < stats.gold) {
-            console.log(
-              "ÿc7Picked up " + stats.color
-              + (_gold ? (_gold - stats.gold) : stats.gold)
-              + " " + stats.name
-              + (keptLine ? " ÿc0(" + keptLine + ")" : "")
-            );
-            return true;
-          }
+        if (me.getItem(stats.classid, -1, stats.gid)) {
+          console.debug("Already picked item");
+          return true;
+        }
+
+        while (!me.idle) {
+          delay(40);
         }
 
         if (!item.onGroundOrDropping) {
-          switch (stats.classid) {
-          case sdk.items.Key:
-            console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc7(" + me.checkKeys() + "/12)");
+          break;
+        }
 
-            return true;
-          case sdk.items.ScrollofTownPortal:
-          case sdk.items.ScrollofIdentify:
-            console.log(
-              "ÿc7Picked up " + stats.color + stats.name
-              + " ÿc7(" + me.checkScrolls(stats.classid === sdk.items.ScrollofTownPortal ? "tbk" : "ibk") + "/20)"
-            );
-            return true;
+        // fastPick check? should only pick items if surrounding monsters have been cleared or if fastPick is active
+        // note: clear of surrounding monsters of the spectype we are set to clear
+        if (stats.useTk && me.mp > tkMana) {
+          if (!Packet.telekinesis(item)) {
+            i > 1 && (stats.useTk = false);
+            continue;
+          }
+        } else {
+          if (item.distance > (Config.FastPick || i < 1 ? 6 : 4)
+            || checkCollision(me, item, sdk.collision.BlockWall)) {
+            if (!Pather.move(item, { retry: 3, allowPicking: false, minDist: 4 })) {
+              continue;
+            }
+            // we had to move, lets check to see if it's still there
+            if (me.getItem(stats.classid, -1, stats.gid)) {
+              // we picked the item during another process - recursion happened
+              // this has pontential to skip logging an item
+              return true;
+            }
+            if (!Game.getItem(stats.classid, -1, stats.gid)) {
+              // it's gone so don't continue, 
+              return false;
+            }
           }
 
-          break MainLoop;
+          // use packet first, if we fail and not using fast pick use click
+          (Config.FastPick || i < 1)
+            ? Packet.click(item)
+            : Misc.click(0, 0, item);
         }
 
-        delay(20);
-      }
+        let tick = getTickCount();
 
-      // TK failed, disable it
-      stats.useTk = false;
-    }
+        while (getTickCount() - tick < 1000) {
+          // why the use of copyUnit here?
+          item = copyUnit(item);
 
-    stats.picked = me.itemcount > itemCount || !!me.getItem(stats.classid, -1, stats.gid);
+          if (stats.classid === sdk.items.Gold) {
+            let _gold = item.gold;
+            if (!_gold || _gold < stats.gold) {
+              console.log(
+                "ÿc7Picked up " + stats.color
+                + (_gold ? (_gold - stats.gold) : stats.gold)
+                + " " + stats.name
+                + (keptLine ? " ÿc0(" + keptLine + ")" : "")
+              );
+              return true;
+            }
+          }
 
-    if (stats.picked) {
-      DataFile.updateStats("lastArea");
-      const _common = "ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")";
-      const pickedItem = me.getItem(stats.classid, -1, stats.gid);
-      if (!pickedItem) return false;
+          if (!item.onGroundOrDropping) {
+            switch (stats.classid) {
+            case sdk.items.Key:
+              console.log("ÿc7Picked up " + stats.color + stats.name + " ÿc7(" + me.checkKeys() + "/12)");
 
-      switch (status) {
-      case Pickit.Result.WANTED:
-        console.log(_common + (keptLine ? " (" + keptLine + ")" : ""));
-        if (Pickit.ignoreLog.indexOf(pickedItem.itemType) === -1) {
-          Item.logger("Kept", pickedItem);
-          Item.logItem("Kept", pickedItem, keptLine);
+              return true;
+            case sdk.items.ScrollofTownPortal:
+            case sdk.items.ScrollofIdentify:
+              console.log(
+                "ÿc7Picked up " + stats.color + stats.name
+                + " ÿc7(" + me.checkScrolls(stats.classid === sdk.items.ScrollofTownPortal ? "tbk" : "ibk") + "/20)"
+              );
+              return true;
+            }
+
+            break MainLoop;
+          }
+
+          delay(20);
         }
 
-        break;
-      case Pickit.Result.CUBING:
-        console.log(_common + " (Cubing)");
-        Item.logger("Kept", pickedItem, "Cubing " + me.findItems(pickedItem.classid).length);
-        Cubing.update();
-
-        break;
-      case Pickit.Result.RUNEWORD:
-        console.log(_common + " (Runewords)");
-        Item.logger("Kept", pickedItem, "Runewords");
-        Runewords.update(pickedItem.classid, pickedItem.gid);
-
-        break;
-      case Pickit.Result.CRAFTING:
-        console.log(_common + " (Crafting System)");
-        CraftingSystem.update(pickedItem);
-
-        break;
-      default:
-        console.log(_common + (keptLine ? " (" + keptLine + ")" : ""));
-
-        break;
+        // TK failed, disable it
+        stats.useTk = false;
       }
-      
-      this.track.lastItem = pickedItem.gid;
-    }
 
-    return true;
-  },
+      stats.picked = me.itemcount > itemCount || !!me.getItem(stats.classid, -1, stats.gid);
+
+      if (stats.picked) {
+        DataFile.updateStats("lastArea");
+        const _common = "ÿc7Picked up " + stats.color + stats.name + " ÿc0(ilvl " + stats.ilvl + ")";
+        const pickedItem = me.getItem(stats.classid, -1, stats.gid);
+        if (!pickedItem) return false;
+
+        switch (status) {
+        case Pickit.Result.WANTED:
+          console.log(_common + (keptLine ? " (" + keptLine + ")" : ""));
+          if (Pickit.ignoreLog.indexOf(pickedItem.itemType) === -1) {
+            Item.logger("Kept", pickedItem);
+            Item.logItem("Kept", pickedItem, keptLine);
+          }
+
+          break;
+        case Pickit.Result.CUBING:
+          console.log(_common + " (Cubing)");
+          Item.logger("Kept", pickedItem, "Cubing " + me.findItems(pickedItem.classid).length);
+          Cubing.update();
+
+          break;
+        case Pickit.Result.RUNEWORD:
+          console.log(_common + " (Runewords)");
+          Item.logger("Kept", pickedItem, "Runewords");
+          Runewords.update(pickedItem.classid, pickedItem.gid);
+
+          break;
+        case Pickit.Result.CRAFTING:
+          console.log(_common + " (Crafting System)");
+          CraftingSystem.update(pickedItem);
+
+          break;
+        default:
+          console.log(_common + (keptLine ? " (" + keptLine + ")" : ""));
+
+          break;
+        }
+        
+        this.track.lastItem = pickedItem.gid;
+      }
+
+      return true;
+    };
+  })(),
 
   /**
    * Check if we can even free up the inventory

@@ -2378,12 +2378,9 @@ Unit.prototype.equip = function (destLocation) {
   };
 };
 
-/**
- * @this {ItemUnit}
- * @returns {number[]}
- */
-Unit.prototype.getBodyLoc = function () {
-  const _types = new Map([
+Unit.prototype.getBodyLoc = (function () {
+  // Body location -> item types that can be equipped there
+  const bodyLocTypes = new Map([
     [sdk.body.Head, [sdk.items.type.Helm, sdk.items.type.Pelt, sdk.items.type.PrimalHelm]],
     [sdk.body.Neck, [sdk.items.type.Amulet]],
     [sdk.body.Armor, [sdk.items.type.Armor]],
@@ -2406,16 +2403,22 @@ Unit.prototype.getBodyLoc = function () {
     [sdk.body.Feet, [sdk.items.type.Boots]],
     [sdk.body.Gloves, [sdk.items.type.Gloves]],
   ]);
-  let bodyLoc = [];
-  
-  for (let [key, value] of _types) {
-    if (value.includes(this.itemType)) {
-      bodyLoc.push(key);
-    }
-  }
+  /**
+   * @this {ItemUnit}
+   * @returns {number[]}
+   */
+  return function () {
+    let bodyLoc = [];
 
-  return bodyLoc;
-};
+    for (let [key, value] of bodyLocTypes) {
+      if (value.includes(this.itemType)) {
+        bodyLoc.push(key);
+      }
+    }
+
+    return bodyLoc;
+  };
+})();
 
 /**
  * @param {number} type - one of sdk.stats.FireResist/ColdResist/PoisonResist/LightningResist

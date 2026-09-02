@@ -376,6 +376,13 @@ const ActionHooks = (function () {
     sdk.areas.Harrogath,
   ];
 
+  const uberPortalConfigs = [
+    { area: sdk.areas.MatronsDen, name: "Matron's Den", key: 5, yOffset: 0 },
+    { area: sdk.areas.ForgottenSands, name: "Forgotten Sands", key: 6, yOffset: 15 },
+    { area: sdk.areas.FurnaceofPain, name: "Furnace of Pain", key: 7, yOffset: 30 },
+    { area: sdk.areas.UberTristram, name: "Uber Tristam", key: 8, yOffset: 45 }
+  ];
+
   const addTombs = function () {
     if (!me.inArea(sdk.areas.CanyonofMagic)) {
       return;
@@ -421,14 +428,7 @@ const ActionHooks = (function () {
       return;
     }
 
-    const portalConfig = [
-      { area: sdk.areas.MatronsDen, name: "Matron's Den", key: 5, yOffset: 0 },
-      { area: sdk.areas.ForgottenSands, name: "Forgotten Sands", key: 6, yOffset: 15 },
-      { area: sdk.areas.FurnaceofPain, name: "Furnace of Pain", key: 7, yOffset: 30 },
-      { area: sdk.areas.UberTristram, name: "Uber Tristam", key: 8, yOffset: 45 }
-    ];
-
-    const openPortals = portalConfig.filter(function (config) {
+    const openPortals = uberPortalConfigs.filter(function (config) {
       return !!Pather.getPortal(config.area);
     });
 
