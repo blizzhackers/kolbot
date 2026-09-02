@@ -24,3 +24,5 @@ const ThreshSocket = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.ThreshSocket),
   }
 );
+
+Loader.register("ThreshSocket", ThreshSocket);

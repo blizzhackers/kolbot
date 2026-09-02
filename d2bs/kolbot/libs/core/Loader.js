@@ -46,6 +46,37 @@ const Loader = {
   doneScripts: new Set(),
 
   /**
+   * Scripts registered by name through register(). Loader resolves scripts from here first, so
+   * a script's top-level binding never has to be a property of the global object - a top-level
+   * const is not one on modern engines.
+   * @type {Object.<string, GlobalScript | Runnable>}
+   */
+  registry: {},
+
+  /**
+   * Registers a script under the name Loader resolves it by: its file basename in libs/scripts/.
+   * @template {GlobalScript | Runnable} T
+   * @param {string} name
+   * @param {T} script
+   * @returns {T} the script, unchanged
+   */
+  register: function (name, script) {
+    this.registry[name] = script;
+
+    return script;
+  },
+
+  /**
+   * Resolves a script by name: registered scripts first, then the global object for scripts
+   * that are still plain function declarations.
+   * @param {string} name
+   * @returns {GlobalScript | Runnable | undefined}
+   */
+  resolve: function (name) {
+    return this.registry.hasOwnProperty(name) ? this.registry[name] : global[name];
+  },
+
+  /**
    * Populates fileList from libs/scripts/ and runs loadScripts().
    */
   init: function () {
@@ -182,14 +213,15 @@ const Loader = {
         continue;
       }
 
-      Loader.currentScript = global[script];
+      Loader.currentScript = Loader.resolve(script);
 
       // Preload the next script
       if (Loader.scriptIndex < Loader.scriptList.length - 1) {
         let nextScript = this.scriptList[Loader.scriptIndex + 1];
         if (include("scripts/" + nextScript + ".js")) {
-          if (global[nextScript] instanceof Runnable && global[nextScript].startArea) {
-            Loader.nextScript = global[nextScript];
+          const next = Loader.resolve(nextScript);
+          if (next instanceof Runnable && next.startArea) {
+            Loader.nextScript = next;
           }
         }
       }
@@ -357,7 +389,7 @@ const Loader = {
       const ctx = {
         _parent: Loader.currentScript
       };
-      Loader.currentScript = global[script];
+      Loader.currentScript = Loader.resolve(script);
       
       try {
         if (Loader.currentScript instanceof Runnable) {

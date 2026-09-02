@@ -49,3 +49,5 @@ const Mausoleum = new Runnable(
     startArea: sdk.areas.ColdPlains
   }
 );
+
+Loader.register("Mausoleum", Mausoleum);

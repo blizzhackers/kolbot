@@ -227,3 +227,5 @@ const DiabloHelper = new Runnable(
     startArea: sdk.areas.PandemoniumFortress
   }
 );
+
+Loader.register("DiabloHelper", DiabloHelper);

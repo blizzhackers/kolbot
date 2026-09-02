@@ -26,3 +26,5 @@ const Pit = new Runnable(
     startArea: sdk.areas.BlackMarsh
   }
 );
+
+Loader.register("Pit", Pit);

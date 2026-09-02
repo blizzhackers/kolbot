@@ -70,3 +70,5 @@ const GetFade = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("GetFade", GetFade);

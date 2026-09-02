@@ -42,3 +42,5 @@ const GetKeys = new Runnable(
     return true;
   }
 );
+
+Loader.register("GetKeys", GetKeys);
