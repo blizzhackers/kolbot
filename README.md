@@ -11,13 +11,14 @@
 - [Required after Download Setup](#required-after-download-setup)
 - [Getting Started](#getting-started)
 - [Guides](#guides)
+- [D2BotNG](#d2botng---alternative-manager)
 - [LimeDrop](#limedrop-web-based-item-manager-and-dropper)
 
 ## General
 
-1. D2BS, D2Bot and kolbot # are educational tools with an open source developer community. These tools are meant to be used offline or on private servers that explicitly allow them. These tools are not meant to be abused on battle.net (a Blizzard Entertainment entity).
+1. D2BS, D2Bot#, D2BotNG and kolbot are educational tools with an open source developer community. These tools are meant to be used offline or on private servers that explicitly allow them. These tools are not meant to be abused on battle.net (a Blizzard Entertainment entity).
 
-2. D2BS, D2Bot # and kolbot are provided as is and for FREE. If you paid or are asked to pay for these tools, do not proceed.
+2. D2BS, D2Bot#, D2BotNG and kolbot are provided as is and for FREE. If you paid or are asked to pay for these tools, do not proceed.
 
 3. These tools are not inteded for cheating, maliciously exploiting, or illegal use of software.
 
@@ -26,6 +27,7 @@
 * this name is better known than others, even it is just a part of d2bs (diablo 2 botting system) which contain 3 distinct components:
 	* D2BS - core (C++)
 	* D2Bot# - manager (C#)
+	* D2BotNG - alternative manager (C#)
 	* kolbot - script library (JS)
 
 If you want to contribute to kolbot code, make sure you run `npm run lint` for final polish.
@@ -68,6 +70,12 @@ To keep your installation updated, you can run `update.bat` at any time to pull 
 - [kolbot-SoloPlay](https://github.com/blizzhackers/kolbot-SoloPlay)
 - [character config](https://github.com/blizzhackers/documentation/blob/restructure/kolbot/CharacterConfig.md/#character-configuration)
 - [TCP/IP Games](https://github.com/blizzhackers/documentation/blob/restructure/kolbot/TCP-IP%20games.md#tcpip-games)
+
+## D2BotNG - Alternative Manager
+
+[D2BotNG](https://github.com/ResurrectedTrader/D2BotNG) is a modern rewrite of D2Bot# that aims to match existing functionality. Features a dark-themed web UI accessible remotely from any browser, and Discord bot integration. Requires the [.NET 10 Desktop Runtime (x86)](https://dotnet.microsoft.com/en-us/download/dotnet/10.0).
+
+See the [D2BotNG project page](https://github.com/ResurrectedTrader/D2BotNG) for screenshots and details. For issues and feature requests, use the [issue tracker](https://github.com/ResurrectedTrader/D2BotNG/issues).
 
 ## LimeDrop web based item manager and dropper
 
