@@ -433,3 +433,5 @@ const OrgTorchHelper = new Runnable(
     startArea: sdk.areas.Harrogath
   }
 );
+
+Loader.register("OrgTorchHelper", OrgTorchHelper);

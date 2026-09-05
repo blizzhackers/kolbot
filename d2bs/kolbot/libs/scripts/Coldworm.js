@@ -42,3 +42,5 @@ const Coldworm = new Runnable(
     bossid: sdk.monsters.ColdwormtheBurrower,
   }
 );
+
+Loader.register("Coldworm", Coldworm);

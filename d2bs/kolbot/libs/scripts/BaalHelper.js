@@ -163,3 +163,5 @@ Object.defineProperty(BaalHelper, "startArea", {
     return sdk.areas.RiverofFlame;
   },
 });
+
+Loader.register("BaalHelper", BaalHelper);

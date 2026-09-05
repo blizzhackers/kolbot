@@ -100,3 +100,5 @@ const GemHunter = new Runnable(
     }
   }
 );
+
+Loader.register("GemHunter", GemHunter);

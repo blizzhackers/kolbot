@@ -100,3 +100,5 @@ const SealLeecher = new Runnable(
     startArea: sdk.areas.PandemoniumFortress
   }
 );
+
+Loader.register("SealLeecher", SealLeecher);
