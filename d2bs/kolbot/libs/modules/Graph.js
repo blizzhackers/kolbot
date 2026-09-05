@@ -175,9 +175,9 @@
       } while (room.getNext());
     }
 
-    this.vertices.sort(function (a, b) {
-      return getDistance(me.x, me.y, a.walkableX, a.walkableY) - getDistance(me.x, me.y, b.walkableX, b.walkableY);
-    });
+    this.vertices.sort(Sort.makeComparator(function (a) {
+      return getDistance(me.x, me.y, a.walkableX, a.walkableY);
+    }));
 
     /**
      * get the graph vertex from room object

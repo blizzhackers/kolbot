@@ -234,7 +234,7 @@ const Follower = new Runnable(
             getUnits(sdk.unittype.Object)
               .filter(unit => unit.classid === sdk.objects.BluePortal
                 && unit.area === me.area && [Leader.partyUnit.name, me.name].includes(unit.getParent()))
-              .sort((a, b) => a.distance - b.distance)
+              .sort(Sort.makeComparator(a => a.distance))
               .some(portal => Pather.usePortal(null, null, portal));
             // Pather.usePortal(null, Leader.unit.name) || Pather.usePortal(sdk.areas.townOf(me.area));
           }

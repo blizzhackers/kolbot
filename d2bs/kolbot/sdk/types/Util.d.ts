@@ -89,6 +89,8 @@ declare global {
   // Value shape of the global `Sort` const built inside Util.js's UMD factory; assigned onto
   // the global object when Util.js is include()d (see includeCoreLibs in libs/globals.js).
   interface Sort {
+    /** Ascending comparator that evaluates `keyFn` once per element (cached by identity) instead of once per comparison */
+    makeComparator<T>(keyFn: (obj: T) => number): (a: T, b: T) => number;
     /** Sort units by comparing distance between the player */
     units(a: Unit, b: Unit): number;
     /** Sort preset units by comparing distance between the player (using preset x/y calculations) */

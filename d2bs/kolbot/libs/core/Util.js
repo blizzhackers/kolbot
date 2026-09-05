@@ -579,35 +579,61 @@
 
   const Sort = {
     /**
-     * Comparator: sorts units by distance from the player.
-     * @param {Unit} a
-     * @param {Unit} b
-     * @returns {number}
+     * Builds an ascending comparator that evaluates `keyFn` once per element instead of once per
+     * comparison. Elements are cached by identity. Build a fresh one per sort.
+     * @template T
+     * @param {(obj: T) => number} keyFn
+     * @returns {(a: T, b: T) => number}
      */
-    units: function (a, b) {
-      return Math.round(getDistance(me.x, me.y, a.x, a.y)) - Math.round(getDistance(me.x, me.y, b.x, b.y));
+    makeComparator: function (keyFn) {
+      const cache = new WeakMap();
+
+      /** @param {T} obj */
+      function getValue (obj) {
+        let value = cache.get(obj);
+
+        if (value === undefined) {
+          value = keyFn(obj);
+          cache.set(obj, value);
+        }
+
+        return value;
+      }
+
+      return function (a, b) {
+        return getValue(a) - getValue(b);
+      };
+    },
+
+    /**
+     * Comparator: sorts units by distance from the player.
+     * @returns {(a: Unit, b: Unit) => number}
+     */
+    get units () {
+      return Sort.makeComparator(function (a) {
+        return Math.round(getDistance(me.x, me.y, a.x, a.y));
+      });
     },
 
     /**
      * Comparator: sorts preset units by distance from the player, using preset room-relative
      * x/y calculations.
-     * @param {PresetUnit} a
-     * @param {PresetUnit} b
-     * @returns {number}
+     * @returns {(a: PresetUnit, b: PresetUnit) => number}
      */
-    presetUnits: function (a, b) {
-      return getDistance(me, a.roomx * 5 + a.x, a.roomy * 5 + a.y)
-        - getDistance(me, b.roomx * 5 + b.x, b.roomy * 5 + b.y);
+    get presetUnits () {
+      return Sort.makeComparator(function (a) {
+        return getDistance(me, a.roomx * 5 + a.x, a.roomy * 5 + a.y);
+      });
     },
 
     /**
      * Comparator: sorts [x, y] coordinate pairs by distance from the player.
-     * @param {[number, number]} a
-     * @param {[number, number]} b
-     * @returns {number}
+     * @returns {(a: [number, number], b: [number, number]) => number}
      */
-    points: function (a, b) {
-      return getDistance(me, a[0], a[1]) - getDistance(me, b[0], b[1]);
+    get points () {
+      return Sort.makeComparator(function (a) {
+        return getDistance(me, a[0], a[1]);
+      });
     },
 
     /**
