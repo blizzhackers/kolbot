@@ -15,7 +15,8 @@
 *   - should this listen for baal death packet?
 */
 
-const AutoBaal = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var AutoBaal = new Runnable(
   function AutoBaal () {
     // internal variables
     let baalCheck, throneCheck, hotCheck, leader; // internal variables

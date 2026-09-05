@@ -7,7 +7,8 @@
 
 // todo - if we have run ghostsbusters before this then some of these areas don't need to be re-run
 
-const ChestMania = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var ChestMania = new Runnable(
   function ChestMania () {
     Config.OpenChests._enabled = Config.OpenChests.Enabled;
     Config.OpenChests.Enabled = true;

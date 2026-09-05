@@ -5,7 +5,8 @@
 *
 */
 
-const ShopBot = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var ShopBot = new Runnable(
   function ShopBot () {
     const overlayText = {
       title: new Text("kolbot shopbot", 50, 245, 2, 1),
