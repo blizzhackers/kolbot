@@ -1,0 +1,15 @@
+/**
+*  @filename    D2BotSoloPlay.dbj
+*  @author      theBGuy
+*  @desc        Entry script for SoloPlay leveling system. Actual logic is in SoloEntry.js
+*
+*
+*  @typedef {import("./sdk/globals")}
+*/
+
+// No touchy!
+include("critical.js"); // required
+if (!include("SoloPlay/OOG/SoloEntry.js")) {
+  D2Bot.printToConsole("SoloPlay: Failed to include SoloEntry.js");
+  D2Bot.stop();
+}

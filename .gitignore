@@ -1,9 +1,62 @@
+# Do not track hidden files and directories by default
+.*
 
+# Track these hidden files
+!.eslintrc.js
+!.gitignore
+!.gitmodules
+!.editorconfig
+!.gitkeep
+
+# Track these hidden directories
+!.github/
+
+# Track these files from vscodes
+!.vscode/settings.json
+!.vscode/extensions.json
+
+# Do not track install packages
+node_modules/
+
+# Do not track files denoted as private
+**/__*
+
+# Do not track user generated data
+data/*.json
+images/
+logs/*.rtf
+logs/*.log
+d2bs/d2bs.ini
 d2bs/kolbot/data/secure/*.txt
-d2bs/kolbot/data/*.json
+d2bs/kolbot/data/**/*.json
 d2bs/kolbot/logs/*.json
 d2bs/kolbot/logs/*.txt
 d2bs/kolbot/logs/**/**
 d2bs/kolbot/mules/**/*.txt
 d2bs/logs/*.log
+d2bs/kolbot/env.json
 d2bs/kolbot/libs/manualplay/config/*.*.js
+d2bs/kolbot/libs/config/*.*.js
+d2bs/kolbot/data/web/limedrop.json
+d2bs/kolbot/libs/systems/automule/config/MuleConfig.js
+d2bs/kolbot/libs/systems/mulecondenser/config/MuleCondenserConfig.js
+d2bs/kolbot/libs/systems/channel/ChannelConfig.js
+d2bs/kolbot/libs/systems/cleaner/CleanerConfig.js
+d2bs/kolbot/libs/systems/torch/FarmerConfig.js
+d2bs/kolbot/libs/systems/pubjoin/PubJoinConfig.js
+d2bs/kolbot/libs/systems/mulelogger/LoggerConfig.js
+d2bs/kolbot/libs/systems/gambling/TeamsConfig.js
+d2bs/kolbot/libs/systems/follow/FollowConfig.js
+d2bs/kolbot/libs/systems/crafting/TeamsConfig.js
+d2bs/kolbot/libs/systems/automule/config/TorchAnniMules.js
+d2bs/kolbot/libs/config/_CustomConfig.js
+d2bs/kolbot/libs/starter/AdvancedConfig.js
+d2bs/kolbot/libs/starter/StarterConfig.js
+d2bs/kolbot/libs/systems/gameaction/GameActionConfig.js
+d2bs/kolbot/libs/systems/automule/config/StarterConfig.js
+d2bs/kolbot/libs/systems/charrefresher/RefresherConfig.js
+d2bs/kolbot/libs/systems/lead/LeadConfig.js
+/d2bs/kolbot/libs/core/Overrides
+d2bs/kolbot/libs/systems/autorush/RushConfig.js
+/d2bs/kolbot/libs/modules/EngineProbe.js
+/d2bs/kolbot/libs/modules/external/base85.js

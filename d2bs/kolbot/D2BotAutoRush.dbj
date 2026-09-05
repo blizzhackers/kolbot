@@ -1,0 +1,583 @@
+/**
+*  @filename    D2BotAutoRush.dbj
+*  @author      theBGuy
+*  @desc        Entry script for AutoRush system
+*
+*  @typedef {import("./sdk/globals")}
+*  @typedef {import("./libs/systems/autorush/index")}
+*/
+
+include("critical.js"); // required
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
+
+// the only things we really need from these are their oog checks
+includeSystemLibs();
+
+
+if (typeof Starter.AdvancedConfig[me.profile] === "object") {
+  Object.assign(Starter.Config, Starter.AdvancedConfig[me.profile]);
+}
+delete Starter.AdvancedConfig;
+
+if (DataFile.init()) {
+  Starter.firstRun = true;
+}
+
+// TODO: need to handle acc creation, char creation somewhat works but will fail if name is in use
+
+const {
+  RushConfig,
+} = require("./libs/systems/autorush/RushConfig");
+const { RushModes, normalizeRushProfileConfig } = require("./libs/systems/autorush/RushConstants");
+const RushProfile = RushConfig[me.profile];
+
+const locationAction = (function () {
+  const Controls = require("./libs/modules/Control");
+  const {
+    locations,
+    addLocations,
+  } = require("./libs/oog/Locations");
+  // const Overrides = require("./libs/modules/Override");
+  // const madeChars = [];
+  // new Overrides.Override(ControlAction, ControlAction.makeCharacter, function (orignal, ...args) {
+  //   /** @type {ControlAction.CharacterInfo} */
+  //   let _charInfo = args[0];
+  //   if (String.isEqual(_charInfo.charName, me.name)) {
+  //     console.debug("Need a new name");
+  //   }
+    
+  //   return orignal.apply(this, args);
+  // }).apply();
+
+  /** @returns {boolean} */
+  Starter.LocationEvents.login = function () {
+    Starter.inGame && (Starter.inGame = false);
+    const pType = Profile().type;
+    /** @type {Map<string, string>} */
+    const classMap = new Map([
+      ["ZON", "amazon"],
+      ["SOR", "sorceress"],
+      ["NEC", "necromancer"],
+      ["PAL", "paladin"],
+      ["BAR", "barbarian"],
+      ["DRU", "druid"],
+      ["SIN", "assassin"],
+    ]);
+    /**
+     * @param {RusheeConfig} rushProfile
+     * @returns {Partial<ControlAction.CharacterInfo>}
+     */
+    const getCharInfo = function (rushProfile) {
+      let charInfo = rushProfile.create.charInfo;
+      let [modePrefix, charClass] = charInfo.toUpperCase().split("-");
+      if (!rushProfile.create.charName) {
+        // we can use soloplay's namegen if available
+        if (FileTools.exists("libs/SoloPlay/Modules/NameGen.js")) {
+          const NameGen = require("./libs/SoloPlay/Modules/NameGen");
+          rushProfile.create.charName = NameGen();
+          Starter.profileInfo.charName = rushProfile.create.charName;
+          D2Bot.setProfile(null, null, rushProfile.create.charName);
+          D2Bot.printToConsole("Generated character name: " + rushProfile.create.charName, sdk.colors.D2Bot.Green);
+        } else {
+          throw new Error("No character name provided and NameGen module not found");
+        }
+      }
+      /** @type {Partial<CharacterInfo>} */
+      let info = {
+        charName: rushProfile.create.charName,
+        charClass: classMap.get(charClass.slice(0, 3)) || "sorceress",
+        hardcore: modePrefix.includes("HC"),
+        expansion: modePrefix.indexOf("CC") === -1,
+        ladder: modePrefix.indexOf("NL") === -1,
+      };
+      console.debug(info);
+      return info;
+    };
+
+    if (getLocation() === sdk.game.locations.MainMenu && Starter.firstRun
+      && pType === sdk.game.profiletype.SinglePlayer
+      && Controls.SinglePlayer.click()) {
+      return;
+    }
+
+    // Wrong char select screen fix
+    if ([sdk.game.locations.CharSelect, sdk.game.locations.CharSelectNoChars].includes(getLocation())) {
+      hideConsole(); // seems to fix odd crash with single-player characters if the console is open to type in
+      let spCheck = pType === sdk.game.profiletype.Battlenet;
+      let realmControl = !!Controls.CharSelectCurrentRealm.control;
+      if ((spCheck && !realmControl) || ((!spCheck && realmControl))) {
+        Controls.BottomLeftExit.click();
+        
+        return;
+      }
+    }
+
+    // Multiple realm botting fix in case of R/D or disconnect
+    if (Starter.firstLogin && getLocation() === sdk.game.locations.Login) {
+      Controls.BottomLeftExit.click();
+    }
+          
+    D2Bot.updateStatus("Logging In");
+
+    try {
+      // make battlenet accounts/characters
+      D2Bot.updateStatus("Logging in");
+      console.debug("ProfileInfo: ", Starter.profileInfo);
+      // need to make an account if we can
+      if (Starter.profileInfo.account === "" && pType === sdk.game.profiletype.Battlenet) {
+        if (RushProfile.type === RushModes.rusher) {
+          D2Bot.printToConsole("Cannot make accounts for rusher", sdk.colors.D2Bot.Red);
+          D2Bot.stop(me.profile, true);
+          return;
+        }
+        if (RushProfile.create.account && RushProfile.create.password) {
+          let { account, password, charInfo } = RushProfile.create;
+          // let madeAcc = false;
+          if (ControlAction.makeAccount(RushProfile.create)) {
+            console.log("Created account " + RushProfile.create.account);
+            D2Bot.setProfile(account, password);
+            // madeAcc = true;
+          } else if (ControlAction.loginAccount(RushProfile.create)) {
+            console.log("Logged into account " + RushProfile.create.account);
+          }
+          if (Starter.profileInfo.charName === "") {
+            D2Bot.updateStatus("Char Select - Looking for character");
+            // if (!madeAcc) {
+            //   let charInfo = DataFile.getStats().charInfo;
+            //   if (charInfo && charInfo.charName) {
+            //     console.log("Found Existing character " + charName);
+            //     Starter.profileInfo.charName = charName;
+            //     if (ControlAction.loginCharacter(Starter.profileInfo)) {
+            //       console.debug("Logged into character " + Starter.profileInfo.charName);
+            //       return;
+            //     }
+            //   }
+            // }
+            // we are going to need to make a character too
+            if (charInfo) {
+              let info = getCharInfo();
+              
+              if (!ControlAction.findCharacter(info)) {
+                if (ControlAction.makeCharacter(info, true)) {
+                  console.log("Created character " + me.charname);
+                  info.charName = me.charname;
+                  DataFile.updateStats("charInfo", info);
+                  D2Bot.setProfile(account, password, me.charname);
+                  
+                  return;
+                }
+              }
+            }
+          }
+        } else {
+          D2Bot.printToConsole("No account information found", sdk.colors.D2Bot.Red);
+          D2Bot.stop(me.profile, true);
+        }
+      } else {
+        // existing account
+        try {
+          login(me.profile);
+          // need a better solution for this
+          if (getLocation() === sdk.game.locations.Lobby && RushProfile.type !== RushModes.rusher) {
+            if (RushProfile.create.charName && me.charname !== RushProfile.create.charName) {
+              Starter.profileInfo.charName = RushProfile.create.charName;
+              console.debug("Logged into wrong character ", Starter.profileInfo);
+              ControlAction.timeoutDelay("Character Change", 5000);
+              Controls.LobbyQuit.click();
+              throw new Error("Character name mismatch");
+            }
+          }
+        } catch (e) {
+          while (!getLocation()) {
+            delay(1000);
+          }
+          switch (getLocation()) {
+          case sdk.game.locations.CharSelect:
+          case sdk.game.locations.CharSelectNoChars:
+            if (Starter.loginRetry < 2) {
+              Starter.loginRetry++;
+              // let charInfo = DataFile.getStats().charInfo;
+              // if (charInfo) {
+              //   try {
+              //     charInfo = JSON.parse(charInfo);
+              //     if (charInfo.charName) {
+              //       console.log("Found Existing character " + charInfo.charName);
+              //       console.debug(charInfo.charName);
+              //       if (ControlAction.loginCharacter(charInfo)) {
+              //         console.debug("Logged into character " + me.charname);
+              //         return;
+              //       }
+              //     }
+              //   } catch (e) {
+              //     console.error(e);
+              //   }
+              // }
+              if (!ControlAction.findCharacter(Starter.profileInfo)) {
+                // dead hardcore character on sp
+                if (getLocation() === sdk.game.locations.OkCenteredErrorPopUp) {
+                  // Exit from that pop-up
+                  Controls.OkCentered.click();
+                  D2Bot.printToConsole("Character died", sdk.colors.D2Bot.Red);
+                  D2Bot.stop();
+                } else if (RushProfile.type !== RushModes.rusher && RushProfile.create.charInfo) {
+                  let info = getCharInfo(RushProfile);
+                  console.debug(info);
+                  if (!ControlAction.findCharacter(info)) {
+                    if (ControlAction.makeCharacter(info, true)) {
+                      console.log("Created character " + me.charname);
+                      info.charName = me.charname;
+                      DataFile.updateStats("charInfo", info);
+                      D2Bot.setProfile(null, null, info.charName);
+                      
+                      return;
+                    }
+                  } else {
+                    ControlAction.loginCharacter(info);
+                  }
+                } else {
+                  Starter.loginRetry++;
+                }
+              } else {
+                ControlAction.loginCharacter(Starter.profileInfo);
+                // login(me.profile);
+              }
+              break;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.log(e + " " + getLocation());
+    }
+  };
+
+  if (RushProfile.type === RushModes.quester) {
+    locations.set(sdk.game.locations.CreateGame, function (location) {
+      D2Bot.updateStatus("Creating Game");
+
+      if (typeof Starter.Config.CharacterDifference === "number") {
+        if (Controls.CharacterDifference.disabled === sdk.game.controls.Disabled) {
+          Controls.CharacterDifferenceButton.click();
+        }
+        Controls.CharacterDifference.setText(Starter.Config.CharacterDifference.toString());
+      } else if (!Starter.Config.CharacterDifference && Controls.CharacterDifference.disabled === 5) {
+        Controls.CharacterDifferenceButton.click();
+      }
+
+      if (typeof Starter.Config.MaxPlayerCount === "number") {
+        Controls.MaxPlayerCount.setText(Starter.Config.MaxPlayerCount.toString());
+      }
+
+      // Get game name if there is none
+      while (!Starter.gameInfo.gameName) {
+        D2Bot.requestGameInfo();
+        delay(500);
+      }
+
+      // FTJ handler
+      if (Starter.lastGameStatus === "pending") {
+        Starter.isUp = "no";
+        D2Bot.printToConsole("Failed to create game");
+        ControlAction.timeoutDelay("FTJ delay", Starter.Config.FTJDelay * 1e3);
+        D2Bot.updateRuns();
+      }
+
+      const gameName = (Starter.gameInfo.gameName === "?"
+        ? Starter.randomString(null, true)
+        : Starter.gameInfo.gameName + Starter.gameCount);
+      const gamePass = (Starter.gameInfo.gamePass === "?"
+        ? Starter.randomString(null, true)
+        : Starter.gameInfo.gamePass);
+
+      ControlAction.createGame(
+        gameName,
+        gamePass,
+        "Highest",
+        Starter.Config.CreateGameDelay * 1000
+      );
+
+      Starter.lastGameStatus = "pending";
+      Starter.setNextGame(Starter.gameInfo);
+      Starter.locationTimeout(10000, location);
+    });
+  }
+
+  if (([
+    RushModes.follower,
+    RushModes.bumper,
+    RushModes.rusher,
+  ].includes(RushProfile.type))) {
+    // Setup follower locations
+    let lastGameTick;
+    const lastGame = [];
+    /** @param {string} leader */
+    const joinCheck = function (leader) {
+      D2Bot.requestGame(leader);
+      delay(500);
+
+      if (!Starter.joinInfo.inGame || (lastGame.length && lastGame.indexOf(Starter.joinInfo.gameName) === -1)) {
+        D2Bot.printToConsole("Game is finished. Stopping join delay.");
+        Starter.gameInfo.gameName = "";
+        Starter.gameInfo.gamePass = "";
+
+        return true;
+      }
+
+      return false;
+    };
+    addLocations([sdk.game.locations.WaitingInLine, sdk.game.locations.CreateGame],
+      function () {
+        Controls.CancelCreateGame.click();
+        Controls.JoinGameWindow.click();
+      }
+    );
+    locations.set(sdk.game.locations.LobbyChat,
+      function () {
+        D2Bot.updateStatus("Lobby Chat");
+
+        if (Starter.inGame) {
+          if (AutoMule.outOfGameCheck()
+            || TorchSystem.outOfGameCheck()
+            || Gambling.outOfGameCheck()
+            || CraftingSystem.outOfGameCheck()) {
+            return;
+          }
+
+          console.log("updating runs");
+          D2Bot.updateRuns();
+
+          lastGameTick = getTickCount();
+          Starter.gameCount += 1;
+          Starter.lastGameStatus = "ready";
+          Starter.inGame = false;
+        }
+
+        if (!Starter.chatActionsDone) {
+          Starter.chatActionsDone = true;
+
+          ControlAction.timeoutDelay("Chat delay", Starter.Config.ChatActionsDelay * 1e3);
+          say("/j " + Starter.Config.JoinChannel);
+          delay(1000);
+
+          if (Starter.Config.FirstJoinMessage !== "") {
+            say(Starter.Config.FirstJoinMessage);
+            delay(500);
+          }
+          // need to handle channel join messages
+        }
+
+        Starter.LocationEvents.openJoinGameWindow();
+      }
+    );
+    locations.set(sdk.game.locations.JoinGame,
+      function (location) {
+        D2Bot.updateStatus("Join Game");
+        Starter.joinInfo = {};
+        D2Bot.requestGame(RushProfile.leader);
+        delay(100);
+
+        if (!Starter.joinInfo.hasOwnProperty("gameName") || Starter.joinInfo.gameName === "") {
+          delay(500);
+          return;
+        }
+
+        if (lastGame.indexOf(Starter.joinInfo.gameName) === -1 || Starter.lastGameStatus === "pending") {
+          Controls.JoinGameName.setText(Starter.joinInfo.gameName);
+          Controls.JoinGamePass.setText(Starter.joinInfo.gamePass);
+
+          if (Starter.lastGameStatus === "pending"
+            || (Starter.gameInfo.error && DataFile.getStats().gameName === Starter.joinInfo.gameName)) {
+            D2Bot.printToConsole("Failed to join game");
+            ControlAction.timeoutDelay(
+              "Join Delay",
+              Starter.Config.JoinRetryDelay * 1000, joinCheck(RushProfile.leader)
+            );
+            D2Bot.updateRuns();
+            D2Bot.requestGame(RushProfile.leader);
+            delay(200);
+
+            if (!Starter.joinInfo.inGame) {
+              Starter.lastGameStatus = "ready";
+
+              return;
+            }
+          }
+
+          if (!Starter.joinInfo.inGame) {
+            if (Starter.joinInfo.delay) {
+              ControlAction.timeoutDelay("Leader Delay", Starter.joinInfo.delay);
+            }
+            return;
+          }
+
+          // Don't join immediately after previous game to avoid FTJ
+          if (getTickCount() - lastGameTick < 5000) {
+            ControlAction.timeoutDelay("Game Delay", (lastGameTick - getTickCount() + 5000));
+          }
+
+          console.log("joining game " + Starter.joinInfo.gameName);
+
+          if (typeof Starter.Config.JoinDelay === "number") {
+            ControlAction.timeoutDelay("Custom Join Delay", Starter.Config.JoinDelay * 1e3);
+          }
+
+          me.blockMouse = true;
+
+          DataFile.updateStats("gameName", Starter.joinInfo.gameName);
+          Controls.JoinGame.click();
+
+          me.blockMouse = false;
+
+          lastGame.push(Starter.joinInfo.gameName);
+
+          Starter.lastGameStatus = "pending";
+          Starter.locationTimeout(15000, location);
+
+          return;
+        } else {
+          // for now, if leader is in game and it's the last game we were in. delay to prevent copyData spam
+          if (lastGame.includes(Starter.joinInfo.gameName)) {
+            delay((Starter.joinInfo.inGame ? 5000 : 2000));
+          }
+        }
+      }
+    );
+    locations.set(sdk.game.locations.TcpIpEnterIp,
+      function () {
+        try {
+          for (let i = 0; i < 3; i++) {
+            D2Bot.requestGame(RushProfile.leader);
+            delay(1000);
+
+            if (Object.keys(Starter.joinInfo).length && Starter.joinInfo.gameName !== "") {
+              break;
+            }
+          }
+
+          if (Controls.IPAdress.setText(Object.keys(Starter.joinInfo).length ? Starter.joinInfo.gameName : "localhost")
+            && Controls.IPAdressOk.click()
+            && Starter.locationTimeout(2e3, sdk.game.locations.TcpIpEnterIp)) {
+            getLocation() === sdk.game.locations.CharSelect && login(me.profile);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    );
+  }
+
+  return {
+    /** @param {number} loc */
+    run: function (loc) {
+      try {
+        let func = locations.get(loc);
+        if (typeof func === "function") {
+          func(loc);
+        } else if (loc !== undefined && loc !== null) {
+          console.log("Unhandled location: " + loc);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    },
+  };
+})();
+
+/**
+ * D2BS entry point: initializes the profile, then loops handling in-game status updates and,
+ * out of game, dispatching the current lobby/menu location to `locationAction`.
+ * @returns {void}
+ */
+function main () {
+  debugLog(me.profile);
+  addEventListener("copydata", Starter.receiveCopyData);
+  addEventListener("scriptmsg", Starter.scriptMsgEvent);
+
+  while (!Starter.handle) {
+    delay(100);
+  }
+
+  DataFile.updateStats("handle", Starter.handle);
+  delay(500);
+  D2Bot.init();
+  load("threads/heartbeat.js");
+
+  while (!Object.keys(Starter.gameInfo).length) {
+    D2Bot.requestGameInfo();
+    delay(500);
+  }
+
+  while (!Object.keys(Starter.profileInfo).length) {
+    D2Bot.getProfile();
+    console.log("Getting Profile");
+    delay(500);
+  }
+  console.debug(Starter.profileInfo);
+
+  Starter.gameCount = (DataFile.getStats().runs + 1 || 1);
+
+  if (Starter.gameInfo.error) {
+    delay(200);
+
+    if (!!DataFile.getStats().debugInfo) {
+      Starter.gameInfo.crashInfo = DataFile.getStats().debugInfo;
+      D2Bot.printToConsole(
+        "Crash Info: Script: " + JSON.parse(Starter.gameInfo.crashInfo).currScript
+        + " Area: " + JSON.parse(Starter.gameInfo.crashInfo).area,
+        sdk.colors.D2Bot.Gray
+      );
+    }
+
+    ControlAction.timeoutDelay("Crash Delay", Starter.Config.CrashDelay * 1e3);
+    D2Bot.updateRuns();
+  }
+
+  DataFile.updateStats("debugInfo", JSON.stringify({ currScript: "none", area: "out of game" }));
+
+  if (!RushProfile) {
+    D2Bot.printToConsole("No Rush Config found for " + me.profile, sdk.colors.D2Bot.Red);
+    D2Bot.stop(me.profile, true);
+  }
+
+  normalizeRushProfileConfig(RushProfile);
+
+  // now that we are all setup, check if we need to start other profiles
+  if (RushProfile.startProfiles.length) {
+    for (let profile of RushProfile.startProfiles) {
+      if (profile !== me.profile) {
+        D2Bot.start(profile);
+      }
+    }
+  }
+
+  while (true) {
+    // returns true before actually in game so we can't only use this check
+    while (me.ingame) {
+      // returns false when switching acts so we can't use while
+      if (me.gameReady) {
+        Starter.isUp = "yes";
+
+        if (!Starter.inGame) {
+          Starter.gameStart = getTickCount();
+          Starter.lastGameStatus = "ingame";
+          Starter.inGame = true;
+
+          DataFile.updateStats("runs", Starter.gameCount);
+          DataFile.updateStats("ingameTick");
+        }
+
+        D2Bot.updateStatus(
+          me.charname + " (" + me.charlvl + ") | Game: " + (me.gamename || "singleplayer")
+          + Starter.timer(Starter.gameStart)
+        );
+      }
+
+      delay(1000);
+    }
+
+    Starter.isUp = "no";
+
+    locationAction.run(getLocation());
+    delay(1000);
+  }
+}

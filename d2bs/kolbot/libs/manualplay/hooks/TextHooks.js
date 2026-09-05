@@ -1,313 +1,464 @@
 /**
-*  @filename    TextHooks.js
-*  @author      theBGuy
-*  @desc        Text hooks for MapThread
-*
-*/
+ *  @filename    TextHooks.js
+ *  @author      theBGuy
+ *  @desc        Text hooks for MapThread
+ *
+ */
 
-const TextHooks = {
-	enabled: true,
-	lastAct: 0,
-	wasInTown: true,
-	displayTitle: true,
-	displaySettings: true,
-	frameworkDisplayed: false,
-	frameYSizeScale: 0,
-	frameYLocScale: 0,
-	settingsModifer: 0,
-	dashBoardWidthScale: 0,
-	statusFrameYSize: 0,
-	qolFrameYSize: 0,
-	statusHookNames: ["pickitStatus", "vectorStatus", "monsterStatus", "itemStatus"],
-	qols: ["previousAct", "nextAct", "key6", "key5"],
-	statusHooks: [],
-	dashBoard: [],
-	qolHooks: [],
-	hooks: [],
-	yLocMapScale: {1: 40, 2: 30, 3: 20, 4: 10, 6: -10, 9: -40},
-	modifier: 16 * (Number(!!me.diff) + Number(!!me.gamepassword) + Number(!!me.gametype) + Number(!!me.gamename) + Number(!!me.gameserverip && !me.realm)),
+/** @type {TextHooks} */
+const TextHooks = (function () {
+  const Events = new (require("../../modules/AsyncEvents"));
+  const HookFactory = require("../modules/HookFactory");
 
-	getScale: function (hkLen) {
-		if (!!this.yLocMapScale[hkLen]) {
-			this.frameYSizeScale = (-1 * this.yLocMapScale[hkLen]);
-			this.frameYLocScale = this.yLocMapScale[hkLen];
-		} else {
-			this.frameYSizeScale = 0;
-			this.frameYLocScale = 0;
-		}
+  const Y_POS_MODIFIER = 16
+    * (Number(!!me.diff)
+      + Number(!!me.gamepassword)
+      + Number(!!me.gametype)
+      + Number(!!me.gamename)
+      + Number(!!me.gameserverip && !me.realm));
+  const IP = (me.gameserverip.length > 0 ? me.gameserverip.split(".")[3] : "");
+  const Y_LOC_MAP_SCALE = { 1: 40, 2: 30, 3: 20, 4: 10, 6: -10, 9: -40 };
 
-		this.settingsModifer = Math.max(0, hkLen - 3);
-	},
+  /** @typedef {import("./TextHooks").HookEntry} HookEntry */
+  /** @typedef {import("../libs/Hooks")} HooksModule */
 
-	check: function () {
-		if (!this.enabled) {
-			this.flush();
+  /**
+   * @param {number} click 
+   * @param {number} x 
+   * @param {number} y 
+   * @returns {boolean}
+   */
+  const onClick = function (click, x, y) {
+    /**
+     * @param {HookEntry} h1 
+     * @param {HookEntry} h2 
+     */
+    const sortHooks = function (h1, h2) {
+      return Math.abs(h1.hook.y - y) - Math.abs(h2.hook.y - y);
+    };
 
-			return;
-		}
+    if (click === 0) {
+      const actionHooks = TextHooks.statusHooks.filter(function ({ hook }) {
+        return typeof hook.click === "function";
+      }).sort(sortHooks);
 
-		if (!this.frameworkDisplayed) {
-			!this.getHook("credits", this.hooks) && this.add("credits");
-			!!me.gameserverip && !this.getHook("ip", this.hooks) && this.add("ip");
-			this.lastAct = 0; // sorta hacky solution, but works this will cause qolBoard to update after being flushed from a uiflag
-			this.frameworkDisplayed = true;
-		}
+      if (!actionHooks.length) {
+        console.log("No action hooks found.", actionHooks);
+        return false;
+      }
 
-		this.displaySettings ? !this.getHook("showSettings", this.statusHooks) && this.add("showSettings") : !this.getHook("hideSettings", this.statusHooks) && this.add("hideSettings");
-		this.displayTitle && !this.getHook("title", this.hooks) && this.add("title");
-		!this.getHook("ping", this.hooks) ? this.add("ping") : (this.getHook("ping", this.hooks).hook.text = "Ping: " + me.ping);
-		!this.getHook("time", this.hooks) ? this.add("time") : (this.getHook("time", this.hooks).hook.text = this.timer());
-	},
+      if (actionHooks[0].name === "hideSettings" || actionHooks[0].name === "showSettings") {
+        TextHooks.displaySettings = !TextHooks.displaySettings;
 
-	update: function (hkLen = 0) {
-		let updateSettingsDisplay = (this.displaySettings && this.settingsModifer < Math.max(0, hkLen - 3));
+        return true;
+      }
+    }
 
-		this.getScale(hkLen);
-		this.add("dashboard");
-		updateSettingsDisplay && this.add("showSettings");
-		(this.lastAct !== me.act || this.wasInTown !== me.inTown || !this.getHook("qolBoard", this.qolHooks)) && this.add("qolBoard");
-	},
+    return false;
+  };
 
-	hookHandler: function (click, x, y) {
-		function sortHooks(h1, h2) {
-			return Math.abs(h1.hook.y - y) - Math.abs(h2.hook.y - y);
-		}
-		
-		if (click === 0) {
-			TextHooks.statusHooks.sort(sortHooks);
+  const getScale = function (hkLen) {
+    if (!!Y_LOC_MAP_SCALE[hkLen]) {
+      TextHooks.frameYSizeScale = -1 * Y_LOC_MAP_SCALE[hkLen];
+      TextHooks.frameYLocScale = Y_LOC_MAP_SCALE[hkLen];
+    } else {
+      TextHooks.frameYSizeScale = 0;
+      TextHooks.frameYLocScale = 0;
+    }
 
-			if (TextHooks.statusHooks[0].name === "hideSettings" || TextHooks.statusHooks[0].name === "showSettings") {
-				TextHooks.displaySettings = !TextHooks.displaySettings;
+    TextHooks.settingsModifer = Math.max(0, hkLen - 3);
+  };
 
-				return true;
-			}
-		}
+  /** @param {HookEntry[]} hooks */
+  const clearHooks = (hooks) => {
+    while (hooks.length) {
+      hooks.pop().hook.remove();
+    }
+  };
 
-		return false;
-	},
+  const timer = function () {
+    return " (" + new Date(getTickCount() - me.gamestarttime).toISOString().slice(11, -5) + ")";
+  };
 
-	add: function (name, hookArr = []) {
-		let orginalLen = hookArr.length;
-		
-		switch (name) {
-		case "credits":
-			this.hooks.push({
-				name: "credits",
-				hook: new Text("MM by theBGuy", 0, 600 + Hooks.resfix.y, 4, 0, 0)
-			});
+  const textHooks = {
+    /** @returns {HookEntry} */
+    credits: function () {
+      return HookFactory.createHooks.text({
+        name: "credits",
+        text: "MM by theBGuy",
+        x: 0,
+        y: 600 + Hooks.resfix.y,
+      });
+    },
+    /** @returns {HookEntry} */
+    title: function () {
+      return HookFactory.createHooks.text({
+        name: "title",
+        text: ":: Running Map-Mode, enter .help in chat to see more commands ::",
+        x: 0,
+        y: 13,
+      });
+    },
+    /** @returns {HookEntry} */
+    ping: function () {
+      return HookFactory.createHooks.text({
+        name: "ping",
+        text: "Ping: " + me.ping,
+        x: 785 + Hooks.resfix.x,
+        y: 56 + Y_POS_MODIFIER,
+        color: 4,
+        font: 1,
+        align: 1,
+      });
+    },
+    /** @returns {HookEntry} */
+    time: function () {
+      return HookFactory.createHooks.text({
+        name: "time",
+        text: timer(),
+        x: 785 + Hooks.resfix.x,
+        y: 72 + Y_POS_MODIFIER,
+        color: 4,
+        font: 1,
+        align: 1,
+      });
+    },
+    /** @returns {HookEntry} */
+    ip: function () {
+      const hook = HookFactory.createHooks.text({
+        name: "ip",
+        text: "IP: " + IP,
+        x: 785 + Hooks.resfix.x,
+        y: 88 + Y_POS_MODIFIER,
+        color: 4,
+        font: 1,
+        align: 1,
+      });
+      hook.hook.zorder = 0;
+      return hook;
+    },
+    /** @returns {HookEntry} */
+    key5: function () {
+      return HookFactory.createHooks.text({
+        name: "key5",
+        text: "Key 5: " + (me.inTown ? "Heal" : "Make Portal"),
+        x: Hooks.qolBoard.x + 5 + Hooks.resfix.x,
+        y: 545 - TextHooks.qolHooks.length * 10 + Hooks.resfix.y,
+      });
+    },
+    /** @returns {HookEntry} */
+    key6: function () {
+      return HookFactory.createHooks.text({
+        name: "key6",
+        text: "Key 6: " + (me.inTown ? "Open Stash" : "Go To Town"),
+        x: Hooks.qolBoard.x + 5 + Hooks.resfix.x,
+        y: 545 - TextHooks.qolHooks.length * 10 + Hooks.resfix.y,
+      });
+    },
+    /** @returns {(HookEntry & { dest: number, type: string })|null} */
+    nextAct: function () {
+      if (me.inTown && me.accessToAct(me.act + 1)) {
+        return Object.assign({
+          dest: me.act + 1,
+          type: "actChange",
+        }, HookFactory.createHooks.text({
+          name: "Next Act",
+          text: "Shift > : Next Act",
+          x: Hooks.qolBoard.x + 5 + Hooks.resfix.x,
+          y: 545 - TextHooks.qolHooks.length * 10 + Hooks.resfix.y,
+        }));
+      }
+      return null;
+    },
+    /** @returns {(HookEntry & { dest: number, type: string })|null} */
+    previousAct: function () {
+      if (me.inTown && me.act > 1) {
+        return Object.assign({
+          dest: me.act - 1,
+          type: "actChange",
+        }, HookFactory.createHooks.text({
+          name: "Previous Act",
+          text: "Shift < : Previous Act",
+          x: Hooks.qolBoard.x + 5 + Hooks.resfix.x,
+          y: 545 - TextHooks.qolHooks.length * 10 + Hooks.resfix.y,
+        }));
+      }
+      return null;
+    },
+    /** @returns {HookEntry} */
+    pickitStatus: function () {
+      return HookFactory.createHooks.text({
+        name: "pickitStatus",
+        text: "ÿc4N-Pad - ÿc0: " + (ItemHooks.pickitEnabled ? "ÿc<Your Filter" : "ÿc1Default Filter"),
+        x: 10,
+        y: 503 - TextHooks.settingsModifer * 10 - TextHooks.statusHooks.length * 11 + Hooks.resfix.y,
+      });
+    },
+    /** @returns {HookEntry} */
+    itemStatus: function () {
+      return HookFactory.createHooks.text({
+        name: "itemStatus",
+        text: "ÿc4Key 7ÿc0: " + (ItemHooks.enabled ? "Disable" : "Enable") + " Item Filter",
+        x: 10,
+        y: 503 - TextHooks.settingsModifer * 10 - TextHooks.statusHooks.length * 11 + Hooks.resfix.y,
+      });
+    },
+    /** @returns {HookEntry} */
+    monsterStatus: function () {
+      return HookFactory.createHooks.text({
+        name: "monsterStatus",
+        text: "ÿc4Key 8ÿc0: " + (MonsterHooks.enabled ? "Disable" : "Enable") + " Monsters",
+        x: 10,
+        y: 503 - TextHooks.settingsModifer * 10 - TextHooks.statusHooks.length * 11 + Hooks.resfix.y,
+      });
+    },
+    /** @returns {HookEntry} */
+    vectorStatus: function () {
+      return HookFactory.createHooks.text({
+        name: "vectorStatus",
+        text: "ÿc4Key 9ÿc0: " + (VectorHooks.enabled ? "Disable" : "Enable") + " Vectors",
+        x: 10,
+        y: 503 - TextHooks.settingsModifer * 10 - TextHooks.statusHooks.length * 11 + Hooks.resfix.y,
+      });
+    },
+  };
 
-			break;
-		case "title":
-			this.hooks.push({
-				name: "title",
-				hook: new Text(":: Running Map-Mode, enter .help in chat to see more commands ::", 0, 13, 4, 0, 0)
-			});
+  const statusHookNames = ["pickitStatus", "vectorStatus", "monsterStatus", "itemStatus"];
+  const qols = ["previousAct", "nextAct", "key6", "key5"];
+  const specialCases = {
+    /**
+     * Rebuilds the dashboard container hooks (box + frame) at the current scale.
+     */
+    dashboard: function () {
+      clearHooks(TextHooks.dashBoard);
+      
+      const containers = HookFactory.createContainer(
+        "dashboard", "dashboardframe",
+        Hooks.dashBoard.x,
+        Hooks.dashBoard.y + Hooks.resfix.y + TextHooks.frameYLocScale,
+        225,
+        60 + TextHooks.frameYSizeScale
+      );
+      
+      containers.forEach(function (container) {
+        TextHooks.dashBoard.push(container);
+      });
+    },
+    
+    /**
+     * Rebuilds the quality-of-life hook list and its container, sized to how many hooks fit.
+     */
+    qolBoard: function () {
+      clearHooks(TextHooks.qolHooks);
+      
+      TextHooks.qolFrameYSize = 50;
+      TextHooks.lastAct = me.act;
 
-			break;
-		case "ping":
-			this.hooks.push({
-				name: "ping",
-				hook: new Text("Ping: " + me.ping, 785 + Hooks.resfix.x, 56 + this.modifier, 4, 1, 1)
-			});
+      qols.forEach(function (hook) {
+        TextHooks.add(hook, TextHooks.qolHooks) && (TextHooks.qolFrameYSize -= 10);
+      });
+      
+      const containers = HookFactory.createContainer(
+        "qolBoard", "qolFrame",
+        Hooks.qolBoard.x + Hooks.resfix.x,
+        Hooks.qolBoard.y + TextHooks.qolFrameYSize + Hooks.resfix.y,
+        140,
+        60 + -1 * TextHooks.qolFrameYSize
+      );
+      
+      containers.forEach(function (container) {
+        TextHooks.qolHooks.push(container);
+      });
+    },
+    
+    /**
+     * Rebuilds the status hooks with the full settings box and a "Hide Settings" toggle.
+     */
+    showSettings: function () {
+      clearHooks(TextHooks.statusHooks);
+      
+      TextHooks.statusFrameYSize = 0;
 
-			break;
-		case "time":
-			this.hooks.push({
-				name: "time",
-				hook: new Text(this.timer(), 785 + Hooks.resfix.x, 72 + this.modifier, 4, 1, 1)
-			});
+      statusHookNames.forEach(function (hook) {
+        TextHooks.add(hook, TextHooks.statusHooks);
+        TextHooks.statusFrameYSize += 13;
+      });
 
-			break;
-		case "ip":
-			this.hooks.push({
-				name: "ip",
-				hook: new Text("IP: " + (me.gameserverip.length > 0 ? me.gameserverip.split(".")[3] : "0"), 785 + Hooks.resfix.x, 88 + this.modifier, 4, 1, 1)
-			});
+      const containers = HookFactory.createContainer(
+        "statusBox", "statusFrame",
+        5,
+        503 - TextHooks.settingsModifer * 10 - statusHookNames.length * 12 + Hooks.resfix.y,
+        170,
+        TextHooks.statusFrameYSize,
+        4
+      );
 
-			break;
-		case "dashboard":
-			while (this.dashBoard.length) {
-				this.dashBoard.shift().hook.remove();
-			}
+      containers.forEach(function (container) {
+        TextHooks.statusHooks.push(container);
+      });
 
-			this.dashBoard.push({
-				name: "dashboard",
-				hook: new Box(Hooks.dashBoard.x, Hooks.dashBoard.y + Hooks.resfix.y + this.frameYLocScale, 225, 60 + this.frameYSizeScale, 0x0, 1, 0)
-			});
+      TextHooks.statusHooks.push(HookFactory.createHooks.text({
+        name: "showSettings",
+        text: "ÿc1Hide Settings",
+        x: 0,
+        y: 590 + Hooks.resfix.y,
+        color: 4,
+        font: 0,
+        align: 0,
+        automap: false,
+        handler: onClick
+      }));
+    },
 
-			this.dashBoard.push({
-				name: "dashboardframe",
-				hook: new Frame(Hooks.dashBoard.x, Hooks.dashBoard.y + Hooks.resfix.y + this.frameYLocScale, 225, 60 + this.frameYSizeScale, 0)
-			});
+    /**
+     * Clears the status hooks and replaces them with a single "Show Settings" toggle.
+     */
+    hideSettings: function () {
+      clearHooks(TextHooks.statusHooks);
 
-			this.getHook("dashboard", this.dashBoard).hook.zorder = 0;
+      TextHooks.statusHooks.push(HookFactory.createHooks.text({
+        name: "hideSettings",
+        text: "ÿc<Show Settings",
+        x: 0,
+        y: 590 + Hooks.resfix.y,
+        color: 4,
+        font: 0,
+        align: 0,
+        automap: false,
+        handler: onClick
+      }));
+    }
+  };
 
-			break;
-		case "key5":
-			this.qolHooks.push({
-				name: "key5",
-				hook: new Text("Key 5: " + (me.inTown ? "Heal" : "Make Portal"), Hooks.qolBoard.x + 5 + Hooks.resfix.x, 545 - (this.qolHooks.length * 10) + Hooks.resfix.y, 4)
-			});
+  Events.on("areachange", function () {
+    console.log("Area change detected, clearing hooks.");
+    
+    clearHooks(TextHooks.dashBoard);
+    clearHooks(TextHooks.qolHooks);
+    
+    getScale(ActionHooks.hooks.length);
+    TextHooks.add("dashboard", TextHooks.dashBoard);
+    TextHooks.add("qolBoard", TextHooks.qolHooks);
 
-			break;
-		case "key6":
-			this.qolHooks.push({
-				name: "key6",
-				hook: new Text("Key 6: " + (me.inTown ? "Open Stash" : "Go To Town"), Hooks.qolBoard.x + 5 + Hooks.resfix.x, 545 - (this.qolHooks.length * 10) + Hooks.resfix.y, 4)
-			});
+    if (TextHooks.displaySettings) {
+      clearHooks(TextHooks.statusHooks);
+      TextHooks.add("showSettings", TextHooks.statusHooks);
+    }
+  });
+  
+  return {
+    events: Events,
+    enabled: true,
+    displayTitle: true,
+    displaySettings: true,
+    frameworkDisplayed: false,
+    frameYSizeScale: 0,
+    frameYLocScale: 0,
+    settingsModifer: 0,
+    dashBoardWidthScale: 0,
+    statusFrameYSize: 0,
+    qolFrameYSize: 0,
+    /** @type {HookEntry[]} */
+    statusHooks: [],
+    /** @type {HookEntry[]} */
+    dashBoard: [],
+    /** @type {HookEntry[]} */
+    qolHooks: [],
+    /** @type {HookEntry[]} */
+    hooks: [],
 
-			break;
-		case "nextAct":
-			me.inTown && Pather.accessToAct(me.act + 1) && this.qolHooks.push({
-				name: "Next Act",
-				dest: me.act + 1,
-				type: "actChange",
-				hook: new Text("Shift > : Next Act", Hooks.qolBoard.x + 5 + Hooks.resfix.x, 545 - (this.qolHooks.length * 10) + Hooks.resfix.y, 4)
-			});
+    /**
+     * Adds/refreshes the framework, settings and title hooks and updates the ping/time text.
+     */
+    check: function () {
+      if (!TextHooks.enabled) {
+        TextHooks.flush();
 
-			break;
-		case "previousAct":
-			me.inTown && me.act > 1 && this.qolHooks.push({
-				name: "Previous Act",
-				dest: me.act - 1,
-				type: "actChange",
-				hook: new Text("Shift < : Previous Act", Hooks.qolBoard.x + 5 + Hooks.resfix.x, 545 - (this.qolHooks.length * 10) + Hooks.resfix.y, 4)
-			});
+        return;
+      }
 
-			break;
-		case "qolBoard":
-			this.qolFrameYSize = 50;
-			this.lastAct = me.act;
-			this.wasInTown = me.inTown;
+      if (!TextHooks.frameworkDisplayed) {
+        TextHooks.add("credits", TextHooks.hooks);
+        !!IP && TextHooks.add("ip", TextHooks.hooks);
+        TextHooks.frameworkDisplayed = true;
+      }
 
-			while (this.qolHooks.length) {
-				this.qolHooks.shift().hook.remove();
-			}
+      TextHooks.displaySettings
+        ? TextHooks.add("showSettings", TextHooks.statusHooks)
+        : TextHooks.add("hideSettings", TextHooks.statusHooks);
+      if (TextHooks.displayTitle) {
+        TextHooks.add("title", TextHooks.hooks);
+      }
+      TextHooks.updateHook("ping", TextHooks.hooks, "Ping: " + me.ping);
+      TextHooks.updateHook("time", TextHooks.hooks, timer());
+    },
 
-			this.qols.forEach(function (hook) {
-				TextHooks.add(hook, TextHooks.qolHooks) && (TextHooks.qolFrameYSize -= 10);
-			});
+    /**
+     * @param {string} name 
+     * @param {HookEntry[]} hookArr 
+     * @param {string} text 
+     */
+    updateHook: function (name = "", hookArr = [], text = "") {
+      const entry = TextHooks.getHook(name, hookArr);
+      
+      if (entry && text) {
+        entry.hook.text = text;
+      } else {
+        TextHooks.add(name, hookArr);
+      }
+    },
 
-			this.qolHooks.push({
-				name: "qolBoard",
-				hook: new Box(Hooks.qolBoard.x + Hooks.resfix.x, Hooks.qolBoard.y + this.qolFrameYSize + Hooks.resfix.y, 140, 60 + (-1 * this.qolFrameYSize), 0x0, 1, 0)
-			});
+    /**
+     * @param {string} name 
+     * @param {HookEntry[]} hookArr 
+     * @returns {boolean}
+     */
+    add: function (name, hookArr = []) {
+      const orginalLen = hookArr.length;
+      
+      if (!name || !hookArr || TextHooks.getHook(name, hookArr)) {
+        return false;
+      }
+      
+      if (textHooks[name]) {
+        let hook = textHooks[name]();
+        if (hook) {
+          hookArr.push(hook);
+        }
+      } else if (specialCases[name]) {
+        specialCases[name]();
+      }
 
-			this.qolHooks.push({
-				name: "qolFrame",
-				hook: new Frame(Hooks.qolBoard.x + Hooks.resfix.x, Hooks.qolBoard.y + this.qolFrameYSize + Hooks.resfix.y, 140, 60 + (-1 * this.qolFrameYSize), 0)
-			});
+      return hookArr.length > orginalLen;
+    },
+    
+    /**
+     * @param {string} name 
+     * @param {HookEntry[]} hookArr 
+     * @returns {HookEntry|boolean}
+     */
+    getHook: function (name, hookArr = []) {
+      for (let i = 0; i < hookArr.length; i++) {
+        if (hookArr[i].name === name) {
+          return hookArr[i];
+        }
+      }
 
-			this.qolHooks[this.qolHooks.length - 2].hook.zorder = 0;
+      return false;
+    },
 
-			break;
-		case "pickitStatus":
-			this.statusHooks.push({
-				name: "pickitStatus",
-				hook: new Text("ÿc4N-Pad - ÿc0: " + (ItemHooks.pickitEnabled ? "ÿc<Your Filter" : "ÿc1Default Filter"), 10, 503 - (this.settingsModifer * 10) - (this.statusHooks.length * 11) + Hooks.resfix.y)
-			});
+    /**
+     * Removes the status/dashboard/qol hooks; also clears the framework hooks if Hooks is disabled.
+     */
+    flush: function () {
+      if (!Hooks.enabled) {
+        clearHooks(this.hooks);
+        TextHooks.frameworkDisplayed = false;
+      }
 
-			break;
-		case "itemStatus":
-			this.statusHooks.push({
-				name: "itemStatus",
-				hook: new Text("ÿc4Key 7ÿc0: " + (ItemHooks.enabled ? "Disable" : "Enable") + " Item Filter", 10, 503 - (this.settingsModifer * 10) - (this.statusHooks.length * 11) + Hooks.resfix.y)
-			});
-
-			break;
-		case "monsterStatus":
-			this.statusHooks.push({
-				name: "monsterStatus",
-				hook: new Text("ÿc4Key 8ÿc0: " + (MonsterHooks.enabled ? "Disable" : "Enable") + " Monsters", 10, 503 - (this.settingsModifer * 10) - (this.statusHooks.length * 11) + Hooks.resfix.y)
-			});
-
-			break;
-		case "vectorStatus":
-			this.statusHooks.push({
-				name: "vectorStatus",
-				hook: new Text("ÿc4Key 9ÿc0: " + (VectorHooks.enabled ? "Disable" : "Enable") + " Vectors", 10, 503 - (this.settingsModifer * 10) - (this.statusHooks.length * 11) + Hooks.resfix.y)
-			});
-
-			break;
-		case "showSettings":
-			this.statusFrameYSize = 0;
-
-			while (this.statusHooks.length) {
-				this.statusHooks.shift().hook.remove();
-			}
-
-			this.statusHookNames.forEach(function (hook) {
-				TextHooks.add(hook, TextHooks.statusHooks);
-				TextHooks.statusFrameYSize += 13;
-			});
-
-			this.statusHooks.push({
-				name: "statusBox",
-				hook: new Box(5, 503 - (this.settingsModifer * 10) - (this.statusHookNames.length * 12) + Hooks.resfix.y, 170, this.statusFrameYSize, 0x0, 1, 0)
-			});
-
-			this.statusHooks.push({
-				name: "statusFrame",
-				hook: new Frame(3, 503 - (this.settingsModifer * 10) - (this.statusHookNames.length * 12) + Hooks.resfix.y, 170, this.statusFrameYSize, 0)
-			});
-
-			this.statusHooks[this.statusHooks.length - 2].hook.zorder = 0;
-
-			this.statusHooks.push({
-				name: "showSettings", /*feels backwards but makes sense I guess*/
-				hook: new Text("ÿc1Hide Settings", 0, 590 + Hooks.resfix.y, 4, 0, 0, false, TextHooks.hookHandler)
-			});
-
-			break;
-		case "hideSettings":
-			while (this.statusHooks.length) {
-				this.statusHooks.shift().hook.remove();
-			}
-
-			this.statusHooks.push({
-				name: "hideSettings",
-				hook: new Text("ÿc<Show Settings", 0, 590 + Hooks.resfix.y, 4, 0, 0, false, TextHooks.hookHandler)
-			});
-
-			break;
-		}
-
-		return hookArr.length > orginalLen;
-	},
-
-	getHook: function (name, hookArr = []) {
-		for (let i = 0; i < hookArr.length; i++) {
-			if (hookArr[i].name === name) {
-				return hookArr[i];
-			}
-		}
-
-		return false;
-	},
-
-	timer: function () {
-		return " (" + new Date(getTickCount() - me.gamestarttime).toISOString().slice(11, -5) + ")";
-	},
-
-	flush: function () {
-		if (!Hooks.enabled) {
-			while (this.hooks.length) {
-				this.hooks.shift().hook.remove();
-			}
-
-			this.frameworkDisplayed = false;
-		}
-
-		while (this.statusHooks.length) {
-			this.statusHooks.shift().hook.remove();
-		}
-
-		while (this.dashBoard.length) {
-			this.dashBoard.shift().hook.remove();
-		}
-
-		while (this.qolHooks.length) {
-			this.qolHooks.shift().hook.remove();
-		}
-	},
-};
+      clearHooks(this.statusHooks);
+      clearHooks(this.dashBoard);
+      clearHooks(this.qolHooks);
+    },
+  };
+})();

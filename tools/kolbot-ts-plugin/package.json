@@ -1,0 +1,7 @@
+{
+  "name": "kolbot-ts-plugin",
+  "version": "0.1.0",
+  "description": "tsserver language-service plugin: attaches kolbot's .dbj entry scripts to the configured TypeScript project so they get full D2BS intellisense",
+  "main": "index.js",
+  "private": true
+}
