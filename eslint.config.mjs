@@ -72,6 +72,11 @@ export default [
         { selector: "ForOfStatement > VariableDeclaration[kind='const']", message: "SM24: const can't bind a for-of head - use let." },
         { selector: "ForInStatement > VariableDeclaration[kind='const']", message: "SM24: const can't bind a for-in head - use let." },
       ],
+      // The other half of the engine's pre-ES6 const: it binds at FUNCTION scope, so two
+      // same-named consts in sibling blocks are a compile-time redeclaration that kills the
+      // whole file. Needs scope analysis, so it can't be a no-restricted-syntax selector.
+      // Straight to error: the tree was at zero when the rule landed.
+      "kolbot/no-redeclared-const": "error",
       // ES2016+ library members provided by libs/Polyfill.js — this disable-list is the
       // machine-checked contract of what the polyfill covers.
       "es-x/no-array-prototype-includes": "off",

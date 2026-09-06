@@ -65,8 +65,72 @@ const includePathExists = {
   },
 };
 
+// Scope kinds that do NOT start a fresh const binding context in SM24. Everything else
+// (function, class, and function-expression-name — the self-binding of
+// `const F = new Runnable(function F () {})`) is a boundary the fold must stop at.
+const BLOCK_SCOPES = new Set(["block", "switch", "for", "catch", "with"]);
+
+const noRedeclaredConst = {
+  meta: {
+    type: "problem",
+    docs: {
+      description:
+        "SM24 predates block-scoped const (that landed ~SpiderMonkey 36), so a const binds at FUNCTION scope - two same-named consts in sibling blocks are one binding and the engine rejects the whole file with \"redeclaration of const X\" before any of it runs",
+    },
+    schema: [],
+    messages: {
+      redeclared:
+        "SM24: const is function-scoped - \"{{name}}\" is already declared at line {{line}} of this function, and nested blocks (if/case/loop bodies) do not separate the two. Rename one, or hoist a single `let` above them.",
+    },
+  },
+  create(context) {
+    // Only const-vs-const is reported. A const paired with a same-named let/var/param in the
+    // same function is the adjacent shape but runs fine in-engine (LazyLoader.js, Cows.js,
+    // SoloPlay/Core/ItemOverrides.js all ship it), so flagging it would be noise.
+    function collect(scope, out) {
+      for (const variable of scope.variables) {
+        for (const def of variable.defs) {
+          if (def.type !== "Variable" || def.parent.kind !== "const") continue;
+          const ids = out.get(variable.name) || [];
+          ids.push(def.name);
+          out.set(variable.name, ids);
+        }
+      }
+      for (const child of scope.childScopes) {
+        if (BLOCK_SCOPES.has(child.type)) collect(child, out);
+      }
+    }
+
+    function walk(scope) {
+      if (!BLOCK_SCOPES.has(scope.type)) {
+        const byName = new Map();
+        collect(scope, byName);
+        for (const ids of byName.values()) {
+          if (ids.length < 2) continue;
+          ids.sort((a, b) => a.range[0] - b.range[0]);
+          for (let i = 1; i < ids.length; i++) {
+            context.report({
+              node: ids[i],
+              messageId: "redeclared",
+              data: { name: ids[i].name, line: ids[0].loc.start.line },
+            });
+          }
+        }
+      }
+      for (const child of scope.childScopes) walk(child);
+    }
+
+    return {
+      Program(node) {
+        walk(context.sourceCode.getScope(node));
+      },
+    };
+  },
+};
+
 export default {
   rules: {
     "include-path-exists": includePathExists,
+    "no-redeclared-const": noRedeclaredConst,
   },
 };
