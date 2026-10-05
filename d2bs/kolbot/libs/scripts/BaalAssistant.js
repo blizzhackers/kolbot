@@ -12,7 +12,8 @@
  * - override Misc.getShrinesInArea to end when we recieve safeCheck message
  */
 
-const BaalAssistant = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var BaalAssistant = new Runnable(
   function BaalAssistant () {
     let Leader = Config.Leader;
     let Helper = Config.BaalAssistant.Helper;

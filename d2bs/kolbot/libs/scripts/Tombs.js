@@ -5,7 +5,8 @@
 *
 */
 
-const Tombs = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Tombs = new Runnable(
   function Tombs() {
     Pather.useWaypoint(sdk.areas.CanyonofMagic);
     Precast.doPrecast(true);

@@ -5,7 +5,8 @@
 *
 */
 
-const Pit = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Pit = new Runnable(
   function Pit () {
     Pather.useWaypoint(sdk.areas.BlackMarsh);
     Precast.doPrecast(true);
