@@ -37,6 +37,8 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
         Write-Host "Submodules updated successfully!"
         Write-Host ""
     }
+    # Run from a linked worktree, the update can repoint the main checkout's submodule links.
+    & "$PSScriptRoot\repair-submodule-links.ps1"
 }
 
 # Set base directories

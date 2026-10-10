@@ -75,6 +75,9 @@ if %errorlevel% neq 0 (
     echo.
 )
 
+REM Run from a linked worktree, the update can repoint the main checkout's submodule links
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0+setup\repair-submodule-links.ps1"
+
 REM Restore stashed changes if any were stashed
 if %stashed% equ 1 (
     echo Restoring your local changes...
