@@ -1,262 +1,1720 @@
-declare type PathNode = { x: number, y: number }
+/// <reference path="./types/sdk.d.ts" />
+/// <reference path="./types/Misc.d.ts" />
+/// <reference path="./types/Util.d.ts" />
+/// <reference path="./types/Town.d.ts" />
+/// <reference path="./types/Attack.d.ts" />
+/// <reference path="./types/Loader.d.ts" />
+/// <reference path="./types/Pather.d.ts" />
+/// <reference path="./types/Skill.d.ts" />
+/// <reference path="./types/Pickit.d.ts" />
+/// <reference path="./types/Item.d.ts" />
+/// <reference path="./types/Storage.d.ts" />
+/// <reference path="./types/Cubing.d.ts" />
+/// <reference path="./types/Runewords.d.ts" />
+/// <reference path="./types/NTIP.d.ts" />
+/// <reference path="./types/AutoMule.d.ts" />
+/// <reference path="./types/OOG.d.ts" />
+/// <reference path="./types/Config.d.ts" />
+/// <reference path="./types/Common.d.ts" />
+/// <reference path="./types/CollMap.d.ts" />
+/// <reference path="./types/ClassAttack.d.ts" />
+/// <reference path="./types/Experience.d.ts" />
+/// <reference path="../libs/systems/torch/TorchSystem.d.ts" />
 
-declare function getUnit(type?: number, name?: string, mode?: number, unitId?: number)
-declare function getUnit(type?: number, classId?: number, mode?: number, unitId?: number)
+declare global {
+  type IncludePath = import("./types/include-paths").IncludePath;
+  type KolbotScript = import("./types/kolbot-scripts").KolbotScript;
+  type EventsInstance = InstanceType<typeof import("../libs/modules/Events")>;
 
-declare function getPath(area: number, fromX: number, fromY: number, toX: number, toY: number, reductionType: 0 | 1, radius: number): PathNode | false
+  /**
+   * @description A string that can be used in NTIP lists, which supports some additional syntax for item properties.
+   */
+  type NipString = string;
 
-declare function getCollision(area: number, x: number, y: number)
+  interface Error {
+    fileName: string;
+    lineNumber: number;
+  }
 
-declare function getMercHP(): number
+  interface ArrayConstructor {
+    /**
+     * Creates a new Array instance with a variable number of elements passed as arguments.
+     *
+     * @param {...T[]} items The elements to include in the array.
+     * ```ts
+     * const arr = Array.of(1, 2, 3, 4, 5);
+     * ```
+     * @returns {Array<T>} A new array with the provided elements.
+     */
+    of<T>(...items: T[]): T[];
+  }
 
-declare function getCursorType(type: 1 | 3 | 6): boolean
+  interface Array<T> {
+    includes(searchElement: T): boolean;
+    find(predicate: (value: T, index: number, obj: T[]) => boolean, thisArg?: unknown): T | undefined;
+    first(): T | undefined;
+    last(): T | undefined;
+    at(index: number): T | undefined;
+    findIndex(predicate: (value: T, index: number, obj: T[]) => unknown, thisArg?: unknown): number;
+    intersection(other: T[]): T[];
+    difference(other: T[]): T[];
+    symmetricDifference(other: T[]): T[];
+    flat(depth?: number): T[];
+    compactMap<U>(callback: (value: T, index: number, obj: T[]) => U, thisArg?: unknown): NonNullable<U>[];
+    filterNull(): T[];
+    filterHighDistance(step: number): T[];
+    isEqual(t: T[]): boolean;
+    remove(val: T): T[];
+    random(): T;
+    shuffle(): T[];
+    /**
+     * Creates a new array by sorting the elements of the original array.
+     *
+     * @param {(function(a: T, b: T): number) | undefined} compareFn Function used to determine the order of the elements.
+     * It is expected to return a negative value if the first argument is less than the second argument, zero if they're equal, and a positive
+     * value otherwise. If omitted, the elements are sorted in ascending, ASCII character order.
+     * ```ts
+     * [11,2,22,1].toSorted((a, b) => a - b)
+     * ```
+     * @returns {Array} A new array with the sorted elements, leaving the orignal intact.
+     */
+    toSorted(compareFn?: ((a: T, b: T) => number) | undefined): T[];
+    /**
+     * Creates a new array with the elements of the original array in reversed order.
+     * Without mutating the original array.
+     *
+     * @returns {Array<T>} A new array with the reversed elements.
+     */
+    toReversed(): T[];
+    /**
+     * Creates a new array by removing and/or adding elements from/to the original array.
+     *
+     * @param {number} start The index at which to start changing the array.
+     * @param {number} deleteCount The number of elements to remove starting from the `start` index.
+     * @param {...T[]} items The elements to add to the array.
+     * @returns {Array<T>} A new array with the removed elements and optionally added elements.
+     */
+    toSpliced(start: number, deleteCount?: number, ...items: T[]): T[];
+    /**
+     * @description The with() method of Array instances is the copying version of using the bracket notation to change the value of a given index.
+     * It returns a new array with the element at the given index replaced with the given value.
+     * @param {number} index - Zero-based index at which to change the array, converted to an integer.
+     * @param {*} value - Any value to be assigned to the given index.
+     * @returns {Array} A new array with the element at index replaced with value.
+     * @throws {RangeError} If index >= array.length or index < -array.length.
+     */
+    with(index: number, value: T): T[];
+    /**
+     * Finds the first element that matches the predicate and removes it from the array.
+     * @param predicate A function to test each element of the array.
+     * @returns The modified array.
+     */
+    findAndRemove(predicate: (value: T, index: number, array: T[]) => boolean): this;
+  }
 
-declare function getSkillByName(name: string): number
+  interface String {
+    lcsGraph(compareToThis: string): { a: string; b: string; graph: Uint16Array[] };
+    diffCount(a: string): number;
+    startsWith(a: string): boolean;
+    capitalize(downCase: boolean): string;
+    format(...pairs: [string, number | string | boolean][]): string;
+    padStart(targetLength: number, padString: string): string;
+    padEnd(targetLength: number, padString: string): string;
+    at(index: number): string | undefined;
+    unshift(str: string): string;
+  }
 
-declare function getSkillById(id: number): string
+  interface StringConstructor {
+    isEqual(str1: string, str2: string, caseSensitive?: boolean): boolean;
+  }
 
-declare function getLocaleString(id: number)
+  interface ObjectConstructor {
+    assign<T, U>(target: T, source: U): T & U;
+    assign<T, U, V>(target: T, source1: U, source2: V): T & U & V;
+    assign<T, U, V, W>(target: T, source1: U, source2: V, source3: W): T & U & V & W;
+    assign(target: object, ...sources: object[]): object;
+    values<T extends object>(source: T): T[keyof T][];
+    entries<T extends object>(source: T): [Extract<keyof T, string>, T[keyof T]][];
+    is(o1: unknown, o2: unknown): boolean;
+    // hasOwn(obj: object, prop: string): boolean;
+    hasOwn<T extends object>(obj: T, prop: keyof T): boolean;
+    hasOwn<T extends object, K extends PropertyKey>(obj: T, prop: K): prop is K & keyof T;
+  }
 
-// Never seen in the wild, not sure about arguments
-declare function getTextSize(name: string, size: number)
+  interface Object {
+    readonly distance: number;
+    path: IPathNode[] | undefined;
 
-declare function getThreadPriority(): number
+    setPrototypeOf(obj: object, proto: object): object;
+  }
 
-declare function getUIFlag(flag: number): boolean
+  interface Set<T> {
+    union(other: Set<T>): Set<T>;
+    intersection(other: Set<T>): Set<T>;
+    difference(other: Set<T>): Set<T>;
+    symmetricDifference(other: Set<T>): Set<T>;
+  }
 
-declare function getTradeInfo(mode: 0 | 1 | 2): boolean
+  interface Date {
+    dateStamp(): string;
+  }
 
-declare function getWaypoint(id: number): boolean
+  /**
+   * Environment configuration
+   * @namespace
+   */
+  interface Env {
+    /**
+     * Updates environment settings with provided values
+     * @param settings Object containing settings to update
+     * @returns The updated env object for chaining
+     */
+    update(settings: Record<string, unknown>): Env;
 
-declare class Script {
-    getNext(): Script
-}
+    /**
+     * Any additional custom properties
+     */
+    [key: string]: unknown;
+  }
 
-declare function getScript(name?: string): Script | false
+  /**
+   * Global environment object
+   * This object is lazily loaded when first accessed.
+   */
+  const env: Env;
 
-declare function getScripts(): Script | false
+  class ScriptError extends Error {}
 
-declare class Room {
+  type Act = 1 | 2 | 3 | 4 | 5;
+  type actType = { initialized: boolean; spot: { [data: string]: [number, number] } };
+  type potType = "hp" | "mp" | "rv";
+
+  class Hook {
+    color: number;
+    visible: boolean;
+
+    /**
+     * The horizontal alignment
+     * - 0 - Left
+     * - 1 - Right
+     * - 2 - Center
+     */
+    align: number;
+
+    /**
+     * The z-order of the Hook (what it covers up and is covered by).
+     */
+    zorder: number;
+
+    /**
+     * How much of the controls underneath the Hook should show through.
+     */
+    opacity: number;
+
+    /**
+     * Whether the Hook is in automap coordinate space (true) or screen coordinate space (false).
+     */
+    automap: boolean;
+
+    remove(): void;
+    click(): void;
+    hover(): void;
+  }
+
+  class Line extends Hook {
+    constructor(
+      x: number,
+      y: number,
+      x2: number,
+      y2: number,
+      color: number,
+      visible: boolean,
+      automap: boolean,
+      ClickHandler?: Function,
+      HoverHandler?: Function,
+    );
+    /**
+     * The first x coordinate of the Line.
+     */
+    x: number;
+
+    /**
+     * The first y coordinate of the Line.
+     */
+    y: number;
+
+    /**
+     * The end x coordinate of the Line.
+     */
+    x2: number;
+
+    /**
+     * The end y coordinate of the Line.
+     */
+    y2: number;
+  }
+
+  class Text extends Hook {
+    constructor(
+      text: string,
+      x: number,
+      y: number,
+      color: number,
+      font: number,
+      align: number,
+      automap: boolean,
+      ClickHandler?: Function,
+      HoverHandler?: Function,
+    );
+    text: string;
+    /**
+     * The x coordinate (left) of the Text.
+     */
+    x: number;
+
+    /**
+     * The y coordinate (top) of the Text.
+     */
+    y: number;
+  }
+
+  class Box extends Hook {
+    constructor(
+      x: number,
+      y: number,
+      xsize: number,
+      ysize: number,
+      color: number,
+      opacity: number,
+      align: number,
+      automap: boolean,
+      ClickHandler?: Function,
+      HoverHandler?: Function,
+    );
+    /**
+     * The x coordinate (left) of the Box.
+     */
+    x: number;
+
+    /**
+     * The y coordinate (top) of the Box.
+     */
+    y: number;
+
+    /**
+     * The xsize (width) of the Box.
+     */
+    xsize: number;
+
+    /**
+     * The ysize (height) of the Box.
+     */
+    ysize: number;
+  }
+
+  class Frame extends Box {}
+
+  /**
+   * @todo Figure out what each of these actually returns to properly document them
+   */
+  class FileClass {
+    readable: boolean;
+    writable: boolean;
+    seekable: boolean;
+    mode: number;
+    binaryMode: boolean;
+    length: number;
+    path: string;
+    position: number;
+    eof: boolean;
+    accessed: number;
+    created: number;
+    modified: number;
+    autoflush: boolean;
+
+    static open(path: string, mode: number): File;
+    close(): File;
+    reopen(): File;
+    read(count: number): string[];
+    read(count: number): ArrayBuffer[];
+    readLine(): string;
+    readAllLines(): string[];
+    readAll(): string;
+    write(): void;
+    seek(n: number): File;
+    seek(n: number, isLines: boolean, fromStart: boolean): File;
+    flush(): void;
+    reset(): void;
+    end(): void;
+  }
+  const FILE_READ: 0;
+  const FILE_WRITE: 1;
+  const FILE_APPEND: 2;
+
+  const FileTools: {
+    readText(filename: string): string;
+    writeText(filename: string, data: string): boolean;
+    appendText(filename: string, data: string): boolean;
+    exists(filename: string): boolean;
+    remove(filename: string): boolean;
+  };
+
+  function getCollision(area: number, x: number, y: number, x2: number, y2: number): number;
+
+  /**
+   * Shape of walk-path nodes. Named IPathNode, NOT PathNode: the runtime constructor is the
+   * top-level `function PathNode (x, y)` in libs/core/Pather.js:15 (this-assignments +
+   * prototype methods), and a same-named ambient interface merges with that JS constructor
+   * symbol and crashes TS 5.9's getConstructorDefinedThisAssignmentTypes (Debug Failure).
+   * The distinct name also keeps this resolvable in the SoloPlay program, which includes
+   * this file but not libs/core/.
+   */
+  interface IPathNode {
+    x: number;
+    y: number;
+    /** Distance from 'me' to this node */
+    readonly distance: number;
+    distanceTo(unit: Unit): number;
+    getWalkDistance(): number;
+    getWalkDistanceTo(node: IPathNode, area?: number): number;
+    mobCount(givenSettings: { range?: number; coll?: number; type?: number; ignoreClassids?: number[] }): number;
+    update({ x, y }: { x?: number; y?: number }): void;
+  }
+  function getDistance(unit: IPathNode, other: IPathNode): number;
+  function getDistance(unit: IPathNode, x: number, y: number): number;
+
+  /*************************************
+   *          Unit description         *
+   *          Needs expansion          *
+   *************************************/
+
+  type UnitType = 0 | 1 | 2 | 3 | 4 | 5;
+  interface Unit {
+    readonly type: UnitType;
+    readonly classid: number;
+    readonly mode: number;
+    readonly name: string;
+    readonly act: 1 | 2 | 3 | 4 | 5;
+    readonly gid: number;
+    readonly x: number;
+    readonly y: number;
+    readonly area: number;
+    readonly hp: number;
+    readonly hpmax: number;
+    readonly mp: number;
+    readonly mpmax: number;
+    readonly stamina: number;
+    readonly staminamax: number;
+    readonly charlvl: number;
+    readonly owner: number;
+    readonly ownertype: number;
+    readonly uniqueid: number;
+  }
+
+  class Unit {
+    readonly attackable: boolean;
+    readonly dead: boolean;
+    readonly islocked: boolean;
+    readonly distance: number;
+
+    readonly targetx: number;
+    readonly targety: number;
+    readonly direction: number;
+    readonly idle: boolean;
+    readonly isPlayer: boolean;
+    readonly isNPC: boolean;
+    readonly isMonster: boolean;
+    readonly rawStrength: number;
+    readonly rawDexterity: number;
+    readonly fireRes: number;
+    readonly coldRes: number;
+    readonly lightRes: number;
+    readonly poisonRes: number;
+    readonly hpPercent: number;
+    readonly prettyPrint: string;
+
+    // D2BS built in
+    getNext(): Unit | false;
+    interact(): boolean;
+    interact(area: number): boolean;
+    getItem(classId?: number, mode?: number, unitId?: number): ItemUnit | false;
+    getItem(name?: string, mode?: number, unitId?: number): ItemUnit | false;
+    getItems(classId?: number, mode?: number, unitId?: number): ItemUnit[];
+    getItems(name?: string, mode?: number, unitId?: number): ItemUnit[];
+    getMerc(): MercUnit;
+    getMercHP(): number | false;
+    /**
+     * @param type -
+     * - `me.getSkill(0)` : Name of skill on right hand
+     * - `me.getSkill(1)` : Name of skill on left hand
+     * - `me.getSkill(2)` : ID of skill on right hand
+     * - `me.getSkill(3)` : ID of skill on left hand
+     * - `me.getSkill(4)` : Array of all skills in format [skillId, hardPoints, softPoints, ...repeat]
+     */
+    getSkill(type: 0 | 1 | 2 | 3 | 4): number | number[];
+    getSkill(skillId: number, type: 0 | 1, item?: ItemUnit): number;
+    getStat(index: number, subid?: number, extra?: number): number;
+    getState(index: number, subid?: number): boolean;
+    getQuest(quest: number, subid: number): number;
+    getParent(): Unit | string;
+    getMinionCount(): number;
+
+    // additions from kolbot
+    getStatEx(one: number, sub?: number): number;
+    getItemsEx(classId?: number, mode?: number, unitId?: number): ItemUnit[];
+    getItemsEx(name?: string, mode?: number, unitId?: number): ItemUnit[];
+    inArea(area: number): boolean;
+    getMobCount(range: number, coll: number, type: number, noSpecialMobs: boolean): number;
+    checkForMobs(givenSettings: { range?: number; count?: number; coll?: number; spectype: number }): boolean;
+  }
+
+  type PlayerType = 0;
+  class Player extends Unit {
+    public type: PlayerType;
+    readonly size: number;
+  }
+
+  type MonsterType = 1;
+  interface Monster extends Unit {}
+
+  class Monster extends Unit {
+    public type: MonsterType;
+    readonly isChampion: boolean;
+    readonly isUnique: boolean;
+    readonly isMinion: boolean;
+    readonly isSuperUnique: boolean;
+    readonly isSpecial: boolean;
+    readonly isWalking: boolean;
+    readonly isRunning: boolean;
+    readonly isMoving: boolean;
+    readonly isChilled: boolean;
+    readonly isFrozen: boolean;
+    readonly currentVelocity: number;
+    readonly isPrimeEvil: boolean;
+    readonly isBoss: boolean;
+    readonly isGhost: boolean;
+    readonly isDoll: boolean;
+    readonly isSoul: boolean;
+    readonly isMonsterObject: boolean;
+    readonly isMonsterEgg: boolean;
+    readonly isMonsterNest: boolean;
+    readonly isBaalTentacle: boolean;
+    readonly isShaman: boolean;
+    readonly isUnraveler: boolean;
+    readonly isFallen: boolean;
+    readonly isBeetle: boolean;
+    readonly isDruidVine: boolean;
+    readonly extraStrong: boolean;
+    readonly extraFast: boolean;
+    readonly cursed: boolean;
+    readonly magicResistant: boolean;
+    readonly fireEnchanted: boolean;
+    readonly lightningEnchanted: boolean;
+    readonly coldEnchanted: boolean;
+    readonly manaBurn: boolean;
+    readonly teleportation: boolean;
+    readonly spectralHit: boolean;
+    readonly stoneSkin: boolean;
+    readonly multiShot: boolean;
+    readonly charlvl: number;
+    readonly spectype: number;
+    readonly curseable: boolean;
+    readonly scareable: boolean;
+    readonly attacking: boolean;
+    readonly fireRes: number;
+    readonly coldRes: number;
+    readonly lightRes: number;
+    readonly poisonRes: number;
+    resPenalty: number;
+    readonly size: number;
+    readonly isEnchantable: boolean;
+
+    getEnchant(type: number): boolean;
+    hasEnchant(...enchants: number[]): boolean;
+  }
+
+  class NPCUnit extends Unit {
+    public type: MonsterType;
+    readonly itemcount: number;
+
+    openMenu(): boolean;
+    useMenu(): boolean;
+    startTrade(mode: string): boolean;
+  }
+
+  class MercUnit extends Monster {
+    equip(destination: number | undefined, item: ItemUnit): boolean;
+  }
+
+  interface ObjectUnit extends Unit {}
+
+  type ObjectType = 2;
+  class ObjectUnit extends Unit {
+    public type: ObjectType;
+    objtype: number;
+    openUnit(): boolean;
+    useUnit(targetArea?: number): boolean;
+  }
+
+  type MissileType = 3;
+  class Missile extends Unit {
+    public readonly type: MissileType;
+    hits(position: IPathNode): boolean;
+  }
+
+  type ItemType = 4;
+  interface ItemUnit extends Unit {
+    castChargedSkill(skillId: number, target?: Unit): boolean;
+    castChargedSkill(skillId: number, x: number, y: number): boolean;
+  }
+
+  class ItemUnit extends Unit {
+    // todo define item modes
+    public readonly type: ItemType;
+    readonly code: string;
+    readonly prefix?: string;
+    readonly suffix?: string;
+    readonly prefixes: string[];
+    readonly suffixes: string[];
+    readonly prefixnum: number;
+    readonly suffixnum: number;
+    readonly prefixnums: number[];
+    readonly suffixnums: number[];
+    readonly fname: string;
+    readonly quality: number;
+    readonly node: number;
+    readonly location: number;
+    readonly sizex: number;
+    readonly sizey: number;
+    readonly itemType: number;
+    readonly bodylocation: number;
+    readonly ilvl: number;
+    readonly lvlreq: number;
+    readonly gfx: number;
+    readonly description: string;
+
+    // additional, not from d2bs
+    readonly identified: boolean;
+    readonly isEquipped: boolean;
+    readonly dexreq: number;
+    readonly strreq: number;
+    readonly charclass: number;
+    readonly isInInventory: boolean;
+    readonly isInStash: boolean;
+    readonly isInCube: boolean;
+    readonly isInStorage: boolean;
+    readonly isInBelt: boolean;
+    readonly isOnMain: boolean;
+    readonly isOnSwap: boolean;
+    readonly runeword: boolean;
+    readonly questItem: boolean;
+    readonly ethereal: boolean;
+    readonly twoHanded: boolean;
+    readonly oneOrTwoHanded: boolean;
+    readonly strictlyTwoHanded: boolean;
+    readonly sellable: boolean;
+    readonly lowQuality: boolean;
+    readonly normal: boolean;
+    readonly superior: boolean;
+    readonly magic: boolean;
+    readonly set: boolean;
+    readonly rare: boolean;
+    readonly unique: boolean;
+    readonly crafted: boolean;
+    readonly sockets: number;
+    readonly onGroundOrDropping: boolean;
+    readonly isShield: boolean;
+    readonly isAnni: boolean;
+    readonly isTorch: boolean;
+    readonly isGheeds: boolean;
+    readonly durabilityPercent: number;
+    readonly isCharm: boolean;
+    readonly gold: number;
+    readonly itemclass: number;
+
+    getColor(): number;
+    getBodyLoc(): number[];
+    getFlags(): number;
+    getFlag(flag: number): boolean;
+    // shop(mode: ShopModes): boolean;
+    getItemCost(type?: 0 | 1 | 2): number;
+    sell(): boolean;
+    drop(): boolean;
+    equip(slot?: number): boolean;
+    buy(shift?: boolean, gamble?: boolean): boolean;
+    sellOrDrop(): void;
+    toCursor(): boolean;
+    use(): boolean;
+  }
+
+  type TileType = 5;
+  class Tile extends Unit {
+    public type: TileType;
+    useUnit(targetArea?: number): boolean;
+  }
+
+  // Authority for ItemInfo lives HERE, not as a @typedef in Prototypes.js: the SoloPlay
+  // program includes this file but no core .js, so a js-typedef authority is invisible there.
+  interface ItemInfo {
+    classid?: number;
+    itemtype?: number;
+    quality?: number;
+    runeword?: boolean;
+    ethereal?: boolean;
+    equipped?: boolean | number;
+    basetype?: boolean;
+    name?: string | number;
+  }
+  interface MeType extends Unit {
+    type: PlayerType;
+    readonly account: string;
+    readonly charname: string;
+    readonly diff: 0 | 1 | 2;
+    readonly maxdiff: 0 | 1 | 2;
+    readonly gamestarttime: number;
+    readonly gametype: 0 | 1;
+    readonly itemoncursor: boolean;
+    readonly ladder: number;
+    readonly ping: number;
+    readonly fps: number;
+    readonly locale: number;
+    readonly playertype: 0 | 1;
+    readonly realm: string;
+    readonly realmshort: string;
+    readonly mercrevivecost: number;
+    chickenhp: number;
+    chickenmp: number;
+    quitonhostile: boolean;
+    readonly gameReady: boolean;
+    readonly profile: string;
+    readonly pid: number;
+    readonly charflags: number;
+    readonly mapid: number;
+    nopickup: boolean;
+    readonly unsupported: boolean;
+    readonly screensize: number;
+    readonly windowtitle: string;
+    readonly ingame: boolean;
+    quitonerror: boolean;
+    maxgametime: number;
+    readonly gamepassword: string;
+    readonly gamename: string;
+    readonly gameserverip: string;
+    readonly itemcount: number;
+    readonly classid: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+    readonly weaponswitch: 0 | 1;
+    blockMouse: boolean;
+    blockKeys: boolean;
+    runwalk: number;
+    automap: boolean;
+
+    readonly expansion: boolean;
+    readonly classic: boolean;
+    readonly softcore: boolean;
+    readonly hardcore: boolean;
+    /** Hardcore character has permanently died; also readable out of game (char select/lobby) */
+    readonly diedHardcore: boolean;
+    readonly normal: boolean;
+    readonly nightmare: boolean;
+    readonly hell: boolean;
+    readonly sorceress: boolean;
+    readonly amazon: boolean;
+    readonly necromancer: boolean;
+    readonly paladin: boolean;
+    readonly barbarian: boolean;
+    readonly assassin: boolean;
+    readonly druid: boolean;
+    readonly hpPercent: number;
+    readonly mpPercent: number;
+    readonly gold: number;
+    readonly inTown: boolean;
+    readonly highestAct: 1 | 2 | 3 | 4 | 5;
+    readonly staminaPercent: number;
+    readonly staminaDrainPerSec: number;
+    readonly staminaTimeLeft: number;
+    readonly staminaMaxDuration: number;
+    readonly inShop: boolean;
+    readonly skillDelay: boolean;
+    readonly highestQuestDone: number;
+    readonly den: boolean;
+    readonly bloodraven: boolean;
+    readonly smith: boolean;
+    readonly imbue: boolean;
+    readonly cain: boolean;
+    readonly tristram: boolean;
+    readonly countess: boolean;
+    readonly andariel: boolean;
+    readonly radament: boolean;
+    readonly horadricstaff: boolean;
+    readonly summoner: boolean;
+    readonly duriel: boolean;
+    readonly goldenbird: boolean;
+    readonly lamessen: boolean;
+    readonly gidbinn: boolean;
+    readonly blackendTemple: boolean;
+    readonly travincal: boolean;
+    readonly mephisto: boolean;
+    readonly izual: boolean;
+    readonly hellforge: boolean;
+    readonly diablo: boolean;
+    readonly shenk: boolean;
+    readonly larzuk: boolean;
+    readonly savebarby: boolean;
+    readonly barbrescue: boolean;
+    readonly anya: boolean;
+    readonly ancients: boolean;
+    readonly baal: boolean;
+    readonly cows: boolean;
+    readonly respec: boolean;
+    readonly diffCompleted: boolean;
+    wirtsleg: ItemUnit;
+    cube: ItemUnit;
+    shaft: ItemUnit;
+    amulet: ItemUnit;
+    staff: ItemUnit;
+    completestaff: ItemUnit;
+    eye: ItemUnit;
+    brain: ItemUnit;
+    heart: ItemUnit;
+    khalimswill: ItemUnit;
+    khalimsflail: ItemUnit;
+    malahspotion: ItemUnit;
+    scrollofresistance: ItemUnit;
+    readonly walking: boolean;
+    readonly running: boolean;
+    readonly deadOrInSequence: boolean;
+    readonly moving: boolean;
+    readonly FCR: number;
+    readonly FHR: number;
+    readonly FBR: number;
+    readonly IAS: number;
+    readonly shapeshifted: boolean;
+    readonly attacking: boolean;
+    readonly size: number;
+    /**
+     * @description max gold capacity (cLvl * 10000)
+     */
+    readonly maxgold: number;
+    waypoints: boolean[];
+    /**
+     * @private
+     * Don't use directly, use `me.shitList`
+     */
+    _shitList: Set<string>;
+    shitList: Set<string>;
+    /**
+     * @private
+     * Don't use directly, use `me.qutting`
+     */
+    _quitting: boolean;
+    quitting: boolean;
+
+    // d2bs functions
+    overhead(msg: string): void;
+    repair(): boolean;
+    revive(): void;
+    move(x: number, y: number): boolean;
+    setSkill(): boolean;
+    cancel(number?: number): boolean;
+    getRepairCost(): number;
+
+    // additions from kolbot
+    // #setters
+    walk(): void;
+    run(): void;
+    switchToPrimary(): boolean;
+    switchWeapons(slot: 0 | 1): boolean;
+
+    // #getters
+    getPingDelay(): number;
+    getTpTool(): ItemUnit | null;
+    getIdTool(): ItemUnit | null;
+    getTome(id: number): ItemUnit | null;
+    getUnids(): ItemUnit[];
+    getWeaponQuantity(weaponLoc: number): number;
+    getItemsForRepair(repairPercent: number, chargedItems: boolean): ItemUnit[];
+    castingFrames(skillId: number, fcr?: number, charClass?: number): number;
+    castingDuration(skillId: number, fcr?: number, charClass?: number): number;
+    getOwned(itemInfo: ItemUnit | {
+      itemType?: number;
+      classid?: number;
+      mode?: number;
+      quality?: number;
+      sockets?: number;
+      location?: number;
+      ethereal?: boolean;
+      cb?: (item: ItemUnit) => boolean;
+    }): ItemUnit[];
+
+    // #checkers?
+    needBeltPots(): boolean;
+    needBufferPots(): boolean;
+    needPotions(): boolean;
+    needHealing(): boolean;
+    needKeys(): boolean;
+    needRepair(): string[];
+    needMerc(): boolean;
+    needStash(): boolean;
+    needHealing(): boolean;
+    checkScrolls(id: number): number;
+    checkKeys(): number;
+    checkShard(): boolean;
+    canTpToTown(): boolean;
+    haveWaypoint(area: number): boolean;
+    accessToAct(act: number): boolean;
+    inArea(area: number): boolean;
+    haveSome(itemInfo: ItemInfo[]): boolean;
+    findItem(id?: number | string, mode?: number, location?: number, quality?: number): ItemUnit | boolean;
+    findItems(id?: number | string, mode?: number, location?: number): ItemUnit[];
+    checkItem(itemInfo: {
+      classid?: number;
+      itemtype?: number;
+      quality?: number;
+      runeword?: boolean;
+      ethereal?: boolean;
+      name?: string | number;
+      equipped?: boolean | number;
+    }): { have: boolean; item: ItemUnit | null };
+    findFirst(itemInfo: ItemInfo): { have: boolean; item: ItemUnit | null };
+    usingShield(): boolean;
+    checkQuest(questId: number, state: number): boolean;
+
+    // #actions
+    cleanUpInvoPotions(beltSize?: number): boolean;
+    equip(destination: number | undefined, item: ItemUnit): boolean;
+    cancelUIFlags(): boolean;
+    fieldID(): boolean;
+    castChargedSkill(skillId: number, target?: Unit): boolean;
+    castChargedSkill(skillId: number, x: number, y: number): boolean;
+    clearBelt(): boolean;
+  }
+
+  const me: MeType;
+
+  function getUnit(type: 4, name?: string, mode?: number, unitId?: number): ItemUnit;
+  function getUnit(type: 4, classId?: number, mode?: number, unitId?: number): ItemUnit;
+  function getUnit(type: 1, name?: string, mode?: number, unitId?: number): Monster;
+  function getUnit(type: 1, classId?: number, mode?: number, unitId?: number): Monster;
+  function getUnit(type?: number, name?: string, mode?: number, unitId?: number): Unit;
+  function getUnit(type?: number, classId?: number, mode?: number, unitId?: number): Unit;
+
+  function getPath(
+    area: number,
+    fromX: number,
+    fromY: number,
+    toX: number,
+    toY: number,
+    reductionType: 0 | 1 | 2,
+    radius: number,
+  ): IPathNode[] | false;
+  function getCollision(area: number, x: number, y: number): number;
+  function getMercHP(): number;
+  function getCursorType(type: 1 | 3 | 6): boolean;
+  function getCursorType(): number;
+  function getSkillByName(name: string): number;
+  function getSkillById(id: number): string;
+  function getLocaleString(id: number): string;
+
+  // Never seen in the wild, not sure about arguments
+  function getTextSize(name: string, size: number): [number, number];
+  function getThreadPriority(): number;
+  function getUIFlag(flag: number): boolean;
+  function getTradeInfo(mode: 0 | 1 | 2): boolean;
+  function getWaypoint(id: number, noCache?: boolean): boolean;
+
+  class Script {
+    running: boolean;
+    name: string;
+    type: boolean;
+    threadid: number;
+    memory: number;
+
+    getNext(): Script;
+    pause(): boolean;
+    resume(): boolean;
+    join(): void;
+    stop(): boolean;
+    send(): void;
+  }
+
+  function getScript(name?: string | boolean): Script | false;
+  function getScripts(): Script | false;
+
+  class Room {
+    area: number;
+    level: number;
+    number: number;
+    correcttomb: number;
+    x: number;
+    y: number;
+    xsize: number;
+    ysize: number;
+
     getNext(): Room | false;
-}
+    getNearby(): Room[];
+    isInRoom(unit: IPathNode): boolean;
+    isInRoom(x: number, y: number): boolean;
+  }
 
-declare function getRoom(area: number, x: number, y: number): Room | false
-declare function getRoom(x: number, y: number): Room | false
-declare function getRoom(area: number): Room | false
-declare function getRoom(): Room | false
+  function getRoom(area: number, x: number, y: number): Room | false;
+  function getRoom(x: number, y: number): Room | false;
+  function getRoom(area: number): Room | false;
+  function getRoom(): Room | false;
 
-declare class Party {
+  class Party {
+    x: number;
+    y: number;
+    area: number;
+    gid: number;
+    life: number;
+    partyflag: number;
+    partyid: number;
+    name: string;
+    classid: number;
+    level: number;
+    inTown: boolean;
+
     getNext(): Party | false;
-}
+  }
 
-declare function getParty(): Party | false
+  function getParty(unit?: Unit): Party | false;
 
-declare class PresetUnit {
-    getNext(): PresetUnit | false
-}
+  class PresetUnit {
+    id: number;
+    x: number;
+    y: number;
+    roomx: number;
+    roomy: number;
+    level: number;
+    readonly distance: number;
 
-declare function getPresetUnit(): PresetUnit | false
+    getNext(): PresetUnit | false;
+    realCoords(): { id: number; area: number; x: number; y: number };
+  }
 
-declare function getPresetUnits(): PresetUnit[] | false
+  type PresetObject = {
+    area: number;
+    id: number;
+    type: number;
+    x: number;
+    y: number;
+  };
 
-declare class Area {
+  function getPresetUnit(area?: number, objType?: number, classid?: number): PresetUnit | false;
+  function getPresetUnit(area?: number, objType?: 2, classid?: number): PresetUnit | false;
+  function getPresetUnits(area?: number, objType?: number, classid?: number): PresetUnit[] | false;
+
+  interface Exit extends Object {
+    x: number;
+    y: number;
+    type: number;
+    target: number;
+    tileid: number;
+    level: number;
+  }
+
+  class Area {
+    name: string;
+    x: number;
+    xsize: number;
+    y: number;
+    ysize: number;
+    id: number;
+    exits: Exit[];
+
     getNext(): Area | false;
+  }
+
+  function getArea(id?: number): Area | false;
+  function getBaseStat(table: string, row: number, column: string | number): number | string;
+  function getBaseStat(row: number, column: string): number | string;
+
+  /**
+   * @todo get a better understanding of Control
+   */
+  class Control {
+    /**
+     * The text of the control
+     */
+    text: string;
+
+    /**
+     * The x coordinate of the control
+     */
+    x: number;
+
+    /**
+     * The y coordinate of the control
+     */
+    y: number;
+
+    /**
+     * The xsize (width) of the control
+     */
+    xsize: number;
+
+    /**
+     * The ysize (height) of the control
+     */
+    ysize: number;
+
+    /**
+     * The state of the control
+     * - Disabled - 4
+     * @todo figure out the rest
+     */
+    state: number;
+
+    /**
+     * Return whether or not the Control holds a password (starred out text).
+     */
+    password: boolean;
+
+    /**
+     * The type of control
+     * - 1 - TextBox
+     * - 2 - Image
+     * - 3 - Image2
+     * - 4 - LabelBox
+     * - 5 - ScrollBar
+     * - 6 - Button
+     * - 7 - List
+     * - 8 - Timer
+     * - 9 - Smack
+     * - 10 - ProgressBar
+     * - 11 - Popup
+     * - 12 - AccountList
+     */
+    type: number;
+    cursorpos: number;
+    selectstart: number;
+    selectend: number;
+    disabled: number;
+
+    getNext(): Control | undefined;
+    click(x?: number, y?: number): void;
+    setText(text: string): void;
+    getText(): string[];
+  }
+
+  type D2BotProfile = {
+    type: number;
+    ip: number;
+    username: string;
+    gateway: string;
+    character: string;
+    difficulty: number;
+    maxloginTime: number;
+    maxCharacterSelectTime: number;
+  };
+  function Profile(): D2BotProfile;
+
+  class SQLite {
+    constructor(database: string, isNew: boolean);
+    execute(query: string): boolean;
+    query(query: string): SQLiteQuery;
+    lastRowId: number;
+    close(): void;
+  }
+
+  class SQLiteQuery {
+    next(): boolean;
+    ready: boolean;
+    getColumnValue(index: number): string | number | null;
+  }
+
+  function getControl(type?: number, x?: number, y?: number, xsize?: number, ysize?: number): Control | false;
+  function getControls(type?: number, x?: number, y?: number, xsize?: number, ysize?: number): Control[];
+  function getPlayerFlag(meGid: number, otherGid: number, type: number): boolean;
+  function getTickCount(): number;
+  function getInteractedNPC(): NPCUnit | false;
+  function getIsTalkingNPC(): boolean;
+  function getDialogLines(): { text: string; handler(): void }[] | false;
+  function print(what: string): void;
+  function stringToEUC(arg: string): number[];
+  function utf8ToEuc(arg: string): number[];
+  function delay(ms: number): void;
+  // Published by libs/modules/Worker.js before it overrides `delay`: both are the engine's
+  // original sleep, kept reachable for code that must not yield to background work.
+  var _delay: typeof delay;
+  var nativeSleep: typeof delay;
+  // Published by libs/core/Pather.js: the engine's getWaypoint captured before the cache wrapper.
+  var _getWaypoint: typeof getWaypoint;
+  // Published by libs/modules/Worker.js: cooperative block-until-settled on the Promise polyfill.
+  var await: <T>(promise: Promise<T>) => T;
+  // Published by libs/require.js. Only the fallback contract for dynamic call shapes - a literal
+  // require("./x") is still resolved per-module by TS itself.
+  var require: (field: string, path?: string) => unknown;
+  function load(file: string): boolean;
+  function isIncluded(file: IncludePath): boolean;
+  function include(file: IncludePath): boolean;
+  function stacktrace(): true;
+  function rand(from: number, to: number): number;
+  function copy(what: string): void;
+  function paste(): string;
+
+  function sendCopyData(noIdea: null, handle: number | string, mode: number, data: string): void;
+
+  function sendDDE(mode: number, server: string, topic: string, item: string, data: string): string | void;
+  function keystate(vKey: number): boolean;
+
+  type eventName =
+    | "itemaction"
+    | "gameevent"
+    | "copydata"
+    | "chatmsg"
+    | "chatinput"
+    | "whispermsg"
+    | "chatmsgblocker"
+    | "chatinputblocker"
+    | "whispermsgblocker"
+    | "mousemove"
+    | "ScreenHookHover"
+    | "mouseclick"
+    | "keyup"
+    | "keydownblocker"
+    | "keydown"
+    | "memana"
+    | "melife"
+    | "playerassign"
+    | "ScreenHookClick"
+    | "Command"
+    | "scriptmsg"
+    | "gamepacket"
+    | "gamepacketsent"
+    | "realmpacket";
+
+  function addEventListener(eventType: "realmpacket", callback: (bytes: ArrayBufferLike) => boolean): void;
+  function addEventListener(eventType: "gamepacket", callback: (bytes: ArrayBufferLike) => boolean): void;
+  function addEventListener(eventType: "scriptmsg", callback: (data: string | object | number) => void): void;
+  function addEventListener(eventType: "copydata", callback: (mode: number, msg: string) => void): void;
+  function addEventListener(
+    eventType: "itemaction",
+    callback: (gid: number, mode?: number, code?: string, global?: true) => void,
+  ): void;
+  function addEventListener(
+    eventType: "keyup" | "keydown" | "keydownblocker",
+    callback: (key: number | string) => void,
+  ): void;
+  function addEventListener(
+    eventType: "chatmsg" | "chatinput" | "whispermsg",
+    callback: (nick: string, msg: string) => void,
+  ): void;
+  function addEventListener(
+    eventType: "chatmsgblocker" | "chatinputblocker" | "whispermsgblocker",
+    callback: (arg1: string, arg2: string) => void,
+  ): void;
+  function addEventListener(eventType: "mousemove", callback: (arg1: string, arg2: string) => void): void;
+  function addEventListener(eventType: "ScreenHookHover", callback: (arg1: string, arg2: string) => void): void;
+  function addEventListener(
+    eventType: "mouseclick",
+    callback: (arg1: string, arg2: string, arg3: string, arg4: string) => void,
+  ): void;
+  function addEventListener(eventType: "memana" | "melife", callback: (arg1: string, arg2: string) => void): void;
+  function addEventListener(eventType: "playerassign", callback: (arg1: string, arg4: string) => void): void;
+  function addEventListener(
+    eventType: "ScreenHookClick",
+    callback: (arg1: string, arg2: string, arg3: string, arg4: string) => void,
+  ): void;
+  function addEventListener(eventType: eventName, callback: (...args: unknown[]) => void): void;
+
+  function removeEventListener(eventType: "gamepacket", callback: (bytes: ArrayBufferLike) => boolean): void;
+  function removeEventListener(eventType: "scriptmsg", callback: (data: string | object | number) => void): void;
+  function removeEventListener(eventType: "copydata", callback: (mode: number, msg: string) => void): void;
+  function removeEventListener(
+    eventType: "itemaction",
+    callback: (gid: number, mode?: number, code?: string, global?: true) => void,
+  ): void;
+  function removeEventListener(eventType: "keyup" | "keydown", callback: (key: number) => void): void;
+  function removeEventListener(eventType: "chatmsg", callback: (nick: string, msg: string) => void): void;
+  function removeEventListener(eventType: eventName, callback: (...args: unknown[]) => void): void;
+
+  function clearEvent(event: string): void;
+  function clearAllEvents(): void;
+  function js_strict(enabled?: boolean): boolean;
+  function version(): number;
+  function scriptBroadcast(what: string | object): void;
+  function sqlite_version(): string;
+  function sqlite_memusage(): number;
+
+  type directory = {
+    getFiles(): string[];
+    getFolders(): string[];
+    create(what?: string): boolean;
+  };
+  // Returns the plain shape, not `directory | false`: the engine does return false on a bad
+  // path, but every call site chains directly (dopen(x).getFiles()) and a `| false` union
+  // types the whole chain `any` under unchecked js - poisoning the idiom the codebase uses.
+  function dopen(what?: string): directory;
+  function debugLog(text: string): void;
+  function showConsole(): void;
+  function hideConsole(): void;
+
+  // out of game functions
+  function login(name?: string): void;
+  function selectCharacter(): boolean;
+  function createGame(name: string, pass?: string, difficulty?: number): void;
+  function joinGame(name: string, password?: string): void;
+  function addProfile(name: string, mode: string, gateway: string, username: string, password: string, character: string): void;
+  function getLocation(): number;
+  function loadMpq(path: string): void;
+
+  // game functions that don't have anything to do with gathering data
+  function submitItem(): void;
+  function getMouseCoords(mapCoords?: boolean, returnObject?: boolean): [number, number] | { x: number; y: number };
+  function copyUnit<S extends Unit>(unit: S): S;
+  function clickMap(type: 0 | 1 | 2 | 3, shift: 0 | 1, x: number, y: number): boolean;
+  function acceptTrade(mode?: number): number;
+  function tradeOk(): void;
+  function beep(id?: number): void;
+
+  function clickItem(where: 0 | 1 | 2, bodyLocation: number): void;
+  function clickItem(where: 0 | 1 | 2, item: ItemUnit): void;
+  function clickItem(where: 0 | 1 | 2, x: number, y: number): void;
+  function clickItem(where: 0 | 1 | 2, x: number, y: number, location: number): void;
+
+  function getDistance(a: Unit, b: Unit): number;
+  function getDistance(a: Unit, toX: number, toY: number): number;
+  function getDistance(fromX: number, fromY: number, b: Unit): number;
+  function getDistance(fromX: number, fromY: number, toX: number, toY: number): number;
+
+  function gold(amount: number, changeType?: 0 | 1 | 2 | 3 | 4): void;
+  function checkCollision(a: Unit, b: Unit, type: number): boolean;
+  function playSound(num: number): void;
+  function quit(): never;
+  function quitGame(): never;
+  function say(what: string, force?: boolean): void;
+  /**
+   * Use when you want to force something to be said in chat and don't know if LocalChat is being used
+   * @param what
+   */
+  function _say(what: string): void;
+  function clickParty(player: Party, type: 0 | 1 | 2 | 3 | 4): void;
+  function weaponSwitch(): void;
+  function transmute(): void;
+  function useStatPoint(type: number): void;
+  function useSkillPoint(type: number): void;
+  function takeScreenshot(): void;
+  function moveNPC(npc: Monster, x: number, y: number): void;
+
+  function getPacket(buffer: ArrayBuffer): void;
+  function getPacket(...args: { size: number; data: number }[]): void;
+
+  function sendPacket(buffer: ArrayBuffer): void;
+  function sendPacket(...number: number[]): void;
+
+  /**
+   * The thread's global scope object, derived in Polyfill.js via the Function-constructor trick
+   * (`[].filter.constructor("return this")()`) since SM24 has no native globalThis. Typed as the
+   * ambient scope itself so `global.X` gets real member typing everywhere.
+   */
+  var global: typeof globalThis;
+
+  /**
+   * Per-class config entry point: every libs/config/<Class>[.<Profile>].js declares
+   * `function LoadConfig () {...}`; core/Config.js include()s the selected file, then calls it
+   * (Config.js:86, mirrored in manualplay ConfigOverrides.js:84).
+   */
+  function LoadConfig(): void;
+
+  /**
+   * Value shape of the `const AutoBuildTemplate` each libs/config/Builds/<Class>.<Template>.js
+   * declares (bound there via JSDoc @type; declaring the const here would collide - the Builds
+   * files are global scripts). core/Auto/AutoBuild.js runs Update() per gained level.
+   */
+  interface AutoBuildTemplate {
+    [level: number]: { Update: () => void };
+  }
+
+  function getIP(): string;
+  function sendKey(key: number): void;
+  /** Sends a raw mouse click at screen coordinates (engine builtin, JSCore.cpp my_sendClick). */
+  function sendClick(x: number, y: number): void;
+  function revealLevel(unknown: true): void;
+
+  /**
+   * Engine TCP socket class (JSSocket.cpp), wrapped by libs/modules/Socket.js - use that
+   * wrapper (or libs/modules/HTTP.js) instead of this raw builtin. Instances only come from
+   * Socket.open; the host must be whitelisted in the D2Bot hosts setting or open throws.
+   */
+  class Socket {
+    private constructor();
+    /** Returns false if either argument is missing; throws on a non-whitelisted host. */
+    static open(host: string, port: number): Socket | false;
+    /** Drains pending data into a string; throws "Socket Error" on a receive failure. */
+    read(): string;
+    send(data: string): void;
+    close(): void;
+    readonly readable: boolean;
+    /** Engine spelling ("writeable"), not a typo. */
+    readonly writeable: boolean;
+  }
+
+  // hash functions
+  function md5(str: string): string;
+  function sha1(str: string): string;
+  function sha256(str: string): string;
+  function sha384(str: string): string;
+  function sha512(str: string): string;
+  function md5_file(str: string): string;
+  function sha1_file(str: string): string;
+  function sha256_file(str: string): string;
+  function sha384_file(str: string): string;
+  function sha512_file(str: string): string;
+
+  interface Console {
+    log(...whatever: unknown[]): void;
+    debug(...whatever: unknown[]): void;
+    warn(...whatever: unknown[]): void;
+    error(...whatever: unknown[]): void;
+    time(name: string): void;
+    timeEnd(name: string): void;
+    trace(): void;
+    info(start: boolean, msg: string, timer: string): void;
+    /** Gates all console.debug output; the Polyfill.js console shim initialises it to true. */
+    printDebug: boolean;
+    /**
+     * Partial polyfill: prints an ASCII table through console.log rather than returning it.
+     * `columns` defaults to Object.keys(data[0]), so every row must expose the same keys and
+     * every value must be toString()-able.
+     */
+    table(data: Array<Record<string, unknown>>, columns?: string[]): void;
+  }
+  const console: Console;
+
+  class File {
+    public readonly readable: boolean;
+    public readonly writeable: boolean;
+    public readonly seekable: boolean;
+    public readonly mode: number;
+    public readonly binaryMode: boolean;
+    public readonly length: number;
+    public readonly path: string;
+    public position: number;
+    public readonly eof: boolean;
+    public readonly accessed: number;
+    public readonly created: number;
+    public readonly modified: number;
+    public autoflush: boolean;
+
+    public static open(filePath: string, mode?: number): File;
+    public static read(count: number): string;
+    public static read(count: number): Uint8Array;
+    public close(): File;
+    public reopen(): File;
+    public readLine(): string;
+    public readAllLines(): string[];
+    public readAll(): string;
+    public write(...args: (string | number)[]): File;
+    public seek(n: number): File;
+    public seek(n: number, isLines: boolean, fromStart: boolean): File;
+    public flush(): File;
+    public reset(): File;
+    public end(): File;
+  }
+
+  function includeIfNotIncluded(file?: string): boolean;
+  function includeCoreLibs(obj: { exclude: string[] }): boolean;
+  function includeSystemLibs(): boolean;
+  function clone<T extends Date | unknown[] | object>(obj: T): T;
+  function copyObj(from: object): object;
+
+  interface StarterConfig {
+    MinGameTime: number;
+    MaxGameTime?: number;
+    PingQuitDelay: number;
+    CreateGameDelay: number;
+    ResetCount: number;
+    CharacterDifference: number;
+    MaxPlayerCount: number;
+    StopOnDeadHardcore: boolean;
+
+    JoinChannel: string;
+    FirstJoinMessage: string;
+    ChatActionsDelay: number;
+    AnnounceGames: boolean;
+    AnnounceMessage: string;
+    AfterGameMessage: string;
+    GameDescription: string;
+
+    /**
+     * Seconds to wait before opening the join game window after a game
+     */
+    JoinGameDelay: number;
+    InvalidPasswordDelay: number; // Minutes to wait after getting Invalid Password message
+    VersionErrorDelay: number; // Seconds to wait after 'unable to identify version' message
+    SwitchKeyDelay: number; // Seconds to wait before switching a used/banned key or after realm down
+    CrashDelay: number; // Seconds to wait after a d2 window crash
+    FTJDelay: number; // Seconds to wait after failing to create a game
+    RealmDownDelay: number; // Minutes to wait after getting Realm Down message
+    UnableToConnectDelay: number; // Minutes to wait after Unable To Connect message
+    TCPIPNoHostDelay: number; // Seconds to wait after Cannot Connect To Server message
+    CDKeyInUseDelay: number; // Minutes to wait before connecting again if CD-Key is in use.
+    ConnectingTimeout: number; // Seconds to wait before cancelling the 'Connecting...' screen
+    PleaseWaitTimeout: number; // Seconds to wait before cancelling the 'Please Wait...' screen
+    WaitInLineTimeout: number; // Seconds to wait before cancelling the 'Waiting in Line...' screen
+    WaitOutQueueRestriction: boolean; // Wait out queue if we are restricted, queue time > 10000
+    WaitOutQueueExitToMenu: boolean; // Wait out queue restriction at D2 Splash screen if true, else wait out in lobby
+    GameDoesNotExistTimeout: number; // Seconds to wait before cancelling the 'Game does not exist.' screen
+  }
+
+  interface ProfileInfo {
+    profile: string;
+    account: string;
+    charName: string;
+    difficulty: string;
+    tag: string;
+    realm: string;
+  }
+
+  interface StarterInterface {
+    Config: StarterConfig;
+    useChat: boolean;
+    pingQuit: boolean;
+    inGame: boolean;
+    firstLogin: boolean;
+    firstRun: boolean;
+    isUp: "yes" | "no";
+    loginRetry: number;
+    deadCheck: boolean;
+    chatActionsDone: boolean;
+    gameStart: boolean;
+    gameCount: number;
+    lastGameStatus: string;
+    handle: number | null;
+    connectFail: boolean;
+    connectFailRetry: number;
+    makeAccount: false;
+    channelNotify: boolean;
+    chanInfo: {
+      joinChannel: string;
+      firstMsg: string;
+      afterMsg: string;
+      announce: boolean;
+    };
+    gameInfo: {
+      error: string;
+      gameName?: string;
+      gamePass?: string;
+      difficulty?: string;
+      crashInfo: {
+        currScript: number;
+        area: number;
+      };
+      switchKeys: boolean;
+    };
+    joinInfo: {};
+    profileInfo: ProfileInfo;
+    ftjCount: number;
+    lastLocation: number[];
+    /** Milliseconds left on the running ControlAction.timeoutDelay countdown; 0 when no countdown is active. */
+    delay: number;
+    /** Per-profile StarterConfig overrides; entry scripts merge the current profile's entry, then delete this (so it must stay optional). */
+    AdvancedConfig?: Record<string, Partial<StarterConfig>>;
+    /** One-shot latch: set on the first "account already exists" login error so the retry happens only once. */
+    accountExists: boolean;
+    /** Retries spent sitting on the CharSelectConnecting screen; past 3 the profile is restarted. */
+    charSelectConnectingRetry: number;
+
+    sayMsg(string: string): void;
+    /**
+     * Cache for waypoints by character name and difficulty
+     */
+    waypointCache: { [charName: string]: number[] };
+
+    /**
+     * Handles script message events (object version)
+     * @param msg - The message object
+     */
+    scriptMsgEvent(msg: string | object): void;
+
+    /**
+     * Handles copy data event
+     * @param mode - The mode
+     * @param msg - The message (object or string)
+     */
+    receiveCopyData(mode: number, msg: object | string): void;
+
+    /**
+     * Returns a random string of given length
+     * @param len - Length of string
+     * @param useNumbers - Whether to use numbers
+     */
+    randomString(len?: number, useNumbers?: boolean): string;
+
+    /**
+     * Returns a random number string of given length
+     * @param len - Length of string
+     */
+    randomNumberString(len?: number): string;
+
+    /**
+     * Formats a timer string from a tick value
+     * @param tick - The tick value
+     */
+    timer(tick: number): string;
+
+    /**
+     * Waits for a location to change or timeout
+     * @param time - Timeout in ms
+     * @param location - Location to wait for
+     */
+    locationTimeout(time: number, location: number): boolean;
+
+    /**
+     * Sets the next game name in the stats
+     * @param gameInfo - Game info object
+     */
+    setNextGame(gameInfo?: { gameName?: string }): void;
+
+    /**
+     * Updates the game count and performs relog actions
+     */
+    updateCount(): void;
+
+    /**
+     * Location event handlers
+     */
+    LocationEvents: {
+      selectDifficultySP(): boolean;
+      loginError(): void;
+      charSelectError(): boolean;
+      realmDown(): void;
+      waitingInLine(): void;
+      gameDoesNotExist(): void;
+      unableToConnect(): void;
+      openCreateGameWindow(): boolean;
+      openJoinGameWindow(): void;
+      login(otherMultiCheck?: boolean): boolean;
+      otherMultiplayerSelect(): void;
+      charSelectConnecting(): boolean;
+    };
+  }
+
+  const Starter: StarterInterface;
+
+  namespace Time {
+    /**
+     * Converts seconds to milliseconds.
+     *
+     * @param {number} [seconds=0] - The number of seconds to convert.
+     * @returns {number} - The equivalent time in milliseconds.
+     */
+    function seconds(seconds: number): number;
+
+    /**
+     * Converts minutes to milliseconds.
+     *
+     * @param {number} [minutes=0] - The number of minutes to convert.
+     * @returns {number} - The equivalent time in milliseconds.
+     */
+    function minutes(minutes: number): number;
+
+    /**
+     * Formats milliseconds into a "HH:MM:SS" string.
+     *
+     * @param {number} [ms=0] - The time in milliseconds to format.
+     * @returns {string} - The formatted time string.
+     */
+    function format(ms: number): string;
+
+    /**
+     * Converts milliseconds to seconds.
+     *
+     * @param {number} [ms=0] - The time in milliseconds to convert.
+     * @returns {number} - The equivalent time in seconds.
+     */
+    function toSeconds(ms: number): number;
+
+    /**
+     * Converts milliseconds to minutes.
+     *
+     * @param {number} [ms=0] - The time in milliseconds to convert.
+     * @returns {number} - The equivalent time in minutes.
+     */
+    function toMinutes(ms: number): number;
+
+    /**
+     * Converts milliseconds to hours.
+     *
+     * @param {number} [ms=0] - The time in milliseconds to convert.
+     * @returns {number} - The equivalent time in hours.
+     */
+    function toHours(ms: number): number;
+
+    /**
+     * Converts milliseconds to days.
+     *
+     * @param {number} [ms=0] - The time in milliseconds to convert.
+     * @returns {number} - The equivalent time in days.
+     */
+    function toDays(ms: number): number;
+
+    /**
+     * Calculates the elapsed time from a given timestamp.
+     *
+     * @param {number} [ms=0] - The starting time in milliseconds.
+     * @returns {number} - The elapsed time in milliseconds.
+     */
+    function elapsed(start: number): number;
+  }
+
+  type PrimitiveType =
+    | "undefined"
+    | "object"
+    | "boolean"
+    | "number"
+    | "bigint"
+    | "string"
+    | "symbol"
+    | "function"
+    | "array";
+
+  /**
+   * Maps each isType() type string to the TS type it narrows to.
+   * "object" includes null since `typeof null === "object"`; "array" is Array.isArray, not typeof.
+   */
+  interface PrimitiveTypeMap {
+    undefined: undefined;
+    object: object | null;
+    boolean: boolean;
+    number: number;
+    bigint: bigint;
+    string: string;
+    symbol: symbol;
+    // typeof val === "function" narrows only to the untyped Function type, not a specific signature
+    function: Function;
+    array: unknown[];
+  }
+
+  /**
+   * Checks if the value matches the expected type.
+   *
+   * @param val - The value to be checked.
+   * @param type - The expected type as a string.
+   * @returns {boolean} - Returns true if the value matches the expected type, otherwise false.
+   */
+  function isType<T extends PrimitiveType>(val: unknown, type: T): val is PrimitiveTypeMap[T];
+
+  /**
+   * This method sleeps the caller thread for the duration in ms passed to it
+   * @note Use sparingly, this method stops the background workers on the callers thread
+   */
+  function nativeDelay(ms: number): void;
+
+  /**
+   * @description blocks the thread for specified milliseconds - use sparingly this does not yield to the other threads so it
+   * can potentially cause the heartbeat thread to crash
+   * @param ms
+   */
+  function hardDelay(ms: number): void;
+
+  /**
+   * Deep merge objects, handling nested properties properly
+   * @param target - Target object to merge into
+   * @param source - Source object to merge from
+   * @returns Merged object
+   */
+  function deepMerge(target: object, source: object): object;
 }
-
-declare function getArea(): Area | false
-
-declare function getBaseStat(table: string, row: number, column: string): number | string
-declare function getBaseStat(row: number, column: string): number | string
-
-declare class Control {
-
-}
-
-declare function getControl(type?: number, x?: number, y?: number, xsize?: number, ysize?: number): Control | false
-
-declare function getControls(type?: number, x?: number, y?: number, xsize?: number, ysize?: number): Control[]
-
-declare function getPlayerFlag(meGid: number, otherGid: number, type: number): boolean
-
-declare function getTickCount(): number
-
-declare function getInteractedNPC(): Monster | false
-
-declare function getIsTalkingNPC(): boolean
-
-declare function getDialogLines(): { handler() }[] | false
-
-declare function print(what: string): void
-
-declare function stringToEUC(arg): []
-
-declare function utf8ToEuc(arg): []
-
-declare function delay(ms: number): void
-
-declare function load(file: string): boolean
-
-declare function isIncluded(file: string): boolean
-
-declare function include(file: string): boolean
-
-declare function stacktrace(): true
-
-declare function rand(from: number, to: number): number
-
-declare function copy(what: string): void
-
-declare function paste(): string
-
-declare function sendCopyData(noIdea: null, handle: number, mode: number, data: string)
-declare function sendCopyData(noIdea: null, handle: string, mode: number, data: string)
-
-declare function sendDDE()
-
-declare function keystate()
-
-declare type eventName = 'gamepacket' | 'scriptmsg' | 'copydata' | 'keyup' | 'keydown'
-
-declare function addEventListener(eventType: 'gamepacket', callback: ((bytes: ArrayBufferLike) => boolean)): void
-declare function addEventListener(eventType: 'scriptmsg', callback: ((data: string | object | number) => void)): void
-declare function addEventListener(eventType: 'copydata', callback: ((mode: number, msg: string) => void)): void
-declare function addEventListener(eventType: 'itemaction', callback: ((gid:number,mode?:number,code?:string,global?:true) => void)): void
-declare function addEventListener(eventType: 'keyup' | 'keydown', callback: ((key: number) => void)): void
-declare function addEventListener(eventType: 'chatmsg', callback: ((nick: string,msg:string) => void)): void
-declare function addEventListener(eventType: eventName, callback: ((...args: any) => void)): void
-
-declare function removeEventListener(eventType: 'gamepacket', callback: ((bytes: ArrayBufferLike) => boolean)): void
-declare function removeEventListener(eventType: 'scriptmsg', callback: ((data: string | object | number) => void)): void
-declare function removeEventListener(eventType: 'copydata', callback: ((mode: number, msg: string) => void)): void
-declare function removeEventListener(eventType: 'itemaction', callback: ((gid:number,mode?:number,code?:string,global?:true) => void)): void
-declare function removeEventListener(eventType: 'keyup' | 'keydown', callback: ((key: number) => void)): void
-declare function removeEventListener(eventType: 'chatmsg', callback: ((nick: string,msg:string) => void)): void
-declare function removeEventListener(eventType: eventName, callback: ((...args: any) => void)): void
-
-declare function clearEvent()
-
-declare function clearAllEvents()
-
-declare function js_strict()
-
-declare function version():number
-
-declare function scriptBroadcast(what:string|object):void
-
-declare function sqlite_version()
-
-declare function sqlite_memusage()
-
-declare function dopen(path:string):false|{create(what:string)}
-
-declare function debugLog(text:string):void
-
-declare function showConsole():void
-
-declare function hideConsole():void
-
-// out of game functions
-
-declare function login(name?:string):void
-
-//
-// declare function createCharacter())
-// this function is not finished
-
-declare function selectCharacter()
-
-declare function createGame()
-
-declare function joinGame()
-
-declare function addProfile()
-
-declare function getLocation()
-
-declare function loadMpq()
-
-// game functions that don't have anything to do with gathering data
-
-declare function submitItem():void
-
-declare function getMouseCoords()
-
-declare function copyUnit(unit: Unit):Unit
-
-declare function clickMap(type: 0|1|2|3,shift:0|1,x:number,y:number)
-
-declare function acceptTrade()
-
-declare function tradeOk()
-
-declare function beep(id?:number)
-
-declare function clickItem(where: 0|1|2,bodyLocation:number)
-declare function clickItem(where: 0|1|2,item:Item)
-declare function clickItem(where: 0|1|2,x:number,y:number)
-declare function clickItem(where: 0|1|2,x:number,y:number,location:number)
-
-declare function getDistance(a: Unit,b: Unit):number
-declare function getDistance(a: Unit,toX:number, toY: number):number
-declare function getDistance(fromX: number, fromY: number,b: Unit):number
-declare function getDistance(fromX: number, fromY: number,toX:number, toY: number):number
-
-declare function gold(amount: number,changeType?: 0|1|2|3|4):void
-
-declare function checkCollision(a: Unit,b:Unit,type:number):boolean
-
-declare function playSound(num:number):void
-
-declare function quit():never
-
-declare function quitGame():never
-
-declare function say(what:string):void
-
-declare function clickParty(player: Party,type: 0|1|2|3|4)
-
-declare function weaponSwitch():void
-
-declare function transmute():void
-
-declare function useStatPoint(type:number):void
-
-declare function useSkillPoint(type:number):void
-
-declare function takeScreenshot():void
-
-declare function moveNPC(npc:Monster,x:number,y:number):void
-
-declare function getPacket(buffer: DataView):void
-declare function getPacket(...args: {size:number, data: number}[]):void
-
-declare function sendPacket(buffer: DataView):void
-declare function sendPacket(...args: {size:number, data: number}[]):void
-
-declare function getIP():string
-
-declare function sendKey(key:number):void
-
-declare function revealLevel(unknown:true):void
-
-// hash functions
-
-declare function md5(str:string):string
-
-declare function sha1(str:string):string
-
-declare function sha256(str:string):string
-
-declare function sha384(str:string):string
-
-declare function sha512(str:string):string
-
-declare function md5_file(str:string):string
-
-declare function sha1_file(str:string):string
-
-declare function sha256_file(str:string):string
-
-declare function sha384_file(str:string):string
-
-declare function sha512_file(str:string):string
+export {};
