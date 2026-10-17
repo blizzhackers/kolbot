@@ -20,3 +20,5 @@ const OuterSteppes = new Runnable(
     startArea: sdk.areas.PandemoniumFortress
   }
 );
+
+Loader.register("OuterSteppes", OuterSteppes);

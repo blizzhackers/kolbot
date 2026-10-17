@@ -39,6 +39,7 @@ declare global {
     nextScript: Runnable | null;
     doneScripts: Set<string>;
     tempList: string[];
+    registry: Record<string, GlobalScript | Runnable>;
 
     init(): void;
     getScripts(): void;
@@ -49,6 +50,8 @@ declare global {
     loadScripts(): void;
     runScript(name: string, configOverride?: Partial<IConfig> | (() => void)): boolean;
     scriptName(offset?: number): string;
+    register<T extends GlobalScript | Runnable>(name: string, script: T): T;
+    resolve(name: string): GlobalScript | Runnable | undefined;
   }
 
   // Value shape of the global `Scripts` const in Config.js (bound there via JSDoc @type).
