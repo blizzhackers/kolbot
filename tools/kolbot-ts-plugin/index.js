@@ -41,20 +41,33 @@ function dbjRoot (project, config) {
   return path.join(path.dirname(name), rel);
 }
 
-// SoloPlay's *Overrides.js files reassign members of core globals (NTIP.CheckItem = ...), so a
-// symbol can have definition sites in both worlds. Which one is LIVE depends on the requesting
-// file: SoloPlay overrides are only include()d by SoloPlay threads. Mirror that at nav time:
-// from outside SoloPlay, drop SoloPlay definition sites (when a non-SoloPlay site exists).
-var OVERRIDE_DIR = "/libs/soloplay/";
+// Override families reassign members of core globals (NTIP.CheckItem = ...) and are include()d
+// only by their own family's code: all of SoloPlay, and manualplay's libs/*Overrides.js (loaded by
+// MapMode.js). Which site is LIVE depends on the requester, so an override site is visible only
+// to requesters in the same family - core requesters see core sites only.
+function familyOf (fileName) {
+  var p = String(fileName).replace(/\\/g, "/").toLowerCase();
+  if (p.indexOf("/libs/soloplay/") >= 0) return "soloplay";
+  if (p.indexOf("/libs/manualplay/") >= 0) return "manualplay";
+  return null;
+}
 
-function inOverrideDir (fileName) {
-  return String(fileName).replace(/\\/g, "/").toLowerCase().indexOf(OVERRIDE_DIR) >= 0;
+function overrideFamilyOf (fileName) {
+  var p = String(fileName).replace(/\\/g, "/").toLowerCase();
+  if (p.indexOf("/libs/soloplay/") >= 0) return "soloplay";
+  if (/\/libs\/manualplay\/libs\/[^/]*overrides\.js$/.test(p)) return "manualplay";
+  return null;
+}
+
+function siteVisible (fromFile, siteFile) {
+  var family = overrideFamilyOf(siteFile);
+  return !family || family === familyOf(fromFile);
 }
 
 function filterContextualDefs (fromFile, definitions) {
-  if (!definitions || definitions.length < 2 || inOverrideDir(fromFile)) return definitions;
+  if (!definitions || definitions.length < 2) return definitions;
   var filtered = definitions.filter(function (d) {
-    return !inOverrideDir(d.fileName);
+    return siteVisible(fromFile, d.fileName);
   });
   return filtered.length > 0 ? filtered : definitions;
 }
@@ -69,24 +82,170 @@ function init (modules) {
       if (position < node.getFullStart() || position >= node.getEnd()) return;
       if (
         ts.isPropertyAccessExpression(node) &&
-        ts.isIdentifier(node.expression) &&
         position >= node.name.getStart(sourceFile) &&
         position < node.name.getEnd()
       ) {
-        hit = { obj: node.expression.text, prop: node.name.text };
+        var obj = ts.isIdentifier(node.expression)
+          ? node.expression.text
+          : node.expression.kind === ts.SyntaxKind.ThisKeyword ? thisOwner(node.expression) : null;
+        if (obj) hit = { obj: obj, prop: node.name.text };
       }
       ts.forEachChild(node, walk);
     })(sourceFile);
     return hit;
   }
 
-  /** Top-level `Obj.prop = ...` assignment sites in non-override, non-declaration program files. */
-  function findAssignmentSites (program, obj, prop, fromOverride, extraFiles) {
+  /** The node an expression sits in, looking through wrapping parentheses. */
+  function outerOf (node) {
+    var p = node.parent;
+    while (p && ts.isParenthesizedExpression(p)) {
+      node = p;
+      p = p.parent;
+    }
+    return { node: node, parent: p };
+  }
+
+  /**
+   * Name of the global a `this` is bound to, for the same house shapes findMemberSites scans:
+   * a function member of `const X = {...}` (direct or IIFE-returned literal), `X.prop = function`
+   * (override style), and `this.prop = function` inside a `new function () {...}` singleton.
+   * Arrow functions inherit `this`. Null when the owner is not one of those shapes.
+   */
+  function thisOwner (thisNode) {
+    var fn = thisNode.parent;
+    while (fn && !(ts.isFunctionLike(fn) && !ts.isArrowFunction(fn))) fn = fn.parent;
+    if (!fn) return null;
+    if ((ts.isMethodDeclaration(fn) || ts.isAccessor(fn)) && ts.isObjectLiteralExpression(fn.parent)) {
+      return valueOwner(fn.parent);
+    }
+    if (!ts.isFunctionExpression(fn)) return null;
+    var at = outerOf(fn);
+    if (!at.parent) return null;
+    if (ts.isPropertyAssignment(at.parent) && ts.isObjectLiteralExpression(at.parent.parent)) {
+      return valueOwner(at.parent.parent);
+    }
+    if (ts.isBinaryExpression(at.parent) && at.parent.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+        at.parent.right === at.node && ts.isPropertyAccessExpression(at.parent.left)) {
+      var target = at.parent.left.expression;
+      if (ts.isIdentifier(target)) return target.text;
+      if (target.kind === ts.SyntaxKind.ThisKeyword) return thisOwner(target);
+      return null;
+    }
+    if (ts.isNewExpression(at.parent) && at.parent.expression === at.node) return valueOwner(at.parent);
+    return null;
+  }
+
+  /** `const X = <expr>` -> "X", following an IIFE's returned literal out to its call site. */
+  function valueOwner (expr) {
+    var at = outerOf(expr);
+    if (!at.parent) return null;
+    if (ts.isVariableDeclaration(at.parent) && at.parent.initializer === at.node &&
+        ts.isIdentifier(at.parent.name)) {
+      return at.parent.name.text;
+    }
+    if (ts.isReturnStatement(at.parent)) {
+      var fn = at.parent.parent;
+      while (fn && !ts.isFunctionLike(fn)) fn = fn.parent;
+      if (!fn || !ts.isFunctionExpression(fn)) return null;
+      var call = outerOf(fn);
+      if (call.parent && ts.isCallExpression(call.parent) && call.parent.expression === call.node) {
+        return valueOwner(call.parent);
+      }
+    }
+    return null;
+  }
+
+  /** The member-name side of `a.b` / `{ b: ... }` - a name lookup there is never a global reference. */
+  function isMemberName (ident) {
+    var p = ident.parent;
+    return !!p && p.name === ident &&
+      (ts.isPropertyAccessExpression(p) || ts.isPropertyAssignment(p) || ts.isMethodDeclaration(p));
+  }
+
+  var heritageCache = new WeakMap();
+
+  /** Interface/class name -> its `extends` base names, across the program's d.ts files. */
+  function heritageOf (program) {
+    var map = heritageCache.get(program);
+    if (map) return map;
+    map = Object.create(null);
+    program.getSourceFiles().forEach(function (sf) {
+      if (!sf.isDeclarationFile) return;
+      (function walk (node) {
+        if ((ts.isInterfaceDeclaration(node) || ts.isClassDeclaration(node)) && node.name) {
+          var bases = map[node.name.text] || (map[node.name.text] = []);
+          (node.heritageClauses || []).forEach(function (h) {
+            if (h.token !== ts.SyntaxKind.ExtendsKeyword) return;
+            h.types.forEach(function (t) {
+              if (ts.isIdentifier(t.expression)) bases.push(t.expression.text);
+            });
+          });
+        } else if (ts.isSourceFile(node) || ts.isModuleDeclaration(node) || ts.isModuleBlock(node)) {
+          ts.forEachChild(node, walk);
+        }
+      })(sf);
+    });
+    heritageCache.set(program, map);
+    return map;
+  }
+
+  /**
+   * The given declaration names plus everything they extend: runtime polyfills attach to the
+   * base constructor (Unit.prototype) while the checker reports the subtype (ItemUnit, NPCUnit).
+   */
+  function ownerSet (program, names) {
+    var heritage = heritageOf(program);
+    var owners = Object.create(null);
+    var queue = names.filter(Boolean);
+    while (queue.length) {
+      var name = queue.shift();
+      if (owners[name]) continue;
+      owners[name] = true;
+      queue = queue.concat(heritage[name] || []);
+    }
+    return owners;
+  }
+
+  /** `Owner.prototype.prop = ...` assignment sites, at any depth, for Owner in `owners`. */
+  function findPrototypeSites (program, owners, prop, fromFile) {
+    var out = [];
+    var files = program.getSourceFiles();
+    for (var i = 0; i < files.length; i++) {
+      var sf = files[i];
+      if (sf.isDeclarationFile || !siteVisible(fromFile, sf.fileName)) continue;
+      (function walk (node) {
+        if (
+          ts.isBinaryExpression(node) &&
+          node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+          ts.isPropertyAccessExpression(node.left) &&
+          node.left.name.text === prop &&
+          ts.isPropertyAccessExpression(node.left.expression) &&
+          node.left.expression.name.text === "prototype" &&
+          ts.isIdentifier(node.left.expression.expression) &&
+          owners[node.left.expression.expression.text] === true
+        ) {
+          out.push({
+            fileName: norm(sf.fileName),
+            textSpan: { start: node.left.name.getStart(sf), length: node.left.name.getWidth(sf) },
+            kind: ts.ScriptElementKind.memberFunctionElement,
+            name: node.left.expression.expression.text + ".prototype." + prop,
+            containerKind: ts.ScriptElementKind.unknown,
+            containerName: node.left.expression.expression.text,
+          });
+        }
+        ts.forEachChild(node, walk);
+      })(sf);
+    }
+    return out;
+  }
+
+  /** Top-level `Obj.prop = ...` assignment sites in requester-visible, non-declaration program files. */
+  function findAssignmentSites (program, obj, prop, fromFile, extraFiles) {
     var out = [];
     var files = program.getSourceFiles().concat(extraFiles || []);
     for (var i = 0; i < files.length; i++) {
       var sf = files[i];
-      if (sf.isDeclarationFile || (!fromOverride && inOverrideDir(sf.fileName))) continue;
+      if (sf.isDeclarationFile || !siteVisible(fromFile, sf.fileName)) continue;
       var statements = sf.statements;
       for (var j = 0; j < statements.length; j++) {
         var s = statements[j];
@@ -149,12 +308,12 @@ function init (modules) {
    * governs visibility like the sibling scans: SoloPlay requesters find their overrides in
    * the first pass, which outranks the disk-parsed core implementation automatically.
    */
-  function findOverrideModuleSites (program, obj, prop, fromOverride, extraFiles) {
+  function findOverrideModuleSites (program, obj, prop, fromFile, extraFiles) {
     var out = [];
     var files = program.getSourceFiles().concat(extraFiles || []);
     for (var i = 0; i < files.length; i++) {
       var sf = files[i];
-      if (sf.isDeclarationFile || (!fromOverride && inOverrideDir(sf.fileName))) continue;
+      if (sf.isDeclarationFile || !siteVisible(fromFile, sf.fileName)) continue;
       (function walk (node) {
         if (
           ts.isNewExpression(node) && node.arguments && node.arguments.length >= 3 &&
@@ -203,15 +362,15 @@ function init (modules) {
 
   /**
    * `Object.defineProperty(obj, "prop", ...)` / `Object.defineProperties(obj, { prop: ... })`
-   * sites anywhere in non-override program files - unlike plain assignments these legitimately
+   * sites anywhere in requester-visible program files - unlike plain assignments these legitimately
    * sit inside blocks (feature-detection guards in Me.js), so the walk is recursive.
    */
-  function findDefinePropertySites (program, obj, prop, fromOverride, extraFiles) {
+  function findDefinePropertySites (program, obj, prop, fromFile, extraFiles) {
     var out = [];
     var files = program.getSourceFiles().concat(extraFiles || []);
     for (var i = 0; i < files.length; i++) {
       var sf = files[i];
-      if (sf.isDeclarationFile || (!fromOverride && inOverrideDir(sf.fileName))) continue;
+      if (sf.isDeclarationFile || !siteVisible(fromFile, sf.fileName)) continue;
       (function walk (node) {
         if (
           ts.isCallExpression(node) &&
@@ -259,7 +418,7 @@ function init (modules) {
    * `new function () {...}` singletons (that shape is opaque to tsserver's implementation
    * search - no contextual typing flows into constructor-function this-assignments).
    */
-  function findMemberSites (program, obj, prop, fromOverride, extraFiles) {
+  function findMemberSites (program, obj, prop, fromFile, extraFiles) {
     var out = [];
 
     function unwrapParens (node) {
@@ -304,7 +463,7 @@ function init (modules) {
     var files = program.getSourceFiles().concat(extraFiles || []);
     for (var i = 0; i < files.length; i++) {
       var sf = files[i];
-      if (sf.isDeclarationFile || (!fromOverride && inOverrideDir(sf.fileName))) continue;
+      if (sf.isDeclarationFile || !siteVisible(fromFile, sf.fileName)) continue;
       // Recursive: UMD modules build the object inside their factory closure
       // (libs/oog/D2Bot.js), so the declaration is NOT a top-level statement.
       (function walkDecls (node) {
@@ -342,12 +501,12 @@ function init (modules) {
    * `<anything>.X = ...` publication assignments. require()-alias consts don't match: the
    * initializer must be a literal/constructor shape, not an arbitrary call.
    */
-  function findGlobalValueSites (program, name, fromOverride, extraFiles) {
+  function findGlobalValueSites (program, name, fromFile, extraFiles) {
     var out = [];
     var files = program.getSourceFiles().concat(extraFiles || []);
     for (var i = 0; i < files.length; i++) {
       var sf = files[i];
-      if (sf.isDeclarationFile || (!fromOverride && inOverrideDir(sf.fileName))) continue;
+      if (sf.isDeclarationFile || !siteVisible(fromFile, sf.fileName)) continue;
       (function walk (node) {
         if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) &&
             node.name.text === name && node.initializer) {
@@ -621,10 +780,9 @@ function init (modules) {
       if ((!res || !res.definitions || res.definitions.length === 0) && sourceFile) {
         var paTarget = propertyAccessAt(sourceFile, position);
         if (paTarget) {
-          var paFromOv = inOverrideDir(fileName);
-          var paSites = dedupSpans(findAssignmentSites(program, paTarget.obj, paTarget.prop, paFromOv)
-            .concat(findDefinePropertySites(program, paTarget.obj, paTarget.prop, paFromOv))
-            .concat(findMemberSites(program, paTarget.obj, paTarget.prop, paFromOv)));
+          var paSites = dedupSpans(findAssignmentSites(program, paTarget.obj, paTarget.prop, fileName)
+            .concat(findDefinePropertySites(program, paTarget.obj, paTarget.prop, fileName))
+            .concat(findMemberSites(program, paTarget.obj, paTarget.prop, fileName)));
           if (paSites.length > 0) {
             var paNode = identifierAt(sourceFile, position);
             return {
@@ -663,11 +821,11 @@ function init (modules) {
             defs.every(function (d) { return isDeclarationPath(d.fileName); })) {
           var ambientTarget = propertyAccessAt(sourceFile, position);
           if (ambientTarget) {
-            var fromOv = inOverrideDir(fileName);
-            var implSites = findAssignmentSites(program, ambientTarget.obj, ambientTarget.prop, fromOv)
-              .concat(findDefinePropertySites(program, ambientTarget.obj, ambientTarget.prop, fromOv))
-              .concat(findMemberSites(program, ambientTarget.obj, ambientTarget.prop, fromOv))
-            implSites = implSites.concat(findOverrideModuleSites(program, ambientTarget.obj, ambientTarget.prop, fromOv));
+            var implSites = findAssignmentSites(program, ambientTarget.obj, ambientTarget.prop, fileName)
+              .concat(findDefinePropertySites(program, ambientTarget.obj, ambientTarget.prop, fileName))
+              .concat(findMemberSites(program, ambientTarget.obj, ambientTarget.prop, fileName))
+            implSites = implSites.concat(
+              findOverrideModuleSites(program, ambientTarget.obj, ambientTarget.prop, fileName));
             // Contextual typing lets the native implementation search reach object-literal
             // members the syntactic scans could miss; keep executable (.js) results only.
             // try/catch: an implementation-search Debug failure must degrade, not turn the
@@ -677,7 +835,9 @@ function init (modules) {
               nativeImpls = ls.getImplementationAtPosition(fileName, position) || [];
             } catch (e) {}
             for (var ni = 0; ni < nativeImpls.length; ni++) {
-              if (!isDeclarationPath(nativeImpls[ni].fileName)) implSites.push(nativeImpls[ni]);
+              if (!isDeclarationPath(nativeImpls[ni].fileName) && siteVisible(fileName, nativeImpls[ni].fileName)) {
+                implSites.push(nativeImpls[ni]);
+              }
             }
             // Module-pair remap: when the only defs are in a .d.ts sitting next to its js
             // implementation (hand-typed UMD modules like modules/Override), jump into the js.
@@ -690,8 +850,8 @@ function init (modules) {
             if (implSites.length === 0) {
               var diskFiles = diskImplFiles(program, defs.map(function (d) { return d.fileName; }));
               if (diskFiles.length > 0) {
-                implSites = findAssignmentSites(program, ambientTarget.obj, ambientTarget.prop, fromOv, diskFiles)
-                  .concat(findMemberSites(program, ambientTarget.obj, ambientTarget.prop, fromOv, diskFiles));
+                implSites = findAssignmentSites(program, ambientTarget.obj, ambientTarget.prop, fileName, diskFiles)
+                  .concat(findMemberSites(program, ambientTarget.obj, ambientTarget.prop, fileName, diskFiles));
               }
             }
             implSites = dedupSpans(implSites);
@@ -699,11 +859,24 @@ function init (modules) {
               defs = implSites;
               changed = true;
             }
+          } else if (ident && isMemberName(ident)) {
+            // Member whose receiver propertyAccessAt cannot resolve (`a.b.c`, `this` in a
+            // prototype method): only `<Owner>.prototype.<name> =` polyfills qualify, Owner being
+            // a declaration the checker placed the member in. A name-only scan here would match
+            // every `<anything>.name =` assignment in the program.
+            if (ts.isPropertyAccessExpression(ident.parent)) {
+              var owners = ownerSet(program, defs.map(function (d) { return d.containerName; }));
+              var protoSites = dedupSpans(findPrototypeSites(program, owners, ident.text, fileName));
+              if (protoSites.length > 0) {
+                defs = protoSites;
+                changed = true;
+              }
+            }
           } else if (ident) {
             // Bare identifier with ambient-only defs: a module-built global (UMD D2Bot,
             // OOG.js's Object.assign exports). Navigate to the closure declaration or
             // publication site instead of the d.ts declare.
-            var valueSites = dedupSpans(findGlobalValueSites(program, ident.text, inOverrideDir(fileName)));
+            var valueSites = dedupSpans(findGlobalValueSites(program, ident.text, fileName));
             if (valueSites.length > 0) {
               defs = valueSites;
               changed = true;
@@ -711,18 +884,18 @@ function init (modules) {
           }
         }
         // The checker sometimes binds an overridden member (Obj.member = ...) to the override
-        // site ONLY - the core assignment never makes the list. When asking from outside the
-        // override dir, recover core sites syntactically: top-level `Obj.member =` assignments
-        // in non-override program files are exactly what the runtime's global include() executes.
-        if (sourceFile && !inOverrideDir(fileName) && defs.length > 0 &&
-            defs.every(function (d) { return inOverrideDir(d.fileName); })) {
+        // site ONLY - the core assignment never makes the list. When none of those sites is
+        // visible to the requester, recover the sites its context does load syntactically:
+        // top-level `Obj.member =` assignments are exactly what the runtime's include() executes.
+        if (sourceFile && defs.length > 0 &&
+            defs.every(function (d) { return !siteVisible(fileName, d.fileName); })) {
           var target = propertyAccessAt(sourceFile, position);
           if (target) {
             // Same three scans as the ambient branch: the core "definition" of an overridden
             // member can be an assignment OR a literal member (Town.doChores in Town.js).
-            var coreSites = findAssignmentSites(program, target.obj, target.prop)
-              .concat(findDefinePropertySites(program, target.obj, target.prop))
-              .concat(findMemberSites(program, target.obj, target.prop));
+            var coreSites = findAssignmentSites(program, target.obj, target.prop, fileName)
+              .concat(findDefinePropertySites(program, target.obj, target.prop, fileName))
+              .concat(findMemberSites(program, target.obj, target.prop, fileName));
             coreSites = dedupSpans(coreSites);
             if (coreSites.length > 0) {
               defs = coreSites;
@@ -749,10 +922,9 @@ function init (modules) {
       var sourceFile = program && program.getSourceFile(fileName);
       var target = sourceFile && propertyAccessAt(sourceFile, position);
       if (target) {
-        var ovCtx = inOverrideDir(fileName);
-        var sites = findAssignmentSites(program, target.obj, target.prop, ovCtx)
-          .concat(findDefinePropertySites(program, target.obj, target.prop, ovCtx))
-          .concat(findMemberSites(program, target.obj, target.prop, ovCtx));
+        var sites = findAssignmentSites(program, target.obj, target.prop, fileName)
+          .concat(findDefinePropertySites(program, target.obj, target.prop, fileName))
+          .concat(findMemberSites(program, target.obj, target.prop, fileName));
         if (sites.length > 0) return dedupSpans(sites);
       }
       return impls ? kept : impls;
