@@ -88,7 +88,9 @@ const Idle = new Runnable(
   {
     startArea: sdk.areas.RogueEncampment,
     preAction: null,
-    /** @param {IdleContext} ctx */
+    /**
+     * Removes the gameevent listener the action registered.
+     */
     cleanup: function (ctx) {
       ctx.cleanup();
     }

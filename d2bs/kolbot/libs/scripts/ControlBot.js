@@ -2262,7 +2262,9 @@ const ControlBot = new Runnable(
   {
     startArea: sdk.areas.RogueEncampment,
     preAction: null,
-    /** @param {ControlBotContext} ctx */
+    /**
+     * Restores the global say function the action overrode.
+     */
     cleanup: function (ctx) {
       ctx.cleanup();
     }

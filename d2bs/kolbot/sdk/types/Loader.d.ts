@@ -4,10 +4,12 @@ declare global {
   type ScriptContext = { [key: string]: unknown };
 
   interface RunnableOptions<TContext extends ScriptContext = ScriptContext> {
-    setup?: (ctx: TContext) => void;
-    preAction?: (ctx: TContext) => void;
-    postAction?: (ctx: TContext) => void;
-    cleanup?: (ctx: TContext) => void;
+    // null opts a hook out explicitly (preAction: null skips the default town chores). Without it,
+    // those scripts' options fail to match and TContext inference falls back to ScriptContext.
+    setup?: ((ctx: TContext) => void) | null;
+    preAction?: ((ctx: TContext) => void) | null;
+    postAction?: ((ctx: TContext) => void) | null;
+    cleanup?: ((ctx: TContext) => void) | null;
     forceTown?: boolean;
     bossid?: number;
     startArea?: number;
@@ -20,7 +22,7 @@ declare global {
     action: (ctx: TContext) => boolean;
     startArea: number | null;
     setup: ((ctx: TContext) => void) | null;
-    preAction: (ctx: TContext) => void;
+    preAction: ((ctx: TContext) => void) | null;
     postAction: ((ctx: TContext) => void) | null;
     cleanup: ((ctx: TContext) => void) | null;
     forceTown: boolean;

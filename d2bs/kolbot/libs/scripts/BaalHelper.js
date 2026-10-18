@@ -147,7 +147,9 @@ const BaalHelper = new Runnable(
         Town.move("portalspot");
       }
     },
-    /** @param {BaalHelperContext} ctx */
+    /**
+     * Removes the DollQuit/SoulQuit chat listener the action registered.
+     */
     cleanup: function (ctx) {
       removeEventListener("chatmsg", ctx.chatEvent);
     }

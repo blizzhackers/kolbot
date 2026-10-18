@@ -7,9 +7,11 @@
 
 
 /**
+ * Generic so a script's annotated action ctx types every option callback without its own annotation.
  * @constructor
- * @param {function(): boolean} action
- * @param {RunnableOptions} [options]
+ * @template {ScriptContext} [TContext=ScriptContext]
+ * @param {(ctx: TContext) => boolean} action
+ * @param {Partial<RunnableOptions<TContext>>} [options]
  */
 function Runnable (action, options = {}) {
   this.action = action;
