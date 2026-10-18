@@ -32,7 +32,7 @@ let stringArray = [];
 
 /**
  * Parses a single pickit line and registers it in the checklists if valid.
- * @param {string} itemString - one pickit line, in NTIP syntax.
+ * @param {NipString} itemString - one pickit line, in NTIP syntax.
  * @param {string} [filename="kolbot"] - source label recorded for error messages.
  * @returns {boolean} always true, regardless of whether the line parsed successfully.
  */

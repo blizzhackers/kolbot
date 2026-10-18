@@ -29,7 +29,7 @@ declare global {
   /**
    * @description A string that can be used in NTIP lists, which supports some additional syntax for item properties.
    */
-  type NipString = string;
+  type NipString = string & {}; // `& {}` keeps the alias name in hovers; a bare string alias displays as string
 
   interface Error {
     fileName: string;

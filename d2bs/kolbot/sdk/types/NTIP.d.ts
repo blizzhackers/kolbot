@@ -26,7 +26,7 @@ declare global {
   type NTIPEntry = [
     ((item: ItemUnit) => boolean) | undefined,
     ((item: ItemUnit) => boolean) | undefined,
-    NTIPWantedSpec | undefined
+    NTIPWantedSpec | undefined,
   ];
 
   // Value shape of the global `NTIP` const in NTItemParser.js (bound there via JSDoc @type).
@@ -37,7 +37,7 @@ declare global {
   const NTIP: NTIP;
 
   interface NTIP {
-    addLine(itemString: string, fileName?: string): boolean;
+    addLine(itemString: NipString, filename?: string): boolean;
     OpenFile(filepath: string, notify: boolean): boolean;
     CheckQuantityOwned(
       item_type: ((item: ItemUnit) => boolean) | null,
