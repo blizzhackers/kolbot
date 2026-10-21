@@ -9,7 +9,8 @@
 *
 */
 
-const Diablo = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Diablo = new Runnable(
   function Diablo () {
     Pather._teleport = Pather.teleport;
     Common.Diablo.clearRadius = Config.Diablo.ClearRadius;

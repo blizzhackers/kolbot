@@ -5,7 +5,8 @@
 *
 */
 
-const DeveloperMode = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var DeveloperMode = new Runnable(
   function DeveloperMode () {
     const className = sdk.player.class.nameOf(me.classid);
     

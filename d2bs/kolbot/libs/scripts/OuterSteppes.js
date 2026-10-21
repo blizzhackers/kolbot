@@ -5,7 +5,8 @@
 *
 */
 
-const OuterSteppes = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var OuterSteppes = new Runnable(
   function OuterSteppes() {
     if (!Town.goToTown(4)) throw new Error("Failed to go to act 4");
     // force random precast because currently bugs if we precast as soon as we go from inTown to out of town

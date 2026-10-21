@@ -5,7 +5,8 @@
 *
 */
 
-const RaiseArmy = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var RaiseArmy = new Runnable(
   function RaiseArmy () {
     if (!me.necromancer || (Config.Skeletons + Config.SkeletonMages + Config.Revives === 0)) {
       console.warn("This script is only meant to be used with a necromancer configured to raise an army of skeletons and/or revives.");
