@@ -8,7 +8,7 @@
 
 *** Single element - lightning + chain lightning
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 49; // Primary skill to bosses.
 	Config.AttackSkill[2] = -1; // Primary untimed skill to bosses. Keep at -1 if Config.AttackSkill[1] is untimed skill.
 	Config.AttackSkill[3] = 53; // Primary skill to others.
@@ -18,7 +18,7 @@
 
 *** Single element - fireball + meteor
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 56; // Primary skill to bosses.
 	Config.AttackSkill[2] = 47; // Primary untimed skill to bosses. Keep at -1 if Config.AttackSkill[1] is untimed skill.
 	Config.AttackSkill[3] = 56; // Primary skill to others.
@@ -28,7 +28,7 @@
 
 *** Single element - blizzard + glacial spike
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 59; // Primary skill to bosses.
 	Config.AttackSkill[2] = 55; // Primary untimed skill to bosses. Keep at -1 if Config.AttackSkill[1] is untimed skill.
 	Config.AttackSkill[3] = 59; // Primary skill to others.
@@ -38,7 +38,7 @@
 
 *** Dual element - frozen orb + nova (with glacial spike to lightning immune)
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 64; // Primary skill to bosses.
 	Config.AttackSkill[2] = 48; // Primary untimed skill to bosses. Keep at -1 if Config.AttackSkill[1] is untimed skill.
 	Config.AttackSkill[3] = 64; // Primary skill to others.
@@ -48,7 +48,7 @@
 
 *** Dual element - blizzard + fireball (with meteor to cold immune and glacial spike to fire immune)
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 59; // Primary skill to bosses.
 	Config.AttackSkill[2] = 47; // Primary untimed skill to bosses. Keep at -1 if Config.AttackSkill[1] is untimed skill.
 	Config.AttackSkill[3] = 59; // Primary skill to others.
@@ -58,7 +58,7 @@
 
 *** Tri-element - blizzard with fireball, meteor on cold immune, nova on fire immune
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 59; // Primary skill to bosses.
 	Config.AttackSkill[2] = 47; // Primary untimed skill to bosses. Keep at -1 if Config.AttackSkill[1] is untimed skill.
 	Config.AttackSkill[3] = 59; // Primary skill to others.
@@ -68,7 +68,7 @@
 
 *** Tri-element - frozen orb with nova, fire wall on cold immune, glacial spike on lightning immune
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 64; // Primary skill to bosses.
 	Config.AttackSkill[2] = 48; // Primary untimed skill to bosses. Keep at -1 if Config.AttackSkill[1] is untimed skill.
 	Config.AttackSkill[3] = 64; // Primary skill to others.
@@ -82,7 +82,7 @@
 
 *** Poison nova with corpse explosion and lower resist
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 92; // Primary skill to bosses.
 	Config.AttackSkill[2] = -1; // Primary untimed skill to bosses. Keep at -1 if Config.AttackSkill[1] is untimed skill.
 	Config.AttackSkill[3] = 92; // Primary skill to others.
@@ -104,7 +104,7 @@
 
 *** Summoner with corpse explosion, amplify damage on non-bosses and decrepify on bosses
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 500; // Primary skill to bosses.
 	Config.AttackSkill[2] = -1; // Primary untimed skill to bosses. Keep at -1 if Config.AttackSkill[1] is untimed skill.
 	Config.AttackSkill[3] = 500; // Primary skill to others.
@@ -122,7 +122,7 @@
 
 *** Bone spirit/spear with corpse explosion and decrepify
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 93; // Primary skill to bosses.
 	Config.AttackSkill[2] = -1; // Primary untimed skill to bosses. Keep at -1 if Config.AttackSkill[1] is untimed skill.
 	Config.AttackSkill[3] = 84; // Primary skill to others.
@@ -146,7 +146,7 @@
 
 *** Hammerdin with holybolt/redemption on immune
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 112; // Primary skill to bosses.
 	Config.AttackSkill[2] = 113; // Primary aura to bosses
 	Config.AttackSkill[3] = 112; // Primary skill to others.
@@ -156,7 +156,7 @@
 
 *** Smiter with zeal on non-bosses
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 97; // Primary skill to bosses.
 	Config.AttackSkill[2] = 122; // Primary aura to bosses
 	Config.AttackSkill[3] = 106; // Primary skill to others.
@@ -170,7 +170,7 @@
 
 *** Tornado druid
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 245; // Primary skill to bosses.
 	Config.AttackSkill[2] = -1; // Primary untimed skill to bosses. Keep at -1 if Config.AttackSkill[1] is untimed skill.
 	Config.AttackSkill[3] = 245; // Primary skill to others.
@@ -186,7 +186,7 @@
 
 *** Trap assassin using lightning sentry and death sentry as traps, shock web as timed attack and fire blast as untimed attack
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 256; // Primary skill to bosses.
 	Config.AttackSkill[2] = 251; // Primary untimed skill to bosses. Keep at -1 if Config.AttackSkill[1] is untimed skill.
 	Config.AttackSkill[3] = 256; // Primary skill to others.
@@ -201,7 +201,7 @@
 
 *** Whirlwind assassin using wake of fire traps
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 151; // Primary skill to bosses.
 	Config.AttackSkill[2] = -1; // Primary untimed skill to bosses. Keep at -1 if Config.AttackSkill[1] is untimed skill.
 	Config.AttackSkill[3] = 151; // Primary skill to others.
@@ -216,7 +216,7 @@
 
 *** Kicksin using Death Sentry for traps
 
-	Config.AttackSkill[0] = -1; // Preattack skill. Not implemented yet.
+	Config.AttackSkill[0] = -1; // Preattack skill. 
 	Config.AttackSkill[1] = 255; // Primary skill to bosses.
 	Config.AttackSkill[2] = -1; // Primary untimed skill to bosses. Keep at -1 if Config.AttackSkill[1] is untimed skill.
 	Config.AttackSkill[3] = 255; // Primary skill to others.
