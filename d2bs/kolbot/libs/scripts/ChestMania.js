@@ -51,3 +51,5 @@ const ChestMania = new Runnable(
     }
   }
 );
+
+Loader.register("ChestMania", ChestMania);

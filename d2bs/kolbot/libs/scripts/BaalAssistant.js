@@ -520,3 +520,5 @@ const BaalAssistant = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("BaalAssistant", BaalAssistant);

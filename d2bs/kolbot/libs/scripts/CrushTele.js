@@ -56,3 +56,5 @@ const CrushTele = new Runnable(
     }
   }
 );
+
+Loader.register("CrushTele", CrushTele);
