@@ -4,25 +4,12 @@
  */
 
 (function (module) {
-  const recursiveCheck = function (stackNumber) {
-    let stack = new Error().stack.match(/[^\r\n]+/g);
-    let functionName = stack[stackNumber || 1].substr(0, stack[stackNumber || 1].indexOf("@"));
-
-    for (let i = (stackNumber || 1) + 1; i < stack.length; i++) {
-      let curFunc = stack[i].substr(0, stack[i].indexOf("@"));
-
-      if (functionName === curFunc) {
-        return true;
-      } // recursion appeared
-    }
-
-    return false;
-  };
-
   const Worker = new (function () {
     const self = this;
     const work = [];
     const workLowPrio = [];
+    /** how many delay() calls are currently on the stack */
+    let delayDepth = 0;
     /** @private */
     this.workDisabled = false;
 
@@ -160,20 +147,24 @@
      * @returns {boolean} always true
      */
     global.delay = function (amount) {
-      let recursive = recursiveCheck();
+      // a delay() called from within work run by an outer delay() must not run low-prio work again
+      let recursive = delayDepth > 0;
       let start = getTickCount();
       amount = amount || 0;
 
-      do {
-        self.check();
-        global._delay(getTickCount() - start > 3 ? 3 : 1);
-        !recursive && self.checkLowPrio();
-      } while (getTickCount() - start <= amount);
+      delayDepth++;
+      try {
+        do {
+          self.check();
+          global._delay(getTickCount() - start > 3 ? 3 : 1);
+          !recursive && self.checkLowPrio();
+        } while (getTickCount() - start <= amount);
+      } finally {
+        delayDepth--;
+      }
 
       return true; // always return true
     };
-
-    this.recursiveCheck = recursiveCheck;
   })();
   module.exports = Worker;
 })(module);
