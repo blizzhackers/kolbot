@@ -321,7 +321,7 @@
     /**
      * Clears the throne room, portals to the Worldstone Chamber, and kills/damages Baal.
      * @param {number} [hurtPercent] if > 0, only damage Baal to this HP percent instead of killing him
-     * @returns {boolean} true once Baal is killed/hurt as requested, false if not yet in the chamber
+     * @returns {boolean} true once Baal is killed/hurt as requested, false if not in the chamber or the attack failed
      */
     this.killBaal = function (hurtPercent = 0) {
       if (me.inArea(sdk.areas.ThroneofDestruction)) {
@@ -353,12 +353,12 @@
 
       if (me.inArea(sdk.areas.WorldstoneChamber)) {
         Pather.moveTo(15134, 5923);
-        hurtPercent > 0
+        const done = hurtPercent > 0
           ? Attack.hurt(sdk.monsters.Baal, hurtPercent)
           : Attack.kill(sdk.monsters.Baal);
         Pickit.pickItems();
 
-        return true;
+        return done;
       }
 
       return false;
