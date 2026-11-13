@@ -605,7 +605,9 @@ const Pickit = {
         case Pickit.Result.UNWANTED:
         case Pickit.Result.TRASH:
           // if we've got items to sell then we can make room as long as we can get to town
-          return me.canTpToTown();
+          if (Town.canClear(item)) return me.canTpToTown();
+          // town won't sell or drop it, so it can only make room by being stashed
+          return Town.canStash(item);
         default: // Check if a kept item can be stashed
           return Town.canStash(item);
         }

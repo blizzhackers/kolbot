@@ -108,6 +108,7 @@ declare global {
     /** @deprecated Use `me.clearBelt` instead */
     clearBelt(): boolean;
     clearScrolls(): boolean;
+    canClear(item: ItemUnit): boolean;
     clearInventory(): boolean;
     initialize(): boolean;
     getDistance(spot?: string): number;
