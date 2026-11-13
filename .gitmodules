@@ -1,3 +1,6 @@
 [submodule "limedrop"]
 	path = limedrop
 	url = https://github.com/noah-/limedrop
+[submodule "d2bs/kolbot/libs/SoloPlay"]
+	path = d2bs/kolbot/libs/SoloPlay
+	url = https://github.com/blizzhackers/kolbot-SoloPlay
