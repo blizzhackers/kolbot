@@ -5,7 +5,8 @@
 *
 */
 
-const Gamble = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Gamble = new Runnable(
   function Gamble () {
     let info = Gambling.getInfo();
     if (!info) throw new Error("Bad Gambling System config.");

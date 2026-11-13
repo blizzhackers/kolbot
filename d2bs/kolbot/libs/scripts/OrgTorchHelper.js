@@ -6,7 +6,8 @@
 */
 
 
-const OrgTorchHelper = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var OrgTorchHelper = new Runnable(
   function OrgTorchHelper () {
     // TODO: Temp remove organs from nip so this doesn't interfere with OrgTorch
     Config.FindItem = false;

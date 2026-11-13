@@ -15,7 +15,8 @@
 *
 */
 
-const Rusher = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Rusher = new Runnable(
   function Rusher () {
     load("threads/rushthread.js");
     delay(500);

@@ -5,7 +5,8 @@
 *
 */
 
-const Coldworm = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Coldworm = new Runnable(
   function Coldworm () {
     Pather.useWaypoint(sdk.areas.FarOasis);
     Precast.doPrecast(true);

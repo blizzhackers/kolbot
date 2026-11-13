@@ -12,7 +12,8 @@
  * - We should also then keep track of where the shrine was, (I don't remember if gem shrines regen, so check this)
  * - Take into account the next area and sort the shrines to bring us to the exit if its connected
  */
-const GemHunter = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var GemHunter = new Runnable(
   function GemHunter () {
     if (!Town.prepareForGemShrine()) {
       console.log("ÿc4GemHunterÿc0: no gems in inventory - aborting.");

@@ -5,7 +5,8 @@
 *
 */
 
-const Pindleskin = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Pindleskin = new Runnable(
   function Pindleskin () {
     Town.goToTown((Config.Pindleskin.UseWaypoint ? undefined : 5));
 

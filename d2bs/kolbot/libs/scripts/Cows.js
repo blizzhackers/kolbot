@@ -5,7 +5,8 @@
 *
 */
 
-const Cows = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Cows = new Runnable(
   function Cows () {
     const getLeg = function () {
       if (me.wirtsleg) return me.wirtsleg;

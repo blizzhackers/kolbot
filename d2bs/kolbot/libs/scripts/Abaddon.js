@@ -5,7 +5,8 @@
 *
 */
 
-const Abaddon = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Abaddon = new Runnable(
   function Abaddon () {
     Pather.useWaypoint(sdk.areas.FrigidHighlands);
     Precast.doPrecast(true);

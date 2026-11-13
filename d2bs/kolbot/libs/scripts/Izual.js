@@ -5,7 +5,8 @@
 *
 */
 
-const Izual = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Izual = new Runnable(
   function Izual () {
     Pather.useWaypoint(sdk.areas.CityoftheDamned);
     Precast.doPrecast(true);

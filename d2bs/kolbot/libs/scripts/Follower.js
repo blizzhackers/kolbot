@@ -65,7 +65,8 @@
 *
 */
 
-const Follower = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Follower = new Runnable(
   function Follower () {
     const QuestData = require("../core/GameData/QuestData");
     /** @type {Map<number, Area>} */
