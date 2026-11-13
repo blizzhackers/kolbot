@@ -157,3 +157,5 @@ const Cows = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("Cows", Cows);

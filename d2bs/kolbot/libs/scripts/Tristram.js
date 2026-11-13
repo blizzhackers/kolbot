@@ -72,3 +72,5 @@ const Tristram = new Runnable(
     startArea: sdk.areas.StonyField
   }
 );
+
+Loader.register("Tristram", Tristram);

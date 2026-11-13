@@ -37,3 +37,5 @@ const Countess = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.TheCountess),
   }
 );
+
+Loader.register("Countess", Countess);

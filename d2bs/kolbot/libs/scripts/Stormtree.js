@@ -23,3 +23,5 @@ const Stormtree = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.Stormtree),
   }
 );
+
+Loader.register("Stormtree", Stormtree);

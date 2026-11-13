@@ -61,3 +61,5 @@ const GetEssences = new Runnable(
     return true;
   }
 );
+
+Loader.register("GetEssences", GetEssences);

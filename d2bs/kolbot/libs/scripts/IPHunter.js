@@ -63,3 +63,5 @@ const IPHunter = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("IPHunter", IPHunter);

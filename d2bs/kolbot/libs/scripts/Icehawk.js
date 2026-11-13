@@ -23,3 +23,5 @@ const Icehawk = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.IcehawkRiftwing),
   }
 );
+
+Loader.register("Icehawk", Icehawk);

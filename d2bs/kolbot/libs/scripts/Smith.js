@@ -24,3 +24,5 @@ const Smith = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.TheSmith),
   }
 );
+
+Loader.register("Smith", Smith);
