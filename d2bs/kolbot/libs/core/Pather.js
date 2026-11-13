@@ -892,8 +892,18 @@ const Pather = {
 
       attemptCount > 1 && this.kickBarrels(x, y);
 
-      // Wait until we're done walking - idle or dead
+      // Wait until we're done walking - idle or dead. A walk that is blocked at once can leave the unit in walk mode
+      // without moving; give up on the click when we have not moved for a while.
+      let lastX = me.x;
+      let lastY = me.y;
+      let lastMoved = getTickCount();
       while (getDistance(me.x, me.y, x, y) > minDist && !me.idle) {
+        if (me.x !== lastX || me.y !== lastY) {
+          [lastX, lastY, lastMoved] = [me.x, me.y, getTickCount()];
+        } else if (getTickCount() - lastMoved > 3000) {
+          console.warn("walkTo :: no movement for 3 seconds at " + lastX + "," + lastY + " heading to " + x + "," + y);
+          break;
+        }
         delay(10);
       }
 
