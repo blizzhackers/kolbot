@@ -456,7 +456,8 @@ declare global {
     getStat(index: number, subid?: number, extra?: number): number;
     getState(index: number, subid?: number): boolean;
     getQuest(quest: number, subid: number): number;
-    getParent(): Unit | string;
+    /** Objects give their owner's name; undefined when there is no parent or it is out of sight. */
+    getParent(): Unit | string | undefined;
     getMinionCount(): number;
 
     // additions from kolbot
@@ -977,7 +978,8 @@ declare global {
     getNext(): Party | false;
   }
 
-  function getParty(unit?: Unit): Party | false;
+  /** Undefined when no player matches, including for a non-player unit or null. */
+  function getParty(unit?: Unit | string | number | null): Party | undefined;
 
   class PresetUnit {
     id: number;
@@ -1129,7 +1131,8 @@ declare global {
   function getTickCount(): number;
   function getInteractedNPC(): NPCUnit | false;
   function getIsTalkingNPC(): boolean;
-  function getDialogLines(): { text: string; handler(): void }[] | false;
+  /** Undefined when no dialog is open; a stale line's handler throws once its dialog has closed. */
+  function getDialogLines(): { text: string; handler(): void }[] | undefined;
   function print(what: string): void;
   function stringToEUC(arg: string): number[];
   function utf8ToEuc(arg: string): number[];
@@ -1230,9 +1233,26 @@ declare global {
   function removeEventListener(eventType: eventName, callback: (...args: unknown[]) => void): void;
 
   function clearEvent(event: string): void;
+  /** Timers are not cleared: they end with clearTimeout/clearInterval/clearAllTimers or their script. */
   function clearAllEvents(): void;
+
+  // Timers run on the owning script's thread, only while it waits in delay(). An interval never
+  // re-enters its own callback, and periods missed while the script was busy coalesce into one call.
+  /** Returns the timer id, or null when the delay is not a number or cb is not a function. */
+  function setTimeout<A extends unknown[]>(cb: (...args: A) => void, delay: number, ...args: A): number | null;
+  /** A period of 0 repeats every millisecond. Returns the timer id, or null on bad arguments. */
+  function setInterval<A extends unknown[]>(cb: (...args: A) => void, period: number, ...args: A): number | null;
+  /** Cancels a timer of either kind, from any script. Same function as clearInterval. */
+  function clearTimeout(id: number | null): void;
+  /** Cancels a timer of either kind, from any script. Same function as clearTimeout. */
+  function clearInterval(id: number | null): void;
+  /** Cancels every timer of the calling script; returns how many. */
+  function clearAllTimers(): number;
+
   function js_strict(enabled?: boolean): boolean;
-  function version(): number;
+  /** The version string, e.g. "1.7.0U (7c036ba)"; with an argument, prints it to the console instead. */
+  function version(): string;
+  function version(print: number): boolean;
   function scriptBroadcast(what: string | object): void;
   function sqlite_version(): string;
   function sqlite_memusage(): number;
@@ -1289,7 +1309,8 @@ declare global {
    * @param what
    */
   function _say(what: string): void;
-  function clickParty(player: Party, type: 0 | 1 | 2 | 3 | 4): void;
+  /** False when the button doesn't apply, or once that player has left or the game has ended. */
+  function clickParty(player: Party, type: 0 | 1 | 2 | 3 | 4): boolean;
   function weaponSwitch(): void;
   function transmute(): void;
   function useStatPoint(type: number): void;
