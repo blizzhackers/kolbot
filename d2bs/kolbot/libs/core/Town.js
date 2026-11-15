@@ -1776,6 +1776,23 @@ const Town = {
   },
 
   /**
+   * @description Check if clearInventory may sell or drop this item once Pickit marks it UNWANTED or TRASH.
+   * Pickit.canMakeRoom uses it too, so it never counts on town removing an item that clearInventory keeps.
+   * Cheap on purpose (type, sellable and gid-list checks only) since canMakeRoom runs it during pickit.
+   * @param {ItemUnit} item
+   * @returns {boolean}
+   */
+  canClear: function (item) {
+    // Don't drop tomes, keys or potions or quest-items
+    // Don't throw cubing/runeword/crafting ingredients
+    return [
+      sdk.items.type.Book, sdk.items.type.Key,
+      sdk.items.type.HealingPotion, sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion
+    ].indexOf(item.itemType) === -1 && item.sellable
+      && !Cubing.keepItem(item) && !Runewords.keepItem(item) && !CraftingSystem.keepItem(item);
+  },
+
+  /**
    * @description Tidy the belt/inventory: return pots to the belt, drink specials, and sell or drop unwanted leftover items
    * @returns {boolean} Always true once the clean-up pass completes
    */
@@ -1871,20 +1888,9 @@ const Town = {
 
     // Any leftover items from a failed ID (crashed game, disconnect etc.)
     Config.DebugMode.Town && console.debug("clearInventory: start invo clean-up");
-    const ignoreTypes = [
-      sdk.items.type.Book, sdk.items.type.Key,
-      sdk.items.type.HealingPotion, sdk.items.type.ManaPotion, sdk.items.type.RejuvPotion
-    ];
     let items = (Storage.Inventory.Compare(Config.Inventory) || [])
       .filter(function (item) {
-        if (!item) return false;
-        // Don't drop tomes, keys or potions or quest-items
-        // Don't throw cubing/runeword/crafting ingredients
-        if (ignoreTypes.indexOf(item.itemType) === -1 && item.sellable
-          && !Cubing.keepItem(item) && !Runewords.keepItem(item) && !CraftingSystem.keepItem(item)) {
-          return true;
-        }
-        return false;
+        return !!item && Town.canClear(item);
       });
 
     // add leftovers from potion cleanup
