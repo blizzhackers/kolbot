@@ -34,6 +34,8 @@ d2bs/kolbot/logs/*.txt
 d2bs/kolbot/logs/**/**
 d2bs/kolbot/mules/**/*.txt
 d2bs/logs/*.log
+d2bs/logs/*.txt
+d2bs/logs/*.dmp
 d2bs/kolbot/env.json
 d2bs/kolbot/libs/manualplay/config/*.*.js
 d2bs/kolbot/libs/config/*.*.js
