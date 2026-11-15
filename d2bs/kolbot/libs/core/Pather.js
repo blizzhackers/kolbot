@@ -862,7 +862,8 @@ const Pather = {
 
           nFail += 1;
           let angle = Math.atan2(me.y - y, me.x - x);
-          let angles = [Math.PI / 2, -Math.PI / 2];
+          // in town also try a step back (angle points away from the target): NPCs can block a street between walls
+          let angles = me.inTown ? [Math.PI / 2, -Math.PI / 2, 0] : [Math.PI / 2, -Math.PI / 2];
 
           for (let i = 0; i < angles.length; i += 1) {
             // TODO: might need rework into getnearestwalkable
