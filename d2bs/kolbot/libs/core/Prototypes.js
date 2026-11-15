@@ -2556,8 +2556,9 @@ Unit.prototype.__defineGetter__("attackable", function () {
   if (this.area !== me.area) return false;
   // player and they are hostile
   if (this.type === sdk.unittype.Player && getPlayerFlag(me.gid, this.gid, 8) && !this.dead) return true;
-  // Dead monster
-  if (this.hp === 0 || this.mode === sdk.monsters.mode.Death || this.mode === sdk.monsters.mode.Dead) return false;
+  // Dead - a monster's hp is its life/128 rounded down, so hp 0 alone isn't death (e.g. Duriel, no regen)
+  if (this.dead) return false;
+  if (this.type !== sdk.unittype.Monster && this.hp === 0) return false;
   // Friendly monster/NPC
   if (this.getStat(sdk.stats.Alignment) === 2) return false;
   // catapults were returning a level of 0 and hanging up clear scripts
@@ -2591,8 +2592,9 @@ Object.defineProperty(Unit.prototype, "curseable", {
   get: function () {
     // must be player or monster
     if (this === undefined || !copyUnit(this).x || this.type > 1) return false;
-    // Dead monster
-    if (this.hp === 0 || this.mode === sdk.monsters.mode.Death || this.mode === sdk.monsters.mode.Dead) return false;
+    // Dead - hp 0 alone isn't death for a monster, see attackable
+    if (this.dead) return false;
+    if (this.type !== sdk.unittype.Monster && this.hp === 0) return false;
     // attract can't be overridden
     if (this.getState(sdk.states.Attract)) return false;
     // "Possessed"
