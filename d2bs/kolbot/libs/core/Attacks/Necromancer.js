@@ -573,7 +573,7 @@
 
       return !!(unit.distance <= 25
         && !checkCollision(me, unit, sdk.collision.Ranged)
-        && badCorpseStates.every(state => !unit.getState(state)));
+        && badCorpseStates.every(function (state) { return !unit.getState(state); }));
     }
   };
 })(module);
