@@ -177,13 +177,19 @@
           }
 
           let closeMob = Attack.getNearestMonster({ skipGid: gid });
-          
+          let castResult = Attack.Result.FAILED;
+
           if (!!closeMob) {
             let findSkill = this.decideSkill(closeMob);
-            if (this.doCast(closeMob, findSkill.timed, findSkill.untimed) !== Attack.Result.SUCCESS) {
+            castResult = this.doCast(closeMob, findSkill.timed, findSkill.untimed);
+            // Out of mana, a telekinesis packet every pass spends each regen tick and floods the server.
+            if (castResult !== Attack.Result.SUCCESS && castResult !== Attack.Result.NEEDMANA) {
               (Skill.haveTK && Packet.telekinesis(unit));
             }
           }
+
+          // A failed or skipped cast returns at once; don't spin while the merc does the work.
+          castResult !== Attack.Result.SUCCESS && delay(100);
         }
 
         return Attack.Result.SUCCESS;
