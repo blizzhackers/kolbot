@@ -13,7 +13,8 @@
 *   - add dodge if position is too hot (hydras can kill a low level quickly)
 */
 
-const TravincalLeech = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var TravincalLeech = new Runnable(
   function TravincalLeech () {
     let leader;
     let done = false;

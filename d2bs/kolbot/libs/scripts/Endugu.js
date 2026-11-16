@@ -5,7 +5,8 @@
 *
 */
 
-const Endugu = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Endugu = new Runnable(
   function Endugu () {
     Pather.useWaypoint(sdk.areas.FlayerJungle);
     Precast.doPrecast(true);

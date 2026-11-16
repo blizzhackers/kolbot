@@ -5,7 +5,8 @@
 *
 */
 
-const Eyeback = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Eyeback = new Runnable(
   function Eyeback () {
     Pather.useWaypoint(sdk.areas.ArreatPlateau);
     Precast.doPrecast(true);

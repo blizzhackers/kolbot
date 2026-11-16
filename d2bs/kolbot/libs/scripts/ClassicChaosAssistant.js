@@ -7,7 +7,8 @@
 
 // redo this, maybe different keys or chat commands instead?
 
-const ClassicChaosAssistant = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var ClassicChaosAssistant = new Runnable(
   function ClassicChaosAssistant () {
     let stargo, infgo, seisgo, vizgo, infseal, seisseal, vizseal, diablopickup, normalpickup = false;
 

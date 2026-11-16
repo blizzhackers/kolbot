@@ -6,7 +6,8 @@
 *
 */
 
-const BoBarbHelper = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var BoBarbHelper = new Runnable(
   function BoBarbHelper () {
     if (!me.barbarian && Config.BoBarbHelper.Mode !== 0) return true;
 

@@ -5,7 +5,8 @@
 *
 */
 
-const TristramLeech = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var TristramLeech = new Runnable(
   function TristramLeech () {
     let done = false;
     let whereisleader, leader;

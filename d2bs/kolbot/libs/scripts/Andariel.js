@@ -5,7 +5,8 @@
 *
 */
 
-const Andariel = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Andariel = new Runnable(
   function Andariel () {
     const killAndariel = function () {
       let target = Game.getMonster(sdk.monsters.Andariel);

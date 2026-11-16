@@ -17,7 +17,8 @@
 *      - bo barb or war cry barb would make killing main boss easier with all the surrounding mobs being stunned
 */
 
-const OrgTorch = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var OrgTorch = new Runnable(
   function OrgTorch () {
     if (Config.OrgTorch.UseSalvation) {
       Config.AdvancedCustomAttack.push({
