@@ -4,54 +4,67 @@
  */
 
 
+/** @param {typeof Socket} buildinSock the engine Socket class, captured before this wrapper shadows the name */
 (function (module, require, buildinSock) {
-	const Worker = require("Worker");
-	const Events = require("Events");
+  const Worker = require("Worker");
+  const Events = require("./AsyncEvents");
 
-	/** @constructor Socket*/
-	function Socket(hostname, port) {
-		typeof Socket.__socketCounter === "undefined" && (Socket.__socketCounter = 0);
-		this.connected = false;
-		const myEvents = new Events;
-		this.connect = () => (this.socket = buildinSock.open(hostname, port)) && (this.connected = true) && this;
+  /** @constructor Socket */
+  function Socket(hostname, port) {
+    typeof Socket.__socketCounter === "undefined" && (Socket.__socketCounter = 0);
+    this.connected = false;
+    const myEvents = new Events;
+    /**
+     * Opens the underlying engine socket and marks the connection as active.
+     * @returns {Socket | false} This wrapper instance once connected, or false if the engine
+     * refused to open the socket (missing args or a non-whitelisted host).
+     */
+    this.connect = () => (this.socket = buildinSock.open(hostname, port)) && (this.connected = true) && this;
 
-		this.on = myEvents.on;
-		this.off = myEvents.off;
-		this.once = myEvents.once;
+    this.on = myEvents.on;
+    this.off = myEvents.off;
+    this.once = myEvents.once;
 
-		const close = () => {
-			this.socket = null;
-			this.connected = false;
-			myEvents.emit("close", this);
-		};
+    const close = () => {
+      this.socket = null;
+      this.connected = false;
+      myEvents.emit("close", this);
+    };
 
-		this.recv = () => {
-			if (!this.connected || !this.socket || !this.socket.readable) return;
+    /**
+     * Drains any pending data off the socket and emits a "data" event; closes on read failure.
+     */
+    this.recv = () => {
+      if (!this.connected || !this.socket || !this.socket.readable) return;
 
-			const data = (() => {
-				try {
-					return this.socket.read();
-				} catch (e) {
-					close();
-				}
-				return undefined;
-			})();
+      const data = (() => {
+        try {
+          return this.socket.read();
+        } catch (e) {
+          close();
+        }
+        return undefined;
+      })();
 
-			data && myEvents.emit("data", data);
-		};
+      data && myEvents.emit("data", data);
+    };
 
-		this.send = (data) => {
-			if (!data || !this.socket) return;
+    /**
+     * Sends data on the socket; closes the socket on a send failure.
+     * @param {string} data
+     */
+    this.send = (data) => {
+      if (!data || !this.socket) return;
 
-			try {
-				this.socket.send(data);
-			} catch (e) {
-				close();
-			}
-		};
+      try {
+        this.socket.send(data);
+      } catch (e) {
+        close();
+      }
+    };
 
-		Worker.runInBackground["__socket__" + (++Socket.__socketCounter)] = () => this.recv() || this.send() || true;
-	}
+    Worker.runInBackground["__socket__" + (++Socket.__socketCounter)] = () => this.recv() || this.send() || true;
+  }
 
-	module.exports = Socket;
+  module.exports = Socket;
 }).call(null, module, require, Socket);

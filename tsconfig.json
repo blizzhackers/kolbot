@@ -1,0 +1,50 @@
+{
+  // Editor-intellisense-only project (noEmit): tsserver types the JS via JSDoc + the ambient
+  // sdk/*.d.ts layer. checkJs stays off - enable per-file with // @ts-check.
+  "compilerOptions": {
+    // No real modules at runtime (D2BS include()/require() shim); preserve+bundler is the
+    // supported replacement for the removed module:"None"/moduleResolution:"classic" pair.
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "lib": [
+      "ES2015",
+      "es2015.collection",
+      "ES2015.Promise",
+      "ES2016.Array.Include",
+      "ES2017.Object",
+      "ScriptHost",
+    ],
+    "target": "ES6",
+    "allowJs": true,
+    "checkJs": false,
+    "allowUmdGlobalAccess": true,
+    "noImplicitAny": true,
+    "noEmit": true,
+    "strict": true,
+    // Keep node_modules/@types (e.g. @types/node) OUT of this program - the D2BS ambient
+    // globals below are the only intended type surface, and Node's collide with them.
+    "types": [],
+    // Editor-only (never affects tsc): attaches the .dbj entry scripts to this project.
+    // Requires the workspace TypeScript version - see tools/kolbot-ts-plugin/index.js.
+    "plugins": [{ "name": "kolbot-ts-plugin" }],
+  },
+  "include": [
+    // The ambient type layer is loaded HERE, explicitly. (typeRoots cannot do this - it only
+    // resolves @types-style package directories - and stray /// <reference> comments in .js
+    // files must never be what keeps intellisense alive.)
+    "./d2bs/kolbot/sdk/globals.d.ts",
+    "./d2bs/kolbot/sdk/types/*.d.ts",
+    "./d2bs/kolbot/libs/**/*.d.ts",
+    "./d2bs/kolbot/**/*.js",
+  ],
+  "exclude": [
+    "node_modules",
+    "**/node_modules/*",
+    "**/data/",
+    // The SoloPlay submodule is its own TS program (libs/SoloPlay/tsconfig.json, nearest-wins
+    // in the editor) with a PARALLEL ambient layer - its namespace declarations for core
+    // globals (Attack/Skill/Misc/Pather) shadow this program's interface+@type pattern when
+    // both are loaded, killing hover on the converted globals.
+    "./d2bs/kolbot/libs/SoloPlay",
+  ],
+}
