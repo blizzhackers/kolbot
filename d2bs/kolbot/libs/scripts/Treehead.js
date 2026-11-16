@@ -23,3 +23,5 @@ const Treehead = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.TreeheadWoodFist),
   }
 );
+
+Loader.register("Treehead", Treehead);

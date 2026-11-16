@@ -304,3 +304,5 @@ const Rusher = new Runnable(
     return true;
   }
 );
+
+Loader.register("Rusher", Rusher);

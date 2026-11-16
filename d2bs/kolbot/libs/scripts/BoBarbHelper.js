@@ -107,3 +107,5 @@ const BoBarbHelper = new Runnable(
     startArea: Config.BoBarbHelper.Wp
   }
 );
+
+Loader.register("BoBarbHelper", BoBarbHelper);

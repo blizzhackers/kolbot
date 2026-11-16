@@ -37,3 +37,5 @@ const AncientTunnels = new Runnable(
     startArea: sdk.areas.LostCity
   }
 );
+
+Loader.register("AncientTunnels", AncientTunnels);

@@ -26,3 +26,5 @@ const Radament = new Runnable(
     bossid: sdk.monsters.Radament,
   }
 );
+
+Loader.register("Radament", Radament);

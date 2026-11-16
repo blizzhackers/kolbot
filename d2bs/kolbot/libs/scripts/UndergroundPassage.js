@@ -22,3 +22,5 @@ const UndergroundPassage = new Runnable(
     startArea: sdk.areas.StonyField
   }
 );
+
+Loader.register("UndergroundPassage", UndergroundPassage);

@@ -25,3 +25,5 @@ const BattlemaidSarina = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.BattlemaidSarina),
   }
 );
+
+Loader.register("BattlemaidSarina", BattlemaidSarina);

@@ -32,3 +32,5 @@ const Hephasto = new Runnable(
     startArea: sdk.areas.RiverofFlame
   }
 );
+
+Loader.register("Hephasto", Hephasto);

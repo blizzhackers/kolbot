@@ -452,3 +452,5 @@ const Wakka = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("Wakka", Wakka);
