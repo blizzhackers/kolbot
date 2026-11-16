@@ -1034,6 +1034,8 @@ const Pather = {
                 break;
               }
             }
+            // The clicks leave a walk-to-unit interaction pending; a ground click cancels it if the barrel stayed shut.
+            !unit.mode && Misc.click(0, 0, me.x, me.y);
           } catch (e) {
             if (e instanceof ScriptError) {
               throw e;
