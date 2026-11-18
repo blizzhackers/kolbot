@@ -1015,8 +1015,11 @@ includeIfNotIncluded("core/Me.js");
      */
     getQueueTime: function () {
       // You are in line to create a game.,Try joining a game to avoid waiting.,,Your position in line is: ÿc02912
-      const text = Controls.CreateGameInLine.getText();
-      if (text && text.indexOf(getLocaleString(sdk.locale.text.YourPositionInLineIs)) > -1) {
+      /** @type {ReturnType<Control["getText"]>} */
+      const rawText = Controls.CreateGameInLine.getText();
+      const text = Array.isArray(rawText) ? rawText.join(" ") : rawText;
+      const localeString = getLocaleString(sdk.locale.text.YourPositionInLineIs);
+      if (text && text.indexOf(localeString) > -1) {
         const result = /ÿc0(\d*)/gm.exec(text);
         if (result && typeof result[1] === "string") {
           return parseInt(result[1]) || 0;
