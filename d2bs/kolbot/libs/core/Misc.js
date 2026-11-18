@@ -536,7 +536,7 @@ const Misc = (function () {
 
       /** @param {ObjectUnit} unit */
       this.update = function (unit) {
-        if (!unit || !unit.hasOwnProperty("objtype")) return;
+        if (!unit || !unit.hasOwnProperty("objtype") || Misc._isWell(unit)) return;
         // we only care about tracking shrines with states
         if (!ShrineData.getState(unit.objtype)) return;
         this.tick = getTickCount();
@@ -559,6 +559,15 @@ const Misc = (function () {
 
     /** @type {Set<number>} */
     _shrinerIgnore: new Set(),
+
+    /**
+     * A well's objtype is a raw object byte, not a shrine id, so wells are told apart by name.
+     * @param {ObjectUnit} unit
+     * @returns {boolean}
+     */
+    _isWell: function (unit) {
+      return !!unit && !!unit.name && unit.name.toLowerCase().includes("well");
+    },
 
     /**
        * TODO: Handle stateful shrines
@@ -602,7 +611,8 @@ const Misc = (function () {
               + " isMyCurrentState: " + Misc.lastShrine.isMyCurrentState()
           );
         }
-        return me.charlvl < 99;
+        // read the buff itself: lastShrine is per-thread and starts empty after a script restart
+        return me.charlvl < 99 && !me.getState(sdk.states.ShrineExperience);
       case sdk.shrines.Skill:
         if (Config.DebugMode.Shrines) {
           console.debug(
@@ -640,7 +650,7 @@ const Misc = (function () {
         // we only want if its close to us if we can't teleport
         if (
           !Pather.useTeleport()
-            && walkDistance > (me.staminamax < 200 || me.staminaPercent < 30) ? 30 : 15
+            && walkDistance > ((me.staminamax < 200 || me.staminaPercent < 30) ? 30 : 15)
         ) {
           return false;
         }
@@ -667,22 +677,10 @@ const Misc = (function () {
           return true;
         }
 
-        // first check if the lasts shrine was a resist shrine
-        if (resistances[Misc.lastShrine.type] === undefined) {
-          // evaluate whether we should overwrite the last shrine
-          if (Misc.lastShrine.type === sdk.shrines.Experience) {
-            // never overwrite experience shrine
-            return false;
-          }
-
-          if (Misc.lastShrine.type === sdk.shrines.Skill) {
-            if (resistances[shrine.objtype] <= 25) {
-              // makes sense if we have a low resistance
-              return true;
-            }
-
-            return false;
-          }
+        // a non-resist last shrine gives way only when it was Skill and this resistance is low; `in` keeps
+        // strict mode from warning on the missing key, which the comparison below would read
+        if (!(Misc.lastShrine.type in resistances)) {
+          return Misc.lastShrine.type === sdk.shrines.Skill && resistances[shrine.objtype] <= 25;
         }
 
         // check that the current shrine benefits our lowest resistance better than the last shrine
@@ -771,11 +769,11 @@ const Misc = (function () {
           // don't leave our area to grab shrines
           // TODO: better fix for this as it'd be okay for small detours but orginally found this at halls of vaught stairs attempting to get shrine that was on next level
           if (!me.inArea(shrine.area)) continue;
-          let _name = shrine.name.toLowerCase();
-          if ((_name.includes("shrine") && ShrineData.has(shrine.objtype) || (_name.includes("well")))
-            && ShrineData.has(shrine.objtype)
-            && !ignore.includes(shrine.objtype)
-            && shrine.mode === sdk.objects.mode.Inactive
+          if (shrine.mode !== sdk.objects.mode.Inactive) continue;
+          if (Misc._isWell(shrine)
+            || (shrine.name.toLowerCase().includes("shrine")
+              && ShrineData.has(shrine.objtype)
+              && !ignore.includes(shrine.objtype))
           ) {
             shrineList.push(copyUnit(shrine));
           }
@@ -791,7 +789,9 @@ const Misc = (function () {
             continue; // too far away
           }
           
-          if (me.inArea(sdk.areas.ChaosSanctuary)) {
+          let isWell = Misc._isWell(shrine);
+
+          if (!isWell && me.inArea(sdk.areas.ChaosSanctuary)) {
             // stateful shrines are pointless in CS unless we are running wakka or diablo has spawned so no more oblivion knights
             if (
               !this._diabloSpawned
@@ -801,8 +801,8 @@ const Misc = (function () {
               continue;
             }
           }
-          
-          if (ShrineData.has(shrine.objtype) ? Misc._wantShrine(shrine) : Misc._wantWell()) {
+
+          if (isWell ? Misc._wantWell() : Misc._wantShrine(shrine)) {
             // need to take distance into account.
             // How far away is this shrine?
             // Can we teleport to it?

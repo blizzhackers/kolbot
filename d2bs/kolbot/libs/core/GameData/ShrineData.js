@@ -10,14 +10,15 @@
     /**
      * @constructor
      * @param {string} name
-     * @param {number} state 
-     * @param {number} duration 
-     * @param {number} regen 
+     * @param {number} state
+     * @param {number} duration - in game frames, as listed in shrines.txt
+     * @param {number} regen
      */
     function Shrine (name, state, duration, regen) {
       this.name = name || "Unknown Shrine";
       this.state = state || 0;
-      this.duration = duration || 0;
+      // stored in ms (25 frames per second) so callers can compare it against getTickCount()
+      this.duration = (duration || 0) * 40;
       this.regenTime = Time.minutes(regen) || Infinity;
     }
     const _shrines = new Map([

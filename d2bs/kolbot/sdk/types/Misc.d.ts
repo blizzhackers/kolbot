@@ -38,6 +38,7 @@ declare global {
     openChest(unit: Unit | number): boolean;
     openChestsInArea(area?: number, chestIds?: number[]): boolean;
     openChests(range?: number): boolean;
+    _isWell(unit: ObjectUnit): boolean;
     _wantShrine(shrine: ObjectUnit): boolean;
     _wantWell(): boolean;
     shriner(ignore?: number[], range?: number): boolean;
