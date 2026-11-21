@@ -7,7 +7,8 @@ declare global {
   }
 
   interface CollMapHook {
-    room: Room;
+    /** A plain copy, never the live Room: held Rooms go stale once their level is freed. */
+    room: CollMapRoom;
     lines: Line[];
   }
 
@@ -34,13 +35,13 @@ declare global {
      * @param color Color name or color code
      * @param update Whether to update existing drawing
      */
-    drawRoom(room: Room, color?: CollMapColorName | number, update?: boolean): void;
+    drawRoom(room: Room | CollMapRoom, color?: CollMapColorName | number, update?: boolean): void;
 
     /**
      * Remove hook for specific room
      * @param room The room to remove hook for
      */
-    removeHookForRoom(room: Room): void;
+    removeHookForRoom(room: Room | CollMapRoom): void;
 
     /**
      * Remove all hooks

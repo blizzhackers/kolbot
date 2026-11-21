@@ -1483,31 +1483,33 @@ const Attack = {
       return CollMap.coordsInRoom(unit.x, unit.y, room);
     };
 
-    if (result) {
-      if (Config.DebugMode.Path) {
-        CollMap.drawRoom(room, "green", true);
-      }
-      let node = new PathNode(result[0], result[1]);
+    try {
+      if (result) {
+        if (Config.DebugMode.Path) {
+          CollMap.drawRoom(room, "green", true);
+        }
+        let node = new PathNode(result[0], result[1]);
 
-      Pather.move(
-        node,
-        { retry: 3, clearSettings: { specType: spectype, clearPath: (!Pather.canTeleport()) } }
-      );
+        Pather.move(
+          node,
+          { retry: 3, clearSettings: { specType: spectype, clearPath: (!Pather.canTeleport()) } }
+        );
 
-      if (!this.clear(60, spectype, undefined, undefined, undefined, shouldAttack)) {
-        return false;
+        if (!this.clear(60, spectype, undefined, undefined, undefined, shouldAttack)) {
+          return false;
+        }
+      } else if (currentArea !== getArea().id) {
+        // Make sure bot does not get stuck in different area.
+        Pather.moveToEx(
+          myRoom[0], myRoom[1],
+          { retry: 3, clearSettings: { specType: spectype, clearPath: (!Pather.canTeleport()) } }
+        );
       }
-    } else if (currentArea !== getArea().id) {
-      // Make sure bot does not get stuck in different area.
-      Pather.moveToEx(
-        myRoom[0], myRoom[1],
-        { retry: 3, clearSettings: { specType: spectype, clearPath: (!Pather.canTeleport()) } }
-      );
+
+      return true;
+    } finally {
+      CollMap.removeHookForRoom(room);
     }
-
-    CollMap.removeHookForRoom(room);
-
-    return true;
   },
 
   /**
@@ -1623,64 +1625,68 @@ const Attack = {
       say("clearlevel " + me.area);
     }
 
-    while (rooms.length > 0) {
-      // get the first room + initialize myRoom var
-      !myRoom && (room = getRoom(me.x, me.y));
+    // A throw from the callback, a pickit or a move must still drop the room hooks.
+    try {
+      while (rooms.length > 0) {
+        // get the first room + initialize myRoom var
+        !myRoom && (room = getRoom(me.x, me.y));
 
-      if (typeof cb === "function" && cb()) {
-        break;
-      }
-
-      if (room) {
-        // use previous room to calculate distance
-        if (room instanceof Array) {
-          myRoom = [room[0], room[1]];
-        } else {
-          // create a new room to calculate distance (first room, done only once)
-          myRoom = getCenter(room);
+        if (typeof cb === "function" && cb()) {
+          break;
         }
-      }
 
-      rooms.sort(RoomSort);
-      room = rooms.shift();
-
-      let result = Pather.getNearestWalkable(room[0], room[1], 18, 3);
-
-      if (result) {
-        if (Config.DebugMode.Path) {
-          CollMap.drawRoom(room[2], "green");
-          hooks.push(new Text((++count).toString(), room[0], room[1], 2, 1, null, true));
-        }
-        let node = new PathNode(result[0], result[1]);
-        
-        if (node.distance < 20 && !canTele && node.mobCount() === 0) {
-          if (Config.DebugMode.Path) {
-            console.debug("ÿc1Skipping room " + room[0] + " " + room[1]);
-            CollMap.drawRoom(room[2], "red", true);
+        if (room) {
+          // use previous room to calculate distance
+          if (room instanceof Array) {
+            myRoom = [room[0], room[1]];
+          } else {
+            // create a new room to calculate distance (first room, done only once)
+            myRoom = getCenter(room);
           }
-        } else {
-          Pather.move(
-            node,
+        }
+
+        rooms.sort(RoomSort);
+        room = rooms.shift();
+
+        let result = Pather.getNearestWalkable(room[0], room[1], 18, 3);
+
+        if (result) {
+          if (Config.DebugMode.Path) {
+            CollMap.drawRoom(room[2], "green");
+            hooks.push(new Text((++count).toString(), room[0], room[1], 2, 1, null, true));
+          }
+          let node = new PathNode(result[0], result[1]);
+
+          if (node.distance < 20 && !canTele && node.mobCount() === 0) {
+            if (Config.DebugMode.Path) {
+              console.debug("ÿc1Skipping room " + room[0] + " " + room[1]);
+              CollMap.drawRoom(room[2], "red", true);
+            }
+          } else {
+            Pather.move(
+              node,
+              { retry: 3, clearSettings: { specType: spectype, clearPath: (!Pather.canTeleport()) } }
+            );
+          }
+          previousArea = result;
+
+          if (!this.clear(40, spectype)) {
+            break;
+          }
+        } else if (currentArea !== getArea().id) {
+          // Make sure bot does not get stuck in different area.
+          Pather.moveToEx(
+            previousArea[0], previousArea[1],
             { retry: 3, clearSettings: { specType: spectype, clearPath: (!Pather.canTeleport()) } }
           );
         }
-        previousArea = result;
-
-        if (!this.clear(40, spectype)) {
-          break;
-        }
-      } else if (currentArea !== getArea().id) {
-        // Make sure bot does not get stuck in different area.
-        Pather.moveToEx(
-          previousArea[0], previousArea[1],
-          { retry: 3, clearSettings: { specType: spectype, clearPath: (!Pather.canTeleport()) } }
-        );
       }
+    } finally {
+      CollMap.removeHooks();
+      hooks.forEach(clearHook);
     }
 
     //this.storeStatistics(getAreaName(me.area));
-    CollMap.removeHooks();
-    hooks.forEach(clearHook);
     console.info(false, getAreaName(currentArea), "clearLevel");
 
     return true;

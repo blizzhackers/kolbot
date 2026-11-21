@@ -9,7 +9,11 @@
 const CollMap = new function () {
   this.rooms = [];
   this.maps = [];
-  /** @type {{ room: Room, lines: Line[]}[]} */
+  /**
+   * Rooms are stored as plain copies: the game frees a level's rooms once the level goes idle and on
+   * every act change, and reading a held Room after that crashes older D2BS builds.
+   * @type {{ room: CollMapRoom, lines: Line[]}[]}
+   */
   this.hooks = [];
   this.colors = {
     green: 0x84,
@@ -21,12 +25,13 @@ const CollMap = new function () {
   };
 
   /**
-   * @param {Room} room 
-   * @param {('green' | 'red' | 'black' | 'white' | 'purple' | 'blue' | number)} [color='green'] 
+   * @param {Room | CollMapRoom} room
+   * @param {('green' | 'red' | 'black' | 'white' | 'purple' | 'blue' | number)} [color='green']
    * @param {boolean} [update=false]
    * @returns {void}
    */
   this.drawRoom = function (room, color = "green", update = false) {
+    if (!room) return;
     let idx = this.hooks.findIndex(h => h.room.x === room.x && h.room.y === room.y);
     if (idx >= 0) {
       if (!update) return;
@@ -42,7 +47,10 @@ const CollMap = new function () {
       new Line(room.x * 5 + room.xsize, room.y * 5 + room.ysize, room.x * 5, room.y * 5 + room.ysize, lineColor, true),
       new Line(room.x * 5, room.y * 5 + room.ysize, room.x * 5, room.y * 5, lineColor, true),
     ];
-    this.hooks.push({ room: room, lines: lines });
+    this.hooks.push({
+      room: { x: room.x, y: room.y, xsize: room.xsize, ysize: room.ysize },
+      lines: lines,
+    });
   };
 
   /** @param {Hook} hook */
@@ -52,7 +60,7 @@ const CollMap = new function () {
 
   /**
    * @this {CollMap}
-   * @param {Room} room 
+   * @param {Room | CollMapRoom} room
    */
   this.removeHookForRoom = function (room) {
     let index = this.hooks.findIndex(h => h.room.x === room.x && h.room.y === room.y);
