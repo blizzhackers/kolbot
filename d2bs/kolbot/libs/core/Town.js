@@ -2372,6 +2372,17 @@ const Town = {
       return true;
     };
 
+    /**
+     * Stub for Unit.prototype.getItemCost: Pickit.checkItem prices unwanted items at low gold. The stub has no price,
+     * and the "trash to sell" result that a price could give does not count as wanting the upgrade anyway.
+     * @param {number} mode unused
+     * @returns {number} always 0
+     */
+    // eslint-disable-next-line no-unused-vars
+    GemUnit.prototype.getItemCost = function (mode) {
+      return 0;
+    };
+
     GemUnit.prototype.getStat = Unit.prototype.getStat;
     GemUnit.prototype.getStatEx = Unit.prototype.getStatEx;
 
