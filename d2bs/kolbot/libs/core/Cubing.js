@@ -1218,7 +1218,9 @@ const Cubing = {
 
       if (item) {
         if (Storage.Inventory.CanFit(item) && Storage.Inventory.MoveTo(item)) return true;
-        if (Storage.Stash.CanFit(item) && Storage.Stash.MoveTo(item)) return true;
+        // The stash can't be opened while an item is on the cursor, and opening it clears the cursor through
+        // this check again: only a stash that is already open can take the item.
+        if (getUIFlag(sdk.uiflags.Stash) && Storage.Stash.CanFit(item) && Storage.Stash.MoveTo(item)) return true;
 
         if (item.drop()) {
           Item.logger("Dropped", item, "cursorCheck");
