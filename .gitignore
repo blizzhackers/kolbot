@@ -62,3 +62,4 @@ d2bs/kolbot/libs/systems/lead/LeadConfig.js
 d2bs/kolbot/libs/systems/autorush/RushConfig.js
 /d2bs/kolbot/libs/modules/EngineProbe.js
 /d2bs/kolbot/libs/modules/external/base85.js
+*.bak
