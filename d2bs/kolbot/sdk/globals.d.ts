@@ -1273,6 +1273,42 @@ declare global {
   // out of game functions
   function login(name?: string): void;
   function selectCharacter(): boolean;
+
+  /** One character of the expansion character select screen, as getCharacterList() reports it. */
+  interface CharSelectCharacter {
+    name: string;
+    /** The realm the character lives on; empty in single player. */
+    realm: string;
+    /** 0 (amazon) to 6 (assassin), the same ids as sdk.player.class. */
+    classid: number;
+    level: number;
+    hardcore: boolean;
+    expansion: boolean;
+    ladder: boolean;
+    /** A hardcore character that died and can't be played. */
+    dead: boolean;
+    /** Realm expiry as Unix time in seconds; 0 when there is none, as in single player. */
+    expires: number;
+  }
+
+  /**
+   * Every character on the expansion character select screen in one call, in screen order, without
+   * scrolling. On a realm it holds the characters the realm sent.
+   * @returns false unless getLocation() reports sdk.game.locations.CharSelect (12), while a realm is
+   * still sending its list, and while D2BS is still starting up.
+   */
+  function getCharacterList(): CharSelectCharacter[] | false;
+
+  /**
+   * Select a character on the expansion character select screen by name (not case sensitive) and
+   * scroll the list to show it. It does not log in: click OK or press Enter afterwards, with no slot
+   * click or arrow key in between.
+   * @returns false when the name is not listed, getLocation() does not report 12, a realm is still
+   * sending its list, a character is being deleted, a popup is open, or D2BS is still starting up.
+   * @throws when name is not a string.
+   */
+  function focusCharacter(name: string): boolean;
+
   function createGame(name: string, pass?: string, difficulty?: number): void;
   function joinGame(name: string, password?: string): void;
   function addProfile(name: string, mode: string, gateway: string, username: string, password: string, character: string): void;

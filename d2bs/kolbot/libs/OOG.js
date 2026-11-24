@@ -28,8 +28,42 @@ includeIfNotIncluded("core/Me.js");
 }([].filter.constructor("return this")(), function () {
   const Controls = require("./modules/Control");
 
+  /**
+   * The engine's character list, or false on a D2BS without getCharacterList or while the list
+   * can't be read yet; callers then page through the slot controls instead.
+   * @returns {CharSelectCharacter[] | false}
+   */
+  const readCharList = function () {
+    return typeof getCharacterList === "function" ? getCharacterList() : false;
+  };
+
+  /**
+   * Select a character through the engine and return its slot control, which focusCharacter has
+   * scrolled into view. The size check skips the selected-name label, which shows the name too.
+   * @param {string} name - as getCharacterList spells it
+   * @returns {Control | false} false when the engine could not select it
+   */
+  const focusCharSlot = function (name) {
+    if (typeof focusCharacter !== "function" || !focusCharacter(name)) return false;
+
+    let control = Controls.CharSelectCharInfo0.control;
+    if (!control) return false;
+    const xsize = control.xsize;
+    const ysize = control.ysize;
+
+    do {
+      if (control.xsize !== xsize || control.ysize !== ysize) continue;
+      let text = control.getText();
+      if (Array.isArray(text) && String.isEqual(text[1], name)) return control;
+    } while (control.getNext());
+
+    return false;
+  };
+
   const ControlAction = {
     mutedKey: false,
+    /** tick of the last click on a character slot, see nextCharPage */
+    lastCharSlotClick: 0,
     realms: {
       "uswest": 0,
       "west": 0,
@@ -171,6 +205,25 @@ includeIfNotIncluded("core/Me.js");
     },
 
     /**
+     * Turn the character list one page (8 characters) down. Only the first page of a scan clicks
+     * the 7th slot, which puts the selection on the bottom row so the arrow keys scroll: a second
+     * click on that spot within the double-click time opens whichever character sits there.
+     * @param {boolean} clickSlot - true for the first page of a scan
+     * @returns {boolean} false if the slot could not be clicked
+     */
+    nextCharPage: function (clickSlot) {
+      if (clickSlot) {
+        // a scan started right after another one (findCharacter then getCharacters) clicks the same spot
+        const wait = this.lastCharSlotClick + 1000 - getTickCount();
+        wait > 0 && delay(wait);
+        if (!Controls.CharSelectChar6.click()) return false;
+        this.lastCharSlotClick = getTickCount();
+      }
+      this.scrollDown();
+      return true;
+    },
+
+    /**
      * Select the given realm/gateway from the main menu, opening the gateway list if needed.
      * @param {number} realm - realm index (0 = US West, 1 = US East, 2 = Asia, 3 = Europe)
      * @returns {boolean} true once the requested realm is selected, false if the gateway control could not be found after retries
@@ -265,6 +318,7 @@ includeIfNotIncluded("core/Me.js");
       let count = 0;
       let tick = getTickCount();
       let firstCheck;
+      let paged = false;
 
       while (getLocation() !== sdk.game.locations.CharSelect) {
         if (getTickCount() - tick >= 5000) {
@@ -294,10 +348,25 @@ includeIfNotIncluded("core/Me.js");
         }
       }
 
+      const chars = readCharList();
+      if (chars) {
+        const listed = chars.find(function (entry) {
+          return String.isEqual(entry.name, info.charName);
+        });
+        const found = listed && focusCharSlot(listed.name);
+
+        if (found) {
+          if (!singlePlayer && info.ladder && !found.getText().some(matchLadderString)) return false;
+          return found;
+        }
+        // the slots only ever show rows of this list, so a scan can't find a name the list lacks
+        if (!listed) return false;
+      }
+
       // start from beginning of the char list
       startFromTop && sendKey(sdk.keys.code.Home);
 
-      while (getLocation() === sdk.game.locations.CharSelect && count < 24) {
+      while (getLocation() === sdk.game.locations.CharSelect && count < cap) {
         let control = Controls.CharSelectCharInfo0.control;
 
         if (control) {
@@ -319,8 +388,8 @@ includeIfNotIncluded("core/Me.js");
 
         // check for additional characters up to 24 (online) or 999 offline (no character limit cap)
         if (count > 0 && count % 8 === 0) {
-          if (Controls.CharSelectChar6.click()) {
-            this.scrollDown();
+          if (this.nextCharPage(!paged)) {
+            paged = true;
             let check = Controls.CharSelectCharInfo0.control;
 
             if (firstCheck && check) {
@@ -345,12 +414,20 @@ includeIfNotIncluded("core/Me.js");
      * @returns {string[]} array of character names (empty if not on the character select screen)
      */
     getCharacters: function () {
+      const chars = readCharList();
+      if (chars) {
+        return chars.map(function (entry) {
+          return entry.name;
+        });
+      }
+
       const singlePlayer = ![sdk.game.profiletype.OpenBattlenet, sdk.game.profiletype.Battlenet].includes(Profile().type);
       // offline doesn't have a character limit cap
       const cap = singlePlayer ? 999 : 24;
       let count = 0;
       let list = [];
       let firstCheck;
+      let paged = false;
 
       // start from beginning of the char list
       sendKey(sdk.keys.code.Home);
@@ -375,8 +452,8 @@ includeIfNotIncluded("core/Me.js");
 
         // check for additional characters up to 24
         if (count > 0 && count % 8 === 0) {
-          if (Controls.CharSelectChar6.click()) {
-            this.scrollDown();
+          if (this.nextCharPage(!paged)) {
+            paged = true;
             let check = Controls.CharSelectCharInfo0.control;
 
             if (firstCheck && check) {
@@ -400,10 +477,22 @@ includeIfNotIncluded("core/Me.js");
     },
 
     /**
-     * @param {CharacterInfo} info 
-     * @returns {boolean}
+     * Whether a character has been permed: a new realm character expires in 11 days, so more time
+     * left means it was played past that. A character with no expiry (single player) counts as permed.
+     * @param {CharacterInfo} info
+     * @returns {boolean} false when the character is not on the list
      */
     getPermStatus: function (info) {
+      const chars = readCharList();
+      if (chars) {
+        const listed = chars.find(function (entry) {
+          return String.isEqual(entry.name, info.charName);
+        });
+        if (!listed) return false;
+
+        return !listed.expires || listed.expires - Date.now() / 1000 > 11 * 86400;
+      }
+
       let expireStr = getLocaleString(sdk.locale.text.ExpiresIn);
       expireStr = expireStr.slice(0, expireStr.indexOf("%")).trim();
 
