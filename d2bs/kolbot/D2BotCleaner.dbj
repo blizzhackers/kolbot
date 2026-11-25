@@ -33,6 +33,18 @@ const accounts = [];
 const chars = [];
 
 /**
+ * Copy a save over an earlier one. FileTools.copy keeps an existing target unless asked to overwrite on d2bs since
+ * blizzhackers/d2bs#48, and older d2bs reads that same third argument as "keep it", so the earlier save is
+ * removed first and the copy is made without the argument, which behaves the same on both.
+ * @param {string} source
+ * @param {string} target
+ */
+function saveCopy (source, target) {
+  FileTools.exists(target) && FileTools.remove(target);
+  FileTools.copy(source, target);
+}
+
+/**
  * Removes SoloPlay data/log files for each profile in `AdvancedProfileCleanerConfig`/`profiles`,
  * optionally archiving them under `libs/SoloPlay/.soloplay/` first.
  * @returns {void}
@@ -126,28 +138,28 @@ function dataCleaner () {
     }
         
     if (FileTools.exists(dataFP)) {
-      CleanerConfig.SaveFiles && FileTools.copy(dataFP, savePath + "Old.json");
+      CleanerConfig.SaveFiles && saveCopy(dataFP, savePath + "Old.json");
       FileTools.remove(dataFP);
       profileExists = true;
     }
     
     if (FileTools.exists(gameTimeFP)) {
-      CleanerConfig.SaveFiles && FileTools.copy(gameTimeFP, savePath + "-GameTimeOld.json");
+      CleanerConfig.SaveFiles && saveCopy(gameTimeFP, savePath + "-GameTimeOld.json");
       FileTools.remove(gameTimeFP);
     }
 
     if (FileTools.exists(charDataFP)) {
-      CleanerConfig.SaveFiles && FileTools.copy(charDataFP, savePath + "-CharDataOld.json");
+      CleanerConfig.SaveFiles && saveCopy(charDataFP, savePath + "-CharDataOld.json");
       FileTools.remove(charDataFP);
     }
     
     if (FileTools.exists(lvlPerfFP)) {
-      CleanerConfig.SaveFiles && FileTools.copy(lvlPerfFP, savePath + "-LevelingPerformanceOld.csv");
+      CleanerConfig.SaveFiles && saveCopy(lvlPerfFP, savePath + "-LevelingPerformanceOld.csv");
       FileTools.remove(lvlPerfFP);
     }
 
     if (FileTools.exists(scrPerfFP)) {
-      CleanerConfig.SaveFiles && FileTools.copy(scrPerfFP, savePath + "-ScriptPerformanceOld.csv");
+      CleanerConfig.SaveFiles && saveCopy(scrPerfFP, savePath + "-ScriptPerformanceOld.csv");
       FileTools.remove(scrPerfFP);
     }
     

@@ -23,13 +23,22 @@ const UserAddon = new Runnable(
 
     const keyEvent = function (key) {
       switch (key) {
-      case sdk.keys.Spacebar:
-        FileTools.copy("libs/config/" + className + ".js", "libs/config/" + className + "." + me.name + ".js");
-        D2Bot.printToConsole("libs/config/" + className + "." + me.name + ".js has been created.");
+      case sdk.keys.Spacebar: {
+        const configFile = "libs/config/" + className + "." + me.name + ".js";
+        // Never replace a personal config: checked here, as older d2bs's FileTools.copy replaced an existing target.
+        if (FileTools.exists(configFile)) {
+          D2Bot.printToConsole(configFile + " already exists.");
+        } else {
+          FileTools.copy("libs/config/" + className + ".js", configFile);
+          D2Bot.printToConsole(FileTools.exists(configFile)
+            ? configFile + " has been created."
+            : "Failed to create " + configFile);
+        }
         D2Bot.printToConsole("Please configure your bot and start it again.");
         D2Bot.stop();
 
         break;
+      }
       }
     };
 
