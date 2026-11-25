@@ -25,3 +25,5 @@ var Coldcrow = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.Coldcrow),
   }
 );
+
+Loader.register("Coldcrow", Coldcrow);

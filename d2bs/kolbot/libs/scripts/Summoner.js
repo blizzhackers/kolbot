@@ -77,3 +77,5 @@ var Summoner = new Runnable(
     startArea: sdk.areas.ArcaneSanctuary
   }
 );
+
+Loader.register("Summoner", Summoner);

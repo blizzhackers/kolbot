@@ -95,3 +95,5 @@ var Diablo = new Runnable(
     bossid: sdk.monsters.Diablo,
   }
 );
+
+Loader.register("Diablo", Diablo);

@@ -132,3 +132,5 @@ var TristramLeech = new Runnable(
     startArea: sdk.areas.RogueEncampment
   }
 );
+
+Loader.register("TristramLeech", TristramLeech);

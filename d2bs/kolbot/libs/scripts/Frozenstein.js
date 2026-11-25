@@ -33,3 +33,5 @@ var Frozenstein = new Runnable(
     startArea: sdk.areas.CrystalizedPassage
   }
 );
+
+Loader.register("Frozenstein", Frozenstein);

@@ -93,3 +93,5 @@ var TravincalLeech = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("TravincalLeech", TravincalLeech);

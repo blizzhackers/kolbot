@@ -298,3 +298,5 @@ var AutoBaal = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("AutoBaal", AutoBaal);

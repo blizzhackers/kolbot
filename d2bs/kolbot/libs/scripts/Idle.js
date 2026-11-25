@@ -97,3 +97,5 @@ var Idle = new Runnable(
     }
   }
 );
+
+Loader.register("Idle", Idle);

@@ -691,3 +691,5 @@ var OrgTorch = new Runnable(
     startArea: sdk.areas.Harrogath
   }
 );
+
+Loader.register("OrgTorch", OrgTorch);

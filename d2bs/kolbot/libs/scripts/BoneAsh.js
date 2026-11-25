@@ -23,3 +23,5 @@ var BoneAsh = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.BoneAsh),
   }
 );
+
+Loader.register("BoneAsh", BoneAsh);

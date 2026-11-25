@@ -122,3 +122,5 @@ var UserAddon = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("UserAddon", UserAddon);

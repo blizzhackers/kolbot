@@ -1041,3 +1041,5 @@ var Follower = new Runnable(
     return true;
   }
 );
+
+Loader.register("Follower", Follower);

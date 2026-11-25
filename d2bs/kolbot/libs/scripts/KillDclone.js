@@ -29,3 +29,5 @@ var KillDclone = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("KillDclone", KillDclone);

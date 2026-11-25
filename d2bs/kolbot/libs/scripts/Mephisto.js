@@ -166,3 +166,5 @@ var Mephisto = new Runnable(
     bossid: sdk.monsters.Mephisto,
   }
 );
+
+Loader.register("Mephisto", Mephisto);

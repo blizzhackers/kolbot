@@ -29,3 +29,5 @@ var WPGetter = new Runnable(
     return true;
   }
 );
+
+Loader.register("WPGetter", WPGetter);

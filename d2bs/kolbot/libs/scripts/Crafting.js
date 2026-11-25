@@ -523,3 +523,5 @@ function shopStuff (npcId, classids, amount) {
 
   return true;
 }
+
+Loader.register("Crafting", Crafting);

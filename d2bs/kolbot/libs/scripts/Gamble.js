@@ -70,3 +70,5 @@ var Gamble = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("Gamble", Gamble);

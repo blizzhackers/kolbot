@@ -46,3 +46,5 @@ var KurastTemples = new Runnable(
     startArea: sdk.areas.KurastBazaar
   }
 );
+
+Loader.register("KurastTemples", KurastTemples);

@@ -313,3 +313,5 @@ var BattleOrders = new Runnable(
     startArea: sdk.areas.CatacombsLvl2
   }
 );
+
+Loader.register("BattleOrders", BattleOrders);

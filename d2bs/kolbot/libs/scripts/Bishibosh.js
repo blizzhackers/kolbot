@@ -22,3 +22,5 @@ var Bishibosh = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.Bishibosh),
   }
 );
+
+Loader.register("Bishibosh", Bishibosh);

@@ -36,3 +36,5 @@ var Rakanishu = new Runnable(
     startArea: sdk.areas.StonyField
   }
 );
+
+Loader.register("Rakanishu", Rakanishu);

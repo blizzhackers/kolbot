@@ -24,3 +24,5 @@ var Abaddon = new Runnable(
     startArea: sdk.areas.FrigidHighlands
   }
 );
+
+Loader.register("Abaddon", Abaddon);

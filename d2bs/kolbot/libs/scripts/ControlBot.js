@@ -2271,3 +2271,5 @@ var ControlBot = new Runnable(
     }
   }
 );
+
+Loader.register("ControlBot", ControlBot);

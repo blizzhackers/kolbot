@@ -47,3 +47,5 @@ var Andariel = new Runnable(
     bossid: sdk.monsters.Andariel,
   }
 );
+
+Loader.register("Andariel", Andariel);

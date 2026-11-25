@@ -27,3 +27,5 @@ var Corpsefire = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.Corpsefire),
   }
 );
+
+Loader.register("Corpsefire", Corpsefire);

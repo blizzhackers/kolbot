@@ -40,3 +40,5 @@ var GetCube = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("GetCube", GetCube);

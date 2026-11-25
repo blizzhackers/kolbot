@@ -54,3 +54,5 @@ var Eldritch = new Runnable(
     startArea: sdk.areas.FrigidHighlands
   }
 );
+
+Loader.register("Eldritch", Eldritch);

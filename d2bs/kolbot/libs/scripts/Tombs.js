@@ -35,3 +35,5 @@ var Tombs = new Runnable(
     startArea: sdk.areas.CanyonofMagic
   }
 );
+
+Loader.register("Tombs", Tombs);

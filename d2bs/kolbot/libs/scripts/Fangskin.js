@@ -30,3 +30,5 @@ var Fangskin = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.Fangskin),
   }
 );
+
+Loader.register("Fangskin", Fangskin);

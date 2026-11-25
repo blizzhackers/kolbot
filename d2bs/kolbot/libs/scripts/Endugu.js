@@ -31,3 +31,5 @@ var Endugu = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.WitchDoctorEndugu),
   }
 );
+
+Loader.register("Endugu", Endugu);

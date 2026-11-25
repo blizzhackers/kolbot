@@ -58,3 +58,5 @@ var Pindleskin = new Runnable(
     startArea: sdk.areas.Harrogath
   }
 );
+
+Loader.register("Pindleskin", Pindleskin);

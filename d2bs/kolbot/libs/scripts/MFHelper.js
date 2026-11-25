@@ -309,3 +309,5 @@ var MFHelper = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("MFHelper", MFHelper);

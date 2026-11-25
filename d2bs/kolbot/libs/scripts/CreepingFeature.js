@@ -22,3 +22,5 @@ var CreepingFeature = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.CreepingFeature),
   }
 );
+
+Loader.register("CreepingFeature", CreepingFeature);

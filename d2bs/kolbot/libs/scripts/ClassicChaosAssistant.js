@@ -133,3 +133,5 @@ var ClassicChaosAssistant = new Runnable(
     startArea: sdk.areas.RiverofFlame
   }
 );
+
+Loader.register("ClassicChaosAssistant", ClassicChaosAssistant);

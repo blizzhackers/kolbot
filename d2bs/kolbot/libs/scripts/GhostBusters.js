@@ -120,3 +120,5 @@ var GhostBusters = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("GhostBusters", GhostBusters);

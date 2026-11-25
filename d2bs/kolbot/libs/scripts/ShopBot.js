@@ -311,3 +311,5 @@ var ShopBot = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("ShopBot", ShopBot);

@@ -73,3 +73,5 @@ var Travincal = new Runnable(
     startArea: sdk.areas.Travincal
   }
 );
+
+Loader.register("Travincal", Travincal);

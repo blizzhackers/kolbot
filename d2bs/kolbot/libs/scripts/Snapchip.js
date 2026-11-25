@@ -25,3 +25,5 @@ var Snapchip = new Runnable(
     startArea: sdk.areas.AncientsWay
   }
 );
+
+Loader.register("Snapchip", Snapchip);

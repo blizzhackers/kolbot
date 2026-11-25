@@ -24,3 +24,5 @@ var Eyeback = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.EyebacktheUnleashed),
   }
 );
+
+Loader.register("Eyeback", Eyeback);

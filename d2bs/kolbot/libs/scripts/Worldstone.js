@@ -42,3 +42,5 @@ var Worldstone = new Runnable(
     startArea: sdk.areas.WorldstoneLvl2
   }
 );
+
+Loader.register("Worldstone", Worldstone);

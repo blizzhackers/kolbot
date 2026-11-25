@@ -412,3 +412,5 @@ var Questing = new Runnable(
     return true;
   }
 );
+
+Loader.register("Questing", Questing);

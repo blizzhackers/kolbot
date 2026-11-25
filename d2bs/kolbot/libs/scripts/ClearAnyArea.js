@@ -28,3 +28,5 @@ Object.defineProperty(ClearAnyArea, "startArea", {
     return Config.ClearAnyArea.AreaList[0];
   }
 });
+
+Loader.register("ClearAnyArea", ClearAnyArea);

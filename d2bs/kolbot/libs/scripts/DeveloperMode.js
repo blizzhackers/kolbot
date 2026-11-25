@@ -350,3 +350,5 @@ var DeveloperMode = new Runnable(
     preAction: null
   }
 );
+
+Loader.register("DeveloperMode", DeveloperMode);

@@ -1253,3 +1253,5 @@ var Rushee = new Runnable(
     return true;
   }
 );
+
+Loader.register("Rushee", Rushee);

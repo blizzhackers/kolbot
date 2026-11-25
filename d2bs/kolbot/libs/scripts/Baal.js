@@ -105,3 +105,5 @@ var Baal = new Runnable(
     bossid: sdk.monsters.Baal,
   }
 );
+
+Loader.register("Baal", Baal);

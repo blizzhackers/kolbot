@@ -25,3 +25,5 @@ var Izual = new Runnable(
     bossid: sdk.monsters.Izual,
   }
 );
+
+Loader.register("Izual", Izual);

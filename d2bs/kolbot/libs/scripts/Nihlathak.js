@@ -44,3 +44,5 @@ var Nihlathak = new Runnable(
     bossid: sdk.monsters.Nihlathak,
   }
 );
+
+Loader.register("Nihlathak", Nihlathak);

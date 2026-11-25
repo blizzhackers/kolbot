@@ -85,3 +85,5 @@ var Duriel = new Runnable(
     preAction: null,
   }
 );
+
+Loader.register("Duriel", Duriel);

@@ -26,3 +26,5 @@ var Bonesaw = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.BonesawBreaker),
   }
 );
+
+Loader.register("Bonesaw", Bonesaw);

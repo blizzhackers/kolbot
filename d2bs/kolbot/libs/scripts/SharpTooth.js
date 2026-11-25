@@ -27,3 +27,5 @@ var SharpTooth = new Runnable(
     bossid: getLocaleString(sdk.locale.monsters.SharpToothSayer),
   }
 );
+
+Loader.register("SharpTooth", SharpTooth);

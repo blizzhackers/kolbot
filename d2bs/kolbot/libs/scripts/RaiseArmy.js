@@ -30,3 +30,5 @@ var RaiseArmy = new Runnable(
     startArea: sdk.areas.Harrogath,
   }
 );
+
+Loader.register("RaiseArmy", RaiseArmy);

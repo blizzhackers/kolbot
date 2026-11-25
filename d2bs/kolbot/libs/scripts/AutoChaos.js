@@ -726,3 +726,5 @@ var AutoChaos = new Runnable(
     }
   }
 );
+
+Loader.register("AutoChaos", AutoChaos);
