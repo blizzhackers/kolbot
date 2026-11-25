@@ -243,12 +243,25 @@ const DeveloperMode = new Runnable(
     /** @param {number} key */
     const keyEvent = function (key) {
       switch (key) {
-      case sdk.keys.Spacebar:
-        FileTools.copy("libs/config/" + className + ".js", "libs/config/" + className + "." + me.name + ".js");
-        log("libs/config/" + className + "." + me.name + ".js has been created.", true);
+      case sdk.keys.Spacebar: {
+        const configFile = "libs/config/" + className + "." + me.name + ".js";
+        // Never replace a personal config: checked here, as older d2bs's FileTools.copy replaced an existing target.
+        if (FileTools.exists(configFile)) {
+          log(configFile + " already exists.", true);
+
+          break;
+        }
+        FileTools.copy("libs/config/" + className + ".js", configFile);
+        if (!FileTools.exists(configFile)) {
+          log("Failed to create " + configFile, true);
+
+          break;
+        }
+        log(configFile + " has been created.", true);
         log("Please configure your bot and reload or restart", true);
 
         break;
+      }
       }
     };
 
