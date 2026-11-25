@@ -8,7 +8,8 @@
 let info;
 let gameRequest = false;
 
-const Crafting = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Crafting = new Runnable(
   function Crafting () {
     info = CraftingSystem.getInfo();
 

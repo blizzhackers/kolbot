@@ -5,7 +5,8 @@
 *
 */
 
-const Countess = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Countess = new Runnable(
   function Countess () {
     Pather.useWaypoint(sdk.areas.BlackMarsh);
     Precast.doPrecast(true);

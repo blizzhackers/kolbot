@@ -5,7 +5,8 @@
 *
 */
 
-const GetFade = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var GetFade = new Runnable(
   function GetFade () {
     // Can't get use river if we can't access the act - TODO: use another area if we can't access river
     if (!me.accessToAct(4)) return false;

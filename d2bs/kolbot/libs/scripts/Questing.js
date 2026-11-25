@@ -7,7 +7,8 @@
 
 // @notes: can't do duriel or meph because all the extra tasks. this is not meant to be autoplay or self rush
 
-const Questing = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Questing = new Runnable(
   function Questing () {
     const log = (msg = "", errorMsg = false) => {
       me.overhead(msg);

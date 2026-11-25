@@ -7,7 +7,8 @@
 
 // todo - define bo-er name, so bots who are getting bo know who is supposed to give it
 // todo - use profile <-> profile communication so we don't need to set char names, Maybe shout global?
-const BattleOrders = new Runnable(
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var BattleOrders = new Runnable(
   function BattleOrders () {
     this.gaveBo = false;
     /** @type {Set<string>} */
