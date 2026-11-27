@@ -1,51 +1,109 @@
 /**
  * @author Jaenster
  * @description A node like event system
- *
  */
 
-(function (module, require) {
-	// eslint-disable-next-line no-unused-vars
-	const Events = module.exports = function () {
-		const Worker = require("Worker"), self = this;
+(function (module) {
+  /**
+   * @class Events
+   * @constructor
+   */
+  function Events() {
+    const handlers = new WeakMap();
+    const onceHandlers = new WeakMap();
 
-		this.hooks = [];
+    /**
+     * Get the event map for an object and map type.
+     * @param {Object} obj - The object to get the map for.
+     * @param {WeakMap<Object, Map<string, Function[]>>} mapType - The WeakMap storing event maps.
+     * @returns {Map<string, Function[]>} The event map for the object.
+     */
+    function getMap(obj, mapType) {
+      if (!mapType.has(obj)) {
+        mapType.set(obj, new Map());
+      }
+      return mapType.get(obj);
+    }
 
-		function Hook(name, callback) {
-			this.name = name;
-			this.callback = callback;
-			this.id = self.hooks.push(this) - 1;
-			this.__callback = callback; // used for once
-		}
+    /**
+     * Register an event handler for the given key.
+     * @param {string} key - The event name.
+     * @param {Function} handler - The callback function.
+     * @param {WeakMap} [handlerType] - Optional handler map (internal use).
+     * @returns {Events} The instance for chaining.
+     */
+    function on(key, handler, handlerType) {
+      handlerType = handlerType || handlers;
+      let map = getMap(this, handlerType);
+      if (!map.has(key)) {
+        map.set(key, []);
+      }
+      map.get(key).push(handler);
+      return this;
+    }
 
-		this.on = function (name, callback) {
-			if (callback === undefined && typeof name === "function") [callback, name] = [name, callback];
-			return new Hook(name, callback);
-		};
+    /**
+     * Register a one-time event handler for the given key.
+     * @param {string} key - The event name.
+     * @param {Function} handler - The callback function.
+     * @returns {Events} The instance for chaining.
+     */
+    function once(key, handler) {
+      return on.call(this, key, handler, onceHandlers);
+    }
 
-		this.trigger = function (name, ...args) {
-			return self.hooks.forEach(hook => !hook.name || hook.name === name && Worker.push(function () {
-				hook.callback.apply(hook, args);
-			}));
-		};
+    /**
+     * Remove an event handler for the given key.
+     * @param {string} key - The event name.
+     * @param {Function} handler - The callback function to remove.
+     * @returns {Events} The instance for chaining.
+     */
+    function off(key, handler) {
+      [handlers, onceHandlers].forEach(function (handlerType) {
+        let map = getMap(this, handlerType);
+        if (map.has(key)) {
+          let arr = map.get(key);
+          let idx = arr.indexOf(handler);
+          if (idx > -1) {
+            arr.splice(idx, 1);
+          }
+        }
+      }, this);
+      return this;
+    }
 
-		this.emit = this.trigger; // Alias for trigger
+    /**
+     * Emit an event, calling all handlers for the given key.
+     * @param {string} key - The event name.
+     * @param {...*} args - Arguments to pass to the handlers.
+     * @returns {Events} The instance for chaining.
+     */
+    function emit(key, ...args) {
+      let callbacks = [];
 
-		this.once = function (name, callback) {
-			if (callback === undefined && typeof name === "function") [callback, name] = [name, callback];
-			const hook = new Hook(name, function (...args) {
-				callback.apply(undefined, args);
-				delete self.hooks[this.id];
-			});
-			hook.__callback = callback;
-		};
+      let onceMap = getMap(this, onceHandlers);
+      let restMap = getMap(this, handlers);
 
-		this.off = function (name, callback) {
-			self.hooks.filter(hook => hook.__callback === callback).forEach(hook => {
-				delete self.hooks[hook.id];
-			});
-		};
+      if (onceMap.has(key)) {
+        callbacks = callbacks.concat(onceMap.get(key).splice(0));
+      }
+      if (restMap.has(key)) {
+        callbacks = callbacks.concat(restMap.get(key));
+      }
 
-		this.removeListener = this.off; // Alias for remove
-	};
-})(module, require);
+      callbacks.forEach(function (cb) {
+        cb.apply(this, args);
+      }, this);
+
+      return this;
+    }
+
+    // Attach methods to the instance
+    this.on = on;
+    this.once = once;
+    this.off = off;
+    this.emit = emit;
+  }
+
+  module.exports = Events;
+})(module);

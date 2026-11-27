@@ -1,0 +1,33 @@
+/**
+*  @filename    KillDclone.js
+*  @author      kolton
+*  @desc        Go to Palace Cellar level 3 and kill Diablo Clone.
+*
+*/
+
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var KillDclone = new Runnable(
+  function KillDclone () {
+    Pather.useWaypoint(sdk.areas.ArcaneSanctuary);
+    Precast.doPrecast(true);
+
+    if (!Pather.usePortal(null)) {
+      throw new Error("Failed to move to Palace Cellar");
+    }
+
+    Attack.kill(sdk.monsters.DiabloClone);
+    Pickit.pickItems();
+
+    if (AutoMule.getInfo() && AutoMule.getInfo().hasOwnProperty("torchMuleInfo")) {
+      scriptBroadcast("muleAnni");
+    }
+
+    return true;
+  },
+  {
+    startArea: sdk.areas.ArcaneSanctuary,
+    preAction: null
+  }
+);
+
+Loader.register("KillDclone", KillDclone);

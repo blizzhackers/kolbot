@@ -1,0 +1,29 @@
+/**
+*  @filename    Coldcrow.js
+*  @author      njomnjomnjom
+*  @desc        kill Coldcrow
+*
+*/
+
+// eslint-disable-next-line no-var -- Loader resolves this via global[script]; a top-level const is not a global property on modern JS engines
+var Coldcrow = new Runnable(
+  function Coldcrow () {
+    Pather.useWaypoint(sdk.areas.ColdPlains);
+    Precast.doPrecast(true);
+
+    if (!Pather.moveToExit(sdk.areas.CaveLvl1, true, false)) throw new Error("Failed to move to Cave");
+    if (!Pather.moveToPreset(me.area, sdk.unittype.Monster, sdk.monsters.preset.Coldcrow, 0, 0, false)) {
+      throw new Error("Failed to move to Coldcrow");
+    }
+
+    Attack.kill(getLocaleString(sdk.locale.monsters.Coldcrow));
+
+    return true;
+  },
+  {
+    startArea: sdk.areas.ColdPlains,
+    bossid: getLocaleString(sdk.locale.monsters.Coldcrow),
+  }
+);
+
+Loader.register("Coldcrow", Coldcrow);
