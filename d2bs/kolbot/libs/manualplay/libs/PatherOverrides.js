@@ -311,6 +311,7 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
   let tpMana = Skill.getManaCost(sdk.skills.Teleport);
   let preSkill = me.getSkill(sdk.skills.get.RightId);
   let annoyingArea = [sdk.areas.MaggotLairLvl1, sdk.areas.MaggotLairLvl2, sdk.areas.MaggotLairLvl3].includes(me.area);
+  const PATH_DEBUG_ID = Date.now() + Math.floor(Math.random() * 1000);
   // defaults must be applied BEFORE clearSettings is built from clearPath - computing them
   // after left the AttackSkill guard unreachable and walkers unconditionally clearing
   retry === undefined && (retry = useTeleport ? 3 : 15);
@@ -327,114 +328,118 @@ Pather.moveTo = function (x, y, retry, clearPath, pop) {
 
   path.reverse();
   pop && path.pop();
-  PathDebug.drawPath(path);
-  useTeleport && Config.TeleSwitch && path.length > 5 && me.switchWeapons(Attack.getPrimarySlot() ^ 1);
+  try {
+    PathDebug.drawPath(PATH_DEBUG_ID, path);
+    useTeleport && Config.TeleSwitch && path.length > 5 && me.switchWeapons(Attack.getPrimarySlot() ^ 1);
 
-  while (path.length > 0) {
-    // Abort if dead
-    if (me.dead || Pather.stop) {
-      Pather.stop = false;	// Reset value
+    while (path.length > 0) {
+      // Abort if dead
+      if (me.dead || Pather.stop) {
+        Pather.stop = false;	// Reset value
       
-      return false;
-    }
-
-    for (let i = 0; i < this.cancelFlags.length; i++) {
-      getUIFlag(this.cancelFlags[i]) && me.cancel();
-    }
-
-    node = path.shift();
-
-    /* Right now getPath's first node is our own position so it's not necessary to take it into account
-      This will be removed if getPath changes
-    */
-    if (getDistance(me, node) > 2) {
-      fail >= 3 && fail % 3 === 0 && !Attack.validSpot(node.x, node.y) && (invalidCheck = true);
-      // Make life in Maggot Lair easier - should this include arcane as well?
-      if (annoyingArea || invalidCheck) {
-        let adjustedNode = this.getNearestWalkable(node.x, node.y, 15, 3, sdk.collision.BlockWalk);
-
-        if (adjustedNode) {
-          node.x = adjustedNode[0];
-          node.y = adjustedNode[1];
-          invalidCheck && (invalidCheck = false);
-        }
-
-        if (annoyingArea) {
-          clearSettings.overrideConfig = true;
-          clearSettings.range = 5;
-        }
-
-        retry <= 3 && !useTeleport && (retry = 15);
+        return false;
       }
 
-      if (useTeleport && tpMana < me.mp ? Pather.teleportTo(node.x, node.y) : Pather.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
-        if (Pather.stop) {
-          continue; // stops on next interation
+      for (let i = 0; i < this.cancelFlags.length; i++) {
+        getUIFlag(this.cancelFlags[i]) && me.cancel();
+      }
+
+      node = path.shift();
+
+      /* Right now getPath's first node is our own position so it's not necessary to take it into account
+        This will be removed if getPath changes
+      */
+      if (getDistance(me, node) > 2) {
+        fail >= 3 && fail % 3 === 0 && !Attack.validSpot(node.x, node.y) && (invalidCheck = true);
+        // Make life in Maggot Lair easier - should this include arcane as well?
+        if (annoyingArea || invalidCheck) {
+          let adjustedNode = this.getNearestWalkable(node.x, node.y, 15, 3, sdk.collision.BlockWalk);
+
+          if (adjustedNode) {
+            node.x = adjustedNode[0];
+            node.y = adjustedNode[1];
+            invalidCheck && (invalidCheck = false);
+          }
+
+          if (annoyingArea) {
+            clearSettings.overrideConfig = true;
+            clearSettings.range = 5;
+          }
+
+          retry <= 3 && !useTeleport && (retry = 15);
         }
+
+        if (useTeleport && tpMana < me.mp ? Pather.teleportTo(node.x, node.y) : Pather.walkTo(node.x, node.y, (fail > 0 || me.inTown) ? 2 : 4)) {
+          if (Pather.stop) {
+            continue; // stops on next interation
+          }
         
-        if (!me.inTown) {
-          if (this.recursion) {
-            this.recursion = false;
-            try {
-              NodeAction.go(clearSettings);
+          if (!me.inTown) {
+            if (this.recursion) {
+              this.recursion = false;
+              try {
+                NodeAction.go(clearSettings);
 
-              if (getDistance(me, node.x, node.y) > 5) {
-                this.moveTo(node.x, node.y);
+                if (getDistance(me, node.x, node.y) > 5) {
+                  this.moveTo(node.x, node.y);
+                }
+              } finally {
+                this.recursion = true;
               }
-            } finally {
-              this.recursion = true;
             }
           }
-        }
-      } else {
-        if (Pather.stop) {
-          continue; // stops on next interation
-        }
-
-        if (!me.inTown) {
-          if (!useTeleport && ((me.checkForMobs({ range: 10 }) && Attack.clear(8)) || Pather.kickBarrels(node.x, node.y) || Pather.openDoors(node.x, node.y))) {
-            continue;
+        } else {
+          if (Pather.stop) {
+            continue; // stops on next interation
           }
 
-          if (fail > 0 && (!useTeleport || tpMana > me.mp)) {
-            // Don't go berserk on longer paths
-            if (!cleared && me.checkForMobs({ range: 6 }) && Attack.clear(5)) {
-              cleared = true;
+          if (!me.inTown) {
+            if (!useTeleport && ((me.checkForMobs({ range: 10 }) && Attack.clear(8)) || Pather.kickBarrels(node.x, node.y) || Pather.openDoors(node.x, node.y))) {
+              continue;
             }
 
-            // Only do this once
-            if (fail > 1 && !leaped && Skill.canUse(sdk.skills.LeapAttack) && Skill.cast(sdk.skills.LeapAttack, sdk.skills.hand.Right, node.x, node.y)) {
-              leaped = true;
+            if (fail > 0 && (!useTeleport || tpMana > me.mp)) {
+              // Don't go berserk on longer paths
+              if (!cleared && me.checkForMobs({ range: 6 }) && Attack.clear(5)) {
+                cleared = true;
+              }
+
+              // Only do this once
+              if (fail > 1 && !leaped && Skill.canUse(sdk.skills.LeapAttack) && Skill.cast(sdk.skills.LeapAttack, sdk.skills.hand.Right, node.x, node.y)) {
+                leaped = true;
+              }
             }
           }
-        }
 
-        // Reduce node distance in new path
-        path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? rand(25, 35) : rand(10, 15));
-        if (!path) throw new Error("moveNear: Failed to generate path.");
+          // Reduce node distance in new path
+          path = getPath(me.area, x, y, me.x, me.y, useTeleport ? 1 : 0, useTeleport ? rand(25, 35) : rand(10, 15));
+          if (!path) throw new Error("moveNear: Failed to generate path.");
 
-        path.reverse();
-        PathDebug.drawPath(path);
-        pop && path.pop();
+          path.reverse();
+          PathDebug.drawPath(PATH_DEBUG_ID, path);
+          pop && path.pop();
 
-        if (fail > 0) {
-          console.debug("move retry " + fail);
-          Packet.flash(me.gid);
+          if (fail > 0) {
+            console.debug("move retry " + fail);
+            Packet.flash(me.gid);
 
-          if (fail >= retry) {
-            break;
+            if (fail >= retry) {
+              break;
+            }
           }
+          fail++;
         }
-        fail++;
       }
-    }
 
-    delay(5);
+      delay(5);
+    }
+  } finally {
+    // runs on every exit, including a throw from a callee such as a nested move
+    PathDebug.removeHooks(PATH_DEBUG_ID);
   }
 
   useTeleport && Config.TeleSwitch && me.switchWeapons(Attack.getPrimarySlot());
   me.getSkill(sdk.skills.get.RightId) !== preSkill && Skill.setSkill(preSkill, sdk.skills.hand.Right);
-  PathDebug.removeHooks();
 
   return getDistance(me, node.x, node.y) < 5;
 };
